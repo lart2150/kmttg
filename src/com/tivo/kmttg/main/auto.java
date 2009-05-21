@@ -400,12 +400,21 @@ public class auto {
             BufferedWriter ofp = new BufferedWriter(new FileWriter(config.autoIni, true));
             ofp.write("<title>\n");
             ofp.write(title + "\n");
-            // By default no options enabled
+            // Use currently defined options in main GUI as default settings
             ofp.write("<options>\n");
-            ofp.write("decrypt 0\n\n");
+            ofp.write("metadata "    + config.gui.metadata_setting() + "\n");
+            ofp.write("decrypt "     + config.gui.decrypt_setting()  + "\n");
+            ofp.write("qsfix "       + config.gui.qsfix_setting()    + "\n");
+            ofp.write("comskip "     + config.gui.comskip_setting()  + "\n");
+            ofp.write("comcut "      + config.gui.comcut_setting()   + "\n");
+            ofp.write("captions "    + config.gui.captions_setting() + "\n");
+            ofp.write("encode "      + config.gui.encode_setting()   + "\n");
+            ofp.write("encode_name " + config.encodeName             + "\n");
+            ofp.write("custom "      + config.gui.custom_setting()   + "\n");
+            ofp.write("\n");
             ofp.close();
             log.warn("Added title entry '" + title + "' to " + config.autoIni);
-            log.warn("(Use Auto Transfers->Configure to setup tasks to perform)");
+            log.warn("(Use Auto Transfers->Configure to modify tasks to perform)");
          } catch (IOException ex) {
             log.error("Cannot write to auto config file: " + config.autoIni);
             log.error(ex.toString());
