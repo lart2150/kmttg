@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<project name="kmttg" basedir="." default="all">
+	<property name="rversion" value="v0p6_beta3"/>
+	<tstamp/>
+	<property name="bversion" value="${DSTAMP}-${TSTAMP}"/>
+	<property name="lib" value="lib"/>
+	<property name="release" value="release"/>
+	<property name="main" value="."/>
+	<property name="main.class" value="com.tivo.kmttg.main.kmttg"/>
+        <property name="debuglevel" value="source,lines,vars"/>
+        <property name="target" value="1.5"/>
+        <property name="source" value="1.5"/>
+    <path id="main.classpath">
+    	<pathelement location="${lib}/swinglabs-0.8.0.jar"/>
+    </path>
+
+    <target name="clean">
+	<delete dir="bin"/>
+	<delete dir="dist"/>
+    </target>
+
+
+    <target name="create">
+        <mkdir dir="bin"/>
+        <mkdir dir="${release}"/>
+    </target>
+    <target name="create-dist">
+	<mkdir dir="dist"/>
+	<mkdir dir="dist/${dist}"/>
+    </target>
+    <target name="create-dist-src" depends="create-dist">
+	<mkdir dir="dist/${dist}-src"/>
+
+    </target>
+
+   <target name="writeversion">
+   	<echo file="${main}/version.txt" append="false" message="${ant.project.name}|${version}"/>	
+   </target>
+    <target name="jar" depends="build">
+        <delete file="${release}/kmttg.jar"/>
+	<jar destfile="${release}/kmttg.jar">
+		<fileset dir="${main}/bin"/>
+		<fileset dir="${main}/images"/>
+                <zipgroupfileset dir="${lib}" includes="swinglabs-0.8.0.jar"/>
+     <manifest>  
+       <attribute name="Main-Class" value="${main.class}" />  
+     </manifest>  
+	</jar>
+    </target>
+    <target name="build" depends="create">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="main.classpath"/>
+        </javac>
+    </target>
+   <target name="init">
+		<property name="version" value="${bversion}"/>
+	<property name="dist" value="kmttg_${version}"/>
+
+	</target>
+   <target name="all" depends="init,clean,build,jar,dist-both"/>
+  <target name="release">
+	<property name="version" value="${rversion}"/>
+	<antcall target="all"/>
+  </target>
+  <target name="dist-src" depends="create-dist-src">
+	<copy todir="dist/${dist}-src">
+		<fileset dir=".">
+			<include name="src/**"/>
+			<include name="build.xml"/>
+			<include name="release/**"/>
+		</fileset>
+	</copy>
+	<chmod file="dist/${release}/kmttg" perm="ugo+x"/>
+	<chmod file="dist/${release}/kmttg.bat" perm="ugo+x"/>
+
+	<zip destfile="dist/${dist}-src.zip">
+		<zipfileset dir="dist/${dist}-src" prefix="${dist}"
+			includes="**"
+			excludes="release META-INF"/>
+		<zipfileset file="dist/${dist}-src/${release}/kmttg" filemode="755"
+			prefix="${dist}"/>
+		<zipfileset file="dist/${dist}-src/${release}/kmttg.bat" filemode="755"
+			prefix="${dist}"/>
+	</zip>
+
+	<delete dir="dist/${dist}-src"/>
+  </target>
+
+   <target name="dist-both" depends="create-dist">
+	<antcall target="build"/>
+	<copy todir="dist/${dist}/release">
+		<fileset dir="release"/>
+	</copy>
+	<fixcrlf file="dist/${dist}/${release}/kmttg.bat" eol="dos"/>
+	<chmod file="dist/${dist}/${release}/kmttg" perm="ugo+x"/>
+	<chmod file="dist/${dist}/${release}/kmttg.bat" perm="ugo+x"/>
+
+	<zip destfile="dist/${dist}.zip">
+		<zipfileset dir="dist/${dist}/${release}" filemode="755" prefix="${dist}"
+			includes="**"/>
+	</zip>
+	<delete dir="dist/${dist}"/>
+   </target>
+  
+</project>

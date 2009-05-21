@@ -1,0 +1,12 @@
+# Description (single line, keep short)
+<description>
+mpeg4 container, same res 5 Mbps h.264 video, copy audio (ac3)
+
+# Encode command or script (single line)
+# Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD
+<command>
+FFMPEG -y -i INPUT -acodec copy -vcodec libx264 -b 5000k -refs 3 -flags2 +mixed_refs+wpred+bpyramid+dct8x8-fastpskip -bf 3 -me_method umh -subq 9 -g 24 -keyint_min 2 -f mp4 OUTPUT
+
+# Encoded output file extension
+<extension>
+mp4

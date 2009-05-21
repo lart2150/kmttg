@@ -1,0 +1,12 @@
+# Description (single line, keep short)
+<description>
+mpeg4 container, 320x240 xvid video, aac audio
+
+# Encode command or script (single line)
+# Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD
+<command>
+FFMPEG -y -i INPUT -vcodec libxvid -maxrate 1000k -qmin 3 -qmax 5 -bufsize 4096k -g 300 -acodec libfaac -s 320x240 -ab 128 -b 700k -f mp4 OUTPUT
+
+# Encoded output file extension
+<extension>
+mp4

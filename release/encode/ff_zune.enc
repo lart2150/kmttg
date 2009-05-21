@@ -1,0 +1,12 @@
+# Description (single line, keep short)
+<description>
+Zune: asf container, 320x240 wmv video, wma audio
+
+# Encode command or script (single line)
+# Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD
+<command>
+FFMPEG -y -i INPUT -vcodec wmv2 -acodec wmav2 -s 320x240 -b 640000 -maxrate 1350000 -bufsize 2048000 -ab 128000 -ac 2 -f asf OUTPUT
+
+# Encoded output file extension
+<extension>
+wmv

@@ -1,0 +1,12 @@
+# Description (single line, keep short)
+<description>
+mpeg4 container, 2Mbps same res h.264 video, copy audio (ac3)
+
+# Encode command or script (single line)
+# Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD
+<command>
+FFMPEG -y -i INPUT -vcodec libx264 -coder 0 -level 41 -sameq -g 300 -bufsize 14745k -b 2000k -maxrate 16000k -bug "+autodetect+ms" -me_method epzs -trellis 2 -mbd 1 -acodec copy -f mp4 OUTPUT
+
+# Encoded output file extension
+<extension>
+mp4

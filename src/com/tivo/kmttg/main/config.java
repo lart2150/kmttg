@@ -1,0 +1,558 @@
+
+package com.tivo.kmttg.main;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Stack;
+
+
+import com.tivo.kmttg.util.*;
+import com.tivo.kmttg.gui.gui;
+
+public class config {
+   public static String kmttg = "kmttg v0p6a";
+   
+   // encoding related
+   public static String encProfDir = "";
+   public static Hashtable<String,Hashtable<String,String>> ENCODE
+      = new Hashtable<String,Hashtable<String,String>>();
+   public static Stack<String> ENCODE_NAMES = new Stack<String>();
+   
+   // 3rd party executable files
+   public static String curl = "";
+   public static String tivodecode = "";
+   public static String outputDir = "";
+   public static String mpegDir = "";
+   public static String mpegCutDir = "";
+   public static String encodeDir = "";
+   public static String ffmpeg = "";
+   public static String mencoder = "";
+   public static String handbrake = "";
+   public static String comskip = "";
+   public static String AtomicParsley = "";
+   public static String VRD = "";
+   public static String t2extract = "";
+
+   // config preferences
+   public static String MAK = "";               // MAK id for NPL downloads
+   public static int RemoveTivoFile = 0;
+   public static int RemoveComcutFiles = 0;
+   public static int RemoveMpegFile = 0;
+   public static int CreateSubFolder = 0;
+   public static int MaxJobs = 2;
+   public static int CheckDiskSpace = 0;
+   public static int LowSpaceSize = 0;
+   public static int CheckBeacon = 1;
+   public static String comskipIni = "";
+   public static String wan_http_port = "";
+   public static String configIni = "";
+   public static String tivoFileNameFormat = null;     
+   
+   // custom related
+   public static String customCommand = "";
+
+   // batch/auto related
+   public static int GUI_AUTO = 0;              // Auto mode in GUI
+   public static Boolean LOOP = false;          // true=>auto loop
+   public static String autoIni = "";
+   public static String autoLog = "";
+   public static String autoHistory = "";
+   public static Stack<String> ignoreHistory = new Stack<String>();
+   public static Hashtable<String,String> KEYWORDS = new Hashtable<String,String>();
+   
+   // Hash to store tivo related information
+   public static Hashtable<String,String> TIVOS = new Hashtable<String,String>();
+   
+   // NPL cache related
+   public static int cache_time = 10;
+   public static Hashtable<String,Stack<Hashtable<String,String>>> cache =
+      new Hashtable<String,Stack<Hashtable<String,String>>>();
+   public static Hashtable<String,Long> cache_times = new Hashtable<String,Long>();
+ 
+   // GUI related
+   public static Boolean GUI = false;       // true=>GUI, false=>batch/auto            
+   public static String tivoName = "FILES"; // Saves currently selected tivo name
+   public static String encodeName = "";    // Saves currently selected encode name
+   public static gui gui;                   // Access to any GUI functions through here
+
+   // GUI table related
+   public static Color tableBkgndDarker = new Color(222,222,222); // light grey
+   public static Color tableBkgndLight = Color.white;
+   public static Color tableBkgndProtected = new Color(191,156,94); // tan
+   public static Color tableBkgndRecording = new Color(149, 151, 221); // light blue
+   public static Font  tableFont = new Font("System", Font.BOLD, 12);
+
+   // misc
+   public static String programDir = "";
+   public static String OS = "other";
+   public static String tmpDir = "/tmp";
+   public static String perl = "perl";
+   
+   // tivo beacon listening
+   public static beacon tivo_beacon;
+   
+   public static Stack<String> parse() {
+      debug.print("");
+      Stack<String> errors = new Stack<String>();
+      defineDefaults();
+      
+      if (file.isFile(configIni)) {
+         parseIni(configIni);
+      }
+
+      // Parse encoding profiles
+      encodeConfig.parseEncodingProfiles(config.encProfDir);
+      
+      // Error checking
+      if (MAK.equals(""))
+         errors.add("MAK not defined!");
+      if ( ! file.isFile(tivodecode) )
+         errors.add("tivodecode not defined!");
+
+      if (outputDir.equals("")) {
+         errors.add("Output Dir not defined!");
+      } else {
+         if ( ! file.isDir(outputDir) )
+            errors.add("Output Dir does not exist: " + outputDir);
+      }
+
+      if ( ! mpegDir.equals("") && ! file.isDir(mpegDir) )
+         errors.add("Mpeg Dir does not exist: " + mpegDir);
+
+      if ( ! mpegCutDir.equals("") && ! file.isDir(mpegCutDir) )
+         errors.add("Mpeg Cut Dir does not exist: " + mpegCutDir);
+
+      if ( ! encodeDir.equals("") && ! file.isDir(encodeDir) )
+         errors.add("Encode Dir does not exist: " + encodeDir);
+      
+      // Start tivo beacon listener if option enabled
+      if (CheckBeacon == 1) tivo_beacon = new beacon();
+
+      return errors;
+   }            
+   
+   public static void printTivosHash() {
+      String name, value;
+      log.print("TIVOS:");
+      for (Enumeration<String> e=TIVOS.keys(); e.hasMoreElements();) {
+         name = e.nextElement();
+         value = TIVOS.get(name);
+         log.print(name + "=" + value);
+      }
+   }
+   
+   public static Stack<String> getTivoNames() {
+      Stack<String> tivos = new Stack<String>();
+      String name;
+      for (Enumeration<String> e=TIVOS.keys(); e.hasMoreElements();) {
+         name = e.nextElement();
+         if ( ! name.matches("FILES") )
+            tivos.add(name);
+      }
+      return tivos;     
+   }
+   
+   public static void setTivoNames(Hashtable<String,String> h) {
+      if (h.size() > 0) {
+         String path = TIVOS.get("FILES");
+         if (path == null) path = config.programDir;
+         TIVOS.clear();
+         TIVOS.put("FILES", path);
+         for (Enumeration<String> e=h.keys(); e.hasMoreElements();) {
+            String name = e.nextElement();
+            if ( ! name.matches("FILES") )
+               TIVOS.put(name, h.get(name));
+         }
+         if (GUI) {
+            config.gui.SetTivos(config.TIVOS);
+         }
+      }
+   }
+
+   // Add a newly detected tivos to hash (and GUI if in GUI mode)
+   public static void addTivo(Hashtable<String,String> b) {
+      log.warn("Adding detected tivo: " + b.get("machine"));
+      TIVOS.put(b.get("machine"), b.get("ip"));
+      if (config.GUI) {
+         config.gui.AddTivo(b.get("machine"), b.get("ip"));
+      }
+   }
+
+   private static void defineDefaults() {
+      debug.print("");
+      String s = File.separator;
+      String exe = "";
+      if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
+         OS = "windows";
+         exe = ".exe";
+      } else if (System.getProperty("os.name").toLowerCase().indexOf("mac") > -1) {
+         OS = "mac";
+      }
+            
+      // Discover location of java file
+      programDir = new File(
+         config.class.getProtectionDomain().getCodeSource().getLocation().getPath()
+      ).getParent();
+      programDir = string.urlDecode(programDir);
+      
+      // tmpDir
+      if (OS.equals("windows")) {
+         tmpDir = System.getenv("TEMP");
+         if ( ! file.isDir(tmpDir) ) {
+            tmpDir = System.getenv("TMP");
+         }
+         if ( ! file.isDir(tmpDir) ) {
+            tmpDir = programDir;
+         }
+      }      
+      
+      // Try and get MAK from ~/.tivodecode_mak
+      String result = getMakFromFile();
+      if (result != null) MAK = result;
+      
+      configIni   = programDir + s + "config.ini";
+      autoIni     = programDir + s + "auto.ini";
+      autoLog     = programDir + s + "auto.log";
+      autoHistory = programDir + s + "auto.history";
+      encProfDir  = programDir + s + "encode";
+      
+      tivoFileNameFormat = "[title]_[wday]_[month]_[mday]";
+      outputDir          = programDir;
+      mpegDir            = outputDir;
+      mpegCutDir         = outputDir;
+      encodeDir          = outputDir;
+      wan_http_port      = "";
+      customCommand      = "";
+      
+      tivodecode    = programDir + s + "tivodecode"    + s + "tivodecode"    + exe;
+      curl          = programDir + s + "curl"          + s + "curl"          + exe;
+      ffmpeg        = programDir + s + "ffmpeg"        + s + "ffmpeg"        + exe;
+      mencoder      = programDir + s + "mencoder"      + s + "mencoder"      + exe;
+      handbrake     = programDir + s + "handbrake"     + s + "HandBrakeCLI"  + exe;
+      comskip       = programDir + s + "comskip"       + s + "comskip"       + exe;
+      comskipIni    = programDir + s + "comskip"       + s + "comskip.ini";
+      AtomicParsley = programDir + s + "AtomicParsley" + s + "AtomicParsley" + exe;
+      if ( ! OS.equals("windows"))
+         curl = "/usr/bin/curl";
+      
+      if (OS.equals("other")) {
+         // For unix try and set paths using "which"
+         if ( ! file.isFile("tivodecode") ) {
+            result = file.unixWhich("tivodecode");
+            if (result != null)
+               tivodecode = result;
+         }
+         if ( ! file.isFile("ffmpeg") ) {
+            result = file.unixWhich("ffmpeg");
+            if (result != null)
+               ffmpeg = result;
+         }
+         if ( ! file.isFile("mencoder") ) {
+            result = file.unixWhich("mencoder");
+            if (result != null)
+               mencoder = result;
+         }
+         if ( ! file.isFile("HandBrakeCLI") ) {
+            result = file.unixWhich("HandBrakeCLI");
+            if (result != null)
+               handbrake = result;
+         }
+         if ( ! file.isFile("comskip") ) {
+            result = file.unixWhich("comskip");
+            if (result != null) {
+               comskip = result;
+               result = string.dirname(comskip) + "comskip.ini";
+               if (file.isFile(result))
+                  comskipIni = result;
+            }
+         }
+         if ( ! file.isFile("AtomicParsley") ) {
+            result = file.unixWhich("AtomicParsley");
+            if (result != null)
+               AtomicParsley = result;
+         }
+      }
+   }
+   
+   private static Boolean parseIni(String config) {
+      debug.print("config=" + config);
+      
+      // Reset globals
+      MAK = "";
+      TIVOS.clear();
+      tivodecode = "";
+      curl = "";
+      outputDir = "";
+      mpegDir = "";
+      mpegCutDir = "";
+      encodeDir = "";
+      ffmpeg = "";
+      mencoder = "";
+      //handbrake = "";
+      comskip = "";
+      //AtomicParsley = "";
+      comskipIni = "";
+      wan_http_port = "";
+      VRD = "";
+      t2extract = "";
+      customCommand = "";
+      
+      try {
+         BufferedReader ini = new BufferedReader(new FileReader(config));
+         String line = null;
+         String key = null;
+         while (( line = ini.readLine()) != null) {
+            // Get rid of leading and trailing white space
+            line = line.replaceFirst("^\\s*(.*$)", "$1");
+            line = line.replaceFirst("^(.*)\\s*$", "$1");
+            if (line.length() == 0) continue; // skip empty lines
+            if (line.matches("^#.+")) continue; // skip comment lines
+            if (line.matches("^<.+>")) {
+               key = line.replaceFirst("<", "");
+               key = key.replaceFirst(">", "");
+               continue;
+            }
+            if (key.equals("MAK")) {
+               MAK = line;
+            }
+            if (key.equals("TIVOS")) {
+               String name, value;
+               String l[] = line.split("\\s+");
+               if (l[0].matches("^.*FILES")) {
+                  name = l[0];
+                  value = line;
+                  value = value.replaceFirst("^(.+)\\s+(.+)$", "$2");
+                  name = name.replaceFirst("^\\*", "");
+               } else {
+                  value = l[l.length-1];
+                  name = "";
+                  for (int i=0; i<l.length-1; i++) {
+                     name += l[i] + " ";
+                  }
+                  name = name.substring(0,name.length()-1);
+               }
+               TIVOS.put(name, value);
+            }
+            if (key.equals("tivoFileNameFormat")) {
+               tivoFileNameFormat = line;
+            }
+            if (key.equals("RemoveTivoFile")) {
+               RemoveTivoFile = Integer.parseInt(line);
+            }
+            if (key.equals("RemoveComcutFiles")) {
+               RemoveComcutFiles = Integer.parseInt(line);
+            }
+            if (key.equals("RemoveMpegFile")) {
+               RemoveMpegFile = Integer.parseInt(line);
+            }
+            if (key.equals("CreateSubFolder")) {
+               CreateSubFolder = Integer.parseInt(line);
+            }
+            if (key.equals("outputDir")) {
+               outputDir = line;
+            }
+            if (key.equals("mpegDir")) {
+               mpegDir = line;
+            }
+            if (key.equals("mpegCutDir")) {
+               mpegCutDir = line;
+            }
+            if (key.equals("encodeDir")) {
+               encodeDir = line;
+            }
+            if (key.equals("tivodecode")) {
+               tivodecode = line;
+            }
+            if (key.equals("curl")) {
+               curl = line;
+            }
+            if (key.equals("ffmpeg")) {
+               ffmpeg = line;
+            }
+            if (key.equals("mencoder")) {
+               mencoder = line;
+            }
+            if (key.equals("handbrake")) {
+               handbrake = line;
+            }
+            if (key.equals("comskip")) {
+               comskip = line;
+            }
+            if (key.equals("AtomicParsley")) {
+               AtomicParsley = line;
+            }
+            if (key.equals("comskipIni")) {
+               comskipIni = line;
+            }
+            if (key.equals("wan_http_port")) {
+               wan_http_port = line;
+            }
+            if (key.equals("cache_time")) {
+               cache_time = Integer.parseInt(line);
+            }
+            if (key.equals("MaxJobs")) {
+               MaxJobs = Integer.parseInt(line);
+            }
+            if (key.equals("VRD")) {
+               VRD = line;
+            }
+            if (key.equals("t2extract")) {
+               t2extract = line;
+            }
+            if (key.equals("custom")) {
+               customCommand = line;
+            }
+            if (key.equals("CheckDiskSpace")) {
+               CheckDiskSpace = Integer.parseInt(line);
+            }
+            if (key.equals("LowSpaceSize")) {
+               LowSpaceSize = Integer.parseInt(line);
+            }
+            if (key.equals("CheckBeacon")) {
+               CheckBeacon = Integer.parseInt(line);
+            }
+         }
+         ini.close();
+
+         // Define FILES mode start dir if not configured
+         if ( ! TIVOS.containsKey("FILES") ) {
+            TIVOS.put("FILES", outputDir);
+         }
+         if ( ! file.isFile(TIVOS.get("FILES")) ) {
+            TIVOS.put("FILES", outputDir);
+         }
+         
+      }         
+      catch (IOException ex) {
+         log.error("Problem parsing config file: " + config);
+         return false;
+      }
+      
+      return true;
+
+   }
+   
+   // Save current settings in memory to config.ini
+   public static Boolean save(String config) {
+      debug.print("config=" + config);
+            
+      try {
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(config));
+         
+         ofp.write("# kmttg config.ini file\n");
+         
+         ofp.write("<MAK>\n" + MAK + "\n\n");
+         
+         ofp.write("<TIVOS>\n");
+         Stack<String> tivoNames = getTivoNames();
+         if (tivoNames.size() > 0) {
+            for (int i=0; i<tivoNames.size(); ++i) {
+               String name = tivoNames.get(i);
+               ofp.write(String.format("%-20s %-20s\n", name, TIVOS.get(name)));
+            }
+         }
+         ofp.write(String.format("%-20s %-20s\n", "FILES", TIVOS.get("FILES")));
+         ofp.write("\n");
+         
+         ofp.write("<RemoveTivoFile>\n" + RemoveTivoFile + "\n\n");
+         
+         ofp.write("<RemoveComcutFiles>\n" + RemoveComcutFiles + "\n\n");
+         
+         ofp.write("<RemoveMpegFile>\n" + RemoveMpegFile + "\n\n");
+         
+         ofp.write("<CreateSubFolder>\n" + CreateSubFolder + "\n\n");
+         
+         ofp.write("<tivoFileNameFormat>\n" + tivoFileNameFormat + "\n\n");
+         
+         ofp.write("<outputDir>\n" + outputDir + "\n\n");
+         
+         ofp.write("<mpegDir>\n" + mpegDir + "\n\n");
+         
+         ofp.write("<mpegCutDir>\n" + mpegCutDir + "\n\n");
+         
+         ofp.write("<encodeDir>\n" + encodeDir + "\n\n");
+         
+         ofp.write("<tivodecode>\n" + tivodecode + "\n\n");
+         
+         ofp.write("<curl>\n" + curl + "\n\n");
+         
+         ofp.write("<ffmpeg>\n" + ffmpeg + "\n\n");
+         
+         ofp.write("<mencoder>\n" + mencoder + "\n\n");
+         
+         ofp.write("<handbrake>\n" + handbrake + "\n\n");
+         
+         ofp.write("<comskip>\n" + comskip + "\n\n");
+         
+         ofp.write("<comskipIni>\n" + comskipIni + "\n\n");
+         
+         ofp.write("<wan_http_port>\n" + wan_http_port + "\n\n");
+         
+         ofp.write("<cache_time>\n" + cache_time + "\n\n");
+         
+         ofp.write("<MaxJobs>\n" + MaxJobs + "\n\n");
+         
+         ofp.write("<VRD>\n" + VRD + "\n\n");
+         
+         ofp.write("<AtomicParsley>\n" + AtomicParsley + "\n\n");
+         
+         ofp.write("<t2extract>\n" + t2extract + "\n\n");
+         
+         ofp.write("<custom>\n" + customCommand + "\n\n");
+         
+         ofp.write("<CheckDiskSpace>\n" + CheckDiskSpace + "\n\n");
+         
+         ofp.write("<LowSpaceSize>\n" + LowSpaceSize + "\n\n");
+         
+         ofp.write("<CheckBeacon>\n" + CheckBeacon + "\n\n");
+         
+         ofp.close();
+         
+      }         
+      catch (IOException ex) {
+         log.error("Problem writing to config file: " + config);
+         return false;
+      }
+      
+      return true;
+   }
+   
+   // Try and get MAK from ~/.tivodecode_mak   
+   public static String getMakFromFile() {
+      if (System.getProperty("user.home") != null) {
+         String f = System.getProperty("user.home") +
+            File.separator + ".tivodecode_mak";
+         if (file.isFile(f)) {
+            String mak = null;
+            try {
+               BufferedReader reader = new BufferedReader(new FileReader(f));
+               String line = null;
+               while (( line = reader.readLine()) != null) {
+                  // Get rid of leading and trailing white space
+                  line = line.replaceFirst("^\\s*(.*$)", "$1");
+                  line = line.replaceFirst("^(.*)\\s*$", "$1");
+                  if (line.length() == 0) continue; // skip empty lines
+                  if (line.matches("^\\d+$"))
+                     mak = line;
+               }
+               reader.close();
+               return mak;
+            }
+            catch (IOException ex) {
+               return null;
+            }
+
+         }
+      }
+      return null;
+   }
+ 
+}

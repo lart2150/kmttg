@@ -1,0 +1,12 @@
+# Description (single line, keep short)
+<description>
+Handbrake iPhone: m4v container, res x=480 h.264 video, aac audio
+
+# Encode command or script (single line)
+# Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD
+<command>
+HANDBRAKE -i INPUT -t 1 -c 1 -f m4v -X 480 -e x264 -q 0.59 -a 1 -E faac -B 128 -R 48 -6 dpl2 -D 1 -x level=30:cabac=0:ref=2:mixed-refs=1:analyse=all:me=umh:no-fast-pskip=1 -v -o OUTPUT
+
+# Encoded output file extension
+<extension>
+m4v

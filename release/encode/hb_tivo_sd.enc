@@ -1,0 +1,12 @@
+# Description (single line, keep short)
+<description>
+Handbrake tivo_sd: mp4 container, same res 2 Mbps h.264 video, ac3 audio
+
+# Encode command or script (single line)
+# Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD
+<command>
+HANDBRAKE -i INPUT -f mp4 -O -p -e x264 -b 2000 -a 1 -E ac3 -x ref=3:mixed-refs=1:bframes=3:b-pyramid=1:weightb=1:analyse=all:8x8dct=1:me=umh:subq=9:psy-rd=1,0.2:direct=auto:keyint=24:min-keyint=2:no-fast-pskip=1:no-dct-decimate=1 -v -o OUTPUT
+ 
+# Encoded output file extension
+<extension>
+mp4

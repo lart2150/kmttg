@@ -1,0 +1,12 @@
+# Description (single line, keep short)
+<description>
+Creative Zen: avi container, 320x240 xvid video, mp3 audio
+
+# Encode command or script (single line)
+# Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD
+<command>
+FFMPEG -y -i INPUT -vcodec libxvid -acodec libmp3lame -b 800k -ac 2 -s 320x240 -f avi OUTPUT
+
+# Encoded output file extension
+<extension>
+avi

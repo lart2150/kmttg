@@ -1,0 +1,12 @@
+# Description (single line, keep short)
+<description>
+Handbrake AppleTV: m4v container, x=960 res h.264 video, aac audio
+
+# Encode command or script (single line)
+# Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD
+<command>
+HANDBRAKE -i INPUT -t 1 -c 1 -f m4v -4  -X 960 -P  -e x264 -q 0.59 -a 1,1 -E faac,ac3 -B 160 -R 48,0 -6 dpl2,dpl2 -D 1,1 -x level=30:cabac=0:ref=3:mixed-refs=1:bframes=6:weightb=1:direct=auto:no-fast-pskip=1:me=umh:subq=7:analyse=all -v -o OUTPUT
+
+# Encoded output file extension
+<extension>
+m4v
