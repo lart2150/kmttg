@@ -930,4 +930,47 @@ public class gui {
    public void refresh() {
       jContentPane.paintImmediately(jContentPane.getBounds());
    }
+   
+   // Returns state of checkbox options (as int for writing to auto.ini purposes)
+   public int metadata_setting() {
+      int selected = 0;
+      if (metadata.isSelected()) selected = 1;
+      return selected;
+   }
+   public int decrypt_setting() {
+      int selected = 0;
+      if (decrypt.isSelected()) selected = 1;
+      return selected;
+   }
+   public int qsfix_setting() {
+      int selected = 0;
+      if (qsfix.isSelected()) selected = 1;
+      return selected;
+   }
+   public int comskip_setting() {
+      int selected = 0;
+      if (comskip.isSelected()) selected = 1;
+      return selected;
+   }
+   public int comcut_setting() {
+      int selected = 0;
+      if (comcut.isSelected()) selected = 1;
+      return selected;
+   }
+   public int captions_setting() {
+      int selected = 0;
+      if (captions.isSelected()) selected = 1;
+      return selected;
+   }
+   public int encode_setting() {
+      int selected = 0;
+      if (encode.isSelected()) selected = 1;
+      return selected;
+   }
+   public int custom_setting() {
+      int selected = 0;
+      if (custom.isSelected()) selected = 1;
+      return selected;
+   }
+
 }
