@@ -11,9 +11,10 @@ public class mainInstall {
    public static void install() {
       debug.print("");
       String dir = config.programDir; // Install where jar file is
-      
-      // If no tivodecode found then prompt for tools download if
-      // downloads available for this OS
+            
+      // If tivodecode not defined then assume tools not installed
+      // and download & install tools package
+      // for windows & mac only
       if ( ! file.isFile(config.tivodecode) ) {
          if (config.OS.equals("windows") || config.OS.equals("mac")) {
             int response = JOptionPane.showConfirmDialog(
