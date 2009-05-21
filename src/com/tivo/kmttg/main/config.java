@@ -101,11 +101,78 @@ public class config {
    
    public static Stack<String> parse() {
       debug.print("");
+      String result;
       Stack<String> errors = new Stack<String>();
       defineDefaults();
       
       if (file.isFile(configIni)) {
          parseIni(configIni);
+      }
+      
+      // Could be output dirs are configured incorrectly, so try and
+      // correct them automatically
+      if (! file.isDir(outputDir)) {
+         log.warn("Configured outputDir does not exist, resetting to default");
+         outputDir = programDir;
+      }
+      if (! file.isDir(TIVOS.get("FILES"))) {
+         log.warn("Configured FILES dir does not exist, resetting to default");
+         TIVOS.put("FILES", outputDir);
+      }
+      if (! file.isDir(mpegDir)) {
+         log.warn("Configured mpegDir does not exist, resetting to default");
+         mpegDir = outputDir;
+      }
+      if (! file.isDir(mpegCutDir)) {
+         log.warn("Configured mpegCutDir does not exist, resetting to default");
+         mpegCutDir = outputDir;
+      }
+      if (! file.isDir(encodeDir)) {
+         log.warn("Configured encodeDir does not exist, resetting to default");
+         encodeDir = outputDir;
+      }
+      
+      // Could be the 3rd party tools are installed locally but just configured
+      // wrong, so try and automatically correct them
+      if ( ! file.isFile(config.curl) ) {
+         result = config.getProgramDefault("curl");
+         if ( file.isFile(result) )
+            config.curl = result;
+      }
+      if ( ! file.isFile(config.tivodecode) ) {
+         result = config.getProgramDefault("tivodecode");
+         if ( file.isFile(result) )
+            config.tivodecode = result;
+      }
+      if ( ! file.isFile(config.ffmpeg) ) {
+         result = config.getProgramDefault("ffmpeg");
+         if ( file.isFile(result) )
+            config.ffmpeg = result;
+      }
+      if ( ! file.isFile(config.mencoder) ) {
+         result = config.getProgramDefault("mencoder");
+         if ( file.isFile(result) )
+            config.mencoder = result;
+      }
+      if ( ! file.isFile(config.handbrake) ) {
+         result = config.getProgramDefault("handbrake");
+         if ( file.isFile(result) )
+            config.handbrake = result;
+      }
+      if ( ! file.isFile(config.comskip) ) {
+         result = config.getProgramDefault("comskip");
+         if ( file.isFile(result) )
+            config.comskip = result;
+      }
+      if ( ! file.isFile(config.comskipIni) ) {
+         result = config.getProgramDefault("comskipIni");
+         if ( file.isFile(result) )
+            config.comskipIni = result;
+      }
+      if ( ! file.isFile(config.AtomicParsley) ) {
+         result = config.getProgramDefault("AtomicParsley");
+         if ( file.isFile(result) )
+            config.AtomicParsley = result;
       }
 
       // Parse encoding profiles
@@ -189,19 +256,18 @@ public class config {
    private static void defineDefaults() {
       debug.print("");
       String s = File.separator;
-      String exe = "";
       if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
          OS = "windows";
-         exe = ".exe";
       } else if (System.getProperty("os.name").toLowerCase().indexOf("mac") > -1) {
          OS = "mac";
       }
             
-      // Discover location of java file
+      // Define programDir based on location of jar file
       programDir = new File(
          config.class.getProtectionDomain().getCodeSource().getLocation().getPath()
       ).getParent();
       programDir = string.urlDecode(programDir);
+      debug.print("programDir=" + programDir);
       
       // tmpDir
       if (OS.equals("windows")) {
@@ -218,68 +284,129 @@ public class config {
       String result = getMakFromFile();
       if (result != null) MAK = result;
       
+      // These files all should reside along side jar file
       configIni   = programDir + s + "config.ini";
       autoIni     = programDir + s + "auto.ini";
       autoLog     = programDir + s + "auto.log";
       autoHistory = programDir + s + "auto.history";
       encProfDir  = programDir + s + "encode";
       
+      // Non-executable defaults
       tivoFileNameFormat = "[title]_[wday]_[month]_[mday]";
       outputDir          = programDir;
+      TIVOS.put("FILES", outputDir);
       mpegDir            = outputDir;
       mpegCutDir         = outputDir;
       encodeDir          = outputDir;
       wan_http_port      = "";
       customCommand      = "";
       
-      tivodecode    = programDir + s + "tivodecode"    + s + "tivodecode"    + exe;
-      curl          = programDir + s + "curl"          + s + "curl"          + exe;
-      ffmpeg        = programDir + s + "ffmpeg"        + s + "ffmpeg"        + exe;
-      mencoder      = programDir + s + "mencoder"      + s + "mencoder"      + exe;
-      handbrake     = programDir + s + "handbrake"     + s + "HandBrakeCLI"  + exe;
-      comskip       = programDir + s + "comskip"       + s + "comskip"       + exe;
-      comskipIni    = programDir + s + "comskip"       + s + "comskip.ini";
-      AtomicParsley = programDir + s + "AtomicParsley" + s + "AtomicParsley" + exe;
-      if ( ! OS.equals("windows"))
-         curl = "/usr/bin/curl";
+      // 3rd party executable defaults
+      curl          = getProgramDefault("curl");
+      tivodecode    = getProgramDefault("tivodecode");
+      ffmpeg        = getProgramDefault("ffmpeg");
+      mencoder      = getProgramDefault("mencoder");
+      handbrake     = getProgramDefault("handbrake");
+      comskip       = getProgramDefault("comskip");
+      comskipIni    = getProgramDefault("comskipIni");
+      AtomicParsley = getProgramDefault("AtomicParsley");
       
-      if (OS.equals("other")) {
-         // For unix try and set paths using "which"
-         if ( ! file.isFile("tivodecode") ) {
+   }
+   
+   // Return default setting for a given programName
+   // For windows & Mac define expected default locations
+   // For other OSs try and find program using "which"
+   public static String getProgramDefault(String programName) {
+      debug.print("programName=" + programName);
+      String s = File.separator;
+      String exe = "";
+      String result;
+      if (OS.equals("windows")) {
+         exe = ".exe";
+      }
+                                          
+      if (programName.equals("curl")) {
+        String curl          = programDir + s + "curl"          + s + "curl"          + exe;
+        if ( ! OS.equals("windows"))
+           curl = "/usr/bin/curl";
+        if (OS.equals("other") && ! file.isFile(curl)) {
+            result = file.unixWhich("curl");
+            if (result != null)
+               curl = result;
+         }
+         return curl;
+      }
+      
+      else if (programName.equals("tivodecode")) {
+         String tivodecode    = programDir + s + "tivodecode"    + s + "tivodecode"    + exe;      
+         if (OS.equals("other") && ! file.isFile(tivodecode)) {
             result = file.unixWhich("tivodecode");
             if (result != null)
                tivodecode = result;
          }
-         if ( ! file.isFile("ffmpeg") ) {
+         return tivodecode;
+      }
+      
+      else if (programName.equals("ffmpeg")) {
+         String ffmpeg        = programDir + s + "ffmpeg"        + s + "ffmpeg"        + exe;
+         if (OS.equals("other") && ! file.isFile(ffmpeg)) {
             result = file.unixWhich("ffmpeg");
             if (result != null)
                ffmpeg = result;
          }
-         if ( ! file.isFile("mencoder") ) {
+         return ffmpeg;
+      }
+      
+      else if (programName.equals("mencoder")) {
+         String mencoder      = programDir + s + "mencoder"      + s + "mencoder"      + exe;
+         if (OS.equals("other") && ! file.isFile(mencoder) ) {
             result = file.unixWhich("mencoder");
             if (result != null)
                mencoder = result;
          }
-         if ( ! file.isFile("HandBrakeCLI") ) {
+         return mencoder;
+      }
+      
+      else if (programName.equals("handbrake")) {
+         String handbrake     = programDir + s + "handbrake"     + s + "HandBrakeCLI"  + exe;
+         if (OS.equals("other") &&  ! file.isFile(handbrake) ) {
             result = file.unixWhich("HandBrakeCLI");
             if (result != null)
                handbrake = result;
          }
-         if ( ! file.isFile("comskip") ) {
+         return handbrake;
+      }
+      
+      else if (programName.equals("comskip")) {
+         String comskip       = programDir + s + "comskip"       + s + "comskip"       + exe;
+         if (OS.equals("other") &&  ! file.isFile(comskip) ) {
             result = file.unixWhich("comskip");
-            if (result != null) {
+            if (result != null)
                comskip = result;
-               result = string.dirname(comskip) + "comskip.ini";
-               if (file.isFile(result))
-                  comskipIni = result;
-            }
          }
-         if ( ! file.isFile("AtomicParsley") ) {
+         return comskip;
+      }
+            
+      else if (programName.equals("comskipIni")) {
+         String comskipIni = string.dirname(getProgramDefault("comskip")) + s + "comskip.ini";
+         return comskipIni;
+      }
+      
+      else if (programName.equals("AtomicParsley")) {
+         String AtomicParsley = programDir + s + "AtomicParsley" + s + "AtomicParsley" + exe;
+         if (OS.equals("other") &&  ! file.isFile(AtomicParsley) ) {
             result = file.unixWhich("AtomicParsley");
             if (result != null)
                AtomicParsley = result;
          }
+         return AtomicParsley;
       }
+      
+      else {
+         log.error("No default defined for programName=" + programName);
+         return "";
+      }
+      
    }
    
    private static Boolean parseIni(String config) {
