@@ -148,6 +148,14 @@ public class encode {
                      config.gui.progressBar_setValue(pct);
                   }
                }
+            } else {
+               // File not yet available so simply update time
+               String t = jobMonitor.getElapsedTime(job.time);
+               config.gui.jobTab_UpdateJobMonitorRowStatus(job, t);
+               if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                  String title = String.format("encode: %s %s", t, config.kmttg);
+                  config.gui.setTitle(title);
+               }
             }
          }
         return true;
