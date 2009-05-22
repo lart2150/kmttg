@@ -35,7 +35,6 @@ public class ChildDataHandler extends Thread {
    
    public void close() {
       if (inputStream != null) {
-         run();
          try {
             inputStream.close();
          } catch (IOException e) {
