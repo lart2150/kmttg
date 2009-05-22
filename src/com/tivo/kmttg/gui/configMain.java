@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -912,26 +911,33 @@ public class configMain {
       c.gridwidth = 3;
       content.add(tivo_ip, c);
       
-      // checkbox options
-      int GAP = 0;
-      JPanel p1 = new JPanel();
-      p1.setLayout(new GridLayout(2, 1, GAP, GAP));
-      p1.add(remove_tivo);
-      p1.add(remove_mpeg);
+      // Remove .TiVo after file decrypt
       gy++;
       c.fill = GridBagConstraints.HORIZONTAL;
       c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
       c.gridwidth = 3;
-      content.add(p1, c);
-
-      JPanel p2 = new JPanel();
-      p2.setLayout(new GridLayout(2, 1, GAP, GAP));
-      p2.add(remove_comcut);
-      p2.add(check_space);
+      content.add(remove_tivo, c);
+      
+      // Remove .edl & .mpg files after comcut
       c.gridx = 5;
-      content.add(p2, c);
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(remove_comcut, c);
+      
+      // Remove .mpg file after encode
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(remove_mpeg, c);
+      
+      // Check Available Disk Space
+      c.gridx = 5;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(check_space, c);
       
       // File naming
       gy++;
@@ -964,111 +970,298 @@ public class configMain {
       c.gridy = gy;
       c.gridwidth = 3;
       content.add(keywords, c);
-           
-      // Build column 0
-      JPanel col0 = new JPanel();
-      GAP = 4;
-      col0.setLayout(new GridLayout(10, 1, GAP, GAP));
-      col0.add(files_path_label);
-      col0.add(MAK_label);
-      col0.add(tivo_output_dir_label);
-      col0.add(mpeg_output_dir_label);
-      col0.add(mpeg_cut_dir_label);
-      col0.add(encode_output_dir_label);
-      col0.add(tivodecode_label);
-      col0.add(curl_label);
-      col0.add(ffmpeg_label);
-      col0.add(wan_http_port_label);
       
+      // FILES Default Path
       gy++;
       c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridheight = 1;
       c.gridwidth = 1;
-      content.add(col0, c);
-      
-      // Build column 1
-      GAP = 0;
-      JPanel col1 = new JPanel();
-      col1.setLayout(new GridLayout(10, 1, GAP, GAP));
-      col1.add(files_path);
-      col1.add(MAK);
-      col1.add(tivo_output_dir);
-      col1.add(mpeg_output_dir);
-      col1.add(mpeg_cut_dir);
-      col1.add(encode_output_dir);
-      col1.add(tivodecode);
-      col1.add(curl);
-      col1.add(ffmpeg);
-      col1.add(wan_http_port);
-      
+      content.add(files_path_label, c);
+
       c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
       c.gridx = 1;
+      c.gridy = gy;
       c.gridwidth = 3;
-      content.add(col1, c);
-            
-      // column 2
-      GAP = 4;
-      JPanel col2 = new JPanel();
-      col2.setLayout(new GridLayout(10, 1, GAP, GAP));
-      col2.add(disk_space_label);
-      col2.add(mencoder_label);
-      col2.add(handbrake_label);
-      col2.add(comskip_label);
-      col2.add(comskip_ini_label);
-      col2.add(VRD_path_label);
-      col2.add(t2extract_label);
-      col2.add(AtomicParsley_label);
-      col2.add(active_job_limit_label);
-      col2.add(NPL_cache_mins_label);
+      content.add(files_path, c);
       
+      // Min req space
       c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 4;
+      c.gridy = gy;
       c.gridwidth = 1;
-      content.add(col2, c);
-      
-      // column 3
-      GAP = 0;
-      JPanel col3 = new JPanel();
-      col3.setLayout(new GridLayout(10, 1, GAP, GAP));
-      col3.add(disk_space);
-      col3.add(mencoder);
-      col3.add(handbrake);
-      col3.add(comskip);
-      col3.add(comskip_ini);
-      col3.add(VRD_path);
-      col3.add(t2extract);
-      col3.add(AtomicParsley);
-      col3.add(active_job_limit);
-      col3.add(NPL_cache_mins);
-      
+      content.add(disk_space_label, c);
+
       c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
       c.gridx = 5;
+      c.gridy = gy;
       c.gridwidth = 3;
-      content.add(col3, c);
+      content.add(disk_space, c);
       
+      // MAK
+      gy++;
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(MAK_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 1;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(MAK, c);
+      
+      // mencoder
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 4;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(mencoder_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 5;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(mencoder, c);
+      
+      // .TiVo Output Dir
+      gy++;
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(tivo_output_dir_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 1;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(tivo_output_dir, c);
+      
+      // handbrake
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 4;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(handbrake_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 5;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(handbrake, c);
+      
+      // .mpg Output Dir
+      gy++;
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(mpeg_output_dir_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 1;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(mpeg_output_dir, c);
+      
+      // comskip
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 4;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(comskip_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 5;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(comskip, c);
+      
+      // .mpg Cut Dir
+      gy++;
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(mpeg_cut_dir_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 1;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(mpeg_cut_dir, c);
+      
+      // comskip.ini
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 4;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(comskip_ini_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 5;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(comskip_ini, c);
+      
+      // Encode output dir
+      gy++;
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(encode_output_dir_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 1;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(encode_output_dir, c);
+      
+      // VRD path
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 4;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(VRD_path_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 5;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(VRD_path, c);
+      
+      // tivodecode
+      gy++;
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(tivodecode_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 1;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(tivodecode, c);
+      
+      // t2extract
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 4;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(t2extract_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 5;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(t2extract, c);
+      
+      // curl
+      gy++;
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(curl_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 1;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(curl, c);
+      
+      // AtomicParsley
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 4;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(AtomicParsley_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 5;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(AtomicParsley, c);
+      
+      // ffmpeg
+      gy++;
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(ffmpeg_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 1;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(ffmpeg, c);
+      
+      // active job limit
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 4;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(active_job_limit_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 5;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(active_job_limit, c);
+      
+      // wan http port
+      gy++;
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(wan_http_port_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 1;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(wan_http_port, c);
+      
+      // NPL cache mins
+      c.fill = GridBagConstraints.NONE;
+      c.gridx = 4;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(NPL_cache_mins_label, c);
+
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 5;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(active_job_limit, c);
+                                   
       // custom row
       gy++;
+      c.fill = GridBagConstraints.NONE;
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(customCommand_label, c);
       
+      c.fill = GridBagConstraints.HORIZONTAL;
       c.gridx = 1;
       c.gridy = gy;
       c.gridwidth = 3;
       content.add(customCommand, c);
       
+      c.fill = GridBagConstraints.NONE;
       c.gridx = 4;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(customFiles_label, c);
       
+      c.fill = GridBagConstraints.HORIZONTAL;
       c.gridx = 5;
       c.gridy = gy;
       c.gridwidth = 3;
