@@ -974,12 +974,14 @@ public class configMain {
       // FILES Default Path
       gy++;
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(files_path_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -987,12 +989,14 @@ public class configMain {
       
       // Min req space
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 4;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(disk_space_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 5;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1001,12 +1005,14 @@ public class configMain {
       // MAK
       gy++;
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(MAK_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1014,12 +1020,14 @@ public class configMain {
       
       // mencoder
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 4;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(mencoder_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 5;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1028,12 +1036,14 @@ public class configMain {
       // .TiVo Output Dir
       gy++;
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(tivo_output_dir_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1041,12 +1051,14 @@ public class configMain {
       
       // handbrake
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 4;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(handbrake_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 5;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1055,12 +1067,14 @@ public class configMain {
       // .mpg Output Dir
       gy++;
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(mpeg_output_dir_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1068,12 +1082,14 @@ public class configMain {
       
       // comskip
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 4;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(comskip_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 5;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1082,12 +1098,14 @@ public class configMain {
       // .mpg Cut Dir
       gy++;
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(mpeg_cut_dir_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1095,12 +1113,14 @@ public class configMain {
       
       // comskip.ini
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 4;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(comskip_ini_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 5;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1109,12 +1129,14 @@ public class configMain {
       // Encode output dir
       gy++;
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(encode_output_dir_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1122,12 +1144,14 @@ public class configMain {
       
       // VRD path
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 4;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(VRD_path_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 5;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1136,12 +1160,14 @@ public class configMain {
       // tivodecode
       gy++;
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(tivodecode_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1149,12 +1175,14 @@ public class configMain {
       
       // t2extract
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 4;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(t2extract_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 5;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1163,12 +1191,14 @@ public class configMain {
       // curl
       gy++;
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(curl_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1176,12 +1206,14 @@ public class configMain {
       
       // AtomicParsley
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 4;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(AtomicParsley_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 5;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1190,12 +1222,14 @@ public class configMain {
       // ffmpeg
       gy++;
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(ffmpeg_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1203,12 +1237,14 @@ public class configMain {
       
       // active job limit
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 4;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(active_job_limit_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 5;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1217,12 +1253,14 @@ public class configMain {
       // wan http port
       gy++;
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(wan_http_port_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1230,12 +1268,14 @@ public class configMain {
       
       // NPL cache mins
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 4;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(NPL_cache_mins_label, c);
 
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 5;
       c.gridy = gy;
       c.gridwidth = 3;
@@ -1244,24 +1284,28 @@ public class configMain {
       // custom row
       gy++;
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(customCommand_label, c);
       
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
       c.gridwidth = 3;
       content.add(customCommand, c);
       
       c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
       c.gridx = 4;
       c.gridy = gy;
       c.gridwidth = 1;
       content.add(customFiles_label, c);
       
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 5;
       c.gridy = gy;
       c.gridwidth = 3;
