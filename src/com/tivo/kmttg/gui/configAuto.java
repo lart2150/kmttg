@@ -9,8 +9,6 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -29,6 +27,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -113,13 +113,14 @@ public class configAuto {
       table_scroll = new JScrollPane(table);
       table_scroll.setPreferredSize(new Dimension(0, 100));
       
-      // Define custom mouse listener for when rows are selected
-      table.addMouseListener(new MouseAdapter() {
-         public void mouseClicked(MouseEvent e) {
+      // Define selection listener to update dialog fields according
+      // to selected row
+      table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+         public void valueChanged(ListSelectionEvent e) {
             TableRowSelected(table.getSelectedRow());
          }
-      }); 
-      
+      });
+            
       text = new JTextPane();
       String message = "for Type=keywords: Multiple keywords are allowed separated by '| character";
       message += "\nkeyword=>AND  (keyword)=>OR  -keyword=>NOT";
@@ -691,7 +692,7 @@ public class configAuto {
          model.setValueAt(autoConfig.keywordsToString(entry.keywords), row, 1);
       
       packColumns(table,2);
-      log.warn("Updated auto transfers entry # " + row+1);
+      log.warn("Updated auto transfers entry # " + (row+1));
    }
    
    // Callback for DEL button
@@ -779,6 +780,7 @@ public class configAuto {
    // This will update component settings according to selected row data
    private void TableRowSelected(int row) {
       debug.print("row=" + row);
+      if (row == -1) return;
       autoEntry entry = GetRowData(row);
       metadata.setSelected((Boolean)(entry.metadata == 1));
       decrypt.setSelected((Boolean)(entry.decrypt == 1));

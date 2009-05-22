@@ -3,8 +3,6 @@ package com.tivo.kmttg.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Comparator;
 import java.util.Hashtable;
@@ -15,6 +13,8 @@ import javax.swing.JTable;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Sorter;
 
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
 
 import com.tivo.kmttg.main.config;
@@ -71,13 +71,15 @@ public class nplTable {
       sorter.setComparator(sortableComparator);
       sorter = NowPlaying.getColumnExt(3).getSorter();
       sorter.setComparator(sortableComparator);
-   
-      // Define custom mouse listener for when rows are selected
-      NowPlaying.addMouseListener(new MouseAdapter() {
-         public void mouseClicked(MouseEvent e) {
+      
+      
+      // Define selection listener to update dialog fields according
+      // to selected row
+      NowPlaying.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+         public void valueChanged(ListSelectionEvent e) {
             NowPlayingRowSelected(NowPlaying.getSelectedRow());
          }
-      }); 
+      });
                   
       // Change color & font
       TableColumn tm;
@@ -200,6 +202,7 @@ public class nplTable {
    
    public void NowPlayingRowSelected(int row) {
       debug.print("row=" + row);
+      if (row == -1) return;
       if (config.tivoName.equals("FILES")) {
          // FILES mode - don't do anything
       } else {
