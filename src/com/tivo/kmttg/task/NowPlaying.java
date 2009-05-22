@@ -121,11 +121,22 @@ public class NowPlaying  {
          // Still running
          if (config.GUI) {
             // Update STATUS column
-            config.gui.jobTab_UpdateJobMonitorRowStatus(job, "running");
+            String t = jobMonitor.getElapsedTime(job.time);
+            config.gui.jobTab_UpdateJobMonitorRowStatus(job, t);
+            if ( jobMonitor.isFirstJobInMonitor(job) ) {
+               String title = String.format("playlist: %s %s", t, config.kmttg);
+               config.gui.setTitle(title);
+            }
          }
          return true;
       } else {
          // Job finished
+         if (config.GUI) {
+            if ( jobMonitor.isFirstJobInMonitor(job) ) {
+               config.gui.setTitle(config.kmttg);
+            }
+         }
+         
          jobMonitor.removeFromJobList(job);
          
          // Check for problems
