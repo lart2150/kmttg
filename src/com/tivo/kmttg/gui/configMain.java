@@ -1279,7 +1279,7 @@ public class configMain {
       c.gridx = 5;
       c.gridy = gy;
       c.gridwidth = 3;
-      content.add(active_job_limit, c);
+      content.add(NPL_cache_mins, c);
                                    
       // custom row
       gy++;
