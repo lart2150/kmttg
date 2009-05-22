@@ -283,7 +283,7 @@ public class config {
       // Try and get MAK from ~/.tivodecode_mak
       String result = getMakFromFile();
       if (result != null) MAK = result;
-      
+     
       // These files all should reside along side jar file
       configIni   = programDir + s + "config.ini";
       autoIni     = programDir + s + "auto.ini";
@@ -413,7 +413,7 @@ public class config {
       debug.print("config=" + config);
       
       // Reset globals
-      MAK = "";
+      /*MAK = "";
       TIVOS.clear();
       tivodecode = "";
       curl = "";
@@ -431,6 +431,7 @@ public class config {
       VRD = "";
       t2extract = "";
       customCommand = "";
+      */
       
       try {
          BufferedReader ini = new BufferedReader(new FileReader(config));
