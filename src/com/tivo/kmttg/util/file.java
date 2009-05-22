@@ -82,13 +82,15 @@ public class file {
                if (l.size() > 0) {
                   String free_string = l.lastElement();
                   String[] ll = free_string.split("\\s+");
-                  free_string = ll[ll.length-3];
-                  try {
-                     free = Long.parseLong(free_string);
-                     free = (long) (free * Math.pow(2, 10));
-                     return free;
-                  } catch (NumberFormatException e) {
-                     return bad;
+                  if (ll.length-3 >= 0) {
+                     free_string = ll[ll.length-3];
+                     try {
+                        free = Long.parseLong(free_string);
+                        free = (long) (free * Math.pow(2, 10));
+                        return free;
+                     } catch (NumberFormatException e) {
+                        return bad;
+                     }
                   }
                }
             }
