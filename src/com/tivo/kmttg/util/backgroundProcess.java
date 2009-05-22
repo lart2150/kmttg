@@ -40,8 +40,8 @@ public class backgroundProcess {
    public int Wait() {
       try {
          int r = proc.waitFor();
-         stdoutHandler.run();
-         stderrHandler.run();
+         stdoutHandler.close();
+         stderrHandler.close();
          return r;
       } catch (InterruptedException e) {
          return -1;
