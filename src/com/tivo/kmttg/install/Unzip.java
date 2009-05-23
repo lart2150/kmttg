@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.util.zip.*;
 
+import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
@@ -37,9 +38,13 @@ public static Boolean unzip(String dir, String file) {
            zipFile.getInputStream(entry),
            new BufferedOutputStream(new FileOutputStream(fullName))
         );
+        
+        // Set all files as executable
+        if ( ! config.OS.equals("windows") )
+           Runtime.getRuntime().exec("chmod 775 " + fullName);
       }
 
-      zipFile.close();
+      zipFile.close();      
       return true;
       
     } catch (IOException ioe) {
