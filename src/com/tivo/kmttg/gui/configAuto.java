@@ -217,7 +217,7 @@ public class configAuto {
       c.gridy = gy;
       c.gridwidth = 1;
       c.gridheight = 1;
-      c.anchor = GridBagConstraints.NORTH;
+      c.anchor = GridBagConstraints.CENTER;
       c.fill = GridBagConstraints.NONE;
       
       // table

@@ -128,7 +128,7 @@ public class gui {
          c.gridy = gy;
          c.gridwidth = 1;
          c.gridheight = 1;
-         c.anchor = GridBagConstraints.NORTH;
+         c.anchor = GridBagConstraints.CENTER;
          c.fill = GridBagConstraints.HORIZONTAL;
          jContentPane.add(tivo_label, c);
 
