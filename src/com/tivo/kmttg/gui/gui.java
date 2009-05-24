@@ -31,6 +31,7 @@ public class gui {
    private JMenuBar jJMenuBar = null;
    private JMenu fileMenu = null;
    private JMenu autoMenu = null;
+   private JMenu serviceMenu = null;
    private JMenuItem exitMenuItem = null;
    private JMenuItem autoConfigMenuItem = null;
    private JMenuItem runInGuiMenuItem = null;
@@ -40,6 +41,11 @@ public class gui {
    private JMenuItem configureMenuItem = null;
    private JMenuItem clearCacheMenuItem = null;
    private JMenuItem refreshEncodingsMenuItem = null;
+   private JMenuItem serviceStatusMenuItem = null;
+   private JMenuItem serviceInstallMenuItem = null;
+   private JMenuItem serviceStartMenuItem = null;
+   private JMenuItem serviceStopMenuItem = null;
+   private JMenuItem serviceRemoveMenuItem = null;
    
    private JComboBox tivos = null;
    private JComboBox encoding = null;
@@ -374,6 +380,8 @@ public class gui {
          autoMenu.setText("Auto Transfers");
          autoMenu.add(getAutoConfigMenuItem());
          autoMenu.add(getRunInGuiMenuItem());
+         if (config.OS.equals("windows"))
+            autoMenu.add(getServiceMenu());
          autoMenu.add(getAddSelectedTitlesMenuItem());
          autoMenu.add(getAddSelectedHistoryMenuItem());
          autoMenu.add(getLogFileMenuItem());
@@ -517,7 +525,122 @@ public class gui {
       }
       return refreshEncodingsMenuItem;
    }
-   
+
+   private JMenu getServiceMenu() {
+      debug.print("");
+      if (serviceMenu == null) {
+         serviceMenu = new JMenu();
+         serviceMenu.setText("Service");
+         serviceMenu.add(getServiceStatusMenuItem());
+         serviceMenu.add(getServiceInstallMenuItem());
+         serviceMenu.add(getServiceStartMenuItem());
+         serviceMenu.add(getServiceStopMenuItem());
+         serviceMenu.add(getServiceRemoveMenuItem());
+      }
+      return serviceMenu;
+   }
+
+   private JMenuItem getServiceStatusMenuItem() {
+      debug.print("");
+      if (serviceStatusMenuItem == null) {
+         serviceStatusMenuItem = new JMenuItem();
+         serviceStatusMenuItem.setText("Status");
+         serviceStatusMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               String query = auto.serviceStatus();
+               if (query != null) {
+                  log.warn(query);
+               }
+            }
+         });
+      }
+      return serviceStatusMenuItem;
+   }
+
+   private JMenuItem getServiceInstallMenuItem() {
+      debug.print("");
+      if (serviceInstallMenuItem == null) {
+         serviceInstallMenuItem = new JMenuItem();
+         serviceInstallMenuItem.setText("Install");
+         serviceInstallMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               String query = auto.serviceStatus();
+               if (query != null) {                  
+                  if (query.matches("^.+STATUS.+$")) {
+                     log.warn("kmttg service already installed");
+                     return;
+                  }
+                  auto.serviceCreate();
+               }
+            }
+         });
+      }
+      return serviceInstallMenuItem;
+   }
+
+   private JMenuItem getServiceStartMenuItem() {
+      debug.print("");
+      if (serviceStartMenuItem == null) {
+         serviceStartMenuItem = new JMenuItem();
+         serviceStartMenuItem.setText("Start");
+         serviceStartMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               String query = auto.serviceStatus();
+               if (query != null) {                  
+                  if (query.matches("^.+RUNNING$")) {
+                     log.warn("kmttg service already running");
+                     return;
+                  }
+                  auto.serviceStart();
+               }
+            }
+         });
+      }
+      return serviceStartMenuItem;
+   }
+
+   private JMenuItem getServiceStopMenuItem() {
+      debug.print("");
+      if (serviceStopMenuItem == null) {
+         serviceStopMenuItem = new JMenuItem();
+         serviceStopMenuItem.setText("Stop");
+         serviceStopMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               String query = auto.serviceStatus();
+               if (query != null) {                  
+                  if (query.matches("^.+STOPPED$")) {
+                     log.warn("kmttg service already stopped");
+                     return;
+                  }
+                  auto.serviceStop();
+               }
+            }
+         });
+      }
+      return serviceStopMenuItem;
+   }
+
+   private JMenuItem getServiceRemoveMenuItem() {
+      debug.print("");
+      if (serviceRemoveMenuItem == null) {
+         serviceRemoveMenuItem = new JMenuItem();
+         serviceRemoveMenuItem.setText("Remove");
+         serviceRemoveMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               String query = auto.serviceStatus();
+               if (query != null) {
+                  if (query.matches("^.+not been created.+$")) {
+                     log.warn("kmttg service not installed");
+                     return;
+                  }
+                  auto.serviceDelete();
+               }
+            }
+         });
+      }
+      return serviceRemoveMenuItem;
+   }
+
    // This will decide which options are enabled based on current config settings
    // Options are disabled when associated config entry is not setup
    public void refreshOptions() {

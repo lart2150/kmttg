@@ -505,5 +505,186 @@ public class auto {
          }
       }
    }
+   
+   // Windows only: Queries kmttg service using "sc query kmttg"
+   public static String serviceStatus() {
+      Stack<String> command = new Stack<String>();
+      command.add("cmd");
+      command.add("/c");
+      command.add("sc");
+      command.add("query");
+      command.add("kmttg");
+      backgroundProcess process = new backgroundProcess();
+      if ( process.run(command) ) {
+         process.Wait();
+         Stack<String> result = process.getStdout();
+         if (result.size() > 0) {
+            Boolean created = false;
+            String status = "undetermined";
+            for (int i=0; i<result.size(); ++i) {
+               if (result.get(i).matches("^SERVICE_NAME.+$"))
+                  created = true;
+               if (result.get(i).matches("^\\s+STATE.+$")) {
+                  status = result.get(i);
+                  String[] l = status.split("\\s+");
+                  status = l[l.length-1];
+               }
+            }
+            if (created) {
+               return "kmttg service is installed: STATUS=" + status;
+            } else {
+               return "kmttg service has not been installed";
+            }
+         }
+      } else {
+         log.error("Command failed: " + process.toString());
+         log.error(process.getStderr());
+      }
+      return null;
+   }
+   
+   // Windows only: Starts kmttg service using "install-kmttg-service.bat" script
+   public static Boolean serviceCreate() {
+      Stack<String> command = new Stack<String>();
+      String script = config.programDir + "\\service\\win32\\install-kmttg-service.bat";
+      if (! file.isFile(script) ) {
+         script = config.programDir + "\\release\\service\\win32\\install-kmttg-service.bat";
+      }
+      command.add("cmd");
+      command.add("/c");
+      command.add(script);
+      backgroundProcess process = new backgroundProcess();
+      if ( process.run(command) ) {
+         process.Wait();
+         Stack<String> result = process.getStdout();
+         if (result.size() > 0) {
+            Boolean good = false;
+            // Look for "kmttg installed"
+            for (int i=0; i<result.size(); ++i) {
+               if (result.get(i).matches("^.+kmttg installed.+$")) {
+                  good = true;
+               }
+            }
+            if (good) {
+               log.warn("kmttg service installed successfully");
+               return true;
+            } else {
+               log.error("There was a problem installing kmttg service");
+               log.error(process.getStdout());
+            }
+         } else {
+            log.error("Problem running command: " + process.toString());
+            log.error(process.getStderr());
+         }
+      } else {
+         log.error("Command failed: " + process.toString());
+         log.error(process.getStderr());
+      }
+      return false;
+   }      
+   // Windows only: Starts kmttg service using "sc start kmttg"
+   public static Boolean serviceStart() {
+      Stack<String> command = new Stack<String>();
+      command.add("cmd");
+      command.add("/c");
+      command.add("sc");
+      command.add("start");
+      command.add("kmttg");
+      backgroundProcess process = new backgroundProcess();
+      if ( process.run(command) ) {
+         process.Wait();
+         Stack<String> result = process.getStdout();
+         if (result.size() > 0) {
+            // Look for FAILED
+            for (int i=0; i<result.size(); ++i) {
+               if (result.get(i).matches("^.+FAILED.+$")) {
+                  log.error(result);
+                  return false;
+               }
+            }
+            // Seemed to work so sleep for a couple of seconds and print status
+            try {
+               Thread.sleep(2000);
+               log.warn(serviceStatus());
+               return true;
+            } catch (InterruptedException e) {
+               log.error(e.getMessage());
+               return false;
+            }               
+         }
+      } else {
+         log.error("Command failed: " + process.toString());
+         log.error(process.getStderr());
+      }
+      return false;
+   }
+   
+   // Windows only: Stops kmttg service using "sc stop kmttg"
+   public static Boolean serviceStop() {
+      Stack<String> command = new Stack<String>();
+      command.add("cmd");
+      command.add("/c");
+      command.add("sc");
+      command.add("stop");
+      command.add("kmttg");
+      backgroundProcess process = new backgroundProcess();
+      if ( process.run(command) ) {
+         process.Wait();
+         Stack<String> result = process.getStdout();
+         if (result.size() > 0) {
+            // Look for FAILED
+            for (int i=0; i<result.size(); ++i) {
+               if (result.get(i).matches("^.+FAILED.+$")) {
+                  log.error(result);
+                  return false;
+               }
+            }
+            // Seemed to work so sleep for a couple of seconds and print status
+            try {
+               Thread.sleep(2000);
+               log.warn(serviceStatus());
+               return true;
+            } catch (InterruptedException e) {
+               log.error(e.getMessage());
+               return false;
+            }               
+         }
+      } else {
+         log.error("Command failed: " + process.toString());
+         log.error(process.getStderr());
+      }
+      return false;
+   }
+   
+   // Windows only: Deletes kmttg service using "sc delete kmttg"
+   public static Boolean serviceDelete() {
+      Stack<String> command = new Stack<String>();
+      command.add("cmd");
+      command.add("/c");
+      command.add("sc");
+      command.add("delete");
+      command.add("kmttg");
+      backgroundProcess process = new backgroundProcess();
+      if ( process.run(command) ) {
+         process.Wait();
+         Stack<String> result = process.getStdout();
+         if (result.size() > 0) {
+            // Look for SUCCESS
+            for (int i=0; i<result.size(); ++i) {
+               if (result.get(i).matches("^.+SUCCESS.*$")) {
+                  log.warn("Successfully removed kmttg service");
+                  return true;
+               }
+            }
+            // Did not seem to work
+            log.error(result);
+            return false;
+         }
+      } else {
+         log.error("Command failed: " + process.toString());
+         log.error(process.getStderr());
+      }
+      return false;
+   }
 
 }
