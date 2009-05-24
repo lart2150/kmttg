@@ -2,6 +2,7 @@ package com.tivo.kmttg.main;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -368,6 +369,7 @@ public class auto {
    
    // Add a given title directly to autoIni file
    public static Boolean autoAddTitleEntryToFile(String title) {
+      debug.print("title=" + title);
       if ( ! file.isFile(config.autoIni) ) {
          autoConfig.parseAuto(config.autoIni);
       }
@@ -426,18 +428,14 @@ public class auto {
    
    // This will check if kmttg background job is running or not on
    // unix flavors using "ps -ef" command to get running processes
-   public static void unixIsRunningAuto() {
+   public static Boolean unixAutoIsRunning(Boolean verbose) {
+      debug.print("verbose=" + verbose);
       backgroundProcess process = new backgroundProcess();
       Stack<String> command = new Stack<String>();
       command.add("ps");
       command.add("-ef");
       if (process.run(command)) {
-         int exit_code = -1;
-         while (exit_code == -1) {
-            // Wait for job to finish
-            exit_code = process.exitStatus();
-         }
-         if (exit_code == 0) {
+         if (process.Wait() == 0) {
             String running = "";
             Stack<String> result = process.getStdout();
             for (int i=0; i<result.size(); ++i) {
@@ -446,34 +444,55 @@ public class auto {
                }
             }
             if (running.length() > 0) {
-               log.warn("Process running: " + running);
-               return;
+               if (verbose) log.warn("Process running: " + running);
+               return true;
             }
             else {
-               log.warn("No background process running");
+               if (verbose) log.warn("No background process running");
             }
          } else {
             log.error("Failed to run command: '" + process.toString() + "'");
             log.error(process.getStderr());
          }
       }
+      return false;
+   }
+   
+   // Start a background auto transfers job
+   public static Boolean unixAutoStart() {
+      debug.print("");
+      if ( unixAutoIsRunning(false) ) {
+         log.warn("Background process already running");
+         return false;
+      }
+      backgroundProcess process = new backgroundProcess();
+      Stack<String> command = new Stack<String>();
+      String jarFile = config.programDir + File.separator + "kmttg.jar";
+      command.add("java");
+      command.add("-jar");
+      command.add(jarFile);
+      command.add("-a");
+      command.add("&");
+      if (process.run(command)) {
+         log.warn("Successfully started job: " + process.toString());
+         return true;
+      } else {
+         log.error("Command failed: " + process.toString());
+      }
+      return false;
    }
    
    // This will check if kmttg background job is running or not on
    // unix flavors using "ps -ef" command to get running processes
    // and then killing job if match found
-   public static void unixKillRunningAuto() {
+   public static void unixAutoKill() {
+      debug.print("");
       backgroundProcess process = new backgroundProcess();
       Stack<String> command = new Stack<String>();
       command.add("ps");
       command.add("-ef");
       if (process.run(command)) {
-         int exit_code = -1;
-         while (exit_code == -1) {
-            // Wait for job to finish
-            exit_code = process.exitStatus();
-         }
-         if (exit_code == 0) {
+         if (process.Wait() == 0) {
             String running = "";
             Stack<String> result = process.getStdout();
             for (int i=0; i<result.size(); ++i) {
@@ -486,11 +505,7 @@ public class auto {
                      command.add("-9");
                      command.add(l[1]);
                      if (process.run(command)) {
-                        while (exit_code == -1) {
-                           // Wait for job to finish
-                           exit_code = process.exitStatus();
-                        }
-                        if (exit_code == 0) {
+                        if (process.Wait() == 0) {
                            log.warn("Process id killed: " + l[1]);
                         }                   
                      }
@@ -508,6 +523,7 @@ public class auto {
    
    // Windows only: Queries kmttg service using "sc query kmttg"
    public static String serviceStatus() {
+      debug.print("");
       Stack<String> command = new Stack<String>();
       command.add("cmd");
       command.add("/c");
@@ -545,6 +561,7 @@ public class auto {
    
    // Windows only: Starts kmttg service using "install-kmttg-service.bat" script
    public static Boolean serviceCreate() {
+      debug.print("");
       Stack<String> command = new Stack<String>();
       String script = config.programDir + "\\service\\win32\\install-kmttg-service.bat";
       if (! file.isFile(script) ) {
@@ -584,6 +601,7 @@ public class auto {
    }      
    // Windows only: Starts kmttg service using "sc start kmttg"
    public static Boolean serviceStart() {
+      debug.print("");
       Stack<String> command = new Stack<String>();
       command.add("cmd");
       command.add("/c");
@@ -621,6 +639,7 @@ public class auto {
    
    // Windows only: Stops kmttg service using "sc stop kmttg"
    public static Boolean serviceStop() {
+      debug.print("");
       Stack<String> command = new Stack<String>();
       command.add("cmd");
       command.add("/c");
@@ -658,6 +677,7 @@ public class auto {
    
    // Windows only: Deletes kmttg service using "sc delete kmttg"
    public static Boolean serviceDelete() {
+      debug.print("");
       Stack<String> command = new Stack<String>();
       command.add("cmd");
       command.add("/c");

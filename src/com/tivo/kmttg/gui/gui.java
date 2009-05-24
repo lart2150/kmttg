@@ -46,6 +46,9 @@ public class gui {
    private JMenuItem serviceStartMenuItem = null;
    private JMenuItem serviceStopMenuItem = null;
    private JMenuItem serviceRemoveMenuItem = null;
+   private JMenuItem backgroundJobStatusMenuItem = null;
+   private JMenuItem backgroundJobEnableMenuItem = null;
+   private JMenuItem backgroundJobDisableMenuItem = null;
    
    private JComboBox tivos = null;
    private JComboBox encoding = null;
@@ -382,6 +385,8 @@ public class gui {
          autoMenu.add(getRunInGuiMenuItem());
          if (config.OS.equals("windows"))
             autoMenu.add(getServiceMenu());
+         else
+            autoMenu.add(getBackgroundJobMenu());
          autoMenu.add(getAddSelectedTitlesMenuItem());
          autoMenu.add(getAddSelectedHistoryMenuItem());
          autoMenu.add(getLogFileMenuItem());
@@ -639,6 +644,60 @@ public class gui {
          });
       }
       return serviceRemoveMenuItem;
+   }
+
+   private JMenu getBackgroundJobMenu() {
+      debug.print("");
+      if (serviceMenu == null) {
+         serviceMenu = new JMenu();
+         serviceMenu.setText("Background Job");
+         serviceMenu.add(getBackgroundJobStatusMenuItem());
+         serviceMenu.add(getBackgroundJobEnableMenuItem());
+         serviceMenu.add(getBackgroundJobDisableMenuItem());
+      }
+      return serviceMenu;
+   }
+
+   private JMenuItem getBackgroundJobStatusMenuItem() {
+      debug.print("");
+      if (backgroundJobStatusMenuItem == null) {
+         backgroundJobStatusMenuItem = new JMenuItem();
+         backgroundJobStatusMenuItem.setText("Status");
+         backgroundJobStatusMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               auto.unixAutoIsRunning(true);
+            }
+         });
+      }
+      return backgroundJobStatusMenuItem;
+   }
+
+   private JMenuItem getBackgroundJobEnableMenuItem() {
+      debug.print("");
+      if (backgroundJobEnableMenuItem == null) {
+         backgroundJobEnableMenuItem = new JMenuItem();
+         backgroundJobEnableMenuItem.setText("Enable");
+         backgroundJobEnableMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               auto.unixAutoStart();
+            }
+         });
+      }
+      return backgroundJobEnableMenuItem;
+   }
+
+   private JMenuItem getBackgroundJobDisableMenuItem() {
+      debug.print("");
+      if (backgroundJobDisableMenuItem == null) {
+         backgroundJobDisableMenuItem = new JMenuItem();
+         backgroundJobDisableMenuItem.setText("Disable");
+         backgroundJobDisableMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               auto.unixAutoKill();
+            }
+         });
+      }
+      return backgroundJobDisableMenuItem;
    }
 
    // This will decide which options are enabled based on current config settings
