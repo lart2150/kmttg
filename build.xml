@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="kmttg" basedir="." default="all">
-	<property name="rversion" value="v0p6a"/>
+	<property name="rversion" value="v0p6b"/>
 	<tstamp/>
 	<property name="bversion" value="${DSTAMP}-${TSTAMP}"/>
 	<property name="lib" value="lib"/>
@@ -92,12 +92,10 @@
 	<copy todir="dist/${dist}/release">
 		<fileset dir="release"/>
 	</copy>
-	<fixcrlf file="dist/${dist}/${release}/kmttg.bat" eol="dos"/>
 	<chmod file="dist/${dist}/${release}/kmttg" perm="ugo+x"/>
-	<chmod file="dist/${dist}/${release}/kmttg.bat" perm="ugo+x"/>
 
 	<zip destfile="dist/${dist}.zip">
-		<zipfileset dir="dist/${dist}/${release}" filemode="755" prefix="${dist}"
+		<zipfileset dir="dist/${dist}/${release}" filemode="755"
 			includes="**"/>
 	</zip>
 	<delete dir="dist/${dist}"/>
