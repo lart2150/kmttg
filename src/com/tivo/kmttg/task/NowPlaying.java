@@ -66,7 +66,13 @@ public class NowPlaying  {
       Stack<String> command = new Stack<String>();
       String urlString = "https://";
       urlString += job.ip;
-      urlString += "/TiVoConnect?Command=QueryContainer&Container=/NowPlaying&Recurse=Yes&AnchorOffset=";
+      // Enable testLimit only for testing multilple downloads
+      Boolean testLimit = false;
+      if (testLimit) {
+         urlString += "/TiVoConnect?Command=QueryContainer&Container=/NowPlaying&Recurse=Yes&ItemCount=5&AnchorOffset=";
+      } else {
+         urlString += "/TiVoConnect?Command=QueryContainer&Container=/NowPlaying&Recurse=Yes&AnchorOffset=";
+      }
       urlString += AnchorOffset;
       command.add(config.curl);
       if (config.OS.equals("windows")) {
@@ -137,7 +143,7 @@ public class NowPlaying  {
             }
          }
          
-         jobMonitor.removeFromJobList(job);
+         // NOTE: Not removing from job list yet as there could be more runs needed
          
          // Check for problems
          int failed = 0;
@@ -422,6 +428,7 @@ public class NowPlaying  {
          return true;
       } else {
          // Done
+         jobMonitor.removeFromJobList(job);
          if (config.GUI_AUTO > 0) {
             // Clear NPL
             config.gui.nplTab_clear();
