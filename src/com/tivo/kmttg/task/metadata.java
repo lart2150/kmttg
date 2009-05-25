@@ -210,7 +210,12 @@ public class metadata {
                      j++;
                      value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
                      value = Entities.replaceHtmlEntities(value);
-                     data.put(name, value);
+                     if (name.matches("duration")) {
+                        // Convert ISO to msecs
+                        data.put(name, string.isoDurationToMsecs(value));
+                     }
+                     else
+                        data.put(name, value);
                      debug.print(name + "=" + value);
                   }
                }
