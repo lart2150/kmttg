@@ -3,6 +3,7 @@ package com.tivo.kmttg.util;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.StringTokenizer;
 
 public class string {
    
@@ -48,6 +49,7 @@ public class string {
    }
       
    public static String urlDecode(String s) {
+      debug.print("s=" + s);
       try {
          return(URLDecoder.decode(s, "UTF-8"));
       } catch (UnsupportedEncodingException e) {
@@ -55,5 +57,92 @@ public class string {
          return s;
       }
    }
+   
+   // ISO 8601 format duration to milliseconds
+   public static Long isoDurationToMsecs(String isodur)  {
+      debug.print("isodur=" + isodur);
+      int plusMinus = 1;
+      double days = -1.0;
+      double hours = -1.0;
+      double minutes = -1.0;
+      double seconds = -1.0;
+      boolean isTime = false;
+      String value = null;
+      String delim = null;
 
+      // DURATION FORMAT IS: (-)PnYnMnDTnHnMnS
+      StringTokenizer st = new StringTokenizer(isodur, "-PYMDTHS", true);
+
+      // OPTIONAL SIGN
+      value = st.nextToken();
+
+      if (value.equals("-")) {
+         plusMinus= -1;
+         value=st.nextToken();
+      }
+
+      // DURATION MUST START WITH A "P"
+      if (!value.equals("P")) {
+         log.error("Invalid isodur string: " + isodur);
+         return null;                                 
+      }
+
+      // GET NEXT FIELD
+      while (st.hasMoreTokens()) {
+         // VALUE
+         value = new String(st.nextToken());
+         if (value.equals("T")) {
+            if (!st.hasMoreTokens()) {
+               log.error("Invalid isodur string: " + isodur);
+               return null;                  
+            }
+            value = st.nextToken();
+            isTime = true;
+         }
+
+         // DELIMINATOR
+         if (!st.hasMoreTokens()) {
+            log.error("Invalid isodur string: " + isodur);
+            return null;                                 
+         }
+         delim = new String(st.nextToken());
+
+         // DAYS
+         if (delim.equals("D")) {
+            days = Double.parseDouble(value);
+         }
+
+         // HOURS
+         else if (delim.equals("H")) {
+            hours = Double.parseDouble(value);
+            isTime = true;
+         }
+
+         // MINUTES
+         else if (delim.equals("M") && isTime == true) {
+            minutes = Double.parseDouble(value);
+         }
+
+         // SECONDS
+         else if (delim.equals("S")) {
+            seconds = Double.parseDouble(value);
+         }
+         else  {
+            log.error("Invalid isodur string: " + isodur);
+            return null;                                 
+         }
+      }
+      
+      Long msecs = Long.parseLong("0");
+      if (days > 0)
+         msecs += new Double(days*24*60*60*1000).longValue();
+      if (hours > 0)
+         msecs += new Double(hours*60*60*1000).longValue();
+      if (minutes > 0)
+         msecs += new Double(minutes*60*1000).longValue();
+      if (seconds > 0)
+         msecs += new Double(seconds*1000).longValue();
+      
+      return msecs * plusMinus;
+   }
 }
