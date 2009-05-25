@@ -18,7 +18,6 @@ import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class metadataTivo {
    private String xmlFile = "chunk-01-0001.xml";
@@ -168,7 +167,7 @@ public class metadataTivo {
       try {
          String[] nameValues = {
                "title", "seriesTitle", "description", "time",
-               "mpaaRating", "movieYear", "isEpisode", "duration",
+               "mpaaRating", "movieYear", "isEpisode",
                "originalAirDate", "episodeTitle", "isEpisodic"
          };
          String[] valuesOnly = {"showingBits", "starRating", "tvRating"};
@@ -197,12 +196,7 @@ public class metadataTivo {
                      j++;
                      value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
                      value = Entities.replaceHtmlEntities(value);
-                     if (name.matches("duration")) {
-                        // Convert ISO to msecs
-                        data.put(name, string.isoDurationToMsecs(value));
-                     }
-                     else
-                        data.put(name, value);
+                     data.put(name, value);
                      debug.print(name + "=" + value);
                   }
                }
