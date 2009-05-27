@@ -40,6 +40,7 @@ public class configMain {
    private static JCheckBox check_space = null;
    private static JCheckBox beacon = null;
    private static JCheckBox create_subfolder = null;
+   private static JCheckBox UseAdscan = null;
    private static JTextField tivo_name = null;
    private static JTextField tivo_ip = null;
    private static JTextField files_path = null;
@@ -244,6 +245,12 @@ public class configMain {
          create_subfolder.setSelected(true);
       else
          create_subfolder.setSelected(false);
+            
+      // UseAdscan
+      if (config.UseAdscan == 1)
+         UseAdscan.setSelected(true);
+      else
+         UseAdscan.setSelected(false);
       
       // Files naming
       file_naming.setText(config.tivoFileNameFormat);
@@ -367,6 +374,12 @@ public class configMain {
          config.CreateSubFolder = 1;
       else
          config.CreateSubFolder = 0;
+      
+      // UseAdscan
+      if (UseAdscan.isSelected())
+         config.UseAdscan = 1;
+      else
+         config.UseAdscan = 0;
       
       // Files naming
       value = file_naming.getText();
@@ -681,6 +694,7 @@ public class configMain {
       remove_comcut = new javax.swing.JCheckBox();
       remove_mpeg = new javax.swing.JCheckBox();
       create_subfolder = new javax.swing.JCheckBox();
+      UseAdscan = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
       JLabel file_naming_label = new javax.swing.JLabel();
       JLabel tivo_output_dir_label = new javax.swing.JLabel();
@@ -757,6 +771,7 @@ public class configMain {
       remove_comcut.setText("Remove .edl & .mpg files after comcut"); 
       remove_mpeg.setText("Remove .mpg file after encode");
       create_subfolder.setText("Create sub-folder for each download");
+      UseAdscan.setText("Use VRD AdScan instead of comskip");
       MAK_label.setText("MAK"); 
       file_naming_label.setText("File Naming"); 
       tivo_output_dir_label.setText(".TiVo Output Dir"); 
@@ -910,6 +925,14 @@ public class configMain {
       c.gridy = gy;
       c.gridwidth = 3;
       content.add(tivo_ip, c);
+      
+      // UseAdscan
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
+      c.gridx = 5;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(UseAdscan, c);      
       
       // Remove .TiVo after file decrypt
       gy++;

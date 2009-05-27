@@ -51,6 +51,7 @@ public class config {
    public static int CheckDiskSpace = 0;
    public static int LowSpaceSize = 0;
    public static int CheckBeacon = 1;
+   public static int UseAdscan = 0;
    public static String comskipIni = "";
    public static String wan_http_port = "";
    public static String configIni = "";
@@ -484,6 +485,9 @@ public class config {
             if (key.equals("CreateSubFolder")) {
                CreateSubFolder = Integer.parseInt(line);
             }
+            if (key.equals("UseAdscan")) {
+               UseAdscan = Integer.parseInt(line);
+            }
             if (key.equals("outputDir")) {
                outputDir = line;
             }
@@ -597,6 +601,8 @@ public class config {
          ofp.write("<RemoveMpegFile>\n" + RemoveMpegFile + "\n\n");
          
          ofp.write("<CreateSubFolder>\n" + CreateSubFolder + "\n\n");
+         
+         ofp.write("<UseAdscan>\n" + UseAdscan + "\n\n");
          
          ofp.write("<tivoFileNameFormat>\n" + tivoFileNameFormat + "\n\n");
          

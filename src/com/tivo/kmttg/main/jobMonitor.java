@@ -527,15 +527,27 @@ public class jobMonitor {
       }
       
       if (comskip) {
-         familyId += 0.1;
-         jobData job = new jobData();
-         job.tivoName     = tivoName;
-         job.type         = "comskip";
-         job.name         = config.comskip;
-         job.familyId     = familyId;
-         job.mpegFile     = mpegFile;
-         job.edlFile      = edlFile;
-         submitNewJob(job);
+         if (file.isDir(config.VRD) && config.UseAdscan == 1) {
+            familyId += 0.1;
+            jobData job = new jobData();
+            job.tivoName     = tivoName;
+            job.type         = "adscan";
+            job.name         = config.VRD;
+            job.familyId     = familyId;
+            job.mpegFile     = mpegFile;
+            job.vprjFile     = string.replaceSuffix(edlFile, ".VPrj");
+            submitNewJob(job);
+         } else {
+            familyId += 0.1;
+            jobData job = new jobData();
+            job.tivoName     = tivoName;
+            job.type         = "comskip";
+            job.name         = config.comskip;
+            job.familyId     = familyId;
+            job.mpegFile     = mpegFile;
+            job.edlFile      = edlFile;
+            submitNewJob(job);            
+         }
       }
       
       if (comcut) {
