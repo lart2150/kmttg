@@ -2,7 +2,12 @@ package com.tivo.kmttg.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 import java.util.Enumeration;
@@ -93,6 +98,7 @@ public class gui {
          nplTab_packColumns(5);
          jobTab_packColumns(5);
 
+         readSettings();
          refreshOptions();
          config.GUI = true;
          
@@ -1057,6 +1063,131 @@ public class gui {
             // From eclipse
             Images.put(names[i], new ImageIcon("images/" + names[i] + ".png"));
          }
+      }
+   }
+   
+   
+   // Save current GUI settings to a file
+   public void saveSettings() {
+      if (config.gui_settings != null) {
+         try {
+            Dimension d = getJFrame().getSize();
+            BufferedWriter ofp = new BufferedWriter(new FileWriter(config.gui_settings));            
+            ofp.write("# kmttg gui preferences file\n");
+            ofp.write("<metadata>\n"    + metadata_setting() + "\n");
+            ofp.write("<decrypt>\n"     + decrypt_setting()  + "\n");
+            ofp.write("<qsfix>\n"       + qsfix_setting()    + "\n");
+            ofp.write("<comskip>\n"     + comskip_setting()  + "\n");
+            ofp.write("<comcut>\n"      + comcut_setting()   + "\n");
+            ofp.write("<captions>\n"    + captions_setting() + "\n");
+            ofp.write("<encode>\n"      + encode_setting()   + "\n");
+            ofp.write("<custom>\n"      + custom_setting()   + "\n");
+            ofp.write("<encode_name>\n" + config.encodeName  + "\n");
+            ofp.write("<width>\n"       + d.width            + "\n");
+            ofp.write("<height>\n"      + d.height           + "\n");
+            ofp.close();
+         }         
+         catch (IOException ex) {
+            log.error("Problem writing to file: " + config.gui_settings);
+         }         
+      }
+   }
+   
+   // Read initial settings from file
+   public void readSettings() {
+      if (! file.isFile(config.gui_settings)) return;
+      try {
+         int width = -1;
+         int height = -1;
+         BufferedReader ifp = new BufferedReader(new FileReader(config.gui_settings));
+         String line = null;
+         String key = null;
+         while (( line = ifp.readLine()) != null) {
+            // Get rid of leading and trailing white space
+            line = line.replaceFirst("^\\s*(.*$)", "$1");
+            line = line.replaceFirst("^(.*)\\s*$", "$1");
+            if (line.length() == 0) continue; // skip empty lines
+            if (line.matches("^#.+")) continue; // skip comment lines
+            if (line.matches("^<.+>")) {
+               key = line.replaceFirst("<", "");
+               key = key.replaceFirst(">", "");
+               continue;
+            }
+            if (key.equals("metadata")) {
+               if (line.matches("1"))
+                  metadata.setSelected(true);
+               else
+                  metadata.setSelected(false);
+            }
+            if (key.equals("decrypt")) {
+               if (line.matches("1"))
+                  decrypt.setSelected(true);
+               else
+                  decrypt.setSelected(false);
+            }
+            if (key.equals("qsfix")) {
+               if (line.matches("1"))
+                  qsfix.setSelected(true);
+               else
+                  qsfix.setSelected(false);
+            }
+            if (key.equals("comskip")) {
+               if (line.matches("1"))
+                  comskip.setSelected(true);
+               else
+                  comskip.setSelected(false);
+            }
+            if (key.equals("comcut")) {
+               if (line.matches("1"))
+                  comcut.setSelected(true);
+               else
+                  comcut.setSelected(false);
+            }
+            if (key.equals("captions")) {
+               if (line.matches("1"))
+                  captions.setSelected(true);
+               else
+                  captions.setSelected(false);
+            }
+            if (key.equals("encode")) {
+               if (line.matches("1"))
+                  encode.setSelected(true);
+               else
+                  encode.setSelected(false);
+            }
+            if (key.equals("custom")) {
+               if (line.matches("1"))
+                  custom.setSelected(true);
+               else
+                  custom.setSelected(false);
+            }
+            if (key.equals("encode_name")) {
+               if (encodeConfig.isValidEncodeName(line))
+                  encoding.setSelectedItem(line);
+            }
+            if (key.equals("width")) {
+               try {
+                  width = Integer.parseInt(line);
+               } catch (NumberFormatException e) {
+                  width = -1;
+               }
+            }
+            if (key.equals("height")) {
+               try {
+                  height = Integer.parseInt(line);
+               } catch (NumberFormatException e) {
+                  height = -1;
+               }
+            }
+         }
+         ifp.close();
+         
+         if (width != -1 && height != -1) {
+            getJFrame().setSize(new Dimension(width,height));
+         }
+      }         
+      catch (IOException ex) {
+         log.error("Problem parsing config file: " + config.gui_settings);
       }
    }
    
