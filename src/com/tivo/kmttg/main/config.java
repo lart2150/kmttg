@@ -83,6 +83,7 @@ public class config {
    public static String tivoName = "FILES"; // Saves currently selected tivo name
    public static String encodeName = "";    // Saves currently selected encode name
    public static gui gui;                   // Access to any GUI functions through here
+   public static String gui_settings = null; // File in which to save GUI settings on exit
 
    // GUI table related
    public static Color tableBkgndDarker = new Color(222,222,222); // light grey
@@ -286,11 +287,12 @@ public class config {
       if (result != null) MAK = result;
      
       // These files all should reside along side jar file
-      configIni   = programDir + s + "config.ini";
-      autoIni     = programDir + s + "auto.ini";
-      autoLog     = programDir + s + "auto.log";
-      autoHistory = programDir + s + "auto.history";
-      encProfDir  = programDir + s + "encode";
+      configIni    = programDir + s + "config.ini";
+      autoIni      = programDir + s + "auto.ini";
+      autoLog      = programDir + s + "auto.log";
+      autoHistory  = programDir + s + "auto.history";
+      encProfDir   = programDir + s + "encode";
+      gui_settings = programDir + s + ".gui_settings";
       
       // Non-executable defaults
       tivoFileNameFormat = "[title]_[wday]_[month]_[mday]";
