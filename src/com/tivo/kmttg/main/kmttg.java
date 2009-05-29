@@ -24,6 +24,10 @@ public class kmttg {
       Runtime.getRuntime().addShutdownHook(new Thread() {
           // This method is called during shutdown
           public void run() {
+             // Save GUI settings if in GUI mode
+             if (config.GUI) {
+                config.gui.saveSettings();
+             }
              // Kill any running background jobs
              jobMonitor.killRunning();
              if (debug.enabled) debug.close();
