@@ -4,6 +4,8 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Hashtable;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.string;
@@ -114,6 +116,16 @@ public class tivoFileName {
       }
       keyword = keyword.replaceFirst("\\[", "");
       keyword = keyword.replaceFirst("\\]", "");
+      
+      // Need to preserve spaces inside quotes before splitting
+      Pattern p = Pattern.compile("\"(.*?)\"");
+      Matcher m = p.matcher(keyword);
+      StringBuffer sb = new StringBuffer();
+      while (m.find()) {
+         m.appendReplacement(sb, m.group().replaceAll("\\s", "___space___"));
+      }
+      m.appendTail(sb);
+      keyword = sb.toString();
 
       String[] fields = keyword.split("\\s+");
       Stack<String>newFields = new Stack<String>();
@@ -121,6 +133,8 @@ public class tivoFileName {
       String text;
       for (int i=0; i<fields.length; i++) {
          text = fields[i];
+         // Put spaces back in that we previously eliminated
+         text = text.replaceAll("___space___", " ");
          if (text.contains("\"")) {
             text = text.replaceAll("\"", "");
          } else {
