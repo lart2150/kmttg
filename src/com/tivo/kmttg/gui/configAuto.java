@@ -72,6 +72,8 @@ public class configAuto {
    private static JCheckBox dry_run = null;
    private static JTextField title = null;
    private static JTextField check_interval = null;
+   private static JButton OK = null;
+   private static JButton CANCEL = null;
 
    public void display(JFrame frame) {
       debug.print("frame=" + frame);
@@ -195,7 +197,7 @@ public class configAuto {
       dry_run = new JCheckBox("Dry Run Mode (test keywords only)");
       dry_run.setSelected((Boolean)(autoConfig.dryrun == 1));
       
-      JButton OK = new JButton("OK");
+      OK = new JButton("OK");
       OK.setBackground(Color.green);
       OK.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -203,7 +205,7 @@ public class configAuto {
          }
       });
       
-      JButton CANCEL = new JButton("CANCEL");
+      CANCEL = new JButton("CANCEL");
       CANCEL.setBackground(Color.red);
       CANCEL.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -448,6 +450,8 @@ public class configAuto {
       add.setToolTipText(getToolTip("add"));
       update.setToolTipText(getToolTip("update"));
       del.setToolTipText(getToolTip("del"));      
+      OK.setToolTipText(getToolTip("OK"));
+      CANCEL.setToolTipText(getToolTip("CANCEL"));      
    }
    
    public String getToolTip(String component) {
@@ -505,6 +509,19 @@ public class configAuto {
          text =  "<b>DEL</b><br>";
          text += "Remove currently selected Auto Transfers entries.<br>";
          text += "NOTE: Removals won't be saved until you <b>OK</b> this form.";
+      }
+      else if (component.equals("OK")) {
+         text =  "<b>OK</b><br>";
+         text += "Save all changes made in this form and close the form.<br>";
+         text += "NOTE: You need to setup and run kmttg service on Windows for Auto Transfers to run.<br>";
+         text += "For non-windows platforms you need to setup a background job for Auto Transfers to run.<br>";
+         text += "You can use <b>Auto Transfers->Service</b> or <b>Auto Transfers->Background Job</b><br>";
+         text += "menus to do this. Consult documentation for more details.";
+         text += "NOTE: Settings are saved to <b>auto.ini</b> file which resides by <b>kmttg.jar</b> file.<br>";
+      }
+      else if (component.equals("CANCEL")) {
+         text =  "<b>CANCEL</b><br>";
+         text += "Do not save any changes made in this form and close the form.<br>";
       }
       
       if (text.length() > 0) {
