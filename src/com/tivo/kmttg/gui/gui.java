@@ -1272,38 +1272,50 @@ public class gui {
       }
       else if (component.equals("decrypt")) {
          text =  "<b>decrypt</b><br>";
-         text += "Decrypts encrypted TiVo files.<br>";
-         text += "Converts video file to normal unencrypted mpeg2 program stream format.<br>";
-         text += "This is necessary before doing any further video file processing<br>";
-         text += "so most often you should leave this option enabled.";
+         text += "Decrypts encrypted TiVo files that were downloaded from TiVos.<br>";
+         text += "Converts video file to normal unencrypted mpeg2 program stream format<br>";
+         text += "which can be played back by most video players without need to have Tivo<br>";
+         text += "Desktop installed. NOTE: This is quick and does not affect video quality.<br>";
+         text += "This is also necessary before doing any further video file processing<br>";
+         text += "with kmttg, so most often you should leave this option enabled.";
       }
       else if (component.equals("qsfix")) {
          text =  "<b>VRD QS fix</b><br>";
-         text += "Runs VideoRedo Quick Stream Fix utility.<br>";
-         text += "Cleans up any potential glitches/errors in mpeg2 video files.";
+         text += "Runs the extremely useful <b>VideoRedo Quick Stream Fix</b> utility.<br>";
+         text += "Cleans up any potential glitches/errors in mpeg2 video files.<br>";
+         text += "Highly recommended step if you have VideoRedo installed.";
       }
       else if (component.equals("comskip")) {
          text =  "<b>comskip</b><br>";
          text += "Automated commercials detection tool.<br>";
-         text += "NOTE: If you have VideoRedo enabled you can choose to use.<br>";
-         text += "VideoReo <b>AdScan</b> instead of comskip if you wish.<br>";
-         text += "NOTE: Typically commercial detection is NOT 100% accurate.";
+         text += "NOTE: Typically automated commercial detection is NOT very accurate.<br>";
+         text += "NOTE: If you have <b>VideoRedo</b> enabled you can choose to use.<br>";
+         text += "VideoRedo <b>AdScan</b> instead of comskip if you wish.<br>";
+         text += "With VideoRedo configured you can also use this step to create a <b>.VPrj</b><br>";
+         text += "file that you can open up in VideoRedo as a starting point for manual<br>";
+         text += "commercial editing. See documentation for more details.";
       }
       else if (component.equals("comcut")) {
          text =  "<b>comcut</b><br>";
-         text += "Automatically cut out commercials detected in <b>comskip</b> step.";
+         text += "Automatically cut out commercials detected in <b>comskip</b> step.<br>";
+         text += "NOTE: By default uses <b>mencoder</b> program to make the cuts which can.<br>";
+         text += "cause audio/video sync problems in the resulting files.<br>";
+         text += "If you have <b>VideoRedo</b> enabled then this step uses VideoRedo for making<br>";
+         text += "the cuts which is a much better solution for preserving proper audio/video sync.";
       }
       else if (component.equals("captions")) {
          text =  "<b>captions</b><br>";
          text += "Generates a <b>.srt</b> captions file which is a text file containing<br>";
          text += "closed captioning text. This file can be used with several<br>";
          text += "video playback tools to display closed captions during playback.<br>";
-         text += "For example <b>streambaby</b> can use this file.";
+         text += "Also for example <b>streambaby</b> can use this file.";
       }
       else if (component.equals("encode")) {
          text =  "<b>encode</b><br>";
          text += "Encode mpeg2 video file to a different video format.<br>";
-         text += "Select video format desired using <b>Encoding Profile</b>.";
+         text += "Select video format desired using <b>Encoding Profile</b>.<br>";
+         text += "Useful to create videos compatible with portable devices or<br>";
+         text += "to reduce file sizes.";
       }
       else if (component.equals("custom")) {
          text =  "<b>custom</b><br>";
