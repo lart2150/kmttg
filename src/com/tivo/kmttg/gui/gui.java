@@ -1087,17 +1087,19 @@ public class gui {
             Dimension d = getJFrame().getSize();
             BufferedWriter ofp = new BufferedWriter(new FileWriter(config.gui_settings));            
             ofp.write("# kmttg gui preferences file\n");
-            ofp.write("<metadata>\n"    + metadata_setting() + "\n");
-            ofp.write("<decrypt>\n"     + decrypt_setting()  + "\n");
-            ofp.write("<qsfix>\n"       + qsfix_setting()    + "\n");
-            ofp.write("<comskip>\n"     + comskip_setting()  + "\n");
-            ofp.write("<comcut>\n"      + comcut_setting()   + "\n");
-            ofp.write("<captions>\n"    + captions_setting() + "\n");
-            ofp.write("<encode>\n"      + encode_setting()   + "\n");
-            ofp.write("<custom>\n"      + custom_setting()   + "\n");
-            ofp.write("<encode_name>\n" + config.encodeName  + "\n");
-            ofp.write("<width>\n"       + d.width            + "\n");
-            ofp.write("<height>\n"      + d.height           + "\n");
+            ofp.write("<metadata>\n"        + metadata_setting()     + "\n");
+            ofp.write("<decrypt>\n"         + decrypt_setting()      + "\n");
+            ofp.write("<qsfix>\n"           + qsfix_setting()        + "\n");
+            ofp.write("<comskip>\n"         + comskip_setting()      + "\n");
+            ofp.write("<comcut>\n"          + comcut_setting()       + "\n");
+            ofp.write("<captions>\n"        + captions_setting()     + "\n");
+            ofp.write("<encode>\n"          + encode_setting()       + "\n");
+            ofp.write("<custom>\n"          + custom_setting()       + "\n");
+            ofp.write("<encode_name>\n"     + config.encodeName      + "\n");
+            ofp.write("<toolTips>\n"        + config.toolTips        + "\n");
+            ofp.write("<toolTipsTimeout>\n" + config.toolTipsTimeout + "\n");
+            ofp.write("<width>\n"           + d.width                + "\n");
+            ofp.write("<height>\n"          + d.height               + "\n");
             ofp.close();
          }         
          catch (IOException ex) {
@@ -1174,9 +1176,22 @@ public class gui {
                else
                   custom.setSelected(false);
             }
+            if (key.equals("toolTips")) {
+               if (line.matches("1"))
+                  config.toolTips = 1;
+               else
+                  config.toolTips = 0;
+            }
             if (key.equals("encode_name")) {
                if (encodeConfig.isValidEncodeName(line))
                   encoding.setSelectedItem(line);
+            }
+            if (key.equals("toolTipsTimeout")) {
+               try {
+                  config.toolTipsTimeout = Integer.parseInt(line);
+               } catch (NumberFormatException e) {
+                  config.toolTipsTimeout = 20;
+               }
             }
             if (key.equals("width")) {
                try {
@@ -1224,8 +1239,11 @@ public class gui {
    }
    
    // Enable/disable all tooltips
-   public void enableToolTips(Boolean flag) {
-      toolTips.setEnabled(flag);
+   public void enableToolTips(int flag) {
+      if (flag == 1)
+         toolTips.setEnabled(true);
+      else
+         toolTips.setEnabled(false);
    }
      
    public String getToolTip(String component) {
@@ -1277,7 +1295,7 @@ public class gui {
       }
       else if (component.equals("captions")) {
          text =  "<b>captions</b><br>";
-         text += "Generates a <b>.srt<b> captions file which is a text file containing<br>";
+         text += "Generates a <b>.srt</b> captions file which is a text file containing<br>";
          text += "closed captioning text. This file can be used with several<br>";
          text += "video playback tools to display closed captions during playback.<br>";
          text += "For example <b>streambaby</b> can use this file.";
