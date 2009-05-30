@@ -84,7 +84,7 @@ public class config {
    public static String encodeName = "";    // Saves currently selected encode name
    public static gui gui;                   // Access to any GUI functions through here
    public static String gui_settings = null; // File in which to save GUI settings on exit
-   public static Boolean toolTips = true;   // If true then display component toolTips
+   public static int toolTips = 1;          // If 1 then display component toolTips
    public static int toolTipsTimeout = 20;  // Set # seconds for tooltip display to timeout
 
    // GUI table related
@@ -294,7 +294,13 @@ public class config {
       autoLog      = programDir + s + "auto.log";
       autoHistory  = programDir + s + "auto.history";
       encProfDir   = programDir + s + "encode";
-      gui_settings = programDir + s + ".gui_settings";
+      
+      // File to store/restore GUI settings
+      gui_settings = programDir + s + ".kmttg_settings";
+      if (file.isDir(System.getProperty("user.home"))) {
+         // Centralize this non-critical file instead of localizing it
+         gui_settings = programDir + s + ".kmttg_settings";
+      }
       
       // Non-executable defaults
       tivoFileNameFormat = "[title]_[wday]_[month]_[mday]";
@@ -314,8 +320,7 @@ public class config {
       handbrake     = getProgramDefault("handbrake");
       comskip       = getProgramDefault("comskip");
       comskipIni    = getProgramDefault("comskipIni");
-      AtomicParsley = getProgramDefault("AtomicParsley");
-      
+      AtomicParsley = getProgramDefault("AtomicParsley");      
    }
    
    // Return default setting for a given programName
