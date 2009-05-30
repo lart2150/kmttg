@@ -84,6 +84,8 @@ public class config {
    public static String encodeName = "";    // Saves currently selected encode name
    public static gui gui;                   // Access to any GUI functions through here
    public static String gui_settings = null; // File in which to save GUI settings on exit
+   public static Boolean toolTips = true;   // If true then display component toolTips
+   public static int toolTipsTimeout = 20;  // Set # seconds for tooltip display to timeout
 
    // GUI table related
    public static Color tableBkgndDarker = new Color(222,222,222); // light grey

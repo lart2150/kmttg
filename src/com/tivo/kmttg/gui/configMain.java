@@ -70,11 +70,20 @@ public class configMain {
       
    public static void display(JFrame frame) {
       debug.print("frame=" + frame);
+      // Create dialog if not already created
       if (dialog == null) {
          create(frame);
+         // Set component tooltips
+         setToolTips();
       }
+      
+      // Update component settings to current configuration
       read();
+      
+      // Clear out any error highlights
       clearTextFieldErrors();
+      
+      // Display the dialog
       dialog.setVisible(true);
    }
    
@@ -1352,5 +1361,267 @@ public class configMain {
       dialog.setMinimumSize(new Dimension(700,200));
       dialog.pack();
   }
+   
+   public static void setToolTips() {
+      tivo_name.setToolTipText(getToolTip("tivo_name"));
+      tivo_ip.setToolTipText(getToolTip("tivo_ip"));
+      remove_tivo.setToolTipText(getToolTip("remove_tivo"));
+      remove_comcut.setToolTipText(getToolTip("remove_comcut"));
+      remove_mpeg.setToolTipText(getToolTip("remove_mpeg"));
+      check_space.setToolTipText(getToolTip("check_space"));
+      beacon.setToolTipText(getToolTip("beacon"));
+      create_subfolder.setToolTipText(getToolTip("create_subfolder"));
+      UseAdscan.setToolTipText(getToolTip("UseAdscan"));
+      files_path.setToolTipText(getToolTip("files_path"));
+      MAK.setToolTipText(getToolTip("MAK"));
+      file_naming.setToolTipText(getToolTip("file_naming"));
+      tivo_output_dir.setToolTipText(getToolTip("tivo_output_dir"));
+      mpeg_output_dir.setToolTipText(getToolTip("mpeg_output_dir"));
+      mpeg_cut_dir.setToolTipText(getToolTip("mpeg_cut_dir"));
+      encode_output_dir.setToolTipText(getToolTip("encode_output_dir"));
+      tivodecode.setToolTipText(getToolTip("tivodecode"));
+      curl.setToolTipText(getToolTip("curl"));
+      ffmpeg.setToolTipText(getToolTip("ffmpeg"));
+      mencoder.setToolTipText(getToolTip("mencoder"));
+      handbrake.setToolTipText(getToolTip("handbrake"));
+      comskip.setToolTipText(getToolTip("comskip"));
+      comskip_ini.setToolTipText(getToolTip("comskip_ini"));
+      t2extract.setToolTipText(getToolTip("t2extract"));
+      VRD_path.setToolTipText(getToolTip("VRD_path"));
+      AtomicParsley.setToolTipText(getToolTip("AtomicParsley"));
+      wan_http_port.setToolTipText(getToolTip("wan_http_port"));
+      NPL_cache_mins.setToolTipText(getToolTip("NPL_cache_mins"));
+      active_job_limit.setToolTipText(getToolTip("active_job_limit"));
+      disk_space.setToolTipText(getToolTip("disk_space"));
+      customCommand.setToolTipText(getToolTip("customCommand"));
+      keywords.setToolTipText(getToolTip("keywords"));
+      customFiles.setToolTipText(getToolTip("customFiles"));      
+   }
+   
+   public static String getToolTip(String component) {
+      String text = "";
+      if (component.equals("tivo_name")) {
+         text =  "<b>Tivo Name</b><br>";
+         text += "Enter the name of a <b>TiVo</b> on your network.<br>";
+         text += "kmttg tries to detect TiVos on your network automatically but that doesn't always work.<br>";
+         text += "Enter corresponding <b>Tivo IP#</b> below and then click on <b>ADD</b> button.";
+      }
+      else if (component.equals("tivo_ip")) {
+         text =  "<b>Tivo IP#</b><br>";
+         text += "Enter the corresponding IP number of a TiVo on your home network.<br>";
+         text += "You can find the IP number of your TiVo from the TiVo as follows:<br>";
+         text += "<b>Tivo Central—Messages&Settings—Settings—Phone&Network: IP addr</b><br>";
+         text += "Enter corresponding <b>Tivo Name</b> above and then click on <b>ADD</b> button.";
+      }
+      else if (component.equals("remove_tivo")) {
+         text =  "<b>Remove .TiVo after file decrypt</b><br>";
+         text += "Enable this option if you would like kmttg to remove .TiVo files automatically<br>";
+         text += "once they have been successfully decrypted to .mpg format.";
+      }
+      else if (component.equals("remove_comcut")) {
+         text =  "<b>Remove .edl & .mpg files after comcut</b><br>";
+         text += "<br>";
+         text += "If you use comcut you can enable this option if you would like kmttg to remove .edl & .mpg<br>";
+         text += "files automatically once comcut completes successfully.";
+      }
+      else if (component.equals("remove_mpeg")) {
+         text =  "<b>Remove .mpg file after encode</b><br>";
+         text += "If you use encode you can enable this option if you would like kmttg to remove .mpg<br>";
+         text += "files automatically once they have been successfully re-encoded.";
+      }
+      else if (component.equals("check_space")) {
+         text =  "<b>Check Available Disk Space</b><br>";
+         text += "If this option is enabled then kmttg will check that destination drive has more than<br>";
+         text += "the space available defined in <b>Min req space (GB)</b> field before running jobs.";
+      }
+      else if (component.equals("beacon")) {
+         text =  "<b>Look for Tivos on network</b><br>";
+         text += "If this option is enabled then kmttg will try to detect Tivos on your network<br>";
+         text += "automatically that you have not already configured manually.<br>";
+         text += "NOTE: The automatic detection is disabled automatically after about 10 minutes.";
+      }
+      else if (component.equals("create_subfolder")) {
+         text =  "<b>Create sub-folder for each download</b><br>";
+         text += "Enable this option if you would like kmttg to create a sub-folder for<br>";
+         text += "<b>each individual</b> show to be processed. The name of the folder<br>";
+         text += "will be the same as the file format you defined but without any file extension.";
+      }
+      else if (component.equals("UseAdscan")) {
+         text =  "<b>Use VRD AdScan instead of comskip</b><br>";
+         text += "If you have VideoRedo and have configured kmttg with the installation path<br>";
+         text += "to VideoRedo, when this option is enabled kmttg will use VideoRedo instead<br>";
+         text += "of <b>comskip</b> for commercials detection.";
+      }
+      else if (component.equals("files_path")) {
+         text =  "<b>FILES Default Path</b><br>";
+         text += "Defines where you would like the file browser to start from in <b>FILES</b> mode.<br>";
+      }
+      else if (component.equals("MAK")) {
+         text =  "<b>MAK</b><br>";
+         text += "<b>REQUIRED</b> setting if you plan to download and/or decrypt files from your TiVos.<br>";
+         text += "This is your TiVo <b>Media Access Key</b> 10 digit number.<br>";
+         text += "You can find the number on any of your networked Tivos as follows:<br>";
+         text += "<b>Tivo Central—Messages&Settings—Account&System Information—Media Access Key</b>";
+      }
+      else if (component.equals("file_naming")) {
+         text =  "<b>File Naming</b><br>";
+         text += "This defines the file naming template for kmttg to use when downloading files<br>";
+         text += "from your TiVos. The <b>Available Keywords</b> entries to the right contain<br>";
+         text += "all the valid recognized keywords. Consult the kmttg documentation for all the<br>";
+         text += "details on the meaning of each keyword and for advanced file naming setup.";
+      }
+      else if (component.equals("tivo_output_dir")) {
+         text =  "<b>.TiVo Output Dir</b><br>";
+         text += "<b>REQUIRED</b> if you plan to download files from your TiVos.<br>";
+         text += "This defines location where TiVo files are download to.<br>";
+         text += "NOTE: Make sure to have plenty of disk space available at this location.";
+      }
+      else if (component.equals("mpeg_output_dir")) {
+         text =  "<b>.mpg Output Dir</b><br>";
+         text += "<b>REQUIRED</b> if you plan to decrypt TiVo files to mpeg files.<br>";
+         text += "This defines location where decrypted mpeg files will be saved to.<br>";
+         text += "NOTE: Make sure to have plenty of disk space available at this location.";
+      }
+      else if (component.equals("mpeg_cut_dir")) {
+         text =  "<b>.mpg Cut Dir</b><br>";
+         text += "<b>REQUIRED</b> if you plan to use <b>comcut</b> step.<br>";
+         text += "This defines location where comcut commercial stripped mpeg file will be saved to.<br>";
+         text += "NOTE: Make sure to have plenty of disk space available at this location.";
+      }
+      else if (component.equals("encode_output_dir")) {
+         text =  "<b>Encode Output Dir</b><br>";
+         text += "<b>REQUIRED</b> if you plan to re-encode mpeg files to other formats.<br>";
+         text += "This defines location where encoded files will be saved to.<br>";
+         text += "NOTE: Make sure to have plenty of disk space available at this location.";
+      }
+      else if (component.equals("tivodecode")) {
+         text =  "<b>tivodecode</b><br>";
+         text += "<b>REQUIRED</b> if you plan to decrypt TiVo files to unecrypted mpeg2 format.<br>";
+         text += "This defines the full path to the <b>tivodecode</b> program.";
+      }
+      else if (component.equals("curl")) {
+         text =  "<b>curl</b><br>";
+         text += "<b>REQUIRED</b> if you plan to download files from your TiVos.<br>";
+         text += "This defines the full path to the <b>curl</b> program.";
+      }
+      else if (component.equals("ffmpeg")) {
+         text =  "<b>ffmpeg</b><br>";
+         text += "This defines the full path to the <b>ffmpeg</b> program.<br>";
+         text += "All the encoding profile names starting with <b>ff_</b> prefix<br>";
+         text += "use this program, so if you plan on encoding to different video<br>";
+         text += "file formats with one of those profiles this setting is required.";
+      }
+      else if (component.equals("mencoder")) {
+         text =  "<b>mencoder</b><br>";
+         text += "This defines the full path to the <b>mencoder</b> program.<br>";
+         text += "Unless you configure kmttg to use VideoRedo, this program is used<br>";
+         text += "during <b>comcut</b> step to remove commercials from an mpeg2 file.<br>";
+         text += "NOTE: This program can also be used in a custom defined encoding<br>";
+         text += "profile if you wish as the encoding program.";
+      }
+      else if (component.equals("handbrake")) {
+         text =  "<b>handbrake</b><br>";
+         text += "This defines the full path to the <b>handbrake</b> program.<br>";
+         text += "All the encoding profile names starting with <b>hb_</b> prefix<br>";
+         text += "use this program, so if you plan on encoding to different video<br>";
+         text += "file formats with one of those profiles this setting is required.";
+      }
+      else if (component.equals("comskip")) {
+         text =  "<b>comskip</b><br>";
+         text += "<b>REQUIRED</b> if you plan to use <b>comskip</b> commercial detection program.<br>";
+         text += "This defines the full path to the <b>comskip</b> program.<br>";
+         text += "NOTE: As an alternative you can configure kmttg to use VideoRedo AdScan instead.";
+      }
+      else if (component.equals("comskip_ini")) {
+         text =  "<b>comskip.ini</b><br>";
+         text += "<b>REQUIRED</b> if you plan to use <b>comskip</b> commercial detection program.<br>";
+         text += "This defines the full path to the <b>comskip.ini</b> comskip configuration file.<br>";
+         text += "NOTE: By default comskip.ini is configured to output .edl files which can be used<br>";
+         text += "by <b>mencoder</b> program to subsequently cut out commercial segments from mpeg file.<br>";
+         text += "NOTE: If you plan to use VideoRedo to cut out commercials you must edit this file.<br>";
+         text += "Consult kmttg documentation for further details.";
+      }
+      else if (component.equals("t2extract")) {
+         text =  "<b>t2extract</b><br>";
+         text += "<b>REQUIRED</b> if you plan to use <b>captions</b> task.<br>";
+         text += "For Windows systems this program is used for generating closed captions <b>.srt</b> files.<br>";
+         text += "This is the full path to the <b>T2Sami t2extract</b> program.";
+      }
+      else if (component.equals("VRD_path")) {
+         text =  "<b>VRD path</b><br>";
+         text += "For Windows systems only if you have VideoRedo program installed on this computer<br>";
+         text += "then supply the full path to the VideoRedo installation directory on your computer.<br>";
+         text += "This setting is <b>REQUIRED</b> to enable <b>VRD QS fix</b> task which runs VideoRedo<br>";
+         text += "to automatically repair glitches/problems in mpeg2 program files.<br>";
+         text += "This setting also REQUIRED if you want to use VideoRedo for commercial cutting (<b>comcut</b>) step.<br>";
+         text += "Example path setting for Windows Vista:<br>";
+         text += "<b>C:\\Program Files (x86)\\VideoRedoPlus</b>";
+      }
+      else if (component.equals("AtomicParsley")) {
+         text =  "<b>AtomicParsley</b><br>";
+         text += "This defines the full path to the <b>AtomicParsley</b> program.<br>";
+         text += "If defined this program is used to automatically add show information<br>";
+         text += "to mpeg4 video files following an <b>encode</b> step. This is useful if<br>";
+         text += "for example you transfer mpeg4 files to your iTunes library.<br>";
+         text += "NOTE: This will only work if you generate <b>pyTivo metadata</b> files<br>";
+         text += "to accompany the mpeg4 video files since information is gathered from those<br>";
+         text += "files and passed along to this program by kmttg.";
+      }
+      else if (component.equals("wan_http_port")) {
+         text =  "<b>wan http port</b><br>";
+         text += "<b>Advanced Setting</b>.<br>";
+         text += "Set this option only if you plan to use kmttg over a WAN instead of your local LAN.<br>";
+         text += "By default http port 80 is used to download shows from the Tivos on the LAN, but from WAN side<br>";
+         text += "you will have to setup port forwarding in your router, and often service providers do not<br>";
+         text += "allow you to use port 80.<br>";
+         text += "NOTE: For Now Playing List retrieval https port 443 also should be port forwarded to your Tivo<br>";
+         text += "port 443 in your router configuration.";
+      }
+      else if (component.equals("NPL_cache_mins")) {
+         text =  "<b>NPL cache mins</b><br>";
+         text += "Defines number of minutes to cache TiVo Now Playing List downloads.<br>";
+         text += "Using cache prevents having to re-download the Now Playing List every time<br>";
+         text += "you select a TiVo, since for TiVos with many shows that can be time-consuming.<br>";
+         text += "NOTE: If you don't want any caching you can set this to 0.";
+      }
+      else if (component.equals("active_job_limit")) {
+         text =  "<b>active job limit</b><br>";
+         text += "Limits the number of CPU intensive jobs that can kmttg can run in parallel.<br>";
+         text += "If you want to allow more CPU intensive jobs to run at the same time (for example if you<br>";
+         text += "have a multi-core processor) you can increase this limit accordingly.<br>";
+         text += "NOTE: Be careful not to overwhelm your computer by setting this number too high.";
+      }
+      else if (component.equals("disk_space")) {
+         text =  "<b>Min req space (GB)</b><br>";
+         text += "If <b>Check Available Disk Space</b> option is enabled then this setting<br>";
+         text += "defines the minimum required disk space (in GB) to be available in order for kmttg<br>";
+         text += "to proceed with certain tasks. If you have less space available then kmttg<br>";
+         text += "will abort the task with an error message about low disk space.";
+      }
+      else if (component.equals("customCommand")) {
+         text =  "<b>custom command</b><br>";
+         text += "Here you can setup any script you want to run as a post-processing step to all other tasks.<br>";
+         text += "You can use certain pre-defined keywords in square brackets as arguments to your<br>";
+         text += "script if you wish which kmttg will replace with the associated full path file names.<br>";
+         text += "The supported keywords are listed in the <b>Available file args</b> cyclic to the right";
+      }
+      else if (component.equals("keywords")) {
+         text =  "<b>Available keywords</b><br>";
+         text += "These are the valid keywords understood by kmttg for setting up file naming template.<br>";
+         text += "Consult kmttg documentation for details.";
+      }
+      else if (component.equals("customFiles")) {
+         text =  "<b>Available file args</b><br>";
+         text += "These are the valid file keywords understood by kmttg for use with custom command.<br>";
+         text += "You can use 1 or more of these keywords as arguments to your custom command.<br>";
+         text += "kmttg will substitute the keywords with full path file names accordingly.";
+      }
+      
+      if (text.length() > 0) {
+         text = "<html>" + text + "</html>";
+      }
+      return text;
+   }
+
       
 }

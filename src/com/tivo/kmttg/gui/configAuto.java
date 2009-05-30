@@ -413,6 +413,27 @@ public class configAuto {
       dialog.pack();
    }
    
+   public void setToolTips() {
+      //tivos.setToolTipText(getToolTip("tivos"));
+      //add.setToolTipText(getToolTip("add"));
+   }
+   
+   public String getToolTip(String component) {
+      String text = "";
+      if (component.equals("tivos")) {
+         text =  "<b>TIVOS</b><br>";
+         text += "Select <b>FILES</b> mode or a <b>TiVo</b> on your network.<br>";
+         text += "<b>FILES</b> mode allows you to select existing TiVo or mpeg2 files on your computer.<br>";
+         text += "<b>TiVo</b> mode allows you to get a listing of all shows for a TiVo on your home network.";
+      }
+      else if (component.equals("add")) {
+         text =  "<b>Add...</b><br>";
+         text += "Brings up a file browser for selecting TiVo or mpeg2 video files to process.<br>";
+         text += "Selected files are added to files table below.<br>";
+      }
+      return text;
+   }
+   
    // This will decide which options are enabled based on current config settings
    // Options are disabled when associated config entry is not setup
    public void refreshOptions() {

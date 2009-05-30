@@ -81,6 +81,7 @@ public class gui {
    private fileBrowser browser = null;
    public  JScrollPane nplScroll = null;
    public  JScrollPane jobScroll = null;
+   private ToolTipManager toolTips = null;
 
    public static Hashtable<String,Icon> Images;
    
@@ -97,9 +98,21 @@ public class gui {
          jFrame.setTitle(title);
          nplTab_packColumns(5);
          jobTab_packColumns(5);
-
+         
+         // Restore last GUI run settings from file
          readSettings();
+         
+         // Enable/disable options according to configuration
          refreshOptions();
+         
+         // Create and enable/disable component tooltips
+         toolTips = ToolTipManager.sharedInstance();
+         toolTips.setDismissDelay(config.toolTipsTimeout*1000);
+         toolTips.setInitialDelay(0);
+         setToolTips();
+         enableToolTips(config.toolTips);
+         
+         // Set master flag indicating that kmttg is running in GUI mode
          config.GUI = true;
          
          // Create NowPlaying icons
@@ -175,7 +188,7 @@ public class gui {
          jContentPane.add(add, c);
 
          // Remove button
-         remove = new JButton("Remove...");
+         remove = new JButton("Remove");
          remove.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {
                removeCB(remove);
@@ -1189,6 +1202,126 @@ public class gui {
       catch (IOException ex) {
          log.error("Problem parsing config file: " + config.gui_settings);
       }
+   }
+   
+   // Component tooltip setup
+   public void setToolTips() {
+      tivos.setToolTipText(getToolTip("tivos"));
+      add.setToolTipText(getToolTip("add"));
+      remove.setToolTipText(getToolTip("remove"));
+      metadata.setToolTipText(getToolTip("metadata"));
+      decrypt.setToolTipText(getToolTip("decrypt"));
+      qsfix.setToolTipText(getToolTip("qsfix"));
+      comskip.setToolTipText(getToolTip("comskip"));
+      comcut.setToolTipText(getToolTip("comcut"));
+      captions.setToolTipText(getToolTip("captions"));
+      encode.setToolTipText(getToolTip("encode"));
+      custom.setToolTipText(getToolTip("custom"));
+      encoding.setToolTipText(getToolTip("encoding"));
+      start.setToolTipText(getToolTip("start"));
+      cancel.setToolTipText(getToolTip("cancel"));
+      jobTab.JobMonitor.setToolTipText(getToolTip("JobMonitor"));
+   }
+   
+   // Enable/disable all tooltips
+   public void enableToolTips(Boolean flag) {
+      toolTips.setEnabled(flag);
+   }
+     
+   public String getToolTip(String component) {
+      String text = "";
+      if (component.equals("tivos")) {
+         text =  "<b>TIVOS</b><br>";
+         text += "Select <b>FILES</b> mode or a <b>TiVo</b> on your network.<br>";
+         text += "<b>FILES</b> mode allows you to select existing TiVo or mpeg2 files on your computer.<br>";
+         text += "<b>TiVo</b> mode allows you to get a listing of all shows for a TiVo on your home network.";
+      }
+      else if (component.equals("add")) {
+         text =  "<b>Add...</b><br>";
+         text += "Brings up a file browser for selecting TiVo or mpeg2 video files to process.<br>";
+         text += "Selected files are added to files table below.<br>";
+      }
+      else if (component.equals("remove")) {
+         text =  "<b>Remove</b><br>";
+         text += "Removes selected file entries from files table below.";
+      }
+      else if (component.equals("metadata")) {
+         text =  "<b>metadata</b><br>";
+         text += "Creates a <b>pyTivo</b> compatible metadata file.<br>";
+         text += "This is a text file that accompanies video file that contains<br>";
+         text += "extended program information about the video file.<br>";
+         text += "Useful if you use pyTivo to copy video files back to your Tivos.";
+      }
+      else if (component.equals("decrypt")) {
+         text =  "<b>decrypt</b><br>";
+         text += "Decrypts encrypted TiVo files.<br>";
+         text += "Converts video file to normal unencrypted mpeg2 program stream format.<br>";
+         text += "This is necessary before doing any further video file processing<br>";
+         text += "so most often you should leave this option enabled.";
+      }
+      else if (component.equals("qsfix")) {
+         text =  "<b>VRD QS fix</b><br>";
+         text += "Runs VideoRedo Quick Stream Fix utility.<br>";
+         text += "Cleans up any potential glitches/errors in mpeg2 video files.";
+      }
+      else if (component.equals("comskip")) {
+         text =  "<b>comskip</b><br>";
+         text += "Automated commercials detection tool.<br>";
+         text += "NOTE: If you have VideoRedo enabled you can choose to use.<br>";
+         text += "VideoReo <b>AdScan</b> instead of comskip if you wish.<br>";
+         text += "NOTE: Typically commercial detection is NOT 100% accurate.";
+      }
+      else if (component.equals("comcut")) {
+         text =  "<b>comcut</b><br>";
+         text += "Automatically cut out commercials detected in <b>comskip</b> step.";
+      }
+      else if (component.equals("captions")) {
+         text =  "<b>captions</b><br>";
+         text += "Generates a <b>.srt<b> captions file which is a text file containing<br>";
+         text += "closed captioning text. This file can be used with several<br>";
+         text += "video playback tools to display closed captions during playback.<br>";
+         text += "For example <b>streambaby</b> can use this file.";
+      }
+      else if (component.equals("encode")) {
+         text =  "<b>encode</b><br>";
+         text += "Encode mpeg2 video file to a different video format.<br>";
+         text += "Select video format desired using <b>Encoding Profile</b>.";
+      }
+      else if (component.equals("custom")) {
+         text =  "<b>custom</b><br>";
+         text += "Run a custom script/program that you define in kmttg configuration.<br>";
+         text += "This task is always the last task to run in set of tasks<br>";
+         text += "and is useful for post-processing purposes.";
+      }
+      else if (component.equals("encoding")) {
+         text =  "<b>Encoding Profile</b><br>";
+         text += "Choose one of the pre-defined encoding profiles to<br>";
+         text += "use when running <b>encode</b> step to encode to a<br>";
+         text += "different video format. By convention there are 2 different<br>";
+         text += "prefix names used for encoding profiles by kmttg:<br>";
+         text += "<b>ff_</b> indicates <b>ffmpeg</b> encoding tool is used.<br>";
+         text += "<b>hb_</b> indicates <b>handbrake</b> encoding tool is used.<br>";
+         text += "NOTE: You can create your own custom encoding profiles.";
+      }
+      else if (component.equals("start")) {
+         text =  "<b>START JOBS</b><br>";
+         text += "Run selected tasks for all selected items in the programs/files table.<br>";
+         text += "First select 1 or more items in the list below to process.";
+      }
+      else if (component.equals("cancel")) {
+         text =  "<b>CANCEL JOBS</b><br>";
+         text += "Cancel selected jobs in <b>JOB MONITOR</b> table.<br>";
+         text += "First select 1 or more running or queued jobs in list below to abort/cancel.";
+      }
+      else if (component.equals("JobMonitor")) {
+         text =  "<b>JOB</b><br>";
+         text += "Double click on a running job to see program output.";
+      }
+      
+      if (text.length() > 0) {
+         text = "<html>" + text + "</html>";
+      }
+      return text;
    }
    
    // Abstraction methods
