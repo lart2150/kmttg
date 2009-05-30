@@ -299,7 +299,7 @@ public class config {
       gui_settings = programDir + s + ".kmttg_settings";
       if (file.isDir(System.getProperty("user.home"))) {
          // Centralize this non-critical file instead of localizing it
-         gui_settings = programDir + s + ".kmttg_settings";
+         gui_settings = System.getProperty("user.home") + s + ".kmttg_settings";
       }
       
       // Non-executable defaults
