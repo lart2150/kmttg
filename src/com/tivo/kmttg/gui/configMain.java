@@ -41,6 +41,7 @@ public class configMain {
    private static JCheckBox beacon = null;
    private static JCheckBox create_subfolder = null;
    private static JCheckBox UseAdscan = null;
+   private static JCheckBox toolTips = null;
    private static JTextField tivo_name = null;
    private static JTextField tivo_ip = null;
    private static JTextField files_path = null;
@@ -65,6 +66,7 @@ public class configMain {
    private static JTextField AtomicParsley = null;
    private static JTextField disk_space = null;
    private static JTextField customCommand = null;
+   private static JTextField toolTipsTimeout = null;
    private static JComboBox keywords = null;
    private static JComboBox customFiles = null;
       
@@ -261,6 +263,12 @@ public class configMain {
       else
          UseAdscan.setSelected(false);
       
+      // toolTips
+      if (config.toolTips == 1)
+         toolTips.setSelected(true);
+      else
+         toolTips.setSelected(false);
+      
       // Files naming
       file_naming.setText(config.tivoFileNameFormat);
       
@@ -326,6 +334,9 @@ public class configMain {
       
       // NPL cache mins
       NPL_cache_mins.setText("" + config.cache_time);
+      
+      // toolTipsTimeout
+      toolTipsTimeout.setText("" + config.toolTipsTimeout);
    }
    
    // Update config settings with widget values
@@ -389,6 +400,13 @@ public class configMain {
          config.UseAdscan = 1;
       else
          config.UseAdscan = 0;
+      
+      // toolTips
+      if (toolTips.isSelected())
+         config.toolTips = 1;
+      else
+         config.toolTips = 0;
+      config.gui.enableToolTips(config.toolTips);
       
       // Files naming
       value = file_naming.getText();
@@ -684,6 +702,23 @@ public class configMain {
       } else {
          config.cache_time = 10;
       }
+      
+      // toolTipsTimeout
+      value = string.removeLeadingTrailingSpaces(toolTipsTimeout.getText());
+      if (value.length() > 0) {
+         try {
+            config.toolTipsTimeout = Integer.parseInt(value);
+         } catch(NumberFormatException e) {
+            textFieldError(toolTipsTimeout, "Illegal setting for toolTips timeout: '" + value + "'");
+            log.error("Setting to 20");
+            config.toolTipsTimeout = 20;
+            toolTipsTimeout.setText("" + config.toolTipsTimeout);
+            errors++;
+         }
+      } else {
+         config.toolTipsTimeout = 20;
+      }
+      
       return errors;
    }
 
@@ -754,6 +789,9 @@ public class configMain {
       JLabel disk_space_label = new javax.swing.JLabel();
       disk_space = new javax.swing.JTextField();
       beacon = new javax.swing.JCheckBox();
+      toolTips = new javax.swing.JCheckBox();
+      JLabel toolTipsTimeout_label = new javax.swing.JLabel();
+      toolTipsTimeout = new javax.swing.JTextField();
       JButton OK = new javax.swing.JButton();
       JButton CANCEL = new javax.swing.JButton();
 
@@ -830,7 +868,10 @@ public class configMain {
       });
 
       disk_space_label.setText("Min req space (GB)"); 
-      beacon.setText("Look for Tivos on network"); 
+      beacon.setText("Look for Tivos on network");
+      
+      toolTips.setText("Display toolTips");
+      toolTipsTimeout_label.setText("toolTip timeout (secs)");
       
       OK.setText("OK");
       OK.setBackground(Color.green);
@@ -1343,6 +1384,29 @@ public class configMain {
       c.gridwidth = 3;
       content.add(customFiles, c);
       
+      // toolTips
+      gy++;
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
+      c.gridx = 1;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(toolTips, c);
+      
+      c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
+      c.gridx = 4;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(toolTipsTimeout_label, c);
+      
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
+      c.gridx = 5;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(toolTipsTimeout, c);
+      
       // OK and CANCEL buttons
       gy++;
       c.gridx = 0;
@@ -1395,7 +1459,9 @@ public class configMain {
       disk_space.setToolTipText(getToolTip("disk_space"));
       customCommand.setToolTipText(getToolTip("customCommand"));
       keywords.setToolTipText(getToolTip("keywords"));
-      customFiles.setToolTipText(getToolTip("customFiles"));      
+      customFiles.setToolTipText(getToolTip("customFiles")); 
+      toolTips.setToolTipText(getToolTip("toolTips")); 
+      toolTipsTimeout.setToolTipText(getToolTip("toolTipsTimeout")); 
    }
    
    public static String getToolTip(String component) {
@@ -1615,6 +1681,14 @@ public class configMain {
          text += "These are the valid file keywords understood by kmttg for use with custom command.<br>";
          text += "You can use 1 or more of these keywords as arguments to your custom command.<br>";
          text += "kmttg will substitute the keywords with full path file names accordingly.";
+      }
+      else if (component.equals("toolTips")) {
+         text =  "<b>Display toolTips</b><br>";
+         text += "Enable or disable display of these mouse over popup toolTip messages.<br>";
+      }
+      else if (component.equals("toolTipsTimeout")) {
+         text =  "<b>toolTip timeout (secs)</b><br>";
+         text += "Time in seconds to timeout display of a toolTip message.<br>";
       }
       
       if (text.length() > 0) {
