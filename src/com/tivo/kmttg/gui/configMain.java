@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -14,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -32,6 +35,10 @@ public class configMain {
    private static Color textbg_default = null;
    private static Color textbg_error = Color.red;
    
+   private static JButton add = null;
+   private static JButton del = null;
+   private static JButton OK = null;
+   private static JButton CANCEL = null;
    private static JDialog dialog = null;
    private static JComboBox tivos = null;
    private static JCheckBox remove_tivo = null;
@@ -69,6 +76,7 @@ public class configMain {
    private static JTextField toolTipsTimeout = null;
    private static JComboBox keywords = null;
    private static JComboBox customFiles = null;
+   private static JFileChooser Browser = null;
       
    public static void display(JFrame frame) {
       debug.print("frame=" + frame);
@@ -726,8 +734,8 @@ public class configMain {
       debug.print("frame=" + frame);
       JLabel tivos_label = new javax.swing.JLabel();
       tivos = new javax.swing.JComboBox();
-      JButton add = new javax.swing.JButton();
-      JButton del = new javax.swing.JButton();
+      add = new javax.swing.JButton();
+      del = new javax.swing.JButton();
       JLabel tivo_name_label = new javax.swing.JLabel();
       tivo_name = new javax.swing.JTextField();
       JLabel tivo_ip_label = new javax.swing.JLabel();
@@ -792,8 +800,10 @@ public class configMain {
       toolTips = new javax.swing.JCheckBox();
       JLabel toolTipsTimeout_label = new javax.swing.JLabel();
       toolTipsTimeout = new javax.swing.JTextField();
-      JButton OK = new javax.swing.JButton();
-      JButton CANCEL = new javax.swing.JButton();
+      OK = new javax.swing.JButton();
+      CANCEL = new javax.swing.JButton();
+      Browser = new JFileChooser(config.programDir);
+      Browser.setMultiSelectionEnabled(false);
 
       tivos_label.setText("Tivos");
       
@@ -888,6 +898,231 @@ public class configMain {
             dialog.setVisible(false);
          }
       });
+      
+      // File browser mouse double-click listeners
+      files_path.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                  int result = Browser.showDialog(files_path, "Choose Directory");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     files_path.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      tivo_output_dir.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                  int result = Browser.showDialog(tivo_output_dir, "Choose Directory");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     tivo_output_dir.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      mpeg_output_dir.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                  int result = Browser.showDialog(mpeg_output_dir, "Choose Directory");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     mpeg_output_dir.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      mpeg_cut_dir.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                  int result = Browser.showDialog(mpeg_cut_dir, "Choose Directory");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     mpeg_cut_dir.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      encode_output_dir.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                  int result = Browser.showDialog(encode_output_dir, "Choose Directory");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     encode_output_dir.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      VRD_path.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                  int result = Browser.showDialog(VRD_path, "Choose Directory");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     VRD_path.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      tivodecode.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(tivodecode, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     tivodecode.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      curl.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(curl, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     curl.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      ffmpeg.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(ffmpeg, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     ffmpeg.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      customCommand.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(customCommand, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     customCommand.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      mencoder.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(mencoder, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     mencoder.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      handbrake.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(handbrake, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     handbrake.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      comskip.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(comskip, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     comskip.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      comskip_ini.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(comskip_ini, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     comskip_ini.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      t2extract.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(t2extract, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     t2extract.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      AtomicParsley.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(AtomicParsley, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     AtomicParsley.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
 
       // Start of layout managaement
       JPanel content = new JPanel(new GridBagLayout());
@@ -1429,6 +1664,8 @@ public class configMain {
    public static void setToolTips() {
       tivo_name.setToolTipText(getToolTip("tivo_name"));
       tivo_ip.setToolTipText(getToolTip("tivo_ip"));
+      add.setToolTipText(getToolTip("add")); 
+      del.setToolTipText(getToolTip("del")); 
       remove_tivo.setToolTipText(getToolTip("remove_tivo"));
       remove_comcut.setToolTipText(getToolTip("remove_comcut"));
       remove_mpeg.setToolTipText(getToolTip("remove_mpeg"));
@@ -1460,6 +1697,8 @@ public class configMain {
       customCommand.setToolTipText(getToolTip("customCommand"));
       keywords.setToolTipText(getToolTip("keywords"));
       customFiles.setToolTipText(getToolTip("customFiles")); 
+      OK.setToolTipText(getToolTip("OK")); 
+      CANCEL.setToolTipText(getToolTip("CANCEL")); 
       toolTips.setToolTipText(getToolTip("toolTips")); 
       toolTipsTimeout.setToolTipText(getToolTip("toolTipsTimeout")); 
    }
@@ -1476,8 +1715,17 @@ public class configMain {
          text =  "<b>Tivo IP#</b><br>";
          text += "Enter the corresponding IP number of a TiVo on your home network.<br>";
          text += "You can find the IP number of your TiVo from the TiVo as follows:<br>";
-         text += "<b>Tivo Central—Messages&Settings—Settings—Phone&Network: IP addr</b><br>";
+         text += "<b>Tivo Central-Messages&Settings-Settings-Phone&Network: IP addr</b><br>";
          text += "Enter corresponding <b>Tivo Name</b> above and then click on <b>ADD</b> button.";
+      }
+      else if (component.equals("add")) {
+         text =  "<b>ADD</b><br>";
+         text += "Add specified <b>Tivo Name</b> and associated <b>Tivo IP#</b> to <b>Tivos</b> list.<br>";
+         text += "kmttg tries to detect TiVos on your network automatically but that doesn't always work.<br>";
+      }
+      else if (component.equals("del")) {
+         text =  "<b>DEL</b><br>";
+         text += "Remove currently selected entry in <b>Tivos</b> list.<br>";
       }
       else if (component.equals("remove_tivo")) {
          text =  "<b>Remove .TiVo after file decrypt</b><br>";
@@ -1521,13 +1769,14 @@ public class configMain {
       else if (component.equals("files_path")) {
          text =  "<b>FILES Default Path</b><br>";
          text += "Defines where you would like the file browser to start from in <b>FILES</b> mode.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("MAK")) {
          text =  "<b>MAK</b><br>";
          text += "<b>REQUIRED</b> setting if you plan to download and/or decrypt files from your TiVos.<br>";
          text += "This is your TiVo <b>Media Access Key</b> 10 digit number.<br>";
          text += "You can find the number on any of your networked Tivos as follows:<br>";
-         text += "<b>Tivo Central—Messages&Settings—Account&System Information—Media Access Key</b>";
+         text += "<b>Tivo Central-Messages&Settings-Account&System Information-Media Access Key</b>";
       }
       else if (component.equals("file_naming")) {
          text =  "<b>File Naming</b><br>";
@@ -1540,42 +1789,49 @@ public class configMain {
          text =  "<b>.TiVo Output Dir</b><br>";
          text += "<b>REQUIRED</b> if you plan to download files from your TiVos.<br>";
          text += "This defines location where TiVo files are download to.<br>";
-         text += "NOTE: Make sure to have plenty of disk space available at this location.";
+         text += "NOTE: Make sure to have plenty of disk space available at this location.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("mpeg_output_dir")) {
          text =  "<b>.mpg Output Dir</b><br>";
          text += "<b>REQUIRED</b> if you plan to decrypt TiVo files to mpeg files.<br>";
          text += "This defines location where decrypted mpeg files will be saved to.<br>";
-         text += "NOTE: Make sure to have plenty of disk space available at this location.";
+         text += "NOTE: Make sure to have plenty of disk space available at this location.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("mpeg_cut_dir")) {
          text =  "<b>.mpg Cut Dir</b><br>";
          text += "<b>REQUIRED</b> if you plan to use <b>comcut</b> step.<br>";
          text += "This defines location where comcut commercial stripped mpeg file will be saved to.<br>";
-         text += "NOTE: Make sure to have plenty of disk space available at this location.";
+         text += "NOTE: Make sure to have plenty of disk space available at this location.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("encode_output_dir")) {
          text =  "<b>Encode Output Dir</b><br>";
          text += "<b>REQUIRED</b> if you plan to re-encode mpeg files to other formats.<br>";
          text += "This defines location where encoded files will be saved to.<br>";
-         text += "NOTE: Make sure to have plenty of disk space available at this location.";
+         text += "NOTE: Make sure to have plenty of disk space available at this location.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("tivodecode")) {
          text =  "<b>tivodecode</b><br>";
          text += "<b>REQUIRED</b> if you plan to decrypt TiVo files to unecrypted mpeg2 format.<br>";
-         text += "This defines the full path to the <b>tivodecode</b> program.";
+         text += "This defines the full path to the <b>tivodecode</b> program.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("curl")) {
          text =  "<b>curl</b><br>";
          text += "<b>REQUIRED</b> if you plan to download files from your TiVos.<br>";
-         text += "This defines the full path to the <b>curl</b> program.";
+         text += "This defines the full path to the <b>curl</b> program.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("ffmpeg")) {
          text =  "<b>ffmpeg</b><br>";
          text += "This defines the full path to the <b>ffmpeg</b> program.<br>";
          text += "All the encoding profile names starting with <b>ff_</b> prefix<br>";
          text += "use this program, so if you plan on encoding to different video<br>";
-         text += "file formats with one of those profiles this setting is required.";
+         text += "file formats with one of those profiles this setting is required.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("mencoder")) {
          text =  "<b>mencoder</b><br>";
@@ -1583,20 +1839,23 @@ public class configMain {
          text += "Unless you configure kmttg to use VideoRedo, this program is used<br>";
          text += "during <b>comcut</b> step to remove commercials from an mpeg2 file.<br>";
          text += "NOTE: This program can also be used in a custom defined encoding<br>";
-         text += "profile if you wish as the encoding program.";
+         text += "profile if you wish as the encoding program.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("handbrake")) {
          text =  "<b>handbrake</b><br>";
          text += "This defines the full path to the <b>handbrake</b> program.<br>";
          text += "All the encoding profile names starting with <b>hb_</b> prefix<br>";
          text += "use this program, so if you plan on encoding to different video<br>";
-         text += "file formats with one of those profiles this setting is required.";
+         text += "file formats with one of those profiles this setting is required.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("comskip")) {
          text =  "<b>comskip</b><br>";
          text += "<b>REQUIRED</b> if you plan to use <b>comskip</b> commercial detection program.<br>";
          text += "This defines the full path to the <b>comskip</b> program.<br>";
-         text += "NOTE: As an alternative you can configure kmttg to use VideoRedo AdScan instead.";
+         text += "NOTE: As an alternative you can configure kmttg to use VideoRedo AdScan instead.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("comskip_ini")) {
          text =  "<b>comskip.ini</b><br>";
@@ -1605,13 +1864,15 @@ public class configMain {
          text += "NOTE: By default comskip.ini is configured to output .edl files which can be used<br>";
          text += "by <b>mencoder</b> program to subsequently cut out commercial segments from mpeg file.<br>";
          text += "NOTE: If you plan to use VideoRedo to cut out commercials you must edit this file.<br>";
-         text += "Consult kmttg documentation for further details.";
+         text += "Consult kmttg documentation for further details.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("t2extract")) {
          text =  "<b>t2extract</b><br>";
          text += "<b>REQUIRED</b> if you plan to use <b>captions</b> task.<br>";
          text += "For Windows systems this program is used for generating closed captions <b>.srt</b> files.<br>";
-         text += "This is the full path to the <b>T2Sami t2extract</b> program.";
+         text += "This is the full path to the <b>T2Sami t2extract</b> program.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("VRD_path")) {
          text =  "<b>VRD path</b><br>";
@@ -1621,7 +1882,8 @@ public class configMain {
          text += "to automatically repair glitches/problems in mpeg2 program files.<br>";
          text += "This setting also REQUIRED if you want to use VideoRedo for commercial cutting (<b>comcut</b>) step.<br>";
          text += "Example path setting for Windows Vista:<br>";
-         text += "<b>C:\\Program Files (x86)\\VideoRedoPlus</b>";
+         text += "<b>C:\\Program Files (x86)\\VideoRedoPlus</b><br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("AtomicParsley")) {
          text =  "<b>AtomicParsley</b><br>";
@@ -1631,7 +1893,8 @@ public class configMain {
          text += "for example you transfer mpeg4 files to your iTunes library.<br>";
          text += "NOTE: This will only work if you generate <b>pyTivo metadata</b> files<br>";
          text += "to accompany the mpeg4 video files since information is gathered from those<br>";
-         text += "files and passed along to this program by kmttg.";
+         text += "files and passed along to this program by kmttg.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("wan_http_port")) {
          text =  "<b>wan http port</b><br>";
@@ -1669,7 +1932,8 @@ public class configMain {
          text += "Here you can setup any script you want to run as a post-processing step to all other tasks.<br>";
          text += "You can use certain pre-defined keywords in square brackets as arguments to your<br>";
          text += "script if you wish which kmttg will replace with the associated full path file names.<br>";
-         text += "The supported keywords are listed in the <b>Available file args</b> cyclic to the right";
+         text += "The supported keywords are listed in the <b>Available file args</b> cyclic to the right.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("keywords")) {
          text =  "<b>Available keywords</b><br>";
@@ -1681,6 +1945,15 @@ public class configMain {
          text += "These are the valid file keywords understood by kmttg for use with custom command.<br>";
          text += "You can use 1 or more of these keywords as arguments to your custom command.<br>";
          text += "kmttg will substitute the keywords with full path file names accordingly.";
+      }
+      else if (component.equals("OK")) {
+         text =  "<b>OK</b><br>";
+         text += "Save all changes made in this form and close the form.<br>";
+         text += "NOTE: Settings are saved to <b>config.ini</b> file which resides by <b>kmttg.jar</b> file.<br>";
+      }
+      else if (component.equals("CANCEL")) {
+         text =  "<b>CANCEL</b><br>";
+         text += "Do not save any changes made in this form and close the form.<br>";
       }
       else if (component.equals("toolTips")) {
          text =  "<b>Display toolTips</b><br>";
