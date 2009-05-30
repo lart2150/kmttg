@@ -54,6 +54,7 @@ public class gui {
    private JMenuItem backgroundJobStatusMenuItem = null;
    private JMenuItem backgroundJobEnableMenuItem = null;
    private JMenuItem backgroundJobDisableMenuItem = null;
+   private JMenuItem saveMessagesMenuItem = null;
    
    private JComboBox tivos = null;
    private JComboBox encoding = null;
@@ -108,7 +109,7 @@ public class gui {
          // Create and enable/disable component tooltips
          toolTips = ToolTipManager.sharedInstance();
          toolTips.setDismissDelay(config.toolTipsTimeout*1000);
-         toolTips.setInitialDelay(0);
+         toolTips.setInitialDelay(500);
          setToolTips();
          enableToolTips(config.toolTips);
          
@@ -390,6 +391,7 @@ public class gui {
          fileMenu.add(getConfigureMenuItem());
          fileMenu.add(getClearCacheMenuItem());
          fileMenu.add(getRefreshEncodingsMenuItem());
+         fileMenu.add(getSaveMessagesMenuItem());
          fileMenu.add(getExitMenuItem());
       }
       return fileMenu;
@@ -443,6 +445,30 @@ public class gui {
          });
       }
       return autoConfigMenuItem;
+   }
+
+   private JMenuItem getSaveMessagesMenuItem() {
+      debug.print("");
+      if (saveMessagesMenuItem == null) {
+         saveMessagesMenuItem = new JMenuItem();
+         saveMessagesMenuItem.setText("Save messages to file");
+         saveMessagesMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+               Event.CTRL_MASK, true));
+         saveMessagesMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               String file = config.programDir + File.separator + "kmttg.log";
+               try {
+                  BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
+                  ofp.write(text.getText());
+                  ofp.close();
+                  log.warn("Saved output messages to file: " + file);
+               } catch (IOException ex) {
+                  log.error("Problem writing to file: " + file);
+               }
+            }
+         });
+      }
+      return saveMessagesMenuItem;
    }
 
    private JMenuItem getRunInGuiMenuItem() {
