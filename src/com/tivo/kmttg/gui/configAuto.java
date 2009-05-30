@@ -53,6 +53,9 @@ public class configAuto {
    
    private static JDialog dialog = null;
    private static JPanel content = null;
+   private static JButton add = null;
+   private static JButton del = null;
+   private static JButton update = null;
    private static JTextPane text = null;
    private static JXTable table = null;
    private static JScrollPane table_scroll = null;
@@ -72,13 +75,26 @@ public class configAuto {
 
    public void display(JFrame frame) {
       debug.print("frame=" + frame);
+      // Create dialog if not already created
       if (dialog == null) {
          create(frame);
+         // Set component tooltips
+         setToolTips();
       }
+      
+      // Parse auto.ini file to define current configuration
       autoConfig.parseAuto(config.autoIni);
+      
+      // Clear out any error highlights
       clearTextFieldErrors();
+      
+      // Update component settings to current configuration
       update();
+      
+      // Refresh available options based on settings
       refreshOptions();
+      
+      // Display the dialog
       dialog.setVisible(true);
    }
    
@@ -129,21 +145,21 @@ public class configAuto {
       text.setText(message);
       text.setEditable(false);
       
-      JButton add = new JButton("ADD");
+      add = new JButton("ADD");
       add.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             addCB();
          }
       });
 
-      JButton update = new JButton("UPDATE");
+      update = new JButton("UPDATE");
       update.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             updateCB();
          }
       });
 
-      JButton del = new JButton("DEL");
+      del = new JButton("DEL");
       del.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             delCB();
@@ -413,23 +429,86 @@ public class configAuto {
       dialog.pack();
    }
    
+   // Component tooltip setup
    public void setToolTips() {
-      //tivos.setToolTipText(getToolTip("tivos"));
-      //add.setToolTipText(getToolTip("add"));
+      metadata.setToolTipText(config.gui.getToolTip("metadata"));
+      decrypt.setToolTipText(config.gui.getToolTip("decrypt"));
+      qsfix.setToolTipText(config.gui.getToolTip("qsfix"));
+      comskip.setToolTipText(config.gui.getToolTip("comskip"));
+      comcut.setToolTipText(config.gui.getToolTip("comcut"));
+      captions.setToolTipText(config.gui.getToolTip("captions"));
+      encode.setToolTipText(config.gui.getToolTip("encode"));
+      custom.setToolTipText(config.gui.getToolTip("custom"));
+      encoding_name.setToolTipText(config.gui.getToolTip("encoding"));
+      table.setToolTipText(getToolTip("table"));
+      type.setToolTipText(getToolTip("type"));
+      dry_run.setToolTipText(getToolTip("dry_run"));
+      title.setToolTipText(getToolTip("title"));
+      check_interval.setToolTipText(getToolTip("check_interval"));
+      add.setToolTipText(getToolTip("add"));
+      update.setToolTipText(getToolTip("update"));
+      del.setToolTipText(getToolTip("del"));      
    }
    
    public String getToolTip(String component) {
       String text = "";
-      if (component.equals("tivos")) {
-         text =  "<b>TIVOS</b><br>";
-         text += "Select <b>FILES</b> mode or a <b>TiVo</b> on your network.<br>";
-         text += "<b>FILES</b> mode allows you to select existing TiVo or mpeg2 files on your computer.<br>";
-         text += "<b>TiVo</b> mode allows you to get a listing of all shows for a TiVo on your home network.";
+      if (component.equals("table")) {
+         text =  "<b>auto transfers entries</b><br>";
+         text += "Click on an entry to select it. Form settings will update to match<br>";
+         text += "the current settings for that entry. You can then change settings as<br>";
+         text += "desired and then use <b>UPDATE</b> button to apply form settings to the entry.<br>";
+         text += "Use <b>ADD</b> button to add a new entry<br>";
+         text += "Use <b>DEL</b> button to remove selected entries<br>";
+         text += "NOTE: Entry updates are only saved after you <b>OK</b> this form.";
+      }
+      else if (component.equals("type")) {
+         text =  "<b>Type</b><br>";
+         text += "<b>title</b> means exact title matching (case insensitive).<br>";
+         text += "<b>keywords</b> means keyword matching (case insensitive) with<br>";
+         text += "optional logical operations as illustrated above. Consult the<br>";
+         text += "documentation for all the details.";
+      }
+      else if (component.equals("dry_run")) {
+         text =  "<b>Dry Run Mode (test keywords only)</b><br>";
+         text += "With this option enabled kmttg will exercise the auto transfers setup<br>";
+         text += "and will print messages about what shows match your setup, but will<br>";
+         text += "not actually run any transfers. This is useful for testing your auto<br>";
+         text += "transfers setup to ensure it will do what you want.<br>";
+         text += "<b>NOTE: Use Auto Transfers->Run in GUI with this option set to test</b>.";
+      }
+      else if (component.equals("title")) {
+         text =  "<b>title/keywords</b><br>";
+         text += "Type in or update title or keywords for this entry here.<br>";
+         text += "Consult example above and documentation for details on keywords setup.<br>";
+         text += "NOTE: title and keywords are all case insensitive.";
+      }
+      else if (component.equals("check_interval")) {
+         text =  "<b>Check Tivos Interval (mins)</b><br>";
+         text += "Once you start the Auto Transfers service or background job kmttg<br>";
+         text += "will run in a loop matching your Auto Transfers entries to shows<br>";
+         text += "on your Tivos and performing all the selected tasks for each match.<br>";
+         text += "Once all matches have been processed kmttg will sleep for this specified<br>";
+         text += "amount of time before checking again.<br>";
+         text += "<b>NOTE: Setting this too low will overburden your network and Tivos.</b>";
       }
       else if (component.equals("add")) {
-         text =  "<b>Add...</b><br>";
-         text += "Brings up a file browser for selecting TiVo or mpeg2 video files to process.<br>";
-         text += "Selected files are added to files table below.<br>";
+         text =  "<b>ADD</b><br>";
+         text += "Add a new Auto Transfers entry based on current form choices.<br>";
+         text += "NOTE: Additions won't be saved until you <b>OK</b> this form.";
+      }
+      else if (component.equals("update")) {
+         text =  "<b>UPDATE</b><br>";
+         text += "Update the currently selected Auto Transfers entry with current form settings.<br>";
+         text += "NOTE: Updates won't be saved until you <b>OK</b> this form.";
+      }
+      else if (component.equals("del")) {
+         text =  "<b>DEL</b><br>";
+         text += "Remove currently selected Auto Transfers entries.<br>";
+         text += "NOTE: Removals won't be saved until you <b>OK</b> this form.";
+      }
+      
+      if (text.length() > 0) {
+         text = "<html>" + text + "</html>";
       }
       return text;
    }
