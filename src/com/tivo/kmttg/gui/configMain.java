@@ -716,6 +716,7 @@ public class configMain {
       if (value.length() > 0) {
          try {
             config.toolTipsTimeout = Integer.parseInt(value);
+            config.gui.setToolTipsTimeout(config.toolTipsTimeout);
          } catch(NumberFormatException e) {
             textFieldError(toolTipsTimeout, "Illegal setting for toolTips timeout: '" + value + "'");
             log.error("Setting to 20");
