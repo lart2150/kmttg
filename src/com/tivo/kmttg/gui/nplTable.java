@@ -43,33 +43,37 @@ public class nplTable {
                sortableDate s2 = (sortableDate)o2;
                long l1 = Long.parseLong(s1.sortable);
                long l2 = Long.parseLong(s2.sortable);
-               if ( l1 > l2 ) {
-                  return 1;
-               } else if ( l1 < l2 ) {
-                  return -1;
-               } else {
-                  return 0;
-               }
+               if (l1 > l2) return 1;
+               if (l1 < l2) return -1;
+               return 0;
             }
             if (o1 instanceof sortableSize && o2 instanceof sortableSize) {
                sortableSize s1 = (sortableSize)o1;
                sortableSize s2 = (sortableSize)o2;
-               if ( s1.sortable > s2.sortable ) {
-                  return 1;
-               } else if (s1.sortable < s2.sortable) {
-                  return -1;
-               } else {
-                  return 0;
-               }                  
+               if (s1.sortable > s2.sortable) return 1;
+               if (s1.sortable < s2.sortable) return -1;
+               return 0;
+            }
+            if (o1 instanceof sortableShow && o2 instanceof sortableShow) {
+               // Sort 1st by titleOnly, then by date
+               sortableShow s1 = (sortableShow)o1;
+               sortableShow s2 = (sortableShow)o2;
+               int result = s1.titleOnly.compareToIgnoreCase(s2.titleOnly);
+               if (result != 0) return result;
+               if (s1.gmt > s2.gmt) return 1;
+               if (s1.gmt < s2.gmt) return -1;
+               return 0;
             }
             return 0;
          }
       };
       
-      // Use custom sorting routine for columns 1 & 3
+      // Use custom sorting routine for columns 1, 3 & 4
       Sorter sorter = NowPlaying.getColumnExt(1).getSorter();
       sorter.setComparator(sortableComparator);
       sorter = NowPlaying.getColumnExt(3).getSorter();
+      sorter.setComparator(sortableComparator);
+      sorter = NowPlaying.getColumnExt(4).getSorter();
       sorter.setComparator(sortableComparator);
       
       
@@ -132,6 +136,9 @@ public class nplTable {
          }
          if (col == 3) {
             return sortableSize.class;
+         }
+         if (col == 4) {
+            return sortableShow.class;
          }
          return Object.class;
       } 
@@ -317,7 +324,7 @@ public class nplTable {
       }
       data[2] = channel;
       data[3] = new sortableSize(entry);
-      data[4] = entry.get("title");
+      data[4] = new sortableShow(entry);
       AddRow(NowPlaying, data);
       
       // Adjust column widths to data
