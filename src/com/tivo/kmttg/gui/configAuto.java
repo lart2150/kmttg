@@ -176,8 +176,8 @@ public class configAuto {
       metadata = new JCheckBox("metadata");
       decrypt  = new JCheckBox("decrypt");
       qsfix    = new JCheckBox("VRD QS fix");
-      comskip  = new JCheckBox("comskip");
-      comcut   = new JCheckBox("comcut");
+      comskip  = new JCheckBox("Ad Detect");
+      comcut   = new JCheckBox("Ad Cut");
       captions = new JCheckBox("captions");
       encode   = new JCheckBox("encode");
       custom   = new JCheckBox("custom");
