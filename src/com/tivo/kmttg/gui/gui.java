@@ -238,12 +238,12 @@ public class gui {
          c.gridy = gy;
          jContentPane.add(qsfix, c);
          
-         comskip = new JCheckBox("comskip", false);
+         comskip = new JCheckBox("Ad Detect", false);
          c.gridx = gx++;
          c.gridy = gy;
          jContentPane.add(comskip, c);
          
-         comcut = new JCheckBox("comcut", false);
+         comcut = new JCheckBox("Ad Cut", false);
          c.gridx = gx++;
          c.gridy = gy;
          jContentPane.add(comcut, c);
@@ -1271,6 +1271,10 @@ public class gui {
       else
          toolTips.setEnabled(false);
    }
+   
+   public void setToolTipsTimeout(int timeout) {
+      toolTips.setDismissDelay(timeout*1000);
+   }
      
    public String getToolTip(String component) {
       String text = "";
@@ -1312,8 +1316,8 @@ public class gui {
          text += "Highly recommended step if you have VideoRedo installed.";
       }
       else if (component.equals("comskip")) {
-         text =  "<b>comskip</b><br>";
-         text += "Automated commercials detection tool.<br>";
+         text =  "<b>Ad Detect</b><br>";
+         text += "Automated commercials detection tool (defaults to <b>comskip</b> tool).<br>";
          text += "NOTE: Typically automated commercial detection is NOT very accurate.<br>";
          text += "NOTE: If you have <b>VideoRedo</b> enabled you can choose to use.<br>";
          text += "VideoRedo <b>AdScan</b> instead of comskip if you wish.<br>";
@@ -1322,8 +1326,8 @@ public class gui {
          text += "commercial editing. See documentation for more details.";
       }
       else if (component.equals("comcut")) {
-         text =  "<b>comcut</b><br>";
-         text += "Automatically cut out commercials detected in <b>comskip</b> step.<br>";
+         text =  "<b>Ad Cut</b><br>";
+         text += "Automatically cut out commercials detected in <b>Ad Detect</b> step.<br>";
          text += "NOTE: By default uses <b>mencoder</b> program to make the cuts which can.<br>";
          text += "cause audio/video sync problems in the resulting files.<br>";
          text += "If you have <b>VideoRedo</b> enabled then this step uses VideoRedo for making<br>";
