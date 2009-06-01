@@ -265,7 +265,11 @@ public class metadataTivo {
             map.put("R", "R4");
             map.put("X", "X5");
             map.put("NC_17", "N6");
-            data.put("mpaaRating", map.get(data.get("mpaaRating")));
+            String mpaaRating = map.get(data.get("mpaaRating"));
+            if (mpaaRating == null)
+               data.put("mpaaRating", data.get("mpaaRating"));
+            else
+               data.put("mpaaRating", mpaaRating);            
          }
                   
          // Now write all data to metaFile in pyTivo format
