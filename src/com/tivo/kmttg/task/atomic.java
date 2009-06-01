@@ -192,6 +192,13 @@ public class atomic {
          if (h.containsKey("episodeNumber") ) {
             args.add("--TVEpisodeNum");
             args.add(h.get("episodeNumber"));
+            String season = h.get("episodeNumber");
+            if (season.length() == 3)
+               season = season.substring(0, 1);
+            else if (season.length() == 4)
+               season = season.substring(0, 2);
+            args.add("--TVSeason");
+            args.add(season);
          }
          if (h.containsKey("callsign") ) {
             args.add("--TVNetwork");
