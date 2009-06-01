@@ -280,9 +280,7 @@ public class metadata {
             map.put("NC_17", "N6");
             map.put("NR", "N8");
             String mpaaRating = map.get(data.get("mpaaRating"));
-            if (mpaaRating == null)
-               data.put("mpaaRating", data.get("mpaaRating"));
-            else
+            if (mpaaRating != null)
                data.put("mpaaRating", mpaaRating);            
          }
          
