@@ -1068,6 +1068,15 @@ public class gui {
       }      
    }
    
+   // Set this choice in tivos combobox (if valid)
+   public void SetTivo(String tivoName) {
+      for (int i=0; i<tivos.getItemCount(); ++i) {
+         if (tivos.getItemAt(i).equals(tivoName)) {
+            tivos.setSelectedItem(tivoName);
+         }
+      }
+   }
+   
    // Add a tivo to tivos combobox
    public void AddTivo(String name, String ip) {
       tivos.addItem(name);
@@ -1126,6 +1135,7 @@ public class gui {
             ofp.write("<toolTipsTimeout>\n" + config.toolTipsTimeout + "\n");
             ofp.write("<width>\n"           + d.width                + "\n");
             ofp.write("<height>\n"          + d.height               + "\n");
+            ofp.write("<tivo>\n"            + config.tivoName        + "\n");
             ofp.close();
          }         
          catch (IOException ex) {
@@ -1232,6 +1242,9 @@ public class gui {
                } catch (NumberFormatException e) {
                   height = -1;
                }
+            }
+            if (key.equals("tivo")) {
+               SetTivo(line);
             }
          }
          ifp.close();
