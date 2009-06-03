@@ -81,6 +81,12 @@ public class comcut {
       command.add("copy");
       command.add("-of");
       command.add("mpeg");
+      command.add("-mpegopts");
+      command.add("format=dvd:tsaf");
+      command.add("-mc");
+      command.add("0");
+      command.add("-vf");
+      command.add("harddup");
       command.add("-o");
       command.add(job.mpegFile_cut);
       process = new backgroundProcess();
