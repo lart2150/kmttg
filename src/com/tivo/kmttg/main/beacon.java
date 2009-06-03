@@ -60,6 +60,8 @@ public class beacon {
                value = l[i].replaceFirst("^(.+)=(.+)$", "$2");
                h.put(name,value);
             }
+            // Filter out pyTivo broadcasts (for tivos: platform = tcd/...)
+            if (h.containsKey("platform") && ! h.get("platform").matches("^tcd.+$") ) return null;
             if (h.containsKey("machine")) return h;
          }
       }
