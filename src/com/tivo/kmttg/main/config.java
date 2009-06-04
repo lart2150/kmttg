@@ -25,6 +25,7 @@ public class config {
    public static Hashtable<String,Hashtable<String,String>> ENCODE
       = new Hashtable<String,Hashtable<String,String>>();
    public static Stack<String> ENCODE_NAMES = new Stack<String>();
+   public static int cpu_cores = 1;
    
    // 3rd party executable files
    public static String curl = "";
