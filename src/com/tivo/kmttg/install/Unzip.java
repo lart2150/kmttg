@@ -38,13 +38,15 @@ public static Boolean unzip(String dir, String file) {
            zipFile.getInputStream(entry),
            new BufferedOutputStream(new FileOutputStream(fullName))
         );
-        
-        // Set all files as executable
-        if ( ! config.OS.equals("windows") )
-           Runtime.getRuntime().exec("chmod 775 " + fullName);
+      }
+      zipFile.close();      
+            
+      // Set all files as executable
+      if ( ! config.OS.equals("windows") ) {
+         String[] command = new String[] {"chmod", "-R", "ugo+x", dir};
+         Runtime.getRuntime().exec(command);
       }
 
-      zipFile.close();      
       return true;
       
     } catch (IOException ioe) {
