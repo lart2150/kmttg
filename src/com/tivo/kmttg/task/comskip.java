@@ -120,8 +120,10 @@ public class comskip {
             
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
                // If 1st job then update title & progress bar
-               String title = String.format("comskip: %s %s", t, config.kmttg);
+               int pct = comskipGetPct();
+               String title = String.format("comskip: %d%% %s", pct, config.kmttg);
                config.gui.setTitle(title);
+               config.gui.progressBar_setValue(pct);
             }
          }
         return true;
@@ -129,6 +131,7 @@ public class comskip {
          // Job finished         
          if ( jobMonitor.isFirstJobInMonitor(job) ) {
             config.gui.setTitle(config.kmttg);
+            config.gui.progressBar_setValue(0);
          }
          jobMonitor.removeFromJobList(job);
          
@@ -161,6 +164,22 @@ public class comskip {
          }
       }
       return false;
+   }
+   
+   // Obtain pct complete from comskip stderr
+   private int comskipGetPct() {
+      String last = process.getStderrLast();
+      if (last.matches("^.+%$")) {
+         String[] all = last.split("\\s+");
+         String pct_str = all[all.length-1].replaceFirst("%", "");
+         try {
+            return (int)Float.parseFloat(pct_str);
+         }
+         catch (NumberFormatException n) {
+            return 0;
+         }
+      }
+      return 0;
    }
 
 }
