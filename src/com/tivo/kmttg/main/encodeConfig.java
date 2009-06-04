@@ -209,6 +209,7 @@ public class encodeConfig {
             arg = arg.replaceAll("PWD", escapeBackSlashes(System.getProperty("user.dir") + File.separator));
             arg = arg.replaceAll("INPUT", escapeBackSlashes(inputFile));
             arg = arg.replaceAll("OUTPUT", escapeBackSlashes(outputFile));
+            arg = arg.replaceAll("CPU_CORES", ("" + config.cpu_cores));
             args.add(arg);
          }
       }
