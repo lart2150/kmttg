@@ -22,8 +22,6 @@ public class auto {
    public static void startBatchMode() {
       debug.print("");
       
-      log.print("\nSTARTING BATCH MODE");
-      
       // Auto download batch mode
       Stack<String> errors = config.parse();
       if(errors.size() > 0) {
@@ -31,6 +29,7 @@ public class auto {
          exitAuto(1);
       }
       
+      log.print("\nSTARTING AUTO TRANSFERS");      
       // Enter master check Tivos loop
       Boolean GO = true;
       while (GO) {         
