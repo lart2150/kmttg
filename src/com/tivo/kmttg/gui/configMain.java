@@ -74,6 +74,7 @@ public class configMain {
    private static JTextField disk_space = null;
    private static JTextField customCommand = null;
    private static JTextField toolTipsTimeout = null;
+   private static JTextField cpu_cores = null;
    private static JComboBox keywords = null;
    private static JComboBox customFiles = null;
    private static JFileChooser Browser = null;
@@ -345,6 +346,9 @@ public class configMain {
       
       // toolTipsTimeout
       toolTipsTimeout.setText("" + config.toolTipsTimeout);
+      
+      // cpu_cores
+      cpu_cores.setText("" + config.cpu_cores);
    }
    
    // Update config settings with widget values
@@ -711,6 +715,22 @@ public class configMain {
          config.cache_time = 10;
       }
       
+      // cpu_cores
+      value = string.removeLeadingTrailingSpaces(cpu_cores.getText());
+      if (value.length() > 0) {
+         try {
+            config.cpu_cores = Integer.parseInt(value);
+         } catch(NumberFormatException e) {
+            textFieldError(cpu_cores, "Illegal setting for cpu cores: '" + value + "'");
+            log.error("Setting to 1");
+            config.cpu_cores = 1;
+            cpu_cores.setText("" + config.cpu_cores);
+            errors++;
+         }
+      } else {
+         config.cpu_cores = 1;
+      }
+      
       // toolTipsTimeout
       value = string.removeLeadingTrailingSpaces(toolTipsTimeout.getText());
       if (value.length() > 0) {
@@ -769,6 +789,7 @@ public class configMain {
       JLabel AtomicParsley_label = new javax.swing.JLabel();
       JLabel customCommand_label = new javax.swing.JLabel();
       JLabel customFiles_label = new javax.swing.JLabel();
+      JLabel cpu_cores_label = new javax.swing.JLabel();
       encode_output_dir = new javax.swing.JTextField();
       textbg_default = encode_output_dir.getBackground();
       mpeg_cut_dir = new javax.swing.JTextField();
@@ -801,6 +822,7 @@ public class configMain {
       toolTips = new javax.swing.JCheckBox();
       JLabel toolTipsTimeout_label = new javax.swing.JLabel();
       toolTipsTimeout = new javax.swing.JTextField();
+      cpu_cores = new javax.swing.JTextField();
       OK = new javax.swing.JButton();
       CANCEL = new javax.swing.JButton();
       Browser = new JFileChooser(config.programDir);
@@ -852,6 +874,7 @@ public class configMain {
       customCommand_label.setText("custom command");
       check_space.setText("Check Available Disk Space");      
       available_keywords_label.setText("Available keywords:"); 
+      cpu_cores_label.setText("encoding cpu cores");
 
       keywords.setModel(new javax.swing.DefaultComboBoxModel(
          new String[] { "[title]", "[mainTitle]", "[episodeTitle]", "[channelNum]",
@@ -1620,6 +1643,22 @@ public class configMain {
       c.gridwidth = 3;
       content.add(customFiles, c);
       
+      // cpu_cores
+      gy++;
+      c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      content.add(cpu_cores_label, c);
+      
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
+      c.gridx = 1;
+      c.gridy = gy;
+      c.gridwidth = 3;
+      content.add(cpu_cores, c);
+      
       // toolTips
       gy++;
       c.fill = GridBagConstraints.HORIZONTAL;
@@ -1702,6 +1741,7 @@ public class configMain {
       CANCEL.setToolTipText(getToolTip("CANCEL")); 
       toolTips.setToolTipText(getToolTip("toolTips")); 
       toolTipsTimeout.setToolTipText(getToolTip("toolTipsTimeout")); 
+      cpu_cores.setToolTipText(getToolTip("cpu_cores"));
    }
    
    public static String getToolTip(String component) {
@@ -1963,6 +2003,13 @@ public class configMain {
       else if (component.equals("toolTipsTimeout")) {
          text =  "<b>toolTip timeout (secs)</b><br>";
          text += "Time in seconds to timeout display of a toolTip message.<br>";
+      }
+      else if (component.equals("cpu_cores")) {
+         text =  "<b>encoding cpu cores</b><br>";
+         text += "If you have a multi-core machine you can set how many cores you would like to use<br>";
+         text += "for the encoding task. NOTE: Consider this setting and <b>active job limit</b> when<br>";
+         text += "deciding what number to use here. If you set number too high it may slow down the machine<br>";
+         text += "for other tasks running in parallel.<br>";
       }
       
       if (text.length() > 0) {
