@@ -449,6 +449,46 @@ public class jobMonitor {
          srtFile = string.replaceSuffix(videoFile, ".srt");
          if (encode)  srtFile = string.replaceSuffix(encodeFile, ".srt");
       }
+      
+      // Check task dependencies and enable prior tasks if necessary
+      
+      // encode requires mpegFile or mpegFile_cut which may require at minimum decrypt
+      if (encode) {
+         if ( ! decrypt ) {
+            if ( ! file.isFile(mpegFile) && ! file.isFile(mpegFile_cut) ) {
+               decrypt = true;
+            }
+         }
+      }
+      
+      // comcut requires an edlFile or vprjFile which may require comskip
+      if (comcut) {
+         if ( ! comskip ) {
+            if (file.isDir(config.VRD)) {
+               if ( ! file.isFile(string.replaceSuffix(edlFile, ".VPrj")) ) {
+                  comskip = true;
+               }
+            } else {
+               if ( ! file.isFile(edlFile) ) {
+                  comskip = true;
+               }
+            }
+         }
+      }
+      
+      // comskip requires an mpeg file which may require decrypt
+      if (comskip) {
+         if ( ! decrypt && ! file.isFile(mpegFile)) {
+            decrypt = true;
+         }
+      }
+      
+      // qsfix requires an mpeg file which may require decrypt
+      if (qsfix) {
+         if ( ! decrypt && ! file.isFile(mpegFile)) {
+            decrypt = true;
+         }
+      }
                            
       // Launch jobs depending on selections
       float familyId = FAMILY_ID++;
@@ -546,6 +586,8 @@ public class jobMonitor {
             job.familyId     = familyId;
             job.mpegFile     = mpegFile;
             job.edlFile      = edlFile;
+            if (file.isDir(config.VRD))
+               job.vprjFile = string.replaceSuffix(edlFile, ".VPrj");
             submitNewJob(job);            
          }
       }
