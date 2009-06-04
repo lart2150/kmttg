@@ -15,11 +15,18 @@ import com.tivo.kmttg.util.string;
 public class comskip {
    private backgroundProcess process;
    private jobData job;
+   private String outputFile = null;
+   private String options = null;
 
    // constructor
    public comskip(jobData job) {
       debug.print("job=" + job);
       this.job = job;
+      outputFile = job.edlFile;
+      if (job.vprjFile != null) {
+         outputFile = job.vprjFile;
+         options = "--videoredo";
+      }
    }
    
    public backgroundProcess getProcess() {
@@ -29,9 +36,9 @@ public class comskip {
    public Boolean launchJob() {
       debug.print("");
       Boolean schedule = true;
-      // Don't comskip if edlFile already exists
-      if ( file.isFile(job.edlFile) ) {
-         log.warn("SKIPPING COMSKIP, FILE ALREADY EXISTS: " + job.edlFile);
+      // Don't comskip if outputFile already exists
+      if ( file.isFile(outputFile) ) {
+         log.warn("SKIPPING COMSKIP, FILE ALREADY EXISTS: " + outputFile);
          schedule = false;
       }
       
@@ -52,7 +59,7 @@ public class comskip {
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.edlFile) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(outputFile) ) schedule = false;
       }
       
       if (schedule) {
@@ -74,6 +81,8 @@ public class comskip {
       command.add(config.comskip);
       command.add("--ini");
       command.add(config.comskipIni);
+      if (options != null)
+         command.add(options);
       command.add(job.mpegFile);
       process = new backgroundProcess();
       log.print(">> Running comskip on " + job.mpegFile + " ...");
@@ -125,8 +134,8 @@ public class comskip {
          
          // Check for problems
          int failed = 0;
-         // No or empty srtFile means problems
-         if ( ! file.isFile(job.edlFile) || file.isEmpty(job.edlFile) ) {
+         // No or empty outputFile means problems
+         if ( ! file.isFile(outputFile) || file.isEmpty(outputFile) ) {
             failed = 1;
          }
          
