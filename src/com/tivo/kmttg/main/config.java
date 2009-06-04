@@ -561,6 +561,9 @@ public class config {
             if (key.equals("CheckBeacon")) {
                CheckBeacon = Integer.parseInt(line);
             }
+            if (key.equals("cpu_cores")) {
+               cpu_cores = Integer.parseInt(line);
+            }
          }
          ini.close();
 
@@ -657,6 +660,8 @@ public class config {
          ofp.write("<LowSpaceSize>\n" + LowSpaceSize + "\n\n");
          
          ofp.write("<CheckBeacon>\n" + CheckBeacon + "\n\n");
+         
+         ofp.write("<cpu_cores>\n" + cpu_cores + "\n\n");
          
          ofp.close();
          
