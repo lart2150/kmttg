@@ -182,6 +182,8 @@ public class jobData {
       }
       else if (type.equals("comskip")) {
          file = edlFile;
+         if (vprjFile != null)
+            file = vprjFile;
       }
       else if (type.equals("adscan")) {
          file = vprjFile;
