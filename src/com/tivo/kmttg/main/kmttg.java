@@ -24,6 +24,9 @@ public class kmttg {
       Runtime.getRuntime().addShutdownHook(new Thread() {
           // This method is called during shutdown
           public void run() {
+             // Shutdown message if in non-GUI mode
+             if ( ! config.GUI ) log.warn("SHUTTING DOWN");
+             
              // Save GUI settings if in GUI mode
              if (config.GUI) {
                 config.gui.saveSettings();
