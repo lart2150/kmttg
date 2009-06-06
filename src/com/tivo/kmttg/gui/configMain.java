@@ -21,6 +21,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
 import com.tivo.kmttg.main.config;
@@ -753,16 +754,44 @@ public class configMain {
 
    private static void create(JFrame frame) {
       debug.print("frame=" + frame);
+      encode_output_dir = new javax.swing.JTextField(30);
+      textbg_default = encode_output_dir.getBackground();
+      mpeg_cut_dir = new javax.swing.JTextField(30);
+      mpeg_output_dir = new javax.swing.JTextField(30);
+      mpeg_cut_dir = new javax.swing.JTextField(30);
+      tivo_output_dir = new javax.swing.JTextField(30);
+      file_naming = new javax.swing.JTextField(30);
+      files_path = new javax.swing.JTextField(30);
+      tivodecode = new javax.swing.JTextField(30);
+      curl = new javax.swing.JTextField(30);
+      ffmpeg = new javax.swing.JTextField(30);
+      mencoder = new javax.swing.JTextField(30);
+      handbrake = new javax.swing.JTextField(30);
+      comskip = new javax.swing.JTextField(30);
+      comskip_ini = new javax.swing.JTextField(30);
+      VRD_path = new javax.swing.JTextField(30);
+      t2extract = new javax.swing.JTextField(30);
+      AtomicParsley = new javax.swing.JTextField(30);
+      customCommand = new javax.swing.JTextField(30);
+      
+      tivo_name = new javax.swing.JTextField(20);
+      tivo_ip = new javax.swing.JTextField(20);
+      
+      MAK = new javax.swing.JTextField(15);
+      wan_http_port = new javax.swing.JTextField(15);
+      NPL_cache_mins = new javax.swing.JTextField(15);
+      active_job_limit = new javax.swing.JTextField(15);
+      disk_space = new javax.swing.JTextField(15);
+      toolTipsTimeout = new javax.swing.JTextField(15);
+      cpu_cores = new javax.swing.JTextField(15);
+      
       JLabel tivos_label = new javax.swing.JLabel();
       tivos = new javax.swing.JComboBox();
       add = new javax.swing.JButton();
       del = new javax.swing.JButton();
       JLabel tivo_name_label = new javax.swing.JLabel();
-      tivo_name = new javax.swing.JTextField();
       JLabel tivo_ip_label = new javax.swing.JLabel();
-      tivo_ip = new javax.swing.JTextField();
       JLabel files_path_label = new javax.swing.JLabel();
-      files_path = new javax.swing.JTextField();
       remove_tivo = new javax.swing.JCheckBox();
       remove_comcut = new javax.swing.JCheckBox();
       remove_mpeg = new javax.swing.JCheckBox();
@@ -790,39 +819,14 @@ public class configMain {
       JLabel customCommand_label = new javax.swing.JLabel();
       JLabel customFiles_label = new javax.swing.JLabel();
       JLabel cpu_cores_label = new javax.swing.JLabel();
-      encode_output_dir = new javax.swing.JTextField();
-      textbg_default = encode_output_dir.getBackground();
-      mpeg_cut_dir = new javax.swing.JTextField();
-      mpeg_output_dir = new javax.swing.JTextField();
-      mpeg_cut_dir = new javax.swing.JTextField();
-      tivo_output_dir = new javax.swing.JTextField();
-      file_naming = new javax.swing.JTextField();
-      MAK = new javax.swing.JTextField();
       JLabel available_keywords_label = new javax.swing.JLabel();
       keywords = new javax.swing.JComboBox();
       customFiles = new javax.swing.JComboBox();
-      tivodecode = new javax.swing.JTextField();
-      curl = new javax.swing.JTextField();
-      ffmpeg = new javax.swing.JTextField();
-      mencoder = new javax.swing.JTextField();
-      handbrake = new javax.swing.JTextField();
-      comskip = new javax.swing.JTextField();
-      comskip_ini = new javax.swing.JTextField();
-      wan_http_port = new javax.swing.JTextField();
-      NPL_cache_mins = new javax.swing.JTextField();
-      active_job_limit = new javax.swing.JTextField();
-      VRD_path = new javax.swing.JTextField();
-      t2extract = new javax.swing.JTextField();
-      AtomicParsley = new javax.swing.JTextField();
-      customCommand = new javax.swing.JTextField();
       check_space = new javax.swing.JCheckBox();
       JLabel disk_space_label = new javax.swing.JLabel();
-      disk_space = new javax.swing.JTextField();
       beacon = new javax.swing.JCheckBox();
       toolTips = new javax.swing.JCheckBox();
       JLabel toolTipsTimeout_label = new javax.swing.JLabel();
-      toolTipsTimeout = new javax.swing.JTextField();
-      cpu_cores = new javax.swing.JTextField();
       OK = new javax.swing.JButton();
       CANCEL = new javax.swing.JButton();
       Browser = new JFileChooser(config.programDir);
@@ -1148,8 +1152,7 @@ public class configMain {
          }
       );
 
-      // Start of layout managaement
-      JPanel content = new JPanel(new GridBagLayout());
+      // Start of layout management
       GridBagConstraints c = new GridBagConstraints();
       int gy = 0;
       c.insets = new Insets(0, 2, 0, 2);
@@ -1161,542 +1164,415 @@ public class configMain {
       c.gridwidth = 1;
       c.gridheight = 1;
       c.anchor = GridBagConstraints.CENTER;
-      c.fill = GridBagConstraints.NONE;
-      
-      // Tivo combobox
-      content.add(tivos_label, c);
-
       c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
+
+      // Tivos Panel
+      JPanel tivo_panel = new JPanel(new GridBagLayout());      
+      // Look for Tivos on network
+      gy = 0;
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(tivos, c);
+      tivo_panel.add(beacon, c);
       
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
+      // Tivo combobox
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      tivo_panel.add(tivos_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      tivo_panel.add(tivos, c);
+
+      // DEL button
       c.gridx = 4;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(del, c);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
-      c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(beacon, c);
+      tivo_panel.add(del, c);
       
       // Tivo name
       gy++;
-      c.weighty = 0.0;  // default to no vertical stretch
-      c.weightx = 0.0;  // default to no horizontal stretch
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      c.gridheight = 1;
-      c.fill = GridBagConstraints.NONE;
-      content.add(tivo_name_label,c);
+      tivo_panel.add(tivo_name_label,c);
 
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(tivo_name, c);
+      tivo_panel.add(tivo_name, c);
       
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
+      // ADD button
       c.gridx = 4;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(add, c);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
-      c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(create_subfolder, c);
+      tivo_panel.add(add, c);
       
       // Tivo ip
       gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(tivo_ip_label, c);
+      tivo_panel.add(tivo_ip_label, c);
 
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(tivo_ip, c);
+      tivo_panel.add(tivo_ip, c);
       
-      // UseAdscan
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
-      c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(UseAdscan, c);      
+      // Files panel
+      JPanel files_panel = new JPanel(new GridBagLayout());      
       
       // Remove .TiVo after file decrypt
-      gy++;
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 1;
+      gy=0;
+      c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(remove_tivo, c);
+      files_panel.add(remove_tivo, c);
       
       // Remove .edl & .mpg files after comcut
-      c.gridx = 5;
+      c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(remove_comcut, c);
+      files_panel.add(remove_comcut, c);
       
       // Remove .mpg file after encode
       gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      files_panel.add(remove_mpeg, c);
+      
+      // create_subfolder
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(remove_mpeg, c);
+      files_panel.add(create_subfolder, c);
       
       // Check Available Disk Space
-      c.gridx = 5;
+      gy++;
+      c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(check_space, c);
+      files_panel.add(check_space, c);
+      
+      // Min req space
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      files_panel.add(disk_space_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      files_panel.add(disk_space, c);
       
       // File naming
       gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridheight = 1;
-      c.gridwidth = 1;
-      content.add(file_naming_label, c);
+      files_panel.add(file_naming_label, c);
       
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(file_naming, c);
+      files_panel.add(file_naming, c);
       
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 4;
+      gy++;
+      c.gridx = 0;
       c.gridy = gy;
-      c.gridheight = 1;
-      c.gridwidth = 1;
-      content.add(available_keywords_label, c);
+      files_panel.add(available_keywords_label, c);
       
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
+      c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(keywords, c);
+      files_panel.add(keywords, c);
       
       // FILES Default Path
       gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(files_path_label, c);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
+      files_panel.add(files_path_label, c);
+      
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(files_path, c);
-      
-      // Min req space
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 4;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(disk_space_label, c);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
-      c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(disk_space, c);
-      
-      // MAK
-      gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 0;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(MAK_label, c);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 1;
-      c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(MAK, c);
-      
-      // mencoder
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 4;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(mencoder_label, c);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
-      c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(mencoder, c);
+      files_panel.add(files_path, c);
       
       // .TiVo Output Dir
       gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(tivo_output_dir_label, c);
+      files_panel.add(tivo_output_dir_label, c);
 
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(tivo_output_dir, c);
-      
-      // handbrake
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 4;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(handbrake_label, c);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
-      c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(handbrake, c);
+      files_panel.add(tivo_output_dir, c);
       
       // .mpg Output Dir
       gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(mpeg_output_dir_label, c);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
+      files_panel.add(mpeg_output_dir_label, c);
+      
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(mpeg_output_dir, c);
-      
-      // comskip
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 4;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(comskip_label, c);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
-      c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(comskip, c);
+      files_panel.add(mpeg_output_dir, c);
       
       // .mpg Cut Dir
       gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(mpeg_cut_dir_label, c);
+      files_panel.add(mpeg_cut_dir_label, c);
 
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(mpeg_cut_dir, c);
-      
-      // comskip.ini
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 4;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(comskip_ini_label, c);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
-      c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(comskip_ini, c);
+      files_panel.add(mpeg_cut_dir, c);
       
       // Encode output dir
       gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(encode_output_dir_label, c);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
+      files_panel.add(encode_output_dir_label, c);
+      
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(encode_output_dir, c);
-      
-      // VRD path
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 4;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(VRD_path_label, c);
+      files_panel.add(encode_output_dir, c);
 
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
+      // Programs Panel
+      JPanel programs_panel = new JPanel(new GridBagLayout());      
+      
+      // mencoder
+      gy = 0;
+      c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(VRD_path, c);
+      programs_panel.add(mencoder_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      programs_panel.add(mencoder, c);
+      
+      // handbrake
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      programs_panel.add(handbrake_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      programs_panel.add(handbrake, c);
+      
+      // comskip
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      programs_panel.add(comskip_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      programs_panel.add(comskip, c);
+      
+      // comskip.ini
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      programs_panel.add(comskip_ini_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      programs_panel.add(comskip_ini, c);
       
       // tivodecode
       gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(tivodecode_label, c);
+      programs_panel.add(tivodecode_label, c);
 
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(tivodecode, c);
+      programs_panel.add(tivodecode, c);
       
       // t2extract
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 4;
+      gy++;
+      c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(t2extract_label, c);
+      programs_panel.add(t2extract_label, c);
 
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
+      c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(t2extract, c);
+      programs_panel.add(t2extract, c);
       
       // curl
       gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(curl_label, c);
+      programs_panel.add(curl_label, c);
 
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(curl, c);
+      programs_panel.add(curl, c);
       
       // AtomicParsley
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 4;
+      gy++;
+      c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(AtomicParsley_label, c);
+      programs_panel.add(AtomicParsley_label, c);
 
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
+      c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(AtomicParsley, c);
+      programs_panel.add(AtomicParsley, c);
       
       // ffmpeg
       gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(ffmpeg_label, c);
+      programs_panel.add(ffmpeg_label, c);
 
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(ffmpeg, c);
+      programs_panel.add(ffmpeg, c);
       
-      // active job limit
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 4;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(active_job_limit_label, c);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
-      c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(active_job_limit, c);
-      
-      // wan http port
+      // VRD path
       gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(wan_http_port_label, c);
+      programs_panel.add(VRD_path_label, c);
 
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(wan_http_port, c);
+      programs_panel.add(VRD_path, c);
+      
+      // custom command
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      programs_panel.add(customCommand_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      programs_panel.add(customCommand, c);
+      
+      // customFiles
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      programs_panel.add(customFiles_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      programs_panel.add(customFiles, c);
+
+      // UseAdscan
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      programs_panel.add(UseAdscan, c);      
+      
+      // Other panel
+      JPanel other = new JPanel(new GridBagLayout());
+      
+      // MAK
+      gy=0;
+      c.gridx = 0;
+      c.gridy = gy;
+      other.add(MAK_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      other.add(MAK, c);
       
       // NPL cache mins
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 4;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(NPL_cache_mins_label, c);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
-      c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(NPL_cache_mins, c);
-                                   
-      // custom row
       gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(customCommand_label, c);
-      
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
+      other.add(NPL_cache_mins_label, c);
+
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(customCommand, c);
+      other.add(NPL_cache_mins, c);
       
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 4;
+      // active job limit
+      gy++;
+      c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(customFiles_label, c);
-      
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
+      other.add(active_job_limit_label, c);
+
+      c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(customFiles, c);
+      other.add(active_job_limit, c);
       
       // cpu_cores
       gy++;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(cpu_cores_label, c);
+      other.add(cpu_cores_label, c);
       
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(cpu_cores, c);
+      other.add(cpu_cores, c);
+      
+      // wan http port
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      other.add(wan_http_port_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      other.add(wan_http_port, c);
+
+      // toolTipsTimeout
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      other.add(toolTipsTimeout_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      other.add(toolTipsTimeout, c);
       
       // toolTips
       gy++;
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 1;
+      c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(toolTips, c);
+      other.add(toolTips, c);
       
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      c.gridx = 4;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      content.add(toolTipsTimeout_label, c);
-      
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      c.gridx = 5;
-      c.gridy = gy;
-      c.gridwidth = 3;
-      content.add(toolTipsTimeout, c);
-      
-      // OK and CANCEL buttons
-      gy++;
+      // Common panel
+      c.ipady = 0;
+      c.weighty = 0.0;  // default to no vertical stretch
+      c.weightx = 1.0;  // default to horizontal stretch
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
-      content.add(OK, c);
-      
-      c.gridx = 4;
+      c.gridheight = 1;
+      c.anchor = GridBagConstraints.WEST;
+      c.fill = GridBagConstraints.HORIZONTAL;
+
+      // Common panel
+      JPanel common_panel = new JPanel(new GridBagLayout());
+      // OK and CANCEL buttons
+      gy = 0;
+      c.gridx = 0;
       c.gridy = gy;
-      content.add(CANCEL, c);
+      c.gridwidth = 1;
+      c.gridheight = 1;
+      common_panel.add(OK, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      c.gridwidth = 1
+      ;
+      common_panel.add(CANCEL, c);
+      
+      // Tabbed panel
+      JTabbedPane tabbed_panel = new JTabbedPane();
+      tabbed_panel.add("Tivos", tivo_panel);
+      tabbed_panel.add("File Settings", files_panel);
+      tabbed_panel.add("Programs", programs_panel);
+      tabbed_panel.add("Other", other);
+      
+      // Main panel
+      JPanel main_panel = new JPanel(new GridBagLayout());
+      gy = 0;
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      c.gridheight = 1;
+      main_panel.add(tabbed_panel, c);
+      
+      c.gridx = 0;
+      c.gridy = gy+1;
+      main_panel.add(common_panel, c);      
       
       // create dialog window
       dialog = new JDialog(frame, false); // non-modal dialog
       dialog.setTitle("kmttg configuration");
-      dialog.setContentPane(content);
+      dialog.setContentPane(main_panel);
       dialog.setMinimumSize(new Dimension(700,200));
       dialog.pack();
   }
