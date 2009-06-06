@@ -1,9 +1,9 @@
 package com.tivo.kmttg.gui;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -589,7 +589,7 @@ public class configMain {
          value = "";
       } else {
          if ( ! file.isDir(value) ) {
-            textFieldError(VRD_path, "VRD path setting not a valid dir: '" + value + "'");
+            textFieldError(VRD_path, "VideoRedo path setting not a valid dir: '" + value + "'");
             errors++;
          }
       }
@@ -781,9 +781,10 @@ public class configMain {
       wan_http_port = new javax.swing.JTextField(15);
       NPL_cache_mins = new javax.swing.JTextField(15);
       active_job_limit = new javax.swing.JTextField(15);
-      disk_space = new javax.swing.JTextField(15);
       toolTipsTimeout = new javax.swing.JTextField(15);
       cpu_cores = new javax.swing.JTextField(15);
+      
+      disk_space = new javax.swing.JTextField(5);
       
       JLabel tivos_label = new javax.swing.JLabel();
       tivos = new javax.swing.JComboBox();
@@ -855,7 +856,7 @@ public class configMain {
       remove_comcut.setText("Remove .edl & .mpg files after comcut"); 
       remove_mpeg.setText("Remove .mpg file after encode");
       create_subfolder.setText("Create sub-folder for each download");
-      UseAdscan.setText("Use VRD AdScan instead of comskip");
+      UseAdscan.setText("Use VideoRedo AdScan instead of comskip");
       MAK_label.setText("MAK"); 
       file_naming_label.setText("File Naming"); 
       tivo_output_dir_label.setText(".TiVo Output Dir"); 
@@ -872,7 +873,7 @@ public class configMain {
       wan_http_port_label.setText("wan http port"); 
       NPL_cache_mins_label.setText("NPL cache mins"); 
       active_job_limit_label.setText("active job limit"); 
-      VRD_path_label.setText("VRD path"); 
+      VRD_path_label.setText("VideoRedo path"); 
       t2extract_label.setText("t2extract"); 
       AtomicParsley_label.setText("AtomicParsley");
       customCommand_label.setText("custom command");
@@ -905,7 +906,7 @@ public class configMain {
          }
       });
 
-      disk_space_label.setText("Min req space (GB)"); 
+      disk_space_label.setText("Min requested space (GB)"); 
       beacon.setText("Look for Tivos on network");
       
       toolTips.setText("Display toolTips");
@@ -1245,15 +1246,14 @@ public class configMain {
       c.gridy = gy;
       files_panel.add(check_space, c);
       
-      // Min req space
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      files_panel.add(disk_space_label, c);
-      
+      // Min requested space      
+      JPanel p = new JPanel();
+      p.setLayout(new GridLayout(1, 2));
+      p.add(disk_space_label);
+      p.add(disk_space, c);
       c.gridx = 1;
       c.gridy = gy;
-      files_panel.add(disk_space, c);
+      files_panel.add(p, c);
       
       // File naming
       gy++;
@@ -1327,8 +1327,28 @@ public class configMain {
       // Programs Panel
       JPanel programs_panel = new JPanel(new GridBagLayout());      
       
+      // curl
+      gy=0;
+      c.gridx = 0;
+      c.gridy = gy;
+      programs_panel.add(curl_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      programs_panel.add(curl, c);
+      
+      // tivodecode
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      programs_panel.add(tivodecode_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      programs_panel.add(tivodecode, c);
+      
       // mencoder
-      gy = 0;
+      gy++;
       c.gridx = 0;
       c.gridy = gy;
       programs_panel.add(mencoder_label, c);
@@ -1336,6 +1356,16 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       programs_panel.add(mencoder, c);
+      
+      // ffmpeg
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      programs_panel.add(ffmpeg_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      programs_panel.add(ffmpeg, c);
       
       // handbrake
       gy++;
@@ -1367,16 +1397,6 @@ public class configMain {
       c.gridy = gy;
       programs_panel.add(comskip_ini, c);
       
-      // tivodecode
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      programs_panel.add(tivodecode_label, c);
-
-      c.gridx = 1;
-      c.gridy = gy;
-      programs_panel.add(tivodecode, c);
-      
       // t2extract
       gy++;
       c.gridx = 0;
@@ -1387,16 +1407,6 @@ public class configMain {
       c.gridy = gy;
       programs_panel.add(t2extract, c);
       
-      // curl
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      programs_panel.add(curl_label, c);
-
-      c.gridx = 1;
-      c.gridy = gy;
-      programs_panel.add(curl, c);
-      
       // AtomicParsley
       gy++;
       c.gridx = 0;
@@ -1406,16 +1416,6 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       programs_panel.add(AtomicParsley, c);
-      
-      // ffmpeg
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      programs_panel.add(ffmpeg_label, c);
-
-      c.gridx = 1;
-      c.gridy = gy;
-      programs_panel.add(ffmpeg, c);
       
       // VRD path
       gy++;
@@ -1539,14 +1539,10 @@ public class configMain {
       gy = 0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      c.gridheight = 1;
       common_panel.add(OK, c);
       
       c.gridx = 1;
       c.gridy = gy;
-      c.gridwidth = 1
-      ;
       common_panel.add(CANCEL, c);
       
       // Tabbed panel
@@ -1561,19 +1557,17 @@ public class configMain {
       gy = 0;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      c.gridheight = 1;
       main_panel.add(tabbed_panel, c);
       
+      gy++;
       c.gridx = 0;
-      c.gridy = gy+1;
+      c.gridy = gy;
       main_panel.add(common_panel, c);      
       
       // create dialog window
       dialog = new JDialog(frame, false); // non-modal dialog
       dialog.setTitle("kmttg configuration");
       dialog.setContentPane(main_panel);
-      dialog.setMinimumSize(new Dimension(700,200));
       dialog.pack();
   }
    
@@ -1663,7 +1657,7 @@ public class configMain {
       else if (component.equals("check_space")) {
          text =  "<b>Check Available Disk Space</b><br>";
          text += "If this option is enabled then kmttg will check that destination drive has more than<br>";
-         text += "the space available defined in <b>Min req space (GB)</b> field before running jobs.";
+         text += "the space available defined in <b>Min requested space (GB)</b> field before running jobs.";
       }
       else if (component.equals("beacon")) {
          text =  "<b>Look for Tivos on network</b><br>";
@@ -1678,7 +1672,7 @@ public class configMain {
          text += "will be the same as the file format you defined but without any file extension.";
       }
       else if (component.equals("UseAdscan")) {
-         text =  "<b>Use VRD AdScan instead of comskip</b><br>";
+         text =  "<b>Use VideoRedo AdScan instead of comskip</b><br>";
          text += "If you have VideoRedo and have configured kmttg with the installation path<br>";
          text += "to VideoRedo, when this option is enabled kmttg will use VideoRedo instead<br>";
          text += "of <b>comskip</b> for commercials detection.";
@@ -1792,7 +1786,7 @@ public class configMain {
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("VRD_path")) {
-         text =  "<b>VRD path</b><br>";
+         text =  "<b>VideoRedo path</b><br>";
          text += "For Windows systems only if you have VideoRedo program installed on this computer<br>";
          text += "then supply the full path to the VideoRedo installation directory on your computer.<br>";
          text += "This setting is <b>REQUIRED</b> to enable <b>VRD QS fix</b> task which runs VideoRedo<br>";
@@ -1838,7 +1832,7 @@ public class configMain {
          text += "NOTE: Be careful not to overwhelm your computer by setting this number too high.";
       }
       else if (component.equals("disk_space")) {
-         text =  "<b>Min req space (GB)</b><br>";
+         text =  "<b>Min requested space (GB)</b><br>";
          text += "If <b>Check Available Disk Space</b> option is enabled then this setting<br>";
          text += "defines the minimum required disk space (in GB) to be available in order for kmttg<br>";
          text += "to proceed with certain tasks. If you have less space available then kmttg<br>";
