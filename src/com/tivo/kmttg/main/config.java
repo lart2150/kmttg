@@ -72,16 +72,9 @@ public class config {
    
    // Hash to store tivo related information
    public static Hashtable<String,String> TIVOS = new Hashtable<String,String>();
-   
-   // NPL cache related
-   public static int cache_time = 10;
-   public static Hashtable<String,Stack<Hashtable<String,String>>> cache =
-      new Hashtable<String,Stack<Hashtable<String,String>>>();
-   public static Hashtable<String,Long> cache_times = new Hashtable<String,Long>();
- 
+    
    // GUI related
    public static Boolean GUI = false;       // true=>GUI, false=>batch/auto            
-   public static String tivoName = "FILES"; // Saves currently selected tivo name
    public static String encodeName = "";    // Saves currently selected encode name
    public static gui gui;                   // Access to any GUI functions through here
    public static String gui_settings = null; // File in which to save GUI settings on exit
@@ -233,19 +226,21 @@ public class config {
    }
    
    public static void setTivoNames(Hashtable<String,String> h) {
+      String path = TIVOS.get("FILES");
+      if (path == null) path = config.programDir;
+      TIVOS.clear();
+      TIVOS.put("FILES", path);
       if (h.size() > 0) {
-         String path = TIVOS.get("FILES");
-         if (path == null) path = config.programDir;
-         TIVOS.clear();
-         TIVOS.put("FILES", path);
          for (Enumeration<String> e=h.keys(); e.hasMoreElements();) {
             String name = e.nextElement();
-            if ( ! name.matches("FILES") )
+            if ( ! name.matches("FILES") ) {
                TIVOS.put(name, h.get(name));
+            }
          }
-         if (GUI) {
-            config.gui.SetTivos(config.TIVOS);
-         }
+      }
+      
+      if (GUI) {
+         config.gui.SetTivos(config.TIVOS);
       }
    }
 
@@ -537,9 +532,6 @@ public class config {
             if (key.equals("wan_http_port")) {
                wan_http_port = line;
             }
-            if (key.equals("cache_time")) {
-               cache_time = Integer.parseInt(line);
-            }
             if (key.equals("MaxJobs")) {
                MaxJobs = Integer.parseInt(line);
             }
@@ -642,8 +634,6 @@ public class config {
          ofp.write("<comskipIni>\n" + comskipIni + "\n\n");
          
          ofp.write("<wan_http_port>\n" + wan_http_port + "\n\n");
-         
-         ofp.write("<cache_time>\n" + cache_time + "\n\n");
          
          ofp.write("<MaxJobs>\n" + MaxJobs + "\n\n");
          
