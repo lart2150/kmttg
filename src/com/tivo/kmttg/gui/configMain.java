@@ -67,7 +67,6 @@ public class configMain {
    private static JTextField comskip = null;
    private static JTextField comskip_ini = null;
    private static JTextField wan_http_port = null;
-   private static JTextField NPL_cache_mins = null;
    private static JTextField active_job_limit = null;
    private static JTextField VRD_path = null;
    private static JTextField t2extract = null;
@@ -342,9 +341,6 @@ public class configMain {
       // wan http port
       wan_http_port.setText(config.wan_http_port);
       
-      // NPL cache mins
-      NPL_cache_mins.setText("" + config.cache_time);
-      
       // toolTipsTimeout
       toolTipsTimeout.setText("" + config.toolTipsTimeout);
       
@@ -360,8 +356,8 @@ public class configMain {
       
       // Tivos
       int count = tivos.getItemCount();
+      Hashtable<String,String> h = new Hashtable<String,String>();
       if (count > 0) {
-         Hashtable<String,String> h = new Hashtable<String,String>();
          for (int i=0; i<count; i++) {
             String s = tivos.getItemAt(i).toString();
             String[] l = s.split("=");
@@ -369,8 +365,8 @@ public class configMain {
                h.put(l[0], l[1]);
             }
          }
-         if (h.size() > 0) config.setTivoNames(h);
       }
+      config.setTivoNames(h);
       
       // Beacon
       if (beacon.isSelected())
@@ -703,19 +699,6 @@ public class configMain {
          config.wan_http_port = "";
       }
       
-      // NPL cache mins
-      value = string.removeLeadingTrailingSpaces(NPL_cache_mins.getText());
-      if (value.length() > 0) {
-         try {
-            config.cache_time = Integer.parseInt(value);
-         } catch(NumberFormatException e) {
-            textFieldError(NPL_cache_mins, "NPL cache mins should be a number: '" + value + "'");
-            errors++;
-         }
-      } else {
-         config.cache_time = 10;
-      }
-      
       // cpu_cores
       value = string.removeLeadingTrailingSpaces(cpu_cores.getText());
       if (value.length() > 0) {
@@ -779,7 +762,6 @@ public class configMain {
       
       MAK = new javax.swing.JTextField(15);
       wan_http_port = new javax.swing.JTextField(15);
-      NPL_cache_mins = new javax.swing.JTextField(15);
       active_job_limit = new javax.swing.JTextField(15);
       toolTipsTimeout = new javax.swing.JTextField(15);
       cpu_cores = new javax.swing.JTextField(15);
@@ -1465,17 +1447,7 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       other.add(MAK, c);
-      
-      // NPL cache mins
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      other.add(NPL_cache_mins_label, c);
-
-      c.gridx = 1;
-      c.gridy = gy;
-      other.add(NPL_cache_mins, c);
-      
+            
       // active job limit
       gy++;
       c.gridx = 0;
@@ -1547,9 +1519,9 @@ public class configMain {
       
       // Tabbed panel
       JTabbedPane tabbed_panel = new JTabbedPane();
-      tabbed_panel.add("Tivos", tivo_panel);
       tabbed_panel.add("File Settings", files_panel);
       tabbed_panel.add("Programs", programs_panel);
+      tabbed_panel.add("Tivos", tivo_panel);
       tabbed_panel.add("Other", other);
       
       // Main panel
@@ -1601,7 +1573,6 @@ public class configMain {
       VRD_path.setToolTipText(getToolTip("VRD_path"));
       AtomicParsley.setToolTipText(getToolTip("AtomicParsley"));
       wan_http_port.setToolTipText(getToolTip("wan_http_port"));
-      NPL_cache_mins.setToolTipText(getToolTip("NPL_cache_mins"));
       active_job_limit.setToolTipText(getToolTip("active_job_limit"));
       disk_space.setToolTipText(getToolTip("disk_space"));
       customCommand.setToolTipText(getToolTip("customCommand"));
@@ -1816,13 +1787,6 @@ public class configMain {
          text += "allow you to use port 80.<br>";
          text += "NOTE: For Now Playing List retrieval https port 443 also should be port forwarded to your Tivo<br>";
          text += "port 443 in your router configuration.";
-      }
-      else if (component.equals("NPL_cache_mins")) {
-         text =  "<b>NPL cache mins</b><br>";
-         text += "Defines number of minutes to cache TiVo Now Playing List downloads.<br>";
-         text += "Using cache prevents having to re-download the Now Playing List every time<br>";
-         text += "you select a TiVo, since for TiVos with many shows that can be time-consuming.<br>";
-         text += "NOTE: If you don't want any caching you can set this to 0.";
       }
       else if (component.equals("active_job_limit")) {
          text =  "<b>active job limit</b><br>";
