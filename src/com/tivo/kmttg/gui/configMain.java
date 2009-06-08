@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
+import com.tivo.kmttg.main.beacon;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.task.custom;
 import com.tivo.kmttg.util.debug;
@@ -200,7 +201,10 @@ public class configMain {
                doit = false;
          }
       }
-      if (doit) tivos.addItem(value);      
+      if (doit) {
+         tivos.addItem(value);
+         tivos.setSelectedItem(value);
+      }
    }
    
    // Callback for del button
@@ -369,10 +373,13 @@ public class configMain {
       config.setTivoNames(h);
       
       // Beacon
-      if (beacon.isSelected())
+      if (beacon.isSelected()) {
          config.CheckBeacon = 1;
-      else
+         if (config.tivo_beacon == null) config.tivo_beacon = new beacon();
+      } else {
          config.CheckBeacon = 0;
+         config.tivo_beacon = null;
+      }
             
       // Remove .TiVo
       if (remove_tivo.isSelected())
