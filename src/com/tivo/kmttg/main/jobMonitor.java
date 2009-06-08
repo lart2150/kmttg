@@ -355,7 +355,8 @@ public class jobMonitor {
       if (specs.containsKey("tivoName")) {
          tivoName = (String)specs.get("tivoName");
       } else {
-         tivoName = config.tivoName;
+         log.error("LaunchJobs error: tivo name not specified!");
+         return;
       }
 
       // Init encodeName
