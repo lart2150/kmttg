@@ -4,11 +4,14 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
 
 import javax.swing.Icon;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Sorter;
@@ -22,13 +25,18 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class nplTable {
+   public String tivoName = null;
    public JXTable NowPlaying = null;
+   public JScrollPane nplScroll = null;
    public String[] FILE_cols = {"", "FILE", "SIZE",    "DIR",  ""};
    public String[] TIVO_cols = {"", "DATE", "CHANNEL", "SIZE", "SHOW"};
       
-   nplTable() {
+   nplTable(String tivoName) {
+      this.tivoName = tivoName;
       Object[][] data = {};        
       NowPlaying = new JXTable(data, FILE_cols);
+      nplScroll = new JScrollPane(NowPlaying);
+
       TableModel myModel = new MyTableModel(data, FILE_cols);
       NowPlaying.setModel(myModel);
       
@@ -210,7 +218,7 @@ public class nplTable {
    public void NowPlayingRowSelected(int row) {
       debug.print("row=" + row);
       if (row == -1) return;
-      if (config.tivoName.equals("FILES")) {
+      if (tivoName.equals("FILES")) {
          // FILES mode - don't do anything
       } else {
          // Now Playing mode
@@ -287,10 +295,15 @@ public class nplTable {
             AddNowPlayingRow(entry);
          }
          String message = String.format(
-            "TOTALS: %d shows, %.2f GB, %s total time\n",
-               h.size(), totalSize/Math.pow(2,30), secsToHoursMins(totalSecs)
+            "%s TOTALS: %d shows, %.2f GB, %s total time\n",
+               tivoName, h.size(), totalSize/Math.pow(2,30), secsToHoursMins(totalSecs)
          );
          log.warn(message);
+         if (config.GUI) {
+            String status = message.replaceFirst(tivoName, "");
+            status += " (Last updated: " + getStatusTime(new Date().getTime()) + ")";
+            config.gui.nplTab_UpdateStatus(tivoName, status);
+         }
       }
    }
    
@@ -443,12 +456,18 @@ public class nplTable {
        if (vColIndex == last) {
           int twidth = table.getPreferredSize().width;
           int awidth = config.gui.getJFrame().getWidth();
-          int offset = 2*config.gui.nplScroll.getVerticalScrollBar().getPreferredSize().width+2*margin;
+          int offset = 3*nplScroll.getVerticalScrollBar().getPreferredSize().width+2*margin;
           if ((awidth-offset) > twidth) {
              width += awidth-offset-twidth;
              col.setPreferredWidth(width);
           }
        }
+   }
+   
+   private String getStatusTime(long gmt) {
+      debug.print("gmt=" + gmt);
+      SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss aa");
+      return sdf.format(gmt);
    }
 
 }
