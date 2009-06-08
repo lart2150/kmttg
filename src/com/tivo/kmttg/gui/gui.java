@@ -9,7 +9,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -33,6 +32,7 @@ public class gui {
    private String title = config.kmttg;
    private JFrame jFrame = null;
    private JPanel jContentPane = null;
+   private JTabbedPane tabbed_panel = null;
    private JMenuBar jJMenuBar = null;
    private JMenu fileMenu = null;
    private JMenu autoMenu = null;
@@ -44,7 +44,6 @@ public class gui {
    private JMenuItem addSelectedHistoryMenuItem = null;
    private JMenuItem logFileMenuItem = null;
    private JMenuItem configureMenuItem = null;
-   private JMenuItem clearCacheMenuItem = null;
    private JMenuItem refreshEncodingsMenuItem = null;
    private JMenuItem serviceStatusMenuItem = null;
    private JMenuItem serviceInstallMenuItem = null;
@@ -56,34 +55,25 @@ public class gui {
    private JMenuItem backgroundJobDisableMenuItem = null;
    private JMenuItem saveMessagesMenuItem = null;
    
-   private JComboBox tivos = null;
    private JComboBox encoding = null;
-   private JLabel tivo_label = null;
    private JLabel encoding_label = null;
    private JLabel encoding_description_label = null;
-   private JLabel job_monitor_label = null;
-   private JButton add = null;
-   private JButton remove = null;
-   private JButton start = null;
-   private JButton cancel = null;
-   private JCheckBox metadata = null;
-   private JCheckBox decrypt = null;
-   private JCheckBox qsfix = null;
-   private JCheckBox comskip = null;
-   private JCheckBox comcut = null;
-   private JCheckBox captions = null;
-   private JCheckBox encode = null;
-   private JCheckBox custom = null;
+   public JCheckBox metadata = null;
+   public JCheckBox decrypt = null;
+   public JCheckBox qsfix = null;
+   public JCheckBox comskip = null;
+   public JCheckBox comcut = null;
+   public JCheckBox captions = null;
+   public JCheckBox encode = null;
+   public JCheckBox custom = null;
    private JTextPane text = null;
-   private nplTable nplTab = null;
    private jobTable jobTab = null;
    private textpane textp = null;
    private JProgressBar progressBar = null;
-   private fileBrowser browser = null;
-   public  JScrollPane nplScroll = null;
    public  JScrollPane jobScroll = null;
    private ToolTipManager toolTips = null;
-
+   
+   private Hashtable<String,tivoTab> tivoTabs = new Hashtable<String,tivoTab>();
    public static Hashtable<String,Icon> Images;
    
    public JFrame getJFrame() {
@@ -92,12 +82,11 @@ public class gui {
          jFrame = new JFrame();
          jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
          jFrame.setJMenuBar(getJJMenuBar());
-         jFrame.setMinimumSize(new Dimension(700,600));
-         jFrame.setPreferredSize(jFrame.getMinimumSize());
-         jFrame.pack();
          jFrame.setContentPane(getJContentPane());
+         //jFrame.setMinimumSize(new Dimension(700,600));
+         //jFrame.setPreferredSize(jFrame.getMinimumSize());
+         jFrame.pack();
          jFrame.setTitle(title);
-         nplTab_packColumns(5);
          jobTab_packColumns(5);
          
          // Restore last GUI run settings from file
@@ -118,9 +107,6 @@ public class gui {
          
          // Create NowPlaying icons
          CreateImages();
-         
-         // Create File Browser instance
-         browser = new fileBrowser();
       }
       return jFrame;
    }
@@ -128,142 +114,78 @@ public class gui {
    private Container getJContentPane() {
       debug.print("");
       if (jContentPane == null) {
-         jContentPane = new JPanel(new GridBagLayout());
-         jContentPane.setLayout(new GridBagLayout());
-
-         // Pack table columns when content pane resized
-         jContentPane.addHierarchyBoundsListener(new HierarchyBoundsListener() {
-            public void ancestorMoved(HierarchyEvent arg0) {
-               // Don't care about movement
-            }
-            public void ancestorResized(HierarchyEvent arg0) {
-               nplTab.packColumns(nplTab.NowPlaying, 2);
-               jobTab.packColumns(jobTab.JobMonitor, 2);
-            }
-         });
          
          GridBagConstraints c = new GridBagConstraints();
-
-         c.fill = GridBagConstraints.HORIZONTAL;
-         int gx=0, gy=0;
-
-         // Tivos label
-         tivo_label = new JLabel("TIVO", JLabel.CENTER);
-         c.insets = new Insets(5, 0, 0, 0);
+         c.insets = new Insets(0, 2, 0, 2);
+         c.ipadx = 0;
          c.ipady = 0;
          c.weighty = 0.0;  // default to no vertical stretch
          c.weightx = 0.0;  // default to no horizontal stretch
-         c.gridx = gx++;
-         c.gridy = gy;
          c.gridwidth = 1;
          c.gridheight = 1;
          c.anchor = GridBagConstraints.CENTER;
          c.fill = GridBagConstraints.HORIZONTAL;
-         jContentPane.add(tivo_label, c);
 
-         // Tivos combo box
-         tivos = new JComboBox();
-         SetTivos(config.TIVOS);
-         tivos.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                  tivosCB(tivos);
-               }
-            }
-         });
-         c.insets = new Insets(0, 0, 0, 0);
-         c.gridx = gx++;
-         c.gridy = gy;
-         jContentPane.add(tivos, c);
-
-         // Add button
-         add = new JButton("Add...");
-         add.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
-               addCB(add);
-            }
-         });
-         c.ipadx = 0;
-         c.gridx = gx++;
-         c.gridy = gy;
-         jContentPane.add(add, c);
-
-         // Remove button
-         remove = new JButton("Remove");
-         remove.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
-               removeCB(remove);
-            }
-         });
-         c.ipadx = 0;
-         c.gridx = gx;
-         c.gridy = gy;
-         jContentPane.add(remove, c);
+         int gx=0, gy=0;
          
-         // custom checkbox
-         custom = new JCheckBox("custom", false);
-         c.gridx = 7;
-         c.gridy = gy++;
-         jContentPane.add(custom, c);
-
-         // Start jobs button
-         start = new JButton("START JOBS");
+         // Tasks panel
+         final JPanel tasks_panel = new JPanel(new GridBagLayout());
+         
+         // START JOBS row         
+         // Encoding row
+         JPanel start_panel = new JPanel();
+         start_panel.setLayout(new BoxLayout(start_panel, BoxLayout.X_AXIS));
+         // START JOBS button
+         JButton start = new JButton("START JOBS");
+         start.setToolTipText(getToolTip("start"));
          start.setBackground(Color.green);
          start.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {
-               startCB(start);
+               String tivoName = getSelectedTivoName();
+               if (tivoName != null) {
+                  tivoTabs.get(tivoName).startCB();
+               }
             }
          });
-         gx = 0;
-         c.ipadx = 0;
-         c.gridx = gx++;
-         c.gridy = gy;
-         jContentPane.add(start, c);
+         
+         // Cancel jobs button
+         JButton cancel = new JButton("CANCEL JOBS");
+         cancel.setToolTipText(getToolTip("cancel"));
+         cancel.setBackground(Color.red);
+         cancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+               cancelCB();
+            }
+         });
+         
+         start_panel.add(start);
+         start_panel.add(cancel);
 
-         // Check boxes
-         metadata = new JCheckBox("metadata", false);
-         c.ipadx = 0;
-         c.gridx = gx++;
-         c.gridy = gy;
-         //c.anchor = GridBagConstraints.WEST;
-         jContentPane.add(metadata, c);
-         
-         decrypt = new JCheckBox("decrypt", true);
-         c.gridx = gx++;
-         c.gridy = gy;
-         jContentPane.add(decrypt, c);
-         
-         qsfix = new JCheckBox("VRD QS fix", false);
-         c.gridx = gx++;
-         c.gridy = gy;
-         jContentPane.add(qsfix, c);
-         
-         comskip = new JCheckBox("Ad Detect", false);
-         c.gridx = gx++;
-         c.gridy = gy;
-         jContentPane.add(comskip, c);
-         
-         comcut = new JCheckBox("Ad Cut", false);
-         c.gridx = gx++;
-         c.gridy = gy;
-         jContentPane.add(comcut, c);
-         
-         captions = new JCheckBox("captions", false);
-         c.gridx = gx++;
-         c.gridy = gy;
-         jContentPane.add(captions, c);
-         
-         encode = new JCheckBox("encode", false);
-         c.gridx = gx;
-         c.gridy = gy++;
-         jContentPane.add(encode, c);
+         // Tasks row
+         JPanel tasks = new JPanel(new GridLayout(1, 0));         
+         metadata = new JCheckBox("metadata", false);         
+         decrypt = new JCheckBox("decrypt", true);         
+         qsfix = new JCheckBox("VRD QS fix", false);         
+         comskip = new JCheckBox("Ad Detect", false);         
+         comcut = new JCheckBox("Ad Cut", false);         
+         captions = new JCheckBox("captions", false);         
+         encode = new JCheckBox("encode", false);         
+         custom = new JCheckBox("custom", false);
+         tasks.add(metadata);
+         tasks.add(decrypt);
+         tasks.add(qsfix);
+         tasks.add(comskip);
+         tasks.add(comcut);
+         tasks.add(captions);
+         tasks.add(encode);
+         tasks.add(custom);
+
+         // Encoding row
+         JPanel encoding_panel = new JPanel();
+         encoding_panel.setLayout(new BoxLayout(encoding_panel, BoxLayout.X_AXIS));
 
          // Encoding label
          encoding_label = new JLabel("Encoding Profile:", JLabel.CENTER);
-         gx = 0;
-         c.gridx = gx++;
-         c.gridy = gy;
-         jContentPane.add(encoding_label, c);
  
          // Encoding names combo box
          encoding = new JComboBox();
@@ -275,11 +197,6 @@ public class gui {
                }
             }
          });
-         c.gridx = gx;
-         c.gridy = gy;
-         c.gridwidth = 2;
-         jContentPane.add(encoding, c);
-         gx += 2;
 
          // Encoding description label
          String description = "";
@@ -287,87 +204,117 @@ public class gui {
             description = "  " + encodeConfig.getDescription(encodeConfig.getEncodeName());
          }
          encoding_description_label = new JLabel(description);
-         c.gridx = gx;
-         c.gridy = gy++;
-         c.gridwidth = 5;
-         jContentPane.add(encoding_description_label, c);
-         c.gridwidth = 1;
-                  
-         // nplTable
-         nplTab = new nplTable();
-         c.weightx = 1.0;    // stretch vertically
-         c.weighty = 1.0;    // stretch horizontally
-         c.ipadx = 0;
-         c.ipady = 150;      //make this component tall
-         c.gridheight = 1;
-         c.gridwidth = 8;
+         encoding_panel.add(encoding_label);
+         encoding_panel.add(encoding);
+         encoding_panel.add(encoding_description_label);
+         
          gx = 0;
          c.gridx = gx;
-         c.gridy = gy++;
-         c.fill = GridBagConstraints.BOTH;         
-         // Add scrollbars to NowPlaying
-         nplScroll = new JScrollPane(nplTab.NowPlaying);
-         jContentPane.add(nplScroll, c);
-
-         // Progress Bar
-         progressBar = new JProgressBar();
-         c.weightx = 1.0;     // stretch horizontally
-         c.weighty = 0.0;     // don't stretch vertically
-         c.ipady = 0;
-         c.gridx = gx;
-         c.gridy = gy++;
-         c.fill = GridBagConstraints.HORIZONTAL;
-         progressBar.setBackground(Color.gray);
-         progressBar.setForeground(Color.green);
-         jContentPane.add(progressBar, c);
-
-         // Cancel jobs button
-         cancel = new JButton("CANCEL JOBS");
-         cancel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
-               cancelCB(cancel);
-            }
-         });
-         c.weightx = 0.0;  // do not stretch horizontally
-         c.ipadx = 0;
-         c.ipady = 0;
-         c.gridx = gx++;
          c.gridy = gy;
          c.gridwidth = 1;
-         cancel.setBackground(Color.red);
-         jContentPane.add(cancel, c);
-
-         // Job Monitor label
-         job_monitor_label = new JLabel("JOB MONITOR", JLabel.CENTER);
-         c.gridx = gx+2;
-         c.gridy = gy++;
-         jContentPane.add(job_monitor_label, c);
+         c.fill = GridBagConstraints.NONE;
+         c.anchor = GridBagConstraints.WEST;
+         tasks_panel.add(start_panel, c);
+         
+         gy++;
+         c.anchor = GridBagConstraints.CENTER;
+         c.fill = GridBagConstraints.HORIZONTAL;
+         c.gridx = gx;
+         c.gridy = gy;
+         c.gridwidth = 1;
+         tasks_panel.add(tasks, c);
+         
+         gy++;
+         c.gridx = 0;
+         c.gridy = gy;
+         c.gridwidth = 1;
+         tasks_panel.add(encoding_panel, c);
 
          // Job Monitor table
          jobTab = new jobTable();
-         c.weightx = 1.0;    // stretch horizontally
-         c.ipady = 100;      //make this component tall
-         c.gridheight = 1;
-         c.gridwidth = 8;
-         gx = 0;
-         c.gridx = gx;
-         c.gridy = gy++;
-         c.fill = GridBagConstraints.BOTH;
          jobScroll = new JScrollPane(jobTab.JobMonitor);
-         jContentPane.add(jobScroll, c);
+         
+         // Progress Bar
+         progressBar = new JProgressBar();
+         progressBar.setBackground(Color.gray);
+         progressBar.setForeground(Color.green);
 
          // Message area
          text = new JTextPane();
          textp = new textpane(text);
          text.setEditable(false);
          JScrollPane scrollPane3 = new JScrollPane(text);
-         //c.ipady = 50;
-         c.gridx = gx;
-         c.gridy = gy++;
-         c.fill = GridBagConstraints.BOTH;
-         c.anchor = GridBagConstraints.SOUTH;
-         jContentPane.add(scrollPane3, c);
+                  
+         // Tabbed panel
+         tabbed_panel = new JTabbedPane();
+         // Add permanent tabs
+         tabbed_panel.add("FILES", new tivoTab("FILES").getPanel());
          
+         // Add Tivo tabs
+         SetTivos(config.TIVOS);
+         
+         // Put all panels together
+         jContentPane = new JPanel(new GridBagLayout());
+
+         // Pack table columns when content pane resized
+         jContentPane.addHierarchyBoundsListener(new HierarchyBoundsListener() {
+            public void ancestorMoved(HierarchyEvent arg0) {
+               // Don't care about movement
+            }
+            public void ancestorResized(HierarchyEvent arg0) {
+               jobTab.packColumns(jobTab.JobMonitor, 2);
+            }
+         });
+         
+         // Common settings
+         c.gridwidth = 1;
+         c.gridheight = 1;
+         c.weightx = 1;
+         c.ipady = 0;
+         
+         gy=0;
+         c.gridx = 0;
+         c.gridy = gy;
+         c.ipady = 0;
+         c.weighty = 1;
+         c.fill = GridBagConstraints.BOTH;
+         jContentPane.add(tabbed_panel, c);
+
+         gy++;
+         c.gridx = 0;
+         c.gridy = gy;
+         c.ipady = 0;
+         c.weighty = 0;
+         c.fill = GridBagConstraints.HORIZONTAL;
+         jContentPane.add(progressBar, c);
+         
+         gy++;
+         c.gridx = 0;
+         c.gridy = gy;
+         c.fill = GridBagConstraints.HORIZONTAL;
+         c.weighty = 0;
+         jContentPane.add(tasks_panel, c);
+         
+         gy++;
+         c.weightx = 1.0;    // stretch horizontally
+         c.weighty = 0;      // stretch vertically
+         c.ipady = 0;      //make this component tall
+         c.gridheight = 1;
+         c.gridwidth = 8;
+         c.gridx = gx;
+         c.gridy = gy;
+         c.ipady = 100;
+         c.fill = GridBagConstraints.HORIZONTAL;
+         jContentPane.add(jobScroll, c);
+         
+         gy++;
+         c.gridx = 0;
+         c.gridy = gy;
+         c.ipady = 100;
+         c.weightx = 1;
+         c.weighty = 0;
+         c.fill = GridBagConstraints.BOTH;
+         jContentPane.add(scrollPane3, c);
       }
       
       return jContentPane;
@@ -389,7 +336,6 @@ public class gui {
          fileMenu = new JMenu();
          fileMenu.setText("File");
          fileMenu.add(getConfigureMenuItem());
-         fileMenu.add(getClearCacheMenuItem());
          fileMenu.add(getRefreshEncodingsMenuItem());
          fileMenu.add(getSaveMessagesMenuItem());
          fileMenu.add(getExitMenuItem());
@@ -484,7 +430,6 @@ public class gui {
       }
       return runInGuiMenuItem;
    }
-
    private JMenuItem getAddSelectedTitlesMenuItem() {
       debug.print("");
       if (addSelectedTitlesMenuItem == null) {
@@ -492,7 +437,12 @@ public class gui {
          addSelectedTitlesMenuItem.setText("Add selected titles");
          addSelectedTitlesMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-               autoSelectedTitlesCB();
+               String tivoName = getSelectedTivoName();
+               if (tivoName != null) {
+                  tivoTabs.get(tivoName).autoSelectedTitlesCB();
+               } else {
+                  log.error("This command must be run from a TiVo tab with selected tivo shows.");
+               }
             }
          });
       }
@@ -506,7 +456,12 @@ public class gui {
          addSelectedHistoryMenuItem.setText("Add selected to history file");
          addSelectedHistoryMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-               autoSelectedHistoryCB();
+               String tivoName = getSelectedTivoName();
+               if (tivoName != null) {
+                  tivoTabs.get(tivoName).autoSelectedHistoryCB();
+               } else {
+                  log.error("This command must be run from a TiVo tab with selected tivo shows.");
+               }
             }
          });
       }
@@ -541,23 +496,6 @@ public class gui {
                Event.CTRL_MASK, true));
       }
       return configureMenuItem;
-   }
-
-   private JMenuItem getClearCacheMenuItem() {
-      debug.print("");
-      if (clearCacheMenuItem == null) {
-         clearCacheMenuItem = new JMenuItem();
-         clearCacheMenuItem.setText("Clear Cache");
-         clearCacheMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               log.warn("Clearing Now Playing List cache");
-               clearCacheCB();
-            }
-         });
-         clearCacheMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,
-               Event.CTRL_MASK, true));
-      }
-      return clearCacheMenuItem;
    }
 
    private JMenuItem getRefreshEncodingsMenuItem() {
@@ -805,59 +743,6 @@ public class gui {
       }
       
    }
-
-   // Tivos cyclic change callback
-   // For FILES entry clear NPL and enter FILES mode
-   // For Tivo entry download Now Playing list (or build from cache)
-   private void tivosCB(JComboBox combo) {
-      debug.print("combo=" + combo);
-      String tivoName = (String)combo.getSelectedItem();
-      // Update config.tivoName
-      config.tivoName = tivoName;
-      
-      if (tivoName.equals("FILES")) {
-         nplTab.SetNowPlayingHeaders(nplTab.FILE_cols);
-         add.setVisible(true);
-         remove.setVisible(true);
-         nplTab.clear(nplTab.NowPlaying);
-      } else {
-         nplTab.SetNowPlayingHeaders(nplTab.TIVO_cols);
-         add.setVisible(false);
-         remove.setVisible(false);
-         nplTab.clear(nplTab.NowPlaying);
-
-         Boolean use_cache = false;
-         if ( config.cache.containsKey(tivoName) ) {
-            if ( config.cache_times.containsKey(tivoName) ) {
-               long now = new Date().getTime();
-               long sdiff = (now - config.cache_times.get(tivoName))/1000;
-               if ( sdiff < config.cache_time*60 ) {
-                  use_cache = true;
-                  log.print("NOTE: Using cached NPL for " + tivoName);
-                  log.print(
-                     "(" + tivoName +
-                     " cache expires in "
-                     + (config.cache_time*60 - sdiff) +
-                     " seconds)"
-                  );
-               }
-            }
-         }
-         if (use_cache) {
-            nplTab_SetNowPlaying(config.cache.get(tivoName));
-         } else {
-            // Queue up a nowplaying list job for newly selected tivo
-            NowPlaying.submitJob(tivoName);
-         }
-      }
-   }
-   
-   // Callback for "Clear Cache" File menu entry
-   // This clears NPL cache so as to force new NPL downloads
-   private void clearCacheCB() {
-      debug.print("");
-      config.cache.clear();
-   }
    
    // Callback for "Refresh Encoding Profiles" File menu entry
    // This will re-parse encoding files and reset Encoding Profile list in GUI
@@ -890,60 +775,6 @@ public class gui {
          }
       }
    }
-  
-   // Callback for "Add selected titles" Auto Transfers menu entry
-   // This will add the selected Tivo show titles to auto.ini file
-   private void autoSelectedTitlesCB() {
-      debug.print("");
-      
-      // Do nothing if in FILES mode
-      if ( config.tivoName.equals("FILES") ) return;
-      
-      // Process selected entries in nplTab
-      int[] rows = nplTab.GetSelectedRows();
-      if (rows.length > 0) {
-         int row;
-         for (int i=0; i<rows.length; i++) {
-            row = rows[i];
-            Hashtable<String,String> entry = nplTab.NowPlayingGetSelectionData(row);
-            if (entry.containsKey("titleOnly")) {
-               auto.autoAddTitleEntryToFile(entry.get("titleOnly"));
-            }
-         }
-      } else {
-         log.error("No shows currently selected for processing");
-      }     
-   }
-   
-   // Callback for "Add selected to history file" Auto Transfers menu entry
-   // This will add the selected Tivo show titles to auto.history file
-   private void autoSelectedHistoryCB() {
-      debug.print("");
-      
-      // Do nothing if in FILES mode
-      if ( config.tivoName.equals("FILES") ) return;
-      
-      // Process selected entries in nplTab
-      int[] rows = nplTab.GetSelectedRows();
-      if (rows.length > 0) {
-         int row;
-         for (int i=0; i<rows.length; i++) {
-            row = rows[i];
-            Hashtable<String,String> entry = nplTab.NowPlayingGetSelectionData(row);
-            if (entry.containsKey("ProgramId")) {
-               int result = auto.AddHistoryEntry(entry);
-               if (result == 1) {
-                  log.print(">> Added '" + entry.get("title") + "' to " + config.autoHistory);
-               }
-               else if (result == 2) {
-                  log.print(">> Entry '" + entry.get("title") + "' already in " + config.autoHistory);
-               }
-            }
-         }
-      } else {
-         log.error("No shows currently selected for processing");
-      }     
-   }
 
    // Encoding cyclic change callback
    // Set the description according to selected item
@@ -955,84 +786,11 @@ public class gui {
       // Set encoding_description_label accordingly
       encoding_description_label.setText("  " + description);
    }
-
-   // Start button callback
-   // Process selected Now Playing entries
-   private void startCB(JButton button) {
-      debug.print("button=" + button);
-      int[] rows = nplTab.GetSelectedRows();
-
-      if (rows.length > 0) {
-         int row;
-         for (int i=0; i<rows.length; i++) {
-            row = rows[i];
-            Hashtable<String,Object> h = new Hashtable<String,Object>();
-            if ( config.tivoName.equals("FILES") ) {
-               h.put("mode", "FILES");
-               String fileName = nplTab.NowPlayingGetSelectionFile(row);
-               if (fileName == null) return;
-               h.put("startFile", fileName);
-            } else {
-               h.put("mode", "Download");
-               Hashtable<String,String> entry = nplTab.NowPlayingGetSelectionData(row);
-               if (entry == null) return;
-               h.put("entry", entry);
-            }
-            
-            // Launch jobs appropriately
-            if (config.tivoName.equals("FILES")) {
-               h.put("metadataTivo", metadata.isSelected());
-               h.put("metadata", false);
-            } else {
-               h.put("metadata", metadata.isSelected());
-               h.put("metadataTivo", false);
-            }
-            h.put("decrypt",  decrypt.isSelected());
-            h.put("qsfix",    qsfix.isSelected());
-            h.put("comskip",  comskip.isSelected());
-            h.put("comcut",   comcut.isSelected());
-            h.put("captions", captions.isSelected());
-            h.put("encode",   encode.isSelected());
-            h.put("custom",   custom.isSelected());
-            jobMonitor.LaunchJobs(h);
-         }
-      }
-   }
-
-   // FILES mode add button callback
-   // Bring up file browser and add selected entries to Now Playing
-   private void addCB(JButton button) {
-      debug.print("button=" + button);
-      // Bring up File Browser
-      int result = browser.Browser.showDialog(nplTab.NowPlaying, "Add");
-      if (result == JFileChooser.APPROVE_OPTION) {
-         File[] files = browser.Browser.getSelectedFiles();
-         for (int i=0; i<files.length; ++i)
-            nplTab.AddNowPlayingFileRow(files[i]);
-      }
-   }
-
-   // FILES mode remove button callback
-   // Remove selected NowPlaying entries from list
-   private void removeCB(JButton button) {
-      debug.print("button=" + button);
-      if ( config.tivoName.equals("FILES") ) {
-         int[] rows = nplTab.GetSelectedRows();
-
-         if (rows.length > 0) {
-            int row;
-            for (int i=rows.length-1; i>=0; i--) {
-               row = rows[i];
-               nplTab.RemoveSelectedRow(row);
-            }
-         }
-      }
-   }
  
    // Cancel button callback
    // Kill and remove selected jobs from job monitor
-   private void cancelCB(JButton button) {
-      debug.print("button=" + button);
+   private void cancelCB() {
+      debug.print("");
       int[] rows = jobTab.GetSelectedRows();
 
       if (rows.length > 0) {
@@ -1045,41 +803,126 @@ public class gui {
       }
    }
 
-   // Set tivos combobox choices
+   // Create tivo tabs as needed
    public void SetTivos(Hashtable<String,String> values) {
       debug.print("values=" + values);
-      if ( values.size() > 0 ) {
-         String[] names = new String[values.size()];
+      if ( values.size() > 1 ) {
+         String[] names = new String[values.size()-1];
          int i = 0;
-         names[i++] = "FILES";
          String value;
+         
          for (Enumeration<String> e=values.keys(); e.hasMoreElements();) {
             value = e.nextElement();
-            if (! value.matches("^FILES$")) {
-               names[i++] = value;
+            if (! value.equals("FILES")) {
+               names[i] = value;
+               i++;
             }
          }
-         combobox.SetValues(tivos, names);
-         config.tivoName = names[0];
+         
+         // Remove unwanted tabs
+         tivoTabRemoveExtra(names);
+         
+         // Add tabs
+         for (int j=0; j<names.length; j++) {
+            tivoTabAdd(names[j]);
+         }
       } else {
-         String[] names = {"FILES"};
-         combobox.SetValues(tivos, names);
-         config.tivoName = names[0];
-      }      
-   }
-   
-   // Set this choice in tivos combobox (if valid)
-   public void SetTivo(String tivoName) {
-      for (int i=0; i<tivos.getItemCount(); ++i) {
-         if (tivos.getItemAt(i).equals(tivoName)) {
-            tivos.setSelectedItem(tivoName);
+         // Remove all tivo tabs
+         while(! tabbed_panel.getTitleAt(0).equals("FILES")) {
+            tivoTabRemove(tabbed_panel.getTitleAt(0));
          }
       }
    }
    
-   // Add a tivo to tivos combobox
+   private String getCurrentTabName() {
+      return tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
+   }
+   
+   private String getSelectedTivoName() {
+      String tabName = getCurrentTabName();
+      if (! tabName.equals("FILES")) {
+         return tabName;
+      }
+      return null;
+   }
+   
+   // Check name against existing tabbed panel names
+   private Boolean tivoTabExists(String name) {
+      debug.print("name=" + name);
+      int numTabs = tabbed_panel.getComponentCount();
+      String tabName;
+      for (int i=0; i<numTabs; i++) {
+         tabName = tabbed_panel.getTitleAt(i);
+         if (tabName.equals(name)) {
+            return true;
+         }
+      }
+      return false;
+   }
+   
+   private void tivoTabAdd(String name) {
+      debug.print("name=" + name);
+      if ( ! tivoTabExists(name) ) {
+         tivoTab tab = new tivoTab(name);
+         tabbed_panel.add(tab.getPanel(), 0);
+         tabbed_panel.setTitleAt(0, name);
+         tivoTabs.put(name,tab);
+         NowPlaying.submitJob(name);
+      }
+   }
+   
+   private void tivoTabRemove(String name) {
+      debug.print("name=" + name);
+      if (tivoTabs.containsKey(name)) {
+         tabbed_panel.remove(tivoTabs.get(name).getPanel());
+         tivoTabs.remove(name);
+      }
+   }
+   
+   private void tivoTabRemoveExtra(String[] names) {
+      debug.print("names=" + names);
+      int numTabs = tabbed_panel.getComponentCount();
+      if (numTabs > 0 && names.length > 0) {
+         // Determine tabs we no longer want
+         Stack<String> unwanted = new Stack<String>();
+         String tabName;
+         Boolean remove;
+         for (int i=0; i<numTabs; i++) {
+            tabName = tabbed_panel.getTitleAt(i);
+            if (! tabName.equals("FILES")) {
+               remove = true;
+               for (int j=0; j<names.length; j++) {
+                  if (names[j].equals(tabName)) {
+                     remove = false;
+                  }
+               }
+               if (remove) {
+                  unwanted.add(tabName);
+               }
+            }
+         }
+         // Now remove the unwanted tabs
+         if (unwanted.size() > 0) {
+            for (int i=0; i<unwanted.size(); i++) {
+               tivoTabRemove(unwanted.get(i));
+            }
+         }
+      }
+   }
+   
+   // Set current tab to this tivo (if valid)
+   public void SetTivo(String tivoName) {
+      debug.print("tivoName=" + tivoName);
+      for (int i=0; i<tabbed_panel.getComponentCount(); ++i) {
+         if (tabbed_panel.getTitleAt(i).equals(tivoName)) {
+            tabbed_panel.setSelectedIndex(i);
+         }
+      }
+   }
+   
+   // Add a tivo
    public void AddTivo(String name, String ip) {
-      tivos.addItem(name);
+      tivoTabAdd(name);
       configMain.addTivo(name, ip);
    }
    
@@ -1120,6 +963,7 @@ public class gui {
       if (config.gui_settings != null) {
          try {
             Dimension d = getJFrame().getSize();
+            String tabName = tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
             BufferedWriter ofp = new BufferedWriter(new FileWriter(config.gui_settings));            
             ofp.write("# kmttg gui preferences file\n");
             ofp.write("<metadata>\n"        + metadata_setting()     + "\n");
@@ -1135,7 +979,7 @@ public class gui {
             ofp.write("<toolTipsTimeout>\n" + config.toolTipsTimeout + "\n");
             ofp.write("<width>\n"           + d.width                + "\n");
             ofp.write("<height>\n"          + d.height               + "\n");
-            ofp.write("<tivo>\n"            + config.tivoName        + "\n");
+            ofp.write("<tab>\n"             + tabName                + "\n");
             ofp.close();
          }         
          catch (IOException ex) {
@@ -1243,7 +1087,7 @@ public class gui {
                   height = -1;
                }
             }
-            if (key.equals("tivo")) {
+            if (key.equals("tab")) {
                SetTivo(line);
             }
          }
@@ -1260,9 +1104,6 @@ public class gui {
    
    // Component tooltip setup
    public void setToolTips() {
-      tivos.setToolTipText(getToolTip("tivos"));
-      add.setToolTipText(getToolTip("add"));
-      remove.setToolTipText(getToolTip("remove"));
       metadata.setToolTipText(getToolTip("metadata"));
       decrypt.setToolTipText(getToolTip("decrypt"));
       qsfix.setToolTipText(getToolTip("qsfix"));
@@ -1272,8 +1113,6 @@ public class gui {
       encode.setToolTipText(getToolTip("encode"));
       custom.setToolTipText(getToolTip("custom"));
       encoding.setToolTipText(getToolTip("encoding"));
-      start.setToolTipText(getToolTip("start"));
-      cancel.setToolTipText(getToolTip("cancel"));
       jobTab.JobMonitor.setToolTipText(getToolTip("JobMonitor"));
    }
    
@@ -1305,6 +1144,10 @@ public class gui {
       else if (component.equals("remove")) {
          text =  "<b>Remove</b><br>";
          text += "Removes selected file entries from files table below.";
+      }
+      else if (component.equals("refresh")) {
+         text =  "<b>Refresh List</b><br>";
+         text += "Refresh Now Playing List for this TiVo.";
       }
       else if (component.equals("metadata")) {
          text =  "<b>metadata</b><br>";
@@ -1378,12 +1221,12 @@ public class gui {
       }
       else if (component.equals("start")) {
          text =  "<b>START JOBS</b><br>";
-         text += "Run selected tasks for all selected items in the programs/files table.<br>";
-         text += "First select 1 or more items in the list below to process.";
+         text += "Run selected tasks for all selected items in the programs/files table above.<br>";
+         text += "First select 1 or more items in the list above to process.";
       }
       else if (component.equals("cancel")) {
          text =  "<b>CANCEL JOBS</b><br>";
-         text += "Cancel selected jobs in <b>JOB MONITOR</b> table.<br>";
+         text += "Cancel selected jobs in <b>JOB MONITOR</b> table below.<br>";
          text += "First select 1 or more running or queued jobs in list below to abort/cancel.";
       }
       else if (component.equals("JobMonitor")) {
@@ -1419,17 +1262,8 @@ public class gui {
    public void text_error(Stack<String> s) {
       textp.error(s);
    }
-   public void nplTab_packColumns(int pad) {
-      nplTab.packColumns(nplTab.NowPlaying, pad);
-   }
    public void jobTab_packColumns(int pad) {
-      nplTab.packColumns(jobTab.JobMonitor, pad);
-   }
-   public void nplTab_SetNowPlaying(Stack<Hashtable<String,String>> h) {
-      nplTab.SetNowPlaying(h);
-   }
-   public void nplTab_clear() {
-      nplTab.clear(nplTab.NowPlaying);
+      jobTab.packColumns(jobTab.JobMonitor, pad);
    }
    public jobData jobTab_GetRowData(int row) {
       return jobTab.GetRowData(row);
@@ -1448,6 +1282,21 @@ public class gui {
    }
    public void refresh() {
       jContentPane.paintImmediately(jContentPane.getBounds());
+   }
+   public void nplTab_SetNowPlaying(String tivoName, Stack<Hashtable<String,String>> entries) {
+      if (tivoTabs.containsKey(tivoName)) {
+         tivoTabs.get(tivoName).nplTab_SetNowPlaying(entries);
+      }
+   }
+   public void nplTab_clear(String tivoName) {
+      if (tivoTabs.containsKey(tivoName)) {
+         tivoTabs.get(tivoName).nplTab_clear();
+      }
+   }
+   public void nplTab_UpdateStatus(String tivoName, String status) {
+      if (tivoTabs.containsKey(tivoName)) {
+         tivoTabs.get(tivoName).nplTab_UpdateStatus(status);
+      }
    }
    
    // Returns state of checkbox options (as int for writing to auto.ini purposes)
