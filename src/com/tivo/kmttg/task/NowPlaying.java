@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -431,7 +430,7 @@ public class NowPlaying  {
          jobMonitor.removeFromJobList(job);
          if (config.GUI_AUTO > 0) {
             // Clear NPL
-            config.gui.nplTab_clear();
+            config.gui.nplTab_clear(job.tivoName);
             
             // Match auto keywords against entries
             for (int j=0; j<ENTRIES.size(); j++) {
@@ -440,10 +439,8 @@ public class NowPlaying  {
             config.GUI_AUTO--;
          }
          else if (config.GUI) {
-            // GUI mode: populate NPL table & update cache
-            config.gui.nplTab_SetNowPlaying(ENTRIES);
-            config.cache.put(job.tivoName, ENTRIES);
-            config.cache_times.put(job.tivoName, new Date().getTime());
+            // GUI mode: populate NPL table
+            config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
          } else {
             // Batch mode
             for (int j=0; j<ENTRIES.size(); j++) {
