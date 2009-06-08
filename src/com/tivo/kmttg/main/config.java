@@ -248,6 +248,7 @@ public class config {
    public static void addTivo(Hashtable<String,String> b) {
       log.warn("Adding detected tivo: " + b.get("machine"));
       TIVOS.put(b.get("machine"), b.get("ip"));
+      save(configIni);
       if (config.GUI) {
          config.gui.AddTivo(b.get("machine"), b.get("ip"));
       }
