@@ -794,7 +794,6 @@ public class configMain {
       JLabel comskip_label = new javax.swing.JLabel();
       JLabel comskip_ini_label = new javax.swing.JLabel();
       JLabel wan_http_port_label = new javax.swing.JLabel();
-      JLabel NPL_cache_mins_label = new javax.swing.JLabel();
       JLabel active_job_limit_label = new javax.swing.JLabel();
       JLabel VRD_path_label = new javax.swing.JLabel();
       JLabel t2extract_label = new javax.swing.JLabel();
@@ -853,7 +852,6 @@ public class configMain {
       comskip_label.setText("comskip"); 
       comskip_ini_label.setText("comskip.ini"); 
       wan_http_port_label.setText("wan http port"); 
-      NPL_cache_mins_label.setText("NPL cache mins"); 
       active_job_limit_label.setText("active job limit"); 
       VRD_path_label.setText("VideoRedo path"); 
       t2extract_label.setText("t2extract"); 
