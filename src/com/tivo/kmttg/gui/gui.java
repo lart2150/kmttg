@@ -141,10 +141,8 @@ public class gui {
          start.setBackground(Color.green);
          start.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {
-               String tivoName = getSelectedTivoName();
-               if (tivoName != null) {
-                  tivoTabs.get(tivoName).startCB();
-               }
+               String tivoName = getCurrentTabName();
+               tivoTabs.get(tivoName).startCB();
             }
          });
          
@@ -248,7 +246,8 @@ public class gui {
          // Tabbed panel
          tabbed_panel = new JTabbedPane();
          // Add permanent tabs
-         tabbed_panel.add("FILES", new tivoTab("FILES").getPanel());
+         tivoTabs.put("FILES", new tivoTab("FILES"));
+         tabbed_panel.add("FILES", tivoTabs.get("FILES").getPanel());
          
          // Add Tivo tabs
          SetTivos(config.TIVOS);
