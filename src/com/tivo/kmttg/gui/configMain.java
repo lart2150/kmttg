@@ -106,9 +106,10 @@ public class configMain {
       log.error(message);
       f.setBackground(textbg_error);
       errors.add(f);
-      int tab_index = tabbed_panel.indexOfComponent(f.getParent());
       // Set tab background of this text field to error color as well
-      tabbed_panel.setBackgroundAt(tab_index, textbg_error);
+      int tab_index = tabbed_panel.indexOfComponent(f.getParent());
+      if (tab_index != -1)
+         tabbed_panel.setBackgroundAt(tab_index, textbg_error);
    }
    
    // Clear all text field and tab background color error paint settings
