@@ -79,6 +79,7 @@ public class configMain {
    private static JComboBox keywords = null;
    private static JComboBox customFiles = null;
    private static JFileChooser Browser = null;
+   private static JTabbedPane tabbed_panel = null;
       
    public static void display(JFrame frame) {
       debug.print("frame=" + frame);
@@ -99,13 +100,18 @@ public class configMain {
       dialog.setVisible(true);
    }
    
+   // Paint text field background to indicate an error setting
    private static void textFieldError(JTextField f, String message) {
       debug.print("f=" + f + " message=" + message);
       log.error(message);
       f.setBackground(textbg_error);
       errors.add(f);
+      int tab_index = tabbed_panel.indexOfComponent(f.getParent());
+      // Set tab background of this text field to error color as well
+      tabbed_panel.setBackgroundAt(tab_index, textbg_error);
    }
    
+   // Clear all text field and tab background color error paint settings
    private static void clearTextFieldErrors() {
       debug.print("");
       if (errors.size() > 0) {
@@ -114,6 +120,9 @@ public class configMain {
          }
          errors.clear();
       }
+      // Clear tab background settings as well
+      for (int i=0; i<tabbed_panel.getTabCount(); ++i)
+         tabbed_panel.setBackgroundAt(i, textbg_default);
    }
    
    // Callback for OK button
@@ -1523,7 +1532,7 @@ public class configMain {
       common_panel.add(CANCEL, c);
       
       // Tabbed panel
-      JTabbedPane tabbed_panel = new JTabbedPane();
+      tabbed_panel = new JTabbedPane();
       tabbed_panel.add("File Settings", files_panel);
       tabbed_panel.add("Programs", programs_panel);
       tabbed_panel.add("Tivos", tivo_panel);
@@ -1549,6 +1558,7 @@ public class configMain {
   }
    
    public static void setToolTips() {
+      debug.print("");
       tivo_name.setToolTipText(getToolTip("tivo_name"));
       tivo_ip.setToolTipText(getToolTip("tivo_ip"));
       add.setToolTipText(getToolTip("add")); 
@@ -1591,6 +1601,7 @@ public class configMain {
    }
    
    public static String getToolTip(String component) {
+      debug.print("component=" + component);
       String text = "";
       if (component.equals("tivo_name")) {
          text =  "<b>Tivo Name</b><br>";
