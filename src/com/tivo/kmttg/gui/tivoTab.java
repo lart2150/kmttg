@@ -32,6 +32,7 @@ public class tivoTab {
    private fileBrowser browser = null;
    
    tivoTab(final String name) {
+      debug.print("name=" + name);
       this.tivoName = name;
       panel = new JPanel(new GridBagLayout());
       nplTab = new nplTable(name);
@@ -211,18 +212,22 @@ public class tivoTab {
    }
    
    public void nplTab_packColumns(int pad) {
+      debug.print("pad=" + pad);
       nplTab.packColumns(nplTab.NowPlaying, pad);
    }
    
    public void nplTab_SetNowPlaying(Stack<Hashtable<String,String>> h) {
+      debug.print("h=" + h);
       nplTab.SetNowPlaying(h);
    }
    
    public void nplTab_UpdateStatus(String s) {
+      debug.print("s=" + s);
       status.setText(s);
    }
    
    public void nplTab_clear() {
+      debug.print("");
       nplTab.clear(nplTab.NowPlaying);
    }
    
