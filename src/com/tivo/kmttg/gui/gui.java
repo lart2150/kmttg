@@ -168,6 +168,7 @@ public class gui {
          comcut = new JCheckBox("Ad Cut", false);         
          captions = new JCheckBox("captions", false);         
          encode = new JCheckBox("encode", false);
+         /* Disabled intentionally (mpeg2repair doesn't work)
          encode.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                boolean selected = encode.isSelected();
@@ -175,6 +176,7 @@ public class gui {
                   if (selected) {
                      if (config.OS.equals("windows") && file.isFile(config.tsremux) && file.isFile(config.mpeg2auto)) {
                         qsfix.setEnabled(true);
+                        qsfix.setSelected(true);
                      }
                   } else {
                      qsfix.setEnabled(false);
@@ -183,6 +185,7 @@ public class gui {
                }
             }
          });
+         */
          custom = new JCheckBox("custom", false);
          tasks.add(metadata);
          tasks.add(decrypt);
@@ -713,12 +716,16 @@ public class gui {
          decrypt.setEnabled(true);
       }
       if (! file.isDir(config.VRD)) {
+         /* Disabled intentionally
          if (config.OS.equals("windows") && file.isFile(config.tsremux) && file.isFile(config.mpeg2auto) && encode.isSelected()) {
             qsfix.setEnabled(true);
+            qsfix.setSelected(true);
          } else {
             qsfix.setSelected(false);
             qsfix.setEnabled(false);
-         }
+         }*/
+         qsfix.setSelected(false);
+         qsfix.setEnabled(false);         
       } else {
          qsfix.setEnabled(true);
       }
