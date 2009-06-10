@@ -167,7 +167,22 @@ public class gui {
          comskip = new JCheckBox("Ad Detect", false);         
          comcut = new JCheckBox("Ad Cut", false);         
          captions = new JCheckBox("captions", false);         
-         encode = new JCheckBox("encode", false);         
+         encode = new JCheckBox("encode", false);
+         encode.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               boolean selected = encode.isSelected();
+               if (! file.isDir(config.VRD)) {
+                  if (selected) {
+                     if (config.OS.equals("windows") && file.isFile(config.tsremux) && file.isFile(config.mpeg2auto)) {
+                        qsfix.setEnabled(true);
+                     }
+                  } else {
+                     qsfix.setEnabled(false);
+                     qsfix.setSelected(false);
+                  }
+               }
+            }
+         });
          custom = new JCheckBox("custom", false);
          tasks.add(metadata);
          tasks.add(decrypt);
@@ -698,8 +713,12 @@ public class gui {
          decrypt.setEnabled(true);
       }
       if (! file.isDir(config.VRD)) {
-         qsfix.setSelected(false);
-         qsfix.setEnabled(false);
+         if (config.OS.equals("windows") && file.isFile(config.tsremux) && file.isFile(config.mpeg2auto) && encode.isSelected()) {
+            qsfix.setEnabled(true);
+         } else {
+            qsfix.setSelected(false);
+            qsfix.setEnabled(false);
+         }
       } else {
          qsfix.setEnabled(true);
       }
