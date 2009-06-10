@@ -328,6 +328,9 @@ public class jobMonitor {
       Boolean encode       = (Boolean)specs.get("encode");
       Boolean custom       = (Boolean)specs.get("custom");
       
+      Boolean tsremux      = false;
+      Boolean mpeg2auto    = false;
+      
       if (metadataTivo) {
          // In FILES mode can only get metadata from .tivo files
          if ( ! startFile.toLowerCase().endsWith(".tivo") ) metadataTivo = false;
@@ -344,6 +347,7 @@ public class jobMonitor {
       String tivoFile     = null;
       String metaFile     = null;
       String mpegFile     = null;
+      String tsFile       = null;
       String mpegFile_fix = null;
       String edlFile      = null;
       String mpegFile_cut = null;
@@ -449,6 +453,14 @@ public class jobMonitor {
          if (comcut)  videoFile = mpegFile_cut;
          srtFile = string.replaceSuffix(videoFile, ".srt");
          if (encode)  srtFile = string.replaceSuffix(encodeFile, ".srt");
+      }
+      
+      // Decide if tsremux & mpeg2auto should be enabled
+      // windows AND qsfix AND ! vrd AND encode => enable
+      if (config.OS.equals("windows") && qsfix && ! file.isDir(config.VRD)) {
+         tsFile = string.replaceSuffix(mpegFile, ".ts");
+         tsremux = true;
+         mpeg2auto = true;
       }
       
       // Check task dependencies and enable prior tasks if necessary
@@ -567,6 +579,29 @@ public class jobMonitor {
          submitNewJob(job);
       }
       
+      if (tsremux) {
+         familyId += 0.1;
+         jobData job = new jobData();
+         job.tivoName     = tivoName;
+         job.type         = "tsremux";
+         job.name         = config.tsremux;
+         job.familyId     = familyId;
+         job.mpegFile     = mpegFile;
+         job.tsFile       = tsFile;
+         submitNewJob(job);
+      }
+      
+      if (mpeg2auto) {
+         familyId += 0.1;
+         jobData job = new jobData();
+         job.tivoName     = tivoName;
+         job.type         = "mpeg2auto";
+         job.name         = config.mpeg2auto;
+         job.familyId     = familyId;
+         job.tsFile       = tsFile;
+         submitNewJob(job);
+      }
+      
       if (comskip) {
          if (file.isDir(config.VRD) && config.UseAdscan == 1) {
             familyId += 0.1;
@@ -585,7 +620,10 @@ public class jobMonitor {
             job.type         = "comskip";
             job.name         = config.comskip;
             job.familyId     = familyId;
-            job.mpegFile     = mpegFile;
+            if (tsFile != null)
+               job.mpegFile  = tsFile;
+            else
+               job.mpegFile  = mpegFile;
             job.edlFile      = edlFile;
             if (file.isDir(config.VRD))
                job.vprjFile = string.replaceSuffix(edlFile, ".VPrj");
@@ -612,7 +650,10 @@ public class jobMonitor {
             job.type         = "comcut";
             job.name         = config.mencoder;
             job.familyId     = familyId;
-            job.mpegFile     = mpegFile;
+            if (tsFile != null)
+               job.mpegFile  = tsFile;
+            else
+               job.mpegFile  = mpegFile;
             job.mpegFile_cut = mpegFile_cut;
             job.edlFile      = edlFile;
             submitNewJob(job);            
@@ -626,7 +667,10 @@ public class jobMonitor {
          job.type         = "captions";
          job.name         = config.t2extract;
          job.familyId     = familyId;
-         job.videoFile    = videoFile;
+         if (tsFile != null && videoFile.equals(mpegFile))
+            job.videoFile = tsFile;
+         else
+            job.videoFile = videoFile;
          job.srtFile      = srtFile;
          submitNewJob(job);
       }
@@ -639,7 +683,10 @@ public class jobMonitor {
          job.name         = encodeName;
          job.familyId     = familyId;
          job.encodeName   = encodeName;
-         job.mpegFile     = mpegFile;
+         if (tsFile != null)
+            job.mpegFile  = tsFile;
+         else
+            job.mpegFile  = mpegFile;
          job.mpegFile_cut = mpegFile_cut;
          job.encodeFile   = encodeFile;
          submitNewJob(job);
