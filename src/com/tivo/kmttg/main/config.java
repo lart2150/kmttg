@@ -41,6 +41,8 @@ public class config {
    public static String AtomicParsley = "";
    public static String VRD = "";
    public static String t2extract = "";
+   public static String tsremux = "";
+   public static String mpeg2auto = "";
 
    // config preferences
    public static String MAK = "";               // MAK id for NPL downloads
@@ -132,45 +134,55 @@ public class config {
       
       // Could be the 3rd party tools are installed locally but just configured
       // wrong, so try and automatically correct them
-      if ( ! file.isFile(config.curl) ) {
-         result = config.getProgramDefault("curl");
+      if ( ! file.isFile(curl) ) {
+         result = getProgramDefault("curl");
          if ( file.isFile(result) )
-            config.curl = result;
+            curl = result;
       }
-      if ( ! file.isFile(config.tivodecode) ) {
-         result = config.getProgramDefault("tivodecode");
+      if ( ! file.isFile(tivodecode) ) {
+         result = getProgramDefault("tivodecode");
          if ( file.isFile(result) )
-            config.tivodecode = result;
+            tivodecode = result;
       }
-      if ( ! file.isFile(config.ffmpeg) ) {
-         result = config.getProgramDefault("ffmpeg");
+      if ( ! file.isFile(ffmpeg) ) {
+         result = getProgramDefault("ffmpeg");
          if ( file.isFile(result) )
-            config.ffmpeg = result;
+            ffmpeg = result;
       }
-      if ( ! file.isFile(config.mencoder) ) {
-         result = config.getProgramDefault("mencoder");
+      if ( ! file.isFile(mencoder) ) {
+         result = getProgramDefault("mencoder");
          if ( file.isFile(result) )
-            config.mencoder = result;
+            mencoder = result;
       }
-      if ( ! file.isFile(config.handbrake) ) {
-         result = config.getProgramDefault("handbrake");
+      if ( ! file.isFile(handbrake) ) {
+         result = getProgramDefault("handbrake");
          if ( file.isFile(result) )
-            config.handbrake = result;
+            handbrake = result;
       }
-      if ( ! file.isFile(config.comskip) ) {
-         result = config.getProgramDefault("comskip");
+      if ( ! file.isFile(comskip) ) {
+         result = getProgramDefault("comskip");
          if ( file.isFile(result) )
-            config.comskip = result;
+            comskip = result;
       }
-      if ( ! file.isFile(config.comskipIni) ) {
-         result = config.getProgramDefault("comskipIni");
+      if ( ! file.isFile(comskipIni) ) {
+         result = getProgramDefault("comskipIni");
          if ( file.isFile(result) )
-            config.comskipIni = result;
+            comskipIni = result;
       }
-      if ( ! file.isFile(config.AtomicParsley) ) {
-         result = config.getProgramDefault("AtomicParsley");
+      if ( ! file.isFile(AtomicParsley) ) {
+         result = getProgramDefault("AtomicParsley");
          if ( file.isFile(result) )
-            config.AtomicParsley = result;
+            AtomicParsley = result;
+      }
+      if ( ! file.isFile(tsremux) ) {
+         result = getProgramDefault("tsremux");
+         if ( file.isFile(result) )
+            tsremux = result;
+      }
+      if ( ! file.isFile(mpeg2auto) ) {
+         result = getProgramDefault("mpeg2auto");
+         if ( file.isFile(result) )
+            mpeg2auto = result;
       }
 
       // Parse encoding profiles
@@ -318,6 +330,8 @@ public class config {
       comskip       = getProgramDefault("comskip");
       comskipIni    = getProgramDefault("comskipIni");
       AtomicParsley = getProgramDefault("AtomicParsley");      
+      tsremux       = getProgramDefault("tsremux"); 
+      mpeg2auto     = getProgramDefault("mpeg2auto");
    }
    
    // Return default setting for a given programName
@@ -407,6 +421,20 @@ public class config {
                AtomicParsley = result;
          }
          return AtomicParsley;
+      }
+      
+      else if (programName.equals("tsremux")) {
+         String tsremux = "";
+         if (OS.equals("windows"))
+            tsremux = programDir + s + "tsremux" + s + "tsremux" + exe;
+         return tsremux;
+      }
+      
+      else if (programName.equals("mpeg2auto")) {
+         String tsremux = "";
+         if (OS.equals("windows"))
+            tsremux = programDir + s + "mpeg2repair" + s + "mpeg2auto" + exe;
+         return tsremux;
       }
       
       else {
@@ -542,6 +570,12 @@ public class config {
             if (key.equals("t2extract")) {
                t2extract = line;
             }
+            if (key.equals("tsremux")) {
+               tsremux = line;
+            }
+            if (key.equals("mpeg2auto")) {
+               mpeg2auto = line;
+            }
             if (key.equals("custom")) {
                customCommand = line;
             }
@@ -643,6 +677,10 @@ public class config {
          ofp.write("<AtomicParsley>\n" + AtomicParsley + "\n\n");
          
          ofp.write("<t2extract>\n" + t2extract + "\n\n");
+         
+         ofp.write("<tsremux>\n" + tsremux + "\n\n");
+         
+         ofp.write("<mpeg2auto>\n" + mpeg2auto + "\n\n");
          
          ofp.write("<custom>\n" + customCommand + "\n\n");
          
