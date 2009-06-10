@@ -137,9 +137,6 @@ public class tsremux {
          } else {
             log.warn("tsremux job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");
-            // Remove mpegFile
-            file.delete(job.mpegFile);
-            log.print("(Deleted mpeg file: " + job.mpegFile + ")");
          }
       }
       return false;
