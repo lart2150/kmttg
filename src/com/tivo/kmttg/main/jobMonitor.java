@@ -457,11 +457,13 @@ public class jobMonitor {
       
       // Decide if tsremux & mpeg2auto should be enabled
       // windows AND qsfix AND ! vrd AND encode => enable
+      /* Intentionally disabled - mpeg2repair doesn't work
       if (config.OS.equals("windows") && qsfix && ! file.isDir(config.VRD)) {
          tsFile = string.replaceSuffix(mpegFile, ".ts");
          tsremux = true;
          mpeg2auto = true;
       }
+      */
       
       // Check task dependencies and enable prior tasks if necessary
       
