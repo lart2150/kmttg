@@ -29,6 +29,8 @@ public class jobData {
    public encode       process_encode = null;
    public atomic       process_atomic = null;
    public custom       process_custom = null;
+   public tsremux      process_tsremux = null;
+   public mpeg2auto    process_mpeg2auto = null;
    
    public String  ip = null;
    public String  inputFile = null;
@@ -60,6 +62,9 @@ public class jobData {
    public Long tivoFileSize = null;
    String ProgramId = null;
    String title = null;
+   
+   // tsremux & mpeg2auto related
+   public String tsFile = null;
    
    public String toString() {
       return "{tivoName=" + tivoName + " type=" + type + " status=" + status + " familyId=" + familyId + "}";
@@ -108,6 +113,12 @@ public class jobData {
       else if (type.matches("custom")) {
          return process_custom.check();
       }
+      else if (type.matches("tsremux")) {
+         return process_tsremux.check();
+      }         
+      else if (type.matches("mpeg2auto")) {
+         return process_mpeg2auto.check();
+      }         
       return false;
    }
    
@@ -153,6 +164,12 @@ public class jobData {
       }
       else if (type.equals("custom")) {
          return process_custom.getProcess();
+      }
+      else if (type.equals("tsremux")) {
+         return process_tsremux.getProcess();
+      }
+      else if (type.equals("mpeg2auto")) {
+         return process_mpeg2auto.getProcess();
       }
       return null;
    }
@@ -202,6 +219,12 @@ public class jobData {
       }
       else if (type.equals("custom")) {
          file = "" + familyId;
+      }
+      else if (type.equals("tsremux")) {
+         file = tsFile;
+      }
+      else if (type.equals("mpeg2auto")) {
+         file = tsFile;
       }
       return file;
    }
@@ -274,6 +297,16 @@ public class jobData {
       
       else if (job.type.equals("custom")) {  
          custom proc = new custom(job);
+         success = proc.launchJob();
+      }
+      
+      else if (job.type.equals("tsremux")) {  
+         tsremux proc = new tsremux(job);
+         success = proc.launchJob();
+      }
+      
+      else if (job.type.equals("mpeg2auto")) {  
+         mpeg2auto proc = new mpeg2auto(job);
          success = proc.launchJob();
       }
       
