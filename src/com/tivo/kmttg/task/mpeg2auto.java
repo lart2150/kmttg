@@ -129,8 +129,8 @@ public class mpeg2auto {
             log.warn("mpeg2auto job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");
             // Remove tsFile.txt
-            file.delete(job.tsFile + ".txt");
-            log.print("(Deleted file: " + job.tsFile + ".txt)");
+            if ( file.delete(job.tsFile + ".txt") )
+               log.print("(Deleted file: " + job.tsFile + ".txt)");
          }
       }
       return false;
