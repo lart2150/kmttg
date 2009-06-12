@@ -184,6 +184,16 @@ public class encode {
             log.warn("encoding job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");
             
+            // Remove mpegFile.qsfix file if present
+            String fix;            
+            if (job.mpegFile.matches("^.+\\.qsfix$"))
+               fix = job.mpegFile;
+            else
+               fix = job.mpegFile + ".qsfix";
+            if (file.isFile(fix)) {
+               if (file.delete(fix)) log.print("(Deleted file: " + fix + ")");
+            }
+            
             // Remove .mpg file if option enabled
             if (config.RemoveMpegFile == 1) {
                if ( file.delete(job.inputFile) ) {
