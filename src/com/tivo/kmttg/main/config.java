@@ -41,8 +41,6 @@ public class config {
    public static String AtomicParsley = "";
    public static String VRD = "";
    public static String t2extract = "";
-   public static String tsremux = "";
-   public static String mpeg2auto = "";
 
    // config preferences
    public static String MAK = "";               // MAK id for NPL downloads
@@ -173,16 +171,6 @@ public class config {
          result = getProgramDefault("AtomicParsley");
          if ( file.isFile(result) )
             AtomicParsley = result;
-      }
-      if ( ! file.isFile(tsremux) ) {
-         result = getProgramDefault("tsremux");
-         if ( file.isFile(result) )
-            tsremux = result;
-      }
-      if ( ! file.isFile(mpeg2auto) ) {
-         result = getProgramDefault("mpeg2auto");
-         if ( file.isFile(result) )
-            mpeg2auto = result;
       }
 
       // Parse encoding profiles
@@ -330,8 +318,6 @@ public class config {
       comskip       = getProgramDefault("comskip");
       comskipIni    = getProgramDefault("comskipIni");
       AtomicParsley = getProgramDefault("AtomicParsley");      
-      tsremux       = getProgramDefault("tsremux"); 
-      mpeg2auto     = getProgramDefault("mpeg2auto");
    }
    
    // Return default setting for a given programName
@@ -422,21 +408,7 @@ public class config {
          }
          return AtomicParsley;
       }
-      
-      else if (programName.equals("tsremux")) {
-         String tsremux = "";
-         if (OS.equals("windows"))
-            tsremux = programDir + s + "tsremux" + s + "tsremux" + exe;
-         return tsremux;
-      }
-      
-      else if (programName.equals("mpeg2auto")) {
-         String tsremux = "";
-         if (OS.equals("windows"))
-            tsremux = programDir + s + "mpeg2repair" + s + "mpeg2auto" + exe;
-         return tsremux;
-      }
-      
+            
       else {
          log.error("No default defined for programName=" + programName);
          return "";
@@ -446,28 +418,7 @@ public class config {
    
    private static Boolean parseIni(String config) {
       debug.print("config=" + config);
-      
-      // Reset globals
-      /*MAK = "";
-      TIVOS.clear();
-      tivodecode = "";
-      curl = "";
-      outputDir = "";
-      mpegDir = "";
-      mpegCutDir = "";
-      encodeDir = "";
-      ffmpeg = "";
-      mencoder = "";
-      //handbrake = "";
-      comskip = "";
-      //AtomicParsley = "";
-      comskipIni = "";
-      wan_http_port = "";
-      VRD = "";
-      t2extract = "";
-      customCommand = "";
-      */
-      
+            
       try {
          BufferedReader ini = new BufferedReader(new FileReader(config));
          String line = null;
@@ -570,12 +521,6 @@ public class config {
             if (key.equals("t2extract")) {
                t2extract = line;
             }
-            if (key.equals("tsremux")) {
-               tsremux = line;
-            }
-            if (key.equals("mpeg2auto")) {
-               mpeg2auto = line;
-            }
             if (key.equals("custom")) {
                customCommand = line;
             }
@@ -677,11 +622,7 @@ public class config {
          ofp.write("<AtomicParsley>\n" + AtomicParsley + "\n\n");
          
          ofp.write("<t2extract>\n" + t2extract + "\n\n");
-         
-         ofp.write("<tsremux>\n" + tsremux + "\n\n");
-         
-         ofp.write("<mpeg2auto>\n" + mpeg2auto + "\n\n");
-         
+                           
          ofp.write("<custom>\n" + customCommand + "\n\n");
          
          ofp.write("<CheckDiskSpace>\n" + CheckDiskSpace + "\n\n");
