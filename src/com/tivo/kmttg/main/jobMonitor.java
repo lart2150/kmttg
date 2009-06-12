@@ -328,8 +328,7 @@ public class jobMonitor {
       Boolean encode       = (Boolean)specs.get("encode");
       Boolean custom       = (Boolean)specs.get("custom");
       
-      Boolean tsremux      = false;
-      Boolean mpeg2auto    = false;
+      Boolean streamfix    = false;
       
       if (metadataTivo) {
          // In FILES mode can only get metadata from .tivo files
@@ -347,7 +346,6 @@ public class jobMonitor {
       String tivoFile     = null;
       String metaFile     = null;
       String mpegFile     = null;
-      String tsFile       = null;
       String mpegFile_fix = null;
       String edlFile      = null;
       String mpegFile_cut = null;
@@ -455,15 +453,12 @@ public class jobMonitor {
          if (encode)  srtFile = string.replaceSuffix(encodeFile, ".srt");
       }
       
-      // Decide if tsremux & mpeg2auto should be enabled
+      // Decide if streamfix should be enabled
       // windows AND qsfix AND ! vrd AND encode => enable
-      /* Intentionally disabled - mpeg2repair doesn't work
       if (config.OS.equals("windows") && qsfix && ! file.isDir(config.VRD)) {
-         tsFile = string.replaceSuffix(mpegFile, ".ts");
-         tsremux = true;
-         mpeg2auto = true;
+         qsfix = false;
+         streamfix = true;
       }
-      */
       
       // Check task dependencies and enable prior tasks if necessary
       
@@ -581,26 +576,15 @@ public class jobMonitor {
          submitNewJob(job);
       }
       
-      if (tsremux) {
+      if (streamfix) {
          familyId += 0.1;
          jobData job = new jobData();
          job.tivoName     = tivoName;
-         job.type         = "tsremux";
-         job.name         = config.tsremux;
+         job.type         = "streamfix";
+         job.name         = config.mencoder;
          job.familyId     = familyId;
          job.mpegFile     = mpegFile;
-         job.tsFile       = tsFile;
-         submitNewJob(job);
-      }
-      
-      if (mpeg2auto) {
-         familyId += 0.1;
-         jobData job = new jobData();
-         job.tivoName     = tivoName;
-         job.type         = "mpeg2auto";
-         job.name         = config.mpeg2auto;
-         job.familyId     = familyId;
-         job.tsFile       = tsFile;
+         job.mpegFile_fix = mpegFile_fix;
          submitNewJob(job);
       }
       
@@ -622,8 +606,8 @@ public class jobMonitor {
             job.type         = "comskip";
             job.name         = config.comskip;
             job.familyId     = familyId;
-            if (tsFile != null)
-               job.mpegFile  = tsFile;
+            if (streamfix)
+               job.mpegFile  = mpegFile_fix;
             else
                job.mpegFile  = mpegFile;
             job.edlFile      = edlFile;
@@ -652,8 +636,8 @@ public class jobMonitor {
             job.type         = "comcut";
             job.name         = config.mencoder;
             job.familyId     = familyId;
-            if (tsFile != null)
-               job.mpegFile  = tsFile;
+            if (streamfix)
+               job.mpegFile  = mpegFile_fix;
             else
                job.mpegFile  = mpegFile;
             job.mpegFile_cut = mpegFile_cut;
@@ -669,8 +653,8 @@ public class jobMonitor {
          job.type         = "captions";
          job.name         = config.t2extract;
          job.familyId     = familyId;
-         if (tsFile != null && videoFile.equals(mpegFile))
-            job.videoFile = tsFile;
+         if (streamfix && videoFile.equals(mpegFile))
+            job.videoFile = mpegFile_fix;
          else
             job.videoFile = videoFile;
          job.srtFile      = srtFile;
@@ -685,8 +669,8 @@ public class jobMonitor {
          job.name         = encodeName;
          job.familyId     = familyId;
          job.encodeName   = encodeName;
-         if (tsFile != null)
-            job.mpegFile  = tsFile;
+         if (streamfix)
+            job.mpegFile  = mpegFile_fix;
          else
             job.mpegFile  = mpegFile;
          job.mpegFile_cut = mpegFile_cut;
