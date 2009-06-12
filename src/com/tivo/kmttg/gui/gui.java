@@ -163,18 +163,17 @@ public class gui {
          JPanel tasks = new JPanel(new GridLayout(1, 0));         
          metadata = new JCheckBox("metadata", false);         
          decrypt = new JCheckBox("decrypt", true);         
-         qsfix = new JCheckBox("VRD QS fix", false);         
+         qsfix = new JCheckBox("Stream fix", false);         
          comskip = new JCheckBox("Ad Detect", false);         
          comcut = new JCheckBox("Ad Cut", false);         
          captions = new JCheckBox("captions", false);         
          encode = new JCheckBox("encode", false);
-         /* Disabled intentionally (mpeg2repair doesn't work)
          encode.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                boolean selected = encode.isSelected();
                if (! file.isDir(config.VRD)) {
                   if (selected) {
-                     if (config.OS.equals("windows") && file.isFile(config.tsremux) && file.isFile(config.mpeg2auto)) {
+                     if (config.OS.equals("windows") && file.isFile(config.mencoder)) {
                         qsfix.setEnabled(true);
                         qsfix.setSelected(true);
                      }
@@ -185,7 +184,6 @@ public class gui {
                }
             }
          });
-         */
          custom = new JCheckBox("custom", false);
          tasks.add(metadata);
          tasks.add(decrypt);
@@ -716,16 +714,13 @@ public class gui {
          decrypt.setEnabled(true);
       }
       if (! file.isDir(config.VRD)) {
-         /* Disabled intentionally
-         if (config.OS.equals("windows") && file.isFile(config.tsremux) && file.isFile(config.mpeg2auto) && encode.isSelected()) {
+         if (config.OS.equals("windows") && file.isFile(config.mencoder) && encode.isSelected()) {
             qsfix.setEnabled(true);
             qsfix.setSelected(true);
          } else {
             qsfix.setSelected(false);
             qsfix.setEnabled(false);
-         }*/
-         qsfix.setSelected(false);
-         qsfix.setEnabled(false);         
+         }
       } else {
          qsfix.setEnabled(true);
       }
@@ -1191,10 +1186,13 @@ public class gui {
          text += "with kmttg, so most often you should leave this option enabled.";
       }
       else if (component.equals("qsfix")) {
-         text =  "<b>VRD QS fix</b><br>";
-         text += "Runs the extremely useful <b>VideoRedo Quick Stream Fix</b> utility.<br>";
+         text =  "<b>Stream fix</b><br>";
+         text += "If you have VideoRedo available and configured in kmttg, this<br>";
+         text += "runs the extremely useful <b>VideoRedo Quick Stream Fix</b> utility.<br>";
+         text += "Without VideoRedo this will run mpeg through mencoder filter.<br>";
          text += "Cleans up any potential glitches/errors in mpeg2 video files.<br>";
-         text += "Highly recommended step if you have VideoRedo installed.";
+         text += "Highly recommended step if you have VideoRedo installed.<br>";
+         text += "Very highly recommended step if you will be running encode.";
       }
       else if (component.equals("comskip")) {
          text =  "<b>Ad Detect</b><br>";
