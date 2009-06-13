@@ -48,7 +48,7 @@ public class config {
    public static int RemoveComcutFiles = 0;
    public static int RemoveMpegFile = 0;
    public static int CreateSubFolder = 0;
-   public static int MaxJobs = 2;
+   public static int MaxJobs = 1;
    public static int CheckDiskSpace = 0;
    public static int LowSpaceSize = 0;
    public static int CheckBeacon = 1;
@@ -308,6 +308,7 @@ public class config {
       encodeDir          = outputDir;
       wan_http_port      = "";
       customCommand      = "";
+      cpu_cores          = Runtime.getRuntime().availableProcessors();
       
       // 3rd party executable defaults
       curl          = getProgramDefault("curl");
