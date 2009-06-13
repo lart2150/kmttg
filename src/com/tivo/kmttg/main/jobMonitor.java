@@ -24,7 +24,7 @@ public class jobMonitor {
    //   * Check status of active job and take action if running job is completed
    //   * Launch a job in queue if appropriate
    //     - Restrict to 1 download per Tivo at a time
-   //     - Restrict CPU intensive jobs to defined 'MaxJobs' (default of 2)
+   //     - Restrict CPU intensive jobs to defined 'MaxJobs' (default of 1)
    //     - Order dependancy of jobs operating on same program   
    static void monitor(gui gui, Timer timer) {
       Stack<jobData> running = new Stack<jobData>();
@@ -131,7 +131,7 @@ public class jobMonitor {
          }
          
          // Don't run more than 'MaxJobs' active jobs at a time
-         if (cpuActiveJobs >= config.MaxJobs) continue;
+         if (cpuActiveJobs > config.MaxJobs) continue;
 
          // OK to launch job
          cpuActiveJobs = jobData.launch(job, cpuActiveJobs);
