@@ -128,15 +128,19 @@ public class gui {
 
          int gx=0, gy=0;
          
-         // Tasks panel
-         final JPanel tasks_panel = new JPanel(new GridBagLayout());
-         
-         // START JOBS row         
-         // Encoding row
-         JPanel start_panel = new JPanel();
-         start_panel.setLayout(new BoxLayout(start_panel, BoxLayout.X_AXIS));
+         // Cancel jobs button
+         JButton cancel = new JButton("CANCEL JOBS");
+         cancel.setMargin(new Insets(0,1,0,1));
+         cancel.setToolTipText(getToolTip("cancel"));
+         cancel.setBackground(Color.red);
+         cancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+               cancelCB();
+            }
+         });
          // START JOBS button
          JButton start = new JButton("START JOBS");
+         start.setMargin(new Insets(0,1,0,1));
          start.setToolTipText(getToolTip("start"));
          start.setBackground(Color.green);
          start.addActionListener(new java.awt.event.ActionListener() {
@@ -145,22 +149,7 @@ public class gui {
                tivoTabs.get(tivoName).startCB();
             }
          });
-         
-         // Cancel jobs button
-         JButton cancel = new JButton("CANCEL JOBS");
-         cancel.setToolTipText(getToolTip("cancel"));
-         cancel.setBackground(Color.red);
-         cancel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
-               cancelCB();
-            }
-         });
-         
-         start_panel.add(start);
-         start_panel.add(cancel);
-
-         // Tasks row
-         JPanel tasks = new JPanel(new GridLayout(1, 0));         
+         // Tasks
          metadata = new JCheckBox("metadata", false);         
          decrypt = new JCheckBox("decrypt", true);         
          qsfix = new JCheckBox("VRD QS fix", false);         
@@ -187,21 +176,60 @@ public class gui {
          });
          */
          custom = new JCheckBox("custom", false);
-         tasks.add(metadata);
-         tasks.add(decrypt);
-         tasks.add(qsfix);
-         tasks.add(comskip);
-         tasks.add(comcut);
-         tasks.add(captions);
-         tasks.add(encode);
-         tasks.add(custom);
+         
+         // Tasks row
+         JPanel tasks = new JPanel(new GridBagLayout());                  
+         gx = 0; gy = 0;
+         c.anchor = GridBagConstraints.CENTER;
+         c.fill = GridBagConstraints.HORIZONTAL;
+         c.gridx = gx;
+         c.gridy = gy;
+         c.gridwidth = 1;
+         tasks.add(start, c);
+         
+         gx++;
+         c.gridx = gx;
+         c.gridy = gy;
+         tasks.add(metadata, c);
+                  
+         gx++;
+         c.gridx = gx;
+         c.gridy = gy;
+         tasks.add(decrypt, c);
+         
+         gx++;
+         c.gridx = gx;
+         c.gridy = gy;
+         tasks.add(qsfix, c);
+         
+         gx++;
+         c.gridx = gx;
+         c.gridy = gy;
+         tasks.add(comskip, c);
+         
+         gx++;
+         c.gridx = gx;
+         c.gridy = gy;
+         tasks.add(comcut, c);
+         
+         gx++;
+         c.gridx = gx;
+         c.gridy = gy;
+         tasks.add(captions, c);
+         
+         gx++;
+         c.gridx = gx;
+         c.gridy = gy;
+         tasks.add(encode, c);
+         
+         gx++;
+         c.gridx = gx;
+         c.gridy = gy;
+         tasks.add(custom, c);
 
          // Encoding row
-         JPanel encoding_panel = new JPanel();
-         encoding_panel.setLayout(new BoxLayout(encoding_panel, BoxLayout.X_AXIS));
-
          // Encoding label
-         encoding_label = new JLabel("Encoding Profile:", JLabel.CENTER);
+         encoding_label = new JLabel("Encoding: ", JLabel.CENTER);
  
          // Encoding names combo box
          encoding = new JComboBox();
@@ -220,32 +248,31 @@ public class gui {
             description = "  " + encodeConfig.getDescription(encodeConfig.getEncodeName());
          }
          encoding_description_label = new JLabel(description);
-         encoding_panel.add(encoding_label);
-         encoding_panel.add(encoding);
-         encoding_panel.add(encoding_description_label);
          
-         gx = 0;
+         gx = 0; gy++;
          c.gridx = gx;
          c.gridy = gy;
          c.gridwidth = 1;
-         c.fill = GridBagConstraints.NONE;
-         c.anchor = GridBagConstraints.WEST;
-         tasks_panel.add(start_panel, c);
+         tasks.add(cancel, c);
          
-         gy++;
-         c.anchor = GridBagConstraints.CENTER;
-         c.fill = GridBagConstraints.HORIZONTAL;
+         gx++;
          c.gridx = gx;
          c.gridy = gy;
          c.gridwidth = 1;
-         tasks_panel.add(tasks, c);
+         tasks.add(encoding_label, c);
          
-         gy++;
-         c.gridx = 0;
+         gx++;
+         c.gridx = gx;
          c.gridy = gy;
-         c.gridwidth = 1;
-         tasks_panel.add(encoding_panel, c);
-
+         c.gridwidth = 2;
+         tasks.add(encoding, c);
+         
+         gx += 2;
+         c.gridx = gx;
+         c.gridy = gy;
+         c.gridwidth = 5;
+         tasks.add(encoding_description_label, c);
+         
          // Job Monitor table
          jobTab = new jobTable();
          jobScroll = new JScrollPane(jobTab.JobMonitor);
@@ -284,6 +311,7 @@ public class gui {
          });
          
          // Common settings
+         gx = 0;
          c.gridwidth = 1;
          c.gridheight = 1;
          c.weightx = 1;
@@ -309,10 +337,11 @@ public class gui {
          c.gridx = 0;
          c.gridy = gy;
          c.fill = GridBagConstraints.HORIZONTAL;
+         c.gridheight = 2;
          c.weighty = 0;
-         jContentPane.add(tasks_panel, c);
+         jContentPane.add(tasks, c);
          
-         gy++;
+         gy += 2;
          c.weightx = 1.0;    // stretch horizontally
          c.weighty = 0;      // stretch vertically
          c.ipady = 0;      //make this component tall
