@@ -69,6 +69,7 @@ public class tivoTab {
          
          // Add button
          add = new JButton("Add...");
+         add.setMargin(new Insets(0,5,0,5));
          add.setToolTipText(config.gui.getToolTip("add"));
          add.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -83,6 +84,7 @@ public class tivoTab {
    
          // Remove button
          remove = new JButton("Remove");
+         remove.setMargin(new Insets(0,5,0,5));
          remove.setToolTipText(config.gui.getToolTip("remove"));
          remove.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -100,6 +102,7 @@ public class tivoTab {
          
          // Refresh button
          refresh = new JButton("Refresh List");
+         refresh.setMargin(new Insets(0,5,0,5));
          refresh.setToolTipText(config.gui.getToolTip("refresh"));
          refresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {
