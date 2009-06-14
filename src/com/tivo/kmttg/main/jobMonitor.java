@@ -455,10 +455,12 @@ public class jobMonitor {
       
       // Decide if streamfix should be enabled
       // windows AND qsfix AND ! vrd AND encode => enable
+      /* This intentionally disabled for now
       if (config.OS.equals("windows") && qsfix && ! file.isDir(config.VRD)) {
          qsfix = false;
          streamfix = true;
       }
+      */
       
       // Check task dependencies and enable prior tasks if necessary
       

@@ -7,8 +7,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+//import java.awt.event.ActionEvent;
+//import java.awt.event.ActionListener;
 import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
 import java.io.BufferedWriter;
@@ -177,11 +177,12 @@ public class configAuto {
             
       metadata = new JCheckBox("metadata");
       decrypt  = new JCheckBox("decrypt");
-      qsfix    = new JCheckBox("Stream fix");
+      qsfix    = new JCheckBox("VRD QS fix");
       comskip  = new JCheckBox("Ad Detect");
       comcut   = new JCheckBox("Ad Cut");
       captions = new JCheckBox("captions");
       encode   = new JCheckBox("encode");
+      /* This intentionally disabled for now
       encode.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
             boolean selected = encode.isSelected();
@@ -198,6 +199,7 @@ public class configAuto {
             }
          }
       });
+      */
       custom   = new JCheckBox("custom");
       
       JLabel encoding_name_label = new JLabel("Encoding Name: ");
@@ -563,6 +565,7 @@ public class configAuto {
       } else {
          decrypt.setEnabled(true);
       }
+      /* This intentionally disabled for now
       if (! file.isDir(config.VRD)) {
          if (config.OS.equals("windows") && file.isFile(config.mencoder) && encode.isSelected()) {
             qsfix.setEnabled(true);
@@ -571,6 +574,13 @@ public class configAuto {
             qsfix.setSelected(false);
             qsfix.setEnabled(false);
          }
+      } else {
+         qsfix.setEnabled(true);
+      }
+      */
+      if (! file.isFile(config.VRD)) {
+         qsfix.setSelected(false);
+         qsfix.setEnabled(false);
       } else {
          qsfix.setEnabled(true);
       }

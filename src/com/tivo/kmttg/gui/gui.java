@@ -163,11 +163,12 @@ public class gui {
          JPanel tasks = new JPanel(new GridLayout(1, 0));         
          metadata = new JCheckBox("metadata", false);         
          decrypt = new JCheckBox("decrypt", true);         
-         qsfix = new JCheckBox("Stream fix", false);         
+         qsfix = new JCheckBox("VRD QS fix", false);         
          comskip = new JCheckBox("Ad Detect", false);         
          comcut = new JCheckBox("Ad Cut", false);         
          captions = new JCheckBox("captions", false);         
          encode = new JCheckBox("encode", false);
+         /* This intentionally disabled for now
          encode.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                boolean selected = encode.isSelected();
@@ -184,6 +185,7 @@ public class gui {
                }
             }
          });
+         */
          custom = new JCheckBox("custom", false);
          tasks.add(metadata);
          tasks.add(decrypt);
@@ -713,6 +715,7 @@ public class gui {
       } else {
          decrypt.setEnabled(true);
       }
+      /* This intentionally disabled for now
       if (! file.isDir(config.VRD)) {
          if (config.OS.equals("windows") && file.isFile(config.mencoder) && encode.isSelected()) {
             qsfix.setEnabled(true);
@@ -721,6 +724,13 @@ public class gui {
             qsfix.setSelected(false);
             qsfix.setEnabled(false);
          }
+      } else {
+         qsfix.setEnabled(true);
+      }
+      */
+      if (! file.isDir(config.VRD)) {
+         qsfix.setSelected(false);
+         qsfix.setEnabled(false);
       } else {
          qsfix.setEnabled(true);
       }
@@ -1186,10 +1196,10 @@ public class gui {
          text += "with kmttg, so most often you should leave this option enabled.";
       }
       else if (component.equals("qsfix")) {
-         text =  "<b>Stream fix</b><br>";
+         text =  "<b>VRD QS fix</b><br>";
          text += "If you have VideoRedo available and configured in kmttg, this<br>";
          text += "runs the extremely useful <b>VideoRedo Quick Stream Fix</b> utility.<br>";
-         text += "Without VideoRedo this will run mpeg through mencoder filter.<br>";
+         //text += "Without VideoRedo this will run mpeg through mencoder filter.<br>";
          text += "Cleans up any potential glitches/errors in mpeg2 video files.<br>";
          text += "Highly recommended step if you have VideoRedo installed.<br>";
          text += "Very highly recommended step if you will be running encode.";
