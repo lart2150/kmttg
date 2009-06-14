@@ -105,25 +105,17 @@ public class backgroundProcess {
          return "";
       }
    }
-   
-   public String getStderr(int n) {
-      debug.print("");
-      try {
-         return stderr.get(n);
-      }
-      catch (NoSuchElementException e) {
-         return "";
-      }      
+
+   // NOTE: This is used by taskInfo
+   public void setStdoutWatch(Stack<String> s) {
+      debug.print("s=" + s);
+      stdoutHandler.watch = s;
    }
-   
-   public String getStdout(int n) {
-      debug.print("");
-      try {
-         return stdout.get(n);
-      }
-      catch (NoSuchElementException e) {
-         return "";
-      }      
+
+   // NOTE: This is used by taskInfo
+   public void setStderrWatch(Stack<String> s) {
+      debug.print("s=" + s);
+      stderrHandler.watch = s;
    }
    
    public void printStderr() {
