@@ -466,7 +466,7 @@ public class nplTable {
    
    private String getStatusTime(long gmt) {
       debug.print("gmt=" + gmt);
-      SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss aa");
+      SimpleDateFormat sdf = new SimpleDateFormat("hh:mm aa");
       return sdf.format(gmt);
    }
 
