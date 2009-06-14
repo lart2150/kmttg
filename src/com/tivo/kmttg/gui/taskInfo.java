@@ -5,6 +5,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Stack;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -21,8 +22,8 @@ import com.tivo.kmttg.util.debug;
 public class taskInfo {
    backgroundProcess process;
    Timer timer;
-   private int scount = 0;
-   private int ecount = 0;
+   private Stack<String> owatch = new Stack<String>();
+   private Stack<String> ewatch = new Stack<String>();
    
    private JDialog dialog;
    private JTextArea stdout = null;
@@ -118,6 +119,9 @@ public class taskInfo {
       dialog.setSize(600,400);
       dialog.setVisible(true);
       
+      process.setStdoutWatch(owatch);
+      process.setStderrWatch(ewatch);
+      
       // Start a timer that updates stdout/stderr text areas dynamically
       timer = new Timer(1000, new ActionListener() {
          public void actionPerformed(ActionEvent evt) {
@@ -133,37 +137,38 @@ public class taskInfo {
       if (! dialog.isShowing()) {
          timer.stop();
          dialog = null;
+         process.setStdoutWatch(null);
+         process.setStderrWatch(null);
          return;
       }
       if ( process.exitStatus() != -1 ) {
          // Process finished so stop timer
          // Don't return so that last flush of stdout/stderr can happen
          timer.stop();
+         process.setStdoutWatch(null);
+         process.setStderrWatch(null);
       }
-      int count = process.getStdout().size();
-      if ( count > scount ) {
-         while (scount < count) {
-            appendStdout(process.getStdout(scount++));
-         }
+      if ( owatch.size() > 0 ) {
+         appendStdout(owatch);
+         owatch.clear();
       }
-      
-      count = process.getStderr().size();
-      if ( count > ecount ) {
-         while (ecount < count) {
-            appendStderr(process.getStderr(ecount++));
-         }
+      if ( ewatch.size() > 0 ) {
+         appendStderr(ewatch);
+         ewatch.clear();
       }
    }
       
-   public void appendStdout(String s) {
+   public void appendStdout(Stack<String> s) {
       stdout.setEditable(true);
-      stdout.append(s + "\n");
+      for (int i=0; i<s.size(); ++i)
+         stdout.append(s.get(i) + "\n");
       stdout.setEditable(false);
    }
    
-   public void appendStderr(String s) {
+   public void appendStderr(Stack<String> s) {
       stderr.setEditable(true);
-      stderr.append(s + "\n");
+      for (int i=0; i<s.size(); ++i)
+         stderr.append(s.get(i) + "\n");
       stderr.setEditable(false);
    }
 
