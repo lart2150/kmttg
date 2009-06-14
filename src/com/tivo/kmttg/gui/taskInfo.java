@@ -119,6 +119,11 @@ public class taskInfo {
       dialog.setSize(600,400);
       dialog.setVisible(true);
       
+      // print available stdout/stderr
+      appendStdout(process.getStdout());
+      appendStderr(process.getStderr());
+
+      // Setup process child handler to add to owatch/ewatch stacks
       process.setStdoutWatch(owatch);
       process.setStderrWatch(ewatch);
       
@@ -159,17 +164,21 @@ public class taskInfo {
    }
       
    public void appendStdout(Stack<String> s) {
-      stdout.setEditable(true);
-      for (int i=0; i<s.size(); ++i)
-         stdout.append(s.get(i) + "\n");
-      stdout.setEditable(false);
+      if (s.size() > 0) {
+         stdout.setEditable(true);
+         for (int i=0; i<s.size(); ++i)
+            stdout.append(s.get(i) + "\n");
+         stdout.setEditable(false);
+      }
    }
    
    public void appendStderr(Stack<String> s) {
-      stderr.setEditable(true);
-      for (int i=0; i<s.size(); ++i)
-         stderr.append(s.get(i) + "\n");
-      stderr.setEditable(false);
+      if (s.size() > 0) {
+         stderr.setEditable(true);
+         for (int i=0; i<s.size(); ++i)
+            stderr.append(s.get(i) + "\n");
+         stderr.setEditable(false);
+      }
    }
 
 }
