@@ -11,8 +11,10 @@ public class ChildDataHandler extends Thread {
    InputStream inputStream;
    InputStreamReader inputStreamReader;
    BufferedReader bufferedReader;
+   int MaxEntries = 1000; // Don't save more than this number of entries
    
    public Stack<String> output;
+   public Stack<String> watch = null;
    
    ChildDataHandler(InputStream inputStream, Stack<String> output) {
      this.inputStream = inputStream;
@@ -26,7 +28,12 @@ public class ChildDataHandler extends Thread {
      try {
        String line=null;
        while((line = bufferedReader.readLine()) != null) {
+         // Limit number of entries saved
+         if (output.size() > MaxEntries)
+            output.remove(0);
          output.add(line);
+         if (watch != null)
+            watch.add(line);
        }
      } catch(Exception e) {
         output.add(e.getMessage());
