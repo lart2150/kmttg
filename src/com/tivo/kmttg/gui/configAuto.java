@@ -536,7 +536,7 @@ public class configAuto {
          text += "NOTE: You need to setup and run kmttg service on Windows for Auto Transfers to run.<br>";
          text += "For non-windows platforms you need to setup a background job for Auto Transfers to run.<br>";
          text += "You can use <b>Auto Transfers->Service</b> or <b>Auto Transfers->Background Job</b><br>";
-         text += "menus to do this. Consult documentation for more details.";
+         text += "menus to do this. Consult documentation for more details.<br>";
          text += "NOTE: Settings are saved to <b>auto.ini</b> file which resides by <b>kmttg.jar</b> file.<br>";
       }
       else if (component.equals("CANCEL")) {
@@ -578,7 +578,7 @@ public class configAuto {
          qsfix.setEnabled(true);
       }
       */
-      if (! file.isFile(config.VRD)) {
+      if (! file.isDir(config.VRD)) {
          qsfix.setSelected(false);
          qsfix.setEnabled(false);
       } else {
