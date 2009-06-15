@@ -184,6 +184,7 @@ public class gui {
          c.fill = GridBagConstraints.HORIZONTAL;
          c.gridx = gx;
          c.gridy = gy;
+         c.weightx = 1;
          c.gridwidth = 1;
          tasks.add(start, c);
          
@@ -296,6 +297,7 @@ public class gui {
          gy=0;
          c.gridx = 0;
          c.gridy = gy;
+         c.weightx = 0;
          c.gridwidth = 1;
          c.anchor = GridBagConstraints.WEST;
          c.fill = GridBagConstraints.NONE;
