@@ -229,7 +229,7 @@ public class gui {
 
          // Encoding row
          // Encoding label
-         encoding_label = new JLabel("Encoding: ", JLabel.CENTER);
+         encoding_label = new JLabel("Encoding Profile:", JLabel.CENTER);
  
          // Encoding names combo box
          encoding = new JComboBox();
@@ -252,16 +252,10 @@ public class gui {
          gx = 0; gy++;
          c.gridx = gx;
          c.gridy = gy;
-         c.gridwidth = 1;
-         tasks.add(cancel, c);
-         
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         c.gridwidth = 1;
+         c.gridwidth = 2;
          tasks.add(encoding_label, c);
          
-         gx++;
+         gx += 2;
          c.gridx = gx;
          c.gridy = gy;
          c.gridwidth = 2;
@@ -297,6 +291,26 @@ public class gui {
          // Add Tivo tabs
          SetTivos(config.TIVOS);
          
+         // Cancel pane
+         JPanel cancel_pane = new JPanel(new GridBagLayout());
+         gy=0;
+         c.gridx = 0;
+         c.gridy = gy;
+         c.gridwidth = 1;
+         c.anchor = GridBagConstraints.WEST;
+         c.fill = GridBagConstraints.NONE;
+         cancel_pane.add(cancel, c);
+         
+         c.gridx = 1;
+         c.gridy = gy;
+         c.ipady = 0;
+         c.gridwidth = 7;
+         c.weightx = 1;
+         c.weighty = 0;
+         c.anchor = GridBagConstraints.CENTER;
+         c.fill = GridBagConstraints.HORIZONTAL;
+         cancel_pane.add(progressBar, c);
+         
          // Put all panels together
          jContentPane = new JPanel(new GridBagLayout());
 
@@ -320,34 +334,36 @@ public class gui {
          gy=0;
          c.gridx = 0;
          c.gridy = gy;
-         c.ipady = 0;
-         c.weighty = 1;
-         c.fill = GridBagConstraints.BOTH;
-         jContentPane.add(tabbed_panel, c);
-
-         gy++;
-         c.gridx = 0;
-         c.gridy = gy;
-         c.ipady = 0;
-         c.weighty = 0;
-         c.fill = GridBagConstraints.HORIZONTAL;
-         jContentPane.add(progressBar, c);
-         
-         gy++;
-         c.gridx = 0;
-         c.gridy = gy;
          c.fill = GridBagConstraints.HORIZONTAL;
          c.gridheight = 2;
          c.weighty = 0;
          jContentPane.add(tasks, c);
          
-         gy += 2;
+         gy += 2;;
+         c.gridx = 0;
+         c.gridy = gy;
+         c.ipady = 0;
+         c.gridheight = 1;
+         c.weighty = 1;
+         c.fill = GridBagConstraints.BOTH;
+         jContentPane.add(tabbed_panel, c);
+         
+         gy++;
+         c.gridx = 0;
+         c.gridy = gy;
+         c.gridheight = 1;
+         c.gridwidth = 8;
+         c.weighty = 0;
+         c.fill = GridBagConstraints.HORIZONTAL;
+         jContentPane.add(cancel_pane, c);
+         
+         gy++;
          c.weightx = 1.0;    // stretch horizontally
          c.weighty = 0;      // stretch vertically
          c.ipady = 0;      //make this component tall
          c.gridheight = 1;
          c.gridwidth = 8;
-         c.gridx = gx;
+         c.gridx = 0;
          c.gridy = gy;
          c.ipady = 100;
          c.fill = GridBagConstraints.HORIZONTAL;
@@ -1283,8 +1299,8 @@ public class gui {
       }
       else if (component.equals("start")) {
          text =  "<b>START JOBS</b><br>";
-         text += "Run selected tasks for all selected items in the programs/files table above.<br>";
-         text += "First select 1 or more items in the list above to process.";
+         text += "Run selected tasks for all selected items in the programs/files table below.<br>";
+         text += "First select 1 or more items in the list below to process.";
       }
       else if (component.equals("cancel")) {
          text =  "<b>CANCEL JOBS</b><br>";
