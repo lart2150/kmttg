@@ -11,6 +11,7 @@ import java.util.Hashtable;
 import java.util.Stack;
 
 import javax.swing.Icon;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import org.jdesktop.swingx.JXTable;
@@ -97,10 +98,16 @@ public class nplTable {
       TableColumn tm;
       tm = NowPlaying.getColumnModel().getColumn(1);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+      // Right justify dates for Tivo tables only
+      if (! tivoName.equals("FILES"))
+         ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
       tm = NowPlaying.getColumnModel().getColumn(2);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
       tm = NowPlaying.getColumnModel().getColumn(3);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+      // Right justify file size for Tivo tables only
+      if (! tivoName.equals("FILES"))
+         ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
       tm = NowPlaying.getColumnModel().getColumn(4);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
                
