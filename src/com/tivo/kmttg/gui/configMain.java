@@ -50,6 +50,7 @@ public class configMain {
    private static JCheckBox beacon = null;
    private static JCheckBox create_subfolder = null;
    private static JCheckBox UseAdscan = null;
+   private static JCheckBox VrdReview = null;
    private static JCheckBox toolTips = null;
    private static JTextField tivo_name = null;
    private static JTextField tivo_ip = null;
@@ -285,6 +286,12 @@ public class configMain {
          UseAdscan.setSelected(true);
       else
          UseAdscan.setSelected(false);
+            
+      // VrdReview
+      if (config.VrdReview == 1)
+         VrdReview.setSelected(true);
+      else
+         VrdReview.setSelected(false);
       
       // toolTips
       if (config.toolTips == 1)
@@ -426,6 +433,12 @@ public class configMain {
          config.UseAdscan = 1;
       else
          config.UseAdscan = 0;
+      
+      // VrdReview
+      if (VrdReview.isSelected())
+         config.VrdReview = 1;
+      else
+         config.VrdReview = 0;
       
       // toolTips
       if (toolTips.isSelected())
@@ -797,6 +810,7 @@ public class configMain {
       remove_mpeg = new javax.swing.JCheckBox();
       create_subfolder = new javax.swing.JCheckBox();
       UseAdscan = new javax.swing.JCheckBox();
+      VrdReview = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
       JLabel file_naming_label = new javax.swing.JLabel();
       JLabel tivo_output_dir_label = new javax.swing.JLabel();
@@ -855,6 +869,7 @@ public class configMain {
       remove_mpeg.setText("Remove .mpg file after encode");
       create_subfolder.setText("Create sub-folder for each download");
       UseAdscan.setText("Use VideoRedo AdScan instead of comskip");
+      VrdReview.setText("Use VideoRedo GUI to review detected commercials");
       MAK_label.setText("MAK"); 
       file_naming_label.setText("File Naming"); 
       tivo_output_dir_label.setText(".TiVo Output Dir"); 
@@ -1449,6 +1464,12 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       programs_panel.add(UseAdscan, c);      
+
+      // VrdReview
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      programs_panel.add(VrdReview, c);      
       
       // Other panel
       JPanel other = new JPanel(new GridBagLayout());
@@ -1571,6 +1592,7 @@ public class configMain {
       beacon.setToolTipText(getToolTip("beacon"));
       create_subfolder.setToolTipText(getToolTip("create_subfolder"));
       UseAdscan.setToolTipText(getToolTip("UseAdscan"));
+      VrdReview.setToolTipText(getToolTip("VrdReview"));
       files_path.setToolTipText(getToolTip("files_path"));
       MAK.setToolTipText(getToolTip("MAK"));
       file_naming.setToolTipText(getToolTip("file_naming"));
@@ -1664,6 +1686,15 @@ public class configMain {
          text += "If you have VideoRedo and have configured kmttg with the installation path<br>";
          text += "to VideoRedo, when this option is enabled kmttg will use VideoRedo instead<br>";
          text += "of <b>comskip</b> for commercials detection.";
+      }
+      else if (component.equals("VrdReview")) {
+         text =  "<b>Use VideoRedo GUI to review detected commercials</b><br>";
+         text += "If you have VideoRedo and have configured kmttg with the installation path<br>";
+         text += "to VideoRedo, when this option is enabled kmttg will start VideoRedo GUI<br>";
+         text += "to allow you to manually review and update the detected commercial segments<br>";
+         text += "before starting the commercial cutting job. kmttg will wait until you close<br>";
+         text += "the VideRedo GUI before proceeding. NOTE: Be sure to save your changes to .VPrj file<br>";
+         text += "before you exit VideoRedo or they will not be used in commercial cut step.";
       }
       else if (component.equals("files_path")) {
          text =  "<b>FILES Default Path</b><br>";
