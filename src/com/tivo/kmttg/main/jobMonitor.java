@@ -620,6 +620,19 @@ public class jobMonitor {
          }
       }
       
+      // Schedule VideoRedo GUI manual cuts review if requested (GUI mode only)
+      if (comskip && config.VrdReview == 1 && config.GUI && file.isDir(config.VRD)) {
+         familyId += 0.1;
+         jobData job = new jobData();
+         job.tivoName     = tivoName;
+         job.type         = "vrdreview";
+         job.name         = config.VRD;
+         job.familyId     = familyId;
+         job.mpegFile     = mpegFile;
+         job.vprjFile     = string.replaceSuffix(edlFile, ".VPrj");
+         submitNewJob(job);
+      }
+      
       if (comcut) {
          if ( file.isFile(config.VRD + File.separator + "vp.vbs") ) {
             familyId += 0.1;

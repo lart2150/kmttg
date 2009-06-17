@@ -23,6 +23,7 @@ public class jobData {
    public qsfix        process_qsfix = null;
    public comskip      process_comskip = null;
    public adscan       process_adscan = null;
+   public vrdreview    process_vrdreview = null;
    public comcut       process_comcut = null;
    public adcut        process_adcut = null;
    public captions     process_captions = null;
@@ -91,6 +92,9 @@ public class jobData {
       else if (type.matches("adscan")) {
          return process_adscan.check();
       }         
+      else if (type.matches("vrdreview")) {
+         return process_vrdreview.check();
+      }         
       else if (type.matches("comcut")) {
          return process_comcut.check();
       }         
@@ -139,6 +143,9 @@ public class jobData {
       }
       else if (type.equals("adscan")) {
          return process_adscan.getProcess();
+      }
+      else if (type.equals("vrdreview")) {
+         return process_vrdreview.getProcess();
       }
       else if (type.equals("comcut")) {
          return process_comcut.getProcess();
@@ -193,6 +200,9 @@ public class jobData {
             file = vprjFile;
       }
       else if (type.equals("adscan")) {
+         file = vprjFile;
+      }
+      else if (type.equals("vrdreview")) {
          file = vprjFile;
       }
       else if (type.equals("comcut")) {
@@ -254,6 +264,11 @@ public class jobData {
       
       else if (job.type.equals("adscan")) {  
          adscan proc = new adscan(job);
+         success = proc.launchJob();
+      }
+      
+      else if (job.type.equals("vrdreview")) {  
+         vrdreview proc = new vrdreview(job);
          success = proc.launchJob();
       }
       
