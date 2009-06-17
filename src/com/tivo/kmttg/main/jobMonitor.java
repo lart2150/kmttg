@@ -242,7 +242,8 @@ public class jobMonitor {
       Stack<jobData> new_jobs = new Stack<jobData>();
       for (int i=0; i<JOBS.size(); ++i) {
          if ( job.job_name != null && JOBS.get(i).job_name != null ) {
-            if ( ! JOBS.get(i).job_name.matches(job.job_name) ) {
+            // NOTE: job.job_name surrounded by \Q..\E to escape any special regex chars
+            if ( ! JOBS.get(i).job_name.matches("\\Q"+job.job_name+"\\E") ) {
                new_jobs.add(JOBS.get(i));
             }
          }

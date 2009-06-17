@@ -307,7 +307,8 @@ public class nplTable {
          );
          log.warn(message);
          if (config.GUI) {
-            String status = message.replaceFirst(tivoName, "");
+            // NOTE: tivoName surrounded by \Q..\E to escape any special regex chars
+            String status = message.replaceFirst("\\Q"+tivoName+"\\E", "");
             status += " (Last updated: " + getStatusTime(new Date().getTime()) + ")";
             config.gui.nplTab_UpdateStatus(tivoName, status);
          }
