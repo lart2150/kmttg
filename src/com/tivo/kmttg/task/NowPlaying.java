@@ -178,6 +178,7 @@ public class NowPlaying  {
             log.error("Exit code: " + exit_code);
             log.error("Check YOUR MAK & IP settings");
             process.printStderr();
+            jobMonitor.removeFromJobList(job);
          } else {
             log.warn("NPL job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");
