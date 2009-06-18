@@ -131,7 +131,9 @@ public class jobMonitor {
          }
          
          // Don't run more than 'MaxJobs' active jobs at a time
-         if (cpuActiveJobs > config.MaxJobs) continue;
+         if ( ! job.type.equals("download") && ! job.type.equals("metadata") ) {
+            if (cpuActiveJobs >= config.MaxJobs) continue;
+         }
 
          // OK to launch job
          cpuActiveJobs = jobData.launch(job, cpuActiveJobs);
