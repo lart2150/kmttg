@@ -103,7 +103,6 @@ public class streamfix {
       if (exit_code == -1) {
          // Still running
          if (config.GUI) {
-            // Update STATUS column
             if ( file.isFile(job.mpegFile_fix) ) {               
                // Update status in job table
                if ( job.tivoFileSize == null ) {
@@ -111,14 +110,19 @@ public class streamfix {
                }
                String s = String.format("%.2f MB", (float)file.size(job.mpegFile_fix)/Math.pow(2,20));
                String t = jobMonitor.getElapsedTime(job.time);
-               config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);
+               int pct = Integer.parseInt(String.format("%d", file.size(job.mpegFile_fix)*100/job.tivoFileSize));
                
                if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                  // Update STATUS column
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);
+                  
                   // If 1st job then update title & progress bar
-                  int pct = Integer.parseInt(String.format("%d", file.size(job.mpegFile_fix)*100/job.tivoFileSize));
                   String title = String.format("streamfix: %d%% %s", pct, config.kmttg);
                   config.gui.setTitle(title);
                   config.gui.progressBar_setValue(pct);
+               } else {
+                  // Update STATUS column
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, String.format("%d%%",pct) + "---" + s);
                }
             }
          }

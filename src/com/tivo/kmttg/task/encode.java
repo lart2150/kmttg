@@ -110,43 +110,52 @@ public class encode {
       if (exit_code == -1) {
          // Still running
          if (config.GUI) {
-            // Update STATUS column
             if ( file.isFile(job.encodeFile) ) {               
-               // Update status in job table
                String s = String.format("%.2f MB", (float)file.size(job.encodeFile)/Math.pow(2,20));
                String t = jobMonitor.getElapsedTime(job.time);
-               config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);
                
+               // Try and determine pct complete
+               int pct = -1;
+               // For ffmpeg job get show duration for computing pct complete
+               if (process.toString().contains(config.ffmpeg)) {
+                  // Get duration from ffmpeg stderr if not yet available
+                  if ( job.duration == null ) {
+                     long duration = ffmpegGetDuration();
+                     if ( duration > 0 ) {
+                        job.duration = duration;
+                     }
+                  }
+                  // Get time from ffmpeg stderr
+                  long time = ffmpegGetTime();
+                  if (job.duration != null && time > 0) {
+                     Long duration = (Long)job.duration;
+                     pct = Integer.parseInt(String.format("%d", time*100/duration));
+                  }
+               }
+               
+               else if (process.toString().contains(config.handbrake)) {
+                  // Get pct complete from handbrake stdout
+                  pct = handbrakeGetPct();
+               }
+                              
                if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                  // Update STATUS column
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);
+                  
                   // If 1st job then update title with pct complete
-                  
-                  // For ffmpeg job get show duration for computing pct complete
-                  if (process.toString().contains(config.ffmpeg)) {
-                     // Get duration from ffmpeg stderr if not yet available
-                     if ( job.duration == null ) {
-                        long duration = ffmpegGetDuration();
-                        if ( duration > 0 ) {
-                           job.duration = duration;
-                        }
-                     }
-                     // Get time from ffmpeg stderr
-                     long time = ffmpegGetTime();
-                     if (job.duration != null && time > 0) {
-                        Long duration = (Long)job.duration;
-                        int pct = Integer.parseInt(String.format("%d", time*100/duration));
-                        String title = String.format("encode: %d%% %s", pct, config.kmttg);
-                        config.gui.setTitle(title);
-                        config.gui.progressBar_setValue(pct);
-                     }
-                  }
-                  
-                  else if (process.toString().contains(config.handbrake)) {
-                     // Get pct complete from handbrake stdout
-                     int pct = handbrakeGetPct();
-                     String title = String.format("encode: %d%% %s", pct, config.kmttg);
-                     config.gui.setTitle(title);
-                     config.gui.progressBar_setValue(pct);
-                  }
+                  String title = null;
+                  if (pct != -1)
+                     title = String.format("encode: %d%% %s", pct, config.kmttg);
+                  else
+                     title = String.format("encode: %s %s", t, config.kmttg);
+                  config.gui.setTitle(title);
+                  config.gui.progressBar_setValue(pct);                  
+               } else {
+                  // Update STATUS column
+                  if (pct != -1)
+                     config.gui.jobTab_UpdateJobMonitorRowStatus(job, String.format("%d%%",pct) + "---" + s);
+                  else
+                     config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);                     
                }
             } else {
                // File not yet available so simply update time

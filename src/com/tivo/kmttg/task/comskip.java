@@ -113,17 +113,23 @@ public class comskip {
       if (exit_code == -1) {
          // Still running
          if (config.GUI) {
-            // Update STATUS column
-            // Update status in job table
             String t = jobMonitor.getElapsedTime(job.time);
-            config.gui.jobTab_UpdateJobMonitorRowStatus(job, t); 
+            int pct = comskipGetPct();
             
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
+               // Update STATUS column
+               config.gui.jobTab_UpdateJobMonitorRowStatus(job, t);
+               
                // If 1st job then update title & progress bar
-               int pct = comskipGetPct();
                String title = String.format("comskip: %d%% %s", pct, config.kmttg);
                config.gui.setTitle(title);
                config.gui.progressBar_setValue(pct);
+            } else {
+               // Update STATUS column
+               if (pct != 0)
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, String.format("%d%%",pct));
+               else
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, t);
             }
          }
         return true;
