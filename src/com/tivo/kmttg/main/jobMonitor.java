@@ -202,6 +202,11 @@ public class jobMonitor {
       
       // Get space available (in bytes)
       long space = file.freeSpace(dir);
+      // If 0 then try again just in case...
+      if (space == 0)
+         space = file.freeSpace(dir);
+      // If still 0 then give up and return true
+      if (space == 0) return true;
       
       if (space <= min) {
          String message = String.format(
