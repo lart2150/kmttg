@@ -143,13 +143,11 @@ public class encode {
                   config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);
                   
                   // If 1st job then update title with pct complete
-                  String title = null;
-                  if (pct != -1)
-                     title = String.format("encode: %d%% %s", pct, config.kmttg);
-                  else
-                     title = String.format("encode: %s %s", t, config.kmttg);
-                  config.gui.setTitle(title);
-                  config.gui.progressBar_setValue(pct);                  
+                  if (pct != -1) {
+                     String title = String.format("encode: %d%% %s", pct, config.kmttg);
+                     config.gui.setTitle(title);
+                     config.gui.progressBar_setValue(pct);                  
+                  }
                } else {
                   // Update STATUS column
                   if (pct != -1)
