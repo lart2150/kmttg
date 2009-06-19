@@ -485,7 +485,7 @@ public class jobMonitor {
       if (comcut) {
          if ( ! comskip ) {
             if (file.isDir(config.VRD)) {
-               if ( ! file.isFile(string.replaceSuffix(edlFile, ".VPrj")) ) {
+               if ( ! file.isFile(string.replaceSuffix(mpegFile, ".VPrj")) ) {
                   comskip = true;
                }
             } else {
@@ -607,7 +607,7 @@ public class jobMonitor {
             job.name         = config.VRD;
             job.familyId     = familyId;
             job.mpegFile     = mpegFile;
-            job.vprjFile     = string.replaceSuffix(edlFile, ".VPrj");
+            job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
             submitNewJob(job);
          } else {
             familyId += 0.1;
@@ -622,7 +622,7 @@ public class jobMonitor {
                job.mpegFile  = mpegFile;
             job.edlFile      = edlFile;
             if (file.isDir(config.VRD))
-               job.vprjFile = string.replaceSuffix(edlFile, ".VPrj");
+               job.vprjFile = string.replaceSuffix(mpegFile, ".VPrj");
             submitNewJob(job);            
          }
       }
@@ -636,7 +636,7 @@ public class jobMonitor {
          job.name         = config.VRD;
          job.familyId     = familyId;
          job.mpegFile     = mpegFile;
-         job.vprjFile     = string.replaceSuffix(edlFile, ".VPrj");
+         job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
          submitNewJob(job);
       }
       
