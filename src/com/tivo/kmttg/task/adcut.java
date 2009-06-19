@@ -22,7 +22,7 @@ public class adcut {
    // constructor
    public adcut(jobData job) {
       debug.print("job=" + job);
-      job.vprjFile = string.replaceSuffix(job.edlFile, ".VPrj");
+      job.vprjFile = string.replaceSuffix(job.mpegFile, ".VPrj");
 
       this.job = job;
    }
@@ -94,7 +94,6 @@ public class adcut {
       command.add("/d");
       command.add("/q");
       command.add("/na");
-      command.add(job.vprjFile);
       process = new backgroundProcess();
       log.print(">> Running adcut on " + job.mpegFile + " ...");
       if ( process.run(command) ) {
