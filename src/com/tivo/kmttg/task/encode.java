@@ -137,20 +137,29 @@ public class encode {
                   // Get pct complete from handbrake stdout
                   pct = handbrakeGetPct();
                }
+               
+               else {
+                  // Some other encoder
+                  pct = -2;
+               }
                               
                if ( jobMonitor.isFirstJobInMonitor(job) ) {
                   // Update STATUS column
                   config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);
                   
                   // If 1st job then update title with pct complete
-                  if (pct != -1) {
+                  if (pct > -1) {
                      String title = String.format("encode: %d%% %s", pct, config.kmttg);
                      config.gui.setTitle(title);
                      config.gui.progressBar_setValue(pct);                  
                   }
+                  if (pct == -2) {
+                     String title = String.format("encode: %s %s", t, config.kmttg);
+                     config.gui.setTitle(title);                     
+                  }
                } else {
                   // Update STATUS column
-                  if (pct != -1)
+                  if (pct > -1)
                      config.gui.jobTab_UpdateJobMonitorRowStatus(job, String.format("%d%%",pct) + "---" + s);
                   else
                      config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);                     
