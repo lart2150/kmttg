@@ -1006,11 +1006,19 @@ public class gui {
    // Set encoding combobox choices
    public void SetEncodings(Stack<String> values) {
       debug.print("values=" + values);
+      
+      // Get existing setting in combobox
+      String current = null;
+      if (encoding.getComponentCount() > 0) {
+         current = (String)encoding.getSelectedItem();
+      }
       String[] names = new String[values.size()];
       for (int i=0; i<values.size(); ++i) {
          names[i] = values.get(i);
       }
       combobox.SetValues(encoding, names);
+      if (current != null)
+         encoding.setSelectedItem(current);
    }
    
    private void CreateImages() {
