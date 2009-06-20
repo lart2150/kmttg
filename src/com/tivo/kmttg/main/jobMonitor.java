@@ -24,6 +24,7 @@ public class jobMonitor {
    //   * Check status of active job and take action if running job is completed
    //   * Launch a job in queue if appropriate
    //     - Restrict to 1 download per Tivo at a time
+   //     - Restrict to 1 VideoRedo job at a time
    //     - Restrict CPU intensive jobs to defined 'MaxJobs' (default of 1)
    //     - Order dependancy of jobs operating on same program   
    static void monitor(gui gui, Timer timer) {
@@ -95,7 +96,9 @@ public class jobMonitor {
       
       // Hash to track running downloads per Tivo
       // Also count number of cpu intensive jobs currently running
+      // Also count number of VideoRedo jobs currently running
       int cpuActiveJobs = 0;
+      int VideoRedoJobs = 0;
       Hashtable<String,Integer> tivoDownload = new Hashtable<String,Integer>();
       for (int i=0; i<running.size(); i++) {
          job = running.get(i);
@@ -106,6 +109,9 @@ public class jobMonitor {
             tivoDownload.put(job.tivoName, tivoDownload.get(job.tivoName)+1);
          } else {
             cpuActiveJobs++;
+            if ( isVideoRedoJob(job) ) {
+               VideoRedoJobs++;
+            }
          }
       }
       
@@ -134,6 +140,11 @@ public class jobMonitor {
          if ( ! job.type.equals("download") && ! job.type.equals("metadata") ) {
             if (cpuActiveJobs >= config.MaxJobs) continue;
          }
+         
+         // Don't launch more than one VideoRedo job at a time
+         if ( isVideoRedoJob(job) ) {
+            if (VideoRedoJobs > 0) continue;
+         }
 
          // OK to launch job
          cpuActiveJobs = jobData.launch(job, cpuActiveJobs);
@@ -148,6 +159,10 @@ public class jobMonitor {
                tivoDownload.put(job.tivoName, tivoDownload.get(job.tivoName)+1);
             }
          }
+         
+         // Update VideoRedoJobs number
+         if ( isVideoRedoJob(job) )
+            VideoRedoJobs++;
       }
    }
 
@@ -764,6 +779,14 @@ public class jobMonitor {
             }
          }
       }
+   }
+
+   // Return true if this job uses VideoRedo
+   private static Boolean isVideoRedoJob(jobData job) {
+      if ( job.type.equals("qsfix") || job.type.equals("adscan") || job.type.equals("vrdreview") || job.type.equals("adcut") ) {
+         return true;
+      }
+      return false;
    }
    
 }
