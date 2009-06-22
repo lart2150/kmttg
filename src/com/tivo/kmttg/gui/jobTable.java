@@ -21,7 +21,7 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.util.debug;
 
 public class jobTable {
-   private String[] TITLE_cols = {"STATUS", "JOB", "DESCRIPTION"};
+   private String[] TITLE_cols = {"STATUS", "JOB", "SOURCE", "OUTPUT"};
 
    public JXTable JobMonitor = null;
    
@@ -39,6 +39,8 @@ public class jobTable {
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
       tm = JobMonitor.getColumnModel().getColumn(2);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+      tm = JobMonitor.getColumnModel().getColumn(3);
+      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
                
       //JobMonitor.setFillsViewportHeight(true);
       JobMonitor.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -60,7 +62,7 @@ public class jobTable {
          if (job.status.equals("running")) {
             new taskInfo(
                config.gui.getJFrame(),
-               job.type + ": " + (String)JobMonitor.getValueAt(row, 2),
+               job.type + ": " + "Tivo=" + (String)JobMonitor.getValueAt(row, 2) + "---Output=" + (String)JobMonitor.getValueAt(row, 3),
                job.getProcess()
             );
          }
@@ -153,12 +155,13 @@ public class jobTable {
        return null;
     }
     
-    public void AddJobMonitorRow(jobData job, String description) {
-       debug.print("job=" + job + " description=" + description);
-       Object[] info = new Object[3];
+    public void AddJobMonitorRow(jobData job, String source, String output) {
+       debug.print("job=" + job + " source=" + source + " output=" + output);
+       Object[] info = new Object[TITLE_cols.length];
        info[0] = job.status;
        info[1] = new jobEntry(job);
-       info[2] = description;
+       info[2] = source;
+       info[3] = output;
        AddRow(JobMonitor, info);
        
        // Adjust column widths to data
