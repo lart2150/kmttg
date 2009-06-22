@@ -1359,8 +1359,8 @@ public class gui {
    public void jobTab_UpdateJobMonitorRowStatus(jobData job, String status) {
       jobTab.UpdateJobMonitorRowStatus(job, status);
    }
-   public void jobTab_AddJobMonitorRow(jobData job, String description) {
-      jobTab.AddJobMonitorRow(job, description);
+   public void jobTab_AddJobMonitorRow(jobData job, String source, String output) {
+      jobTab.AddJobMonitorRow(job, source, output);
    }
    public void jobTab_RemoveJobMonitorRow(jobData job) {
       jobTab.RemoveJobMonitorRow(job);
