@@ -12,6 +12,7 @@
         <property name="source" value="1.5"/>
     <path id="main.classpath">
     	<pathelement location="${lib}/swinglabs-0.8.0.jar"/>
+    	<pathelement location="${lib}/jmdns.jar"/>
     </path>
 
     <target name="clean">
@@ -42,6 +43,7 @@
 		<fileset dir="${main}/bin"/>
 		<fileset dir="${main}/images"/>
                 <zipgroupfileset dir="${lib}" includes="swinglabs-0.8.0.jar"/>
+                <zipgroupfileset dir="${lib}" includes="jmdns.jar"/>
      <manifest>  
        <attribute name="Main-Class" value="${main.class}" />  
      </manifest>  
