@@ -24,8 +24,8 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
-import com.tivo.kmttg.main.beacon;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.mdns;
 import com.tivo.kmttg.task.custom;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -392,10 +392,12 @@ public class configMain {
       // Beacon
       if (beacon.isSelected()) {
          config.CheckBeacon = 1;
-         if (config.tivo_beacon == null) config.tivo_beacon = new beacon();
+         //if (config.tivo_beacon == null) config.tivo_beacon = new beacon();
+         if (config.jmdns == null) config.jmdns = new mdns();
       } else {
          config.CheckBeacon = 0;
-         config.tivo_beacon = null;
+         config.jmdns.close();
+         //config.tivo_beacon = null;
       }
             
       // Remove .TiVo

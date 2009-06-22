@@ -96,7 +96,8 @@ public class config {
    public static String perl = "perl";
    
    // tivo beacon listening
-   public static beacon tivo_beacon;
+   //public static beacon tivo_beacon;
+   public static mdns jmdns = null;
    
    public static Stack<String> parse() {
       debug.print("");
@@ -200,7 +201,8 @@ public class config {
          errors.add("Encode Dir does not exist: " + encodeDir);
       
       // Start tivo beacon listener if option enabled
-      if (CheckBeacon == 1) tivo_beacon = new beacon();
+      //if (CheckBeacon == 1) tivo_beacon = new beacon();
+      if (CheckBeacon == 1) jmdns = new mdns();
 
       return errors;
    }            

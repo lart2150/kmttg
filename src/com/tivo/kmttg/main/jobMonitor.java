@@ -36,7 +36,9 @@ public class jobMonitor {
          return;
       }
       
-      tivoBeaconUpdate();
+      // Check for new tivos
+      if (config.jmdns != null) config.jmdns.process();
+      //tivoBeaconUpdate();
       
       if ( JOBS != null && ! JOBS.isEmpty() ) {
          for (int i=0; i<JOBS.size(); ++i) {
@@ -763,7 +765,7 @@ public class jobMonitor {
    }
 
    // Listen on tivo_beacon for any newly detected tivos
-   private static void tivoBeaconUpdate() {
+   /*private static void tivoBeaconUpdate() {
       if (config.CheckBeacon == 1 && config.tivo_beacon != null) {
          Hashtable<String,String> b = config.tivo_beacon.listen();
          if (b != null) {
@@ -779,7 +781,7 @@ public class jobMonitor {
             }
          }
       }
-   }
+   }*/
 
    // Return true if this job uses VideoRedo
    private static Boolean isVideoRedoJob(jobData job) {
