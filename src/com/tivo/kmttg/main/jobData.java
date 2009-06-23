@@ -171,6 +171,59 @@ public class jobData {
       return null;
    }
    
+   public String getInputFile() {
+      String file = "";
+      if (type.equals("playlist")) {
+         file = tivoName;
+      }
+      else if (type.equals("metadata")) {
+         file = tivoName;
+      }
+      else if (type.equals("metadataTivo")) {
+         file = tivoFile;
+      }
+      else if (type.equals("download")) {
+         file = url;
+      }
+      else if (type.equals("decrypt")) {
+         file = tivoFile;
+      }
+      else if (type.equals("qsfix")) {
+         file = mpegFile;
+      }
+      else if (type.equals("captions")) {
+         file = videoFile;
+      }
+      else if (type.equals("comskip")) {
+         file = mpegFile;
+      }
+      else if (type.equals("adscan")) {
+         file = mpegFile;
+      }
+      else if (type.equals("vrdreview")) {
+         file = vprjFile;
+      }
+      else if (type.equals("comcut")) {
+         file = mpegFile;
+      }
+      else if (type.equals("adcut")) {
+         file = vprjFile;
+      }
+      else if (type.equals("encode")) {
+         file = inputFile;
+      }
+      else if (type.equals("atomic")) {
+         file = encodeFile;
+      }
+      else if (type.equals("custom")) {
+         file = tivoFile;
+      }
+      else if (type.equals("streamfix")) {
+         file = mpegFile;
+      }
+      return file;
+   }
+   
    public String getOutputFile() {
       String file = "";
       if (type.equals("playlist")) {
