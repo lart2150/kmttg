@@ -80,6 +80,7 @@ public class config {
    public static gui gui;                   // Access to any GUI functions through here
    public static String gui_settings = null; // File in which to save GUI settings on exit
    public static int toolTips = 1;          // If 1 then display component toolTips
+   public static int jobMonitorFullPaths = 1; // If 1 then show full paths in job monitor
    public static int toolTipsTimeout = 20;  // Set # seconds for tooltip display to timeout
 
    // GUI table related
