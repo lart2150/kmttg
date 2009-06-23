@@ -52,6 +52,7 @@ public class configMain {
    private static JCheckBox UseAdscan = null;
    private static JCheckBox VrdReview = null;
    private static JCheckBox toolTips = null;
+   private static JCheckBox jobMonitorFullPaths = null;
    private static JTextField tivo_name = null;
    private static JTextField tivo_ip = null;
    private static JTextField files_path = null;
@@ -299,6 +300,12 @@ public class configMain {
       else
          toolTips.setSelected(false);
       
+      // toolTips
+      if (config.jobMonitorFullPaths == 1)
+         jobMonitorFullPaths.setSelected(true);
+      else
+         jobMonitorFullPaths.setSelected(false);
+      
       // Files naming
       file_naming.setText(config.tivoFileNameFormat);
       
@@ -448,6 +455,12 @@ public class configMain {
       else
          config.toolTips = 0;
       config.gui.enableToolTips(config.toolTips);
+      
+      // jobMonitorFullPaths
+      if (jobMonitorFullPaths.isSelected())
+         config.jobMonitorFullPaths = 1;
+      else
+         config.jobMonitorFullPaths = 0;
       
       // Files naming
       value = file_naming.getText();
@@ -841,6 +854,7 @@ public class configMain {
       JLabel disk_space_label = new javax.swing.JLabel();
       beacon = new javax.swing.JCheckBox();
       toolTips = new javax.swing.JCheckBox();
+      jobMonitorFullPaths = new javax.swing.JCheckBox();
       JLabel toolTipsTimeout_label = new javax.swing.JLabel();
       OK = new javax.swing.JButton();
       CANCEL = new javax.swing.JButton();
@@ -925,6 +939,8 @@ public class configMain {
       
       toolTips.setText("Display toolTips");
       toolTipsTimeout_label.setText("toolTip timeout (secs)");
+      
+      jobMonitorFullPaths.setText("Show full paths in Job Monitor");
       
       OK.setText("OK");
       OK.setBackground(Color.green);
@@ -1473,64 +1489,70 @@ public class configMain {
       c.gridy = gy;
       programs_panel.add(VrdReview, c);      
       
-      // Other panel
-      JPanel other = new JPanel(new GridBagLayout());
+      // General panel
+      JPanel general = new JPanel(new GridBagLayout());
       
       // MAK
       gy=0;
       c.gridx = 0;
       c.gridy = gy;
-      other.add(MAK_label, c);
+      general.add(MAK_label, c);
 
       c.gridx = 1;
       c.gridy = gy;
-      other.add(MAK, c);
+      general.add(MAK, c);
             
       // active job limit
       gy++;
       c.gridx = 0;
       c.gridy = gy;
-      other.add(active_job_limit_label, c);
+      general.add(active_job_limit_label, c);
 
       c.gridx = 1;
       c.gridy = gy;
-      other.add(active_job_limit, c);
+      general.add(active_job_limit, c);
       
       // cpu_cores
       gy++;
       c.gridx = 0;
       c.gridy = gy;
-      other.add(cpu_cores_label, c);
+      general.add(cpu_cores_label, c);
       
       c.gridx = 1;
       c.gridy = gy;
-      other.add(cpu_cores, c);
+      general.add(cpu_cores, c);
       
       // wan http port
       gy++;
       c.gridx = 0;
       c.gridy = gy;
-      other.add(wan_http_port_label, c);
+      general.add(wan_http_port_label, c);
 
       c.gridx = 1;
       c.gridy = gy;
-      other.add(wan_http_port, c);
+      general.add(wan_http_port, c);
 
       // toolTipsTimeout
       gy++;
       c.gridx = 0;
       c.gridy = gy;
-      other.add(toolTipsTimeout_label, c);
+      general.add(toolTipsTimeout_label, c);
       
       c.gridx = 1;
       c.gridy = gy;
-      other.add(toolTipsTimeout, c);
+      general.add(toolTipsTimeout, c);
       
       // toolTips
       gy++;
       c.gridx = 0;
       c.gridy = gy;
-      other.add(toolTips, c);
+      general.add(toolTips, c);
+      
+      // jobMonitorFullPaths
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      general.add(jobMonitorFullPaths, c);
       
       // Common panel
       c.ipady = 0;
@@ -1560,7 +1582,7 @@ public class configMain {
       tabbed_panel.add("File Settings", files_panel);
       tabbed_panel.add("Programs", programs_panel);
       tabbed_panel.add("Tivos", tivo_panel);
-      tabbed_panel.add("Other", other);
+      tabbed_panel.add("General", general);
       
       // Main panel
       JPanel main_panel = new JPanel(new GridBagLayout());
@@ -1620,7 +1642,8 @@ public class configMain {
       customFiles.setToolTipText(getToolTip("customFiles")); 
       OK.setToolTipText(getToolTip("OK")); 
       CANCEL.setToolTipText(getToolTip("CANCEL")); 
-      toolTips.setToolTipText(getToolTip("toolTips")); 
+      toolTips.setToolTipText(getToolTip("toolTips"));
+      jobMonitorFullPaths.setToolTipText(getToolTip("jobMonitorFullPaths"));
       toolTipsTimeout.setToolTipText(getToolTip("toolTipsTimeout")); 
       cpu_cores.setToolTipText(getToolTip("cpu_cores"));
    }
@@ -1883,6 +1906,10 @@ public class configMain {
       else if (component.equals("toolTips")) {
          text =  "<b>Display toolTips</b><br>";
          text += "Enable or disable display of these mouse over popup toolTip messages.<br>";
+      }
+      else if (component.equals("jobMonitorFullPaths")) {
+         text =  "<b>Show full paths in Job Monitor</b><br>";
+         text += "Enable or disable display of full paths in Job Monitor OUTPUT column.<br>";
       }
       else if (component.equals("toolTipsTimeout")) {
          text =  "<b>toolTip timeout (secs)</b><br>";
