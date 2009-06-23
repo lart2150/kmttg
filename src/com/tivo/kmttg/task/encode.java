@@ -1,6 +1,7 @@
 package com.tivo.kmttg.task;
 
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Stack;
 
 import com.tivo.kmttg.main.config;
@@ -287,6 +288,49 @@ public class encode {
          }
       }
       return 0;
+   }
+   
+   private String getPaddingString(Hashtable<String,String> h) {
+      // Get inputs
+      float inputPAR = -1, outputPAR = -1, DAR = -1;
+      if (h.contains("inputPAR"))
+         inputPAR = Float.parseFloat(h.get("inputPAR"));
+      if (h.contains("outputPAR"))
+         outputPAR = Float.parseFloat(h.get("outputPAR"));
+      DAR = Float.parseFloat(h.get("outputPAR"));      
+      int inputWidth  = Integer.parseInt(h.get("inputWidth"));
+      int inputHeight = Integer.parseInt(h.get("inputHeight"));
+      int outputWidth  = Integer.parseInt(h.get("outputWidth"));
+      int outputHeight = Integer.parseInt(h.get("outputHeight"));
+      
+      // Set PAR if not already passed in
+      if (inputPAR < 0)
+         inputPAR = (float)inputWidth / (float)inputHeight;
+      if (outputPAR < 0)
+         outputPAR = (float)outputWidth / (float)outputHeight;
+
+      // Calculate properly scaled width and height
+      int scaledWidth, scaledHeight;      
+      if (DAR > outputPAR) {
+          scaledWidth  = outputWidth;
+          scaledHeight = (int)(outputWidth / DAR);
+      } else {
+          scaledHeight = outputHeight;
+          scaledWidth  = (int)(outputHeight * DAR);
+      }
+      
+      // Calculate padding values
+      int padx = (scaledWidth - outputWidth)/2;
+      int pady = (scaledHeight - outputHeight)/2;
+      
+      // Produce padding options for ffmpeg
+      String padding = "";
+      if (padx > 0)
+         padding += String.format(" -padtop %d -padbottom %d", padx, padx);
+      if (pady > 0)
+         padding += String.format(" -padleft %d -padright %d", pady, pady);
+      
+      return padding;
    }
    
 }
