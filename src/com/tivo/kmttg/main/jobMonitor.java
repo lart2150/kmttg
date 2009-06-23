@@ -251,10 +251,10 @@ public class jobMonitor {
       
       // Update GUI Job Monitor
       if (config.GUI) {
-         String s = "Tivo=" + job.tivoName;
+         String output = "";
          if (! job.type.equals("playlist") && ! job.type.equals("custom"))
-            s += "---Output=" + job.getOutputFile();         
-         if (config.GUI) config.gui.jobTab_AddJobMonitorRow(job, s);
+            output = job.getOutputFile();         
+         if (config.GUI) config.gui.jobTab_AddJobMonitorRow(job, job.tivoName, output);
       }
       
       // Add job to master job list
