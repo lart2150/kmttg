@@ -252,8 +252,12 @@ public class jobMonitor {
       // Update GUI Job Monitor
       if (config.GUI) {
          String output = "";
-         if (! job.type.equals("playlist") && ! job.type.equals("custom"))
-            output = job.getOutputFile();         
+         if (! job.type.equals("playlist") && ! job.type.equals("custom")) {
+            if (config.jobMonitorFullPaths == 1)
+               output = job.getOutputFile();
+            else
+               output = string.basename(job.getOutputFile());
+         }
          if (config.GUI) config.gui.jobTab_AddJobMonitorRow(job, job.tivoName, output);
       }
       
