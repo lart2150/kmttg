@@ -147,6 +147,9 @@ public class jobMonitor {
          if ( isVideoRedoJob(job) ) {
             if (VideoRedoJobs > 0) continue;
          }
+         
+         // Check for redundant or job dependencies
+         if ( ! okToLaunch(job) ) continue;
 
          // OK to launch job
          cpuActiveJobs = jobData.launch(job, cpuActiveJobs);
@@ -290,6 +293,43 @@ public class jobMonitor {
       job.status   = "queued";      
       JOB++;            
       addToJobList(job);
+   }
+   
+   // Check against running or queued jobs
+   // This needed for cases when you forget to enable a task and want to
+   // add a task while a family is already running   
+   public static boolean okToLaunch(jobData job) {
+      debug.print("job=" + job);
+      Boolean run = true;
+      String inputFile = job.getInputFile();
+      Stack<String> inputFiles = new Stack<String>();
+      Stack<String> outputFiles = new Stack<String>();
+      for (int i=0; i<JOBS.size(); ++i) {
+         String inp = JOBS.get(i).getInputFile();
+         if (inputFile != null && inp != null) {
+            if (job.type.equals(JOBS.get(i).type) && inputFile.equals(inp) && job.familyId != JOBS.get(i).familyId) {
+               System.out.println("Job already running: " + job.toString());
+               removeFromJobList(job);
+               return false;
+            }
+         }
+         inputFiles.add(inp);
+         outputFiles.add(JOBS.get(i).getOutputFile());
+      }
+            
+      // Job inputFile depends on an outputFile => queue
+      String outputFile;
+      for (int i=0; i<outputFiles.size(); ++i) {
+         outputFile = outputFiles.get(i);
+         if (inputFile != null && outputFile != null) {
+            if (inputFile.equals(outputFile)) {
+               System.out.println("Job dependency: " + job.toString());
+               return false;
+            }
+         }
+      }
+      
+      return run;
    }
    
    public static Boolean isFirstJobInMonitor(jobData job) {
