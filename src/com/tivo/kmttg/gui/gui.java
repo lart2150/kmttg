@@ -1051,20 +1051,21 @@ public class gui {
             String tabName = tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
             BufferedWriter ofp = new BufferedWriter(new FileWriter(config.gui_settings));            
             ofp.write("# kmttg gui preferences file\n");
-            ofp.write("<metadata>\n"        + metadata_setting()     + "\n");
-            ofp.write("<decrypt>\n"         + decrypt_setting()      + "\n");
-            ofp.write("<qsfix>\n"           + qsfix_setting()        + "\n");
-            ofp.write("<comskip>\n"         + comskip_setting()      + "\n");
-            ofp.write("<comcut>\n"          + comcut_setting()       + "\n");
-            ofp.write("<captions>\n"        + captions_setting()     + "\n");
-            ofp.write("<encode>\n"          + encode_setting()       + "\n");
-            ofp.write("<custom>\n"          + custom_setting()       + "\n");
-            ofp.write("<encode_name>\n"     + config.encodeName      + "\n");
-            ofp.write("<toolTips>\n"        + config.toolTips        + "\n");
-            ofp.write("<toolTipsTimeout>\n" + config.toolTipsTimeout + "\n");
-            ofp.write("<width>\n"           + d.width                + "\n");
-            ofp.write("<height>\n"          + d.height               + "\n");
-            ofp.write("<tab>\n"             + tabName                + "\n");
+            ofp.write("<metadata>\n"            + metadata_setting()         + "\n");
+            ofp.write("<decrypt>\n"             + decrypt_setting()          + "\n");
+            ofp.write("<qsfix>\n"               + qsfix_setting()            + "\n");
+            ofp.write("<comskip>\n"             + comskip_setting()          + "\n");
+            ofp.write("<comcut>\n"              + comcut_setting()           + "\n");
+            ofp.write("<captions>\n"            + captions_setting()         + "\n");
+            ofp.write("<encode>\n"              + encode_setting()           + "\n");
+            ofp.write("<custom>\n"              + custom_setting()           + "\n");
+            ofp.write("<encode_name>\n"         + config.encodeName          + "\n");
+            ofp.write("<toolTips>\n"            + config.toolTips            + "\n");
+            ofp.write("<toolTipsTimeout>\n"     + config.toolTipsTimeout     + "\n");
+            ofp.write("<jobMonitorFullPaths>\n" + config.jobMonitorFullPaths + "\n");
+            ofp.write("<width>\n"               + d.width                    + "\n");
+            ofp.write("<height>\n"              + d.height                   + "\n");
+            ofp.write("<tab>\n"                 + tabName                    + "\n");
             ofp.close();
          }         
          catch (IOException ex) {
@@ -1146,6 +1147,12 @@ public class gui {
                   config.toolTips = 1;
                else
                   config.toolTips = 0;
+            }
+            if (key.equals("jobMonitorFullPaths")) {
+               if (line.matches("1"))
+                  config.jobMonitorFullPaths = 1;
+               else
+                  config.jobMonitorFullPaths = 0;
             }
             if (key.equals("encode_name")) {
                if (encodeConfig.isValidEncodeName(line))
