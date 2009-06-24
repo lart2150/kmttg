@@ -944,6 +944,8 @@ public class gui {
          tabbed_panel.add(tab.getPanel(), 0);
          tabbed_panel.setTitleAt(0, name);
          tivoTabs.put(name,tab);
+         
+         // Populate table
          NowPlaying.submitJob(name);
       }
    }
@@ -1066,6 +1068,22 @@ public class gui {
             ofp.write("<width>\n"               + d.width                    + "\n");
             ofp.write("<height>\n"              + d.height                   + "\n");
             ofp.write("<tab>\n"                 + tabName                    + "\n");
+            ofp.write("<columnOrder>\n");
+            String name, colName;
+            for (Enumeration<String> e=tivoTabs.keys(); e.hasMoreElements();) {
+               name = e.nextElement();
+               String order[] = tivoTabs.get(name).getColumnOrder();
+               colName = order[0];
+               if (colName.equals("")) colName = "ICON";
+               ofp.write(name + "=" + colName);
+               for (int j=1; j<order.length; ++j) {
+                  colName = order[j];
+                  if (colName.equals("")) colName = "ICON";
+                  ofp.write("," + colName);
+               }
+               ofp.write("\n");
+            }
+            ofp.write("\n");
             ofp.close();
          }         
          catch (IOException ex) {
@@ -1181,6 +1199,13 @@ public class gui {
             }
             if (key.equals("tab")) {
                SetTivo(line);
+            }
+            if (key.equals("columnOrder")) {
+               String[] l = line.split("=");
+               String[] order = l[1].split(",");
+               if (tivoTabs.containsKey(l[0])) {
+                  tivoTabs.get(l[0]).setColumnOrder(order);
+               }
             }
          }
          ifp.close();

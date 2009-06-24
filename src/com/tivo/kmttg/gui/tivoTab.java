@@ -13,6 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.table.TableColumnModel;
 
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
@@ -286,6 +287,35 @@ public class tivoTab {
       } else {
          log.error("No shows currently selected for processing");
       }     
+   }
+   
+   // Return current column name order as a string array
+   public String[] getColumnOrder() {
+      int size = nplTab.NowPlaying.getColumnCount();
+      String[] order = new String[size];
+      for (int i=0; i<size; ++i) {
+         order[i] = nplTab.getColumnName(i);
+      }
+      return order;
+   }
+   
+   // Change table column order according to given string array order
+   public void setColumnOrder(String[] order) {
+      debug.print("order=" + order);      
+      // Re-order to desired positions
+      String colName;
+      for (int i=0; i<order.length; ++i) {
+         colName = order[i];
+         if (colName.equals("ICON")) colName = "";
+         moveColumn(nplTab.getColumnIndex(colName), i);
+      }
+   }
+   
+   // Move a table column from -> to
+   public void moveColumn(int from, int to) {
+      debug.print("from=" + from + " to=" + to);
+      TableColumnModel tableColumnModel = nplTab.NowPlaying.getTableHeader().getColumnModel();
+      tableColumnModel.moveColumn(from, to);
    }
 
 }

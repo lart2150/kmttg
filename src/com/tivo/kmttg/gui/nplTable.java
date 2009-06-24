@@ -29,22 +29,23 @@ public class nplTable {
    public String tivoName = null;
    public JXTable NowPlaying = null;
    public JScrollPane nplScroll = null;
-   public String[] FILE_cols = {"", "FILE", "SIZE",    "DIR",  ""};
+   public String[] FILE_cols = {"FILE", "SIZE", "DIR"};
    public String[] TIVO_cols = {"", "DATE", "CHANNEL", "SIZE", "SHOW"};
       
    nplTable(String tivoName) {
       this.tivoName = tivoName;
-      Object[][] data = {};        
-      NowPlaying = new JXTable(data, FILE_cols);
-      nplScroll = new JScrollPane(NowPlaying);
-
-      TableModel myModel = new MyTableModel(data, FILE_cols);
-      NowPlaying.setModel(myModel);
+      Object[][] data = {}; 
+      if (tivoName.equals("FILES")) {
+         NowPlaying = new JXTable(data, FILE_cols);
+         NowPlaying.setModel(new FilesTableModel(data, FILE_cols));
+      }
+      else {
+         NowPlaying = new JXTable(data, TIVO_cols);
+         NowPlaying.setModel(new NplTableModel(data, TIVO_cols));
+      }
+      nplScroll = new JScrollPane(NowPlaying);            
       
-      // Allow icons in column 0
-      NowPlaying.setDefaultRenderer(Icon.class, new IconCellRenderer());
-      
-      // Define custom column sorting routines for columns 1 & 3
+      // Define custom column sorting routines
       Comparator<Object> sortableComparator = new Comparator<Object>() {
          public int compare(Object o1, Object o2) {
             if (o1 instanceof sortableDate && o2 instanceof sortableDate) {
@@ -77,39 +78,59 @@ public class nplTable {
          }
       };
       
-      // Use custom sorting routine for columns 1, 3 & 4
-      Sorter sorter = NowPlaying.getColumnExt(1).getSorter();
-      sorter.setComparator(sortableComparator);
-      sorter = NowPlaying.getColumnExt(3).getSorter();
-      sorter.setComparator(sortableComparator);
-      sorter = NowPlaying.getColumnExt(4).getSorter();
-      sorter.setComparator(sortableComparator);
-      
+      // Use custom sorting routines for certain columns
+      if (tivoName.equals("FILES")) {
+         Sorter sorter = NowPlaying.getColumnExt(1).getSorter();
+         sorter.setComparator(sortableComparator);
+      } else {
+         Sorter sorter = NowPlaying.getColumnExt(1).getSorter();
+         sorter.setComparator(sortableComparator);
+         sorter = NowPlaying.getColumnExt(3).getSorter();
+         sorter.setComparator(sortableComparator);
+         sorter = NowPlaying.getColumnExt(4).getSorter();
+         sorter.setComparator(sortableComparator);
+      }      
       
       // Define selection listener to update dialog fields according
       // to selected row
       NowPlaying.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
          public void valueChanged(ListSelectionEvent e) {
-            NowPlayingRowSelected(NowPlaying.getSelectedRow());
+            if (e.getValueIsAdjusting())
+               NowPlayingRowSelected(NowPlaying.getSelectedRow());
          }
       });
                   
       // Change color & font
       TableColumn tm;
-      tm = NowPlaying.getColumnModel().getColumn(1);
-      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
-      // Right justify dates for Tivo tables only
-      if (! tivoName.equals("FILES"))
+      if (tivoName.equals("FILES")) {
+         tm = NowPlaying.getColumnModel().getColumn(0);
+         tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+         
+         tm = NowPlaying.getColumnModel().getColumn(1);
+         tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+         
+         tm = NowPlaying.getColumnModel().getColumn(2);
+         tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));         
+      } else {
+         // Allow icons in column 0
+         NowPlaying.setDefaultRenderer(Icon.class, new IconCellRenderer());
+         
+         tm = NowPlaying.getColumnModel().getColumn(1);
+         tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+         // Right justify dates
          ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
-      tm = NowPlaying.getColumnModel().getColumn(2);
-      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
-      tm = NowPlaying.getColumnModel().getColumn(3);
-      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
-      // Right justify file size for Tivo tables only
-      if (! tivoName.equals("FILES"))
+         
+         tm = NowPlaying.getColumnModel().getColumn(2);
+         tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+         
+         tm = NowPlaying.getColumnModel().getColumn(3);
+         tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+         // Right justify file size
          ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
-      tm = NowPlaying.getColumnModel().getColumn(4);
-      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+         
+         tm = NowPlaying.getColumnModel().getColumn(4);
+         tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+      }
                
       //NowPlaying.setFillsViewportHeight(true);
       NowPlaying.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -130,13 +151,29 @@ public class nplTable {
             super.setValue(value);
          }
       }
+      
+      public Component getTableCellRendererComponent
+      (JTable table, Object value, boolean isSelected,
+       boolean hasFocus, int row, int column) {
+         Component cell = super.getTableCellRendererComponent(
+            table, value, isSelected, hasFocus, row, column
+         );
+        
+         if ( ! isSelected ) {
+            if (column % 2 == 0)
+               cell.setBackground(config.tableBkgndLight);
+            else
+               cell.setBackground(config.tableBkgndDarker);
+         }            
+         return cell;
+      }
    }
    
    // Override some default table model actions
-   class MyTableModel extends DefaultTableModel {
+   class NplTableModel extends DefaultTableModel {
       private static final long serialVersionUID = 1L;
 
-      public MyTableModel(Object[][] data, Object[] columnNames) {
+      public NplTableModel(Object[][] data, Object[] columnNames) {
          super(data, columnNames);
       }
       
@@ -154,6 +191,29 @@ public class nplTable {
          }
          if (col == 4) {
             return sortableShow.class;
+         }
+         return Object.class;
+      } 
+      
+      // Set all cells uneditable
+      public boolean isCellEditable(int row, int column) {        
+         return false;
+      }
+   }   
+   
+   // Override some default table model actions
+   class FilesTableModel extends DefaultTableModel {
+      private static final long serialVersionUID = 1L;
+
+      public FilesTableModel(Object[][] data, Object[] columnNames) {
+         super(data, columnNames);
+      }
+      
+      @SuppressWarnings("unchecked")
+      // This is used to define columns as specific classes
+      public Class getColumnClass(int col) {
+         if (col == 1) {
+            return sortableSize.class;
          }
          return Object.class;
       } 
@@ -191,20 +251,26 @@ public class nplTable {
             (table, value, isSelected, hasFocus, row, column);
          
          if ( ! isSelected ) {
-            if ( table.getValueAt(row, 1) instanceof sortableDate ) {
+            if ( getColumnIndex("DATE") != -1 ) {
                // Download mode
-               sortableDate d = (sortableDate)table.getValueAt(row, 1);
+               sortableDate d = (sortableDate)table.getValueAt(row, getColumnIndex("DATE"));
                if (d.data.containsKey("CopyProtected")) {
                   cell.setBackground( config.tableBkgndProtected );
                } else if (d.data.containsKey("ExpirationImage") &&
                           d.data.get("ExpirationImage").equals("in-progress-recording")) {
                   cell.setBackground( config.tableBkgndRecording );
-               } else {    
-                  cell.setBackground( bkgndColor );
+               } else {
+                  if (column % 2 == 0)
+                     cell.setBackground(config.tableBkgndLight);
+                  else
+                     cell.setBackground(config.tableBkgndDarker);
                }
             } else {
                // FILES mode
-               cell.setBackground( bkgndColor );
+               if (column % 2 == 0)
+                  cell.setBackground(config.tableBkgndLight);
+               else
+                  cell.setBackground(config.tableBkgndDarker);
             }
          }
          
@@ -213,6 +279,19 @@ public class nplTable {
          return cell;
       }
    }   
+   
+   public String getColumnName(int c) {
+      return (String)NowPlaying.getColumnModel().getColumn(c).getHeaderValue();
+   }
+   
+   public int getColumnIndex(String name) {
+      String cname;
+      for (int i=0; i<NowPlaying.getColumnCount(); i++) {
+         cname = (String)NowPlaying.getColumnModel().getColumn(i).getHeaderValue();
+         if (cname.equals(name)) return i;
+      }
+      return -1;
+   }
    
    public int[] GetSelectedRows() {
       debug.print("");
@@ -230,7 +309,7 @@ public class nplTable {
       } else {
          // Now Playing mode
          // Get column items for selected row 
-         sortableDate s = (sortableDate)NowPlaying.getValueAt(row,1);
+         sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
          String t = s.data.get("date_long");
          String channelNum = null;
          if ( s.data.containsKey("channelNum") ) {
@@ -269,7 +348,7 @@ public class nplTable {
          config.gui.text_error("Nothing selected");
          return null;
       }
-      sortableDate s = (sortableDate)NowPlaying.getValueAt(row, 1);
+      sortableDate s = (sortableDate)NowPlaying.getValueAt(row, getColumnIndex("DATE"));
       return s.data;
    }
    
@@ -282,8 +361,8 @@ public class nplTable {
          return null;
       }
       String s = java.io.File.separator;
-      String fileName = (String)NowPlaying.getValueAt(row, 1);
-      String dirName = (String)NowPlaying.getValueAt(row, 3);
+      String fileName = (String)NowPlaying.getValueAt(row, getColumnIndex("FILE"));
+      String dirName = (String)NowPlaying.getValueAt(row, getColumnIndex("DIR"));
       String fullName = dirName + s + fileName;
       return fullName;
    }
@@ -356,20 +435,19 @@ public class nplTable {
    // Add a selected file in FILES mode to NowPlaying table
    public void AddNowPlayingFileRow(File file) {
       debug.print("file=" + file);
-      int cols = 4;
+      int cols = 3;
       Object[] data = new Object[cols];
       String fileName = file.getName();
       String baseDir = file.getParentFile().getPath();
       long size = file.length();
       
-      data[0] = "";
-      data[1] = fileName;
+      data[0] = fileName;
       Hashtable<String,String> h = new Hashtable<String,String>();
       h.put("size", "" + size);
       double GB = Math.pow(2,30);
       h.put("sizeGB", String.format("%.2f GB", (double)size/GB));
-      data[2] = new sortableSize(h);
-      data[3] = baseDir;
+      data[1] = new sortableSize(h);
+      data[2] = baseDir;
       AddRow(NowPlaying, data);
       
       // Adjust column widths to data
