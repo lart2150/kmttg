@@ -147,9 +147,6 @@ public class jobMonitor {
          if ( isVideoRedoJob(job) ) {
             if (VideoRedoJobs > 0) continue;
          }
-         
-         // Check for redundant or job dependencies
-         if ( ! okToLaunch(job) ) continue;
 
          // OK to launch job
          cpuActiveJobs = jobData.launch(job, cpuActiveJobs);
@@ -248,6 +245,9 @@ public class jobMonitor {
          }
       }      
       
+      // Insert job in proper location if same source as existing jobs
+      if ( ! okToLaunch(job) ) return;
+      
       // Create unique job name
       job.job_name = "job" + JOB_COUNT;
       JOB_COUNT++;
@@ -297,39 +297,59 @@ public class jobMonitor {
    
    // Check against running or queued jobs
    // This needed for cases when you forget to enable a task and want to
-   // add a task while a family is already running   
+   // add a task while a family is already running
+   // This will insert job in appropriate location of family tree if it
+   // is from same source as existing jobs
    public static boolean okToLaunch(jobData job) {
       debug.print("job=" + job);
-      Boolean run = true;
-      String inputFile = job.getInputFile();
-      Stack<String> inputFiles = new Stack<String>();
-      Stack<String> outputFiles = new Stack<String>();
+      if (JOBS.size() == 0) return true;
+      
+      // Determine if this job has same source as running/queued jobs
+      Boolean sameSource = false;
+      String sourceFile = job.source;
+      Stack<jobData> sameSources = new Stack<jobData>();
       for (int i=0; i<JOBS.size(); ++i) {
-         String inp = JOBS.get(i).getInputFile();
-         if (inputFile != null && inp != null) {
-            if (job.type.equals(JOBS.get(i).type) && inputFile.equals(inp) && job.familyId != JOBS.get(i).familyId) {
-               System.out.println("Job already running: " + job.toString());
-               removeFromJobList(job);
-               return false;
+         if (sourceFile != null && JOBS.get(i).source != null) {
+            if(JOBS.get(i).source.equals(sourceFile)) {
+               if (JOBS.get(i).type.equals(job.type)) {
+                  // Identical job => remove from job list and return
+                  removeFromJobList(job);
+                  return false;
+               }
+               sameSource = true;
+               sameSources.add(JOBS.get(i));
             }
          }
-         inputFiles.add(inp);
-         outputFiles.add(JOBS.get(i).getOutputFile());
       }
             
-      // Job inputFile depends on an outputFile => queue
-      String outputFile;
-      for (int i=0; i<outputFiles.size(); ++i) {
-         outputFile = outputFiles.get(i);
-         if (inputFile != null && outputFile != null) {
-            if (inputFile.equals(outputFile)) {
-               System.out.println("Job dependency: " + job.toString());
-               return false;
+      if ( sameSource ) {
+         // Same source as existing jobs => Assign familyId appropriately
+         Hashtable<String,Float> h = new Hashtable<String,Float>();
+         // Populate hash based on existing tasks
+         for (int i=0; i<sameSources.size(); ++i) {
+            h.put(sameSources.get(i).type, sameSources.get(i).familyId);
+         }
+         
+         String taskNames[] = jobData.allTaskNames();
+         // Start off with same major familyId index
+         float major_float = sameSources.get(0).familyId;
+         int major = (int)major_float;
+         float id = (float)major;
+         
+         // Insert job into family tree
+         for (int i=0; i<taskNames.length; ++i) {
+            if (h.containsKey(taskNames[i]))
+               id = (float) (h.get(taskNames[i]) + 0.01);
+            else
+               id += 0.01;
+            if (taskNames[i].equals(job.type)) {
+               job.familyId = id;
+               log.warn("Inserted job '" + job.type + "' into existing job set");
+               return true;
             }
          }
       }
-      
-      return run;
+      return true;
    }
    
    public static Boolean isFirstJobInMonitor(jobData job) {
@@ -410,6 +430,7 @@ public class jobMonitor {
       }
       
       // Init names
+      String source       = null;
       String tivoName     = null;
       String encodeName   = null;
       String tivoFile     = null;
@@ -461,6 +482,7 @@ public class jobMonitor {
       String s = File.separator;
       if ( mode.equals("FILES") ) {
          // FILES mode means different starting points than download mode
+         source = startFile;
          if ( startFile.toLowerCase().endsWith(".tivo") ) {
             tivoFile = startFile;
             metaFile = string.replaceSuffix(tivoFile, ".mpg.txt");
@@ -574,9 +596,11 @@ public class jobMonitor {
       // Launch jobs depending on selections
       float familyId = FAMILY_ID++;
       Hashtable<String,String> entry = (Hashtable<String,String>)specs.get("entry");
-      if ( mode.equals("Download") ) {         
+      if ( mode.equals("Download") ) {
+         source = entry.get("url_TiVoVideoDetails");
          if (metadata) {
             jobData job = new jobData();
+            job.source             = source;
             job.tivoName           = tivoName;
             job.type               = "metadata";
             job.name               = "curl";
@@ -596,6 +620,7 @@ public class jobMonitor {
          
          familyId += 0.1;
          jobData job = new jobData();
+         job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "download";
          job.name         = "curl";
@@ -614,6 +639,7 @@ public class jobMonitor {
       
       if (metadataTivo) {
          jobData job = new jobData();
+         job.source             = source;
          job.tivoName           = tivoName;
          job.type               = "metadataTivo";
          job.name               = "tivodecode";
@@ -626,6 +652,7 @@ public class jobMonitor {
       if (decrypt) {
          familyId += 0.1;
          jobData job = new jobData();
+         job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "decrypt";
          job.name         = config.tivodecode;
@@ -638,6 +665,7 @@ public class jobMonitor {
       if (qsfix) {
          familyId += 0.1;
          jobData job = new jobData();
+         job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "qsfix";
          job.name         = config.VRD;
@@ -650,6 +678,7 @@ public class jobMonitor {
       if (streamfix) {
          familyId += 0.1;
          jobData job = new jobData();
+         job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "streamfix";
          job.name         = config.mencoder;
@@ -663,6 +692,7 @@ public class jobMonitor {
          if (file.isDir(config.VRD) && config.UseAdscan == 1) {
             familyId += 0.1;
             jobData job = new jobData();
+            job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "adscan";
             job.name         = config.VRD;
@@ -673,6 +703,7 @@ public class jobMonitor {
          } else {
             familyId += 0.1;
             jobData job = new jobData();
+            job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "comskip";
             job.name         = config.comskip;
@@ -692,6 +723,7 @@ public class jobMonitor {
       if (comskip && config.VrdReview == 1 && config.GUI && file.isDir(config.VRD)) {
          familyId += 0.1;
          jobData job = new jobData();
+         job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "vrdreview";
          job.name         = config.VRD;
@@ -705,6 +737,7 @@ public class jobMonitor {
          if ( file.isFile(config.VRD + File.separator + "vp.vbs") ) {
             familyId += 0.1;
             jobData job = new jobData();
+            job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "adcut";
             job.name         = config.VRD;
@@ -716,6 +749,7 @@ public class jobMonitor {
          } else {
             familyId += 0.1;
             jobData job = new jobData();
+            job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "comcut";
             job.name         = config.mencoder;
@@ -733,6 +767,7 @@ public class jobMonitor {
       if (captions) {
          familyId += 0.1;
          jobData job = new jobData();
+         job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "captions";
          job.name         = config.t2extract;
@@ -748,6 +783,7 @@ public class jobMonitor {
       if (encode) {
          familyId += 0.1;
          jobData job = new jobData();
+         job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "encode";
          job.name         = encodeName;
@@ -765,6 +801,7 @@ public class jobMonitor {
       if (custom) {
          familyId += 0.1;
          jobData job = new jobData();
+         job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "custom";
          job.name         = config.customCommand;
