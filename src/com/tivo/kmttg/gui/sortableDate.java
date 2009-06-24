@@ -8,7 +8,7 @@ public class sortableDate {
    Hashtable<String,String> data;
    
    sortableDate(Hashtable<String,String> entry) {
-      display = (String)entry.get("date");
+      display = (String)entry.get("date") + " ";
       sortable = (String)entry.get("gmt");
       data = entry;
    }

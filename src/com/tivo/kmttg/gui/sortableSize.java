@@ -7,7 +7,7 @@ public class sortableSize {
    long sortable;
    
    sortableSize(Hashtable<String,String> entry) {
-      display = (String)entry.get("sizeGB");
+      display = (String)entry.get("sizeGB") + " ";
       sortable = Long.parseLong(entry.get("size"));
    }
    
