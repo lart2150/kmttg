@@ -108,6 +108,8 @@ public class nplTable {
          
          tm = NowPlaying.getColumnModel().getColumn(1);
          tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+         // Right justify file size
+         ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
          
          tm = NowPlaying.getColumnModel().getColumn(2);
          tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));         
