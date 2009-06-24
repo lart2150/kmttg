@@ -5,6 +5,7 @@ import com.tivo.kmttg.util.backgroundProcess;
 
 public class jobData {
    // Common to all jobs
+   public String  source = null;
    public Integer monitor = null;
    public Long    time = null;
    public String  status = null;
@@ -62,9 +63,32 @@ public class jobData {
    public Long tivoFileSize = null;
    String ProgramId = null;
    String title = null;
+   
+   // NOTE: This used for job insertion purposes
+   // ** JOB ORDER IS VERY IMPORTANT **
+   public static String[] allTaskNames() {
+      return new String[] {
+         "NowPlaying",
+         "metadata",
+         "metadataTivo",
+         "download",
+         "decrypt",
+         "qsfix",
+         "streamfix",
+         "comskip",
+         "adscan",
+         "vrdreview",
+         "comcut",
+         "adcut",
+         "captions",
+         "encode",
+         "atomic",
+         "custom"
+      };
+   }
       
    public String toString() {
-      return "{tivoName=" + tivoName + " type=" + type + " status=" + status + " familyId=" + familyId + "}";
+      return "{source=" + source + " tivoName=" + tivoName + " type=" + type + " status=" + status + " familyId=" + familyId + "}";
    }
    
    public Boolean check() {
