@@ -95,8 +95,8 @@ public class nplTable {
       // to selected row
       NowPlaying.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
          public void valueChanged(ListSelectionEvent e) {
-            if (e.getValueIsAdjusting())
-               NowPlayingRowSelected(NowPlaying.getSelectedRow());
+            if (e.getValueIsAdjusting()) return;
+            NowPlayingRowSelected(NowPlaying.getSelectedRow());
          }
       });
                   
