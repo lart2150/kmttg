@@ -68,7 +68,7 @@ public class jobData {
    // ** JOB ORDER IS VERY IMPORTANT **
    public static String[] allTaskNames() {
       return new String[] {
-         "NowPlaying",
+         "playlist",
          "metadata",
          "metadataTivo",
          "download",
