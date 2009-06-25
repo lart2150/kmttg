@@ -246,7 +246,7 @@ public class jobMonitor {
       }      
       
       // Insert job in proper location if same source as existing jobs
-      if ( ! okToLaunch(job) ) return;
+      if ( ! assignFamilyId(job) ) return;
       
       // Create unique job name
       job.job_name = "job" + JOB_COUNT;
@@ -295,19 +295,31 @@ public class jobMonitor {
       addToJobList(job);
    }
    
-   // Check against running or queued jobs
-   // This needed for cases when you forget to enable a task and want to
-   // add a task while a family is already running
-   // This will insert job in appropriate location of family tree if it
-   // is from same source as existing jobs
-   public static boolean okToLaunch(jobData job) {
+   // Set job monitor familyId
+   // familyId structure is majorId.minorId (majorId is integer, minorId is float)
+   // All jobs with same source are considered same family and have same majorId
+   // minorId is set based on location in allTaskNames array
+   // Jobs in family are designed to execute in lowest to highest minorId order
+   public static boolean assignFamilyId(jobData job) {
       debug.print("job=" + job);
-      if (JOBS.size() == 0) return true;
       
+      // Assume this is a new family at first => new majorId
+      int majorId = FAMILY_ID;
+      
+      // minorId assignment related to taskName location in allTaskNames
+      String taskNames[] = jobData.allTaskNames();
+      int task_offset = 0;
+      if (job.type != null) {
+         while (! job.type.equals(taskNames[task_offset])) {
+            task_offset++;
+         }
+      }
+      float minorId = (float)0.01*task_offset;
+
       // Determine if this job has same source as running/queued jobs
+      // in which case use existing family majorId
       Boolean sameSource = false;
       String sourceFile = job.source;
-      Stack<jobData> sameSources = new Stack<jobData>();
       for (int i=0; i<JOBS.size(); ++i) {
          if (sourceFile != null && JOBS.get(i).source != null) {
             if(JOBS.get(i).source.equals(sourceFile)) {
@@ -317,37 +329,18 @@ public class jobMonitor {
                   return false;
                }
                sameSource = true;
-               sameSources.add(JOBS.get(i));
+               // Use existing family majorId
+               float major_float = JOBS.get(i).familyId;
+               majorId = (int)major_float;
+               break;
             }
          }
       }
-            
-      if ( sameSource ) {
-         // Same source as existing jobs => Assign familyId appropriately
-         Hashtable<String,Float> h = new Hashtable<String,Float>();
-         // Populate hash based on existing tasks
-         for (int i=0; i<sameSources.size(); ++i) {
-            h.put(sameSources.get(i).type, sameSources.get(i).familyId);
-         }
-         
-         String taskNames[] = jobData.allTaskNames();
-         // Start off with same major familyId index
-         float major_float = sameSources.get(0).familyId;
-         int major = (int)major_float;
-         float id = (float)major;
-         
-         // Insert job into family tree
-         for (int i=0; i<taskNames.length; ++i) {
-            if (h.containsKey(taskNames[i]))
-               id = (float) (h.get(taskNames[i]) + 0.01);
-            else
-               id += 0.01;
-            if (taskNames[i].equals(job.type)) {
-               job.familyId = id;
-               log.warn("Inserted job '" + job.type + "' into existing job set");
-               return true;
-            }
-         }
+
+      job.familyId = majorId + minorId;
+      
+      if ( ! sameSource ) {
+         FAMILY_ID++;
       }
       return true;
    }
@@ -594,7 +587,6 @@ public class jobMonitor {
       }
                            
       // Launch jobs depending on selections
-      float familyId = FAMILY_ID++;
       Hashtable<String,String> entry = (Hashtable<String,String>)specs.get("entry");
       if ( mode.equals("Download") ) {
          source = entry.get("url_TiVoVideoDetails");
@@ -604,7 +596,6 @@ public class jobMonitor {
             job.tivoName           = tivoName;
             job.type               = "metadata";
             job.name               = "curl";
-            job.familyId           = familyId;
             job.metaFile           = metaFile;
             job.url                = entry.get("url_TiVoVideoDetails");
             if (entry.containsKey("EpisodeNumber"))
@@ -618,13 +609,11 @@ public class jobMonitor {
             submitNewJob(job);
          }
          
-         familyId += 0.1;
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "download";
          job.name         = "curl";
-         job.familyId     = familyId;
          job.tivoFile     = tivoFile;
          job.url          = entry.get("url");
          job.tivoFileSize = Long.parseLong(entry.get("size"));
@@ -643,46 +632,39 @@ public class jobMonitor {
          job.tivoName           = tivoName;
          job.type               = "metadataTivo";
          job.name               = "tivodecode";
-         job.familyId           = familyId;
          job.tivoFile           = tivoFile;
          job.metaFile           = metaFile;
          submitNewJob(job);
       }
       
       if (decrypt) {
-         familyId += 0.1;
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "decrypt";
          job.name         = config.tivodecode;
-         job.familyId     = familyId;
          job.tivoFile     = tivoFile;
          job.mpegFile     = mpegFile;
          submitNewJob(job);
       }
       
       if (qsfix) {
-         familyId += 0.1;
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "qsfix";
          job.name         = config.VRD;
-         job.familyId     = familyId;
          job.mpegFile     = mpegFile;
          job.mpegFile_fix = mpegFile_fix;
          submitNewJob(job);
       }
       
       if (streamfix) {
-         familyId += 0.1;
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "streamfix";
          job.name         = config.mencoder;
-         job.familyId     = familyId;
          job.mpegFile     = mpegFile;
          job.mpegFile_fix = mpegFile_fix;
          submitNewJob(job);
@@ -690,24 +672,20 @@ public class jobMonitor {
       
       if (comskip) {
          if (file.isDir(config.VRD) && config.UseAdscan == 1) {
-            familyId += 0.1;
             jobData job = new jobData();
             job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "adscan";
             job.name         = config.VRD;
-            job.familyId     = familyId;
             job.mpegFile     = mpegFile;
             job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
             submitNewJob(job);
          } else {
-            familyId += 0.1;
             jobData job = new jobData();
             job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "comskip";
             job.name         = config.comskip;
-            job.familyId     = familyId;
             if (streamfix)
                job.mpegFile  = mpegFile_fix;
             else
@@ -721,13 +699,11 @@ public class jobMonitor {
       
       // Schedule VideoRedo GUI manual cuts review if requested (GUI mode only)
       if (comskip && config.VrdReview == 1 && config.GUI && file.isDir(config.VRD)) {
-         familyId += 0.1;
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "vrdreview";
          job.name         = config.VRD;
-         job.familyId     = familyId;
          job.mpegFile     = mpegFile;
          job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
          submitNewJob(job);
@@ -735,25 +711,21 @@ public class jobMonitor {
       
       if (comcut) {
          if ( file.isFile(config.VRD + File.separator + "vp.vbs") ) {
-            familyId += 0.1;
             jobData job = new jobData();
             job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "adcut";
             job.name         = config.VRD;
-            job.familyId     = familyId;
             job.mpegFile     = mpegFile;
             job.mpegFile_cut = mpegFile_cut;
             job.edlFile      = edlFile;
             submitNewJob(job);
          } else {
-            familyId += 0.1;
             jobData job = new jobData();
             job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "comcut";
             job.name         = config.mencoder;
-            job.familyId     = familyId;
             if (streamfix)
                job.mpegFile  = mpegFile_fix;
             else
@@ -765,13 +737,11 @@ public class jobMonitor {
       }
       
       if (captions) {
-         familyId += 0.1;
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "captions";
          job.name         = config.t2extract;
-         job.familyId     = familyId;
          if (streamfix && videoFile.equals(mpegFile))
             job.videoFile = mpegFile_fix;
          else
@@ -781,13 +751,11 @@ public class jobMonitor {
       }
       
       if (encode) {
-         familyId += 0.1;
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "encode";
          job.name         = encodeName;
-         job.familyId     = familyId;
          job.encodeName   = encodeName;
          if (streamfix)
             job.mpegFile  = mpegFile_fix;
@@ -799,13 +767,11 @@ public class jobMonitor {
       }
       
       if (custom) {
-         familyId += 0.1;
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "custom";
          job.name         = config.customCommand;
-         job.familyId     = familyId;
          job.tivoName     = tivoName;
          job.metaFile     = metaFile;
          job.mpegFile     = mpegFile;
