@@ -62,7 +62,10 @@ public class jobTable {
          if (job.status.equals("running")) {
             new taskInfo(
                config.gui.getJFrame(),
-               job.type + ": " + "Tivo=" + (String)JobMonitor.getValueAt(row, 2) + "---Output=" + (String)JobMonitor.getValueAt(row, 3),
+               job.type + ": " + "Tivo=" +
+               (String)JobMonitor.getValueAt(row, getColumnIndex("SOURCE")) +
+               "---Output=" +
+               (String)JobMonitor.getValueAt(row, getColumnIndex("OUTPUT")),
                job.getProcess()
             );
          }
@@ -126,6 +129,15 @@ public class jobTable {
           return cell;
        }
     } 
+    
+    public int getColumnIndex(String name) {
+       String cname;
+       for (int i=0; i<JobMonitor.getColumnCount(); i++) {
+          cname = (String)JobMonitor.getColumnModel().getColumn(i).getHeaderValue();
+          if (cname.equals(name)) return i;
+       }
+       return -1;
+    }
         
     public int[] GetSelectedRows() {
        int[] rows = JobMonitor.getSelectedRows();
@@ -141,7 +153,7 @@ public class jobTable {
           config.gui.text_error("Nothing selected");
           return null;
        }
-       jobEntry s = (jobEntry)JobMonitor.getValueAt(row, 1);
+       jobEntry s = (jobEntry)JobMonitor.getValueAt(row, getColumnIndex("JOB"));
        return s.job;
     }
     
@@ -149,7 +161,7 @@ public class jobTable {
     public jobData GetRowData(int row) {
        // Get column items for given row 
        if ( JobMonitor.getRowCount() > row ) {
-          jobEntry s = (jobEntry)JobMonitor.getValueAt(row, 1);
+          jobEntry s = (jobEntry)JobMonitor.getValueAt(row, getColumnIndex("JOB"));
           return s.job;
        }
        return null;
@@ -162,7 +174,26 @@ public class jobTable {
        info[1] = new jobEntry(job);
        info[2] = source;
        info[3] = output;
-       AddRow(JobMonitor, info);
+       
+       // Insert location depends on familyId if it exists
+       if (job.familyId != null) {
+          // Determine insertion location
+          int index = -1;
+          Float id;
+          for (int i=0; i<JobMonitor.getRowCount(); ++i) {
+             id = GetRowData(i).familyId;
+             if (id != null && id > job.familyId) {
+                index = i;
+                break;
+             }
+          }
+          if (index != -1)
+             InsertRow(JobMonitor, info, index);
+          else
+             AddRow(JobMonitor, info);
+       } else {
+          AddRow(JobMonitor, info);
+       }
        
        // Adjust column widths to data
        packColumns(JobMonitor, 2);
@@ -173,7 +204,7 @@ public class jobTable {
        TableModel model = JobMonitor.getModel(); 
        int numrows = model.getRowCount(); 
        for(int i=0; i<numrows; i++) {
-          jobEntry e = (jobEntry)JobMonitor.getValueAt(i,1);
+          jobEntry e = (jobEntry)JobMonitor.getValueAt(i,getColumnIndex("JOB"));
           if (e.job == job) {
              RemoveRow(JobMonitor, i);
              return;
@@ -186,9 +217,9 @@ public class jobTable {
        TableModel model = JobMonitor.getModel(); 
        int numrows = model.getRowCount(); 
        for(int i=0; i<numrows; i++) {
-          jobEntry e = (jobEntry)JobMonitor.getValueAt(i,1);
+          jobEntry e = (jobEntry)JobMonitor.getValueAt(i,getColumnIndex("JOB"));
           if (e.job == job) {
-             JobMonitor.setValueAt(status, i, 0);
+             JobMonitor.setValueAt(status, i, getColumnIndex("STATUS"));
              packColumns(JobMonitor,2);
              return;
           }
@@ -207,6 +238,12 @@ public class jobTable {
        debug.print("table=" + table + " data=" + data);
        DefaultTableModel dm = (DefaultTableModel)table.getModel();
        dm.addRow(data);
+    }
+    
+    public void InsertRow(JTable table, Object[] data, int row) {
+       debug.print("table=" + table + " data=" + data);
+       DefaultTableModel dm = (DefaultTableModel)table.getModel();
+       dm.insertRow(row, data);
     }
     
     public void RemoveRow(JTable table, int row) {
