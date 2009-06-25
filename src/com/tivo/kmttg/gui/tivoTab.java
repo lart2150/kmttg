@@ -301,13 +301,20 @@ public class tivoTab {
    
    // Change table column order according to given string array order
    public void setColumnOrder(String[] order) {
-      debug.print("order=" + order);      
+      debug.print("order=" + order);
+      
+      // Don't do anything if column counts don't match up
+      if (nplTab.NowPlaying.getColumnCount() != order.length) return;
+      
       // Re-order to desired positions
       String colName;
+      int index;
       for (int i=0; i<order.length; ++i) {
          colName = order[i];
          if (colName.equals("ICON")) colName = "";
-         moveColumn(nplTab.getColumnIndex(colName), i);
+         index = nplTab.getColumnIndex(colName);
+         if ( index != -1)
+            moveColumn(index, i);
       }
    }
    
