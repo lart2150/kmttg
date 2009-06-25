@@ -84,7 +84,7 @@ public class config {
    public static int toolTipsTimeout = 20;  // Set # seconds for tooltip display to timeout
 
    // GUI table related
-   public static Color tableBkgndDarker = new Color(222,222,222); // light grey
+   public static Color tableBkgndDarker = new Color(245,245,245); // light grey
    public static Color tableBkgndLight = Color.white;
    public static Color tableBkgndProtected = new Color(191,156,94); // tan
    public static Color tableBkgndRecording = new Color(149, 151, 221); // light blue
