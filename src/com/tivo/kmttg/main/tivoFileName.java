@@ -15,7 +15,7 @@ public class tivoFileName {
    
    public static String buildTivoFileName(Hashtable<String,String> entry) {      
       if ( config.tivoFileNameFormat == null ) {
-         config.tivoFileNameFormat = "[title]_[wday]_[month]_[mday]";
+         config.tivoFileNameFormat = "[title] ([monthNum]_[mday]_[year])";
       }
       String file = config.tivoFileNameFormat + ".TiVo";
       

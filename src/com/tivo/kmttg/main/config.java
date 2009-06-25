@@ -304,7 +304,7 @@ public class config {
       }
       
       // Non-executable defaults
-      tivoFileNameFormat = "[title]_[wday]_[month]_[mday]";
+      tivoFileNameFormat = "[title] ([monthNum]_[mday]_[year])";
       outputDir          = programDir;
       TIVOS.put("FILES", outputDir);
       mpegDir            = outputDir;

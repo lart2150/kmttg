@@ -466,7 +466,7 @@ public class configMain {
       value = file_naming.getText();
       if (value.length() == 0) {
          // Reset to default if none given
-         value = "[title]_[wday]_[month]_[mday]";
+         value = "[title] ([monthNum]_[mday]_[year])";
       }
       config.tivoFileNameFormat = value;
       
