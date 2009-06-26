@@ -8,7 +8,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -37,6 +39,8 @@ public class gui {
    private JMenu fileMenu = null;
    private JMenu autoMenu = null;
    private JMenu serviceMenu = null;
+   private JMenu helpMenu = null;
+   private JMenuItem helpAboutMenuItem = null;
    private JMenuItem exitMenuItem = null;
    private JMenuItem autoConfigMenuItem = null;
    private JMenuItem runInGuiMenuItem = null;
@@ -390,6 +394,7 @@ public class gui {
          jJMenuBar = new JMenuBar();
          jJMenuBar.add(getFileMenu());
          jJMenuBar.add(getAutoTransfersMenu());
+         jJMenuBar.add(getHelpMenu());
       }
       return jJMenuBar;
    }
@@ -423,6 +428,58 @@ public class gui {
          autoMenu.add(getLogFileMenuItem());
       }
       return autoMenu;
+   }
+
+   private JMenu getHelpMenu() {
+      debug.print("");
+      if (helpMenu == null) {
+         helpMenu = new JMenu();
+         helpMenu.setText("Help");
+         helpMenu.add(getHelpAboutMenuItem());
+      }
+      return helpMenu;
+   }
+
+   private JMenuItem getHelpAboutMenuItem() {
+      debug.print("");
+      if (helpAboutMenuItem == null) {
+         helpAboutMenuItem = new JMenuItem();
+         helpAboutMenuItem.setText("About...");
+         helpAboutMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               String available = null;
+               String version_url = "http://kmttg.googlecode.com/svn/trunk/version";
+               try {
+                  URL url = new URL(version_url);
+                  URLConnection con = url.openConnection();
+                  BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                  String inputLine;
+                  while ((inputLine = in.readLine()) != null) 
+                     available = inputLine;
+                  in.close();
+               } catch (Exception ex) {
+                  available = null;
+               }
+               if (available == null) {
+                  available = "";
+               } else {
+                  available = "Latest released version: " + available;
+               }
+
+               JOptionPane.showMessageDialog(
+                  config.gui.getJFrame(),
+                  "<html>" +
+                  "<h2 style=\"text-align: center;\">" + config.kmttg + "</h2>" +
+                  "<p style=\"text-align: center;\">" + available + "</p>" +
+            		"<p style=\"text-align: center;\">HOME PAGE: http://code.google.com/p/kmttg/</p>" +
+            		"</html>", 
+                  "About kmttg",
+                  JOptionPane.DEFAULT_OPTION
+               );
+            }
+         });
+      }
+      return helpAboutMenuItem;
    }
 
    private JMenuItem getExitMenuItem() {
