@@ -77,6 +77,7 @@ public class help {
          });
          content.add(ok);
          dialog.getContentPane().add(content);
+         dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
          dialog.pack();
       }
       dialog.setVisible(true);
