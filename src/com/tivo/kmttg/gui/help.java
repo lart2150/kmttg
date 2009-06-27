@@ -1,13 +1,18 @@
 package com.tivo.kmttg.gui;
 
+import java.awt.Component;
+import java.awt.Insets;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
+import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
@@ -16,12 +21,16 @@ import com.tivo.kmttg.util.debug;
 
 public class help {
    private static JDialog dialog = null;
+   private static JPanel content = null;
    private static JEditorPane pane = null;
    
    static void showHelp() {
       debug.print("");
       if (dialog == null) {
          dialog = new JDialog(config.gui.getJFrame(), "About kmttg");
+         content = new JPanel();
+         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+         
          pane = new JEditorPane();
          pane.setContentType("text/html");
          String version = getVersion();
@@ -32,16 +41,17 @@ public class help {
             text += version + ".zip\">" + version + "</a></h3>";
          }
          text += "<p>LINKS:</p>";
-         text += "<p style=\"text-align: center;\"><a href=\"http://code.google.com/p/kmttg/\">kmttg Home Page</a></p>";
-         text += "<p style=\"text-align: center;\"><a href=\"http://code.google.com/p/kmttg/downloads/list\">kmttg downloads</a></p>";
-         text += "<p style=\"text-align: center;\"><a href=\"http://code.google.com/p/kmttg/wiki/release_notes\">Release Notes</a></p>";
-         text += "<p style=\"text-align: center;\"><a href=\"http://code.google.com/p/kmttg/wiki/windows_installation\">Windows Installation</a></p>";
-         text += "<p style=\"text-align: center;\"><a href=\"http://code.google.com/p/kmttg/wiki/mac_osx_installation\">Mac OSX Installation</a></p>";
-         text += "<p style=\"text-align: center;\"><a href=\"http://code.google.com/p/kmttg/wiki/linux_installation\">Linux Installation</a></p>";
-         text += "<p style=\"text-align: center;\"><a href=\"http://code.google.com/p/kmttg/wiki/configuring_kmttg\">kmttg configuration</a></p>";
-         text += "<p style=\"text-align: center;\"><a href=\"http://code.google.com/p/kmttg/wiki/using_kmttg\">kmttg operation</a></p>";
-         text += "<p style=\"text-align: center;\"><a href=\"http://code.google.com/p/kmttg/wiki/auto_transfers\">Setting up Auto Transfers</a></p>";
-         text += "</html>";
+         text += "<table>";
+         text += "<tr><td><a href=\"http://code.google.com/p/kmttg/\">kmttg Home Page</a></td>";
+         text += "<td><a href=\"http://code.google.com/p/kmttg/downloads/list\">kmttg downloads</a></td></tr>";
+         text += "<tr><td><a href=\"http://code.google.com/p/kmttg/wiki/release_notes\">Release Notes</a></td>";
+         text += "<td><a href=\"http://code.google.com/p/kmttg/wiki/configuring_kmttg\">kmttg configuration</a></td></tr>";
+         text += "<tr><td><a href=\"http://code.google.com/p/kmttg/wiki/using_kmttg\">kmttg operation</a></td>";
+         text += "<td><a href=\"http://code.google.com/p/kmttg/wiki/auto_transfers\">Setting up Auto Transfers</a></td></tr>";
+         text += "<tr><td><a href=\"http://code.google.com/p/kmttg/wiki/windows_installation\">Windows Installation</a></td>";
+         text += "<td><a href=\"http://code.google.com/p/kmttg/wiki/mac_osx_installation\">Mac OSX Installation</a></td></tr>";
+         text += "<tr><a href=\"http://code.google.com/p/kmttg/wiki/linux_installation\">Linux Installation</a></tr>";
+         text += "</table></html>";
          pane.setText(text);
          pane.setEditable(false);
          
@@ -55,7 +65,18 @@ public class help {
          }
          
          pane.addHyperlinkListener(new Hyper());
-         dialog.getContentPane().add(pane);
+         pane.setAlignmentX(Component.CENTER_ALIGNMENT);
+         content.add(pane);
+         JButton ok = new JButton("OK");
+         ok.setMargin(new Insets(1,100,1,100));
+         ok.setAlignmentX(Component.CENTER_ALIGNMENT);
+         ok.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+               dialog.setVisible(false);
+            }
+         });
+         content.add(ok);
+         dialog.getContentPane().add(content);
          dialog.pack();
       }
       dialog.setVisible(true);
