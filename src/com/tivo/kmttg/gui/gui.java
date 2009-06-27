@@ -392,6 +392,8 @@ public class gui {
          jJMenuBar = new JMenuBar();
          jJMenuBar.add(getFileMenu());
          jJMenuBar.add(getAutoTransfersMenu());
+         // This causes remaining menus to be right justified
+         jJMenuBar.add(Box.createGlue());
          jJMenuBar.add(getHelpMenu());
       }
       return jJMenuBar;
