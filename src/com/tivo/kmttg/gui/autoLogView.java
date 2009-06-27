@@ -62,6 +62,7 @@ public class autoLogView {
          dialog.setContentPane(content);
          dialog.pack();
          dialog.setSize(600,400);
+         dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
          dialog.setVisible(true);
       } else {
          // Deallocate resources and return
