@@ -448,6 +448,7 @@ public class configAuto {
       dialog.setTitle("kmttg auto transfers configuration");
       dialog.setContentPane(content);
       dialog.setSize(new Dimension(700,300));
+      dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
       dialog.pack();
    }
    
