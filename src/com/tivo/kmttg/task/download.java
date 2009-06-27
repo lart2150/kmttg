@@ -176,6 +176,7 @@ public class download {
                if ( first.toLowerCase().contains("failed") ) failed = 1;
                if (failed == 1) {
                   process.printStdout();
+                  log.error(first);
                }
             }
             catch (IOException ex) {
