@@ -18,7 +18,7 @@ import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 
 public class config {
-   public static String kmttg = "kmttg v0p6g_beta";
+   public static String kmttg = "kmttg v0p6g";
    
    // encoding related
    public static String encProfDir = "";
@@ -84,7 +84,7 @@ public class config {
    public static int toolTipsTimeout = 20;  // Set # seconds for tooltip display to timeout
 
    // GUI table related
-   public static Color tableBkgndDarker = new Color(245,245,245); // light grey
+   public static Color tableBkgndDarker = new Color(235,235,235); // light grey
    public static Color tableBkgndLight = Color.white;
    public static Color tableBkgndProtected = new Color(191,156,94); // tan
    public static Color tableBkgndRecording = new Color(149, 151, 221); // light blue
