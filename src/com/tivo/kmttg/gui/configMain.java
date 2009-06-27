@@ -1600,6 +1600,7 @@ public class configMain {
       dialog = new JDialog(frame, false); // non-modal dialog
       dialog.setTitle("kmttg configuration");
       dialog.setContentPane(main_panel);
+      dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
       dialog.pack();
   }
    
