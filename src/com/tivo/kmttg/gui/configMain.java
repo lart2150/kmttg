@@ -51,6 +51,7 @@ public class configMain {
    private static JCheckBox create_subfolder = null;
    private static JCheckBox UseAdscan = null;
    private static JCheckBox VrdReview = null;
+   private static JCheckBox OverwriteFiles = null;
    private static JCheckBox toolTips = null;
    private static JCheckBox jobMonitorFullPaths = null;
    private static JTextField tivo_name = null;
@@ -294,6 +295,12 @@ public class configMain {
       else
          VrdReview.setSelected(false);
       
+      // OverwriteFiles
+      if (config.OverwriteFiles == 1)
+         OverwriteFiles.setSelected(true);
+      else
+         OverwriteFiles.setSelected(false);
+      
       // toolTips
       if (config.toolTips == 1)
          toolTips.setSelected(true);
@@ -448,6 +455,12 @@ public class configMain {
          config.VrdReview = 1;
       else
          config.VrdReview = 0;
+      
+      // OverwriteFiles
+      if (OverwriteFiles.isSelected())
+         config.OverwriteFiles = 1;
+      else
+         config.OverwriteFiles = 0;
       
       // toolTips
       if (toolTips.isSelected())
@@ -826,6 +839,7 @@ public class configMain {
       create_subfolder = new javax.swing.JCheckBox();
       UseAdscan = new javax.swing.JCheckBox();
       VrdReview = new javax.swing.JCheckBox();
+      OverwriteFiles = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
       JLabel file_naming_label = new javax.swing.JLabel();
       JLabel tivo_output_dir_label = new javax.swing.JLabel();
@@ -886,6 +900,7 @@ public class configMain {
       create_subfolder.setText("Create sub-folder for each download");
       UseAdscan.setText("Use VideoRedo AdScan instead of comskip");
       VrdReview.setText("Use VideoRedo GUI to review detected commercials");
+      OverwriteFiles.setText("Overwrite existing files");
       MAK_label.setText("MAK"); 
       file_naming_label.setText("File Naming"); 
       tivo_output_dir_label.setText(".TiVo Output Dir"); 
@@ -1554,6 +1569,12 @@ public class configMain {
       c.gridy = gy;
       general.add(jobMonitorFullPaths, c);
       
+      // OverwriteFiles
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      general.add(OverwriteFiles, c);
+      
       // Common panel
       c.ipady = 0;
       c.weighty = 0.0;  // default to no vertical stretch
@@ -1618,6 +1639,7 @@ public class configMain {
       create_subfolder.setToolTipText(getToolTip("create_subfolder"));
       UseAdscan.setToolTipText(getToolTip("UseAdscan"));
       VrdReview.setToolTipText(getToolTip("VrdReview"));
+      OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
       files_path.setToolTipText(getToolTip("files_path"));
       MAK.setToolTipText(getToolTip("MAK"));
       file_naming.setToolTipText(getToolTip("file_naming"));
@@ -1721,6 +1743,13 @@ public class configMain {
          text += "before starting the commercial cutting job. kmttg will wait until you close<br>";
          text += "the VideRedo GUI before proceeding. NOTE: Be sure to save your changes to .VPrj file<br>";
          text += "before you exit VideoRedo or they will not be used in commercial cut step.";
+      }
+      else if (component.equals("OverwriteFiles")) {
+         text =  "<b>Overwrite existing files</b><br>";
+         text += "With this option disabled kmttg will skip tasks for which output files already exist<br>";
+         text += "so as not to overwrite any existing files of same name on your computer.<br>";
+         text += "With this option enabled kmttg will run tasks regardless of whether their output files<br>";
+         text += "exist or not, overwriting existing files as needed.";
       }
       else if (component.equals("files_path")) {
          text =  "<b>FILES Default Path</b><br>";
