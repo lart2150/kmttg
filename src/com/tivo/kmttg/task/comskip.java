@@ -38,8 +38,12 @@ public class comskip {
       Boolean schedule = true;
       // Don't comskip if outputFile already exists
       if ( file.isFile(outputFile) ) {
-         log.warn("SKIPPING COMSKIP, FILE ALREADY EXISTS: " + outputFile);
-         schedule = false;
+         if (config.OverwriteFiles == 0) {
+            log.warn("SKIPPING COMSKIP, FILE ALREADY EXISTS: " + outputFile);
+            schedule = false;
+         } else {
+            log.warn("OVERWRITING EXISTING FILE: " + outputFile);
+         }
       }
       
       if ( ! file.isFile(config.comskip) ) {

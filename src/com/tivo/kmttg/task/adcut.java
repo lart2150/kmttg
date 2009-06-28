@@ -36,8 +36,12 @@ public class adcut {
       Boolean schedule = true;
       // Don't adcut if mpegFile_cut already exists
       if ( file.isFile(job.mpegFile_cut) ) {
-         log.warn("SKIPPING ADCUT, FILE ALREADY EXISTS: " + job.mpegFile_cut);
-         schedule = false;
+         if (config.OverwriteFiles == 0) {
+            log.warn("SKIPPING ADCUT, FILE ALREADY EXISTS: " + job.mpegFile_cut);
+            schedule = false;
+         } else {
+            log.warn("OVERWRITING EXISTING FILE: " + job.mpegFile_cut);
+         }
       }
       
       String s = File.separator;

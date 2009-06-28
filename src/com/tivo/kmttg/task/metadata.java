@@ -38,9 +38,12 @@ public class metadata {
       debug.print("");
       Boolean schedule = true;
       if ( file.isFile(job.metaFile) ) {
-         // metadata file already exists, so skip download
-         log.warn("SKIPPING METADATA GENERATION, FILE ALREADY EXISTS: " + job.metaFile);
-         schedule = false;
+         if (config.OverwriteFiles == 0) {
+            log.warn("SKIPPING METADATA GENERATION, FILE ALREADY EXISTS: " + job.metaFile);
+            schedule = false;
+         } else {
+            log.warn("OVERWRITING EXISTING FILE: " + job.metaFile);
+         }
       }
       if ( ! file.isFile(config.curl) ) {             
          log.error("curl not found: " + config.curl);

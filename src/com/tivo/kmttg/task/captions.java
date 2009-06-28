@@ -33,8 +33,12 @@ public class captions {
       Boolean schedule = true;
       // Don't encode if mpegFile already exists
       if ( file.isFile(job.srtFile) ) {
-         log.warn("SKIPPING CAPTIONS, FILE ALREADY EXISTS: " + job.srtFile);
-         schedule = false;
+         if (config.OverwriteFiles == 0) {
+            log.warn("SKIPPING CAPTIONS, FILE ALREADY EXISTS: " + job.srtFile);
+            schedule = false;
+         } else {
+            log.warn("OVERWRITING EXISTING FILE: " + job.srtFile);
+         }
       }
       
       if ( ! file.isFile(config.t2extract) ) {

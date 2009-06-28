@@ -29,8 +29,12 @@ public class encode {
       Boolean schedule = true;
       // Don't encode if encodeFile already exists
       if ( file.isFile(job.encodeFile) ) {
-         log.warn("SKIPPING ENCODE, FILE ALREADY EXISTS: " + job.encodeFile);
-         schedule = false;
+         if (config.OverwriteFiles == 0) {
+            log.warn("SKIPPING ENCODE, FILE ALREADY EXISTS: " + job.encodeFile);
+            schedule = false;
+         } else {
+            log.warn("OVERWRITING EXISTING FILE: " + job.encodeFile);
+         }
       }
       
       // Decide which file needs to be encoded and update args accordingly

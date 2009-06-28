@@ -30,8 +30,12 @@ public class decrypt {
       Boolean schedule = true;
       // Don't decrypt if mpegFile already exists
       if ( file.isFile(job.mpegFile) ) {
-         log.warn("SKIPPING DECRYPT, FILE ALREADY EXISTS: " + job.mpegFile);
-         schedule = false;
+         if (config.OverwriteFiles == 0) {
+            log.warn("SKIPPING DECRYPT, FILE ALREADY EXISTS: " + job.mpegFile);
+            schedule = false;
+         } else {
+            log.warn("OVERWRITING EXISTING FILE: " + job.mpegFile);
+         }
       }
       
       if ( ! file.isFile(config.tivodecode) ) {

@@ -33,8 +33,12 @@ public class adscan {
       Boolean schedule = true;
       // Don't adscan if vprjFile already exists
       if ( file.isFile(job.vprjFile) ) {
-         log.warn("SKIPPING ADSCAN, FILE ALREADY EXISTS: " + job.vprjFile);
-         schedule = false;
+         if (config.OverwriteFiles == 0) {
+            log.warn("SKIPPING ADSCAN, FILE ALREADY EXISTS: " + job.vprjFile);
+            schedule = false;
+         } else {
+            log.warn("OVERWRITING EXISTING FILE: " + job.vprjFile);
+         }
       }
       
       String s = File.separator;

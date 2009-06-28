@@ -36,9 +36,12 @@ public class download {
       debug.print("");
       Boolean schedule = true;
       if ( file.isFile(job.tivoFile) ) {
-         // tivoFile already exists, so skip download
-         log.warn("SKIPPING DOWNLOAD, FILE ALREADY EXISTS: " + job.tivoFile);
-         schedule = false;
+         if (config.OverwriteFiles == 0) {
+            log.warn("SKIPPING DOWNLOAD, FILE ALREADY EXISTS: " + job.tivoFile);
+            schedule = false;
+         } else {
+            log.warn("OVERWRITING EXISTING FILE: " + job.tivoFile);
+         }
       }
       
       if ( ! file.isFile(config.curl) ) {             
