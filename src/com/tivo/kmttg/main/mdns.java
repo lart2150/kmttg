@@ -49,23 +49,24 @@ public class mdns {
          Stack<String> tivoNames = config.getTivoNames();
          // Step through list of found host names
          for (int i=0; i<info.length; ++i) {
-            String name = info[i].getName();
-            if (name != null) {
+            // No tsn => not a tivo
+            String tsn = info[i].getPropertyString("TSN");
+            if (tsn != null) {
                Boolean add = true;
-               for (int j=0; j<tivoNames.size(); ++j) {
-                  if ( tivoNames.get(j).matches(name) ) {
-                     add = false;
+               String name = info[i].getName();
+               if (name != null) {
+                  for (int j=0; j<tivoNames.size(); ++j) {
+                     if ( tivoNames.get(j).equals(name) ) {
+                        add = false;
+                     }
                   }
                }
                if (add) {
                   // This tivo not part of current kmttg list so add it
-                  String tsn = info[i].getPropertyString("TSN");
-                  if (tsn != null) {
-                     Hashtable<String,String> b = new Hashtable<String,String>();
-                     b.put("ip", info[i].getHostAddress());
-                     b.put("machine", name);
-                     config.addTivo(b);
-                  }
+                  Hashtable<String,String> b = new Hashtable<String,String>();
+                  b.put("ip", info[i].getHostAddress());
+                  b.put("machine", name);
+                  config.addTivo(b);
                }
             }
          }
