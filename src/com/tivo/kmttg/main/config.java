@@ -18,7 +18,7 @@ import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 
 public class config {
-   public static String kmttg = "kmttg v0p6h_beta";
+   public static String kmttg = "kmttg v0p6h";
    
    // encoding related
    public static String encProfDir = "";
@@ -54,7 +54,7 @@ public class config {
    public static int CheckBeacon = 1;
    public static int UseAdscan = 0;
    public static int VrdReview = 1;
-   public static int OverwriteFiles = 1;
+   public static int OverwriteFiles = 0;
    public static String comskipIni = "";
    public static String wan_http_port = "";
    public static String configIni = "";
