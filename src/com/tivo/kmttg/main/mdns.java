@@ -51,20 +51,25 @@ public class mdns {
             // No tsn => not a tivo
             String tsn = info[i].getPropertyString("TSN");
             if (tsn != null) {
+               Boolean add = true;
                String name = info[i].getName();
                if (name != null) {
                   // Check against current tivo list
                   for (int j=0; j<tivoNames.size(); ++j) {
                      if ( tivoNames.get(j).equals(name) ) {
-                        return;
+                        add = false;
                      }
                   }
+               } else {
+                  add = false;
                }
-               // This tivo not part of current kmttg list so add it
-               Hashtable<String,String> b = new Hashtable<String,String>();
-               b.put("ip", info[i].getHostAddress());
-               b.put("machine", name);
-               config.addTivo(b);
+               if (add) {
+                  // This tivo not part of current kmttg list so add it
+                  Hashtable<String,String> b = new Hashtable<String,String>();
+                  b.put("ip", info[i].getHostAddress());
+                  b.put("machine", name);
+                  config.addTivo(b);
+               }
             }
          }
       }
