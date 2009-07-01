@@ -410,7 +410,10 @@ public class configMain {
          if (config.jmdns == null) config.jmdns = new mdns();
       } else {
          config.CheckBeacon = 0;
-         config.jmdns.close();
+         if (config.jmdns != null) {
+            config.jmdns.close();
+            config.jmdns = null;
+         }
          //config.tivo_beacon = null;
       }
             
