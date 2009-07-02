@@ -763,6 +763,7 @@ public class jobMonitor {
             job.mpegFile  = mpegFile;
          job.mpegFile_cut = mpegFile_cut;
          job.encodeFile   = encodeFile;
+         job.srtFile      = srtFile;
          submitNewJob(job);
       }
       
