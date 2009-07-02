@@ -74,6 +74,7 @@ public class configMain {
    private static JTextField active_job_limit = null;
    private static JTextField VRD_path = null;
    private static JTextField t2extract = null;
+   private static JTextField t2extract_args = null;
    private static JTextField AtomicParsley = null;
    private static JTextField disk_space = null;
    private static JTextField customCommand = null;
@@ -357,6 +358,9 @@ public class configMain {
       
       // t2extract
       t2extract.setText(config.t2extract);
+      
+      // t2extract_args
+      t2extract_args.setText(config.t2extract_args);
       
       // curl
       curl.setText(config.curl);
@@ -678,6 +682,14 @@ public class configMain {
       }
       config.t2extract = value;
       
+      // t2extract_args
+      value = string.removeLeadingTrailingSpaces(t2extract_args.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = "";
+      }
+      config.t2extract_args = value;
+      
       // curl
       value = string.removeLeadingTrailingSpaces(curl.getText());
       if (value.length() == 0) {
@@ -815,6 +827,7 @@ public class configMain {
       comskip_ini = new javax.swing.JTextField(30);
       VRD_path = new javax.swing.JTextField(30);
       t2extract = new javax.swing.JTextField(30);
+      t2extract_args = new javax.swing.JTextField(30);
       AtomicParsley = new javax.swing.JTextField(30);
       customCommand = new javax.swing.JTextField(30);
       
@@ -860,6 +873,7 @@ public class configMain {
       JLabel active_job_limit_label = new javax.swing.JLabel();
       JLabel VRD_path_label = new javax.swing.JLabel();
       JLabel t2extract_label = new javax.swing.JLabel();
+      JLabel t2extract_args_label = new javax.swing.JLabel();
       JLabel AtomicParsley_label = new javax.swing.JLabel();
       JLabel customCommand_label = new javax.swing.JLabel();
       JLabel customFiles_label = new javax.swing.JLabel();
@@ -921,6 +935,7 @@ public class configMain {
       active_job_limit_label.setText("active job limit"); 
       VRD_path_label.setText("VideoRedo path"); 
       t2extract_label.setText("t2extract"); 
+      t2extract_args_label.setText("t2extract extra arguments"); 
       AtomicParsley_label.setText("AtomicParsley");
       customCommand_label.setText("custom command");
       check_space.setText("Check Available Disk Space");      
@@ -1495,17 +1510,30 @@ public class configMain {
       c.gridy = gy;
       programs_panel.add(customFiles, c);
 
+      // Program_options Panel
+      JPanel program_options_panel = new JPanel(new GridBagLayout());      
+
       // UseAdscan
-      gy++;
+      gy=0;
       c.gridx = 1;
       c.gridy = gy;
-      programs_panel.add(UseAdscan, c);      
-
+      program_options_panel.add(UseAdscan, c);      
+      
       // VrdReview
       gy++;
       c.gridx = 1;
       c.gridy = gy;
-      programs_panel.add(VrdReview, c);      
+      program_options_panel.add(VrdReview, c);
+      
+      // t2extract_args
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(t2extract_args_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(t2extract_args, c);
       
       // General panel
       JPanel general = new JPanel(new GridBagLayout());
@@ -1605,6 +1633,7 @@ public class configMain {
       tabbed_panel = new JTabbedPane();
       tabbed_panel.add("File Settings", files_panel);
       tabbed_panel.add("Programs", programs_panel);
+      tabbed_panel.add("Program Options", program_options_panel);
       tabbed_panel.add("Tivos", tivo_panel);
       tabbed_panel.add("General", general);
       
@@ -1658,6 +1687,7 @@ public class configMain {
       comskip.setToolTipText(getToolTip("comskip"));
       comskip_ini.setToolTipText(getToolTip("comskip_ini"));
       t2extract.setToolTipText(getToolTip("t2extract"));
+      t2extract_args.setToolTipText(getToolTip("t2extract_args"));
       VRD_path.setToolTipText(getToolTip("VRD_path"));
       AtomicParsley.setToolTipText(getToolTip("AtomicParsley"));
       wan_http_port.setToolTipText(getToolTip("wan_http_port"));
@@ -1861,6 +1891,15 @@ public class configMain {
          text += "For Windows systems this program is used for generating closed captions <b>.srt</b> files.<br>";
          text += "This is the full path to the <b>T2Sami t2extract</b> program.<br>";
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
+      }
+      else if (component.equals("t2extract_args")) {
+         text =  "<b>t2extract extra arguments</b><br>";
+         text += "Any extra arguments you want kmttg to use when running <b>t2extract</b> which is the<br>";
+         text += "program used to generate closed captions <b>.srt</b> file. By default the program<br>";
+         text += "arguments are as follows: <b>t2extract -f srt videoFile</b>. Extra arguments you<br>";
+         text += "supply are added following the <b>-f srt</b> option.<b>";
+         text += "NOTE: kmttg expects <b>srt</b> as output file. If you want to output a different format<br>";
+         text += "then consider using <b>custom</b> job to run t2extract with whatever arguments you want.";
       }
       else if (component.equals("VRD_path")) {
          text =  "<b>VideoRedo path</b><br>";
