@@ -83,8 +83,9 @@ public class encode {
          return false;
       }
       Stack<String> command = encodeConfig.getFullCommand(
-         job.encodeName, job.inputFile, job.encodeFile
+         job.encodeName, job.inputFile, job.encodeFile, job.srtFile
       );
+         
       process = new backgroundProcess();
       log.print(">> ENCODING WITH PROFILE '" + job.encodeName + "' TO FILE " + job.encodeFile + " ...");
       if ( process.run(command) ) {
