@@ -168,10 +168,10 @@ public class encodeConfig {
    }
 
    // Return in string stack form the full encoding command
-   public static Stack<String> getFullCommand(String encodeName, String inputFile, String outputFile) {
+   public static Stack<String> getFullCommand(String encodeName, String inputFile, String outputFile, String srtFile) {
       debug.print("inputFile=" + inputFile + " outputFile=" + outputFile);
       String command = getCommandName(encodeName);
-      Stack<String> full = getCommandArgs(encodeName, inputFile, outputFile);
+      Stack<String> full = getCommandArgs(encodeName, inputFile, outputFile, srtFile);
       full.add(0, command);
       return full;      
    }
@@ -193,7 +193,7 @@ public class encodeConfig {
    }
 
    // Return encoder command arguments
-   public static Stack<String> getCommandArgs(String encodeName, String inputFile, String outputFile) {
+   public static Stack<String> getCommandArgs(String encodeName, String inputFile, String outputFile, String srtFile) {
       debug.print("inputFile=" + inputFile + " outputFile=" + outputFile);
       Stack<String> args = new Stack<String>();
       if ( ! config.ENCODE.isEmpty() ) {
@@ -210,6 +210,9 @@ public class encodeConfig {
             arg = arg.replaceAll("INPUT", escapeBackSlashes(inputFile));
             arg = arg.replaceAll("OUTPUT", escapeBackSlashes(outputFile));
             arg = arg.replaceAll("CPU_CORES", ("" + config.cpu_cores));
+            if (srtFile != null) {
+               arg = arg.replaceAll("SRTFILE", escapeBackSlashes(srtFile));
+            }
             args.add(arg);
          }
       }
