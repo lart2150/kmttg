@@ -75,6 +75,11 @@ public class captions {
       command.add(config.t2extract);
       command.add("-f");
       command.add("srt");
+      if (config.t2extract_args.length() > 0) {
+         String[] args = config.t2extract_args.split("\\s+");
+         for (int i=0; i<args.length; i++)
+            command.add(args[i]);
+      }
       command.add(job.videoFile);
       process = new backgroundProcess();
       log.print(">> Running t2extract on " + job.videoFile + " ...");
