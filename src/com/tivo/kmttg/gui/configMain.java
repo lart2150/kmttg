@@ -1897,7 +1897,7 @@ public class configMain {
          text += "Any extra arguments you want kmttg to use when running <b>t2extract</b> which is the<br>";
          text += "program used to generate closed captions <b>.srt</b> file. By default the program<br>";
          text += "arguments are as follows: <b>t2extract -f srt videoFile</b>. Extra arguments you<br>";
-         text += "supply are added following the <b>-f srt</b> option.<b>";
+         text += "supply are added following the <b>-f srt</b> option.<br>";
          text += "NOTE: kmttg expects <b>srt</b> as output file. If you want to output a different format<br>";
          text += "then consider using <b>custom</b> job to run t2extract with whatever arguments you want.";
       }
