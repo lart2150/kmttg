@@ -18,7 +18,7 @@ import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 
 public class config {
-   public static String kmttg = "kmttg v0p6i";
+   public static String kmttg = "kmttg v0p6j_beta";
    
    // encoding related
    public static String encProfDir = "";
@@ -100,6 +100,9 @@ public class config {
    // tivo beacon listening
    //public static beacon tivo_beacon;
    public static mdns jmdns = null;
+   
+   // t2extract related
+   public static String t2extract_args = "";
    
    public static Stack<String> parse() {
       debug.print("");
@@ -533,6 +536,9 @@ public class config {
             if (key.equals("t2extract")) {
                t2extract = line;
             }
+            if (key.equals("t2extract_args")) {
+               t2extract_args = line;
+            }
             if (key.equals("custom")) {
                customCommand = line;
             }
@@ -638,6 +644,8 @@ public class config {
          ofp.write("<AtomicParsley>\n" + AtomicParsley + "\n\n");
          
          ofp.write("<t2extract>\n" + t2extract + "\n\n");
+         
+         ofp.write("<t2extract_args>\n" + t2extract_args + "\n\n");
                            
          ofp.write("<custom>\n" + customCommand + "\n\n");
          
