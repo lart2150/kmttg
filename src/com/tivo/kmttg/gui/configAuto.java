@@ -51,7 +51,6 @@ import com.tivo.kmttg.util.string;
 public class configAuto {
    private static Stack<JTextField> errors = new Stack<JTextField>();
    private static Color textbg_default = null;
-   private static Color textbg_error = Color.red;
    
    private static JDialog dialog = null;
    private static JPanel content = null;
@@ -105,7 +104,7 @@ public class configAuto {
    private void textFieldError(JTextField f, String message) {
       debug.print("f=" + f + " message=" + message);
       log.error(message);
-      f.setBackground(textbg_error);
+      f.setBackground(config.lightRed);
       errors.add(f);
    }
    
@@ -226,7 +225,7 @@ public class configAuto {
       });
       
       CANCEL = new JButton("CANCEL");
-      CANCEL.setBackground(Color.red);
+      CANCEL.setBackground(config.lightRed);
       CANCEL.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             dialog.setVisible(false);
