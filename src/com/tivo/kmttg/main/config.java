@@ -89,6 +89,7 @@ public class config {
    public static Color tableBkgndLight = Color.white;
    public static Color tableBkgndProtected = new Color(191,156,94); // tan
    public static Color tableBkgndRecording = new Color(149, 151, 221); // light blue
+   public static Color lightRed = new Color(250, 190, 190); // light red
    public static Font  tableFont = new Font("System", Font.BOLD, 12);
 
    // misc
