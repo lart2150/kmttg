@@ -261,6 +261,12 @@ public class jobMonitor {
             else
                output = string.basename(job.getOutputFile());
          }
+         
+         // For encode jobs add profile name before output file name
+         if (job.type.equals("encode")) {
+            output = "(" + job.encodeName + ") " + output;
+         }
+         
          if (config.GUI) config.gui.jobTab_AddJobMonitorRow(job, job.tivoName, output);
       }
       
