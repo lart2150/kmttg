@@ -56,6 +56,7 @@ public class gui {
    private JMenuItem backgroundJobEnableMenuItem = null;
    private JMenuItem backgroundJobDisableMenuItem = null;
    private JMenuItem saveMessagesMenuItem = null;
+   private JMenuItem clearMessagesMenuItem = null;
    
    private JComboBox encoding = null;
    private JLabel encoding_label = null;
@@ -134,7 +135,7 @@ public class gui {
          JButton cancel = new JButton("CANCEL JOBS");
          cancel.setMargin(new Insets(0,1,0,1));
          cancel.setToolTipText(getToolTip("cancel"));
-         cancel.setBackground(Color.red);
+         cancel.setBackground(config.lightRed);
          cancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {
                cancelCB();
@@ -407,6 +408,7 @@ public class gui {
          fileMenu.add(getConfigureMenuItem());
          fileMenu.add(getRefreshEncodingsMenuItem());
          fileMenu.add(getSaveMessagesMenuItem());
+         fileMenu.add(getClearMessagesMenuItem());
          fileMenu.add(getExitMenuItem());
       }
       return fileMenu;
@@ -508,6 +510,22 @@ public class gui {
          });
       }
       return saveMessagesMenuItem;
+   }
+
+   private JMenuItem getClearMessagesMenuItem() {
+      debug.print("");
+      if (clearMessagesMenuItem == null) {
+         clearMessagesMenuItem = new JMenuItem();
+         clearMessagesMenuItem.setText("Clear all messages");
+         clearMessagesMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               text.setEditable(true);
+               text.setText("");
+               text.setEditable(false);
+            }
+         });
+      }
+      return clearMessagesMenuItem;
    }
 
    private JMenuItem getRunInGuiMenuItem() {
