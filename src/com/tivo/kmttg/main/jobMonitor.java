@@ -324,8 +324,7 @@ public class jobMonitor {
          if (sourceFile != null && JOBS.get(i).source != null) {
             if(JOBS.get(i).source.equals(sourceFile)) {
                if (JOBS.get(i).type.equals(job.type)) {
-                  // Identical job => remove from job list and return
-                  removeFromJobList(job);
+                  // Identical job => do not run this job
                   return false;
                }
                sameSource = true;
