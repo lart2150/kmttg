@@ -57,6 +57,7 @@ public class gui {
    private JMenuItem backgroundJobDisableMenuItem = null;
    private JMenuItem saveMessagesMenuItem = null;
    private JMenuItem clearMessagesMenuItem = null;
+   private JMenuItem resetServerMenuItem = null;
    
    private JComboBox encoding = null;
    private JLabel encoding_label = null;
@@ -409,6 +410,7 @@ public class gui {
          fileMenu.add(getRefreshEncodingsMenuItem());
          fileMenu.add(getSaveMessagesMenuItem());
          fileMenu.add(getClearMessagesMenuItem());
+         fileMenu.add(getResetServerMenuItem());
          fileMenu.add(getExitMenuItem());
       }
       return fileMenu;
@@ -528,6 +530,33 @@ public class gui {
       return clearMessagesMenuItem;
    }
 
+   private JMenuItem getResetServerMenuItem() {
+      debug.print("");
+      if (resetServerMenuItem == null) {
+         resetServerMenuItem = new JMenuItem();
+         resetServerMenuItem.setText("Reset TiVo web server");
+         resetServerMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               String tivoName = getSelectedTivoName();
+               if (tivoName != null) {
+                  String urlString = "http://" + config.TIVOS.get(tivoName) + "/TiVoConnect?Command=ResetServer";
+                  try {
+                     URL url = new URL(urlString);
+                     log.warn("Resetting " + tivoName + " TiVo: " + urlString);
+                     url.openConnection();
+                  }
+                  catch(Exception ex) {
+                     log.error(ex.toString());
+                  }
+               } else {
+                  log.error("This command must be run with a TiVo tab selected.");
+               }
+            }
+         });
+      }
+      return resetServerMenuItem;
+   }
+   
    private JMenuItem getRunInGuiMenuItem() {
       debug.print("");
       if (runInGuiMenuItem == null) {
