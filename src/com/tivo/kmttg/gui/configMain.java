@@ -35,7 +35,6 @@ import com.tivo.kmttg.util.string;
 public class configMain {
    private static Stack<JTextField> errors = new Stack<JTextField>();
    private static Color textbg_default = null;
-   private static Color textbg_error = Color.red;
    
    private static JButton add = null;
    private static JButton del = null;
@@ -108,12 +107,12 @@ public class configMain {
    private static void textFieldError(JTextField f, String message) {
       debug.print("f=" + f + " message=" + message);
       log.error(message);
-      f.setBackground(textbg_error);
+      f.setBackground(config.lightRed);
       errors.add(f);
       // Set tab background of this text field to error color as well
       int tab_index = tabbed_panel.indexOfComponent(f.getParent());
       if (tab_index != -1)
-         tabbed_panel.setBackgroundAt(tab_index, textbg_error);
+         tabbed_panel.setBackgroundAt(tab_index, config.lightRed);
    }
    
    // Clear all text field and tab background color error paint settings
@@ -984,7 +983,7 @@ public class configMain {
       });
 
       CANCEL.setText("CANCEL"); 
-      CANCEL.setBackground(Color.red);
+      CANCEL.setBackground(config.lightRed);
       CANCEL.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             dialog.setVisible(false);
@@ -1655,6 +1654,7 @@ public class configMain {
       dialog.setContentPane(main_panel);
       dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
       dialog.pack();
+      dialog.setResizable(false);
   }
    
    public static void setToolTips() {
