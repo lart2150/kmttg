@@ -16,6 +16,7 @@ import com.tivo.kmttg.task.*;
 
 public class jobMonitor {
    public static Stack<jobData> JOBS = new Stack<jobData>();
+   private static Stack<jobData> JOB_HISTORY = new Stack<jobData>();
    public static int JOB_COUNT = 0;
    public static int JOB = 0;
    public static int FAMILY_ID = 0;
@@ -355,7 +356,19 @@ public class jobMonitor {
          return true;
       return false;
    }
-  
+   
+   // status = completed, failed, killed or canceled
+   public static void addToJobHistory(jobData job, String status) {
+      if (config.GUI) {
+         // Save final status of job
+         job.status = status;
+         // Save length of time job lasted
+         job.duration = (new Date().getTime()) - job.time;
+         
+         // Add to job history stack
+         JOB_HISTORY.add(job);
+      }
+   }  
 
    // Return elapsed time of a job in hh:mm:ss format
    public static String getElapsedTime(long start) {
