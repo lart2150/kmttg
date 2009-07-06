@@ -1385,6 +1385,12 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       files_panel.add(encode_output_dir, c);
+      
+      // OverwriteFiles
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      files_panel.add(OverwriteFiles, c);
 
       // Programs Panel
       JPanel programs_panel = new JPanel(new GridBagLayout());      
@@ -1598,12 +1604,6 @@ public class configMain {
       c.gridx = 0;
       c.gridy = gy;
       general.add(jobMonitorFullPaths, c);
-      
-      // OverwriteFiles
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      general.add(OverwriteFiles, c);
       
       // Common panel
       c.ipady = 0;
