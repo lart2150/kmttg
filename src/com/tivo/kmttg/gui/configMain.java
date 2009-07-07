@@ -1760,7 +1760,10 @@ public class configMain {
          text =  "<b>Create sub-folder for each download</b><br>";
          text += "Enable this option if you would like kmttg to create a sub-folder for<br>";
          text += "<b>each individual</b> show to be processed. The name of the folder<br>";
-         text += "will be the same as the file format you defined but without any file extension.";
+         text += "will be the same as the file format you defined but without any file extension.<br>";
+         text += "<b>NOTE: Most users will probably want to leave this option disabled</b>.<br>";
+         text += "NOTE: If you want to use folder structures use the more useful <b>[/]</b> keyword in<br>";
+         text += "<b>File Naming</b> template. Consult the kmttg configuration wiki for more info.";
       }
       else if (component.equals("UseAdscan")) {
          text =  "<b>Use VideoRedo AdScan instead of comskip</b><br>";
