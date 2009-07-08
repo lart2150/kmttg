@@ -368,7 +368,18 @@ public class jobMonitor {
          // Add to job history stack
          JOB_HISTORY.add(job);
       }
-   }  
+   }
+   
+   // If any jobs remain for given tivoName then return true
+   public static Boolean jobsRemain(String tivoName) {
+      if ( JOBS != null && ! JOBS.isEmpty() ) {
+         for (int i=0; i<JOBS.size(); ++i) {
+            if (JOBS.get(i).tivoName.equals(tivoName))
+               return true;
+         }
+      }
+      return false;
+   }
 
    // Return elapsed time of a job in hh:mm:ss format
    public static String getElapsedTime(long start) {
