@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -29,31 +30,18 @@ public class auto {
          exitAuto(1);
       }
       
-      log.print("\nSTARTING AUTO TRANSFERS");      
-      // Enter master check Tivos loop
-      Boolean GO = true;
-      while (GO) {         
-         // Parse auto.ini file (this in main loop in case auto.ini file is updated)
-         if ( ! autoConfig.parseAuto(config.autoIni) ) {
-            log.error("Auto Transfers config has errors or is not setup");
-            exitAuto(1);
-         }
-         if ( getTitleEntries().isEmpty() && getKeywordsEntries().isEmpty() ) {
-            log.error("No keywords defined in " + config.autoIni + "... aborting");
-            exitAuto(0);
-         }
-
+      // Single loop batch mode
+      if ( ! config.LOOP ) {
+         log.print("\nSTARTING BATCH MODE SINGLE LOOP TRANSFERS");
+         parseAutoIni();
+         
          // Queue up now playing list downloads from all Tivos
-         if ( config.getTivoNames().isEmpty() ) {
-            log.error("No tivos defined in config");
-            exitAuto(1);
-         }
          for (int i=0; i < config.getTivoNames().size(); i++) {
             String tivoName = config.getTivoNames().get(i);
             NowPlaying.submitJob(tivoName);
          }
          
-         // Process all queued up jobs
+         // Process all queued up jobs until all completed
          while( ! jobMonitor.JOBS.isEmpty() ) {
             try {
                Thread.sleep(2000);
@@ -64,20 +52,74 @@ public class auto {
             jobMonitor.monitor(null, null);
          }
          
-         // Exit now if in single loop mode
-         if ( ! config.LOOP  ) exitAuto(0);
+         // Done
+         exitAuto(0);
          
-         // Exit it autoLog file doesn't exist
-         if ( ! file.isFile(config.autoLog) ) exitAuto(1);
-
-         // Sleep for a period of time before checking Tivos again
-         log.print("\nSLEEPING " + autoConfig.CHECK_TIVOS_INTERVAL + " mins ...");
-         try {
-            Thread.sleep(autoConfig.CHECK_TIVOS_INTERVAL*60*1000);
-         } catch (InterruptedException e) {
-            log.error(e.toString());
-            exitAuto(1);
+      } else {
+         // Auto mode         
+         log.print("\nSTARTING AUTO TRANSFERS");
+         Hashtable<String,Long> launch = new Hashtable<String,Long>();
+         Long now = new Date().getTime() - 1;
+         for (int i=0; i < config.getTivoNames().size(); i++) {
+            launch.put(config.getTivoNames().get(i), now);
          }
+         Long launchTime;
+         
+         // Endless loop
+         Boolean GO = true;         
+         while (GO) {                     
+            // Launch jobs for Tivos or update launch times appropriately
+            for (int i=0; i < config.getTivoNames().size(); i++) {
+               String tivoName = config.getTivoNames().get(i);
+               now = new Date().getTime();
+               launchTime = launch.get(tivoName);
+               
+               // Launch new jobs for this Tivo if ready
+               if (launchTime != -1 && now > launchTime) {
+                  // Parse auto.ini each time before launch in case it gets updated
+                  parseAutoIni();
+                  // Launch jobs for this tivo
+                  NowPlaying.submitJob(tivoName);
+                  launch.put(tivoName, (long)-1);
+               }
+               
+               if ( ! jobMonitor.jobsRemain(tivoName) && launchTime == -1 ) {
+                  // Setup to launch new jobs after user configured sleep time
+                  launch.put(tivoName, now + autoConfig.CHECK_TIVOS_INTERVAL*60*1000);
+                  log.print("\n'" + tivoName + "' PROCESSING SLEEPING " + autoConfig.CHECK_TIVOS_INTERVAL + " mins ...");
+               }
+            }
+            
+            // Sleep for a little and then process jobs for this iteration
+            try {
+               Thread.sleep(2000);
+            } catch (InterruptedException e) {
+               log.error(e.toString());
+               exitAuto(1);
+            }
+            jobMonitor.monitor(null, null);
+            
+            // Exit if autoLog file doesn't exist
+            if ( ! file.isFile(config.autoLog) ) exitAuto(1);
+         } // while GO
+      } // auto mode    
+   }
+   
+   private static void parseAutoIni() {
+      // Parse auto.ini file (this in main loop in case auto.ini file is updated)
+      if ( ! autoConfig.parseAuto(config.autoIni) ) {
+         log.error("Auto Transfers config has errors or is not setup");
+         exitAuto(1);
+      }
+      if ( getTitleEntries().isEmpty() && getKeywordsEntries().isEmpty() ) {
+         log.error("No keywords defined in " + config.autoIni + "... aborting");
+         exitAuto(0);
+      }
+
+      // No tivos => nothing else to do
+      if ( config.getTivoNames().isEmpty() ) {
+         log.error("No tivos defined in config");
+         exitAuto(1);
       }
    }
    
