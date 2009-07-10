@@ -295,7 +295,9 @@ public class jobData {
          file = encodeFile;
       }
       else if (type.equals("custom")) {
-         file = "" + familyId;
+    	  // NOTE: Must assign an output file of some sort to prevent job duplication
+    	  // across different Tivos
+         file = mpegFile;
       }
       else if (type.equals("streamfix")) {
          file = mpegFile_fix;
