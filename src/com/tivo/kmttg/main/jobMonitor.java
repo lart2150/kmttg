@@ -240,6 +240,8 @@ public class jobMonitor {
    static void addToJobList(jobData job) {
       debug.print("job=" + job);
       // Prevent duplicate jobs from being queued to the job list
+      // NOTE: There can be identical shows on different Tivos, so must check output file
+      // since source will be different in that case
       for (int i=0; i<JOBS.size(); ++i) {
          if (job.type.equals(JOBS.get(i).type)) {
             if (job.getOutputFile().equals(JOBS.get(i).getOutputFile())) return;
