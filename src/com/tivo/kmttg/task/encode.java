@@ -230,11 +230,10 @@ public class encode {
                  (job.encodeFile.toLowerCase().endsWith(".mp4") ||
                   job.encodeFile.toLowerCase().endsWith(".m4v")) ) {
                jobData new_job = new jobData();
+               new_job.source       = job.source;
                new_job.tivoName     = job.tivoName;
                new_job.type         = "atomic";
                new_job.name         = config.AtomicParsley;
-               new_job.familyId     = job.familyId;
-               new_job.familyId     += (float)0.1;
                new_job.encodeFile   = job.encodeFile;
                jobMonitor.submitNewJob(new_job);
             }
