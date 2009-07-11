@@ -3,7 +3,7 @@
 Handbrake iPod: m4v container, res x=320 h.264 video, aac audio
 
 # Encode command or script (single line)
-# Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD, CPU_CORES
+# Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
 HANDBRAKE -i INPUT --cpu CPU_CORES -t 1 -c 1 -f m4v -I  -X 320 -e x264 -b 700 -a 1 -E faac -B 160 -R 48 -6 dpl2 -D 1 -x level=30:bframes=0:cabac=0:ref=1:vbv-maxrate=768:vbv-bufsize=2000:analyse=all:me=umh:no-fast-pskip=1 -v -o OUTPUT
  

@@ -3,7 +3,7 @@
 mpeg4 container, 320x240 mpeg4 video, aac audio
 
 # Encode command or script (single line)
-# Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES
+# Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
 FFMPEG -y -i INPUT -threads CPU_CORES -vcodec mpeg4 -acodec libfaac -b 672k -ab 96k -ac 2 -ar 24000 -s 320x240 -g 300 -mbd 2 -cmp 3 -precmp 3 -subcmp 3 -trellis 2 -flags +mv4 -f psp OUTPUT
 
