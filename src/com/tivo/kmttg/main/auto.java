@@ -373,7 +373,7 @@ public class auto {
          ofp.write(job.ProgramId);
          if (job.title != null)
             ofp.write(" " + job.title);
-         ofp.write("\n");
+         ofp.write("\r\n");
          ofp.close();
          return 1;
       } catch (IOException ex) {
@@ -399,7 +399,7 @@ public class auto {
          ofp.write(job.get("ProgramId"));
          if (job.containsKey("title"))
             ofp.write(" " + job.get("title"));
-         ofp.write("\n");
+         ofp.write("\r\n");
          ofp.close();
          return 1;
       } catch (IOException ex) {
