@@ -158,9 +158,14 @@ public class qsfix {
             log.warn("qsfix job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");
             // Rename mpegFile_fix to mpegFile
-            file.delete(job.mpegFile);
-            file.rename(job.mpegFile_fix, job.mpegFile);
-            log.print("(Renamed " + job.mpegFile_fix + " to " + job.mpegFile + ")");
+            Boolean result = file.delete(job.mpegFile);
+            if ( ! result )
+            	log.error("Failed to delete file in preparation for rename: " + job.mpegFile);
+            result = file.rename(job.mpegFile_fix, job.mpegFile);
+            if (result)
+            	log.print("(Renamed " + job.mpegFile_fix + " to " + job.mpegFile + ")");
+            else
+            	log.error("Failed to rename " + job.mpegFile_fix + " to " + job.mpegFile);
          }
       }
       return false;
