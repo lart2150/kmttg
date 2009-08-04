@@ -159,8 +159,10 @@ public class qsfix {
             log.print("---DONE---");
             // Rename mpegFile_fix to mpegFile
             Boolean result = file.delete(job.mpegFile);
-            if ( ! result )
+            if ( ! result ) {
             	log.error("Failed to delete file in preparation for rename: " + job.mpegFile);
+            	return false;
+            }
             result = file.rename(job.mpegFile_fix, job.mpegFile);
             if (result)
             	log.print("(Renamed " + job.mpegFile_fix + " to " + job.mpegFile + ")");
