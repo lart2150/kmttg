@@ -82,6 +82,11 @@ public class tivoFileName {
       file = file.replaceAll("\\\\", "");
       file = file.replaceAll("\\$", "");
       
+      // Don't allow folders ending in dots
+      while (file.matches("^.+\\.__separator__.*$")) {
+         file = file.replaceAll("\\.__separator__", "__separator__");
+      }
+      
       // Deal with separators
       String s = File.separator;
       s = s.replaceFirst("\\\\", "\\\\\\\\");
@@ -93,6 +98,12 @@ public class tivoFileName {
       // Add sub-folder if requested
       if ( config.CreateSubFolder == 1 ) {
          String folder = string.basename(file).replaceFirst("\\.TiVo$", "");
+         
+         // Don't allow folders ending in dots
+         while (folder.matches("^.+\\.$")) {
+            folder = folder.replaceAll("\\.$", "");
+         }
+         
          file = folder + File.separator + file;
       }
       
