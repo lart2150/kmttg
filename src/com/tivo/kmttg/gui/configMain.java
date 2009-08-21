@@ -74,6 +74,7 @@ public class configMain {
    private static JTextField VRD_path = null;
    private static JTextField t2extract = null;
    private static JTextField t2extract_args = null;
+   private static JTextField ccextractor = null;
    private static JTextField AtomicParsley = null;
    private static JTextField disk_space = null;
    private static JTextField customCommand = null;
@@ -360,6 +361,9 @@ public class configMain {
       
       // t2extract_args
       t2extract_args.setText(config.t2extract_args);
+      
+      // ccextractor
+      ccextractor.setText(config.ccextractor);
       
       // curl
       curl.setText(config.curl);
@@ -689,6 +693,19 @@ public class configMain {
       }
       config.t2extract_args = value;
       
+      // ccextractor
+      value = string.removeLeadingTrailingSpaces(ccextractor.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = "";
+      } else {
+         if ( ! file.isFile(value) ) {
+            textFieldError(ccextractor, "ccextractor setting not a valid file: '" + value  + "'");
+            errors++;
+         }
+      }
+      config.ccextractor = value;
+      
       // curl
       value = string.removeLeadingTrailingSpaces(curl.getText());
       if (value.length() == 0) {
@@ -827,6 +844,7 @@ public class configMain {
       VRD_path = new javax.swing.JTextField(30);
       t2extract = new javax.swing.JTextField(30);
       t2extract_args = new javax.swing.JTextField(30);
+      ccextractor = new javax.swing.JTextField(30);
       AtomicParsley = new javax.swing.JTextField(30);
       customCommand = new javax.swing.JTextField(30);
       
@@ -873,6 +891,7 @@ public class configMain {
       JLabel VRD_path_label = new javax.swing.JLabel();
       JLabel t2extract_label = new javax.swing.JLabel();
       JLabel t2extract_args_label = new javax.swing.JLabel();
+      JLabel ccextractor_label = new javax.swing.JLabel();
       JLabel AtomicParsley_label = new javax.swing.JLabel();
       JLabel customCommand_label = new javax.swing.JLabel();
       JLabel customFiles_label = new javax.swing.JLabel();
@@ -934,7 +953,8 @@ public class configMain {
       active_job_limit_label.setText("active job limit"); 
       VRD_path_label.setText("VideoRedo path"); 
       t2extract_label.setText("t2extract"); 
-      t2extract_args_label.setText("t2extract extra arguments"); 
+      t2extract_args_label.setText("t2extract extra arguments");
+      ccextractor_label.setText("ccextractor");
       AtomicParsley_label.setText("AtomicParsley");
       customCommand_label.setText("custom command");
       check_space.setText("Check Available Disk Space");      
@@ -1195,6 +1215,20 @@ public class configMain {
                   int result = Browser.showDialog(t2extract, "Choose File");
                   if (result == JFileChooser.APPROVE_OPTION) {
                      t2extract.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      ccextractor.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(ccextractor, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     ccextractor.setText(Browser.getSelectedFile().getPath());
                   }
                }
             }
@@ -1475,6 +1509,18 @@ public class configMain {
       c.gridy = gy;
       programs_panel.add(t2extract, c);
       
+      // ccextractor (intentionally disabled for now)
+      /*
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      programs_panel.add(ccextractor_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      programs_panel.add(ccextractor, c);
+      */
+      
       // AtomicParsley
       gy++;
       c.gridx = 0;
@@ -1688,6 +1734,7 @@ public class configMain {
       comskip_ini.setToolTipText(getToolTip("comskip_ini"));
       t2extract.setToolTipText(getToolTip("t2extract"));
       t2extract_args.setToolTipText(getToolTip("t2extract_args"));
+      ccextractor.setToolTipText(getToolTip("ccextractor"));
       VRD_path.setToolTipText(getToolTip("VRD_path"));
       AtomicParsley.setToolTipText(getToolTip("AtomicParsley"));
       wan_http_port.setToolTipText(getToolTip("wan_http_port"));
@@ -1890,9 +1937,11 @@ public class configMain {
       }
       else if (component.equals("t2extract")) {
          text =  "<b>t2extract</b><br>";
-         text += "<b>REQUIRED</b> if you plan to use <b>captions</b> task.<br>";
+         text += "<b>REQUIRED</b> if you plan to use <b>captions</b> task (and don't define ccextractor).<br>";
          text += "For Windows systems this program is used for generating closed captions <b>.srt</b> files.<br>";
          text += "This is the full path to the <b>T2Sami t2extract</b> program.<br>";
+         text += "NOTE: For Windows this is a better, more robust solution compared to cross-platform ccextractor.<br>";
+         text += "NOTE: kmttg will use t2extract over ccextractor if possible.<br>";
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("t2extract_args")) {
@@ -1904,6 +1953,15 @@ public class configMain {
          text += "NOTE: kmttg expects <b>srt</b> as output file. If you want to output a different format<br>";
          text += "then consider using <b>custom</b> job to run t2extract with whatever arguments you want.";
       }
+      else if (component.equals("ccextractor")) {
+          text =  "<b>ccextractor</b><br>";
+          text += "<b>REQUIRED</b> if you plan to use <b>captions</b> task (and don't define t2extract).<br>";
+          text += "Cross-platform program for generating closed captions <b>.srt</b> files from mpeg files.<br>";
+          text += "This is the full path to the <b>ccextractor</b> program executable.<br>";
+          text += "NOTE: For Windows platform consider using t2sami instead (faster, more robust and supports .TiVo files).<br>";
+          text += "NOTE: kmttg will use t2extract over ccextractor if possible.<br>";
+          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
+       }
       else if (component.equals("VRD_path")) {
          text =  "<b>VideoRedo path</b><br>";
          text += "For Windows systems only if you have VideoRedo program installed on this computer<br>";

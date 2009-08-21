@@ -41,6 +41,7 @@ public class config {
    public static String AtomicParsley = "";
    public static String VRD = "";
    public static String t2extract = "";
+   public static String ccextractor = "";
 
    // config preferences
    public static String MAK = "";               // MAK id for NPL downloads
@@ -180,6 +181,14 @@ public class config {
          if ( file.isFile(result) )
             AtomicParsley = result;
       }
+      // Intentionally disabled for now
+      /*
+      if ( ! file.isFile(ccextractor) ) {
+          result = getProgramDefault("ccextractor");
+          if ( file.isFile(result) )
+             ccextractor = result;
+       }
+       */
 
       // Parse encoding profiles
       encodeConfig.parseEncodingProfiles(config.encProfDir);
@@ -328,6 +337,7 @@ public class config {
       comskip       = getProgramDefault("comskip");
       comskipIni    = getProgramDefault("comskipIni");
       AtomicParsley = getProgramDefault("AtomicParsley");      
+      //ccextractor   = getProgramDefault("ccextractor");
    }
    
    // Return default setting for a given programName
@@ -417,6 +427,16 @@ public class config {
                AtomicParsley = result;
          }
          return AtomicParsley;
+      }
+      
+      else if (programName.equals("ccextractor")) {
+         String ccextractor    = programDir + s + "ccextractor"    + s + "ccextractor"    + exe;      
+         if (OS.equals("other") && ! file.isFile(ccextractor)) {
+            result = file.unixWhich("ccextractor");
+            if (result != null)
+               ccextractor = result;
+         }
+         return ccextractor;
       }
             
       else {
@@ -540,6 +560,9 @@ public class config {
             if (key.equals("t2extract_args")) {
                t2extract_args = line;
             }
+            if (key.equals("ccextractor")) {
+                ccextractor = line;
+             }
             if (key.equals("custom")) {
                customCommand = line;
             }
@@ -647,7 +670,9 @@ public class config {
          ofp.write("<t2extract>\n" + t2extract + "\n\n");
          
          ofp.write("<t2extract_args>\n" + t2extract_args + "\n\n");
-                           
+                                    
+         ofp.write("<ccextractor>\n" + ccextractor + "\n\n");
+         
          ofp.write("<custom>\n" + customCommand + "\n\n");
          
          ofp.write("<CheckDiskSpace>\n" + CheckDiskSpace + "\n\n");

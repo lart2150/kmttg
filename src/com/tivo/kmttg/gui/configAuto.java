@@ -599,7 +599,7 @@ public class configAuto {
          comcut.setEnabled(true);
       }
 
-      if (! file.isFile(config.t2extract)) {
+      if (! file.isFile(config.t2extract) && ! file.isFile(config.ccextractor)) {
          captions.setSelected(false);
          captions.setEnabled(false);
       } else {

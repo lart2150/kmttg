@@ -616,6 +616,13 @@ public class jobMonitor {
             decrypt = true;
          }
       }
+      
+      // ccextractor requires an mpeg file which may require decrypt
+      if (captions && ! file.isFile(config.t2extract) && file.isFile(config.ccextractor)) {
+         if ( ! decrypt && ! file.isFile(mpegFile)) {
+            decrypt = true;
+         }
+      }
                            
       // Launch jobs depending on selections
       Hashtable<String,String> entry = (Hashtable<String,String>)specs.get("entry");
@@ -772,11 +779,18 @@ public class jobMonitor {
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "captions";
-         job.name         = config.t2extract;
+         if (file.isFile(config.t2extract))
+        	 job.name     = config.t2extract;
+         else
+        	 job.name     = config.ccextractor;
          if (streamfix && videoFile.equals(mpegFile))
             job.videoFile = mpegFile_fix;
-         else
-            job.videoFile = videoFile;
+         else {
+            if (file.isFile(config.t2extract))
+               job.videoFile = videoFile;
+            else
+               job.videoFile = mpegFile;
+         }
          job.srtFile      = srtFile;
          submitNewJob(job);
       }
