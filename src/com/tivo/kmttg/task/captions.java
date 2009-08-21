@@ -16,6 +16,7 @@ public class captions {
    private String srtFile;
    private backgroundProcess process;
    private jobData job;
+   private String executable;
 
    // constructor
    public captions(jobData job) {
@@ -41,8 +42,8 @@ public class captions {
          }
       }
       
-      if ( ! file.isFile(config.t2extract) ) {
-         log.error("t2extract not found: " + config.t2extract);
+      if ( ! file.isFile(config.t2extract) && ! file.isFile(config.ccextractor) ) {
+         log.error("t2extract (" + config.t2extract + ") or ccextractor (" + config.ccextractor + ") not found");
          schedule = false;
       }
       
@@ -72,17 +73,24 @@ public class captions {
    private Boolean start() {
       debug.print("");
       Stack<String> command = new Stack<String>();
-      command.add(config.t2extract);
-      command.add("-f");
-      command.add("srt");
-      if (config.t2extract_args.length() > 0) {
-         String[] args = config.t2extract_args.split("\\s+");
-         for (int i=0; i<args.length; i++)
-            command.add(args[i]);
+      if (file.isFile(config.t2extract)) {
+    	  executable = "t2extract";
+	      command.add(config.t2extract);
+	      command.add("-f");
+	      command.add("srt");
+	      if (config.t2extract_args.length() > 0) {
+	         String[] args = config.t2extract_args.split("\\s+");
+	         for (int i=0; i<args.length; i++)
+	            command.add(args[i]);
+	      }
+	      log.print(">> Running t2extract on " + job.videoFile + " ...");
+      } else {
+    	  executable = "ccextractor";
+    	  command.add(config.ccextractor);
+          log.print(">> Running ccextractor on " + job.videoFile + " ...");
       }
       command.add(job.videoFile);
       process = new backgroundProcess();
-      log.print(">> Running t2extract on " + job.videoFile + " ...");
       if ( process.run(command) ) {
          log.print(process.toString());
       } else {
@@ -136,10 +144,10 @@ public class captions {
          }
          
          if (failed == 1) {
-            log.error("t2extract failed (exit code: " + exit_code + " ) - check command: " + process.toString());
+            log.error(executable + " failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
          } else {
-            log.warn("t2extract job completed: " + jobMonitor.getElapsedTime(job.time));
+            log.warn(executable + " job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");
             // Rename srtFile to job.srtFile if they are different
             if ( ! srtFile.equals(job.srtFile) ) {
