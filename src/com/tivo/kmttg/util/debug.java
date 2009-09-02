@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 public class debug {
    private static String file = null;
@@ -14,7 +16,7 @@ public class debug {
       String dir = new File(
          debug.class.getProtectionDomain().getCodeSource().getLocation().getPath()
       ).getParent();
-      dir = string.urlDecode(dir);
+      dir = urlDecode(dir);
 
       file = dir + File.separator + "debug.log";
       try {
@@ -22,6 +24,15 @@ public class debug {
       }
       catch (IOException ex) {
          System.out.println("Problem writing to debug file: " + file);
+      }
+   }
+   
+   private static String urlDecode(String s) {
+      try {
+         return(URLDecoder.decode(s, "UTF-8"));
+      } catch (UnsupportedEncodingException e) {
+         System.out.println(e.getMessage());
+         return s;
       }
    }
    
