@@ -156,11 +156,14 @@ public class atomic {
          while ( (line = ifp.readLine()) != null ) {
             debug.print("line=" + line);
             String[] tokens = line.split("\\s*:\\s*");
-            name  = tokens[0];
-            value = tokens[1];
-            // Get rid of quotes in value
-            value = value.replaceAll("\"", "");
-            if ( ! h.containsKey(name) ) h.put(name, value);
+            if (tokens.length == 2) {
+               name  = tokens[0];
+               value = tokens[1];
+               // Get rid of quotes in value
+               value = value.replaceAll("\"", "");
+               value = value.replaceAll("'", "");
+               if ( ! h.containsKey(name) ) h.put(name, value);
+            }
          }
          ifp.close();
          if (h.containsKey("isEpisodic")) {
