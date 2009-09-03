@@ -155,14 +155,18 @@ public class atomic {
          String name="", value="";
          while ( (line = ifp.readLine()) != null ) {
             debug.print("line=" + line);
-            name  = line.replaceFirst("(.+)\\s+:\\s+(.+)$", "$1");
-            value = line.replaceFirst("(.+)\\s+:\\s+(.+)$", "$2");
+            String[] tokens = line.split("\\s*:\\s*");
+            name  = tokens[0];
+            value = tokens[1];
             // Get rid of quotes in value
             value = value.replaceAll("\"", "");
             if ( ! h.containsKey(name) ) h.put(name, value);
          }
          ifp.close();
-         if (h.get("isEpisodic").equals("true") ) h.put("MediaKind", "TV Show");
+         if (h.containsKey("isEpisodic")) {
+            if ( h.get("isEpisodic").equals("true") )
+               h.put("MediaKind", "TV Show");
+         }
          args.add(job.encodeFile);
          args.add("--overWrite");
          args.add("-S");
