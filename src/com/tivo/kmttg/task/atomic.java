@@ -155,8 +155,10 @@ public class atomic {
          String name="", value="";
          while ( (line = ifp.readLine()) != null ) {
             debug.print("line=" + line);
-            name  = line.replaceFirst("(.+)\\s+:\\s+(.+)$", "$1");
-            value = line.replaceFirst("(.+)\\s+:\\s+(.+)$", "$2");
+            name  = line.replaceFirst("(.+)\\s*:\\s*(.+)$", "$1");
+            value = line.replaceFirst("(.+)\\s*:\\s*(.+)$", "$2");
+            // Get rid of quotes in value
+            value = line.replaceAll("\"", "");
             if ( ! h.containsKey(name) ) h.put(name, value);
          }
          ifp.close();
