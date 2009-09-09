@@ -3,7 +3,7 @@ package com.tivo.kmttg.main;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
+//import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -14,13 +14,13 @@ import com.tivo.kmttg.util.log;
 
 public class mdns {
    private JmDNS jmdns = null;
-   private int timeout = 5;          // ~mins after which mdns listening disabled
-   private long start_time;
+   //private int timeout = 5;          // ~mins after which mdns listening disabled
+   //private long start_time;
    
    public mdns() {
       try {
          jmdns = JmDNS.create(InetAddress.getLocalHost());
-         start_time = new Date().getTime();
+         //start_time = new Date().getTime();
       } catch (UnknownHostException e) {
          log.error("mdns error: " + e.getMessage());
       } catch (IOException e) {
@@ -34,6 +34,7 @@ public class mdns {
    }
    
    public void process() {
+      /* INTENTIONALLY DISABLED TIMEOUT - WANT POTENTIAL IP UPDATES TO HAPPEN
       // If running longer than timeout, disable
       if (jmdns != null) {
          long now = new Date().getTime();
@@ -41,6 +42,7 @@ public class mdns {
             close();
          }
       }
+      */
       
       if (jmdns == null) return;
       ServiceInfo info[] = jmdns.list("_http._tcp.local.");
@@ -58,6 +60,14 @@ public class mdns {
                   for (int j=0; j<tivoNames.size(); ++j) {
                      if ( tivoNames.get(j).equals(name) ) {
                         add = false;
+                     }
+                  }
+                  // Update existing IP if necessary (for case if DHCP updates IP of existing Tivo)
+                  if (add == false) {
+                     if (! info[i].getHostAddress().equals(config.TIVOS.get(name))) {
+                        log.warn("Updating IP for TiVo: " + name);
+                        config.TIVOS.put(name, info[i].getHostAddress());
+                        config.save(config.configIni);
                      }
                   }
                } else {
