@@ -1105,7 +1105,7 @@ public class gui {
       String[] names = {
          "expires-soon-recording", "save-until-i-delete-recording",
          "in-progress-recording", "in-progress-transfer",
-         "expired-recording"
+         "expired-recording", "suggestion-recording"
       };
       URL url;
       for (int i=0; i<names.length; i++) {
@@ -1290,8 +1290,8 @@ public class gui {
             getJFrame().setSize(new Dimension(width,height));
          }
       }         
-      catch (IOException ex) {
-         log.error("Problem parsing config file: " + config.gui_settings);
+      catch (Exception ex) {
+         log.warn("Problem parsing config file: " + config.gui_settings);
       }
    }
    
