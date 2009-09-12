@@ -174,9 +174,9 @@ public class atomic {
          args.add("--overWrite");
          args.add("-S");
          args.add(h.get("MediaKind"));
-         if (h.containsKey("title") ) {
+         if (h.containsKey("episodeTitle") ) {
             args.add("--title");
-            args.add(h.get("title"));
+            args.add(h.get("episodeTitle"));
          }
          if (h.containsKey("vProgramGenre") ) {
             args.add("--grouping");
@@ -190,16 +190,14 @@ public class atomic {
             args.add("--description");
             args.add(h.get("description"));
          }
-         if (h.containsKey("seriesTitle") ) {
-            args.add("-H");
-            args.add(h.get("seriesTitle"));
-         }
-         if (h.containsKey("episodeTitle") ) {
-            args.add("--TVEpisode");
-            args.add(h.get("episodeTitle"));
+         if (h.containsKey("title") ) {
+            args.add("--TVShowName");
+            args.add(h.get("title"));
          }
          if (h.containsKey("episodeNumber") ) {
             args.add("--TVEpisodeNum");
+            args.add(h.get("episodeNumber"));
+            args.add("--TVEpisode");
             args.add(h.get("episodeNumber"));
             String season = h.get("episodeNumber");
             if (season.length() == 3)
