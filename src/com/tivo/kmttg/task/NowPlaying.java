@@ -403,6 +403,9 @@ public class NowPlaying  {
                if (value.matches("^.*expired-recording.*$")) {
                   h.put("ExpirationImage", "expired-recording");
                }
+               if (value.matches("^.*suggestion-recording.*$")) {
+                  h.put("ExpirationImage", "suggestion-recording");
+               }
             }
          }
          // Add last entry
