@@ -18,7 +18,7 @@ import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 
 public class config {
-   public static String kmttg = "kmttg v0p6l_beta";
+   public static String kmttg = "kmttg v0p7a_beta";
    
    // encoding related
    public static String encProfDir = "";
@@ -59,7 +59,7 @@ public class config {
    public static String comskipIni = "";
    public static String wan_http_port = "";
    public static String configIni = "";
-   public static String tivoFileNameFormat = null;    
+   public static String tivoFileNameFormat = null;
    
    // custom related
    public static String customCommand = "";
@@ -84,6 +84,7 @@ public class config {
    public static int toolTips = 1;          // If 1 then display component toolTips
    public static int jobMonitorFullPaths = 1; // If 1 then show full paths in job monitor
    public static int toolTipsTimeout = 20;  // Set # seconds for tooltip display to timeout
+   public static int showFolders = 0;       // If 1 then display folder structure in NPL table
 
    // GUI table related
    public static Color tableBkgndDarker = new Color(235,235,235); // light grey

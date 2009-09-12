@@ -77,7 +77,7 @@ public class gui {
    public  JScrollPane jobScroll = null;
    private ToolTipManager toolTips = null;
    
-   private Hashtable<String,tivoTab> tivoTabs = new Hashtable<String,tivoTab>();
+   public Hashtable<String,tivoTab> tivoTabs = new Hashtable<String,tivoTab>();
    public static Hashtable<String,Icon> Images;
    
    public JFrame getJFrame() {
@@ -1105,7 +1105,7 @@ public class gui {
       String[] names = {
          "expires-soon-recording", "save-until-i-delete-recording",
          "in-progress-recording", "in-progress-transfer",
-         "expired-recording"
+         "expired-recording", "folder"
       };
       URL url;
       for (int i=0; i<names.length; i++) {
@@ -1342,6 +1342,10 @@ public class gui {
          text =  "<b>Refresh List</b><br>";
          text += "Refresh Now Playing List for this TiVo.";
       }
+      else if (component.equals("return")) {
+         text =  "<b>Return</b><br>";
+         text += "Exit folder view and return to top level Now Playing List for this TiVo.";
+      }
       else if (component.equals("metadata")) {
          text =  "<b>metadata</b><br>";
          text += "Creates a <b>pyTivo</b> compatible metadata file.<br>";
@@ -1482,6 +1486,11 @@ public class gui {
    public void nplTab_SetNowPlaying(String tivoName, Stack<Hashtable<String,String>> entries) {
       if (tivoTabs.containsKey(tivoName)) {
          tivoTabs.get(tivoName).nplTab_SetNowPlaying(entries);
+      }
+   }
+   public void nplTab_SetNowPlaying(String tivoName, Hashtable<String,Stack<Hashtable<String,String>>> folderEntry) {
+      if (tivoTabs.containsKey(tivoName)) {
+         tivoTabs.get(tivoName).nplTab_SetNowPlaying(folderEntry);
       }
    }
    public void nplTab_clear(String tivoName) {

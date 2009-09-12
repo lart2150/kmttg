@@ -27,7 +27,7 @@ public class tivoTab {
    private JPanel panel = null;
    private JButton add = null;
    private JButton remove = null;
-   private JButton refresh = null;
+   public JButton refresh = null;
    private JLabel status = null;
    private nplTable nplTab = null;
    private fileBrowser browser = null;
@@ -107,7 +107,17 @@ public class tivoTab {
          refresh.setToolTipText(config.gui.getToolTip("refresh"));
          refresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {
-               NowPlaying.submitJob(name);
+               if (nplTab.inFolder) {
+                  // Return from folder display mode
+                  nplTab.inFolder = false;
+                  refresh.setText("Refresh List");
+                  refresh.setToolTipText(config.gui.getToolTip("refresh"));
+                  config.gui.nplTab_SetNowPlaying(tivoName, nplTab.folderEntries);
+                  nplTab.SelectRow(nplTab.folderEntryNum);
+               } else {
+                  // Refresh now playing list mode
+                  NowPlaying.submitJob(name);
+               }
             }
          });
          gx++;
@@ -223,6 +233,11 @@ public class tivoTab {
    public void nplTab_SetNowPlaying(Stack<Hashtable<String,String>> h) {
       debug.print("h=" + h);
       nplTab.SetNowPlaying(h);
+   }
+   
+   public void nplTab_SetNowPlaying(Hashtable<String,Stack<Hashtable<String,String>>> folderEntry) {
+      debug.print("folderEntry=" + folderEntry);
+      nplTab.SetNowPlaying(folderEntry);
    }
    
    public void nplTab_UpdateStatus(String s) {
