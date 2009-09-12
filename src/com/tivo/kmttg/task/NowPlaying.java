@@ -16,7 +16,6 @@ import com.tivo.kmttg.util.*;
 
 public class NowPlaying  {
    private Stack<Hashtable<String,String>> ENTRIES = new Stack<Hashtable<String,String>>();
-   private Hashtable<String,Stack<Hashtable<String,String>>> FOLDERS = new Hashtable<String,Stack<Hashtable<String,String>>>();
    private String cookieFile = "";
    private String outputFile = "";
    private int AnchorOffset = 0;
@@ -442,12 +441,7 @@ public class NowPlaying  {
          }
          else if (config.GUI) {
             // GUI mode: populate NPL table
-            if (config.showFolders == 1) {
-               folderize();
-               config.gui.nplTab_SetNowPlaying(job.tivoName, FOLDERS);
-            } else {
-               config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
-            }
+            config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
          } else {
             // Batch mode
             for (int j=0; j<ENTRIES.size(); j++) {
@@ -473,38 +467,6 @@ public class NowPlaying  {
             name = e.nextElement();
             value = ENTRIES.get(i).get(name);
             log.print(name + "=" + value);
-         }
-      }
-   }
-   
-   // Create data structure to organize NPL in folder format
-   private void folderize() {
-      FOLDERS.clear();
-      for (int i=0; i<ENTRIES.size(); i++) {
-         if (ENTRIES.get(i).containsKey("titleOnly")) {
-            String folderName = ENTRIES.get(i).get("titleOnly");
-            if ( ! FOLDERS.containsKey(folderName) ) {
-               // Init new stack
-               Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
-               FOLDERS.put(folderName, stack);
-            }
-            FOLDERS.get(folderName).add(ENTRIES.get(i));
-         }
-      }
-      //printFolderStructure();
-   }
-   
-   public void printFolderStructure() {
-      debug.print("");
-      String name;
-      log.print("NPL FOLDER STRUCTURE:");
-      log.print("FOLDERS=" + FOLDERS.size());
-      for (Enumeration<String> e=FOLDERS.keys(); e.hasMoreElements();) {
-         name = e.nextElement();
-         log.print(" ");
-         log.print("FOLDER " + name + " (" + FOLDERS.get(name).size() + ")");
-         for (int i=0; i<FOLDERS.get(name).size(); ++i) {
-            log.print(" " + FOLDERS.get(name).get(i).get("title"));
          }
       }
    }
