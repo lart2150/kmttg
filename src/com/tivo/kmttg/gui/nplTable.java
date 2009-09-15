@@ -7,11 +7,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
+import java.util.Vector;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -39,6 +41,7 @@ public class nplTable {
    public int folderEntryNum = -1;
    private Stack<Hashtable<String,String>> entries = null;
    private Hashtable<String,Stack<Hashtable<String,String>>> folders = null;
+   private Vector<Hashtable<String,String>> sortedOrder = null;
    private String lastUpdated = null;
          
    nplTable(String tivoName) {
@@ -300,10 +303,10 @@ public class nplTable {
       }
    }   
    
-   // Mouse event handler - for double click
-   // This will display folder entries in table if folder entry double-clicked
+   // Mouse event handler
+   // This will display folder entries in table if folder entry single-clicked
    private void MouseClicked(MouseEvent e) {
-      if(e.getClickCount() == 2) {
+      if(e.getClickCount() == 1) {
          int row = NowPlaying.rowAtPoint(e.getPoint());
          sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
          if (s.folder) {
@@ -497,22 +500,39 @@ public class nplTable {
    public void displayFolderStructure() {
       debug.print("");
       clear(NowPlaying);
+      String[] special = {"TiVo Suggestions", "HD Channels"};
       // Folder based structure
       int size;
       String name;
       Hashtable<String,String> entry;
-      for (Enumeration<String> e=folders.keys(); e.hasMoreElements();) {
-         name = e.nextElement();
-         size = folders.get(name).size();
-         if (size > 1 || name.equals("HD Recordings")) {
-            // Display as a folder
-            AddNowPlayingRow(name, folders.get(name));
-         } else {
-            // Single entry
-            entry = folders.get(name).get(0);
-            AddNowPlayingRow(entry);
+      // Add all folders except suggestions & HD channels which are saved for last
+      for (int i=0; i<sortedOrder.size(); ++i) {
+         name = sortedOrder.get(i).get("__folderName__");
+         if (! matches(name, special) ) {
+            size = folders.get(name).size();
+            if (size > 1) {
+               // Display as a folder
+               AddNowPlayingRow(name, folders.get(name));
+            } else {
+               // Single entry
+               entry = folders.get(name).get(0);
+               AddNowPlayingRow(entry);
+            }
          }
-      }      
+      }
+      for (int i=0; i<special.length; i++) {
+         if (folders.containsKey(special[i])) {
+            AddNowPlayingRow(special[i], folders.get(special[i]));
+         }
+      }
+   }
+   
+   // Simple string matching to string array
+   public static Boolean matches(String test, String[] array) {
+      for (int i=0; i<array.length; ++i) {
+         if (test.matches(array[i])) return true;
+      }
+      return false;
    }
    
    // Compute total size and duration of all given items and return as a string
@@ -547,6 +567,7 @@ public class nplTable {
    }
    
    // Create data structure to organize NPL in folder format
+   @SuppressWarnings("unchecked")
    private void folderize(Stack<Hashtable<String,String>> entries) {
       debug.print("entries=" + entries);
       folders = new Hashtable<String,Stack<Hashtable<String,String>>>();
@@ -579,12 +600,10 @@ public class nplTable {
             folders.get(name).add(entries.get(i));
          }
          
-         // Categorize by HD recordings (includes suggestions)
-         // NOTE: This doesn't work as all HD channel recordings are marked as HD
-         /*
+         // Categorize by HD channels (includes suggestions)
          if (entries.get(i).containsKey("HD")) {
             if (entries.get(i).get("HD").equals("Yes")) {
-               name = "HD Recordings";
+               name = "HD Channels";
                if ( ! folders.containsKey(name) ) {
                   // Init new stack
                   Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
@@ -592,9 +611,29 @@ public class nplTable {
                }
                folders.get(name).add(entries.get(i));
             }
-         }*/
+         }
       }
-      //printFolderStructure();
+      
+      // Define default sort order for all folder entries
+      // Sort by largest gmt first except put Suggestions & HD Channels last
+      Comparator<Hashtable<String,String>> folderSort = new Comparator<Hashtable<String,String>>() {
+         public int compare(Hashtable<String,String> o1, Hashtable<String,String> o2) {
+            long gmt1 = Long.parseLong(o1.get("gmt"));
+            long gmt2 = Long.parseLong(o2.get("gmt"));
+            if (gmt1 < gmt2) return 1;
+            if (gmt1 > gmt2) return -1;
+            return 0;
+         }
+      };      
+      Hashtable<String,String> entry;
+      sortedOrder = new Vector<Hashtable<String,String>>();
+      for (Enumeration<String> e=folders.keys(); e.hasMoreElements();) {
+         name = e.nextElement();
+         entry = (Hashtable<String, String>) folders.get(name).get(0).clone();
+         entry.put("__folderName__", name);
+         sortedOrder.add(entry);
+      }
+      Collections.sort(sortedOrder, folderSort);
    }
    
    // Convert seconds to hours:mins
