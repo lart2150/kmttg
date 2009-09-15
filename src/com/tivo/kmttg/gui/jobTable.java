@@ -228,10 +228,8 @@ public class jobTable {
        
     public void clear(JTable table) {
        debug.print("table=" + table);
-       TableModel model = table.getModel(); 
-       int numrows = model.getRowCount(); 
-       for(int i = numrows - 1; i >=0; i--)
-          ((DefaultTableModel) model).removeRow(i); 
+       DefaultTableModel model = (DefaultTableModel)table.getModel();
+       model.setNumRows(0);
     }
     
     public void AddRow(JTable table, Object[] data) {
