@@ -1165,6 +1165,18 @@ public class gui {
                ofp.write("\n");
             }
             ofp.write("\n");
+            ofp.write("<showFolders>\n");
+            for (Enumeration<String> e=tivoTabs.keys(); e.hasMoreElements();) {
+               name = e.nextElement();
+               if ( ! name.equals("FILES") ) {
+                  if (tivoTabs.get(name).showFolders()) {
+                     ofp.write(name + "=" + 1 + "\n");
+                  } else {
+                     ofp.write(name + "=" + 0 + "\n");
+                  }
+               }
+            }
+            ofp.write("\n");
             ofp.close();
          }         
          catch (IOException ex) {
@@ -1286,6 +1298,13 @@ public class gui {
                String[] order = l[1].split(",");
                if (tivoTabs.containsKey(l[0])) {
                   tivoTabs.get(l[0]).setColumnOrder(order);
+               }
+            }
+            if (key.equals("showFolders")) {
+               String[] l = line.split("=");
+               if (l[1].equals("1")) {
+                  if (tivoTabs.containsKey(l[0]))
+                     tivoTabs.get(l[0]).showFoldersSet(true);
                }
             }
          }
