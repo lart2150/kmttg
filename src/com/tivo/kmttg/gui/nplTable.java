@@ -795,8 +795,16 @@ public class nplTable {
          if (s.folder) {
             if (s.folderName.equals(folderName)) {
                NowPlaying.clearSelection();
-               NowPlaying.setRowSelectionInterval(i,i);
-               NowPlaying.scrollRectToVisible(NowPlaying.getCellRect(i, 0, true));
+               try {
+                  NowPlaying.setRowSelectionInterval(i,i);
+                  NowPlaying.scrollRectToVisible(NowPlaying.getCellRect(i, 0, true));
+               }
+               catch (Exception e) {
+                  // This is here because JXTable seems to have a problem sometimes after table cleared
+                  // and an item is selected. This prevents nasty stack trace problem from being
+                  // printed to message window
+                  System.out.println("Exception: " + e.getMessage());
+               }
                return;
             }
          }
