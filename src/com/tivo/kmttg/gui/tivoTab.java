@@ -183,6 +183,10 @@ public class tivoTab {
       showFolders.setVisible(visible);
    }
    
+   public void showFoldersSet(Boolean value) {
+      showFolders.setSelected(value);
+   }
+   
    public JPanel getPanel() {
       return panel;
    }
