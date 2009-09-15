@@ -14,6 +14,9 @@ public class autoConfig {
    public static int dryrun = 0;
    public static int CHECK_TIVOS_INTERVAL = 60;
    public static Stack<String> ignoreHistory = new Stack<String>();
+   public static int dateFilter = 0;
+   public static String dateOperator = "less than";
+   public static float dateHours = 48;
    
    public static Boolean parseAuto(String config) {
       debug.print("config=" + config);
@@ -74,6 +77,15 @@ public class autoConfig {
             }
             if (key.equals("dryrun")) {
                dryrun = Integer.parseInt(line);
+            }
+            if (key.equals("dateFilter")) {
+               dateFilter = Integer.parseInt(line);
+            }
+            if (key.equals("dateOperator")) {
+               dateOperator = line;
+            }
+            if (key.equals("dateHours")) {
+               dateHours = Float.parseFloat(line);
             }
             if (key.equals("options")) {
                String[] l = line.split("\\s+");

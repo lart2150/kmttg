@@ -73,6 +73,9 @@ public class configAuto {
    private static JCheckBox dry_run = null;
    private static JTextField title = null;
    private static JTextField check_interval = null;
+   private static JCheckBox dateFilter = null;
+   private static JComboBox dateOperator = null;
+   private static JTextField dateHours = null;
    private static JButton OK = null;
    private static JButton CANCEL = null;
 
@@ -215,6 +218,13 @@ public class configAuto {
       
       dry_run = new JCheckBox("Dry Run Mode (test keywords only)");
       dry_run.setSelected((Boolean)(autoConfig.dryrun == 1));
+      
+      dateFilter = new JCheckBox("Date Filter");
+      dateOperator = new JComboBox();
+      dateOperator.addItem("more than");
+      dateOperator.addItem("less than");
+      dateHours = new JTextField("48");
+      JLabel dateHours_label = new JLabel("hours old");
       
       OK = new JButton("OK");
       OK.setBackground(Color.green);
@@ -424,6 +434,24 @@ public class configAuto {
       c.fill = GridBagConstraints.HORIZONTAL;
       c.weightx = 1.0;
       content.add(check_interval, c);
+      
+      // date filter row
+      GAP = 0;
+      JPanel date = new JPanel();
+      date.setLayout(new GridLayout(1, 8, GAP, GAP));
+      date.add(dateFilter);
+      date.add(dateOperator);
+      date.add(dateHours);
+      date.add(dateHours_label);
+
+      gy++;
+      gx = 0;
+      c.gridx = gx++;
+      c.gridy = gy;
+      c.gridwidth = 8;
+      c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
+      content.add(date, c);
 
       // OK & CANCEL
       GAP = 0;
@@ -470,6 +498,9 @@ public class configAuto {
       add.setToolTipText(getToolTip("add"));
       update.setToolTipText(getToolTip("update"));
       del.setToolTipText(getToolTip("del"));      
+      dateFilter.setToolTipText(getToolTip("dateFilter"));
+      dateOperator.setToolTipText(getToolTip("dateOperator"));
+      dateHours.setToolTipText(getToolTip("dateHours"));
       OK.setToolTipText(getToolTip("OK"));
       CANCEL.setToolTipText(getToolTip("CANCEL"));      
    }
@@ -529,6 +560,23 @@ public class configAuto {
          text =  "<b>DEL</b><br>";
          text += "Remove currently selected Auto Transfers entries.<br>";
          text += "NOTE: Removals won't be saved until you <b>OK</b> this form.";
+      }
+      else if (component.equals("dateFilter")) {
+         text =  "<b>Date Filter</b><br>";
+         text += "If enabled then only process shows earlier or later than the specified<br>";
+         text += "number of hours old. Examples:<br>";
+         text += "<b>less than 48</b> means only process shows earlier than 2 days old.<br>";
+         text += "<b>more than 24</b> means only process shows later than 1 day old.";
+      }
+      else if (component.equals("dateOperator")) {
+         text =  "<b>Date Filter Operator</b><br>";
+         text += "Operator for Date Filter setting.";
+      }
+      else if (component.equals("dateHours")) {
+         text =  "<b>Date Filter Hours</b><br>";
+         text += "Number of hours to use for filtering by date. Examples:<br>";
+         text += "<b>less than 48</b> means only process shows earlier than 2 days old.<br>";
+         text += "<b>more than 24</b> means only process shows later than 1 day old.";
       }
       else if (component.equals("OK")) {
          text =  "<b>OK</b><br>";
@@ -754,6 +802,9 @@ public class configAuto {
       SetEncodings(encodeConfig.getValidEncodeNames());            
       check_interval.setText("" + autoConfig.CHECK_TIVOS_INTERVAL);      
       dry_run.setSelected((Boolean)(autoConfig.dryrun == 1));
+      dateFilter.setSelected((Boolean)(autoConfig.dateFilter == 1));
+      dateOperator.setSelectedItem(autoConfig.dateOperator);
+      dateHours.setText("" + autoConfig.dateHours);
    }
    
    // Set encoding_name combobox choices
@@ -872,6 +923,15 @@ public class configAuto {
          return;
       }
       
+      float hours = 48;
+      value = string.removeLeadingTrailingSpaces(dateHours.getText());
+      try {
+         hours = Float.parseFloat(value);
+      } catch(NumberFormatException e) {
+         textFieldError(check_interval, "Date Filter hours should be of type float: '" + value + "'");
+         return;
+      }
+      
       // Write to file
       try {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(config.autoIni));
@@ -879,9 +939,16 @@ public class configAuto {
          ofp.write("<check_tivos_interval>\n" + interval + "\n\n");
          ofp.write("<dryrun>\n");
          if (dry_run.isSelected())
-            ofp.write("1\n");
+            ofp.write("1\n\n");
          else
-            ofp.write("0\n");
+            ofp.write("0\n\n");
+         ofp.write("<dateFilter>\n");
+         if (dateFilter.isSelected())
+            ofp.write("1\n\n");
+         else
+            ofp.write("0\n\n");
+         ofp.write("<dateOperator>\n" + dateOperator.getSelectedItem() + "\n\n");
+         ofp.write("<dateHours>\n" + hours + "\n\n");
          
          TableModel model = table.getModel();
          int rows = model.getRowCount();
