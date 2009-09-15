@@ -1109,7 +1109,8 @@ public class gui {
       String[] names = {
          "expires-soon-recording", "save-until-i-delete-recording",
          "in-progress-recording", "in-progress-transfer",
-         "expired-recording", "suggestion-recording", "folder"
+         "expired-recording", "suggestion-recording", "folder",
+         "copy-protected"
       };
       URL url;
       for (int i=0; i<names.length; i++) {
