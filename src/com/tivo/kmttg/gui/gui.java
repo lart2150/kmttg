@@ -928,6 +928,7 @@ public class gui {
          for (int i=0; i<tivoNames.size(); i++) {
             // Queue up a nowplaying list job for this tivo
             config.GUI_AUTO++;
+            getTab(tivoNames.get(i)).getTable().setFolderState(false);
             NowPlaying.submitJob(tivoNames.get(i));
          }
       }
