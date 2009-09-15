@@ -551,10 +551,13 @@ public class nplTable {
       debug.print("entries=" + entries);
       folders = new Hashtable<String,Stack<Hashtable<String,String>>>();
       String name;
+      Boolean suggestion;
       for (int i=0; i<entries.size(); i++) {
+         suggestion = false;
          // Categorize by suggestions
          if (entries.get(i).containsKey("ExpirationImage")) {
             if (entries.get(i).get("ExpirationImage").equals("suggestion-recording")) {
+               suggestion = true;
                name = "TiVo Suggestions";
                if ( ! folders.containsKey(name) ) {
                   // Init new stack
@@ -562,12 +565,11 @@ public class nplTable {
                   folders.put(name, stack);
                }
                folders.get(name).add(entries.get(i));
-               continue; // Don't further categorize suggestions
             }
          }
          
-         // Categorize by titleOnly
-         if (entries.get(i).containsKey("titleOnly")) {
+         // Categorize by titleOnly (not including suggestions)
+         if (!suggestion && entries.get(i).containsKey("titleOnly")) {
             name = entries.get(i).get("titleOnly");
             if ( ! folders.containsKey(name) ) {
                // Init new stack
@@ -577,7 +579,9 @@ public class nplTable {
             folders.get(name).add(entries.get(i));
          }
          
-         // Categorize by HD recordings
+         // Categorize by HD recordings (includes suggestions)
+         // NOTE: This doesn't work as all HD channel recordings are marked as HD
+         /*
          if (entries.get(i).containsKey("HD")) {
             if (entries.get(i).get("HD").equals("Yes")) {
                name = "HD Recordings";
@@ -588,7 +592,7 @@ public class nplTable {
                }
                folders.get(name).add(entries.get(i));
             }
-         }
+         }*/
       }
       //printFolderStructure();
    }
