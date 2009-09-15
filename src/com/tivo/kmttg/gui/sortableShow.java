@@ -9,6 +9,7 @@ public class sortableShow {
    long gmt;
    Boolean folder = false;
    int numEntries = 0;
+   String folderName = "";
    
    // Single entry constructor
    sortableShow(Hashtable<String,String> entry) {
@@ -18,8 +19,9 @@ public class sortableShow {
    }
    
    // Folder entry constructor
-   sortableShow(Stack<Hashtable<String,String>> folderEntry, int gmt_index) {
+   sortableShow(String folderName, Stack<Hashtable<String,String>> folderEntry, int gmt_index) {
       folder = true;
+      this.folderName = folderName;
       numEntries = folderEntry.size();
       gmt = Long.parseLong(folderEntry.get(gmt_index).get("gmt"));
       titleOnly = folderEntry.get(0).get("titleOnly");
@@ -28,7 +30,7 @@ public class sortableShow {
    
    public String toString() {
       if (folder) {
-         return titleOnly + " (" + numEntries + ")";
+         return folderName + " (" + numEntries + ")";
       } else {
          return title;
       }
