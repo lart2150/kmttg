@@ -114,7 +114,7 @@ public class tivoTab {
                if (nplTab.inFolder) {
                   // Return from folder display mode to top level mode
                   nplTab.setFolderState(false);
-                  nplTab.RefreshNowPlaying(nplTab.entries);
+                  nplTab.RefreshNowPlaying(null);
                   if (nplTab.folderEntryNum >= 0) {
                      nplTab.SelectFolder(nplTab.folderName);
                   }
@@ -151,7 +151,7 @@ public class tivoTab {
                   refresh.setToolTipText(config.gui.getToolTip("refresh"));
                   
                   // Refresh to show top level entries
-                  nplTab.RefreshNowPlaying(nplTab.entries);
+                  nplTab.RefreshNowPlaying(null);
                }
             });
             gx++;
