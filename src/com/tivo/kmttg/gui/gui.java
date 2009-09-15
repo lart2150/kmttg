@@ -80,6 +80,10 @@ public class gui {
    private Hashtable<String,tivoTab> tivoTabs = new Hashtable<String,tivoTab>();
    public static Hashtable<String,Icon> Images;
    
+   public tivoTab getTab(String tabName) {
+      return tivoTabs.get(tabName);
+   }
+   
    public JFrame getJFrame() {
       debug.print("");
       if (jFrame == null) {
@@ -1105,7 +1109,7 @@ public class gui {
       String[] names = {
          "expires-soon-recording", "save-until-i-delete-recording",
          "in-progress-recording", "in-progress-transfer",
-         "expired-recording", "suggestion-recording"
+         "expired-recording", "suggestion-recording", "folder"
       };
       URL url;
       for (int i=0; i<names.length; i++) {
@@ -1341,6 +1345,10 @@ public class gui {
       else if (component.equals("refresh")) {
          text =  "<b>Refresh List</b><br>";
          text += "Refresh Now Playing List for this TiVo.";
+      }
+      else if (component.equals("return")) {
+         text =  "<b>Return</b><br>";
+         text += "Exit folder view and return to top level Now Playing List for this TiVo.";
       }
       else if (component.equals("metadata")) {
          text =  "<b>metadata</b><br>";

@@ -3,10 +3,13 @@ package com.tivo.kmttg.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -31,7 +34,13 @@ public class nplTable {
    public JScrollPane nplScroll = null;
    public String[] FILE_cols = {"FILE", "SIZE", "DIR"};
    public String[] TIVO_cols = {"", "DATE", "CHANNEL", "SIZE", "SHOW"};
-      
+   public Boolean inFolder = false;
+   public String folderName = null;
+   public int folderEntryNum = -1;
+   public Stack<Hashtable<String,String>> entries = null;
+   private Hashtable<String,Stack<Hashtable<String,String>>> folders = null;
+   private String lastUpdated = null;
+         
    nplTable(String tivoName) {
       this.tivoName = tivoName;
       Object[][] data = {}; 
@@ -43,7 +52,16 @@ public class nplTable {
          NowPlaying = new JXTable(data, TIVO_cols);
          NowPlaying.setModel(new NplTableModel(data, TIVO_cols));
       }
-      nplScroll = new JScrollPane(NowPlaying);            
+      nplScroll = new JScrollPane(NowPlaying);
+      
+      // Add listener for double-click handling (for folder entries)
+      NowPlaying.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               MouseClicked(e);
+            }
+         }
+      );
       
       // Define custom column sorting routines
       Comparator<Object> sortableComparator = new Comparator<Object>() {
@@ -256,9 +274,9 @@ public class nplTable {
             if ( getColumnIndex("DATE") != -1 ) {
                // Download mode
                sortableDate d = (sortableDate)table.getValueAt(row, getColumnIndex("DATE"));
-               if (d.data.containsKey("CopyProtected")) {
+               if ( ! d.folder && d.data.containsKey("CopyProtected") ) {
                   cell.setBackground( config.tableBkgndProtected );
-               } else if (d.data.containsKey("ExpirationImage") &&
+               } else if ( ! d.folder && d.data.containsKey("ExpirationImage") &&
                           d.data.get("ExpirationImage").equals("in-progress-recording")) {
                   cell.setBackground( config.tableBkgndRecording );
                } else {
@@ -281,6 +299,42 @@ public class nplTable {
          return cell;
       }
    }   
+   
+   // Mouse event handler - for double click
+   // This will display folder entries in table if folder entry double-clicked
+   private void MouseClicked(MouseEvent e) {
+      if(e.getClickCount() == 2) {
+         int row = NowPlaying.rowAtPoint(e.getPoint());
+         sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
+         if (s.folder) {
+            setFolderState(true);
+            sortableShow show = (sortableShow)NowPlaying.getValueAt(row, getColumnIndex("SHOW"));
+            folderName = show.titleOnly;
+            folderEntryNum = row;
+            RefreshNowPlaying(folders.get(folderName));
+         }
+      }
+   }
+   
+   public void setFolderState(Boolean state) {
+      if (state) {
+         inFolder = true;
+         config.gui.getTab(tivoName).showFoldersVisible(false);
+         config.gui.getTab(tivoName).getRefreshButton().setText("Return");
+         config.gui.getTab(tivoName).getRefreshButton().setToolTipText(config.gui.getToolTip("return"));
+      } else {
+         inFolder = false;
+         config.gui.getTab(tivoName).showFoldersVisible(true);
+         config.gui.getTab(tivoName).getRefreshButton().setText("Refresh");
+         config.gui.getTab(tivoName).getRefreshButton().setToolTipText(config.gui.getToolTip("refresh"));         
+      }
+   }
+   
+   // Return current state of Display Folders boolean for this TiVo
+   public Boolean showFolders() {
+      if (tivoName.equals("FILES")) return false;
+      return config.gui.getTab(tivoName).showFolders();
+   }
    
    public String getColumnName(int c) {
       return (String)NowPlaying.getColumnModel().getColumn(c).getHeaderValue();
@@ -312,33 +366,38 @@ public class nplTable {
          // Now Playing mode
          // Get column items for selected row 
          sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
-         String t = s.data.get("date_long");
-         String channelNum = null;
-         if ( s.data.containsKey("channelNum") ) {
-            channelNum = s.data.get("channelNum");
+         if (s.folder) {
+            // Folder entry - don't display anything
+         } else {
+            // Non folder entry so print single entry info
+            String t = s.data.get("date_long");
+            String channelNum = null;
+            if ( s.data.containsKey("channelNum") ) {
+               channelNum = s.data.get("channelNum");
+            }
+            String channel = null;
+            if ( s.data.containsKey("channel") ) {
+               channelNum = s.data.get("channel");
+            }
+            String description = null;
+            if ( s.data.containsKey("description") ) {
+               description = s.data.get("description");
+            }
+            int duration = Integer.parseInt(s.data.get("duration"));
+            String d = String.format("%d mins", duration/(1000*60));
+            String message = "Recorded " + t;
+            if (channelNum != null && channel != null) {
+               message += " on " + channelNum + "=" + channel;
+            }
+            message += ", Duration = " + d;
+            
+            if (description != null) {
+               message += "\n" + description;
+            }
+      
+            config.gui.text_warn("\n" + s.data.get("title"));
+            config.gui.text_print(message);
          }
-         String channel = null;
-         if ( s.data.containsKey("channel") ) {
-            channelNum = s.data.get("channel");
-         }
-         String description = null;
-         if ( s.data.containsKey("description") ) {
-            description = s.data.get("description");
-         }
-         int duration = Integer.parseInt(s.data.get("duration"));
-         String d = String.format("%d mins", duration/(1000*60));
-         String message = "Recorded " + t;
-         if (channelNum != null && channel != null) {
-            message += " on " + channelNum + "=" + channel;
-         }
-         message += ", Duration = " + d;
-         
-         if (description != null) {
-            message += "\n" + description;
-         }
-   
-         config.gui.text_warn("\n" + s.data.get("title"));
-         config.gui.text_print(message);
       }
    }
    
@@ -351,6 +410,10 @@ public class nplTable {
          return null;
       }
       sortableDate s = (sortableDate)NowPlaying.getValueAt(row, getColumnIndex("DATE"));
+      if (s.folder) {
+         config.gui.text_warn("Cannot process a folder entry");
+         return null;
+      }
       return s.data;
    }
    
@@ -368,32 +431,135 @@ public class nplTable {
       String fullName = dirName + s + fileName;
       return fullName;
    }
-  
+
+   // Update table to display NowPlaying entries
+   // (Called only when NowPlaying task completes)
    public void SetNowPlaying(Stack<Hashtable<String,String>> h) {
       debug.print("h=" + h);
-      long totalSize = 0;
-      long totalSecs = 0;
+      
+      // Update lastUpdated since this is a brand new listing
+      lastUpdated = " (Last updated: " + getStatusTime(new Date().getTime()) + ")";
+      
+      // Reset local entries/folders hashes to new entries
+      entries = h;
+      folderize(h); // populates folders hash
+      
+      // Update table listings
+      RefreshNowPlaying(entries);
+   }
+   
+   // Refresh table with given NowPlaying entries
+   // (This can be flat top level display, top level folder display or individual folder item display)
+   public void RefreshNowPlaying(Stack<Hashtable<String,String>> h) {
+      debug.print("");
+      String message = "";
       if (NowPlaying != null) {
-         clear(NowPlaying);
-         Hashtable<String,String> entry;
-         for (int i=0; i<h.size(); ++i) {
-            entry = h.get(i);
-            if (entry.containsKey("size")) totalSize += Long.parseLong(entry.get("size"));
-            if (entry.containsKey("duration")) totalSecs += Long.parseLong(entry.get("duration"))/1000;
-            AddNowPlayingRow(entry);
-         }
-         String message = String.format(
-            "%s TOTALS: %d shows, %.2f GB, %s total time\n",
-               tivoName, h.size(), totalSize/Math.pow(2,30), secsToHoursMins(totalSecs)
-         );
-         log.warn(message);
-         if (config.GUI) {
-            // NOTE: tivoName surrounded by \Q..\E to escape any special regex chars
-            String status = message.replaceFirst("\\Q"+tivoName+"\\E", "");
-            status += " (Last updated: " + getStatusTime(new Date().getTime()) + ")";
-            config.gui.nplTab_UpdateStatus(tivoName, status);
+         if ( ! showFolders() ) {
+            // Not showing folders
+            message = displayFlatStructure(h);
+         } else {
+            // Folder based structure
+            if (inFolder) {
+               // Display a particular folder
+               message = displayFlatStructure(h);
+            } else {
+               // Top level folder structure
+               displayFolderStructure();
+               message = getTotalsString(h);
+            }
          }
       }
+      
+      // Display totals message
+      displayTotals(message);      
+   }
+   
+   // Update table display to show either top level flat structure or inside a folder
+   public String displayFlatStructure(Stack<Hashtable<String,String>> h) {
+      debug.print("");
+      String message;
+      clear(NowPlaying);
+      Hashtable<String,String> entry;
+      for (int i=0; i<h.size(); ++i) {
+         entry = h.get(i);
+         AddNowPlayingRow(entry);
+      }
+      
+      // Return message indicating size totals of displayed items
+      message = getTotalsString(h);
+      if (inFolder) {
+         message = "FOLDER '" + folderName + "' " + message;
+      }
+      return message;
+   }
+   
+   // Update table display to show top level folderized NPL entries
+   public void displayFolderStructure() {
+      debug.print("");
+      clear(NowPlaying);
+      // Folder based structure
+      int size;
+      String name;
+      Hashtable<String,String> entry;
+      for (Enumeration<String> e=folders.keys(); e.hasMoreElements();) {
+         name = e.nextElement();
+         size = folders.get(name).size();
+         if (size > 1) {
+            // Display as a folder
+            AddNowPlayingRow(folders.get(name));
+         } else {
+            // Single entry
+            entry = folders.get(name).get(0);
+            AddNowPlayingRow(entry);
+         }
+      }      
+   }
+   
+   // Compute total size and duration of all given items and return as a string
+   private String getTotalsString(Stack<Hashtable<String,String>> h) {
+      debug.print("h=" + h);
+      String message;
+      long totalSize = 0;
+      long totalSecs = 0;
+      Hashtable<String,String> entry;
+      for (int i=0; i<h.size(); ++i) {
+         entry = h.get(i);
+         if (entry.containsKey("size")) totalSize += Long.parseLong(entry.get("size"));
+         if (entry.containsKey("duration")) totalSecs += Long.parseLong(entry.get("duration"))/1000;
+      }
+      message = String.format(
+         "TOTALS: %d shows, %.2f GB, %s total time\n",
+         h.size(), totalSize/Math.pow(2,30), secsToHoursMins(totalSecs)
+      );
+      return message;
+   }
+   
+   // Display size/duration totals
+   private void displayTotals(String message) {
+      log.warn(message);
+      if (config.GUI) {
+         // NOTE: tivoName surrounded by \Q..\E to escape any special regex chars
+         String status = message.replaceFirst("\\Q"+tivoName+"\\E", "");
+         status += lastUpdated;
+         config.gui.nplTab_UpdateStatus(tivoName, status);
+      }
+   }
+   
+   // Create data structure to organize NPL in folder format
+   private void folderize(Stack<Hashtable<String,String>> entries) {
+      folders = new Hashtable<String,Stack<Hashtable<String,String>>>();
+      for (int i=0; i<entries.size(); i++) {
+         if (entries.get(i).containsKey("titleOnly")) {
+            String folderName = entries.get(i).get("titleOnly");
+            if ( ! folders.containsKey(folderName) ) {
+               // Init new stack
+               Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
+               folders.put(folderName, stack);
+            }
+            folders.get(folderName).add(entries.get(i));
+         }
+      }
+      //printFolderStructure();
    }
    
    // Convert seconds to hours:mins
@@ -404,7 +570,7 @@ public class nplTable {
       return String.format("%02d:%02d", hours, mins);
    }  
    
-   // Add a now playing entry to NowPlaying table
+   // Add a now playing non folder entry to NowPlaying table
    public void AddNowPlayingRow(Hashtable<String,String> entry) {
       debug.print("entry=" + entry);
       int cols = 5;
@@ -432,6 +598,61 @@ public class nplTable {
       // Adjust column widths to data
       packColumns(NowPlaying, 2);
 
+   }   
+
+   // Add a now playing folder entry to NowPlaying table
+   public void AddNowPlayingRow(Stack<Hashtable<String,String>> folderEntry) {
+      debug.print("folderEntry=" + folderEntry);
+      int cols = 5;
+      Object[] data = new Object[cols];
+      // Initialize to empty strings
+      for (int i=0; i<cols; ++i) {
+         data[i] = "";
+      }
+      // Put folder icon as entry 0
+      data[0] = gui.Images.get("folder");
+      
+      // For date, find most recent recording
+      // For channel see if they are all from same channel
+      String channel = "";
+      if (folderEntry.get(0).containsKey("channel")) {
+         channel = folderEntry.get(0).get("channel");
+      }
+      Boolean sameChannel = true;
+      long gmt, largestGmt=0;
+      int gmt_index=0;
+      for (int i=0; i<folderEntry.size(); ++i) {
+         gmt = Long.parseLong(folderEntry.get(i).get("gmt"));
+         if (gmt > largestGmt) {
+            largestGmt = gmt;
+            gmt_index = i;
+         }
+         if (folderEntry.get(i).containsKey("channel")) {
+            if ( ! folderEntry.get(i).get("channel").equals(channel) ) {
+               sameChannel = false;
+            }
+         }
+      }
+      data[1] = new sortableDate(folderEntry, gmt_index);
+      
+      if (sameChannel) {
+         if ( folderEntry.get(0).containsKey("channelNum") ) {
+            channel = folderEntry.get(0).get("channelNum");
+         }
+         if ( folderEntry.get(0).containsKey("channel") ) {
+            channel += "=" + folderEntry.get(0).get("channel"); 
+         }
+      } else {
+         channel = "<various>";
+      }
+      data[2] = channel;
+      
+      data[3] = new sortableSize(folderEntry);
+      data[4] = new sortableShow(folderEntry, gmt_index);
+      AddRow(NowPlaying, data);
+      
+      // Adjust column widths to data
+      packColumns(NowPlaying, 2);
    }
  
    // Add a selected file in FILES mode to NowPlaying table
@@ -465,7 +686,7 @@ public class nplTable {
       RemoveRow(NowPlaying, row);
 
    }
-   public void RemoveRow(JTable table, int row) {
+   public void RemoveRow(JXTable table, int row) {
       debug.print("table=" + table + " row=" + row);
       DefaultTableModel dm = (DefaultTableModel)table.getModel();
       dm.removeRow(row);
@@ -479,27 +700,46 @@ public class nplTable {
       packColumns(NowPlaying,2);
    }
    
-   public void clear(JTable table) {
+   public void clear(JXTable table) {
       debug.print("table=" + table);
-      TableModel model = table.getModel(); 
-      int numrows = model.getRowCount(); 
-      for(int i = numrows - 1; i >=0; i--)
-         ((DefaultTableModel) model).removeRow(i); 
+      DefaultTableModel model = (DefaultTableModel)table.getModel(); 
+      model.setNumRows(0);
    }
    
-   public void AddRow(JTable table, Object[] data) {
+   public void AddRow(JXTable table, Object[] data) {
       debug.print("data=" + data);
       DefaultTableModel dm = (DefaultTableModel)table.getModel();
       dm.addRow(data);
    }
+
+   // Look for entry with given folder name and select it
+   // (This used when returning back from folder mode to top level mode)
+   public void SelectFolder(String folderName) {
+      debug.print("folderName=" + folderName);
+      String name;
+      for (int i=0; i<NowPlaying.getRowCount(); ++i) {
+         sortableDate s = (sortableDate)NowPlaying.getValueAt(i,getColumnIndex("DATE"));
+         if (s.folder) {
+            if (s.folderData.get(0).containsKey("titleOnly")) {
+               name = s.folderData.get(0).get("titleOnly");
+               if (name.equals(folderName)) {
+                  NowPlaying.clearSelection();
+                  NowPlaying.setRowSelectionInterval(i,i);
+                  NowPlaying.scrollRectToVisible(NowPlaying.getCellRect(i, 0, true));
+                  return;
+               }
+            }
+         }
+      }
+   }
    
-   public void SetHeaderText(JTable table, String text, int col) {
+   public void SetHeaderText(JXTable table, String text, int col) {
       debug.print("table=" + table + " text=" + text + " col=" + col);
       table.getColumnModel().getColumn(col).setHeaderValue(text);
    }
 
    // Pack all table columns to fit widest cell element
-   public void packColumns(JTable table, int margin) {
+   public void packColumns(JXTable table, int margin) {
       debug.print("table=" + table + " margin=" + margin);
       for (int c=0; c<table.getColumnCount(); c++) {
           packColumn(table, c, 2);
@@ -510,7 +750,7 @@ public class nplTable {
    // will be just wide enough to show the column head and the widest cell in the column.
    // margin pixels are added to the left and right
    // (resulting in an additional width of 2*margin pixels).
-   public void packColumn(JTable table, int vColIndex, int margin) {
+   public void packColumn(JXTable table, int vColIndex, int margin) {
       debug.print("table=" + table + " vColIndex=" + vColIndex + " margin=" + margin);
        DefaultTableColumnModel colModel = (DefaultTableColumnModel)table.getColumnModel();
        TableColumn col = colModel.getColumn(vColIndex);

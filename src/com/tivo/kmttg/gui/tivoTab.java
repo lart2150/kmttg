@@ -3,6 +3,8 @@ package com.tivo.kmttg.gui;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
 import java.io.File;
@@ -10,6 +12,7 @@ import java.util.Hashtable;
 import java.util.Stack;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -29,6 +32,7 @@ public class tivoTab {
    private JButton remove = null;
    private JButton refresh = null;
    private JLabel status = null;
+   private JCheckBox showFolders = null;
    private nplTable nplTab = null;
    private fileBrowser browser = null;
    
@@ -107,7 +111,17 @@ public class tivoTab {
          refresh.setToolTipText(config.gui.getToolTip("refresh"));
          refresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {
-               NowPlaying.submitJob(name);
+               if (nplTab.inFolder) {
+                  // Return from folder display mode to top level mode
+                  nplTab.setFolderState(false);
+                  nplTab.RefreshNowPlaying(nplTab.entries);
+                  if (nplTab.folderEntryNum >= 0) {
+                     nplTab.SelectFolder(nplTab.folderName);
+                  }
+               } else {
+                  // Refresh now playing list mode
+                  NowPlaying.submitJob(name);
+               }
             }
          });
          gx++;
@@ -123,6 +137,29 @@ public class tivoTab {
          c.gridy = gy;
          c.gridwidth = 1;
          panel.add(status, c);
+         
+         // showFolders
+         if ( ! tivoName.equals("FILES") ) {
+            showFolders = new JCheckBox("Show Folders");
+            showFolders.addActionListener(new ActionListener() {
+               // Toggle between folder mode and non folder mode display
+               public void actionPerformed(ActionEvent e) {
+                  // Reset to top level display
+                  nplTab.inFolder = false;
+                  nplTab.folderEntryNum = -1;
+                  refresh.setText("Refresh List");
+                  refresh.setToolTipText(config.gui.getToolTip("refresh"));
+                  
+                  // Refresh to show top level entries
+                  nplTab.RefreshNowPlaying(nplTab.entries);
+               }
+            });
+            gx++;
+            c.gridx = gx;
+            c.gridy = gy;
+            c.gridwidth = 1;
+            panel.add(showFolders, c);
+         }
       }
       
       // nplTable
@@ -137,8 +174,25 @@ public class tivoTab {
       panel.add(nplTab.nplScroll, c);
    }
    
+   public Boolean showFolders() {
+      if (showFolders == null) return false;
+      return showFolders.isSelected();
+   }
+   
+   public void showFoldersVisible(Boolean visible) {
+      showFolders.setVisible(visible);
+   }
+   
    public JPanel getPanel() {
       return panel;
+   }
+   
+   public JButton getRefreshButton() {
+      return refresh;
+   }
+   
+   public nplTable getTable() {
+      return nplTab;
    }
    
    // FILES mode add button callback
