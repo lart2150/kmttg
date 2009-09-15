@@ -488,7 +488,7 @@ public class nplTable {
       // Return message indicating size totals of displayed items
       message = getTotalsString(h);
       if (inFolder) {
-         message = "FOLDER '" + folderName + "' " + message;
+         message = "'" + folderName + "' " + message;
       }
       return message;
    }
