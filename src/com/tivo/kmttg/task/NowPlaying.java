@@ -407,6 +407,11 @@ public class NowPlaying  {
                   h.put("ExpirationImage", "suggestion-recording");
                }
             }
+            
+            // Set copy-protect icon if copy-protected
+            if (h.containsKey("CopyProtected")) {
+               h.put("ExpirationImage", "copy-protected");
+            }
          }
          // Add last entry
          if ( ! h.isEmpty() ) {
