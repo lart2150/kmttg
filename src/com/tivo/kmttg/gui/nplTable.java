@@ -37,7 +37,7 @@ public class nplTable {
    public Boolean inFolder = false;
    public String folderName = null;
    public int folderEntryNum = -1;
-   public Stack<Hashtable<String,String>> entries = null;
+   private Stack<Hashtable<String,String>> entries = null;
    private Hashtable<String,Stack<Hashtable<String,String>>> folders = null;
    private String lastUpdated = null;
          
@@ -308,10 +308,9 @@ public class nplTable {
          sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
          if (s.folder) {
             setFolderState(true);
-            sortableShow show = (sortableShow)NowPlaying.getValueAt(row, getColumnIndex("SHOW"));
-            folderName = show.titleOnly;
+            folderName = s.folderName;
             folderEntryNum = row;
-            RefreshNowPlaying(folders.get(folderName));
+            RefreshNowPlaying(s.folderData);
          }
       }
    }
@@ -451,7 +450,8 @@ public class nplTable {
    // Refresh table with given NowPlaying entries
    // (This can be flat top level display, top level folder display or individual folder item display)
    public void RefreshNowPlaying(Stack<Hashtable<String,String>> h) {
-      debug.print("");
+      debug.print("h=" + h);
+      if (h == null) h = entries;
       String message = "";
       if (NowPlaying != null) {
          if ( ! showFolders() ) {
@@ -476,7 +476,7 @@ public class nplTable {
    
    // Update table display to show either top level flat structure or inside a folder
    public String displayFlatStructure(Stack<Hashtable<String,String>> h) {
-      debug.print("");
+      debug.print("h=" + h);
       String message;
       clear(NowPlaying);
       Hashtable<String,String> entry;
@@ -504,9 +504,9 @@ public class nplTable {
       for (Enumeration<String> e=folders.keys(); e.hasMoreElements();) {
          name = e.nextElement();
          size = folders.get(name).size();
-         if (size > 1) {
+         if (size > 1 || name.equals("HD Recordings")) {
             // Display as a folder
-            AddNowPlayingRow(folders.get(name));
+            AddNowPlayingRow(name, folders.get(name));
          } else {
             // Single entry
             entry = folders.get(name).get(0);
@@ -536,6 +536,7 @@ public class nplTable {
    
    // Display size/duration totals
    private void displayTotals(String message) {
+      debug.print("message=" + message);
       log.warn(message);
       if (config.GUI) {
          // NOTE: tivoName surrounded by \Q..\E to escape any special regex chars
@@ -547,16 +548,46 @@ public class nplTable {
    
    // Create data structure to organize NPL in folder format
    private void folderize(Stack<Hashtable<String,String>> entries) {
+      debug.print("entries=" + entries);
       folders = new Hashtable<String,Stack<Hashtable<String,String>>>();
+      String name;
       for (int i=0; i<entries.size(); i++) {
+         // Categorize by suggestions
+         if (entries.get(i).containsKey("ExpirationImage")) {
+            if (entries.get(i).get("ExpirationImage").equals("suggestion-recording")) {
+               name = "TiVo Suggestions";
+               if ( ! folders.containsKey(name) ) {
+                  // Init new stack
+                  Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
+                  folders.put(name, stack);
+               }
+               folders.get(name).add(entries.get(i));
+               continue; // Don't further categorize suggestions
+            }
+         }
+         
+         // Categorize by titleOnly
          if (entries.get(i).containsKey("titleOnly")) {
-            String folderName = entries.get(i).get("titleOnly");
-            if ( ! folders.containsKey(folderName) ) {
+            name = entries.get(i).get("titleOnly");
+            if ( ! folders.containsKey(name) ) {
                // Init new stack
                Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
-               folders.put(folderName, stack);
+               folders.put(name, stack);
             }
-            folders.get(folderName).add(entries.get(i));
+            folders.get(name).add(entries.get(i));
+         }
+         
+         // Categorize by HD recordings
+         if (entries.get(i).containsKey("HD")) {
+            if (entries.get(i).get("HD").equals("Yes")) {
+               name = "HD Recordings";
+               if ( ! folders.containsKey(name) ) {
+                  // Init new stack
+                  Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
+                  folders.put(name, stack);
+               }
+               folders.get(name).add(entries.get(i));
+            }
          }
       }
       //printFolderStructure();
@@ -601,7 +632,7 @@ public class nplTable {
    }   
 
    // Add a now playing folder entry to NowPlaying table
-   public void AddNowPlayingRow(Stack<Hashtable<String,String>> folderEntry) {
+   public void AddNowPlayingRow(String fName, Stack<Hashtable<String,String>> folderEntry) {
       debug.print("folderEntry=" + folderEntry);
       int cols = 5;
       Object[] data = new Object[cols];
@@ -633,7 +664,7 @@ public class nplTable {
             }
          }
       }
-      data[1] = new sortableDate(folderEntry, gmt_index);
+      data[1] = new sortableDate(fName, folderEntry, gmt_index);
       
       if (sameChannel) {
          if ( folderEntry.get(0).containsKey("channelNum") ) {
@@ -648,7 +679,7 @@ public class nplTable {
       data[2] = channel;
       
       data[3] = new sortableSize(folderEntry);
-      data[4] = new sortableShow(folderEntry, gmt_index);
+      data[4] = new sortableShow(fName, folderEntry, gmt_index);
       AddRow(NowPlaying, data);
       
       // Adjust column widths to data
@@ -716,18 +747,14 @@ public class nplTable {
    // (This used when returning back from folder mode to top level mode)
    public void SelectFolder(String folderName) {
       debug.print("folderName=" + folderName);
-      String name;
       for (int i=0; i<NowPlaying.getRowCount(); ++i) {
          sortableDate s = (sortableDate)NowPlaying.getValueAt(i,getColumnIndex("DATE"));
          if (s.folder) {
-            if (s.folderData.get(0).containsKey("titleOnly")) {
-               name = s.folderData.get(0).get("titleOnly");
-               if (name.equals(folderName)) {
-                  NowPlaying.clearSelection();
-                  NowPlaying.setRowSelectionInterval(i,i);
-                  NowPlaying.scrollRectToVisible(NowPlaying.getCellRect(i, 0, true));
-                  return;
-               }
+            if (s.folderName.equals(folderName)) {
+               NowPlaying.clearSelection();
+               NowPlaying.setRowSelectionInterval(i,i);
+               NowPlaying.scrollRectToVisible(NowPlaying.getCellRect(i, 0, true));
+               return;
             }
          }
       }
