@@ -7,6 +7,7 @@ public class sortableDate {
    String display;
    String sortable;
    Hashtable<String,String> data;
+   String folderName = "";
    Stack<Hashtable<String,String>> folderData;
    Boolean folder = false;
    
@@ -18,7 +19,8 @@ public class sortableDate {
    }
    
    // Folder entry constructor
-   sortableDate(Stack<Hashtable<String,String>> folderEntry, int gmt_index) {
+   sortableDate(String folderName, Stack<Hashtable<String,String>> folderEntry, int gmt_index) {
+      this.folderName = folderName;
       folder = true;
       display = (String)folderEntry.get(gmt_index).get("date") + " ";
       sortable = (String)folderEntry.get(gmt_index).get("gmt"); 
