@@ -130,7 +130,7 @@ public class auto {
    }
    
    // Match title & keywords against an entry 
-   public static void keywordSearch(Hashtable<String,String> entry) {
+   public static Boolean keywordSearch(Hashtable<String,String> entry) {
       debug.print("entry=" + entry);
       
       // Title matching
@@ -145,7 +145,9 @@ public class auto {
             debug.print("keywordSearch::matching title '" + keyword + "' in '" + title + "'");
             if ( title.matches(keyword) ) {
                // Match found, so queue up relevant job actions
-               if ( ! filterByDate(entry) ) {
+               if ( filterByDate(entry) ) {
+                  return false;
+               } else {
                   log.print("Title keyword match: '" + keyword + "' found in '" + title + "'");
                   if (autoConfig.dryrun == 1) {
                      log.print("(dry run mode => will not download)");
@@ -153,7 +155,7 @@ public class auto {
                      keywordMatchJobInit(entry, auto);
                   }
                }
-               return;
+               return true;
             }
          }
       }
@@ -258,7 +260,9 @@ public class auto {
          if( match ) {
             // Match found, so queue up relevant job actions
             debug.print("keywordSearch::KEYWORDS MATCH");
-            if ( ! filterByDate(entry) ) {
+            if ( filterByDate(entry) ) {
+               return false;
+            } else {
                log.print("keywords match: '" + keywordsList + "' matches '" + text + "'");
                if (autoConfig.dryrun == 1) {
                   log.print("(dry run mode => will not download)");
@@ -266,11 +270,12 @@ public class auto {
                   keywordMatchJobInit(entry, auto);
                }
             }
-            return;
+            return true;
          } else {
             debug.print("keywordSearch::no match is final determination");
          }
       }
+      return false;
    }
 
    // Return true if should be filtered out due to Date Filter, false otherwise
@@ -280,20 +285,21 @@ public class auto {
       if (autoConfig.dateFilter == 1 && entry.containsKey("gmt")) {
          long now = new Date().getTime();
          long recorded = Long.parseLong(entry.get("gmt"));
-         float diff = (now - recorded)/(3600*1000);
+         float diff = (float)(now - recorded)/(float)(3600*1000);
+         String diffStr = String.format("%10.2f", diff);
          if (autoConfig.dateOperator.equals("less than")) {
             if (diff > autoConfig.dateHours) {
                filter = true;
-               debug.print("keywordSearch::no match due to 'less than' Date Filter (age=" + diff + " hours)");
+               debug.print("keywordSearch::no match due to 'less than' Date Filter (age=" + diffStr + " hours)");
             }
          } else {
             if (diff < autoConfig.dateHours) {
                filter = true;
-               debug.print("keywordSearch::no match due to 'more than' Date Filter (age=" + diff + " hours)");
+               debug.print("keywordSearch::no match due to 'more than' Date Filter (age=" + diffStr + " hours)");
             }               
          }
          if (filter) {
-            log.print("NOTE: no match due to Date Filter - " + entry.get("title") + ", age=" + diff + " hours");
+            log.print("NOTE: no match due to Date Filter - " + entry.get("title") + ", age=" + diffStr + " hours");
          }
       }
       return filter;
