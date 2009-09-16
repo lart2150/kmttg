@@ -442,9 +442,12 @@ public class NowPlaying  {
             config.gui.nplTab_clear(job.tivoName);
             
             // Match auto keywords against entries
+            int count = 0;
             for (int j=0; j<ENTRIES.size(); j++) {
-               auto.keywordSearch(ENTRIES.get(j));
+               if ( auto.keywordSearch(ENTRIES.get(j)) )
+                  count++;
             }
+            log.print("TOTAL auto matches for '" + job.tivoName + "' = " + count + "/" + ENTRIES.size());
             config.GUI_AUTO--;
          }
          else if (config.GUI) {
@@ -452,9 +455,12 @@ public class NowPlaying  {
             config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
          } else {
             // Batch mode
+            int count = 0;
             for (int j=0; j<ENTRIES.size(); j++) {
-               auto.keywordSearch(ENTRIES.get(j));
+               if ( auto.keywordSearch(ENTRIES.get(j)) )
+                  count++;
             }
+            log.print("TOTAL auto matches for '" + job.tivoName + "' = " + count + "/" + ENTRIES.size());
          }
          com.tivo.kmttg.util.file.delete(cookieFile);
          com.tivo.kmttg.util.file.delete(outputFile);
