@@ -884,4 +884,18 @@ public class jobMonitor {
       return false;
    }
    
+   // Shut down OS (Windows only)
+   public void shutdown() {
+      if (config.OS.equals("windows")) {
+         try {
+            Runtime.getRuntime().exec("shutdown.exe -f -s");
+         }
+         catch(Exception e) {
+            log.error(e.toString());
+         }
+      } else {
+         log.warn("shutdown not supported on this OS");
+      }
+   }
+   
 }
