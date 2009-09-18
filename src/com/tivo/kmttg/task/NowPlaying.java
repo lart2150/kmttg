@@ -1,8 +1,10 @@
 package com.tivo.kmttg.task;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -194,13 +196,16 @@ public class NowPlaying  {
    }
 
    // Return true if additional downloads needed, false otherwise
+   // NOTE: Must use UTF8 for special characters like Spanish/French characters
    private Boolean parseNPL(String file) {
       debug.print("file=" + file);
       int TotalItems=0, ItemCount=0, offset=0;
       String ll, l, value;
       Hashtable<String,String> h = new Hashtable<String,String>();
       try {
-         BufferedReader xml = new BufferedReader(new FileReader(outputFile));
+         BufferedReader xml = new BufferedReader(
+            new InputStreamReader(new FileInputStream(file),"UTF8")
+         );
          ll = xml.readLine();
          xml.close();
          String[] line = ll.split(">");
