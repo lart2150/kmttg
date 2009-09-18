@@ -306,7 +306,7 @@ public class nplTable {
    // Mouse event handler
    // This will display folder entries in table if folder entry single-clicked
    private void MouseClicked(MouseEvent e) {
-      if(e.getClickCount() == 1) {
+      if( ! tivoName.equals("FILES") && e.getClickCount() == 1 ) {
          int row = NowPlaying.rowAtPoint(e.getPoint());
          sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
          if (s.folder) {
