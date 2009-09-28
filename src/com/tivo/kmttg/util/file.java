@@ -59,12 +59,16 @@ public class file {
                Stack<String> l = process.getStdout();
                if (l.size() > 0) {
                   String free_string = l.lastElement();
-                  String[] ll = free_string.split("\\s+");
-                  free_string = ll[ll.length-3].replaceAll(",", "");
-                  try {
-                     free = Long.parseLong(free_string);
-                     return free;
-                  } catch (NumberFormatException e) {
+                  if (free_string.matches(".*bytes\\s+free")) {
+                     String[] ll = free_string.split("\\s+");
+                     free_string = ll[ll.length-3].replaceAll(",", "");
+                     try {
+                        free = Long.parseLong(free_string);
+                        return free;
+                     } catch (NumberFormatException e) {
+                        return bad;
+                     }
+                  } else {
                      return bad;
                   }
                }
