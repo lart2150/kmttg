@@ -171,7 +171,8 @@ public class metadataTivo {
          String[] nameValues = {
                "title", "seriesTitle", "description", "time",
                "mpaaRating", "movieYear", "isEpisode",
-               "originalAirDate", "episodeTitle", "isEpisodic"
+               "originalAirDate", "episodeTitle", "isEpisodic",
+               "episodeNumber", "uniqueId"
          };
          String[] valuesOnly = {"showingBits", "starRating", "tvRating"};
          String[] arrays = {
@@ -195,13 +196,16 @@ public class metadataTivo {
                // nameValues have value on following line
                for (int k=0; k<nameValues.length; k++) {
                   name = nameValues[k];
-                  if (l.matches("^<" + name + ".*$")) {
+                  if (l.matches("^<" + name + "$")) {
                      j++;
                      value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
                      value = Entities.replaceHtmlEntities(value);
-                     if (value.length() > 0)
-                        data.put(name, value);
-                     debug.print(name + "=" + value);
+                     if (value.length() > 0) {
+                        if (! data.containsKey(name)) {
+                           data.put(name, value);
+                           debug.print(name + "=" + value);
+                        }
+                     }
                   }
                }
             }
@@ -252,6 +256,14 @@ public class metadataTivo {
          xml.close();
                   
          // Post-process some of the data
+         if (data.containsKey("uniqueId")) {
+            // seriesId == 1st uniqueId for episodic shows only
+            if (data.containsKey("isEpisodic")) {
+               if (data.get("isEpisodic").equals("true"))
+                  data.put("seriesId", data.get("uniqueId"));
+            }
+            data.remove("uniqueId");
+         }
          if ( data.containsKey("starRating") )
             data.put("starRating", "x" + data.get("starRating"));
          if ( data.containsKey("tvRating") )
