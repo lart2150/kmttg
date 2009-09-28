@@ -68,19 +68,7 @@ public class tivoFileName {
       file = n;
       
       // Remove/replace certain special characters
-      //file = file.replaceAll("\\s+","_");
-      file = file.replaceAll("/", "_");
-      file = file.replaceAll("\\*", "");
-      file = file.replaceAll("\"", "");
-      file = file.replaceAll("'", "");
-      file = file.replaceAll(":", "");
-      file = file.replaceAll(";", "");
-      //file = file.replaceAll("-", "_");
-      file = file.replaceAll("!", "");
-      file = file.replaceAll("\\?", "");
-      file = file.replaceAll("&", "and");
-      file = file.replaceAll("\\\\", "");
-      file = file.replaceAll("\\$", "");
+      file = removeSpecialChars(file);
       
       // Don't allow folders ending in dots
       while (file.matches("^.+\\.__separator__.*$")) {
@@ -149,20 +137,20 @@ public class tivoFileName {
          if (text.contains("\"")) {
             text = text.replaceAll("\"", "");
          } else {
-            text = text.replaceFirst("^title$",         keys.get("title"));
-            text = text.replaceFirst("^mainTitle$",     keys.get("titleOnly"));
-            text = text.replaceFirst("^episodeTitle$",  keys.get("episodeTitle"));
-            text = text.replaceFirst("^channelNum$",    keys.get("channelNum"));
-            text = text.replaceFirst("^channel$",       keys.get("channel"));
-            text = text.replaceFirst("^min$",           keys.get("min"));
-            text = text.replaceFirst("^hour$",          keys.get("hour"));
-            text = text.replaceFirst("^wday$",          keys.get("wday"));
-            text = text.replaceFirst("^mday$",          keys.get("mday"));
-            text = text.replaceFirst("^month$",         keys.get("month"));
-            text = text.replaceFirst("^monthNum$",      keys.get("monthNum"));
-            text = text.replaceFirst("^year$",          keys.get("year"));
-            text = text.replaceFirst("^EpisodeNumber$", keys.get("EpisodeNumber"));
-            text = text.replaceFirst("^description$",   keys.get("description"));
+            text = text.replaceFirst("^title$",         removeSpecialChars(keys.get("title")));
+            text = text.replaceFirst("^mainTitle$",     removeSpecialChars(keys.get("titleOnly")));
+            text = text.replaceFirst("^episodeTitle$",  removeSpecialChars(keys.get("episodeTitle")));
+            text = text.replaceFirst("^channelNum$",    removeSpecialChars(keys.get("channelNum")));
+            text = text.replaceFirst("^channel$",       removeSpecialChars(keys.get("channel")));
+            text = text.replaceFirst("^min$",           removeSpecialChars(keys.get("min")));
+            text = text.replaceFirst("^hour$",          removeSpecialChars(keys.get("hour")));
+            text = text.replaceFirst("^wday$",          removeSpecialChars(keys.get("wday")));
+            text = text.replaceFirst("^mday$",          removeSpecialChars(keys.get("mday")));
+            text = text.replaceFirst("^month$",         removeSpecialChars(keys.get("month")));
+            text = text.replaceFirst("^monthNum$",      removeSpecialChars(keys.get("monthNum")));
+            text = text.replaceFirst("^year$",          removeSpecialChars(keys.get("year")));
+            text = text.replaceFirst("^EpisodeNumber$", removeSpecialChars(keys.get("EpisodeNumber")));
+            text = text.replaceFirst("^description$",   removeSpecialChars(keys.get("description")));
             if (text.length() == 0) exists = false;
          }
          newFields.add(text);
@@ -178,6 +166,23 @@ public class tivoFileName {
       l.put("delta", delta);
       l.put("text", text);
       return l;
+   }
+   
+   private static String removeSpecialChars(String s) {
+      //s = s.replaceAll("\\s+","_");
+      s = s.replaceAll("/", "_");
+      s = s.replaceAll("\\*", "");
+      s = s.replaceAll("\"", "");
+      s = s.replaceAll("'", "");
+      s = s.replaceAll(":", "");
+      s = s.replaceAll(";", "");
+      //s = s.replaceAll("-", "_");
+      s = s.replaceAll("!", "");
+      s = s.replaceAll("\\?", "");
+      s = s.replaceAll("&", "and");
+      s = s.replaceAll("\\\\", "");
+      s = s.replaceAll("\\$", "");
+      return s;
    }
 
 }
