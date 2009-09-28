@@ -201,7 +201,10 @@ public class metadataTivo {
                      value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
                      value = Entities.replaceHtmlEntities(value);
                      if (value.length() > 0) {
-                        if (! data.containsKey(name)) {
+                        if (name.equals("uniqueId") && ! data.containsKey(name)) {
+                           data.put(name, value);
+                           debug.print(name + "=" + value);
+                        } else {
                            data.put(name, value);
                            debug.print(name + "=" + value);
                         }
