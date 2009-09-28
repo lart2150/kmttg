@@ -213,7 +213,8 @@ public class metadata {
                      j++;
                      value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
                      value = Entities.replaceHtmlEntities(value);
-                     data.put(name, value);
+                     if (value.length() > 0)
+                        data.put(name, value);
                      debug.print(name + "=" + value);
                   }
                }
@@ -288,7 +289,7 @@ public class metadata {
          }
          
          // Add additional data
-         if ( job.episodeNumber != null )
+         if ( job.episodeNumber != null && job.episodeNumber.length() > 0 )
             data.put("episodeNumber", job.episodeNumber);
          if ( job.displayMajorNumber != null ) {
             // Doesn't like sub-channel #s so strip them out
@@ -306,20 +307,23 @@ public class metadata {
          for (int i=0; i<nameValues.length; ++i) {
             key = nameValues[i];
             if (data.containsKey(key)) {
-               ofp.write(key + " : " + data.get(key) + "\n");
+               if (data.get(key).toString().length() > 0)
+                  ofp.write(key + " : " + data.get(key) + "\n");
             }
          }
          for (int i=0; i<valuesOnly.length; ++i) {
             key = valuesOnly[i];
             if (data.containsKey(key)) {
-               ofp.write(key + " : " + data.get(key) + "\n");
+               if (data.get(key).toString().length() > 0)
+                  ofp.write(key + " : " + data.get(key) + "\n");
             }
          }
          String[] additional = {"episodeNumber", "displayMajorNumber", "callsign", "seriesId"};
          for (int i=0; i<additional.length; ++i) {
             key = additional[i];
             if (data.containsKey(key)) {
-               ofp.write(key + " : " + data.get(key) + "\n");
+               if (data.get(key).toString().length() > 0)
+                  ofp.write(key + " : " + data.get(key) + "\n");
             }
          }
          for (int i=0; i<arrays.length; i++) {
