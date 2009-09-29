@@ -444,7 +444,9 @@ public class NowPlaying  {
          jobMonitor.removeFromJobList(job);
          if (config.GUI_AUTO > 0) {
             // Clear NPL
-            config.gui.nplTab_clear(job.tivoName);
+            //config.gui.nplTab_clear(job.tivoName);
+            // Update NPL
+            config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
             
             // Match auto keywords against entries
             int count = 0;
