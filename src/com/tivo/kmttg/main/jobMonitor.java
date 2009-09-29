@@ -226,15 +226,40 @@ public class jobMonitor {
       // If still 0 then give up and return true
       if (space == 0) return true;
       
-      if (space <= min) {
+      // Get estimated space needed for already queued jobs
+      long jobSpace = getJobsEstimatedDiskSpace();
+      
+      if (space-jobSpace <= min) {
          String message = String.format(
-            "%s: Space available = %.2f GB is less than min = %.2f GB",
-            dir, space/Math.pow(2,30), min/Math.pow(2, 30)
+            "%s: Space available = %.2f GB - estimated needed = %.2f GB is less than min = %.2f GB",
+            dir, space/Math.pow(2,30), jobSpace/Math.pow(2,30), min/Math.pow(2, 30)
          );
          log.error(message);
          return false;
       }
       return true;
+   }
+
+   // Return an estimate of disk space required for running & queued jobs
+   static long getJobsEstimatedDiskSpace() {
+      long total = 0;
+      jobData job;
+      if ( JOBS != null && ! JOBS.isEmpty() ) {
+         for (int i=0; i<JOBS.size(); ++i) {
+            job = JOBS.get(i);                        
+            // Only considering download jobs for now
+            if ( job.type.equals("download") ) {
+               if ( job.status.equals("running") ) {
+                  // Estimated size - what is already downloaded
+                  total += job.tivoFileSize - file.size(job.tivoFile);
+               } else {
+                  // Total estimated size
+                  total += job.tivoFileSize;
+               }
+            }
+         }
+      }
+      return total;
    }
    
    static void addToJobList(jobData job) {
