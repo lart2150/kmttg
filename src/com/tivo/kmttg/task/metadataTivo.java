@@ -172,7 +172,7 @@ public class metadataTivo {
                "title", "seriesTitle", "description", "time",
                "mpaaRating", "movieYear", "isEpisode",
                "originalAirDate", "episodeTitle", "isEpisodic",
-               "episodeNumber", "uniqueId"
+               "episodeNumber"
          };
          String[] valuesOnly = {"showingBits", "starRating", "tvRating"};
          String[] arrays = {
@@ -201,13 +201,8 @@ public class metadataTivo {
                      value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
                      value = Entities.replaceHtmlEntities(value);
                      if (value.length() > 0) {
-                        if (name.equals("uniqueId") && ! data.containsKey(name)) {
-                           data.put(name, value);
-                           debug.print(name + "=" + value);
-                        } else {
-                           data.put(name, value);
-                           debug.print(name + "=" + value);
-                        }
+                        data.put(name, value);
+                        debug.print(name + "=" + value);
                      }
                   }
                }
@@ -259,14 +254,6 @@ public class metadataTivo {
          xml.close();
                   
          // Post-process some of the data
-         if (data.containsKey("uniqueId")) {
-            // seriesId == 1st uniqueId for episodic shows only
-            if (data.containsKey("isEpisodic")) {
-               if (data.get("isEpisodic").equals("true"))
-                  data.put("seriesId", data.get("uniqueId"));
-            }
-            data.remove("uniqueId");
-         }
          if ( data.containsKey("starRating") )
             data.put("starRating", "x" + data.get("starRating"));
          if ( data.containsKey("tvRating") )
@@ -308,7 +295,7 @@ public class metadataTivo {
                   ofp.write(key + " : " + data.get(key) + "\n");
             }
          }
-         String[] additional = {"episodeNumber", "displayMajorNumber", "callsign", "seriesId"};
+         String[] additional = {"displayMajorNumber", "callsign"};
          for (int i=0; i<additional.length; ++i) {
             key = additional[i];
             if (data.containsKey(key)) {
