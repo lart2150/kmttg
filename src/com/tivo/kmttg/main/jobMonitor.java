@@ -240,7 +240,7 @@ public class jobMonitor {
       return true;
    }
 
-   // Return an estimate of disk space required for running & queued jobs
+   // Return an estimate of disk space required for running jobs
    static long getJobsEstimatedDiskSpace() {
       long total = 0;
       jobData job;
@@ -248,14 +248,9 @@ public class jobMonitor {
          for (int i=0; i<JOBS.size(); ++i) {
             job = JOBS.get(i);                        
             // Only considering download jobs for now
-            if ( job.type.equals("download") ) {
-               if ( job.status.equals("running") ) {
-                  // Estimated size - what is already downloaded
-                  total += job.tivoFileSize - file.size(job.tivoFile);
-               } else {
-                  // Total estimated size
-                  total += job.tivoFileSize;
-               }
+            if ( job.type.equals("download") && job.status.equals("running")) {
+               // Estimated size - what is already downloaded
+               total += job.tivoFileSize - file.size(job.tivoFile);
             }
          }
       }
