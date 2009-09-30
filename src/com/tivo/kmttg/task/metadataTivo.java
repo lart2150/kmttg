@@ -170,11 +170,11 @@ public class metadataTivo {
       try {
          String[] nameValues = {
                "title", "seriesTitle", "description", "time",
-               "mpaaRating", "movieYear", "isEpisode",
+               "movieYear", "isEpisode",
                "originalAirDate", "episodeTitle", "isEpisodic",
                "episodeNumber"
          };
-         String[] valuesOnly = {"showingBits", "starRating", "tvRating"};
+         String[] valuesOnly = {"showingBits", "starRating", "tvRating", "mpaaRating"};
          String[] arrays = {
                "vActor", "vDirector", "vExecProducer", "vProducer",
                "vProgramGenre", "vSeriesGenre", "vAdvisory", "vHost",
@@ -265,20 +265,20 @@ public class metadataTivo {
          
          if ( data.containsKey("mpaaRating") ) {
             Hashtable<String,String> map = new Hashtable<String,String>();
-            map.put("G", "G1");
-            map.put("PG", "P2");
-            map.put("PG_13", "P3");
-            map.put("R", "R4");
-            map.put("X", "X5");
-            map.put("NC_17", "N6");
-            map.put("NR", "N8");
+            map.put("1", "G1");
+            map.put("2", "P2");
+            map.put("3", "P3");
+            map.put("4", "R4");
+            map.put("5", "X5");
+            map.put("6", "N6");
+            map.put("7", "N8");
             String mpaaRating = map.get(data.get("mpaaRating"));
             if (mpaaRating != null)
                data.put("mpaaRating", mpaaRating);            
          }
                   
          // Now write all data to metaFile in pyTivo format
-         BufferedWriter ofp = new BufferedWriter(new FileWriter(job.metaFile));
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(metaFile));
          
          String key;
          for (int i=0; i<nameValues.length; ++i) {
