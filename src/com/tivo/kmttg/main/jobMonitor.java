@@ -195,7 +195,7 @@ public class jobMonitor {
    }
 
    // Create directory of f if it doesn't already exist
-   public static Boolean createSubFolders(String f) {
+   public static Boolean createSubFolders(String f, jobData job) {
       debug.print("f=" + f);
       String baseDir = string.dirname(f);
       if ( ! file.isDir(baseDir) ) {
@@ -207,13 +207,13 @@ public class jobMonitor {
 
       // Check for sufficient disk space in this dir if check enabled
       if ( config.CheckDiskSpace == 1 ) {
-         return checkDiskSpace(baseDir);
+         return checkDiskSpace(baseDir, job);
       }
       
       return true;
    }
    
-   public static Boolean checkDiskSpace(String dir) {
+   public static Boolean checkDiskSpace(String dir, jobData job) {
       debug.print("dir=" + dir);
       // Min available expected (in bytes)
       long min = (long) (config.LowSpaceSize * Math.pow(2, 30));
@@ -229,8 +229,17 @@ public class jobMonitor {
          return true;
       }
       
-      // Get estimated space needed for already queued jobs
-      long jobSpace = getJobsEstimatedDiskSpace();
+      // Get estimated space needed for already running jobs
+      long runningSpace = getJobsEstimatedDiskSpace();
+      
+      // Get estimated space for this job candidate
+      long candidateSpace = 0;
+      if (job.type.equals("download")) {
+         candidateSpace = job.tivoFileSize;
+      }
+      
+      // jobSpace = runningSpace (space for running jobs) + candidateSpace (jobs to be launched)
+      long jobSpace = runningSpace + candidateSpace;
       
       if (space-jobSpace <= min) {
          String message = String.format(
