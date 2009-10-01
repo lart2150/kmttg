@@ -41,7 +41,7 @@ public class streamfix {
                   
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.mpegFile_fix) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.mpegFile_fix, job) ) schedule = false;
       }
       
       if (schedule) {

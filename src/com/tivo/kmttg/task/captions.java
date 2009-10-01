@@ -54,7 +54,7 @@ public class captions {
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.srtFile) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.srtFile, job) ) schedule = false;
       }
       
       if (schedule) {

@@ -60,7 +60,7 @@ public class encode {
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.encodeFile) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.encodeFile, job) ) schedule = false;
       }
       
       if (schedule) {

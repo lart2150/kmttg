@@ -56,7 +56,7 @@ public class comcut {
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.mpegFile_cut) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.mpegFile_cut, job) ) schedule = false;
       }
       
       if (schedule) {

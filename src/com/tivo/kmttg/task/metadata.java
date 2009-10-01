@@ -52,7 +52,7 @@ public class metadata {
 
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.metaFile) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.metaFile, job) ) schedule = false;
       }
       
       if (schedule) {

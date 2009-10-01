@@ -51,7 +51,7 @@ public class download {
 
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.tivoFile) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.tivoFile, job) ) schedule = false;
       }
       
       if (schedule) {

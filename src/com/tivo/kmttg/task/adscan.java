@@ -62,7 +62,7 @@ public class adscan {
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.vprjFile) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.vprjFile, job) ) schedule = false;
       }
       
       if (schedule) {

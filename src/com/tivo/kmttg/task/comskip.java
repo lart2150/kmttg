@@ -63,7 +63,7 @@ public class comskip {
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(outputFile) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(outputFile, job) ) schedule = false;
       }
       
       if (schedule) {
