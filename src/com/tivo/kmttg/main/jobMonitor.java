@@ -224,7 +224,10 @@ public class jobMonitor {
       if (space == 0)
          space = file.freeSpace(dir);
       // If still 0 then give up and return true
-      if (space == 0) return true;
+      if (space == 0) {
+         log.warn("NOTE: Free space check failed...");
+         return true;
+      }
       
       // Get estimated space needed for already queued jobs
       long jobSpace = getJobsEstimatedDiskSpace();
