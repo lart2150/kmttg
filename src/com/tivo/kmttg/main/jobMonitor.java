@@ -61,7 +61,7 @@ public class jobMonitor {
                if (job.process_npl != null) {
                   job.process_npl.job = job; // This is used by npl check
                   if (job.process_npl.start()) {
-                     job.status = "running";
+                     updateJobStatus(job, "running");
                      job.time = new Date().getTime();
                      job.job_name = "playlist" + job.tivoName;
                      running.add(job);
@@ -302,11 +302,12 @@ public class jobMonitor {
             output = "(" + job.encodeName + ") " + output;
          }
          
-         if (config.GUI) config.gui.jobTab_AddJobMonitorRow(job, job.tivoName, output);
+         config.gui.jobTab_AddJobMonitorRow(job, job.tivoName, output);
       }
       
       // Add job to master job list
       JOBS.add(job);
+      updateNPLjobStatus();
    }
    
    public static void removeFromJobList(jobData job) {
@@ -323,7 +324,17 @@ public class jobMonitor {
       JOBS = new_jobs;
       
       // Remove entry from job monitor
-      if (config.GUI) config.gui.jobTab_RemoveJobMonitorRow(job);      
+      if (config.GUI) {
+         config.gui.jobTab_RemoveJobMonitorRow(job); 
+         updateNPLjobStatus();
+      }
+   }
+   
+   // Change job status
+   public static void updateJobStatus(jobData job, String status) {
+      job.status = status;
+      if (config.GUI)
+         updateNPLjobStatus();
    }
    
    public static void submitNewJob(jobData job) {
@@ -930,4 +941,28 @@ public class jobMonitor {
       }
    }
    
+   // Identify NPL table items associated with queued/running jobs
+   public static void updateNPLjobStatus() {
+      if (config.GUI && JOBS != null) {
+         // Build hash of source ID -> job status
+         Hashtable<String,String> map = new Hashtable<String,String>();
+         for (int i=0; i<JOBS.size(); ++i) {
+            if (JOBS.get(i).source != null) {
+               if (map.containsKey(JOBS.get(i).source)) {
+                  // Already have an entry with this source
+                  if (JOBS.get(i).status.equals("running")) {
+                     // Running status should override queued status when there
+                     // are multiple jobs with same source id
+                     map.put(JOBS.get(i).source,JOBS.get(i).status);
+                  }
+               } else {
+                  map.put(JOBS.get(i).source,JOBS.get(i).status);
+               }
+            }
+         }
+         
+         // Update NPL lists according to above hash
+         config.gui.updateNPLjobStatus(map);
+      }
+   }
 }

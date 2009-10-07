@@ -1111,7 +1111,7 @@ public class gui {
          "expires-soon-recording", "save-until-i-delete-recording",
          "in-progress-recording", "in-progress-transfer",
          "expired-recording", "suggestion-recording", "folder",
-         "copy-protected"
+         "copy-protected", "running", "queued"
       };
       URL url;
       for (int i=0; i<names.length; i++) {
@@ -1564,6 +1564,17 @@ public class gui {
       int selected = 0;
       if (custom.isSelected()) selected = 1;
       return selected;
+   }
+   
+   // Identify NPL table items associated with queued/running jobs
+   public void updateNPLjobStatus(Hashtable<String,String> map) {
+      Stack<String> tivoNames = config.getTivoNames();
+      if (tivoNames.size() > 0) {
+         for (int i=0; i<tivoNames.size(); i++) {
+            nplTable npl = getTab(tivoNames.get(i)).getTable();
+            npl.updateNPLjobStatus(map);
+         }
+      }
    }
 
 }

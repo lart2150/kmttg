@@ -27,6 +27,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
 
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
@@ -474,7 +475,10 @@ public class nplTable {
       }
       
       // Display totals message
-      displayTotals(message);      
+      displayTotals(message); 
+      
+      // Identify NPL table items associated with queued/running jobs
+      jobMonitor.updateNPLjobStatus();
    }
    
    // Update table display to show either top level flat structure or inside a folder
@@ -874,6 +878,30 @@ public class nplTable {
       debug.print("gmt=" + gmt);
       SimpleDateFormat sdf = new SimpleDateFormat("hh:mm aa");
       return sdf.format(gmt);
+   }
+   
+   // Identify NPL table items associated with queued/running jobs
+   public void updateNPLjobStatus(Hashtable<String,String> map) {
+      for (int row=0; row<NowPlaying.getRowCount(); row++) {
+         sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
+         if (s != null && s.data != null) {
+            if (s.data.containsKey("url_TiVoVideoDetails")) {
+               String source = s.data.get("url_TiVoVideoDetails");
+               if (map.containsKey(source)) {
+                  // Has associated queued or running job, so set special icon
+                  NowPlaying.setValueAt(gui.Images.get(map.get(source)), row, getColumnIndex(""));
+               } else {
+                  // Has no associated queued or running job so reset icon
+                  NowPlaying.setValueAt(null, row, getColumnIndex(""));
+                  
+                  // Set to ExpirationImage icon if available
+                  if ( s.data.containsKey("ExpirationImage") ) {
+                     NowPlaying.setValueAt(gui.Images.get(s.data.get("ExpirationImage")), row, getColumnIndex(""));
+                  }
+               }
+            }
+         }
+      }
    }
 
 }
