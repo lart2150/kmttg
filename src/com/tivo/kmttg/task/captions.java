@@ -60,7 +60,7 @@ public class captions {
       if (schedule) {
          if ( start() ) {
             job.process_captions = this;
-            job.status           = "running";
+            jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
          return true;

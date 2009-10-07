@@ -69,7 +69,7 @@ public class comskip {
       if (schedule) {
          if ( start() ) {
             job.process_comskip  = this;
-            job.status           = "running";
+            jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
          return true;

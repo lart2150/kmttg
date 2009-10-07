@@ -59,7 +59,7 @@ public class qsfix {
       if (schedule) {
          if ( start() ) {
             job.process_qsfix    = this;
-            job.status           = "running";
+            jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
          return true;

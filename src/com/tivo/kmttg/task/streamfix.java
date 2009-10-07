@@ -47,7 +47,7 @@ public class streamfix {
       if (schedule) {
          if ( start() ) {
             job.process_streamfix = this;
-            job.status            = "running";
+            jobMonitor.updateJobStatus(job, "running");
             job.time              = new Date().getTime();
          }
          return true;

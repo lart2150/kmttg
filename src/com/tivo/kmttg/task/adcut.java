@@ -76,7 +76,7 @@ public class adcut {
       if (schedule) {
          if ( start() ) {
             job.process_adcut    = this;
-            job.status           = "running";
+            jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
          return true;

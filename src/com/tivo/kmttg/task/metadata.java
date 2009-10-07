@@ -58,7 +58,7 @@ public class metadata {
       if (schedule) {
          if ( start() ) {
             job.process_metadata = this;
-            job.status           = "running";
+            jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
          return true;

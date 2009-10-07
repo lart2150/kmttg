@@ -58,7 +58,7 @@ public class metadataTivo {
       if (schedule) {
          if ( start() ) {
             job.process_metadataTivo = this;
-            job.status               = "running";
+            jobMonitor.updateJobStatus(job, "running");
             job.time                 = new Date().getTime();
          }
          return true;

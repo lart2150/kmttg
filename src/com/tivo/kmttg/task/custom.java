@@ -38,7 +38,7 @@ public class custom {
       if (schedule) {
          if ( start() ) {
             job.process_custom   = this;
-            job.status           = "running";
+            jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
          return true;
