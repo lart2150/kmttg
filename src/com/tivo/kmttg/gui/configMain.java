@@ -50,6 +50,7 @@ public class configMain {
    private static JCheckBox create_subfolder = null;
    private static JCheckBox UseAdscan = null;
    private static JCheckBox VrdReview = null;
+   private static JCheckBox VrdQsFilter = null;
    private static JCheckBox OverwriteFiles = null;
    private static JCheckBox toolTips = null;
    private static JCheckBox jobMonitorFullPaths = null;
@@ -296,6 +297,12 @@ public class configMain {
       else
          VrdReview.setSelected(false);
       
+      // VrdQsFilter
+      if (config.VrdQsFilter == 1)
+         VrdQsFilter.setSelected(true);
+      else
+         VrdQsFilter.setSelected(false);
+      
       // OverwriteFiles
       if (config.OverwriteFiles == 1)
          OverwriteFiles.setSelected(true);
@@ -465,6 +472,12 @@ public class configMain {
          config.VrdReview = 1;
       else
          config.VrdReview = 0;
+      
+      // VrdQsFilter
+      if (VrdQsFilter.isSelected())
+         config.VrdQsFilter = 1;
+      else
+         config.VrdQsFilter = 0;
       
       // OverwriteFiles
       if (OverwriteFiles.isSelected())
@@ -872,6 +885,7 @@ public class configMain {
       create_subfolder = new javax.swing.JCheckBox();
       UseAdscan = new javax.swing.JCheckBox();
       VrdReview = new javax.swing.JCheckBox();
+      VrdQsFilter = new javax.swing.JCheckBox();
       OverwriteFiles = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
       JLabel file_naming_label = new javax.swing.JLabel();
@@ -935,6 +949,7 @@ public class configMain {
       create_subfolder.setText("Create sub-folder for each download");
       UseAdscan.setText("Use VideoRedo AdScan instead of comskip");
       VrdReview.setText("Use VideoRedo GUI to review detected commercials");
+      VrdQsFilter.setText("Enable VideoRedo QS Fix video dimension filter");
       OverwriteFiles.setText("Overwrite existing files");
       MAK_label.setText("MAK"); 
       file_naming_label.setText("File Naming"); 
@@ -1576,6 +1591,12 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(VrdReview, c);
       
+      // VrdQsFilter
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(VrdQsFilter, c);
+      
       // t2extract_args
       gy++;
       c.gridx = 0;
@@ -1717,6 +1738,7 @@ public class configMain {
       create_subfolder.setToolTipText(getToolTip("create_subfolder"));
       UseAdscan.setToolTipText(getToolTip("UseAdscan"));
       VrdReview.setToolTipText(getToolTip("VrdReview"));
+      VrdQsFilter.setToolTipText(getToolTip("VrdQsFilter"));
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
       files_path.setToolTipText(getToolTip("files_path"));
       MAK.setToolTipText(getToolTip("MAK"));
@@ -1826,6 +1848,14 @@ public class configMain {
          text += "before starting the commercial cutting job. kmttg will wait until you close<br>";
          text += "the VideRedo GUI before proceeding. NOTE: Be sure to save your changes to .VPrj file<br>";
          text += "before you exit VideoRedo or they will not be used in commercial cut step.";
+      }
+      else if (component.equals("VrdQsFilter")) {
+         text =  "<b>Enable VideoRedo QS Fix video dimension filter</b><br>";
+         text += "If you have trouble in VideoRedo editing some files due to <b>Video Dimensions Changed</b><br>";
+         text += "erro message then enabling this option will apply a Video Dimensions filter as part of kmttg VRD<br>";
+         text += "Quickstream Fix run that will solve that problem. Note that kmttg uses ffmpeg<br>";
+         text += "to automatically detect the mpeg video file dimensions to be used as the filter and<br>";
+         text += "prepares a custom version of VRD vp.vbs file with an added filter line.";
       }
       else if (component.equals("OverwriteFiles")) {
          text =  "<b>Overwrite existing files</b><br>";

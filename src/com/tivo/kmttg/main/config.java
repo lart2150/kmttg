@@ -55,6 +55,7 @@ public class config {
    public static int CheckBeacon = 1;
    public static int UseAdscan = 0;
    public static int VrdReview = 1;
+   public static int VrdQsFilter = 0;
    public static int OverwriteFiles = 0;
    public static String comskipIni = "";
    public static String wan_http_port = "";
@@ -506,6 +507,9 @@ public class config {
             if (key.equals("VrdReview")) {
                VrdReview = Integer.parseInt(line);
             }
+            if (key.equals("VrdQsFilter")) {
+               VrdQsFilter = Integer.parseInt(line);
+            }
             if (key.equals("OverwriteFiles")) {
                OverwriteFiles = Integer.parseInt(line);
             }
@@ -632,6 +636,8 @@ public class config {
          ofp.write("<UseAdscan>\n" + UseAdscan + "\n\n");
          
          ofp.write("<VrdReview>\n" + VrdReview + "\n\n");
+         
+         ofp.write("<VrdQsFilter>\n" + VrdQsFilter + "\n\n");
          
          ofp.write("<OverwriteFiles>\n" + OverwriteFiles + "\n\n");
          
