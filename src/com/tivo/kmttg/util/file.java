@@ -158,6 +158,18 @@ public class file {
       }
    }
    
+   public static String makeTempFile(String prefix, String suffix) {
+      debug.print("prefix=" + prefix);
+      try {
+         File tmp = File.createTempFile(prefix, suffix, new File(config.tmpDir));
+         tmp.deleteOnExit();
+         return tmp.getPath();
+      } catch (IOException e) {
+         log.error(e.getMessage());
+         return null;
+      }
+   }
+   
    // Locate full path of an executable using "which"
    // Return null if not found
    public static String unixWhich(String c) {
