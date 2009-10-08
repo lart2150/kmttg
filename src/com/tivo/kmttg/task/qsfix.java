@@ -1,8 +1,16 @@
 package com.tivo.kmttg.task;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -14,6 +22,7 @@ import com.tivo.kmttg.util.log;
 
 public class qsfix {
    String  vrdscript = null;
+   String  vrdscript_temp = null;
    String  cscript = null;
    private backgroundProcess process;
    private jobData job;
@@ -31,7 +40,7 @@ public class qsfix {
    public Boolean launchJob() {
       debug.print("");
       Boolean schedule = true;
-      
+            
       String s = File.separator;
       vrdscript = config.VRD + s + "vp.vbs";
       cscript = System.getenv("SystemRoot") + s + "system32" + s + "cscript.exe";
@@ -56,6 +65,25 @@ public class qsfix {
          if ( ! jobMonitor.createSubFolders(job.mpegFile_fix, job) ) schedule = false;
       }
       
+      if (config.VrdQsFilter == 1 && schedule) {
+         log.warn("VideoRedo video dimensions filter is enabled - making custom VRD script");
+         // Want QSFix run with video dimension filter enabled
+         Hashtable<String,String> dimensions = ffmpegGetVideoDimensions(job.mpegFile);
+         if (dimensions == null) {
+            log.error("VRD QS Filter enabled but unable to determine video dimensions of file: " + job.mpegFile);
+            schedule = false;
+         } else {    
+            log.warn("VideoRedo video dimensions filter set to: x=" + dimensions.get("x") + ", y=" + dimensions.get("y"));
+            // Build a custom vrdscript with video filtering enabled
+            vrdscript_temp = makeTempVrdFilterScript(vrdscript, dimensions);
+            if (vrdscript_temp == null) {
+               schedule = false;
+            } else {
+               vrdscript = vrdscript_temp;
+            }
+         }
+      }
+
       if (schedule) {
          if ( start() ) {
             job.process_qsfix    = this;
@@ -64,8 +92,9 @@ public class qsfix {
          }
          return true;
       } else {
+         if (vrdscript_temp != null) file.delete(vrdscript_temp);
          return false;
-      }      
+      }     
    }
 
    // Return false if starting command fails, true otherwise
@@ -90,6 +119,7 @@ public class qsfix {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
+         if (vrdscript_temp != null) file.delete(vrdscript_temp);
          return false;
       }
       return true;
@@ -99,6 +129,7 @@ public class qsfix {
       debug.print("");
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
+      if (vrdscript_temp != null) file.delete(vrdscript_temp);
    }
 
    // Check status of a currently running job
@@ -161,6 +192,7 @@ public class qsfix {
             Boolean result = file.delete(job.mpegFile);
             if ( ! result ) {
             	log.error("Failed to delete file in preparation for rename: " + job.mpegFile);
+            	if (vrdscript_temp != null) file.delete(vrdscript_temp);
             	return false;
             }
             result = file.rename(job.mpegFile_fix, job.mpegFile);
@@ -170,7 +202,66 @@ public class qsfix {
             	log.error("Failed to rename " + job.mpegFile_fix + " to " + job.mpegFile);
          }
       }
+      if (vrdscript_temp != null) file.delete(vrdscript_temp);
       return false;
+   }
+   
+   // Use ffmpeg to get video dimensions from given mpeg video file
+   // Returns null if undetermined, a hash with x, y members otherwise
+   private Hashtable<String,String> ffmpegGetVideoDimensions(String videoFile) {      
+      // Use ffmpeg command to get video information      
+      Stack<String> command = new Stack<String>();
+      command.add(config.ffmpeg);
+      command.add("-i");
+      command.add(videoFile);
+      backgroundProcess process = new backgroundProcess();
+      if ( process.run(command) ) {
+         // Wait for command to terminate
+         process.Wait();
+         
+         // Parse stderr
+         Stack<String> l = process.getStderr();
+         if (l.size() > 0) {
+            for (int i=0; i<l.size(); ++i) {
+               if (l.get(i).matches("^.+\\s+Video:\\s+.+$")) {
+                  Pattern p = Pattern.compile(".*Video: .+, (\\d+)x(\\d+)[, ].*");
+                  Matcher m = p.matcher(l.get(i));
+                  if (m.matches()) {
+                     Hashtable<String,String> dimensions = new Hashtable<String,String>();
+                     dimensions.put("x", m.group(1));
+                     dimensions.put("y", m.group(2));
+                     return dimensions;
+                  }
+               }
+            }
+         }
+      }
+      return null;
+   }
+   
+   // Create a custom VRD script file based on given vrdscript file by adding a video dimension filter
+   private String makeTempVrdFilterScript(String inputFile, Hashtable<String,String> dimensions) {
+      String script = file.makeTempFile("VRD", ".vbs");
+      try {
+         BufferedReader ifp = new BufferedReader(new FileReader(inputFile));
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(script));
+         String line;
+         while ( (line = ifp.readLine()) != null ) {
+            if (line.matches("^.+FileSaveAs.+$")) {
+               // Add filter line right before the FileSaveAs statement which does most of the work
+               ofp.write("VideoReDo.SetFilterDimensions " + dimensions.get("x") + ", " + dimensions.get("y") + "\n\r");
+            }
+            ofp.write(line + "\n\r");
+         }
+         ifp.close();
+         ofp.close();
+      }
+      catch (IOException ex) {
+         log.error(ex.toString());
+         return null;
+      }
+
+      return script;
    }
 
 }
