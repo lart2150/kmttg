@@ -4,9 +4,11 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import javax.swing.BoxLayout;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -45,17 +47,11 @@ public class freeSpace {
 
       //Configure object properties
       Object2DProperties object2DProps = new Object2DProperties();
-      object2DProps.setObjectTitleText("Disk Space Usage (GB)");
+      object2DProps.setObjectTitleText(tivoName + " Disk Space Usage (GB)");
 
       //Configure chart properties
       Chart2DProperties chart2DProps = new Chart2DProperties();
       chart2DProps.setChartDataLabelsPrecision(-1);
-
-      //Configure legend properties
-      LegendProperties legendProps = new LegendProperties();
-      String[] legendLabels =
-        {"Free Space", "TiVo Suggestions", "Keep Until I Delete", "Keep Until Space Needed"};
-      legendProps.setLegendLabelsTexts(legendLabels);
 
       //Configure graph component colors
       MultiColorsProperties multiColorsProps = new MultiColorsProperties();
@@ -67,7 +63,6 @@ public class freeSpace {
       chart2D = new PieChart2D();
       chart2D.setObject2DProperties(object2DProps);
       chart2D.setChart2DProperties(chart2DProps);
-      chart2D.setLegendProperties(legendProps);
       chart2D.setMultiColorsProperties(multiColorsProps);
       chart2D.setPieChart2DProperties(pieChart2DProps);
       
@@ -81,24 +76,25 @@ public class freeSpace {
       JPanel content;      
       
       // Define content for dialog window
-      content = new JPanel(new GridBagLayout());
+      content = new JPanel();
       content.setLayout(new GridBagLayout());
-      
       GridBagConstraints c = new GridBagConstraints();
-      c.fill = GridBagConstraints.HORIZONTAL;
       c.ipady = 0;
-      c.weighty = 1.0;  // default to vertical stretch
+      c.weighty = 0.0;  // default to no vertical stretch
       c.weightx = 1.0;  // default to horizontal stretch
       c.gridx = 0;
       c.gridy = 0;
       c.gridwidth = 1;
       c.gridheight = 1;
-      c.anchor = GridBagConstraints.NORTH;
-      c.fill = GridBagConstraints.BOTH;
-      
+      c.anchor = GridBagConstraints.CENTER;
+      c.fill = GridBagConstraints.HORIZONTAL;
+            
+      // Row 1
+      JPanel row1 = new JPanel();
+      row1.setLayout(new BoxLayout(row1, BoxLayout.LINE_AXIS));
       // Free space
       JLabel space_label = new JLabel("Total Disk Space (GB):");
-      space = new JTextField(20);
+      space = new JTextField(8);
       space.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
             setData();
@@ -108,14 +104,15 @@ public class freeSpace {
          }
       });
       space.setText(String.format("%.1f",getDiskSpace()));
-      content.add(space_label);
-      c.gridx = 2;
-      content.add(space);
+      row1.add(space_label);
+      row1.add(space);
       
-      // Pie chart
-      c.gridx = 0;
+      // Build content layout
+      content.add(row1, c);
+      
       c.gridy = 1;
-      c.gridwidth = 2;
+      c.weighty = 1.0;
+      c.fill = GridBagConstraints.BOTH;
       content.add(chart2D, c);
      
       // create and display dialog window
@@ -124,7 +121,7 @@ public class freeSpace {
       dialog.setTitle(tivoName + " Disk Usage Analysis");
       dialog.setContentPane(content);
       dialog.pack();
-      //dialog.setSize(600,400);
+      dialog.setSize((int)(frame.getSize().width/1.5), (int)(frame.getSize().height/1.5));
       dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
       dialog.setVisible(true);
    }
@@ -144,15 +141,13 @@ public class freeSpace {
          if (entries.get(i).containsKey("size")) {
             size = (float) (Float.parseFloat(entries.get(i).get("size"))/Math.pow(2,30));
          }
-         if (entries.get(i).containsKey("ExpirationImage")) {
-            if (entries.get(i).get("ExpirationImage").equals("suggestion-recording")) {
-               data.put("suggestions", data.get("suggestions") + size);
-               continue;
-            }
-            if (entries.get(i).get("ExpirationImage").equals("save-until-i-delete-recording")) {
-               data.put("kuid", data.get("kuid") + size);
-               continue;
-            }
+         if (entries.get(i).containsKey("suggestion")) {
+            data.put("suggestions", data.get("suggestions") + size);
+            continue;
+         }
+         if (entries.get(i).containsKey("kuid")) {
+            data.put("kuid", data.get("kuid") + size);
+            continue;
          }
          data.put("kusn", data.get("kusn") + size);
       }
@@ -168,15 +163,41 @@ public class freeSpace {
       }
       data.put("free", free);
       
-      int numSets = 4, numCats = 1, numItems = 1;
+      // Don't include any items set to zero
+      if (data.get("suggestions") == 0) data.remove("suggestions");
+      if (data.get("kuid") == 0)        data.remove("kuid");
+      if (data.get("kusn") == 0)        data.remove("kusn");
+      
+      int numSets = data.size(), numCats = 1, numItems = 1;
+      String[] keys = new String[numSets];
       Dataset dataset = new Dataset (numSets, numCats, numItems);
-      dataset.set(0, 0, 0, data.get("free"));
-      dataset.set(1, 0, 0, data.get("suggestions"));
-      dataset.set(2, 0, 0, data.get("kuid"));
-      dataset.set(3, 0, 0, data.get("kusn"));      
+      int i=0;
+      for (Enumeration<String> e=data.keys(); e.hasMoreElements();) {
+         String name = e.nextElement();
+         dataset.set(i, 0, 0, data.get(name));
+         keys[i] = name;
+         i++;
+      }
+      setLegends(keys);
       chart2D.setDataset(dataset);
       
       return true;
+   }
+
+   private void setLegends(String[] keys) {
+      //Configure legend properties
+      LegendProperties legendProps = new LegendProperties();
+      Hashtable<String,String> map = new Hashtable<String,String>();
+      map.put("free", "Free Space");
+      map.put("suggestions", "TiVo Suggestions");
+      map.put("kuid", "Keep Until I Delete");
+      map.put("kusn", "Keep Until Space Needed");
+      String[] legendLabels = new String[keys.length];
+      for (int i=0; i<keys.length; i++) {
+         legendLabels[i] = map.get(keys[i]);
+      }
+      legendProps.setLegendLabelsTexts(legendLabels);
+      chart2D.setLegendProperties(legendProps);
    }
    
    private float getDiskSpace() {
