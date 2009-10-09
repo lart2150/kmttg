@@ -567,7 +567,9 @@ public class gui {
       debug.print("");
       if (freeSpaceMenuItem == null) {
          freeSpaceMenuItem = new JMenuItem();
-         freeSpaceMenuItem.setText("Free Space Pie Chart");
+         freeSpaceMenuItem.setText("TiVo Disk Space Usage");
+         freeSpaceMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D,
+               Event.CTRL_MASK, true));
          freeSpaceMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                String tivoName = getSelectedTivoName();
