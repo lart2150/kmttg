@@ -58,6 +58,7 @@ public class gui {
    private JMenuItem saveMessagesMenuItem = null;
    private JMenuItem clearMessagesMenuItem = null;
    private JMenuItem resetServerMenuItem = null;
+   private JMenuItem freeSpaceMenuItem = null;
    
    private JComboBox encoding = null;
    private JLabel encoding_label = null;
@@ -414,6 +415,7 @@ public class gui {
          fileMenu.add(getRefreshEncodingsMenuItem());
          fileMenu.add(getSaveMessagesMenuItem());
          fileMenu.add(getClearMessagesMenuItem());
+         fileMenu.add(getFreeSpaceMenuItem());
          fileMenu.add(getResetServerMenuItem());
          fileMenu.add(getExitMenuItem());
       }
@@ -559,6 +561,25 @@ public class gui {
          });
       }
       return resetServerMenuItem;
+   }
+
+   private JMenuItem getFreeSpaceMenuItem() {
+      debug.print("");
+      if (freeSpaceMenuItem == null) {
+         freeSpaceMenuItem = new JMenuItem();
+         freeSpaceMenuItem.setText("Free Space Pie Chart");
+         freeSpaceMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               String tivoName = getSelectedTivoName();
+               if (tivoName != null) {
+                  new freeSpace(tivoName, getJFrame());
+               } else {
+                  log.error("This command must be run with a TiVo tab selected.");
+               }
+            }
+         });
+      }
+      return freeSpaceMenuItem;
    }
    
    private JMenuItem getRunInGuiMenuItem() {
