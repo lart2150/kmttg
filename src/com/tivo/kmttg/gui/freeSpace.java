@@ -13,6 +13,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import net.sourceforge.chart2d.Chart2DProperties;
@@ -33,7 +34,9 @@ public class freeSpace {
    private JFrame frame = null;
    private JDialog dialog = null;
    private JTextField space = null;
+   private bitrateTable tab = null;
    private float disk_space = 0;
+   private Hashtable<String,Hashtable<String,Double>> chanData = new Hashtable<String,Hashtable<String,Double>>();
    
    freeSpace(String tivoName, JFrame frame) {
       this.tivoName = tivoName;
@@ -76,6 +79,7 @@ public class freeSpace {
       JPanel content;      
       
       // Define content for dialog window
+      int gy = 0;
       content = new JPanel();
       content.setLayout(new GridBagLayout());
       GridBagConstraints c = new GridBagConstraints();
@@ -83,7 +87,7 @@ public class freeSpace {
       c.weighty = 0.0;  // default to no vertical stretch
       c.weightx = 1.0;  // default to horizontal stretch
       c.gridx = 0;
-      c.gridy = 0;
+      c.gridy = gy;
       c.gridwidth = 1;
       c.gridheight = 1;
       c.anchor = GridBagConstraints.CENTER;
@@ -110,10 +114,29 @@ public class freeSpace {
       // Build content layout
       content.add(row1, c);
       
-      c.gridy = 1;
+      gy++;
+      c.gridy = gy;
       c.weighty = 1.0;
       c.fill = GridBagConstraints.BOTH;
       content.add(chart2D, c);
+      
+      // bitrate label
+      JLabel bitrate_label = new JLabel("Channel Bit Rates");
+      gy++;
+      c.gridy = gy;
+      c.weighty = 0.0;
+      c.fill = GridBagConstraints.CENTER;
+      content.add(bitrate_label, c);
+      
+      // bitrateTable
+      tab = new bitrateTable();
+      JScrollPane tabScroll = new JScrollPane(tab.TABLE);
+      tab.AddRows(chanData);
+      gy++;
+      c.gridy = gy;
+      c.weighty = 0.3;
+      c.fill = GridBagConstraints.BOTH;
+      content.add(tabScroll, c);
      
       // create and display dialog window
       dialog = new JDialog(frame, false); // non-modal dialog
@@ -123,7 +146,7 @@ public class freeSpace {
       dialog.pack();
       dialog.setSize((int)(frame.getSize().width/1.5), (int)(frame.getSize().height/1.5));
       dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
-      dialog.setVisible(true);
+      dialog.setVisible(true);      
    }
    
    public Boolean setData() {
@@ -136,7 +159,22 @@ public class freeSpace {
       Stack<Hashtable<String,String>> entries = config.gui.getTab(tivoName).getTable().getEntries();
       if (entries == null) return false;
       float size;
-      for (int i=0; i<entries.size(); ++i) {
+      for (int i=0; i<entries.size(); i++) {         
+         // Bit rate data
+         if (entries.get(i).containsKey("channel") && entries.get(i).containsKey("size") && entries.get(i).containsKey("duration")) {
+            String channel = entries.get(i).get("channel");
+            Double bytes = Double.parseDouble(entries.get(i).get("size"));
+            Double duration  = Double.parseDouble(entries.get(i).get("duration"))/1000.0;
+            if ( ! chanData.containsKey(channel) ) {
+               chanData.put(channel, new Hashtable<String,Double>());
+               chanData.get(channel).put("bytes", 0.0);
+               chanData.get(channel).put("duration", 0.0);
+            }
+            chanData.get(channel).put("bytes",    chanData.get(channel).get("bytes")+bytes);
+            chanData.get(channel).put("duration", chanData.get(channel).get("duration")+duration);
+         }
+
+         // Disk space allocation data
          size = 0;
          if (entries.get(i).containsKey("size")) {
             size = (float) (Float.parseFloat(entries.get(i).get("size"))/Math.pow(2,30));
@@ -180,7 +218,7 @@ public class freeSpace {
       }
       setLegends(keys);
       chart2D.setDataset(dataset);
-      
+            
       return true;
    }
 
