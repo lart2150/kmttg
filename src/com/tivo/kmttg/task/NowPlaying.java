@@ -395,6 +395,7 @@ public class NowPlaying  {
                // Expiration Image Type
                if (value.matches("^.*save-until-i-delete-recording.*$")) {
                   h.put("ExpirationImage", "save-until-i-delete-recording");
+                  h.put("kuid", "yes");
                }
                if (value.matches("^.*in-progress-recording.*$")) {
                   h.put("ExpirationImage", "in-progress-recording");
@@ -410,6 +411,7 @@ public class NowPlaying  {
                }
                if (value.matches("^.*suggestion-recording.*$")) {
                   h.put("ExpirationImage", "suggestion-recording");
+                  h.put("suggestion", "yes");
                }
             }
             
