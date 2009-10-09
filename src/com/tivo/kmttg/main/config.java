@@ -93,6 +93,9 @@ public class config {
    public static Color tableBkgndRecording = new Color(149, 151, 221); // light blue
    public static Color lightRed = new Color(250, 190, 190); // light red
    public static Font  tableFont = new Font("System", Font.BOLD, 12);
+   
+   // GUI free space related
+   public static Hashtable<String,Float> diskSpace = new Hashtable<String,Float>();
 
    // misc
    public static String programDir = "";
@@ -582,6 +585,18 @@ public class config {
             if (key.equals("cpu_cores")) {
                cpu_cores = Integer.parseInt(line);
             }
+            if (key.equals("diskSpace")) {
+               String[] l = line.split("=");
+               if (l.length == 2) {
+                  try {
+                     float size = Float.parseFloat(l[1]);
+                     diskSpace.put(l[0],size);
+                  }
+                  catch(NumberFormatException e) {
+                     log.warn("Error parsing diskSpace setting");
+                  }
+               }
+            }
          }
          ini.close();
 
@@ -688,6 +703,15 @@ public class config {
          ofp.write("<CheckBeacon>\n" + CheckBeacon + "\n\n");
          
          ofp.write("<cpu_cores>\n" + cpu_cores + "\n\n");
+         
+         if (diskSpace.size() > 0) {
+            ofp.write("<diskSpace>\n");
+            for (Enumeration<String> e=diskSpace.keys(); e.hasMoreElements();) {
+               String name = e.nextElement();
+               ofp.write(name + "=" + diskSpace.get(name) + "\n");
+            }
+            ofp.write("\n");
+         }
          
          ofp.close();
          
