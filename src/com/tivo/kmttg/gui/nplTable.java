@@ -880,6 +880,10 @@ public class nplTable {
       return sdf.format(gmt);
    }
    
+   public Stack<Hashtable<String,String>> getEntries() {
+      return entries;
+   }
+   
    // Identify NPL table items associated with queued/running jobs
    public void updateNPLjobStatus(Hashtable<String,String> map) {
       for (int row=0; row<NowPlaying.getRowCount(); row++) {
