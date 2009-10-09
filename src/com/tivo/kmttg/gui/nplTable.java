@@ -580,17 +580,15 @@ public class nplTable {
       for (int i=0; i<entries.size(); i++) {
          suggestion = false;
          // Categorize by suggestions
-         if (entries.get(i).containsKey("ExpirationImage")) {
-            if (entries.get(i).get("ExpirationImage").equals("suggestion-recording")) {
-               suggestion = true;
-               name = "TiVo Suggestions";
-               if ( ! folders.containsKey(name) ) {
-                  // Init new stack
-                  Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
-                  folders.put(name, stack);
-               }
-               folders.get(name).add(entries.get(i));
+         if (entries.get(i).containsKey("suggestion")) {
+            suggestion = true;
+            name = "TiVo Suggestions";
+            if ( ! folders.containsKey(name) ) {
+               // Init new stack
+               Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
+               folders.put(name, stack);
             }
+            folders.get(name).add(entries.get(i));
          }
          
          // Categorize by titleOnly (not including suggestions)
