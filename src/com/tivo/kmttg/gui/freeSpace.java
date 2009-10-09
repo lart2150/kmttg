@@ -25,6 +25,7 @@ import net.sourceforge.chart2d.PieChart2D;
 import net.sourceforge.chart2d.PieChart2DProperties;
 
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
@@ -35,8 +36,11 @@ public class freeSpace {
    private JDialog dialog = null;
    private JTextField space = null;
    private bitrateTable tab = null;
+   private JLabel totals1 = null;
+   private JLabel totals2 = null;
    private float disk_space = 0;
    private Hashtable<String,Hashtable<String,Double>> chanData = new Hashtable<String,Hashtable<String,Double>>();
+   private Hashtable<String,Object> totalsData = new Hashtable<String,Object>();
    
    freeSpace(String tivoName, JFrame frame) {
       this.tivoName = tivoName;
@@ -103,6 +107,7 @@ public class freeSpace {
          public void actionPerformed(ActionEvent e) {
             setData();
             chart2D.repaint();
+            updateLabels();
             config.diskSpace.put(tivoName, getDiskSpace());
             config.save(config.configIni);
          }
@@ -119,6 +124,22 @@ public class freeSpace {
       c.weighty = 1.0;
       c.fill = GridBagConstraints.BOTH;
       content.add(chart2D, c);
+      
+      // totals
+      totals1 = new JLabel("");
+      gy++;
+      c.gridy = gy;
+      c.weighty = 0.0;
+      c.fill = GridBagConstraints.CENTER;
+      content.add(totals1, c);
+      
+      totals2 = new JLabel("");
+      updateLabels();
+      gy++;
+      c.gridy = gy;
+      c.weighty = 0.0;
+      c.fill = GridBagConstraints.CENTER;
+      content.add(totals2, c);
       
       // bitrate label
       JLabel bitrate_label = new JLabel("Channel Bit Rates");
@@ -144,7 +165,7 @@ public class freeSpace {
       dialog.setTitle(tivoName + " Disk Usage Analysis");
       dialog.setContentPane(content);
       dialog.pack();
-      dialog.setSize((int)(frame.getSize().width/1.5), (int)(frame.getSize().height/1.5));
+      dialog.setSize((int)(frame.getSize().width), (int)(frame.getSize().height));
       dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
       dialog.setVisible(true);      
    }
@@ -156,11 +177,16 @@ public class freeSpace {
       data.put("kuid",        (float)0.0);
       data.put("kusn",        (float)0.0);
       
+      // Init totalsData to 0
+      totalsData.put("bytes", (double)0.0);
+      totalsData.put("duration", (double)0.0);
+      
       Stack<Hashtable<String,String>> entries = config.gui.getTab(tivoName).getTable().getEntries();
       if (entries == null) return false;
       float size;
+      totalsData.put("recordings", entries.size());
       for (int i=0; i<entries.size(); i++) {         
-         // Bit rate data
+         // Bit rate & totals data
          if (entries.get(i).containsKey("channel") && entries.get(i).containsKey("size") && entries.get(i).containsKey("duration")) {
             String channel = entries.get(i).get("channel");
             Double bytes = Double.parseDouble(entries.get(i).get("size"));
@@ -172,7 +198,11 @@ public class freeSpace {
             }
             chanData.get(channel).put("bytes",    chanData.get(channel).get("bytes")+bytes);
             chanData.get(channel).put("duration", chanData.get(channel).get("duration")+duration);
+            
+            // Want to store total time of all recordings
+            totalsData.put("duration", (Double)totalsData.get("duration")+duration);
          }
+         
 
          // Disk space allocation data
          size = 0;
@@ -189,10 +219,11 @@ public class freeSpace {
          }
          data.put("kusn", data.get("kusn") + size);
       }
-      
+            
       // Compute free space
       float available = getDiskSpace();
       float used = data.get("suggestions") + data.get("kuid") + data.get("kusn");
+      totalsData.put("bytes", used);
       float free = available - used;
       if (free < 0) {
          // Set disk space available to used space if used > available
@@ -200,6 +231,7 @@ public class freeSpace {
          free = 0;
       }
       data.put("free", free);
+      totalsData.put("free", free);
       
       // Don't include any items set to zero
       if (data.get("suggestions") == 0) data.remove("suggestions");
@@ -218,6 +250,16 @@ public class freeSpace {
       }
       setLegends(keys);
       chart2D.setDataset(dataset);
+      
+      // Complete Totals data (recordings, bytes, duration set so far)
+      totalsData.put("rate", (Double)8.0e3*(Float)totalsData.get("bytes")/(Double)totalsData.get("duration"));
+      totalsData.put("rate", String.format("%.2f", (Double)totalsData.get("rate")));
+      totalsData.put("remaining", (Double)totalsData.get("duration")*(Float)totalsData.get("free")/(Float)totalsData.get("bytes"));
+      totalsData.put("remaining", secsToHoursMins((Double)totalsData.get("remaining")));
+      
+      totalsData.put("recordings", "" + totalsData.get("recordings"));
+      totalsData.put("bytes", String.format("%.2f", (Float)totalsData.get("bytes")));
+      totalsData.put("duration", secsToHoursMins((Double)totalsData.get("duration")));
             
       return true;
    }
@@ -238,6 +280,19 @@ public class freeSpace {
       chart2D.setLegendProperties(legendProps);
    }
    
+   private void updateLabels() {
+      totals1.setText(
+         "Recordings: " + totalsData.get("recordings") +
+         ", Space used: " + totalsData.get("bytes") + " GB" +
+         ", Total time: " + totalsData.get("duration")
+      );
+      totals2.setText(
+         "Average Bit Rate (Mbps): " + totalsData.get("rate") +
+         ", Recording Time Remaining: " + totalsData.get("remaining")
+      );
+
+   }
+   
    private float getDiskSpace() {
       if (config.diskSpace.containsKey(tivoName)) {
          disk_space = config.diskSpace.get(tivoName);
@@ -256,6 +311,13 @@ public class freeSpace {
       }
       return available;
    }
+   
+   private String secsToHoursMins(Double secs) {
+      debug.print("secs=" + secs);
+      Integer hours = (int) (secs/3600);
+      Integer mins  = (int) (secs/60 - hours*60);
+      return String.format("%02dh : %02dm", hours, mins);
+   }  
    
    public void destroy() {
       if (dialog != null) dialog.dispose();
