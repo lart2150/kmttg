@@ -139,7 +139,7 @@ public class auto {
       autoEntry auto;
       for (int i=0; i<auto_entries.size(); i++) {
          auto = auto_entries.get(i);
-         keyword = auto.keyword;
+         keyword = auto.keyword.toLowerCase();
          if (entry.containsKey("titleOnly")) {
             title = entry.get("titleOnly").toLowerCase();
             debug.print("keywordSearch::matching title '" + keyword + "' in '" + title + "'");
@@ -165,9 +165,9 @@ public class auto {
       auto_entries = getKeywordsEntries();
       for (int i=0; i<auto_entries.size(); i++) {
          auto = auto_entries.get(i);
-         String keywordsList = auto.keywords.get(0);
+         String keywordsList = auto.keywords.get(0).toLowerCase();
          for (int j=1; j<auto.keywords.size(); j++) {
-            keywordsList += "|" + auto.keywords.get(j);
+            keywordsList += "|" + auto.keywords.get(j).toLowerCase();
          }
          // Divide up into and, or, not
          Stack<String> and = new Stack<String>();
