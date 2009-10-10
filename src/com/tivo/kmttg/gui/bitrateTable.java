@@ -137,7 +137,7 @@ public class bitrateTable {
        // Total bytes in GB
        info[1] = new sortableDouble(data.get("bytes")/Math.pow(2,30));
        // Rate in Mbps = (bytes*8)/(1e6*secs)
-       info[2] = new sortableDouble(8.0*data.get("bytes")/(1.0e6*data.get("duration")));
+       info[2] = new sortableDouble(bitRate(data.get("bytes"), data.get("duration")));
        // Rate in GB/hour = (bytes/2^30)/(secs/3600)
        info[3] = new sortableDouble((data.get("bytes")/Math.pow(2,30))/(data.get("duration")/3600.0));       
        AddRow(TABLE, info);       
@@ -148,4 +148,10 @@ public class bitrateTable {
        DefaultTableModel dm = (DefaultTableModel)table.getModel();
        dm.addRow(data);
     }
+    
+    // Mbps = (bytes*8)/(1e6*secs)
+    public static Double bitRate(Double bytes, Double secs) {
+       return (bytes*8)/(1e6*secs);
+    }
+
 }
