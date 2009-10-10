@@ -1,10 +1,11 @@
 package com.tivo.kmttg.gui;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -32,6 +33,7 @@ import com.tivo.kmttg.util.string;
 public class freeSpace {
    private String tivoName = null;
    private PieChart2D chart2D = null;
+   private LegendProperties legendProps = null;
    private JFrame frame = null;
    private JDialog dialog = null;
    private JTextField space = null;
@@ -54,7 +56,7 @@ public class freeSpace {
 
       //Configure object properties
       Object2DProperties object2DProps = new Object2DProperties();
-      object2DProps.setObjectTitleText(tivoName + " Disk Space Usage (GB)");
+      object2DProps.setObjectTitleText(tivoName + " Disk Space Usage");
 
       //Configure chart properties
       Chart2DProperties chart2DProps = new Chart2DProperties();
@@ -62,9 +64,18 @@ public class freeSpace {
 
       //Configure graph component colors
       MultiColorsProperties multiColorsProps = new MultiColorsProperties();
+      Color[] colors = {Color.green, Color.blue, Color.pink, Color.yellow};
+      multiColorsProps.setColorsCustom(colors);
+      multiColorsProps.setColorsCustomize(true);
+      
+      // Legend properties
+      legendProps = new LegendProperties();
+      legendProps.setLegendLabelsFontName(config.tableFont.getFamily());
+      legendProps.setLegendLabelsFontPointModel(6);
 
       //Configure pie area
       PieChart2DProperties pieChart2DProps = new PieChart2DProperties();
+      pieChart2DProps.setPieLabelsExistence(false);
 
       //Configure chart
       chart2D = new PieChart2D();
@@ -72,6 +83,7 @@ public class freeSpace {
       chart2D.setChart2DProperties(chart2DProps);
       chart2D.setMultiColorsProperties(multiColorsProps);
       chart2D.setPieChart2DProperties(pieChart2DProps);
+      chart2D.setPreferredSize(new Dimension(200,200));
       
       // Populate dataset
       if ( ! setData() ) {
@@ -95,7 +107,7 @@ public class freeSpace {
       c.gridwidth = 1;
       c.gridheight = 1;
       c.anchor = GridBagConstraints.CENTER;
-      c.fill = GridBagConstraints.HORIZONTAL;
+      c.fill = GridBagConstraints.NONE;
             
       // Row 1
       JPanel row1 = new JPanel();
@@ -141,18 +153,11 @@ public class freeSpace {
       c.fill = GridBagConstraints.CENTER;
       content.add(totals2, c);
       
-      // bitrate label
-      JLabel bitrate_label = new JLabel("Channel Bit Rates");
-      gy++;
-      c.gridy = gy;
-      c.weighty = 0.0;
-      c.fill = GridBagConstraints.CENTER;
-      content.add(bitrate_label, c);
-      
       // bitrateTable
       tab = new bitrateTable();
-      JScrollPane tabScroll = new JScrollPane(tab.TABLE);
       tab.AddRows(chanData);
+      tab.TABLE.setPreferredScrollableViewportSize(tab.TABLE.getPreferredSize());
+      JScrollPane tabScroll = new JScrollPane(tab.TABLE);
       gy++;
       c.gridy = gy;
       c.weighty = 0.3;
@@ -183,14 +188,23 @@ public class freeSpace {
       
       Stack<Hashtable<String,String>> entries = config.gui.getTab(tivoName).getTable().getEntries();
       if (entries == null) return false;
-      float size;
+      Double duration, bytes;
+      float sizeGB;
       totalsData.put("recordings", entries.size());
-      for (int i=0; i<entries.size(); i++) {         
-         // Bit rate & totals data
-         if (entries.get(i).containsKey("channel") && entries.get(i).containsKey("size") && entries.get(i).containsKey("duration")) {
-            String channel = entries.get(i).get("channel");
-            Double bytes = Double.parseDouble(entries.get(i).get("size"));
-            Double duration  = Double.parseDouble(entries.get(i).get("duration"))/1000.0;
+      for (int i=0; i<entries.size(); i++) {  
+         duration = 0.0;
+         bytes = 0.0;
+         sizeGB = (float)0.0;
+         if (entries.get(i).containsKey("duration")) {
+            duration = Double.parseDouble(entries.get(i).get("duration"))/1000.0;
+         }
+         if (entries.get(i).containsKey("size")) {
+            bytes = Double.parseDouble(entries.get(i).get("size"));
+            sizeGB = (float) (bytes/Math.pow(2,30));
+         }
+         // Channel bit rates
+         if (entries.get(i).containsKey("channel")) {
+            String channel = entries.get(i).get("channel");            
             if ( ! chanData.containsKey(channel) ) {
                chanData.put(channel, new Hashtable<String,Double>());
                chanData.get(channel).put("bytes", 0.0);
@@ -198,32 +212,27 @@ public class freeSpace {
             }
             chanData.get(channel).put("bytes",    chanData.get(channel).get("bytes")+bytes);
             chanData.get(channel).put("duration", chanData.get(channel).get("duration")+duration);
-            
-            // Want to store total time of all recordings
-            totalsData.put("duration", (Double)totalsData.get("duration")+duration);
          }
          
+         // Duration totals
+         totalsData.put("duration", (Double)totalsData.get("duration")+duration);
+         totalsData.put("bytes", (Double)totalsData.get("bytes")+bytes);
 
          // Disk space allocation data
-         size = 0;
-         if (entries.get(i).containsKey("size")) {
-            size = (float) (Float.parseFloat(entries.get(i).get("size"))/Math.pow(2,30));
-         }
          if (entries.get(i).containsKey("suggestion")) {
-            data.put("suggestions", data.get("suggestions") + size);
+            data.put("suggestions", data.get("suggestions") + sizeGB);
             continue;
          }
          if (entries.get(i).containsKey("kuid")) {
-            data.put("kuid", data.get("kuid") + size);
+            data.put("kuid", data.get("kuid") + sizeGB);
             continue;
          }
-         data.put("kusn", data.get("kusn") + size);
+         data.put("kusn", data.get("kusn") + sizeGB);
       }
             
       // Compute free space
       float available = getDiskSpace();
       float used = data.get("suggestions") + data.get("kuid") + data.get("kusn");
-      totalsData.put("bytes", used);
       float free = available - used;
       if (free < 0) {
          // Set disk space available to used space if used > available
@@ -233,51 +242,45 @@ public class freeSpace {
       data.put("free", free);
       totalsData.put("free", free);
       
-      // Don't include any items set to zero
-      if (data.get("suggestions") == 0) data.remove("suggestions");
-      if (data.get("kuid") == 0)        data.remove("kuid");
-      if (data.get("kusn") == 0)        data.remove("kusn");
-      
       int numSets = data.size(), numCats = 1, numItems = 1;
-      String[] keys = new String[numSets];
+      String[] legendLabels = new String[numSets];
       Dataset dataset = new Dataset (numSets, numCats, numItems);
-      int i=0;
-      for (Enumeration<String> e=data.keys(); e.hasMoreElements();) {
-         String name = e.nextElement();
-         dataset.set(i, 0, 0, data.get(name));
-         keys[i] = name;
-         i++;
+      String[] keys = {"kusn", "kuid", "suggestions", "free"};
+      String[] labels = {
+         "Keep Until Space Needed",
+         "Keep Until I Delete",
+         "Suggestions",
+         "Free Space"
+      };
+      for (int i=0; i<keys.length; ++i) {
+         legendLabels[i] = String.format(
+            "%s: %.2f GB (%.1f%%)",
+            labels[i], data.get(keys[i]), data.get(keys[i])*100/available
+         );
+         dataset.set(i, 0, 0, data.get(keys[i]));
       }
-      setLegends(keys);
+      
+      legendProps.setLegendLabelsTexts(legendLabels);
+      chart2D.setLegendProperties(legendProps);
       chart2D.setDataset(dataset);
       
       // Complete Totals data (recordings, bytes, duration set so far)
-      totalsData.put("rate", (Double)8.0e3*(Float)totalsData.get("bytes")/(Double)totalsData.get("duration"));
+      totalsData.put("rate", bitrateTable.bitRate((Double)totalsData.get("bytes"),(Double)totalsData.get("duration")));
       totalsData.put("rate", String.format("%.2f", (Double)totalsData.get("rate")));
-      totalsData.put("remaining", (Double)totalsData.get("duration")*(Float)totalsData.get("free")/(Float)totalsData.get("bytes"));
+      totalsData.put("remaining",
+         timeRemaining(
+            (Double)totalsData.get("bytes"),
+            (Float)totalsData.get("free")*Math.pow(2,30),
+            (Double)totalsData.get("duration")
+         )
+      );
       totalsData.put("remaining", secsToHoursMins((Double)totalsData.get("remaining")));
       
       totalsData.put("recordings", "" + totalsData.get("recordings"));
-      totalsData.put("bytes", String.format("%.2f", (Float)totalsData.get("bytes")));
+      totalsData.put("bytes", String.format("%.2f", (Double)totalsData.get("bytes")/Math.pow(2,30)));
       totalsData.put("duration", secsToHoursMins((Double)totalsData.get("duration")));
             
       return true;
-   }
-
-   private void setLegends(String[] keys) {
-      //Configure legend properties
-      LegendProperties legendProps = new LegendProperties();
-      Hashtable<String,String> map = new Hashtable<String,String>();
-      map.put("free", "Free Space");
-      map.put("suggestions", "TiVo Suggestions");
-      map.put("kuid", "Keep Until I Delete");
-      map.put("kusn", "Keep Until Space Needed");
-      String[] legendLabels = new String[keys.length];
-      for (int i=0; i<keys.length; i++) {
-         legendLabels[i] = map.get(keys[i]);
-      }
-      legendProps.setLegendLabelsTexts(legendLabels);
-      chart2D.setLegendProperties(legendProps);
    }
    
    private void updateLabels() {
@@ -310,6 +313,10 @@ public class freeSpace {
          }
       }
       return available;
+   }
+   
+   private Double timeRemaining(Double totalBytes, Double freeBytes, Double totalSecs) {
+      return totalSecs*freeBytes/totalBytes;
    }
    
    private String secsToHoursMins(Double secs) {
