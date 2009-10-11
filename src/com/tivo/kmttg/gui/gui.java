@@ -58,7 +58,6 @@ public class gui {
    private JMenuItem saveMessagesMenuItem = null;
    private JMenuItem clearMessagesMenuItem = null;
    private JMenuItem resetServerMenuItem = null;
-   private JMenuItem freeSpaceMenuItem = null;
    
    private JComboBox encoding = null;
    private JLabel encoding_label = null;
@@ -415,7 +414,6 @@ public class gui {
          fileMenu.add(getRefreshEncodingsMenuItem());
          fileMenu.add(getSaveMessagesMenuItem());
          fileMenu.add(getClearMessagesMenuItem());
-         fileMenu.add(getFreeSpaceMenuItem());
          fileMenu.add(getResetServerMenuItem());
          fileMenu.add(getExitMenuItem());
       }
@@ -561,27 +559,6 @@ public class gui {
          });
       }
       return resetServerMenuItem;
-   }
-
-   private JMenuItem getFreeSpaceMenuItem() {
-      debug.print("");
-      if (freeSpaceMenuItem == null) {
-         freeSpaceMenuItem = new JMenuItem();
-         freeSpaceMenuItem.setText("TiVo Disk Space Usage");
-         freeSpaceMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D,
-               Event.CTRL_MASK, true));
-         freeSpaceMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               String tivoName = getSelectedTivoName();
-               if (tivoName != null) {
-                  new freeSpace(tivoName, getJFrame());
-               } else {
-                  log.error("This command must be run with a TiVo tab selected.");
-               }
-            }
-         });
-      }
-      return freeSpaceMenuItem;
    }
    
    private JMenuItem getRunInGuiMenuItem() {
@@ -1480,6 +1457,10 @@ public class gui {
       else if (component.equals("JobMonitor")) {
          text =  "<b>JOB</b><br>";
          text += "Double click on a running job to see program output.";
+      }
+      else if (component.equals("disk_usage")) {
+         text =  "<b>Disk Usage</b><br>";
+         text += "Display disk usage statistics and channel bit rate information for this TiVo";
       }
       
       if (text.length() > 0) {
