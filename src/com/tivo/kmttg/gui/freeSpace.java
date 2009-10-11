@@ -70,8 +70,8 @@ public class freeSpace {
       
       // Legend properties
       legendProps = new LegendProperties();
-      legendProps.setLegendLabelsFontName(config.tableFont.getFamily());
-      legendProps.setLegendLabelsFontPointModel(6);
+      //legendProps.setLegendLabelsFontName(config.tableFont.getFamily());
+      legendProps.setLegendLabelsFontPointModel(7);
 
       //Configure pie area
       PieChart2DProperties pieChart2DProps = new PieChart2DProperties();
@@ -83,7 +83,7 @@ public class freeSpace {
       chart2D.setChart2DProperties(chart2DProps);
       chart2D.setMultiColorsProperties(multiColorsProps);
       chart2D.setPieChart2DProperties(pieChart2DProps);
-      chart2D.setPreferredSize(new Dimension(200,200));
+      chart2D.setPreferredSize(new Dimension((int)frame.getSize().width/2,100));
       
       // Populate dataset
       if ( ! setData() ) {
@@ -328,5 +328,7 @@ public class freeSpace {
    
    public void destroy() {
       if (dialog != null) dialog.dispose();
+      chanData.clear();
+      totalsData.clear();
    }
 }
