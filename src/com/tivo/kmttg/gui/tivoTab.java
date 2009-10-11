@@ -138,6 +138,22 @@ public class tivoTab {
          c.gridwidth = 1;
          panel.add(status, c);
          
+         // Disk Usage button
+         if ( ! tivoName.equals("FILES") ) {
+            JButton disk_usage = new JButton("Disk Usage");
+            disk_usage.setMargin(new Insets(0,5,0,5));
+            disk_usage.setToolTipText(config.gui.getToolTip("disk_usage"));
+            disk_usage.addActionListener(new java.awt.event.ActionListener() {
+               public void actionPerformed(java.awt.event.ActionEvent e) {
+                  new freeSpace(tivoName, config.gui.getJFrame());
+               }
+            });
+            gx++;
+            c.gridx = gx;
+            c.gridy = gy;
+            panel.add(disk_usage, c);
+         }
+         
          // showFolders
          if ( ! tivoName.equals("FILES") ) {
             showFolders = new JCheckBox("Show Folders");
