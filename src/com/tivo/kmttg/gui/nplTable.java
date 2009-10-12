@@ -170,8 +170,8 @@ public class nplTable {
          
          tm = NowPlaying.getColumnModel().getColumn(4);
          tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
-         // Right justify duration
-         ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
+         // Center justify duration
+         ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.CENTER);
          
          tm = NowPlaying.getColumnModel().getColumn(5);
          tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
