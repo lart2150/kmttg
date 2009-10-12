@@ -1462,6 +1462,11 @@ public class gui {
          text =  "<b>Disk Usage</b><br>";
          text += "Display disk usage statistics and channel bit rate information for this TiVo";
       }
+      else if (component.equals("total_disk_space")) {
+         text =  "<b>Total Disk Space (GB)</b><br>";
+         text += "Enter total disk space capacity in GB for this TiVo and then press <b>Enter</b><br>";
+         text += "to update this window and save the value.";
+      }
       
       if (text.length() > 0) {
          text = "<html>" + text + "</html>";
