@@ -64,6 +64,12 @@ public class NowPlaying  {
          log.error("MAK not specified or not correct");
          return false;
       }
+      
+      if (config.GUI) {
+         // Clear out NPL list
+         config.gui.getTab(job.tivoName).nplTab_clear();
+      }
+      
       Stack<String> command = new Stack<String>();
       String urlString = "https://";
       urlString += job.ip;
