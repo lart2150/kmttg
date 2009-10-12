@@ -36,7 +36,7 @@ public class nplTable {
    public JXTable NowPlaying = null;
    public JScrollPane nplScroll = null;
    public String[] FILE_cols = {"FILE", "SIZE", "DIR"};
-   public String[] TIVO_cols = {"", "DATE", "CHANNEL", "SIZE", "SHOW"};
+   public String[] TIVO_cols = {"", "SHOW", "DATE", "CHANNEL", "SIZE", "DUR", "Mbps"};
    public Boolean inFolder = false;
    public String folderName = null;
    public int folderEntryNum = -1;
@@ -96,6 +96,20 @@ public class nplTable {
                if (s1.gmt < s2.gmt) return -1;
                return 0;
             }
+            if (o1 instanceof sortableDuration && o2 instanceof sortableDuration) {
+               sortableDuration d1 = (sortableDuration)o1;
+               sortableDuration d2 = (sortableDuration)o2;
+               if (d1.sortable > d2.sortable) return 1;
+               if (d1.sortable < d2.sortable) return -1;
+               return 0;
+            }
+            if (o1 instanceof sortableDouble && o2 instanceof sortableDouble) {
+               sortableDouble d1 = (sortableDouble)o1;
+               sortableDouble d2 = (sortableDouble)o2;
+               if (d1.sortable > d2.sortable) return 1;
+               if (d1.sortable < d2.sortable) return -1;
+               return 0;
+            }
             return 0;
          }
       };
@@ -107,9 +121,13 @@ public class nplTable {
       } else {
          Sorter sorter = NowPlaying.getColumnExt(1).getSorter();
          sorter.setComparator(sortableComparator);
-         sorter = NowPlaying.getColumnExt(3).getSorter();
+         sorter = NowPlaying.getColumnExt(2).getSorter();
          sorter.setComparator(sortableComparator);
          sorter = NowPlaying.getColumnExt(4).getSorter();
+         sorter.setComparator(sortableComparator);
+         sorter = NowPlaying.getColumnExt(5).getSorter();
+         sorter.setComparator(sortableComparator);
+         sorter = NowPlaying.getColumnExt(6).getSorter();
          sorter.setComparator(sortableComparator);
       }      
       
@@ -141,19 +159,29 @@ public class nplTable {
          
          tm = NowPlaying.getColumnModel().getColumn(1);
          tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
-         // Right justify dates
-         ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
          
          tm = NowPlaying.getColumnModel().getColumn(2);
          tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+         // Right justify dates
+         ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
          
          tm = NowPlaying.getColumnModel().getColumn(3);
          tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
-         // Right justify file size
-         ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
          
          tm = NowPlaying.getColumnModel().getColumn(4);
          tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+         // Right justify file size
+         ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
+         
+         tm = NowPlaying.getColumnModel().getColumn(5);
+         tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+         // Right justify duration
+         ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
+         
+         tm = NowPlaying.getColumnModel().getColumn(6);
+         tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+         // Right justify Mbps
+         ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
       }
                
       //NowPlaying.setFillsViewportHeight(true);
@@ -208,13 +236,19 @@ public class nplTable {
             return Icon.class;
          }
          if (col == 1) {
+            return sortableShow.class;
+         }
+         if (col == 2) {
             return sortableDate.class;
          }
-         if (col == 3) {
+         if (col == 4) {
             return sortableSize.class;
          }
-         if (col == 4) {
-            return sortableShow.class;
+         if (col == 5) {
+            return sortableDuration.class;
+         }
+         if (col == 6) {
+            return sortableDouble.class;
          }
          return Object.class;
       } 
@@ -485,7 +519,7 @@ public class nplTable {
    public String displayFlatStructure(Stack<Hashtable<String,String>> h) {
       debug.print("h=" + h);
       String message;
-      clear(NowPlaying);
+      clear();
       Hashtable<String,String> entry;
       for (int i=0; i<h.size(); ++i) {
          entry = h.get(i);
@@ -503,7 +537,7 @@ public class nplTable {
    // Update table display to show top level folderized NPL entries
    public void displayFolderStructure() {
       debug.print("");
-      clear(NowPlaying);
+      clear();
       String[] special = {"TiVo Suggestions", "HD Channels"};
       // Folder based structure
       int size;
@@ -649,7 +683,7 @@ public class nplTable {
    // Add a now playing non folder entry to NowPlaying table
    public void AddNowPlayingRow(Hashtable<String,String> entry) {
       debug.print("entry=" + entry);
-      int cols = 5;
+      int cols = TIVO_cols.length;
       Object[] data = new Object[cols];
       // Initialize to empty strings
       for (int i=0; i<cols; ++i) {
@@ -658,7 +692,8 @@ public class nplTable {
       if ( entry.containsKey("ExpirationImage") ) {
          data[0] = gui.Images.get(entry.get("ExpirationImage"));
       }
-      data[1] = new sortableDate(entry);
+      data[1] = new sortableShow(entry);
+      data[2] = new sortableDate(entry);
       String channel = "";
       if ( entry.containsKey("channelNum") ) {
          channel = entry.get("channelNum");
@@ -666,9 +701,14 @@ public class nplTable {
       if ( entry.containsKey("channel") ) {
          channel += "=" + entry.get("channel"); 
       }
-      data[2] = channel;
-      data[3] = new sortableSize(entry);
-      data[4] = new sortableShow(entry);
+      data[3] = channel;
+      data[4] = new sortableSize(entry);
+      data[5] = new sortableDuration(entry);
+      Double rate = 0.0;
+      if (entry.containsKey("size") && entry.containsKey("duration")) {
+         rate = bitRate(entry.get("size"), entry.get("duration"));
+      }
+      data[6] = new sortableDouble(rate);
       AddRow(NowPlaying, data);
       
       // Adjust column widths to data
@@ -679,7 +719,7 @@ public class nplTable {
    // Add a now playing folder entry to NowPlaying table
    public void AddNowPlayingRow(String fName, Stack<Hashtable<String,String>> folderEntry) {
       debug.print("folderEntry=" + folderEntry);
-      int cols = 5;
+      int cols = TIVO_cols.length;
       Object[] data = new Object[cols];
       // Initialize to empty strings
       for (int i=0; i<cols; ++i) {
@@ -695,6 +735,8 @@ public class nplTable {
          channel = folderEntry.get(0).get("channel");
       }
       Boolean sameChannel = true;
+      Double rate_total = 0.0;
+      Double rate;
       long gmt, largestGmt=0;
       int gmt_index=0;
       for (int i=0; i<folderEntry.size(); ++i) {
@@ -708,8 +750,17 @@ public class nplTable {
                sameChannel = false;
             }
          }
+         rate = 0.0;
+         if (folderEntry.get(i).containsKey("size") && folderEntry.get(i).containsKey("duration")) {
+            rate = bitRate(folderEntry.get(i).get("size"), folderEntry.get(i).get("duration"));
+         }
+         rate_total += rate;
       }
-      data[1] = new sortableDate(fName, folderEntry, gmt_index);
+      if (folderEntry.size() > 0) {
+         rate_total /= folderEntry.size();
+      }
+      data[1] = new sortableShow(fName, folderEntry, gmt_index);
+      data[2] = new sortableDate(fName, folderEntry, gmt_index);
       
       if (sameChannel) {
          if ( folderEntry.get(0).containsKey("channelNum") ) {
@@ -721,10 +772,11 @@ public class nplTable {
       } else {
          channel = "<various>";
       }
-      data[2] = channel;
+      data[3] = channel;
       
-      data[3] = new sortableSize(folderEntry);
-      data[4] = new sortableShow(fName, folderEntry, gmt_index);
+      data[4] = new sortableSize(folderEntry);
+      data[5] = new sortableDuration(folderEntry);
+      data[6] = new sortableDouble(rate_total);
       AddRow(NowPlaying, data);
       
       // Adjust column widths to data
@@ -776,9 +828,9 @@ public class nplTable {
       packColumns(NowPlaying,2);
    }
    
-   public void clear(JXTable table) {
-      debug.print("table=" + table);
-      DefaultTableModel model = (DefaultTableModel)table.getModel(); 
+   public void clear() {
+      debug.print("");
+      DefaultTableModel model = (DefaultTableModel)NowPlaying.getModel(); 
       model.setNumRows(0);
    }
    
@@ -859,8 +911,13 @@ public class nplTable {
        // Set the width
        col.setPreferredWidth(width);
        
-       // Adjust last column to fit available
-       int last = table.getColumnCount()-1;
+       // Adjust last columns (FILES) or SHOW column (Tivos) to fit available space
+       int last;
+       if (tivoName.equals("FILES")) {
+          last = table.getColumnCount()-1;
+       } else {
+          last = getColumnIndex("SHOW");
+       }
        if (vColIndex == last) {
           int twidth = table.getPreferredSize().width;
           int awidth = config.gui.getJFrame().getWidth();
@@ -880,6 +937,20 @@ public class nplTable {
    
    public Stack<Hashtable<String,String>> getEntries() {
       return entries;
+   }
+   
+   public static Double bitRate(String size, String duration) {
+      Double rate = 0.0;
+      try {
+         Double bytes = Double.parseDouble(size);
+         Double secs = Double.parseDouble(duration)/1000;
+         rate = (bytes*8)/(1e6*secs);
+      }
+      catch (Exception ex) {
+         log.error(ex.getMessage());
+         rate = 0.0;
+      }
+      return rate;
    }
    
    // Identify NPL table items associated with queued/running jobs
