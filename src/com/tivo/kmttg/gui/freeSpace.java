@@ -125,6 +125,7 @@ public class freeSpace {
          }
       });
       space.setText(String.format("%.1f",getDiskSpace()));
+      space.setToolTipText(config.gui.getToolTip("total_disk_space"));
       row1.add(space_label);
       row1.add(space);
       
