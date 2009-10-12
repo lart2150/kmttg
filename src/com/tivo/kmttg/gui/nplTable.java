@@ -36,7 +36,7 @@ public class nplTable {
    public JXTable NowPlaying = null;
    public JScrollPane nplScroll = null;
    public String[] FILE_cols = {"FILE", "SIZE", "DIR"};
-   public String[] TIVO_cols = {"", "SHOW", "DATE", "CHANNEL", "SIZE", "DUR", "Mbps"};
+   public String[] TIVO_cols = {"", "SHOW", "DATE", "CHANNEL", "DUR", "SIZE", "Mbps"};
    public Boolean inFolder = false;
    public String folderName = null;
    public int folderEntryNum = -1;
@@ -170,12 +170,12 @@ public class nplTable {
          
          tm = NowPlaying.getColumnModel().getColumn(4);
          tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
-         // Right justify file size
+         // Right justify duration
          ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
          
          tm = NowPlaying.getColumnModel().getColumn(5);
          tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
-         // Right justify duration
+         // Right justify file size
          ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
          
          tm = NowPlaying.getColumnModel().getColumn(6);
@@ -242,10 +242,10 @@ public class nplTable {
             return sortableDate.class;
          }
          if (col == 4) {
-            return sortableSize.class;
+            return sortableDuration.class;
          }
          if (col == 5) {
-            return sortableDuration.class;
+            return sortableSize.class;
          }
          if (col == 6) {
             return sortableDouble.class;
@@ -702,8 +702,8 @@ public class nplTable {
          channel += "=" + entry.get("channel"); 
       }
       data[3] = channel;
-      data[4] = new sortableSize(entry);
-      data[5] = new sortableDuration(entry);
+      data[4] = new sortableDuration(entry);
+      data[5] = new sortableSize(entry);
       Double rate = 0.0;
       if (entry.containsKey("size") && entry.containsKey("duration")) {
          rate = bitRate(entry.get("size"), entry.get("duration"));
@@ -774,8 +774,8 @@ public class nplTable {
       }
       data[3] = channel;
       
-      data[4] = new sortableSize(folderEntry);
-      data[5] = new sortableDuration(folderEntry);
+      data[4] = new sortableDuration(folderEntry);
+      data[5] = new sortableSize(folderEntry);
       data[6] = new sortableDouble(rate_total);
       AddRow(NowPlaying, data);
       
@@ -786,7 +786,7 @@ public class nplTable {
    // Add a selected file in FILES mode to NowPlaying table
    public void AddNowPlayingFileRow(File file) {
       debug.print("file=" + file);
-      int cols = 3;
+      int cols = FILE_cols.length;
       Object[] data = new Object[cols];
       String fileName = file.getName();
       String baseDir = file.getParentFile().getPath();
