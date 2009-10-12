@@ -106,7 +106,7 @@ public class tivoTab {
          nplTab.SetNowPlayingHeaders(nplTab.TIVO_cols);
          
          // Refresh button
-         refresh = new JButton("Refresh List");
+         refresh = new JButton("Refresh");
          refresh.setMargin(new Insets(0,5,0,5));
          refresh.setToolTipText(config.gui.getToolTip("refresh"));
          refresh.addActionListener(new java.awt.event.ActionListener() {
@@ -163,7 +163,7 @@ public class tivoTab {
                   // Reset to top level display
                   nplTab.inFolder = false;
                   nplTab.folderEntryNum = -1;
-                  refresh.setText("Refresh List");
+                  refresh.setText("Refresh");
                   refresh.setToolTipText(config.gui.getToolTip("refresh"));
                   
                   // Refresh to show top level entries
@@ -306,7 +306,7 @@ public class tivoTab {
    
    public void nplTab_clear() {
       debug.print("");
-      nplTab.clear(nplTab.NowPlaying);
+      nplTab.clear();
    }
    
    // Callback for "Add selected titles" Auto Transfers menu entry
