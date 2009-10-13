@@ -292,7 +292,7 @@ public class freeSpace {
          ", Total time: " + totalsData.get("duration")
       );
       totals2.setText(
-         "Average Bit Rate (Mbps): " + totalsData.get("rate") +
+         "Average Bit Rate: " + totalsData.get("rate") + " Mbps" +
          ", Free Space: " + String.format("%.2f GB", (Float)totalsData.get("free")) +
          ", Recording Time Remaining: " + totalsData.get("remaining")
       );
