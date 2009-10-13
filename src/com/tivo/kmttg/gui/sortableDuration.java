@@ -53,8 +53,16 @@ public class sortableDuration {
       if (mins > 0) {
          duration -= mins*60;
       }
+      // Round mins +1 if secs > 30
       long secs = duration;
-      return String.format(" %02d:%02d:%02d ",hours,mins,secs);
+      if (secs > 30) {
+         mins += 1;
+      }
+      if (mins > 59) {
+         hours += 1;
+         mins = 0;
+      }
+      return String.format(" %02d:%02d ",hours,mins);
    }
 
    
