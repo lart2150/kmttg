@@ -696,11 +696,12 @@ public class nplTable {
       data[2] = new sortableDate(entry);
       String channel = "";
       if ( entry.containsKey("channelNum") ) {
-         channel = entry.get("channelNum");
+         channel = " " + entry.get("channelNum");
       }
       if ( entry.containsKey("channel") ) {
          channel += "=" + entry.get("channel"); 
       }
+      if (channel.length() > 0) channel += " ";
       data[3] = channel;
       data[4] = new sortableDuration(entry);
       data[5] = new sortableSize(entry);
