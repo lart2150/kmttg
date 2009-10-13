@@ -21,7 +21,7 @@ public class sortableDuration {
             sortable = (long)0;
          }
       }
-      display = millisecsToHM(sortable);
+      display = millisecsToHMS(sortable);
    }
    
    // folder constructor
@@ -39,17 +39,22 @@ public class sortableDuration {
             }
          }
          sortable += duration;
-         display = millisecsToHM(sortable);
+         display = millisecsToHMS(sortable);
       }
    }
    
-   public static String millisecsToHM(long duration) {
-      long hours = duration/(1000*3600);
+   public static String millisecsToHMS(long duration) {
+      duration /= 1000;
+      long hours = duration/3600;
       if (hours > 0) {
-         duration -= hours*3600*1000;
+         duration -= hours*3600;
       }
-      long mins = duration/(1000*60);
-      return String.format("%02d:%02d",hours,mins);
+      long mins = duration/60;
+      if (mins > 0) {
+         duration -= mins*60;
+      }
+      long secs = duration;
+      return String.format("%02d:%02d:%02d",hours,mins,secs);
    }
 
    
