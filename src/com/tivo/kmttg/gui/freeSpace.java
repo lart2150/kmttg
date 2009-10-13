@@ -64,7 +64,7 @@ public class freeSpace {
 
       //Configure graph component colors
       MultiColorsProperties multiColorsProps = new MultiColorsProperties();
-      Color[] colors = {Color.yellow, Color.green, Color.pink, Color.blue};
+      Color[] colors = {Color.yellow, Color.green, Color.orange, Color.blue};
       multiColorsProps.setColorsCustom(colors);
       multiColorsProps.setColorsCustomize(true);
       
