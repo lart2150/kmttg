@@ -120,6 +120,8 @@ public class tivoTab {
                   }
                } else {
                   // Refresh now playing list mode
+                  getTable().NowPlaying.clearSelection();
+                  getTable().clear();
                   NowPlaying.submitJob(name);
                }
             }
