@@ -101,20 +101,20 @@ public class freeSpace {
       GridBagConstraints c = new GridBagConstraints();
       c.ipady = 0;
       c.weighty = 0.0;  // default to no vertical stretch
-      c.weightx = 1.0;  // default to horizontal stretch
+      c.weightx = 0.0;  // default to no horizontal stretch
       c.gridx = 0;
       c.gridy = gy;
       c.gridwidth = 1;
       c.gridheight = 1;
       c.anchor = GridBagConstraints.CENTER;
-      c.fill = GridBagConstraints.NONE;
+      c.fill = GridBagConstraints.HORIZONTAL;
             
       // Row 1
       JPanel row1 = new JPanel();
       row1.setLayout(new BoxLayout(row1, BoxLayout.LINE_AXIS));
       // Free space
       JLabel space_label = new JLabel("Total Disk Space (GB):");
-      space = new JTextField(8);
+      space = new JTextField(10);
       space.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
             setData();
@@ -134,6 +134,7 @@ public class freeSpace {
       
       gy++;
       c.gridy = gy;
+      c.weightx = 1.0;
       c.weighty = 1.0;
       c.fill = GridBagConstraints.BOTH;
       content.add(chart2D, c);
@@ -292,6 +293,7 @@ public class freeSpace {
       );
       totals2.setText(
          "Average Bit Rate (Mbps): " + totalsData.get("rate") +
+         ", Free Space: " + String.format("%.2f GB", (Float)totalsData.get("free")) +
          ", Recording Time Remaining: " + totalsData.get("remaining")
       );
 
