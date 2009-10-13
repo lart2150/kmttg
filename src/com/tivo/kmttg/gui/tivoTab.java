@@ -132,14 +132,6 @@ public class tivoTab {
          c.gridwidth = 1;
          panel.add(refresh, c);
          
-         // Status label
-         status = new JLabel();
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         c.gridwidth = 1;
-         panel.add(status, c);
-         
          // Disk Usage button
          if ( ! tivoName.equals("FILES") ) {
             JButton disk_usage = new JButton("Disk Usage");
@@ -155,6 +147,14 @@ public class tivoTab {
             c.gridy = gy;
             panel.add(disk_usage, c);
          }
+         
+         // Status label
+         status = new JLabel();
+         gx++;
+         c.gridx = gx;
+         c.gridy = gy;
+         c.gridwidth = 1;
+         panel.add(status, c);
          
          // showFolders
          if ( ! tivoName.equals("FILES") ) {
