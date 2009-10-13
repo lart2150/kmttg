@@ -6,7 +6,7 @@ public class sortableDouble {
    
    // Single entry constructor
    sortableDouble(Double num) {
-      display = String.format("%.2f", num);
+      display = String.format(" %.2f ", num);
       sortable = num;
    }
       

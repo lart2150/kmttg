@@ -54,7 +54,7 @@ public class sortableDuration {
          duration -= mins*60;
       }
       long secs = duration;
-      return String.format("%02d:%02d:%02d",hours,mins,secs);
+      return String.format(" %02d:%02d:%02d ",hours,mins,secs);
    }
 
    
