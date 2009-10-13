@@ -414,7 +414,7 @@ public class nplTable {
             }
             String channel = null;
             if ( s.data.containsKey("channel") ) {
-               channelNum = s.data.get("channel");
+               channel = s.data.get("channel");
             }
             String description = null;
             if ( s.data.containsKey("description") ) {
