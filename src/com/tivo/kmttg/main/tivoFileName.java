@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.tivo.kmttg.util.debug;
+import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 // Build tivo file name based on certain keyword/specs
@@ -96,6 +97,14 @@ public class tivoFileName {
       }
       
       debug.print("buildTivoFileName::file=" + file);
+      
+      // Check file name to make sure basename is not empty
+      // If empty print error and return null
+      if (string.basename(file).equals(".TiVo")) {
+         log.error("File naming template resulted in empty file base name for this entry: " + entry.toString());
+         return null;
+      }
+      
       return file;
    }
    
