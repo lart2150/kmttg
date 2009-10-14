@@ -469,7 +469,14 @@ public class jobMonitor {
             return;
          }
          
-         specs.put("startFile", tivoFileName.buildTivoFileName(entry));
+         String name = tivoFileName.buildTivoFileName(entry);
+         if (name == null) {
+            // Invalid file name => abort processing
+            return;
+         } else {
+            // Valid file name => proceed
+            specs.put("startFile", name);            
+         }
       }
 
       // Determine which actions are enabled
