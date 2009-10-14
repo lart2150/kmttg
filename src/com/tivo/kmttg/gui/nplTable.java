@@ -22,8 +22,6 @@ import javax.swing.JTable;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Sorter;
 
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
 
 import com.tivo.kmttg.main.config;
@@ -58,7 +56,7 @@ public class nplTable {
       }
       nplScroll = new JScrollPane(NowPlaying);
       
-      // Add listener for double-click handling (for folder entries)
+      // Add listener for click handling (for folder entries)
       NowPlaying.addMouseListener(
          new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -130,16 +128,7 @@ public class nplTable {
          sorter = NowPlaying.getColumnExt(6).getSorter();
          sorter.setComparator(sortableComparator);
       }      
-      
-      // Define selection listener to update dialog fields according
-      // to selected row
-      NowPlaying.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-         public void valueChanged(ListSelectionEvent e) {
-            if (e.getValueIsAdjusting()) return;
-            NowPlayingRowSelected(NowPlaying.getSelectedRow());
-         }
-      });
-                  
+                        
       // Change color & font
       TableColumn tm;
       if (tivoName.equals("FILES")) {
@@ -349,6 +338,8 @@ public class nplTable {
             folderName = s.folderName;
             folderEntryNum = row;
             RefreshNowPlaying(s.folderData);
+         } else {
+            NowPlayingRowSelected(row);
          }
       }
    }
