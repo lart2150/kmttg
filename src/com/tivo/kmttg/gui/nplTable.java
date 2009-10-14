@@ -358,8 +358,8 @@ public class nplTable {
          inFolder = true;
          config.gui.getTab(tivoName).showFoldersVisible(false);
          config.gui.getTab(tivoName).showDiskUsageVisible(false);
-         config.gui.getTab(tivoName).getRefreshButton().setText("Return");
-         config.gui.getTab(tivoName).getRefreshButton().setToolTipText(config.gui.getToolTip("return"));
+         config.gui.getTab(tivoName).getRefreshButton().setText("Back");
+         config.gui.getTab(tivoName).getRefreshButton().setToolTipText(config.gui.getToolTip("back"));
       } else {
          inFolder = false;
          config.gui.getTab(tivoName).showFoldersVisible(true);
@@ -588,9 +588,15 @@ public class nplTable {
          if (entry.containsKey("duration")) totalSecs += Long.parseLong(entry.get("duration"))/1000;
       }
       message = String.format(
-         "TOTALS: %d shows, %.2f GB, %s total time\n",
+         "TOTALS: %d shows, %.2f GB, %s total time",
          h.size(), totalSize/Math.pow(2,30), secsToHoursMins(totalSecs)
       );
+      if (! inFolder && config.diskSpace.containsKey(tivoName)) {
+         float disk = config.diskSpace.get(tivoName);
+         Double free = disk - totalSize/Math.pow(2,30);
+         if (free < 0.0) free = 0.0;
+         message += String.format(", free=%.2f GB", free);
+      }
       return message;
    }
    
