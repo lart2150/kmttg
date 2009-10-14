@@ -1367,8 +1367,8 @@ public class gui {
          text =  "<b>Refresh List</b><br>";
          text += "Refresh Now Playing List for this TiVo.";
       }
-      else if (component.equals("return")) {
-         text =  "<b>Return</b><br>";
+      else if (component.equals("back")) {
+         text =  "<b>Back</b><br>";
          text += "Exit folder view and return to top level Now Playing List for this TiVo.";
       }
       else if (component.equals("metadata")) {
