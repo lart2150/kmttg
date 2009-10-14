@@ -62,7 +62,7 @@ public class sortableDuration {
          hours += 1;
          mins = 0;
       }
-      return String.format(" %02d:%02d ",hours,mins);
+      return String.format(" %d:%02d ",hours,mins);
    }
 
    
