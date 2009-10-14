@@ -31,6 +31,7 @@ public class tivoTab {
    private JButton add = null;
    private JButton remove = null;
    private JButton refresh = null;
+   private JButton disk_usage = null;
    private JLabel status = null;
    private JCheckBox showFolders = null;
    private nplTable nplTab = null;
@@ -134,7 +135,7 @@ public class tivoTab {
          
          // Disk Usage button
          if ( ! tivoName.equals("FILES") ) {
-            JButton disk_usage = new JButton("Disk Usage");
+            disk_usage = new JButton("Disk Usage");
             disk_usage.setMargin(new Insets(0,5,0,5));
             disk_usage.setToolTipText(config.gui.getToolTip("disk_usage"));
             disk_usage.addActionListener(new java.awt.event.ActionListener() {
@@ -199,6 +200,10 @@ public class tivoTab {
    
    public void showFoldersVisible(Boolean visible) {
       showFolders.setVisible(visible);
+   }
+   
+   public void showDiskUsageVisible(Boolean visible) {
+      disk_usage.setVisible(visible);
    }
    
    public void showFoldersSet(Boolean value) {
