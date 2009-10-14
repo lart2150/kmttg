@@ -64,7 +64,7 @@ public class freeSpace {
 
       //Configure graph component colors
       MultiColorsProperties multiColorsProps = new MultiColorsProperties();
-      Color[] colors = {Color.yellow, Color.green, Color.orange, Color.blue};
+      Color[] colors = {Color.green, Color.yellow, Color.orange, Color.blue};
       multiColorsProps.setColorsCustom(colors);
       multiColorsProps.setColorsCustomize(true);
       
@@ -247,10 +247,10 @@ public class freeSpace {
       int numSets = data.size(), numCats = 1, numItems = 1;
       String[] legendLabels = new String[numSets];
       Dataset dataset = new Dataset (numSets, numCats, numItems);
-      String[] keys = {"kusn", "kuid", "suggestions", "free"};
+      String[] keys = {"kuid", "kusn", "suggestions", "free"};
       String[] labels = {
-         "Keep Until Space Needed",
          "Keep Until I Delete",
+         "Keep Until Space Needed",
          "Suggestions",
          "Free Space"
       };
