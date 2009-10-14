@@ -357,11 +357,13 @@ public class nplTable {
       if (state) {
          inFolder = true;
          config.gui.getTab(tivoName).showFoldersVisible(false);
+         config.gui.getTab(tivoName).showDiskUsageVisible(false);
          config.gui.getTab(tivoName).getRefreshButton().setText("Return");
          config.gui.getTab(tivoName).getRefreshButton().setToolTipText(config.gui.getToolTip("return"));
       } else {
          inFolder = false;
          config.gui.getTab(tivoName).showFoldersVisible(true);
+         config.gui.getTab(tivoName).showDiskUsageVisible(true);
          config.gui.getTab(tivoName).getRefreshButton().setText("Refresh");
          config.gui.getTab(tivoName).getRefreshButton().setToolTipText(config.gui.getToolTip("refresh"));         
       }
