@@ -799,7 +799,7 @@ public class nplTable {
       } else {
          channel = "<various>";
       }
-      data[3] = channel;
+      data[3] = " " + channel + " ";
       
       data[4] = new sortableDuration(folderEntry);
       data[5] = new sortableSize(folderEntry);
