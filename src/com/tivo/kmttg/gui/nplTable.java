@@ -414,7 +414,7 @@ public class nplTable {
                description = s.data.get("description");
             }
             int duration = Integer.parseInt(s.data.get("duration"));
-            String d = String.format("%d mins", duration/(1000*60));
+            String d = String.format("%d mins", secsToMins((long)duration/1000));
             String message = "Recorded " + t;
             if (channelNum != null && channel != null) {
                message += " on " + channelNum + "=" + channel;
@@ -674,11 +674,38 @@ public class nplTable {
    // Convert seconds to hours:mins
    private String secsToHoursMins(Long secs) {
       debug.print("secs=" + secs);
-      Long hours = secs/3600;
-      Long mins  = secs/60 - hours*60;
+      long hours = secs/3600;
+      if (hours > 0) {
+         secs -= hours*3600;
+      }
+      long mins = secs/60;
+      if (mins > 0) {
+         secs -= mins*60;
+      }
+      // Round mins +1 if secs > 30
+      if (secs > 30) {
+         mins += 1;
+      }
+      if (mins > 59) {
+         hours += 1;
+         mins = 0;
+      }
       return String.format("%02d:%02d", hours, mins);
    }  
    
+   // Convert seconds to mins
+   private long secsToMins(Long secs) {
+      debug.print("secs=" + secs);
+      long mins = secs/60;
+      if (mins > 0) {
+         secs -= mins*60;
+      }
+      // Round mins +1 if secs > 30
+      if (secs > 30) {
+         mins += 1;
+      }
+      return mins;
+   }   
    // Add a now playing non folder entry to NowPlaying table
    public void AddNowPlayingRow(Hashtable<String,String> entry) {
       debug.print("entry=" + entry);
