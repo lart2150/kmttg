@@ -596,14 +596,14 @@ public class nplTable {
          if (entry.containsKey("duration")) totalSecs += Long.parseLong(entry.get("duration"))/1000;
       }
       message = String.format(
-         "TOTALS: %d shows, %.2f GB, %s total time",
-         h.size(), totalSize/Math.pow(2,30), secsToHoursMins(totalSecs)
+         "%d SHOWS, %.0f GB USED",
+         h.size(), totalSize/Math.pow(2,30)
       );
       if (! inFolder && config.diskSpace.containsKey(tivoName)) {
          float disk = config.diskSpace.get(tivoName);
          Double free = disk - totalSize/Math.pow(2,30);
          if (free < 0.0) free = 0.0;
-         message += String.format(", free=%.2f GB", free);
+         message += String.format(", %.0f GB FREE", free);
       }
       return message;
    }
