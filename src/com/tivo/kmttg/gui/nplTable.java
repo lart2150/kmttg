@@ -19,9 +19,13 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Sorter;
 
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
 
 import com.tivo.kmttg.main.config;
@@ -42,6 +46,9 @@ public class nplTable {
    private Hashtable<String,Stack<Hashtable<String,String>>> folders = null;
    private Vector<Hashtable<String,String>> sortedOrder = null;
    private String lastUpdated = null;
+   // This needed to flag when calling updateNPLjobStatus so that multiple
+   // selection event triggers can be avoided
+   private Boolean UpdatingNPL = false;
          
    nplTable(String tivoName) {
       this.tivoName = tivoName;
@@ -127,7 +134,19 @@ public class nplTable {
          sorter.setComparator(sortableComparator);
          sorter = NowPlaying.getColumnExt(6).getSorter();
          sorter.setComparator(sortableComparator);
-      }      
+      }   
+      
+      // Define selection listener to detect table row selection changes
+      NowPlaying.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+         public void valueChanged(ListSelectionEvent e) {
+            if (e.getValueIsAdjusting() || UpdatingNPL) return;
+            ListSelectionModel rowSM = (ListSelectionModel)e.getSource();
+            int row = rowSM.getMinSelectionIndex();
+            if (row > -1) {
+               NowPlayingRowSelected(row);
+            }
+         }
+      });
                         
       // Change color & font
       TableColumn tm;
@@ -338,8 +357,6 @@ public class nplTable {
             folderName = s.folderName;
             folderEntryNum = row;
             RefreshNowPlaying(s.folderData);
-         } else {
-            NowPlayingRowSelected(row);
          }
       }
    }
@@ -982,6 +999,7 @@ public class nplTable {
    
    // Identify NPL table items associated with queued/running jobs
    public void updateNPLjobStatus(Hashtable<String,String> map) {
+      UpdatingNPL = true;
       for (int row=0; row<NowPlaying.getRowCount(); row++) {
          sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
          if (s != null && s.data != null) {
@@ -1002,6 +1020,7 @@ public class nplTable {
             }
          }
       }
+      UpdatingNPL = false;
    }
 
 }
