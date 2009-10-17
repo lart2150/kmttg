@@ -1,7 +1,10 @@
 package com.tivo.kmttg.gui;
 
+import java.text.SimpleDateFormat;
 import java.util.Hashtable;
 import java.util.Stack;
+
+import com.tivo.kmttg.util.debug;
 
 public class sortableDate {
    String display;
@@ -13,7 +16,7 @@ public class sortableDate {
    
    // Single entry constructor
    sortableDate(Hashtable<String,String> entry) {
-      display = (String)entry.get("date") + " ";
+      display = getTime(Long.parseLong(entry.get("gmt"))) + " ";
       sortable = (String)entry.get("gmt");
       data = entry;
    }
@@ -22,10 +25,17 @@ public class sortableDate {
    sortableDate(String folderName, Stack<Hashtable<String,String>> folderEntry, int gmt_index) {
       this.folderName = folderName;
       folder = true;
-      display = (String)folderEntry.get(gmt_index).get("date") + " ";
+      display = getTime(Long.parseLong(folderEntry.get(gmt_index).get("gmt"))) + " ";
       sortable = (String)folderEntry.get(gmt_index).get("gmt"); 
       folderData = folderEntry;
    }   
+   
+   private String getTime(long gmt) {
+      debug.print("gmt=" + gmt);
+      SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy HH:mm");
+      return sdf.format(gmt);
+   }
+
    public String toString() {
       return display;
    }
