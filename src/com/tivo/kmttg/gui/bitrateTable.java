@@ -19,7 +19,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 
 public class bitrateTable {
-   private String[] TITLE_cols = {"CHANNEL", "SIZE (GB)", "RATE (Mbps)", "RATE (GB/hour)"};
+   private String[] TITLE_cols = {"CHANNEL", "SIZE (GB)", "TIME", "RATE (Mbps)", "RATE (GB/hour)"};
    public JXTable TABLE = null;
    
    bitrateTable() {
@@ -37,13 +37,14 @@ public class bitrateTable {
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
       tm = TABLE.getColumnModel().getColumn(3);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+      tm = TABLE.getColumnModel().getColumn(4);
+      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
                
-      //JobMonitor.setFillsViewportHeight(true);
       TABLE.setAutoResizeMode(JXTable.AUTO_RESIZE_ALL_COLUMNS);
       
-      // Set sorting routines for cols 1-3
+      // Set sorting routines for cols 1-4
       Sorter sorter;
-      for (int i=1; i<4; i++) {
+      for (int i=1; i<TITLE_cols.length; i++) {
          sorter = TABLE.getColumnExt(i).getSorter();
          sorter.setComparator(sortableComparator);
       }
@@ -55,6 +56,13 @@ public class bitrateTable {
          if (o1 instanceof sortableDouble && o2 instanceof sortableDouble) {
             sortableDouble s1 = (sortableDouble)o1;
             sortableDouble s2 = (sortableDouble)o2;
+            if (s1.sortable > s2.sortable) return 1;
+            if (s1.sortable < s2.sortable) return -1;
+            return 0;
+         }
+         if (o1 instanceof sortableDuration && o2 instanceof sortableDuration) {
+            sortableDuration s1 = (sortableDuration)o1;
+            sortableDuration s2 = (sortableDuration)o2;
             if (s1.sortable > s2.sortable) return 1;
             if (s1.sortable < s2.sortable) return -1;
             return 0;
@@ -109,8 +117,11 @@ public class bitrateTable {
        @SuppressWarnings("unchecked")
        // This is used to define columns as specific classes
        public Class getColumnClass(int col) {
-          if (col == 1 || col == 2 || col == 3) {
+          if (col == 1 || col == 3 || col == 4) {
              return sortableDouble.class;
+          }
+          if (col == 2) {
+             return sortableDuration.class;
           }
           return Object.class;
        } 
@@ -136,10 +147,12 @@ public class bitrateTable {
        info[0] = channel;
        // Total bytes in GB
        info[1] = new sortableDouble(data.get("bytes")/Math.pow(2,30));
+       // Total time
+       info[2] = new sortableDuration(data.get("duration").longValue()*1000);
        // Rate in Mbps = (bytes*8)/(1e6*secs)
-       info[2] = new sortableDouble(bitRate(data.get("bytes"), data.get("duration")));
+       info[3] = new sortableDouble(bitRate(data.get("bytes"), data.get("duration")));
        // Rate in GB/hour = (bytes/2^30)/(secs/3600)
-       info[3] = new sortableDouble((data.get("bytes")/Math.pow(2,30))/(data.get("duration")/3600.0));       
+       info[4] = new sortableDouble((data.get("bytes")/Math.pow(2,30))/(data.get("duration")/3600.0));       
        AddRow(TABLE, info);       
     }
     
