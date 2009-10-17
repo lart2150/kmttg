@@ -687,29 +687,7 @@ public class nplTable {
       }
       Collections.sort(sortedOrder, folderSort);
    }
-   
-   // Convert seconds to hours:mins
-   private String secsToHoursMins(Long secs) {
-      debug.print("secs=" + secs);
-      long hours = secs/3600;
-      if (hours > 0) {
-         secs -= hours*3600;
-      }
-      long mins = secs/60;
-      if (mins > 0) {
-         secs -= mins*60;
-      }
-      // Round mins +1 if secs > 30
-      if (secs > 30) {
-         mins += 1;
-      }
-      if (mins > 59) {
-         hours += 1;
-         mins = 0;
-      }
-      return String.format("%02d:%02d", hours, mins);
-   }  
-   
+      
    // Convert seconds to mins
    private long secsToMins(Long secs) {
       debug.print("secs=" + secs);
