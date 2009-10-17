@@ -21,7 +21,7 @@ public class sortableDuration {
             sortable = (long)0;
          }
       }
-      display = millisecsToHMS(sortable);
+      display = millisecsToHMS(sortable, false);
    }
    
    // folder constructor
@@ -39,11 +39,17 @@ public class sortableDuration {
             }
          }
          sortable += duration;
-         display = millisecsToHMS(sortable);
+         display = millisecsToHMS(sortable, false);
       }
    }
    
-   public static String millisecsToHMS(long duration) {
+   // simple long value constructor used by bitrateTable
+   sortableDuration(long value) {
+      sortable = value;
+      display = millisecsToHMS(sortable, true);
+   }
+   
+   public static String millisecsToHMS(long duration, Boolean showSecs) {
       duration /= 1000;
       long hours = duration/3600;
       if (hours > 0) {
@@ -53,16 +59,21 @@ public class sortableDuration {
       if (mins > 0) {
          duration -= mins*60;
       }
-      // Round mins +1 if secs > 30
-      long secs = duration;
-      if (secs > 30) {
-         mins += 1;
+      
+      if (showSecs) {
+         return String.format(" %d:%02d:%02d", hours,mins,duration);
+      } else {
+         // Round mins +1 if secs > 30
+         long secs = duration;
+         if (secs > 30) {
+            mins += 1;
+         }
+         if (mins > 59) {
+            hours += 1;
+            mins = 0;
+         }
+         return String.format(" %d:%02d ",hours,mins);
       }
-      if (mins > 59) {
-         hours += 1;
-         mins = 0;
-      }
-      return String.format(" %d:%02d ",hours,mins);
    }
 
    
