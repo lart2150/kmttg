@@ -293,7 +293,9 @@ public class metadata {
             data.put("episodeNumber", job.episodeNumber);
          if ( job.displayMajorNumber != null ) {
             // Doesn't like sub-channel #s so strip them out
-            data.put("displayMajorNumber", job.displayMajorNumber.replaceFirst("^(.+)-.+$", "$1"));
+            // NOTE: New versions of pyTivo are fine with dashes now
+            //data.put("displayMajorNumber", job.displayMajorNumber.replaceFirst("^(.+)-.+$", "$1"));
+            data.put("displayMajorNumber", job.displayMajorNumber);
          }
          if ( job.callsign != null )
             data.put("callsign", job.callsign);
