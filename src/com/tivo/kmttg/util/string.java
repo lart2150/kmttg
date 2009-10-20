@@ -30,7 +30,7 @@ public class string {
          }
          return dir;
       } else {
-         return name;
+         return "";
       }            
    }
 
