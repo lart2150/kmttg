@@ -69,6 +69,7 @@ public class gui {
    public JCheckBox comcut = null;
    public JCheckBox captions = null;
    public JCheckBox encode = null;
+   public JCheckBox push = null;
    public JCheckBox custom = null;
    private JTextPane text = null;
    private jobTable jobTab = null;
@@ -165,6 +166,7 @@ public class gui {
          comcut = new JCheckBox("Ad Cut", false);         
          captions = new JCheckBox("captions", false);         
          encode = new JCheckBox("encode", false);
+         push = new JCheckBox("push", false);
          /* This intentionally disabled for now
          encode.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -230,6 +232,11 @@ public class gui {
          c.gridx = gx;
          c.gridy = gy;
          tasks.add(encode, c);
+         
+         gx++;
+         c.gridx = gx;
+         c.gridy = gy;
+         tasks.add(push, c);
          
          gx++;
          c.gridx = gx;
@@ -892,6 +899,13 @@ public class gui {
          encode.setEnabled(true);
       }
       
+      if ( ! file.isFile(config.pyTivo_config) ) {
+         push.setSelected(false);
+         push.setEnabled(false);
+      } else {
+         push.setEnabled(true);
+      }
+      
       if ( ! com.tivo.kmttg.task.custom.customCommandExists() ) {
          custom.setSelected(false);
          custom.setEnabled(false);
@@ -1142,6 +1156,7 @@ public class gui {
             ofp.write("<comcut>\n"              + comcut_setting()           + "\n");
             ofp.write("<captions>\n"            + captions_setting()         + "\n");
             ofp.write("<encode>\n"              + encode_setting()           + "\n");
+            ofp.write("<push>\n"                + push_setting()             + "\n");
             ofp.write("<custom>\n"              + custom_setting()           + "\n");
             ofp.write("<encode_name>\n"         + config.encodeName          + "\n");
             ofp.write("<toolTips>\n"            + config.toolTips            + "\n");
@@ -1248,6 +1263,12 @@ public class gui {
                else
                   encode.setSelected(false);
             }
+            if (key.equals("push")) {
+               if (line.matches("1"))
+                  push.setSelected(true);
+               else
+                  push.setSelected(false);
+            }
             if (key.equals("custom")) {
                if (line.matches("1"))
                   custom.setSelected(true);
@@ -1329,6 +1350,7 @@ public class gui {
       comcut.setToolTipText(getToolTip("comcut"));
       captions.setToolTipText(getToolTip("captions"));
       encode.setToolTipText(getToolTip("encode"));
+      push.setToolTipText(getToolTip("push"));
       custom.setToolTipText(getToolTip("custom"));
       encoding.setToolTipText(getToolTip("encoding"));
       jobTab.JobMonitor.setToolTipText(getToolTip("JobMonitor"));
@@ -1427,6 +1449,14 @@ public class gui {
          text += "Select video format desired using <b>Encoding Profile</b>.<br>";
          text += "Useful to create videos compatible with portable devices or<br>";
          text += "to reduce file sizes.";
+      }
+      else if (component.equals("push")) {
+         text =  "<b>push</b><br>";
+         text += "Contact pyTivo server to initiate a push of a video file to a TiVo.<br>";
+         text += "pyTivo server must be running and the file to be pushed should<br>";
+         text += "reside in a defined pyTivo share directory. In order for this task<br>";
+         text += "to be available you must define path to pyTivo.conf file in kmttg<br>";
+         text += "configuration. The TiVo you want to push to is also defined there.";
       }
       else if (component.equals("custom")) {
          text =  "<b>custom</b><br>";
@@ -1567,6 +1597,11 @@ public class gui {
    public int encode_setting() {
       int selected = 0;
       if (encode.isSelected()) selected = 1;
+      return selected;
+   }
+   public int push_setting() {
+      int selected = 0;
+      if (push.isSelected()) selected = 1;
       return selected;
    }
    public int custom_setting() {
