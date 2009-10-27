@@ -304,7 +304,7 @@ public class jobMonitor {
          
          // For push jobs add push Tivo name
          if (job.type.equals("push")) {
-            output = "(" + config.pyTivo_tivo + ") " + output;
+            output = "(" + job.pyTivo_tivo + ") " + output;
          }
          
          config.gui.jobTab_AddJobMonitorRow(job, job.tivoName, output);
@@ -869,17 +869,48 @@ public class jobMonitor {
       }
       
       if (push) {
-         jobData job = new jobData();
-         job.source       = source;
-         job.tivoName     = tivoName;
-         job.type         = "push";
-         job.name         = "pyTivo_push";
-         job.tivoName     = tivoName;
-         job.videoFile    = videoFile;
-         if (encode) {
-            job.videoFile = encodeFile;
+         Stack<String> push_files = new Stack<String>();
+         if ( ! config.pyTivo_files.equals("all") ) {
+            // files setting != "all" => single push job
+            if (config.pyTivo_files.equals("last")) {
+               if (encode)
+                  push_files.add(encodeFile);
+               else if (decrypt || comcut)
+                  push_files.add(videoFile);
+            }
+            else if (decrypt && config.pyTivo_files.equals("mpegFile")) {
+               push_files.add(mpegFile);
+            }
+            else if (comcut && config.pyTivo_files.equals("mpegFile_cut")) {
+               push_files.add(mpegFile_cut);
+            }
+            else if (encode && config.pyTivo_files.equals("encodeFile")) {
+               push_files.add(encodeFile);
+            }
+         } else {
+            // files setting = "all" => potentially multiple push jobs
+            if (decrypt)
+               push_files.add(mpegFile);
+            if (comcut)
+               push_files.add(mpegFile_cut);
+            if (encode)
+               push_files.add(encodeFile);
          }
-         submitNewJob(job);
+         if (push_files.size() > 0) {
+            for (int i=0; i<push_files.size(); ++i) {
+               jobData job = new jobData();
+               job.source       = source;
+               job.tivoName     = tivoName;
+               job.type         = "push";
+               job.name         = "pyTivo_push";
+               job.tivoName     = tivoName;
+               job.pyTivo_tivo  = config.pyTivo_tivo;
+               job.videoFile    = push_files.get(i);
+               submitNewJob(job);
+            }
+         } else {
+            log.error("push files setting=" + config.pyTivo_files + " but file(s) not available for this task set");
+         }
       }
       
       if (custom) {
