@@ -3,6 +3,7 @@ package com.tivo.kmttg.util;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Stack;
+import java.util.concurrent.TimeoutException;
 
 public class backgroundProcess {
    private Process proc;
@@ -37,6 +38,7 @@ public class backgroundProcess {
       return true;
    }
    
+   // Wait with no timeout
    public int Wait() {
       try {
          int r = proc.waitFor();
@@ -47,6 +49,43 @@ public class backgroundProcess {
          return -1;
       }
    }
+   
+   // Wait with timeout
+   public int Wait(long timeout) throws IOException, InterruptedException, TimeoutException {
+      
+      class Worker extends Thread {
+         private final Process process;
+         private Integer exit;
+         private Worker(Process process) {
+           this.process = process;
+         }
+         public void run() {
+           try { 
+             exit = process.waitFor();
+           } catch (InterruptedException ignore) {
+             return;
+           }
+         }  
+      }
+      
+      Worker worker = new Worker(proc);
+      worker.start();
+      try {
+        worker.join(timeout);
+        if (worker.exit != null)
+          return worker.exit;
+        else
+          throw new TimeoutException();
+      } catch(InterruptedException ex) {
+        worker.interrupt();
+        Thread.currentThread().interrupt();
+        throw ex;
+      } finally {
+        proc.destroy();
+        stdoutHandler.close();
+        stderrHandler.close();
+      }
+    }
    
    public Boolean isRunning() {
       debug.print("");
