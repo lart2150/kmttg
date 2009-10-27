@@ -489,6 +489,7 @@ public class jobMonitor {
       Boolean comcut       = (Boolean)specs.get("comcut");
       Boolean captions     = (Boolean)specs.get("captions");
       Boolean encode       = (Boolean)specs.get("encode");
+      Boolean push         = (Boolean)specs.get("push");
       Boolean custom       = (Boolean)specs.get("custom");
       
       Boolean streamfix    = false;
@@ -862,6 +863,20 @@ public class jobMonitor {
          submitNewJob(job);
       }
       
+      if (push) {
+         jobData job = new jobData();
+         job.source       = source;
+         job.tivoName     = tivoName;
+         job.type         = "push";
+         job.name         = "pyTivo_push";
+         job.tivoName     = tivoName;
+         job.videoFile    = videoFile;
+         if (encode) {
+            job.videoFile = encodeFile;
+         }
+         submitNewJob(job);
+      }
+      
       if (custom) {
          jobData job = new jobData();
          job.source       = source;
@@ -884,8 +899,12 @@ public class jobMonitor {
       if (job.type != null) {
          // Kill job if running
          if (job.status.equals("running")) {
-            log.warn("Killing '" + job.type + "' job: " + job.getProcess().toString());
-            job.getProcess().kill();
+            if (job.type.equals("push")) {
+               job.kill();
+            } else {
+               log.warn("Killing '" + job.type + "' job: " + job.getProcess().toString());
+               job.getProcess().kill();
+            }
          }
          // Clear title & progress bar
          if ( config.GUI && isFirstJobInMonitor(job) ) {
