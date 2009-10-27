@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -330,9 +331,11 @@ public class push {
          if (path.length() == 0) {
             path_entry = "&File=/";
          } else {
-            path_entry = "&File=/" + path + "/";
+            path_entry = "&File=/" + urlEncode(path) + "/";
          }
-         String urlString = header + share + path_entry + string.basename(push_file) + "&tsn=" + tivoName;
+         String urlString = header + urlEncode(share) + path_entry +
+            urlEncode(string.basename(push_file)) +
+            "&tsn=" + tivoName;
          try {
             URL url = new URL(urlString);
             log.warn(">> Pushing " + push_file + " to " + tivoName);
@@ -362,5 +365,18 @@ public class push {
       thread_running = false;
       return false;
    }
+   
+   public static String urlEncode(String s) {
+      String encoded;
+      try {
+         encoded = URLEncoder.encode(s, "UTF-8");
+         return encoded;
+      } catch (Exception e) {
+         log.error("Cannot encode url: " + s);
+         log.error(e.toString());
+         return s;
+      }
+   }
+
 
 }
