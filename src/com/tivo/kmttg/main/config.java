@@ -111,10 +111,10 @@ public class config {
    public static String t2extract_args = "";
    
    // pyTivo push related
-   // TODO: set these to null
-   public static String pyTivo_config = "c:\\home\\pyTivo\\wmcbrine\\pyTivo.conf";
+   public static String pyTivo_config = "";
    public static String pyTivo_host = "localhost";
-   public static String pyTivo_tivo = "LivingRoom";
+   public static String pyTivo_tivo = "";
+   public static String pyTivo_files = "last";
    
    public static Stack<String> parse() {
       debug.print("");
@@ -337,6 +337,8 @@ public class config {
       wan_http_port      = "";
       customCommand      = "";
       cpu_cores          = Runtime.getRuntime().availableProcessors();
+      pyTivo_host        = "localhost";
+      pyTivo_config      = "";
       
       // 3rd party executable defaults
       curl          = getProgramDefault("curl");
@@ -579,6 +581,18 @@ public class config {
             if (key.equals("custom")) {
                customCommand = line;
             }
+            if (key.equals("pyTivo_config")) {
+               pyTivo_config = line;
+            }
+            if (key.equals("pyTivo_host")) {
+               pyTivo_host = line;
+            }
+            if (key.equals("pyTivo_tivo")) {
+               pyTivo_tivo = line;
+            }
+            if (key.equals("pyTivo_files")) {
+               pyTivo_files = line;
+            }
             if (key.equals("CheckDiskSpace")) {
                CheckDiskSpace = Integer.parseInt(line);
             }
@@ -701,6 +715,14 @@ public class config {
          ofp.write("<ccextractor>\n" + ccextractor + "\n\n");
          
          ofp.write("<custom>\n" + customCommand + "\n\n");
+         
+         ofp.write("<pyTivo_config>\n" + pyTivo_config + "\n\n");
+         
+         ofp.write("<pyTivo_host>\n" + pyTivo_host + "\n\n");
+         
+         ofp.write("<pyTivo_tivo>\n" + pyTivo_tivo + "\n\n");
+         
+         ofp.write("<pyTivo_files>\n" + pyTivo_files + "\n\n");
          
          ofp.write("<CheckDiskSpace>\n" + CheckDiskSpace + "\n\n");
          
