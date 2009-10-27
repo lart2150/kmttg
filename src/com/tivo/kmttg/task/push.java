@@ -30,7 +30,6 @@ public class push {
    private String share = null;     // pyTivo share name to push to
    private String path = null;      // pyTivo file path relative to share path
    private String push_file = null; // pyTivo file base name
-   private String tivoName = null;  // TiVo name to push file to
    private Boolean success = false;
    private backgroundProcess process;
    public jobData job;
@@ -42,7 +41,6 @@ public class push {
          shares = parsePyTivoConf(config.pyTivo_config);
       }
       host = config.pyTivo_host;
-      tivoName = config.pyTivo_tivo;
       videoFile = lowerCaseVolume(job.videoFile);
    }
    
@@ -72,7 +70,7 @@ public class push {
          schedule = false;
       }
       
-      if ( tivoName == null ) {
+      if ( job.pyTivo_tivo == null ) {
          log.error("tivoName to push to not defined");
          schedule = false;
       }
@@ -100,7 +98,7 @@ public class push {
       class AutoThread implements Runnable {
          AutoThread() {}       
          public void run () {
-            success = push_file(tivoName, share, path, push_file);
+            success = push_file(job.pyTivo_tivo, share, path, push_file);
          }
       }
       thread_running = true;
@@ -334,8 +332,7 @@ public class push {
             path_entry = "&File=/" + urlEncode(path) + "/";
          }
          String urlString = header + urlEncode(share) + path_entry +
-            urlEncode(string.basename(push_file)) +
-            "&tsn=" + urlEncode(tivoName);
+            urlEncode(string.basename(push_file)) + "&tsn=" + urlEncode(tivoName);
          try {
             URL url = new URL(urlString);
             log.warn(">> Pushing " + push_file + " to " + tivoName);
