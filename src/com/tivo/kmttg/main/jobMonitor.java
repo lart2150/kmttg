@@ -302,6 +302,11 @@ public class jobMonitor {
             output = "(" + job.encodeName + ") " + output;
          }
          
+         // For push jobs add push Tivo name
+         if (job.type.equals("push")) {
+            output = "(" + config.pyTivo_tivo + ") " + output;
+         }
+         
          config.gui.jobTab_AddJobMonitorRow(job, job.tivoName, output);
       }
       
