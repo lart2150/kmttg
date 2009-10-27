@@ -110,6 +110,10 @@ public class config {
    // t2extract related
    public static String t2extract_args = "";
    
+   // pyTivo push related
+   public static String pyTivo_config = "c:\\home\\pyTivo\\wmcbrine\\pyTivo.conf";
+   public static String pyTivo_host = "localhost";
+   
    public static Stack<String> parse() {
       debug.print("");
       String result;
