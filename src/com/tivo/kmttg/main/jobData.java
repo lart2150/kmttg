@@ -30,6 +30,7 @@ public class jobData {
    public captions     process_captions = null;
    public encode       process_encode = null;
    public atomic       process_atomic = null;
+   public push         process_push = null;
    public custom       process_custom = null;
    public streamfix    process_streamfix = null;
    
@@ -83,6 +84,7 @@ public class jobData {
          "captions",
          "encode",
          "atomic",
+         "push",
          "custom"
       };
    }
@@ -137,6 +139,9 @@ public class jobData {
       else if (type.matches("custom")) {
          return process_custom.check();
       }
+      else if (type.matches("push")) {
+         return process_push.check();
+      }
       else if (type.matches("streamfix")) {
          return process_streamfix.check();
       }         
@@ -185,6 +190,9 @@ public class jobData {
       }
       else if (type.equals("atomic")) {
          return process_atomic.getProcess();
+      }
+      else if (type.equals("push")) {
+         return process_push.getProcess();
       }
       else if (type.equals("custom")) {
          return process_custom.getProcess();
@@ -238,6 +246,9 @@ public class jobData {
       }
       else if (type.equals("atomic")) {
          file = encodeFile;
+      }
+      else if (type.equals("push")) {
+         file = videoFile;
       }
       else if (type.equals("custom")) {
          file = tivoFile;
@@ -293,6 +304,9 @@ public class jobData {
       }
       else if (type.equals("atomic")) {
          file = encodeFile;
+      }
+      else if (type.equals("push")) {
+         file = videoFile;
       }
       else if (type.equals("custom")) {
     	  // NOTE: Must assign an output file of some sort to prevent job duplication
@@ -373,6 +387,11 @@ public class jobData {
       
       else if (job.type.equals("atomic")) {  
          atomic proc = new atomic(job);
+         success = proc.launchJob();
+      }
+      
+      else if (job.type.equals("push")) {  
+         push proc = new push(job);
          success = proc.launchJob();
       }
       
