@@ -290,6 +290,7 @@ public class tivoTab {
             h.put("comcut",   config.gui.comcut.isSelected());
             h.put("captions", config.gui.captions.isSelected());
             h.put("encode",   config.gui.encode.isSelected());
+            h.put("push",     config.gui.push.isSelected());
             h.put("custom",   config.gui.custom.isSelected());
             jobMonitor.LaunchJobs(h);
          }
