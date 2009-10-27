@@ -65,6 +65,9 @@ public class jobData {
    String ProgramId = null;
    String title = null;
    
+   // pyTivo push related
+   public String pyTivo_tivo = null;
+   
    // NOTE: This used for job insertion purposes
    // ** JOB ORDER IS VERY IMPORTANT **
    public static String[] allTaskNames() {
