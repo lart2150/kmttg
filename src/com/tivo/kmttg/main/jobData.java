@@ -413,4 +413,60 @@ public class jobData {
       
       return cpuActiveJobs;
    }
+
+   
+   public void kill() {
+      if (type.equals("playlist")) {
+         process_npl.kill();
+      }
+      else if (type.equals("metadata")) {
+         process_metadata.kill();
+      }
+      else if (type.equals("metadataTivo")) {
+         process_metadataTivo.kill();
+      }
+      else if (type.equals("download")) {
+         process_download.kill();
+      }
+      else if (type.equals("decrypt")) {
+         process_decrypt.kill();
+      }
+      else if (type.equals("qsfix")) {
+         process_qsfix.kill();
+      }
+      else if (type.equals("comskip")) {
+         process_comskip.kill();
+      }
+      else if (type.equals("adscan")) {
+         process_adscan.kill();
+      }
+      else if (type.equals("vrdreview")) {
+         process_vrdreview.kill();
+      }
+      else if (type.equals("comcut")) {
+         process_comcut.kill();
+      }
+      else if (type.equals("adcut")) {
+         process_adcut.kill();
+      }
+      else if (type.equals("captions")) {
+         process_captions.kill();
+      }
+      else if (type.equals("encode")) {
+         process_encode.kill();
+      }
+      else if (type.equals("atomic")) {
+         process_atomic.kill();
+      }
+      else if (type.equals("push")) {
+         process_push.kill();
+      }
+      else if (type.equals("custom")) {
+         process_custom.kill();
+      }
+      else if (type.equals("streamfix")) {
+         process_streamfix.kill();
+      }
+   }
+
 }
