@@ -110,6 +110,9 @@ public class config {
    // t2extract related
    public static String t2extract_args = "";
    
+   // metadata related
+   public static String metadata_files = "last";
+   
    // pyTivo push related
    public static String pyTivo_config = "";
    public static String pyTivo_host = "localhost";
@@ -339,6 +342,8 @@ public class config {
       cpu_cores          = Runtime.getRuntime().availableProcessors();
       pyTivo_host        = "localhost";
       pyTivo_config      = "";
+      pyTivo_files       = "last";
+      metadata_files     = "last";
       
       // 3rd party executable defaults
       curl          = getProgramDefault("curl");
@@ -593,6 +598,9 @@ public class config {
             if (key.equals("pyTivo_files")) {
                pyTivo_files = line;
             }
+            if (key.equals("metadata_files")) {
+               metadata_files = line;
+            }
             if (key.equals("CheckDiskSpace")) {
                CheckDiskSpace = Integer.parseInt(line);
             }
@@ -723,6 +731,8 @@ public class config {
          ofp.write("<pyTivo_tivo>\n" + pyTivo_tivo + "\n\n");
          
          ofp.write("<pyTivo_files>\n" + pyTivo_files + "\n\n");
+         
+         ofp.write("<metadata_files>\n" + metadata_files + "\n\n");
          
          ofp.write("<CheckDiskSpace>\n" + CheckDiskSpace + "\n\n");
          
