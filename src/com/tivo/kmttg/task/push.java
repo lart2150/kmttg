@@ -335,7 +335,7 @@ public class push {
          }
          String urlString = header + urlEncode(share) + path_entry +
             urlEncode(string.basename(push_file)) +
-            "&tsn=" + tivoName;
+            "&tsn=" + urlEncode(tivoName);
          try {
             URL url = new URL(urlString);
             log.warn(">> Pushing " + push_file + " to " + tivoName);
