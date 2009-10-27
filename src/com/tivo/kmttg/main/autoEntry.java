@@ -15,6 +15,7 @@ public class autoEntry {
    public int comcut   = 0;
    public int captions = 0;
    public int encode   = 0;
+   public int push     = 0;
    public int custom   = 0;
    public String encode_name = null;
    

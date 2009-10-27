@@ -69,6 +69,7 @@ public class configAuto {
    private static JCheckBox comcut = null;
    private static JCheckBox captions = null;
    private static JCheckBox encode = null;
+   private static JCheckBox push = null;
    private static JCheckBox custom = null;
    private static JCheckBox dry_run = null;
    private static JTextField title = null;
@@ -184,6 +185,7 @@ public class configAuto {
       comcut   = new JCheckBox("Ad Cut");
       captions = new JCheckBox("captions");
       encode   = new JCheckBox("encode");
+      push     = new JCheckBox("push");
       /* This intentionally disabled for now
       encode.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
@@ -324,6 +326,7 @@ public class configAuto {
       row4.add(comcut);
       row4.add(captions);
       row4.add(encode);
+      row4.add(push);
       row4.add(custom);
 
       gy++;
@@ -488,6 +491,7 @@ public class configAuto {
       comcut.setToolTipText(config.gui.getToolTip("comcut"));
       captions.setToolTipText(config.gui.getToolTip("captions"));
       encode.setToolTipText(config.gui.getToolTip("encode"));
+      push.setToolTipText(config.gui.getToolTip("push"));
       custom.setToolTipText(config.gui.getToolTip("custom"));
       encoding_name.setToolTipText(config.gui.getToolTip("encoding"));
       table.setToolTipText(getToolTip("table"));
@@ -661,6 +665,13 @@ public class configAuto {
          encode.setEnabled(false);
       } else {
          encode.setEnabled(true);
+      }
+
+      if ( ! file.isFile(config.pyTivo_config) ) {
+         push.setSelected(false);
+         push.setEnabled(false);
+      } else {
+         push.setEnabled(true);
       }
       
       if ( ! com.tivo.kmttg.task.custom.customCommandExists() ) {
@@ -972,6 +983,7 @@ public class configAuto {
                ofp.write("comcut "   + entry.comcut   + "\n");               
                ofp.write("captions " + entry.captions + "\n");               
                ofp.write("encode "   + entry.encode   + "\n");
+               ofp.write("push "     + entry.push     + "\n");
                ofp.write("custom "   + entry.custom   + "\n");
                if (entry.encode_name != null && entry.encode_name.length() > 0)
                   ofp.write("encode_name " + entry.encode_name + "\n");               
@@ -1006,6 +1018,7 @@ public class configAuto {
       comcut.setSelected((Boolean)(entry.comcut == 1));
       captions.setSelected((Boolean)(entry.captions == 1));
       encode.setSelected((Boolean)(entry.encode == 1));
+      push.setSelected((Boolean)(entry.push == 1));
       custom.setSelected((Boolean)(entry.custom == 1));
       
       encoding_name.setSelectedItem(entry.encode_name);
@@ -1061,6 +1074,11 @@ public class configAuto {
          entry.encode = 1;
       else
          entry.encode = 0;
+      
+      if (push.isSelected())
+         entry.push = 1;
+      else
+         entry.push = 0;
       
       if (custom.isSelected())
          entry.custom = 1;

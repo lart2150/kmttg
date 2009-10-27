@@ -105,6 +105,8 @@ public class autoConfig {
                   entry.captions = Integer.parseInt(value);
                if (name.matches("encode"))
                   entry.encode = Integer.parseInt(value);
+               if (name.matches("push"))
+                  entry.push = Integer.parseInt(value);
                if (name.matches("custom"))
                   entry.custom = Integer.parseInt(value);
                if (name.matches("encode_name"))
