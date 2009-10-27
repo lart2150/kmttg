@@ -25,9 +25,12 @@ public class push {
    private int timeout_http = 10;
    private int timeout_ffmpeg = 10;
    private Stack<Hashtable<String,String>> shares = null;
+   private String videoFile = null; // file to be pushed
    private String share = null;     // pyTivo share name to push to
    private String path = null;      // pyTivo file path relative to share path
    private String push_file = null; // pyTivo file base name
+   private String tivoName = null;  // TiVo name to push file to
+   private Boolean success = false;
    private backgroundProcess process;
    public jobData job;
    
@@ -38,6 +41,8 @@ public class push {
          shares = parsePyTivoConf(config.pyTivo_config);
       }
       host = config.pyTivo_host;
+      tivoName = config.pyTivo_tivo;
+      videoFile = lowerCaseVolume(job.videoFile);
    }
    
    public backgroundProcess getProcess() {
@@ -50,6 +55,7 @@ public class push {
       
       // If no pyTivo shares available then nothing can be done
       if (shares == null) {
+         log.error("No pyTivo video shares found in pyTivo config file: " + config.pyTivo_config);
          return false;
       }
       if (shares.size() == 0) {
@@ -58,16 +64,20 @@ public class push {
       }
       // Check that file to be pushed resides under a pyTivo share
       // NOTE: This will define share, path & push_file strings
-      if ( ! inPyTivoShare(job.videoFile) ) {
+      if ( ! inPyTivoShare(videoFile) ) {
+         log.error("This file is not located in a pyTivo share directory");
+         log.error("Available pyTivo shares:");
+         log.error(getShareInfo());
          schedule = false;
       }
       
-      if ( job.tivoName == null ) {
+      if ( tivoName == null ) {
          log.error("tivoName to push to not defined");
          schedule = false;
       }
       // Check that file to be pushed is a video file
-      if ( ! isVideo(job.videoFile) ) {
+      if ( ! isVideo(videoFile) ) {
+         log.error("This is not a valid video file to be pushed");
          schedule = false;
       }
       
@@ -89,7 +99,7 @@ public class push {
       class AutoThread implements Runnable {
          AutoThread() {}       
          public void run () {
-            push_file(job.tivoName, share, path, push_file);
+            success = push_file(tivoName, share, path, push_file);
          }
       }
       thread_running = true;
@@ -103,7 +113,7 @@ public class push {
    public void kill() {
       debug.print("");
       thread.interrupt();
-      log.warn("Killing '" + job.type + "' file: " + job.videoFile);
+      log.warn("Killing '" + job.type + "' file: " + videoFile);
    }
    
    // Check status of a currently running job
@@ -116,8 +126,27 @@ public class push {
             config.gui.jobTab_UpdateJobMonitorRowStatus(job, "running");
          }
          return true;
-      }      
+      } else {
+         // Job finished
+         jobMonitor.removeFromJobList(job);
+         if (success) {
+            log.warn("push job completed: " + jobMonitor.getElapsedTime(job.time));
+            log.print("---DONE---");
+         }
+      }
       return false;
+   }
+   
+   private String getShareInfo() {
+      String s = "";
+      if (shares != null && shares.size() > 0) {
+         for (int i=0; i<shares.size(); ++i) {
+            s += "share=" + shares.get(i).get("share");
+            s += " path=" + shares.get(i).get("path");
+            s += "\n";
+         }
+      }
+      return s;
    }
    
    private Boolean inPyTivoShare(String videoFile) {
@@ -131,7 +160,7 @@ public class push {
          if (videoFile.startsWith(shares.get(i).get("path"))) {
             String shareDir = shares.get(i).get("path");
             share = shares.get(i).get("share");
-            push_file = string.basename(videoFile);
+            push_file = videoFile;
             path = string.dirname(videoFile.substring(shareDir.length()+1, videoFile.length()));
             if (config.OS.equals("windows")) {
                path = path.replaceAll("\\\\", "/");
@@ -144,6 +173,23 @@ public class push {
          }
       }
       return false;
+   }
+   
+   // For Windows lowercase file volume
+   private String lowerCaseVolume(String fileName) {
+      String lowercased = fileName;
+      if (config.OS.equals("windows")) {
+         if (fileName.matches("^(.+):.*$") ) {
+            String[] l = fileName.split(":");
+            if (l.length > 0) {
+               lowercased = l[0].toLowerCase() + ":";
+               for (int i=1; i<l.length; i++) {
+                  lowercased += l[i];
+               }
+            }
+         }
+      }
+      return lowercased;
    }
    
    private Stack<Hashtable<String,String>> parsePyTivoConf(String config) {
@@ -207,7 +253,7 @@ public class push {
             if (line.matches("(?i)^path\\s*=.+")) {
                String[] l = line.split("=");
                if (l.length > 1) {
-                  h.put("path", string.removeLeadingTrailingSpaces(l[1]));
+                  h.put("path", lowerCaseVolume(string.removeLeadingTrailingSpaces(l[1])));
                }
             }
          }
@@ -289,6 +335,7 @@ public class push {
          String urlString = header + share + path_entry + string.basename(push_file) + "&tsn=" + tivoName;
          try {
             URL url = new URL(urlString);
+            log.warn(">> Pushing " + push_file + " to " + tivoName);
             log.print(url.toString());
             HttpURLConnection c = (HttpURLConnection) url.openConnection();
             c.setRequestMethod("GET");
