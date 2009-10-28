@@ -105,7 +105,7 @@ public class jobMonitor {
       Hashtable<String,Integer> tivoDownload = new Hashtable<String,Integer>();
       for (int i=0; i<running.size(); i++) {
          job = running.get(i);
-         if ( job.type.equals("download") || job.type.equals("metadata") ) {
+         if ( job.type.equals("download") || job.type.equals("metadata") || job.type.equals("metadataTivo")) {
             if ( ! tivoDownload.containsKey(job.tivoName) ) {
                tivoDownload.put(job.tivoName, 0);
             }
@@ -130,7 +130,7 @@ public class jobMonitor {
          
          // Only 1 download at a time per Tivo allowed
          if (tivoDownload.size() > 0) {
-            if ( job.type.equals("download") || job.type.equals("metadata") ) {
+            if ( job.type.equals("download") || job.type.equals("metadata") || job.type.equals("metadataTivo") ) {
                if ( tivoDownload.containsKey(job.tivoName) ) {
                   if (tivoDownload.get(job.tivoName) > 0) {
                      continue;
@@ -154,7 +154,7 @@ public class jobMonitor {
          
          // Update tivoDownload hash if appropriate
          // (to prevent multiple queued downloads for same tivo to launch at once)
-         if ( job.type.equals("download") || job.type.equals("metadata") ) {
+         if ( job.type.equals("download") || job.type.equals("metadata") || job.type.equals("metadataTivo")) {
             if (job.status.equals("running")) {
                if ( ! tivoDownload.containsKey(job.tivoName) ) {
                   tivoDownload.put(job.tivoName, 0);
@@ -382,7 +382,8 @@ public class jobMonitor {
             if(JOBS.get(i).source.equals(sourceFile)) {
                if (JOBS.get(i).type.equals(job.type)) {
                   // Identical job => do not run this job
-                  return false;
+                  if (! job.type.equals("push") && ! job.type.equals("metadata") && ! job.type.equals("metadataTivo"))
+                     return false;
                }
                sameSource = true;
                // Use existing family majorId
@@ -685,22 +686,55 @@ public class jobMonitor {
       if ( mode.equals("Download") ) {
          source = entry.get("url_TiVoVideoDetails");
          if (metadata) {
-            jobData job = new jobData();
-            job.source             = source;
-            job.tivoName           = tivoName;
-            job.type               = "metadata";
-            job.name               = "curl";
-            job.metaFile           = metaFile;
-            job.url                = entry.get("url_TiVoVideoDetails");
-            if (entry.containsKey("EpisodeNumber"))
-               job.episodeNumber = entry.get("EpisodeNumber");
-            if (entry.containsKey("channelNum"))
-               job.displayMajorNumber = entry.get("channelNum");
-            if (entry.containsKey("channel"))
-               job.callsign = entry.get("channel");
-            if (entry.containsKey("SeriesId"))
-               job.seriesId = entry.get("SeriesId");
-            submitNewJob(job);
+            Stack<String> meta_files = new Stack<String>();
+            if ( ! config.metadata_files.equals("all") ) {
+               // files setting != "all" => single metadata job
+               if (config.metadata_files.equals("last")) {
+                  if (encode)
+                     meta_files.add(encodeFile + ".txt");
+                  else if (decrypt || comcut)
+                     meta_files.add(videoFile + ".txt");
+               }
+               else if (decrypt && config.metadata_files.equals("mpegFile")) {
+                  meta_files.add(mpegFile + ".txt");
+               }
+               else if (comcut && config.metadata_files.equals("mpegFile_cut")) {
+                  meta_files.add(mpegFile_cut + ".txt");
+               }
+               else if (encode && config.metadata_files.equals("encodeFile")) {
+                  meta_files.add(encodeFile + ".txt");
+               }
+            } else {
+               // files setting = "all" => potentially multiple push jobs
+               if (decrypt)
+                  meta_files.add(mpegFile + ".txt");
+               if (comcut)
+                  meta_files.add(mpegFile_cut + ".txt");
+               if (encode)
+                  meta_files.add(encodeFile + ".txt");
+            }
+            if (meta_files.size() > 0) {
+               for (int i=0; i<meta_files.size(); ++i) {
+                  jobData job = new jobData();
+                  job.source             = source;
+                  job.tivoName           = tivoName;
+                  job.type               = "metadata";
+                  job.name               = "curl";
+                  job.metaFile           = meta_files.get(i);
+                  job.url                = entry.get("url_TiVoVideoDetails");
+                  if (entry.containsKey("EpisodeNumber"))
+                     job.episodeNumber = entry.get("EpisodeNumber");
+                  if (entry.containsKey("channelNum"))
+                     job.displayMajorNumber = entry.get("channelNum");
+                  if (entry.containsKey("channel"))
+                     job.callsign = entry.get("channel");
+                  if (entry.containsKey("SeriesId"))
+                     job.seriesId = entry.get("SeriesId");
+                  submitNewJob(job);
+               }
+            } else {
+               log.error("metadata files setting=" + config.metadata_files + " but file(s) not available for this task set");
+            }
          }
          
          jobData job = new jobData();
@@ -721,14 +755,47 @@ public class jobMonitor {
       }
       
       if (metadataTivo) {
-         jobData job = new jobData();
-         job.source             = source;
-         job.tivoName           = tivoName;
-         job.type               = "metadataTivo";
-         job.name               = "tivodecode";
-         job.tivoFile           = tivoFile;
-         job.metaFile           = metaFile;
-         submitNewJob(job);
+         Stack<String> meta_files = new Stack<String>();
+         if ( ! config.metadata_files.equals("all") ) {
+            // files setting != "all" => single metadata job
+            if (config.metadata_files.equals("last")) {
+               if (encode)
+                  meta_files.add(encodeFile + ".txt");
+               else if (decrypt || comcut)
+                  meta_files.add(videoFile + ".txt");
+            }
+            else if (decrypt && config.metadata_files.equals("mpegFile")) {
+               meta_files.add(mpegFile + ".txt");
+            }
+            else if (comcut && config.metadata_files.equals("mpegFile_cut")) {
+               meta_files.add(mpegFile_cut + ".txt");
+            }
+            else if (encode && config.metadata_files.equals("encodeFile")) {
+               meta_files.add(encodeFile + ".txt");
+            }
+         } else {
+            // files setting = "all" => potentially multiple push jobs
+            if (decrypt)
+               meta_files.add(mpegFile + ".txt");
+            if (comcut)
+               meta_files.add(mpegFile_cut + ".txt");
+            if (encode)
+               meta_files.add(encodeFile + ".txt");
+         }
+         if (meta_files.size() > 0) {
+            for (int i=0; i<meta_files.size(); ++i) {
+               jobData job = new jobData();
+               job.source             = source;
+               job.tivoName           = tivoName;
+               job.type               = "metadataTivo";
+               job.name               = "tivodecode";
+               job.tivoFile           = tivoFile;
+               job.metaFile           = meta_files.get(i);
+               submitNewJob(job);
+            }
+         } else {
+            log.error("metadata files setting=" + config.metadata_files + " but file(s) not available for this task set");
+         }
       }
       
       if (decrypt) {
