@@ -961,7 +961,7 @@ public class jobMonitor {
          }
          else if (filter.equals("encodeFile")) {
             if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
-            files.add(encodeFile + suffix);
+               files.add(encodeFile + suffix);
          }
       } else {
          // files setting = "all" => potentially multiple push jobs
