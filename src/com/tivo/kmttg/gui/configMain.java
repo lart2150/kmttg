@@ -81,6 +81,11 @@ public class configMain {
    private static JTextField customCommand = null;
    private static JTextField toolTipsTimeout = null;
    private static JTextField cpu_cores = null;
+   private static JTextField pyTivo_host = null;
+   private static JTextField pyTivo_config = null;
+   private static JComboBox pyTivo_tivo = null;
+   private static JComboBox pyTivo_files = null;
+   private static JComboBox metadata_files = null;
    private static JComboBox keywords = null;
    private static JComboBox customFiles = null;
    private static JFileChooser Browser = null;
@@ -395,6 +400,30 @@ public class configMain {
       
       // cpu_cores
       cpu_cores.setText("" + config.cpu_cores);
+      
+      // pyTivo_host
+      pyTivo_host.setText("" + config.pyTivo_host);
+      
+      // pyTivo_config
+      pyTivo_config.setText("" + config.pyTivo_config);
+      
+      // pyTivo_tivo
+      Stack<String> names = config.getTivoNames();
+      if (names.size() > 0) {
+         String setting = names.get(0);
+         for (int i=0; i<names.size(); ++i) {
+            if (names.get(i).equals(config.pyTivo_tivo)) {
+               setting = config.pyTivo_tivo;
+            }
+         }
+         pyTivo_tivo.setSelectedItem(setting);
+      }
+      
+      // pyTivo_files
+      pyTivo_files.setSelectedItem(config.pyTivo_files);
+      
+      // metadata_files
+      metadata_files.setSelectedItem(config.metadata_files);
    }
    
    // Update config settings with widget values
@@ -834,6 +863,31 @@ public class configMain {
          config.toolTipsTimeout = 20;
       }
       
+      // pyTivo_host
+      value = string.removeLeadingTrailingSpaces(pyTivo_host.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = "localhost";
+      }
+      config.pyTivo_host = value;
+      
+      // pyTivo_config
+      value = string.removeLeadingTrailingSpaces(pyTivo_config.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = "";
+      }
+      config.pyTivo_config = value;
+      
+      // pyTivo_tivo
+      config.pyTivo_tivo = (String)pyTivo_tivo.getSelectedItem();
+      
+      // pyTivo_files
+      config.pyTivo_files = (String)pyTivo_files.getSelectedItem();
+      
+      // metadata_files
+      config.metadata_files = (String)metadata_files.getSelectedItem();
+      
       return errors;
    }
 
@@ -860,9 +914,11 @@ public class configMain {
       ccextractor = new javax.swing.JTextField(30);
       AtomicParsley = new javax.swing.JTextField(30);
       customCommand = new javax.swing.JTextField(30);
+      pyTivo_config = new javax.swing.JTextField(30);
       
       tivo_name = new javax.swing.JTextField(20);
       tivo_ip = new javax.swing.JTextField(20);
+      pyTivo_host = new javax.swing.JTextField(20);
       
       MAK = new javax.swing.JTextField(15);
       wan_http_port = new javax.swing.JTextField(15);
@@ -911,6 +967,14 @@ public class configMain {
       JLabel customFiles_label = new javax.swing.JLabel();
       JLabel cpu_cores_label = new javax.swing.JLabel();
       JLabel available_keywords_label = new javax.swing.JLabel();
+      JLabel pyTivo_host_label = new javax.swing.JLabel();
+      JLabel pyTivo_config_label = new javax.swing.JLabel();
+      JLabel pyTivo_tivo_label = new javax.swing.JLabel();
+      JLabel pyTivo_files_label = new javax.swing.JLabel();
+      JLabel metadata_files_label = new javax.swing.JLabel();
+      pyTivo_tivo = new javax.swing.JComboBox();
+      pyTivo_files = new javax.swing.JComboBox();
+      metadata_files = new javax.swing.JComboBox();
       keywords = new javax.swing.JComboBox();
       customFiles = new javax.swing.JComboBox();
       check_space = new javax.swing.JCheckBox();
@@ -975,6 +1039,11 @@ public class configMain {
       check_space.setText("Check Available Disk Space");      
       available_keywords_label.setText("Available keywords:"); 
       cpu_cores_label.setText("encoding cpu cores");
+      pyTivo_host_label.setText("pyTivo host name");
+      pyTivo_config_label.setText("pyTivo.conf file");
+      pyTivo_tivo_label.setText("pyTivo push destination");
+      pyTivo_files_label.setText("Files to push");
+      metadata_files_label.setText("metadata files");
 
       keywords.setModel(new javax.swing.DefaultComboBoxModel(
          new String[] { "[title]", "[mainTitle]", "[episodeTitle]", "[channelNum]",
@@ -988,6 +1057,19 @@ public class configMain {
             }
          }
       });
+      
+      pyTivo_tivo.setModel(new javax.swing.DefaultComboBoxModel(config.getTivoNames()));
+      pyTivo_tivo.setName("pyTivo_tivo");
+      
+      pyTivo_files.setModel(new javax.swing.DefaultComboBoxModel(
+         new String[] { "mpegFile", "mpegFile_cut", "encodeFile", "last", "all" }
+      ));
+      pyTivo_files.setName("pyTivo_files");
+      
+      metadata_files.setModel(new javax.swing.DefaultComboBoxModel(
+         new String[] { "mpegFile", "mpegFile_cut", "encodeFile", "last", "all" }
+      ));
+      metadata_files.setName("metadata_files");
 
       customFiles_label.setText("Available file args:");
       customFiles.setModel(new javax.swing.DefaultComboBoxModel(
@@ -1258,6 +1340,25 @@ public class configMain {
                   int result = Browser.showDialog(AtomicParsley, "Choose File");
                   if (result == JFileChooser.APPROVE_OPTION) {
                      AtomicParsley.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      pyTivo_config.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(pyTivo_config, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     String selected = Browser.getSelectedFile().getPath();
+                     if (string.basename(selected).equals("pyTivo.conf")) {
+                        pyTivo_config.setText(selected);
+                     } else {
+                        log.error("Invalid file chosen - must be pyTivo.conf: " + selected);
+                     }
                   }
                }
             }
@@ -1672,6 +1773,59 @@ public class configMain {
       c.gridy = gy;
       general.add(jobMonitorFullPaths, c);
       
+      // metadata_files
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      general.add(metadata_files_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      general.add(metadata_files, c);
+
+      // pyTivo Panel
+      JPanel pyTivo_panel = new JPanel(new GridBagLayout());      
+      
+      // pyTivo_config
+      gy=0;
+      c.gridx = 0;
+      c.gridy = gy;
+      pyTivo_panel.add(pyTivo_config_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      pyTivo_panel.add(pyTivo_config, c);
+      
+      // pyTivo_host
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      pyTivo_panel.add(pyTivo_host_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      pyTivo_panel.add(pyTivo_host, c);
+      
+      // pyTivo_tivo
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      pyTivo_panel.add(pyTivo_tivo_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      pyTivo_panel.add(pyTivo_tivo, c);
+      
+      // pyTivo_files
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      pyTivo_panel.add(pyTivo_files_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      pyTivo_panel.add(pyTivo_files, c);
+      
       // Common panel
       c.ipady = 0;
       c.weighty = 0.0;  // default to no vertical stretch
@@ -1702,6 +1856,7 @@ public class configMain {
       tabbed_panel.add("Program Options", program_options_panel);
       tabbed_panel.add("Tivos", tivo_panel);
       tabbed_panel.add("General", general);
+      tabbed_panel.add("pyTivo", pyTivo_panel);
       
       // Main panel
       JPanel main_panel = new JPanel(new GridBagLayout());
@@ -1771,6 +1926,11 @@ public class configMain {
       jobMonitorFullPaths.setToolTipText(getToolTip("jobMonitorFullPaths"));
       toolTipsTimeout.setToolTipText(getToolTip("toolTipsTimeout")); 
       cpu_cores.setToolTipText(getToolTip("cpu_cores"));
+      pyTivo_host.setToolTipText(getToolTip("pyTivo_host"));
+      pyTivo_config.setToolTipText(getToolTip("pyTivo_config"));
+      pyTivo_tivo.setToolTipText(getToolTip("pyTivo_tivo"));
+      pyTivo_files.setToolTipText(getToolTip("pyTivo_files"));
+      metadata_files.setToolTipText(getToolTip("metadata_files"));
    }
    
    public static String getToolTip(String component) {
@@ -1792,11 +1952,11 @@ public class configMain {
       else if (component.equals("add")) {
          text =  "<b>ADD</b><br>";
          text += "Add specified <b>Tivo Name</b> and associated <b>Tivo IP#</b> to <b>Tivos</b> list.<br>";
-         text += "kmttg tries to detect TiVos on your network automatically but that doesn't always work.<br>";
+         text += "kmttg tries to detect TiVos on your network automatically but that doesn't always work.";
       }
       else if (component.equals("del")) {
          text =  "<b>DEL</b><br>";
-         text += "Remove currently selected entry in <b>Tivos</b> list.<br>";
+         text += "Remove currently selected entry in <b>Tivos</b> list.";
       }
       else if (component.equals("remove_tivo")) {
          text =  "<b>Remove .TiVo after file decrypt</b><br>";
@@ -2060,30 +2220,66 @@ public class configMain {
       else if (component.equals("OK")) {
          text =  "<b>OK</b><br>";
          text += "Save all changes made in this form and close the form.<br>";
-         text += "NOTE: Settings are saved to <b>config.ini</b> file which resides by <b>kmttg.jar</b> file.<br>";
+         text += "NOTE: Settings are saved to <b>config.ini</b> file which resides by <b>kmttg.jar</b> file.";
       }
       else if (component.equals("CANCEL")) {
          text =  "<b>CANCEL</b><br>";
-         text += "Do not save any changes made in this form and close the form.<br>";
+         text += "Do not save any changes made in this form and close the form.";
       }
       else if (component.equals("toolTips")) {
          text =  "<b>Display toolTips</b><br>";
-         text += "Enable or disable display of these mouse over popup toolTip messages.<br>";
+         text += "Enable or disable display of these mouse over popup toolTip messages.";
       }
       else if (component.equals("jobMonitorFullPaths")) {
          text =  "<b>Show full paths in Job Monitor</b><br>";
-         text += "Enable or disable display of full paths in Job Monitor OUTPUT column.<br>";
+         text += "Enable or disable display of full paths in Job Monitor OUTPUT column.";
       }
       else if (component.equals("toolTipsTimeout")) {
          text =  "<b>toolTip timeout (secs)</b><br>";
-         text += "Time in seconds to timeout display of a toolTip message.<br>";
+         text += "Time in seconds to timeout display of a toolTip message.";
       }
       else if (component.equals("cpu_cores")) {
          text =  "<b>encoding cpu cores</b><br>";
          text += "If you have a multi-core machine you can set how many cores you would like to use<br>";
          text += "for the encoding task. NOTE: Consider this setting and <b>active job limit</b> when<br>";
          text += "deciding what number to use here. If you set number too high it may slow down the machine<br>";
-         text += "for other tasks running in parallel.<br>";
+         text += "for other tasks running in parallel.";
+      }
+      else if (component.equals("pyTivo_host")) {
+         text =  "<b>pyTivo host name</b><br>";
+         text += "Host name of the machine you are running pyTivo server on. If it is the same machine as you<br>";
+         text += "are running kmttg then <b>localhost</b> is usually the right setting to use. Note that the port<br>";
+         text += "number is obtained by kmttg from the <b>pyTivo.conf</b> file.";
+      }
+      else if (component.equals("pyTivo_config")) {
+         text =  "<b>pyTivo.conf file</b><br>";
+         text += "Double click in text field to bring up browser to find and set full path<br>";
+         text += "to your pyTivo config file <b>pyTivo.conf</b> file. This is where information<br>";
+         text += "on available pyTivo shares and their directory locations is contained.";
+      }
+      else if (component.equals("pyTivo_tivo")) {
+         text =  "<b>pyTivo push destination</b><br>";
+         text += "Set which TiVo you would like to send files to via pyTivo push.";
+      }
+      else if (component.equals("pyTivo_files")) {
+         text =  "<b>Files to push</b><br>";
+         text += "Select which files to push when the <b>push</b> task is enabled for a job.<br>";
+         text += "The meaning of each setting is as follows:<br>";
+         text += "<b>mpegFile: </b>Push only mpeg file after decode task if that task is enabled.<br>";
+         text += "<b>mpegFile_cut: </b>Push only mpeg file after AdCut task if that task is enabled.<br>";
+         text += "<b>encodeFile: </b>Push only encoded file after encode task if that task is enabled.<br>";
+         text += "<b>last: </b>Push only last video file in sequence of tasks (this is default setting).<br>";
+         text += "<b>all: </b>Push all available video files for the task set (except for .TiVo files).";
+      }
+      else if (component.equals("metadata_files")) {
+         text =  "<b>metadata files</b><br>";
+         text += "Select which files to create metadata files for when <b>metadata</b> task is enabled for a job.<br>";
+         text += "The meaning of each setting is as follows:<br>";
+         text += "<b>mpegFile: </b>Only for mpeg file after decode task if that task is enabled.<br>";
+         text += "<b>mpegFile_cut: </b>Only for mpeg file after AdCut task if that task is enabled.<br>";
+         text += "<b>encodeFile: </b>Only for encoded file after encode task if that task is enabled.<br>";
+         text += "<b>last: </b>Only last video file in sequence of tasks (this is default setting).<br>";
+         text += "<b>all: </b>For all available video files for the task set (except for .TiVo files).";
       }
       
       if (text.length() > 0) {
