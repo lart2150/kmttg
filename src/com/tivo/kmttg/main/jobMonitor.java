@@ -105,7 +105,7 @@ public class jobMonitor {
       Hashtable<String,Integer> tivoDownload = new Hashtable<String,Integer>();
       for (int i=0; i<running.size(); i++) {
          job = running.get(i);
-         if ( job.type.equals("download") || job.type.equals("metadata") || job.type.equals("metadataTivo")) {
+         if ( oneJobAtATime(job.type) ) {
             if ( ! tivoDownload.containsKey(job.tivoName) ) {
                tivoDownload.put(job.tivoName, 0);
             }
@@ -130,7 +130,7 @@ public class jobMonitor {
          
          // Only 1 download at a time per Tivo allowed
          if (tivoDownload.size() > 0) {
-            if ( job.type.equals("download") || job.type.equals("metadata") || job.type.equals("metadataTivo") ) {
+            if ( oneJobAtATime(job.type) ) {
                if ( tivoDownload.containsKey(job.tivoName) ) {
                   if (tivoDownload.get(job.tivoName) > 0) {
                      continue;
@@ -154,7 +154,7 @@ public class jobMonitor {
          
          // Update tivoDownload hash if appropriate
          // (to prevent multiple queued downloads for same tivo to launch at once)
-         if ( job.type.equals("download") || job.type.equals("metadata") || job.type.equals("metadataTivo")) {
+         if ( oneJobAtATime(job.type) ) {
             if (job.status.equals("running")) {
                if ( ! tivoDownload.containsKey(job.tivoName) ) {
                   tivoDownload.put(job.tivoName, 0);
@@ -167,6 +167,12 @@ public class jobMonitor {
          if ( isVideoRedoJob(job) )
             VideoRedoJobs++;
       }
+   }
+   
+   // If true this job can only be run one at a time per TiVo
+   private static Boolean oneJobAtATime(String type) {
+      return type.equals("download") || type.equals("metadata") ||
+         type.equals("metadataTivo") || type.equals("push");
    }
 
    // Determine if there are jobs in same family to run before this one
@@ -382,6 +388,7 @@ public class jobMonitor {
             if(JOBS.get(i).source.equals(sourceFile)) {
                if (JOBS.get(i).type.equals(job.type)) {
                   // Identical job => do not run this job
+                  // NOTE: Types below are allowed to have multiple at a time
                   if (! job.type.equals("push") && ! job.type.equals("metadata") && ! job.type.equals("metadataTivo"))
                      return false;
                }
@@ -764,8 +771,9 @@ public class jobMonitor {
                else if (decrypt || comcut)
                   meta_files.add(videoFile + ".txt");
             }
-            else if (decrypt && config.metadata_files.equals("mpegFile")) {
-               meta_files.add(mpegFile + ".txt");
+            else if (config.metadata_files.equals("mpegFile")) {
+               if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
+                  meta_files.add(mpegFile + ".txt");
             }
             else if (comcut && config.metadata_files.equals("mpegFile_cut")) {
                meta_files.add(mpegFile_cut + ".txt");
@@ -775,7 +783,7 @@ public class jobMonitor {
             }
          } else {
             // files setting = "all" => potentially multiple push jobs
-            if (decrypt)
+            if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
                meta_files.add(mpegFile + ".txt");
             if (comcut)
                meta_files.add(mpegFile_cut + ".txt");
@@ -945,8 +953,9 @@ public class jobMonitor {
                else if (decrypt || comcut)
                   push_files.add(videoFile);
             }
-            else if (decrypt && config.pyTivo_files.equals("mpegFile")) {
-               push_files.add(mpegFile);
+            else if (config.pyTivo_files.equals("mpegFile")) {
+               if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
+                  push_files.add(mpegFile);
             }
             else if (comcut && config.pyTivo_files.equals("mpegFile_cut")) {
                push_files.add(mpegFile_cut);
@@ -956,7 +965,7 @@ public class jobMonitor {
             }
          } else {
             // files setting = "all" => potentially multiple push jobs
-            if (decrypt)
+            if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
                push_files.add(mpegFile);
             if (comcut)
                push_files.add(mpegFile_cut);
