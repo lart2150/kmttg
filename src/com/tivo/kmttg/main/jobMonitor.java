@@ -1000,10 +1000,8 @@ public class jobMonitor {
    
    // Kill all running jobs - called on program exit
    public static void killRunning() {
-      jobData job;
       for (int i=0; i<JOBS.size(); ++i) {
-         job = JOBS.get(i);
-         if ( job.status.equals("running") ) job.getProcess().kill();
+         kill(JOBS.get(i));
       }
    }
 
