@@ -693,33 +693,10 @@ public class jobMonitor {
       if ( mode.equals("Download") ) {
          source = entry.get("url_TiVoVideoDetails");
          if (metadata) {
-            Stack<String> meta_files = new Stack<String>();
-            if ( ! config.metadata_files.equals("all") ) {
-               // files setting != "all" => single metadata job
-               if (config.metadata_files.equals("last")) {
-                  if (encode)
-                     meta_files.add(encodeFile + ".txt");
-                  else if (decrypt || comcut)
-                     meta_files.add(videoFile + ".txt");
-               }
-               else if (decrypt && config.metadata_files.equals("mpegFile")) {
-                  meta_files.add(mpegFile + ".txt");
-               }
-               else if (comcut && config.metadata_files.equals("mpegFile_cut")) {
-                  meta_files.add(mpegFile_cut + ".txt");
-               }
-               else if (encode && config.metadata_files.equals("encodeFile")) {
-                  meta_files.add(encodeFile + ".txt");
-               }
-            } else {
-               // files setting = "all" => potentially multiple push jobs
-               if (decrypt)
-                  meta_files.add(mpegFile + ".txt");
-               if (comcut)
-                  meta_files.add(mpegFile_cut + ".txt");
-               if (encode)
-                  meta_files.add(encodeFile + ".txt");
-            }
+            Stack<String> meta_files = videoFilesToProcess(
+               mode, decrypt, comcut, encode, config.metadata_files,
+               startFile, videoFile, mpegFile, mpegFile_cut, encodeFile, ".txt"
+            );
             if (meta_files.size() > 0) {
                for (int i=0; i<meta_files.size(); ++i) {
                   jobData job = new jobData();
@@ -762,34 +739,10 @@ public class jobMonitor {
       }
       
       if (metadataTivo) {
-         Stack<String> meta_files = new Stack<String>();
-         if ( ! config.metadata_files.equals("all") ) {
-            // files setting != "all" => single metadata job
-            if (config.metadata_files.equals("last")) {
-               if (encode)
-                  meta_files.add(encodeFile + ".txt");
-               else if (decrypt || comcut)
-                  meta_files.add(videoFile + ".txt");
-            }
-            else if (config.metadata_files.equals("mpegFile")) {
-               if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
-                  meta_files.add(mpegFile + ".txt");
-            }
-            else if (comcut && config.metadata_files.equals("mpegFile_cut")) {
-               meta_files.add(mpegFile_cut + ".txt");
-            }
-            else if (encode && config.metadata_files.equals("encodeFile")) {
-               meta_files.add(encodeFile + ".txt");
-            }
-         } else {
-            // files setting = "all" => potentially multiple push jobs
-            if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
-               meta_files.add(mpegFile + ".txt");
-            if (comcut)
-               meta_files.add(mpegFile_cut + ".txt");
-            if (encode)
-               meta_files.add(encodeFile + ".txt");
-         }
+         Stack<String> meta_files = videoFilesToProcess(
+            mode, decrypt, comcut, encode, config.metadata_files,
+            startFile, videoFile, mpegFile, mpegFile_cut, encodeFile, ".txt"
+         );
          if (meta_files.size() > 0) {
             for (int i=0; i<meta_files.size(); ++i) {
                jobData job = new jobData();
@@ -944,34 +897,10 @@ public class jobMonitor {
       }
       
       if (push) {
-         Stack<String> push_files = new Stack<String>();
-         if ( ! config.pyTivo_files.equals("all") ) {
-            // files setting != "all" => single push job
-            if (config.pyTivo_files.equals("last")) {
-               if (encode)
-                  push_files.add(encodeFile);
-               else if (decrypt || comcut)
-                  push_files.add(videoFile);
-            }
-            else if (config.pyTivo_files.equals("mpegFile")) {
-               if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
-                  push_files.add(mpegFile);
-            }
-            else if (comcut && config.pyTivo_files.equals("mpegFile_cut")) {
-               push_files.add(mpegFile_cut);
-            }
-            else if (encode && config.pyTivo_files.equals("encodeFile")) {
-               push_files.add(encodeFile);
-            }
-         } else {
-            // files setting = "all" => potentially multiple push jobs
-            if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
-               push_files.add(mpegFile);
-            if (comcut)
-               push_files.add(mpegFile_cut);
-            if (encode)
-               push_files.add(encodeFile);
-         }
+         Stack<String> push_files = videoFilesToProcess(
+            mode, decrypt, comcut, encode, config.pyTivo_files,
+            startFile, videoFile, mpegFile, mpegFile_cut, encodeFile, ""
+         );
          if (push_files.size() > 0) {
             for (int i=0; i<push_files.size(); ++i) {
                jobData job = new jobData();
@@ -1004,6 +933,46 @@ public class jobMonitor {
          submitNewJob(job);
       }
       
+   }
+   
+   // This makes decisions based on file filter setting for metadata and/or push tasks which
+   // video files specifically should be processed
+   private static Stack<String> videoFilesToProcess(
+      String mode, Boolean decrypt, Boolean comcut, Boolean encode, String filter,
+      String startFile, String videoFile, String mpegFile, String mpegFile_cut, String encodeFile,
+      String suffix
+      ) {
+      Stack<String> files = new Stack<String>();
+      if ( ! filter.equals("all") ) {
+         // files setting != "all" => single push job
+         if (filter.equals("last")) {
+            if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
+               files.add(encodeFile + suffix);
+            else if (decrypt || comcut || (mode.equals("FILES") && videoFile.equals(startFile)))
+               files.add(videoFile + suffix);
+         }
+         else if (filter.equals("mpegFile")) {
+            if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
+               files.add(mpegFile + suffix);
+         }
+         else if (filter.equals("mpegFile_cut")) {
+            if (comcut || (mode.equals("FILES") && mpegFile_cut.equals(startFile)))
+               files.add(mpegFile_cut + suffix);
+         }
+         else if (filter.equals("encodeFile")) {
+            if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
+            files.add(encodeFile + suffix);
+         }
+      } else {
+         // files setting = "all" => potentially multiple push jobs
+         if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
+            files.add(mpegFile + suffix);
+         if (comcut || (mode.equals("FILES") && mpegFile_cut.equals(startFile)))
+            files.add(mpegFile_cut + suffix);
+         if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
+            files.add(encodeFile + suffix);
+      }
+      return files;
    }
 
    // Cancel and/or kill given job
