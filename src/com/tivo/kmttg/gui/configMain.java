@@ -1708,6 +1708,16 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(t2extract_args, c);
       
+      // metadata_files
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(metadata_files_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(metadata_files, c);
+      
       // General panel
       JPanel general = new JPanel(new GridBagLayout());
       
@@ -1772,16 +1782,6 @@ public class configMain {
       c.gridx = 0;
       c.gridy = gy;
       general.add(jobMonitorFullPaths, c);
-      
-      // metadata_files
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      general.add(metadata_files_label, c);
-
-      c.gridx = 1;
-      c.gridy = gy;
-      general.add(metadata_files, c);
 
       // pyTivo Panel
       JPanel pyTivo_panel = new JPanel(new GridBagLayout());      
