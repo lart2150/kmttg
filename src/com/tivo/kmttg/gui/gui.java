@@ -1398,7 +1398,10 @@ public class gui {
          text += "Creates a <b>pyTivo</b> compatible metadata file.<br>";
          text += "This is a text file that accompanies video file that contains<br>";
          text += "extended program information about the video file.<br>";
-         text += "Useful if you use pyTivo to copy video files back to your Tivos.";
+         text += "Useful if you use pyTivo to copy video files back to your Tivos.<br>";
+         text += "Under configuration <b>Program Options</b> tab there is an option<br>";
+         text += "called <b>metadata files</b> where you can specify which video files<br>";
+         text += "to create metadata files for.";
       }
       else if (component.equals("decrypt")) {
          text =  "<b>decrypt</b><br>";
