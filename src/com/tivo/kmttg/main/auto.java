@@ -351,6 +351,7 @@ public class auto {
             }
          }
       }
+      log.print("START PROCESSING OF ENTRY: " + entry.get("title"));
       
       Hashtable<String,Object> h = new Hashtable<String,Object>();
       h.put("tivoName", entry.get("tivoName"));
