@@ -2265,7 +2265,7 @@ public class configMain {
          text =  "<b>Files to push</b><br>";
          text += "Select which files to push when the <b>push</b> task is enabled for a job.<br>";
          text += "The meaning of each setting is as follows:<br>";
-         text += "<b>mpegFile: </b>Push only mpeg file after decode task if that task is enabled.<br>";
+         text += "<b>mpegFile: </b>Push only mpeg file after decrypt task if that task is enabled.<br>";
          text += "<b>mpegFile_cut: </b>Push only mpeg file after AdCut task if that task is enabled.<br>";
          text += "<b>encodeFile: </b>Push only encoded file after encode task if that task is enabled.<br>";
          text += "<b>last: </b>Push only last video file in sequence of tasks (this is default setting).<br>";
@@ -2275,7 +2275,7 @@ public class configMain {
          text =  "<b>metadata files</b><br>";
          text += "Select which files to create metadata files for when <b>metadata</b> task is enabled for a job.<br>";
          text += "The meaning of each setting is as follows:<br>";
-         text += "<b>mpegFile: </b>Only for mpeg file after decode task if that task is enabled.<br>";
+         text += "<b>mpegFile: </b>Only for mpeg file after decrypt task if that task is enabled.<br>";
          text += "<b>mpegFile_cut: </b>Only for mpeg file after AdCut task if that task is enabled.<br>";
          text += "<b>encodeFile: </b>Only for encoded file after encode task if that task is enabled.<br>";
          text += "<b>last: </b>Only last video file in sequence of tasks (this is default setting).<br>";
