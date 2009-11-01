@@ -925,6 +925,7 @@ public class jobMonitor {
          job.type         = "custom";
          job.name         = config.customCommand;
          job.tivoName     = tivoName;
+         job.tivoFile     = tivoFile;
          job.metaFile     = metaFile;
          job.mpegFile     = mpegFile;
          job.mpegFile_cut = mpegFile_cut;
