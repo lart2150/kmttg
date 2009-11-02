@@ -2,6 +2,8 @@ package com.tivo.kmttg.task;
 
 import java.util.Date;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -150,14 +152,14 @@ public class custom {
    private static Stack<String> buildCustomCommandStack(String command) {
       debug.print("command=" + command);
       Stack<String> c = new Stack<String>();
-      // First separate out any quotes
       if (command.contains("\"") ) {
-         String[] p = command.split("\"");
-         String s;
-         for(int i=0; i<p.length; ++i) {
-            s = p[i];
-            s = string.removeLeadingTrailingSpaces(s);
-            if (s.length() > 0 ) c.add(s);
+         // Separate out by spaces with quote delimiters
+         Pattern p = Pattern.compile("(?:([^\\s\"]\\S*)|(?:\"((?:i|[^i])*?)(?:(?:\"\\s)|(?:\"$)|$)))");
+         Matcher m = p.matcher(command);
+         while (m.find()) {
+            String s = string.removeLeadingTrailingSpaces(m.group());
+            s = s.replaceAll("\"", "");
+            c.add(s);
          }
       } else {
          String[] p = command.split("\\s+");
