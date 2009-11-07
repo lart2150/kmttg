@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -153,12 +155,14 @@ public class atomic {
          BufferedReader ifp = new BufferedReader(new FileReader(job.metaFile));
          String line;
          String name="", value="";
+         Pattern p = Pattern.compile("\\s*(\\S+)\\s*:\\s*(.*)");
+         Matcher m;
          while ( (line = ifp.readLine()) != null ) {
             debug.print("line=" + line);
-            String[] tokens = line.split("\\s*:\\s*");
-            if (tokens.length == 2) {
-               name  = tokens[0];
-               value = tokens[1];
+            m = p.matcher(line);
+            if (m.matches()) {
+               name  = m.group(1);
+               value = m.group(2);
                // Get rid of quotes in value
                value = value.replaceAll("\"", "");
                value = value.replaceAll("'", "");
