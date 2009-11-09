@@ -54,7 +54,7 @@ public class config {
    public static int LowSpaceSize = 0;
    public static int CheckBeacon = 1;
    public static int UseAdscan = 0;
-   public static int VrdReview = 1;
+   public static int VrdReview = 0;
    public static int VrdQsFilter = 0;
    public static int OverwriteFiles = 0;
    public static String comskipIni = "";
