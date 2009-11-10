@@ -55,6 +55,7 @@ public class config {
    public static int CheckBeacon = 1;
    public static int UseAdscan = 0;
    public static int VrdReview = 0;
+   public static int VrdReview_noCuts = 0;
    public static int VrdQsFilter = 0;
    public static int OverwriteFiles = 0;
    public static String comskipIni = "";
@@ -523,6 +524,9 @@ public class config {
             if (key.equals("VrdReview")) {
                VrdReview = Integer.parseInt(line);
             }
+            if (key.equals("VrdReview_noCuts")) {
+               VrdReview_noCuts = Integer.parseInt(line);
+            }
             if (key.equals("VrdQsFilter")) {
                VrdQsFilter = Integer.parseInt(line);
             }
@@ -679,6 +683,8 @@ public class config {
          ofp.write("<UseAdscan>\n" + UseAdscan + "\n\n");
          
          ofp.write("<VrdReview>\n" + VrdReview + "\n\n");
+         
+         ofp.write("<VrdReview_noCuts>\n" + VrdReview_noCuts + "\n\n");
          
          ofp.write("<VrdQsFilter>\n" + VrdQsFilter + "\n\n");
          

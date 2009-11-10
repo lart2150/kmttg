@@ -1,6 +1,9 @@
 package com.tivo.kmttg.task;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Stack;
 
@@ -46,6 +49,11 @@ public class vrdreview {
       if ( ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not found: " + job.mpegFile);
          schedule = false;
+      }
+      
+      // Make a vprjFile with no cuts if requested
+      if (config.VrdReview_noCuts == 1 && ! file.isFile(job.vprjFile)) {
+         schedule = createBasicVprjFile(job.vprjFile, job.mpegFile);
       }
       
       if ( ! file.isFile(job.vprjFile) ) {
@@ -139,6 +147,22 @@ public class vrdreview {
          }
       }
       return false;
+   }
+   
+   // Create a VRD vprj file with no file cuts - just source video file
+   private Boolean createBasicVprjFile(String vprjFile, String inputFile) {
+      try {
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(vprjFile));
+         ofp.write("<Version>2\n");
+         ofp.write("<Filename>" + inputFile + "\n");
+         ofp.close();
+      }
+      catch (IOException ex) {
+         log.error("Failed to write to file: " + vprjFile);
+         log.error(ex.toString());
+         return false;
+      }
+      return true;
    }
 
 }

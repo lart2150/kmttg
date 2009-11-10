@@ -50,6 +50,7 @@ public class configMain {
    private static JCheckBox create_subfolder = null;
    private static JCheckBox UseAdscan = null;
    private static JCheckBox VrdReview = null;
+   private static JCheckBox VrdReview_noCuts = null;
    private static JCheckBox VrdQsFilter = null;
    private static JCheckBox OverwriteFiles = null;
    private static JCheckBox toolTips = null;
@@ -302,6 +303,12 @@ public class configMain {
       else
          VrdReview.setSelected(false);
       
+      // VrdReview_noCuts
+      if (config.VrdReview_noCuts == 1)
+         VrdReview_noCuts.setSelected(true);
+      else
+         VrdReview_noCuts.setSelected(false);
+      
       // VrdQsFilter
       if (config.VrdQsFilter == 1)
          VrdQsFilter.setSelected(true);
@@ -501,6 +508,12 @@ public class configMain {
          config.VrdReview = 1;
       else
          config.VrdReview = 0;
+      
+      // VrdReview_noCuts
+      if (VrdReview_noCuts.isSelected())
+         config.VrdReview_noCuts = 1;
+      else
+         config.VrdReview_noCuts = 0;
       
       // VrdQsFilter
       if (VrdQsFilter.isSelected())
@@ -941,6 +954,7 @@ public class configMain {
       create_subfolder = new javax.swing.JCheckBox();
       UseAdscan = new javax.swing.JCheckBox();
       VrdReview = new javax.swing.JCheckBox();
+      VrdReview_noCuts = new javax.swing.JCheckBox();
       VrdQsFilter = new javax.swing.JCheckBox();
       OverwriteFiles = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
@@ -1013,6 +1027,7 @@ public class configMain {
       create_subfolder.setText("Create sub-folder for each download");
       UseAdscan.setText("Use VideoRedo AdScan instead of comskip");
       VrdReview.setText("Use VideoRedo GUI to review detected commercials");
+      VrdReview_noCuts.setText("Bring up VideoRedo GUI to make manual cuts");
       VrdQsFilter.setText("Enable VideoRedo QS Fix video dimension filter");
       OverwriteFiles.setText("Overwrite existing files");
       MAK_label.setText("MAK"); 
@@ -1692,6 +1707,12 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(VrdReview, c);
       
+      // VrdReview_noCuts
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(VrdReview_noCuts, c);
+      
       // VrdQsFilter
       gy++;
       c.gridx = 1;
@@ -1893,6 +1914,7 @@ public class configMain {
       create_subfolder.setToolTipText(getToolTip("create_subfolder"));
       UseAdscan.setToolTipText(getToolTip("UseAdscan"));
       VrdReview.setToolTipText(getToolTip("VrdReview"));
+      VrdReview_noCuts.setToolTipText(getToolTip("VrdReview_noCuts"));
       VrdQsFilter.setToolTipText(getToolTip("VrdQsFilter"));
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
       files_path.setToolTipText(getToolTip("files_path"));
@@ -2008,6 +2030,17 @@ public class configMain {
          text += "before starting the commercial cutting job. kmttg will wait until you close<br>";
          text += "the VideRedo GUI before proceeding. NOTE: Be sure to save your changes to .VPrj file<br>";
          text += "before you exit VideoRedo or they will not be used in commercial cut step.";
+      }
+      else if (component.equals("VrdReview_noCuts")) {
+         text =  "<b>Bring up VideoRedo GUI to make manual cuts</b><br>";
+         text += "If you have VideoRedo and have configured kmttg with the installation path<br>";
+         text += "to VideoRedo, when this option is enabled kmttg will start VideoRedo GUI<br>";
+         text += "to allow you to manually define the commercial cuts before starting the<br>";
+         text += "the commercial cutting job. kmttg will wait until you close the VideoRedo GUI<br>";
+         text += "before proceeding. <b>NOTE: Be sure to save your changes to .VPrj file<br>";
+         text += "before you exit VideoRedo (File->Save Project)</b>.<br>";
+         text += "NOTE: When using this option you normally want to disable <b>Ad Detect</b> task<br>";
+         text += "and enable <b>Ad Cut</b> task.";
       }
       else if (component.equals("VrdQsFilter")) {
          text =  "<b>Enable VideoRedo QS Fix video dimension filter</b><br>";

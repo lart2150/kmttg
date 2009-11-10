@@ -656,7 +656,7 @@ public class jobMonitor {
       if (comcut) {
          if ( ! comskip ) {
             if (file.isDir(config.VRD)) {
-               if ( ! file.isFile(string.replaceSuffix(mpegFile, ".VPrj")) ) {
+               if ( config.VrdReview_noCuts == 0 && ! file.isFile(string.replaceSuffix(mpegFile, ".VPrj")) ) {
                   comskip = true;
                }
             } else {
@@ -820,15 +820,17 @@ public class jobMonitor {
       }
       
       // Schedule VideoRedo GUI manual cuts review if requested (GUI mode only)
-      if (comskip && config.VrdReview == 1 && config.GUI && file.isDir(config.VRD)) {
-         jobData job = new jobData();
-         job.source       = source;
-         job.tivoName     = tivoName;
-         job.type         = "vrdreview";
-         job.name         = config.VRD;
-         job.mpegFile     = mpegFile;
-         job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
-         submitNewJob(job);
+      if (file.isDir(config.VRD) && config.GUI) {
+         if ( (comskip && config.VrdReview == 1) || config.VrdReview_noCuts == 1 ) {
+            jobData job = new jobData();
+            job.source       = source;
+            job.tivoName     = tivoName;
+            job.type         = "vrdreview";
+            job.name         = config.VRD;
+            job.mpegFile     = mpegFile;
+            job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
+            submitNewJob(job);
+         }
       }
       
       if (comcut) {
