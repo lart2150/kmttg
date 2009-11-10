@@ -145,7 +145,7 @@ public class auto {
             debug.print("keywordSearch::matching title '" + keyword + "' in '" + title + "'");
             if ( title.matches(keyword) ) {
                // Match found, so queue up relevant job actions
-               if ( filterByDate(entry) ) {
+               if ( filterByDate(entry) || filterTivoSuggestions(entry) || filterKUID(entry) ) {
                   return false;
                } else {
                   log.print("Title keyword match: '" + keyword + "' found in '" + title + "'");
@@ -260,7 +260,7 @@ public class auto {
          if( match ) {
             // Match found, so queue up relevant job actions
             debug.print("keywordSearch::KEYWORDS MATCH");
-            if ( filterByDate(entry) ) {
+            if ( filterByDate(entry) || filterTivoSuggestions(entry) || filterKUID(entry) ) {
                return false;
             } else {
                log.print("keywords match: '" + keywordsList + "' matches '" + text + "'");
@@ -300,6 +300,35 @@ public class auto {
          }
          if (filter) {
             log.print("NOTE: no match due to Date Filter - " + entry.get("title") + ", age=" + diffStr + " hours");
+         }
+      }
+      return filter;
+   }
+   
+   // Return true if should be filtered out because it's a TiVo suggestion
+   private static Boolean filterTivoSuggestions(Hashtable<String,String>entry) {
+      if (entry.containsKey("suggestion")) {
+         if (autoConfig.suggestionsFilter == 1 && entry.get("suggestion").equals("yes")) {
+            log.print("NOTE: no match due to Suggestions Filter - " + entry.get("title"));
+            return true;
+         }
+      }
+      return false;
+   }
+   
+   // Return true if should be filtered out because it's NOT marked KUID
+   private static Boolean filterKUID(Hashtable<String,String>entry) {
+      Boolean filter = false;
+      if (autoConfig.kuidFilter == 1) {
+         if (entry.containsKey("kuid")) {
+            if ( ! entry.get("kuid").equals("yes") ) {
+               filter = true;
+            }
+         } else {
+            filter = true;
+         }
+         if (filter) {
+            log.print("NOTE: no match due to KUID Only Filter - " + entry.get("title"));
          }
       }
       return filter;

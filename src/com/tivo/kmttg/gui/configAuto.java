@@ -75,6 +75,8 @@ public class configAuto {
    private static JTextField title = null;
    private static JTextField check_interval = null;
    private static JCheckBox dateFilter = null;
+   private static JCheckBox suggestionsFilter = null;
+   private static JCheckBox kuidFilter = null;
    private static JComboBox dateOperator = null;
    private static JTextField dateHours = null;
    private static JButton OK = null;
@@ -227,6 +229,10 @@ public class configAuto {
       dateOperator.addItem("less than");
       dateHours = new JTextField("48");
       JLabel dateHours_label = new JLabel("hours old");
+      
+      suggestionsFilter = new JCheckBox("Filter out TiVo Suggestions");
+      
+      kuidFilter = new JCheckBox("Only process KUID recordings");
       
       OK = new JButton("OK");
       OK.setBackground(Color.green);
@@ -455,7 +461,23 @@ public class configAuto {
       c.fill = GridBagConstraints.NONE;
       c.weightx = 0.0;
       content.add(date, c);
-
+      
+      gy++;
+      gx = 0;
+      c.gridx = gx++;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
+      content.add(suggestionsFilter, c);
+      
+      c.gridx = gx++;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
+      content.add(kuidFilter, c);
+      
       // OK & CANCEL
       GAP = 0;
       JPanel last = new JPanel();
@@ -503,6 +525,8 @@ public class configAuto {
       update.setToolTipText(getToolTip("update"));
       del.setToolTipText(getToolTip("del"));      
       dateFilter.setToolTipText(getToolTip("dateFilter"));
+      suggestionsFilter.setToolTipText(getToolTip("suggestionsFilter"));
+      kuidFilter.setToolTipText(getToolTip("kuidFilter"));
       dateOperator.setToolTipText(getToolTip("dateOperator"));
       dateHours.setToolTipText(getToolTip("dateHours"));
       OK.setToolTipText(getToolTip("OK"));
@@ -581,6 +605,15 @@ public class configAuto {
          text += "Number of hours to use for filtering by date. Examples:<br>";
          text += "<b>less than 48</b> means only process shows earlier than 2 days old.<br>";
          text += "<b>more than 24</b> means only process shows later than 1 day old.";
+      }
+      else if (component.equals("suggestionsFilter")) {
+         text =  "<b>Filter out TiVo Suggestions</b><br>";
+         text += "If enabled then do not process any TiVo Suggestions recordings.";
+      }
+      else if (component.equals("kuidFilter")) {
+         text =  "<b>Only process KUID recordings</b><br>";
+         text += "If enabled then only process recordings that are marked as<br>";
+         text += "Keep Until I Delete (KUID).";
       }
       else if (component.equals("OK")) {
          text =  "<b>OK</b><br>";
@@ -816,6 +849,8 @@ public class configAuto {
       dateFilter.setSelected((Boolean)(autoConfig.dateFilter == 1));
       dateOperator.setSelectedItem(autoConfig.dateOperator);
       dateHours.setText("" + autoConfig.dateHours);
+      suggestionsFilter.setSelected((Boolean)(autoConfig.suggestionsFilter == 1));
+      kuidFilter.setSelected((Boolean)(autoConfig.kuidFilter == 1));
    }
    
    // Set encoding_name combobox choices
@@ -960,6 +995,16 @@ public class configAuto {
             ofp.write("0\n\n");
          ofp.write("<dateOperator>\n" + dateOperator.getSelectedItem() + "\n\n");
          ofp.write("<dateHours>\n" + hours + "\n\n");
+         ofp.write("<suggestionsFilter>\n");
+         if (suggestionsFilter.isSelected())
+            ofp.write("1\n\n");
+         else
+            ofp.write("0\n\n");
+         ofp.write("<kuidFilter>\n");
+         if (kuidFilter.isSelected())
+            ofp.write("1\n\n");
+         else
+            ofp.write("0\n\n");
          
          TableModel model = table.getModel();
          int rows = model.getRowCount();

@@ -17,6 +17,8 @@ public class autoConfig {
    public static int dateFilter = 0;
    public static String dateOperator = "less than";
    public static float dateHours = 48;
+   public static int suggestionsFilter = 0;
+   public static int kuidFilter = 0;
    
    public static Boolean parseAuto(String config) {
       debug.print("config=" + config);
@@ -86,6 +88,12 @@ public class autoConfig {
             }
             if (key.equals("dateHours")) {
                dateHours = Float.parseFloat(line);
+            }
+            if (key.equals("suggestionsFilter")) {
+               suggestionsFilter = Integer.parseInt(line);
+            }
+            if (key.equals("kuidFilter")) {
+               kuidFilter = Integer.parseInt(line);
             }
             if (key.equals("options")) {
                String[] l = line.split("\\s+");
