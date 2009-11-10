@@ -46,15 +46,14 @@ public class atomic {
          schedule = false;
       }
       
-      job.metaFile = job.encodeFile + ".txt";
       if ( ! file.isFile(job.metaFile) ) {
-         log.error("encode file not found: " + job.metaFile);
+         log.error("metadata file not found: " + job.metaFile);
          schedule = false;
       }
       
       atomicGetArgs();
       if ( args.isEmpty() ) {
-         log.error("Failed to parse meta file: " + job.metaFile);
+         log.error("Failed to parse metadata file: " + job.metaFile);
       }
       
       if (schedule) {
