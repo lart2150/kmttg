@@ -225,17 +225,26 @@ public class encode {
             }
             
             // Schedule an AtomicParsley job if relevant
-            job.metaFile = job.encodeFile + ".txt";
-            if ( file.isFile(job.metaFile) && file.isFile(config.AtomicParsley) &&
-                 (job.encodeFile.toLowerCase().endsWith(".mp4") ||
-                  job.encodeFile.toLowerCase().endsWith(".m4v")) ) {
-               jobData new_job = new jobData();
-               new_job.source       = job.source;
-               new_job.tivoName     = job.tivoName;
-               new_job.type         = "atomic";
-               new_job.name         = config.AtomicParsley;
-               new_job.encodeFile   = job.encodeFile;
-               jobMonitor.submitNewJob(new_job);
+            if (file.isFile(config.AtomicParsley)) {
+               job.metaFile = job.encodeFile + ".txt";
+               if ( ! file.isFile(job.metaFile) ) {
+                  job.metaFile = job.mpegFile_cut + ".txt";
+               }
+               if ( ! file.isFile(job.metaFile) ) {
+                  job.metaFile = job.mpegFile + ".txt";
+               }
+               if ( file.isFile(job.metaFile) &&
+                    (job.encodeFile.toLowerCase().endsWith(".mp4") ||
+                     job.encodeFile.toLowerCase().endsWith(".m4v")) ) {
+                  jobData new_job = new jobData();
+                  new_job.source       = job.source;
+                  new_job.tivoName     = job.tivoName;
+                  new_job.type         = "atomic";
+                  new_job.name         = config.AtomicParsley;
+                  new_job.encodeFile   = job.encodeFile;
+                  new_job.metaFile     = job.metaFile;
+                  jobMonitor.submitNewJob(new_job);
+               }
             }
          }
       }
