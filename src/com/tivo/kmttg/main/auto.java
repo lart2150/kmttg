@@ -129,9 +129,20 @@ public class auto {
       System.exit(num);
    }
    
-   // Match title & keywords against an entry 
+   // Match title & keywords against an entry
+   // Return true if this entry should be processed, false otherwise
    public static Boolean keywordSearch(Hashtable<String,String> entry) {
       debug.print("entry=" + entry);
+      
+      // Skip currently recording or copy protected entries
+      if (entry.containsKey("InProgress")) {
+         log.print("Skipping currently recording show: " + entry.get("title"));
+         return false;
+      }
+      if (entry.containsKey("CopyProtected")) {
+         log.print("Skipping copy protected show: " + entry.get("title"));
+         return false;
+      }
       
       // Title matching
       String title, keyword;
