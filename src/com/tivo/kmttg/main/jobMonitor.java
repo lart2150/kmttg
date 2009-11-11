@@ -821,7 +821,7 @@ public class jobMonitor {
       
       // Schedule VideoRedo GUI manual cuts review if requested (GUI mode only)
       if (file.isDir(config.VRD) && config.GUI) {
-         if ( (comskip && config.VrdReview == 1) || config.VrdReview_noCuts == 1 ) {
+         if ( (comskip && config.VrdReview == 1) || (comcut && config.VrdReview_noCuts == 1) ) {
             jobData job = new jobData();
             job.source       = source;
             job.tivoName     = tivoName;
