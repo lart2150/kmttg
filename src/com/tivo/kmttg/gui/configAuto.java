@@ -1034,6 +1034,16 @@ public class configAuto {
                   ofp.write("encode_name " + entry.encode_name + "\n");               
             }
          }
+         
+         // put any ignoreHistory entries last
+         if (autoConfig.ignoreHistory.size() > 0) {
+            ofp.write("\n<ignorehistory>\n");
+            for (int i=0; i<autoConfig.ignoreHistory.size(); ++i) {
+               ofp.write(autoConfig.ignoreHistory.get(i) + "\n");
+            }
+            ofp.write("\n");
+         }
+         
          ofp.close();
       } catch (IOException ex) {
          log.error("Cannot write to auto config file: " + config.autoIni);
