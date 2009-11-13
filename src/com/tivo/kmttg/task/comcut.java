@@ -158,15 +158,17 @@ public class comcut {
          } else {
             log.warn("comcut job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");
-            // Remove vprjFile, edlFile & mpegFile files if option enabled
+            // Remove Ad Cut files if option enabled
             if ( config.RemoveComcutFiles == 1 ) {
-               job.vprjFile = string.replaceSuffix(job.edlFile, ".VPrj");
-               if ( file.delete(job.vprjFile) )
-                  log.print("(Deleted vprj file: " + job.vprjFile + ")");               
-               file.delete(job.mpegFile);
-               log.print("(Deleted mpeg file: " + job.mpegFile + ")");
-               file.delete(job.edlFile);
-               log.print("(Deleted edl file: " + job.edlFile + ")");
+               if (file.delete(job.vprjFile))
+                  log.print("(Deleted vprj file: " + job.vprjFile + ")");
+               if (file.delete(job.edlFile))
+                  log.print("(Deleted edl file: " + job.edlFile + ")");
+            }
+            // Remove .mpg file if option enabled
+            if ( config.RemoveComcutFiles_mpeg == 1 ) {
+               if (file.delete(job.mpegFile))
+                  log.print("(Deleted mpeg file: " + job.mpegFile + ")");
             }
          }
       }
