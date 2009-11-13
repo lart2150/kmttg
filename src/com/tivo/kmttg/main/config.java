@@ -47,8 +47,8 @@ public class config {
    public static String MAK = "";               // MAK id for NPL downloads
    public static int RemoveTivoFile = 0;
    public static int RemoveComcutFiles = 0;
+   public static int RemoveComcutFiles_mpeg = 0;
    public static int RemoveMpegFile = 0;
-   public static int CreateSubFolder = 0;
    public static int MaxJobs = 1;
    public static int CheckDiskSpace = 0;
    public static int LowSpaceSize = 0;
@@ -512,11 +512,11 @@ public class config {
             if (key.equals("RemoveComcutFiles")) {
                RemoveComcutFiles = Integer.parseInt(line);
             }
+            if (key.equals("RemoveComcutFiles_mpeg")) {
+               RemoveComcutFiles_mpeg = Integer.parseInt(line);
+            }
             if (key.equals("RemoveMpegFile")) {
                RemoveMpegFile = Integer.parseInt(line);
-            }
-            if (key.equals("CreateSubFolder")) {
-               CreateSubFolder = Integer.parseInt(line);
             }
             if (key.equals("UseAdscan")) {
                UseAdscan = Integer.parseInt(line);
@@ -676,9 +676,9 @@ public class config {
          
          ofp.write("<RemoveComcutFiles>\n" + RemoveComcutFiles + "\n\n");
          
-         ofp.write("<RemoveMpegFile>\n" + RemoveMpegFile + "\n\n");
+         ofp.write("<RemoveComcutFiles_mpeg>\n" + RemoveComcutFiles_mpeg + "\n\n");
          
-         ofp.write("<CreateSubFolder>\n" + CreateSubFolder + "\n\n");
+         ofp.write("<RemoveMpegFile>\n" + RemoveMpegFile + "\n\n");
          
          ofp.write("<UseAdscan>\n" + UseAdscan + "\n\n");
          
