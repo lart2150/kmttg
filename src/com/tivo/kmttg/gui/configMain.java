@@ -44,10 +44,10 @@ public class configMain {
    private static JComboBox tivos = null;
    private static JCheckBox remove_tivo = null;
    private static JCheckBox remove_comcut = null;
+   private static JCheckBox remove_comcut_mpeg = null;
    private static JCheckBox remove_mpeg = null;
    private static JCheckBox check_space = null;
    private static JCheckBox beacon = null;
-   private static JCheckBox create_subfolder = null;
    private static JCheckBox UseAdscan = null;
    private static JCheckBox VrdReview = null;
    private static JCheckBox VrdReview_noCuts = null;
@@ -273,6 +273,12 @@ public class configMain {
       else
          remove_comcut.setSelected(false);
       
+      // Remove mpeg file after comcut
+      if (config.RemoveComcutFiles_mpeg == 1)
+         remove_comcut_mpeg.setSelected(true);
+      else
+         remove_comcut_mpeg.setSelected(false);
+      
       // Remove .mpg file
       if (config.RemoveMpegFile == 1)
          remove_mpeg.setSelected(true);
@@ -284,12 +290,6 @@ public class configMain {
          check_space.setSelected(true);
       else
          check_space.setSelected(false);
-      
-      // Create sub-folder
-      if (config.CreateSubFolder == 1)
-         create_subfolder.setSelected(true);
-      else
-         create_subfolder.setSelected(false);
             
       // UseAdscan
       if (config.UseAdscan == 1)
@@ -479,6 +479,12 @@ public class configMain {
       else
          config.RemoveComcutFiles = 0;
       
+      // Remove mpeg file after comcut
+      if (remove_comcut_mpeg.isSelected())
+         config.RemoveComcutFiles_mpeg = 1;
+      else
+         config.RemoveComcutFiles_mpeg = 0;
+      
       // Remove .mpg file
       if (remove_mpeg.isSelected())
          config.RemoveMpegFile = 1;
@@ -490,12 +496,6 @@ public class configMain {
          config.CheckDiskSpace = 1;
       else
          config.CheckDiskSpace = 0;
-      
-      // Create sub-folder
-      if (create_subfolder.isSelected())
-         config.CreateSubFolder = 1;
-      else
-         config.CreateSubFolder = 0;
       
       // UseAdscan
       if (UseAdscan.isSelected())
@@ -950,8 +950,8 @@ public class configMain {
       JLabel files_path_label = new javax.swing.JLabel();
       remove_tivo = new javax.swing.JCheckBox();
       remove_comcut = new javax.swing.JCheckBox();
+      remove_comcut_mpeg = new javax.swing.JCheckBox();
       remove_mpeg = new javax.swing.JCheckBox();
-      create_subfolder = new javax.swing.JCheckBox();
       UseAdscan = new javax.swing.JCheckBox();
       VrdReview = new javax.swing.JCheckBox();
       VrdReview_noCuts = new javax.swing.JCheckBox();
@@ -1022,9 +1022,9 @@ public class configMain {
       tivo_ip_label.setText("Tivo IP#"); 
       files_path_label.setText("FILES Default Path"); 
       remove_tivo.setText("Remove .TiVo after file decrypt"); 
-      remove_comcut.setText("Remove .edl & .mpg files after comcut"); 
+      remove_comcut.setText("Remove Ad Detect files after Ad Cut");
+      remove_comcut_mpeg.setText("Remove .mpg file after Ad Cut");
       remove_mpeg.setText("Remove .mpg file after encode");
-      create_subfolder.setText("Create sub-folder for each download");
       UseAdscan.setText("Use VideoRedo AdScan instead of comskip");
       VrdReview.setText("Use VideoRedo GUI to review detected commercials");
       VrdReview_noCuts.setText("Bring up VideoRedo GUI to make manual cuts");
@@ -1451,22 +1451,23 @@ public class configMain {
       c.gridy = gy;
       files_panel.add(remove_tivo, c);
       
-      // Remove .edl & .mpg files after comcut
+      // Remove Ad Detect files after Ad Cut
       c.gridx = 1;
       c.gridy = gy;
       files_panel.add(remove_comcut, c);
       
-      // Remove .mpg file after encode
+      // Remove .mpg file after Ad Cut
       gy++;
       c.gridx = 0;
       c.gridy = gy;
-      files_panel.add(remove_mpeg, c);
+      files_panel.add(remove_comcut_mpeg, c);
       
-      // create_subfolder
+      // Remove Ad Detect files after Ad Cut
+      // Remove .mpg file after encode
       c.gridx = 1;
       c.gridy = gy;
-      files_panel.add(create_subfolder, c);
-      
+      files_panel.add(remove_mpeg, c);
+            
       // Check Available Disk Space
       gy++;
       c.gridx = 0;
@@ -1908,10 +1909,10 @@ public class configMain {
       del.setToolTipText(getToolTip("del")); 
       remove_tivo.setToolTipText(getToolTip("remove_tivo"));
       remove_comcut.setToolTipText(getToolTip("remove_comcut"));
+      remove_comcut_mpeg.setToolTipText(getToolTip("remove_comcut_mpeg"));
       remove_mpeg.setToolTipText(getToolTip("remove_mpeg"));
       check_space.setToolTipText(getToolTip("check_space"));
       beacon.setToolTipText(getToolTip("beacon"));
-      create_subfolder.setToolTipText(getToolTip("create_subfolder"));
       UseAdscan.setToolTipText(getToolTip("UseAdscan"));
       VrdReview.setToolTipText(getToolTip("VrdReview"));
       VrdReview_noCuts.setToolTipText(getToolTip("VrdReview_noCuts"));
@@ -1986,10 +1987,14 @@ public class configMain {
          text += "once they have been successfully decrypted to .mpg format.";
       }
       else if (component.equals("remove_comcut")) {
-         text =  "<b>Remove .edl & .mpg files after comcut</b><br>";
-         text += "<br>";
-         text += "If you use comcut you can enable this option if you would like kmttg to remove .edl & .mpg<br>";
-         text += "files automatically once comcut completes successfully.";
+         text =  "<b>Remove Ad Detect files after Ad Cut</b><br>";
+         text += "If you use comcut you can enable this option if you would like kmttg to remove files<br>";
+         text += "associated with Ad Detect task automatically once Ad Cut job completes successfully.";
+      }
+      else if (component.equals("remove_comcut_mpeg")) {
+         text =  "<b>Remove .mpg file after Ad Cut</b><br>";
+         text += "If this option is enabled kmttg will remove the .mpg file (not the _cut.mpg file)<br>";
+         text += "automatically once Ad Cut job completes successfully.";
       }
       else if (component.equals("remove_mpeg")) {
          text =  "<b>Remove .mpg file after encode</b><br>";
@@ -2006,15 +2011,6 @@ public class configMain {
          text += "If this option is enabled then kmttg will try to detect Tivos on your network<br>";
          text += "automatically that you have not already configured manually.<br>";
          text += "NOTE: The automatic detection is disabled automatically after about 10 minutes.";
-      }
-      else if (component.equals("create_subfolder")) {
-         text =  "<b>Create sub-folder for each download</b><br>";
-         text += "Enable this option if you would like kmttg to create a sub-folder for<br>";
-         text += "<b>each individual</b> show to be processed. The name of the folder<br>";
-         text += "will be the same as the file format you defined but without any file extension.<br>";
-         text += "<b>NOTE: Most users will probably want to leave this option disabled</b>.<br>";
-         text += "NOTE: If you want to use folder structures use the more useful <b>[/]</b> keyword in<br>";
-         text += "<b>File Naming</b> template. Consult the kmttg configuration wiki for more info.";
       }
       else if (component.equals("UseAdscan")) {
          text =  "<b>Use VideoRedo AdScan instead of comskip</b><br>";
