@@ -83,19 +83,7 @@ public class tivoFileName {
       if (l.length > 0) {
          file = file.replaceAll("__separator__", s);
       }
-      
-      // Add sub-folder if requested
-      if ( config.CreateSubFolder == 1 ) {
-         String folder = string.basename(file).replaceFirst("\\.TiVo$", "");
-         
-         // Don't allow folders ending in dots
-         while (folder.matches("^.+\\.$")) {
-            folder = folder.replaceAll("\\.$", "");
-         }
-         
-         file = folder + File.separator + file;
-      }
-      
+            
       debug.print("buildTivoFileName::file=" + file);
       
       // Check file name to make sure basename is not empty
