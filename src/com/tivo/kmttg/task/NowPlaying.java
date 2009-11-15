@@ -500,14 +500,14 @@ public class NowPlaying  {
       }
    }
 
-   // If programId doesn't exist then grab id from url instead
+   // If programId doesn't exist then make a fake one out of url id & size
    private void checkProgramId(Hashtable<String,String> h) {      
       if (! h.containsKey("ProgramId")) {
-         if (h.containsKey("url")) {
+         if (h.containsKey("url") && h.containsKey("size")) {
             String id = h.get("url");
             id = id.replaceFirst("^.+id=(.+)$", "$1");
             if (id.length() > 0) {
-               h.put("ProgramId", id);
+               h.put("ProgramId", id + "_" + h.get("size"));
             }
          }
       }
