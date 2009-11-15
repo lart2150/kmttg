@@ -464,12 +464,11 @@ public class configAuto {
       last.add(OK);
       last.add(CANCEL);
    
-      // OK
       gy++;
-      gx = 2;
+      gx = 1;
       c.gridx = gx;
       c.gridy = gy;
-      c.gridwidth = 2;
+      c.gridwidth = 6;
       c.fill = GridBagConstraints.HORIZONTAL;
       c.weightx = 0.0;
       content.add(last, c);
