@@ -143,7 +143,7 @@ public class auto {
          log.print("Skipping copy protected show: " + entry.get("title"));
          return false;
       }
-      
+            
       // Title matching
       String title, keyword;
       Stack<autoEntry> auto_entries = getTitleEntries();
@@ -156,7 +156,7 @@ public class auto {
             debug.print("keywordSearch::matching title '" + keyword + "' in '" + title + "'");
             if ( title.matches(keyword) ) {
                // Match found, so queue up relevant job actions
-               if ( filterByDate(entry) || filterTivoSuggestions(entry) || filterKUID(entry) ) {
+               if ( filterByTivoName(entry, auto) || filterByDate(entry) || filterTivoSuggestions(entry) || filterKUID(entry) ) {
                   return false;
                } else {
                   log.print("Title keyword match: '" + keyword + "' found in '" + title + "'");
@@ -271,7 +271,7 @@ public class auto {
          if( match ) {
             // Match found, so queue up relevant job actions
             debug.print("keywordSearch::KEYWORDS MATCH");
-            if ( filterByDate(entry) || filterTivoSuggestions(entry) || filterKUID(entry) ) {
+            if ( filterByTivoName(entry, auto) || filterByDate(entry) || filterTivoSuggestions(entry) || filterKUID(entry) ) {
                return false;
             } else {
                log.print("keywords match: '" + keywordsList + "' matches '" + text + "'");
@@ -284,6 +284,18 @@ public class auto {
             return true;
          } else {
             debug.print("keywordSearch::no match is final determination");
+         }
+      }
+      return false;
+   }
+   
+   // Return true if should be filtered out due to TiVo name, false otherwise
+   public static Boolean filterByTivoName(Hashtable<String,String>entry, autoEntry auto) {
+      if ( ! auto.tivo.equals("all") ) {
+         if ( ! auto.tivo.equals(entry.get("tivoName")) ) {
+            log.print("NOTE: no match due to tivo name filter - tivo: " +
+                  auto.tivo + ", entry: " + entry.get("title"));
+            return true;
          }
       }
       return false;
@@ -523,6 +535,7 @@ public class auto {
             ofp.write(title + "\n");
             // Use currently defined options in main GUI as default settings
             ofp.write("<options>\n");
+            ofp.write("tivo "        + "all"                         + "\n");
             ofp.write("metadata "    + config.gui.metadata_setting() + "\n");
             ofp.write("decrypt "     + config.gui.decrypt_setting()  + "\n");
             ofp.write("qsfix "       + config.gui.qsfix_setting()    + "\n");
