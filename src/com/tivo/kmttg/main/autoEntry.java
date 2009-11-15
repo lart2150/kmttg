@@ -8,6 +8,7 @@ public class autoEntry {
    public Stack<String> keywords = new Stack<String>();
    
    // options
+   public String tivo  = "all";
    public int metadata = 0;
    public int decrypt  = 0;
    public int qsfix    = 0;
@@ -20,6 +21,6 @@ public class autoEntry {
    public String encode_name = null;
    
    public String toString() {
-      return "{type=" + type + ", keyword=" + keyword + ", keywords=" + keywords + "}";
+      return "{type=" + type + ", tivo=" + tivo + ", keyword=" + keyword + ", keywords=" + keywords + "}";
    }
 }
