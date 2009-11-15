@@ -420,6 +420,9 @@ public class NowPlaying  {
             if (h.containsKey("CopyProtected")) {
                h.put("ExpirationImage", "copy-protected");
             }
+            
+            // If programId doesn't exist then grab id from url instead
+            checkProgramId(h);
          }
          // Add last entry
          if ( ! h.isEmpty() ) {
@@ -427,6 +430,8 @@ public class NowPlaying  {
                h.put("title", h.get("title") + " - " + h.get("episodeTitle"));
             }
             h.put("tivoName", job.tivoName);
+            // If programId doesn't exist then grab id from url instead
+            checkProgramId(h);
             ENTRIES.add(h);
          }
       }
@@ -491,6 +496,19 @@ public class NowPlaying  {
             name = e.nextElement();
             value = ENTRIES.get(i).get(name);
             log.print(name + "=" + value);
+         }
+      }
+   }
+
+   // If programId doesn't exist then grab id from url instead
+   private void checkProgramId(Hashtable<String,String> h) {      
+      if (! h.containsKey("ProgramId")) {
+         if (h.containsKey("url")) {
+            String id = h.get("url");
+            id = id.replaceFirst("^.+id=(.+)$", "$1");
+            if (id.length() > 0) {
+               h.put("ProgramId", id);
+            }
          }
       }
    }
