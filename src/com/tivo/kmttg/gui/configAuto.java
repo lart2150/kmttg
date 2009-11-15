@@ -16,6 +16,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Stack;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -61,6 +63,7 @@ public class configAuto {
    private static JXTable table = null;
    private static JScrollPane table_scroll = null;
    private static JComboBox type = null;
+   private static JComboBox tivo = null;
    private static JComboBox encoding_name = null;
    private static JCheckBox metadata = null;
    private static JCheckBox decrypt = null;
@@ -178,6 +181,9 @@ public class configAuto {
       JLabel type_label = new JLabel("Type");
       type = new JComboBox(new Object[] {"title", "keywords"});
       
+      JLabel tivo_label = new JLabel("TiVo");
+      tivo = new JComboBox(getTivoFilterNames());
+      
       title = new JTextField();
             
       metadata = new JCheckBox("metadata");
@@ -217,7 +223,7 @@ public class configAuto {
       
       JLabel check_interval_label = new JLabel("Check Tivos Interval (mins)");
       
-      check_interval = new JTextField();
+      check_interval = new JTextField(5);
       check_interval.setText("" + autoConfig.CHECK_TIVOS_INTERVAL);
       
       dry_run = new JCheckBox("Dry Run Mode (test keywords only)");
@@ -285,7 +291,7 @@ public class configAuto {
       //c.ipady = 150;
       content.add(table_scroll, c);
 
-      // text
+      // text pane
       gy++;
       c.gridx = 0;
       c.gridy = gy;
@@ -295,31 +301,31 @@ public class configAuto {
       c.weighty = 0.0;
       c.ipady = 0;
       content.add(text, c);
-      
-      // type_label
+
+      // row 3 items
+      JPanel row3 = new JPanel();
+      row3.setLayout(new BoxLayout(row3, BoxLayout.X_AXIS));
+      Dimension space_5 = new Dimension(5,0);
+      Dimension space_10 = new Dimension(10,0);
+      Dimension space_50 = new Dimension(50,0);
+      row3.add(type_label);
+      row3.add(Box.createRigidArea(space_5));
+      row3.add(type);
+      row3.add(Box.createRigidArea(space_5));
+      row3.add(tivo_label);
+      row3.add(Box.createRigidArea(space_5));
+      row3.add(tivo);
+      row3.add(Box.createRigidArea(space_5));
+      row3.add(title);
+            
       gy++;
       c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 1;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      content.add(type_label, c);
-      
-      // type
-      c.gridx = 1;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      content.add(type, c);
-           
-      // title
-      c.gridx = 2;
-      c.gridy = gy;
-      c.gridwidth = 6;     
+      c.gridwidth = 8;
       c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      content.add(title, c); 
+      c.anchor = GridBagConstraints.CENTER;
+      c.weightx = 0.0;
+      content.add(row3, c);
       
       // row4
       int GAP = 0;
@@ -341,59 +347,33 @@ public class configAuto {
       c.gridy = gy;
       c.gridwidth = 8;
       c.fill = GridBagConstraints.NONE;
+      c.anchor = GridBagConstraints.WEST;
       c.weightx = 0.0;
       content.add(row4, c);
       
-      // encoding_name_label
+      // row5
+      JPanel row5 = new JPanel();
+      row5.setLayout(new BoxLayout(row5, BoxLayout.X_AXIS));
+      row5.add(encoding_name_label);
+      row5.add(Box.createRigidArea(space_10));
+      row5.add(encoding_name);
+      row5.add(Box.createRigidArea(space_50));
+      row5.add(add);
+      row5.add(Box.createRigidArea(space_10));
+      row5.add(update);
+      row5.add(Box.createRigidArea(space_10));
+      row5.add(del);
+
       gy++;
       gx = 0;
-      c.gridx = gx;
+      c.gridx = gx++;
       c.gridy = gy;
-      c.gridwidth = 2;
+      c.gridwidth = 8;
       c.fill = GridBagConstraints.NONE;
+      c.anchor = GridBagConstraints.WEST;
       c.weightx = 0.0;
-      content.add(encoding_name_label, c);
+      content.add(row5, c);
             
-      // encoding_name
-      gx += c.gridwidth;
-      c.gridx = gx;
-      c.gridy = gy;
-      c.gridwidth = 2;
-      c.anchor = GridBagConstraints.WEST;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      content.add(encoding_name, c);
-      
-      // add
-      gx += c.gridwidth;
-      c.gridx = gx;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      c.anchor = GridBagConstraints.NORTH;
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 0.0;
-      content.add(add, c);
-      
-      // update
-      gx += c.gridwidth;
-      c.gridx = gx;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      c.anchor = GridBagConstraints.NORTH;
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 0.0;
-      content.add(update, c);
-      
-      // del
-      gx += c.gridwidth;
-      c.gridx = gx;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      c.anchor = GridBagConstraints.WEST;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      content.add(del, c);
-      
       // separator
       JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
       gy++;
@@ -415,34 +395,23 @@ public class configAuto {
       c.weightx = 0.0;
       content.add(global_settings, c);
       
-      // dry_run
-      gx += c.gridwidth;
-      c.ipady = -8;
+      // row7
+      JPanel row7 = new JPanel();
+      row7.setLayout(new BoxLayout(row7, BoxLayout.X_AXIS));
+      row7.add(dry_run);
+      row7.add(Box.createRigidArea(space_10));
+      row7.add(check_interval_label);
+      row7.add(Box.createRigidArea(space_10));
+      row7.add(check_interval);
+            
+      gy++;
+      gx = 0;
       c.gridx = gx;
       c.gridy = gy;
-      c.gridwidth = 2;
+      c.gridwidth = 8;
       c.fill = GridBagConstraints.NONE;
       c.weightx = 0.0;
-      content.add(dry_run, c);
-      
-      // check_interval_label
-      gx += c.gridwidth;
-      c.ipady = 0;
-      c.gridx = gx;
-      c.gridy = gy;
-      c.gridwidth = 2;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      content.add(check_interval_label, c);
-      
-      // check_interval
-      gx += c.gridwidth;
-      c.gridx = gx;
-      c.gridy = gy;
-      c.gridwidth = 2;
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 1.0;
-      content.add(check_interval, c);
+      content.add(row7, c);
       
       // date filter row
       GAP = 0;
@@ -499,7 +468,7 @@ public class configAuto {
       dialog = new JDialog(frame, false); // non-modal dialog
       dialog.setTitle("kmttg auto transfers configuration");
       dialog.setContentPane(content);
-      dialog.setSize(new Dimension(700,300));
+      dialog.setSize(new Dimension(700,400));
       dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
       dialog.pack();
    }
@@ -518,6 +487,7 @@ public class configAuto {
       encoding_name.setToolTipText(config.gui.getToolTip("encoding"));
       table.setToolTipText(getToolTip("table"));
       type.setToolTipText(getToolTip("type"));
+      tivo.setToolTipText(getToolTip("tivo"));
       dry_run.setToolTipText(getToolTip("dry_run"));
       title.setToolTipText(getToolTip("title"));
       check_interval.setToolTipText(getToolTip("check_interval"));
@@ -550,6 +520,11 @@ public class configAuto {
          text += "<b>keywords</b> means keyword matching (case insensitive) with<br>";
          text += "optional logical operations as illustrated above. Consult the<br>";
          text += "documentation for all the details.";
+      }
+      else if (component.equals("tivo")) {
+         text =  "<b>TiVo</b><br>";
+         text += "Restrict transfers to be from this TiVo only.<br>";
+         text += "<b>all</b> means all TiVos currently configured in kmttg.";
       }
       else if (component.equals("dry_run")) {
          text =  "<b>Dry Run Mode (test keywords only)</b><br>";
@@ -633,6 +608,38 @@ public class configAuto {
          text = "<html>" + text + "</html>";
       }
       return text;
+   }
+   
+   private void setTivoFilterNames() {
+      tivo.removeAllItems();
+      Object[] names = getTivoFilterNames();
+      for (int i=0; i<names.length; ++i) {
+         tivo.addItem(names[i]);
+      }
+   }
+   
+   // Defines choices for tivo name filtering
+   private Object[] getTivoFilterNames() {
+      Stack<String> names = config.getTivoNames();
+      names.add(0, "all");
+      Object[] tivoNames = new Object[names.size()];
+      for (int i=0; i<names.size(); ++i) {
+         tivoNames[i] = names.get(i);
+      }
+      return tivoNames;
+   }
+
+   // Checks given tivo name against current valid names and resets to all if not valid
+   private String validateTivoName(String tivoName) {
+      if ( ! tivoName.equals("all") ) {
+         Stack<String> names = config.getTivoNames();
+         for (int i=0; i<names.size(); ++i) {
+            if (tivoName.equals(names.get(i)))
+               return tivoName;
+         }
+         log.error("TiVo '" + tivoName + "' currently not configured in kmttg - resetting to all");
+      }
+      return "all";
    }
    
    // This will decide which options are enabled based on current config settings
@@ -843,7 +850,8 @@ public class configAuto {
    // Update dialog settings based on autoConfig current settings
    public void update() {
       SetKeywords(autoConfig.KEYWORDS);
-      SetEncodings(encodeConfig.getValidEncodeNames());            
+      SetEncodings(encodeConfig.getValidEncodeNames());
+      setTivoFilterNames();
       check_interval.setText("" + autoConfig.CHECK_TIVOS_INTERVAL);      
       dry_run.setSelected((Boolean)(autoConfig.dryrun == 1));
       dateFilter.setSelected((Boolean)(autoConfig.dateFilter == 1));
@@ -1020,7 +1028,8 @@ public class configAuto {
                   ofp.write("<keywords>\n");
                   ofp.write(autoConfig.keywordsToString(entry.keywords) + "\n");
                }
-               ofp.write("<options>\n");               
+               ofp.write("<options>\n");
+               ofp.write("tivo "     + entry.tivo     + "\n");
                ofp.write("metadata " + entry.metadata + "\n");               
                ofp.write("decrypt "  + entry.decrypt  + "\n");               
                ofp.write("qsfix "    + entry.qsfix    + "\n");               
@@ -1080,6 +1089,9 @@ public class configAuto {
       
       type.setSelectedItem(entry.type);
       
+      entry.tivo = validateTivoName(entry.tivo);
+      tivo.setSelectedItem(entry.tivo);
+      
       if (entry.type.equals("title")) {
          title.setText(entry.keyword);
       } else {
@@ -1089,6 +1101,7 @@ public class configAuto {
    
    private Boolean guiToEntry(autoEntry entry) {
       String ktype = (String)type.getSelectedItem();
+      String ktivo = (String)tivo.getSelectedItem();
       String keywords = string.removeLeadingTrailingSpaces(title.getText());
       if (keywords.length() == 0) {
          log.error("No keywords specified");
@@ -1143,6 +1156,8 @@ public class configAuto {
       entry.encode_name = (String)encoding_name.getSelectedItem();
       
       entry.type = ktype;
+      
+      entry.tivo = ktivo;
       
       if (ktype.equals("title")) {
          entry.keyword = keywords;
