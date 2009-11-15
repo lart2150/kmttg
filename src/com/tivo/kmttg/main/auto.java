@@ -156,7 +156,7 @@ public class auto {
             debug.print("keywordSearch::matching title '" + keyword + "' in '" + title + "'");
             if ( title.matches(keyword) ) {
                // Match found, so queue up relevant job actions
-               if ( filterByTivoName(entry, auto) || filterByDate(entry) || filterTivoSuggestions(entry) || filterKUID(entry) ) {
+               if ( filter(entry, auto) ) {
                   return false;
                } else {
                   log.print("Title keyword match: '" + keyword + "' found in '" + title + "'");
@@ -271,7 +271,7 @@ public class auto {
          if( match ) {
             // Match found, so queue up relevant job actions
             debug.print("keywordSearch::KEYWORDS MATCH");
-            if ( filterByTivoName(entry, auto) || filterByDate(entry) || filterTivoSuggestions(entry) || filterKUID(entry) ) {
+            if ( filter(entry, auto) ) {
                return false;
             } else {
                log.print("keywords match: '" + keywordsList + "' matches '" + text + "'");
@@ -289,8 +289,17 @@ public class auto {
       return false;
    }
    
+   // Run given entry through all filters
+   private static Boolean filter(Hashtable<String,String>entry, autoEntry auto) {
+      return   filterByTivoName(entry, auto) ||
+               filterByDate(entry)           ||
+               filterTivoSuggestions(entry)  ||
+               filterKUID(entry)             ||
+               filterProgramId(entry);
+   }
+   
    // Return true if should be filtered out due to TiVo name, false otherwise
-   public static Boolean filterByTivoName(Hashtable<String,String>entry, autoEntry auto) {
+   private static Boolean filterByTivoName(Hashtable<String,String>entry, autoEntry auto) {
       if ( ! auto.tivo.equals("all") ) {
          if ( ! auto.tivo.equals(entry.get("tivoName")) ) {
             log.print("NOTE: no match due to tivo name filter - tivo: " +
@@ -302,7 +311,7 @@ public class auto {
    }
 
    // Return true if should be filtered out due to Date Filter, false otherwise
-   public static Boolean filterByDate(Hashtable<String,String>entry) {
+   private static Boolean filterByDate(Hashtable<String,String>entry) {
       // Date filtering
       Boolean filter = false;
       if (autoConfig.dateFilter == 1 && entry.containsKey("gmt")) {
@@ -352,6 +361,24 @@ public class auto {
          }
          if (filter) {
             log.print("NOTE: no match due to KUID Only Filter - " + entry.get("title"));
+         }
+      }
+      return filter;
+   }
+   
+   // Return true if should be filtered out because does not have proper ProgramId
+   private static Boolean filterProgramId(Hashtable<String,String>entry) {
+      Boolean filter = false;
+      if (autoConfig.programIdFilter == 1) {
+         if (entry.containsKey("ProgramId")) {
+            if ( entry.get("ProgramId").contains("_") ) {
+               filter = true;
+            }
+         } else {
+            filter = true;
+         }
+         if (filter) {
+            log.print("NOTE: no match due to no/fake ProgramId Filter - " + entry.get("title"));
          }
       }
       return filter;

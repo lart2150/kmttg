@@ -80,6 +80,7 @@ public class configAuto {
    private static JCheckBox dateFilter = null;
    private static JCheckBox suggestionsFilter = null;
    private static JCheckBox kuidFilter = null;
+   private static JCheckBox programIdFilter = null;
    private static JComboBox dateOperator = null;
    private static JTextField dateHours = null;
    private static JButton OK = null;
@@ -239,6 +240,8 @@ public class configAuto {
       suggestionsFilter = new JCheckBox("Filter out TiVo Suggestions");
       
       kuidFilter = new JCheckBox("Only process KUID recordings");
+      
+      programIdFilter = new JCheckBox("Do not process recordings without ProgramId");
       
       OK = new JButton("OK");
       OK.setBackground(Color.green);
@@ -447,6 +450,13 @@ public class configAuto {
       c.weightx = 0.0;
       content.add(kuidFilter, c);
       
+      c.gridx = gx++;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
+      content.add(programIdFilter, c);
+      
       // OK & CANCEL
       GAP = 0;
       JPanel last = new JPanel();
@@ -497,6 +507,7 @@ public class configAuto {
       dateFilter.setToolTipText(getToolTip("dateFilter"));
       suggestionsFilter.setToolTipText(getToolTip("suggestionsFilter"));
       kuidFilter.setToolTipText(getToolTip("kuidFilter"));
+      programIdFilter.setToolTipText(getToolTip("programIdFilter"));
       dateOperator.setToolTipText(getToolTip("dateOperator"));
       dateHours.setToolTipText(getToolTip("dateHours"));
       OK.setToolTipText(getToolTip("OK"));
@@ -589,6 +600,13 @@ public class configAuto {
          text =  "<b>Only process KUID recordings</b><br>";
          text += "If enabled then only process recordings that are marked as<br>";
          text += "Keep Until I Delete (KUID).";
+      }
+      else if (component.equals("programIdFilter")) {
+         text =  "<b>Do not process recordings without ProgramId</b><br>";
+         text += "If enabled then do not process recordings without ProgramId.<br>";
+         text += "Typically, these are programs that were transferred to your TiVo(s)<br>";
+         text += "from a PC or other source other than a recorded TV station or MRV,<br>";
+         text += "such as pyTivo or TiVo Desktop transfers.";
       }
       else if (component.equals("OK")) {
          text =  "<b>OK</b><br>";
@@ -859,6 +877,7 @@ public class configAuto {
       dateHours.setText("" + autoConfig.dateHours);
       suggestionsFilter.setSelected((Boolean)(autoConfig.suggestionsFilter == 1));
       kuidFilter.setSelected((Boolean)(autoConfig.kuidFilter == 1));
+      programIdFilter.setSelected((Boolean)(autoConfig.programIdFilter == 1));
    }
    
    // Set encoding_name combobox choices
@@ -1010,6 +1029,11 @@ public class configAuto {
             ofp.write("0\n\n");
          ofp.write("<kuidFilter>\n");
          if (kuidFilter.isSelected())
+            ofp.write("1\n\n");
+         else
+            ofp.write("0\n\n");
+         ofp.write("<programIdFilter>\n");
+         if (programIdFilter.isSelected())
             ofp.write("1\n\n");
          else
             ofp.write("0\n\n");
