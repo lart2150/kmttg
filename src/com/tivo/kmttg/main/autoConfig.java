@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -99,6 +101,14 @@ public class autoConfig {
                String[] l = line.split("\\s+");
                String name = l[0];
                String value = l[1];
+               if (name.matches("tivo")) {
+                  // tivo value can have spaces
+                  Pattern p = Pattern.compile("(\\S+)\\s+(.+)");
+                  Matcher m = p.matcher(line);
+                  if (m.matches()) {
+                     entry.tivo = m.group(2);
+                  }
+               }
                if (name.matches("metadata"))
                   entry.metadata = Integer.parseInt(value);
                if (name.matches("decrypt"))
