@@ -46,7 +46,7 @@ public class metadataTivo {
          }
       }
       if ( ! file.isFile(config.tivodecode) ) {             
-         log.error("tivodecode not found: " + config.curl);
+         log.error("tivodecode not found: " + config.tivodecode);
          schedule = false;
       }
 
