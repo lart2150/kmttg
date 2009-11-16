@@ -165,7 +165,7 @@ public class download {
             String s = String.format("%.2f MB", file.size(job.tivoFile)/Math.pow(2,20));
             String t = jobMonitor.getElapsedTime(job.time);
             String r = jobMonitor.getRate(file.size(job.tivoFile), job.time);
-            log.warn(job.tivoFile + "size=" + s + " elapsed=" + t + " (" + r + ")");
+            log.warn(job.tivoFile + ": size=" + s + " elapsed=" + t + " (" + r + ")");
          }
          
          // Check first line in tivo file for errors
