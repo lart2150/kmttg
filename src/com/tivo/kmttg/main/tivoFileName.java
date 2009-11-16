@@ -179,6 +179,8 @@ public class tivoFileName {
       s = s.replaceAll("&", "and");
       s = s.replaceAll("\\\\", "");
       s = s.replaceAll("\\$", "");
+      // #001 seems to be a special reserved pattern in Windows shell
+      s = s.replaceAll("#001", "# 001");
       return s;
    }
 
