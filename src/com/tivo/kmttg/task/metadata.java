@@ -81,6 +81,7 @@ public class metadata {
          command.add("3");
       }
       command.add("--anyauth");
+      command.add("--globoff");
       command.add("--user");
       command.add("tivo:" + config.MAK);
       command.add("--insecure");
