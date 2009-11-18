@@ -449,6 +449,10 @@ public class auto {
       h.put("custom",       (Boolean)(auto.custom   == 1));
       if (auto.encode_name != null)
          h.put("encodeName",   auto.encode_name);
+      
+      if (file.isFile(auto.comskipIni)) {
+         h.put("comskipIni", auto.comskipIni);
+      }
 
       jobMonitor.LaunchJobs(h);
    }
@@ -573,6 +577,7 @@ public class auto {
             ofp.write("encode_name " + config.encodeName             + "\n");
             ofp.write("push "        + config.gui.push_setting()     + "\n");
             ofp.write("custom "      + config.gui.custom_setting()   + "\n");
+            ofp.write("comskipIni "  + "none"                        + "\n");
             ofp.write("\n");
             ofp.close();
             log.warn("Added title entry '" + title + "' to " + config.autoIni);

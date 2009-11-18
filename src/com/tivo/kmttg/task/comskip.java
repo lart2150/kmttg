@@ -17,6 +17,7 @@ public class comskip {
    private jobData job;
    private String outputFile = null;
    private String options = null;
+   private String comskipIni = null;
 
    // constructor
    public comskip(jobData job) {
@@ -51,8 +52,16 @@ public class comskip {
          schedule = false;
       }
       
-      if ( ! file.isFile(config.comskipIni) ) {
-         log.error("comskip.ini not found: " + config.comskipIni);
+      // comskipIni can be overriden locally by job
+      comskipIni = config.comskipIni;
+      if (job.comskipIni != null) {
+         if ( file.isFile(job.comskipIni) ) {
+            comskipIni = job.comskipIni;
+         }
+      }
+      
+      if ( ! file.isFile(comskipIni) ) {
+         log.error("comskip.ini not found: " + comskipIni);
          schedule = false;
       }
       
@@ -84,7 +93,7 @@ public class comskip {
       Stack<String> command = new Stack<String>();
       command.add(config.comskip);
       command.add("--ini");
-      command.add(config.comskipIni);
+      command.add(comskipIni);
       if (options != null)
          command.add(options);
       command.add(job.mpegFile);

@@ -68,6 +68,9 @@ public class jobData {
    // pyTivo push related
    public String pyTivo_tivo = null;
    
+   // comskip related
+   public String comskipIni = null;
+   
    // NOTE: This used for job insertion purposes
    // ** JOB ORDER IS VERY IMPORTANT **
    public static String[] allTaskNames() {

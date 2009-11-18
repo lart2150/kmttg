@@ -815,6 +815,8 @@ public class jobMonitor {
             job.edlFile      = edlFile;
             if (file.isDir(config.VRD))
                job.vprjFile = string.replaceSuffix(mpegFile, ".VPrj");
+            if (specs.containsKey("comskipIni"))
+               job.comskipIni = (String) specs.get("comskipIni");
             submitNewJob(job);            
          }
       }

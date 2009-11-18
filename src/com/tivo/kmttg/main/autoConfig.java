@@ -113,6 +113,14 @@ public class autoConfig {
                      entry.tivo = m.group(2);
                   }
                }
+               if (name.matches("comskipIni")) {
+                  // comskipIni value can have spaces
+                  Pattern p = Pattern.compile("(\\S+)\\s+(.+)");
+                  Matcher m = p.matcher(line);
+                  if (m.matches()) {
+                     entry.comskipIni = m.group(2);
+                  }
+               }
                if (name.matches("metadata"))
                   entry.metadata = Integer.parseInt(value);
                if (name.matches("decrypt"))

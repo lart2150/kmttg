@@ -77,6 +77,7 @@ public class configAuto {
    private static JCheckBox dry_run = null;
    private static JTextField title = null;
    private static JTextField check_interval = null;
+   private static JTextField comskipIni = null;
    private static JCheckBox dateFilter = null;
    private static JCheckBox suggestionsFilter = null;
    private static JCheckBox kuidFilter = null;
@@ -214,6 +215,9 @@ public class configAuto {
       });
       */
       custom   = new JCheckBox("custom");
+      
+      JLabel comskipIni_label = new JLabel("comskip.ini override: ");
+      comskipIni = new JTextField(30);
       
       JLabel encoding_name_label = new JLabel("Encoding Name: ");
       
@@ -376,6 +380,23 @@ public class configAuto {
       c.anchor = GridBagConstraints.WEST;
       c.weightx = 0.0;
       content.add(row5, c);
+      
+      // row 6
+      JPanel row6 = new JPanel();
+      row6.setLayout(new BoxLayout(row6, BoxLayout.X_AXIS));
+      row6.add(comskipIni_label);
+      row6.add(Box.createRigidArea(space_5));
+      row6.add(comskipIni);
+      
+      gy++;
+      gx = 0;
+      c.gridx = gx++;
+      c.gridy = gy;
+      c.gridwidth = 8;
+      c.fill = GridBagConstraints.NONE;
+      c.anchor = GridBagConstraints.WEST;
+      c.weightx = 0.0;
+      content.add(row6, c);      
             
       // separator
       JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
@@ -477,7 +498,7 @@ public class configAuto {
       dialog = new JDialog(frame, false); // non-modal dialog
       dialog.setTitle("kmttg auto transfers configuration");
       dialog.setContentPane(content);
-      dialog.setSize(new Dimension(700,400));
+      dialog.setSize(new Dimension(700,450));
       dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
       dialog.pack();
    }
@@ -499,6 +520,7 @@ public class configAuto {
       tivo.setToolTipText(getToolTip("tivo"));
       dry_run.setToolTipText(getToolTip("dry_run"));
       title.setToolTipText(getToolTip("title"));
+      comskipIni.setToolTipText(getToolTip("comskipIni"));
       check_interval.setToolTipText(getToolTip("check_interval"));
       add.setToolTipText(getToolTip("add"));
       update.setToolTipText(getToolTip("update"));
@@ -549,6 +571,12 @@ public class configAuto {
          text += "Type in or update title or keywords for this entry here.<br>";
          text += "Consult example above and documentation for details on keywords setup.<br>";
          text += "NOTE: title and keywords are all case insensitive.";
+      }
+      else if (component.equals("comskipIni")) {
+         text =  "<b>comskip.ini override</b><br>";
+         text += "If you wish to use a specific comskip.ini file to use with <b>comcut</b> for<br>";
+         text += "this auto transfer then specify the full path to the file here.<br>";
+         text += "This will override the comskip.ini file specified in main kmttg configuration.";
       }
       else if (component.equals("check_interval")) {
          text =  "<b>Check Tivos Interval (mins)</b><br>";
@@ -1063,7 +1091,11 @@ public class configAuto {
                ofp.write("push "     + entry.push     + "\n");
                ofp.write("custom "   + entry.custom   + "\n");
                if (entry.encode_name != null && entry.encode_name.length() > 0)
-                  ofp.write("encode_name " + entry.encode_name + "\n");               
+                  ofp.write("encode_name " + entry.encode_name + "\n");
+               if (file.isFile(entry.comskipIni))
+                  ofp.write("comskipIni " + entry.comskipIni + "\n");
+               else
+                  ofp.write("comskipIni " + "none" + "\n");
             }
          }
          
@@ -1109,6 +1141,8 @@ public class configAuto {
       custom.setSelected((Boolean)(entry.custom == 1));
       
       encoding_name.setSelectedItem(entry.encode_name);
+      
+      comskipIni.setText(entry.comskipIni);
       
       type.setSelectedItem(entry.type);
       
@@ -1177,6 +1211,14 @@ public class configAuto {
          entry.custom = 0;
       
       entry.encode_name = (String)encoding_name.getSelectedItem();
+
+      String ini = (String)string.removeLeadingTrailingSpaces(comskipIni.getText());
+      if (ini.length() > 0 && ! ini.equals("none")) {
+         if ( ! file.isFile(ini) ) {
+            log.error("Specified comskip.ini override file does not exist...");
+         }
+      }
+      entry.comskipIni = ini;
       
       entry.type = ktype;
       

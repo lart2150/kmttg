@@ -19,6 +19,7 @@ public class autoEntry {
    public int push     = 0;
    public int custom   = 0;
    public String encode_name = null;
+   public String comskipIni = "none";
    
    public String toString() {
       return "{type=" + type + ", tivo=" + tivo + ", keyword=" + keyword + ", keywords=" + keywords + "}";
