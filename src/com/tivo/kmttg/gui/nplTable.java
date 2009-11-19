@@ -493,6 +493,9 @@ public class nplTable {
       
       // Update table listings
       RefreshNowPlaying(entries);
+            
+      // Adjust column widths to data
+      packColumns(NowPlaying, 2);
    }
    
    // Refresh table with given NowPlaying entries
