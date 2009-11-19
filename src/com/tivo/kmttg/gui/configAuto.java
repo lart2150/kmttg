@@ -65,6 +65,7 @@ public class configAuto {
    private static JComboBox type = null;
    private static JComboBox tivo = null;
    private static JComboBox encoding_name = null;
+   private static JCheckBox enabled = null;
    private static JCheckBox metadata = null;
    private static JCheckBox decrypt = null;
    private static JCheckBox qsfix = null;
@@ -188,6 +189,7 @@ public class configAuto {
       
       title = new JTextField();
             
+      enabled  = new JCheckBox("enabled", true);
       metadata = new JCheckBox("metadata");
       decrypt  = new JCheckBox("decrypt");
       qsfix    = new JCheckBox("VRD QS fix");
@@ -384,6 +386,8 @@ public class configAuto {
       // row 6
       JPanel row6 = new JPanel();
       row6.setLayout(new BoxLayout(row6, BoxLayout.X_AXIS));
+      row6.add(enabled);
+      row6.add(Box.createRigidArea(space_5));
       row6.add(comskipIni_label);
       row6.add(Box.createRigidArea(space_5));
       row6.add(comskipIni);
@@ -505,6 +509,7 @@ public class configAuto {
    
    // Component tooltip setup
    public void setToolTips() {
+      enabled.setToolTipText(getToolTip("enabled"));
       metadata.setToolTipText(config.gui.getToolTip("metadata"));
       decrypt.setToolTipText(config.gui.getToolTip("decrypt"));
       qsfix.setToolTipText(config.gui.getToolTip("qsfix"));
@@ -557,6 +562,12 @@ public class configAuto {
          text =  "<b>TiVo</b><br>";
          text += "Restrict transfers to be from this TiVo only.<br>";
          text += "<b>all</b> means all TiVos currently configured in kmttg.";
+      }
+      else if (component.equals("enabled")) {
+         text =  "<b>enabled</b><br>";
+         text += "You can use this option to enable or disable an Auto Transfer entry.<br>";
+         text += "This is useful to temporarily disable Auto Transfer entries without having<br>";
+         text += "to delete them.";
       }
       else if (component.equals("dry_run")) {
          text =  "<b>Dry Run Mode (test keywords only)</b><br>";
@@ -1080,6 +1091,7 @@ public class configAuto {
                   ofp.write(autoConfig.keywordsToString(entry.keywords) + "\n");
                }
                ofp.write("<options>\n");
+               ofp.write("enabled "  + entry.enabled  + "\n");
                ofp.write("tivo "     + entry.tivo     + "\n");
                ofp.write("metadata " + entry.metadata + "\n");               
                ofp.write("decrypt "  + entry.decrypt  + "\n");               
@@ -1130,6 +1142,7 @@ public class configAuto {
       debug.print("row=" + row);
       if (row == -1) return;
       autoEntry entry = GetRowData(row);
+      enabled.setSelected((Boolean)(entry.enabled ==1));
       metadata.setSelected((Boolean)(entry.metadata == 1));
       decrypt.setSelected((Boolean)(entry.decrypt == 1));
       qsfix.setSelected((Boolean)(entry.qsfix == 1));
@@ -1164,6 +1177,11 @@ public class configAuto {
          log.error("No keywords specified");
          return false;
       }
+      
+      if (enabled.isSelected())
+         entry.enabled = 1;
+      else
+         entry.enabled = 0;
       
       if (metadata.isSelected())
          entry.metadata = 1;

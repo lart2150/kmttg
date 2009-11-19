@@ -150,6 +150,10 @@ public class auto {
       autoEntry auto;
       for (int i=0; i<auto_entries.size(); i++) {
          auto = auto_entries.get(i);
+         if (auto.enabled == 0) {
+            // Skip disabled auto transfer entries
+            continue;
+         }
          keyword = auto.keyword.toLowerCase();
          if (entry.containsKey("titleOnly")) {
             title = entry.get("titleOnly").toLowerCase();
@@ -176,6 +180,10 @@ public class auto {
       auto_entries = getKeywordsEntries();
       for (int i=0; i<auto_entries.size(); i++) {
          auto = auto_entries.get(i);
+         if (auto.enabled == 0) {
+            // Skip disabled auto transfer entries
+            continue;
+         }
          String keywordsList = auto.keywords.get(0).toLowerCase();
          for (int j=1; j<auto.keywords.size(); j++) {
             keywordsList += "|" + auto.keywords.get(j).toLowerCase();
@@ -566,6 +574,7 @@ public class auto {
             ofp.write(title + "\n");
             // Use currently defined options in main GUI as default settings
             ofp.write("<options>\n");
+            ofp.write("enabled "     + "1"                           + "\n");
             ofp.write("tivo "        + "all"                         + "\n");
             ofp.write("metadata "    + config.gui.metadata_setting() + "\n");
             ofp.write("decrypt "     + config.gui.decrypt_setting()  + "\n");

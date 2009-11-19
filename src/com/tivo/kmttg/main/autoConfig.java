@@ -121,6 +121,8 @@ public class autoConfig {
                      entry.comskipIni = m.group(2);
                   }
                }
+               if (name.matches("enabled"))
+                  entry.enabled = Integer.parseInt(value);
                if (name.matches("metadata"))
                   entry.metadata = Integer.parseInt(value);
                if (name.matches("decrypt"))

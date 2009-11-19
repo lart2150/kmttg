@@ -18,6 +18,7 @@ public class autoEntry {
    public int encode   = 0;
    public int push     = 0;
    public int custom   = 0;
+   public int enabled  = 1;
    public String encode_name = null;
    public String comskipIni = "none";
    
