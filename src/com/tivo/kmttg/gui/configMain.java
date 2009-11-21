@@ -2032,7 +2032,7 @@ public class configMain {
          text += "If you have VideoRedo and have configured kmttg with the installation path<br>";
          text += "to VideoRedo, when this option is enabled kmttg will start VideoRedo GUI<br>";
          text += "to allow you to manually define the commercial cuts before starting the<br>";
-         text += "the commercial cutting job. kmttg will wait until you close the VideoRedo GUI<br>";
+         text += "commercial cutting job. kmttg will wait until you close the VideoRedo GUI<br>";
          text += "before proceeding. <b>NOTE: Be sure to save your changes to .VPrj file<br>";
          text += "before you exit VideoRedo (File->Save Project)</b>.<br>";
          text += "NOTE: When using this option you normally want to disable <b>Ad Detect</b> task<br>";
