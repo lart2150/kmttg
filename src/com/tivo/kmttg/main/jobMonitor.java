@@ -759,7 +759,7 @@ public class jobMonitor {
          }
       }
       
-      if (decrypt) {
+      if (decrypt && config.VrdDecrypt == 0) {
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
@@ -770,7 +770,7 @@ public class jobMonitor {
          submitNewJob(job);
       }
       
-      if (qsfix) {
+      if (qsfix || (decrypt && config.VrdDecrypt == 1)) {
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
@@ -778,6 +778,9 @@ public class jobMonitor {
          job.name         = config.VRD;
          job.mpegFile     = mpegFile;
          job.mpegFile_fix = mpegFile_fix;
+         if (config.VrdDecrypt == 1) {
+            job.tivoFile  = tivoFile;
+         }
          submitNewJob(job);
       }
       
