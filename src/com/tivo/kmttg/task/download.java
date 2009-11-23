@@ -74,6 +74,9 @@ public class download {
          return false;
       }
       Stack<String> command = new Stack<String>();
+      String url = job.url;
+      if (config.TSDownload == 1)
+         url += "&Format=video/x-tivo-mpeg-ts";
       command.add(config.curl);
       if (config.OS.equals("windows")) {
          command.add("--retry");
@@ -87,7 +90,7 @@ public class download {
       command.add("--cookie-jar");
       command.add(cookieFile);
       command.add("--url");
-      command.add(job.url);
+      command.add(url);
       command.add("--output");
       command.add(job.tivoFile);
       process = new backgroundProcess();
