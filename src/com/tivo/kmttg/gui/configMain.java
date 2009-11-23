@@ -52,6 +52,8 @@ public class configMain {
    private static JCheckBox VrdReview = null;
    private static JCheckBox VrdReview_noCuts = null;
    private static JCheckBox VrdQsFilter = null;
+   private static JCheckBox VrdDecrypt = null;
+   private static JCheckBox TSDownload = null;
    private static JCheckBox OverwriteFiles = null;
    private static JCheckBox toolTips = null;
    private static JCheckBox jobMonitorFullPaths = null;
@@ -315,6 +317,18 @@ public class configMain {
       else
          VrdQsFilter.setSelected(false);
       
+      // VrdDecrypt
+      if (config.VrdDecrypt == 1)
+         VrdDecrypt.setSelected(true);
+      else
+         VrdDecrypt.setSelected(false);
+      
+      // TSDownload
+      if (config.TSDownload == 1)
+         TSDownload.setSelected(true);
+      else
+         TSDownload.setSelected(false);
+      
       // OverwriteFiles
       if (config.OverwriteFiles == 1)
          OverwriteFiles.setSelected(true);
@@ -520,6 +534,18 @@ public class configMain {
          config.VrdQsFilter = 1;
       else
          config.VrdQsFilter = 0;
+      
+      // VrdDecrypt
+      if (VrdDecrypt.isSelected())
+         config.VrdDecrypt = 1;
+      else
+         config.VrdDecrypt = 0;
+      
+      // TSDownload
+      if (TSDownload.isSelected())
+         config.TSDownload = 1;
+      else
+         config.TSDownload = 0;
       
       // OverwriteFiles
       if (OverwriteFiles.isSelected())
@@ -956,6 +982,8 @@ public class configMain {
       VrdReview = new javax.swing.JCheckBox();
       VrdReview_noCuts = new javax.swing.JCheckBox();
       VrdQsFilter = new javax.swing.JCheckBox();
+      VrdDecrypt = new javax.swing.JCheckBox();
+      TSDownload = new javax.swing.JCheckBox();
       OverwriteFiles = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
       JLabel file_naming_label = new javax.swing.JLabel();
@@ -1029,6 +1057,8 @@ public class configMain {
       VrdReview.setText("Use VideoRedo GUI to review detected commercials");
       VrdReview_noCuts.setText("Bring up VideoRedo GUI to make manual cuts");
       VrdQsFilter.setText("Enable VideoRedo QS Fix video dimension filter");
+      VrdDecrypt.setText("Decrypt using VideoRedo instead of tivodecode");
+      TSDownload.setText("Download TiVo files in Transport Stream format");
       OverwriteFiles.setText("Overwrite existing files");
       MAK_label.setText("MAK"); 
       file_naming_label.setText("File Naming"); 
@@ -1720,6 +1750,18 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(VrdQsFilter, c);
       
+      // VrdDecrypt
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(VrdDecrypt, c);
+      
+      // TSDownload
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(TSDownload, c);
+      
       // t2extract_args
       gy++;
       c.gridx = 0;
@@ -1917,6 +1959,8 @@ public class configMain {
       VrdReview.setToolTipText(getToolTip("VrdReview"));
       VrdReview_noCuts.setToolTipText(getToolTip("VrdReview_noCuts"));
       VrdQsFilter.setToolTipText(getToolTip("VrdQsFilter"));
+      VrdDecrypt.setToolTipText(getToolTip("VrdDecrypt"));
+      TSDownload.setToolTipText(getToolTip("TSDownload"));
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
       files_path.setToolTipText(getToolTip("files_path"));
       MAK.setToolTipText(getToolTip("MAK"));
@@ -2045,6 +2089,23 @@ public class configMain {
          text += "Quickstream Fix run that will solve that problem. Note that kmttg uses ffmpeg<br>";
          text += "to automatically detect the mpeg video file dimensions to be used as the filter and<br>";
          text += "prepares a custom version of VRD vp.vbs file with an added filter line.";
+      }
+      else if (component.equals("VrdDecrypt")) {
+         text =  "<b>Decrypt using VideoRedo instead of tivodecode</b><br>";
+         text += "If you have VideoRedo and have configured kmttg with the installation path<br>";
+         text += "to VideoRedo, when this option is enabled kmttg will use VideoRedo QSFix task<br>";
+         text += "to decrypt .TiVo files instead of the standard <b>tivodecode</b> program. This is<br>";
+         text += "useful for cases when the .TiVo files are in a format that tivodecode cannot decrypt<br>";
+         text += "such as for Transport Stream format .TiVo files used in AU/NZ TiVos.<br>";
+         text += "NOTE: You must have TiVo Desktop (or at least TiVoDirectShowFilter.dll) installed for this to work.";
+      }
+      else if (component.equals("TSDownload")) {
+         text =  "<b>Download TiVo files in Transport Stream format</b><br>";
+         text += "For TiVo software that properly supports it, this forces TiVo file downloads to use<br>";
+         text += "Transport Stream format instead of the default Program Stream format by adding<br>";
+         text += "<b>&Format=video/x-tivo-mpeg-ts</b> tag to the download URL.<br>";
+         text += "NOTE: Currently on Australia/New Zealand TiVos support this format and this will<br>";
+         text += "have no effect for other TiVos";
       }
       else if (component.equals("OverwriteFiles")) {
          text =  "<b>Overwrite existing files</b><br>";

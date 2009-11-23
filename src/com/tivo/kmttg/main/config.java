@@ -57,11 +57,13 @@ public class config {
    public static int VrdReview = 0;
    public static int VrdReview_noCuts = 0;
    public static int VrdQsFilter = 0;
+   public static int VrdDecrypt = 0;
+   public static int TSDownload = 0;
    public static int OverwriteFiles = 0;
    public static String comskipIni = "";
    public static String wan_http_port = "";
    public static String configIni = "";
-   public static String tivoFileNameFormat = null;    
+   public static String tivoFileNameFormat = null; 
    
    // custom related
    public static String customCommand = "";
@@ -530,6 +532,12 @@ public class config {
             if (key.equals("VrdQsFilter")) {
                VrdQsFilter = Integer.parseInt(line);
             }
+            if (key.equals("VrdDecrypt")) {
+               VrdDecrypt = Integer.parseInt(line);
+            }
+            if (key.equals("TSDownload")) {
+               TSDownload = Integer.parseInt(line);
+            }
             if (key.equals("OverwriteFiles")) {
                OverwriteFiles = Integer.parseInt(line);
             }
@@ -687,6 +695,10 @@ public class config {
          ofp.write("<VrdReview_noCuts>\n" + VrdReview_noCuts + "\n\n");
          
          ofp.write("<VrdQsFilter>\n" + VrdQsFilter + "\n\n");
+         
+         ofp.write("<VrdDecrypt>\n" + VrdDecrypt + "\n\n");
+         
+         ofp.write("<TSDownload>\n" + TSDownload + "\n\n");
          
          ofp.write("<OverwriteFiles>\n" + OverwriteFiles + "\n\n");
          
