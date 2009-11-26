@@ -1008,7 +1008,7 @@ public class jobMonitor {
    }
 
    // Remove all jobs in the family whose familId > given job familyId
-   public static void removeFamilyJobs(jobData job) {
+   private static void removeFamilyJobs(jobData job) {
       float major_float = job.familyId;
       int majorId = (int)major_float;
       float mf;
