@@ -986,6 +986,7 @@ public class jobMonitor {
    // Cancel and/or kill given job
    public static void kill(jobData job) {
       if (job.type != null) {
+         removeFamilyJobs(job);
          // Kill job if running
          if (job.status.equals("running")) {
             if (job.type.equals("push")) {
@@ -1003,6 +1004,22 @@ public class jobMonitor {
          removeFromJobList(job);
       } else {
          log.error("Could not kill job - Missing 'type' key: " + job);
+      }
+   }
+
+   // Remove all jobs in the family whose familId > given job familyId
+   public static void removeFamilyJobs(jobData job) {
+      float major_float = job.familyId;
+      int majorId = (int)major_float;
+      float mf;
+      int m;
+      for (int i=0; i<JOBS.size(); ++i) {
+         mf = JOBS.get(i).familyId;
+         m = (int)mf;
+         if (m == majorId && mf > major_float) {
+            log.warn("Removing job: " + job.toString());
+            removeFromJobList(JOBS.get(i));
+         }
       }
    }
    
