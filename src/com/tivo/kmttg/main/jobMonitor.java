@@ -1017,7 +1017,7 @@ public class jobMonitor {
          mf = JOBS.get(i).familyId;
          m = (int)mf;
          if (m == majorId && mf > major_float) {
-            log.warn("Removing job: " + job.toString());
+            log.warn("Removing job: " + JOBS.get(i).toString());
             removeFromJobList(JOBS.get(i));
          }
       }
