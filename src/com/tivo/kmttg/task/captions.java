@@ -87,7 +87,7 @@ public class captions {
       } else {
     	  executable = "ccextractor";
     	  command.add(config.ccextractor);
-          log.print(">> Running ccextractor on " + job.videoFile + " ...");
+    	  log.print(">> Running ccextractor on " + job.videoFile + " ...");
       }
       command.add(job.videoFile);
       process = new backgroundProcess();
