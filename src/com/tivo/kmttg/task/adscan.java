@@ -47,22 +47,28 @@ public class adscan {
       
       if ( ! file.isFile(vrdscript) ) {
          log.error("File does not exist: " + vrdscript);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if ( ! file.isFile(cscript) ) {
          log.error("File does not exist: " + cscript);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
                   
       if ( ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not found: " + job.mpegFile);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.vprjFile, job) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.vprjFile, job) ) {
+            jobMonitor.removeFamilyJobs(job);
+            schedule = false;
+         }
       }
       
       if (schedule) {

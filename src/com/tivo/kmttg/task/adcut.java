@@ -50,27 +50,34 @@ public class adcut {
       
       if ( ! file.isFile(vrdscript) ) {
          log.error("File does not exist: " + vrdscript);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if ( ! file.isFile(cscript) ) {
          log.error("File does not exist: " + cscript);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if ( ! file.isFile(job.vprjFile) ) {
          log.error("vprj file not found: " + job.vprjFile);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
             
       if ( ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not found: " + job.mpegFile);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.mpegFile_cut, job) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.mpegFile_cut, job) ) {
+            jobMonitor.removeFamilyJobs(job);
+            schedule = false;
+         }
       }
       
       if (schedule) {

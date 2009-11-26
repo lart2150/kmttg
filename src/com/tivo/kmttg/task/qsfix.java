@@ -48,11 +48,13 @@ public class qsfix {
       
       if ( ! file.isFile(vrdscript) ) {
          log.error("File does not exist: " + vrdscript);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if ( ! file.isFile(cscript) ) {
          log.error("File does not exist: " + cscript);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
@@ -64,12 +66,16 @@ public class qsfix {
                   
       if ( ! file.isFile(sourceFile) ) {
          log.error("source file not found: " + sourceFile);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
             
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.mpegFile_fix, job) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.mpegFile_fix, job) ) {
+            jobMonitor.removeFamilyJobs(job);
+            schedule = false;
+         }
       }
       
       if (config.VrdQsFilter == 1 && schedule) {
@@ -78,12 +84,14 @@ public class qsfix {
          Hashtable<String,String> dimensions = ffmpegGetVideoDimensions(sourceFile);
          if (dimensions == null) {
             log.error("VRD QS Filter enabled but unable to determine video dimensions of file: " + sourceFile);
+            jobMonitor.removeFamilyJobs(job);
             schedule = false;
          } else {    
             log.warn("VideoRedo video dimensions filter set to: x=" + dimensions.get("x") + ", y=" + dimensions.get("y"));
             // Build a custom vrdscript with video filtering enabled
             vrdscript_temp = makeTempVrdFilterScript(vrdscript, dimensions);
             if (vrdscript_temp == null) {
+               jobMonitor.removeFamilyJobs(job);
                schedule = false;
             } else {
                vrdscript = vrdscript_temp;

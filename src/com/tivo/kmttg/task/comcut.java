@@ -40,22 +40,28 @@ public class comcut {
             
       if ( ! file.isFile(config.mencoder) ) {
          log.error("mencoder not found: " + config.mencoder);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if ( ! file.isFile(job.edlFile) ) {
          log.error("edl file not found: " + job.edlFile);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
             
       if ( ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not found: " + job.mpegFile);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.mpegFile_cut, job) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.mpegFile_cut, job) ) {
+            jobMonitor.removeFamilyJobs(job);
+            schedule = false;
+         }
       }
       
       if (schedule) {

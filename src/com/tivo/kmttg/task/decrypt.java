@@ -40,12 +40,16 @@ public class decrypt {
       
       if ( ! file.isFile(config.tivodecode) ) {
          log.error("tivodecode not found: " + config.tivodecode);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.mpegFile, job) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.mpegFile, job) ) {
+            jobMonitor.removeFamilyJobs(job);
+            schedule = false;
+         }
       }
       
       if (schedule) {

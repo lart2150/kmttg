@@ -43,27 +43,35 @@ public class vrdreview {
       
       if ( ! file.isFile(vrd) ) {
          log.error("Could not determine VideRedo GUI executable path in installation dir: " + config.VRD);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
                         
       if ( ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not found: " + job.mpegFile);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       // Make a vprjFile with no cuts if requested
       if (config.VrdReview_noCuts == 1 && ! file.isFile(job.vprjFile)) {
          schedule = createBasicVprjFile(job.vprjFile, job.mpegFile);
+         if (schedule == false)
+            jobMonitor.removeFamilyJobs(job);
       }
       
       if ( ! file.isFile(job.vprjFile) ) {
          log.error("VPrj file not found: " + job.vprjFile);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.vprjFile, job) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.vprjFile, job) ) {
+            jobMonitor.removeFamilyJobs(job);
+            schedule = false;
+         }
       }
       
       if (schedule) {

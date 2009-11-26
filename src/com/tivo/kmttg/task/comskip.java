@@ -49,6 +49,7 @@ public class comskip {
       
       if ( ! file.isFile(config.comskip) ) {
          log.error("comskip not found: " + config.comskip);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
@@ -62,17 +63,22 @@ public class comskip {
       
       if ( ! file.isFile(comskipIni) ) {
          log.error("comskip.ini not found: " + comskipIni);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if ( ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not found: " + job.mpegFile);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(outputFile, job) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(outputFile, job) ) {
+            jobMonitor.removeFamilyJobs(job);
+            schedule = false;
+         }
       }
       
       if (schedule) {

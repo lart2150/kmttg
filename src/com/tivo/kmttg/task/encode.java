@@ -47,6 +47,7 @@ public class encode {
       
       if ( ! file.isFile(mpeg) ) {
          log.error("mpeg file not given or doesn't exist: " + mpeg);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       job.inputFile = mpeg;
@@ -54,13 +55,17 @@ public class encode {
       if (schedule) {
          if ( ! encodeConfig.isValidEncodeName(job.encodeName) ) {
             log.error("invalid encoding profile for this job: " + job.encodeName);
+            jobMonitor.removeFamilyJobs(job);
             schedule = false;
          }
       }
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.encodeFile, job) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.encodeFile, job) ) {
+            jobMonitor.removeFamilyJobs(job);
+            schedule = false;
+         }
       }
       
       if (schedule) {

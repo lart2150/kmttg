@@ -31,17 +31,22 @@ public class streamfix {
             
       if ( ! file.isFile(config.mencoder) ) {
          log.error("mencoder not found: " + config.mencoder);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if ( ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not given or doesn't exist: " + job.mpegFile);
+         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
                   
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.mpegFile_fix, job) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(job.mpegFile_fix, job) ) {
+            jobMonitor.removeFamilyJobs(job);
+            schedule = false;
+         }
       }
       
       if (schedule) {
