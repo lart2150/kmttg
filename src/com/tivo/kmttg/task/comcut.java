@@ -97,6 +97,7 @@ public class comcut {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
+         jobMonitor.removeFamilyJobs(job);
          return false;
       }
       return true;
@@ -106,6 +107,7 @@ public class comcut {
       debug.print("");
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
+      jobMonitor.removeFamilyJobs(job);
    }
 
    // Check status of a currently running job
@@ -154,6 +156,7 @@ public class comcut {
          if (failed == 1) {
             log.error("comcut failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
+            jobMonitor.removeFamilyJobs(job);
          } else {
             log.warn("comcut job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");

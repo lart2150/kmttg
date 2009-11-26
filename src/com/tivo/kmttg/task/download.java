@@ -102,6 +102,7 @@ public class download {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
+         jobMonitor.removeFamilyJobs(job);
          return false;
       }
       return true;
@@ -112,6 +113,7 @@ public class download {
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
       file.delete(cookieFile);
+      jobMonitor.removeFamilyJobs(job);
    }
    
    // Check status of a currently running job
@@ -195,6 +197,7 @@ public class download {
             log.error("Download failed to file: " + job.tivoFile);
             log.error("Exit code: " + exit_code);
             process.printStderr();
+            jobMonitor.removeFamilyJobs(job);
          } else {
             log.print("---DONE---");
             // Add auto history entry if auto downloads configured

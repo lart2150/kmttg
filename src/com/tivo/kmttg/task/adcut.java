@@ -107,6 +107,7 @@ public class adcut {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
+         jobMonitor.removeFamilyJobs(job);
          return false;
       }
       return true;
@@ -116,6 +117,7 @@ public class adcut {
       debug.print("");
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
+      jobMonitor.removeFamilyJobs(job);
    }
 
    // Check status of a currently running job
@@ -164,6 +166,7 @@ public class adcut {
          if (failed == 1) {
             log.error("adcut failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
+            jobMonitor.removeFamilyJobs(job);
          } else {
             log.warn("adcut job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");

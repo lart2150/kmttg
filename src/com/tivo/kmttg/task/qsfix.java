@@ -126,6 +126,7 @@ public class qsfix {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
+         jobMonitor.removeFamilyJobs(job);
          if (vrdscript_temp != null) file.delete(vrdscript_temp);
          return false;
       }
@@ -137,6 +138,7 @@ public class qsfix {
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
       if (vrdscript_temp != null) file.delete(vrdscript_temp);
+      jobMonitor.removeFamilyJobs(job);
    }
 
    // Check status of a currently running job
@@ -192,6 +194,7 @@ public class qsfix {
          if (failed == 1) {
             log.error("qsfix failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
+            jobMonitor.removeFamilyJobs(job);
          } else {
             log.warn("qsfix job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");
