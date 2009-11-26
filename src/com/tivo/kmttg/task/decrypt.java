@@ -40,14 +40,12 @@ public class decrypt {
       
       if ( ! file.isFile(config.tivodecode) ) {
          log.error("tivodecode not found: " + config.tivodecode);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if (schedule) {
          // Create sub-folders for output file if needed
          if ( ! jobMonitor.createSubFolders(job.mpegFile, job) ) {
-            jobMonitor.removeFamilyJobs(job);
             schedule = false;
          }
       }
@@ -83,7 +81,6 @@ public class decrypt {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
-         jobMonitor.removeFamilyJobs(job);
          return false;
       }
       return true;
@@ -93,7 +90,6 @@ public class decrypt {
       debug.print("");
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
-      jobMonitor.removeFamilyJobs(job);
    }
 
    // Check status of a currently running job
@@ -155,7 +151,6 @@ public class decrypt {
          if (failed == 1) {
             log.error("tivodecode failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
-            jobMonitor.removeFamilyJobs(job);
          } else {
             log.warn("tivodecode job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");

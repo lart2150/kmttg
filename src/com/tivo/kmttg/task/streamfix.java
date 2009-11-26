@@ -31,20 +31,17 @@ public class streamfix {
             
       if ( ! file.isFile(config.mencoder) ) {
          log.error("mencoder not found: " + config.mencoder);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if ( ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not given or doesn't exist: " + job.mpegFile);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
                   
       if (schedule) {
          // Create sub-folders for output file if needed
          if ( ! jobMonitor.createSubFolders(job.mpegFile_fix, job) ) {
-            jobMonitor.removeFamilyJobs(job);
             schedule = false;
          }
       }
@@ -88,7 +85,6 @@ public class streamfix {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
-         jobMonitor.removeFamilyJobs(job);
          return false;
       }
       return true;
@@ -98,7 +94,6 @@ public class streamfix {
       debug.print("");
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
-      jobMonitor.removeFamilyJobs(job);
    }
 
    // Check status of a currently running job
@@ -157,7 +152,6 @@ public class streamfix {
          if (failed == 1) {
             log.error("streamfix failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
-            jobMonitor.removeFamilyJobs(job);
          } else {
             log.warn("streamfix job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");

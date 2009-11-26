@@ -50,32 +50,27 @@ public class adcut {
       
       if ( ! file.isFile(vrdscript) ) {
          log.error("File does not exist: " + vrdscript);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if ( ! file.isFile(cscript) ) {
          log.error("File does not exist: " + cscript);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if ( ! file.isFile(job.vprjFile) ) {
          log.error("vprj file not found: " + job.vprjFile);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
             
       if ( ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not found: " + job.mpegFile);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if (schedule) {
          // Create sub-folders for output file if needed
          if ( ! jobMonitor.createSubFolders(job.mpegFile_cut, job) ) {
-            jobMonitor.removeFamilyJobs(job);
             schedule = false;
          }
       }
@@ -114,7 +109,6 @@ public class adcut {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
-         jobMonitor.removeFamilyJobs(job);
          return false;
       }
       return true;
@@ -124,7 +118,6 @@ public class adcut {
       debug.print("");
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
-      jobMonitor.removeFamilyJobs(job);
    }
 
    // Check status of a currently running job
@@ -173,7 +166,6 @@ public class adcut {
          if (failed == 1) {
             log.error("adcut failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
-            jobMonitor.removeFamilyJobs(job);
          } else {
             log.warn("adcut job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");

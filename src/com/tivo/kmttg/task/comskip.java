@@ -49,7 +49,6 @@ public class comskip {
       
       if ( ! file.isFile(config.comskip) ) {
          log.error("comskip not found: " + config.comskip);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
@@ -63,20 +62,17 @@ public class comskip {
       
       if ( ! file.isFile(comskipIni) ) {
          log.error("comskip.ini not found: " + comskipIni);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if ( ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not found: " + job.mpegFile);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if (schedule) {
          // Create sub-folders for output file if needed
          if ( ! jobMonitor.createSubFolders(outputFile, job) ) {
-            jobMonitor.removeFamilyJobs(job);
             schedule = false;
          }
       }
@@ -112,7 +108,6 @@ public class comskip {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
-         jobMonitor.removeFamilyJobs(job);
          return false;
       }
       return true;
@@ -122,7 +117,6 @@ public class comskip {
       debug.print("");
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
-      jobMonitor.removeFamilyJobs(job);
    }
 
    // Check status of a currently running job
@@ -177,7 +171,6 @@ public class comskip {
          if (failed == 1) {
             log.error("comskip failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
-            jobMonitor.removeFamilyJobs(job);
          } else {
             log.warn("comskip job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");

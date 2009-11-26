@@ -48,13 +48,11 @@ public class qsfix {
       
       if ( ! file.isFile(vrdscript) ) {
          log.error("File does not exist: " + vrdscript);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if ( ! file.isFile(cscript) ) {
          log.error("File does not exist: " + cscript);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
@@ -66,14 +64,12 @@ public class qsfix {
                   
       if ( ! file.isFile(sourceFile) ) {
          log.error("source file not found: " + sourceFile);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
             
       if (schedule) {
          // Create sub-folders for output file if needed
          if ( ! jobMonitor.createSubFolders(job.mpegFile_fix, job) ) {
-            jobMonitor.removeFamilyJobs(job);
             schedule = false;
          }
       }
@@ -84,14 +80,12 @@ public class qsfix {
          Hashtable<String,String> dimensions = ffmpegGetVideoDimensions(sourceFile);
          if (dimensions == null) {
             log.error("VRD QS Filter enabled but unable to determine video dimensions of file: " + sourceFile);
-            jobMonitor.removeFamilyJobs(job);
             schedule = false;
          } else {    
             log.warn("VideoRedo video dimensions filter set to: x=" + dimensions.get("x") + ", y=" + dimensions.get("y"));
             // Build a custom vrdscript with video filtering enabled
             vrdscript_temp = makeTempVrdFilterScript(vrdscript, dimensions);
             if (vrdscript_temp == null) {
-               jobMonitor.removeFamilyJobs(job);
                schedule = false;
             } else {
                vrdscript = vrdscript_temp;
@@ -134,7 +128,6 @@ public class qsfix {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
-         jobMonitor.removeFamilyJobs(job);
          if (vrdscript_temp != null) file.delete(vrdscript_temp);
          return false;
       }
@@ -146,7 +139,6 @@ public class qsfix {
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
       if (vrdscript_temp != null) file.delete(vrdscript_temp);
-      jobMonitor.removeFamilyJobs(job);
    }
 
    // Check status of a currently running job
@@ -202,7 +194,6 @@ public class qsfix {
          if (failed == 1) {
             log.error("qsfix failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
-            jobMonitor.removeFamilyJobs(job);
          } else {
             log.warn("qsfix job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");

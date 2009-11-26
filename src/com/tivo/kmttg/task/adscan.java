@@ -47,26 +47,22 @@ public class adscan {
       
       if ( ! file.isFile(vrdscript) ) {
          log.error("File does not exist: " + vrdscript);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if ( ! file.isFile(cscript) ) {
          log.error("File does not exist: " + cscript);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
                   
       if ( ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not found: " + job.mpegFile);
-         jobMonitor.removeFamilyJobs(job);
          schedule = false;
       }
       
       if (schedule) {
          // Create sub-folders for output file if needed
          if ( ! jobMonitor.createSubFolders(job.vprjFile, job) ) {
-            jobMonitor.removeFamilyJobs(job);
             schedule = false;
          }
       }
@@ -102,7 +98,6 @@ public class adscan {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
-         jobMonitor.removeFamilyJobs(job);
          return false;
       }
       return true;
@@ -112,7 +107,6 @@ public class adscan {
       debug.print("");
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
-      jobMonitor.removeFamilyJobs(job);
    }
 
    // Check status of a currently running job
@@ -160,7 +154,6 @@ public class adscan {
          if (failed == 1) {
             log.error("adscan failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
-            jobMonitor.removeFamilyJobs(job);
          } else {
             log.warn("adscan job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");
