@@ -2075,10 +2075,10 @@ public class configMain {
          text =  "<b>Bring up VideoRedo GUI to make manual cuts</b><br>";
          text += "If you have VideoRedo and have configured kmttg with the installation path<br>";
          text += "to VideoRedo, when this option is enabled kmttg will start VideoRedo GUI<br>";
-         text += "to allow you to manually define the commercial cuts before starting the<br>";
-         text += "commercial cutting job. kmttg will wait until you close the VideoRedo GUI<br>";
-         text += "before proceeding. <b>NOTE: Be sure to save your changes to .VPrj file<br>";
-         text += "before you exit VideoRedo (File->Save Project)</b>.<br>";
+         text += "to allow you create the commercial edited mpeg file manually. kmttg will wait<br>";
+         text += "until you close the VideoRedo GUI before proceeding to next task.<br>";
+         text += "<b>NOTE: Be sure to specify the output file using the VRD default ' (02).mpg'<br>";
+         text += "suffix or using the kmttg conventional '_cut.mpg' suffix when saving output file</b>.<br>";
          text += "NOTE: When using this option you normally want to disable <b>Ad Detect</b> task<br>";
          text += "and enable <b>Ad Cut</b> task.";
       }
