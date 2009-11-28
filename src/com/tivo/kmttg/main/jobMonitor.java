@@ -835,6 +835,9 @@ public class jobMonitor {
             job.mpegFile     = mpegFile;
             job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
             submitNewJob(job);
+            // VRD will be used to save output with cuts, so cancel comcut
+            if (config.VrdReview_noCuts == 1)
+               comcut = false;
          }
       }
       
