@@ -198,16 +198,17 @@ public class qsfix {
             log.print("---DONE---");
             // Rename mpegFile_fix to mpegFile
             Boolean result;
-            if (config.VrdDecrypt == 0) {
+            if (file.isFile(job.mpegFile)) {
+               // Need to 1st remove mpegFile if it exists
                result = file.delete(job.mpegFile);
                if ( ! result ) {
-               	log.error("Failed to delete file in preparation for rename: " + job.mpegFile);
-               	if (vrdscript_temp != null) file.delete(vrdscript_temp);
-               	return false;
+                  log.error("Failed to delete file in preparation for rename: " + job.mpegFile);
+                  if (vrdscript_temp != null) file.delete(vrdscript_temp);
+                  return false;
                }
             }
-            // NOTE: Using rename with possible 3 sec sleep time since delayed VRD exit may hold file lock
-            result = file.rename(job.mpegFile_fix, job.mpegFile, 3);
+            // Now do the file rename
+            result = file.rename(job.mpegFile_fix, job.mpegFile);
             if (result)
             	log.print("(Renamed " + job.mpegFile_fix + " to " + job.mpegFile + ")");
             else
