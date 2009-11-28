@@ -146,6 +146,10 @@ public class vrdreview {
          } else {
             log.warn("vrdreview job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE---");
+            if ( config.RemoveComcutFiles == 1 && config.VrdReview_noCuts == 1 ) {
+               if (file.delete(job.vprjFile))
+                  log.print("(Deleted vprj file: " + job.vprjFile + ")");
+            }
          }
       }
       return false;
