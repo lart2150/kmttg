@@ -207,7 +207,8 @@ public class qsfix {
                	return false;
                }
             }
-            result = file.rename(job.mpegFile_fix, job.mpegFile);
+            // NOTE: Using rename with possible 3 sec sleep time since delayed VRD exit may hold file lock
+            result = file.rename(job.mpegFile_fix, job.mpegFile, 3);
             if (result)
             	log.print("(Renamed " + job.mpegFile_fix + " to " + job.mpegFile + ")");
             else
