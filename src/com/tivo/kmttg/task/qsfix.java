@@ -56,9 +56,8 @@ public class qsfix {
          schedule = false;
       }
       
-      if (config.VrdDecrypt == 0) {
-         sourceFile = job.mpegFile;
-      } else {
+      sourceFile = job.mpegFile;
+      if (config.VrdDecrypt == 1 && ! file.isFile(sourceFile)) {
          sourceFile = job.tivoFile;
       }
                   
