@@ -21,6 +21,15 @@ public class captions {
    // constructor
    public captions(jobData job) {
       debug.print("job=" + job);
+      
+      if (config.VrdReview_noCuts == 1) {
+         // Look for VRD default edit file output
+         String tryit = job.videoFile.replaceFirst("_cut.mpg", ".mpg");
+         tryit = string.replaceSuffix(tryit, " (02).mpg");
+         if (file.isFile(tryit))
+            job.videoFile = tryit;
+      }
+
       srtFile = string.replaceSuffix(job.videoFile, ".srt");
       this.job = job;
    }
@@ -46,7 +55,7 @@ public class captions {
          log.error("t2extract (" + config.t2extract + ") or ccextractor (" + config.ccextractor + ") not found");
          schedule = false;
       }
-      
+         
       if ( ! file.isFile(job.videoFile) ) {
          log.error("video file not found: " + job.videoFile);
          schedule = false;

@@ -43,6 +43,12 @@ public class encode {
          mpeg = job.mpegFile_cut;
       } else {
          mpeg = job.mpegFile;
+         if (config.VrdReview_noCuts == 1) {
+            // Look for VRD default edit file output
+            String tryit = string.replaceSuffix(mpeg, " (02).mpg");
+            if (file.isFile(tryit))
+               mpeg = tryit;
+         }
       }
       
       if ( ! file.isFile(mpeg) ) {
@@ -223,6 +229,10 @@ public class encode {
                   log.print("(Deleted file: " + job.inputFile + ")");
                } else {
                   log.error("Failed to delete file: "+ job.inputFile);
+               }
+               
+               if ( file.delete(job.mpegFile)) {
+                  log.print("(Deleted file: " + job.mpegFile + ")");
                }
             }
             
