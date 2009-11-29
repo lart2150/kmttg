@@ -146,10 +146,20 @@ public class vrdreview {
          } else {
             log.warn("vrdreview job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " output=" + job.vprjFile);
-            if ( config.RemoveComcutFiles == 1 && config.VrdReview_noCuts == 1 ) {
-               if (file.delete(job.vprjFile))
-                  log.print("(Deleted vprj file: " + job.vprjFile + ")");
+            
+            if (config.VrdReview_noCuts == 1) {
+               if (config.RemoveComcutFiles == 1) {
+                  if (file.delete(job.vprjFile))
+                     log.print("(Deleted vprj file: " + job.vprjFile + ")");
+               }
+               
+               // Remove .mpg file if option enabled
+               if (config.RemoveComcutFiles_mpeg == 1) {
+                  if (file.delete(job.mpegFile))
+                     log.print("(Deleted mpeg file: " + job.mpegFile + ")");
+               }
             }
+
          }
       }
       return false;
