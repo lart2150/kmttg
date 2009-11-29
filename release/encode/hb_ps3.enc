@@ -5,7 +5,7 @@ Handbrake PS3: mpeg4 container, same res h.264 video, aac audio
 # Encode command or script (single line)
 # Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
-HANDBRAKE -i INPUT --cpu CPU_CORES -t 1 -c 1 -f mp4 -p  -e x264 -b 2500 -a 1 -E faac -B 160 -R 48 -6 dpl2 -D 1 -x level=41:me=umh -v -o OUTPUT
+HANDBRAKE -i INPUT --cpu CPU_CORES -t 1 -c 1 -f mp4 -e x264 -b 2500 -a 1 -E faac -B 160 -R 48 -6 dpl2 -D 1 -x level=41:me=umh -v -o OUTPUT
  
 # Encoded output file extension
 <extension>

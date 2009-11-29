@@ -5,7 +5,7 @@ Handbrake animation: mkv container, same res h.264 video, aac audio
 # Encode command or script (single line)
 # Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
-HANDBRAKE -i INPUT --cpu CPU_CORES -t 1 -c 1 -f mkv --decomb -p --detelecine -e x264 -b 1000 -2  -T  -a 1 -E faac -B 160 -6 dpl2 -D 1 -x ref=5:mixed-refs=1:bframes=6:weightb=1:direct=auto:b-pyramid=1:me=umh:analyse=all:8x8dct=1:trellis=1:nr=150:no-fast-pskip=1:deblock=2,2:psy-rd=1,1:subq=9 -v -o OUTPUT
+HANDBRAKE -i INPUT --cpu CPU_CORES -t 1 -c 1 -f mkv --decomb --detelecine -e x264 -b 1000 -2  -T  -a 1 -E faac -B 160 -6 dpl2 -D 1 -x ref=5:mixed-refs=1:bframes=6:weightb=1:direct=auto:b-pyramid=1:me=umh:analyse=all:8x8dct=1:trellis=1:nr=150:no-fast-pskip=1:deblock=2,2:psy-rd=1,1:subq=9 -v -o OUTPUT
  
 # Encoded output file extension
 <extension>
