@@ -196,6 +196,16 @@ public class qsfix {
          } else {
             log.warn("qsfix job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " output=" + job.mpegFile_fix);
+            
+            // Remove .TiVo file if option enabled
+            if (config.RemoveTivoFile == 1 && config.VrdDecrypt == 1) {
+               if ( file.delete(job.tivoFile) ) {
+                  log.print("(Deleted file: " + job.tivoFile + ")");
+               } else {
+                  log.error("Failed to delete file: "+ job.tivoFile);
+               }
+            }      
+            
             // Rename mpegFile_fix to mpegFile
             Boolean result;
             if (file.isFile(job.mpegFile)) {
