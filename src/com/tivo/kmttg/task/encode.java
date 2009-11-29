@@ -211,7 +211,7 @@ public class encode {
             process.printStderr();
          } else {
             log.warn("encoding job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " output=" + job.encodeFile);
             
             // Remove mpegFile.qsfix file if present
             String fix;            

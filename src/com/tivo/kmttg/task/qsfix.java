@@ -195,7 +195,7 @@ public class qsfix {
             process.printStderr();
          } else {
             log.warn("qsfix job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " output=" + job.mpegFile_fix);
             // Rename mpegFile_fix to mpegFile
             Boolean result;
             if (file.isFile(job.mpegFile)) {

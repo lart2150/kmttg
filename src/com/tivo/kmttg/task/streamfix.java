@@ -154,7 +154,7 @@ public class streamfix {
             process.printStderr();
          } else {
             log.warn("streamfix job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " output=" + job.mpegFile_fix);
          }
       }
       return false;

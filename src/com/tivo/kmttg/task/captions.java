@@ -157,7 +157,7 @@ public class captions {
             process.printStderr();
          } else {
             log.warn(executable + " job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " output=" + job.srtFile);
             // Rename srtFile to job.srtFile if they are different
             if ( ! srtFile.equals(job.srtFile) ) {
                file.rename(srtFile, job.srtFile);

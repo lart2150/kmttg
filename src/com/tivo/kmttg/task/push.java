@@ -130,7 +130,7 @@ public class push {
          jobMonitor.removeFromJobList(job);
          if (success) {
             log.warn("push job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " video=" + videoFile);
          }
       }
       return false;

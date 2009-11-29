@@ -156,7 +156,7 @@ public class adscan {
             process.printStderr();
          } else {
             log.warn("adscan job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " output=" + job.vprjFile);
          }
       }
       return false;

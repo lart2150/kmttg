@@ -127,7 +127,7 @@ public class custom {
          
          log.warn("custom job completed: " + jobMonitor.getElapsedTime(job.time));
          log.warn("exit code: " + exit_code);
-         log.print("---DONE---");
+         log.print("---DONE--- job=" + job.type);
          if (exit_code != 0)
             process.printStderr();
       }

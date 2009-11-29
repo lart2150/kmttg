@@ -165,7 +165,7 @@ public class metadata {
             process.printStderr();
          } else {
             log.warn("metadata job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " output=" + job.metaFile);
             
             // Success, so create pyTivo metadata file
             job.metaTmpFile = outputFile;

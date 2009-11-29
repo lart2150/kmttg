@@ -151,7 +151,7 @@ public class metadataTivo {
             process.printStderr();
          } else {
             log.warn("metadata job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " output=" + job.metaFile);
             
             // Success, so generate pyTivo metaFile from xmlFile
             metaFileFromXmlFile(xmlFile2, job.metaFile);

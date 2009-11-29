@@ -185,7 +185,7 @@ public class NowPlaying  {
             jobMonitor.removeFromJobList(job);
          } else {
             log.warn("NPL job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " tivo=" + job.tivoName);
             
             // Success, so parse the result
             return parseNPL(outputFile);

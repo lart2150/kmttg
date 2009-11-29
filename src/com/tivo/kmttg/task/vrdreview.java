@@ -145,7 +145,7 @@ public class vrdreview {
             process.printStderr();
          } else {
             log.warn("vrdreview job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " output=" + job.vprjFile);
             if ( config.RemoveComcutFiles == 1 && config.VrdReview_noCuts == 1 ) {
                if (file.delete(job.vprjFile))
                   log.print("(Deleted vprj file: " + job.vprjFile + ")");

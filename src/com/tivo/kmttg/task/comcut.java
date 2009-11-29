@@ -158,7 +158,7 @@ public class comcut {
             process.printStderr();
          } else {
             log.warn("comcut job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " output=" + job.mpegFile_cut);
             // Remove Ad Cut files if option enabled
             if ( config.RemoveComcutFiles == 1 ) {
                if (file.delete(job.vprjFile))

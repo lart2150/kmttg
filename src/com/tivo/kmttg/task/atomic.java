@@ -137,7 +137,7 @@ public class atomic {
          } else {
             // Print statistics for the job
             log.warn("AtomicParsley job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " output=" + job.encodeFile);
          }
       }
       return false;

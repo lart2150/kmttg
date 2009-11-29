@@ -173,7 +173,7 @@ public class comskip {
             process.printStderr();
          } else {
             log.warn("comskip job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " output=" + outputFile);
             // Cleanup
             String[] extensions = {".log", ".logo.txt", ".txt"};
             String f;

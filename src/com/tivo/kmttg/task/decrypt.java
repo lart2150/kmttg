@@ -153,7 +153,7 @@ public class decrypt {
             process.printStderr();
          } else {
             log.warn("tivodecode job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " output=" + job.mpegFile);
             
             // Remove .TiVo file if option enabled
             if (config.RemoveTivoFile == 1) {

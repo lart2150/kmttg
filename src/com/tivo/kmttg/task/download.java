@@ -196,7 +196,7 @@ public class download {
             log.error("Exit code: " + exit_code);
             process.printStderr();
          } else {
-            log.print("---DONE---");
+            log.print("---DONE--- job=" + job.type + " output=" + job.tivoFile);
             // Add auto history entry if auto downloads configured
             if (file.isFile(config.autoIni))
                auto.AddHistoryEntry(job);
