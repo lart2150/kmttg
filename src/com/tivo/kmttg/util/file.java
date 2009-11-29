@@ -133,27 +133,7 @@ public class file {
          return false;
       }
    }
-   
-   // rename with a little sleep time if needed
-   public static Boolean rename(String fold, String fnew, int sleep) {
-      Boolean result = rename(fold, fnew);
-      if (result) {
-         return result;
-      } else {
-         if (sleep > 0) {
-            try {
-               Thread.sleep(sleep*1000);
-               return rename(fold, fnew);
-            } catch (InterruptedException e) {
-               log.error(e.toString());
-               return false;
-            }
-
-         }
-         return result;
-      }
-   }
-   
+      
    // Create a new empty file
    public static Boolean create(String fileName) {
       debug.print("fileName=" + fileName);
