@@ -480,7 +480,20 @@ public class configMain {
          }
          //config.tivo_beacon = null;
       }
-            
+                  
+      // VRD path
+      value = string.removeLeadingTrailingSpaces(VRD_path.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = "";
+      } else {
+         if ( ! file.isDir(value) ) {
+            textFieldError(VRD_path, "VideoRedo path setting not a valid dir: '" + value + "'");
+            errors++;
+         }
+      }
+      config.VRD = value;
+      
       // Remove .TiVo
       if (remove_tivo.isSelected())
          config.RemoveTivoFile = 1;
@@ -512,31 +525,31 @@ public class configMain {
          config.CheckDiskSpace = 0;
       
       // UseAdscan
-      if (UseAdscan.isSelected())
+      if (UseAdscan.isSelected() && file.isDir(config.VRD))
          config.UseAdscan = 1;
       else
          config.UseAdscan = 0;
       
       // VrdReview
-      if (VrdReview.isSelected())
+      if (VrdReview.isSelected() && file.isDir(config.VRD))
          config.VrdReview = 1;
       else
          config.VrdReview = 0;
       
       // VrdReview_noCuts
-      if (VrdReview_noCuts.isSelected())
+      if (VrdReview_noCuts.isSelected() && file.isDir(config.VRD))
          config.VrdReview_noCuts = 1;
       else
          config.VrdReview_noCuts = 0;
       
       // VrdQsFilter
-      if (VrdQsFilter.isSelected())
+      if (VrdQsFilter.isSelected() && file.isDir(config.VRD))
          config.VrdQsFilter = 1;
       else
          config.VrdQsFilter = 0;
       
       // VrdDecrypt
-      if (VrdDecrypt.isSelected())
+      if (VrdDecrypt.isSelected() && file.isDir(config.VRD))
          config.VrdDecrypt = 1;
       else
          config.VrdDecrypt = 0;
@@ -726,19 +739,6 @@ public class configMain {
          }
       }
       config.comskipIni = value;
-      
-      // VRD path
-      value = string.removeLeadingTrailingSpaces(VRD_path.getText());
-      if (value.length() == 0) {
-         // Reset to default if none given
-         value = "";
-      } else {
-         if ( ! file.isDir(value) ) {
-            textFieldError(VRD_path, "VideoRedo path setting not a valid dir: '" + value + "'");
-            errors++;
-         }
-      }
-      config.VRD = value;
       
       // tivodecode
       value = string.removeLeadingTrailingSpaces(tivodecode.getText());
