@@ -2074,7 +2074,10 @@ public class configMain {
          text += "to allow you to manually review and update the detected commercial segments<br>";
          text += "before starting the commercial cutting job. kmttg will wait until you close<br>";
          text += "the VideRedo GUI before proceeding. NOTE: Be sure to save your changes to .VPrj file<br>";
-         text += "before you exit VideoRedo or they will not be used in commercial cut step.";
+         text += "before you exit VideoRedo or they will not be used in commercial cut step.<br>";
+         text += "NOTE: If you have <b>Bring up VideoRedo GUI to make manual cuts</b> option set<br>";
+         text += "you will need to save the output file from VideoRedo GUI, otherwise without that<br>";
+         text += "option set the cuts will be make by kmttg <b>Ad Cut</b> task.";
       }
       else if (component.equals("VrdReview_noCuts")) {
          text =  "<b>Bring up VideoRedo GUI to make manual cuts</b><br>";
