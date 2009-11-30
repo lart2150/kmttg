@@ -1693,16 +1693,6 @@ public class configMain {
       c.gridy = gy;
       programs_panel.add(AtomicParsley, c);
       
-      // VRD path
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      programs_panel.add(VRD_path_label, c);
-
-      c.gridx = 1;
-      c.gridy = gy;
-      programs_panel.add(VRD_path, c);
-      
       // custom command
       gy++;
       c.gridx = 0;
@@ -1725,39 +1715,9 @@ public class configMain {
 
       // Program_options Panel
       JPanel program_options_panel = new JPanel(new GridBagLayout());      
-
-      // UseAdscan
-      gy=0;
-      c.gridx = 1;
-      c.gridy = gy;
-      program_options_panel.add(UseAdscan, c);      
-      
-      // VrdReview
-      gy++;
-      c.gridx = 1;
-      c.gridy = gy;
-      program_options_panel.add(VrdReview, c);
-      
-      // VrdReview_noCuts
-      gy++;
-      c.gridx = 1;
-      c.gridy = gy;
-      program_options_panel.add(VrdReview_noCuts, c);
-      
-      // VrdQsFilter
-      gy++;
-      c.gridx = 1;
-      c.gridy = gy;
-      program_options_panel.add(VrdQsFilter, c);
-      
-      // VrdDecrypt
-      gy++;
-      c.gridx = 1;
-      c.gridy = gy;
-      program_options_panel.add(VrdDecrypt, c);
       
       // TSDownload
-      gy++;
+      gy=0;
       c.gridx = 1;
       c.gridy = gy;
       program_options_panel.add(TSDownload, c);
@@ -1846,7 +1806,50 @@ public class configMain {
       c.gridx = 0;
       c.gridy = gy;
       general.add(jobMonitorFullPaths, c);
+      
+      // VRD Panel
+      JPanel vrd_panel = new JPanel(new GridBagLayout());       
+      
+      // VRD path
+      gy=0;
+      c.gridx = 0;
+      c.gridy = gy;
+      vrd_panel.add(VRD_path_label, c);
 
+      c.gridx = 1;
+      c.gridy = gy;
+      vrd_panel.add(VRD_path, c);
+
+      // UseAdscan
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      vrd_panel.add(UseAdscan, c);      
+      
+      // VrdReview
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      vrd_panel.add(VrdReview, c);
+      
+      // VrdReview_noCuts
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      vrd_panel.add(VrdReview_noCuts, c);
+      
+      // VrdQsFilter
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      vrd_panel.add(VrdQsFilter, c);
+      
+      // VrdDecrypt
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      vrd_panel.add(VrdDecrypt, c);
+      
       // pyTivo Panel
       JPanel pyTivo_panel = new JPanel(new GridBagLayout());      
       
@@ -1920,6 +1923,8 @@ public class configMain {
       tabbed_panel.add("Program Options", program_options_panel);
       tabbed_panel.add("Tivos", tivo_panel);
       tabbed_panel.add("General", general);
+      if (config.OS.equals("windows"))
+         tabbed_panel.add("VideoRedo", vrd_panel);
       tabbed_panel.add("pyTivo", pyTivo_panel);
       
       // Main panel
