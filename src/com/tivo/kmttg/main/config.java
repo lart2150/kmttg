@@ -88,6 +88,7 @@ public class config {
    public static int toolTips = 1;          // If 1 then display component toolTips
    public static int jobMonitorFullPaths = 1; // If 1 then show full paths in job monitor
    public static int toolTipsTimeout = 20;  // Set # seconds for tooltip display to timeout
+   public static int FontSize = 12;
 
    // GUI table related
    public static Color tableBkgndDarker = new Color(235,235,235); // light grey
@@ -95,7 +96,7 @@ public class config {
    public static Color tableBkgndProtected = new Color(191,156,94); // tan
    public static Color tableBkgndRecording = new Color(149, 151, 221); // light blue
    public static Color lightRed = new Color(250, 190, 190); // light red
-   public static Font  tableFont = new Font("System", Font.BOLD, 12);
+   public static Font  tableFont = new Font("System", Font.BOLD, FontSize);
    
    // GUI free space related
    public static Hashtable<String,Float> diskSpace = new Hashtable<String,Float>();
@@ -485,7 +486,7 @@ public class config {
                continue;
             }
             if (key.equals("MAK")) {
-               MAK = line;
+               MAK = string.removeLeadingTrailingSpaces(line);
             }
             if (key.equals("TIVOS")) {
                String name, value;
@@ -508,38 +509,41 @@ public class config {
             if (key.equals("tivoFileNameFormat")) {
                tivoFileNameFormat = line;
             }
+            if (key.equals("FontSize")) {
+               FontSize = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("RemoveTivoFile")) {
-               RemoveTivoFile = Integer.parseInt(line);
+               RemoveTivoFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("RemoveComcutFiles")) {
-               RemoveComcutFiles = Integer.parseInt(line);
+               RemoveComcutFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("RemoveComcutFiles_mpeg")) {
-               RemoveComcutFiles_mpeg = Integer.parseInt(line);
+               RemoveComcutFiles_mpeg = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("RemoveMpegFile")) {
-               RemoveMpegFile = Integer.parseInt(line);
+               RemoveMpegFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("UseAdscan")) {
-               UseAdscan = Integer.parseInt(line);
+               UseAdscan = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("VrdReview")) {
-               VrdReview = Integer.parseInt(line);
+               VrdReview = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("VrdReview_noCuts")) {
-               VrdReview_noCuts = Integer.parseInt(line);
+               VrdReview_noCuts = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("VrdQsFilter")) {
-               VrdQsFilter = Integer.parseInt(line);
+               VrdQsFilter = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("VrdDecrypt")) {
-               VrdDecrypt = Integer.parseInt(line);
+               VrdDecrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("TSDownload")) {
-               TSDownload = Integer.parseInt(line);
+               TSDownload = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("OverwriteFiles")) {
-               OverwriteFiles = Integer.parseInt(line);
+               OverwriteFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("outputDir")) {
                outputDir = line;
@@ -581,7 +585,7 @@ public class config {
                wan_http_port = line;
             }
             if (key.equals("MaxJobs")) {
-               MaxJobs = Integer.parseInt(line);
+               MaxJobs = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("VRD")) {
                VRD = line;
@@ -614,16 +618,16 @@ public class config {
                metadata_files = line;
             }
             if (key.equals("CheckDiskSpace")) {
-               CheckDiskSpace = Integer.parseInt(line);
+               CheckDiskSpace = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("LowSpaceSize")) {
-               LowSpaceSize = Integer.parseInt(line);
+               LowSpaceSize = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("CheckBeacon")) {
-               CheckBeacon = Integer.parseInt(line);
+               CheckBeacon = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("cpu_cores")) {
-               cpu_cores = Integer.parseInt(line);
+               cpu_cores = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("diskSpace")) {
                String[] l = line.split("=");
@@ -679,6 +683,8 @@ public class config {
          }
          ofp.write(String.format("%-20s %-20s\n", "FILES", TIVOS.get("FILES")));
          ofp.write("\n");
+         
+         ofp.write("<FontSize>\n" + FontSize + "\n\n");
          
          ofp.write("<RemoveTivoFile>\n" + RemoveTivoFile + "\n\n");
          
