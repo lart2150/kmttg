@@ -14,6 +14,7 @@ import java.util.Hashtable;
 import java.util.Stack;
 
 import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
 
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.autoConfig;
@@ -116,10 +117,44 @@ public class gui {
          
          // Create NowPlaying icons
          CreateImages();
+         
+         setFontSize(config.FontSize);
       }
       return jFrame;
    }
 
+   @SuppressWarnings("unchecked")
+   public void setFontSize(int fontSize) {
+      Enumeration keys = UIManager.getDefaults().keys();
+      while (keys.hasMoreElements()) {
+         Object key = keys.nextElement();
+         Object value = UIManager.get(key);
+         if (value != null && value instanceof FontUIResource) {
+            UIManager.put(key, null);
+            Font font = UIManager.getFont(key);
+            if (font != null) {
+               UIManager.put(key, new FontUIResource(font.getFamily(), font.getStyle(), fontSize));
+            }
+         }
+      }
+      config.tableFont = new Font("System", Font.BOLD, fontSize);
+      SwingUtilities.updateComponentTreeUI(jFrame);
+      
+      // Update config dialog fonts if created
+      JDialog d = configMain.getDialog();
+      if (d != null) {
+         SwingUtilities.updateComponentTreeUI(d);
+         d.pack();
+      }
+      
+      // Update auto config dialog fonts if created
+      d = configAuto.getDialog();
+      if (d != null) {
+         SwingUtilities.updateComponentTreeUI(d);
+         d.pack();
+      }
+   }
+   
    private Container getJContentPane() {
       debug.print("");
       if (jContentPane == null) {
