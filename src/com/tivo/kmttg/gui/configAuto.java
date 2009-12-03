@@ -113,6 +113,10 @@ public class configAuto {
       dialog.setVisible(true);
    }
    
+   public static JDialog getDialog() {
+      return dialog;
+   }
+   
    private void textFieldError(JTextField f, String message) {
       debug.print("f=" + f + " message=" + message);
       log.error(message);
