@@ -61,6 +61,7 @@ public class configMain {
    private static JTextField tivo_ip = null;
    private static JTextField files_path = null;
    private static JTextField MAK = null;
+   private static JTextField FontSize = null;
    private static JTextField file_naming = null;
    private static JTextField tivo_output_dir = null;
    private static JTextField mpeg_output_dir = null;
@@ -111,6 +112,10 @@ public class configMain {
       
       // Display the dialog
       dialog.setVisible(true);
+   }
+   
+   public static JDialog getDialog() {
+      return dialog;
    }
    
    // Paint text field background to indicate an error setting
@@ -358,6 +363,9 @@ public class configMain {
       
       // MAK
       MAK.setText(config.MAK);
+      
+      // FontSize
+      FontSize.setText("" + config.FontSize);
       
       // .TiVo output dir
       tivo_output_dir.setText(config.outputDir);
@@ -634,6 +642,25 @@ public class configMain {
       } else {
          textFieldError(MAK, "MAK not specified - should be a 10 digit number");
          errors++;
+      }
+      
+      // FontSize
+      value = string.removeLeadingTrailingSpaces(FontSize.getText());
+      int size = 12;
+      if (value.length() > 0) {
+         try {
+            size = Integer.parseInt(value);
+         } catch(NumberFormatException e) {
+            textFieldError(FontSize, "Illegal setting for FontSize: '" + value + "'");
+            log.error("Setting to 12");
+            size = 12;
+            FontSize.setText("" + size);
+            errors++;
+         }
+      }
+      if (config.FontSize != size) {
+         config.FontSize = size;
+         config.gui.setFontSize(size);
       }
       
       // .TiVo output dir
@@ -966,6 +993,7 @@ public class configMain {
       cpu_cores = new javax.swing.JTextField(15);
       
       disk_space = new javax.swing.JTextField(5);
+      FontSize = new javax.swing.JTextField(5);
       
       JLabel tivos_label = new javax.swing.JLabel();
       tivos = new javax.swing.JComboBox();
@@ -986,6 +1014,7 @@ public class configMain {
       TSDownload = new javax.swing.JCheckBox();
       OverwriteFiles = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
+      JLabel FontSize_label = new javax.swing.JLabel();
       JLabel file_naming_label = new javax.swing.JLabel();
       JLabel tivo_output_dir_label = new javax.swing.JLabel();
       JLabel mpeg_output_dir_label = new javax.swing.JLabel();
@@ -1061,6 +1090,7 @@ public class configMain {
       TSDownload.setText("Download TiVo files in Transport Stream format");
       OverwriteFiles.setText("Overwrite existing files");
       MAK_label.setText("MAK"); 
+      FontSize_label.setText("GUI Font Size");
       file_naming_label.setText("File Naming"); 
       tivo_output_dir_label.setText(".TiVo Output Dir"); 
       mpeg_output_dir_label.setText(".mpg Output Dir"); 
@@ -1745,8 +1775,18 @@ public class configMain {
       // General panel
       JPanel general = new JPanel(new GridBagLayout());
       
-      // MAK
+      // FontSize
       gy=0;
+      c.gridx = 0;
+      c.gridy = gy;
+      general.add(FontSize_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      general.add(FontSize, c);
+      
+      // MAK
+      gy++;
       c.gridx = 0;
       c.gridy = gy;
       general.add(MAK_label, c);
@@ -1969,6 +2009,7 @@ public class configMain {
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
       files_path.setToolTipText(getToolTip("files_path"));
       MAK.setToolTipText(getToolTip("MAK"));
+      FontSize.setToolTipText(getToolTip("FontSize"));
       file_naming.setToolTipText(getToolTip("file_naming"));
       tivo_output_dir.setToolTipText(getToolTip("tivo_output_dir"));
       mpeg_output_dir.setToolTipText(getToolTip("mpeg_output_dir"));
@@ -2133,6 +2174,10 @@ public class configMain {
          text += "This is your TiVo <b>Media Access Key</b> 10 digit number.<br>";
          text += "You can find the number on any of your networked Tivos as follows:<br>";
          text += "<b>Tivo Central-Messages&Settings-Account&System Information-Media Access Key</b>";
+      }
+      else if (component.equals("Font Size")) {
+         text =  "<b>GUI Font Size</b><br>";
+         text += "Sets the text font size to use for all text GUI components.";
       }
       else if (component.equals("file_naming")) {
          text =  "<b>File Naming</b><br>";
