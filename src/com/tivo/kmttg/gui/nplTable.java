@@ -340,7 +340,7 @@ public class nplTable {
             }
          }
          
-         cell.setFont(font);
+         cell.setFont(config.tableFont);
         
          return cell;
       }

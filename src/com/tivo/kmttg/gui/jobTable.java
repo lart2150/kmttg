@@ -124,7 +124,7 @@ public class jobTable {
           if (bkgndColor != null && ! isSelected)
              cell.setBackground( bkgndColor );
           
-          cell.setFont(font);
+          cell.setFont(config.tableFont);
          
           return cell;
        }
