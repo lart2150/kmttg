@@ -2175,7 +2175,7 @@ public class configMain {
          text += "You can find the number on any of your networked Tivos as follows:<br>";
          text += "<b>Tivo Central-Messages&Settings-Account&System Information-Media Access Key</b>";
       }
-      else if (component.equals("Font Size")) {
+      else if (component.equals("FontSize")) {
          text =  "<b>GUI Font Size</b><br>";
          text += "Sets the text font size to use for all text GUI components.";
       }
