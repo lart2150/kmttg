@@ -2153,8 +2153,8 @@ public class configMain {
          text += "For TiVo software that properly supports it, this forces TiVo file downloads to use<br>";
          text += "Transport Stream format instead of the default Program Stream format by adding<br>";
          text += "<b>&Format=video/x-tivo-mpeg-ts</b> tag to the download URL.<br>";
-         text += "NOTE: Currently on Australia/New Zealand TiVos support this format and this will<br>";
-         text += "have no effect for other TiVos";
+         text += "NOTE: Currently only Australia/New Zealand TiVos support this format and this will<br>";
+         text += "have no effect on other TiVos";
       }
       else if (component.equals("OverwriteFiles")) {
          text =  "<b>Overwrite existing files</b><br>";
