@@ -695,7 +695,7 @@ public class jobMonitor {
          if (metadata) {
             Stack<String> meta_files = videoFilesToProcess(
                mode, decrypt, comcut, encode, config.metadata_files,
-               startFile, videoFile, mpegFile, mpegFile_cut, encodeFile, ".txt"
+               startFile, videoFile, tivoFile, mpegFile, mpegFile_cut, encodeFile, ".txt"
             );
             if (meta_files.size() > 0) {
                for (int i=0; i<meta_files.size(); ++i) {
@@ -741,7 +741,7 @@ public class jobMonitor {
       if (metadataTivo) {
          Stack<String> meta_files = videoFilesToProcess(
             mode, decrypt, comcut, encode, config.metadata_files,
-            startFile, videoFile, mpegFile, mpegFile_cut, encodeFile, ".txt"
+            startFile, videoFile, tivoFile, mpegFile, mpegFile_cut, encodeFile, ".txt"
          );
          if (meta_files.size() > 0) {
             for (int i=0; i<meta_files.size(); ++i) {
@@ -909,7 +909,7 @@ public class jobMonitor {
       if (push) {
          Stack<String> push_files = videoFilesToProcess(
             mode, decrypt, comcut, encode, config.pyTivo_files,
-            startFile, videoFile, mpegFile, mpegFile_cut, encodeFile, ""
+            startFile, videoFile, tivoFile, mpegFile, mpegFile_cut, encodeFile, ""
          );
          if (push_files.size() > 0) {
             for (int i=0; i<push_files.size(); ++i) {
@@ -950,7 +950,7 @@ public class jobMonitor {
    // video files specifically should be processed
    private static Stack<String> videoFilesToProcess(
       String mode, Boolean decrypt, Boolean comcut, Boolean encode, String filter,
-      String startFile, String videoFile, String mpegFile, String mpegFile_cut, String encodeFile,
+      String startFile, String videoFile, String tivoFile, String mpegFile, String mpegFile_cut, String encodeFile,
       String suffix
       ) {
       Stack<String> files = new Stack<String>();
@@ -961,6 +961,12 @@ public class jobMonitor {
                files.add(encodeFile + suffix);
             else if (decrypt || comcut || (mode.equals("FILES") && videoFile.equals(startFile)))
                files.add(videoFile + suffix);
+            else if (mode.equals("Download") || (mode.equals("FILES") && tivoFile.equals(startFile)))
+               files.add(tivoFile + suffix);
+         }
+         else if (filter.equals("tivoFile")) {
+            if (mode.equals("Download") || (mode.equals("FILES") && tivoFile.equals(startFile)))
+               files.add(tivoFile + suffix);
          }
          else if (filter.equals("mpegFile")) {
             if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
@@ -976,6 +982,8 @@ public class jobMonitor {
          }
       } else {
          // files setting = "all" => potentially multiple push jobs
+         if (mode.equals("Download") || (mode.equals("FILES") && tivoFile.equals(startFile)))
+            files.add(tivoFile + suffix);
          if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
             files.add(mpegFile + suffix);
          if (comcut || (mode.equals("FILES") && mpegFile_cut.equals(startFile)))
