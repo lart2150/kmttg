@@ -1137,12 +1137,12 @@ public class configMain {
       pyTivo_tivo.setName("pyTivo_tivo");
       
       pyTivo_files.setModel(new javax.swing.DefaultComboBoxModel(
-         new String[] { "mpegFile", "mpegFile_cut", "encodeFile", "last", "all" }
+         new String[] { "tivoFile", "mpegFile", "mpegFile_cut", "encodeFile", "last", "all" }
       ));
       pyTivo_files.setName("pyTivo_files");
       
       metadata_files.setModel(new javax.swing.DefaultComboBoxModel(
-         new String[] { "mpegFile", "mpegFile_cut", "encodeFile", "last", "all" }
+         new String[] { "tivoFile", "mpegFile", "mpegFile_cut", "encodeFile", "last", "all" }
       ));
       metadata_files.setName("metadata_files");
 
@@ -2408,6 +2408,7 @@ public class configMain {
          text =  "<b>Files to push</b><br>";
          text += "Select which files to push when the <b>push</b> task is enabled for a job.<br>";
          text += "The meaning of each setting is as follows:<br>";
+         text += "<b>tivoFile: </b>Push only TiVo file.<br>";
          text += "<b>mpegFile: </b>Push only mpeg file after decrypt task if that task is enabled.<br>";
          text += "<b>mpegFile_cut: </b>Push only mpeg file after AdCut task if that task is enabled.<br>";
          text += "<b>encodeFile: </b>Push only encoded file after encode task if that task is enabled.<br>";
@@ -2418,6 +2419,7 @@ public class configMain {
          text =  "<b>metadata files</b><br>";
          text += "Select which files to create metadata files for when <b>metadata</b> task is enabled for a job.<br>";
          text += "The meaning of each setting is as follows:<br>";
+         text += "<b>tivoFile: </b>Only for TiVo file.<br>";
          text += "<b>mpegFile: </b>Only for mpeg file after decrypt task if that task is enabled.<br>";
          text += "<b>mpegFile_cut: </b>Only for mpeg file after AdCut task if that task is enabled.<br>";
          text += "<b>encodeFile: </b>Only for encoded file after encode task if that task is enabled.<br>";
