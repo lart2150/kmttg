@@ -2134,7 +2134,7 @@ public class configMain {
       else if (component.equals("VrdQsFilter")) {
          text =  "<b>Enable VideoRedo QS Fix video dimension filter</b><br>";
          text += "If you have trouble in VideoRedo editing some files due to <b>Video Dimensions Changed</b><br>";
-         text += "erro message then enabling this option will apply a Video Dimensions filter as part of kmttg VRD<br>";
+         text += "error message then enabling this option will apply a Video Dimensions filter as part of kmttg VRD<br>";
          text += "Quickstream Fix run that will solve that problem. Note that kmttg uses ffmpeg<br>";
          text += "to automatically detect the mpeg video file dimensions to be used as the filter and<br>";
          text += "prepares a custom version of VRD vp.vbs file with an added filter line.";
