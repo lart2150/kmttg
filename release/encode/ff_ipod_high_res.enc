@@ -1,11 +1,11 @@
 # Description (single line, keep short)
 <description>
-mpeg4 container, 640x480 xvid video, aac audio
+mpeg4 container, 640x480 30fps xvid video, 48KHz/128Kbps 2 chan aac audio
 
 # Encode command or script (single line)
 # Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
-FFMPEG -y -i INPUT -threads CPU_CORES -vcodec libxvid -maxrate 2000k -qmin 3 -qmax 5 -bufsize 5096k -g 300 -acodec libfaac -s 640x480 -ab 128 -b 1500k -f mp4 OUTPUT
+FFMPEG -y -i INPUT -threads CPU_CORES -vcodec libxvid -maxrate 2000k -qmin 3 -qmax 5 -bufsize 5096k -g 300 -acodec libfaac -ac 2 -ab 128k -ar 48000 -s 640x480 -r 29.97 -b 1500k -f mp4 OUTPUT
 
 # Encoded output file extension
 <extension>
