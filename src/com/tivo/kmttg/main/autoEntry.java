@@ -21,6 +21,7 @@ public class autoEntry {
    public int enabled  = 1;
    public String encode_name = null;
    public String comskipIni = "none";
+   public int suggestionsFilter = 0;
    
    public String toString() {
       return "{type=" + type + ", tivo=" + tivo + ", keyword=" + keyword + ", keywords=" + keywords + "}";
