@@ -299,10 +299,10 @@ public class auto {
    
    // Run given entry through all filters
    private static Boolean filter(Hashtable<String,String>entry, autoEntry auto) {
-      return   filterByTivoName(entry, auto)       ||
-               filterByDate(entry)                 ||
-               filterTivoSuggestions(entry, auto)  ||
-               filterKUID(entry)                   ||
+      return   filterByTivoName(entry, auto) ||
+               filterByDate(entry)           ||
+               filterTivoSuggestions(entry)  ||
+               filterKUID(entry)             ||
                filterProgramId(entry);
    }
    
@@ -345,10 +345,10 @@ public class auto {
       return filter;
    }
    
-   // Return true if should be filtered out because it's a TiVo suggestion
-   private static Boolean filterTivoSuggestions(Hashtable<String,String>entry, autoEntry auto) {
+   // Return true if should be filtered out because it's a TiVo suggestion (GLOBAL suggestionFilter)
+   private static Boolean filterTivoSuggestions(Hashtable<String,String>entry) {
       if (entry.containsKey("suggestion")) {
-         if ((autoConfig.suggestionsFilter == 1 || auto.suggestionsFilter == 1) && entry.get("suggestion").equals("yes")) {
+         if (autoConfig.suggestionsFilter == 1 && entry.get("suggestion").equals("yes")) {
             log.print("NOTE: no match due to Suggestions Filter - " + entry.get("title"));
             return true;
          }
@@ -438,6 +438,13 @@ public class auto {
             }
          }
       }
+      
+      // auto entry specific suggestionsFilter
+      if (auto.suggestionsFilter == 1 && entry.get("suggestion").equals("yes")) {
+         log.print("NOTE: no match due to auto entry Suggestions Filter - " + entry.get("title"));
+         return;
+      }
+      
       log.print("START PROCESSING OF ENTRY: " + entry.get("title"));
       
       Hashtable<String,Object> h = new Hashtable<String,Object>();
