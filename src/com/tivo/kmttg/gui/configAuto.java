@@ -81,6 +81,7 @@ public class configAuto {
    private static JTextField comskipIni = null;
    private static JCheckBox dateFilter = null;
    private static JCheckBox suggestionsFilter = null;
+   private static JCheckBox suggestionsFilter_single = null;
    private static JCheckBox kuidFilter = null;
    private static JCheckBox programIdFilter = null;
    private static JComboBox dateOperator = null;
@@ -202,6 +203,7 @@ public class configAuto {
       captions = new JCheckBox("captions");
       encode   = new JCheckBox("encode");
       push     = new JCheckBox("push");
+      suggestionsFilter_single = new JCheckBox("Filter out TiVo Suggestions");
       /* This intentionally disabled for now
       encode.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
@@ -398,6 +400,16 @@ public class configAuto {
       
       gy++;
       gx = 0;
+      c.gridx = gx;
+      c.gridy = gy;
+      c.gridwidth = 4;
+      c.fill = GridBagConstraints.NONE;
+      c.anchor = GridBagConstraints.WEST;
+      c.weightx = 0.0;
+      content.add(suggestionsFilter_single, c);
+      
+      gy++;
+      gx = 0;
       c.gridx = gx++;
       c.gridy = gy;
       c.gridwidth = 8;
@@ -536,6 +548,7 @@ public class configAuto {
       del.setToolTipText(getToolTip("del"));      
       dateFilter.setToolTipText(getToolTip("dateFilter"));
       suggestionsFilter.setToolTipText(getToolTip("suggestionsFilter"));
+      suggestionsFilter_single.setToolTipText(getToolTip("suggestionsFilter_single"));
       kuidFilter.setToolTipText(getToolTip("kuidFilter"));
       programIdFilter.setToolTipText(getToolTip("programIdFilter"));
       dateOperator.setToolTipText(getToolTip("dateOperator"));
@@ -636,7 +649,12 @@ public class configAuto {
       }
       else if (component.equals("suggestionsFilter")) {
          text =  "<b>Filter out TiVo Suggestions</b><br>";
-         text += "If enabled then do not process any TiVo Suggestions recordings.";
+         text += "If enabled then do not process any TiVo Suggestions recordings.<br>";
+         text += "NOTE: If enabled this filter overrides any individual suggestions filter settings.";
+      }
+      else if (component.equals("suggestionsFilter_single")) {
+         text =  "<b>Filter out TiVo Suggestions</b><br>";
+         text += "If enabled then do not process any TiVo Suggestions recordings for this entry.";
       }
       else if (component.equals("kuidFilter")) {
          text =  "<b>Only process KUID recordings</b><br>";
@@ -1095,17 +1113,18 @@ public class configAuto {
                   ofp.write(autoConfig.keywordsToString(entry.keywords) + "\n");
                }
                ofp.write("<options>\n");
-               ofp.write("enabled "  + entry.enabled  + "\n");
-               ofp.write("tivo "     + entry.tivo     + "\n");
-               ofp.write("metadata " + entry.metadata + "\n");               
-               ofp.write("decrypt "  + entry.decrypt  + "\n");               
-               ofp.write("qsfix "    + entry.qsfix    + "\n");               
-               ofp.write("comskip "  + entry.comskip  + "\n");               
-               ofp.write("comcut "   + entry.comcut   + "\n");               
-               ofp.write("captions " + entry.captions + "\n");               
-               ofp.write("encode "   + entry.encode   + "\n");
-               ofp.write("push "     + entry.push     + "\n");
-               ofp.write("custom "   + entry.custom   + "\n");
+               ofp.write("enabled "           + entry.enabled           + "\n");
+               ofp.write("tivo "              + entry.tivo              + "\n");
+               ofp.write("metadata "          + entry.metadata          + "\n");               
+               ofp.write("decrypt "           + entry.decrypt           + "\n");               
+               ofp.write("qsfix "             + entry.qsfix             + "\n");               
+               ofp.write("comskip "           + entry.comskip           + "\n");               
+               ofp.write("comcut "            + entry.comcut            + "\n");               
+               ofp.write("captions "          + entry.captions          + "\n");               
+               ofp.write("encode "            + entry.encode            + "\n");
+               ofp.write("push "              + entry.push              + "\n");
+               ofp.write("custom "            + entry.custom            + "\n");
+               ofp.write("suggestionsFilter " + entry.suggestionsFilter + "\n");
                if (entry.encode_name != null && entry.encode_name.length() > 0)
                   ofp.write("encode_name " + entry.encode_name + "\n");
                if (file.isFile(entry.comskipIni))
@@ -1146,7 +1165,7 @@ public class configAuto {
       debug.print("row=" + row);
       if (row == -1) return;
       autoEntry entry = GetRowData(row);
-      enabled.setSelected((Boolean)(entry.enabled ==1));
+      enabled.setSelected((Boolean)(entry.enabled == 1));
       metadata.setSelected((Boolean)(entry.metadata == 1));
       decrypt.setSelected((Boolean)(entry.decrypt == 1));
       qsfix.setSelected((Boolean)(entry.qsfix == 1));
@@ -1156,6 +1175,7 @@ public class configAuto {
       encode.setSelected((Boolean)(entry.encode == 1));
       push.setSelected((Boolean)(entry.push == 1));
       custom.setSelected((Boolean)(entry.custom == 1));
+      suggestionsFilter_single.setSelected((Boolean)(entry.suggestionsFilter == 1));
       
       encoding_name.setSelectedItem(entry.encode_name);
       
@@ -1231,6 +1251,11 @@ public class configAuto {
          entry.custom = 1;
       else
          entry.custom = 0;
+      
+      if (suggestionsFilter_single.isSelected())
+         entry.suggestionsFilter = 1;
+      else
+         entry.suggestionsFilter = 0;
       
       entry.encode_name = (String)encoding_name.getSelectedItem();
 
