@@ -141,6 +141,8 @@ public class autoConfig {
                   entry.push = Integer.parseInt(value);
                if (name.matches("custom"))
                   entry.custom = Integer.parseInt(value);
+               if (name.matches("suggestionsFilter"))
+                  entry.suggestionsFilter = Integer.parseInt(value);
                if (name.matches("encode_name"))
                   entry.encode_name = value;
             }
