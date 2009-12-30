@@ -145,6 +145,9 @@ public class auto {
       }
             
       // Title matching
+      Boolean matches_title = false;
+      Boolean matches_keyword = false;
+      int matches_count = 0; // This used to prevent launch of same entry > once
       String title, keyword;
       Stack<autoEntry> auto_entries = getTitleEntries();
       autoEntry auto;
@@ -161,16 +164,20 @@ public class auto {
             if ( title.matches(keyword) ) {
                // Match found, so queue up relevant job actions
                if ( filter(entry, auto) ) {
-                  return false;
+                  // Rejected against this auto entry, so go to next
+                  continue;
                } else {
                   log.print("Title keyword match: '" + keyword + "' found in '" + title + "'");
                   if (autoConfig.dryrun == 1) {
                      log.print("(dry run mode => will not download)");
                   } else {
-                     keywordMatchJobInit(entry, auto);
+                     matches_count++;
+                     if (matches_count == 1) {
+                        keywordMatchJobInit(entry, auto);
+                     }
                   }
                }
-               return true;
+               matches_title = true;
             }
          }
       }
@@ -280,21 +287,25 @@ public class auto {
             // Match found, so queue up relevant job actions
             debug.print("keywordSearch::KEYWORDS MATCH");
             if ( filter(entry, auto) ) {
-               return false;
+               // Rejected against this auto entry, so go to next
+               continue;
             } else {
                log.print("keywords match: '" + keywordsList + "' matches '" + text + "'");
                if (autoConfig.dryrun == 1) {
                   log.print("(dry run mode => will not download)");
                } else {
-                  keywordMatchJobInit(entry, auto);
+                  matches_count++;
+                  if (matches_count == 1) {
+                     keywordMatchJobInit(entry, auto);
+                  }
                }
             }
-            return true;
+            matches_keyword = true;
          } else {
             debug.print("keywordSearch::no match is final determination");
          }
       }
-      return false;
+      return (matches_title || matches_keyword);
    }
    
    // Run given entry through all filters
