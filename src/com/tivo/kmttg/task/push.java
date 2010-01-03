@@ -1,6 +1,7 @@
 package com.tivo.kmttg.task;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -252,7 +253,13 @@ public class push {
             if (line.matches("(?i)^path\\s*=.+")) {
                String[] l = line.split("=");
                if (l.length > 1) {
-                  h.put("path", lowerCaseVolume(string.removeLeadingTrailingSpaces(l[1])));
+                  String p = lowerCaseVolume(string.removeLeadingTrailingSpaces(l[1]));
+                  char separator = File.separator.charAt(0);
+                  if (p.charAt(p.length()-1) == separator) {
+                     // Remove extra ending file separator
+                     p = p.substring(0, p.length()-1);
+                  }
+                  h.put("path", p);
                }
             }
          }
