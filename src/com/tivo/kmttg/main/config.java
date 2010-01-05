@@ -60,6 +60,7 @@ public class config {
    public static int VrdDecrypt = 0;
    public static int TSDownload = 0;
    public static int OverwriteFiles = 0;
+   public static int HideProtectedFiles = 0;
    public static String comskipIni = "";
    public static String wan_http_port = "";
    public static String configIni = "";
@@ -542,6 +543,9 @@ public class config {
             if (key.equals("TSDownload")) {
                TSDownload = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("HideProtectedFiles")) {
+               HideProtectedFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("OverwriteFiles")) {
                OverwriteFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -705,6 +709,8 @@ public class config {
          ofp.write("<VrdDecrypt>\n" + VrdDecrypt + "\n\n");
          
          ofp.write("<TSDownload>\n" + TSDownload + "\n\n");
+         
+         ofp.write("<HideProtectedFiles>\n" + HideProtectedFiles + "\n\n");
          
          ofp.write("<OverwriteFiles>\n" + OverwriteFiles + "\n\n");
          

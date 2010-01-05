@@ -54,6 +54,7 @@ public class configMain {
    private static JCheckBox VrdQsFilter = null;
    private static JCheckBox VrdDecrypt = null;
    private static JCheckBox TSDownload = null;
+   private static JCheckBox HideProtectedFiles = null;
    private static JCheckBox OverwriteFiles = null;
    private static JCheckBox toolTips = null;
    private static JCheckBox jobMonitorFullPaths = null;
@@ -334,6 +335,12 @@ public class configMain {
       else
          TSDownload.setSelected(false);
       
+      // HideProtectedFiles
+      if (config.HideProtectedFiles == 1)
+         HideProtectedFiles.setSelected(true);
+      else
+         HideProtectedFiles.setSelected(false);
+      
       // OverwriteFiles
       if (config.OverwriteFiles == 1)
          OverwriteFiles.setSelected(true);
@@ -567,6 +574,12 @@ public class configMain {
          config.TSDownload = 1;
       else
          config.TSDownload = 0;
+      
+      // HideProtectedFiles
+      if (HideProtectedFiles.isSelected())
+         config.HideProtectedFiles = 1;
+      else
+         config.HideProtectedFiles = 0;
       
       // OverwriteFiles
       if (OverwriteFiles.isSelected())
@@ -1012,6 +1025,7 @@ public class configMain {
       VrdQsFilter = new javax.swing.JCheckBox();
       VrdDecrypt = new javax.swing.JCheckBox();
       TSDownload = new javax.swing.JCheckBox();
+      HideProtectedFiles = new javax.swing.JCheckBox();
       OverwriteFiles = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
       JLabel FontSize_label = new javax.swing.JLabel();
@@ -1088,6 +1102,7 @@ public class configMain {
       VrdQsFilter.setText("Enable VideoRedo QS Fix video dimension filter");
       VrdDecrypt.setText("Decrypt using VideoRedo instead of tivodecode");
       TSDownload.setText("Download TiVo files in Transport Stream format");
+      HideProtectedFiles.setText("Do not show copy protected files in table");
       OverwriteFiles.setText("Overwrite existing files");
       MAK_label.setText("MAK"); 
       FontSize_label.setText("GUI Font Size");
@@ -1846,6 +1861,12 @@ public class configMain {
       c.gridx = 0;
       c.gridy = gy;
       general.add(jobMonitorFullPaths, c);
+
+      // HideProtectedFiles
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      general.add(HideProtectedFiles, c);
       
       // VRD Panel
       JPanel vrd_panel = new JPanel(new GridBagLayout());       
@@ -2006,6 +2027,7 @@ public class configMain {
       VrdQsFilter.setToolTipText(getToolTip("VrdQsFilter"));
       VrdDecrypt.setToolTipText(getToolTip("VrdDecrypt"));
       TSDownload.setToolTipText(getToolTip("TSDownload"));
+      HideProtectedFiles.setToolTipText(getToolTip("HideProtectedFiles"));
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
       files_path.setToolTipText(getToolTip("files_path"));
       MAK.setToolTipText(getToolTip("MAK"));
@@ -2155,6 +2177,11 @@ public class configMain {
          text += "<b>&Format=video/x-tivo-mpeg-ts</b> tag to the download URL.<br>";
          text += "NOTE: Currently only Australia/New Zealand TiVos support this format and this will<br>";
          text += "have no effect on other TiVos";
+      }
+      else if (component.equals("HideProtectedFiles")) {
+         text = "<b>Do not show copy protected files in table</b><br>";
+         text += "If this option is enabled then copy protected TiVo shows are not displayed in the<br>";
+         text += "TiVo Now Playing lists.";
       }
       else if (component.equals("OverwriteFiles")) {
          text =  "<b>Overwrite existing files</b><br>";
