@@ -392,12 +392,22 @@ public class configAuto {
       // row 6
       JPanel row6 = new JPanel();
       row6.setLayout(new BoxLayout(row6, BoxLayout.X_AXIS));
-      row6.add(enabled);
-      row6.add(Box.createRigidArea(space_5));
       row6.add(comskipIni_label);
       row6.add(Box.createRigidArea(space_5));
       row6.add(comskipIni);
       
+      // comskip.ini override
+      gy++;
+      gx = 0;
+      c.gridx = gx++;
+      c.gridy = gy;
+      c.gridwidth = 8;
+      c.fill = GridBagConstraints.NONE;
+      c.anchor = GridBagConstraints.WEST;
+      c.weightx = 0.0;
+      content.add(row6, c); 
+      
+      // Filter out TiVo Suggestions
       gy++;
       gx = 0;
       c.gridx = gx;
@@ -408,15 +418,34 @@ public class configAuto {
       c.weightx = 0.0;
       content.add(suggestionsFilter_single, c);
       
+      // enabled
+      gy++;
+      gx = 0;
+      c.gridx = gx;
+      c.gridy = gy;
+      c.gridwidth = 4;
+      c.fill = GridBagConstraints.NONE;
+      c.anchor = GridBagConstraints.WEST;
+      c.weightx = 0.0;
+      content.add(enabled, c);
+      
+      // Add, Update, Del
+      JPanel buttons = new JPanel();
+      buttons.setLayout(new BoxLayout(buttons, BoxLayout.X_AXIS));
+      buttons.add(add);
+      buttons.add(Box.createRigidArea(space_5));
+      buttons.add(update);
+      buttons.add(Box.createRigidArea(space_5));
+      buttons.add(del);
       gy++;
       gx = 0;
       c.gridx = gx++;
       c.gridy = gy;
       c.gridwidth = 8;
       c.fill = GridBagConstraints.NONE;
-      c.anchor = GridBagConstraints.WEST;
+      c.anchor = GridBagConstraints.CENTER;
       c.weightx = 0.0;
-      content.add(row6, c);      
+      content.add(buttons, c); 
             
       // separator
       JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
@@ -426,6 +455,7 @@ public class configAuto {
       c.gridy = gy;
       c.gridwidth = 8;
       c.fill = GridBagConstraints.HORIZONTAL;
+      c.anchor = GridBagConstraints.WEST;
       c.weightx = 1.0;
       content.add(sep, c);
                         
