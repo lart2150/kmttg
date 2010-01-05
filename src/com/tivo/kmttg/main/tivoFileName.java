@@ -181,6 +181,7 @@ public class tivoFileName {
       s = s.replaceAll("\\$", "");
       s = s.replaceAll(">", "_");
       s = s.replaceAll("<", "_");
+      s = s.replaceAll("|", "_");
       return s;
    }
 
