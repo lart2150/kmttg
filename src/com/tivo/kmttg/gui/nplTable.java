@@ -536,7 +536,8 @@ public class nplTable {
       Hashtable<String,String> entry;
       for (int i=0; i<h.size(); ++i) {
          entry = h.get(i);
-         AddNowPlayingRow(entry);
+         if ( ! (config.HideProtectedFiles == 1 && entry.containsKey("CopyProtected")) )
+            AddNowPlayingRow(entry);
       }
       
       // Return message indicating size totals of displayed items
@@ -567,7 +568,8 @@ public class nplTable {
             } else {
                // Single entry
                entry = folders.get(name).get(0);
-               AddNowPlayingRow(entry);
+               if ( ! (config.HideProtectedFiles == 1 && entry.containsKey("CopyProtected")) )
+                  AddNowPlayingRow(entry);
             }
          }
       }
