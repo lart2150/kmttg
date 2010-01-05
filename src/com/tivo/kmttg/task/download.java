@@ -124,13 +124,28 @@ public class download {
          // Still running
          if (config.GUI && file.isFile(job.tivoFile)) {
             // Update status in job table
-            String s = String.format("%.2f MB", (float)file.size(job.tivoFile)/Math.pow(2,20));
+            Long size = file.size(job.tivoFile);
+            String s = String.format("%.2f MB", (float)size/Math.pow(2,20));
             String t = jobMonitor.getElapsedTime(job.time);
             int pct = Integer.parseInt(String.format("%d", file.size(job.tivoFile)*100/job.tivoFileSize));
             
+            // Calculate current transfer rate over last dt msecs
+            Long dt = (long)5000;
+            job.time2 = new Date().getTime();
+            job.size2 = size;
+            if (job.time1 == null)
+               job.time1 = job.time2;
+            if (job.size1 == null)
+               job.size1 = job.size2;
+            if (job.time2-job.time1 >= dt && job.size2 > job.size1) {
+               job.rate = getRate(job.size2-job.size1, job.time2-job.time1);
+               job.time1 = job.time2;
+               job.size1 = job.size2;
+            }
+            
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
                // Update STATUS column 
-               config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);
+               config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s + "---" + job.rate);
                
                // If 1st job then update title & progress bar
                String title = String.format("download: %d%% %s", pct, config.kmttg);
@@ -138,7 +153,7 @@ public class download {
                config.gui.progressBar_setValue(pct);
             } else {
                // Update STATUS column            
-               config.gui.jobTab_UpdateJobMonitorRowStatus(job, String.format("%d%%",pct) + "---" + s);
+               config.gui.jobTab_UpdateJobMonitorRowStatus(job, String.format("%d%%",pct) + "---" + s + "---" + job.rate);
             }
          }
          return true;
@@ -205,6 +220,11 @@ public class download {
       file.delete(cookieFile);
       
       return false;
+   }
+
+   // Return rate in Mbps (ds=delta bytes, dt=delta time in msecs)
+   private String getRate(long ds, long dt) {      
+      return String.format("%.1f Mbps", (ds*8000)/(1e6*dt));
    }
 
 }
