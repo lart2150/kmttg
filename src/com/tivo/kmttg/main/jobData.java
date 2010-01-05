@@ -64,6 +64,8 @@ public class jobData {
    public Long tivoFileSize = null;
    String ProgramId = null;
    String title = null;
+   public Long time1=null, time2=null, size1=null, size2=null;
+   public String rate = "n/a";
    
    // pyTivo push related
    public String pyTivo_tivo = null;
