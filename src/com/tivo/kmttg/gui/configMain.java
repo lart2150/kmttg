@@ -2211,7 +2211,10 @@ public class configMain {
          text += "This defines the file naming template for kmttg to use when downloading files<br>";
          text += "from your TiVos. The <b>Available Keywords</b> entries to the right contain<br>";
          text += "all the valid recognized keywords. Consult the kmttg documentation for all the<br>";
-         text += "details on the meaning of each keyword and for advanced file naming setup.";
+         text += "details on the meaning of each keyword and for advanced file naming setup.<br>";
+         text += "<b>NOTE: Several special characters are stripped or mapped from file names to avoid<br>";
+         text += "potential problems with the various helper tools being used.<br>";
+         text += "Consult the kmttg documentation on this option for details on that</b>";
       }
       else if (component.equals("tivo_output_dir")) {
          text =  "<b>.TiVo Output Dir</b><br>";
