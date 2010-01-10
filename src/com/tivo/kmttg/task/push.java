@@ -24,7 +24,7 @@ public class push {
    private Boolean thread_running = false;
    private String host = "localhost";
    private String port = "9032";
-   private int timeout_http = 10;
+   private int timeout_http = 60;
    private int timeout_ffmpeg = 10;
    private Stack<Hashtable<String,String>> shares = null;
    private String videoFile = null; // file to be pushed
