@@ -320,17 +320,19 @@ public class nplTable {
             if ( getColumnIndex("DATE") != -1 ) {
                // Download mode
                sortableDate d = (sortableDate)table.getValueAt(row, getColumnIndex("DATE"));
-               if ( ! d.folder && d.data.containsKey("CopyProtected") ) {
+               if (column % 2 == 0)
+                  cell.setBackground(config.tableBkgndLight);
+               else
+                  cell.setBackground(config.tableBkgndDarker);
+               
+               if ( ! d.folder && d.data.containsKey("CopyProtected") )
                   cell.setBackground( config.tableBkgndProtected );
-               } else if ( ! d.folder && d.data.containsKey("ExpirationImage") &&
-                          d.data.get("ExpirationImage").equals("in-progress-recording")) {
+               
+               if ( ! d.folder && d.data.containsKey("ExpirationImage") &&
+                   (d.data.get("ExpirationImage").equals("in-progress-recording") ||
+                    d.data.get("ExpirationImage").equals("in-progress-transfer")))
                   cell.setBackground( config.tableBkgndRecording );
-               } else {
-                  if (column % 2 == 0)
-                     cell.setBackground(config.tableBkgndLight);
-                  else
-                     cell.setBackground(config.tableBkgndDarker);
-               }
+               
             } else {
                // FILES mode
                if (column % 2 == 0)
