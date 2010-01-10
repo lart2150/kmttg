@@ -50,6 +50,7 @@ public class config {
    public static int RemoveComcutFiles_mpeg = 0;
    public static int RemoveMpegFile = 0;
    public static int MaxJobs = 1;
+   public static int MinChanDigits = 1;
    public static int CheckDiskSpace = 0;
    public static int LowSpaceSize = 0;
    public static int CheckBeacon = 1;
@@ -591,6 +592,9 @@ public class config {
             if (key.equals("MaxJobs")) {
                MaxJobs = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("MinChanDigits")) {
+               MinChanDigits = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("VRD")) {
                VRD = line;
             }
@@ -741,6 +745,8 @@ public class config {
          ofp.write("<wan_http_port>\n" + wan_http_port + "\n\n");
          
          ofp.write("<MaxJobs>\n" + MaxJobs + "\n\n");
+         
+         ofp.write("<MinChanDigits>\n" + MinChanDigits + "\n\n");
          
          ofp.write("<VRD>\n" + VRD + "\n\n");
          

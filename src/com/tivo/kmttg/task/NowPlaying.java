@@ -322,13 +322,30 @@ public class NowPlaying  {
             if (l.matches("^<SourceChannel.*$")) {
                j++;
                value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
-               h.put("channelNum", value);
                if (value.matches("^.+-.+$")) {
+                  // OTA sytle channel #
                   int major = Integer.parseInt(value.replaceFirst("(.+)-.+$", "$1"));
                   int minor = Integer.parseInt(value.replaceFirst(".+-(.+)$", "$1"));
                   value = String.format("%d.%03d", major, minor);
+                  h.put("sortableChannel", value);
+                  switch (config.MinChanDigits) {
+                     case 1: value = String.format("%d-%d", major, minor); break;
+                     case 2: value = String.format("%02d-%d", major, minor); break;
+                     case 3: value = String.format("%03d-%d", major, minor); break;
+                     case 4: value = String.format("%04d-%d", major, minor); break;
+                  }
+                  h.put("channelNum", value);
+               } else {
+                  // Integer style channel #
+                  h.put("sortableChannel", value);
+                  int major = Integer.parseInt(value);
+                  switch (config.MinChanDigits) {
+                     case 2: value = String.format("%02d", major); break;
+                     case 3: value = String.format("%03d", major); break;
+                     case 4: value = String.format("%04d", major); break;
+                  }
+                  h.put("channelNum", value);
                }
-               h.put("sortableChannel", value);
             }
 
             // Channel Name

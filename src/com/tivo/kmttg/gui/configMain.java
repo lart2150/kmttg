@@ -88,6 +88,7 @@ public class configMain {
    private static JTextField cpu_cores = null;
    private static JTextField pyTivo_host = null;
    private static JTextField pyTivo_config = null;
+   private static JComboBox MinChanDigits = null;
    private static JComboBox pyTivo_tivo = null;
    private static JComboBox pyTivo_files = null;
    private static JComboBox metadata_files = null;
@@ -427,6 +428,9 @@ public class configMain {
       
       // active job limit
       active_job_limit.setText("" + config.MaxJobs);
+      
+      // MinChanDigits
+      MinChanDigits.setSelectedItem(config.MinChanDigits);
       
       // wan http port
       wan_http_port.setText(config.wan_http_port);
@@ -895,6 +899,9 @@ public class configMain {
          config.MaxJobs = 2;
       }
       
+      // MinChanDigits
+      config.MinChanDigits = (Integer)MinChanDigits.getSelectedItem();
+      
       // wan http port
       value = string.removeLeadingTrailingSpaces(wan_http_port.getText());
       if (value.length() > 0) {
@@ -1055,8 +1062,10 @@ public class configMain {
       JLabel pyTivo_host_label = new javax.swing.JLabel();
       JLabel pyTivo_config_label = new javax.swing.JLabel();
       JLabel pyTivo_tivo_label = new javax.swing.JLabel();
+      JLabel MinChanDigits_label = new javax.swing.JLabel();
       JLabel pyTivo_files_label = new javax.swing.JLabel();
       JLabel metadata_files_label = new javax.swing.JLabel();
+      MinChanDigits = new javax.swing.JComboBox();
       pyTivo_tivo = new javax.swing.JComboBox();
       pyTivo_files = new javax.swing.JComboBox();
       metadata_files = new javax.swing.JComboBox();
@@ -1134,6 +1143,7 @@ public class configMain {
       pyTivo_tivo_label.setText("pyTivo push destination");
       pyTivo_files_label.setText("Files to push");
       metadata_files_label.setText("metadata files");
+      MinChanDigits_label.setText("Min # Channel Digits");
 
       keywords.setModel(new javax.swing.DefaultComboBoxModel(
          new String[] { "[title]", "[mainTitle]", "[episodeTitle]", "[channelNum]",
@@ -1147,6 +1157,11 @@ public class configMain {
             }
          }
       });
+      
+      MinChanDigits.setModel(new javax.swing.DefaultComboBoxModel(
+         new Integer[] {1, 2, 3, 4}
+      ));
+      MinChanDigits.setName("MinChanDigits");
       
       pyTivo_tivo.setModel(new javax.swing.DefaultComboBoxModel(config.getTivoNames()));
       pyTivo_tivo.setName("pyTivo_tivo");
@@ -1850,6 +1865,16 @@ public class configMain {
       c.gridy = gy;
       general.add(toolTipsTimeout, c);
       
+      // MinChanDigits
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      general.add(MinChanDigits_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      general.add(MinChanDigits, c);
+      
       // toolTips
       gy++;
       c.gridx = 0;
@@ -2066,6 +2091,7 @@ public class configMain {
       pyTivo_tivo.setToolTipText(getToolTip("pyTivo_tivo"));
       pyTivo_files.setToolTipText(getToolTip("pyTivo_files"));
       metadata_files.setToolTipText(getToolTip("metadata_files"));
+      MinChanDigits.setToolTipText(getToolTip("MinChanDigits"));
    }
    
    public static String getToolTip(String component) {
@@ -2455,6 +2481,16 @@ public class configMain {
          text += "<b>encodeFile: </b>Only for encoded file after encode task if that task is enabled.<br>";
          text += "<b>last: </b>Only last video file in sequence of tasks (this is default setting).<br>";
          text += "<b>all: </b>For all available video files for the task set (except for .TiVo files).";
+      }
+      else if (component.equals("MinChanDigits")) {
+         text =  "<b>Min # Channel Digits</b><br>";
+         text += "Set minimum number of digits to display for leading channel number.<br>";
+         text += "Leading channel number will be padded with zeros if shorter than this number.<br>";
+         text += "For example:<br>";
+         text += "1 => channel 2 = 2;    channel 704 = 704";
+         text += "2 => channel 2 = 02;   channel 704 = 704";
+         text += "3 => channel 2 = 002;  channel 704 = 704";
+         text += "4 => channel 2 = 0002; channel 704 = 0704";
       }
       
       if (text.length() > 0) {
