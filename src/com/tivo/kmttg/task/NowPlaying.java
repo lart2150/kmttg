@@ -419,7 +419,16 @@ public class NowPlaying  {
             
             // Set copy-protect icon if copy-protected
             if (h.containsKey("CopyProtected")) {
-               h.put("ExpirationImage", "copy-protected");
+               // Give preference to show transferring status over copy protected
+               Boolean flag = true;
+               if (h.containsKey("ExpirationImage")) {
+                  if (h.get("ExpirationImage").equals("in-progress-recording"))
+                     flag = false;
+                  if (h.get("ExpirationImage").equals("in-progress-transfer"))
+                     flag = false;                  
+               }                  
+               if (flag)
+                  h.put("ExpirationImage", "copy-protected");
             }
             
             // If programId doesn't exist then grab id from url instead
