@@ -2487,9 +2487,9 @@ public class configMain {
          text += "Set minimum number of digits to display for leading channel number.<br>";
          text += "Leading channel number will be padded with zeros if shorter than this number.<br>";
          text += "For example:<br>";
-         text += "1 => channel 2 = 2;    channel 704 = 704";
-         text += "2 => channel 2 = 02;   channel 704 = 704";
-         text += "3 => channel 2 = 002;  channel 704 = 704";
+         text += "1 => channel 2 = 2;    channel 704 = 704<br>";
+         text += "2 => channel 2 = 02;   channel 704 = 704<br>";
+         text += "3 => channel 2 = 002;  channel 704 = 704<br>";
          text += "4 => channel 2 = 0002; channel 704 = 0704";
       }
       
