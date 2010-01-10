@@ -322,30 +322,23 @@ public class NowPlaying  {
             if (l.matches("^<SourceChannel.*$")) {
                j++;
                value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
+               int len = value.length();
+               String channelNum=value, sortableChannel=value;
                if (value.matches("^.+-.+$")) {
-                  // OTA sytle channel #
-                  int major = Integer.parseInt(value.replaceFirst("(.+)-.+$", "$1"));
+                  // OTA style channel #
+                  String majorString = value.replaceFirst("(.+)-.+$", "$1");
+                  len = majorString.length();
+                  int major = Integer.parseInt(majorString);
                   int minor = Integer.parseInt(value.replaceFirst(".+-(.+)$", "$1"));
-                  value = String.format("%d.%03d", major, minor);
-                  h.put("sortableChannel", value);
-                  switch (config.MinChanDigits) {
-                     case 1: value = String.format("%d-%d", major, minor); break;
-                     case 2: value = String.format("%02d-%d", major, minor); break;
-                     case 3: value = String.format("%03d-%d", major, minor); break;
-                     case 4: value = String.format("%04d-%d", major, minor); break;
-                  }
-                  h.put("channelNum", value);
-               } else {
-                  // Integer style channel #
-                  h.put("sortableChannel", value);
-                  int major = Integer.parseInt(value);
-                  switch (config.MinChanDigits) {
-                     case 2: value = String.format("%02d", major); break;
-                     case 3: value = String.format("%03d", major); break;
-                     case 4: value = String.format("%04d", major); break;
-                  }
-                  h.put("channelNum", value);
+                  sortableChannel = String.format("%d.%03d", major, minor);
                }
+               if (config.MinChanDigits > len) {
+                  // Pad with 0s up to MinChanDigits length
+                  for (int k=0; k<config.MinChanDigits-len; ++k)
+                     channelNum = "0" + channelNum;
+               }
+               h.put("channelNum", channelNum);
+               h.put("sortableChannel", sortableChannel);
             }
 
             // Channel Name
