@@ -33,6 +33,7 @@ public class gui {
    private String title = config.kmttg;
    private JFrame jFrame = null;
    private JSplitPane jContentPane = null;
+   private JSplitPane splitBottom = null;
    private JTabbedPane tabbed_panel = null;
    private JMenuBar jJMenuBar = null;
    private JMenu fileMenu = null;
@@ -364,7 +365,7 @@ public class gui {
          cancel_pane.add(progressBar, c);
          
          // Create a split pane between job & messages pane
-         JSplitPane splitBottom = new JSplitPane(
+         splitBottom = new JSplitPane(
             JSplitPane.VERTICAL_SPLIT, jobPane, messagePane
          );
          splitBottom.setDividerLocation(130);
@@ -1189,6 +1190,8 @@ public class gui {
       if (config.gui_settings != null) {
          try {
             Dimension d = getJFrame().getSize();
+            int centerDivider = jContentPane.getDividerLocation();
+            int bottomDivider = splitBottom.getDividerLocation();
             String tabName = tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
             BufferedWriter ofp = new BufferedWriter(new FileWriter(config.gui_settings));            
             ofp.write("# kmttg gui preferences file\n");
@@ -1207,6 +1210,8 @@ public class gui {
             ofp.write("<jobMonitorFullPaths>\n" + config.jobMonitorFullPaths + "\n");
             ofp.write("<width>\n"               + d.width                    + "\n");
             ofp.write("<height>\n"              + d.height                   + "\n");
+            ofp.write("<centerDivider>\n"       + centerDivider              + "\n");
+            ofp.write("<bottomDivider>\n"       + bottomDivider              + "\n");
             ofp.write("<tab>\n"                 + tabName                    + "\n");
             ofp.write("<columnOrder>\n");
             String name, colName;
@@ -1250,6 +1255,7 @@ public class gui {
       try {
          int width = -1;
          int height = -1;
+         int centerDivider = -1, bottomDivider = -1;
          BufferedReader ifp = new BufferedReader(new FileReader(config.gui_settings));
          String line = null;
          String key = null;
@@ -1355,6 +1361,20 @@ public class gui {
                   height = -1;
                }
             }
+            if (key.equals("centerDivider")) {
+               try {
+                  centerDivider = Integer.parseInt(line);
+               } catch (NumberFormatException e) {
+                  centerDivider = -1;
+               }
+            }
+            if (key.equals("bottomDivider")) {
+               try {
+                  bottomDivider = Integer.parseInt(line);
+               } catch (NumberFormatException e) {
+                  bottomDivider = -1;
+               }
+            }
             if (key.equals("tab")) {
                SetTivo(line);
             }
@@ -1378,6 +1398,12 @@ public class gui {
          if (width != -1 && height != -1) {
             getJFrame().setSize(new Dimension(width,height));
          }
+         
+         if (centerDivider != -1)
+            jContentPane.setDividerLocation(centerDivider);
+         
+         if (bottomDivider != -1)
+            splitBottom.setDividerLocation(bottomDivider);
       }         
       catch (Exception ex) {
          log.warn("Problem parsing config file: " + config.gui_settings);
