@@ -297,7 +297,7 @@ public class jobTable {
         if (vColIndex == last) {
            int twidth = table.getPreferredSize().width;
            int awidth = config.gui.getJFrame().getWidth();
-           int offset = 2*config.gui.jobScroll.getVerticalScrollBar().getPreferredSize().width+2*margin;
+           int offset = 2*config.gui.jobPane.getVerticalScrollBar().getPreferredSize().width+2*margin;
            if ((awidth-offset) > twidth) {
               width += awidth-offset-twidth;
               col.setPreferredWidth(width);
