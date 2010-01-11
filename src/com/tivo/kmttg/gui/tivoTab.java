@@ -189,6 +189,7 @@ public class tivoTab {
       c.gridwidth = 8;
       c.gridx = gx;
       c.gridy = gy;
+      //c.ipady = 100;
       c.fill = GridBagConstraints.BOTH;         
       panel.add(nplTab.nplScroll, c);
    }
