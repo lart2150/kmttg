@@ -32,7 +32,7 @@ public class gui {
    private configAuto config_auto = null;
    private String title = config.kmttg;
    private JFrame jFrame = null;
-   private JPanel jContentPane = null;
+   private JSplitPane jContentPane = null;
    private JTabbedPane tabbed_panel = null;
    private JMenuBar jJMenuBar = null;
    private JMenu fileMenu = null;
@@ -76,7 +76,7 @@ public class gui {
    private jobTable jobTab = null;
    private textpane textp = null;
    private JProgressBar progressBar = null;
-   public  JScrollPane jobScroll = null;
+   public  JScrollPane jobPane = null;
    private ToolTipManager toolTips = null;
    
    private Hashtable<String,tivoTab> tivoTabs = new Hashtable<String,tivoTab>();
@@ -320,7 +320,7 @@ public class gui {
          
          // Job Monitor table
          jobTab = new jobTable();
-         jobScroll = new JScrollPane(jobTab.JobMonitor);
+         jobPane = new JScrollPane(jobTab.JobMonitor);
          
          // Progress Bar
          progressBar = new JProgressBar();
@@ -331,7 +331,7 @@ public class gui {
          text = new JTextPane();
          textp = new textpane(text);
          text.setEditable(false);
-         JScrollPane scrollPane3 = new JScrollPane(text);
+         JScrollPane messagePane = new JScrollPane(text);
                   
          // Tabbed panel
          tabbed_panel = new JTabbedPane();
@@ -363,8 +363,70 @@ public class gui {
          c.fill = GridBagConstraints.HORIZONTAL;
          cancel_pane.add(progressBar, c);
          
+         // Create a split pane between job & messages pane
+         JSplitPane splitBottom = new JSplitPane(
+            JSplitPane.VERTICAL_SPLIT, jobPane, messagePane
+         );
+         splitBottom.setDividerLocation(130);
+         
+         // bottomPane will consist of cancel_pane & splitBottom
+         JPanel bottomPane = new JPanel(new GridBagLayout());
+         
+         gy=0;
+         c.gridx = 0;
+         c.gridy = gy;
+         c.gridheight = 1;
+         c.gridwidth = 8;
+         c.weighty = 0;
+         c.fill = GridBagConstraints.HORIZONTAL;
+         c.anchor = GridBagConstraints.NORTH;
+         bottomPane.add(cancel_pane, c);
+         
+         gy++;
+         c.weightx = 1.0;    // stretch horizontally
+         c.weighty = 1.0;      // stretch vertically
+         c.gridheight = 1;
+         c.gridwidth = 8;
+         c.gridx = 0;
+         c.gridy = gy;
+         c.ipady = 200;
+         c.fill = GridBagConstraints.BOTH;
+         c.anchor = GridBagConstraints.SOUTH;
+         bottomPane.add(splitBottom, c);
+         
+         // topPane will consist of tasks & tabbed_panel
+         JPanel topPane = new JPanel(new GridBagLayout());
+         
+         // Common settings for topPane
+         gx = 0;
+         c.gridwidth = 1;
+         c.gridheight = 1;
+         c.weightx = 1;
+         c.weighty = 0;
+         c.ipady = 0;
+         
+         gy=0;
+         c.gridx = 0;
+         c.gridy = gy;
+         c.fill = GridBagConstraints.HORIZONTAL;
+         c.weighty = 0;
+         topPane.add(tasks, c);
+         
+         gy += 2;
+         c.gridx = 0;
+         c.gridy = gy;
+         c.ipady = 100;
+         c.weighty = 1.0;
+         c.gridheight = 2;
+         c.fill = GridBagConstraints.BOTH;
+         c.anchor = GridBagConstraints.NORTH;
+         topPane.add(tabbed_panel, c);
+         
          // Put all panels together
-         jContentPane = new JPanel(new GridBagLayout());
+         jContentPane = new JSplitPane(
+            JSplitPane.VERTICAL_SPLIT, topPane, bottomPane
+         );
+         jContentPane.setDividerLocation(330);
 
          // Pack table columns when content pane resized
          jContentPane.addHierarchyBoundsListener(new HierarchyBoundsListener() {
@@ -375,60 +437,6 @@ public class gui {
                jobTab.packColumns(jobTab.JobMonitor, 2);
             }
          });
-         
-         // Common settings
-         gx = 0;
-         c.gridwidth = 1;
-         c.gridheight = 1;
-         c.weightx = 1;
-         c.ipady = 0;
-         
-         gy=0;
-         c.gridx = 0;
-         c.gridy = gy;
-         c.fill = GridBagConstraints.HORIZONTAL;
-         c.gridheight = 2;
-         c.weighty = 0;
-         jContentPane.add(tasks, c);
-         
-         gy += 2;;
-         c.gridx = 0;
-         c.gridy = gy;
-         c.ipady = 0;
-         c.gridheight = 1;
-         c.weighty = 1;
-         c.fill = GridBagConstraints.BOTH;
-         jContentPane.add(tabbed_panel, c);
-         
-         gy++;
-         c.gridx = 0;
-         c.gridy = gy;
-         c.gridheight = 1;
-         c.gridwidth = 8;
-         c.weighty = 0;
-         c.fill = GridBagConstraints.HORIZONTAL;
-         jContentPane.add(cancel_pane, c);
-         
-         gy++;
-         c.weightx = 1.0;    // stretch horizontally
-         c.weighty = 0;      // stretch vertically
-         c.ipady = 0;      //make this component tall
-         c.gridheight = 1;
-         c.gridwidth = 8;
-         c.gridx = 0;
-         c.gridy = gy;
-         c.ipady = 100;
-         c.fill = GridBagConstraints.HORIZONTAL;
-         jContentPane.add(jobScroll, c);
-         
-         gy++;
-         c.gridx = 0;
-         c.gridy = gy;
-         c.ipady = 100;
-         c.weightx = 1;
-         c.weighty = 0;
-         c.fill = GridBagConstraints.BOTH;
-         jContentPane.add(scrollPane3, c);
       }
       
       return jContentPane;
