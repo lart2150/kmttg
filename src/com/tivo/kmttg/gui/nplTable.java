@@ -689,8 +689,10 @@ public class nplTable {
       for (Enumeration<String> e=folders.keys(); e.hasMoreElements();) {
          name = e.nextElement();
          entry = (Hashtable<String, String>) folders.get(name).get(0).clone();
-         entry.put("__folderName__", name);
-         sortedOrder.add(entry);
+         if ( ! (config.HideProtectedFiles == 1 && entry.containsKey("CopyProtected")) ) {
+            entry.put("__folderName__", name);
+            sortedOrder.add(entry);
+         }
       }
       Collections.sort(sortedOrder, folderSort);
    }
