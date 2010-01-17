@@ -538,7 +538,7 @@ public class nplTable {
       Hashtable<String,String> entry;
       for (int i=0; i<h.size(); ++i) {
          entry = h.get(i);
-         if ( ! (config.HideProtectedFiles == 1 && entry.containsKey("CopyProtected")) )
+         if ( ! shouldHideEntry(entry) )
             AddNowPlayingRow(entry);
       }
       
@@ -570,7 +570,7 @@ public class nplTable {
             } else {
                // Single entry
                entry = folders.get(name).get(0);
-               if ( ! (config.HideProtectedFiles == 1 && entry.containsKey("CopyProtected")) )
+               if ( ! shouldHideEntry(entry) )
                   AddNowPlayingRow(entry);
             }
          }
@@ -689,7 +689,7 @@ public class nplTable {
       for (Enumeration<String> e=folders.keys(); e.hasMoreElements();) {
          name = e.nextElement();
          entry = (Hashtable<String, String>) folders.get(name).get(0).clone();
-         if ( ! (config.HideProtectedFiles == 1 && entry.containsKey("CopyProtected")) ) {
+         if ( ! shouldHideEntry(entry) ) {
             entry.put("__folderName__", name);
             sortedOrder.add(entry);
          }
@@ -982,6 +982,11 @@ public class nplTable {
          rate = 0.0;
       }
       return rate;
+   }
+   
+   // Return true if this entry should not be displayed, false otherwise
+   private Boolean shouldHideEntry(Hashtable<String,String> entry) {
+      return config.HideProtectedFiles == 1 && entry.containsKey("CopyProtected");
    }
    
    // Identify NPL table items associated with queued/running jobs
