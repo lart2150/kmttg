@@ -56,6 +56,7 @@ public class config {
    public static int CheckBeacon = 1;
    public static int UseAdscan = 0;
    public static int VrdReview = 0;
+   public static int VrdEncode = 0;
    public static int VrdReview_noCuts = 0;
    public static int VrdQsFilter = 0;
    public static int VrdDecrypt = 0;
@@ -66,6 +67,7 @@ public class config {
    public static String wan_http_port = "";
    public static String configIni = "";
    public static String tivoFileNameFormat = null; 
+   public static String VrdProfilesXml = "";
    
    // custom related
    public static String customCommand = "";
@@ -210,7 +212,7 @@ public class config {
        */
 
       // Parse encoding profiles
-      encodeConfig.parseEncodingProfiles(config.encProfDir);
+      encodeConfig.parseEncodingProfiles();
       
       // Error checking
       if (MAK.equals(""))
@@ -315,6 +317,15 @@ public class config {
          }
          if ( ! file.isDir(tmpDir) ) {
             tmpDir = programDir;
+         }
+         
+         // VrdProfilesXml file
+         String UserProfile = System.getenv("USERPROFILE");
+         if (UserProfile != null && file.isDir(UserProfile)) {
+            String xml = UserProfile + "\\Documents\\VideoReDo\\OutputProfiles.xml";
+            if (file.isFile(xml)) {
+               VrdProfilesXml = xml;
+            }
          }
       }      
       
@@ -541,6 +552,12 @@ public class config {
             if (key.equals("VrdDecrypt")) {
                VrdDecrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("VrdEncode")) {
+               VrdEncode = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
+            if (key.equals("VrdProfilesXml")) {
+               VrdProfilesXml = line;
+            }
             if (key.equals("TSDownload")) {
                TSDownload = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -711,6 +728,10 @@ public class config {
          ofp.write("<VrdQsFilter>\n" + VrdQsFilter + "\n\n");
          
          ofp.write("<VrdDecrypt>\n" + VrdDecrypt + "\n\n");
+         
+         ofp.write("<VrdEncode>\n" + VrdEncode + "\n\n");
+         
+         ofp.write("<VrdProfilesXml>\n" + VrdProfilesXml + "\n\n");
          
          ofp.write("<TSDownload>\n" + TSDownload + "\n\n");
          

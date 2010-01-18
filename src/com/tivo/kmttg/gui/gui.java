@@ -957,6 +957,8 @@ public class gui {
          custom.setEnabled(true);
       }
       
+      // Refresh encoding profiles in case toggled between VRD & regular
+      refreshEncodingProfilesCB();      
    }
    
    // Callback for "Refresh Encoding Profiles" File menu entry
@@ -964,7 +966,7 @@ public class gui {
    private void refreshEncodingProfilesCB() {
       debug.print("");
       log.warn("Refreshing encoding profiles");
-      encodeConfig.parseEncodingProfiles(config.encProfDir);
+      encodeConfig.parseEncodingProfiles();
       SetEncodings(encodeConfig.getValidEncodeNames());
    }
    

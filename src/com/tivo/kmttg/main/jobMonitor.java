@@ -304,7 +304,7 @@ public class jobMonitor {
          }
          
          // For encode jobs add profile name before output file name
-         if (job.type.equals("encode")) {
+         if (job.type.equals("encode") || job.type.equals("vrdencode")) {
             output = "(" + job.encodeName + ") " + output;
          }
          
@@ -644,7 +644,7 @@ public class jobMonitor {
       // Check task dependencies and enable prior tasks if necessary
       
       // encode requires mpegFile or mpegFile_cut which may require at minimum decrypt
-      if (encode) {
+      if (encode && config.VrdEncode == 0) {
          if ( ! decrypt ) {
             if ( ! file.isFile(mpegFile) && ! file.isFile(mpegFile_cut) ) {
                decrypt = true;
@@ -903,9 +903,14 @@ public class jobMonitor {
          job.mpegFile_cut = mpegFile_cut;
          job.encodeFile   = encodeFile;
          job.srtFile      = srtFile;
+         if (config.VrdEncode == 1) {
+            // If VRD encode selected then vrdencode job
+            job.type      = "vrdencode";
+            job.tivoFile  = tivoFile;
+         }
          submitNewJob(job);
       }
-      
+            
       if (push) {
          Stack<String> push_files = videoFilesToProcess(
             mode, decrypt, comcut, encode, config.pyTivo_files,
@@ -1062,7 +1067,8 @@ public class jobMonitor {
 
    // Return true if this job uses VideoRedo
    private static Boolean isVideoRedoJob(jobData job) {
-      if ( job.type.equals("qsfix") || job.type.equals("adscan") || job.type.equals("vrdreview") || job.type.equals("adcut") ) {
+      if ( job.type.equals("qsfix") || job.type.equals("adscan") ||
+           job.type.equals("vrdreview") || job.type.equals("adcut") || job.type.equals("vrdencode")) {
          return true;
       }
       return false;

@@ -29,6 +29,7 @@ public class jobData {
    public adcut        process_adcut = null;
    public captions     process_captions = null;
    public encode       process_encode = null;
+   public vrdencode    process_vrdencode = null;
    public atomic       process_atomic = null;
    public push         process_push = null;
    public custom       process_custom = null;
@@ -91,6 +92,7 @@ public class jobData {
          "adcut",
          "captions",
          "encode",
+         "vrdencode",
          "atomic",
          "push",
          "custom"
@@ -140,6 +142,9 @@ public class jobData {
       }        
       else if (type.matches("encode")) {
          return process_encode.check();
+      }   
+      else if (type.matches("vrdencode")) {
+         return process_vrdencode.check();
       }   
       else if (type.matches("atomic")) {
          return process_atomic.check();
@@ -196,6 +201,9 @@ public class jobData {
       else if (type.equals("encode")) {
          return process_encode.getProcess();
       }
+      else if (type.equals("vrdencode")) {
+         return process_vrdencode.getProcess();
+      }
       else if (type.equals("atomic")) {
          return process_atomic.getProcess();
       }
@@ -250,6 +258,9 @@ public class jobData {
          file = vprjFile;
       }
       else if (type.equals("encode")) {
+         file = inputFile;
+      }
+      else if (type.equals("vrdencode")) {
          file = inputFile;
       }
       else if (type.equals("atomic")) {
@@ -308,6 +319,9 @@ public class jobData {
          file = mpegFile_cut;
       }
       else if (type.equals("encode")) {
+         file = encodeFile;
+      }
+      else if (type.equals("vrdencode")) {
          file = encodeFile;
       }
       else if (type.equals("atomic")) {
@@ -393,6 +407,11 @@ public class jobData {
          success = proc.launchJob();
       }
       
+      else if (job.type.equals("vrdencode")) {  
+         vrdencode proc = new vrdencode(job);
+         success = proc.launchJob();
+      }
+      
       else if (job.type.equals("atomic")) {  
          atomic proc = new atomic(job);
          success = proc.launchJob();
@@ -462,6 +481,9 @@ public class jobData {
       }
       else if (type.equals("encode")) {
          process_encode.kill();
+      }
+      else if (type.equals("vrdencode")) {
+         process_vrdencode.kill();
       }
       else if (type.equals("atomic")) {
          process_atomic.kill();

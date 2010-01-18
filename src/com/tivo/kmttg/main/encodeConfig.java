@@ -12,45 +12,60 @@ import java.util.List;
 import java.util.Stack;
 
 import com.tivo.kmttg.util.debug;
+import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
 public class encodeConfig {
 
-   // Parse .enc files in encode folder
-   public static Stack<String> parseEncodingProfiles(String dir) {
-      debug.print("dir=" + dir);
+   // Determine list of encoding profiles to use
+   public static Stack<String> parseEncodingProfiles() {
+      
+      Stack<String> errors = new Stack<String>();
       
       // Clear out any previous settings
       config.ENCODE.clear();
       config.ENCODE_NAMES.clear();
-      
-      Stack<String> errors = new Stack<String>();
-      
-      File d = new File(dir);
-      if ( ! d.isDirectory() ) {
-         errors.add("Encoding profiles dir not valid: " + dir);
-         return errors;
-      }
-      FilenameFilter filter = new FilenameFilter() {
-         public boolean accept(File dir, String name) {
-            debug.print("dir=" + dir + " name=" + name);
-            File d = new File(dir.getPath() + File.separator + name);
-            if (d.isDirectory()) {
+     
+      if (config.VrdEncode == 1) {
+         // Use encoding profiles from VRD
+         if ( ! file.isFile(config.VrdProfilesXml) ) {
+            errors.add("VideoRedo profiles file not valid: " + config.VrdProfilesXml);
+            return errors;
+         }
+         
+         if ( ! parseXmlFile(config.VrdProfilesXml) ) {
+            errors.add("Encountered problems parsing VideoRedo profiles xml file: " + config.VrdProfilesXml);
+         }
+      } else {
+         // Use encoding profiles in "encode" folder
+         String dir = config.encProfDir;
+         
+         File d = new File(dir);
+         if ( ! d.isDirectory() ) {
+            errors.add("Encoding profiles dir not valid: " + dir);
+            return errors;
+         }
+         FilenameFilter filter = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+               debug.print("dir=" + dir + " name=" + name);
+               File d = new File(dir.getPath() + File.separator + name);
+               if (d.isDirectory()) {
+                  return false;
+               }
+               // .enc files
+               if ( name.toLowerCase().endsWith(".enc") ) {
+                  return true;
+               }
                return false;
             }
-            // .enc files
-            if ( name.toLowerCase().endsWith(".enc") ) {
-               return true;
+         };
+        
+         // Define list of filter entries
+         File[] files = d.listFiles(filter);
+         for (int i=0; i<files.length; i++) {
+            if ( ! parseEncFile(files[i]) ) {
+               errors.add("Parsing error with profile: " + files[i].getName());
             }
-            return false;
-         }
-      };
-     
-      // Define list of filter entries
-      File[] files = d.listFiles(filter);
-      for (int i=0; i<files.length; i++) {
-         if ( ! parseEncFile(files[i]) ) {
-            errors.add("Parsing error with profile: " + files[i].getName());
          }
       }
       
@@ -110,6 +125,44 @@ public class encodeConfig {
          
       }         
       catch (IOException ex) {
+         return false;
+      }
+      
+      return true;
+   }
+   
+   // Parse VRD profile xml file and extract encoding information
+   private static Boolean parseXmlFile(String xmlFile) {
+      try {         
+         BufferedReader xml = new BufferedReader(new FileReader(xmlFile));
+         String line, Name="", FileType="";
+         while ( (line = xml.readLine()) != null ) {
+            // Get rid of leading and trailing white space
+            line = line.replaceFirst("^\\s*(.*$)", "$1");
+            line = line.replaceFirst("^(.*)\\s*$", "$1");
+                                   
+            // Now parse all items tagged with <Name> or <FileType>            
+            if (line.matches("^<Name.+$")) {
+               Name = line.replaceFirst("^<Name>(.+)</.+$", "$1");
+            }
+            if (line.matches("^<FileType.+$")) {
+               FileType = line.replaceFirst("^<FileType>(.+)</.+$", "$1");
+               if (FileType.length() > 0 && Name.length() > 0) {
+                  if (FileType.startsWith("MP4")) {
+                     // Filter out all entries except MP4 types
+                     Hashtable<String,String> h = new Hashtable<String,String>();
+                     h.put("description", "(VideoRedo MP4 profile)");
+                     h.put("extension", "mp4");
+                     config.ENCODE.put(Name, h);
+                  }
+                  Name = "";
+               }
+            }
+         }
+         xml.close();                           
+      }
+      catch (IOException ex) {
+         log.error(ex.toString());
          return false;
       }
       
