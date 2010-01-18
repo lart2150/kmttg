@@ -135,8 +135,9 @@ public class encodeConfig {
    private static Boolean parseXmlFile(String xmlFile) {
       try {         
          BufferedReader xml = new BufferedReader(new FileReader(xmlFile));
-         String line, Name="", FileType="";
+         String line, Name="", FileType="", extension;
          while ( (line = xml.readLine()) != null ) {
+            extension = "";
             // Get rid of leading and trailing white space
             line = line.replaceFirst("^\\s*(.*$)", "$1");
             line = line.replaceFirst("^(.*)\\s*$", "$1");
@@ -148,11 +149,17 @@ public class encodeConfig {
             if (line.matches("^<FileType.+$")) {
                FileType = line.replaceFirst("^<FileType>(.+)</.+$", "$1");
                if (FileType.length() > 0 && Name.length() > 0) {
+                  // Filter out all entries except MP4 & WMV types
                   if (FileType.startsWith("MP4")) {
-                     // Filter out all entries except MP4 types
+                     extension = "mp4";
+                  }
+                  if (FileType.startsWith("WMV")) {
+                     extension = "wmv";
+                  }
+                  if (extension.length() > 0) {
                      Hashtable<String,String> h = new Hashtable<String,String>();
-                     h.put("description", "(VideoRedo MP4 profile)");
-                     h.put("extension", "mp4");
+                     h.put("description", "VideoRedo " + extension + " profile");
+                     h.put("extension", extension);
                      config.ENCODE.put(Name, h);
                   }
                   Name = "";
