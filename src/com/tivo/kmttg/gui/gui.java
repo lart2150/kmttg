@@ -96,6 +96,7 @@ public class gui {
          jFrame.setContentPane(getJContentPane());
          //jFrame.setMinimumSize(new Dimension(700,600));
          //jFrame.setPreferredSize(jFrame.getMinimumSize());
+         setFontSize(config.FontSize);
          jFrame.pack();
          jFrame.setTitle(title);
          jobTab_packColumns(5);
@@ -117,9 +118,7 @@ public class gui {
          config.GUI = true;
          
          // Create NowPlaying icons
-         CreateImages();
-         
-         setFontSize(config.FontSize);
+         CreateImages();         
       }
       return jFrame;
    }
