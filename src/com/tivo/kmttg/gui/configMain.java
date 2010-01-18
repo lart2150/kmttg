@@ -2272,7 +2272,7 @@ public class configMain {
          text += "profiles for <b>encode</b> task.<br>";
          text += "NOTE: You must have VideoRedo with H.264 support (TVSuite4 or later) in order<br>";
          text += "to use this option. kmttg will scan the VideoRedo <b>OutputProfiles.xml</b> file<br>";
-         text += "for MP4 profile types to use as encoding choices.";
+         text += "for MP4 & WMV profile types to use as encoding choices.";
       }
       else if (component.equals("VrdProfilesXml")) {
          text =  "<b>OutputProfiles.xml file</b><br>";
@@ -2280,7 +2280,7 @@ public class configMain {
          text += "then supply the full path to the VideoRedo <b>OutputProfiles.xml</b> file.<br>";
          text += "NOTE: Usually the file is located at: %USERPROFILE%\\Documents\\VideoReDo\\OutputProfiles.xml<br>";
          text += "NOTE: You must have VideoRedo with H.264 support (TVSuite4 or later) in order for this file to<br>";
-         text += "be relevant. kmttg will scan this file only for MP4 profile types to use as encoding choices.<br>";
+         text += "be relevant. kmttg will scan this file only for MP4 & WMV profile types to use as encoding choices.<br>";
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("TSDownload")) {
