@@ -325,6 +325,10 @@ public class config {
             String xml = UserProfile + "\\Documents\\VideoReDo\\OutputProfiles.xml";
             if (file.isFile(xml)) {
                VrdProfilesXml = xml;
+            } else {
+               xml = UserProfile + "\\My Documents\\VideoReDo\\OutputProfiles.xml";
+               if (file.isFile(xml))
+                  VrdProfilesXml = xml;
             }
          }
       }      
