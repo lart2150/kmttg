@@ -27,14 +27,10 @@ public class encodeConfig {
       config.ENCODE_NAMES.clear();
      
       if (config.VrdEncode == 1) {
-         // Use encoding profiles from VRD
-         if ( ! file.isFile(config.VrdProfilesXml) ) {
-            errors.add("VideoRedo profiles file not valid: " + config.VrdProfilesXml);
-            return errors;
-         }
-         
-         if ( ! parseXmlFile(config.VrdProfilesXml) ) {
-            errors.add("Encountered problems parsing VideoRedo profiles xml file: " + config.VrdProfilesXml);
+         // Use VRD encoding profiles
+         Stack<String> result = getVrdProfiles();
+         if (result.size() > 0) {
+            return result;
          }
       } else {
          // Use encoding profiles in "encode" folder
@@ -131,10 +127,41 @@ public class encodeConfig {
       return true;
    }
    
+   // Build list of encoding profile names from VRD
+   private static Stack<String> getVrdProfiles() {
+      Stack<String> errors = new Stack<String>();
+      
+      // This method parses xml file for profiles
+      if ( ! parseVrdXmlFile() ) {
+         errors.add("Encountered problems parsing VideoRedo profiles xml file");
+      }
+
+      return errors;
+   }
+   
    // Parse VRD profile xml file and extract encoding information
-   private static Boolean parseXmlFile(String xmlFile) {
+   private static Boolean parseVrdXmlFile() {
+      
+      String VrdProfilesXml = "";      
+      String UserProfile = System.getenv("USERPROFILE");
+      if (UserProfile != null && file.isDir(UserProfile)) {
+         String xml = UserProfile + "\\Documents\\VideoReDo\\OutputProfiles.xml";
+         if (file.isFile(xml)) {
+            VrdProfilesXml = xml;
+         } else {
+            xml = UserProfile + "\\My Documents\\VideoReDo\\OutputProfiles.xml";
+            if (file.isFile(xml))
+               VrdProfilesXml = xml;
+         }
+      }
+
+      if ( ! file.isFile(VrdProfilesXml) ) {
+         log.error("VideoRedo OutputProfiles.xml file not found");
+         return false;
+      }
+            
       try {         
-         BufferedReader xml = new BufferedReader(new FileReader(xmlFile));
+         BufferedReader xml = new BufferedReader(new FileReader(VrdProfilesXml));
          String line, Name="", FileType="", extension;
          while ( (line = xml.readLine()) != null ) {
             extension = "";
