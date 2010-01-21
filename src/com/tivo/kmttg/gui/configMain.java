@@ -25,7 +25,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
 import com.tivo.kmttg.main.config;
-import com.tivo.kmttg.main.encodeConfig;
 import com.tivo.kmttg.main.mdns;
 import com.tivo.kmttg.task.custom;
 import com.tivo.kmttg.util.debug;
@@ -80,7 +79,6 @@ public class configMain {
    private static JTextField wan_http_port = null;
    private static JTextField active_job_limit = null;
    private static JTextField VRD_path = null;
-   private static JTextField VrdProfilesXml = null;
    private static JTextField t2extract = null;
    private static JTextField t2extract_args = null;
    private static JTextField ccextractor = null;
@@ -411,9 +409,6 @@ public class configMain {
       // VRD path
       VRD_path.setText(config.VRD);
       
-      // VrdProfilesXml
-      VrdProfilesXml.setText(config.VrdProfilesXml);
-      
       // tivodecode
       tivodecode.setText(config.tivodecode);
       
@@ -524,20 +519,7 @@ public class configMain {
          }
       }
       config.VRD = value;
-      
-      // VrdProfilesXml
-      value = string.removeLeadingTrailingSpaces(VrdProfilesXml.getText());
-      if (value.length() == 0) {
-         // Reset to default if none given
-         value = "";
-      } else {
-         if ( ! file.isFile(value) ) {
-            textFieldError(VrdProfilesXml, "VideoRedo profiles file setting does not exist: '" + value + "'");
-            errors++;
-         }
-      }
-      config.VrdProfilesXml = value;
-      
+            
       // Remove .TiVo
       if (remove_tivo.isSelected())
          config.RemoveTivoFile = 1;
@@ -1026,7 +1008,6 @@ public class configMain {
       comskip = new javax.swing.JTextField(30);
       comskip_ini = new javax.swing.JTextField(30);
       VRD_path = new javax.swing.JTextField(30);
-      VrdProfilesXml = new javax.swing.JTextField(30);
       t2extract = new javax.swing.JTextField(30);
       t2extract_args = new javax.swing.JTextField(30);
       ccextractor = new javax.swing.JTextField(30);
@@ -1084,7 +1065,6 @@ public class configMain {
       JLabel wan_http_port_label = new javax.swing.JLabel();
       JLabel active_job_limit_label = new javax.swing.JLabel();
       JLabel VRD_path_label = new javax.swing.JLabel();
-      JLabel VrdProfilesXml_label = new javax.swing.JLabel();
       JLabel t2extract_label = new javax.swing.JLabel();
       JLabel t2extract_args_label = new javax.swing.JLabel();
       JLabel ccextractor_label = new javax.swing.JLabel();
@@ -1165,7 +1145,6 @@ public class configMain {
       wan_http_port_label.setText("wan http port"); 
       active_job_limit_label.setText("active job limit"); 
       VRD_path_label.setText("VideoRedo path");
-      VrdProfilesXml_label.setText("OutputProfiles.xml file");
       t2extract_label.setText("t2extract"); 
       t2extract_args_label.setText("t2extract extra arguments");
       ccextractor_label.setText("ccextractor");
@@ -1332,22 +1311,7 @@ public class configMain {
             }
          }
       );
-      
-      VrdProfilesXml.addMouseListener(
-         new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-               if(e.getClickCount() == 2) {
-                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                  int result = Browser.showDialog(VrdProfilesXml, "Choose File");
-                  if (result == JFileChooser.APPROVE_OPTION) {
-                     VrdProfilesXml.setText(Browser.getSelectedFile().getPath());
-                     encodeConfig.parseEncodingProfiles();
-                  }
-               }
-            }
-         }
-      );
-      
+            
       tivodecode.addMouseListener(
          new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -1993,16 +1957,6 @@ public class configMain {
       c.gridy = gy;
       vrd_panel.add(VrdEncode, c);
       
-      // VRD path
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      vrd_panel.add(VrdProfilesXml_label, c);
-
-      c.gridx = 1;
-      c.gridy = gy;
-      vrd_panel.add(VrdProfilesXml, c);
-      
       // pyTivo Panel
       JPanel pyTivo_panel = new JPanel(new GridBagLayout());      
       
@@ -2141,7 +2095,6 @@ public class configMain {
       t2extract_args.setToolTipText(getToolTip("t2extract_args"));
       ccextractor.setToolTipText(getToolTip("ccextractor"));
       VRD_path.setToolTipText(getToolTip("VRD_path"));
-      VrdProfilesXml.setToolTipText(getToolTip("VrdProfilesXml"));
       AtomicParsley.setToolTipText(getToolTip("AtomicParsley"));
       wan_http_port.setToolTipText(getToolTip("wan_http_port"));
       active_job_limit.setToolTipText(getToolTip("active_job_limit"));
@@ -2271,17 +2224,8 @@ public class configMain {
          text += "to VideoRedo, when this option is enabled kmttg will use VideoRedo encoding<br>";
          text += "profiles for <b>encode</b> task.<br>";
          text += "NOTE: You must have VideoRedo with H.264 support (TVSuite4 or later) in order<br>";
-         text += "to use this option. kmttg will scan the VideoRedo <b>OutputProfiles.xml</b> file<br>";
+         text += "to use this option. kmttg will scan your VideoRedo TVS4 output profiles<br>";
          text += "for MP4 & WMV profile types to use as encoding choices.";
-      }
-      else if (component.equals("VrdProfilesXml")) {
-         text =  "<b>OutputProfiles.xml file</b><br>";
-         text += "For Windows systems only if you have VideoRedo program installed on this computer<br>";
-         text += "then supply the full path to the VideoRedo <b>OutputProfiles.xml</b> file.<br>";
-         text += "NOTE: Usually the file is located at: %USERPROFILE%\\Documents\\VideoReDo\\OutputProfiles.xml<br>";
-         text += "NOTE: You must have VideoRedo with H.264 support (TVSuite4 or later) in order for this file to<br>";
-         text += "be relevant. kmttg will scan this file only for MP4 & WMV profile types to use as encoding choices.<br>";
-         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("TSDownload")) {
          text =  "<b>Download TiVo files in Transport Stream format</b><br>";
