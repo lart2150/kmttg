@@ -67,7 +67,6 @@ public class config {
    public static String wan_http_port = "";
    public static String configIni = "";
    public static String tivoFileNameFormat = null; 
-   public static String VrdProfilesXml = "";
    
    // custom related
    public static String customCommand = "";
@@ -318,19 +317,6 @@ public class config {
          if ( ! file.isDir(tmpDir) ) {
             tmpDir = programDir;
          }
-         
-         // VrdProfilesXml file
-         String UserProfile = System.getenv("USERPROFILE");
-         if (UserProfile != null && file.isDir(UserProfile)) {
-            String xml = UserProfile + "\\Documents\\VideoReDo\\OutputProfiles.xml";
-            if (file.isFile(xml)) {
-               VrdProfilesXml = xml;
-            } else {
-               xml = UserProfile + "\\My Documents\\VideoReDo\\OutputProfiles.xml";
-               if (file.isFile(xml))
-                  VrdProfilesXml = xml;
-            }
-         }
       }      
       
       // Try and get MAK from ~/.tivodecode_mak
@@ -559,9 +545,6 @@ public class config {
             if (key.equals("VrdEncode")) {
                VrdEncode = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
-            if (key.equals("VrdProfilesXml")) {
-               VrdProfilesXml = line;
-            }
             if (key.equals("TSDownload")) {
                TSDownload = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -734,8 +717,6 @@ public class config {
          ofp.write("<VrdDecrypt>\n" + VrdDecrypt + "\n\n");
          
          ofp.write("<VrdEncode>\n" + VrdEncode + "\n\n");
-         
-         ofp.write("<VrdProfilesXml>\n" + VrdProfilesXml + "\n\n");
          
          ofp.write("<TSDownload>\n" + TSDownload + "\n\n");
          
