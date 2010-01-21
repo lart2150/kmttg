@@ -1,6 +1,8 @@
 package com.tivo.kmttg.task;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.util.Date;
 import java.util.Stack;
 
@@ -34,11 +36,11 @@ public class vrdencode {
       Boolean schedule = true;
             
       String s = File.separator;
-      vrdscript = config.VRD + s + "vp.vbs";
+      vrdscript = createScript();
       cscript = System.getenv("SystemRoot") + s + "system32" + s + "cscript.exe";
       
-      if ( ! file.isFile(vrdscript) ) {
-         log.error("File does not exist: " + vrdscript);
+      if ( vrdscript == null || ! file.isFile(vrdscript) ) {
+         log.error("Failed to created script: " + vrdscript);
          schedule = false;
       }
       
@@ -95,6 +97,7 @@ public class vrdencode {
          }
          return true;
       } else {
+         if (vrdscript != null) file.delete(vrdscript);
          return false;
       }     
    }
@@ -108,9 +111,6 @@ public class vrdencode {
       command.add(vrdscript);
       command.add(job.inputFile);
       command.add(job.encodeFile);
-      command.add("/d");
-      command.add("/q");
-      command.add("/na");
       command.add("/p:" + job.encodeName);
       process = new backgroundProcess();
       log.print(">> ENCODING WITH PROFILE '" + job.encodeName + "' TO FILE " + job.encodeFile + " ...");
@@ -121,6 +121,7 @@ public class vrdencode {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
+         if (vrdscript != null) file.delete(vrdscript);
          return false;
       }
       return true;
@@ -130,6 +131,7 @@ public class vrdencode {
       debug.print("");
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
+      if (vrdscript != null) file.delete(vrdscript);
    }
 
    // Check status of a currently running job
@@ -145,14 +147,17 @@ public class vrdencode {
                // Update status in job table
                String s = String.format("%.2f MB", (float)file.size(job.encodeFile)/Math.pow(2,20));
                String t = jobMonitor.getElapsedTime(job.time);
+               int pct = encodeGetPct();
                               
                if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                  // Update STATUS column 
-                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);
-                  
-                  // If 1st job then update title & progress bar
-                  String title = String.format("vrdencode: %s %s", t, config.kmttg);
+                  // Update STATUS column, title & progress bar
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);                  
+                  String title = String.format("vrdencode: %d%% %s", pct, config.kmttg);
                   config.gui.setTitle(title);
+                  config.gui.progressBar_setValue(pct);
+               } else {
+                  // Update STATUS column only
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, String.format("%d%%",pct) + "---" + s); 
                }
             }
          }
@@ -231,7 +236,108 @@ public class vrdencode {
             }
          }
       }
+      if (vrdscript != null) file.delete(vrdscript);
       return false;
+   }
+   
+   // Create custom cscript file
+   private String createScript() {
+      String script = file.makeTempFile("VRD", ".vbs");
+      String eol = "\r";
+      try {
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(script));
+         ofp.write("set Args = wscript.Arguments" + eol);
+         ofp.write("if Args.Count < 2 then" + eol);
+         ofp.write("   wscript.stderr.writeline( \"? Invalid number of arguments\")" + eol);
+         ofp.write("   wscript.quit 1" + eol);
+         ofp.write("end if" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Check for flags." + eol);
+         ofp.write("profileName  = \"\"" + eol);
+         ofp.write("for i = 1 to args.Count" + eol);
+         ofp.write("   p = args(i-1)" + eol);
+         ofp.write("   if left(p,3)=\"/p:\" then profileName = mid(p,4)" + eol);
+         ofp.write("next" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Check that a profile name was given" + eol);
+         ofp.write("if ( profileName = \"\" ) then" + eol);
+         ofp.write("   wscript.stderr.writeline( \"? Profile name not given\" )" + eol);
+         ofp.write("   wscript.quit 2" + eol);
+         ofp.write("end if" + eol);
+         ofp.write("" + eol);
+         ofp.write("sourceFile = args(0)" + eol);
+         ofp.write("destFile   = args(1)" + eol);
+         ofp.write("" + eol);
+         ofp.write("'Create VideoReDo object and open the source project / file." + eol);
+         ofp.write("Set VideoReDoSilent = wscript.CreateObject( \"VideoReDo.VideoReDoSilent\" )" + eol);
+         ofp.write("set VideoReDo = VideoReDoSilent.VRDInterface" + eol);
+         ofp.write("" + eol);
+         ofp.write("'Hard code no audio alert" + eol);
+         ofp.write("VideoReDo.AudioAlert = false" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Open source file" + eol);
+         ofp.write("openFlag = VideoReDo.FileOpen( sourceFile )" + eol);
+         ofp.write("" + eol);
+         ofp.write("if openFlag = false then" + eol);
+         ofp.write("   wscript.stderr.writeline( \"? Unable to open file/project: \" + sourceFile )" + eol);
+         ofp.write("   wscript.quit 3" + eol);
+         ofp.write("end if" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Open output file and start processing." + eol);
+         ofp.write("outputFlag = false" + eol);
+         ofp.write("outputXML = VideoReDo.FileSaveProfile( destFile, profileName )" + eol);
+         ofp.write("if ( left(outputXML,1) = \"*\" ) then" + eol);
+         ofp.write("   wscript.stderr.writeline(\"? Problem opening output file: \" + outputXML )" + eol);
+         ofp.write("   wscript.quit 4" + eol);
+         ofp.write("else" + eol);
+         ofp.write("   outputFlag = true" + eol);
+         ofp.write("end if" + eol);
+         ofp.write("" + eol);
+         ofp.write("if outputFlag = false then" + eol);
+         ofp.write("   wscript.stderr.writeline(\"? Problem opening output file: \" + destFile )" + eol);
+         ofp.write("   wscript.quit 4" + eol);
+         ofp.write("end if" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Wait until output done and output % complete to stdout" + eol);
+         ofp.write("while( VideoRedo.IsOutputInProgress() )" + eol);
+         ofp.write("   percent = \"Progress: \" & Int(VideoReDo.OutputPercentComplete) & \"%\"" + eol);
+         ofp.write("   wscript.echo(percent)" + eol);
+         ofp.write("   wscript.sleep 2000" + eol);
+         ofp.write("wend" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Close VRD" + eol);
+         ofp.write("VideoReDo.Close()" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Exit with status 0" + eol);
+         ofp.write("wscript.echo( \"   Output complete to: \" + destFile )" + eol);
+         ofp.write("wscript.quit 0" + eol);
+         ofp.close();
+      }
+      catch (Exception ex) {
+         log.error(ex.toString());
+         return null;
+      }
+
+      return script;
+   }
+   
+   // Obtain pct complete from VRD stdout
+   private int encodeGetPct() {
+      String last = process.getStdoutLast();
+      if (last.matches("")) return 0;
+      if (last.contains("Progress: ")) {
+         String[] all = last.split("Progress: ");
+         if (all.length > 1) {
+            String pct_str = all[1].replaceFirst("%", "");
+            try {
+               return (int)Float.parseFloat(pct_str);
+            }
+            catch (NumberFormatException n) {
+               return 0;
+            }
+         }
+      }
+      return 0;
    }
 
 }
