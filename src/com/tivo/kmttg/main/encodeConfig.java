@@ -1,8 +1,10 @@
 package com.tivo.kmttg.main;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Stack;
 
+import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -18,7 +21,7 @@ import com.tivo.kmttg.util.log;
 public class encodeConfig {
 
    // Determine list of encoding profiles to use
-   public static Stack<String> parseEncodingProfiles() {
+   public static void parseEncodingProfiles() {
       
       Stack<String> errors = new Stack<String>();
       
@@ -30,7 +33,8 @@ public class encodeConfig {
          // Use VRD encoding profiles
          Stack<String> result = getVrdProfiles();
          if (result.size() > 0) {
-            return result;
+            log.error(result);
+            return;
          }
       } else {
          // Use encoding profiles in "encode" folder
@@ -39,7 +43,8 @@ public class encodeConfig {
          File d = new File(dir);
          if ( ! d.isDirectory() ) {
             errors.add("Encoding profiles dir not valid: " + dir);
-            return errors;
+            log.error(errors);
+            return;
          }
          FilenameFilter filter = new FilenameFilter() {
             public boolean accept(File dir, String name) {
@@ -79,8 +84,6 @@ public class encodeConfig {
          // Set config.encodeName to 1st entry
          config.encodeName = config.ENCODE_NAMES.get(0);
       }
-
-      return errors;
    }
 
    // Parse an individual .enc file
@@ -121,82 +124,6 @@ public class encodeConfig {
          
       }         
       catch (IOException ex) {
-         return false;
-      }
-      
-      return true;
-   }
-   
-   // Build list of encoding profile names from VRD
-   private static Stack<String> getVrdProfiles() {
-      Stack<String> errors = new Stack<String>();
-      
-      // This method parses xml file for profiles
-      if ( ! parseVrdXmlFile() ) {
-         errors.add("Encountered problems parsing VideoRedo profiles xml file");
-      }
-
-      return errors;
-   }
-   
-   // Parse VRD profile xml file and extract encoding information
-   private static Boolean parseVrdXmlFile() {
-      
-      String VrdProfilesXml = "";      
-      String UserProfile = System.getenv("USERPROFILE");
-      if (UserProfile != null && file.isDir(UserProfile)) {
-         String xml = UserProfile + "\\Documents\\VideoReDo\\OutputProfiles.xml";
-         if (file.isFile(xml)) {
-            VrdProfilesXml = xml;
-         } else {
-            xml = UserProfile + "\\My Documents\\VideoReDo\\OutputProfiles.xml";
-            if (file.isFile(xml))
-               VrdProfilesXml = xml;
-         }
-      }
-
-      if ( ! file.isFile(VrdProfilesXml) ) {
-         log.error("VideoRedo OutputProfiles.xml file not found");
-         return false;
-      }
-            
-      try {         
-         BufferedReader xml = new BufferedReader(new FileReader(VrdProfilesXml));
-         String line, Name="", FileType="", extension;
-         while ( (line = xml.readLine()) != null ) {
-            extension = "";
-            // Get rid of leading and trailing white space
-            line = line.replaceFirst("^\\s*(.*$)", "$1");
-            line = line.replaceFirst("^(.*)\\s*$", "$1");
-                                   
-            // Now parse all items tagged with <Name> or <FileType>            
-            if (line.matches("^<Name.+$")) {
-               Name = line.replaceFirst("^<Name>(.+)</.+$", "$1");
-            }
-            if (line.matches("^<FileType.+$")) {
-               FileType = line.replaceFirst("^<FileType>(.+)</.+$", "$1");
-               if (FileType.length() > 0 && Name.length() > 0) {
-                  // Filter out all entries except MP4 & WMV types
-                  if (FileType.startsWith("MP4")) {
-                     extension = "mp4";
-                  }
-                  if (FileType.startsWith("WMV")) {
-                     extension = "wmv";
-                  }
-                  if (extension.length() > 0) {
-                     Hashtable<String,String> h = new Hashtable<String,String>();
-                     h.put("description", "VideoRedo " + extension + " profile");
-                     h.put("extension", extension);
-                     config.ENCODE.put(Name, h);
-                  }
-                  Name = "";
-               }
-            }
-         }
-         xml.close();                           
-      }
-      catch (IOException ex) {
-         log.error(ex.toString());
          return false;
       }
       
@@ -309,6 +236,200 @@ public class encodeConfig {
    // It's crazy but in Java regex one backslash = 4 ...
    private static String escapeBackSlashes(String s) {
       return s.replaceAll("\\\\", "\\\\\\\\");
+   }
+   
+   // Build list of encoding profile names from VRD
+   private static Stack<String> getVrdProfiles() {
+      Stack<String> errors = new Stack<String>();
+      
+      // This method parses xml file for profiles
+      //if ( ! parseVrdXmlFile() ) {
+      //   errors.add("Encountered problems parsing VideoRedo profiles xml file");
+      //}
+      
+      // This method uses VRD functions to get profiles
+      if ( ! vrdGetProfiles() ) {
+         errors.add("Encountered problems obtaining encoding profiles from VideoRedo");
+      }
+
+      return errors;
+   }
+   
+   // Parse VRD profile xml file and extract encoding information
+   private static Boolean parseVrdXmlFile() {
+      
+      String VrdProfilesXml = "";      
+      String UserProfile = System.getenv("USERPROFILE");
+      if (UserProfile != null && file.isDir(UserProfile)) {
+         String xml = UserProfile + "\\Documents\\VideoReDo\\OutputProfiles.xml";
+         if (file.isFile(xml)) {
+            VrdProfilesXml = xml;
+         } else {
+            xml = UserProfile + "\\My Documents\\VideoReDo\\OutputProfiles.xml";
+            if (file.isFile(xml))
+               VrdProfilesXml = xml;
+         }
+      }
+
+      if ( ! file.isFile(VrdProfilesXml) ) {
+         log.error("VideoRedo OutputProfiles.xml file not found");
+         return false;
+      }
+            
+      try {         
+         BufferedReader xml = new BufferedReader(new FileReader(VrdProfilesXml));
+         String line, Name="", FileType="", extension;
+         while ( (line = xml.readLine()) != null ) {
+            extension = "";
+            // Get rid of leading and trailing white space
+            line = line.replaceFirst("^\\s*(.*$)", "$1");
+            line = line.replaceFirst("^(.*)\\s*$", "$1");
+                                   
+            // Now parse all items tagged with <Name> or <FileType>            
+            if (line.matches("^<Name.+$")) {
+               Name = line.replaceFirst("^<Name>(.+)</.+$", "$1");
+            }
+            if (line.matches("^<FileType.+$")) {
+               FileType = line.replaceFirst("^<FileType>(.+)</.+$", "$1");
+               if (FileType.length() > 0 && Name.length() > 0) {
+                  // Filter out all entries except MP4 & WMV types
+                  if (FileType.startsWith("MP4")) {
+                     extension = "mp4";
+                  }
+                  if (FileType.startsWith("WMV")) {
+                     extension = "wmv";
+                  }
+                  if (extension.length() > 0) {
+                     Hashtable<String,String> h = new Hashtable<String,String>();
+                     h.put("description", "VideoRedo " + extension + " profile");
+                     h.put("extension", extension);
+                     config.ENCODE.put(Name, h);
+                  }
+                  Name = "";
+               }
+            }
+         }
+         xml.close();                           
+      }
+      catch (IOException ex) {
+         log.error(ex.toString());
+         return false;
+      }
+      
+      return true;
+   }
+   
+   // Get list of output profiles from VRD with custom VBS script
+   // Update ENCODE & ENCODE_NAMES according to retrieved list
+   private static Boolean vrdGetProfiles() {
+      String s = File.separator;
+      String vrdscript = createGetProfilesScript();
+      if (vrdscript == null || ! file.isFile(vrdscript))
+         return false;
+      String cscript = System.getenv("SystemRoot") + s + "system32" + s + "cscript.exe";
+      if (! file.isFile(cscript)) {
+         log.error("cscript.exe path does not exist: " + cscript);
+         return false;
+      }
+
+      // System call to ccsript to do most of the work      
+      Stack<String> command = new Stack<String>();
+      command.add(cscript);
+      command.add("//nologo");
+      command.add(vrdscript);
+      backgroundProcess process = new backgroundProcess();
+      if ( process.run(command) ) {
+         // Wait for command to terminate
+         process.Wait();
+         
+         Stack<String> l;
+         // Look for errors
+         l = process.getStderr();
+         if (l.size() > 0) {
+            log.error(l);
+            file.delete(vrdscript);
+            return false;
+         }
+         
+         // Parse stdout
+         l = process.getStdout();
+         if (l.size() > 0) {
+            String line, Name="", FileType="", extension;
+            for (int i=0; i<l.size(); ++i) {
+               extension = "";
+               line = l.get(i);
+               // Get rid of leading and trailing white space
+               line = line.replaceFirst("^\\s*(.*$)", "$1");
+               line = line.replaceFirst("^(.*)\\s*$", "$1");
+                                      
+               // Now parse all items tagged with <Name> or <FileType>            
+               if (line.matches("^<Name.+$")) {
+                  Name = line.replaceFirst("^<Name>(.+)</.+$", "$1");
+               }
+               if (line.matches("^<FileType.+$")) {
+                  FileType = line.replaceFirst("^<FileType>(.+)</.+$", "$1");
+                  if (FileType.length() > 0 && Name.length() > 0) {
+                     // Filter out all entries except MP4 & WMV types
+                     if (FileType.startsWith("MP4")) {
+                        extension = "mp4";
+                     }
+                     if (FileType.startsWith("WMV")) {
+                        extension = "wmv";
+                     }
+                     if (extension.length() > 0) {
+                        Hashtable<String,String> h = new Hashtable<String,String>();
+                        h.put("description", "VideoRedo " + extension + " profile");
+                        h.put("extension", extension);
+                        config.ENCODE.put(Name, h);
+                     }
+                     Name = "";
+                  }
+               }
+            }
+            file.delete(vrdscript);
+            return true;
+         }
+      } else {
+         log.error("Failed to launch command: " + process.toString());
+         log.error(process.getStderr());
+      }
+      file.delete(vrdscript);
+      return false;
+   }
+   
+   // Create custom VB script that uses VideoRedo methods to print encoding profiles to stdout
+   private static String createGetProfilesScript() {
+      String script = file.makeTempFile("VRD", ".vbs");
+      String eol = "\r";
+      try {
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(script));
+         ofp.write("'Create VideoReDo object." + eol);
+         ofp.write("Set VideoReDoSilent = wscript.CreateObject( \"VideoReDo.VideoReDoSilent\" )" + eol);
+         ofp.write("set VideoReDo = VideoReDoSilent.VRDInterface" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Get number of profiles available." + eol);
+         ofp.write("numProfiles = VideoReDo.GetProfilesCount()" + eol);
+         ofp.write("if ( numProfiles > 0 ) then" + eol);
+         ofp.write("   for i = 1 to numProfiles" + eol);
+         ofp.write("      if (VideoReDo.IsProfileEnabled(i)) then" + eol);
+         ofp.write("         wscript.echo(VideoReDo.GetProfileXML(i))" + eol);
+         ofp.write("      end if" + eol);
+         ofp.write("   next" + eol);
+         ofp.write("end if" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Close VRD" + eol);
+         ofp.write("VideoReDo.Close()" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Exit with status 0" + eol);
+         ofp.write("wscript.quit 0" + eol);
+         ofp.close();
+      }
+      catch (Exception ex) {
+         log.error(ex.toString());
+         return null;
+      }
+
+      return script;
    }
 
 }
