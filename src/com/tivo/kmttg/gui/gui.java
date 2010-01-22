@@ -957,7 +957,7 @@ public class gui {
       }
       
       // Refresh encoding profiles in case toggled between VRD & regular
-      refreshEncodingProfilesCB();      
+      if (config.GUI) refreshEncodingProfilesCB();    
    }
    
    // Callback for "Refresh Encoding Profiles" File menu entry
