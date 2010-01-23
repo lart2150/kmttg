@@ -1067,8 +1067,9 @@ public class jobMonitor {
 
    // Return true if this job uses VideoRedo
    private static Boolean isVideoRedoJob(jobData job) {
+      // NOTE: vrdreview is GUI job and multiple VRD GUI jobs are OK
       if ( job.type.equals("qsfix") || job.type.equals("adscan") ||
-           job.type.equals("vrdreview") || job.type.equals("adcut") || job.type.equals("vrdencode")) {
+           job.type.equals("adcut") || job.type.equals("vrdencode")) {
          return true;
       }
       return false;
