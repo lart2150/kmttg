@@ -243,14 +243,14 @@ public class encodeConfig {
       Stack<String> errors = new Stack<String>();
       
       // This method parses xml file for profiles
-      //if ( ! parseVrdXmlFile() ) {
-      //   errors.add("Encountered problems parsing VideoRedo profiles xml file");
-      //}
+      if ( ! parseVrdXmlFile() ) {
+         errors.add("Encountered problems parsing VideoRedo profiles xml file");
+      }
       
       // This method uses VRD functions to get profiles
-      if ( ! vrdGetProfiles() ) {
-         errors.add("Encountered problems obtaining encoding profiles from VideoRedo");
-      }
+      //if ( ! vrdGetProfiles() ) {
+      //   errors.add("Encountered problems obtaining encoding profiles from VideoRedo");
+      //}
 
       return errors;
    }
