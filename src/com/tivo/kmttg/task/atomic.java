@@ -175,7 +175,7 @@ public class atomic {
          }
          args.add(job.encodeFile);
          args.add("--overWrite");
-         args.add("-S");
+         args.add("--stik");
          args.add(h.get("MediaKind"));
          if (h.containsKey("episodeTitle") ) {
             args.add("--title");
@@ -194,25 +194,60 @@ public class atomic {
             args.add(h.get("description"));
          }
          if (h.containsKey("title") ) {
+            String title = h.get("title");
             args.add("--TVShowName");
-            args.add(h.get("title"));
+            args.add(title);
+            args.add("--artist");
+            args.add(title);
+            args.add("--albumArtist");
+            args.add(title);
          }
          if (h.containsKey("episodeNumber") ) {
-            args.add("--TVEpisodeNum");
-            args.add(h.get("episodeNumber"));
             args.add("--TVEpisode");
             args.add(h.get("episodeNumber"));
-            String season = h.get("episodeNumber");
-            if (season.length() == 3)
-               season = season.substring(0, 1);
-            else if (season.length() == 4)
-               season = season.substring(0, 2);
-            args.add("--TVSeason");
+         }
+         if (h.containsKey("episode") || h.containsKey("episodeNumber")) {
+            String ep;
+             if (h.containsKey("episode"))
+                ep = h.get("episode");
+             else
+                ep = h.get("episodeNumber");
+             args.add("--TVEpisodeNum");
+             args.add(ep);
+             args.add("--tracknum");
+             args.add(ep);
+         }
+         if (h.containsKey("season") || h.containsKey("episodeNumber")) {
+            String season;
+            if (h.containsKey("season"))
+               season = (h.get("season"));
+            else {
+               season = h.get("episodeNumber");
+               if (season.length() == 3)
+                  season = season.substring(0, 1);
+               else if (season.length() == 4)
+                  season = season.substring(0, 2);
+               else if (season.length() == 5)
+                  season = season.substring(0, 2);
+            }
+            args.add("--TVSeasonNum");
             args.add(season);
+            
+            if (h.containsKey("title")) {
+               season = h.get("title") + ", Season " + season;
+               args.add("--album");
+               args.add(season);
+            }
          }
          if (h.containsKey("callsign") ) {
             args.add("--TVNetwork");
             args.add(h.get("callsign"));
+         }
+         args.add("-d");
+         args.add("1/1");
+         if (h.containsKey("artwork")) {
+            args.add("--artwork");
+            args.add(h.get("artwork"));
          }
          return;
       }
