@@ -99,9 +99,11 @@ public class jobMonitor {
       
       // Hash to track running downloads per Tivo
       // Also count number of cpu intensive jobs currently running
-      // Also count number of VideoRedo jobs currently running
+      // Also count number of COM VideoRedo jobs currently running
+      // Also count number of GUI VideoRedo jobs currently running
       int cpuActiveJobs = 0;
-      int VideoRedoJobs = 0;
+      int VideoRedoCOMJobs = 0;
+      int VideoRedoGUIJobs = 0;
       Hashtable<String,Integer> tivoDownload = new Hashtable<String,Integer>();
       for (int i=0; i<running.size(); i++) {
          job = running.get(i);
@@ -110,10 +112,13 @@ public class jobMonitor {
                tivoDownload.put(job.tivoName, 0);
             }
             tivoDownload.put(job.tivoName, tivoDownload.get(job.tivoName)+1);
+         } else if ( isVideoRedoGUIJob(job) ) {
+            // NOTE: VRD GUI job not considered CPU active
+            VideoRedoGUIJobs++;
          } else {
             cpuActiveJobs++;
-            if ( isVideoRedoJob(job) ) {
-               VideoRedoJobs++;
+            if ( isVideoRedoCOMJob(job) ) {
+               VideoRedoCOMJobs++;
             }
          }
       }
@@ -140,13 +145,19 @@ public class jobMonitor {
          }
          
          // Don't run more than 'MaxJobs' active jobs at a time
-         if ( ! job.type.equals("download") && ! job.type.equals("metadata") ) {
+         // NOTE: VRD GUI job not considered CPU active
+         if ( ! job.type.equals("download") && ! job.type.equals("metadata") && ! isVideoRedoGUIJob(job)) {
             if (cpuActiveJobs >= config.MaxJobs) continue;
          }
          
-         // Don't launch more than one VideoRedo job at a time
-         if ( isVideoRedoJob(job) ) {
-            if (VideoRedoJobs > 0) continue;
+         // Don't launch more than one VideoRedo COM job at a time
+         if ( isVideoRedoCOMJob(job) ) {
+            if (VideoRedoCOMJobs > 0) continue;
+         }
+         
+         // Don't launch more than one VideoRedo GUI job at a time
+         if ( isVideoRedoGUIJob(job) ) {
+            if (VideoRedoGUIJobs > 0) continue;
          }
 
          // OK to launch job
@@ -163,9 +174,13 @@ public class jobMonitor {
             }
          }
          
-         // Update VideoRedoJobs number
-         if ( isVideoRedoJob(job) )
-            VideoRedoJobs++;
+         // Update VideoRedoCOMJobs number
+         if ( isVideoRedoCOMJob(job) )
+            VideoRedoCOMJobs++;
+         
+         // Update VideoRedoGUIJobs number
+         if ( isVideoRedoGUIJob(job) )
+            VideoRedoGUIJobs++;
       }
    }
    
@@ -1065,11 +1080,20 @@ public class jobMonitor {
       }
    }*/
 
-   // Return true if this job uses VideoRedo
-   private static Boolean isVideoRedoJob(jobData job) {
+   // Return true if this job is a VideoRedo COM job
+   private static Boolean isVideoRedoCOMJob(jobData job) {
       // NOTE: vrdreview is GUI job and multiple VRD GUI jobs are OK
       if ( job.type.equals("qsfix") || job.type.equals("adscan") ||
            job.type.equals("adcut") || job.type.equals("vrdencode")) {
+         return true;
+      }
+      return false;
+   }
+
+   // Return true if this job is a VideoRedo GUI job
+   private static Boolean isVideoRedoGUIJob(jobData job) {
+      // NOTE: vrdreview is GUI job and multiple VRD GUI jobs are OK
+      if ( job.type.equals("vrdreview") ) {
          return true;
       }
       return false;
