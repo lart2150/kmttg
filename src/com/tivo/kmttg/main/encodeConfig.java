@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
@@ -243,20 +245,20 @@ public class encodeConfig {
       Stack<String> errors = new Stack<String>();
       
       // This method parses xml file for profiles
-      if ( ! parseVrdXmlFile() ) {
-         errors.add("Encountered problems parsing VideoRedo profiles xml file");
-      }
+      //if ( ! parseVrdXmlFile() ) {
+      //   errors.add("Encountered problems parsing VideoRedo profiles xml file");
+      //}
       
       // This method uses VRD functions to get profiles
-      //if ( ! vrdGetProfiles() ) {
-      //   errors.add("Encountered problems obtaining encoding profiles from VideoRedo");
-      //}
+      if ( ! vrdGetProfiles() ) {
+         errors.add("Encountered problems obtaining encoding profiles from VideoRedo");
+      }
 
       return errors;
    }
    
    // Parse VRD profile xml file and extract encoding information
-   private static Boolean parseVrdXmlFile() {
+   /*private static Boolean parseVrdXmlFile() {
       
       String VrdProfilesXml = "";      
       String UserProfile = System.getenv("USERPROFILE");
@@ -317,7 +319,7 @@ public class encodeConfig {
       }
       
       return true;
-   }
+   }*/
    
    // Get list of output profiles from VRD with custom VBS script
    // Update ENCODE & ENCODE_NAMES according to retrieved list
@@ -352,6 +354,7 @@ public class encodeConfig {
          }
          
          // Parse stdout
+         Pattern p = Pattern.compile("^.+<Name>(.+)</Name>.+<FileType>(.+)</FileType>.+$");
          l = process.getStdout();
          if (l.size() > 0) {
             String line, Name="", FileType="", extension;
@@ -361,30 +364,23 @@ public class encodeConfig {
                // Get rid of leading and trailing white space
                line = line.replaceFirst("^\\s*(.*$)", "$1");
                line = line.replaceFirst("^(.*)\\s*$", "$1");
-                                      
-               // Now parse all items tagged with <Name> or <FileType>            
-               if (line.matches("^<Name.+$")) {
-                  Name = line.replaceFirst("^<Name>(.+)</.+$", "$1");
-               }
-               if (line.matches("^<FileType.+$")) {
-                  FileType = line.replaceFirst("^<FileType>(.+)</.+$", "$1");
-                  if (FileType.length() > 0 && Name.length() > 0) {
-                     // Filter out all entries except MP4 & WMV types
-                     if (FileType.startsWith("MP4")) {
-                        extension = "mp4";
-                     }
-                     if (FileType.startsWith("WMV")) {
-                        extension = "wmv";
-                     }
-                     if (extension.length() > 0) {
-                        Hashtable<String,String> h = new Hashtable<String,String>();
-                        h.put("description", "VideoRedo " + extension + " profile");
-                        h.put("extension", extension);
-                        config.ENCODE.put(Name, h);
-                     }
-                     Name = "";
+               Matcher m = p.matcher(line);
+               if (m.matches()) {
+                  Name = m.group(1);
+                  FileType = m.group(2);
+                  if (FileType.startsWith("MP4")) {
+                     extension = "mp4";
                   }
-               }
+                  if (FileType.startsWith("WMV")) {
+                     extension = "wmv";
+                  }
+                  if (extension.length() > 0) {
+                     Hashtable<String,String> h = new Hashtable<String,String>();
+                     h.put("description", "VideoRedo " + extension + " profile");
+                     h.put("extension", extension);
+                     config.ENCODE.put(Name, h);
+                  }
+               }                                      
             }
             file.delete(vrdscript);
             return true;
