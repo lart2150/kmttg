@@ -170,7 +170,7 @@ public class gui {
          c.anchor = GridBagConstraints.CENTER;
          c.fill = GridBagConstraints.HORIZONTAL;
 
-         int gx=0, gy=0;
+         int gy=0;
          
          // Cancel jobs button
          JButton cancel = new JButton("CANCEL JOBS");
@@ -223,61 +223,29 @@ public class gui {
          custom = new JCheckBox("custom", false);
          
          // Tasks row
-         JPanel tasks = new JPanel(new GridBagLayout());                  
-         gx = 0; gy = 0;
-         c.anchor = GridBagConstraints.CENTER;
-         c.fill = GridBagConstraints.HORIZONTAL;
-         c.gridx = gx;
-         c.gridy = gy;
-         c.weightx = 1;
-         c.gridwidth = 1;
-         tasks.add(start, c);
+         JPanel tasks_panel = new JPanel();
+         tasks_panel.setLayout(new BoxLayout(tasks_panel, BoxLayout.X_AXIS));
+         Dimension space_5 = new Dimension(5,0);
+         tasks_panel.add(start);
+         tasks_panel.add(Box.createRigidArea(space_5));
+         tasks_panel.add(metadata);
+         tasks_panel.add(Box.createRigidArea(space_5));
+         tasks_panel.add(decrypt);
+         tasks_panel.add(Box.createRigidArea(space_5));
+         tasks_panel.add(qsfix);
+         tasks_panel.add(Box.createRigidArea(space_5));
+         tasks_panel.add(comskip);
+         tasks_panel.add(Box.createRigidArea(space_5));
+         tasks_panel.add(comcut);
+         tasks_panel.add(Box.createRigidArea(space_5));
+         tasks_panel.add(captions);
+         tasks_panel.add(Box.createRigidArea(space_5));
+         tasks_panel.add(encode);
+         tasks_panel.add(Box.createRigidArea(space_5));
+         tasks_panel.add(push);
+         tasks_panel.add(Box.createRigidArea(space_5));
+         tasks_panel.add(custom);
          
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         tasks.add(metadata, c);
-                  
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         tasks.add(decrypt, c);
-         
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         tasks.add(qsfix, c);
-         
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         tasks.add(comskip, c);
-         
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         tasks.add(comcut, c);
-         
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         tasks.add(captions, c);
-         
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         tasks.add(encode, c);
-         
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         tasks.add(push, c);
-         
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         tasks.add(custom, c);
-
          // Encoding row
          // Encoding label
          encoding_label = new JLabel("Encoding Profile:", JLabel.CENTER);
@@ -299,24 +267,14 @@ public class gui {
             description = "  " + encodeConfig.getDescription(encodeConfig.getEncodeName());
          }
          encoding_description_label = new JLabel(description);
-         
-         gx = 0; gy++;
-         c.gridx = gx;
-         c.gridy = gy;
-         c.gridwidth = 2;
-         tasks.add(encoding_label, c);
-         
-         gx += 2;
-         c.gridx = gx;
-         c.gridy = gy;
-         c.gridwidth = 2;
-         tasks.add(encoding, c);
-         
-         gx += 2;
-         c.gridx = gx;
-         c.gridy = gy;
-         c.gridwidth = 5;
-         tasks.add(encoding_description_label, c);
+
+         JPanel encoding_panel = new JPanel();
+         encoding_panel.setLayout(new BoxLayout(encoding_panel, BoxLayout.X_AXIS));
+         encoding_panel.add(encoding_label);
+         encoding_panel.add(Box.createRigidArea(space_5));
+         encoding_panel.add(encoding);
+         encoding_panel.add(Box.createRigidArea(space_5));
+         encoding_panel.add(encoding_description_label);
          
          // Job Monitor table
          jobTab = new jobTable();
@@ -398,8 +356,7 @@ public class gui {
          JPanel topPane = new JPanel(new GridBagLayout());
          
          // Common settings for topPane
-         gx = 0;
-         c.gridwidth = 1;
+         c.gridwidth = 8;
          c.gridheight = 1;
          c.weightx = 1;
          c.weighty = 0;
@@ -410,13 +367,19 @@ public class gui {
          c.gridy = gy;
          c.fill = GridBagConstraints.HORIZONTAL;
          c.weighty = 0;
-         topPane.add(tasks, c);
+         topPane.add(tasks_panel, c);
+         gy++;
+         c.gridy = gy;
+         c.fill = GridBagConstraints.NONE;
+         c.anchor = GridBagConstraints.WEST;
+         topPane.add(encoding_panel, c);
          
          gy += 2;
          c.gridx = 0;
          c.gridy = gy;
          c.ipady = 100;
          c.weighty = 1.0;
+         c.gridwidth = 1;
          c.gridheight = 2;
          c.fill = GridBagConstraints.BOTH;
          c.anchor = GridBagConstraints.NORTH;
