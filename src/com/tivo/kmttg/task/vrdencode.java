@@ -242,6 +242,8 @@ public class vrdencode {
    
    // Create custom cscript file
    private String createScript() {
+      // NOTE: In GUI mode we are able to run concurrent VRD COM jobs
+      Boolean gui_mode = true;
       String script = file.makeTempFile("VRD", ".vbs");
       String eol = "\r";
       try {
@@ -269,8 +271,13 @@ public class vrdencode {
          ofp.write("destFile   = args(1)" + eol);
          ofp.write("" + eol);
          ofp.write("'Create VideoReDo object and open the source project / file." + eol);
-         ofp.write("Set VideoReDoSilent = wscript.CreateObject( \"VideoReDo.VideoReDoSilent\" )" + eol);
-         ofp.write("set VideoReDo = VideoReDoSilent.VRDInterface" + eol);
+         if (gui_mode) {
+            ofp.write("Set VideoReDo = wscript.CreateObject( \"VideoReDo.Application\" )" + eol);
+            ofp.write("VideoReDo.SetQuietMode(true)" + eol);            
+         } else {
+            ofp.write("Set VideoReDoSilent = wscript.CreateObject( \"VideoReDo.VideoReDoSilent\" )" + eol);
+            ofp.write("set VideoReDo = VideoReDoSilent.VRDInterface" + eol);
+         }
          ofp.write("" + eol);
          ofp.write("'Hard code no audio alert" + eol);
          ofp.write("VideoReDo.AudioAlert = false" + eol);
