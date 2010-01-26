@@ -18,6 +18,7 @@ import com.tivo.kmttg.util.string;
 public class vrdencode {
    String  vrdscript = null;
    String  cscript = null;
+   String  lockFile = null;
    private backgroundProcess process;
    private jobData job;
 
@@ -36,11 +37,17 @@ public class vrdencode {
       Boolean schedule = true;
             
       String s = File.separator;
-      vrdscript = createScript();
       cscript = System.getenv("SystemRoot") + s + "system32" + s + "cscript.exe";
-      
+            
+      vrdscript = createScript();
       if ( vrdscript == null || ! file.isFile(vrdscript) ) {
          log.error("Failed to created script: " + vrdscript);
+         schedule = false;
+      }
+      
+      lockFile = file.makeTempFile("VRDLock");      
+      if ( lockFile == null || ! file.isFile(lockFile) ) {
+         log.error("Failed to created lock file: " + lockFile);
          schedule = false;
       }
       
@@ -98,6 +105,7 @@ public class vrdencode {
          return true;
       } else {
          if (vrdscript != null) file.delete(vrdscript);
+         if (lockFile != null) file.delete(lockFile);
          return false;
       }     
    }
@@ -111,6 +119,7 @@ public class vrdencode {
       command.add(vrdscript);
       command.add(job.inputFile);
       command.add(job.encodeFile);
+      command.add("/l:" + lockFile);
       command.add("/p:" + job.encodeName);
       process = new backgroundProcess();
       log.print(">> ENCODING WITH PROFILE '" + job.encodeName + "' TO FILE " + job.encodeFile + " ...");
@@ -122,6 +131,7 @@ public class vrdencode {
          process = null;
          jobMonitor.removeFromJobList(job);
          if (vrdscript != null) file.delete(vrdscript);
+         if (lockFile != null) file.delete(lockFile);
          return false;
       }
       return true;
@@ -129,7 +139,9 @@ public class vrdencode {
    
    public void kill() {
       debug.print("");
-      process.kill();
+      // NOTE: Instead of process.kill VRD jobs are special case where removing lockFile
+      // causes VB script to close VRD. (Otherwise script is killed but VRD still runs).
+      file.delete(lockFile);
       log.warn("Killing '" + job.type + "' job: " + process.toString());
       if (vrdscript != null) file.delete(vrdscript);
    }
@@ -237,13 +249,13 @@ public class vrdencode {
          }
       }
       if (vrdscript != null) file.delete(vrdscript);
+      if (lockFile != null) file.delete(lockFile);
       return false;
    }
    
    // Create custom cscript file
    private String createScript() {
       // NOTE: In GUI mode we are able to run concurrent VRD COM jobs
-      Boolean gui_mode = true;
       String script = file.makeTempFile("VRD", ".vbs");
       String eol = "\r";
       try {
@@ -255,11 +267,19 @@ public class vrdencode {
          ofp.write("end if" + eol);
          ofp.write("" + eol);
          ofp.write("' Check for flags." + eol);
+         ofp.write("lockFile = \"\"" + eol);
          ofp.write("profileName  = \"\"" + eol);
          ofp.write("for i = 1 to args.Count" + eol);
          ofp.write("   p = args(i-1)" + eol);
+         ofp.write("   if left(p,3)=\"/l:\" then lockFile = mid(p,4)" + eol);
          ofp.write("   if left(p,3)=\"/p:\" then profileName = mid(p,4)" + eol);
          ofp.write("next" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Check that a lock file name was given" + eol);
+         ofp.write("if ( lockFile = \"\" ) then" + eol);
+         ofp.write("   wscript.stderr.writeline( \"? Lock file (/l:) not given\" )" + eol);
+         ofp.write("   wscript.quit 2" + eol);
+         ofp.write("end if" + eol);
          ofp.write("" + eol);
          ofp.write("' Check that a profile name was given" + eol);
          ofp.write("if ( profileName = \"\" ) then" + eol);
@@ -267,11 +287,12 @@ public class vrdencode {
          ofp.write("   wscript.quit 2" + eol);
          ofp.write("end if" + eol);
          ofp.write("" + eol);
+         ofp.write("Set fso = CreateObject(\"Scripting.FileSystemObject\")" + eol);
          ofp.write("sourceFile = args(0)" + eol);
          ofp.write("destFile   = args(1)" + eol);
          ofp.write("" + eol);
          ofp.write("'Create VideoReDo object and open the source project / file." + eol);
-         if (gui_mode) {
+         if (config.VrdAllowMultiple == 1) {
             ofp.write("Set VideoReDo = wscript.CreateObject( \"VideoReDo.Application\" )" + eol);
             ofp.write("VideoReDo.SetQuietMode(true)" + eol);            
          } else {
@@ -309,6 +330,10 @@ public class vrdencode {
          ofp.write("while( VideoRedo.IsOutputInProgress() )" + eol);
          ofp.write("   percent = \"Progress: \" & Int(VideoReDo.OutputPercentComplete) & \"%\"" + eol);
          ofp.write("   wscript.echo(percent)" + eol);
+         ofp.write("   if not fso.FileExists(lockFile) then" + eol);
+         ofp.write("      VideoReDo.Close()" + eol);
+         ofp.write("      wscript.quit 5" + eol);
+         ofp.write("   end if" + eol);
          ofp.write("   wscript.sleep 2000" + eol);
          ofp.write("wend" + eol);
          ofp.write("" + eol);
