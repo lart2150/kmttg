@@ -1082,9 +1082,9 @@ public class jobMonitor {
 
    // Return true if this job is a VideoRedo COM job
    private static Boolean isVideoRedoCOMJob(jobData job) {
-      // NOTE: vrdreview is GUI job and multiple VRD GUI jobs are OK
+      // NOTE: vrdencode is set as GUI COM job and multiple of those are OK
       if ( job.type.equals("qsfix") || job.type.equals("adscan") ||
-           job.type.equals("adcut") || job.type.equals("vrdencode")) {
+           job.type.equals("adcut")) {
          return true;
       }
       return false;
@@ -1092,7 +1092,7 @@ public class jobMonitor {
 
    // Return true if this job is a VideoRedo GUI job
    private static Boolean isVideoRedoGUIJob(jobData job) {
-      // NOTE: vrdreview is GUI job and multiple VRD GUI jobs are OK
+      // NOTE: vrdreview is GUI job and multiple VRD GUI jobs are OK, but restrict to 1
       if ( job.type.equals("vrdreview") ) {
          return true;
       }
