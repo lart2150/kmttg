@@ -143,8 +143,14 @@ public class autoConfig {
                   entry.custom = Integer.parseInt(value);
                if (name.matches("suggestionsFilter"))
                   entry.suggestionsFilter = Integer.parseInt(value);
-               if (name.matches("encode_name"))
-                  entry.encode_name = value;
+               if (name.matches("encode_name")) {
+                  // encode_name value can have spaces
+                  Pattern p = Pattern.compile("(\\S+)\\s+(.+)");
+                  Matcher m = p.matcher(line);
+                  if (m.matches()) {
+                     entry.encode_name = m.group(2);
+                  }
+               }
             }
             if (key.equals("ignorehistory")) {
                ignoreHistory.add(line);
