@@ -35,7 +35,7 @@ public class vrdreview {
       Boolean schedule = true;
       
       String s = File.separator;
-      String[] pnames = {"VRDPlus.exe", "VideoReDo.exe", "VideoReDo3.exe"};
+      String[] pnames = {"VRDPlus.exe", "VideoReDo.exe", "VideoReDo3.exe", "VideoReDo4.exe"};
       for (int i=0; i<pnames.length; ++i) {
          vrd = config.VRD + s + pnames[i];
          if (file.isFile(vrd)) break;
