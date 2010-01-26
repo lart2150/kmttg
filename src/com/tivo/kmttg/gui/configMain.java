@@ -54,6 +54,7 @@ public class configMain {
    private static JCheckBox VrdQsFilter = null;
    private static JCheckBox VrdDecrypt = null;
    private static JCheckBox VrdEncode = null;
+   private static JCheckBox VrdAllowMultiple = null;
    private static JCheckBox TSDownload = null;
    private static JCheckBox HideProtectedFiles = null;
    private static JCheckBox OverwriteFiles = null;
@@ -337,6 +338,12 @@ public class configMain {
       else
          VrdEncode.setSelected(false);
       
+      // VrdAllowMultiple
+      if (config.VrdAllowMultiple == 1)
+         VrdAllowMultiple.setSelected(true);
+      else
+         VrdAllowMultiple.setSelected(false);
+      
       // TSDownload
       if (config.TSDownload == 1)
          TSDownload.setSelected(true);
@@ -585,6 +592,12 @@ public class configMain {
          config.VrdEncode = 1;
       else
          config.VrdEncode = 0;
+      
+      // VrdAllowMultiple
+      if (VrdAllowMultiple.isSelected() && file.isDir(config.VRD))
+         config.VrdAllowMultiple = 1;
+      else
+         config.VrdAllowMultiple = 0;
       
       // TSDownload
       if (TSDownload.isSelected())
@@ -1045,6 +1058,7 @@ public class configMain {
       VrdQsFilter = new javax.swing.JCheckBox();
       VrdDecrypt = new javax.swing.JCheckBox();
       VrdEncode = new javax.swing.JCheckBox();
+      VrdAllowMultiple = new javax.swing.JCheckBox();
       TSDownload = new javax.swing.JCheckBox();
       HideProtectedFiles = new javax.swing.JCheckBox();
       OverwriteFiles = new javax.swing.JCheckBox();
@@ -1125,6 +1139,7 @@ public class configMain {
       VrdQsFilter.setText("Enable VideoRedo QS Fix video dimension filter");
       VrdDecrypt.setText("Decrypt using VideoRedo instead of tivodecode");
       VrdEncode.setText("Encode using VideoRedo");
+      VrdAllowMultiple.setText("Allow multiple VideoRedo jobs at once");
       TSDownload.setText("Download TiVo files in Transport Stream format");
       HideProtectedFiles.setText("Do not show copy protected files in table");
       OverwriteFiles.setText("Overwrite existing files");
@@ -1957,6 +1972,12 @@ public class configMain {
       c.gridy = gy;
       vrd_panel.add(VrdEncode, c);
       
+      // VrdAllowMultiple
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      vrd_panel.add(VrdAllowMultiple, c);
+      
       // pyTivo Panel
       JPanel pyTivo_panel = new JPanel(new GridBagLayout());      
       
@@ -2073,6 +2094,7 @@ public class configMain {
       VrdQsFilter.setToolTipText(getToolTip("VrdQsFilter"));
       VrdDecrypt.setToolTipText(getToolTip("VrdDecrypt"));
       VrdEncode.setToolTipText(getToolTip("VrdEncode"));
+      VrdAllowMultiple.setToolTipText(getToolTip("VrdAllowMultiple"));
       TSDownload.setToolTipText(getToolTip("TSDownload"));
       HideProtectedFiles.setToolTipText(getToolTip("HideProtectedFiles"));
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
@@ -2226,6 +2248,19 @@ public class configMain {
          text += "NOTE: You must have VideoRedo with H.264 support (TVSuite4 or later) in order<br>";
          text += "to use this option. kmttg will scan your VideoRedo TVS4 output profiles<br>";
          text += "for MP4 & WMV profile types to use as encoding choices.";
+      }
+      else if (component.equals("VrdAllowMultiple")) {
+         text =  "<b>Allow multiple VideoRedo jobs at once</b><br>";
+         text += "If this option is enabled then this allows kmttg to launch more than 1 VideoRedo<br>";
+         text += "job at a time. The side effect of doing this is that if you are running from kmttg<br>";
+         text += "GUI then each VideoRedo job that is started will temporarily popup the initial<br>";
+         text += "VideoRedo screen. Once a job starts it will be hidden and only tray status will show.<br>";
+         text += "If this option is disabled then you will not be bothered by VideoRedo screens but<br>";
+         text += "kmttg will be limited to only 1 VideoRedo job at a time.<br>";
+         text += "NOTE: VideoRedo has limitation where you cannot run more than 1 <b>silent</b> job at<br>";
+         text += "time, which is why restricting to 1 at a time in that mode is necessary.<br>";
+         text += "<b>NOTE: 'active job limit' setting is still in effect for VideoRedo jobs, so if you want<br>";
+         text += "to allow multiple VideoRedo jobs at once you also need to consider that setting.</b>";
       }
       else if (component.equals("TSDownload")) {
          text =  "<b>Download TiVo files in Transport Stream format</b><br>";
