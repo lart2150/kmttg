@@ -1020,12 +1020,13 @@ public class jobMonitor {
          removeFamilyJobs(job);
          // Kill job if running
          if (job.status.equals("running")) {
-            if (job.type.equals("push")) {
+            /*if (job.type.equals("push")) {
                job.kill();
             } else {
                log.warn("Killing '" + job.type + "' job: " + job.getProcess().toString());
                job.getProcess().kill();
-            }
+            }*/
+            job.kill();
          }
          // Clear title & progress bar
          if ( config.GUI && isFirstJobInMonitor(job) ) {
@@ -1080,23 +1081,33 @@ public class jobMonitor {
       }
    }*/
 
-   // Return true if this job is a VideoRedo COM job
+   // Return true if this job is a VideoRedo COM job that needs to be restricted to 1 at a time
    private static Boolean isVideoRedoCOMJob(jobData job) {
-      // NOTE: vrdencode is set as GUI COM job and multiple of those are OK
+      Boolean restricted = false;
       if ( job.type.equals("qsfix") || job.type.equals("adscan") ||
-           job.type.equals("adcut")) {
-         return true;
+           job.type.equals("adcut") || job.type.equals("vrdencode") ) {
+         restricted = true;
       }
-      return false;
+      
+      // If VrdAllowMultiple is set then don't restrict to 1 at a time
+      if (restricted && config.VrdAllowMultiple == 1)
+         restricted = false;
+      
+      return restricted;
    }
 
-   // Return true if this job is a VideoRedo GUI job
+   // Return true if this job is a VideoRedo GUI job that needs to be restricted to 1 at a time
    private static Boolean isVideoRedoGUIJob(jobData job) {
-      // NOTE: vrdreview is GUI job and multiple VRD GUI jobs are OK, but restrict to 1
+      Boolean restricted = false;
       if ( job.type.equals("vrdreview") ) {
-         return true;
+         restricted = true;
       }
-      return false;
+      
+      // If VrdAllowMultiple is set then don't restrict to 1 at a time
+      if (restricted && config.VrdAllowMultiple == 1)
+         restricted = false;
+      
+      return restricted;
    }
    
    // Shut down OS (Windows only)
