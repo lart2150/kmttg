@@ -403,6 +403,14 @@ public class encodeConfig {
          ofp.write("Set VideoReDoSilent = wscript.CreateObject( \"VideoReDo.VideoReDoSilent\" )" + eol);
          ofp.write("set VideoReDo = VideoReDoSilent.VRDInterface" + eol);
          ofp.write("" + eol);
+         ofp.write("' Check for proper version" + eol);
+         ofp.write("version = GetVersion(VideoReDo.VersionNumber)" + eol);
+         ofp.write("If version < 4202595 Then" + eol);
+         ofp.write("   wscript.stderr.writeline(\"Encoding support requires VRD version 4.20.2.595 or later\")" + eol);
+         ofp.write("   wscript.stderr.writeline(\"Version you are running is: \" & VideoReDo.VersionNumber)" + eol);
+         ofp.write("   wscript.quit 1" + eol);
+         ofp.write("End If" + eol);
+         ofp.write("" + eol);
          ofp.write("' Get number of profiles available." + eol);
          ofp.write("numProfiles = VideoReDo.GetProfilesCount()" + eol);
          ofp.write("if ( numProfiles > 0 ) then" + eol);
@@ -418,6 +426,24 @@ public class encodeConfig {
          ofp.write("" + eol);
          ofp.write("' Exit with status 0" + eol);
          ofp.write("wscript.quit 0" + eol);
+         ofp.write("" + eol);
+         ofp.write("function GetVersion(string)" + eol);
+         ofp.write("   version = 0" + eol);
+         ofp.write("   Set objRE = New RegExp" + eol);
+         ofp.write("   With objRE" + eol);
+         ofp.write("      .Pattern = \"^(\\S+).+$\"" + eol);
+         ofp.write("      .IgnoreCase = True" + eol);
+         ofp.write("      .Global = False" + eol);
+         ofp.write("   End With" + eol);
+         ofp.write("   Set objMatch = objRE.Execute( string )" + eol);
+         ofp.write("   If objMatch.Count = 1 Then" + eol);
+         ofp.write("      v = objMatch.Item(0).Submatches(0)" + eol);
+         ofp.write("      version = Replace(v, \".\", \"\")" + eol);
+         ofp.write("   End If" + eol);
+         ofp.write("   Set objRE = Nothing" + eol);
+         ofp.write("   Set objMatch = Nothing" + eol);
+         ofp.write("   GetVersion = version" + eol);
+         ofp.write("end function" + eol);
          ofp.close();
       }
       catch (Exception ex) {
