@@ -359,8 +359,10 @@ public class jobMonitor {
    // Change job status
    public static void updateJobStatus(jobData job, String status) {
       job.status = status;
-      if (config.GUI)
+      if (config.GUI) {
+         config.gui.jobTab_UpdateJobMonitorRowStatus(job,status);
          updateNPLjobStatus();
+      }
    }
    
    public static void submitNewJob(jobData job) {
