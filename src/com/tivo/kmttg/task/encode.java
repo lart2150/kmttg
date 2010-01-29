@@ -130,7 +130,7 @@ public class encode {
                // Try and determine pct complete
                int pct = -1;
                // For ffmpeg job get show duration for computing pct complete
-               if (process.toString().contains(config.ffmpeg)) {
+               if (process.toString().contains("ffmpeg")) {
                   // Get duration from ffmpeg stderr if not yet available
                   if ( job.duration == null ) {
                      long duration = ffmpegGetDuration();
