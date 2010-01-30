@@ -313,7 +313,6 @@ public class gui {
          
          c.gridx = 1;
          c.gridy = gy;
-         c.ipady = 0;
          c.gridwidth = 7;
          c.weightx = 1;
          c.weighty = 0;
@@ -333,7 +332,6 @@ public class gui {
          gy=0;
          c.gridx = 0;
          c.gridy = gy;
-         c.gridheight = 1;
          c.gridwidth = 8;
          c.weighty = 0;
          c.fill = GridBagConstraints.HORIZONTAL;
@@ -343,11 +341,9 @@ public class gui {
          gy++;
          c.weightx = 1.0;    // stretch horizontally
          c.weighty = 1.0;      // stretch vertically
-         c.gridheight = 1;
          c.gridwidth = 8;
          c.gridx = 0;
          c.gridy = gy;
-         c.ipady = 200;
          c.fill = GridBagConstraints.BOTH;
          c.anchor = GridBagConstraints.SOUTH;
          bottomPane.add(splitBottom, c);
@@ -357,10 +353,8 @@ public class gui {
          
          // Common settings for topPane
          c.gridwidth = 8;
-         c.gridheight = 1;
          c.weightx = 1;
          c.weighty = 0;
-         c.ipady = 0;
          
          gy=0;
          c.gridx = 0;
@@ -374,13 +368,11 @@ public class gui {
          c.anchor = GridBagConstraints.WEST;
          topPane.add(encoding_panel, c);
          
-         gy += 2;
+         gy++;
          c.gridx = 0;
          c.gridy = gy;
-         c.ipady = 100;
          c.weighty = 1.0;
          c.gridwidth = 1;
-         c.gridheight = 2;
          c.fill = GridBagConstraints.BOTH;
          c.anchor = GridBagConstraints.NORTH;
          topPane.add(tabbed_panel, c);
