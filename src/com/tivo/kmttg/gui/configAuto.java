@@ -297,24 +297,18 @@ public class configAuto {
       c.fill = GridBagConstraints.NONE;
       
       // table
-      c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 8;     
       c.fill = GridBagConstraints.BOTH;
       c.weightx = 1.0;
       c.weighty = 1.0;
-      //c.ipady = 150;
       content.add(table_scroll, c);
 
       // text pane
       gy++;
-      c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 8;
       c.fill = GridBagConstraints.HORIZONTAL;
       c.weightx = 1.0;
       c.weighty = 0.0;
-      c.ipady = 0;
       content.add(text, c);
 
       // row 3 items
@@ -334,9 +328,7 @@ public class configAuto {
       row3.add(title);
             
       gy++;
-      c.gridx = 0;
       c.gridy = gy;
-      c.gridwidth = 8;
       c.fill = GridBagConstraints.HORIZONTAL;
       c.anchor = GridBagConstraints.CENTER;
       c.weightx = 0.0;
@@ -345,22 +337,27 @@ public class configAuto {
       // row4
       int GAP = 0;
       JPanel row4 = new JPanel();
-      row4.setLayout(new GridLayout(1, 8, GAP, GAP));
+      row4.setLayout(new BoxLayout(row4, BoxLayout.X_AXIS));
       row4.add(metadata);
+      row4.add(Box.createRigidArea(space_5));
       row4.add(decrypt);
+      row4.add(Box.createRigidArea(space_5));
       row4.add(qsfix);
+      row4.add(Box.createRigidArea(space_5));
       row4.add(comskip);
+      row4.add(Box.createRigidArea(space_5));
       row4.add(comcut);
+      row4.add(Box.createRigidArea(space_5));
       row4.add(captions);
+      row4.add(Box.createRigidArea(space_5));
       row4.add(encode);
+      row4.add(Box.createRigidArea(space_5));
       row4.add(push);
+      row4.add(Box.createRigidArea(space_5));
       row4.add(custom);
 
       gy++;
-      int gx = 0;
-      c.gridx = gx++;
       c.gridy = gy;
-      c.gridwidth = 8;
       c.fill = GridBagConstraints.NONE;
       c.anchor = GridBagConstraints.WEST;
       c.weightx = 0.0;
@@ -380,10 +377,7 @@ public class configAuto {
       row5.add(del);
 
       gy++;
-      gx = 0;
-      c.gridx = gx++;
       c.gridy = gy;
-      c.gridwidth = 8;
       c.fill = GridBagConstraints.NONE;
       c.anchor = GridBagConstraints.WEST;
       c.weightx = 0.0;
@@ -398,21 +392,15 @@ public class configAuto {
       
       // comskip.ini override
       gy++;
-      gx = 0;
-      c.gridx = gx++;
       c.gridy = gy;
-      c.gridwidth = 8;
-      c.fill = GridBagConstraints.NONE;
-      c.anchor = GridBagConstraints.WEST;
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.anchor = GridBagConstraints.CENTER;
       c.weightx = 0.0;
       content.add(row6, c); 
       
       // Filter out TiVo Suggestions
       gy++;
-      gx = 0;
-      c.gridx = gx;
       c.gridy = gy;
-      c.gridwidth = 4;
       c.fill = GridBagConstraints.NONE;
       c.anchor = GridBagConstraints.WEST;
       c.weightx = 0.0;
@@ -420,10 +408,7 @@ public class configAuto {
       
       // enabled
       gy++;
-      gx = 0;
-      c.gridx = gx;
       c.gridy = gy;
-      c.gridwidth = 4;
       c.fill = GridBagConstraints.NONE;
       c.anchor = GridBagConstraints.WEST;
       c.weightx = 0.0;
@@ -438,10 +423,7 @@ public class configAuto {
       buttons.add(Box.createRigidArea(space_5));
       buttons.add(del);
       gy++;
-      gx = 0;
-      c.gridx = gx++;
       c.gridy = gy;
-      c.gridwidth = 8;
       c.fill = GridBagConstraints.NONE;
       c.anchor = GridBagConstraints.CENTER;
       c.weightx = 0.0;
@@ -450,10 +432,7 @@ public class configAuto {
       // separator
       JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
       gy++;
-      gx=0;
-      c.gridx = gx;
       c.gridy = gy;
-      c.gridwidth = 8;
       c.fill = GridBagConstraints.HORIZONTAL;
       c.anchor = GridBagConstraints.WEST;
       c.weightx = 1.0;
@@ -461,10 +440,7 @@ public class configAuto {
                         
       // global_settings
       gy++;
-      gx = 0;
-      c.gridx = gx;
       c.gridy = gy;
-      c.gridwidth = 2;
       c.fill = GridBagConstraints.NONE;
       c.weightx = 0.0;
       content.add(global_settings, c);
@@ -479,55 +455,43 @@ public class configAuto {
       row7.add(check_interval);
             
       gy++;
-      gx = 0;
-      c.gridx = gx;
       c.gridy = gy;
-      c.gridwidth = 8;
-      c.fill = GridBagConstraints.NONE;
+      c.fill = GridBagConstraints.HORIZONTAL;
       c.weightx = 0.0;
       content.add(row7, c);
       
       // date filter row
       GAP = 0;
       JPanel date = new JPanel();
-      date.setLayout(new GridLayout(1, 8, GAP, GAP));
+      date.setLayout(new BoxLayout(date, BoxLayout.X_AXIS));
       date.add(dateFilter);
+      date.add(Box.createRigidArea(space_5));
       date.add(dateOperator);
+      date.add(Box.createRigidArea(space_5));
       date.add(dateHours);
+      date.add(Box.createRigidArea(space_5));
       date.add(dateHours_label);
 
       gy++;
-      gx = 0;
-      c.gridx = gx++;
       c.gridy = gy;
-      c.gridwidth = 8;
-      c.fill = GridBagConstraints.NONE;
+      c.fill = GridBagConstraints.HORIZONTAL;
       c.weightx = 0.0;
       content.add(date, c);
-      
+
+      JPanel filter_panel = new JPanel();
+      filter_panel.setLayout(new BoxLayout(filter_panel, BoxLayout.X_AXIS));
+      filter_panel.add(suggestionsFilter);
+      filter_panel.add(Box.createRigidArea(space_5));
+      filter_panel.add(kuidFilter);
+      filter_panel.add(Box.createRigidArea(space_5));
+      filter_panel.add(programIdFilter);
+
       gy++;
-      gx = 0;
-      c.gridx = gx++;
       c.gridy = gy;
-      c.gridwidth = 1;
       c.fill = GridBagConstraints.NONE;
       c.weightx = 0.0;
-      content.add(suggestionsFilter, c);
-      
-      c.gridx = gx++;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      content.add(kuidFilter, c);
-      
-      c.gridx = gx++;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      c.fill = GridBagConstraints.NONE;
-      c.weightx = 0.0;
-      content.add(programIdFilter, c);
-      
+      content.add(filter_panel, c);
+            
       // OK & CANCEL
       GAP = 0;
       JPanel last = new JPanel();
@@ -536,10 +500,7 @@ public class configAuto {
       last.add(CANCEL);
    
       gy++;
-      gx = 1;
-      c.gridx = gx;
       c.gridy = gy;
-      c.gridwidth = 6;
       c.fill = GridBagConstraints.HORIZONTAL;
       c.weightx = 0.0;
       content.add(last, c);
