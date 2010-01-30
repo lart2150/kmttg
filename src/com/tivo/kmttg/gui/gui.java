@@ -1169,6 +1169,7 @@ public class gui {
             ofp.write("<centerDivider>\n"       + centerDivider              + "\n");
             ofp.write("<bottomDivider>\n"       + bottomDivider              + "\n");
             ofp.write("<tab>\n"                 + tabName                    + "\n");
+            
             ofp.write("<columnOrder>\n");
             String name, colName;
             for (Enumeration<String> e=tivoTabs.keys(); e.hasMoreElements();) {
@@ -1185,6 +1186,19 @@ public class gui {
                ofp.write("\n");
             }
             ofp.write("\n");
+            
+            ofp.write("<columnWidths>\n");
+            for (Enumeration<String> e=tivoTabs.keys(); e.hasMoreElements();) {
+               name = e.nextElement();
+               int[] widths = tivoTabs.get(name).getTable().getColWidths();
+               ofp.write(name + "=" + widths[0]);
+               for (int j=1; j<widths.length; ++j) {
+                  ofp.write("," + widths[j]);
+               }
+               ofp.write("\n");
+            }
+            ofp.write("\n");
+            
             ofp.write("<showFolders>\n");
             for (Enumeration<String> e=tivoTabs.keys(); e.hasMoreElements();) {
                name = e.nextElement();
@@ -1196,6 +1210,7 @@ public class gui {
                   }
                }
             }
+            
             ofp.write("\n");
             ofp.close();
          }         
@@ -1339,6 +1354,18 @@ public class gui {
                String[] order = l[1].split(",");
                if (tivoTabs.containsKey(l[0])) {
                   tivoTabs.get(l[0]).setColumnOrder(order);
+               }
+            }
+            if (key.equals("columnWidths")) {
+               String[] l = line.split("=");
+               String name = l[0];
+               String[] order = l[1].split(",");
+               int[] widths = new int[order.length];
+               for (int i=0; i<order.length; ++i) {
+                  widths[i] = Integer.parseInt(order[i]);
+               }
+               if (tivoTabs.containsKey(l[0])) {
+                  tivoTabs.get(name).getTable().setColWidths(widths);
                }
             }
             if (key.equals("showFolders")) {
