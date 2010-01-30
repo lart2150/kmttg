@@ -88,6 +88,9 @@ public class comcut {
       command.add("mpeg");
       command.add("-vf");
       command.add("harddup");
+      command.add("-noskip");
+      command.add("-mpegopts");
+      command.add("vbuf_size=400");
       command.add("-o");
       command.add(job.mpegFile_cut);
       process = new backgroundProcess();
