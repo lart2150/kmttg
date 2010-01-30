@@ -904,8 +904,10 @@ public class nplTable {
    // Pack all table columns to fit widest cell element
    public void packColumns(JXTable table, int margin) {
       debug.print("table=" + table + " margin=" + margin);
-      for (int c=0; c<table.getColumnCount(); c++) {
-          packColumn(table, c, 2);
+      if (config.tableColAutoSize == 1) {
+         for (int c=0; c<table.getColumnCount(); c++) {
+             packColumn(table, c, 2);
+         }
       }
    }
    
@@ -958,6 +960,29 @@ public class nplTable {
              col.setPreferredWidth(width);
           }
        }
+   }
+   
+   // Compute and return all table column widths as an integer array
+   public int[] getColWidths() {
+      int[] widths = new int[NowPlaying.getColumnCount()];
+      DefaultTableColumnModel colModel = (DefaultTableColumnModel)NowPlaying.getColumnModel();
+      for (int i=0; i<widths.length; ++i) {
+         TableColumn col = colModel.getColumn(i);
+         widths[i] = col.getWidth();
+      }
+      return widths;
+   }
+   
+   // Compute and return all table column widths as an integer array
+   public void setColWidths(int[] widths) {
+      if (widths.length != NowPlaying.getColumnCount()) {
+         return;
+      }
+      DefaultTableColumnModel colModel = (DefaultTableColumnModel)NowPlaying.getColumnModel();
+      for (int i=0; i<widths.length; ++i) {
+         TableColumn col = colModel.getColumn(i);
+         col.setPreferredWidth(widths[i]);
+      }
    }
    
    private String getStatusTime(long gmt) {
