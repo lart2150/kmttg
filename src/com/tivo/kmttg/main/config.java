@@ -101,6 +101,7 @@ public class config {
    public static Color tableBkgndRecording = new Color(149, 151, 221); // light blue
    public static Color lightRed = new Color(250, 190, 190); // light red
    public static Font  tableFont = new Font("System", Font.BOLD, FontSize);
+   public static int   tableColAutoSize = 1; // If 0 then don't auto size table columns
    
    // GUI free space related
    public static Hashtable<String,Float> diskSpace = new Hashtable<String,Float>();
@@ -516,6 +517,9 @@ public class config {
             if (key.equals("FontSize")) {
                FontSize = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("tableColAutoSize")) {
+               tableColAutoSize = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("RemoveTivoFile")) {
                RemoveTivoFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -701,6 +705,8 @@ public class config {
          ofp.write("\n");
          
          ofp.write("<FontSize>\n" + FontSize + "\n\n");
+         
+         ofp.write("<tableColAutoSize>\n" + tableColAutoSize + "\n\n");
          
          ofp.write("<RemoveTivoFile>\n" + RemoveTivoFile + "\n\n");
          

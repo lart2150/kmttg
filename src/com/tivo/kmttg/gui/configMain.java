@@ -59,6 +59,7 @@ public class configMain {
    private static JCheckBox HideProtectedFiles = null;
    private static JCheckBox OverwriteFiles = null;
    private static JCheckBox toolTips = null;
+   private static JCheckBox tableColAutoSize = null;
    private static JCheckBox jobMonitorFullPaths = null;
    private static JTextField tivo_name = null;
    private static JTextField tivo_ip = null;
@@ -368,7 +369,13 @@ public class configMain {
       else
          toolTips.setSelected(false);
       
-      // toolTips
+      // tableColAutoSize
+      if (config.tableColAutoSize == 1)
+         tableColAutoSize.setSelected(true);
+      else
+         tableColAutoSize.setSelected(false);
+      
+      // jobMonitorFullPaths
       if (config.jobMonitorFullPaths == 1)
          jobMonitorFullPaths.setSelected(true);
       else
@@ -623,6 +630,12 @@ public class configMain {
       else
          config.toolTips = 0;
       config.gui.enableToolTips(config.toolTips);
+      
+      // tableColAutoSize
+      if (tableColAutoSize.isSelected())
+         config.tableColAutoSize = 1;
+      else
+         config.tableColAutoSize = 0;
       
       // jobMonitorFullPaths
       if (jobMonitorFullPaths.isSelected())
@@ -1103,6 +1116,7 @@ public class configMain {
       JLabel disk_space_label = new javax.swing.JLabel();
       beacon = new javax.swing.JCheckBox();
       toolTips = new javax.swing.JCheckBox();
+      tableColAutoSize = new javax.swing.JCheckBox();
       jobMonitorFullPaths = new javax.swing.JCheckBox();
       JLabel toolTipsTimeout_label = new javax.swing.JLabel();
       OK = new javax.swing.JButton();
@@ -1223,6 +1237,8 @@ public class configMain {
       
       toolTips.setText("Display toolTips");
       toolTipsTimeout_label.setText("toolTip timeout (secs)");
+      
+      tableColAutoSize.setText("Auto size NPL column widths");
       
       jobMonitorFullPaths.setText("Show full paths in Job Monitor");
       
@@ -1806,11 +1822,45 @@ public class configMain {
       // Program_options Panel
       JPanel program_options_panel = new JPanel(new GridBagLayout());      
       
-      // TSDownload
+      // MAK
       gy=0;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(MAK_label, c);
+
       c.gridx = 1;
       c.gridy = gy;
-      program_options_panel.add(TSDownload, c);
+      program_options_panel.add(MAK, c);
+            
+      // active job limit
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(active_job_limit_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(active_job_limit, c);
+      
+      // cpu_cores
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(cpu_cores_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(cpu_cores, c);
+      
+      // wan http port
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(wan_http_port_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(wan_http_port, c);
       
       // t2extract_args
       gy++;
@@ -1832,96 +1882,68 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(metadata_files, c);
       
-      // General panel
-      JPanel general = new JPanel(new GridBagLayout());
+      // TSDownload
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(TSDownload, c);
+      
+      // Visual Panel
+      JPanel visual_panel = new JPanel(new GridBagLayout());       
       
       // FontSize
       gy=0;
       c.gridx = 0;
       c.gridy = gy;
-      general.add(FontSize_label, c);
+      visual_panel.add(FontSize_label, c);
 
       c.gridx = 1;
       c.gridy = gy;
-      general.add(FontSize, c);
-      
-      // MAK
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      general.add(MAK_label, c);
-
-      c.gridx = 1;
-      c.gridy = gy;
-      general.add(MAK, c);
-            
-      // active job limit
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      general.add(active_job_limit_label, c);
-
-      c.gridx = 1;
-      c.gridy = gy;
-      general.add(active_job_limit, c);
-      
-      // cpu_cores
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      general.add(cpu_cores_label, c);
-      
-      c.gridx = 1;
-      c.gridy = gy;
-      general.add(cpu_cores, c);
-      
-      // wan http port
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      general.add(wan_http_port_label, c);
-
-      c.gridx = 1;
-      c.gridy = gy;
-      general.add(wan_http_port, c);
+      visual_panel.add(FontSize, c);
 
       // toolTipsTimeout
       gy++;
       c.gridx = 0;
       c.gridy = gy;
-      general.add(toolTipsTimeout_label, c);
+      visual_panel.add(toolTipsTimeout_label, c);
       
       c.gridx = 1;
       c.gridy = gy;
-      general.add(toolTipsTimeout, c);
+      visual_panel.add(toolTipsTimeout, c);
       
       // MinChanDigits
       gy++;
       c.gridx = 0;
       c.gridy = gy;
-      general.add(MinChanDigits_label, c);
+      visual_panel.add(MinChanDigits_label, c);
       
       c.gridx = 1;
       c.gridy = gy;
-      general.add(MinChanDigits, c);
+      visual_panel.add(MinChanDigits, c);
       
       // toolTips
       gy++;
       c.gridx = 0;
       c.gridy = gy;
-      general.add(toolTips, c);
+      visual_panel.add(toolTips, c);
       
       // jobMonitorFullPaths
       gy++;
       c.gridx = 0;
       c.gridy = gy;
-      general.add(jobMonitorFullPaths, c);
+      visual_panel.add(jobMonitorFullPaths, c);
 
       // HideProtectedFiles
       gy++;
       c.gridx = 0;
       c.gridy = gy;
-      general.add(HideProtectedFiles, c);
+      visual_panel.add(HideProtectedFiles, c);
+      
+      // tableColAutoSize
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      visual_panel.add(tableColAutoSize, c);      
       
       // VRD Panel
       JPanel vrd_panel = new JPanel(new GridBagLayout());       
@@ -2045,12 +2067,12 @@ public class configMain {
       common_panel.add(CANCEL, c);
       
       // Tabbed panel
-      tabbed_panel = new JTabbedPane();
+      tabbed_panel = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
       tabbed_panel.add("File Settings", files_panel);
       tabbed_panel.add("Programs", programs_panel);
       tabbed_panel.add("Program Options", program_options_panel);
       tabbed_panel.add("Tivos", tivo_panel);
-      tabbed_panel.add("General", general);
+      tabbed_panel.add("Visual", visual_panel);
       if (config.OS.equals("windows"))
          tabbed_panel.add("VideoRedo", vrd_panel);
       tabbed_panel.add("pyTivo", pyTivo_panel);
@@ -2127,6 +2149,7 @@ public class configMain {
       OK.setToolTipText(getToolTip("OK")); 
       CANCEL.setToolTipText(getToolTip("CANCEL")); 
       toolTips.setToolTipText(getToolTip("toolTips"));
+      tableColAutoSize.setToolTipText(getToolTip("tableColAutoSize"));
       jobMonitorFullPaths.setToolTipText(getToolTip("jobMonitorFullPaths"));
       toolTipsTimeout.setToolTipText(getToolTip("toolTipsTimeout")); 
       cpu_cores.setToolTipText(getToolTip("cpu_cores"));
@@ -2494,6 +2517,10 @@ public class configMain {
       else if (component.equals("toolTips")) {
          text =  "<b>Display toolTips</b><br>";
          text += "Enable or disable display of these mouse over popup toolTip messages.";
+      }
+      else if (component.equals("tableColAutoSize")) {
+         text =  "<b>Auto size NPL column widths</b><br>";
+         text += "If enabled then automatically size to fit text NPL table column widths.";
       }
       else if (component.equals("jobMonitorFullPaths")) {
          text =  "<b>Show full paths in Job Monitor</b><br>";
