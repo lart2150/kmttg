@@ -554,12 +554,13 @@ public class nplTable {
    public void displayFolderStructure() {
       debug.print("");
       clear();
-      String[] special = {"TiVo Suggestions", "HD Channels"};
+      //String[] special = {"TiVo Suggestions", "HD Channels"};
+      String[] special = {"TiVo Suggestions"};
       // Folder based structure
       int size;
       String name;
       Hashtable<String,String> entry;
-      // Add all folders except suggestions & HD channels which are saved for last
+      // Add all folders except suggestions which are saved for last
       for (int i=0; i<sortedOrder.size(); ++i) {
          name = sortedOrder.get(i).get("__folderName__");
          if (! matches(name, special) ) {
@@ -660,7 +661,7 @@ public class nplTable {
          }
          
          // Categorize by HD channels (includes suggestions)
-         if (entries.get(i).containsKey("HD")) {
+         /*if (entries.get(i).containsKey("HD")) {
             if (entries.get(i).get("HD").equals("Yes")) {
                name = "HD Channels";
                if ( ! folders.containsKey(name) ) {
@@ -670,11 +671,11 @@ public class nplTable {
                }
                folders.get(name).add(entries.get(i));
             }
-         }
+         }*/
       }
       
       // Define default sort order for all folder entries
-      // Sort by largest gmt first except put Suggestions & HD Channels last
+      // Sort by largest gmt first except put Suggestions last
       Comparator<Hashtable<String,String>> folderSort = new Comparator<Hashtable<String,String>>() {
          public int compare(Hashtable<String,String> o1, Hashtable<String,String> o2) {
             long gmt1 = Long.parseLong(o1.get("gmt"));
