@@ -14,6 +14,7 @@ import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class vrdreview {
    String  vrd = null;
@@ -138,6 +139,15 @@ public class vrdreview {
          // No or empty vprjFile means problems
          if ( ! file.isFile(job.vprjFile) || file.isEmpty(job.vprjFile) ) {
             failed = 1;
+         }
+         
+         if (config.VrdReview_noCuts == 1) {
+            // Look for VRD default edit file output
+            String tryit = string.replaceSuffix(job.mpegFile, " (02).mpg");
+            if ( ! file.isFile(tryit) ) {
+               log.error("vrdreview expected output file not available: " + tryit);
+               failed = 1;
+            }
          }
          
          if (failed == 1) {
