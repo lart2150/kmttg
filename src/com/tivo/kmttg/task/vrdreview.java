@@ -144,8 +144,9 @@ public class vrdreview {
          if (config.VrdReview_noCuts == 1) {
             // Look for VRD default edit file output
             String tryit = string.replaceSuffix(job.mpegFile, " (02).mpg");
-            if ( ! file.isFile(tryit) ) {
-               log.error("vrdreview expected output file not available: " + tryit);
+            String tryit2 = string.replaceSuffix(job.mpegFile, "_cut.mpg");
+            if ( ! file.isFile(tryit) && ! file.isFile(tryit2)) {
+               log.error("vrdreview expected output file not available: " + tryit + " or " + tryit2);
                failed = 1;
             }
          }
