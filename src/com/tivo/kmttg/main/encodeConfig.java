@@ -368,10 +368,32 @@ public class encodeConfig {
                if (m.matches()) {
                   Name = m.group(1);
                   FileType = m.group(2);
-                  if (FileType.startsWith("MP4")) {
+                  extension = FileType.toLowerCase();
+                  if (FileType.startsWith("DVRMS")) {
+                     extension = "dvr-ms";
+                  }
+                  else if (FileType.startsWith("Elementary")) {
+                     extension = "m2v";
+                  }
+                  else if (FileType.startsWith("M2TS")) {
+                     extension = "m2ts";
+                  }
+                  else if (FileType.startsWith("MP4")) {
                      extension = "mp4";
                   }
-                  if (FileType.startsWith("WMV")) {
+                  else if (FileType.startsWith("MPG")) {
+                     extension = "mpg";
+                  }
+                  else if (FileType.startsWith("REC")) {
+                     extension = "rec";
+                  }
+                  else if (FileType.startsWith("TiVo")) {
+                     extension = "TiVo";
+                  }
+                  else if (FileType.startsWith("TS")) {
+                     extension = "ts";
+                  }
+                  else if (FileType.startsWith("WMV")) {
                      extension = "wmv";
                   }
                   if (extension.length() > 0) {
