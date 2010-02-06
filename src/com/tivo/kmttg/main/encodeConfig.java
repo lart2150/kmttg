@@ -374,6 +374,8 @@ public class encodeConfig {
                   }
                   else if (FileType.startsWith("Elementary")) {
                      extension = "m2v";
+                     if (Name.contains("H.264"))
+                        extension = "m4v";
                   }
                   else if (FileType.startsWith("M2TS")) {
                      extension = "m2ts";
