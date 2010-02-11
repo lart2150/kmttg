@@ -1004,14 +1004,22 @@ public class jobMonitor {
          }
       } else {
          // files setting = "all" => potentially multiple push jobs
-         if (mode.equals("Download") || (mode.equals("FILES") && tivoFile.equals(startFile)))
-            files.add(tivoFile + suffix);
-         if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
-            files.add(mpegFile + suffix);
-         if (comcut || (mode.equals("FILES") && mpegFile_cut.equals(startFile)))
-            files.add(mpegFile_cut + suffix);
-         if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
-            files.add(encodeFile + suffix);
+         if (tivoFile != null) {
+            if (mode.equals("Download") || (mode.equals("FILES") && tivoFile.equals(startFile)))
+               files.add(tivoFile + suffix);
+         }
+         if (mpegFile != null) {
+            if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
+               files.add(mpegFile + suffix);
+         }
+         if (mpegFile_cut != null) {
+            if (comcut || (mode.equals("FILES") && mpegFile_cut.equals(startFile)))
+               files.add(mpegFile_cut + suffix);
+         }
+         if (encodeFile != null) {
+            if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
+               files.add(encodeFile + suffix);
+         }
       }
       return files;
    }
