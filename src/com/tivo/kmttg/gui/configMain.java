@@ -2269,8 +2269,8 @@ public class configMain {
          text += "to VideoRedo, when this option is enabled kmttg will use VideoRedo encoding<br>";
          text += "profiles for <b>encode</b> task.<br>";
          text += "NOTE: You must have VideoRedo with H.264 support (TVSuite4 or later) in order<br>";
-         text += "to use this option. kmttg will scan your VideoRedo TVS4 output profiles<br>";
-         text += "for MP4 & WMV profile types to use as encoding choices.";
+         text += "to use this option. kmttg will scan all your VideoRedo TVS4 output profiles<br>";
+         text += "to display as encoding and/or remuxing choices.";
       }
       else if (component.equals("VrdAllowMultiple")) {
          text =  "<b>Allow multiple VideoRedo jobs at once</b><br>";
