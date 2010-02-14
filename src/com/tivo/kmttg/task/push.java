@@ -345,6 +345,7 @@ public class push {
             log.warn(">> Pushing " + push_file + " to " + tivoName);
             log.print(url.toString());
             HttpURLConnection c = (HttpURLConnection) url.openConnection();
+            c.addRequestProperty("REFERER", "/");
             c.setRequestMethod("GET");
             c.setReadTimeout(timeout_http*1000);
             c.connect();
