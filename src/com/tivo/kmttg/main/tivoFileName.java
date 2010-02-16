@@ -71,14 +71,9 @@ public class tivoFileName {
       // Remove/replace certain special characters
       file = removeSpecialChars(file);
       
-      // Don't allow folders ending in dots
-      while (file.matches("^.+\\.__separator__.*$")) {
-         file = file.replaceAll("\\.__separator__", "__separator__");
-      }
-      
-      // Don't allow folders ending in white space
-      while (file.matches("^.+\\s+__separator__.*$")) {
-         file = file.replaceAll("\\s+__separator__", "__separator__");
+      // Don't allow folders ending in dots or white space
+      while (file.matches("^.+[\\.|\\s+]__separator__.*$")) {
+         file = file.replaceAll("[\\.|\\s+]__separator__", "__separator__");
       }
       
       // Deal with separators
