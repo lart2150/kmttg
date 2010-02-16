@@ -76,6 +76,11 @@ public class tivoFileName {
          file = file.replaceAll("\\.__separator__", "__separator__");
       }
       
+      // Don't allow folders ending in white space
+      while (file.matches("^.+\\s+__separator__.*$")) {
+         file = file.replaceAll("\\s+__separator__", "__separator__");
+      }
+      
       // Deal with separators
       String s = File.separator;
       s = s.replaceFirst("\\\\", "\\\\\\\\");
