@@ -1152,7 +1152,7 @@ public class configMain {
       VrdReview_noCuts.setText("Bring up VideoRedo GUI to make manual cuts");
       VrdQsFilter.setText("Enable VideoRedo QS Fix video dimension filter");
       VrdDecrypt.setText("Decrypt using VideoRedo instead of tivodecode");
-      VrdEncode.setText("Encode using VideoRedo");
+      VrdEncode.setText("Show VideoRedo encoding profiles");
       VrdAllowMultiple.setText("Allow multiple VideoRedo jobs at once");
       TSDownload.setText("Download TiVo files in Transport Stream format");
       HideProtectedFiles.setText("Do not show copy protected files in table");
@@ -2264,10 +2264,10 @@ public class configMain {
          text += "NOTE: You must have TiVo Desktop (or at least TiVoDirectShowFilter.dll) installed for this to work.";
       }
       else if (component.equals("VrdEncode")) {
-         text =  "<b>Encode using VideoRedo</b><br>";
+         text =  "<b>Show VideoRedo encoding profiles</b><br>";
          text += "If you have VideoRedo and have configured kmttg with the installation path<br>";
-         text += "to VideoRedo, when this option is enabled kmttg will use VideoRedo encoding<br>";
-         text += "profiles for <b>encode</b> task.<br>";
+         text += "to VideoRedo, when this option is enabled kmttg will add VideoRedo encoding<br>";
+         text += "profiles to list of available encoding profiles to use for <b>encode</b> task.<br>";
          text += "NOTE: You must have VideoRedo with H.264 support (TVSuite4 or later) in order<br>";
          text += "to use this option. kmttg will scan all your VideoRedo TVS4 output profiles<br>";
          text += "to display as encoding and/or remuxing choices.";
