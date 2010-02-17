@@ -920,8 +920,8 @@ public class jobMonitor {
          job.mpegFile_cut = mpegFile_cut;
          job.encodeFile   = encodeFile;
          job.srtFile      = srtFile;
-         if (config.VrdEncode == 1) {
-            // If VRD encode selected then vrdencode job
+         if (config.VrdEncode == 1 && encodeConfig.getCommandName(encodeName) == null) {
+            // VRD encode selected => vrdencode job
             job.type      = "vrdencode";
             job.tivoFile  = tivoFile;
          }
