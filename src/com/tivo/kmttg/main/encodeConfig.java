@@ -30,57 +30,66 @@ public class encodeConfig {
       // Clear out any previous settings
       config.ENCODE.clear();
       config.ENCODE_NAMES.clear();
-     
-      if (config.VrdEncode == 1) {
-         // Use VRD encoding profiles
-         Stack<String> result = getVrdProfiles();
-         if (result.size() > 0) {
-            log.error(result);
-            return;
-         }
-      } else {
-         // Use encoding profiles in "encode" folder
-         String dir = config.encProfDir;
-         
-         File d = new File(dir);
-         if ( ! d.isDirectory() ) {
-            errors.add("Encoding profiles dir not valid: " + dir);
-            log.error(errors);
-            return;
-         }
-         FilenameFilter filter = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-               debug.print("dir=" + dir + " name=" + name);
-               File d = new File(dir.getPath() + File.separator + name);
-               if (d.isDirectory()) {
-                  return false;
-               }
-               // .enc files
-               if ( name.toLowerCase().endsWith(".enc") ) {
-                  return true;
-               }
+
+      // First parse encoding profiles in "encode" folder
+      String dir = config.encProfDir;
+      
+      File d = new File(dir);
+      if ( ! d.isDirectory() ) {
+         errors.add("Encoding profiles dir not valid: " + dir);
+         log.error(errors);
+         return;
+      }
+      FilenameFilter filter = new FilenameFilter() {
+         public boolean accept(File dir, String name) {
+            debug.print("dir=" + dir + " name=" + name);
+            File d = new File(dir.getPath() + File.separator + name);
+            if (d.isDirectory()) {
                return false;
             }
-         };
-        
-         // Define list of filter entries
-         File[] files = d.listFiles(filter);
-         for (int i=0; i<files.length; i++) {
-            if ( ! parseEncFile(files[i]) ) {
-               errors.add("Parsing error with profile: " + files[i].getName());
+            // .enc files
+            if ( name.toLowerCase().endsWith(".enc") ) {
+               return true;
             }
+            return false;
+         }
+      };
+     
+      // Define list of filter entries
+      File[] files = d.listFiles(filter);
+      for (int i=0; i<files.length; i++) {
+         if ( ! parseEncFile(files[i]) ) {
+            errors.add("Parsing error with profile: " + files[i].getName());
          }
       }
+      
+      // Sort encode list alphabetically
+      List<String> encode_list = new ArrayList<String>(config.ENCODE.keySet());
+      Collections.sort(encode_list);
       
       // Set ENCODE_NAMES to sorted list of entries
       if ( config.ENCODE.isEmpty() ) {
          errors.add("No valid encoding profiles found");
-      } else {
-         List<String> l = new ArrayList<String>(config.ENCODE.keySet());
-         Collections.sort(l);
-   
-         for (String str : l) {
+      } else {   
+         for (String str : encode_list) {
             config.ENCODE_NAMES.add(str);
+         }
+         
+         // Add VideoRedo profiles to list if configured
+         if (config.VrdEncode == 1) {
+            // Add VRD encoding profiles
+            Hashtable<String,Hashtable<String,String>> hlist = getVrdProfiles();
+            if (hlist != null) {
+               // Sort encode list alphabetically
+               List<String> vrd_list = new ArrayList<String>(hlist.keySet());
+               Collections.sort(vrd_list);
+               
+               // Add to main encode profiles hash
+               for (String str : vrd_list) {
+                  config.ENCODE.put(str, hlist.get(str));
+                  config.ENCODE_NAMES.add(str);
+               }
+            }
          }
          
          // Set config.encodeName to 1st entry
@@ -197,13 +206,18 @@ public class encodeConfig {
       debug.print("");
       String command = "";
       if ( ! config.ENCODE.isEmpty() ) {
-         String[] l = config.ENCODE.get(encodeName).get("command").split("\\s+");
-         command = l[0];
-         command = command.replaceFirst("FFMPEG", escapeBackSlashes(config.ffmpeg));
-         command = command.replaceFirst("MENCODER", escapeBackSlashes(config.mencoder));
-         command = command.replaceFirst("HANDBRAKE", escapeBackSlashes(config.handbrake));
-         command = command.replaceFirst("PERL", escapeBackSlashes(config.perl));
-         command = command.replaceFirst("PWD", escapeBackSlashes(System.getProperty("user.dir") + File.separator));
+         if (config.ENCODE.get(encodeName).containsKey("command")) {
+            String[] l = config.ENCODE.get(encodeName).get("command").split("\\s+");
+            command = l[0];
+            command = command.replaceFirst("FFMPEG", escapeBackSlashes(config.ffmpeg));
+            command = command.replaceFirst("MENCODER", escapeBackSlashes(config.mencoder));
+            command = command.replaceFirst("HANDBRAKE", escapeBackSlashes(config.handbrake));
+            command = command.replaceFirst("PERL", escapeBackSlashes(config.perl));
+            command = command.replaceFirst("PWD", escapeBackSlashes(System.getProperty("user.dir") + File.separator));
+         } else {
+            // This could be a VideoRedo profile which has no command defined
+            return null;
+         }
       }
       return command;
    }
@@ -241,8 +255,8 @@ public class encodeConfig {
    }
    
    // Build list of encoding profile names from VRD
-   private static Stack<String> getVrdProfiles() {
-      Stack<String> errors = new Stack<String>();
+   private static Hashtable<String,Hashtable<String,String>> getVrdProfiles() {
+      Hashtable<String,Hashtable<String,String>> hlist;
       
       // This method parses xml file for profiles
       //if ( ! parseVrdXmlFile() ) {
@@ -250,11 +264,12 @@ public class encodeConfig {
       //}
       
       // This method uses VRD functions to get profiles
-      if ( ! vrdGetProfiles() ) {
-         errors.add("Encountered problems obtaining encoding profiles from VideoRedo");
+      hlist = vrdGetProfiles();
+      if ( hlist == null ) {
+         log.error("Encountered problems obtaining encoding profiles from VideoRedo");
       }
 
-      return errors;
+      return hlist;
    }
    
    // Parse VRD profile xml file and extract encoding information
@@ -322,16 +337,17 @@ public class encodeConfig {
    }*/
    
    // Get list of output profiles from VRD with custom VBS script
-   // Update ENCODE & ENCODE_NAMES according to retrieved list
-   private static Boolean vrdGetProfiles() {
+   // Return retrieved list has hash table or null if something fails
+   private static Hashtable<String,Hashtable<String,String>> vrdGetProfiles() {
+      Hashtable<String,Hashtable<String,String>> hlist = new Hashtable<String,Hashtable<String,String>>();
       String s = File.separator;
       String vrdscript = createGetProfilesScript();
       if (vrdscript == null || ! file.isFile(vrdscript))
-         return false;
+         return null;
       String cscript = System.getenv("SystemRoot") + s + "system32" + s + "cscript.exe";
       if (! file.isFile(cscript)) {
          log.error("cscript.exe path does not exist: " + cscript);
-         return false;
+         return null;
       }
 
       // System call to ccsript to do most of the work      
@@ -350,7 +366,7 @@ public class encodeConfig {
          if (l.size() > 0) {
             log.error(l);
             file.delete(vrdscript);
-            return false;
+            return null;
          }
          
          // Parse stdout
@@ -402,19 +418,19 @@ public class encodeConfig {
                      Hashtable<String,String> h = new Hashtable<String,String>();
                      h.put("description", "VideoRedo " + extension + " profile");
                      h.put("extension", extension);
-                     config.ENCODE.put(Name, h);
+                     hlist.put(Name, h);
                   }
                }                                      
             }
             file.delete(vrdscript);
-            return true;
+            return hlist;
          }
       } else {
          log.error("Failed to launch command: " + process.toString());
          log.error(process.getStderr());
       }
       file.delete(vrdscript);
-      return false;
+      return null;
    }
    
    // Create custom VB script that uses VideoRedo methods to print encoding profiles to stdout
