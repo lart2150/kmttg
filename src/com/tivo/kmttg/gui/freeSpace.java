@@ -235,6 +235,12 @@ public class freeSpace {
       // Compute free space
       float available = getDiskSpace();
       float used = data.get("suggestions") + data.get("kuid") + data.get("kusn");
+      float small = (float)0.001;
+      if (available < small) {
+         // Available not specified, so set to close to total used
+         available = used - small;
+         config.diskSpace.put(tivoName, available);
+      }
       float free = available - used;
       if (free < 0) {
          // Set disk space available to used space if used > available
