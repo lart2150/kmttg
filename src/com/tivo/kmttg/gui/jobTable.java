@@ -28,6 +28,8 @@ public class jobTable {
    jobTable() {
       Object[][] data = {};
       JobMonitor = new JXTable(data, TITLE_cols);
+      // Disable sorting
+      JobMonitor.setSortable(false);
       TableModel myModel = new MyTableModel(data, TITLE_cols);
       JobMonitor.setModel(myModel);
             
