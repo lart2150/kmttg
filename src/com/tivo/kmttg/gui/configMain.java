@@ -89,6 +89,8 @@ public class configMain {
    private static JTextField customCommand = null;
    private static JTextField toolTipsTimeout = null;
    private static JTextField cpu_cores = null;
+   private static JTextField download_tries = null;
+   private static JTextField download_retry_delay = null;
    private static JTextField pyTivo_host = null;
    private static JTextField pyTivo_config = null;
    private static JComboBox MinChanDigits = null;
@@ -461,6 +463,12 @@ public class configMain {
       
       // cpu_cores
       cpu_cores.setText("" + config.cpu_cores);
+      
+      // download_tries
+      download_tries.setText("" + config.download_tries);
+      
+      // download_retry_delay
+      download_retry_delay.setText("" + config.download_retry_delay);
       
       // pyTivo_host
       pyTivo_host.setText("" + config.pyTivo_host);
@@ -971,6 +979,38 @@ public class configMain {
          config.cpu_cores = 1;
       }
       
+      // download_tries
+      value = string.removeLeadingTrailingSpaces(download_tries.getText());
+      if (value.length() > 0) {
+         try {
+            config.download_tries = Integer.parseInt(value);
+         } catch(NumberFormatException e) {
+            textFieldError(download_tries, "Illegal setting for # download tries: '" + value + "'");
+            log.error("Setting to 5");
+            config.download_tries = 5;
+            download_tries.setText("" + config.download_tries);
+            errors++;
+         }
+      } else {
+         config.download_tries = 5;
+      }
+      
+      // download_retry_delay
+      value = string.removeLeadingTrailingSpaces(download_retry_delay.getText());
+      if (value.length() > 0) {
+         try {
+            config.download_retry_delay = Integer.parseInt(value);
+         } catch(NumberFormatException e) {
+            textFieldError(download_retry_delay, "Illegal setting for delay between download tries: '" + value + "'");
+            log.error("Setting to 10");
+            config.download_retry_delay = 10;
+            download_retry_delay.setText("" + config.download_retry_delay);
+            errors++;
+         }
+      } else {
+         config.download_retry_delay = 10;
+      }
+      
       // toolTipsTimeout
       value = string.removeLeadingTrailingSpaces(toolTipsTimeout.getText());
       if (value.length() > 0) {
@@ -1050,6 +1090,8 @@ public class configMain {
       active_job_limit = new javax.swing.JTextField(15);
       toolTipsTimeout = new javax.swing.JTextField(15);
       cpu_cores = new javax.swing.JTextField(15);
+      download_tries = new javax.swing.JTextField(15);
+      download_retry_delay = new javax.swing.JTextField(15);
       
       disk_space = new javax.swing.JTextField(5);
       FontSize = new javax.swing.JTextField(5);
@@ -1099,6 +1141,8 @@ public class configMain {
       JLabel customCommand_label = new javax.swing.JLabel();
       JLabel customFiles_label = new javax.swing.JLabel();
       JLabel cpu_cores_label = new javax.swing.JLabel();
+      JLabel download_tries_label = new javax.swing.JLabel();
+      JLabel download_retry_delay_label = new javax.swing.JLabel();
       JLabel available_keywords_label = new javax.swing.JLabel();
       JLabel pyTivo_host_label = new javax.swing.JLabel();
       JLabel pyTivo_config_label = new javax.swing.JLabel();
@@ -1182,6 +1226,8 @@ public class configMain {
       check_space.setText("Check Available Disk Space");      
       available_keywords_label.setText("Available keywords:"); 
       cpu_cores_label.setText("encoding cpu cores");
+      download_tries_label.setText("# download attempts");
+      download_retry_delay_label.setText("seconds between download retry attempts");
       pyTivo_host_label.setText("pyTivo host name");
       pyTivo_config_label.setText("pyTivo.conf file");
       pyTivo_tivo_label.setText("pyTivo push destination");
@@ -1872,6 +1918,26 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(t2extract_args, c);
       
+      // download_tries
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(download_tries_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(download_tries, c);
+      
+      // download_retry_delay
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(download_retry_delay_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(download_retry_delay, c);
+      
       // metadata_files
       gy++;
       c.gridx = 0;
@@ -2153,6 +2219,8 @@ public class configMain {
       jobMonitorFullPaths.setToolTipText(getToolTip("jobMonitorFullPaths"));
       toolTipsTimeout.setToolTipText(getToolTip("toolTipsTimeout")); 
       cpu_cores.setToolTipText(getToolTip("cpu_cores"));
+      download_tries.setToolTipText(getToolTip("download_tries"));
+      download_retry_delay.setToolTipText(getToolTip("download_retry_delay"));
       pyTivo_host.setToolTipText(getToolTip("pyTivo_host"));
       pyTivo_config.setToolTipText(getToolTip("pyTivo_config"));
       pyTivo_tivo.setToolTipText(getToolTip("pyTivo_tivo"));
@@ -2536,6 +2604,18 @@ public class configMain {
          text += "for the encoding task. NOTE: Consider this setting and <b>active job limit</b> when<br>";
          text += "deciding what number to use here. If you set number too high it may slow down the machine<br>";
          text += "for other tasks running in parallel.";
+      }
+      else if (component.equals("download_tries")) {
+         text =  "<b># download attempts</b><br>";
+         text += "Number of times to attempt to download a TiVo file (in case download attempt fails).<br>";
+         text += "If you only want 1 attempt then set this to 1 or 0.<br>";
+         text += "Occasionally TiVo downloads fail due to <b>Server Busy</b> or other such errors, but<br>";
+         text += "sometimes trying a download again after a short delay will work.";
+      }
+      else if (component.equals("download_retry_delay")) {
+         text =  "<b>seconds between download retry attempts</b><br>";
+         text += "Number of seconds to wait between download retry attempts. kmttg will wait at least this<br>";
+         text += "number of seconds before trying a download again.";
       }
       else if (component.equals("pyTivo_host")) {
          text =  "<b>pyTivo host name</b><br>";
