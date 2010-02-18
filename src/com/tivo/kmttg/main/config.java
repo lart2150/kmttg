@@ -129,8 +129,8 @@ public class config {
    public static String pyTivo_files = "last";
    
    // download retry related
-   public static int download_tries = 5;       // Number of times to retry downloads
-   public static int download_retry_delay = 5; // Delay in secs between retry attempts
+   public static int download_tries = 5;        // Number of times to retry downloads
+   public static int download_retry_delay = 10; // Delay in secs between retry attempts
    
    public static Stack<String> parse() {
       debug.print("");
@@ -653,6 +653,12 @@ public class config {
             if (key.equals("cpu_cores")) {
                cpu_cores = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("download_tries")) {
+               download_tries = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
+            if (key.equals("download_retry_delay")) {
+               download_retry_delay = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("diskSpace")) {
                String[] l = line.split("=");
                if (l.length == 2) {
@@ -799,6 +805,10 @@ public class config {
          ofp.write("<CheckBeacon>\n" + CheckBeacon + "\n\n");
          
          ofp.write("<cpu_cores>\n" + cpu_cores + "\n\n");
+         
+         ofp.write("<download_tries>\n" + download_tries + "\n\n");
+         
+         ofp.write("<download_retry_delay>\n" + download_retry_delay + "\n\n");
          
          if (diskSpace.size() > 0) {
             ofp.write("<diskSpace>\n");
