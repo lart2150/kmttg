@@ -14,6 +14,7 @@ import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class download {
    String cookieFile = "";
@@ -213,6 +214,17 @@ public class download {
             log.error("Download failed to file: " + job.tivoFile);
             log.error("Exit code: " + exit_code);
             process.printStderr();
+            
+            // Try download again with delayed launch time if specified
+            if (job.launch_tries < config.download_tries) {
+               job.launch_tries++;
+               log.warn(string.basename(job.tivoFile) + ": Download attempt # " +
+                     job.launch_tries + " scheduled in " + config.download_retry_delay + " seconds.");
+               job.launch_time = new Date().getTime() + config.download_retry_delay*1000;
+               jobMonitor.submitNewJob(job);
+            } else {
+               log.error(string.basename(job.tivoFile) + ": Too many failed downloads, GIVING UP!!");
+            }
          } else {
             log.print("---DONE--- job=" + job.type + " output=" + job.tivoFile);
             // Add auto history entry if auto downloads configured
