@@ -188,6 +188,7 @@ public class download {
          }
          
          // Check first line in tivo file for errors
+         // Also if file size is very small then it's likely a failure
          if (failed == 0) {
             try {
                BufferedReader ifp = new BufferedReader(new FileReader(job.tivoFile));
@@ -196,9 +197,11 @@ public class download {
                if ( first.toLowerCase().contains("html") ) failed = 1;
                if ( first.toLowerCase().contains("busy") ) failed = 1;
                if ( first.toLowerCase().contains("failed") ) failed = 1;
+               if ( file.size(job.tivoFile) < 1000 ) failed = 1;
                if (failed == 1) {
                   process.printStdout();
                   log.error(first);
+                  file.delete(job.tivoFile);
                }
             }
             catch (IOException ex) {
