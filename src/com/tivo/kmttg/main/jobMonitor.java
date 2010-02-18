@@ -159,6 +159,13 @@ public class jobMonitor {
          if ( isVideoRedoGUIJob(job) ) {
             if (VideoRedoGUIJobs > 0) continue;
          }
+         
+         // If there is a launch time setup for this job then don't launch until
+         // after job.launch_time
+         if (job.launch_time != null) {
+            long now = new Date().getTime();
+            if (now < job.launch_time) continue;
+         }
 
          // OK to launch job
          cpuActiveJobs = jobData.launch(job, cpuActiveJobs);
