@@ -202,7 +202,6 @@ public class download {
                if (failed == 1) {
                   process.printStdout();
                   log.error(first);
-                  file.delete(job.tivoFile);
                }
             }
             catch (IOException ex) {
@@ -214,6 +213,7 @@ public class download {
             log.error("Download failed to file: " + job.tivoFile);
             log.error("Exit code: " + exit_code);
             process.printStderr();
+            file.delete(job.tivoFile);
             
             // Try download again with delayed launch time if specified
             if (job.launch_tries < config.download_tries) {
