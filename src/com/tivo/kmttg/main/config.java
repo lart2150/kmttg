@@ -128,6 +128,10 @@ public class config {
    public static String pyTivo_tivo = "";
    public static String pyTivo_files = "last";
    
+   // download retry related
+   public static int download_tries = 5;       // Number of times to retry downloads
+   public static int download_retry_delay = 5; // Delay in secs between retry attempts
+   
    public static Stack<String> parse() {
       debug.print("");
       String result;
