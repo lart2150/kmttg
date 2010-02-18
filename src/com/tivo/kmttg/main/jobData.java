@@ -52,6 +52,10 @@ public class jobData {
    // job status update related
    public Long duration = null;
    
+   // Delayed launch variables
+   public Long launch_time = null;
+   public int launch_tries = 1;
+   
    // metadata related
    public String url = null;
    public String metaTmpFile = null;
