@@ -162,7 +162,12 @@ public class decrypt {
                } else {
                   log.error("Failed to delete file: "+ job.tivoFile);
                }
-            }            
+            }
+            
+            // TivoWebPlus call to delete show on TiVo if configured
+            if (config.TivoWebPlusDelete == 1) {
+               file.TivoWebPlusDelete(job.url);
+            }
          }
       }
       return false;

@@ -207,6 +207,11 @@ public class qsfix {
                }
             }      
             
+            // TivoWebPlus call to delete show on TiVo if configured
+            if (config.TivoWebPlusDelete == 1) {
+               file.TivoWebPlusDelete(job.url);
+            }
+            
             // Rename mpegFile_fix to mpegFile
             Boolean result;
             if (file.isFile(job.mpegFile)) {
