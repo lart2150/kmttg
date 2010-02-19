@@ -56,6 +56,7 @@ public class configMain {
    private static JCheckBox VrdEncode = null;
    private static JCheckBox VrdAllowMultiple = null;
    private static JCheckBox TSDownload = null;
+   private static JCheckBox TivoWebPlusDelete = null;
    private static JCheckBox HideProtectedFiles = null;
    private static JCheckBox OverwriteFiles = null;
    private static JCheckBox toolTips = null;
@@ -353,6 +354,12 @@ public class configMain {
       else
          TSDownload.setSelected(false);
       
+      // TivoWebPlusDelete
+      if (config.TivoWebPlusDelete == 1)
+         TivoWebPlusDelete.setSelected(true);
+      else
+         TivoWebPlusDelete.setSelected(false);
+      
       // HideProtectedFiles
       if (config.HideProtectedFiles == 1)
          HideProtectedFiles.setSelected(true);
@@ -619,6 +626,12 @@ public class configMain {
          config.TSDownload = 1;
       else
          config.TSDownload = 0;
+      
+      // TivoWebPlusDelete
+      if (TivoWebPlusDelete.isSelected())
+         config.TivoWebPlusDelete = 1;
+      else
+         config.TivoWebPlusDelete = 0;
       
       // HideProtectedFiles
       if (HideProtectedFiles.isSelected())
@@ -1115,6 +1128,7 @@ public class configMain {
       VrdEncode = new javax.swing.JCheckBox();
       VrdAllowMultiple = new javax.swing.JCheckBox();
       TSDownload = new javax.swing.JCheckBox();
+      TivoWebPlusDelete = new javax.swing.JCheckBox();
       HideProtectedFiles = new javax.swing.JCheckBox();
       OverwriteFiles = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
@@ -1199,6 +1213,7 @@ public class configMain {
       VrdEncode.setText("Show VideoRedo encoding profiles");
       VrdAllowMultiple.setText("Allow multiple VideoRedo jobs at once");
       TSDownload.setText("Download TiVo files in Transport Stream format");
+      TivoWebPlusDelete.setText("Use TivoWebPlus to delete TiVo shows");
       HideProtectedFiles.setText("Do not show copy protected files in table");
       OverwriteFiles.setText("Overwrite existing files");
       MAK_label.setText("MAK"); 
@@ -1954,6 +1969,12 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(TSDownload, c);
       
+      // TivoWebPlusDelete
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(TivoWebPlusDelete, c);
+      
       // Visual Panel
       JPanel visual_panel = new JPanel(new GridBagLayout());       
       
@@ -2184,6 +2205,7 @@ public class configMain {
       VrdEncode.setToolTipText(getToolTip("VrdEncode"));
       VrdAllowMultiple.setToolTipText(getToolTip("VrdAllowMultiple"));
       TSDownload.setToolTipText(getToolTip("TSDownload"));
+      TivoWebPlusDelete.setToolTipText(getToolTip("TivoWebPlusDelete"));
       HideProtectedFiles.setToolTipText(getToolTip("HideProtectedFiles"));
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
       files_path.setToolTipText(getToolTip("files_path"));
@@ -2360,6 +2382,12 @@ public class configMain {
          text += "<b>&Format=video/x-tivo-mpeg-ts</b> tag to the download URL.<br>";
          text += "NOTE: Currently only Australia/New Zealand TiVos support this format and this will<br>";
          text += "have no effect on other TiVos";
+      }
+      else if (component.equals("TivoWebPlusDelete")) {
+         text =  "<b>Use TivoWebPlus to delete TiVo shows</b><br>";
+         text += "If you have TivoWebPlus configured on your TiVo(s) then if you enable this option<br>";
+         text += "a TivoWebPlus http call to delete show on TiVo will be issued following<br>";
+         text += "successful decrypt of a downloaded .TiVo file.";
       }
       else if (component.equals("HideProtectedFiles")) {
          text = "<b>Do not show copy protected files in table</b><br>";

@@ -54,6 +54,7 @@ public class config {
    public static int CheckDiskSpace = 0;
    public static int LowSpaceSize = 0;
    public static int CheckBeacon = 1;
+   public static int TivoWebPlusDelete = 0;
    public static int UseAdscan = 0;
    public static int VrdReview = 0;
    public static int VrdEncode = 0;
@@ -650,6 +651,9 @@ public class config {
             if (key.equals("CheckBeacon")) {
                CheckBeacon = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("TivoWebPlusDelete")) {
+               TivoWebPlusDelete = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("cpu_cores")) {
                cpu_cores = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -803,6 +807,8 @@ public class config {
          ofp.write("<LowSpaceSize>\n" + LowSpaceSize + "\n\n");
          
          ofp.write("<CheckBeacon>\n" + CheckBeacon + "\n\n");
+         
+         ofp.write("<TivoWebPlusDelete>\n" + TivoWebPlusDelete + "\n\n");
          
          ofp.write("<cpu_cores>\n" + cpu_cores + "\n\n");
          
