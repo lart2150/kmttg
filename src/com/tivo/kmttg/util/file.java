@@ -2,7 +2,11 @@ package com.tivo.kmttg.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.tivo.kmttg.main.config;
 
@@ -188,5 +192,60 @@ public class file {
          }
       }
       return null;
+   }
+   
+   // TivoWebPlus file delete function
+   // Note that show id needs to be extracted from given download_url
+   // in order to construct the actual delete url
+   // Sample download url looks like:
+   // http://10.0.0.53:80/download/XXI%20Winter%20Olympics.TiVo?Container=%2FNowPlaying&id=1242283
+   // So TWP delete url for above would be:
+   // http://10.0.0.53:8080/confirm/del/1242283
+   public static void TivoWebPlusDelete(String download_url) {
+      if (download_url == null) return;
+      int port = 8080;
+      Pattern p = Pattern.compile("http://(\\S+):.+&id=(.+)$");
+      Matcher m = p.matcher(download_url);
+      if (m.matches()) {
+         String ip = m.group(1);
+         String id = m.group(2);
+         final String urlString = "http://" + ip + ":" + port + "/confirm/del/" + id;
+         try {
+            // Run the http request in separate thread so as not to hang up the main program
+            final URL url = new URL(urlString);
+            class AutoThread implements Runnable {
+               AutoThread() {}       
+               public void run () {
+                  int timeout = 10;
+                  log.warn(">> Issuing TivoWebPlus show delete request...");
+                  log.print(url.toString());
+                  try {
+                     HttpURLConnection c = (HttpURLConnection) url.openConnection();
+                     c.setRequestMethod("GET");
+                     c.setReadTimeout(timeout*1000);
+                     c.connect();
+                     String response = c.getResponseMessage();
+                     if (response.equals("OK")) {
+                        log.print(">> TivoWebPlus delete succeeded.");
+                     } else {
+                        log.error("Received unexpected response for: " + urlString);
+                        log.error(response);
+                     }
+                  }
+                  catch (Exception e) {
+                     log.error("Connection failed: " + urlString);
+                     log.error(e.toString());
+                  }
+               }
+            }
+            AutoThread t = new AutoThread();
+            Thread thread = new Thread(t);
+            thread.start();
+         }
+         catch (Exception e) {
+            log.error("Connection failed: " + urlString);
+            log.error(e.toString());
+         }
+      }
    }
 }
