@@ -791,7 +791,8 @@ public class jobMonitor {
          job.name         = config.tivodecode;
          job.tivoFile     = tivoFile;
          job.mpegFile     = mpegFile;
-         job.url          = entry.get("url"); // This added in case TivoWebPlus delete needed
+         if (entry != null && entry.containsKey("url"))
+            job.url          = entry.get("url"); // This added in case TivoWebPlus delete needed
          submitNewJob(job);
       }
       
@@ -805,7 +806,8 @@ public class jobMonitor {
          job.mpegFile_fix = mpegFile_fix;
          if (config.VrdDecrypt == 1) {
             job.tivoFile  = tivoFile;
-            job.url       = entry.get("url"); // This added in case TivoWebPlus delete needed
+            if (entry != null && entry.containsKey("url"))
+               job.url       = entry.get("url"); // This added in case TivoWebPlus delete needed
          }
          submitNewJob(job);
       }
