@@ -1,9 +1,12 @@
 package com.tivo.kmttg.util;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -208,7 +211,7 @@ public class file {
       Matcher m = p.matcher(download_url);
       if (m.matches()) {
          String ip = m.group(1);
-         String id = m.group(2);
+         final String id = m.group(2);
          final String urlString = "http://" + ip + ":" + port + "/confirm/del/" + id;
          try {
             // Run the http request in separate thread so as not to hang up the main program
@@ -220,10 +223,19 @@ public class file {
                   log.warn(">> Issuing TivoWebPlus show delete request...");
                   log.print(url.toString());
                   try {
+                     String data = "u2=bnowshowing";
+                     data += "&sub=Delete";
+                     data += "&" + URLEncoder.encode("fsida(" + id + ")", "UTF-8")  + "=on";
+                     data += "&submit=Confirm_Delete";
                      HttpURLConnection c = (HttpURLConnection) url.openConnection();
-                     c.setRequestMethod("GET");
+                     c.setRequestMethod("POST");
                      c.setReadTimeout(timeout*1000);
+                     c.setDoOutput(true);
                      c.connect();
+                     BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(c.getOutputStream()));
+                     bw.write(data);
+                     bw.flush();
+                     bw.close();
                      String response = c.getResponseMessage();
                      if (response.equals("OK")) {
                         log.print(">> TivoWebPlus delete succeeded.");
