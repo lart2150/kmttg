@@ -4,7 +4,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Stack;
@@ -231,6 +233,15 @@ public class file {
                      c.setRequestMethod("POST");
                      c.setReadTimeout(timeout*1000);
                      c.setDoOutput(true);
+                     /* If authentication needed
+                     final String login ="oztivo";
+                     final String password ="moyekj";
+                     Authenticator.setDefault(new Authenticator() {
+                         protected PasswordAuthentication getPasswordAuthentication() {
+                             return new PasswordAuthentication (login, password.toCharArray());
+                         }
+                     });
+                     */
                      c.connect();
                      BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(c.getOutputStream()));
                      bw.write(data);
