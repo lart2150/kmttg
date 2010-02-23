@@ -52,37 +52,45 @@ public class qsfix {
          schedule = false;
       }
       
-      if (config.VrdQsFilter == 1) {
-         // Create script with video dimensions filter enabled
-         log.warn("VideoRedo video dimensions filter is enabled");
-         Hashtable<String,String> dimensions = ffmpegGetVideoDimensions(sourceFile);
-         if (dimensions == null) {
-            log.error("VRD QS Filter enabled but unable to determine video dimensions of file: " + sourceFile);
-            schedule = false;
-         } else {    
-            log.warn("VideoRedo video dimensions filter set to: x=" + dimensions.get("x") + ", y=" + dimensions.get("y"));
-            vrdscript = createScript(dimensions);
-         }
-      } else {
-         // Create script without video dimensions filter
-         vrdscript = createScript(null);
+      if (config.OverwriteFiles == 0 && sourceFile.equals(job.tivoFile) && file.isFile(job.mpegFile)) {
+         log.warn("SKIPPING QSFIX, FILE ALREADY EXISTS: " + job.mpegFile);
+         schedule = false;
       }
       
+      if (schedule) {
+         if (config.VrdQsFilter == 1) {
+            // Create script with video dimensions filter enabled
+            log.warn("VideoRedo video dimensions filter is enabled");
+            Hashtable<String,String> dimensions = ffmpegGetVideoDimensions(sourceFile);
+            if (dimensions == null) {
+               log.error("VRD QS Filter enabled but unable to determine video dimensions of file: " + sourceFile);
+               schedule = false;
+            } else {    
+               log.warn("VideoRedo video dimensions filter set to: x=" + dimensions.get("x") + ", y=" + dimensions.get("y"));
+               vrdscript = createScript(dimensions);
+            }
+         } else {
+            // Create script without video dimensions filter
+            vrdscript = createScript(null);
+         }
+      }
             
-      if ( ! file.isFile(vrdscript) ) {
+      if ( schedule && ! file.isFile(vrdscript) ) {
          log.error("File does not exist: " + vrdscript);
          schedule = false;
       }
       
-      if ( ! file.isFile(cscript) ) {
+      if ( schedule && ! file.isFile(cscript) ) {
          log.error("File does not exist: " + cscript);
          schedule = false;
       }
-            
-      lockFile = file.makeTempFile("VRDLock");      
-      if ( lockFile == null || ! file.isFile(lockFile) ) {
-         log.error("Failed to created lock file: " + lockFile);
-         schedule = false;
+
+      if ( schedule ) {
+         lockFile = file.makeTempFile("VRDLock");      
+         if ( lockFile == null || ! file.isFile(lockFile) ) {
+            log.error("Failed to created lock file: " + lockFile);
+            schedule = false;
+         }
       }
             
       if (schedule) {
