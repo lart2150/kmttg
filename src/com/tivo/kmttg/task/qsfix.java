@@ -207,7 +207,7 @@ public class qsfix {
             log.print("---DONE--- job=" + job.type + " output=" + job.mpegFile_fix);
             
             // Remove .TiVo file if option enabled
-            if (config.RemoveTivoFile == 1 && config.VrdDecrypt == 1) {
+            if (job.tivoFile != null && config.RemoveTivoFile == 1 && config.VrdDecrypt == 1) {
                if ( file.delete(job.tivoFile) ) {
                   log.print("(Deleted file: " + job.tivoFile + ")");
                } else {
