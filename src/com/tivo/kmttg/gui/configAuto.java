@@ -82,6 +82,7 @@ public class configAuto {
    private static JCheckBox dateFilter = null;
    private static JCheckBox suggestionsFilter = null;
    private static JCheckBox suggestionsFilter_single = null;
+   private static JCheckBox useProgramId_unique = null;
    private static JCheckBox kuidFilter = null;
    private static JCheckBox programIdFilter = null;
    private static JComboBox dateOperator = null;
@@ -204,6 +205,7 @@ public class configAuto {
       encode   = new JCheckBox("encode");
       push     = new JCheckBox("push");
       suggestionsFilter_single = new JCheckBox("Filter out TiVo Suggestions");
+      useProgramId_unique = new JCheckBox("Treat each recording as unique");
       /* This intentionally disabled for now
       encode.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
@@ -406,6 +408,14 @@ public class configAuto {
       c.weightx = 0.0;
       content.add(suggestionsFilter_single, c);
       
+      // Treat each recording as unique
+      gy++;
+      c.gridy = gy;
+      c.fill = GridBagConstraints.NONE;
+      c.anchor = GridBagConstraints.WEST;
+      c.weightx = 0.0;
+      content.add(useProgramId_unique, c);
+      
       // enabled
       gy++;
       c.gridy = gy;
@@ -540,6 +550,7 @@ public class configAuto {
       dateFilter.setToolTipText(getToolTip("dateFilter"));
       suggestionsFilter.setToolTipText(getToolTip("suggestionsFilter"));
       suggestionsFilter_single.setToolTipText(getToolTip("suggestionsFilter_single"));
+      useProgramId_unique.setToolTipText(getToolTip("useProgramId_unique"));
       kuidFilter.setToolTipText(getToolTip("kuidFilter"));
       programIdFilter.setToolTipText(getToolTip("programIdFilter"));
       dateOperator.setToolTipText(getToolTip("dateOperator"));
@@ -646,6 +657,18 @@ public class configAuto {
       else if (component.equals("suggestionsFilter_single")) {
          text =  "<b>Filter out TiVo Suggestions</b><br>";
          text += "If enabled then do not process any TiVo Suggestions recordings for this entry.";
+      }
+      else if (component.equals("useProgramId_unique")) {
+         text =  "<b>Treat each recording as unique</b><br>";
+         text += "If enabled then kmttg will generate a unique ProgramId based on ProgramId and recorded<br>";
+         text += "time for each recording of this program. This is useful only for programs that do not<br>";
+         text += "already have unique ProgramIds for each episode, such as some news programs for example.<br>";
+         text += "For such programs kmttg would not ordinarily auto download subsequent episodes because<br>";
+         text += "a ProgramId entry already exists in <b>auto.history</b> file. By enabling this option<br>";
+         text += "kmttg will instead use a time-based ProgramId entry so that future recordings on different<br>";
+         text += "dates with same ProgramId will still auto download<br>";
+         text += "<b>NOTE: Enabling this option may lead to repeated downloads of shows so use wisely/sparingly<br>";
+         text += "only for shows without unique ProgramId</b>";
       }
       else if (component.equals("kuidFilter")) {
          text =  "<b>Only process KUID recordings</b><br>";
@@ -1104,18 +1127,19 @@ public class configAuto {
                   ofp.write(autoConfig.keywordsToString(entry.keywords) + "\n");
                }
                ofp.write("<options>\n");
-               ofp.write("enabled "           + entry.enabled           + "\n");
-               ofp.write("tivo "              + entry.tivo              + "\n");
-               ofp.write("metadata "          + entry.metadata          + "\n");               
-               ofp.write("decrypt "           + entry.decrypt           + "\n");               
-               ofp.write("qsfix "             + entry.qsfix             + "\n");               
-               ofp.write("comskip "           + entry.comskip           + "\n");               
-               ofp.write("comcut "            + entry.comcut            + "\n");               
-               ofp.write("captions "          + entry.captions          + "\n");               
-               ofp.write("encode "            + entry.encode            + "\n");
-               ofp.write("push "              + entry.push              + "\n");
-               ofp.write("custom "            + entry.custom            + "\n");
-               ofp.write("suggestionsFilter " + entry.suggestionsFilter + "\n");
+               ofp.write("enabled "             + entry.enabled             + "\n");
+               ofp.write("tivo "                + entry.tivo                + "\n");
+               ofp.write("metadata "            + entry.metadata            + "\n");               
+               ofp.write("decrypt "             + entry.decrypt             + "\n");               
+               ofp.write("qsfix "               + entry.qsfix               + "\n");               
+               ofp.write("comskip "             + entry.comskip             + "\n");               
+               ofp.write("comcut "              + entry.comcut              + "\n");               
+               ofp.write("captions "            + entry.captions            + "\n");               
+               ofp.write("encode "              + entry.encode              + "\n");
+               ofp.write("push "                + entry.push                + "\n");
+               ofp.write("custom "              + entry.custom              + "\n");
+               ofp.write("suggestionsFilter "   + entry.suggestionsFilter   + "\n");
+               ofp.write("useProgramId_unique " + entry.useProgramId_unique + "\n");
                if (entry.encode_name != null && entry.encode_name.length() > 0)
                   ofp.write("encode_name " + entry.encode_name + "\n");
                if (file.isFile(entry.comskipIni))
@@ -1123,15 +1147,6 @@ public class configAuto {
                else
                   ofp.write("comskipIni " + "none" + "\n");
             }
-         }
-         
-         // put any ignoreHistory entries last
-         if (autoConfig.ignoreHistory.size() > 0) {
-            ofp.write("\n<ignorehistory>\n");
-            for (int i=0; i<autoConfig.ignoreHistory.size(); ++i) {
-               ofp.write(autoConfig.ignoreHistory.get(i) + "\n");
-            }
-            ofp.write("\n");
          }
          
          ofp.close();
@@ -1167,6 +1182,7 @@ public class configAuto {
       push.setSelected((Boolean)(entry.push == 1));
       custom.setSelected((Boolean)(entry.custom == 1));
       suggestionsFilter_single.setSelected((Boolean)(entry.suggestionsFilter == 1));
+      useProgramId_unique.setSelected((Boolean)(entry.useProgramId_unique == 1));
       
       encoding_name.setSelectedItem(entry.encode_name);
       
@@ -1247,6 +1263,11 @@ public class configAuto {
          entry.suggestionsFilter = 1;
       else
          entry.suggestionsFilter = 0;
+      
+      if (useProgramId_unique.isSelected())
+         entry.useProgramId_unique = 1;
+      else
+         entry.useProgramId_unique = 0;
       
       entry.encode_name = (String)encoding_name.getSelectedItem();
 
