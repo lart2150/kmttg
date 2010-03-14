@@ -528,6 +528,10 @@ public class jobMonitor {
       Boolean encode       = (Boolean)specs.get("encode");
       Boolean push         = (Boolean)specs.get("push");
       Boolean custom       = (Boolean)specs.get("custom");
+      Boolean useProgramId_unique = false;
+      if (specs.containsKey("useProgramId_unique")) {
+         useProgramId_unique = (Boolean)specs.get("useProgramId_unique");
+      }
       
       Boolean streamfix    = false;
       
@@ -755,6 +759,9 @@ public class jobMonitor {
          job.tivoFileSize = Long.parseLong(entry.get("size"));
          if (entry.containsKey("ProgramId")) {
             job.ProgramId = entry.get("ProgramId");
+         }
+         if (useProgramId_unique && entry.containsKey("ProgramId_unique")) {
+            job.ProgramId_unique = entry.get("ProgramId_unique");
          }
          if (entry.containsKey("title")) {
             job.title = entry.get("title");
