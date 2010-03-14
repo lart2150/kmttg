@@ -429,24 +429,30 @@ public class auto {
       return entries;
    }
       
-   private static Boolean grep(String string, Stack<String> stack) {
+   /*private static Boolean grep(String string, Stack<String> stack) {
       for (int i=0; i<stack.size(); ++i) {
          if (stack.get(i).contains(string))
             return true;
       }
       return false;
-   }
+   }*/
    
    private static void keywordMatchJobInit(Hashtable<String,String> entry, autoEntry auto) {
       debug.print("entry=" + entry + " auto=" + auto);
       
+      // Need to check ProgramId_unique if enabled to see if we already have processed this previously
+      if (auto.useProgramId_unique == 1 && entry.containsKey("ProgramId_unique")) {
+         if ( keywordMatchHistory(entry.get("ProgramId_unique"), config.autoHistory) ) {
+            log.print("(ProgramId_unique=" + entry.get("ProgramId_unique") + " already processed => will not download)");
+            return;
+         }
+      }
+      
       // Need to check ProgramId to see if we already have processed this previously
-      if (entry.containsKey("ProgramId")) {
-         if ( ! grep(entry.get("ProgramId"), autoConfig.ignoreHistory) ) {
-            if ( keywordMatchHistory(entry.get("ProgramId"), config.autoHistory) ) {
-               log.print("(ProgramId=" + entry.get("ProgramId") + " already processed => will not download)");
-               return;
-            }
+      if (auto.useProgramId_unique == 0 && entry.containsKey("ProgramId")) {
+         if ( keywordMatchHistory(entry.get("ProgramId"), config.autoHistory) ) {
+            log.print("(ProgramId=" + entry.get("ProgramId") + " already processed => will not download)");
+            return;
          }
       }
       
@@ -456,17 +462,18 @@ public class auto {
       h.put("tivoName", entry.get("tivoName"));
       h.put("mode", "Download");
       if (entry == null) return;
-      h.put("entry",        entry);   
-      h.put("metadata",     (Boolean)(auto.metadata == 1));
-      h.put("metadataTivo", false);
-      h.put("decrypt",      (Boolean)(auto.decrypt  == 1));
-      h.put("qsfix",        (Boolean)(auto.qsfix    == 1));
-      h.put("comskip",      (Boolean)(auto.comskip  == 1));
-      h.put("comcut",       (Boolean)(auto.comcut   == 1));
-      h.put("captions",     (Boolean)(auto.captions == 1));
-      h.put("encode",       (Boolean)(auto.encode   == 1));
-      h.put("push",         (Boolean)(auto.push     == 1));
-      h.put("custom",       (Boolean)(auto.custom   == 1));
+      h.put("entry",               entry);   
+      h.put("metadata",            (Boolean)(auto.metadata == 1));
+      h.put("metadataTivo",        false);
+      h.put("decrypt",             (Boolean)(auto.decrypt  == 1));
+      h.put("qsfix",               (Boolean)(auto.qsfix    == 1));
+      h.put("comskip",             (Boolean)(auto.comskip  == 1));
+      h.put("comcut",              (Boolean)(auto.comcut   == 1));
+      h.put("captions",            (Boolean)(auto.captions == 1));
+      h.put("encode",              (Boolean)(auto.encode   == 1));
+      h.put("push",                (Boolean)(auto.push     == 1));
+      h.put("custom",              (Boolean)(auto.custom   == 1));
+      h.put("useProgramId_unique", (Boolean)(auto.useProgramId_unique == 1));
       if (auto.encode_name != null)
          h.put("encodeName",   auto.encode_name);
       
@@ -500,18 +507,22 @@ public class auto {
    // Append a ProgramId entry to the autoHistory file based on job data
    public static int AddHistoryEntry(jobData job) {
       debug.print("job=" + job);
+      String ProgramId = job.ProgramId;
+      if (job.ProgramId_unique != null)
+         ProgramId = job.ProgramId_unique;
+      
       // Don't add if entry already exists
-      if (job.ProgramId == null) {
+      if (ProgramId == null) {
          return 0;
       } else {
-         if (keywordMatchHistory(job.ProgramId, config.autoHistory))
+         if (keywordMatchHistory(ProgramId, config.autoHistory))
             return 2;
       }
 
       // Append entry to autoHistory file
       try {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(config.autoHistory, true));
-         ofp.write(job.ProgramId);
+         ofp.write(ProgramId);
          if (job.title != null)
             ofp.write(" " + job.title);
          ofp.write("\r\n");
