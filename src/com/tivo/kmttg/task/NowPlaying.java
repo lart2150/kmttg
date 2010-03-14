@@ -441,7 +441,8 @@ public class NowPlaying  {
                   h.put("ExpirationImage", "copy-protected");
             }
             
-            // If programId doesn't exist then grab id from url instead
+            // If ProgramId doesn't exist then grab id from url instead
+            // Also add ProgramId_unique
             checkProgramId(h);
          }
          // Add last entry
@@ -451,6 +452,7 @@ public class NowPlaying  {
             }
             h.put("tivoName", job.tivoName);
             // If programId doesn't exist then grab id from url instead
+            // Also add ProgramId_unique
             checkProgramId(h);
             ENTRIES.add(h);
          }
@@ -520,7 +522,8 @@ public class NowPlaying  {
       }
    }
 
-   // If programId doesn't exist then make a fake one out of url id & size
+   // If ProgramId doesn't exist then make a fake one out of url id & size
+   // Also add ProgramId_unique
    private void checkProgramId(Hashtable<String,String> h) {      
       if (! h.containsKey("ProgramId")) {
          if (h.containsKey("url") && h.containsKey("size")) {
@@ -531,6 +534,9 @@ public class NowPlaying  {
             }
          }
       }
+      
+      // Add ProgramId_unique
+      h.put("ProgramId_unique", h.get("ProgramId") + "_" + h.get("gmt"));
    }
    
    public Stack<Hashtable<String,String>> getEntries() {
