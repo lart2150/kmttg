@@ -22,6 +22,7 @@ public class autoEntry {
    public String encode_name = null;
    public String comskipIni = "none";
    public int suggestionsFilter = 0;
+   public int useProgramId_unique = 0;
    
    public String toString() {
       return "{type=" + type + ", tivo=" + tivo + ", keyword=" + keyword + ", keywords=" + keywords + "}";
