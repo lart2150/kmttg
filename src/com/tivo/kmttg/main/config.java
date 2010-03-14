@@ -79,7 +79,6 @@ public class config {
    public static String autoIni = "";
    public static String autoLog = "";
    public static String autoHistory = "";
-   public static Stack<String> ignoreHistory = new Stack<String>();
    public static Hashtable<String,String> KEYWORDS = new Hashtable<String,String>();
    
    // Hash to store tivo related information
