@@ -15,7 +15,6 @@ public class autoConfig {
    public static Stack<autoEntry> KEYWORDS = new Stack<autoEntry>();
    public static int dryrun = 0;
    public static int CHECK_TIVOS_INTERVAL = 60;
-   public static Stack<String> ignoreHistory = new Stack<String>();
    public static int dateFilter = 0;
    public static String dateOperator = "less than";
    public static float dateHours = 48;
@@ -32,7 +31,6 @@ public class autoConfig {
          }
       }
       KEYWORDS.clear();
-      ignoreHistory.clear();
             
       try {
          BufferedReader ini = new BufferedReader(new FileReader(config));
@@ -143,6 +141,8 @@ public class autoConfig {
                   entry.custom = Integer.parseInt(value);
                if (name.matches("suggestionsFilter"))
                   entry.suggestionsFilter = Integer.parseInt(value);
+               if (name.matches("useProgramId_unique"))
+                  entry.useProgramId_unique = Integer.parseInt(value);
                if (name.matches("encode_name")) {
                   // encode_name value can have spaces
                   Pattern p = Pattern.compile("(\\S+)\\s+(.+)");
@@ -151,9 +151,6 @@ public class autoConfig {
                      entry.encode_name = m.group(2);
                   }
                }
-            }
-            if (key.equals("ignorehistory")) {
-               ignoreHistory.add(line);
             }
          }
          if ( entry.type != null ) {
