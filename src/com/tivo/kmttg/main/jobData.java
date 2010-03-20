@@ -76,6 +76,9 @@ public class jobData {
    // pyTivo push related
    public String pyTivo_tivo = null;
    
+   // TWP delete related
+   public Boolean twpdelete = false;
+   
    // comskip related
    public String comskipIni = null;
    
