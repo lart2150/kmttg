@@ -285,14 +285,15 @@ public class tivoTab {
                h.put("metadata", config.gui.metadata.isSelected());
                h.put("metadataTivo", false);
             }
-            h.put("decrypt",  config.gui.decrypt.isSelected());
-            h.put("qsfix",    config.gui.qsfix.isSelected());
-            h.put("comskip",  config.gui.comskip.isSelected());
-            h.put("comcut",   config.gui.comcut.isSelected());
-            h.put("captions", config.gui.captions.isSelected());
-            h.put("encode",   config.gui.encode.isSelected());
-            h.put("push",     config.gui.push.isSelected());
-            h.put("custom",   config.gui.custom.isSelected());
+            h.put("decrypt",   config.gui.decrypt.isSelected());
+            h.put("qsfix",     config.gui.qsfix.isSelected());
+            h.put("twpdelete", config.gui.twpdelete.isSelected());
+            h.put("comskip",   config.gui.comskip.isSelected());
+            h.put("comcut",    config.gui.comcut.isSelected());
+            h.put("captions",  config.gui.captions.isSelected());
+            h.put("encode",    config.gui.encode.isSelected());
+            h.put("push",      config.gui.push.isSelected());
+            h.put("custom",    config.gui.custom.isSelected());
             jobMonitor.LaunchJobs(h);
          }
       }

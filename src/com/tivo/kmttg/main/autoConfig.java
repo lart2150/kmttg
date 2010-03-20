@@ -127,6 +127,8 @@ public class autoConfig {
                   entry.decrypt = Integer.parseInt(value);
                if (name.matches("qsfix"))
                   entry.qsfix = Integer.parseInt(value);
+               if (name.matches("twpdelete"))
+                  entry.twpdelete = Integer.parseInt(value);
                if (name.matches("comskip"))
                   entry.comskip = Integer.parseInt(value);
                if (name.matches("comcut"))

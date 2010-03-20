@@ -1213,7 +1213,7 @@ public class configMain {
       VrdEncode.setText("Show VideoRedo encoding profiles");
       VrdAllowMultiple.setText("Allow multiple VideoRedo jobs at once");
       TSDownload.setText("Download TiVo files in Transport Stream format");
-      TivoWebPlusDelete.setText("Use TivoWebPlus to delete TiVo shows");
+      TivoWebPlusDelete.setText("Enable TivoWebPlus Delete task");
       HideProtectedFiles.setText("Do not show copy protected files in table");
       OverwriteFiles.setText("Overwrite existing files");
       MAK_label.setText("MAK"); 
@@ -2384,10 +2384,13 @@ public class configMain {
          text += "have no effect on other TiVos";
       }
       else if (component.equals("TivoWebPlusDelete")) {
-         text =  "<b>Use TivoWebPlus to delete TiVo shows</b><br>";
+         text =  "<b>Enable TivoWebPlus Delete task</b><br>";
          text += "If you have TivoWebPlus configured on your TiVo(s) then if you enable this option<br>";
-         text += "a TivoWebPlus http call to delete show on TiVo will be issued following<br>";
-         text += "successful decrypt of a downloaded .TiVo file.";
+         text += "an optional <b>TWP Delete</b> task is made available in the kmttg GUI or auto transfers<br>";
+         text += "task set. When task is enabled, a TivoWebPlus http call to delete show on TiVo will be<br>";
+         text += "issued following successful decrypt of a downloaded .TiVo file.<br>";
+         text += "NOTE: Once you set and save this option you must restart kmttg to see the change.";
+
       }
       else if (component.equals("HideProtectedFiles")) {
          text = "<b>Do not show copy protected files in table</b><br>";

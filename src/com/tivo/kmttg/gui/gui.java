@@ -67,6 +67,7 @@ public class gui {
    public JCheckBox metadata = null;
    public JCheckBox decrypt = null;
    public JCheckBox qsfix = null;
+   public JCheckBox twpdelete = null;
    public JCheckBox comskip = null;
    public JCheckBox comcut = null;
    public JCheckBox captions = null;
@@ -197,6 +198,7 @@ public class gui {
          metadata = new JCheckBox("metadata", false);         
          decrypt = new JCheckBox("decrypt", true);         
          qsfix = new JCheckBox("VRD QS fix", false);         
+         twpdelete = new JCheckBox("TWP Delete", false);         
          comskip = new JCheckBox("Ad Detect", false);         
          comcut = new JCheckBox("Ad Cut", false);         
          captions = new JCheckBox("captions", false);         
@@ -233,6 +235,10 @@ public class gui {
          tasks_panel.add(decrypt);
          tasks_panel.add(Box.createRigidArea(space_5));
          tasks_panel.add(qsfix);
+         if (config.TivoWebPlusDelete == 1) {
+            tasks_panel.add(Box.createRigidArea(space_5));
+            tasks_panel.add(twpdelete);            
+         }
          tasks_panel.add(Box.createRigidArea(space_5));
          tasks_panel.add(comskip);
          tasks_panel.add(Box.createRigidArea(space_5));
@@ -866,6 +872,13 @@ public class gui {
       } else {
          qsfix.setEnabled(true);
       }
+      
+      if (config.TivoWebPlusDelete == 0) {
+         twpdelete.setSelected(false);
+         twpdelete.setEnabled(false);
+      } else {
+         twpdelete.setEnabled(true);
+      }
 
       if (! file.isFile(config.comskip)) {
          comskip.setSelected(false);
@@ -1154,6 +1167,7 @@ public class gui {
             ofp.write("<metadata>\n"            + metadata_setting()         + "\n");
             ofp.write("<decrypt>\n"             + decrypt_setting()          + "\n");
             ofp.write("<qsfix>\n"               + qsfix_setting()            + "\n");
+            ofp.write("<twpdelete>\n"           + twpdelete_setting()        + "\n");
             ofp.write("<comskip>\n"             + comskip_setting()          + "\n");
             ofp.write("<comcut>\n"              + comcut_setting()           + "\n");
             ofp.write("<captions>\n"            + captions_setting()         + "\n");
@@ -1258,13 +1272,13 @@ public class gui {
                   qsfix.setSelected(true);
                else
                   qsfix.setSelected(false);
-            }
-            if (key.equals("comskip")) {
+            }            
+            if (key.equals("twpdelete")) {
                if (line.matches("1"))
-                  comskip.setSelected(true);
+                  twpdelete.setSelected(true);
                else
-                  comskip.setSelected(false);
-            }
+                  twpdelete.setSelected(false);
+            }            
             if (key.equals("comcut")) {
                if (line.matches("1"))
                   comcut.setSelected(true);
@@ -1398,6 +1412,7 @@ public class gui {
       metadata.setToolTipText(getToolTip("metadata"));
       decrypt.setToolTipText(getToolTip("decrypt"));
       qsfix.setToolTipText(getToolTip("qsfix"));
+      twpdelete.setToolTipText(getToolTip("twpdelete"));
       comskip.setToolTipText(getToolTip("comskip"));
       comcut.setToolTipText(getToolTip("comcut"));
       captions.setToolTipText(getToolTip("captions"));
@@ -1472,6 +1487,12 @@ public class gui {
          text += "Cleans up any potential glitches/errors in mpeg2 video files.<br>";
          text += "Highly recommended step if you have VideoRedo installed.<br>";
          text += "Very highly recommended step if you will be running encode.";
+      }
+      else if (component.equals("twpdelete")) {
+         text =  "<b>TWP Delete</b><br>";
+         text += "If you have TivoWebPlus configured on your TiVo(s) then if you enable this task<br>";
+         text += "a TivoWebPlus http call to delete show on TiVo will be issued following<br>";
+         text += "successful decrypt of a downloaded .TiVo file.";
       }
       else if (component.equals("comskip")) {
          text =  "<b>Ad Detect</b><br>";
@@ -1632,6 +1653,11 @@ public class gui {
    public int qsfix_setting() {
       int selected = 0;
       if (qsfix.isSelected()) selected = 1;
+      return selected;
+   }
+   public int twpdelete_setting() {
+      int selected = 0;
+      if (twpdelete.isSelected()) selected = 1;
       return selected;
    }
    public int comskip_setting() {

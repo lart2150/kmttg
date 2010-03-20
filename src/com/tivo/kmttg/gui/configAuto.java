@@ -69,6 +69,7 @@ public class configAuto {
    private static JCheckBox metadata = null;
    private static JCheckBox decrypt = null;
    private static JCheckBox qsfix = null;
+   private static JCheckBox twpdelete = null;
    private static JCheckBox comskip = null;
    private static JCheckBox comcut = null;
    private static JCheckBox captions = null;
@@ -195,15 +196,16 @@ public class configAuto {
       
       title = new JTextField();
             
-      enabled  = new JCheckBox("enabled", true);
-      metadata = new JCheckBox("metadata");
-      decrypt  = new JCheckBox("decrypt");
-      qsfix    = new JCheckBox("VRD QS fix");
-      comskip  = new JCheckBox("Ad Detect");
-      comcut   = new JCheckBox("Ad Cut");
-      captions = new JCheckBox("captions");
-      encode   = new JCheckBox("encode");
-      push     = new JCheckBox("push");
+      enabled   = new JCheckBox("enabled", true);
+      metadata  = new JCheckBox("metadata");
+      decrypt   = new JCheckBox("decrypt");
+      qsfix     = new JCheckBox("VRD QS fix");
+      twpdelete = new JCheckBox("TWP Delete");
+      comskip   = new JCheckBox("Ad Detect");
+      comcut    = new JCheckBox("Ad Cut");
+      captions  = new JCheckBox("captions");
+      encode    = new JCheckBox("encode");
+      push      = new JCheckBox("push");
       suggestionsFilter_single = new JCheckBox("Filter out TiVo Suggestions");
       useProgramId_unique = new JCheckBox("Treat each recording as unique");
       /* This intentionally disabled for now
@@ -345,6 +347,10 @@ public class configAuto {
       row4.add(decrypt);
       row4.add(Box.createRigidArea(space_5));
       row4.add(qsfix);
+      if (config.TivoWebPlusDelete == 1) {
+         row4.add(Box.createRigidArea(space_5));
+         row4.add(twpdelete);         
+      }
       row4.add(Box.createRigidArea(space_5));
       row4.add(comskip);
       row4.add(Box.createRigidArea(space_5));
@@ -530,6 +536,7 @@ public class configAuto {
       metadata.setToolTipText(config.gui.getToolTip("metadata"));
       decrypt.setToolTipText(config.gui.getToolTip("decrypt"));
       qsfix.setToolTipText(config.gui.getToolTip("qsfix"));
+      twpdelete.setToolTipText(config.gui.getToolTip("twpdelete"));
       comskip.setToolTipText(config.gui.getToolTip("comskip"));
       comcut.setToolTipText(config.gui.getToolTip("comcut"));
       captions.setToolTipText(config.gui.getToolTip("captions"));
@@ -767,6 +774,13 @@ public class configAuto {
          qsfix.setEnabled(false);
       } else {
          qsfix.setEnabled(true);
+      }
+      
+      if (config.TivoWebPlusDelete == 0) {
+         twpdelete.setSelected(false);
+         twpdelete.setEnabled(false);
+      } else {
+         twpdelete.setEnabled(true);
       }
 
       if (! file.isFile(config.comskip)) {
@@ -1132,6 +1146,7 @@ public class configAuto {
                ofp.write("metadata "            + entry.metadata            + "\n");               
                ofp.write("decrypt "             + entry.decrypt             + "\n");               
                ofp.write("qsfix "               + entry.qsfix               + "\n");               
+               ofp.write("twpdelete "           + entry.twpdelete           + "\n");               
                ofp.write("comskip "             + entry.comskip             + "\n");               
                ofp.write("comcut "              + entry.comcut              + "\n");               
                ofp.write("captions "            + entry.captions            + "\n");               
@@ -1175,6 +1190,7 @@ public class configAuto {
       metadata.setSelected((Boolean)(entry.metadata == 1));
       decrypt.setSelected((Boolean)(entry.decrypt == 1));
       qsfix.setSelected((Boolean)(entry.qsfix == 1));
+      twpdelete.setSelected((Boolean)(entry.twpdelete == 1));
       comskip.setSelected((Boolean)(entry.comskip == 1));
       comcut.setSelected((Boolean)(entry.comcut == 1));
       captions.setSelected((Boolean)(entry.captions == 1));
@@ -1228,6 +1244,11 @@ public class configAuto {
          entry.qsfix = 1;
       else
          entry.qsfix = 0;
+      
+      if (twpdelete.isSelected())
+         entry.twpdelete = 1;
+      else
+         entry.twpdelete = 0;
       
       if (comskip.isSelected())
          entry.comskip = 1;
