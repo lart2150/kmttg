@@ -215,6 +215,7 @@ public class file {
          String ip = m.group(1);
          final String id = m.group(2);
          final String urlString = "http://" + ip + ":" + port + "/confirm/del/" + id;
+         log.warn(">> Issuing TivoWebPlus show delete request: " + urlString);
          try {
             // Run the http request in separate thread so as not to hang up the main program
             final URL url = new URL(urlString);
@@ -222,8 +223,6 @@ public class file {
                AutoThread() {}       
                public void run () {
                   int timeout = 10;
-                  log.warn(">> Issuing TivoWebPlus show delete request...");
-                  log.print(url.toString());
                   try {
                      String data = "u2=bnowshowing";
                      data += "&sub=Delete";
@@ -251,12 +250,12 @@ public class file {
                      if (response.equals("OK")) {
                         log.print(">> TivoWebPlus delete succeeded.");
                      } else {
-                        log.error("Received unexpected response for: " + urlString);
+                        log.error("TWP Delete: Received unexpected response for: " + urlString);
                         log.error(response);
                      }
                   }
                   catch (Exception e) {
-                     log.error("Connection failed: " + urlString);
+                     log.error("TWP Delete: connection failed: " + urlString);
                      log.error(e.toString());
                   }
                }
@@ -266,7 +265,7 @@ public class file {
             thread.start();
          }
          catch (Exception e) {
-            log.error("Connection failed: " + urlString);
+            log.error("TWP Delete: connection failed: " + urlString);
             log.error(e.toString());
          }
       }
