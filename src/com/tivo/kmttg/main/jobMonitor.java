@@ -522,6 +522,7 @@ public class jobMonitor {
       Boolean metadataTivo = (Boolean)specs.get("metadataTivo");
       Boolean decrypt      = (Boolean)specs.get("decrypt");
       Boolean qsfix        = (Boolean)specs.get("qsfix");
+      Boolean twpdelete    = (Boolean)specs.get("twpdelete");
       Boolean comskip      = (Boolean)specs.get("comskip");
       Boolean comcut       = (Boolean)specs.get("comcut");
       Boolean captions     = (Boolean)specs.get("captions");
@@ -798,8 +799,10 @@ public class jobMonitor {
          job.name         = config.tivodecode;
          job.tivoFile     = tivoFile;
          job.mpegFile     = mpegFile;
-         if (entry != null && entry.containsKey("url"))
-            job.url          = entry.get("url"); // This added in case TivoWebPlus delete needed
+         if (twpdelete && entry != null && entry.containsKey("url")) {
+            job.twpdelete = true;
+            job.url       = entry.get("url");
+         }
          submitNewJob(job);
       }
       
@@ -813,8 +816,10 @@ public class jobMonitor {
          job.mpegFile_fix = mpegFile_fix;
          if (config.VrdDecrypt == 1) {
             job.tivoFile  = tivoFile;
-            if (entry != null && entry.containsKey("url"))
-               job.url       = entry.get("url"); // This added in case TivoWebPlus delete needed
+            if (twpdelete && entry != null && entry.containsKey("url")) {
+               job.twpdelete = true;
+               job.url       = entry.get("url");
+            }
          }
          submitNewJob(job);
       }
