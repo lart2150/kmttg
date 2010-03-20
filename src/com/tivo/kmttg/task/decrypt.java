@@ -165,7 +165,7 @@ public class decrypt {
             }
             
             // TivoWebPlus call to delete show on TiVo if configured
-            if (config.TivoWebPlusDelete == 1) {
+            if (job.twpdelete) {
                file.TivoWebPlusDelete(job.url);
             }
          }
