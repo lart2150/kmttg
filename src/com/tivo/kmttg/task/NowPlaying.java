@@ -241,7 +241,10 @@ public class NowPlaying  {
                   if (h.containsKey("episodeTitle")) {
                      h.put("title", h.get("title") + " - " + h.get("episodeTitle"));
                   }
-                  h.put("tivoName", job.tivoName);
+                  h.put("tivoName", job.tivoName);                  
+                  // If ProgramId doesn't exist then grab id from url instead
+                  // Also add ProgramId_unique
+                  checkProgramId(h);                  
                   ENTRIES.add(h);
                }
                h = new Hashtable<String,String>();
@@ -440,10 +443,6 @@ public class NowPlaying  {
                if (flag)
                   h.put("ExpirationImage", "copy-protected");
             }
-            
-            // If ProgramId doesn't exist then grab id from url instead
-            // Also add ProgramId_unique
-            checkProgramId(h);
          }
          // Add last entry
          if ( ! h.isEmpty() ) {
