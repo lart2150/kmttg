@@ -370,20 +370,25 @@ public class encodeConfig {
          }
          
          // Parse stdout
-         Pattern p = Pattern.compile("^.+<Name>(.+)</Name>.+<FileType>(.+)</FileType>.+$");
+         Pattern pname = Pattern.compile("^.*<Name>(.+)</Name>.*$");
+         Pattern ptype = Pattern.compile("^.*<FileType>(.+)</FileType>.*$");
          l = process.getStdout();
          if (l.size() > 0) {
             String line, Name="", FileType="", extension;
             for (int i=0; i<l.size(); ++i) {
                extension = "";
                line = l.get(i);
+               //System.out.println("line=" + line);
                // Get rid of leading and trailing white space
                line = line.replaceFirst("^\\s*(.*$)", "$1");
                line = line.replaceFirst("^(.*)\\s*$", "$1");
-               Matcher m = p.matcher(line);
-               if (m.matches()) {
-                  Name = m.group(1);
-                  FileType = m.group(2);
+               Matcher mname = pname.matcher(line);
+               Matcher mtype = ptype.matcher(line);
+               if (mname.matches()) {
+                  Name = mname.group(1);
+               }
+               if (mtype.matches() && Name.length() > 0) {
+                  FileType = mtype.group(1);
                   extension = FileType.toLowerCase();
                   if (FileType.startsWith("DVRMS")) {
                      extension = "dvr-ms";
@@ -420,6 +425,7 @@ public class encodeConfig {
                      h.put("extension", extension);
                      hlist.put(Name, h);
                   }
+                  Name = "";
                }                                      
             }
             file.delete(vrdscript);
