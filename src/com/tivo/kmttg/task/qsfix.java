@@ -63,6 +63,11 @@ public class qsfix {
             log.warn("VideoRedo video dimensions filter is enabled");
             Hashtable<String,String> dimensions = ffmpegGetVideoDimensions(sourceFile);
             if (dimensions == null) {
+               log.warn("ffmpeg on source file didn't work - trying to get dimensions from 2 sec clip");
+               String destFile = file.makeTempFile("mpegFile", ".mpg");
+               dimensions = getDimensionsFromShortClip(sourceFile, destFile);
+            }
+            if (dimensions == null) {
                log.error("VRD QS Filter enabled but unable to determine video dimensions of file: " + sourceFile);
                schedule = false;
             } else {    
@@ -355,6 +360,106 @@ public class qsfix {
          ofp.write("" + eol);
          ofp.write("' Exit with status 0" + eol);
          ofp.write("wscript.echo( \"   Output complete to: \" + destFile )" + eol);
+         ofp.write("wscript.quit 0" + eol);
+         ofp.close();
+      }
+      catch (Exception ex) {
+         log.error(ex.toString());
+         return null;
+      }
+
+      return script;
+   }
+   
+   // This procedure uses VRD to create a short 2 sec mpeg2 clip and then calls
+   // ffmpegGetVideoDimensions on that clip to try and obtain video dimensions
+   // This is a fallback call in case getting dimensions directly from source file fails.
+   private Hashtable<String,String> getDimensionsFromShortClip(String sourceFile, String destFile) { 
+      String script = createShortClipScript();
+      if (script == null) {
+         return null;
+      }
+      
+      // Run VRD with above script      
+      Stack<String> command = new Stack<String>();
+      command.add(cscript);
+      command.add("//nologo");
+      command.add(script);
+      command.add(sourceFile);
+      command.add(destFile);
+      backgroundProcess process = new backgroundProcess();
+      if ( process.run(command) ) {
+         // Wait for command to terminate
+         process.Wait();
+         if (process.exitStatus() != 0) {
+            log.error("VideoRedo run failed");
+            log.error(process.getStderr());
+            return null;
+         }
+      } 
+      Hashtable<String,String> dimensions = ffmpegGetVideoDimensions(destFile);
+      file.delete(destFile);
+      return(dimensions);
+   }
+   
+   // Create custom cscript VRD file to create a 2 sec mpg file
+   private String createShortClipScript() {
+      // NOTE: In GUI mode we are able to run concurrent VRD COM jobs
+      String script = file.makeTempFile("VRD", ".vbs");
+      String eol = "\r";
+      try {
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(script));
+         ofp.write("set Args = wscript.Arguments" + eol);
+         ofp.write("if Args.Count < 2 then" + eol);
+         ofp.write("   wscript.stderr.writeline( \"? Invalid number of arguments\")" + eol);
+         ofp.write("   wscript.quit 1" + eol);
+         ofp.write("end if" + eol);
+         ofp.write("" + eol);
+         ofp.write("sourceFile = args(0)" + eol);
+         ofp.write("destFile   = args(1)" + eol);
+         ofp.write("" + eol);
+         ofp.write("'Create VideoReDo object and open the source project / file." + eol);
+         if (config.VrdAllowMultiple == 1) {
+            ofp.write("Set VideoReDo = wscript.CreateObject( \"VideoReDo.Application\" )" + eol);
+            ofp.write("VideoReDo.SetQuietMode(true)" + eol);            
+         } else {
+            ofp.write("Set VideoReDoSilent = wscript.CreateObject( \"VideoReDo.VideoReDoSilent\" )" + eol);
+            ofp.write("set VideoReDo = VideoReDoSilent.VRDInterface" + eol);
+         }
+         ofp.write("" + eol);
+         ofp.write("'Hard code no audio alert" + eol);
+         ofp.write("VideoReDo.AudioAlert = false" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Open source file" + eol);
+         ofp.write("openFlag = VideoReDo.FileOpen( sourceFile )" + eol);
+         ofp.write("" + eol);
+         ofp.write("if openFlag = false then" + eol);
+         ofp.write("   wscript.stderr.writeline( \"? Unable to open file: \" + sourceFile )" + eol);
+         ofp.write("   wscript.quit 2" + eol);
+         ofp.write("end if" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Open output file and start processing." + eol);
+         ofp.write("VideoReDo.SetCutMode(false)" + eol);
+         ofp.write("if NOT VideoReDo.SelectScene(0, 2000) then" + eol);
+         ofp.write("   wscript.stderr.writeline(\"Failed to select scene\")" + eol);
+         ofp.write("   wscript.quit 3" + eol);
+         ofp.write("end if" + eol);
+         ofp.write("VideoReDo.AddToJoiner()" + eol);
+         ofp.write("' Save selection to mpeg2 program stream." + eol);
+         ofp.write("outputFlag = VideoReDo.SaveJoinerAsEx( destFile, 1 )" + eol);
+         ofp.write("" + eol);
+         ofp.write("if outputFlag = false then" + eol);
+         ofp.write("   wscript.stderr.writeline(\"? Problem opening output file: \" + destFile )" + eol);
+         ofp.write("   wscript.quit 4" + eol);
+         ofp.write("end if" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Wait until output done" + eol);
+         ofp.write("while( VideoRedo.IsOutputInProgress() )" + eol);
+         ofp.write("   wscript.sleep 1000" + eol);
+         ofp.write("wend" + eol);
+         ofp.write("" + eol);
+         ofp.write("' Close VRD" + eol);
+         ofp.write("VideoReDo.Close()" + eol);
          ofp.write("wscript.quit 0" + eol);
          ofp.close();
       }
