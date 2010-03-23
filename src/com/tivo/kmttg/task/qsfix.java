@@ -394,10 +394,12 @@ public class qsfix {
          if (process.exitStatus() != 0) {
             log.error("VideoRedo run failed");
             log.error(process.getStderr());
+            file.delete(script);
             return null;
          }
       } 
       Hashtable<String,String> dimensions = ffmpegGetVideoDimensions(destFile);
+      file.delete(script);
       file.delete(destFile);
       return(dimensions);
    }
