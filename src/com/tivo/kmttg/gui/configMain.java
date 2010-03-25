@@ -2378,10 +2378,10 @@ public class configMain {
       else if (component.equals("TSDownload")) {
          text =  "<b>Download TiVo files in Transport Stream format</b><br>";
          text += "For TiVo software that properly supports it, this forces TiVo file downloads to use<br>";
-         text += "Transport Stream format instead of the default Program Stream format by adding<br>";
+         text += "the faster Transport Stream format instead of the default Program Stream format by adding<br>";
          text += "<b>&Format=video/x-tivo-mpeg-ts</b> tag to the download URL.<br>";
-         text += "NOTE: Currently only Australia/New Zealand TiVos support this format and this will<br>";
-         text += "have no effect on other TiVos";
+         text += "NOTE: Currently only Premiere, Australia, and New Zealand TiVos support this format and this will<br>";
+         text += "have no effect on other TiVos.";
       }
       else if (component.equals("TivoWebPlusDelete")) {
          text =  "<b>Enable TivoWebPlus Delete task</b><br>";
