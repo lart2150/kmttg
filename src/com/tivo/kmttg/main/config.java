@@ -62,7 +62,7 @@ public class config {
    public static int VrdQsFilter = 0;
    public static int VrdDecrypt = 0;
    public static int VrdAllowMultiple = 0; // Allow multiple VRD instances at once
-   public static int TSDownload = 0;
+   public static int TSDownload = 1;
    public static int OverwriteFiles = 0;
    public static int HideProtectedFiles = 0;
    public static String comskipIni = "";
