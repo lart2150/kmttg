@@ -119,6 +119,9 @@ public class config {
    // t2extract related
    public static String t2extract_args = "";
    
+   // mencoder related (for Ad Cut task)
+   public static String mencoder_args = "";
+   
    // metadata related
    public static String metadata_files = "last";
    
@@ -590,6 +593,9 @@ public class config {
             if (key.equals("mencoder")) {
                mencoder = line;
             }
+            if (key.equals("mencoder_args")) {
+               mencoder_args = line;
+            }
             if (key.equals("handbrake")) {
                handbrake = line;
             }
@@ -766,6 +772,8 @@ public class config {
          ofp.write("<ffmpeg>\n" + ffmpeg + "\n\n");
          
          ofp.write("<mencoder>\n" + mencoder + "\n\n");
+         
+         ofp.write("<mencoder_args>\n" + mencoder_args + "\n\n");
          
          ofp.write("<handbrake>\n" + handbrake + "\n\n");
          
