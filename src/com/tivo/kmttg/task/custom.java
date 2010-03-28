@@ -52,10 +52,20 @@ public class custom {
    // Return false if starting command fails, true otherwise
    private Boolean start() {
       debug.print("");
+      String mpegFile_cut = "";
       if (job.tivoFile == null) job.tivoFile = "";
       if (job.metaFile == null) job.metaFile = "";
       if (job.mpegFile == null) job.mpegFile = "";
-      if (job.mpegFile_cut == null) job.mpegFile_cut = "";
+      if (job.mpegFile_cut != null) {
+         mpegFile_cut = job.mpegFile_cut;
+         if (! file.isFile(mpegFile_cut)) {
+            // Look for VRD default edit file output
+            String tryit = mpegFile_cut.replaceFirst("_cut.mpg", ".mpg");
+            tryit = string.replaceSuffix(tryit, " (02).mpg");
+            if (file.isFile(tryit))
+               mpegFile_cut = tryit;
+         }
+      }
       if (job.srtFile == null) job.srtFile = "";
       if (job.encodeFile == null) job.encodeFile = "";
       
@@ -70,7 +80,7 @@ public class custom {
          string = string.replaceAll("\\[tivoFile\\]", escapeBackSlashes(job.tivoFile));
          string = string.replaceAll("\\[metaFile\\]", escapeBackSlashes(job.metaFile));
          string = string.replaceAll("\\[mpegFile\\]", escapeBackSlashes(job.mpegFile));
-         string = string.replaceAll("\\[mpegFile_cut\\]", escapeBackSlashes(job.mpegFile_cut));
+         string = string.replaceAll("\\[mpegFile_cut\\]", escapeBackSlashes(mpegFile_cut));
          string = string.replaceAll("\\[srtFile\\]", escapeBackSlashes(job.srtFile));
          string = string.replaceAll("\\[encodeFile\\]", escapeBackSlashes(job.encodeFile));
          command.add(string);
