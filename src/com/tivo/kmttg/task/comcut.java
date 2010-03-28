@@ -88,9 +88,14 @@ public class comcut {
       command.add("mpeg");
       command.add("-vf");
       command.add("harddup");
-      command.add("-noskip");
-      command.add("-mpegopts");
-      command.add("vbuf_size=400");
+      if (config.mencoder_args.length() > 0) {
+         String[] args = config.mencoder_args.split("\\s+");
+         for (int i=0; i<args.length; i++)
+            command.add(args[i]);
+      }
+      //command.add("-noskip");
+      //command.add("-mpegopts");
+      //command.add("vbuf_size=400");
       command.add("-o");
       command.add(job.mpegFile_cut);
       process = new backgroundProcess();
