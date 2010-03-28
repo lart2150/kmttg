@@ -84,6 +84,7 @@ public class configMain {
    private static JTextField VRD_path = null;
    private static JTextField t2extract = null;
    private static JTextField t2extract_args = null;
+   private static JTextField mencoder_args = null;
    private static JTextField ccextractor = null;
    private static JTextField AtomicParsley = null;
    private static JTextField disk_space = null;
@@ -419,6 +420,9 @@ public class configMain {
             
       // mencoder
       mencoder.setText(config.mencoder);
+      
+      // mencoder_args
+      mencoder_args.setText(config.mencoder_args);
 
       // handbrake
       handbrake.setText(config.handbrake);
@@ -805,6 +809,14 @@ public class configMain {
       }
       config.mencoder = value;
       
+      // mencoder_args
+      value = string.removeLeadingTrailingSpaces(mencoder_args.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = "";
+      }
+      config.mencoder_args = value;
+      
       // handbrake
       value = string.removeLeadingTrailingSpaces(handbrake.getText());
       if (value.length() == 0) {
@@ -1083,6 +1095,7 @@ public class configMain {
       curl = new javax.swing.JTextField(30);
       ffmpeg = new javax.swing.JTextField(30);
       mencoder = new javax.swing.JTextField(30);
+      mencoder_args = new javax.swing.JTextField(30);
       handbrake = new javax.swing.JTextField(30);
       comskip = new javax.swing.JTextField(30);
       comskip_ini = new javax.swing.JTextField(30);
@@ -1142,6 +1155,7 @@ public class configMain {
       JLabel curl_label = new javax.swing.JLabel();
       JLabel ffmpeg_label = new javax.swing.JLabel();
       JLabel mencoder_label = new javax.swing.JLabel();
+      JLabel mencoder_args_label = new javax.swing.JLabel();
       JLabel handbrake_label = new javax.swing.JLabel();
       JLabel comskip_label = new javax.swing.JLabel();
       JLabel comskip_ini_label = new javax.swing.JLabel();
@@ -1227,6 +1241,7 @@ public class configMain {
       curl_label.setText("curl"); 
       ffmpeg_label.setText("ffmpeg"); 
       mencoder_label.setText("mencoder"); 
+      mencoder_args_label.setText("mencoder Ad Cut extra args");
       handbrake_label.setText("handbrake"); 
       comskip_label.setText("comskip"); 
       comskip_ini_label.setText("comskip.ini"); 
@@ -1933,6 +1948,16 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(t2extract_args, c);
       
+      // mencoder_args
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(mencoder_args_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(mencoder_args, c);
+      
       // download_tries
       gy++;
       c.gridx = 0;
@@ -1963,17 +1988,16 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(metadata_files, c);
       
-      // TSDownload
+      // TivoWebPlusDelete
       gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(TivoWebPlusDelete, c);
+      
+      // TSDownload
       c.gridx = 1;
       c.gridy = gy;
       program_options_panel.add(TSDownload, c);
-      
-      // TivoWebPlusDelete
-      gy++;
-      c.gridx = 1;
-      c.gridy = gy;
-      program_options_panel.add(TivoWebPlusDelete, c);
       
       // Visual Panel
       JPanel visual_panel = new JPanel(new GridBagLayout());       
@@ -2220,6 +2244,7 @@ public class configMain {
       curl.setToolTipText(getToolTip("curl"));
       ffmpeg.setToolTipText(getToolTip("ffmpeg"));
       mencoder.setToolTipText(getToolTip("mencoder"));
+      mencoder_args.setToolTipText(getToolTip("mencoder_args"));
       handbrake.setToolTipText(getToolTip("handbrake"));
       comskip.setToolTipText(getToolTip("comskip"));
       comskip_ini.setToolTipText(getToolTip("comskip_ini"));
@@ -2486,6 +2511,15 @@ public class configMain {
          text += "NOTE: This program can also be used in a custom defined encoding<br>";
          text += "profile if you wish as the encoding program.<br>";
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
+      }
+      else if (component.equals("mencoder_args")) {
+         text =  "<b>mencoder Ad Cut extra args</b><br>";
+         text += "Any extra arguments you want kmttg to use when running <b>mencoder</b> for the<br>";
+         text += "<b>Ad Cut</b> task. NOTE: If you have VideoRedo configured then VideoRedo is used<br>";
+         text += "for Ad Cut so this setting will not be relevant. The default mencoder arguments for the<br>";
+         text += "Ad Cut task are as follows:<br>";
+         text += "<b>mencoder videoFile -edl edlFile -oac copy -ovc copy -of mpeg -vf harddup -o mpegFile_cut</b><br>";
+         text += "Extra arguments you supply are added following the <b>-vf harddup</b> option.";
       }
       else if (component.equals("handbrake")) {
          text =  "<b>handbrake</b><br>";
