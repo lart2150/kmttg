@@ -1159,6 +1159,7 @@ public class gui {
       if (config.gui_settings != null) {
          try {
             Dimension d = getJFrame().getSize();
+            Point p = getJFrame().getLocation();
             int centerDivider = jContentPane.getDividerLocation();
             int bottomDivider = splitBottom.getDividerLocation();
             String tabName = tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
@@ -1180,12 +1181,15 @@ public class gui {
             ofp.write("<jobMonitorFullPaths>\n" + config.jobMonitorFullPaths + "\n");
             ofp.write("<width>\n"               + d.width                    + "\n");
             ofp.write("<height>\n"              + d.height                   + "\n");
+            ofp.write("<x>\n"                   + p.x                        + "\n");
+            ofp.write("<y>\n"                   + p.y                        + "\n");
             ofp.write("<centerDivider>\n"       + centerDivider              + "\n");
             ofp.write("<bottomDivider>\n"       + bottomDivider              + "\n");
             ofp.write("<tab>\n"                 + tabName                    + "\n");
             
             ofp.write("<columnOrder>\n");
             String name, colName;
+            // NPL & Files tables
             for (Enumeration<String> e=tivoTabs.keys(); e.hasMoreElements();) {
                name = e.nextElement();
                String order[] = tivoTabs.get(name).getColumnOrder();
@@ -1199,7 +1203,13 @@ public class gui {
                }
                ofp.write("\n");
             }
-            ofp.write("\n");
+            // Job table
+            String order[] = jobTab.getColumnOrder();
+            ofp.write("JOBS=" + order[0]);
+            for (int j=1; j<order.length; ++j) {
+               ofp.write("," + order[j]);
+            }
+            ofp.write("\n\n");
             
             ofp.write("<columnWidths>\n");
             for (Enumeration<String> e=tivoTabs.keys(); e.hasMoreElements();) {
@@ -1240,6 +1250,8 @@ public class gui {
       try {
          int width = -1;
          int height = -1;
+         int x = -1;
+         int y = -1;
          int centerDivider = -1, bottomDivider = -1;
          BufferedReader ifp = new BufferedReader(new FileReader(config.gui_settings));
          String line = null;
@@ -1346,6 +1358,20 @@ public class gui {
                   height = -1;
                }
             }
+            if (key.equals("x")) {
+               try {
+                  x = Integer.parseInt(line);
+               } catch (NumberFormatException e) {
+                  x = -1;
+               }
+            }
+            if (key.equals("y")) {
+               try {
+                  y = Integer.parseInt(line);
+               } catch (NumberFormatException e) {
+                  y = -1;
+               }
+            }
             if (key.equals("centerDivider")) {
                try {
                   centerDivider = Integer.parseInt(line);
@@ -1368,6 +1394,9 @@ public class gui {
                String[] order = l[1].split(",");
                if (tivoTabs.containsKey(l[0])) {
                   tivoTabs.get(l[0]).setColumnOrder(order);
+               }
+               if (l[0].equals("JOBS")) {
+                  jobTab.setColumnOrder(order);
                }
             }
             if (key.equals("columnWidths")) {
@@ -1394,6 +1423,10 @@ public class gui {
          
          if (width != -1 && height != -1) {
             getJFrame().setSize(new Dimension(width,height));
+         }
+         
+         if (x != -1 && y != -1) {
+            getJFrame().setLocation(new Point(x,y));
          }
          
          if (centerDivider != -1)
