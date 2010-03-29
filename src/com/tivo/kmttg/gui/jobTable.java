@@ -12,6 +12,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXTable;
@@ -306,5 +307,40 @@ public class jobTable {
            }
         }
     }
-
+    
+    // Return current column name order as a string array
+    public String[] getColumnOrder() {
+       int size = JobMonitor.getColumnCount();
+       String[] order = new String[size];
+       for (int i=0; i<size; ++i) {
+          order[i] = JobMonitor.getColumnName(i);
+       }
+       return order;
+    }
+    
+    // Change table column order according to given string array order
+    public void setColumnOrder(String[] order) {
+       debug.print("order=" + order);
+       
+       // Don't do anything if column counts don't match up
+       if (JobMonitor.getColumnCount() != order.length) return;
+       
+       // Re-order to desired positions
+       String colName;
+       int index;
+       for (int i=0; i<order.length; ++i) {
+          colName = order[i];
+          if (colName.equals("ICON")) colName = "";
+          index = getColumnIndex(colName);
+          if ( index != -1)
+             moveColumn(index, i);
+       }
+    }
+    
+    // Move a table column from -> to
+    public void moveColumn(int from, int to) {
+       debug.print("from=" + from + " to=" + to);
+       TableColumnModel tableColumnModel = JobMonitor.getTableHeader().getColumnModel();
+       tableColumnModel.moveColumn(from, to);
+    }
 }
