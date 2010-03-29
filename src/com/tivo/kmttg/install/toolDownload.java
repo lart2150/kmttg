@@ -15,8 +15,8 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class toolDownload {
-   String windows_file = "http://kmttg.googlecode.com/files/kmttg_win32_tools_v0p7h.zip";
-   String mac_file = "http://kmttg.googlecode.com/files/kmttg_MacOSX_tools_v0p7h.zip";
+   String windows_file = "http://kmttg.googlecode.com/files/kmttg_win32_tools_v0p7j.zip";
+   String mac_file = "http://kmttg.googlecode.com/files/kmttg_MacOSX_tools_v0p7j.zip";
    String localFileName = null;
    
    public String download(String dir, String os) {
