@@ -307,18 +307,19 @@ public class metadata {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(job.metaFile));
          
          String key;
+         String eol = "\r\n";
          for (int i=0; i<nameValues.length; ++i) {
             key = nameValues[i];
             if (data.containsKey(key)) {
                if (data.get(key).toString().length() > 0)
-                  ofp.write(key + " : " + data.get(key) + "\n");
+                  ofp.write(key + " : " + data.get(key) + eol);
             }
          }
          for (int i=0; i<valuesOnly.length; ++i) {
             key = valuesOnly[i];
             if (data.containsKey(key)) {
                if (data.get(key).toString().length() > 0)
-                  ofp.write(key + " : " + data.get(key) + "\n");
+                  ofp.write(key + " : " + data.get(key) + eol);
             }
          }
          String[] additional = {"episodeNumber", "displayMajorNumber", "callsign", "seriesId"};
@@ -326,7 +327,7 @@ public class metadata {
             key = additional[i];
             if (data.containsKey(key)) {
                if (data.get(key).toString().length() > 0)
-                  ofp.write(key + " : " + data.get(key) + "\n");
+                  ofp.write(key + " : " + data.get(key) + eol);
             }
          }
          for (int i=0; i<arrays.length; i++) {
@@ -334,7 +335,7 @@ public class metadata {
             if (data.containsKey(key)) {
                Stack<String> values = (Stack<String>)data.get(key);
                for (int j=0; j<values.size(); ++j) {
-                  ofp.write(key + " : " + values.get(j) + "\n");
+                  ofp.write(key + " : " + values.get(j) + eol);
                }
             }
          }
