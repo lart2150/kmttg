@@ -44,6 +44,7 @@ public class gui {
    private JMenuItem exitMenuItem = null;
    private JMenuItem autoConfigMenuItem = null;
    private JMenuItem runInGuiMenuItem = null;
+   private JCheckBoxMenuItem loopInGuiMenuItem = null;
    private JMenuItem addSelectedTitlesMenuItem = null;
    private JMenuItem addSelectedHistoryMenuItem = null;
    private JMenuItem logFileMenuItem = null;
@@ -437,7 +438,6 @@ public class gui {
          autoMenu = new JMenu();
          autoMenu.setText("Auto Transfers");
          autoMenu.add(getAutoConfigMenuItem());
-         autoMenu.add(getRunInGuiMenuItem());
          if (config.OS.equals("windows"))
             autoMenu.add(getServiceMenu());
          else
@@ -445,6 +445,8 @@ public class gui {
          autoMenu.add(getAddSelectedTitlesMenuItem());
          autoMenu.add(getAddSelectedHistoryMenuItem());
          autoMenu.add(getLogFileMenuItem());
+         autoMenu.add(getRunInGuiMenuItem());
+         autoMenu.add(getLoopInGuiMenuItem());
       }
       return autoMenu;
    }
@@ -585,6 +587,29 @@ public class gui {
       }
       return runInGuiMenuItem;
    }
+   
+   private JMenuItem getLoopInGuiMenuItem() {
+      debug.print("");
+      if (loopInGuiMenuItem == null) {
+         loopInGuiMenuItem = new JCheckBoxMenuItem();
+         loopInGuiMenuItem.setText("Loop in GUI");
+         loopInGuiMenuItem.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+               config.GUI_AUTO = -1;
+               AbstractButton button = (AbstractButton) e.getItem();
+               if (button.isSelected()) {
+                  log.warn("\nAuto Transfers Loop in GUI enabled");
+                  config.GUI_LOOP = 1;
+               } else {
+                  log.warn("\nAuto Transfers Loop in GUI disabled");
+                  config.GUI_LOOP = 0;
+               }
+            }
+         });
+      }
+      return loopInGuiMenuItem;
+   }
+   
    private JMenuItem getAddSelectedTitlesMenuItem() {
       debug.print("");
       if (addSelectedTitlesMenuItem == null) {
@@ -939,7 +964,7 @@ public class gui {
    
    // Callback for "Run in GUI" Auto Transfers menu entry
    // This is equivalent to a batch mode run but is performed in GUI
-   private void autoRunInGUICB() {
+   public void autoRunInGUICB() {
       debug.print("");
       config.GUI_AUTO = 0;
       if ( ! autoConfig.parseAuto(config.autoIni) ) {
@@ -960,7 +985,7 @@ public class gui {
          }
       }
    }
-
+   
    // Encoding cyclic change callback
    // Set the description according to selected item
    private void encodingCB(JComboBox combo) {
