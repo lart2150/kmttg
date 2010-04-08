@@ -21,6 +21,10 @@ public class jobMonitor {
    public static int JOB = 0;
    public static int FAMILY_ID = 0;
    
+   // These used for Auto Transfers->Loop in GUI mode
+   private static Hashtable<String,Long> launch = new Hashtable<String,Long>();
+   private static Long launchTime;
+   
    // Master job monitor that runs on timer. Key functions:
    //   * Check status of active job and take action if running job is completed
    //   * Launch a job in queue if appropriate
@@ -35,6 +39,11 @@ public class jobMonitor {
       if (config.GUI && gui == null && timer != null) {
          timer.stop();
          return;
+      }
+      
+      // Handle auto transfers GUI run if "Loop in GUI" menu item enabled
+      if (config.GUI && config.GUI_LOOP == 1) {
+         handleLoopInGUI();
       }
       
       // Check for new tivos
@@ -1179,6 +1188,48 @@ public class jobMonitor {
          
          // Update NPL lists according to above hash
          config.gui.updateNPLjobStatus(map);
+      }
+   }
+   
+   private static void handleLoopInGUI() {
+      // Clear out launch hash if menu item was just toggled
+      if (config.GUI_AUTO == -1) {
+         launch.clear();
+         config.GUI_AUTO = 0;
+      }
+      
+      // Launch jobs for Tivos or update launch times appropriately
+      Long now = new Date().getTime();
+      for (int i=0; i < config.getTivoNames().size(); i++) {
+         String tivoName = config.getTivoNames().get(i);
+         if (launch.get(tivoName) == null) {
+            launch.put(tivoName, now - 1);
+         }
+         launchTime = launch.get(tivoName);
+         
+         // Launch new jobs for this Tivo if ready
+         if (launchTime != -1 && now > launchTime) {
+            log.print("\n>> Running auto transfers for TiVo: " + tivoName);
+            // Parse auto.ini each time before launch in case it gets updated
+            if ( ! autoConfig.parseAuto(config.autoIni) ) {
+               log.error("Auto Transfers config has errors or is not setup");
+               return;
+            }
+            if ( auto.getTitleEntries().isEmpty() && auto.getKeywordsEntries().isEmpty() ) {
+               log.error("No keywords defined in " + config.autoIni + "... aborting");
+               return;
+            }
+            // Launch jobs for this tivo
+            config.GUI_AUTO++;
+            NowPlaying.submitJob(tivoName);
+            launch.put(tivoName, (long)-1);
+         }
+         
+         if ( ! jobsRemain(tivoName) && launchTime == -1 ) {
+            // Setup to launch new jobs after user configured sleep time
+            launch.put(tivoName, now + autoConfig.CHECK_TIVOS_INTERVAL*60*1000);
+            log.print("\n'" + tivoName + "' AUTO TRANSFERS PROCESSING SLEEPING " + autoConfig.CHECK_TIVOS_INTERVAL + " mins ...");
+         }
       }
    }
 }
