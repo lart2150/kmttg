@@ -75,6 +75,7 @@ public class config {
 
    // batch/auto related
    public static int GUI_AUTO = 0;              // Auto mode in GUI
+   public static int GUI_LOOP = 0;              // Loop mode in GUI
    public static Boolean LOOP = false;          // true=>auto loop
    public static String autoIni = "";
    public static String autoLog = "";
