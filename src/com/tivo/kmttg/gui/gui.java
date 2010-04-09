@@ -1316,6 +1316,12 @@ public class gui {
                else
                   twpdelete.setSelected(false);
             }            
+            if (key.equals("comskip")) {
+               if (line.matches("1"))
+                  comskip.setSelected(true);
+               else
+                  comskip.setSelected(false);
+            }
             if (key.equals("comcut")) {
                if (line.matches("1"))
                   comcut.setSelected(true);
