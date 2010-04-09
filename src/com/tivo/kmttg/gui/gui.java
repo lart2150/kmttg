@@ -595,12 +595,36 @@ public class gui {
          loopInGuiMenuItem.setText("Loop in GUI");
          loopInGuiMenuItem.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
+               // This triggers jobMonitor to clear launch hash
                config.GUI_AUTO = -1;
+               
+               // Check menu button setting & act accordingly
                AbstractButton button = (AbstractButton) e.getItem();
-               if (button.isSelected()) {
+               if (button.isSelected()) {                  
+                  if (config.OS.equals("windows")) {
+                     // Query to stop windows service if it's running
+                     String query = auto.serviceStatus();
+                     if (query != null && query.matches("^.+RUNNING$")) {                  
+                        int response = JOptionPane.showConfirmDialog(
+                           config.gui.getJFrame(),
+                           "kmttg service is currently running. Stop the service?",
+                           "Confirm",
+                           JOptionPane.YES_NO_OPTION,
+                           JOptionPane.QUESTION_MESSAGE
+                        );
+                        if (response == JOptionPane.YES_OPTION) {
+                           if (auto.serviceStop()) {
+                              log.warn("kmttg service stopped");
+                           }
+                        }
+                     }
+                  }
+
+                  // Start Loop in GUI mode
                   log.warn("\nAuto Transfers Loop in GUI enabled");
                   config.GUI_LOOP = 1;
                } else {
+                  // Stop Loop in GUI mode
                   log.warn("\nAuto Transfers Loop in GUI disabled");
                   config.GUI_LOOP = 0;
                }
