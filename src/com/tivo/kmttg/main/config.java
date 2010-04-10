@@ -504,10 +504,11 @@ public class config {
             if (key.equals("TIVOS")) {
                String name, value;
                String l[] = line.split("\\s+");
-               if (l[0].matches("^.*FILES")) {
+               if (l[0].equals("FILES")) {
                   name = l[0];
                   value = line;
-                  value = value.replaceFirst("^(.+)\\s+(.+)$", "$2");
+                  value = value.replaceFirst("^\\s*FILES\\s+(.+)$", "$1");
+                  value = string.removeLeadingTrailingSpaces(value);
                   name = name.replaceFirst("^\\*", "");
                } else {
                   value = l[l.length-1];
@@ -688,7 +689,7 @@ public class config {
          if ( ! TIVOS.containsKey("FILES") ) {
             TIVOS.put("FILES", outputDir);
          }
-         if ( ! file.isFile(TIVOS.get("FILES")) ) {
+         if ( ! file.isDir(TIVOS.get("FILES")) ) {
             TIVOS.put("FILES", outputDir);
          }
          
