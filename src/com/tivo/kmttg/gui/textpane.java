@@ -5,12 +5,14 @@ import java.util.Stack;
 
 import javax.swing.JTextPane;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
 public class textpane {
    private JTextPane p;
+   private int BUFFER_SIZE = 10000000; // Limit text pane buffer size to 10MB
    
    textpane(JTextPane p) {
       this.p = p;
@@ -51,12 +53,29 @@ public class textpane {
       AttributeSet aset = sc.addAttribute(
          SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c
       );
+      
+      // Limit total text pane buffer size
+      limitBuffer(s.length());
 
       int len = p.getDocument().getLength();
       p.setCaretPosition(len);
       p.setCharacterAttributes(aset, false);
       p.replaceSelection(s);
       p.setEditable(false);
+   }
+   
+   // Limit text pane buffer size by truncating total data size to
+   // BUFFER_SIZE or less if needed
+   private void limitBuffer(int incomingDataSize) {
+      Document doc = p.getStyledDocument();
+      int overLength = doc.getLength() + incomingDataSize - BUFFER_SIZE;
+      if (overLength > 0 && doc.getLength() >= overLength) {
+         try {
+            doc.remove(0, overLength);
+         } catch (Exception e) {
+            e.printStackTrace();
+         }
+      }
    }
    
 }
