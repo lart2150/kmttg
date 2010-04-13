@@ -17,9 +17,9 @@ import com.tivo.kmttg.task.*;
 public class jobMonitor {
    public static Stack<jobData> JOBS = new Stack<jobData>();
    //private static Stack<jobData> JOB_HISTORY = new Stack<jobData>();
-   public static int JOB_COUNT = 0;
-   public static int JOB = 0;
-   public static int FAMILY_ID = 0;
+   private static int JOB_COUNT = 0;
+   private static int JOB = 0;
+   private static int FAMILY_ID = 0;
    
    // These used for Auto Transfers->Loop in GUI mode
    private static Hashtable<String,Long> launch = new Hashtable<String,Long>();
