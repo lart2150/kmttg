@@ -12,7 +12,7 @@ import javax.swing.text.StyleContext;
 
 public class textpane {
    private JTextPane p;
-   private int BUFFER_SIZE = 10000000; // Limit text pane buffer size to 10MB
+   private int BUFFER_SIZE = 250000; // Limit text pane buffer size to ~10MB RAM
    
    textpane(JTextPane p) {
       this.p = p;
