@@ -1019,8 +1019,8 @@ public class gui {
          }
 
          // Start Loop in GUI mode
-         log.warn("\nAuto Transfers Loop in GUI enabled");
          config.GUI_LOOP = 1;
+         log.warn("\nAuto Transfers Loop in GUI enabled");
       } else {
          // Stop Loop in GUI mode
          log.warn("\nAuto Transfers Loop in GUI disabled");
