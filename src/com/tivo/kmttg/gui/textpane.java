@@ -48,32 +48,36 @@ public class textpane {
    }
    
    public void appendText(Color c, String s) {
-      p.setEditable(true);
-      StyleContext sc = StyleContext.getDefaultStyleContext();
-      AttributeSet aset = sc.addAttribute(
-         SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c
-      );
-      
-      // Limit total text pane buffer size
-      limitBuffer(s.length());
-
-      int len = p.getDocument().getLength();
-      p.setCaretPosition(len);
-      p.setCharacterAttributes(aset, false);
-      p.replaceSelection(s);
-      p.setEditable(false);
+      if (p != null) {
+         p.setEditable(true);
+         StyleContext sc = StyleContext.getDefaultStyleContext();
+         AttributeSet aset = sc.addAttribute(
+            SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c
+         );
+         
+         // Limit total text pane buffer size
+         limitBuffer(s.length());
+   
+         int len = p.getDocument().getLength();
+         p.setCaretPosition(len);
+         p.setCharacterAttributes(aset, false);
+         p.replaceSelection(s);
+         p.setEditable(false);
+      }
    }
    
    // Limit text pane buffer size by truncating total data size to
    // BUFFER_SIZE or less if needed
    private void limitBuffer(int incomingDataSize) {
-      Document doc = p.getStyledDocument();
-      int overLength = doc.getLength() + incomingDataSize - BUFFER_SIZE;
-      if (overLength > 0 && doc.getLength() >= overLength) {
-         try {
-            doc.remove(0, overLength);
-         } catch (Exception e) {
-            e.printStackTrace();
+      if (p != null) {
+         Document doc = p.getStyledDocument();
+         int overLength = doc.getLength() + incomingDataSize - BUFFER_SIZE;
+         if (overLength > 0 && doc.getLength() >= overLength) {
+            try {
+               doc.remove(0, overLength);
+            } catch (Exception e) {
+               e.printStackTrace();
+            }
          }
       }
    }
