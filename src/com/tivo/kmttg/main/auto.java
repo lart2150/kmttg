@@ -542,22 +542,27 @@ public class auto {
       if ( ! job.containsKey("ProgramId") ) {
          return 0;
       } else {
-         if (keywordMatchHistory(job.get("ProgramId"), config.autoHistory))
+         if (  keywordMatchHistory(job.get("ProgramId"), config.autoHistory) && 
+               keywordMatchHistory(job.get("ProgramId_unique"), config.autoHistory) )
             return 2;
       }
 
       // Append entry to autoHistory file
       try {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(config.autoHistory, true));
-         ofp.write(job.get("ProgramId"));
-         if (job.containsKey("title"))
-            ofp.write(" " + job.get("title"));
-         ofp.write("\r\n");
-         if (job.containsKey("ProgramId_unique")) {
-            ofp.write(job.get("ProgramId_unique"));
+         if ( ! keywordMatchHistory(job.get("ProgramId"), config.autoHistory) ) {
+            ofp.write(job.get("ProgramId"));
             if (job.containsKey("title"))
                ofp.write(" " + job.get("title"));
-            ofp.write("\r\n");            
+            ofp.write("\r\n");
+         }
+         if ( ! keywordMatchHistory(job.get("ProgramId_unique"), config.autoHistory) ) {
+            if (job.containsKey("ProgramId_unique")) {
+               ofp.write(job.get("ProgramId_unique"));
+               if (job.containsKey("title"))
+                  ofp.write(" " + job.get("title"));
+               ofp.write("\r\n");            
+            }
          }
          ofp.close();
          return 1;
