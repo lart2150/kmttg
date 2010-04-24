@@ -553,6 +553,12 @@ public class auto {
          if (job.containsKey("title"))
             ofp.write(" " + job.get("title"));
          ofp.write("\r\n");
+         if (job.containsKey("ProgramId_unique")) {
+            ofp.write(job.get("ProgramId_unique"));
+            if (job.containsKey("title"))
+               ofp.write(" " + job.get("title"));
+            ofp.write("\r\n");            
+         }
          ofp.close();
          return 1;
       } catch (IOException ex) {
