@@ -49,7 +49,6 @@ public class textpane {
    
    public void appendText(Color c, String s) {
       if (p != null) {
-         p.setEditable(true);
          StyleContext sc = StyleContext.getDefaultStyleContext();
          AttributeSet aset = sc.addAttribute(
             SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c
@@ -58,11 +57,14 @@ public class textpane {
          // Limit total text pane buffer size
          limitBuffer(s.length());
    
-         int len = p.getDocument().getLength();
-         p.setCaretPosition(len);
-         p.setCharacterAttributes(aset, false);
-         p.replaceSelection(s);
-         p.setEditable(false);
+         try {
+            int len = p.getDocument().getLength();
+            p.getDocument().insertString(len, s, aset);
+            p.setCaretPosition(len + s.length());
+            
+         } catch (Exception e) {
+            e.printStackTrace();
+         }
       }
    }
    
