@@ -72,7 +72,7 @@ public class textpane {
    // BUFFER_SIZE or less if needed
    private void limitBuffer(int incomingDataSize) {
       if (p != null) {
-         Document doc = p.getStyledDocument();
+         Document doc = p.getDocument();
          int overLength = doc.getLength() + incomingDataSize - BUFFER_SIZE;
          if (overLength > 0 && doc.getLength() >= overLength) {
             try {
