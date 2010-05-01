@@ -5,7 +5,6 @@ import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -49,7 +48,6 @@ public class gui {
    private JMenuItem addSelectedTitlesMenuItem = null;
    private JMenuItem addSelectedHistoryMenuItem = null;
    private JMenuItem logFileMenuItem = null;
-   private JMenuItem clearLogFileMenuItem = null;
    private JMenuItem configureMenuItem = null;
    private JMenuItem refreshEncodingsMenuItem = null;
    private JMenuItem serviceStatusMenuItem = null;
@@ -447,7 +445,6 @@ public class gui {
          autoMenu.add(getAddSelectedTitlesMenuItem());
          autoMenu.add(getAddSelectedHistoryMenuItem());
          autoMenu.add(getLogFileMenuItem());
-         autoMenu.add(getClearLogFileMenuItem());
          autoMenu.add(getRunInGuiMenuItem());
          autoMenu.add(getLoopInGuiMenuItem());
       }
@@ -656,28 +653,6 @@ public class gui {
          });
       }
       return logFileMenuItem;
-   }
-
-   private JMenuItem getClearLogFileMenuItem() {
-      debug.print("");
-      if (clearLogFileMenuItem == null) {
-         clearLogFileMenuItem = new JMenuItem();
-         clearLogFileMenuItem.setText("Clear log file");
-         clearLogFileMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               FileOutputStream ofp;
-               try {
-                  ofp = new FileOutputStream(config.autoLog);
-                  ofp.write((new String()).getBytes());
-                  ofp.close();
-                  log.warn("Cleared log file: " + config.autoLog);
-               } catch (Exception e1) {
-                  log.warn("Unable to write to file: " + config.autoLog);
-               }
-            }
-         });
-      }
-      return clearLogFileMenuItem;
    }
 
    private JMenuItem getConfigureMenuItem() {
