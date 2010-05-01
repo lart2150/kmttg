@@ -20,12 +20,13 @@ import com.tivo.kmttg.util.log;
 public class autoLogView {   
    private JDialog dialog = null;
    private JTextArea text = null;
+   private static String logfile = config.autoLog + ".0";
    
    public autoLogView(JFrame frame) {
       debug.print("frame=" + frame);
       
-      if ( ! file.isFile(config.autoLog)) {
-         log.error("Auto log file not found: " + config.autoLog);
+      if ( ! file.isFile(logfile)) {
+         log.error("Auto log file not found: " + logfile);
          return;
       }
       
@@ -58,7 +59,7 @@ public class autoLogView {
          // create and display dialog window
          dialog = new JDialog(frame, false); // non-modal dialog
          dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE); // Destroy when closed
-         dialog.setTitle(config.autoLog);
+         dialog.setTitle(logfile);
          dialog.setContentPane(content);
          dialog.pack();
          dialog.setSize(600,400);
@@ -77,7 +78,7 @@ public class autoLogView {
    // Update text with auto log file contents
    private Boolean view() {
       try {
-         BufferedReader log = new BufferedReader(new FileReader(config.autoLog));
+         BufferedReader log = new BufferedReader(new FileReader(logfile));
          String line = null;
          text.setEditable(true);
          while (( line = log.readLine()) != null) {
@@ -87,7 +88,7 @@ public class autoLogView {
          text.setEditable(false);
       }         
       catch (IOException ex) {
-         log.error("Auto log file cannot be read: " + config.autoLog);
+         log.error("Auto log file cannot be read: " + logfile);
          return false;
       }
       return true;
