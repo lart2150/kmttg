@@ -1025,6 +1025,7 @@ public class gui {
          // Stop Loop in GUI mode
          log.warn("\nAuto Transfers Loop in GUI disabled");
          config.GUI_LOOP = 0;
+         log.stopLogger();
       }
    }
    
