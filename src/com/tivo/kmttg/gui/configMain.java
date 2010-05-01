@@ -93,6 +93,7 @@ public class configMain {
    private static JTextField cpu_cores = null;
    private static JTextField download_tries = null;
    private static JTextField download_retry_delay = null;
+   private static JTextField autoLogSizeMB = null;
    private static JTextField pyTivo_host = null;
    private static JTextField pyTivo_config = null;
    private static JComboBox MinChanDigits = null;
@@ -480,6 +481,9 @@ public class configMain {
       
       // download_retry_delay
       download_retry_delay.setText("" + config.download_retry_delay);
+      
+      // autoLogSizeMB
+      autoLogSizeMB.setText("" + config.autoLogSizeMB);
       
       // pyTivo_host
       pyTivo_host.setText("" + config.pyTivo_host);
@@ -1036,6 +1040,22 @@ public class configMain {
          config.download_retry_delay = 10;
       }
       
+      // autoLogSizeMB
+      value = string.removeLeadingTrailingSpaces(autoLogSizeMB.getText());
+      if (value.length() > 0) {
+         try {
+            config.autoLogSizeMB = Integer.parseInt(value);
+         } catch(NumberFormatException e) {
+            textFieldError(autoLogSizeMB, "Illegal setting for auto log file size limit (MB): '" + value + "'");
+            log.error("Setting to 10");
+            config.autoLogSizeMB = 10;
+            autoLogSizeMB.setText("" + config.autoLogSizeMB);
+            errors++;
+         }
+      } else {
+         config.autoLogSizeMB = 10;
+      }
+      
       // toolTipsTimeout
       value = string.removeLeadingTrailingSpaces(toolTipsTimeout.getText());
       if (value.length() > 0) {
@@ -1118,6 +1138,7 @@ public class configMain {
       cpu_cores = new javax.swing.JTextField(15);
       download_tries = new javax.swing.JTextField(15);
       download_retry_delay = new javax.swing.JTextField(15);
+      autoLogSizeMB = new javax.swing.JTextField(15);
       
       disk_space = new javax.swing.JTextField(5);
       FontSize = new javax.swing.JTextField(5);
@@ -1171,6 +1192,7 @@ public class configMain {
       JLabel cpu_cores_label = new javax.swing.JLabel();
       JLabel download_tries_label = new javax.swing.JLabel();
       JLabel download_retry_delay_label = new javax.swing.JLabel();
+      JLabel autoLogSizeMB_label = new javax.swing.JLabel();
       JLabel available_keywords_label = new javax.swing.JLabel();
       JLabel pyTivo_host_label = new javax.swing.JLabel();
       JLabel pyTivo_config_label = new javax.swing.JLabel();
@@ -1258,6 +1280,7 @@ public class configMain {
       cpu_cores_label.setText("encoding cpu cores");
       download_tries_label.setText("# download attempts");
       download_retry_delay_label.setText("seconds between download retry attempts");
+      autoLogSizeMB_label.setText("auto log file size limit (MB)");
       pyTivo_host_label.setText("pyTivo host name");
       pyTivo_config_label.setText("pyTivo.conf file");
       pyTivo_tivo_label.setText("pyTivo push destination");
@@ -1764,6 +1787,16 @@ public class configMain {
       c.gridy = gy;
       files_panel.add(encode_output_dir, c);
       
+      // autoLogSizeMB
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      files_panel.add(autoLogSizeMB_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      files_panel.add(autoLogSizeMB, c);
+      
       // OverwriteFiles
       gy++;
       c.gridx = 0;
@@ -2268,6 +2301,7 @@ public class configMain {
       cpu_cores.setToolTipText(getToolTip("cpu_cores"));
       download_tries.setToolTipText(getToolTip("download_tries"));
       download_retry_delay.setToolTipText(getToolTip("download_retry_delay"));
+      autoLogSizeMB.setToolTipText(getToolTip("autoLogSizeMB"));
       pyTivo_host.setToolTipText(getToolTip("pyTivo_host"));
       pyTivo_config.setToolTipText(getToolTip("pyTivo_config"));
       pyTivo_tivo.setToolTipText(getToolTip("pyTivo_tivo"));
@@ -2681,6 +2715,14 @@ public class configMain {
          text =  "<b>seconds between download retry attempts</b><br>";
          text += "Number of seconds to wait between download retry attempts. kmttg will wait at least this<br>";
          text += "number of seconds before trying a download again.";
+      }
+      else if (component.equals("autoLogSizeMB")) {
+         text = "<b>auto log file size limit (MB)</b><br>";
+         text += "File size limit for auto.log files which contains message logs when running kmttg <b>Auto Transfers</b><br>";
+         text += "in service/background mode or if running <b>Loop in GUI</b> mode in kmttg GUI.<br>";
+         text += "kmttg initially logs to <b>auto.log.0</b> file. Once this specified file size limit is reached then<br>";
+         text += "contents of <b>auto.log.0</b> are copied to <b>auto.log.1</b> and <b>auto.log.0</b> contents are flushed.<br>";
+         text += "This limit prevents auto log file from growing in size indefinitely.";
       }
       else if (component.equals("pyTivo_host")) {
          text =  "<b>pyTivo host name</b><br>";
