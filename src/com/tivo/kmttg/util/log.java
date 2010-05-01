@@ -1,34 +1,64 @@
 package com.tivo.kmttg.util;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Stack;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import com.tivo.kmttg.main.config;
 
 public class log {
+   private static Logger logger = null;
    private static String n = "\r\n";
-   private static String message;
    
-   private static void logToFile(String type, String s) {
-      String time = getDetailedTime();
-      String extra = " ";
-      if (type.equals("warn"))
-         extra = " NOTE: ";
-      if (type.equals("error"))
-         extra = " ERROR: ";
-      message = time + extra + s + n;
+   private static boolean initLogger() {
+      class CustomFormatter extends Formatter {
+         public synchronized String format(LogRecord record) {
+            String time = getDetailedTime();
+            Level level = record.getLevel();
+            String extra = " ";
+            if (level == Level.WARNING)
+               extra = " NOTE: ";
+            if (level == Level.SEVERE)
+               extra = " ERROR: ";
+               
+            return time + extra + record.getMessage() + n;
+         }
+       }
+      logger = Logger.getLogger("log");
+      logger.setUseParentHandlers(false);
       try {
-         BufferedWriter ofp = new BufferedWriter(new FileWriter(config.autoLog, true));
-         System.out.print(message);
-         ofp.write(message);
-         ofp.close();
-      } catch (IOException ex) {
-         System.out.print(message);
-      }     
+         // Create a FileHandler with file size limit and 2 rotating log files.
+         int MB = 1024*1024;
+         int size = MB*config.autoLogSizeMB;
+         FileHandler handler = new FileHandler(config.autoLog, size, 2, true);
+         handler.setFormatter(new CustomFormatter());
+         logger.addHandler(handler);
+         return true;
+      } catch (IOException e) {
+         System.out.println("Failed to initialize logger handler.");
+         return false;
+      }      
+   }
+   
+   // Log entries to config.autoLog file
+   // Uses logger for 2 file limited size rotation
+   private static void logToFile(String type, String s) {
+      if (logger == null) {
+         if ( ! initLogger() )
+            return;
+      }
+      if (type.equals("print"))
+         logger.info(s);
+      if (type.equals("warn"))
+         logger.warning(s);
+      if (type.equals("error"))
+         logger.severe(s);
    }
    
    public static void print(String s) {
