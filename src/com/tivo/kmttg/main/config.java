@@ -79,6 +79,7 @@ public class config {
    public static Boolean LOOP = false;          // true=>auto loop
    public static String autoIni = "";
    public static String autoLog = "";
+   public static int autoLogSizeMB = 10;        // Default log size of 10MB
    public static String autoHistory = "";
    public static Hashtable<String,String> KEYWORDS = new Hashtable<String,String>();
    
@@ -670,6 +671,9 @@ public class config {
             if (key.equals("download_retry_delay")) {
                download_retry_delay = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("autoLogSizeMB")) {
+               autoLogSizeMB = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("diskSpace")) {
                String[] l = line.split("=");
                if (l.length == 2) {
@@ -824,6 +828,8 @@ public class config {
          ofp.write("<download_tries>\n" + download_tries + "\n\n");
          
          ofp.write("<download_retry_delay>\n" + download_retry_delay + "\n\n");
+         
+         ofp.write("<autoLogSizeMB>\n" + autoLogSizeMB + "\n\n");
          
          if (diskSpace.size() > 0) {
             ofp.write("<diskSpace>\n");
