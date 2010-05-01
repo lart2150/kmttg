@@ -14,7 +14,16 @@ import com.tivo.kmttg.main.config;
 
 public class log {
    private static Logger logger = null;
+   private static FileHandler handler = null;
    private static String n = "\r\n";
+   
+   public static void stopLogger() {
+      if (logger != null && handler != null) {
+         handler.close();
+         handler = null;
+         logger = null;
+      }
+   }
    
    private static boolean initLogger() {
       class CustomFormatter extends Formatter {
@@ -36,7 +45,7 @@ public class log {
          // Create a FileHandler with file size limit and 2 rotating log files.
          int MB = 1024*1024;
          int size = MB*config.autoLogSizeMB;
-         FileHandler handler = new FileHandler(config.autoLog, size, 2, true);
+         handler = new FileHandler(config.autoLog, size, 2, true);
          handler.setFormatter(new CustomFormatter());
          logger.addHandler(handler);
          return true;
