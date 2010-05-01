@@ -98,9 +98,6 @@ public class auto {
                exitAuto(1);
             }
             jobMonitor.monitor(null, null);
-            
-            // Exit if autoLog file doesn't exist
-            if ( ! file.isFile(config.autoLog) ) exitAuto(1);
          } // while GO
       } // auto mode    
    }
