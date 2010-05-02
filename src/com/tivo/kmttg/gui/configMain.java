@@ -1045,9 +1045,16 @@ public class configMain {
       if (value.length() > 0) {
          try {
             config.autoLogSizeMB = Integer.parseInt(value);
+            if (config.autoLogSizeMB < 1) {
+               textFieldError(autoLogSizeMB, "Illegal setting for auto log file size limit (MB): '" + config.autoLogSizeMB + "'");
+               log.error("Should be integer > 0... Setting to 10");
+               config.autoLogSizeMB = 10;
+               autoLogSizeMB.setText("" + config.autoLogSizeMB);
+               errors++;               
+            }
          } catch(NumberFormatException e) {
             textFieldError(autoLogSizeMB, "Illegal setting for auto log file size limit (MB): '" + value + "'");
-            log.error("Setting to 10");
+            log.error("Should be integer > 0... Setting to 10");
             config.autoLogSizeMB = 10;
             autoLogSizeMB.setText("" + config.autoLogSizeMB);
             errors++;
