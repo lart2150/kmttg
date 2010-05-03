@@ -170,11 +170,13 @@ public class backgroundProcess {
    public String toString() {
       debug.print("");
       String c = "";
-      for (int i=0; i<command.length; ++i) {
-         if (command[i].matches("^.*\\s+.*$")) {
-            c += "\"" + command[i] + "\" ";
-         } else {
-            c += command[i] + " ";
+      if (command.length > 0) {
+         for (int i=0; i<command.length; ++i) {
+            if (command[i].matches("^.*\\s+.*$")) {
+               c += "\"" + command[i] + "\" ";
+            } else {
+               c += command[i] + " ";
+            }
          }
       }
       return c;
