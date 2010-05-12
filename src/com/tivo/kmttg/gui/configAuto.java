@@ -601,7 +601,7 @@ public class configAuto {
          text += "and will print messages about what shows match your setup, but will<br>";
          text += "not actually run any transfers. This is useful for testing your auto<br>";
          text += "transfers setup to ensure it will do what you want.<br>";
-         text += "<b>NOTE: Use Auto Transfers->Run in GUI with this option set to test</b>.";
+         text += "<b>NOTE: Use Auto Transfers->Run Once in GUI with this option set to test</b>.";
       }
       else if (component.equals("title")) {
          text =  "<b>title/keywords</b><br>";
