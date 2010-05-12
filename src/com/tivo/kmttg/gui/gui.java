@@ -578,7 +578,7 @@ public class gui {
       debug.print("");
       if (runInGuiMenuItem == null) {
          runInGuiMenuItem = new JMenuItem();
-         runInGuiMenuItem.setText("Run in GUI");
+         runInGuiMenuItem.setText("Run Once in GUI");
          runInGuiMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                autoRunInGUICB();
@@ -955,7 +955,7 @@ public class gui {
       SetEncodings(encodeConfig.getValidEncodeNames());
    }
    
-   // Callback for "Run in GUI" Auto Transfers menu entry
+   // Callback for "Run Once in GUI" Auto Transfers menu entry
    // This is equivalent to a batch mode run but is performed in GUI
    public void autoRunInGUICB() {
       debug.print("");
