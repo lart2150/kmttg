@@ -1,5 +1,6 @@
 package com.tivo.kmttg.gui;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -11,6 +12,8 @@ import java.io.File;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -20,16 +23,20 @@ import javax.swing.table.TableColumnModel;
 
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.task.NowPlaying;
 import com.tivo.kmttg.util.debug;
+import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class tivoTab {
    String tivoName = null;
    private JPanel panel = null;
    private JButton add = null;
    private JButton remove = null;
+   private JButton atomic = null;
    private JButton refresh = null;
    private JButton disk_usage = null;
    private JLabel status = null;
@@ -82,11 +89,6 @@ public class tivoTab {
                addCB(add);
             }
          });         
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         c.gridwidth = 1;
-         panel.add(add, c);
    
          // Remove button
          remove = new JButton("Remove");
@@ -97,11 +99,34 @@ public class tivoTab {
                removeCB(remove);
             }
          });
-         gx++;
+
+         // Create row with Add, Remove, atomic
+         JPanel row = new JPanel();
+         row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+         Dimension space1 = new Dimension(5,0);
+         Dimension space2 = new Dimension(100,0);
+         row.add(add);
+         row.add(Box.createRigidArea(space1));
+         row.add(remove);
+         
+         // atomic button
+         if ( file.isFile(config.AtomicParsley) ) {
+            atomic = new JButton("Run AtomicParsley");
+            atomic.setMargin(new Insets(0,5,0,5));
+            atomic.setToolTipText(config.gui.getToolTip("atomic"));
+            atomic.addActionListener(new java.awt.event.ActionListener() {
+               public void actionPerformed(java.awt.event.ActionEvent e) {
+                  atomicCB(atomic);
+               }
+            });
+            row.add(Box.createRigidArea(space2));
+            row.add(atomic);
+         }
+         
          c.gridx = gx;
          c.gridy = gy;
-         panel.add(remove, c);
-         gx++;
+         c.gridwidth = 1;
+         panel.add(row, c);
       } else {
          // This is a TiVo tab
          nplTab.SetNowPlayingHeaders(nplTab.TIVO_cols);
@@ -248,6 +273,53 @@ public class tivoTab {
             for (int i=rows.length-1; i>=0; i--) {
                row = rows[i];
                nplTab.RemoveSelectedRow(row);
+            }
+         }
+      }
+   }
+
+   // FILES mode atomic button callback
+   // Run AtomicParsley for selected FILES entries
+   private void atomicCB(JButton button) {
+      debug.print("button=" + button);
+      if ( tivoName.equals("FILES") ) {
+         if (! file.isFile(config.AtomicParsley)) {
+            log.error("AtomicParsley binary not found: " + config.AtomicParsley);
+            return;
+         }
+         int[] rows = nplTab.GetSelectedRows();
+
+         if (rows.length > 0) {
+            int row;
+            for (int i=rows.length-1; i>=0; i--) {
+               row = rows[i];
+               // Schedule an AtomicParsley job if relevant
+               String encodeFile = nplTab.NowPlayingGetSelectionFile(row);
+               if ( encodeFile.toLowerCase().endsWith(".mp4") ||
+                    encodeFile.toLowerCase().endsWith(".m4v")) {
+                  String metaFile = encodeFile + ".txt";
+                  if ( ! file.isFile(metaFile) ) {
+                     metaFile = string.replaceSuffix(encodeFile, "_cut.mpg.txt");
+                  }
+                  if ( ! file.isFile(metaFile) ) {
+                     metaFile = string.replaceSuffix(encodeFile, ".mpg.txt");
+                  }
+                  if ( file.isFile(metaFile) ) {
+                     log.warn("Manual AtomicParsley using metadata file: " + metaFile);
+                     jobData new_job = new jobData();
+                     new_job.source       = encodeFile;
+                     new_job.tivoName     = "FILES";
+                     new_job.type         = "atomic";
+                     new_job.name         = config.AtomicParsley;
+                     new_job.encodeFile   = encodeFile;
+                     new_job.metaFile     = metaFile;
+                     jobMonitor.submitNewJob(new_job);
+                  } else {
+                     log.error("Cannot find a pyTivo metadata file to use for AtomicParsley run: (file=" + encodeFile + ")");
+                  }
+               } else {
+                  log.error("File does not have mp4 or m4v suffix: " + encodeFile);
+               }
             }
          }
       }
