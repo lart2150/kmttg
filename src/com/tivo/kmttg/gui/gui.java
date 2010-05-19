@@ -1559,6 +1559,13 @@ public class gui {
          text =  "<b>Remove</b><br>";
          text += "Removes selected file entries from files table below.";
       }
+      else if (component.equals("atomic")) {
+         text =  "<b>Run AtomicParsley</b><br>";
+         text += "Run AtomicParsley on files selected in table below.<br>";
+         text += "This is only supported for mp4/m4v files ending in .mp4 or .m4v suffix.<br>";
+         text += "Change <b>Files of Type</b> to <b>All Files</b> in File browser to see all file types.<br>";
+         text += "NOTE: There must be accompanying pyTivo metadata .txt file for this command to work.";
+      }
       else if (component.equals("refresh")) {
          text =  "<b>Refresh List</b><br>";
          text += "Refresh Now Playing List for this TiVo.";
