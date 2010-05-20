@@ -1,9 +1,12 @@
 package com.tivo.kmttg.main;
 
+import java.io.Serializable;
+
 import com.tivo.kmttg.task.*;
 import com.tivo.kmttg.util.backgroundProcess;
 
-public class jobData {
+public class jobData implements Serializable {
+   private static final long serialVersionUID = 1L;
    // Common to all jobs
    public String  source = null;
    public Integer monitor = null;
