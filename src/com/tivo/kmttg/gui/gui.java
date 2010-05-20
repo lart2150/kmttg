@@ -45,6 +45,7 @@ public class gui {
    private JMenuItem autoConfigMenuItem = null;
    private JMenuItem runInGuiMenuItem = null;
    private JCheckBoxMenuItem loopInGuiMenuItem = null;
+   private JCheckBoxMenuItem toggleLaunchingJobsMenuItem = null;
    private JMenuItem addSelectedTitlesMenuItem = null;
    private JMenuItem addSelectedHistoryMenuItem = null;
    private JMenuItem logFileMenuItem = null;
@@ -61,6 +62,8 @@ public class gui {
    private JMenuItem saveMessagesMenuItem = null;
    private JMenuItem clearMessagesMenuItem = null;
    private JMenuItem resetServerMenuItem = null;
+   private JMenuItem saveJobsMenuItem = null;
+   private JMenuItem loadJobsMenuItem = null;
    
    private JComboBox encoding = null;
    private JLabel encoding_label = null;
@@ -427,6 +430,9 @@ public class gui {
          fileMenu.add(getSaveMessagesMenuItem());
          fileMenu.add(getClearMessagesMenuItem());
          fileMenu.add(getResetServerMenuItem());
+         fileMenu.add(getToggleLaunchingJobsMenuItem());
+         fileMenu.add(getSaveJobsMenuItem());
+         fileMenu.add(getLoadJobsMenuItem());
          fileMenu.add(getExitMenuItem());
       }
       return fileMenu;
@@ -572,6 +578,56 @@ public class gui {
          });
       }
       return resetServerMenuItem;
+   }
+   
+   private JMenuItem getToggleLaunchingJobsMenuItem() {
+      debug.print("");
+      if (toggleLaunchingJobsMenuItem == null) {
+         toggleLaunchingJobsMenuItem = new JCheckBoxMenuItem();
+         toggleLaunchingJobsMenuItem.setText("Do not launch queued jobs");
+         toggleLaunchingJobsMenuItem.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+               AbstractButton button = (AbstractButton) e.getItem();
+               Boolean enabled = button.isSelected();
+               if (enabled) {
+                  jobMonitor.NoNewJobs = true;
+                  log.warn("Launching new jobs disabled. No new jobs will be launched. When all running jobs complete you can save queued jobs and exit.");
+               } else {
+                  jobMonitor.NoNewJobs = false;
+                  log.warn("Launching new jobs re-enabled. Normal job processing will continue.");
+               }
+            }
+         });
+      }
+      return toggleLaunchingJobsMenuItem;
+   }
+
+   private JMenuItem getSaveJobsMenuItem() {
+      debug.print("");
+      if (saveJobsMenuItem == null) {
+         saveJobsMenuItem = new JMenuItem();
+         saveJobsMenuItem.setText("Save queued jobs");
+         saveJobsMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               jobMonitor.saveQueuedJobs();
+            }   
+         });
+      }
+      return saveJobsMenuItem;
+   }
+
+   private JMenuItem getLoadJobsMenuItem() {
+      debug.print("");
+      if (loadJobsMenuItem == null) {
+         loadJobsMenuItem = new JMenuItem();
+         loadJobsMenuItem.setText("Load queued jobs");
+         loadJobsMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               jobMonitor.loadQueuedJobs();
+            }
+         });
+      }
+      return loadJobsMenuItem;
    }
    
    private JMenuItem getRunInGuiMenuItem() {
