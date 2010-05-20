@@ -1,6 +1,10 @@
 package com.tivo.kmttg.main;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -20,6 +24,8 @@ public class jobMonitor {
    private static int JOB_COUNT = 0;
    private static int JOB = 0;
    private static int FAMILY_ID = 0;
+   public static Boolean NoNewJobs = false;
+   private static String jobDataFile = "jobData.dat";
    
    // These used for Auto Transfers->Loop in GUI mode
    private static Hashtable<String,Long> launch = new Hashtable<String,Long>();
@@ -134,6 +140,8 @@ public class jobMonitor {
       
       // See if we can launch any queued jobs
       for (int i=0; i<queued.size(); i++) {
+         if (NoNewJobs) continue; //Skip all jobs when this flag is set (to facilitate a graceful shutdown)
+         
          job = queued.get(i);
          debug.print("job=" + job);
          
@@ -1166,6 +1174,66 @@ public class jobMonitor {
       }
    }
    
+   private static int getNumQueuedJobs() {
+      int num = 0;
+      for (int i=0; i<JOBS.size(); ++i) {
+         if ( JOBS.get(i).status.equals("queued") ) {
+            num++;
+         }
+      }
+      return num;
+   }
+   
+   public static void saveQueuedJobs() {
+      if ( JOBS.isEmpty() ) {
+         log.error("There are currently no queued jobs to save.");
+      } else {
+         try {
+            FileOutputStream fos = new FileOutputStream(config.programDir + File.separator + jobDataFile);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+
+            int n = getNumQueuedJobs();
+            if (n == 0) {
+               log.error("There are currently no queued jobs to save.");
+               return;
+            }
+            oos.writeInt(n);
+            for (int i=0; i<JOBS.size(); ++i) {
+               if ( JOBS.get(i).status.equals("queued") )
+                  oos.writeObject(JOBS.get(i));
+            }
+            oos.close();
+            fos.close();
+            log.warn("Saved " + n + " queued jobs to file: " + jobDataFile);
+         } catch (Exception ex) {
+            log.error("Failed to save queued jobs to file\n" + ex.toString());
+         }
+      }
+   }
+
+   public static void loadQueuedJobs() {
+      if ( JOBS.isEmpty() ) {
+         try {
+            String jobFile = config.programDir + File.separator + jobDataFile;
+            FileInputStream fis = new FileInputStream(jobFile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            int n = ois.readInt();
+            for (int i=0; i<n; ++i) {
+               submitNewJob((jobData) ois.readObject()); 
+            }
+            ois.close();
+            fis.close();
+            log.warn("Loaded " + n + " queued jobs from file: " + jobDataFile);
+            // Should we delete file after load?
+            //file.delete(jobFile);
+         } catch (Exception ex) {
+            log.error("Failed to load queued jobs from file\n" + ex.toString());
+         }
+      } else {
+         log.error("You can only load queued jobs from file when there are no active or queued jobs.");
+      }
+   }
+    
    // Identify NPL table items associated with queued/running jobs
    public static void updateNPLjobStatus() {
       if (config.GUI && JOBS != null) {
