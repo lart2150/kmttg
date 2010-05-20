@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -15,7 +16,8 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.*;
 
-public class metadata {
+public class metadata implements Serializable {
+   private static final long serialVersionUID = 1L;
    String cookieFile = "";
    String outputFile = "";
    private backgroundProcess process;

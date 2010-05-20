@@ -3,6 +3,7 @@ package com.tivo.kmttg.task;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Stack;
 
@@ -16,7 +17,8 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class download {
+public class download implements Serializable {
+   private static final long serialVersionUID = 1L;
    String cookieFile = "";
    private backgroundProcess process;
    public jobData job;

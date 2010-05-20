@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Stack;
 
@@ -16,7 +17,8 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class vrdreview {
+public class vrdreview implements Serializable {
+   private static final long serialVersionUID = 1L;
    String  vrd = null;
    private backgroundProcess process;
    private jobData job;

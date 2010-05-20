@@ -1,5 +1,6 @@
 package com.tivo.kmttg.task;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Stack;
 
@@ -12,7 +13,8 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class comskip {
+public class comskip implements Serializable {
+   private static final long serialVersionUID = 1L;
    private backgroundProcess process;
    private jobData job;
    private String outputFile = null;

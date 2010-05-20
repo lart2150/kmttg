@@ -1,5 +1,6 @@
 package com.tivo.kmttg.task;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Stack;
 
@@ -10,7 +11,8 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.*;
 
 // Encoding class for running background ffmpeg, handbrake, etc. encoding jobs
-public class encode {
+public class encode implements Serializable {
+   private static final long serialVersionUID = 1L;
    private backgroundProcess process;
    private jobData job;
 

@@ -3,6 +3,7 @@ package com.tivo.kmttg.task;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Stack;
 
@@ -14,7 +15,8 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
-public class adscan {
+public class adscan implements Serializable {
+   private static final long serialVersionUID = 1L;
    String  vrdscript = null;
    String  cscript = null;
    String  lockFile = null;

@@ -3,6 +3,7 @@ package com.tivo.kmttg.task;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -19,7 +20,8 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class push {
+public class push implements Serializable {
+   private static final long serialVersionUID = 1L;
    private Thread thread = null;
    private Boolean thread_running = false;
    private String host = "localhost";

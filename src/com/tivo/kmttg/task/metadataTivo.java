@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -19,7 +20,8 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
-public class metadataTivo {
+public class metadataTivo implements Serializable {
+   private static final long serialVersionUID = 1L;
    private String xmlFile = "chunk-01-0001.xml";
    private String xmlFile2 = null;
    private backgroundProcess process;

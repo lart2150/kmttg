@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -16,7 +17,8 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.*;
 
-public class NowPlaying  {
+public class NowPlaying implements Serializable {
+   private static final long serialVersionUID = 1L;
    private Stack<Hashtable<String,String>> ENTRIES = new Stack<Hashtable<String,String>>();
    private String cookieFile = "";
    private String outputFile = "";
