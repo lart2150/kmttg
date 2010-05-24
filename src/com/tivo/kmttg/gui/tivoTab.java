@@ -104,7 +104,7 @@ public class tivoTab {
          JPanel row = new JPanel();
          row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
          Dimension space1 = new Dimension(5,0);
-         Dimension space2 = new Dimension(100,0);
+         Dimension space2 = new Dimension(20,0);
          row.add(add);
          row.add(Box.createRigidArea(space1));
          row.add(remove);
