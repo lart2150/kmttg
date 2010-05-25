@@ -37,6 +37,7 @@ public class gui {
    private JTabbedPane tabbed_panel = null;
    private JMenuBar jJMenuBar = null;
    private JMenu fileMenu = null;
+   private JMenu jobMenu = null;
    private JMenu autoMenu = null;
    private JMenu serviceMenu = null;
    private JMenu helpMenu = null;
@@ -430,12 +431,21 @@ public class gui {
          fileMenu.add(getSaveMessagesMenuItem());
          fileMenu.add(getClearMessagesMenuItem());
          fileMenu.add(getResetServerMenuItem());
-         fileMenu.add(getToggleLaunchingJobsMenuItem());
-         fileMenu.add(getSaveJobsMenuItem());
-         fileMenu.add(getLoadJobsMenuItem());
+         fileMenu.add(getJobMenu());
          fileMenu.add(getExitMenuItem());
       }
       return fileMenu;
+   }
+   
+   private JMenu getJobMenu() {
+      if (jobMenu == null) {
+         jobMenu = new JMenu();
+         jobMenu.setText("Jobs");
+         jobMenu.add(getToggleLaunchingJobsMenuItem());
+         jobMenu.add(getSaveJobsMenuItem());
+         jobMenu.add(getLoadJobsMenuItem());
+      }
+      return jobMenu;
    }
 
    private JMenu getAutoTransfersMenu() {
