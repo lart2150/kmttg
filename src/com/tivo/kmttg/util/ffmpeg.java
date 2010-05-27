@@ -1,0 +1,134 @@
+package com.tivo.kmttg.util;
+
+import java.util.Hashtable;
+import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.tivo.kmttg.main.config;
+
+public class ffmpeg {
+   
+   // Use ffmpeg to get video dimensions from given mpeg video file
+   // Returns null if undetermined, a hash with x, y members otherwise
+   // Also grabs Display Aspect Ratio numbers if available
+   public static Hashtable<String,String> getVideoDimensions(String videoFile) {      
+      // Use ffmpeg command to get video information      
+      Stack<String> command = new Stack<String>();
+      command.add(config.ffmpeg);
+      command.add("-i");
+      command.add(videoFile);
+      backgroundProcess process = new backgroundProcess();
+      if ( process.run(command) ) {
+         // Wait for command to terminate
+         process.Wait();
+         
+         // Parse stderr
+         Stack<String> l = process.getStderr();
+         if (l.size() > 0) {
+            for (int i=0; i<l.size(); ++i) {
+               if (l.get(i).matches("^.+\\s+Video:\\s+.+$")) {
+                  Pattern p = Pattern.compile(".*Video: .+, (\\d+)x(\\d+)[, ].*");
+                  Matcher m = p.matcher(l.get(i));
+                  if (m.matches()) {
+                     Hashtable<String,String> dimensions = new Hashtable<String,String>();
+                     dimensions.put("x", m.group(1));
+                     dimensions.put("y", m.group(2));
+                     p = Pattern.compile(".*Video: .+\\s+DAR\\s+(\\d+):(\\d+).*");
+                     m = p.matcher(l.get(i));
+                     if (m.matches()) {
+                        dimensions.put("DAR_x", m.group(1));
+                        dimensions.put("DAR_y", m.group(2));
+                     }
+                     return dimensions;
+                  }
+               }
+            }
+         }
+      }
+      return null;
+   }
+   
+   // Compute and return other output dimension based on 1 known output dimension and DAR of an input videoFile
+   // i.e. If output_known is "width" then return computed height, else if "height" return computed width
+   // Return 0 on failure
+   private static int computeOutputDimensions(String videoFile, String output_known, int output_dim) {
+      Hashtable<String,String> source_dimensions = getVideoDimensions(videoFile);
+      int DAR_x=0, DAR_y=0;
+      if (source_dimensions == null) {
+         log.error("Failed to determine video dimensions from video file: " + videoFile);
+      } else {
+         // Use detected DAR if available
+         if (source_dimensions.containsKey("DAR_x")) {
+            DAR_x = Integer.parseInt(source_dimensions.get("DAR_x"));
+            DAR_y = Integer.parseInt(source_dimensions.get("DAR_y"));
+         }
+         
+         // Assume DAR = source video dimensions if not found from videoFile
+         if (DAR_x == 0) DAR_x = Integer.parseInt(source_dimensions.get("x"));
+         if (DAR_y == 0) DAR_y = Integer.parseInt(source_dimensions.get("y"));
+         
+         if (output_known.equals("width")) {              
+            int output_height = output_dim*DAR_y/DAR_x;
+            // Want even number
+            if (output_height % 2 != 0) output_height += 1;
+            return output_height;
+         }
+         
+         if (output_known.equals("height")) {              
+            int output_width = output_dim*DAR_x/DAR_y;
+            // Want even number
+            if (output_width % 2 != 0) output_width += 1;
+            return output_width;
+         }
+      }
+      return 0;
+   }
+   
+   // Examine given ffmpeg encoding string and look for ###xHEIGHT or WIDTHx### keywords
+   // indicating that height or width needs to be computed based on DAR of input video file.
+   // If keywords found then replace given encodeCommand stack with adjusted one, else return original.
+   // A sample command line with keyword is:
+   //FFMPEG -y -i INPUT -threads CPU_CORES -vcodec mpeg4 -s 640xHEIGHT -f mp4 OUTPUT
+   public static Stack<String> getOutputDimensions(String inputFile, Stack<String> encodeCommand) {
+      Pattern p;
+      Matcher m;
+      String s;
+      Stack<String> newCommand = new Stack<String>();
+      
+      for (int i=0; i<encodeCommand.size(); ++i) {
+         s = encodeCommand.get(i);
+         
+         p = Pattern.compile("^(\\d+)xHEIGHT$");
+         m = p.matcher(s);
+         if (m.matches()) {
+            int width = Integer.parseInt(m.group(1));
+            int height = computeOutputDimensions(inputFile, "width", width);
+            if (height == 0) {
+               return encodeCommand;
+            } else {
+               s = "" + width + "x" + height;
+               log.warn("Computed resolution to use for output file = " + s);
+            }
+         }
+         
+         p = Pattern.compile("^WIDTHx(\\d+)$");
+         m = p.matcher(s);
+         if (m.matches()) {
+            int height = Integer.parseInt(m.group(1));
+            int width = computeOutputDimensions(inputFile, "height", height);
+            if (width == 0) {
+               return encodeCommand;
+            } else {
+               s = "" + width + "x" + height;
+               log.warn("Computed resolution to use for output file = " + s);
+            }
+         }
+         
+         newCommand.add(s);
+      }
+      
+      return newCommand;
+   }
+
+}
