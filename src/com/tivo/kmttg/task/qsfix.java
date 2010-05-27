@@ -7,14 +7,13 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
+import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
@@ -63,7 +62,7 @@ public class qsfix implements Serializable {
          if (config.VrdQsFilter == 1) {
             // Create script with video dimensions filter enabled
             log.warn("VideoRedo video dimensions filter is enabled");
-            Hashtable<String,String> dimensions = ffmpegGetVideoDimensions(sourceFile);
+            Hashtable<String,String> dimensions = ffmpeg.getVideoDimensions(sourceFile);
             if (dimensions == null) {
                log.warn("ffmpeg on source file didn't work - trying to get dimensions from 2 sec clip");
                String destFile = file.makeTempFile("mpegFile", ".mpg");
@@ -252,39 +251,6 @@ public class qsfix implements Serializable {
       return false;
    }
    
-   // Use ffmpeg to get video dimensions from given mpeg video file
-   // Returns null if undetermined, a hash with x, y members otherwise
-   private Hashtable<String,String> ffmpegGetVideoDimensions(String videoFile) {      
-      // Use ffmpeg command to get video information      
-      Stack<String> command = new Stack<String>();
-      command.add(config.ffmpeg);
-      command.add("-i");
-      command.add(videoFile);
-      backgroundProcess process = new backgroundProcess();
-      if ( process.run(command) ) {
-         // Wait for command to terminate
-         process.Wait();
-         
-         // Parse stderr
-         Stack<String> l = process.getStderr();
-         if (l.size() > 0) {
-            for (int i=0; i<l.size(); ++i) {
-               if (l.get(i).matches("^.+\\s+Video:\\s+.+$")) {
-                  Pattern p = Pattern.compile(".*Video: .+, (\\d+)x(\\d+)[, ].*");
-                  Matcher m = p.matcher(l.get(i));
-                  if (m.matches()) {
-                     Hashtable<String,String> dimensions = new Hashtable<String,String>();
-                     dimensions.put("x", m.group(1));
-                     dimensions.put("y", m.group(2));
-                     return dimensions;
-                  }
-               }
-            }
-         }
-      }
-      return null;
-   }
-   
    // Create custom cscript file
    private String createScript(Hashtable<String,String> dimensions) {
       // NOTE: In GUI mode we are able to run concurrent VRD COM jobs
@@ -400,7 +366,7 @@ public class qsfix implements Serializable {
             return null;
          }
       } 
-      Hashtable<String,String> dimensions = ffmpegGetVideoDimensions(destFile);
+      Hashtable<String,String> dimensions = ffmpeg.getVideoDimensions(destFile);
       file.delete(script);
       file.delete(destFile);
       return(dimensions);
