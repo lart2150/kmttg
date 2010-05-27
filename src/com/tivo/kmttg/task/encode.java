@@ -97,6 +97,9 @@ public class encode implements Serializable {
       Stack<String> command = encodeConfig.getFullCommand(
          job.encodeName, job.inputFile, job.encodeFile, job.srtFile
       );
+      
+      // This deals with potential ###xHEIGHT or WIDTHx### keywords in encoding profile
+      command = ffmpeg.getOutputDimensions(job.inputFile, command);
          
       process = new backgroundProcess();
       log.print(">> ENCODING WITH PROFILE '" + job.encodeName + "' TO FILE " + job.encodeFile + " ...");
