@@ -1,11 +1,11 @@
 # Description (single line, keep short)
 <description>
-mpeg4 container, 640x480 30fps mpeg4 video, 48KHz/128Kbps 2 chan aac audio
+mpeg4 container, x=640 30fps mpeg4 video, 48KHz/128Kbps 2 chan aac audio
 
 # Encode command or script (single line)
 # Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
-FFMPEG -y -i INPUT -threads CPU_CORES -vcodec mpeg4 -maxrate 2000k -qmin 3 -qmax 5 -bufsize 5096k -g 300 -acodec aac -ac 2 -ab 128k -ar 48000 -s 640x480 -r 29.97 -b 1500k -f mp4 OUTPUT
+FFMPEG -y -i INPUT -threads CPU_CORES -vcodec mpeg4 -maxrate 2000k -qmin 3 -qmax 5 -bufsize 5096k -g 300 -acodec aac -ac 2 -ab 128k -ar 48000 -s 640xHEIGHT -r 29.97 -b 1500k -f mp4 OUTPUT
 
 # Encoded output file extension
 <extension>
