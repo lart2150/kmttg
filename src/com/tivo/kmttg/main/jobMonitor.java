@@ -1015,6 +1015,14 @@ public class jobMonitor {
       String startFile, String videoFile, String tivoFile, String mpegFile, String mpegFile_cut, String encodeFile,
       String suffix
       ) {
+      // Don't want null values for file names
+      if (startFile    == null)    startFile = "startFile";
+      if (videoFile    == null)    videoFile = "videoFile";
+      if (tivoFile     == null)     tivoFile = "tivoFile";
+      if (mpegFile     == null)     mpegFile = "mpegFile";
+      if (mpegFile_cut == null) mpegFile_cut = "mpegFile_cut";
+      if (encodeFile   == null)   encodeFile = "encodeFile";
+      
       Stack<String> files = new Stack<String>();
       if ( ! filter.equals("all") ) {
          // files setting != "all" => single push job
@@ -1044,22 +1052,14 @@ public class jobMonitor {
          }
       } else {
          // files setting = "all" => potentially multiple push jobs
-         if (tivoFile != null) {
-            if (mode.equals("Download") || (mode.equals("FILES") && tivoFile.equals(startFile)))
-               files.add(tivoFile + suffix);
-         }
-         if (mpegFile != null) {
-            if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
-               files.add(mpegFile + suffix);
-         }
-         if (mpegFile_cut != null) {
-            if (comcut || (mode.equals("FILES") && mpegFile_cut.equals(startFile)))
-               files.add(mpegFile_cut + suffix);
-         }
-         if (encodeFile != null) {
-            if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
-               files.add(encodeFile + suffix);
-         }
+         if (mode.equals("Download") || (mode.equals("FILES") && tivoFile.equals(startFile)))
+            files.add(tivoFile + suffix);
+         if (decrypt || (mode.equals("FILES") && mpegFile.equals(startFile)))
+            files.add(mpegFile + suffix);
+         if (comcut || (mode.equals("FILES") && mpegFile_cut.equals(startFile)))
+            files.add(mpegFile_cut + suffix);
+         if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
+            files.add(encodeFile + suffix);
       }
       return files;
    }
