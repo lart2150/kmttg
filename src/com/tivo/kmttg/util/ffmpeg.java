@@ -54,10 +54,15 @@ public class ffmpeg {
    // Return 0 on failure
    private static int computeOutputDimensions(String videoFile, String output_known, int output_dim) {
       Hashtable<String,String> source_dimensions = getVideoDimensions(videoFile);
-      int DAR_x=0, DAR_y=0;
+      if (source_dimensions == null) {
+         // Try once again in case of transient issue
+         log.warn("2nd try to obtain video file dimensions from file: " + videoFile);
+         source_dimensions = getVideoDimensions(videoFile);
+      }
       if (source_dimensions == null) {
          log.error("Failed to determine video dimensions from video file: " + videoFile);
       } else {
+         int DAR_x=0, DAR_y=0;
          // Use detected DAR if available
          if (source_dimensions.containsKey("DAR_x")) {
             DAR_x = Integer.parseInt(source_dimensions.get("DAR_x"));
