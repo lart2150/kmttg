@@ -1,6 +1,6 @@
 # Description (single line, keep short)
 <description>
-mpeg4 container, x=1280 h.264 video, 48KHz/160Kbps 2 chan aac audio
+mpeg4 container, res x=1280 h.264 video, 48KHz/160Kbps 2 chan aac audio
 
 # Encode command or script (single line)
 # Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
