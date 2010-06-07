@@ -601,10 +601,10 @@ public class gui {
                Boolean enabled = button.isSelected();
                if (enabled) {
                   jobMonitor.NoNewJobs = true;
-                  log.warn("Launching new jobs disabled. No new jobs will be launched. When all running jobs complete you can save queued jobs and exit.");
+                  log.warn("Launching queued jobs disabled. Queued jobs will not be launched.");
                } else {
                   jobMonitor.NoNewJobs = false;
-                  log.warn("Launching new jobs re-enabled. Normal job processing will continue.");
+                  log.warn("Launching queued jobs enabled. Resuming normal job processing.");
                }
             }
          });
