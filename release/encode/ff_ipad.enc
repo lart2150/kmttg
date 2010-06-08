@@ -5,7 +5,7 @@ mpeg4 container, res x=1280 h.264 video, 48KHz/160Kbps 2 chan aac audio
 # Encode command or script (single line)
 # Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
-FFMPEG -y -i INPUT -threads CPU_CORES -vcodec libx264 -level 31 -s 1280xHEIGHT -subq 6 -me_range 16 -qmin 10 -qmax 50 -maxrate 4000k -g 300 -r 29.97 -b 2500k -acodec aac -dts_delta_threshold 1 -async 48000 -ac 2 -ab 160k -ar 48000 -f mp4 OUTPUT
+FFMPEG -y -i INPUT -threads CPU_CORES -vcodec libx264 -level 31 -subq 6 -me_range 16 -qmin 10 -qmax 50 -g 300 -s 1280xHEIGHT -r 29.97 -b 2500k -maxrate 4000k -acodec aac -dts_delta_threshold 1 -async 48000 -ac 2 -ab 160k -ar 48000 -f mp4 OUTPUT
 
 # Encoded output file extension
 <extension>
