@@ -5,7 +5,7 @@ Creative Zen: avi container, 320x240 mpeg4 video, mp3 audio
 # Encode command or script (single line)
 # Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
-FFMPEG -y -i INPUT -threads CPU_CORES -vcodec mpeg4 -acodec libmp3lame -dts_delta_threshold 1 -async 48000 -b 800k -ac 2 -s 320x240 -f avi OUTPUT
+FFMPEG -y -i INPUT -threads CPU_CORES -vcodec mpeg4 -acodec libmp3lame -b 800k -ac 2 -s 320x240 -f avi OUTPUT
 
 # Encoded output file extension
 <extension>
