@@ -1,0 +1,12 @@
+# Description (single line, keep short)
+<description>
+mencoder iPhone: mpeg4 container, 480x320 h.264 video, aac audio
+
+# Encode command or script (single line)
+# Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
+<command>
+MENCODER INPUT -of lavf -lavfopts format=ipod -ovc x264 -x264encopts nocabac:level_idc=30:bitrate=384:threads=auto:bframes=0:global_header -vf pp=lb,dsize=480:320:0,scale=-8:-8,harddup -af volume=13:1 -oac faac -faacopts mpeg=4:object=2:raw:br=128 -hr-edl-seek -o OUTPUT
+
+# Encoded output file extension
+<extension>
+mp4
