@@ -1,0 +1,8 @@
+# Description (single line, keep short)<description>
+Blackberry Bold 9xxx (mencoder): avi container, 480x320 8vid video, mp3 audio
+# Encode command or script (single line)
+# Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
+<command>MENCODER INPUT -oac mp3lame -lameopts vol=5  -ovc xvid -xvidencopts threads=CPU_CORES:bitrate=400 -vf scale=480:320 -o OUTPUT
+# Encoded output file extension
+<extension>
+avi
