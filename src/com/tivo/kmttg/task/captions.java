@@ -57,9 +57,40 @@ public class captions implements Serializable {
          log.error("t2extract (" + config.t2extract + ") or ccextractor (" + config.ccextractor + ") not found");
          schedule = false;
       }
-         
-      if ( ! file.isFile(job.videoFile) ) {
-         log.error("video file not found: " + job.videoFile);
+      
+      // Find TiVo or mpeg2 video file to process if job.videoFile not available
+      String videoFile = job.videoFile;
+      String tryit;
+      if ( ! file.isFile(videoFile) && config.VrdReview_noCuts == 1) {
+         // Look for VRD default edit file output
+         tryit = string.replaceSuffix(videoFile, " (02).mpg");
+         if (file.isFile(tryit)) {
+            videoFile = tryit;
+         }
+      }
+      if ( ! file.isFile(videoFile) ) {
+         tryit = string.replaceSuffix(videoFile, "_cut.mpg");
+         if (file.isFile(tryit)) {
+            videoFile = tryit;
+         }
+      }
+      if ( ! file.isFile(videoFile)) {
+         tryit = string.replaceSuffix(videoFile, ".mpg");
+         if (file.isFile(tryit)) {
+            videoFile = tryit;
+         }
+      }
+      if ( ! file.isFile(videoFile)) {
+         tryit = string.replaceSuffix(videoFile, ".TiVo");
+         if (file.isFile(tryit)) {
+            videoFile = tryit;
+         }
+      }
+      
+      if (file.isFile(videoFile)) {
+         job.videoFile = videoFile;
+      } else {
+         log.error("cannot find .TiVo or .mpg file to process");
          schedule = false;
       }
       
