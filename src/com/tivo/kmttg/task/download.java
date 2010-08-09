@@ -44,6 +44,7 @@ public class download implements Serializable {
             schedule = false;
          } else {
             log.warn("OVERWRITING EXISTING FILE: " + job.tivoFile);
+            file.delete(job.tivoFile);
          }
       }
       
