@@ -38,7 +38,13 @@ public class download implements Serializable {
    public Boolean launchJob() {
       debug.print("");
       Boolean schedule = true;
-      if ( file.isFile(job.tivoFile) ) {
+      
+      if ( ! file.isFile(config.curl) ) {             
+         log.error("curl not found: " + config.curl);
+         schedule = false;
+      }
+      
+      if ( schedule && file.isFile(job.tivoFile) ) {
          if (config.OverwriteFiles == 0) {
             log.warn("SKIPPING DOWNLOAD, FILE ALREADY EXISTS: " + job.tivoFile);
             schedule = false;
@@ -46,11 +52,6 @@ public class download implements Serializable {
             log.warn("OVERWRITING EXISTING FILE: " + job.tivoFile);
             file.delete(job.tivoFile);
          }
-      }
-      
-      if ( ! file.isFile(config.curl) ) {             
-         log.error("curl not found: " + config.curl);
-         schedule = false;
       }
 
       if (schedule) {
