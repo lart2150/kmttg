@@ -11,6 +11,12 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -165,7 +171,7 @@ public class metadataTivo implements Serializable {
       return false;
    }
    
-   // Create a pyTivo compatible metadata file from a TiVoVideoDetails xml download
+   // Create a pyTivo compatible metadata file from a tivodecode xml dump
    @SuppressWarnings("unchecked")
    private Boolean metaFileFromXmlFile(String xmlFile, String metaFile) {
       debug.print("xmlFile=" + xmlFile + " metaFile=" + metaFile);
@@ -183,78 +189,60 @@ public class metadataTivo implements Serializable {
                "vGuestStar", "vWriter", "vChoreographer"
          };
          
-         BufferedReader xml = new BufferedReader(new FileReader(xmlFile));
-         String ll;
          Hashtable<String,Object> data = new Hashtable<String,Object>();
-         while ( (ll = xml.readLine()) != null ) {
-            debug.print("ll=" + ll);
-            String[] line = ll.split(">");
-                                   
-            // Now parse all items tagged with <Item>
-            String l, name, value;
-            for (int j=0; j<line.length; ++j) {            
-               l = line[j];
-               
-               // nameValues have value on following line
-               for (int k=0; k<nameValues.length; k++) {
-                  name = nameValues[k];
-                  if (l.matches("^<" + name + "$")) {
-                     j++;
-                     value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
-                     value = Entities.replaceHtmlEntities(value);
-                     if (value.length() > 0) {
-                        data.put(name, value);
-                        debug.print(name + "=" + value);
-                     }
-                  }
-               }
-            }
-            
-            for (int j=0; j<line.length; ++j) {            
-               l = line[j];
-               
-               // valuesOnly have value on same line
-               for (int k=0; k<valuesOnly.length; k++) {
-                  name = valuesOnly[k];
-                  if (l.matches("^<" + name + ".*$")) {
-                     value = line[j].replaceFirst("^.+\"(.+)\".*$", "$1");
-                     data.put(name, value);
-                     debug.print(name + "=" + value);
-                  }
-               }
-            }
-            
-            for (int j=0; j<line.length; ++j) {            
-               l = line[j];
-               debug.print("l=" + l);
-                
-               // arrays have 1 or more values
-               for (int k=0; k<arrays.length; k++) {
-                  name = arrays[k];
-                  if (l.matches("^<" + name + "$")) {
-                     Stack<String> values = new Stack<String>();
-                     Boolean go = true;
-                     while (go && j < line.length) {
-                        j++;
-                        if ( j < line.length ) {
-                           if ( line[j].matches("^</" + name + "$") ) go = false;
-                           if ( go && line[j].matches("^<element.*$") ) {
-                              j++;
-                              if ( ! line[j].matches("^<.+$") ) {
-                                 value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
-                                 values.add(value);
-                              }
-                           }
-                        }
-                     }
-                     data.put(name, values);
-                     debug.print(name + "=" + values);
-                  }
-               }           
+         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+         Document doc = docBuilder.parse(xmlFile);
+         
+         // First process nameValues
+         String name, value;
+         NodeList nlist;
+         for (int k=0; k<nameValues.length; k++) {
+            name = nameValues[k];
+            nlist = doc.getElementsByTagName(name);
+            if (nlist.getLength() > 0) {
+               value = nlist.item(0).getTextContent();
+               value = Entities.replaceHtmlEntities(value);
+               data.put(name, value);
+               debug.print(name + "=" + value);
             }
          }
-         xml.close();
-                  
+         
+         // Process valuesOnly which have a "value" node
+         for (int k=0; k<valuesOnly.length; k++) {
+            name = valuesOnly[k];
+            nlist = doc.getElementsByTagName(name);
+            if (nlist.getLength() > 0) {
+               value = nlist.item(0).getAttributes().getNamedItem("value").getNodeValue();
+               data.put(name, value);
+               debug.print(name + "=" + value);
+            }           
+         }
+         
+         // Process arrays which have 1 or more values
+         for (int k=0; k<arrays.length; k++) {
+            name = arrays[k];
+            nlist = doc.getElementsByTagName(name);
+            if (nlist.getLength() > 0) {
+               Stack<String> values = new Stack<String>();
+               NodeList children = nlist.item(0).getChildNodes();
+               for (int c=0; c<children.getLength(); c++) {
+                  value = children.item(c).getTextContent();
+                  values.add(value);
+                  debug.print(name + "=" + value);
+               }
+               data.put(name, values);
+            }
+         }
+         
+         // Look for seriesId under <series><uniqueId>
+         nlist = doc.getElementsByTagName("series");
+         value = getNodeValueByName(nlist, "uniqueId");
+         if (value != null) {
+            data.put("seriesId", value);
+            debug.print("seriesId=" + value);
+         }
+                                       
          // Post-process some of the data
          if ( data.containsKey("starRating") )
             data.put("starRating", "x" + data.get("starRating"));
@@ -298,7 +286,7 @@ public class metadataTivo implements Serializable {
                   ofp.write(key + " : " + data.get(key) + eol);
             }
          }
-         String[] additional = {"displayMajorNumber", "callsign"};
+         String[] additional = {"seriesId", "displayMajorNumber", "callsign"};
          for (int i=0; i<additional.length; ++i) {
             key = additional[i];
             if (data.containsKey(key)) {
@@ -318,7 +306,7 @@ public class metadataTivo implements Serializable {
          ofp.close();
          
       }
-      catch (IOException ex) {
+      catch (Exception ex) {
          log.error(ex.toString());
          file.delete(xmlFile);
          file.delete(xmlFile2);
@@ -328,6 +316,19 @@ public class metadataTivo implements Serializable {
       file.delete(xmlFile);
       file.delete(xmlFile2);
       return true;
+   }
+   
+   private String getNodeValueByName(NodeList nlist, String name) {
+      String value = null;
+      NodeList clist = nlist.item(0).getChildNodes();
+      if (clist.getLength() > 0) {
+         for (int i=0; i<clist.getLength(); ++i) {
+            if (clist.item(i).getNodeName().equals(name)) {
+               value = clist.item(i).getTextContent();
+            }
+         }
+      }
+      return value;
    }
    
    public void printData(Hashtable<String,Object> data) {
