@@ -11,6 +11,12 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -196,74 +202,50 @@ public class metadata implements Serializable {
                "vProgramGenre", "vSeriesGenre", "vAdvisory", "vHost",
                "vGuestStar", "vWriter", "vChoreographer"
          };
-         
-         BufferedReader xml = new BufferedReader(new FileReader(outputFile));
-         String ll;
+
          Hashtable<String,Object> data = new Hashtable<String,Object>();
-         while ( (ll = xml.readLine()) != null ) {
-            debug.print("ll=" + ll);
-            String[] line = ll.split(">");
-                                   
-            // Now parse all items tagged with <Item>
-            String l, name, value;
-            for (int j=0; j<line.length; ++j) {            
-               l = line[j];
-               
-               // nameValues have value on following line
-               for (int k=0; k<nameValues.length; k++) {
-                  name = nameValues[k];
-                  if (l.matches("^<" + name + ".*$")) {
-                     j++;
-                     value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
-                     value = Entities.replaceHtmlEntities(value);
-                     if (value.length() > 0)
-                        data.put(name, value);
-                     debug.print(name + "=" + value);
-                  }
-               }
+         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+         Document doc = docBuilder.parse(outputFile);
+         
+         // First process nameValues
+         String name, value;
+         NodeList nlist;
+         for (int k=0; k<nameValues.length; k++) {
+            name = nameValues[k];
+            nlist = doc.getElementsByTagName(name);
+            if (nlist.getLength() > 0) {
+               value = nlist.item(0).getTextContent();
+               value = Entities.replaceHtmlEntities(value);
+               data.put(name, value);
+               debug.print(name + "=" + value);
             }
-            
-            for (int j=0; j<line.length; ++j) {            
-               l = line[j];
-               
-               // valuesOnly have value on same line
-               for (int k=0; k<valuesOnly.length; k++) {
-                  name = valuesOnly[k];
-                  if (l.matches("^<" + name + ".*$")) {
-                     value = line[j].replaceFirst("^.+\"(.+)\".*$", "$1");
-                     data.put(name, value);
-                     debug.print(name + "=" + value);
-                  }
+         }
+         
+         // Process valuesOnly which have a "value" node
+         for (int k=0; k<valuesOnly.length; k++) {
+            name = valuesOnly[k];
+            nlist = doc.getElementsByTagName(name);
+            if (nlist.getLength() > 0) {
+               value = nlist.item(0).getAttributes().getNamedItem("value").getNodeValue();
+               data.put(name, value);
+               debug.print(name + "=" + value);
+            }           
+         }
+         
+         // Process arrays which have 1 or more values
+         for (int k=0; k<arrays.length; k++) {
+            name = arrays[k];
+            nlist = doc.getElementsByTagName(name);
+            if (nlist.getLength() > 0) {
+               Stack<String> values = new Stack<String>();
+               NodeList children = nlist.item(0).getChildNodes();
+               for (int c=0; c<children.getLength(); c++) {
+                  value = children.item(c).getTextContent();
+                  values.add(value);
+                  debug.print(name + "=" + value);
                }
-            }
-            
-            for (int j=0; j<line.length; ++j) {            
-               l = line[j];
-               debug.print("l=" + l);
-                
-               // arrays have 1 or more values
-               for (int k=0; k<arrays.length; k++) {
-                  name = arrays[k];
-                  if (l.matches("^<" + name + "$")) {
-                     Stack<String> values = new Stack<String>();
-                     Boolean go = true;
-                     while (go && j < line.length) {
-                        j++;
-                        if ( j < line.length ) {
-                           if ( line[j].matches("^</" + name + "$") ) go = false;
-                           if ( go && line[j].matches("^<element.*$") ) {
-                              j++;
-                              if ( ! line[j].matches("^<.+$") ) {
-                                 value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
-                                 values.add(value);
-                              }
-                           }
-                        }
-                     }
-                     data.put(name, values);
-                     debug.print(name + "=" + values);
-                  }
-               }           
+               data.put(name, values);
             }
          }
                   
@@ -341,12 +323,10 @@ public class metadata implements Serializable {
                }
             }
          }
-
-         xml.close();
          ofp.close();
          
       }
-      catch (IOException ex) {
+      catch (Exception ex) {
          log.error(ex.toString());
          file.delete(cookieFile);
          file.delete(outputFile);
