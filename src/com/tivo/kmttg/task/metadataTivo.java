@@ -237,10 +237,12 @@ public class metadataTivo implements Serializable {
          
          // Look for seriesId under <series><uniqueId>
          nlist = doc.getElementsByTagName("series");
-         value = getNodeValueByName(nlist, "uniqueId");
-         if (value != null) {
-            data.put("seriesId", value);
-            debug.print("seriesId=" + value);
+         if (nlist.getLength() > 0) {
+            value = getNodeValueByName(nlist, "uniqueId");
+            if (value != null) {
+               data.put("seriesId", value);
+               debug.print("seriesId=" + value);
+            }
          }
                                        
          // Post-process some of the data
