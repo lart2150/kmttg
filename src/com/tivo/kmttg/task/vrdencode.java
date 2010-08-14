@@ -159,23 +159,29 @@ public class vrdencode implements Serializable {
       if (exit_code == -1) {
          // Still running
          if (config.GUI) {
+            String t = jobMonitor.getElapsedTime(job.time);
+            String size = null;
             if ( file.isFile(job.encodeFile) ) {               
-               // Update status in job table
-               String s = String.format("%.2f MB", (float)file.size(job.encodeFile)/Math.pow(2,20));
-               String t = jobMonitor.getElapsedTime(job.time);
-               int pct = encodeGetPct();
-                              
-               if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                  // Update STATUS column, title & progress bar
-                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);                  
-                  String title = String.format("vrdencode: %d%% %s", pct, config.kmttg);
-                  config.gui.setTitle(title);
-                  config.gui.progressBar_setValue(pct);
-               } else {
-                  // Update STATUS column only
-                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, String.format("%d%%",pct) + "---" + s); 
-               }
+               size = String.format("%.2f MB", (float)file.size(job.encodeFile)/Math.pow(2,20));
+               if (size.equals("0.00 MB")) size = null;
             }
+            
+            // Update job table
+            int pct = encodeGetPct();
+
+            String status = t;
+            if ( jobMonitor.isFirstJobInMonitor(job) ) {
+               // Update STATUS column, title & progress bar
+               String title = String.format("vrdencode: %d%% %s", pct, config.kmttg);
+               config.gui.setTitle(title);
+               config.gui.progressBar_setValue(pct);
+            } else {
+               status = String.format("%d%%",pct);
+            }
+            // Update STATUS column
+            if (size != null) status += "---" + size;
+            config.gui.jobTab_UpdateJobMonitorRowStatus(job, status);
+
          }
         return true;
       } else {
