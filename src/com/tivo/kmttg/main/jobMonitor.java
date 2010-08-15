@@ -480,13 +480,13 @@ public class jobMonitor {
       return false;
    }
 
-   // Return elapsed time of a job in hh:mm:ss format
+   // Return elapsed time of a job in h:mm:ss format
    public static String getElapsedTime(long start) {
       long elapsed = (new Date().getTime() - start)/1000;
       int hours = (int)(elapsed/3600);
       int mins  = (int)((elapsed/60) - (hours*60));
       int secs  = (int)(elapsed % 60);
-      return String.format("%02d:%02d:%02d",hours,mins,secs);
+      return String.format("%d:%02d:%02d",hours,mins,secs);
    }
 
    // Return elapsed time of a job in hh:mm:ss format
