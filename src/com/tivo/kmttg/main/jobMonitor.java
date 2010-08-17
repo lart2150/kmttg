@@ -767,7 +767,7 @@ public class jobMonitor {
             }
          }
          
-         if (config.autotune != null && config.autotune.containsKey(tivoName)) {
+         if (autotune.isConfigured()) {
             jobData job = new jobData();
             job.source   = source;
             job.tivoName = tivoName;
