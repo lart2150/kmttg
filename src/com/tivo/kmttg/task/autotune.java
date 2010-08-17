@@ -10,6 +10,7 @@ import com.tivo.kmttg.main.telnet;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class autotune implements Serializable {
    private static final long serialVersionUID = 1L;
@@ -38,17 +39,17 @@ public class autotune implements Serializable {
          return false;
       }
       
-      if (config.autotune == null) {
+      // No configuration => nothing to do
+      if ( ! isConfigured() ) {
+         log.error("autotune missing configuration or disabled");
          return false;
       }
-      
-      if ( ! config.autotune.containsKey(job.tivoName) ) {
-         return false;
-      }
-      
-      String[] keys = {"channel_interval", "button_interval", "chan1", "chan2"};
+            
+      // Check that autotune TiVo hash contains the required keys
+      String[] keys = getRequiredElements();
       for (int i=0; i<keys.length; ++i) {
-         if ( ! config.autotune.get(job.tivoName).containsKey(keys[i]) ) {
+         if ( ! config.autotune.containsKey(keys[i]) ) {
+            log.error("autotune missing configuration item: " + keys[i]);
             return false;
          }
       }
@@ -64,15 +65,18 @@ public class autotune implements Serializable {
    private Boolean start() {
       debug.print("");
       // Run telnet in a separate thread
+      // Send sequence of channel changes for both tuners
       class AutoThread implements Runnable {
          AutoThread() {}       
          public void run () {
-            String[] seq1 = sequenceFromChannel(config.autotune.get(job.tivoName).get("chan1"));
-            String[] seq2 = sequenceFromChannel(config.autotune.get(job.tivoName).get("chan2"));
-            int channel_interval = Integer.getInteger(config.autotune.get(job.tivoName).get("channel_interval"));
-            int button_interval = Integer.getInteger(config.autotune.get(job.tivoName).get("button_interval"));
-            telnet t = new telnet(IP, channel_interval, button_interval, seq1, seq2);
-            success = t.success;
+            String[] seq1 = sequenceFromChannel("chan1");
+            String[] seq2 = sequenceFromChannel("chan2");
+            int channel_interval = getInterval("channel_interval");
+            int button_interval  = getInterval("button_interval");
+            if (seq1 != null && seq2 != null && channel_interval != -1 && button_interval != -1) {
+               telnet t = new telnet(IP, channel_interval, button_interval, seq1, seq2);
+               success = t.success;
+            }
             thread_running = false;
          }
       }
@@ -114,9 +118,47 @@ public class autotune implements Serializable {
       return false;
    }
    
-   // LIVETV,CLEAR,CHANNEL DIGIT 1, CHANNEL DIGIT 2...,ENTER
-   public String[] sequenceFromChannel(String channel) {
-      return null;
+   // Example: 922 -> LIVETV,CLEAR,9,2,2,ENTER
+   private String[] sequenceFromChannel(String channelNum) {
+      String channel = config.autotune.get(channelNum);
+      // Test for all integers in string
+      if ( ! channel.matches("^\\d+$") ) {
+         log.error("Given autotune channel is not all integers: '" + channel + "'");
+         return null;
+      }
+      int index = 0;
+      char[] digits = channel.toCharArray();
+      String[] seq = new String[digits.length+3];
+      seq[index++] = "LIVETV";
+      seq[index++] = "CLEAR";
+      for (int i=0; i<digits.length; i++) {
+         seq[index++] = "" + digits[i];
+      }
+      seq[index++] = "ENTER";
+      return seq;
+   }
+   
+   private int getInterval(String name) {
+      int interval = -1;
+      try {
+         interval = Integer.parseInt(
+            string.removeLeadingTrailingSpaces(config.autotune.get(name))
+         );
+      } catch (Exception e) {
+         log.error("autotune error determining " + job.tivoName + " parameter: " + name + " - " + e.getMessage());
+      }
+      return interval;
+   }
+      
+   // Return true if given tivoName has valid autotune configuration
+   public static Boolean isConfigured() {
+      return config.autotune != null &&
+             config.autotune.containsKey("enabled") &&
+             config.autotune.get("enabled").equals("true");
+   }
+   
+   public static String[] getRequiredElements() {
+      return new String[] {"enabled", "channel_interval", "button_interval", "chan1", "chan2"};
    }
 
 }
