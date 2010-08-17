@@ -22,6 +22,7 @@ public class jobData implements Serializable {
    public NowPlaying   process_npl = null;
    public metadata     process_metadata = null;
    public metadataTivo process_metadataTivo = null;
+   public autotune     process_autotune = null;
    public download     process_download = null;
    public decrypt      process_decrypt = null;
    public qsfix        process_qsfix = null;
@@ -92,6 +93,7 @@ public class jobData implements Serializable {
          "playlist",
          "metadata",
          "metadataTivo",
+         "autotune",
          "download",
          "decrypt",
          "qsfix",
@@ -123,6 +125,9 @@ public class jobData implements Serializable {
       }      
       else if (type.matches("metadataTivo")) {
          return process_metadataTivo.check();
+      }      
+      else if (type.matches("autotune")) {
+         return process_autotune.check();
       }      
       else if (type.matches("download")) {
          return process_download.check();
@@ -181,6 +186,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("metadataTivo")) {
          return process_metadataTivo.getProcess();
+      }
+      else if (type.equals("autotune")) {
+         return process_autotune.getProcess();
       }
       else if (type.equals("download")) {
          return process_download.getProcess();
@@ -241,6 +249,9 @@ public class jobData implements Serializable {
       else if (type.equals("metadataTivo")) {
          file = tivoFile;
       }
+      else if (type.equals("autotune")) {
+         file = tivoName;
+      }
       else if (type.equals("download")) {
          file = url;
       }
@@ -299,6 +310,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("metadataTivo")) {
          file = metaFile;
+      }
+      else if (type.equals("autotune")) {
+         file = tivoName;
       }
       else if (type.equals("download")) {
          file = tivoFile;
@@ -364,6 +378,11 @@ public class jobData implements Serializable {
       else if (job.type.equals("metadataTivo")) {  
          metadataTivo proc = new metadataTivo(job);
          active = 0; // Not CPU active
+         success = proc.launchJob();
+      }
+      
+      else if (job.type.equals("autotune")) {  
+         autotune proc = new autotune(job);
          success = proc.launchJob();
       }
       
@@ -462,6 +481,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("metadataTivo")) {
          process_metadataTivo.kill();
+      }
+      else if (type.equals("autotune")) {
+         process_autotune.kill();
       }
       else if (type.equals("download")) {
          process_download.kill();
