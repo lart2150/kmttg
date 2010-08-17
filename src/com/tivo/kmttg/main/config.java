@@ -138,7 +138,7 @@ public class config {
    public static int download_retry_delay = 10; // Delay in secs between retry attempts
    
    // autotune related
-   public static Hashtable<String,Hashtable<String,String>> autotune = null;
+   public static Hashtable<String,String> autotune = null;
    
    public static Stack<String> parse() {
       debug.print("");
@@ -491,6 +491,7 @@ public class config {
          BufferedReader ini = new BufferedReader(new FileReader(config));
          String line = null;
          String key = null;
+         String[] autotune_keys = com.tivo.kmttg.task.autotune.getRequiredElements();
          while (( line = ini.readLine()) != null) {
             // Get rid of leading and trailing white space
             line = line.replaceFirst("^\\s*(.*$)", "$1");
@@ -652,6 +653,12 @@ public class config {
             }
             if (key.equals("metadata_files")) {
                metadata_files = line;
+            }
+            for (int i=0; i<autotune_keys.length; ++i) {
+               if (key.equals("autotune_" + autotune_keys[i])) {
+                  if (autotune == null) autotune = new Hashtable<String,String>();
+                  autotune.put(autotune_keys[i], string.removeLeadingTrailingSpaces(line));
+               }
             }
             if (key.equals("CheckDiskSpace")) {
                CheckDiskSpace = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
@@ -834,6 +841,15 @@ public class config {
          
          ofp.write("<autoLogSizeMB>\n" + autoLogSizeMB + "\n\n");
          
+         if (autotune != null ) {
+            String[] keys = com.tivo.kmttg.task.autotune.getRequiredElements();
+            for (int i=0; i<keys.length; ++i) {
+               if ( autotune.containsKey(keys[i]) ) {
+                  ofp.write("<autotune_" + keys[i] + ">\n" + autotune.get(keys[i]) + "\n\n");
+               }
+            }
+         }
+         
          if (diskSpace.size() > 0) {
             ofp.write("<diskSpace>\n");
             for (Enumeration<String> e=diskSpace.keys(); e.hasMoreElements();) {
@@ -883,5 +899,5 @@ public class config {
       }
       return null;
    }
- 
+    
 }
