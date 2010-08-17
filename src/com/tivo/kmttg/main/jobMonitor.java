@@ -767,6 +767,15 @@ public class jobMonitor {
             }
          }
          
+         if (config.autotune != null && config.autotune.containsKey(tivoName)) {
+            jobData job = new jobData();
+            job.source   = source;
+            job.tivoName = tivoName;
+            job.type     = "autotune";
+            job.name     = "telnet";
+            submitNewJob(job);
+         }
+         
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
