@@ -137,6 +137,9 @@ public class config {
    public static int download_tries = 5;        // Number of times to retry downloads
    public static int download_retry_delay = 10; // Delay in secs between retry attempts
    
+   // autotune related
+   public static Hashtable<String,Hashtable<String,String>> autotune = null;
+   
    public static Stack<String> parse() {
       debug.print("");
       String result;
