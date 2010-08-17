@@ -14,26 +14,61 @@ public class telnet {
    private int port = 31339;
    private Socket socket = null;
    private int timeout = 5;
+   private int button_interval = 100;
    private PrintStream pout = null;
+   public Boolean success = true;
    private String valid[] = {
        "NUM0", "NUM1", "NUM2", "NUM3", "NUM4", "NUM5", "NUM6", "NUM7", "NUM8", "NUM9",
        "TIVO", "INFO", "LIVETV", "GUIDE", "WINDOW",
        "LEFT", "UP", "RIGHT", "DOWN", "SELECT", "THUMBSUP", "THUMBSDOWN",
        "CHANNELUP", "CHANNELDOWN", "RECORD", "CLEAR", "ENTER",
        "PLAY", "REVERSE", "PAUSE", "FORWARD", "REPLAY", "SLOW", "ADVANCE",
+       "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
+       "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
    };
+   
+   // Constructor for dual tuner channel change
+   public telnet(String IP, int pause_time, int button_interval, String[] seq1, String[] seq2) {
+      this.IP = IP;
+      this.button_interval = button_interval;
+      try {
+         telnet t1 = new telnet(IP, seq1);
+         if (t1.success) {
+            Thread.sleep(1000*pause_time);
+            t1 = new telnet(IP, seq2);
+            success = t1.success;
+         } else {
+            success = false;
+         }
+      } catch (Exception e) {
+         log.error("telnet - " + e.getMessage());
+         success = false;
+      }
+   }
 
+   // Constructor for single sequence
    public telnet(String IP, String[] buttons) {
       this.IP = IP;
-      send(buttons);
+      success = send(buttons);
       disconnect();
    }
    
    private String mapButton(String code) {
+      Boolean ircode = true;
       String mapped = code.toUpperCase();
       // [0-9] maps to NUM[0-9]
-      if (code.matches("^\\d$")) {
+      if (mapped.matches("^\\d$")) {
          mapped = "NUM" + code;
+      }
+      
+      // space maps to FORWARD
+      if (mapped.matches("^\\s+$")) {
+         mapped = "FORWARD";
+      }
+      
+      // [A-Z] => KEYBOARD
+      if (mapped.matches("^[A-Z]$")) {
+         ircode = false;
       }
       
       // Check that mapped is among valid strings
@@ -43,10 +78,17 @@ public class telnet {
             good = true;
          }
       }
-      if (good)
+      
+      if (good) {
+         if (ircode)
+            mapped = "IRCODE " + mapped;
+         else
+            mapped = "KEYBOARD " + mapped;
          return mapped;
+      }
       
       log.error("telnet - Unrecognized or invalid button code: " + mapped);
+      success = false;
       return null;
    }
       
@@ -94,7 +136,7 @@ public class telnet {
       }
       try {
          pout.println(s + "\r");
-         Thread.sleep(100L);
+         Thread.sleep(button_interval);
       } catch (InterruptedException e) {
          log.error("telnet - " + e.getMessage());
          return false;
@@ -106,7 +148,7 @@ public class telnet {
       for (int i=0; i<codes.length; ++i) {
          String mapped = mapButton(codes[i]);
          if ( mapped == null ) return false;
-         if ( ! write("IRCODE " + mapped ) ) return false;
+         if ( ! write(mapped ) ) return false;
       }
       return true;
    }
