@@ -41,7 +41,7 @@ public class autotune implements Serializable {
       }
       
       // No configuration => nothing to do
-      if ( ! isConfigured() ) {
+      if ( ! isConfigured() && job.autotune_chan1 == null) {
          log.error("autotune missing configuration or disabled");
          return false;
       }
@@ -121,7 +121,13 @@ public class autotune implements Serializable {
    
    // Example: 922 -> LIVETV,CLEAR,9,2,2,ENTER
    private String[] sequenceFromChannel(String channelNum) {
-      String channel = config.autotune.get(channelNum);
+      String channel;
+      if (job.autotune_chan1 != null && channelNum.equals("chan1"))
+         channel = job.autotune_chan1;
+      else if (job.autotune_chan2 != null && channelNum.equals("chan2"))
+         channel = job.autotune_chan2;
+      else
+         channel = config.autotune.get(channelNum);
       // Test for all integers in string
       if ( ! channel.matches("^\\d+$") ) {
          log.error("Given autotune channel is not all integers: '" + channel + "'");
@@ -142,9 +148,15 @@ public class autotune implements Serializable {
    private int getInterval(String name) {
       int interval = -1;
       try {
-         interval = Integer.parseInt(
-            string.removeLeadingTrailingSpaces(config.autotune.get(name))
-         );
+         if (job.autotune_channel_interval != -1 && name.equals("channel_interval")) {
+            interval = job.autotune_channel_interval;
+         } else if (job.autotune_button_interval != -1 && name.equals("button_interval")) {
+            interval = job.autotune_channel_interval;
+         } else {
+            interval = Integer.parseInt(
+               string.removeLeadingTrailingSpaces(config.autotune.get(name))
+            );
+         }
       } catch (Exception e) {
          log.error("autotune error determining " + job.tivoName + " parameter: " + name + " - " + e.getMessage());
       }
