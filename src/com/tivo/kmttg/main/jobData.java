@@ -86,6 +86,12 @@ public class jobData implements Serializable {
    // comskip related
    public String comskipIni = null;
    
+   // autotune testing related
+   public int autotune_channel_interval = -1;
+   public int autotune_button_interval = -1;
+   public String autotune_chan1 = null;
+   public String autotune_chan2 = null;
+   
    // NOTE: This used for job insertion purposes
    // ** JOB ORDER IS VERY IMPORTANT **
    public static String[] allTaskNames() {
