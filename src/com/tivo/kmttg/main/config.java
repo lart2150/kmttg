@@ -656,7 +656,7 @@ public class config {
             }
             for (int i=0; i<autotune_keys.length; ++i) {
                if (key.equals("autotune_" + autotune_keys[i])) {
-                  if (autotune == null) autotune = new Hashtable<String,String>();
+                  com.tivo.kmttg.task.autotune.init();
                   autotune.put(autotune_keys[i], string.removeLeadingTrailingSpaces(line));
                }
             }
