@@ -26,6 +26,7 @@ import javax.swing.JTextField;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.mdns;
+import com.tivo.kmttg.task.autotune;
 import com.tivo.kmttg.task.custom;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -62,6 +63,7 @@ public class configMain {
    private static JCheckBox toolTips = null;
    private static JCheckBox tableColAutoSize = null;
    private static JCheckBox jobMonitorFullPaths = null;
+   private static JCheckBox autotune_enabled = null;
    private static JTextField tivo_name = null;
    private static JTextField tivo_ip = null;
    private static JTextField files_path = null;
@@ -96,6 +98,10 @@ public class configMain {
    private static JTextField autoLogSizeMB = null;
    private static JTextField pyTivo_host = null;
    private static JTextField pyTivo_config = null;
+   private static JTextField autotune_channel_interval = null;
+   private static JTextField autotune_button_interval = null;
+   private static JTextField autotune_chan1 = null;
+   private static JTextField autotune_chan2 = null;
    private static JComboBox MinChanDigits = null;
    private static JComboBox pyTivo_tivo = null;
    private static JComboBox pyTivo_files = null;
@@ -508,6 +514,16 @@ public class configMain {
       
       // metadata_files
       metadata_files.setSelectedItem(config.metadata_files);
+      
+      // autotune settings      
+      if (autotune.isConfigured())
+         autotune_enabled.setSelected(true);
+      else
+         autotune_enabled.setSelected(false);
+      autotune_channel_interval.setText("" + config.autotune.get("channel_interval"));
+      autotune_button_interval.setText("" + config.autotune.get("button_interval"));
+      autotune_chan1.setText("" + config.autotune.get("chan1"));
+      autotune_chan2.setText("" + config.autotune.get("chan2"));
    }
    
    // Update config settings with widget values
@@ -1105,6 +1121,18 @@ public class configMain {
       // metadata_files
       config.metadata_files = (String)metadata_files.getSelectedItem();
       
+      // autotune settings
+      
+      // autotune enabled
+      if (autotune_enabled.isSelected())
+         autotune.enable();
+      else
+         autotune.disable();
+      config.autotune.put("channel_interval", string.removeLeadingTrailingSpaces(autotune_channel_interval.getText()));
+      config.autotune.put("button_interval", string.removeLeadingTrailingSpaces(autotune_button_interval.getText()));
+      config.autotune.put("chan1", string.removeLeadingTrailingSpaces(autotune_chan1.getText()));
+      config.autotune.put("chan2", string.removeLeadingTrailingSpaces(autotune_chan2.getText()));
+      
       return errors;
    }
 
@@ -1136,6 +1164,10 @@ public class configMain {
       
       tivo_name = new javax.swing.JTextField(20);
       tivo_ip = new javax.swing.JTextField(20);
+      autotune_channel_interval = new javax.swing.JTextField(20);
+      autotune_button_interval = new javax.swing.JTextField(20);
+      autotune_chan1 = new javax.swing.JTextField(20);
+      autotune_chan2 = new javax.swing.JTextField(20);
       pyTivo_host = new javax.swing.JTextField(20);
       
       MAK = new javax.swing.JTextField(15);
@@ -1156,6 +1188,10 @@ public class configMain {
       del = new javax.swing.JButton();
       JLabel tivo_name_label = new javax.swing.JLabel();
       JLabel tivo_ip_label = new javax.swing.JLabel();
+      JLabel autotune_channel_interval_label = new javax.swing.JLabel();
+      JLabel autotune_button_interval_label = new javax.swing.JLabel();
+      JLabel autotune_chan1_label = new javax.swing.JLabel();
+      JLabel autotune_chan2_label = new javax.swing.JLabel();
       JLabel files_path_label = new javax.swing.JLabel();
       remove_tivo = new javax.swing.JCheckBox();
       remove_comcut = new javax.swing.JCheckBox();
@@ -1219,6 +1255,7 @@ public class configMain {
       toolTips = new javax.swing.JCheckBox();
       tableColAutoSize = new javax.swing.JCheckBox();
       jobMonitorFullPaths = new javax.swing.JCheckBox();
+      autotune_enabled = new javax.swing.JCheckBox();
       JLabel toolTipsTimeout_label = new javax.swing.JLabel();
       OK = new javax.swing.JButton();
       CANCEL = new javax.swing.JButton();
@@ -1242,7 +1279,11 @@ public class configMain {
       });
       
       tivo_name_label.setText("Tivo Name"); 
-      tivo_ip_label.setText("Tivo IP#"); 
+      tivo_ip_label.setText("Tivo IP#");
+      autotune_channel_interval_label.setText("Channel change interval (secs)");
+      autotune_button_interval_label.setText("Button press interval (msecs)");
+      autotune_chan1_label.setText("Channel number for tuner 1");
+      autotune_chan2_label.setText("Channel number for tuner 2");
       files_path_label.setText("FILES Default Path"); 
       remove_tivo.setText("Remove .TiVo after file decrypt"); 
       remove_comcut.setText("Remove Ad Detect files after Ad Cut");
@@ -1347,6 +1388,8 @@ public class configMain {
       tableColAutoSize.setText("Auto size NPL column widths");
       
       jobMonitorFullPaths.setText("Show full paths in Job Monitor");
+      
+      autotune_enabled.setText("Tune to specified channels before a download");
       
       OK.setText("OK");
       OK.setBackground(Color.green);
@@ -1683,6 +1726,50 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       tivo_panel.add(tivo_ip, c);
+      
+      // autotune panel
+      JPanel autotune_panel = new JPanel(new GridBagLayout());      
+
+      gy=0;
+      c.gridx = 1;
+      c.gridy = gy;
+      autotune_panel.add(autotune_enabled, c);
+      
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      autotune_panel.add(autotune_chan1_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      autotune_panel.add(autotune_chan1, c);
+      
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      autotune_panel.add(autotune_chan2_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      autotune_panel.add(autotune_chan2, c);
+      
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      autotune_panel.add(autotune_channel_interval_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      autotune_panel.add(autotune_channel_interval, c);
+      
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      autotune_panel.add(autotune_button_interval_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      autotune_panel.add(autotune_button_interval, c);
       
       // Files panel
       JPanel files_panel = new JPanel(new GridBagLayout());      
@@ -2227,6 +2314,7 @@ public class configMain {
       if (config.OS.equals("windows"))
          tabbed_panel.add("VideoRedo", vrd_panel);
       tabbed_panel.add("pyTivo", pyTivo_panel);
+      tabbed_panel.add("Autotune", autotune_panel);
       
       // Main panel
       JPanel main_panel = new JPanel(new GridBagLayout());
@@ -2253,6 +2341,11 @@ public class configMain {
       debug.print("");
       tivo_name.setToolTipText(getToolTip("tivo_name"));
       tivo_ip.setToolTipText(getToolTip("tivo_ip"));
+      autotune_enabled.setToolTipText(getToolTip("autotune_enabled"));
+      autotune_channel_interval.setToolTipText(getToolTip("autotune_channel_interval"));
+      autotune_button_interval.setToolTipText(getToolTip("autotune_button_interval"));
+      autotune_chan1.setToolTipText(getToolTip("autotune_chan1"));
+      autotune_chan2.setToolTipText(getToolTip("autotune_chan2"));
       add.setToolTipText(getToolTip("add")); 
       del.setToolTipText(getToolTip("del")); 
       remove_tivo.setToolTipText(getToolTip("remove_tivo"));
@@ -2332,6 +2425,37 @@ public class configMain {
          text += "You can find the IP number of your TiVo from the TiVo as follows:<br>";
          text += "<b>Tivo Central-Messages&Settings-Settings-Phone&Network: IP addr</b><br>";
          text += "Enter corresponding <b>Tivo Name</b> above and then click on <b>ADD</b> button.";
+      }
+      else if (component.equals("autotune_enabled")) {
+         text =  "<b>Tune to specified channels before a download</b><br>";
+         text += "For Series 3 & 4 TiVos that have <b>Network Remote Control</b> option enabled<br>";
+         text += "you can have kmttg tune to silent channels or channels you don't receive before<br>";
+         text += "initiating a download from a TiVo. This helps speed up transfer rates by removing CPU load<br>";
+         text += "from the TiVo. In order for this to work you must enabled Network Remote Control feature:<br>";
+         text += "<b>Tivo Central-Messages&Settings-Settings-Remote,CableCARD&Devices: Network Remote Control</b><br>";
+         text += "kmttg uses LIVETV,CLEAR,CHANNEL #,ENTER network button press sequence to tune to a channel.";
+      }
+      else if (component.equals("autotune_channel_interval")) {
+         text =  "<b>Channel change interval (secs)</b><br>";
+         text += "Specifies interval of time in seconds to wait after tuning first tuner before attempting<br>";
+         text += "to tune second tuner. Depending on how responsive your TiVo is this may have to be tweeked for<br>";
+         text += "both channel changes to work.";
+      }
+      else if (component.equals("autotune_button_interval")) {
+         text =  "<b>Button press interval (msecs)</b><br>";
+         text += "Specifies interval of time in milliseconds to wait between network button press commands that<br>";
+         text += "are sent to the TiVo for tuning. Depending on how responsive your TiVo is this may have to be<br>";
+         text += "tweeked for network based channel tuning to work.";
+      }
+      else if (component.equals("autotune_chan1")) {
+         text =  "<b>Channel number for tuner 1</b><br>";
+         text += "Channel number to use for first tuner. Typically you want to set this to a music channel or<br>";
+         text += "channel that you don't subscribe to so that it relieves the load on your TiVo CPU.";
+      }
+      else if (component.equals("autotune_chan2")) {
+         text =  "<b>Channel number for tuner 2</b><br>";
+         text += "Channel number to use for second tuner. Typically you want to set this to a music channel or<br>";
+         text += "channel that you don't subscribe to so that it relieves the load on your TiVo CPU.";
       }
       else if (component.equals("add")) {
          text =  "<b>ADD</b><br>";
