@@ -1157,7 +1157,7 @@ public class gui {
       return tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
    }
    
-   private String getSelectedTivoName() {
+   public String getSelectedTivoName() {
       String tabName = getCurrentTabName();
       if (! tabName.equals("FILES")) {
          return tabName;
