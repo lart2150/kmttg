@@ -25,6 +25,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.jobData;
+import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.main.mdns;
 import com.tivo.kmttg.task.autotune;
 import com.tivo.kmttg.task.custom;
@@ -41,6 +43,7 @@ public class configMain {
    private static JButton del = null;
    private static JButton OK = null;
    private static JButton CANCEL = null;
+   private static JButton autotune_test = null;
    private static JDialog dialog = null;
    private static JComboBox tivos = null;
    private static JCheckBox remove_tivo = null;
@@ -203,6 +206,73 @@ public class configMain {
          return;
       }
       addTivo(name, ip);      
+   }
+   
+   // Callback for add button
+   private static void autotune_testCB() {
+      debug.print("");
+      String cinterval = string.removeLeadingTrailingSpaces(
+         autotune_channel_interval.getText()
+      );
+      String binterval = string.removeLeadingTrailingSpaces(
+         autotune_button_interval.getText()
+      );
+      String chan1 = string.removeLeadingTrailingSpaces(
+         autotune_chan1.getText()
+      );
+      String chan2 = string.removeLeadingTrailingSpaces(
+         autotune_chan2.getText()
+      );
+      int channel_interval, button_interval;
+      if (cinterval.length() == 0) {
+         log.error("channel interval number not specified");
+         return;
+      } else {
+         try {
+            channel_interval = Integer.parseInt(
+               string.removeLeadingTrailingSpaces(cinterval)
+            );
+         } catch (Exception e) {
+            log.error("channel interval should be an integer");
+            return;
+         }
+      }
+      if (binterval.length() == 0) {
+         log.error("button interval number not specified");
+         return;
+      } else {
+         try {
+            button_interval = Integer.parseInt(
+               string.removeLeadingTrailingSpaces(binterval)
+            );
+         } catch (Exception e) {
+            log.error("button interval should be an integer");
+            return;
+         }
+      }
+      if (chan1.length() == 0) {
+         log.error("channel 1 not specified");
+         return;
+      }
+      if (chan2.length() == 0) {
+         log.error("channel 2 not specified");
+         return;
+      }
+      String tivoName = config.gui.getSelectedTivoName();
+      if (tivoName.equals("FILES")) {
+         log.error("FILES tab currently selected");
+         return;
+      }
+      jobData job = new jobData();
+      job.source   = tivoName;
+      job.tivoName = tivoName;
+      job.type     = "autotune";
+      job.name     = "telnet";
+      job.autotune_channel_interval = channel_interval;
+      job.autotune_button_interval = button_interval;
+      job.autotune_chan1 = chan1;
+      job.autotune_chan2 = chan2;
+      jobMonitor.submitNewJob(job);
    }
    
    // Callback for keywords combobox
@@ -1259,6 +1329,7 @@ public class configMain {
       JLabel toolTipsTimeout_label = new javax.swing.JLabel();
       OK = new javax.swing.JButton();
       CANCEL = new javax.swing.JButton();
+      autotune_test = new javax.swing.JButton();
       Browser = new JFileChooser(config.programDir);
       Browser.setMultiSelectionEnabled(false);
 
@@ -1404,6 +1475,14 @@ public class configMain {
       CANCEL.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             dialog.setVisible(false);
+         }
+      });
+      
+      autotune_test.setText("TEST");
+      //autotune_test.setBackground(Color.green);
+      autotune_test.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            autotune_testCB();
          }
       });
       
@@ -1770,6 +1849,11 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       autotune_panel.add(autotune_button_interval, c);
+      
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      autotune_panel.add(autotune_test, c);
       
       // Files panel
       JPanel files_panel = new JPanel(new GridBagLayout());      
@@ -2393,7 +2477,8 @@ public class configMain {
       keywords.setToolTipText(getToolTip("keywords"));
       customFiles.setToolTipText(getToolTip("customFiles")); 
       OK.setToolTipText(getToolTip("OK")); 
-      CANCEL.setToolTipText(getToolTip("CANCEL")); 
+      CANCEL.setToolTipText(getToolTip("CANCEL"));
+      autotune_test.setToolTipText(getToolTip("autotune_test"));
       toolTips.setToolTipText(getToolTip("toolTips"));
       tableColAutoSize.setToolTipText(getToolTip("tableColAutoSize"));
       jobMonitorFullPaths.setToolTipText(getToolTip("jobMonitorFullPaths"));
@@ -2456,6 +2541,11 @@ public class configMain {
          text =  "<b>Channel number for tuner 2</b><br>";
          text += "Channel number to use for second tuner. Typically you want to set this to a music channel or<br>";
          text += "channel that you don't subscribe to so that it relieves the load on your TiVo CPU.";
+      }
+      else if (component.equals("autotune_test")) {
+         text =  "<b>TEST</b><br>";
+         text += "Test channel changing based on current form settings.<br>";
+         text += "NOTE: Select the tab of the TiVo you want to test in main kmttg window before running the test.";
       }
       else if (component.equals("add")) {
          text =  "<b>ADD</b><br>";
