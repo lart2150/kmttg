@@ -13,7 +13,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
 
-
 import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 
@@ -138,7 +137,7 @@ public class config {
    public static int download_retry_delay = 10; // Delay in secs between retry attempts
    
    // autotune related
-   public static Hashtable<String,String> autotune = null;
+   public static Hashtable<String,Hashtable<String,String>> autotune = null;
    
    public static Stack<String> parse() {
       debug.print("");
@@ -492,6 +491,7 @@ public class config {
          String line = null;
          String key = null;
          String[] autotune_keys = com.tivo.kmttg.task.autotune.getRequiredElements();
+         String autotune_tivoName = null;
          while (( line = ini.readLine()) != null) {
             // Get rid of leading and trailing white space
             line = line.replaceFirst("^\\s*(.*$)", "$1");
@@ -654,10 +654,17 @@ public class config {
             if (key.equals("metadata_files")) {
                metadata_files = line;
             }
-            for (int i=0; i<autotune_keys.length; ++i) {
-               if (key.equals("autotune_" + autotune_keys[i])) {
-                  com.tivo.kmttg.task.autotune.init();
-                  autotune.put(autotune_keys[i], string.removeLeadingTrailingSpaces(line));
+            if (key.equals("autotune_tivoName")) {
+               autotune_tivoName = line;
+            }
+            if (autotune_tivoName != null) {
+               for (int i=0; i<autotune_keys.length; ++i) {
+                  if (key.equals("autotune_" + autotune_keys[i])) {
+                     com.tivo.kmttg.task.autotune.init(autotune_tivoName);
+                     autotune.get(autotune_tivoName).put(
+                        autotune_keys[i], string.removeLeadingTrailingSpaces(line)
+                     );
+                  }
                }
             }
             if (key.equals("CheckDiskSpace")) {
@@ -842,10 +849,16 @@ public class config {
          ofp.write("<autoLogSizeMB>\n" + autoLogSizeMB + "\n\n");
          
          if (autotune != null ) {
+            Enumeration<String> tivos = autotune.keys();
             String[] keys = com.tivo.kmttg.task.autotune.getRequiredElements();
-            for (int i=0; i<keys.length; ++i) {
-               if ( autotune.containsKey(keys[i]) ) {
-                  ofp.write("<autotune_" + keys[i] + ">\n" + autotune.get(keys[i]) + "\n\n");
+            String tivoName;
+            while (tivos.hasMoreElements()) {
+               tivoName = tivos.nextElement();
+               ofp.write("<autotune_tivoName>\n" + tivoName + "\n\n");
+               for (int i=0; i<keys.length; ++i) {
+                  if ( autotune.get(tivoName).containsKey(keys[i]) ) {
+                     ofp.write("<autotune_" + keys[i] + ">\n" + autotune.get(tivoName).get(keys[i]) + "\n\n");
+                  }
                }
             }
          }
@@ -867,6 +880,7 @@ public class config {
          return false;
       }
       
+      log.warn("Configuration saved to file: " + config);
       return true;
    }
    

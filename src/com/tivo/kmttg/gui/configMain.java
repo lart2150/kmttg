@@ -111,6 +111,7 @@ public class configMain {
    private static JComboBox metadata_files = null;
    private static JComboBox keywords = null;
    private static JComboBox customFiles = null;
+   private static JComboBox autotune_tivoName = null;
    private static JFileChooser Browser = null;
    private static JTabbedPane tabbed_panel = null;
       
@@ -258,9 +259,9 @@ public class configMain {
          log.error("channel 2 not specified");
          return;
       }
-      String tivoName = config.gui.getSelectedTivoName();
-      if (tivoName.equals("FILES")) {
-         log.error("FILES tab currently selected");
+      String tivoName = (String)autotune_tivoName.getSelectedItem();
+      if (tivoName == null || tivoName.length() == 0) {
+         log.error("No TiVo name selected");
          return;
       }
       jobData job = new jobData();
@@ -299,6 +300,22 @@ public class configMain {
       int len = customCommand.getText().length();
       customCommand.setCaretPosition(len);
       customCommand.replaceSelection(keyword);
+   }
+   
+   // Callback for autotune_tivoName combobox
+   private static void autotune_tivoNameCB() {
+      debug.print("");
+      String name = (String)autotune_tivoName.getSelectedItem();
+      if (name != null && name.length() > 0) {
+         if (autotune.isConfigured(name))
+            autotune_enabled.setSelected(true);
+         else
+            autotune_enabled.setSelected(false);
+         autotune_channel_interval.setText("" + config.autotune.get(name).get("channel_interval"));
+         autotune_button_interval.setText("" + config.autotune.get(name).get("button_interval"));
+         autotune_chan1.setText("" + config.autotune.get(name).get("chan1"));
+         autotune_chan2.setText("" + config.autotune.get(name).get("chan2"));
+      }
    }
    
    public static void addTivo(String name, String ip) {  
@@ -585,15 +602,23 @@ public class configMain {
       // metadata_files
       metadata_files.setSelectedItem(config.metadata_files);
       
-      // autotune settings      
-      if (autotune.isConfigured())
-         autotune_enabled.setSelected(true);
-      else
-         autotune_enabled.setSelected(false);
-      autotune_channel_interval.setText("" + config.autotune.get("channel_interval"));
-      autotune_button_interval.setText("" + config.autotune.get("button_interval"));
-      autotune_chan1.setText("" + config.autotune.get("chan1"));
-      autotune_chan2.setText("" + config.autotune.get("chan2"));
+      // autotune settings
+      String name;
+      if (autotune_tivoName != null) {
+         name = (String)autotune_tivoName.getSelectedItem();
+      } else {
+         name = config.getTivoNames().get(0);
+      }
+      if (name != null && name.length() > 0) {
+         if (autotune.isConfigured(name))
+            autotune_enabled.setSelected(true);
+         else
+            autotune_enabled.setSelected(false);
+         autotune_channel_interval.setText("" + config.autotune.get(name).get("channel_interval"));
+         autotune_button_interval.setText("" + config.autotune.get(name).get("button_interval"));
+         autotune_chan1.setText("" + config.autotune.get(name).get("chan1"));
+         autotune_chan2.setText("" + config.autotune.get(name).get("chan2"));
+      }
    }
    
    // Update config settings with widget values
@@ -1192,16 +1217,20 @@ public class configMain {
       config.metadata_files = (String)metadata_files.getSelectedItem();
       
       // autotune settings
-      
-      // autotune enabled
+      String name;
+      if (autotune_tivoName != null) {
+         name = (String)autotune_tivoName.getSelectedItem();
+      } else {
+         name = config.getTivoNames().get(0);
+      }
       if (autotune_enabled.isSelected())
-         autotune.enable();
+         autotune.enable(name);
       else
-         autotune.disable();
-      config.autotune.put("channel_interval", string.removeLeadingTrailingSpaces(autotune_channel_interval.getText()));
-      config.autotune.put("button_interval", string.removeLeadingTrailingSpaces(autotune_button_interval.getText()));
-      config.autotune.put("chan1", string.removeLeadingTrailingSpaces(autotune_chan1.getText()));
-      config.autotune.put("chan2", string.removeLeadingTrailingSpaces(autotune_chan2.getText()));
+         autotune.disable(name);
+      config.autotune.get(name).put("channel_interval", string.removeLeadingTrailingSpaces(autotune_channel_interval.getText()));
+      config.autotune.get(name).put("button_interval", string.removeLeadingTrailingSpaces(autotune_button_interval.getText()));
+      config.autotune.get(name).put("chan1", string.removeLeadingTrailingSpaces(autotune_chan1.getText()));
+      config.autotune.get(name).put("chan2", string.removeLeadingTrailingSpaces(autotune_chan2.getText()));
       
       return errors;
    }
@@ -1262,6 +1291,7 @@ public class configMain {
       JLabel autotune_button_interval_label = new javax.swing.JLabel();
       JLabel autotune_chan1_label = new javax.swing.JLabel();
       JLabel autotune_chan2_label = new javax.swing.JLabel();
+      JLabel autotune_tivoName_label = new javax.swing.JLabel();
       JLabel files_path_label = new javax.swing.JLabel();
       remove_tivo = new javax.swing.JCheckBox();
       remove_comcut = new javax.swing.JCheckBox();
@@ -1319,6 +1349,7 @@ public class configMain {
       metadata_files = new javax.swing.JComboBox();
       keywords = new javax.swing.JComboBox();
       customFiles = new javax.swing.JComboBox();
+      autotune_tivoName = new javax.swing.JComboBox();
       check_space = new javax.swing.JCheckBox();
       JLabel disk_space_label = new javax.swing.JLabel();
       beacon = new javax.swing.JCheckBox();
@@ -1355,6 +1386,7 @@ public class configMain {
       autotune_button_interval_label.setText("Button press interval (msecs)");
       autotune_chan1_label.setText("Channel number for tuner 1");
       autotune_chan2_label.setText("Channel number for tuner 2");
+      autotune_tivoName_label.setText("TiVo");
       files_path_label.setText("FILES Default Path"); 
       remove_tivo.setText("Remove .TiVo after file decrypt"); 
       remove_comcut.setText("Remove Ad Detect files after Ad Cut");
@@ -1416,6 +1448,15 @@ public class configMain {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
                keywordsCB();
+            }
+         }
+      });
+
+      autotune_tivoName.setModel(new javax.swing.DefaultComboBoxModel(config.getTivoNames()));
+      autotune_tivoName.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+               autotune_tivoNameCB();
             }
          }
       });
@@ -1807,9 +1848,18 @@ public class configMain {
       tivo_panel.add(tivo_ip, c);
       
       // autotune panel
-      JPanel autotune_panel = new JPanel(new GridBagLayout());      
-
+      JPanel autotune_panel = new JPanel(new GridBagLayout());
+      
       gy=0;
+      c.gridx = 0;
+      c.gridy = gy;
+      autotune_panel.add(autotune_tivoName_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      autotune_panel.add(autotune_tivoName, c);
+
+      gy++;
       c.gridx = 1;
       c.gridy = gy;
       autotune_panel.add(autotune_enabled, c);
@@ -2430,6 +2480,7 @@ public class configMain {
       autotune_button_interval.setToolTipText(getToolTip("autotune_button_interval"));
       autotune_chan1.setToolTipText(getToolTip("autotune_chan1"));
       autotune_chan2.setToolTipText(getToolTip("autotune_chan2"));
+      autotune_tivoName.setToolTipText(getToolTip("autotune_tivoName"));
       add.setToolTipText(getToolTip("add")); 
       del.setToolTipText(getToolTip("del")); 
       remove_tivo.setToolTipText(getToolTip("remove_tivo"));
@@ -2544,8 +2595,11 @@ public class configMain {
       }
       else if (component.equals("autotune_test")) {
          text =  "<b>TEST</b><br>";
-         text += "Test channel changing based on current form settings.<br>";
-         text += "NOTE: Select the tab of the TiVo you want to test in main kmttg window before running the test.";
+         text += "Test channel changing for currently selected TiVo based on current form settings.";
+      }
+      else if (component.equals("autotune_tivoName")) {
+         text =  "<b>TiVo</b><br>";
+         text += "Select which TiVo you would like to configure for/test.<br>";
       }
       else if (component.equals("add")) {
          text =  "<b>ADD</b><br>";
