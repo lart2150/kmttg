@@ -41,7 +41,7 @@ public class autotune implements Serializable {
       }
       
       // No configuration => nothing to do
-      if ( ! isConfigured() && job.autotune_chan1 == null) {
+      if ( ! isConfigured(job.tivoName) && job.autotune_chan1 == null ) {
          log.error("autotune missing configuration or disabled");
          return false;
       }
@@ -49,7 +49,7 @@ public class autotune implements Serializable {
       // Check that autotune TiVo hash contains the required keys
       String[] keys = getRequiredElements();
       for (int i=0; i<keys.length; ++i) {
-         if ( ! config.autotune.containsKey(keys[i]) ) {
+         if ( ! config.autotune.get(job.tivoName).containsKey(keys[i]) ) {
             log.error("autotune missing configuration item: " + keys[i]);
             return false;
          }
@@ -127,7 +127,7 @@ public class autotune implements Serializable {
       else if (job.autotune_chan2 != null && channelNum.equals("chan2"))
          channel = job.autotune_chan2;
       else
-         channel = config.autotune.get(channelNum);
+         channel = config.autotune.get(job.tivoName).get(channelNum);
       // Test for all integers in string
       if ( ! channel.matches("^\\d+$") ) {
          log.error("Given autotune channel is not all integers: '" + channel + "'");
@@ -154,7 +154,7 @@ public class autotune implements Serializable {
             interval = job.autotune_channel_interval;
          } else {
             interval = Integer.parseInt(
-               string.removeLeadingTrailingSpaces(config.autotune.get(name))
+               string.removeLeadingTrailingSpaces(config.autotune.get(job.tivoName).get(name))
             );
          }
       } catch (Exception e) {
@@ -164,33 +164,35 @@ public class autotune implements Serializable {
    }
       
    // Return true if given tivoName has valid autotune configuration
-   public static Boolean isConfigured() {
-      init();
-      return config.autotune.get("enabled").equals("true");
+   public static Boolean isConfigured(String tivoName) {
+      init(tivoName);
+      return config.autotune.get(tivoName).get("enabled").equals("true");
    }
    
-   public static void init() {
-      if (config.autotune == null) config.autotune = new Hashtable<String,String>();
-      if ( ! config.autotune.containsKey("enabled"))
-         config.autotune.put("enabled", "false");
-      if ( ! config.autotune.containsKey("channel_interval"))
-         config.autotune.put("channel_interval", "5");
-      if ( ! config.autotune.containsKey("button_interval"))
-         config.autotune.put("button_interval", "100");
-      if ( ! config.autotune.containsKey("chan1"))
-         config.autotune.put("chan1", "0");
-      if ( ! config.autotune.containsKey("chan2"))
-         config.autotune.put("chan2", "1");
+   public static void init(String tivoName) {
+      if (config.autotune == null) config.autotune = new Hashtable<String,Hashtable<String,String>>();
+      if ( ! config.autotune.containsKey(tivoName))
+         config.autotune.put(tivoName, new Hashtable<String,String>());
+      if ( ! config.autotune.get(tivoName).containsKey("enabled"))
+         config.autotune.get(tivoName).put("enabled", "false");
+      if ( ! config.autotune.get(tivoName).containsKey("channel_interval"))
+         config.autotune.get(tivoName).put("channel_interval", "5");
+      if ( ! config.autotune.get(tivoName).containsKey("button_interval"))
+         config.autotune.get(tivoName).put("button_interval", "100");
+      if ( ! config.autotune.get(tivoName).containsKey("chan1"))
+         config.autotune.get(tivoName).put("chan1", "0");
+      if ( ! config.autotune.get(tivoName).containsKey("chan2"))
+         config.autotune.get(tivoName).put("chan2", "1");
    }
    
-   public static void enable() {
-      init();
-      config.autotune.put("enabled", "true");
+   public static void enable(String tivoName) {
+      init(tivoName);
+      config.autotune.get(tivoName).put("enabled", "true");
    }
    
-   public static void disable() {
-      init();
-      config.autotune.put("enabled", "false");      
+   public static void disable(String tivoName) {
+      init(tivoName);
+      config.autotune.get(tivoName).put("enabled", "false");      
    }
    
    public static String[] getRequiredElements() {
