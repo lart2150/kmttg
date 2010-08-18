@@ -2,6 +2,7 @@ package com.tivo.kmttg.task;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Hashtable;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -152,9 +153,32 @@ public class autotune implements Serializable {
       
    // Return true if given tivoName has valid autotune configuration
    public static Boolean isConfigured() {
-      return config.autotune != null &&
-             config.autotune.containsKey("enabled") &&
-             config.autotune.get("enabled").equals("true");
+      init();
+      return config.autotune.get("enabled").equals("true");
+   }
+   
+   public static void init() {
+      if (config.autotune == null) config.autotune = new Hashtable<String,String>();
+      if ( ! config.autotune.containsKey("enabled"))
+         config.autotune.put("enabled", "false");
+      if ( ! config.autotune.containsKey("channel_interval"))
+         config.autotune.put("channel_interval", "5");
+      if ( ! config.autotune.containsKey("button_interval"))
+         config.autotune.put("button_interval", "100");
+      if ( ! config.autotune.containsKey("chan1"))
+         config.autotune.put("chan1", "0");
+      if ( ! config.autotune.containsKey("chan2"))
+         config.autotune.put("chan2", "1");
+   }
+   
+   public static void enable() {
+      init();
+      config.autotune.put("enabled", "true");
+   }
+   
+   public static void disable() {
+      init();
+      config.autotune.put("enabled", "false");      
    }
    
    public static String[] getRequiredElements() {
