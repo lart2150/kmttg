@@ -61,6 +61,11 @@ public class telnet {
          mapped = "NUM" + code;
       }
       
+      // - and . map to ADVANCE
+      if (mapped.equals("-") || mapped.equals(".")) {
+         mapped = "ADVANCE";
+      }
+      
       // space maps to FORWARD
       if (mapped.matches("^\\s+$")) {
          mapped = "FORWARD";
