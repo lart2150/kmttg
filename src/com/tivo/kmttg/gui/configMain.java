@@ -2586,12 +2586,14 @@ public class configMain {
       else if (component.equals("autotune_chan1")) {
          text =  "<b>Channel number for tuner 1</b><br>";
          text += "Channel number to use for first tuner. Typically you want to set this to a music channel or<br>";
-         text += "channel that you don't subscribe to so that it relieves the load on your TiVo CPU.";
+         text += "channel that you don't subscribe to so that it relieves the load on your TiVo CPU.<br>";
+         text += "Both conventional integer only channel numbers and OTA style x.y or x-y are supported.";
       }
       else if (component.equals("autotune_chan2")) {
          text =  "<b>Channel number for tuner 2</b><br>";
          text += "Channel number to use for second tuner. Typically you want to set this to a music channel or<br>";
          text += "channel that you don't subscribe to so that it relieves the load on your TiVo CPU.";
+         text += "Both conventional integer only channel numbers and OTA style x.y or x-y are supported.";
       }
       else if (component.equals("autotune_test")) {
          text =  "<b>TEST</b><br>";
