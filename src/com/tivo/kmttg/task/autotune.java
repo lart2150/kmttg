@@ -120,6 +120,7 @@ public class autotune implements Serializable {
    }
    
    // Example: 922 -> LIVETV,CLEAR,9,2,2,ENTER
+   // Example: 9-1 -> LIVETV,CLEAR,9,ADVANCE,1
    private String[] sequenceFromChannel(String channelNum) {
       String channel;
       if (job.autotune_chan1 != null && channelNum.equals("chan1"))
@@ -128,11 +129,6 @@ public class autotune implements Serializable {
          channel = job.autotune_chan2;
       else
          channel = config.autotune.get(job.tivoName).get(channelNum);
-      // Test for all integers in string
-      if ( ! channel.matches("^\\d+$") ) {
-         log.error("Given autotune channel is not all integers: '" + channel + "'");
-         return null;
-      }
       int index = 0;
       char[] digits = channel.toCharArray();
       String[] seq = new String[digits.length+3];
@@ -178,7 +174,7 @@ public class autotune implements Serializable {
       if ( ! config.autotune.get(tivoName).containsKey("channel_interval"))
          config.autotune.get(tivoName).put("channel_interval", "5");
       if ( ! config.autotune.get(tivoName).containsKey("button_interval"))
-         config.autotune.get(tivoName).put("button_interval", "100");
+         config.autotune.get(tivoName).put("button_interval", "1000");
       if ( ! config.autotune.get(tivoName).containsKey("chan1"))
          config.autotune.get(tivoName).put("chan1", "0");
       if ( ! config.autotune.get(tivoName).containsKey("chan2"))
