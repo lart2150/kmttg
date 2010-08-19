@@ -1386,7 +1386,7 @@ public class configMain {
       autotune_button_interval_label.setText("Button press interval (msecs)");
       autotune_chan1_label.setText("Channel number for tuner 1");
       autotune_chan2_label.setText("Channel number for tuner 2");
-      autotune_tivoName_label.setText("TiVo");
+      autotune_tivoName_label.setText("TiVo to Autotune");
       files_path_label.setText("FILES Default Path"); 
       remove_tivo.setText("Remove .TiVo after file decrypt"); 
       remove_comcut.setText("Remove Ad Detect files after Ad Cut");
@@ -2598,7 +2598,7 @@ public class configMain {
          text += "Test channel changing for currently selected TiVo based on current form settings.";
       }
       else if (component.equals("autotune_tivoName")) {
-         text =  "<b>TiVo</b><br>";
+         text =  "<b>TiVo to Autotune</b><br>";
          text += "Select which TiVo you would like to configure for/test.<br>";
       }
       else if (component.equals("add")) {
