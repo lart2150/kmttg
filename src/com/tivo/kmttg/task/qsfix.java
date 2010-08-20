@@ -234,7 +234,7 @@ public class qsfix implements Serializable {
                   String backupFile = job.mpegFile + ".bak";
                   int count = 1;
                   while (file.isFile(backupFile)) {
-                     backupFile += ".bak" + count++;
+                     backupFile = job.mpegFile + ".bak" + count++;
                   }
                   result = file.rename(job.mpegFile, backupFile);
                   if ( result ) {
