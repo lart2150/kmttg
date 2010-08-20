@@ -72,6 +72,9 @@ public class auto {
             for (int i=0; i < config.getTivoNames().size(); i++) {
                String tivoName = config.getTivoNames().get(i);
                now = new Date().getTime();
+               if ( ! launch.containsKey(tivoName) ) {
+                  launch.put(tivoName, new Date().getTime() - 1);
+               }
                launchTime = launch.get(tivoName);
                
                // Launch new jobs for this Tivo if ready
