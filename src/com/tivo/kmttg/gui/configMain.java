@@ -50,6 +50,7 @@ public class configMain {
    private static JCheckBox remove_comcut = null;
    private static JCheckBox remove_comcut_mpeg = null;
    private static JCheckBox remove_mpeg = null;
+   private static JCheckBox QSFixBackupMpegFile = null;
    private static JCheckBox check_space = null;
    private static JCheckBox beacon = null;
    private static JCheckBox UseAdscan = null;
@@ -394,6 +395,11 @@ public class configMain {
          remove_mpeg.setSelected(true);
       else
          remove_mpeg.setSelected(false);
+
+      if (config.QSFixBackupMpegFile == 1)
+         QSFixBackupMpegFile.setSelected(true);
+      else
+         QSFixBackupMpegFile.setSelected(false);
       
       // Check disk space
       if (config.CheckDiskSpace == 1)
@@ -691,6 +697,11 @@ public class configMain {
          config.RemoveMpegFile = 1;
       else
          config.RemoveMpegFile = 0;
+      
+      if (QSFixBackupMpegFile.isSelected())
+         config.QSFixBackupMpegFile = 1;
+      else
+         config.QSFixBackupMpegFile = 0;
       
       // Check disk space
       if (check_space.isSelected())
@@ -1297,6 +1308,7 @@ public class configMain {
       remove_comcut = new javax.swing.JCheckBox();
       remove_comcut_mpeg = new javax.swing.JCheckBox();
       remove_mpeg = new javax.swing.JCheckBox();
+      QSFixBackupMpegFile = new javax.swing.JCheckBox();
       UseAdscan = new javax.swing.JCheckBox();
       VrdReview = new javax.swing.JCheckBox();
       VrdReview_noCuts = new javax.swing.JCheckBox();
@@ -1392,6 +1404,7 @@ public class configMain {
       remove_comcut.setText("Remove Ad Detect files after Ad Cut");
       remove_comcut_mpeg.setText("Remove .mpg file after Ad Cut");
       remove_mpeg.setText("Remove .mpg file after encode");
+      QSFixBackupMpegFile.setText("For QS Fix of .mpg file backup original .mpg");
       UseAdscan.setText("Use VideoRedo AdScan instead of comskip");
       VrdReview.setText("Use VideoRedo GUI to review detected commercials");
       VrdReview_noCuts.setText("Bring up VideoRedo GUI to make manual cuts");
@@ -1930,6 +1943,12 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       files_panel.add(remove_mpeg, c);
+      
+      // QSFixBackupMpegFile
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      files_panel.add(QSFixBackupMpegFile, c);
             
       // Check Available Disk Space
       gy++;
@@ -2487,6 +2506,7 @@ public class configMain {
       remove_comcut.setToolTipText(getToolTip("remove_comcut"));
       remove_comcut_mpeg.setToolTipText(getToolTip("remove_comcut_mpeg"));
       remove_mpeg.setToolTipText(getToolTip("remove_mpeg"));
+      QSFixBackupMpegFile.setToolTipText(getToolTip("QSFixBackupMpegFile"));
       check_space.setToolTipText(getToolTip("check_space"));
       beacon.setToolTipText(getToolTip("beacon"));
       UseAdscan.setToolTipText(getToolTip("UseAdscan"));
@@ -2631,6 +2651,12 @@ public class configMain {
          text =  "<b>Remove .mpg file after encode</b><br>";
          text += "If you use encode you can enable this option if you would like kmttg to remove .mpg<br>";
          text += "files automatically once they have been successfully re-encoded.";
+      }
+      else if (component.equals("QSFixBackupMpegFile")) {
+         text =  "<b>For QS Fix of .mpg file backup original .mpg</b><br>";
+         text += "If running VRD QS Fix on a .mpg file kmttg will rename the original .mpg file to .mpg.bak<br>";
+         text += "if this option is enabled. Otherwise kmttg removes the original .mpg file and replaces with<br>";
+         text += "the fixed version following successful VideoRedo QS Fix run";
       }
       else if (component.equals("check_space")) {
          text =  "<b>Check Available Disk Space</b><br>";

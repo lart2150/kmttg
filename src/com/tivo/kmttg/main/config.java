@@ -48,6 +48,7 @@ public class config {
    public static int RemoveComcutFiles = 0;
    public static int RemoveComcutFiles_mpeg = 0;
    public static int RemoveMpegFile = 0;
+   public static int QSFixBackupMpegFile = 0;
    public static int MaxJobs = 1;
    public static int MinChanDigits = 1;
    public static int CheckDiskSpace = 0;
@@ -546,6 +547,9 @@ public class config {
             if (key.equals("RemoveMpegFile")) {
                RemoveMpegFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("QSFixBackupMpegFile")) {
+               QSFixBackupMpegFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("UseAdscan")) {
                UseAdscan = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -757,6 +761,8 @@ public class config {
          ofp.write("<RemoveComcutFiles_mpeg>\n" + RemoveComcutFiles_mpeg + "\n\n");
          
          ofp.write("<RemoveMpegFile>\n" + RemoveMpegFile + "\n\n");
+         
+         ofp.write("<QSFixBackupMpegFile>\n" + QSFixBackupMpegFile + "\n\n");
          
          ofp.write("<UseAdscan>\n" + UseAdscan + "\n\n");
          

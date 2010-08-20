@@ -229,13 +229,31 @@ public class qsfix implements Serializable {
             // Rename mpegFile_fix to mpegFile
             Boolean result;
             if (file.isFile(job.mpegFile)) {
-               // Need to 1st remove mpegFile if it exists
-               result = file.delete(job.mpegFile);
-               if ( ! result ) {
-                  log.error("Failed to delete file in preparation for rename: " + job.mpegFile);
-                  if (vrdscript != null) file.delete(vrdscript);
-                  if (lockFile != null) file.delete(lockFile);
-                  return false;
+               if (config.QSFixBackupMpegFile == 1) {
+                  // Rename mpegFile to backupFile if it exists
+                  String backupFile = job.mpegFile + ".bak";
+                  int count = 1;
+                  while (file.isFile(backupFile)) {
+                     backupFile += ".bak" + count++;
+                  }
+                  result = file.rename(job.mpegFile, backupFile);
+                  if ( result ) {
+                     log.print("(Renamed " + job.mpegFile + " to " + backupFile + ")");
+                  } else {
+                     log.error("Failed to rename " + job.mpegFile + " to " + backupFile);
+                     if (vrdscript != null) file.delete(vrdscript);
+                     if (lockFile != null) file.delete(lockFile);
+                     return false;                     
+                  }
+               } else {
+                  // Remove mpegFile if it exists
+                  result = file.delete(job.mpegFile);
+                  if ( ! result ) {
+                     log.error("Failed to delete file in preparation for rename: " + job.mpegFile);
+                     if (vrdscript != null) file.delete(vrdscript);
+                     if (lockFile != null) file.delete(lockFile);
+                     return false;
+                  }
                }
             }
             // Now do the file rename
