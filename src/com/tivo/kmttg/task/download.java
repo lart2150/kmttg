@@ -132,7 +132,7 @@ public class download implements Serializable {
             Long size = file.size(job.tivoFile);
             String s = String.format("%.2f MB", (float)size/Math.pow(2,20));
             String t = jobMonitor.getElapsedTime(job.time);
-            int pct = Integer.parseInt(String.format("%d", file.size(job.tivoFile)*100/job.tivoFileSize));
+            int pct = Integer.parseInt(String.format("%d", size*100/job.tivoFileSize));
             
             // Calculate current transfer rate over last dt msecs
             Long dt = (long)5000;
