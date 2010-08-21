@@ -248,7 +248,7 @@ public class metadataTivo implements Serializable {
             if (programNode != null) {
                Node seriesNode = getNodeByName(doc, programNode, "series");
                if (seriesNode != null) {
-                  Node n = getNodeByName(doc, programNode, "uniqueId");
+                  Node n = getNodeByName(doc, seriesNode, "uniqueId");
                   if (n != null) {
                      value = n.getTextContent();
                      data.put("seriesId", value);
