@@ -17,6 +17,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.traversal.DocumentTraversal;
+import org.w3c.dom.traversal.NodeFilter;
+import org.w3c.dom.traversal.TreeWalker;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -188,68 +191,68 @@ public class metadataTivo implements Serializable {
                "vActor", "vDirector", "vExecProducer", "vProducer",
                "vProgramGenre", "vSeriesGenre", "vAdvisory", "vHost",
                "vGuestStar", "vWriter", "vChoreographer"
-         };
+         };                  
          
          Hashtable<String,Object> data = new Hashtable<String,Object>();
          DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
          DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
          Document doc = docBuilder.parse(xmlFile);
          
-         // First process nameValues
-         String name, value;
-         NodeList nlist;
-         for (int k=0; k<nameValues.length; k++) {
-            name = nameValues[k];
-            nlist = doc.getElementsByTagName(name);
-            if (nlist.getLength() > 0) {
-               value = nlist.item(0).getTextContent();
-               value = Entities.replaceHtmlEntities(value);
-               data.put(name, value);
-               debug.print(name + "=" + value);
-            }
-         }
-         
-         // Process valuesOnly which have a "value" node
-         for (int k=0; k<valuesOnly.length; k++) {
-            name = valuesOnly[k];
-            nlist = doc.getElementsByTagName(name);
-            if (nlist.getLength() > 0) {
-               value = nlist.item(0).getAttributes().getNamedItem("value").getNodeValue();
-               data.put(name, value);
-               debug.print(name + "=" + value);
-            }           
-         }
-         
-         // Process arrays which have 1 or more values
-         for (int k=0; k<arrays.length; k++) {
-            name = arrays[k];
-            nlist = doc.getElementsByTagName(name);
-            if (nlist.getLength() > 0) {
-               Stack<String> values = new Stack<String>();
-               NodeList children = nlist.item(0).getChildNodes();
-               for (int c=0; c<children.getLength(); c++) {
-                  value = children.item(c).getTextContent();
-                  values.add(value);
+         // Search for everything under <showing>
+         NodeList nlist = doc.getElementsByTagName("showing");
+         if (nlist.getLength() > 0) {
+            Node showingNode = nlist.item(0);
+            String name, value;
+            
+            // First process nameValues
+            for (int k=0; k<nameValues.length; k++) {
+               name = nameValues[k];
+               Node n = getNodeByName(doc, showingNode, name);
+               if ( n != null) {
+                  value = n.getTextContent();
+                  value = Entities.replaceHtmlEntities(value);
+                  data.put(name, value);
                   debug.print(name + "=" + value);
                }
-               data.put(name, values);
             }
-         }
-         
-         // Look for seriesId under <showing><program><series><uniqueId>
-         nlist = doc.getElementsByTagName("showing");
-         if (nlist.getLength() > 0) {
-            Node n = getNodeByName(nlist.item(0).getChildNodes(), "program");
-            if (n != null) {
-               n = getNodeByName(n.getChildNodes(), "series");
-               if (n != null) {
-                  n = getNodeByName(n.getChildNodes(), "uniqueId");
+            
+            // Process valuesOnly which have a "value" node
+            for (int k=0; k<valuesOnly.length; k++) {
+               name = valuesOnly[k];
+               Node n = getNodeByName(doc, showingNode, name);
+               if ( n != null) {
+                  value = n.getAttributes().getNamedItem("value").getNodeValue();
+                  data.put(name, value);
+                  debug.print(name + "=" + value);
+               }
+            }
+            
+            // Process arrays which have 1 or more values
+            for (int k=0; k<arrays.length; k++) {
+               name = arrays[k];
+               Node n = getNodeByName(doc, showingNode, name);
+               if ( n != null) {
+                  Stack<String> values = new Stack<String>();
+                  NodeList children = n.getChildNodes();
+                  for (int c=0; c<children.getLength(); c++) {
+                     value = children.item(c).getTextContent();
+                     values.add(value);
+                     debug.print(name + "=" + value);
+                  }
+                  data.put(name, values);
+               }
+            }
+            
+            // Look for seriesId under <showing><program><series><uniqueId>
+            Node programNode = getNodeByName(doc, showingNode, "program");
+            if (programNode != null) {
+               Node seriesNode = getNodeByName(doc, programNode, "series");
+               if (seriesNode != null) {
+                  Node n = getNodeByName(doc, programNode, "uniqueId");
                   if (n != null) {
                      value = n.getTextContent();
-                     if (value != null) {
-                        data.put("seriesId", value);
-                        debug.print("seriesId=" + value);
-                     }
+                     data.put("seriesId", value);
+                     debug.print("seriesId=" + value);                     
                   }
                }
             }
@@ -330,12 +333,18 @@ public class metadataTivo implements Serializable {
       return true;
    }
    
-   private Node getNodeByName(NodeList nlist, String name) {
+   private Node getNodeByName(Document doc, Node n, String name) {
+      DocumentTraversal docTraversal = (DocumentTraversal)doc;
+      TreeWalker iter = docTraversal.createTreeWalker(
+         n,
+         NodeFilter.SHOW_ALL,                                                 
+         null,
+         false
+      );      
       Node node = null;
-      for (int i=0; i<nlist.getLength(); ++i) {
-         if (nlist.item(i).getNodeName().equals(name)) {
-            node = nlist.item(i);
-         }
+      while ( (node=iter.nextNode()) != null ) {
+         if (node.getNodeName().equals(name))
+            return node;
       }
       return node;
    }
