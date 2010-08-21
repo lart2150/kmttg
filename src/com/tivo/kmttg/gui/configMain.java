@@ -1233,7 +1233,8 @@ public class configMain {
          name = (String)autotune_tivoName.getSelectedItem();
       }
       if (name == null) {
-         name = config.getTivoNames().get(0);
+         if (config.getTivoNames().size() > 0)
+            name = config.getTivoNames().get(0);
       }
       if (name != null) {
          if (autotune_enabled.isSelected())
