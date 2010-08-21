@@ -15,6 +15,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.tivo.kmttg.main.config;
@@ -235,16 +236,25 @@ public class metadataTivo implements Serializable {
             }
          }
          
-         // Look for seriesId under <series><uniqueId>
-         nlist = doc.getElementsByTagName("series");
+         // Look for seriesId under <showing><program><series><uniqueId>
+         nlist = doc.getElementsByTagName("showing");
          if (nlist.getLength() > 0) {
-            value = getNodeValueByName(nlist, "uniqueId");
-            if (value != null) {
-               data.put("seriesId", value);
-               debug.print("seriesId=" + value);
+            Node n = getNodeByName(nlist.item(0).getChildNodes(), "program");
+            if (n != null) {
+               n = getNodeByName(n.getChildNodes(), "series");
+               if (n != null) {
+                  n = getNodeByName(n.getChildNodes(), "uniqueId");
+                  if (n != null) {
+                     value = n.getTextContent();
+                     if (value != null) {
+                        data.put("seriesId", value);
+                        debug.print("seriesId=" + value);
+                     }
+                  }
+               }
             }
          }
-                                       
+                                                
          // Post-process some of the data
          if ( data.containsKey("starRating") )
             data.put("starRating", "x" + data.get("starRating"));
@@ -320,19 +330,16 @@ public class metadataTivo implements Serializable {
       return true;
    }
    
-   private String getNodeValueByName(NodeList nlist, String name) {
-      String value = null;
-      NodeList clist = nlist.item(0).getChildNodes();
-      if (clist.getLength() > 0) {
-         for (int i=0; i<clist.getLength(); ++i) {
-            if (clist.item(i).getNodeName().equals(name)) {
-               value = clist.item(i).getTextContent();
-            }
+   private Node getNodeByName(NodeList nlist, String name) {
+      Node node = null;
+      for (int i=0; i<nlist.getLength(); ++i) {
+         if (nlist.item(i).getNodeName().equals(name)) {
+            node = nlist.item(i);
          }
       }
-      return value;
+      return node;
    }
-   
+      
    public void printData(Hashtable<String,Object> data) {
       debug.print("data=" + data);
       String name;
