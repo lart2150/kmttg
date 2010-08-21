@@ -213,68 +213,70 @@ public class configMain {
    // Callback for add button
    private static void autotune_testCB() {
       debug.print("");
-      String cinterval = string.removeLeadingTrailingSpaces(
-         autotune_channel_interval.getText()
-      );
-      String binterval = string.removeLeadingTrailingSpaces(
-         autotune_button_interval.getText()
-      );
-      String chan1 = string.removeLeadingTrailingSpaces(
-         autotune_chan1.getText()
-      );
-      String chan2 = string.removeLeadingTrailingSpaces(
-         autotune_chan2.getText()
-      );
-      int channel_interval, button_interval;
-      if (cinterval.length() == 0) {
-         log.error("channel interval number not specified");
-         return;
-      } else {
-         try {
-            channel_interval = Integer.parseInt(
-               string.removeLeadingTrailingSpaces(cinterval)
-            );
-         } catch (Exception e) {
-            log.error("channel interval should be an integer");
+      if ( autotune_tivoName.getComponentCount() > 0 ) {
+         String cinterval = string.removeLeadingTrailingSpaces(
+            autotune_channel_interval.getText()
+         );
+         String binterval = string.removeLeadingTrailingSpaces(
+            autotune_button_interval.getText()
+         );
+         String chan1 = string.removeLeadingTrailingSpaces(
+            autotune_chan1.getText()
+         );
+         String chan2 = string.removeLeadingTrailingSpaces(
+            autotune_chan2.getText()
+         );
+         int channel_interval, button_interval;
+         if (cinterval.length() == 0) {
+            log.error("channel interval number not specified");
+            return;
+         } else {
+            try {
+               channel_interval = Integer.parseInt(
+                  string.removeLeadingTrailingSpaces(cinterval)
+               );
+            } catch (Exception e) {
+               log.error("channel interval should be an integer");
+               return;
+            }
+         }
+         if (binterval.length() == 0) {
+            log.error("button interval number not specified");
+            return;
+         } else {
+            try {
+               button_interval = Integer.parseInt(
+                  string.removeLeadingTrailingSpaces(binterval)
+               );
+            } catch (Exception e) {
+               log.error("button interval should be an integer");
+               return;
+            }
+         }
+         if (chan1.length() == 0) {
+            log.error("channel 1 not specified");
             return;
          }
-      }
-      if (binterval.length() == 0) {
-         log.error("button interval number not specified");
-         return;
-      } else {
-         try {
-            button_interval = Integer.parseInt(
-               string.removeLeadingTrailingSpaces(binterval)
-            );
-         } catch (Exception e) {
-            log.error("button interval should be an integer");
+         if (chan2.length() == 0) {
+            log.error("channel 2 not specified");
             return;
          }
+         String tivoName = (String)autotune_tivoName.getSelectedItem();
+         if (tivoName == null || tivoName.length() == 0) {
+            log.error("No TiVo name selected");
+            return;
+         }
+         jobData job = new jobData();
+         job.source   = tivoName;
+         job.tivoName = tivoName;
+         job.type     = "autotune";
+         job.name     = "telnet";
+         job.autotune_channel_interval = channel_interval;
+         job.autotune_button_interval = button_interval;
+         job.autotune_chan1 = chan1;
+         job.autotune_chan2 = chan2;
+         jobMonitor.submitNewJob(job);
       }
-      if (chan1.length() == 0) {
-         log.error("channel 1 not specified");
-         return;
-      }
-      if (chan2.length() == 0) {
-         log.error("channel 2 not specified");
-         return;
-      }
-      String tivoName = (String)autotune_tivoName.getSelectedItem();
-      if (tivoName == null || tivoName.length() == 0) {
-         log.error("No TiVo name selected");
-         return;
-      }
-      jobData job = new jobData();
-      job.source   = tivoName;
-      job.tivoName = tivoName;
-      job.type     = "autotune";
-      job.name     = "telnet";
-      job.autotune_channel_interval = channel_interval;
-      job.autotune_button_interval = button_interval;
-      job.autotune_chan1 = chan1;
-      job.autotune_chan2 = chan2;
-      jobMonitor.submitNewJob(job);
    }
    
    // Callback for keywords combobox
@@ -1228,15 +1230,8 @@ public class configMain {
       config.metadata_files = (String)metadata_files.getSelectedItem();
       
       // autotune settings
-      String name = null;
-      if (autotune_tivoName != null) {
-         name = (String)autotune_tivoName.getSelectedItem();
-      }
-      if (name == null) {
-         if (config.getTivoNames().size() > 0)
-            name = config.getTivoNames().get(0);
-      }
-      if (name != null) {
+      if (autotune_tivoName != null && autotune_tivoName.getComponentCount() > 0) {
+         String name = (String)autotune_tivoName.getSelectedItem();
          if (autotune_enabled.isSelected())
             autotune.enable(name);
          else
