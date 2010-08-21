@@ -1228,20 +1228,23 @@ public class configMain {
       config.metadata_files = (String)metadata_files.getSelectedItem();
       
       // autotune settings
-      String name;
+      String name = null;
       if (autotune_tivoName != null) {
          name = (String)autotune_tivoName.getSelectedItem();
-      } else {
+      }
+      if (name == null) {
          name = config.getTivoNames().get(0);
       }
-      if (autotune_enabled.isSelected())
-         autotune.enable(name);
-      else
-         autotune.disable(name);
-      config.autotune.get(name).put("channel_interval", string.removeLeadingTrailingSpaces(autotune_channel_interval.getText()));
-      config.autotune.get(name).put("button_interval", string.removeLeadingTrailingSpaces(autotune_button_interval.getText()));
-      config.autotune.get(name).put("chan1", string.removeLeadingTrailingSpaces(autotune_chan1.getText()));
-      config.autotune.get(name).put("chan2", string.removeLeadingTrailingSpaces(autotune_chan2.getText()));
+      if (name != null) {
+         if (autotune_enabled.isSelected())
+            autotune.enable(name);
+         else
+            autotune.disable(name);
+         config.autotune.get(name).put("channel_interval", string.removeLeadingTrailingSpaces(autotune_channel_interval.getText()));
+         config.autotune.get(name).put("button_interval", string.removeLeadingTrailingSpaces(autotune_button_interval.getText()));
+         config.autotune.get(name).put("chan1", string.removeLeadingTrailingSpaces(autotune_chan1.getText()));
+         config.autotune.get(name).put("chan2", string.removeLeadingTrailingSpaces(autotune_chan2.getText()));
+      }
       
       return errors;
    }
