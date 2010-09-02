@@ -12,5 +12,6 @@ public class combobox {
       for (int i=0; i<values.length; i++) {
          box.addItem(values[i]);
       }
+      box.revalidate();
    }
 }
