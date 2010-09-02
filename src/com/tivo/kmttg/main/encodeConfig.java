@@ -77,19 +77,30 @@ public class encodeConfig {
          
          // Add VideoRedo profiles to list if configured
          if (config.VrdEncode == 1) {
-            // Add VRD encoding profiles
-            Hashtable<String,Hashtable<String,String>> hlist = getVrdProfiles();
-            if (hlist != null) {
-               // Sort encode list alphabetically
-               List<String> vrd_list = new ArrayList<String>(hlist.keySet());
-               Collections.sort(vrd_list);
-               
-               // Add to main encode profiles hash
-               for (String str : vrd_list) {
-                  config.ENCODE.put(str, hlist.get(str));
-                  config.ENCODE_NAMES.add(str);
+            // Add VRD encoding profiles in background/threaded mode
+            class AutoThread implements Runnable {
+               AutoThread() {}       
+               public void run () {
+                  Hashtable<String,Hashtable<String,String>> hlist = getVrdProfiles();
+                  if (hlist != null) {
+                     // Sort encode list alphabetically
+                     List<String> vrd_list = new ArrayList<String>(hlist.keySet());
+                     Collections.sort(vrd_list);
+                     
+                     // Add to main encode profiles hash
+                     for (String str : vrd_list) {
+                        config.ENCODE.put(str, hlist.get(str));
+                        config.ENCODE_NAMES.add(str);
+                     }
+                  }
+                  // If in GUI mode then refresh Encoding Profile combo box
+                  if (config.GUI)
+                     config.gui.SetEncodings(encodeConfig.getValidEncodeNames());
                }
             }
+            AutoThread t = new AutoThread();
+            Thread thread = new Thread(t);
+            thread.start();
          }
          
          // Set config.encodeName to 1st entry
