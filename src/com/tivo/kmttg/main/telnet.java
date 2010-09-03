@@ -54,7 +54,6 @@ public class telnet {
    }
    
    private String mapButton(String code) {
-      Boolean ircode = true;
       String mapped = code.toUpperCase();
       // [0-9] maps to NUM[0-9]
       if (mapped.matches("^\\d$")) {
@@ -71,11 +70,6 @@ public class telnet {
          mapped = "FORWARD";
       }
       
-      // [A-Z] => KEYBOARD
-      if (mapped.matches("^[A-Z]$")) {
-         ircode = false;
-      }
-      
       // Check that mapped is among valid strings
       Boolean good = false;
       for (int i=0; i<valid.length; ++i) {
@@ -85,10 +79,7 @@ public class telnet {
       }
       
       if (good) {
-         if (ircode)
-            mapped = "IRCODE " + mapped;
-         else
-            mapped = "KEYBOARD " + mapped;
+         mapped = "IRCODE " + mapped;
          return mapped;
       }
       
