@@ -15,6 +15,8 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jdesktop.swingx.util.SwingWorker;
+
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -80,18 +82,22 @@ public class encodeConfig {
             if (config.gui != null) {
                // In GUI mode add VRD encoding profiles in background/threaded mode
                // since this can take several seconds and would hang up GUI
-               class AutoThread implements Runnable {
-                  AutoThread() {}       
-                  public void run () {
-                     if (getVrdProfiles()) {
-                        // Refresh Encoding Profile combo box
-                        config.gui.SetEncodings(getValidEncodeNames());
-                     }
+               SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {         
+                  public Boolean doInBackground() {
+                    return getVrdProfiles();
                   }
-               }
-               AutoThread t = new AutoThread();
-               Thread thread = new Thread(t);
-               thread.start();
+                  public void done() {
+                    try {
+                       if ( get() ) {
+                          // Refresh Encoding Profile combo box
+                          config.gui.SetEncodings(getValidEncodeNames());                          
+                       }
+                    } catch (Exception e) {
+                       log.error(e.getMessage());
+                    }
+                  }
+               };
+               worker.execute();
             } else {
                // In non GUI mode we want don't want threaded run
                getVrdProfiles();
