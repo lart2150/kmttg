@@ -25,7 +25,6 @@ import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
-import com.tivo.kmttg.task.NowPlaying;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -148,7 +147,7 @@ public class tivoTab {
                   // Refresh now playing list mode
                   getTable().NowPlaying.clearSelection();
                   getTable().clear();
-                  NowPlaying.submitJob(name);
+                  jobMonitor.getNPL(name);
                }
             }
          });
