@@ -64,6 +64,7 @@ public class configMain {
    private static JCheckBox TivoWebPlusDelete = null;
    private static JCheckBox HideProtectedFiles = null;
    private static JCheckBox OverwriteFiles = null;
+   private static JCheckBox java_downloads = null;
    private static JCheckBox toolTips = null;
    private static JCheckBox tableColAutoSize = null;
    private static JCheckBox jobMonitorFullPaths = null;
@@ -475,6 +476,12 @@ public class configMain {
       else
          OverwriteFiles.setSelected(false);
       
+      // java_downloads
+      if (config.java_downloads == 1)
+         java_downloads.setSelected(true);
+      else
+         java_downloads.setSelected(false);
+      
       // toolTips
       if (config.toolTips == 1)
          toolTips.setSelected(true);
@@ -776,6 +783,12 @@ public class configMain {
          config.OverwriteFiles = 1;
       else
          config.OverwriteFiles = 0;
+      
+      // java_downloads
+      if (java_downloads.isSelected())
+         config.java_downloads = 1;
+      else
+         config.java_downloads = 0;
       
       // toolTips
       if (toolTips.isSelected())
@@ -1319,6 +1332,7 @@ public class configMain {
       TivoWebPlusDelete = new javax.swing.JCheckBox();
       HideProtectedFiles = new javax.swing.JCheckBox();
       OverwriteFiles = new javax.swing.JCheckBox();
+      java_downloads = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
       JLabel FontSize_label = new javax.swing.JLabel();
       JLabel file_naming_label = new javax.swing.JLabel();
@@ -1415,6 +1429,7 @@ public class configMain {
       TivoWebPlusDelete.setText("Enable TivoWebPlus Delete task");
       HideProtectedFiles.setText("Do not show copy protected files in table");
       OverwriteFiles.setText("Overwrite existing files");
+      java_downloads.setText("Use Java for downloads instead of curl");
       MAK_label.setText("MAK"); 
       FontSize_label.setText("GUI Font Size");
       file_naming_label.setText("File Naming"); 
@@ -2278,6 +2293,12 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(TSDownload, c);
       
+      // java_downloads
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(java_downloads, c);
+      
       // Visual Panel
       JPanel visual_panel = new JPanel(new GridBagLayout());       
       
@@ -2519,6 +2540,7 @@ public class configMain {
       TivoWebPlusDelete.setToolTipText(getToolTip("TivoWebPlusDelete"));
       HideProtectedFiles.setToolTipText(getToolTip("HideProtectedFiles"));
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
+      java_downloads.setToolTipText(getToolTip("java_downloads"));
       files_path.setToolTipText(getToolTip("files_path"));
       MAK.setToolTipText(getToolTip("MAK"));
       FontSize.setToolTipText(getToolTip("FontSize"));
@@ -2764,6 +2786,11 @@ public class configMain {
          text += "so as not to overwrite any existing files of same name on your computer.<br>";
          text += "With this option enabled kmttg will run tasks regardless of whether their output files<br>";
          text += "exist or not, overwriting existing files as needed.";
+      }
+      else if (component.equals("java_downloads")) {
+         text =  "<b>Use Java for downloads instead of curl</b><br>";
+         text += "If this option is enabled then kmttg will use native Java methods for retrieving Now Playing<br>";
+         text += "lists and downloading shows from TiVos instead of using <b>curl</b>.";
       }
       else if (component.equals("files_path")) {
          text =  "<b>FILES Default Path</b><br>";
