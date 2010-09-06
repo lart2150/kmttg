@@ -21,6 +21,7 @@ import javax.net.ssl.X509TrustManager;
 import com.tivo.kmttg.util.log;
 
 public class http {
+   private static final int READ_TIMEOUT = 10;  // Timeout for InputStream reads
    private static final SSLSocketFactory TRUST_ANY = createSocketFactory();
    
    private static final HostnameVerifier VERIFY_ANY = new HostnameVerifier() {
@@ -69,6 +70,7 @@ public class http {
       try {
          URL url = new URL(urlString);
          URLConnection conn = getConnection(url);         
+         conn.setReadTimeout(READ_TIMEOUT*1000);
          
          // Set authentication and get input stream
          synchronized (Authenticator.class) {
@@ -78,20 +80,21 @@ public class http {
          }
       }
       catch (MalformedURLException e) {
-         log.error("http Malformed URL exception: " + urlString);
+         log.error("http Malformed URL exception for: " + urlString);
          log.error(e.getMessage());
       }
       catch (IOException e) {
-         log.error("http IO exception: " + e.getMessage());
+         log.error("http IO exception for: " + urlString);
+         log.error(e.getMessage());
       }
       catch (Exception e) {
-         log.error("getConnection error: " + e.getMessage());
+         log.error("getConnection error for: " + urlString);
+         log.error(e.getMessage());
       }
       return in;
    }
    
    public static InputStream getTivoStream(final String urlString, final String username, final String password) {
-      int TIMEOUT = 10;
       InputStream in = null;
       CookieManager cm = new CookieManager();
       Authenticator authenticator = new Authenticator() {
@@ -102,7 +105,6 @@ public class http {
       try {
          URL url = new URL(urlString);
          URLConnection conn = getConnection(url);
-         conn.setReadTimeout(TIMEOUT*1000);
          // NOTE: Intentionally connect without authentication to grab cookies
          try { conn.connect(); }
          catch (IOException ignore) {};
@@ -110,6 +112,7 @@ public class http {
          
          // Connect again and init cookies with connection
          conn = getConnection(url);
+         conn.setReadTimeout(READ_TIMEOUT*1000);
          cm.setCookies(conn);
          
          // Set authentication and get input stream
@@ -120,14 +123,16 @@ public class http {
          }
       }
       catch (MalformedURLException e) {
-         log.error("http Malformed URL exception: " + urlString);
+         log.error("http Malformed URL exception for: " + urlString);
          log.error(e.getMessage());
       }
       catch (IOException e) {
-         log.error("http IO exception: " + e.getMessage());
+         log.error("http IO exception for: " + urlString);
+         log.error(e.getMessage());
       }
       catch (Exception e) {
-         log.error("getConnection error: " + e.getMessage());
+         log.error("getConnection error for: " + urlString);
+         log.error(e.getMessage());
       }
 
       return in;
