@@ -64,7 +64,9 @@ public class config {
    public static int VrdAllowMultiple = 0; // Allow multiple VRD instances at once
    public static int TSDownload = 0;
    public static int OverwriteFiles = 0;
-   public static int HideProtectedFiles = 0;
+   public static int HideProtectedFiles = 0;   
+   public static int java_downloads = 0;        // Use java instead of curl to download
+
    public static String comskipIni = "";
    public static String wan_http_port = "";
    public static String configIni = "";
@@ -136,7 +138,6 @@ public class config {
    // download retry related
    public static int download_tries = 5;        // Number of times to retry downloads
    public static int download_retry_delay = 10; // Delay in secs between retry attempts
-   public static int java_downloads = 0;        // Use java instead of curl to download
    
    // autotune related
    public static Hashtable<String,Hashtable<String,String>> autotune = null;
@@ -581,6 +582,9 @@ public class config {
             if (key.equals("OverwriteFiles")) {
                OverwriteFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("java_downloads")) {
+               java_downloads = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("outputDir")) {
                outputDir = line;
             }
@@ -784,6 +788,8 @@ public class config {
          ofp.write("<HideProtectedFiles>\n" + HideProtectedFiles + "\n\n");
          
          ofp.write("<OverwriteFiles>\n" + OverwriteFiles + "\n\n");
+         
+         ofp.write("<java_downloads>\n" + java_downloads + "\n\n");
          
          ofp.write("<tivoFileNameFormat>\n" + tivoFileNameFormat + "\n\n");
          
