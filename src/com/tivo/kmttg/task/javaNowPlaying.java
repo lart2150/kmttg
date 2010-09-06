@@ -261,19 +261,19 @@ public class javaNowPlaying implements Serializable {
             in.close();
          }
          catch (FileNotFoundException e) {
-            log.error(e.getMessage());
+            log.error(url + ": " + e.getMessage());
             if (out != null) out.close();
             if (in != null) in.close();
             throw new FileNotFoundException(e.getMessage());
          }
          catch (IOException e) {
-            log.error(e.getMessage());
+            log.error(url + ": " + e.getMessage());
             if (out != null) out.close();
             if (in != null) in.close();
             throw new IOException(e.getMessage());
          }
          catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(url + ": " + e.getMessage());
             if (out != null) out.close();
             if (in != null) in.close();
             throw new Exception(e.getMessage(), e);
