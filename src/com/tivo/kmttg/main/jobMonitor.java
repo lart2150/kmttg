@@ -66,27 +66,47 @@ public class jobMonitor {
             }
             
             // Add non playlist queued jobs to queued list so we can decide when to launch
-            if ( job.status.equals("queued") && ! job.type.equals("playlist") ) {
+            if ( job.status.equals("queued") && ! job.type.equals("playlist") && ! job.type.equals("javaplaylist")) {
                queued.add(job);
             }
             
             // queued playlist jobs launch right away, other jobs go to queue
-            if ( job.type.equals("playlist") && job.status.matches("queued") ) {
-               job.process_npl = new NowPlaying(job);
-               if (job.process_npl != null) {
-                  job.process_npl.job = job; // This is used by npl check
-                  if (job.process_npl.start()) {
-                     updateJobStatus(job, "running");
-                     job.time = new Date().getTime();
-                     job.job_name = "playlist" + job.tivoName;
-                     running.add(job);
+            if ( (job.type.equals("playlist") || job.type.equals("javaplaylist")) && job.status.matches("queued") ) {
+               if (job.type.equals("playlist")) {
+                  job.process_npl = new NowPlaying(job);
+                  if (job.process_npl != null) {
+                     job.process_npl.job = job; // This is used by npl check
+                     if (job.process_npl.start()) {
+                        updateJobStatus(job, "running");
+                        job.time = new Date().getTime();
+                        job.job_name = "playlist" + job.tivoName;
+                        running.add(job);
+                     } else {
+                        // Failed to launch
+                        removeFromJobList(job);
+                     }
                   } else {
                      // Failed to launch
                      removeFromJobList(job);
                   }
-               } else {
-                  // Failed to launch
-                  removeFromJobList(job);
+               }
+               if (job.type.equals("javaplaylist")) {
+                  job.process_javanpl = new javaNowPlaying(job);
+                  if (job.process_javanpl != null) {
+                     job.process_javanpl.job = job; // This is used by npl check
+                     if (job.process_javanpl.start()) {
+                        updateJobStatus(job, "running");
+                        job.time = new Date().getTime();
+                        job.job_name = "javaplaylist" + job.tivoName;
+                        running.add(job);
+                     } else {
+                        // Failed to launch
+                        removeFromJobList(job);
+                     }
+                  } else {
+                     // Failed to launch
+                     removeFromJobList(job);
+                  }
                }
             }
          }
@@ -163,7 +183,10 @@ public class jobMonitor {
          
          // Don't run more than 'MaxJobs' active jobs at a time
          // NOTE: VRD GUI job not considered CPU active
-         if ( ! job.type.equals("download") && ! job.type.equals("metadata") && ! isVideoRedoGUIJob(job)) {
+         if ( ! job.type.equals("download") &&
+              ! job.type.equals("javadownload") &&
+              ! job.type.equals("metadata") &&
+              ! isVideoRedoGUIJob(job)) {
             if (cpuActiveJobs >= config.MaxJobs) continue;
          }
          
@@ -208,10 +231,20 @@ public class jobMonitor {
       }
    }
    
+   public static void getNPL(String name) {
+      if (config.java_downloads == 0)
+         NowPlaying.submitJob(name);
+      else
+         javaNowPlaying.submitJob(name);
+   }
+   
    // If true this job can only be run one at a time per TiVo
    private static Boolean oneJobAtATime(String type) {
-      return type.equals("download") || type.equals("metadata") ||
-         type.equals("metadataTivo") || type.equals("push");
+      return type.equals("download") ||
+             type.equals("javadownload") ||
+             type.equals("metadata") ||
+             type.equals("metadataTivo") ||
+             type.equals("push");
    }
 
    // Determine if there are jobs in same family to run before this one
@@ -279,7 +312,7 @@ public class jobMonitor {
       
       // Get estimated space for this job candidate
       long candidateSpace = 0;
-      if (job.type.equals("download")) {
+      if (job.type.equals("download") || job.type.equals("javadownload")) {
          candidateSpace = job.tivoFileSize;
       }
       
@@ -305,7 +338,7 @@ public class jobMonitor {
          for (int i=0; i<JOBS.size(); ++i) {
             job = JOBS.get(i);                        
             // Only considering download jobs for now
-            if ( job.type.equals("download") && job.status.equals("running")) {
+            if ( (job.type.equals("download") || job.type.equals("javadownload")) && job.status.equals("running")) {
                // Estimated size - what is already downloaded
                total += job.tivoFileSize - file.size(job.tivoFile);
             }
@@ -335,7 +368,7 @@ public class jobMonitor {
       // Update GUI Job Monitor
       if (config.GUI) {
          String output = "";
-         if (! job.type.equals("playlist") && ! job.type.equals("custom")) {
+         if (! job.type.equals("playlist") && ! job.type.equals("javaplaylist") && ! job.type.equals("custom")) {
             if (config.jobMonitorFullPaths == 1)
                output = job.getOutputFile();
             else
@@ -779,8 +812,13 @@ public class jobMonitor {
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
-         job.type         = "download";
-         job.name         = "curl";
+         if (config.java_downloads == 1) {
+            job.type      = "javadownload";
+            job.name      = "java";
+         } else {
+            job.type      = "download";
+            job.name      = "curl";
+         }
          job.tivoFile     = tivoFile;
          job.url          = entry.get("url");
          job.tivoFileSize = Long.parseLong(entry.get("size"));
@@ -1298,7 +1336,7 @@ public class jobMonitor {
             }
             // Launch jobs for this tivo
             config.GUI_AUTO++;
-            NowPlaying.submitJob(tivoName);
+            getNPL(tivoName);
             launch.put(tivoName, (long)-1);
          }
          
