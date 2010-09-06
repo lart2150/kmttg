@@ -77,6 +77,7 @@ public class javadownload implements Serializable {
                thread_running = false;
             }
             catch (Exception e) {
+               success = false;
                thread_running = false;
                Thread.currentThread().interrupt();
             }
@@ -215,7 +216,6 @@ public class javadownload implements Serializable {
       return String.format("%.1f Mbps", (ds*8000)/(1e6*dt));
    }
    
-   // NOTE: PROBLEM - Network timeouts are not handled with this!!
    private Boolean download() throws IOException, InterruptedException, Exception {
       String url = job.url;
       if (config.TSDownload == 1)
@@ -227,8 +227,9 @@ public class javadownload implements Serializable {
          int BUFSIZE = 65536;
          byte[] buffer = new byte[BUFSIZE];
          int c;
+         FileOutputStream out = null;
          try {
-            FileOutputStream out = new FileOutputStream(job.tivoFile);
+            out = new FileOutputStream(job.tivoFile);
             while ((c = in.read(buffer, 0, BUFSIZE)) != -1) {
                if (Thread.interrupted()) {
                   out.close();
@@ -242,15 +243,25 @@ public class javadownload implements Serializable {
          }
          catch (FileNotFoundException e) {
             log.error(e.getMessage());
+            if (out != null) out.close();
+            if (in != null) in.close();
             throw new FileNotFoundException(e.getMessage());
          }
          catch (IOException e) {
             log.error(e.getMessage());
+            if (out != null) out.close();
+            if (in != null) in.close();
             throw new IOException(e.getMessage());
          }
          catch (Exception e) {
             log.error(e.getMessage());
+            if (out != null) out.close();
+            if (in != null) in.close();
             throw new Exception(e.getMessage(), e);
+         }
+         finally {
+            if (out != null) out.close();
+            if (in != null) in.close();
          }
       }
 

@@ -95,7 +95,8 @@ public class javaNowPlaying implements Serializable {
                success = getNPL(url, "tivo", config.MAK);
                thread_running = false;
             }
-            catch (InterruptedException ie) {
+            catch (Exception e) {
+               success = false;
                thread_running = false;
                Thread.currentThread().interrupt();
             }
@@ -171,7 +172,6 @@ public class javaNowPlaying implements Serializable {
          if (failed == 1) {
             log.error("Failed to retrieve Now Playing List from " + job.tivoName);
             log.error("Check YOUR MAK & IP settings");
-            process.printStderr();
             jobMonitor.removeFromJobList(job);
          } else {
             log.warn("NPL job completed: " + jobMonitor.getElapsedTime(job.time));
@@ -237,7 +237,7 @@ public class javaNowPlaying implements Serializable {
       }
    }
    
-   private Boolean getNPL(String url, String username, String password) throws InterruptedException {
+   private Boolean getNPL(String url, String username, String password) throws InterruptedException, IOException, Exception {
       debug.print("url=" + url);
       InputStream in = http.getNowPlaying(url, username, password);
       if (in == null) {
@@ -246,8 +246,9 @@ public class javaNowPlaying implements Serializable {
          int BUFSIZE = 65536;
          byte[] buffer = new byte[BUFSIZE];
          int c;
+         FileOutputStream out = null;
          try {
-            FileOutputStream out = new FileOutputStream(outputFile);
+            out = new FileOutputStream(outputFile);
             while ((c = in.read(buffer, 0, BUFSIZE)) != -1) {
                if (Thread.interrupted()) {
                   out.close();
@@ -261,11 +262,25 @@ public class javaNowPlaying implements Serializable {
          }
          catch (FileNotFoundException e) {
             log.error(e.getMessage());
-            return false;
+            if (out != null) out.close();
+            if (in != null) in.close();
+            throw new FileNotFoundException(e.getMessage());
          }
          catch (IOException e) {
             log.error(e.getMessage());
-            return false;
+            if (out != null) out.close();
+            if (in != null) in.close();
+            throw new IOException(e.getMessage());
+         }
+         catch (Exception e) {
+            log.error(e.getMessage());
+            if (out != null) out.close();
+            if (in != null) in.close();
+            throw new Exception(e.getMessage(), e);
+         }
+         finally {
+            if (out != null) out.close();
+            if (in != null) in.close();
          }
       }
 
