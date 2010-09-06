@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
 
-import com.tivo.kmttg.task.NowPlaying;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -38,7 +37,7 @@ public class auto {
          // Queue up now playing list downloads from all Tivos
          for (int i=0; i < config.getTivoNames().size(); i++) {
             String tivoName = config.getTivoNames().get(i);
-            NowPlaying.submitJob(tivoName);
+            jobMonitor.getNPL(tivoName);
          }
          
          // Process all queued up jobs until all completed
@@ -82,7 +81,7 @@ public class auto {
                   // Parse auto.ini each time before launch in case it gets updated
                   parseAutoIni();
                   // Launch jobs for this tivo
-                  NowPlaying.submitJob(tivoName);
+                  jobMonitor.getNPL(tivoName);
                   launch.put(tivoName, (long)-1);
                }
                
