@@ -22,7 +22,6 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.encodeConfig;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
-import com.tivo.kmttg.task.NowPlaying;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -1040,7 +1039,7 @@ public class gui {
             // Queue up a nowplaying list job for this tivo
             config.GUI_AUTO++;
             getTab(tivoNames.get(i)).getTable().setFolderState(false);
-            NowPlaying.submitJob(tivoNames.get(i));
+            jobMonitor.getNPL(tivoNames.get(i));
          }
       }
    }
@@ -1188,7 +1187,7 @@ public class gui {
          tivoTabs.put(name,tab);
          
          // Populate table
-         NowPlaying.submitJob(name);
+         jobMonitor.getNPL(name);
       }
    }
    
