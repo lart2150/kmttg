@@ -253,7 +253,7 @@ public class javaNowPlaying implements Serializable {
                if (Thread.interrupted()) {
                   out.close();
                   in.close();
-                  throw new InterruptedException();
+                  throw new InterruptedException("Killed by user");
                }
                out.write(buffer, 0, c);
             }
