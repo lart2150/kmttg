@@ -91,6 +91,7 @@ public class http {
    }
    
    public static InputStream getTivoStream(final String urlString, final String username, final String password) {
+      int TIMEOUT = 10;
       InputStream in = null;
       CookieManager cm = new CookieManager();
       Authenticator authenticator = new Authenticator() {
@@ -101,6 +102,7 @@ public class http {
       try {
          URL url = new URL(urlString);
          URLConnection conn = getConnection(url);
+         conn.setReadTimeout(TIMEOUT*1000);
          // NOTE: Intentionally connect without authentication to grab cookies
          try { conn.connect(); }
          catch (IOException ignore) {};
