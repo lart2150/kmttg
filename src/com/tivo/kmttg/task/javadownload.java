@@ -76,7 +76,7 @@ public class javadownload implements Serializable {
                success = download();
                thread_running = false;
             }
-            catch (InterruptedException ie) {
+            catch (Exception e) {
                thread_running = false;
                Thread.currentThread().interrupt();
             }
@@ -215,7 +215,8 @@ public class javadownload implements Serializable {
       return String.format("%.1f Mbps", (ds*8000)/(1e6*dt));
    }
    
-   private Boolean download() throws InterruptedException {
+   // NOTE: PROBLEM - Network timeouts are not handled with this!!
+   private Boolean download() throws IOException, InterruptedException, Exception {
       String url = job.url;
       if (config.TSDownload == 1)
          url += "&Format=video/x-tivo-mpeg-ts";
@@ -241,11 +242,15 @@ public class javadownload implements Serializable {
          }
          catch (FileNotFoundException e) {
             log.error(e.getMessage());
-            return false;
+            throw new FileNotFoundException(e.getMessage());
          }
          catch (IOException e) {
             log.error(e.getMessage());
-            return false;
+            throw new IOException(e.getMessage());
+         }
+         catch (Exception e) {
+            log.error(e.getMessage());
+            throw new Exception(e.getMessage(), e);
          }
       }
 
