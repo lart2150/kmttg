@@ -136,6 +136,7 @@ public class config {
    // download retry related
    public static int download_tries = 5;        // Number of times to retry downloads
    public static int download_retry_delay = 10; // Delay in secs between retry attempts
+   public static int java_downloads = 0;        // Use java instead of curl to download
    
    // autotune related
    public static Hashtable<String,Hashtable<String,String>> autotune = null;
