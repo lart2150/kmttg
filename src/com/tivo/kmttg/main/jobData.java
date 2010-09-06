@@ -20,10 +20,12 @@ public class jobData implements Serializable {
    
    // process
    public NowPlaying   process_npl = null;
+   public javaNowPlaying process_javanpl = null;
    public metadata     process_metadata = null;
    public metadataTivo process_metadataTivo = null;
    public autotune     process_autotune = null;
    public download     process_download = null;
+   public javadownload process_javadownload = null;
    public decrypt      process_decrypt = null;
    public qsfix        process_qsfix = null;
    public comskip      process_comskip = null;
@@ -97,10 +99,12 @@ public class jobData implements Serializable {
    public static String[] allTaskNames() {
       return new String[] {
          "playlist",
+         "javaplaylist",
          "metadata",
          "metadataTivo",
          "autotune",
          "download",
+         "javadownload",
          "decrypt",
          "qsfix",
          "streamfix",
@@ -126,6 +130,9 @@ public class jobData implements Serializable {
       if (type.matches("playlist")) {
          return process_npl.check();
       }      
+      else if (type.matches("javaplaylist")) {
+         return process_javanpl.check();
+      }      
       else if (type.matches("metadata")) {
          return process_metadata.check();
       }      
@@ -137,6 +144,9 @@ public class jobData implements Serializable {
       }      
       else if (type.matches("download")) {
          return process_download.check();
+      }      
+      else if (type.matches("javadownload")) {
+         return process_javadownload.check();
       }      
       else if (type.matches("decrypt")) {
          return process_decrypt.check();
@@ -187,6 +197,9 @@ public class jobData implements Serializable {
       if (type.equals("playlist")) {
          return process_npl.getProcess();
       }
+      else if (type.equals("javaplaylist")) {
+         return process_javanpl.getProcess();
+      }
       else if (type.equals("metadata")) {
          return process_metadata.getProcess();
       }
@@ -198,6 +211,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("download")) {
          return process_download.getProcess();
+      }
+      else if (type.equals("javadownload")) {
+         return process_javadownload.getProcess();
       }
       else if (type.equals("decrypt")) {
          return process_decrypt.getProcess();
@@ -249,6 +265,9 @@ public class jobData implements Serializable {
       if (type.equals("playlist")) {
          file = tivoName;
       }
+      else if (type.equals("javaplaylist")) {
+         file = tivoName;
+      }
       else if (type.equals("metadata")) {
          file = tivoName;
       }
@@ -259,6 +278,9 @@ public class jobData implements Serializable {
          file = tivoName;
       }
       else if (type.equals("download")) {
+         file = url;
+      }
+      else if (type.equals("javadownload")) {
          file = url;
       }
       else if (type.equals("decrypt")) {
@@ -311,6 +333,9 @@ public class jobData implements Serializable {
       if (type.equals("playlist")) {
          file = tivoName;
       }
+      else if (type.equals("javaplaylist")) {
+         file = tivoName;
+      }
       else if (type.equals("metadata")) {
          file = metaFile;
       }
@@ -321,6 +346,9 @@ public class jobData implements Serializable {
          file = tivoName;
       }
       else if (type.equals("download")) {
+         file = tivoFile;
+      }
+      else if (type.equals("javadownload")) {
          file = tivoFile;
       }
       else if (type.equals("decrypt")) {
@@ -394,6 +422,12 @@ public class jobData implements Serializable {
       
       else if (job.type.equals("download")) {  
          download proc = new download(job);
+         active = 0; // Not CPU active
+         success = proc.launchJob();
+      }
+      
+      else if (job.type.equals("javadownload")) {  
+         javadownload proc = new javadownload(job);
          active = 0; // Not CPU active
          success = proc.launchJob();
       }
@@ -482,6 +516,9 @@ public class jobData implements Serializable {
       if (type.equals("playlist")) {
          process_npl.kill();
       }
+      else if (type.equals("javaplaylist")) {
+         process_javanpl.kill();
+      }
       else if (type.equals("metadata")) {
          process_metadata.kill();
       }
@@ -493,6 +530,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("download")) {
          process_download.kill();
+      }
+      else if (type.equals("javadownload")) {
+         process_javadownload.kill();
       }
       else if (type.equals("decrypt")) {
          process_decrypt.kill();
