@@ -88,6 +88,7 @@ public class javaNowPlaying implements Serializable {
          log.print(">> Getting Now Playing List from " + job.tivoName + " ...");
       else
          log.print(">> Continuing Now Playing List from " + job.tivoName + " (" + AnchorOffset + "/" + TotalItems + ")...");
+      log.print(url);
       // Run download method in a separate thread
       Runnable r = new Runnable() {
          public void run () {
