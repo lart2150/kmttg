@@ -22,6 +22,7 @@ public class jobData implements Serializable {
    public NowPlaying   process_npl = null;
    public javaNowPlaying process_javanpl = null;
    public metadata     process_metadata = null;
+   public javametadata process_javametadata = null;
    public metadataTivo process_metadataTivo = null;
    public autotune     process_autotune = null;
    public download     process_download = null;
@@ -101,6 +102,7 @@ public class jobData implements Serializable {
          "playlist",
          "javaplaylist",
          "metadata",
+         "javametadata",
          "metadataTivo",
          "autotune",
          "download",
@@ -135,6 +137,9 @@ public class jobData implements Serializable {
       }      
       else if (type.matches("metadata")) {
          return process_metadata.check();
+      }      
+      else if (type.matches("javametadata")) {
+         return process_javametadata.check();
       }      
       else if (type.matches("metadataTivo")) {
          return process_metadataTivo.check();
@@ -203,6 +208,9 @@ public class jobData implements Serializable {
       else if (type.equals("metadata")) {
          return process_metadata.getProcess();
       }
+      else if (type.equals("javametadata")) {
+         return process_javametadata.getProcess();
+      }
       else if (type.equals("metadataTivo")) {
          return process_metadataTivo.getProcess();
       }
@@ -269,6 +277,9 @@ public class jobData implements Serializable {
          file = tivoName;
       }
       else if (type.equals("metadata")) {
+         file = tivoName;
+      }
+      else if (type.equals("javametadata")) {
          file = tivoName;
       }
       else if (type.equals("metadataTivo")) {
@@ -339,6 +350,9 @@ public class jobData implements Serializable {
       else if (type.equals("metadata")) {
          file = metaFile;
       }
+      else if (type.equals("javametadata")) {
+         file = metaFile;
+      }
       else if (type.equals("metadataTivo")) {
          file = metaFile;
       }
@@ -405,6 +419,12 @@ public class jobData implements Serializable {
       int active = 1;
       if (job.type.equals("metadata")) {  
          metadata proc = new metadata(job);
+         active = 0; // Not CPU active
+         success = proc.launchJob();
+      }
+      
+      else if (job.type.equals("javametadata")) {  
+         javametadata proc = new javametadata(job);
          active = 0; // Not CPU active
          success = proc.launchJob();
       }
@@ -521,6 +541,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("metadata")) {
          process_metadata.kill();
+      }
+      else if (type.equals("javametadata")) {
+         process_javametadata.kill();
       }
       else if (type.equals("metadataTivo")) {
          process_metadataTivo.kill();
