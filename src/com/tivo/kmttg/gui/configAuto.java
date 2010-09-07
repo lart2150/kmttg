@@ -744,7 +744,7 @@ public class configAuto {
    // This will decide which options are enabled based on current config settings
    // Options are disabled when associated config entry is not setup
    public void refreshOptions() {
-      if (! file.isFile(config.curl)) {
+      if (! file.isFile(config.curl) && config.java_downloads == 0) {
          metadata.setSelected(false);
          metadata.setEnabled(false);
       } else {
