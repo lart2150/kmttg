@@ -186,6 +186,7 @@ public class jobMonitor {
          if ( ! job.type.equals("download") &&
               ! job.type.equals("javadownload") &&
               ! job.type.equals("metadata") &&
+              ! job.type.equals("javametadata") &&
               ! isVideoRedoGUIJob(job)) {
             if (cpuActiveJobs >= config.MaxJobs) continue;
          }
@@ -243,6 +244,7 @@ public class jobMonitor {
       return type.equals("download") ||
              type.equals("javadownload") ||
              type.equals("metadata") ||
+             type.equals("javametadata") ||
              type.equals("metadataTivo") ||
              type.equals("push");
    }
@@ -463,7 +465,7 @@ public class jobMonitor {
                if (JOBS.get(i).type.equals(job.type)) {
                   // Identical job => do not run this job
                   // NOTE: Types below are allowed to have multiple at a time
-                  if (! job.type.equals("push") && ! job.type.equals("metadata") && ! job.type.equals("metadataTivo"))
+                  if (! job.type.equals("push") && ! job.type.equals("metadata") && ! job.type.equals("javametadata") && ! job.type.equals("metadataTivo"))
                      return false;
                }
                sameSource = true;
@@ -781,8 +783,13 @@ public class jobMonitor {
                   jobData job = new jobData();
                   job.source             = source;
                   job.tivoName           = tivoName;
-                  job.type               = "metadata";
-                  job.name               = "curl";
+                  if (config.java_downloads == 0) {
+                     job.type            = "metadata";
+                     job.name            = "curl";
+                  } else {
+                     job.type            = "javametadata";
+                     job.name            = "java";                     
+                  }
                   job.metaFile           = meta_files.get(i);
                   job.url                = entry.get("url_TiVoVideoDetails");
                   if (entry.containsKey("EpisodeNumber"))
