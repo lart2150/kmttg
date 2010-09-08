@@ -1,11 +1,8 @@
 package com.tivo.kmttg.task;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -93,7 +90,7 @@ public class javaNowPlaying implements Serializable {
       Runnable r = new Runnable() {
          public void run () {
             try {
-               success = getNPL(url, "tivo", config.MAK);
+               success = http.download(url, "tivo", config.MAK, outputFile, false);
                thread_running = false;
             }
             catch (Exception e) {
@@ -236,55 +233,5 @@ public class javaNowPlaying implements Serializable {
          com.tivo.kmttg.util.file.delete(outputFile);
          return false;
       }
-   }
-   
-   private Boolean getNPL(String url, String username, String password) throws InterruptedException, IOException, Exception {
-      debug.print("url=" + url);
-      InputStream in = http.noCookieInputStream(url, username, password);
-      if (in == null) {
-         return false;
-      } else {
-         int BUFSIZE = 65536;
-         byte[] buffer = new byte[BUFSIZE];
-         int c;
-         FileOutputStream out = null;
-         try {
-            out = new FileOutputStream(outputFile);
-            while ((c = in.read(buffer, 0, BUFSIZE)) != -1) {
-               if (Thread.interrupted()) {
-                  out.close();
-                  in.close();
-                  throw new InterruptedException("Killed by user");
-               }
-               out.write(buffer, 0, c);
-            }
-            out.close();
-            in.close();
-         }
-         catch (FileNotFoundException e) {
-            log.error(url + ": " + e.getMessage());
-            if (out != null) out.close();
-            if (in != null) in.close();
-            throw new FileNotFoundException(e.getMessage());
-         }
-         catch (IOException e) {
-            log.error(url + ": " + e.getMessage());
-            if (out != null) out.close();
-            if (in != null) in.close();
-            throw new IOException(e.getMessage());
-         }
-         catch (Exception e) {
-            log.error(url + ": " + e.getMessage());
-            if (out != null) out.close();
-            if (in != null) in.close();
-            throw new Exception(e.getMessage(), e);
-         }
-         finally {
-            if (out != null) out.close();
-            if (in != null) in.close();
-         }
-      }
-
-      return true;
-   }
+   }   
 }

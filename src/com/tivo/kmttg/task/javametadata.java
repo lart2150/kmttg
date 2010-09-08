@@ -1,11 +1,8 @@
 package com.tivo.kmttg.task;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -78,10 +75,11 @@ public class javametadata implements Serializable {
       }
       log.print(">> CREATING " + job.metaFile + " ...");
       log.print(job.url);
+      // Run download method in a separate thread
       Runnable r = new Runnable() {
          public void run () {
             try {
-               success = getXML(job.url, "tivo", config.MAK);
+               success = http.download(job.url, "tivo", config.MAK, outputFile, false);
                thread_running = false;
             }
             catch (Exception e) {
@@ -165,55 +163,4 @@ public class javametadata implements Serializable {
       
       return false;
    }   
-   
-   private Boolean getXML(String url, String username, String password) throws InterruptedException, IOException, Exception {
-      debug.print("url=" + url);
-      InputStream in = http.noCookieInputStream(url, username, password);
-      if (in == null) {
-         return false;
-      } else {
-         int BUFSIZE = 65536;
-         byte[] buffer = new byte[BUFSIZE];
-         int c;
-         FileOutputStream out = null;
-         try {
-            out = new FileOutputStream(outputFile);
-            while ((c = in.read(buffer, 0, BUFSIZE)) != -1) {
-               if (Thread.interrupted()) {
-                  out.close();
-                  in.close();
-                  throw new InterruptedException("Killed by user");
-               }
-               out.write(buffer, 0, c);
-            }
-            out.close();
-            in.close();
-         }
-         catch (FileNotFoundException e) {
-            log.error(url + ": " + e.getMessage());
-            if (out != null) out.close();
-            if (in != null) in.close();
-            throw new FileNotFoundException(e.getMessage());
-         }
-         catch (IOException e) {
-            log.error(url + ": " + e.getMessage());
-            if (out != null) out.close();
-            if (in != null) in.close();
-            throw new IOException(e.getMessage());
-         }
-         catch (Exception e) {
-            log.error(url + ": " + e.getMessage());
-            if (out != null) out.close();
-            if (in != null) in.close();
-            throw new Exception(e.getMessage(), e);
-         }
-         finally {
-            if (out != null) out.close();
-            if (in != null) in.close();
-         }
-      }
-
-      return true;
-   }
-
 }

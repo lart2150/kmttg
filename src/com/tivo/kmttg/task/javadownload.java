@@ -1,11 +1,8 @@
 package com.tivo.kmttg.task;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -69,11 +66,17 @@ public class javadownload implements Serializable {
    
    private Boolean start() {
       debug.print("");
+      String url = job.url;
+      if (config.TSDownload == 1)
+         url += "&Format=video/x-tivo-mpeg-ts";
+      final String urlString = url;
+      log.print(">> DOWNLOADING " + job.tivoFile + " ...");
+      log.print(urlString);
       // Run download method in a separate thread
       Runnable r = new Runnable() {
          public void run () {
             try {
-               success = download();
+               success = http.download(urlString, "tivo", config.MAK, job.tivoFile, true);
                thread_running = false;
             }
             catch (Exception e) {
@@ -214,59 +217,5 @@ public class javadownload implements Serializable {
    // Return rate in Mbps (ds=delta bytes, dt=delta time in msecs)
    private String getRate(long ds, long dt) {      
       return String.format("%.1f Mbps", (ds*8000)/(1e6*dt));
-   }
-   
-   private Boolean download() throws IOException, InterruptedException, Exception {
-      String url = job.url;
-      if (config.TSDownload == 1)
-         url += "&Format=video/x-tivo-mpeg-ts";
-      log.print(">> DOWNLOADING " + job.tivoFile + " ...");
-      log.print(url);
-      InputStream in = http.cookieInputStream(url, "tivo", config.MAK);
-      if (in == null) {
-         return false;
-      } else {
-         int BUFSIZE = 65536;
-         byte[] buffer = new byte[BUFSIZE];
-         int c;
-         FileOutputStream out = null;
-         try {
-            out = new FileOutputStream(job.tivoFile);
-            while ((c = in.read(buffer, 0, BUFSIZE)) != -1) {
-               if (Thread.interrupted()) {
-                  out.close();
-                  in.close();
-                  throw new InterruptedException("Killed by user");
-               }
-               out.write(buffer, 0, c);
-            }
-            out.close();
-            in.close();
-         }
-         catch (FileNotFoundException e) {
-            log.error(url + ": " + e.getMessage());
-            if (out != null) out.close();
-            if (in != null) in.close();
-            throw new FileNotFoundException(e.getMessage());
-         }
-         catch (IOException e) {
-            log.error(url + ": " + e.getMessage());
-            if (out != null) out.close();
-            if (in != null) in.close();
-            throw new IOException(e.getMessage());
-         }
-         catch (Exception e) {
-            log.error(url + ": " + e.getMessage());
-            if (out != null) out.close();
-            if (in != null) in.close();
-            throw new Exception(e.getMessage(), e);
-         }
-         finally {
-            if (out != null) out.close();
-            if (in != null) in.close();
-         }
-      }
-
-      return true;
    }
 }
