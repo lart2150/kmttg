@@ -1,5 +1,7 @@
 package com.tivo.kmttg.main;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Authenticator;
@@ -60,7 +62,7 @@ public class http {
       return connection;
    }
    
-   public static InputStream noCookieInputStream(final String urlString, final String username, final String password) {
+   private static InputStream noCookieInputStream(final String urlString, final String username, final String password) {
       InputStream in = null;
       Authenticator authenticator = new Authenticator() {
          protected PasswordAuthentication getPasswordAuthentication() {
@@ -94,7 +96,7 @@ public class http {
       return in;
    }
    
-   public static InputStream cookieInputStream(final String urlString, final String username, final String password) {
+   private static InputStream cookieInputStream(final String urlString, final String username, final String password) {
       InputStream in = null;
       CookieManager cm = new CookieManager();
       Authenticator authenticator = new Authenticator() {
@@ -136,6 +138,60 @@ public class http {
       }
 
       return in;
+   }
+   
+   public static Boolean download(String url, String username, String password, String outFile, Boolean cookies)
+      throws IOException, InterruptedException, Exception {
+      InputStream in;
+      if (cookies)
+         in = http.cookieInputStream(url, username, password);
+      else
+         in = http.noCookieInputStream(url, username, password);
+      if (in == null) {
+         return false;
+      } else {
+         int BUFSIZE = 65536;
+         byte[] buffer = new byte[BUFSIZE];
+         int c;
+         FileOutputStream out = null;
+         try {
+            out = new FileOutputStream(outFile);
+            while ((c = in.read(buffer, 0, BUFSIZE)) != -1) {
+               if (Thread.interrupted()) {
+                  out.close();
+                  in.close();
+                  throw new InterruptedException("Killed by user");
+               }
+               out.write(buffer, 0, c);
+            }
+            out.close();
+            in.close();
+         }
+         catch (FileNotFoundException e) {
+            log.error(url + ": " + e.getMessage());
+            if (out != null) out.close();
+            if (in != null) in.close();
+            throw new FileNotFoundException(e.getMessage());
+         }
+         catch (IOException e) {
+            log.error(url + ": " + e.getMessage());
+            if (out != null) out.close();
+            if (in != null) in.close();
+            throw new IOException(e.getMessage());
+         }
+         catch (Exception e) {
+            log.error(url + ": " + e.getMessage());
+            if (out != null) out.close();
+            if (in != null) in.close();
+            throw new Exception(e.getMessage(), e);
+         }
+         finally {
+            if (out != null) out.close();
+            if (in != null) in.close();
+         }
+      }
+
+      return true;
    }
 
 }
