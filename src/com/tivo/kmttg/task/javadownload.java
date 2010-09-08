@@ -66,6 +66,11 @@ public class javadownload implements Serializable {
    
    private Boolean start() {
       debug.print("");
+      if (job.url == null || job.url.length() == 0) {
+         log.error("URL not given");
+         jobMonitor.removeFromJobList(job);
+         return false;
+      }
       String url = job.url;
       if (config.TSDownload == 1)
          url += "&Format=video/x-tivo-mpeg-ts";
