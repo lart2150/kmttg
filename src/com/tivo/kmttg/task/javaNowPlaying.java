@@ -240,7 +240,7 @@ public class javaNowPlaying implements Serializable {
    
    private Boolean getNPL(String url, String username, String password) throws InterruptedException, IOException, Exception {
       debug.print("url=" + url);
-      InputStream in = http.getNowPlaying(url, username, password);
+      InputStream in = http.noCookieInputStream(url, username, password);
       if (in == null) {
          return false;
       } else {

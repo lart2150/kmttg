@@ -60,7 +60,7 @@ public class http {
       return connection;
    }
    
-   public static InputStream getNowPlaying(final String urlString, final String username, final String password) {
+   public static InputStream noCookieInputStream(final String urlString, final String username, final String password) {
       InputStream in = null;
       Authenticator authenticator = new Authenticator() {
          protected PasswordAuthentication getPasswordAuthentication() {
@@ -94,7 +94,7 @@ public class http {
       return in;
    }
    
-   public static InputStream getTivoStream(final String urlString, final String username, final String password) {
+   public static InputStream cookieInputStream(final String urlString, final String username, final String password) {
       InputStream in = null;
       CookieManager cm = new CookieManager();
       Authenticator authenticator = new Authenticator() {

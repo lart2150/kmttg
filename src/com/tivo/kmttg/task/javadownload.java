@@ -222,7 +222,7 @@ public class javadownload implements Serializable {
          url += "&Format=video/x-tivo-mpeg-ts";
       log.print(">> DOWNLOADING " + job.tivoFile + " ...");
       log.print(url);
-      InputStream in = http.getTivoStream(url, "tivo", config.MAK);
+      InputStream in = http.cookieInputStream(url, "tivo", config.MAK);
       if (in == null) {
          return false;
       } else {
