@@ -54,6 +54,7 @@ public class config {
    public static int CheckDiskSpace = 0;
    public static int LowSpaceSize = 0;
    public static int CheckBeacon = 1;
+   public static int UseOldBeacon = 0;
    public static int TivoWebPlusDelete = 0;
    public static int UseAdscan = 0;
    public static int VrdReview = 0;
@@ -117,7 +118,7 @@ public class config {
    public static String perl = "perl";
    
    // tivo beacon listening
-   //public static beacon tivo_beacon;
+   public static beacon tivo_beacon = null;
    public static mdns jmdns = null;
    
    // t2extract related
@@ -252,8 +253,12 @@ public class config {
          errors.add("Encode Dir does not exist: " + encodeDir);
       
       // Start tivo beacon listener if option enabled
-      //if (CheckBeacon == 1) tivo_beacon = new beacon();
-      if (CheckBeacon == 1) jmdns = new mdns();
+      if (CheckBeacon == 1) {
+         if (UseOldBeacon == 0)
+            jmdns = new mdns();
+         else
+            tivo_beacon = new beacon();
+      }
 
       return errors;
    }            
@@ -685,6 +690,9 @@ public class config {
             if (key.equals("CheckBeacon")) {
                CheckBeacon = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("UseOldBeacon")) {
+               UseOldBeacon = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("TivoWebPlusDelete")) {
                TivoWebPlusDelete = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -850,6 +858,8 @@ public class config {
          ofp.write("<LowSpaceSize>\n" + LowSpaceSize + "\n\n");
          
          ofp.write("<CheckBeacon>\n" + CheckBeacon + "\n\n");
+         
+         ofp.write("<UseOldBeacon>\n" + UseOldBeacon + "\n\n");
          
          ofp.write("<TivoWebPlusDelete>\n" + TivoWebPlusDelete + "\n\n");
          
