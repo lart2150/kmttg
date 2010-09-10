@@ -160,6 +160,11 @@ public class gui {
       }
    }
    
+   public void grabFocus() {
+      if (jFrame != null)
+         if(! jFrame.hasFocus()) { jFrame.requestFocus(); }
+   }
+   
    private Container getJContentPane() {
       debug.print("");
       if (jContentPane == null) {
