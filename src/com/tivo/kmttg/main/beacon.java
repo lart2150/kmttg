@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Stack;
 
 import com.tivo.kmttg.util.log;
 
@@ -15,7 +16,6 @@ public class beacon {
    static int serverPort = 2190;
    static int listen_timeout = 100; // millisecs timeout for non-blocking receive
    byte[] data = new byte[1024];
-   static int timeout = 5;          // ~mins after which beacon listening disabled
    static long start_time;
    
    public beacon() {
@@ -31,15 +31,6 @@ public class beacon {
    }
    
    public Hashtable<String,String> listen() {
-      // If running longer than timeout, disable
-      if (server != null) {
-         long now = new Date().getTime();
-         if ( (now-start_time)/(1000*60) > timeout ) {
-            server.close();
-            server = null;
-         }
-      }
-      
       // Not disabled => listen in
       if (server != null) {
          try {
@@ -66,6 +57,33 @@ public class beacon {
          }
       }
       return null;
+   }
+
+   // Listen on tivo_beacon for any newly detected tivos
+   public void tivoBeaconUpdate() {
+      Hashtable<String,String> b = listen();
+      if (b != null) {
+         // Check against current Tivos list
+         Stack<String> tivoNames = config.getTivoNames();
+         Boolean add = true;
+         for (int i=0; i<tivoNames.size(); ++i) {
+            if ( tivoNames.get(i).matches(b.get("machine")) ) {
+               add = false;
+            }
+         }
+         if (add) {
+            config.addTivo(b);
+         } else {
+            // Update existing IP if necessary (for case if DHCP updates IP of existing Tivo)
+            String name = b.get("machine");
+            String ip = b.get("ip");
+            if (! ip.equals(config.TIVOS.get(name))) {
+               log.warn("Updating IP for TiVo: " + name);
+               config.TIVOS.put(name, ip);
+               config.save(config.configIni);
+            }
+         }
+      }
    }
 }
 
