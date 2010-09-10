@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
+import com.tivo.kmttg.main.beacon;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -53,6 +54,7 @@ public class configMain {
    private static JCheckBox QSFixBackupMpegFile = null;
    private static JCheckBox check_space = null;
    private static JCheckBox beacon = null;
+   private static JCheckBox UseOldBeacon = null;
    private static JCheckBox UseAdscan = null;
    private static JCheckBox VrdReview = null;
    private static JCheckBox VrdReview_noCuts = null;
@@ -378,6 +380,12 @@ public class configMain {
       else
          beacon.setSelected(false);
       
+      // UseOldBeacon
+      if (config.UseOldBeacon == 1)
+         UseOldBeacon.setSelected(true);
+      else
+         UseOldBeacon.setSelected(false);
+      
       // Remove .TiVo
       if (config.RemoveTivoFile == 1)
          remove_tivo.setSelected(true);
@@ -659,18 +667,31 @@ public class configMain {
       }
       config.setTivoNames(h);
       
+      // UseOldBeacon
+      if (UseOldBeacon.isSelected()) {
+         config.UseOldBeacon = 1;
+      } else {
+         config.UseOldBeacon = 0;
+      }
+      
       // Beacon
       if (beacon.isSelected()) {
          config.CheckBeacon = 1;
-         //if (config.tivo_beacon == null) config.tivo_beacon = new beacon();
-         if (config.jmdns == null) config.jmdns = new mdns();
+         if (config.UseOldBeacon == 0) {
+            if (config.jmdns == null) config.jmdns = new mdns();            
+         } else {
+            if (config.tivo_beacon == null) config.tivo_beacon = new beacon();
+         }         
       } else {
          config.CheckBeacon = 0;
-         if (config.jmdns != null) {
-            config.jmdns.close();
-            config.jmdns = null;
+         if (config.UseOldBeacon == 0) {
+            if (config.jmdns != null) {
+               config.jmdns.close();
+               config.jmdns = null;
+            }
+         } else {
+            config.tivo_beacon = null;
          }
-         //config.tivo_beacon = null;
       }
                   
       // VRD path
@@ -1383,6 +1404,7 @@ public class configMain {
       check_space = new javax.swing.JCheckBox();
       JLabel disk_space_label = new javax.swing.JLabel();
       beacon = new javax.swing.JCheckBox();
+      UseOldBeacon = new javax.swing.JCheckBox();
       toolTips = new javax.swing.JCheckBox();
       tableColAutoSize = new javax.swing.JCheckBox();
       jobMonitorFullPaths = new javax.swing.JCheckBox();
@@ -1525,6 +1547,7 @@ public class configMain {
 
       disk_space_label.setText("Min requested space (GB)"); 
       beacon.setText("Look for Tivos on network");
+      UseOldBeacon.setText("Detect with TiVo Beacon instead of Bonjour");
       
       toolTips.setText("Display toolTips");
       toolTipsTimeout_label.setText("toolTip timeout (secs)");
@@ -1838,6 +1861,12 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       tivo_panel.add(beacon, c);
+      
+      // UseOldBeacon
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      tivo_panel.add(UseOldBeacon, c);
       
       // Tivo combobox
       gy++;
@@ -2534,6 +2563,7 @@ public class configMain {
       QSFixBackupMpegFile.setToolTipText(getToolTip("QSFixBackupMpegFile"));
       check_space.setToolTipText(getToolTip("check_space"));
       beacon.setToolTipText(getToolTip("beacon"));
+      UseOldBeacon.setToolTipText(getToolTip("UseOldBeacon"));
       UseAdscan.setToolTipText(getToolTip("UseAdscan"));
       VrdReview.setToolTipText(getToolTip("VrdReview"));
       VrdReview_noCuts.setToolTipText(getToolTip("VrdReview_noCuts"));
@@ -2694,6 +2724,11 @@ public class configMain {
          text += "If this option is enabled then kmttg will try to detect Tivos on your network<br>";
          text += "automatically that you have not already configured manually.<br>";
          text += "NOTE: The automatic detection is disabled automatically after about 10 minutes.";
+      }
+      else if (component.equals("UseOldBeacon")) {
+         text =  "<b>Detect with TiVo Beacon instead of Bonjour</b><br>";
+         text += "Use the old TiVo Beacon method for detecting TiVos on the network instead of the<br>";
+         text += "newer Bonjour method. You can try this method if Bonjour is not working for you.";
       }
       else if (component.equals("UseAdscan")) {
          text =  "<b>Use VideoRedo AdScan instead of comskip</b><br>";

@@ -53,8 +53,10 @@ public class jobMonitor {
       }
       
       // Check for new tivos
-      if (config.jmdns != null) config.jmdns.process();
-      //tivoBeaconUpdate();
+      if (config.UseOldBeacon == 0 && config.jmdns != null)
+         config.jmdns.process();
+      if (config.UseOldBeacon == 1 && config.tivo_beacon != null)
+         tivoBeaconUpdate();
       
       if ( JOBS != null && ! JOBS.isEmpty() ) {
          for (int i=0; i<JOBS.size(); ++i) {
@@ -1167,23 +1169,31 @@ public class jobMonitor {
    }
 
    // Listen on tivo_beacon for any newly detected tivos
-   /*private static void tivoBeaconUpdate() {
-      if (config.CheckBeacon == 1 && config.tivo_beacon != null) {
-         Hashtable<String,String> b = config.tivo_beacon.listen();
-         if (b != null) {
-            Stack<String> tivoNames = config.getTivoNames();
-            Boolean add = true;
-            for (int i=0; i<tivoNames.size(); ++i) {
-               if ( tivoNames.get(i).matches(b.get("machine")) ) {
-                  add = false;
-               }
+   private static void tivoBeaconUpdate() {
+      Hashtable<String,String> b = config.tivo_beacon.listen();
+      if (b != null) {
+         // Check against current Tivos list
+         Stack<String> tivoNames = config.getTivoNames();
+         Boolean add = true;
+         for (int i=0; i<tivoNames.size(); ++i) {
+            if ( tivoNames.get(i).matches(b.get("machine")) ) {
+               add = false;
             }
-            if (add) {
-               config.addTivo(b);
+         }
+         if (add) {
+            config.addTivo(b);
+         } else {
+            // Update existing IP if necessary (for case if DHCP updates IP of existing Tivo)
+            String name = b.get("machine");
+            String ip = b.get("ip");
+            if (! ip.equals(config.TIVOS.get(name))) {
+               log.warn("Updating IP for TiVo: " + name);
+               config.TIVOS.put(name, ip);
+               config.save(config.configIni);
             }
          }
       }
-   }*/
+   }
 
    // Return true if this job is a VideoRedo COM job that needs to be restricted to 1 at a time
    private static Boolean isVideoRedoCOMJob(jobData job) {
