@@ -167,28 +167,34 @@ public class autotune implements Serializable {
    
    public static void init(String tivoName) {
       if (config.autotune == null) config.autotune = new Hashtable<String,Hashtable<String,String>>();
-      if ( ! config.autotune.containsKey(tivoName))
-         config.autotune.put(tivoName, new Hashtable<String,String>());
-      if ( ! config.autotune.get(tivoName).containsKey("enabled"))
-         config.autotune.get(tivoName).put("enabled", "false");
-      if ( ! config.autotune.get(tivoName).containsKey("channel_interval"))
-         config.autotune.get(tivoName).put("channel_interval", "5");
-      if ( ! config.autotune.get(tivoName).containsKey("button_interval"))
-         config.autotune.get(tivoName).put("button_interval", "1000");
-      if ( ! config.autotune.get(tivoName).containsKey("chan1"))
-         config.autotune.get(tivoName).put("chan1", "0");
-      if ( ! config.autotune.get(tivoName).containsKey("chan2"))
-         config.autotune.get(tivoName).put("chan2", "1");
+      if (tivoName != null) {
+         if ( ! config.autotune.containsKey(tivoName))
+            config.autotune.put(tivoName, new Hashtable<String,String>());
+         if ( ! config.autotune.get(tivoName).containsKey("enabled"))
+            config.autotune.get(tivoName).put("enabled", "false");
+         if ( ! config.autotune.get(tivoName).containsKey("channel_interval"))
+            config.autotune.get(tivoName).put("channel_interval", "5");
+         if ( ! config.autotune.get(tivoName).containsKey("button_interval"))
+            config.autotune.get(tivoName).put("button_interval", "1000");
+         if ( ! config.autotune.get(tivoName).containsKey("chan1"))
+            config.autotune.get(tivoName).put("chan1", "0");
+         if ( ! config.autotune.get(tivoName).containsKey("chan2"))
+            config.autotune.get(tivoName).put("chan2", "1");
+      }
    }
    
    public static void enable(String tivoName) {
-      init(tivoName);
-      config.autotune.get(tivoName).put("enabled", "true");
+      if (tivoName != null) {
+         init(tivoName);
+         config.autotune.get(tivoName).put("enabled", "true");
+      }
    }
    
    public static void disable(String tivoName) {
-      init(tivoName);
-      config.autotune.get(tivoName).put("enabled", "false");      
+      if (tivoName != null) {
+         init(tivoName);
+         config.autotune.get(tivoName).put("enabled", "false"); 
+      }
    }
    
    public static String[] getRequiredElements() {
