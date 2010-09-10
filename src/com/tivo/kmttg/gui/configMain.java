@@ -360,13 +360,16 @@ public class configMain {
       // Tivos
       Stack<String> tivoNames = config.getTivoNames();
       if (tivoNames.size()>0) {
+         // Update tivo name lists
          tivos.removeAllItems();
+         autotune_tivoName.removeAllItems();
          String name, ip;
          for (int i=0; i<tivoNames.size(); i++) {
             name = tivoNames.get(i);
             ip = config.TIVOS.get(name);
             tivos.addItem(name + "=" + ip);
-         }
+            autotune_tivoName.addItem(name);
+         }         
       }
       
       // Beacon
