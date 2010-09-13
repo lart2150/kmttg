@@ -259,6 +259,9 @@ public class encode implements Serializable {
          if ( ! file.isFile(job.metaFile) ) {
             job.metaFile = job.mpegFile + ".txt";
          }
+         if ( ! file.isFile(job.metaFile) ) {
+            job.metaFile = string.replaceSuffix(job.encodeFile, ".txt.TiVo");
+         }
          if ( file.isFile(job.metaFile) &&
               (job.encodeFile.toLowerCase().endsWith(".mp4") ||
                job.encodeFile.toLowerCase().endsWith(".m4v")) ) {

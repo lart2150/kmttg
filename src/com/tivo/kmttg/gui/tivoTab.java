@@ -303,6 +303,9 @@ public class tivoTab {
                   if ( ! file.isFile(metaFile) ) {
                      metaFile = string.replaceSuffix(encodeFile, ".mpg.txt");
                   }
+                  if ( ! file.isFile(metaFile) ) {
+                     metaFile = string.replaceSuffix(encodeFile, ".TiVo.txt");
+                  }
                   if ( file.isFile(metaFile) ) {
                      log.warn("Manual AtomicParsley using metadata file: " + metaFile);
                      jobData new_job = new jobData();
