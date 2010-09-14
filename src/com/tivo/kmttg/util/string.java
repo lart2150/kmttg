@@ -152,7 +152,7 @@ public class string {
    // add given port as part of url
    public static String addPort(String url, String port) {
       url = url.replaceFirst(":[0-9]+/", "/");
-      Pattern p = Pattern.compile("^.+//(\\S+)/.+$");
+      Pattern p = Pattern.compile("^.+://(.+?)/.+");
       Matcher m = p.matcher(url);
       if (m.matches()) {
          String ip = m.group(1);
