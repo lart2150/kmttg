@@ -72,6 +72,12 @@ public class javaNowPlaying implements Serializable {
       
       String urlString = "https://";
       urlString += job.ip;
+      
+      // Add wan https port if configured
+      String wan_port = config.getWanSetting(job.tivoName, "https");
+      if (wan_port != null)
+         urlString += ":" + wan_port;
+      
       // Enable testLimit only for testing multiple downloads
       Boolean testLimit = false;
       if (testLimit) {
