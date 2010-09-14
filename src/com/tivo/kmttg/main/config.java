@@ -69,7 +69,6 @@ public class config {
    public static int java_downloads = 0;        // Use java instead of curl to download
 
    public static String comskipIni = "";
-   public static String wan_http_port = "";
    public static String configIni = "";
    public static String tivoFileNameFormat = null; 
    
@@ -88,6 +87,7 @@ public class config {
    
    // Hash to store tivo related information
    public static Hashtable<String,String> TIVOS = new Hashtable<String,String>();
+   public static Hashtable<String,String> WAN = new Hashtable<String,String>();
     
    // GUI related
    public static Boolean GUI = false;       // true=>GUI, false=>batch/auto            
@@ -312,6 +312,19 @@ public class config {
          config.gui.AddTivo(b.get("machine"), b.get("ip"));
       }
    }
+   
+   public static String getWanSetting(String tivoName, String setting) {
+      String key = "wan_" + tivoName + "_" + setting;
+      if (WAN.containsKey(key))
+         return WAN.get(key);
+      else
+         return null;
+   }
+   
+   public static void setWanSetting(String tivoName, String setting, String value) {
+      String key = "wan_" + tivoName + "_" + setting;
+      WAN.put(key, value);
+   }
 
    private static void defineDefaults() {
       debug.print("");
@@ -365,7 +378,6 @@ public class config {
       mpegDir            = outputDir;
       mpegCutDir         = outputDir;
       encodeDir          = outputDir;
-      wan_http_port      = "";
       customCommand      = "";
       cpu_cores          = Runtime.getRuntime().availableProcessors();
       pyTivo_host        = "localhost";
@@ -629,8 +641,8 @@ public class config {
             if (key.equals("comskipIni")) {
                comskipIni = line;
             }
-            if (key.equals("wan_http_port")) {
-               wan_http_port = line;
+            if (key.matches("^wan_.+$")) {
+               WAN.put(key, line);
             }
             if (key.equals("MaxJobs")) {
                MaxJobs = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
@@ -763,6 +775,14 @@ public class config {
          ofp.write(String.format("%-20s %-20s\n", "FILES", TIVOS.get("FILES")));
          ofp.write("\n");
          
+         if (WAN.size() > 0) {
+            for (Enumeration<String> e=WAN.keys(); e.hasMoreElements();) {
+               String name = e.nextElement();
+               ofp.write("<" + name + ">\n");
+               ofp.write(WAN.get(name) + "\n\n");
+            }
+         }
+         
          ofp.write("<FontSize>\n" + FontSize + "\n\n");
          
          ofp.write("<tableColAutoSize>\n" + tableColAutoSize + "\n\n");
@@ -824,8 +844,6 @@ public class config {
          ofp.write("<comskip>\n" + comskip + "\n\n");
          
          ofp.write("<comskipIni>\n" + comskipIni + "\n\n");
-         
-         ofp.write("<wan_http_port>\n" + wan_http_port + "\n\n");
          
          ofp.write("<MaxJobs>\n" + MaxJobs + "\n\n");
          

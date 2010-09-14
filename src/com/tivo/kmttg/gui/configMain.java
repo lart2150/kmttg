@@ -89,6 +89,7 @@ public class configMain {
    private static JTextField comskip = null;
    private static JTextField comskip_ini = null;
    private static JTextField wan_http_port = null;
+   private static JTextField wan_https_port = null;
    private static JTextField active_job_limit = null;
    private static JTextField VRD_path = null;
    private static JTextField t2extract = null;
@@ -196,7 +197,7 @@ public class configMain {
       config.gui.refreshOptions();
    }
    
-   // Callback for add button
+   // Callback for tivo add button
    private static void addCB() {
       debug.print("");
       // Add name=ip to tivos combobox
@@ -213,7 +214,55 @@ public class configMain {
       addTivo(name, ip);      
    }
    
-   // Callback for add button
+   public static void addTivo(String name, String ip) {  
+      debug.print("name=" + name + " ip=" + ip);
+      if (dialog == null || tivos == null) return;
+      String value = name + "=" + ip;
+      // Don't add duplicate value
+      Boolean doit = true;
+      int count = tivos.getItemCount();
+      if (count > 0) {
+         for (int i=0; i<count; i++) {
+            String s = tivos.getItemAt(i).toString();
+            if (s.equals(value))
+               doit = false;
+         }
+      }
+      if (doit) {
+         tivos.addItem(value);
+         tivos.setSelectedItem(value);
+      }
+   }
+   
+   private static void updateWanSettings(String tivoName) {      
+      // Update http & https setting according to selected TiVo
+      String http = config.getWanSetting(tivoName, "http");
+      if (http != null) {
+         wan_http_port.setText(http);
+      } else {
+         wan_http_port.setText("");
+      }
+      String https = config.getWanSetting(tivoName, "https");
+      if (https != null) {
+         wan_https_port.setText(https);
+      } else {
+         wan_https_port.setText("");
+      }
+   }
+   
+   // Callback for tivo del button
+   private static void delCB() {
+      debug.print("");
+      // Remove current selection in tivos combobox
+      int selected = tivos.getSelectedIndex();
+      if (selected > -1) {
+         tivos.removeItemAt(selected);
+      } else {
+         log.error("No tivo entries left to remove");
+      }
+   }
+   
+   // Callback for autotune test button
    private static void autotune_testCB() {
       debug.print("");
       if ( autotune_tivoName.getComponentCount() > 0 ) {
@@ -324,48 +373,17 @@ public class configMain {
       }
    }
    
-   public static void addTivo(String name, String ip) {  
-      debug.print("name=" + name + " ip=" + ip);
-      if (dialog == null || tivos == null) return;
-      String value = name + "=" + ip;
-      // Don't add duplicate value
-      Boolean doit = true;
-      int count = tivos.getItemCount();
-      if (count > 0) {
-         for (int i=0; i<count; i++) {
-            String s = tivos.getItemAt(i).toString();
-            if (s.equals(value))
-               doit = false;
-         }
-      }
-      if (doit) {
-         tivos.addItem(value);
-         tivos.setSelectedItem(value);
-      }
-   }
-   
-   // Callback for del button
-   private static void delCB() {
-      debug.print("");
-      // Remove current selection in tivos combobox
-      int selected = tivos.getSelectedIndex();
-      if (selected > -1) {
-         tivos.removeItemAt(selected);
-      } else {
-         log.error("No tivo entries left to remove");
-      }
-   }
-   
    // Update widgets with config settings
    public static void read() {
       debug.print("");
+      String name;
       // Tivos
       Stack<String> tivoNames = config.getTivoNames();
       if (tivoNames.size()>0) {
          // Update tivo name lists
          tivos.removeAllItems();
          autotune_tivoName.removeAllItems();
-         String name, ip;
+         String ip;
          for (int i=0; i<tivoNames.size(); i++) {
             name = tivoNames.get(i);
             ip = config.TIVOS.get(name);
@@ -374,6 +392,20 @@ public class configMain {
          }         
       }
       
+      // wan http & https ports
+      wan_http_port.setText("");
+      wan_https_port.setText("");
+      name = (String)tivos.getSelectedItem();
+      if (name != null) {
+         String tivoName = name.replaceFirst("=.+$", "");
+         String http = config.getWanSetting(tivoName, "http");
+         if (http != null)
+            wan_http_port.setText(http);
+         String https = config.getWanSetting(tivoName, "https");
+         if (https != null)
+            wan_https_port.setText(https);
+      }
+            
       // Beacon
       if (config.CheckBeacon == 1)
          beacon.setSelected(true);
@@ -586,9 +618,6 @@ public class configMain {
       // MinChanDigits
       MinChanDigits.setSelectedItem(config.MinChanDigits);
       
-      // wan http port
-      wan_http_port.setText(config.wan_http_port);
-      
       // toolTipsTimeout
       toolTipsTimeout.setText("" + config.toolTipsTimeout);
       
@@ -629,7 +658,6 @@ public class configMain {
       metadata_files.setSelectedItem(config.metadata_files);
       
       // autotune settings
-      String name;
       if (autotune_tivoName != null) {
          name = (String)autotune_tivoName.getSelectedItem();
       } else {
@@ -652,6 +680,7 @@ public class configMain {
       debug.print("");
       int errors = 0;
       String value;
+      String name;
       
       // Tivos
       int count = tivos.getItemCount();
@@ -666,6 +695,36 @@ public class configMain {
          }
       }
       config.setTivoNames(h);
+      
+      // wan http & https ports
+      name = (String)tivos.getSelectedItem();
+      if (name != null) {
+         String tivoName = name.replaceFirst("=.+$", "");
+         value = string.removeLeadingTrailingSpaces(wan_http_port.getText());
+         if (value.length() > 0) {
+            try {
+               Integer.parseInt(value);
+               config.setWanSetting(tivoName, "http", value);
+            } catch(NumberFormatException e) {
+               textFieldError(wan_http_port, "wan http port should be a number: '" + value + "'");
+               errors++;
+            }
+         } else {
+            config.setWanSetting(tivoName, "http", "");
+         }
+         value = string.removeLeadingTrailingSpaces(wan_https_port.getText());
+         if (value.length() > 0) {
+            try {
+               Integer.parseInt(value);
+               config.setWanSetting(tivoName, "https", value);
+            } catch(NumberFormatException e) {
+               textFieldError(wan_https_port, "wan https port should be a number: '" + value + "'");
+               errors++;
+            }
+         } else {
+            config.setWanSetting(tivoName, "https", "");
+         }
+      }
       
       // UseOldBeacon
       if (UseOldBeacon.isSelected()) {
@@ -1139,20 +1198,6 @@ public class configMain {
       // MinChanDigits
       config.MinChanDigits = (Integer)MinChanDigits.getSelectedItem();
       
-      // wan http port
-      value = string.removeLeadingTrailingSpaces(wan_http_port.getText());
-      if (value.length() > 0) {
-         try {
-            Integer.parseInt(value);
-            config.wan_http_port = value;
-         } catch(NumberFormatException e) {
-            textFieldError(wan_http_port, "wan http port should be a number: '" + value + "'");
-            errors++;
-         }
-      } else {
-         config.wan_http_port = "";
-      }
-      
       // cpu_cores
       value = string.removeLeadingTrailingSpaces(cpu_cores.getText());
       if (value.length() > 0) {
@@ -1268,7 +1313,7 @@ public class configMain {
       
       // autotune settings
       if (autotune_tivoName != null && autotune_tivoName.getComponentCount() > 0) {
-         String name = (String)autotune_tivoName.getSelectedItem();
+         name = (String)autotune_tivoName.getSelectedItem();
          if (name != null) {
             if (autotune_enabled.isSelected())
                autotune.enable(name);
@@ -1320,6 +1365,7 @@ public class configMain {
       
       MAK = new javax.swing.JTextField(15);
       wan_http_port = new javax.swing.JTextField(15);
+      wan_https_port = new javax.swing.JTextField(15);
       active_job_limit = new javax.swing.JTextField(15);
       toolTipsTimeout = new javax.swing.JTextField(15);
       cpu_cores = new javax.swing.JTextField(15);
@@ -1332,6 +1378,16 @@ public class configMain {
       
       JLabel tivos_label = new javax.swing.JLabel();
       tivos = new javax.swing.JComboBox();
+      tivos.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+                String name = (String)tivos.getSelectedItem();
+                if (name != null)
+                   updateWanSettings(name);
+            }
+         }
+      });
+
       add = new javax.swing.JButton();
       del = new javax.swing.JButton();
       JLabel tivo_name_label = new javax.swing.JLabel();
@@ -1375,6 +1431,7 @@ public class configMain {
       JLabel comskip_label = new javax.swing.JLabel();
       JLabel comskip_ini_label = new javax.swing.JLabel();
       JLabel wan_http_port_label = new javax.swing.JLabel();
+      JLabel wan_https_port_label = new javax.swing.JLabel();
       JLabel active_job_limit_label = new javax.swing.JLabel();
       JLabel VRD_path_label = new javax.swing.JLabel();
       JLabel t2extract_label = new javax.swing.JLabel();
@@ -1473,6 +1530,7 @@ public class configMain {
       comskip_label.setText("comskip"); 
       comskip_ini_label.setText("comskip.ini"); 
       wan_http_port_label.setText("wan http port"); 
+      wan_https_port_label.setText("wan https port"); 
       active_job_limit_label.setText("active job limit"); 
       VRD_path_label.setText("VideoRedo path");
       t2extract_label.setText("t2extract"); 
@@ -1908,6 +1966,33 @@ public class configMain {
       c.gridy = gy;
       tivo_panel.add(tivo_ip, c);
       
+      // vertical space via empty label
+      JLabel bogus = new JLabel(" ");
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      tivo_panel.add(bogus, c);
+            
+      // wan http port
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      tivo_panel.add(wan_http_port_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      tivo_panel.add(wan_http_port, c);
+      
+      // wan https port
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      tivo_panel.add(wan_https_port_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      tivo_panel.add(wan_https_port, c);
+      
       // autotune panel
       JPanel autotune_panel = new JPanel(new GridBagLayout());
       
@@ -2256,16 +2341,6 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(cpu_cores, c);
       
-      // wan http port
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      program_options_panel.add(wan_http_port_label, c);
-
-      c.gridx = 1;
-      c.gridy = gy;
-      program_options_panel.add(wan_http_port, c);
-      
       // t2extract_args
       gy++;
       c.gridx = 0;
@@ -2598,6 +2673,7 @@ public class configMain {
       VRD_path.setToolTipText(getToolTip("VRD_path"));
       AtomicParsley.setToolTipText(getToolTip("AtomicParsley"));
       wan_http_port.setToolTipText(getToolTip("wan_http_port"));
+      wan_https_port.setToolTipText(getToolTip("wan_https_port"));
       active_job_limit.setToolTipText(getToolTip("active_job_limit"));
       disk_space.setToolTipText(getToolTip("disk_space"));
       customCommand.setToolTipText(getToolTip("customCommand"));
@@ -3003,10 +3079,18 @@ public class configMain {
          text += "<b>Advanced Setting</b>.<br>";
          text += "Set this option only if you plan to use kmttg over a WAN instead of your local LAN.<br>";
          text += "By default http port 80 is used to download shows from the Tivos on the LAN, but from WAN side<br>";
-         text += "you will have to setup port forwarding in your router, and often service providers do not<br>";
-         text += "allow you to use port 80.<br>";
-         text += "NOTE: For Now Playing List retrieval https port 443 also should be port forwarded to your Tivo<br>";
-         text += "port 443 in your router configuration.";
+         text += "you will have to setup port forwarding in your router, then you should specify here the WAN (public) side<br>";
+         text += "port number you are using in your router port forwarding settings.<br>";
+         text += "NOTE: In order to save this setting you must OK the configuration window once for each TiVo";
+      }
+      else if (component.equals("wan_http_ports")) {
+         text =  "<b>wan https port</b><br>";
+         text += "<b>Advanced Setting</b>.<br>";
+         text += "Set this option only if you plan to use kmttg over a WAN instead of your local LAN.<br>";
+         text += "By default http port 443 is used to get Now Playing List from the Tivos on the LAN, but from WAN side<br>";
+         text += "you will have to setup port forwarding in your router, then you should specify here the WAN (public) side<br>";
+         text += "port number you are using in your router port forwarding settings.<br>";
+         text += "NOTE: In order to save this setting you must OK the configuration window once for each TiVo";
       }
       else if (component.equals("active_job_limit")) {
          text =  "<b>active job limit</b><br>";
