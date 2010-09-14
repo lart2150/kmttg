@@ -72,6 +72,12 @@ public class metadata implements Serializable {
          jobMonitor.removeFromJobList(job);
          return false;
       }
+      
+      // Add wan https port if configured
+      String wan_port = config.getWanSetting(job.tivoName, "https");
+      if (wan_port != null)
+         job.url = string.addPort(job.url, wan_port);
+      
       Stack<String> command = new Stack<String>();
       command.add(config.curl);
       if (config.OS.equals("windows")) {

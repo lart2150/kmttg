@@ -15,6 +15,7 @@ import com.tivo.kmttg.util.createMeta;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class javametadata implements Serializable {
    private static final long serialVersionUID = 1L;
@@ -73,6 +74,12 @@ public class javametadata implements Serializable {
          jobMonitor.removeFromJobList(job);
          return false;
       }
+      
+      // Add wan https port if configured
+      String wan_port = config.getWanSetting(job.tivoName, "https");
+      if (wan_port != null)
+         job.url = string.addPort(job.url, wan_port);
+
       log.print(">> CREATING " + job.metaFile + " ...");
       log.print(job.url);
       // Run download method in a separate thread
