@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class string {
    
@@ -145,4 +147,19 @@ public class string {
       
       return msecs * plusMinus;
    }
+      
+   // For given url strip off port if already there, then
+   // add given port as part of url
+   public static String addPort(String url, String port) {
+      url = url.replaceFirst(":[0-9]+/", "/");
+      Pattern p = Pattern.compile("^.+//(\\S+)/.+$");
+      Matcher m = p.matcher(url);
+      if (m.matches()) {
+         String ip = m.group(1);
+         System.out.println("ip=" + ip);
+         url = url.replaceFirst(ip, ip + ":" + port);
+      }
+      return url;
+   }
+
 }
