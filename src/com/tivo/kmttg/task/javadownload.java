@@ -71,6 +71,12 @@ public class javadownload implements Serializable {
          jobMonitor.removeFromJobList(job);
          return false;
       }
+      
+      // Add wan http port if configured
+      String wan_port = config.getWanSetting(job.tivoName, "http");
+      if (wan_port != null)
+         job.url = string.addPort(job.url, wan_port);
+      
       String url = job.url;
       if (config.TSDownload == 1)
          url += "&Format=video/x-tivo-mpeg-ts";
