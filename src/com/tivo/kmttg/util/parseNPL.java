@@ -207,9 +207,6 @@ public class parseNPL {
                if (value.matches("^.*download.*$")) {
                   value = value.replaceFirst("^(.+)<\\/.+$", "$1");
                   value = value.replaceFirst("&amp;", "&");
-                  if (config.wan_http_port.length() > 0) {
-                     value = value.replaceFirst(":80", ":" + config.wan_http_port);
-                  }
                   h.put("url", value);
                }
                
