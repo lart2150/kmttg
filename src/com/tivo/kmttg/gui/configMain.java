@@ -3083,7 +3083,7 @@ public class configMain {
          text += "port number you are using in your router port forwarding settings.<br>";
          text += "NOTE: In order to save this setting you must OK the configuration window once for each TiVo";
       }
-      else if (component.equals("wan_http_ports")) {
+      else if (component.equals("wan_https_port")) {
          text =  "<b>wan https port</b><br>";
          text += "<b>Advanced Setting</b>.<br>";
          text += "Set this option only if you plan to use kmttg over a WAN instead of your local LAN.<br>";
