@@ -25,6 +25,7 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class gui {
 
@@ -577,6 +578,10 @@ public class gui {
                String tivoName = getSelectedTivoName();
                if (tivoName != null) {
                   String urlString = "http://" + config.TIVOS.get(tivoName) + "/TiVoConnect?Command=ResetServer";
+                  // Add wan port if configured
+                  String wan_port = config.getWanSetting(tivoName, "http");
+                  if (wan_port != null)
+                     urlString = string.addPort(urlString, wan_port);
                   try {
                      URL url = new URL(urlString);
                      log.warn("Resetting " + tivoName + " TiVo: " + urlString);
