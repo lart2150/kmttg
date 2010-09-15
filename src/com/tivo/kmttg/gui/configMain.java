@@ -234,19 +234,22 @@ public class configMain {
       }
    }
    
-   private static void updateWanSettings(String tivoName) {      
-      // Update http & https setting according to selected TiVo
-      String http = config.getWanSetting(tivoName, "http");
-      if (http != null) {
-         wan_http_port.setText(http);
-      } else {
-         wan_http_port.setText("");
-      }
-      String https = config.getWanSetting(tivoName, "https");
-      if (https != null) {
-         wan_https_port.setText(https);
-      } else {
-         wan_https_port.setText("");
+   private static void updateWanSettings(String setting) {
+      if (setting != null) {
+         String tivoName = setting.replaceFirst("=.+$", "");
+         // Update http & https setting according to selected TiVo
+         String http = config.getWanSetting(tivoName, "http");
+         if (http != null) {
+            wan_http_port.setText(http);
+         } else {
+            wan_http_port.setText("");
+         }
+         String https = config.getWanSetting(tivoName, "https");
+         if (https != null) {
+            wan_https_port.setText(https);
+         } else {
+            wan_https_port.setText("");
+         }
       }
    }
    
@@ -3076,7 +3079,7 @@ public class configMain {
       }
       else if (component.equals("wan_http_port")) {
          text =  "<b>wan http port</b><br>";
-         text += "<b>Advanced Setting</b>.<br>";
+         text += "<b>Advanced Setting - for normal use leave this setting empty</b>.<br>";
          text += "Set this option only if you plan to use kmttg over a WAN instead of your local LAN.<br>";
          text += "By default http port 80 is used to download shows from the Tivos on the LAN, but from WAN side<br>";
          text += "you will have to setup port forwarding in your router, then you should specify here the WAN (public) side<br>";
@@ -3085,7 +3088,7 @@ public class configMain {
       }
       else if (component.equals("wan_https_port")) {
          text =  "<b>wan https port</b><br>";
-         text += "<b>Advanced Setting</b>.<br>";
+         text += "<b>Advanced Setting - for normal use leave this setting empty</b>.<br>";
          text += "Set this option only if you plan to use kmttg over a WAN instead of your local LAN.<br>";
          text += "By default http port 443 is used to get Now Playing List from the Tivos on the LAN, but from WAN side<br>";
          text += "you will have to setup port forwarding in your router, then you should specify here the WAN (public) side<br>";
