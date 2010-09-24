@@ -54,7 +54,7 @@ public class qsfix implements Serializable {
          schedule = false;
       }
       
-      if (config.OverwriteFiles == 0 && sourceFile.equals(job.tivoFile) && file.isFile(job.mpegFile)) {
+      if (schedule && config.OverwriteFiles == 0 && sourceFile.equals(job.tivoFile) && file.isFile(job.mpegFile)) {
          log.warn("SKIPPING QSFIX, FILE ALREADY EXISTS: " + job.mpegFile);
          schedule = false;
       }
@@ -323,10 +323,9 @@ public class qsfix implements Serializable {
          if (dimensions != null) {
             ofp.write("VideoReDo.SetFilterDimensions " + dimensions.get("x") + ", " + dimensions.get("y") + eol);
          }
-         ofp.write("' Check for proper version" + eol);
-         ofp.write("version = GetVersion(VideoReDo.VersionNumber)" + eol);
          ofp.write("' Open output file and start processing." + eol);
-         // NOTE: NEWER VRD TVSUITE4 NO LONGER SUPPORTS FileSaveAsEx so have to use FileSaveProfile
+         ofp.write("'NOTE: NEWER VRD TVSUITE4 NO LONGER SUPPORTS FileSaveAsEx so have to use FileSaveProfile" + eol);
+         ofp.write("version = GetVersion(VideoReDo.VersionNumber)" + eol);
          ofp.write("if version < 4205604 then" + eol);
          ofp.write("   outputFlag = VideoReDo.FileSaveAsEx( destFile, 1 )" + eol);
          ofp.write("else" + eol);
@@ -448,17 +447,18 @@ public class qsfix implements Serializable {
          ofp.write("end if" + eol);
          ofp.write("VideoReDo.AddToJoiner()" + eol);
          ofp.write("' Save selection to mpeg2 program stream." + eol);
-         // NOTE: NEWER VRD TVSUITE4 NO LONGER SUPPORTS FileSaveAsEx so have to use FileSaveProfile
-         //ofp.write("if version < 4205604 then" + eol);
+         ofp.write("'NOTE: NEWER VRD TVSUITE4 NO LONGER SUPPORTS SaveJoinerAsEx so have to use SaveJoinerWithProfile" + eol);
+         ofp.write("version = GetVersion(VideoReDo.VersionNumber)" + eol);
+         ofp.write("if version < 4205604 then" + eol);
          ofp.write("   outputFlag = VideoReDo.SaveJoinerAs( destFile )" + eol);
-         //ofp.write("else" + eol);
-         //ofp.write("   outputFlag = true" + eol);
-         //ofp.write("   profileName = \"MPEG2 Program Stream\"" + eol);
-         //ofp.write("   outputXML = VideoReDo.FileSaveProfile( destFile, profileName )" + eol);
-         //ofp.write("   if ( left(outputXML,1) = \"*\" ) then" + eol);
-         //ofp.write("      outputFlag = false" + eol);
-         //ofp.write("   end if" + eol);
-         //ofp.write("end if" + eol);
+         ofp.write("else" + eol);
+         ofp.write("   outputFlag = true" + eol);
+         ofp.write("   profileName = \"MPEG2 Program Stream\"" + eol);
+         ofp.write("   outputXML = VideoReDo.SaveJoinerWithProfile( destFile, profileName )" + eol);
+         ofp.write("   if ( left(outputXML,1) = \"*\" ) then" + eol);
+         ofp.write("      outputFlag = false" + eol);
+         ofp.write("   end if" + eol);
+         ofp.write("end if" + eol);
          ofp.write("" + eol);
          ofp.write("if outputFlag = false then" + eol);
          ofp.write("   wscript.stderr.writeline(\"? Problem opening output file: \" + destFile )" + eol);
