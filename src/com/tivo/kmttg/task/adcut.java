@@ -261,7 +261,18 @@ public class adcut implements Serializable {
          ofp.write("end if" + eol);
          ofp.write("" + eol);
          ofp.write("' Open output file and start processing." + eol);
-         ofp.write("outputFlag = VideoReDo.FileSaveAsEx( destFile, 1 )" + eol);
+         ofp.write("'NOTE: NEWER VRD TVSUITE4 NO LONGER SUPPORTS FileSaveAsEx so have to use FileSaveProfile" + eol);
+         ofp.write("version = GetVersion(VideoReDo.VersionNumber)" + eol);
+         ofp.write("if version < 4205604 then" + eol);
+         ofp.write("   outputFlag = VideoReDo.FileSaveAsEx( destFile, 1 )" + eol);
+         ofp.write("else" + eol);
+         ofp.write("   outputFlag = true" + eol);
+         ofp.write("   profileName = \"MPEG2 Program Stream\"" + eol);
+         ofp.write("   outputXML = VideoReDo.FileSaveProfile( destFile, profileName )" + eol);
+         ofp.write("   if ( left(outputXML,1) = \"*\" ) then" + eol);
+         ofp.write("      outputFlag = false" + eol);
+         ofp.write("   end if" + eol);
+         ofp.write("end if" + eol);
          ofp.write("" + eol);
          ofp.write("if outputFlag = false then" + eol);
          ofp.write("   wscript.stderr.writeline(\"? Problem opening output file: \" + destFile )" + eol);
@@ -285,6 +296,7 @@ public class adcut implements Serializable {
          ofp.write("' Exit with status 0" + eol);
          ofp.write("wscript.echo( \"   Output complete to: \" + destFile )" + eol);
          ofp.write("wscript.quit 0" + eol);
+         string.PrintVideoRedoVersionFctn(ofp);
          ofp.close();
       }
       catch (Exception ex) {
