@@ -1,6 +1,5 @@
 package com.tivo.kmttg.util;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -162,32 +161,4 @@ public class string {
       }
       return url;
    }
-   
-   public static void PrintVideoRedoVersionFctn(BufferedWriter ofp) {
-      String eol = "\r";
-      try {
-         ofp.write("" + eol);
-         ofp.write("function GetVersion(string)" + eol);
-         ofp.write("   version = 0" + eol);
-         ofp.write("   Set objRE = New RegExp" + eol);
-         ofp.write("   With objRE" + eol);
-         ofp.write("      .Pattern = \"^(\\S+).+$\"" + eol);
-         ofp.write("      .IgnoreCase = True" + eol);
-         ofp.write("      .Global = False" + eol);
-         ofp.write("   End With" + eol);
-         ofp.write("   Set objMatch = objRE.Execute( string )" + eol);
-         ofp.write("   If objMatch.Count = 1 Then" + eol);
-         ofp.write("      v = objMatch.Item(0).Submatches(0)" + eol);
-         ofp.write("      version = Replace(v, \".\", \"\")" + eol);
-         ofp.write("   End If" + eol);
-         ofp.write("   Set objRE = Nothing" + eol);
-         ofp.write("   Set objMatch = Nothing" + eol);
-         ofp.write("   GetVersion = version" + eol);
-         ofp.write("end function" + eol);
-      }
-      catch (Exception ex) {
-         log.error(ex.toString());
-      }
-   }
-
 }
