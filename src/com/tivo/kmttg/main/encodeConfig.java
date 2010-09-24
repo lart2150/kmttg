@@ -1,10 +1,8 @@
 package com.tivo.kmttg.main;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,7 +19,6 @@ import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class encodeConfig {
 
@@ -271,11 +268,6 @@ public class encodeConfig {
    private static Boolean getVrdProfiles() {
       Hashtable<String,Hashtable<String,String>> hlist;
       
-      // This method parses xml file for profiles
-      //if ( ! parseVrdXmlFile() ) {
-      //   errors.add("Encountered problems parsing VideoRedo profiles xml file");
-      //}
-      
       // This method uses VRD functions to get profiles
       hlist = vrdGetProfiles();
       if ( hlist == null ) {
@@ -295,78 +287,17 @@ public class encodeConfig {
       }
    }
    
-   // Parse VRD profile xml file and extract encoding information
-   /*private static Boolean parseVrdXmlFile() {
-      
-      String VrdProfilesXml = "";      
-      String UserProfile = System.getenv("USERPROFILE");
-      if (UserProfile != null && file.isDir(UserProfile)) {
-         String xml = UserProfile + "\\Documents\\VideoReDo\\OutputProfiles.xml";
-         if (file.isFile(xml)) {
-            VrdProfilesXml = xml;
-         } else {
-            xml = UserProfile + "\\My Documents\\VideoReDo\\OutputProfiles.xml";
-            if (file.isFile(xml))
-               VrdProfilesXml = xml;
-         }
-      }
-
-      if ( ! file.isFile(VrdProfilesXml) ) {
-         log.error("VideoRedo OutputProfiles.xml file not found");
-         return false;
-      }
-            
-      try {         
-         BufferedReader xml = new BufferedReader(new FileReader(VrdProfilesXml));
-         String line, Name="", FileType="", extension;
-         while ( (line = xml.readLine()) != null ) {
-            extension = "";
-            // Get rid of leading and trailing white space
-            line = line.replaceFirst("^\\s*(.*$)", "$1");
-            line = line.replaceFirst("^(.*)\\s*$", "$1");
-                                   
-            // Now parse all items tagged with <Name> or <FileType>            
-            if (line.matches("^<Name.+$")) {
-               Name = line.replaceFirst("^<Name>(.+)</.+$", "$1");
-            }
-            if (line.matches("^<FileType.+$")) {
-               FileType = line.replaceFirst("^<FileType>(.+)</.+$", "$1");
-               if (FileType.length() > 0 && Name.length() > 0) {
-                  // Filter out all entries except MP4 & WMV types
-                  if (FileType.startsWith("MP4")) {
-                     extension = "mp4";
-                  }
-                  if (FileType.startsWith("WMV")) {
-                     extension = "wmv";
-                  }
-                  if (extension.length() > 0) {
-                     Hashtable<String,String> h = new Hashtable<String,String>();
-                     h.put("description", "VideoRedo " + extension + " profile");
-                     h.put("extension", extension);
-                     config.ENCODE.put(Name, h);
-                  }
-                  Name = "";
-               }
-            }
-         }
-         xml.close();                           
-      }
-      catch (IOException ex) {
-         log.error(ex.toString());
-         return false;
-      }
-      
-      return true;
-   }*/
-   
    // Get list of output profiles from VRD with custom VBS script
    // Return retrieved list has hash table or null if something fails
    private static Hashtable<String,Hashtable<String,String>> vrdGetProfiles() {
       Hashtable<String,Hashtable<String,String>> hlist = new Hashtable<String,Hashtable<String,String>>();
       String s = File.separator;
-      String vrdscript = createGetProfilesScript();
-      if (vrdscript == null || ! file.isFile(vrdscript))
+      String vrdscript = config.programDir + "\\VRDscripts\\getProfiles.vbs";      
+      if ( ! file.isFile(vrdscript) ) {
+         log.error("File does not exist: " + vrdscript);
+         log.error("Aborting. Fix incomplete kmttg installation");
          return null;
+      }
       String cscript = System.getenv("SystemRoot") + s + "system32" + s + "cscript.exe";
       if (! file.isFile(cscript)) {
          log.error("cscript.exe path does not exist: " + cscript);
@@ -388,7 +319,6 @@ public class encodeConfig {
          l = process.getStderr();
          if (l.size() > 0) {
             log.error(l);
-            file.delete(vrdscript);
             return null;
          }
          
@@ -451,59 +381,12 @@ public class encodeConfig {
                   Name = "";
                }                                      
             }
-            file.delete(vrdscript);
             return hlist;
          }
       } else {
          log.error("Failed to launch command: " + process.toString());
          log.error(process.getStderr());
       }
-      file.delete(vrdscript);
       return null;
    }
-   
-   // Create custom VB script that uses VideoRedo methods to print encoding profiles to stdout
-   private static String createGetProfilesScript() {
-      String script = file.makeTempFile("VRD", ".vbs");
-      String eol = "\r";
-      try {
-         BufferedWriter ofp = new BufferedWriter(new FileWriter(script));
-         ofp.write("'Create VideoReDo object." + eol);
-         ofp.write("Set VideoReDoSilent = wscript.CreateObject( \"VideoReDo.VideoReDoSilent\" )" + eol);
-         ofp.write("set VideoReDo = VideoReDoSilent.VRDInterface" + eol);
-         ofp.write("" + eol);
-         ofp.write("' Check for proper version" + eol);
-         ofp.write("version = GetVersion(VideoReDo.VersionNumber)" + eol);
-         ofp.write("If version < 4202595 Then" + eol);
-         ofp.write("   wscript.stderr.writeline(\"Encoding support requires VRD version 4.20.2.595 or later\")" + eol);
-         ofp.write("   wscript.stderr.writeline(\"Version you are running is: \" & VideoReDo.VersionNumber)" + eol);
-         ofp.write("   wscript.quit 1" + eol);
-         ofp.write("End If" + eol);
-         ofp.write("" + eol);
-         ofp.write("' Get number of profiles available." + eol);
-         ofp.write("numProfiles = VideoReDo.GetProfilesCount()" + eol);
-         ofp.write("if ( numProfiles > 0 ) then" + eol);
-         ofp.write("   for i = 1 to numProfiles" + eol);
-         ofp.write("      if (VideoReDo.IsProfileEnabled(i)) then" + eol);
-         ofp.write("         wscript.echo(VideoReDo.GetProfileXML(i))" + eol);
-         ofp.write("      end if" + eol);
-         ofp.write("   next" + eol);
-         ofp.write("end if" + eol);
-         ofp.write("" + eol);
-         ofp.write("' Close VRD" + eol);
-         ofp.write("VideoReDo.Close()" + eol);
-         ofp.write("" + eol);
-         ofp.write("' Exit with status 0" + eol);
-         ofp.write("wscript.quit 0" + eol);
-         string.PrintVideoRedoVersionFctn(ofp);
-         ofp.close();
-      }
-      catch (Exception ex) {
-         log.error(ex.toString());
-         return null;
-      }
-
-      return script;
-   }
-
 }
