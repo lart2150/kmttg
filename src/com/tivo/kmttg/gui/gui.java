@@ -1274,6 +1274,20 @@ public class gui {
          encoding.setSelectedItem(current);
    }
    
+   public String GetSelectedEncoding() {
+      String selected = null;
+      if (encoding.getComponentCount() > 0) {
+         selected = (String)encoding.getSelectedItem();
+      }
+      return selected;
+   }
+   
+   public void SetSelectedEncoding(String name) {
+      if (encoding.getComponentCount() > 0) {
+         encoding.setSelectedItem(name);
+      }
+   }
+   
    private void CreateImages() {
       debug.print("");
       Images = new Hashtable<String,Icon>();
@@ -1483,8 +1497,10 @@ public class gui {
                   config.jobMonitorFullPaths = 0;
             }
             if (key.equals("encode_name")) {
-               if (encodeConfig.isValidEncodeName(line))
+               if (encodeConfig.isValidEncodeName(line)) {
                   encoding.setSelectedItem(line);
+                  config.encodeName = line;
+               }
             }
             if (key.equals("toolTipsTimeout")) {
                try {
