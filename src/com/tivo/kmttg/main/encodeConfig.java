@@ -26,6 +26,7 @@ public class encodeConfig {
    public static void parseEncodingProfiles() {
       
       Stack<String> errors = new Stack<String>();
+      String selected = config.encodeName;
       
       // Clear out any previous settings
       config.ENCODE.clear();
@@ -80,6 +81,7 @@ public class encodeConfig {
             if (config.gui != null) {
                // In GUI mode add VRD encoding profiles in background/threaded mode
                // since this can take several seconds and would hang up GUI
+               final String selected_final = selected;
                SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {         
                   public Boolean doInBackground() {
                     return getVrdProfiles();
@@ -89,6 +91,8 @@ public class encodeConfig {
                        if ( get() ) {
                           // Refresh Encoding Profile combo box
                           config.gui.SetEncodings(getValidEncodeNames());                          
+                          if (selected_final != null && getDescription(selected_final).length() > 0)
+                             config.gui.SetSelectedEncoding(selected_final);
                        }
                     } catch (Exception e) {
                        log.error(e.getMessage());
@@ -103,7 +107,7 @@ public class encodeConfig {
          }
          
          // Set config.encodeName to 1st entry
-         config.encodeName = config.ENCODE_NAMES.get(0);
+         //config.encodeName = config.ENCODE_NAMES.get(0);
       }
    }
 
