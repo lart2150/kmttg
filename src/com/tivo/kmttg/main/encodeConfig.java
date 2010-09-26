@@ -90,6 +90,7 @@ public class encodeConfig {
                     try {
                        if ( get() ) {
                           // Refresh Encoding Profile combo box
+                          log.warn("VideoRedo Profiles refreshed");
                           config.gui.SetEncodings(getValidEncodeNames());                          
                           if (selected_final != null && getDescription(selected_final).length() > 0)
                              config.gui.SetSelectedEncoding(selected_final);
@@ -104,10 +105,11 @@ public class encodeConfig {
                // In non GUI mode we want don't want threaded run
                getVrdProfiles();
             }
+         } else {
+            // No VideoRedo profiles => update gui settings right away
+            if (config.gui != null)
+               config.gui.SetEncodings(getValidEncodeNames());
          }
-         
-         // Set config.encodeName to 1st entry
-         //config.encodeName = config.ENCODE_NAMES.get(0);
       }
    }
 
