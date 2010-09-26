@@ -1027,7 +1027,7 @@ public class gui {
       debug.print("");
       log.warn("Refreshing encoding profiles");
       encodeConfig.parseEncodingProfiles();
-      SetEncodings(encodeConfig.getValidEncodeNames());
+      //SetEncodings(encodeConfig.getValidEncodeNames());
    }
    
    // Callback for "Run Once in GUI" Auto Transfers menu entry
