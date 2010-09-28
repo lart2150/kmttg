@@ -110,6 +110,10 @@ public class encodeConfig {
             if (config.gui != null)
                config.gui.SetEncodings(getValidEncodeNames());
          }
+         
+         // Set config.encodeName to 1st entry
+         if (config.encodeName.length() == 0)
+            config.encodeName = config.ENCODE_NAMES.get(0);
       }
    }
 
