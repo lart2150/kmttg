@@ -1,0 +1,12 @@
+# Description (single line, keep short)
+<description>
+Handbrake roku: mp4 container, same res 5 Mbps x=640 h.264 video, aac audio
+
+# Encode command or script (single line)
+# Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
+<command>
+HANDBRAKE -i INPUT --cpu CPU_CORES -f mp4 --large-file --decomb --detelecine -O --encoder x264 -w 640 -l 368 -q 19.0 -a 1 --aencoder faac --ab 160 --mixdown dpl12 --arate 48 --drc 0.0 --x264opts ref=2:bframes=2:subq=6:mixed-refs=0:weightb=0:8x8dct=0:trellis=0 -v -o OUTPUT
+ 
+# Encoded output file extension
+<extension>
+mp4
