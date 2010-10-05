@@ -5,7 +5,7 @@ Handbrake tivo hd: mp4 container, Constant Quality (CRF=21) h.264 video, ac3 aud
 # Encode command or script (single line)
 # Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
-HANDBRAKE -i INPUT --cpu CPU_CORES --preset="High Profile" --large-file -e x264 -f mp4 -O -q 21.0 -a 1 -E ac3 -x keyint=48:min-keyint=4 --denoise="weak" -r 23.976 -v -o OUTPUT
+HANDBRAKE -i INPUT --cpu CPU_CORES --preset="High Profile" --large-file -e x264 -f mp4 -O -q 21.0 -a 1 -E ac3 -x keyint=48:min-keyint=4 --denoise="weak" -v -o OUTPUT
  
 # Encoded output file extension
 <extension>
