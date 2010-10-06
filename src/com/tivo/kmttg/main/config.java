@@ -718,6 +718,9 @@ public class config {
             if (key.equals("download_retry_delay")) {
                download_retry_delay = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("download_time_estimate")) {
+               download_time_estimate = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("autoLogSizeMB")) {
                autoLogSizeMB = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -887,6 +890,8 @@ public class config {
          ofp.write("<download_tries>\n" + download_tries + "\n\n");
          
          ofp.write("<download_retry_delay>\n" + download_retry_delay + "\n\n");
+         
+         ofp.write("<download_time_estimate>\n" + download_time_estimate + "\n\n");
          
          ofp.write("<autoLogSizeMB>\n" + autoLogSizeMB + "\n\n");
          

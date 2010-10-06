@@ -55,6 +55,7 @@ public class configMain {
    private static JCheckBox check_space = null;
    private static JCheckBox beacon = null;
    private static JCheckBox UseOldBeacon = null;
+   private static JCheckBox download_time_estimate = null;
    private static JCheckBox UseAdscan = null;
    private static JCheckBox VrdReview = null;
    private static JCheckBox VrdReview_noCuts = null;
@@ -421,6 +422,12 @@ public class configMain {
       else
          UseOldBeacon.setSelected(false);
       
+      // download_time_estimate
+      if (config.download_time_estimate == 1)
+         download_time_estimate.setSelected(true);
+      else
+         download_time_estimate.setSelected(false);
+      
       // Remove .TiVo
       if (config.RemoveTivoFile == 1)
          remove_tivo.setSelected(true);
@@ -734,6 +741,13 @@ public class configMain {
          config.UseOldBeacon = 1;
       } else {
          config.UseOldBeacon = 0;
+      }
+      
+      // download_time_estimate
+      if (download_time_estimate.isSelected()) {
+         config.download_time_estimate = 1;
+      } else {
+         config.download_time_estimate = 0;
       }
       
       // Beacon
@@ -1465,6 +1479,7 @@ public class configMain {
       JLabel disk_space_label = new javax.swing.JLabel();
       beacon = new javax.swing.JCheckBox();
       UseOldBeacon = new javax.swing.JCheckBox();
+      download_time_estimate = new javax.swing.JCheckBox();
       toolTips = new javax.swing.JCheckBox();
       tableColAutoSize = new javax.swing.JCheckBox();
       jobMonitorFullPaths = new javax.swing.JCheckBox();
@@ -1609,6 +1624,8 @@ public class configMain {
       disk_space_label.setText("Min requested space (GB)"); 
       beacon.setText("Look for Tivos on network");
       UseOldBeacon.setText("Detect with TiVo Beacon instead of Bonjour");
+      
+      download_time_estimate.setText("Show estimated time remaining for downloads");
       
       toolTips.setText("Display toolTips");
       toolTipsTimeout_label.setText("toolTip timeout (secs)");
@@ -2411,6 +2428,11 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(java_downloads, c);
       
+      // download_time_estimate
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(download_time_estimate, c);
+      
       // Visual Panel
       JPanel visual_panel = new JPanel(new GridBagLayout());       
       
@@ -2642,6 +2664,7 @@ public class configMain {
       check_space.setToolTipText(getToolTip("check_space"));
       beacon.setToolTipText(getToolTip("beacon"));
       UseOldBeacon.setToolTipText(getToolTip("UseOldBeacon"));
+      download_time_estimate.setToolTipText(getToolTip("download_time_estimate"));
       UseAdscan.setToolTipText(getToolTip("UseAdscan"));
       VrdReview.setToolTipText(getToolTip("VrdReview"));
       VrdReview_noCuts.setToolTipText(getToolTip("VrdReview_noCuts"));
@@ -2808,6 +2831,13 @@ public class configMain {
          text =  "<b>Detect with TiVo Beacon instead of Bonjour</b><br>";
          text += "Use the old TiVo Beacon method for detecting TiVos on the network instead of the<br>";
          text += "newer Bonjour method. You can try this method if Bonjour is not working for you.";
+      }
+      else if (component.equals("download_time_estimate")) {
+         text =  "<b>Show estimated time remaining for downloads</b><br>";
+         text += "If this option is enabled then download tasks will show estimated time remaining<br>";
+         text += "instead of download bit rate in the status column.<br>";
+         text += "NOTE: Since file size reported by TiVo is not accurate this number is also not accurate<br>";
+         text += "and will never reach 0";
       }
       else if (component.equals("UseAdscan")) {
          text =  "<b>Use VideoRedo AdScan instead of comskip</b><br>";
