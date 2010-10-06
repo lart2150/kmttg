@@ -160,5 +160,23 @@ public class string {
          url = url.replaceFirst(ip, ip + ":" + port);
       }
       return url;
+   }   
+
+   // Return string for estimated time remaining for a download
+   public static String getTimeRemaining(long currentTime, long startTime, long totalSize, long size) {
+      long tdelta = currentTime - startTime;
+      long tleft = (totalSize-size)/(1000*size/tdelta);
+      int hours = (int)(tleft/3600);
+      int mins  = (int)((tleft/60) - (hours*60));
+      int secs  = (int)(tleft % 60);
+      String s = "time remaining: ";
+      if (hours > 0)
+         s += String.format("%d:", hours);
+      if (hours > 0 || mins > 0)
+         s += String.format("%02d:", mins);
+      if (hours == 0 && mins < 5)
+         s += String.format("%02d", secs);
+      return s;
    }
+
 }
