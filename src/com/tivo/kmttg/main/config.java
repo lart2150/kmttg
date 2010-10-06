@@ -136,9 +136,10 @@ public class config {
    public static String pyTivo_tivo = "";
    public static String pyTivo_files = "last";
    
-   // download retry related
+   // download related
    public static int download_tries = 5;        // Number of times to retry downloads
    public static int download_retry_delay = 10; // Delay in secs between retry attempts
+   public static int download_time_estimate = 0; // Show estimated remaining time for downloads if enabled
    
    // autotune related
    public static Hashtable<String,Hashtable<String,String>> autotune = null;
