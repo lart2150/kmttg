@@ -137,6 +137,11 @@ public class javadownload implements Serializable {
                job.size1 = job.size2;
             }
             
+            if (config.download_time_estimate == 1) {
+               // Estimated time remaining
+               job.rate = string.getTimeRemaining(job.time2, job.time, job.tivoFileSize, size);
+            }
+            
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
                // Update STATUS column 
                config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s + "---" + job.rate);

@@ -154,6 +154,11 @@ public class download implements Serializable {
                job.size1 = job.size2;
             }
             
+            if (config.download_time_estimate == 1) {
+               // Estimated time remaining
+               job.rate = string.getTimeRemaining(job.time2, job.time, job.tivoFileSize, size);
+            }
+            
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
                // Update STATUS column 
                config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s + "---" + job.rate);
@@ -251,5 +256,4 @@ public class download implements Serializable {
    private String getRate(long ds, long dt) {      
       return String.format("%.1f Mbps", (ds*8000)/(1e6*dt));
    }
-
 }
