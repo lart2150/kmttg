@@ -17,7 +17,7 @@ import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 
 public class config {
-   public static String kmttg = "kmttg v0p7p";
+   public static String kmttg = "kmttg v0p7q_beta";
    
    // encoding related
    public static String encProfDir = "";
@@ -137,6 +137,7 @@ public class config {
    public static String pyTivo_files = "last";
    
    // download related
+   public static int download_delay = 20;        // Delay in secs to apply to each download attempt
    public static int download_tries = 5;        // Number of times to retry downloads
    public static int download_retry_delay = 10; // Delay in secs between retry attempts
    public static int download_time_estimate = 0; // Show estimated remaining time for downloads if enabled
@@ -324,7 +325,13 @@ public class config {
    
    public static void setWanSetting(String tivoName, String setting, String value) {
       String key = "wan_" + tivoName + "_" + setting;
-      WAN.put(key, value);
+      if (value.length() > 0) {      
+         WAN.put(key, value);
+      } else {
+         if (WAN.containsKey(key)) {
+            WAN.remove(key);
+         }
+      }
    }
 
    private static void defineDefaults() {
