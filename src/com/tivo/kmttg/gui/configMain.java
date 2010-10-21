@@ -104,6 +104,7 @@ public class configMain {
    private static JTextField cpu_cores = null;
    private static JTextField download_tries = null;
    private static JTextField download_retry_delay = null;
+   private static JTextField download_delay = null;
    private static JTextField autoLogSizeMB = null;
    private static JTextField pyTivo_host = null;
    private static JTextField pyTivo_config = null;
@@ -639,6 +640,9 @@ public class configMain {
       
       // download_retry_delay
       download_retry_delay.setText("" + config.download_retry_delay);
+      
+      // download_delay
+      download_delay.setText("" + config.download_delay);
       
       // autoLogSizeMB
       autoLogSizeMB.setText("" + config.autoLogSizeMB);
@@ -1263,6 +1267,22 @@ public class configMain {
          config.download_retry_delay = 10;
       }
       
+      // download_delay
+      value = string.removeLeadingTrailingSpaces(download_delay.getText());
+      if (value.length() > 0) {
+         try {
+            config.download_delay = Integer.parseInt(value);
+         } catch(NumberFormatException e) {
+            textFieldError(download_delay, "Illegal setting for download delay: '" + value + "'");
+            log.error("Setting to 10");
+            config.download_delay = 10;
+            download_delay.setText("" + config.download_delay);
+            errors++;
+         }
+      } else {
+         config.download_delay = 10;
+      }
+      
       // autoLogSizeMB
       value = string.removeLeadingTrailingSpaces(autoLogSizeMB.getText());
       if (value.length() > 0) {
@@ -1388,6 +1408,7 @@ public class configMain {
       cpu_cores = new javax.swing.JTextField(15);
       download_tries = new javax.swing.JTextField(15);
       download_retry_delay = new javax.swing.JTextField(15);
+      download_delay = new javax.swing.JTextField(15);
       autoLogSizeMB = new javax.swing.JTextField(15);
       
       disk_space = new javax.swing.JTextField(5);
@@ -1460,6 +1481,7 @@ public class configMain {
       JLabel cpu_cores_label = new javax.swing.JLabel();
       JLabel download_tries_label = new javax.swing.JLabel();
       JLabel download_retry_delay_label = new javax.swing.JLabel();
+      JLabel download_delay_label = new javax.swing.JLabel();
       JLabel autoLogSizeMB_label = new javax.swing.JLabel();
       JLabel available_keywords_label = new javax.swing.JLabel();
       JLabel pyTivo_host_label = new javax.swing.JLabel();
@@ -1561,6 +1583,7 @@ public class configMain {
       cpu_cores_label.setText("encoding cpu cores");
       download_tries_label.setText("# download attempts");
       download_retry_delay_label.setText("seconds between download retry attempts");
+      download_delay_label.setText("delay in seconds between multiple downloads");
       autoLogSizeMB_label.setText("auto log file size limit (MB)");
       pyTivo_host_label.setText("pyTivo host name");
       pyTivo_config_label.setText("pyTivo.conf file");
@@ -2401,6 +2424,16 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(download_retry_delay, c);
       
+      // download_delay
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(download_delay_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(download_delay, c);
+      
       // metadata_files
       gy++;
       c.gridx = 0;
@@ -2715,6 +2748,7 @@ public class configMain {
       cpu_cores.setToolTipText(getToolTip("cpu_cores"));
       download_tries.setToolTipText(getToolTip("download_tries"));
       download_retry_delay.setToolTipText(getToolTip("download_retry_delay"));
+      download_delay.setToolTipText(getToolTip("download_delay"));
       autoLogSizeMB.setToolTipText(getToolTip("autoLogSizeMB"));
       pyTivo_host.setToolTipText(getToolTip("pyTivo_host"));
       pyTivo_config.setToolTipText(getToolTip("pyTivo_config"));
@@ -3201,6 +3235,11 @@ public class configMain {
          text =  "<b>seconds between download retry attempts</b><br>";
          text += "Number of seconds to wait between download retry attempts. kmttg will wait at least this<br>";
          text += "number of seconds before trying a download again.";
+      }
+      else if (component.equals("download_delay")) {
+         text =  "<b>delay in seconds between multiple downloads</b><br>";
+         text += "For multiple downloads from same TiVo use this delay between consecutive download attempts.<br>";
+         text += "This helps take stress off TiVo web server to avoid potential <b>server busy</b> messages.";
       }
       else if (component.equals("autoLogSizeMB")) {
          text = "<b>auto log file size limit (MB)</b><br>";

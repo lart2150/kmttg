@@ -17,7 +17,7 @@ import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 
 public class config {
-   public static String kmttg = "kmttg v0p7q_beta";
+   public static String kmttg = "kmttg v0p7q";
    
    // encoding related
    public static String encProfDir = "";
@@ -137,7 +137,7 @@ public class config {
    public static String pyTivo_files = "last";
    
    // download related
-   public static int download_delay = 20;        // Delay in secs to apply to each download attempt
+   public static int download_delay = 10;       // Delay in secs to apply to each download attempt
    public static int download_tries = 5;        // Number of times to retry downloads
    public static int download_retry_delay = 10; // Delay in secs between retry attempts
    public static int download_time_estimate = 0; // Show estimated remaining time for downloads if enabled
@@ -725,6 +725,9 @@ public class config {
             if (key.equals("download_retry_delay")) {
                download_retry_delay = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("download_delay")) {
+               download_delay = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("download_time_estimate")) {
                download_time_estimate = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -897,6 +900,8 @@ public class config {
          ofp.write("<download_tries>\n" + download_tries + "\n\n");
          
          ofp.write("<download_retry_delay>\n" + download_retry_delay + "\n\n");
+         
+         ofp.write("<download_delay>\n" + download_delay + "\n\n");
          
          ofp.write("<download_time_estimate>\n" + download_time_estimate + "\n\n");
          
