@@ -164,16 +164,20 @@ public class string {
 
    // Return string for estimated time remaining for a download
    public static String getTimeRemaining(long currentTime, long startTime, long totalSize, long size) {
-      long tdelta = currentTime - startTime;
-      long tleft = (totalSize-size)/(1000*size/tdelta);
-      int mins  = (int)(tleft/60);
-      int secs  = (int)(tleft % 60);
       String s = "time remaining: ";
-      if (mins >= 5) {
-         s += String.format("%d mins", mins);
+      long tdelta = currentTime - startTime;
+      if (tdelta > 0 && size > 0) {
+         long tleft = (totalSize-size)/(1000*size/tdelta);
+         int mins  = (int)(tleft/60);
+         int secs  = (int)(tleft % 60);
+         if (mins >= 5) {
+            s += String.format("%d mins", mins);
+         } else {
+            secs += mins*60;
+            s += String.format("%d secs", secs);
+         }
       } else {
-         secs += mins*60;
-         s += String.format("%d secs", secs);
+         s += "N/A";
       }
       return s;
    }
