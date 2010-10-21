@@ -173,10 +173,16 @@ public class jobMonitor {
          }
          
          // Only 1 download at a time per Tivo allowed
-         if (tivoDownload.size() > 0) {
+         if (tivoDownload.size() > 0) {            
             if ( oneJobAtATime(job.type) ) {
                if ( tivoDownload.containsKey(job.tivoName) ) {
                   if (tivoDownload.get(job.tivoName) > 0) {
+                     if (config.download_delay > 0 && (job.type.equals("download") || job.type.equals("javadownload"))) {
+                        // Apply a start delay to consecutive download jobs
+                        long now = new Date().getTime();
+                        job.launch_time = now + config.download_delay*1000;                        
+                     }
+                     // Cannot launch this download yet
                      continue;
                   }
                }
