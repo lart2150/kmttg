@@ -342,11 +342,14 @@ public class configMain {
       // Get currently selected item
       String keyword = (String)keywords.getSelectedItem();
       
-      // Append selected entry to file_naming text field
-      // (Replace current selection if any)
-      int len = file_naming.getText().length();
-      file_naming.setCaretPosition(len);
-      file_naming.replaceSelection(keyword);
+      if (keyword != null) {
+         // Append selected entry to file_naming text field
+         // (Replace current selection if any)
+         int len = file_naming.getText().length();
+         file_naming.setCaretPosition(len);
+         file_naming.replaceSelection(keyword);
+      }
+      keywords.setSelectedItem(null);
    }
    
    // Callback for customFiles combobox
@@ -1596,6 +1599,7 @@ public class configMain {
          new String[] { "[title]", "[mainTitle]", "[episodeTitle]", "[channelNum]",
                "[channel]", "[min]", "[hour]", "[wday]", "[mday]", "[month]",
                "[monthNum]", "[year]", "[EpisodeNumber]", "[description]", "[/]" }));
+      keywords.setSelectedItem(null);
       keywords.setName("keywords"); 
       keywords.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
