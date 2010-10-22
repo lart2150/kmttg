@@ -62,7 +62,7 @@ public class jobTable {
       if(e.getClickCount() == 2) {
          int row = JobMonitor.rowAtPoint(e.getPoint());
          jobData job = GetRowData(row);
-         if (job.status.equals("running")) {
+         if (job.status.equals("running") && job.getProcess() != null) {
             new taskInfo(
                config.gui.getJFrame(),
                job.type + ": " + "Tivo=" +
