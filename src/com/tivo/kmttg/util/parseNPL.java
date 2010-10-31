@@ -2,7 +2,6 @@ package com.tivo.kmttg.util;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Hashtable;
@@ -266,7 +265,8 @@ public class parseNPL {
             ENTRIES.add(h);
          }
       }
-      catch (IOException ex) {
+      catch (Exception ex) {
+         log.error("Error parsing NPL XML");
          log.error(ex.toString());
          return null;
       }
