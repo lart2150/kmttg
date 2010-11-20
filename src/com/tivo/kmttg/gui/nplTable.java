@@ -92,14 +92,19 @@ public class nplTable {
                return 0;
             }
             if (o1 instanceof sortableShow && o2 instanceof sortableShow) {
-               // Sort 1st by titleOnly, then by date
                sortableShow s1 = (sortableShow)o1;
                sortableShow s2 = (sortableShow)o2;
-               int result = s1.titleOnly.compareToIgnoreCase(s2.titleOnly);
-               if (result != 0) return result;
-               if (s1.gmt > s2.gmt) return 1;
-               if (s1.gmt < s2.gmt) return -1;
-               return 0;
+               if (inFolder) {
+                  // Alphabetical sort only inside a folder
+                  return s1.title.compareToIgnoreCase(s2.title);
+               } else {
+                  // Sort 1st by titleOnly, then by date
+                  int result = s1.titleOnly.compareToIgnoreCase(s2.titleOnly);
+                  if (result != 0) return result;
+                  if (s1.gmt > s2.gmt) return 1;
+                  if (s1.gmt < s2.gmt) return -1;
+                  return 0;
+               }
             }
             if (o1 instanceof sortableDuration && o2 instanceof sortableDuration) {
                sortableDuration d1 = (sortableDuration)o1;
