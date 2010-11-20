@@ -1132,12 +1132,6 @@ public class jobMonitor {
          removeFamilyJobs(job);
          // Kill job if running
          if (job.status.equals("running")) {
-            /*if (job.type.equals("push")) {
-               job.kill();
-            } else {
-               log.warn("Killing '" + job.type + "' job: " + job.getProcess().toString());
-               job.getProcess().kill();
-            }*/
             job.kill();
          }
          // Clear title & progress bar
