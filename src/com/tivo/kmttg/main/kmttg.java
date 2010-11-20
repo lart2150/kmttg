@@ -23,17 +23,29 @@ public class kmttg {
       // Register a shutdown thread
       Runtime.getRuntime().addShutdownHook(new Thread() {
           // This method is called during shutdown
-          public void run() {
-             // Shutdown message if in non-GUI mode
-             if ( ! config.GUI ) log.warn("SHUTTING DOWN");
-             
-             // Save GUI settings if in GUI mode
+          public void run() {             
              if (config.GUI) {
+                // Save GUI settings if in GUI mode
                 config.gui.saveSettings();
+             } else {
+                // Shut down message in in batch mode
+                log.warn("SHUTTING DOWN");
              }
              // Kill any running background jobs
+             // NOTE: For some reason this hangs up JVM exit if jobs are running...
              jobMonitor.killRunning();
              if (debug.enabled) debug.close();
+             
+             // Kill any non-deamon, non-AWT threads
+             /*for (Thread thread : Thread.getAllStackTraces().keySet()) {
+                // daemon threads will not prevent shutdown
+                if (!thread.isDaemon()) {
+                   if (! thread.getName().startsWith("AWT") && ! thread.getName().startsWith("Destroy")) {
+                      System.err.println("Killing thread: " + thread.getName());
+                      thread.interrupt();
+                   }
+                }
+             }*/
           }
       });
       
