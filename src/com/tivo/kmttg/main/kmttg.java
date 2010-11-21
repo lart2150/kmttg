@@ -32,7 +32,7 @@ public class kmttg {
                 log.warn("SHUTTING DOWN");
              }
              // Kill any running background jobs
-             // NOTE: For some reason this hangs up JVM exit if jobs are running...
+             config.GUI = false;
              jobMonitor.killRunning();
              if (debug.enabled) debug.close();
              
