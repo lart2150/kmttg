@@ -74,7 +74,7 @@ public class log {
       Boolean log = true;
       if (s != null && s.length() > 0) {
          s = filterMAK(s);
-         if (config.GUI) {
+         if (config.GUIMODE) {
             config.gui.text_print(s);
             if (config.GUI_LOOP == 0) {
                log = false;
@@ -91,7 +91,7 @@ public class log {
       Boolean log = true;
       if (s != null && s.length() > 0) {
          s = filterMAK(s);
-         if (config.GUI) {
+         if (config.GUIMODE) {
             config.gui.text_warn(s);
             if (config.GUI_LOOP == 0) {
                log = false;
@@ -108,7 +108,7 @@ public class log {
       Boolean log = true;
       if (s != null && s.length() > 0) {
          s = filterMAK(s);
-         if (config.GUI) {
+         if (config.GUIMODE) {
             config.gui.text_error(s);
             if (config.GUI_LOOP == 0) {
                log = false;
@@ -123,7 +123,7 @@ public class log {
    
    public static void print(Stack<String> s) {
       if (s != null && s.size() > 0) {
-         if (config.GUI) {
+         if (config.GUIMODE) {
             config.gui.text_print(s);
             if (config.GUI_LOOP == 1) {
                // Log to file for loop in GUI
@@ -141,7 +141,7 @@ public class log {
    
    public static void warn(Stack<String> s) {
       if (s != null && s.size() > 0) {
-         if (config.GUI) {
+         if (config.GUIMODE) {
             config.gui.text_warn(s);
             if (config.GUI_LOOP == 1) {
                // Log to file for loop in GUI
@@ -159,7 +159,7 @@ public class log {
    
    public static void error(Stack<String> s) {
       if (s != null && s.size() > 0) {
-         if (config.GUI) {
+         if (config.GUIMODE) {
             config.gui.text_error(s);
             if (config.GUI_LOOP == 1) {
                // Log to file for loop in GUI

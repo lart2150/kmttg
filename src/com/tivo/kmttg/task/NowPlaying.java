@@ -137,7 +137,7 @@ public class NowPlaying implements Serializable {
       int exit_code = process.exitStatus();
       if (exit_code == -1) {
          // Still running
-         if (config.GUI) {
+         if (config.GUIMODE) {
             // Update STATUS column
             String t = jobMonitor.getElapsedTime(job.time);
             config.gui.jobTab_UpdateJobMonitorRowStatus(job, t);
@@ -149,7 +149,7 @@ public class NowPlaying implements Serializable {
          return true;
       } else {
          // Job finished
-         if (config.GUI) {
+         if (config.GUIMODE) {
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
                config.gui.setTitle(config.kmttg);
             }
@@ -241,7 +241,7 @@ public class NowPlaying implements Serializable {
             log.print("TOTAL auto matches for '" + job.tivoName + "' = " + count + "/" + ENTRIES.size());
             config.GUI_AUTO--;
          }
-         else if (config.GUI) {
+         else if (config.GUIMODE) {
             // GUI mode: populate NPL table
             config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
          } else {

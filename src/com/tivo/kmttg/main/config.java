@@ -90,7 +90,7 @@ public class config {
    public static Hashtable<String,String> WAN = new Hashtable<String,String>();
     
    // GUI related
-   public static Boolean GUI = false;       // true=>GUI, false=>batch/auto            
+   public static Boolean GUIMODE = false;   // true=>GUI, false=>batch/auto            
    public static String encodeName = "";    // Saves currently selected encode name
    public static gui gui;                   // Access to any GUI functions through here
    public static String gui_settings = null; // File in which to save GUI settings on exit
@@ -300,7 +300,7 @@ public class config {
          }
       }
       
-      if (GUI) {
+      if (GUIMODE) {
          config.gui.SetTivos(config.TIVOS);
       }
    }
@@ -310,7 +310,7 @@ public class config {
       log.warn("Adding detected tivo: " + b.get("machine"));
       TIVOS.put(b.get("machine"), b.get("ip"));
       save(configIni);
-      if (config.GUI) {
+      if (GUIMODE) {
          config.gui.AddTivo(b.get("machine"), b.get("ip"));
       }
    }

@@ -625,7 +625,7 @@ public class nplTable {
    private void displayTotals(String message) {
       debug.print("message=" + message);
       log.warn(message);
-      if (config.GUI) {
+      if (config.GUIMODE) {
          // NOTE: tivoName surrounded by \Q..\E to escape any special regex chars
          String status = message.replaceFirst("\\Q"+tivoName+"\\E", "");
          status += lastUpdated;

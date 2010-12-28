@@ -164,7 +164,7 @@ public class qsfix implements Serializable {
       int exit_code = process.exitStatus();
       if (exit_code == -1) {
          // Still running
-         if (config.GUI) {
+         if (config.GUIMODE) {
             if ( file.isFile(job.mpegFile_fix) ) {               
                // Update status in job table
                String s = String.format("%.2f MB", (float)file.size(job.mpegFile_fix)/Math.pow(2,20));

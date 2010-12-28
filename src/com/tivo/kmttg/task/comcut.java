@@ -128,7 +128,7 @@ public class comcut implements Serializable {
       int exit_code = process.exitStatus();
       if (exit_code == -1) {
          // Still running
-         if (config.GUI) {
+         if (config.GUIMODE) {
             // Update STATUS column
             if ( file.isFile(job.mpegFile_cut) ) {               
                // Update status in job table

@@ -159,7 +159,7 @@ public class captions implements Serializable {
       int exit_code = process.exitStatus();
       if (exit_code == -1) {
          // Still running
-         if (config.GUI) {
+         if (config.GUIMODE) {
             // Update STATUS column
             if ( file.isFile(srtFile) ) {               
                // Update status in job table

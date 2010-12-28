@@ -42,13 +42,13 @@ public class jobMonitor {
       Stack<jobData> running = new Stack<jobData>();
       Stack<jobData> queued  = new Stack<jobData>();
       jobData job;
-      if (config.GUI && gui == null && timer != null) {
+      if (config.GUIMODE && gui == null && timer != null) {
          timer.stop();
          return;
       }
       
       // Handle auto transfers GUI run if "Loop in GUI" menu item enabled
-      if (config.GUI && config.GUI_LOOP == 1) {
+      if (config.GUIMODE && config.GUI_LOOP == 1) {
          handleLoopInGUI();
       }
       
@@ -376,7 +376,7 @@ public class jobMonitor {
       JOB_COUNT++;
       
       // Update GUI Job Monitor
-      if (config.GUI) {
+      if (config.GUIMODE) {
          String output = "";
          if (! job.type.equals("playlist") && ! job.type.equals("javaplaylist") && ! job.type.equals("custom")) {
             if (config.jobMonitorFullPaths == 1)
@@ -417,7 +417,7 @@ public class jobMonitor {
       JOBS = new_jobs;
       
       // Remove entry from job monitor
-      if (config.GUI) {
+      if (config.GUIMODE) {
          config.gui.jobTab_RemoveJobMonitorRow(job); 
          updateNPLjobStatus();
       }
@@ -426,7 +426,7 @@ public class jobMonitor {
    // Change job status
    public static void updateJobStatus(jobData job, String status) {
       job.status = status;
-      if (config.GUI) {
+      if (config.GUIMODE) {
          config.gui.jobTab_UpdateJobMonitorRowStatus(job,status);
          updateNPLjobStatus();
       }
@@ -494,14 +494,14 @@ public class jobMonitor {
    }
    
    public static Boolean isFirstJobInMonitor(jobData job) {
-      if ( config.GUI && config.gui.jobTab_GetRowData(0) == job )
+      if ( config.GUIMODE && config.gui.jobTab_GetRowData(0) == job )
          return true;
       return false;
    }
    
    // status = completed, failed, killed or canceled
    public static void addToJobHistory(jobData job, String status) {
-      if (config.GUI) {
+      if (config.GUIMODE) {
          // Save final status of job
          job.status = status;
          // Save length of time job lasted
@@ -944,7 +944,7 @@ public class jobMonitor {
       }
       
       // Schedule VideoRedo GUI manual cuts review if requested (GUI mode only)
-      if (file.isDir(config.VRD) && config.GUI) {
+      if (file.isDir(config.VRD) && config.GUIMODE) {
          if ( (comskip && config.VrdReview == 1) || (comcut && config.VrdReview_noCuts == 1) ) {
             jobData job = new jobData();
             job.source       = source;
@@ -1135,7 +1135,7 @@ public class jobMonitor {
             job.kill();
          }
          // Clear title & progress bar
-         if ( config.GUI && isFirstJobInMonitor(job) ) {
+         if ( config.GUIMODE && isFirstJobInMonitor(job) ) {
             config.gui.setTitle(config.kmttg);
             config.gui.progressBar_setValue(0);
          }         
@@ -1273,7 +1273,7 @@ public class jobMonitor {
     
    // Identify NPL table items associated with queued/running jobs
    public static void updateNPLjobStatus() {
-      if (config.GUI && JOBS != null) {
+      if (config.GUIMODE && JOBS != null) {
          // Build hash of source ID -> job status
          Hashtable<String,String> map = new Hashtable<String,String>();
          for (int i=0; i<JOBS.size(); ++i) {

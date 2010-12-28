@@ -157,7 +157,7 @@ public class vrdencode implements Serializable {
       int exit_code = process.exitStatus();
       if (exit_code == -1) {
          // Still running
-         if (config.GUI) {
+         if (config.GUIMODE) {
             String t = jobMonitor.getElapsedTime(job.time);
             String size = null;
             if ( file.isFile(job.encodeFile) ) {               

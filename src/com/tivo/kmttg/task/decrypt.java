@@ -102,7 +102,7 @@ public class decrypt implements Serializable {
       int exit_code = process.exitStatus();
       if (exit_code == -1) {
          // Still running
-         if (config.GUI) {
+         if (config.GUIMODE) {
             if ( file.isFile(job.mpegFile) ) {               
                // Update status in job table
                if ( job.tivoFileSize == null ) {
@@ -129,7 +129,7 @@ public class decrypt implements Serializable {
         return true;
       } else {
          // Job finished
-         if (config.GUI) {
+         if (config.GUIMODE) {
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
                config.gui.setTitle(config.kmttg);
                config.gui.progressBar_setValue(0);

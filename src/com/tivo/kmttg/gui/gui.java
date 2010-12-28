@@ -121,7 +121,7 @@ public class gui {
          enableToolTips(config.toolTips);
          
          // Set master flag indicating that kmttg is running in GUI mode
-         config.GUI = true;
+         config.GUIMODE = true;
          
          // Create NowPlaying icons
          CreateImages();         
@@ -1018,7 +1018,7 @@ public class gui {
       }
       
       // Refresh encoding profiles in case toggled between VRD & regular
-      if (config.GUI) refreshEncodingProfilesCB();    
+      if (config.GUIMODE) refreshEncodingProfilesCB();    
    }
    
    // Callback for "Refresh Encoding Profiles" File menu entry

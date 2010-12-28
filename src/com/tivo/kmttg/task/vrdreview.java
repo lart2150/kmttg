@@ -117,7 +117,7 @@ public class vrdreview implements Serializable {
       int exit_code = process.exitStatus();
       if (exit_code == -1) {
          // Still running
-         if (config.GUI) {
+         if (config.GUIMODE) {
             // Update STATUS column
             String t = jobMonitor.getElapsedTime(job.time);
             config.gui.jobTab_UpdateJobMonitorRowStatus(job, t);

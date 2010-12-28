@@ -103,7 +103,7 @@ public class autotune implements Serializable {
    public Boolean check() {
       if (thread_running) {
          // Still running
-         if (config.GUI) {
+         if (config.GUIMODE) {
             // Update STATUS column
             config.gui.jobTab_UpdateJobMonitorRowStatus(job, "running");
          }

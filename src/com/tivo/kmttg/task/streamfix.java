@@ -106,7 +106,7 @@ public class streamfix implements Serializable {
       int exit_code = process.exitStatus();
       if (exit_code == -1) {
          // Still running
-         if (config.GUI) {
+         if (config.GUIMODE) {
             if ( file.isFile(job.mpegFile_fix) ) {               
                // Update status in job table
                if ( job.tivoFileSize == null ) {

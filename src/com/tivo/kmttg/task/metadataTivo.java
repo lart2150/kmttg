@@ -118,7 +118,7 @@ public class metadataTivo implements Serializable {
       int exit_code = process.exitStatus();
       if (exit_code == -1) {
          // Still running
-         if (config.GUI) {
+         if (config.GUIMODE) {
             // Update STATUS column
             config.gui.jobTab_UpdateJobMonitorRowStatus(job, "running");
          }

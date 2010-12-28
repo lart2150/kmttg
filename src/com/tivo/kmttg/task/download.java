@@ -133,7 +133,7 @@ public class download implements Serializable {
       int exit_code = process.exitStatus();
       if (exit_code == -1) {
          // Still running
-         if (config.GUI && file.isFile(job.tivoFile)) {
+         if (config.GUIMODE && file.isFile(job.tivoFile)) {
             // Update status in job table
             Long size = file.size(job.tivoFile);
             String s = String.format("%.2f MB", (float)size/Math.pow(2,20));
@@ -175,7 +175,7 @@ public class download implements Serializable {
          return true;
       } else {
          // Job finished
-         if (config.GUI) {
+         if (config.GUIMODE) {
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
                config.gui.setTitle(config.kmttg);
                config.gui.progressBar_setValue(0);
