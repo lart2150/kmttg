@@ -21,6 +21,8 @@ public class NowPlaying implements Serializable {
    private String outputFile = "";
    private int AnchorOffset = 0;
    private int TotalItems = 0;
+   private static int limit_npl_fetches = 0;
+   private int fetchCount = 0;
    private backgroundProcess process;
    public  jobData job;
    
@@ -50,6 +52,7 @@ public class NowPlaying implements Serializable {
       job.name               = "curl";
       job.ip                 = ip;
       jobMonitor.submitNewJob(job);
+      limit_npl_fetches = config.getLimitNplSetting(tivoName);
       return true;      
    }
    
@@ -99,6 +102,7 @@ public class NowPlaying implements Serializable {
       command.add("--output");
       command.add(outputFile);
       process = new backgroundProcess();
+      fetchCount++;
       if (AnchorOffset == 0)
          log.print(">> Getting Now Playing List from " + job.tivoName + " ...");
       else
@@ -218,7 +222,18 @@ public class NowPlaying implements Serializable {
       }
       TotalItems = result.get("TotalItems");
       
-      if ( (AnchorOffset + result.get("ItemCount")) < result.get("TotalItems") ) {
+      Boolean done = true;
+      
+      if ( (AnchorOffset + result.get("ItemCount")) < result.get("TotalItems") )
+         done = false;
+      
+      if (limit_npl_fetches > 0 && fetchCount >= limit_npl_fetches) {
+         if ( ! done )
+            log.warn(job.tivoName + ": Further NPL listings not obtained due to fetch limit=" + limit_npl_fetches + " exceeded.");
+         done = true;
+      }
+      
+      if ( ! done ) {
          // Additional items to retrieve
          AnchorOffset += result.get("ItemCount");
          start();

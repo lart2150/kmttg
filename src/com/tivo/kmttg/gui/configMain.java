@@ -91,6 +91,7 @@ public class configMain {
    private static JTextField comskip_ini = null;
    private static JTextField wan_http_port = null;
    private static JTextField wan_https_port = null;
+   private static JTextField limit_npl_fetches = null;
    private static JTextField active_job_limit = null;
    private static JTextField VRD_path = null;
    private static JTextField t2extract = null;
@@ -255,6 +256,15 @@ public class configMain {
       }
    }
    
+   private static void updateLimitNplSettings(String setting) {
+      if (setting != null) {
+         String tivoName = setting.replaceFirst("=.+$", "");
+         // Update limit_npl_fetches setting according to selected TiVo
+         int limit = config.getLimitNplSetting(tivoName);
+         limit_npl_fetches.setText("" + limit);
+      }
+   }
+   
    // Callback for tivo del button
    private static void delCB() {
       debug.print("");
@@ -398,6 +408,15 @@ public class configMain {
             tivos.addItem(name + "=" + ip);
             autotune_tivoName.addItem(name);
          }         
+      }
+      
+      // limit_npl_fetches
+      limit_npl_fetches.setText("0");
+      name = (String)tivos.getSelectedItem();
+      if (name != null) {
+         String tivoName = name.replaceFirst("=.+$", "");
+         int limit = config.getLimitNplSetting(tivoName);
+         limit_npl_fetches.setText("" + limit);
       }
       
       // wan http & https ports
@@ -712,6 +731,24 @@ public class configMain {
          }
       }
       config.setTivoNames(h);
+      
+      // limit_npl_fetches
+      name = (String)tivos.getSelectedItem();
+      if (name != null) {
+         String tivoName = name.replaceFirst("=.+$", "");
+         value = string.removeLeadingTrailingSpaces(limit_npl_fetches.getText());
+         if (value.length() > 0) {
+            try {
+               Integer.parseInt(value);
+               config.setLimitNplSetting("limit_npl_" + tivoName, value);
+            } catch(NumberFormatException e) {
+               textFieldError(limit_npl_fetches, "limit npl fetches should be a number: '" + value + "'");
+               errors++;
+            }
+         } else {
+            config.setLimitNplSetting("limit_npl_" + tivoName, "0");
+         }
+      }
       
       // wan http & https ports
       name = (String)tivos.getSelectedItem();
@@ -1406,6 +1443,7 @@ public class configMain {
       MAK = new javax.swing.JTextField(15);
       wan_http_port = new javax.swing.JTextField(15);
       wan_https_port = new javax.swing.JTextField(15);
+      limit_npl_fetches = new javax.swing.JTextField(15);
       active_job_limit = new javax.swing.JTextField(15);
       toolTipsTimeout = new javax.swing.JTextField(15);
       cpu_cores = new javax.swing.JTextField(15);
@@ -1423,8 +1461,10 @@ public class configMain {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
                 String name = (String)tivos.getSelectedItem();
-                if (name != null)
+                if (name != null) {
                    updateWanSettings(name);
+                   updateLimitNplSettings(name);
+                }
             }
          }
       });
@@ -1473,6 +1513,7 @@ public class configMain {
       JLabel comskip_ini_label = new javax.swing.JLabel();
       JLabel wan_http_port_label = new javax.swing.JLabel();
       JLabel wan_https_port_label = new javax.swing.JLabel();
+      JLabel limit_npl_fetches_label = new javax.swing.JLabel();
       JLabel active_job_limit_label = new javax.swing.JLabel();
       JLabel VRD_path_label = new javax.swing.JLabel();
       JLabel t2extract_label = new javax.swing.JLabel();
@@ -1573,7 +1614,8 @@ public class configMain {
       comskip_label.setText("comskip"); 
       comskip_ini_label.setText("comskip.ini"); 
       wan_http_port_label.setText("wan http port"); 
-      wan_https_port_label.setText("wan https port"); 
+      wan_https_port_label.setText("wan https port");
+      limit_npl_fetches_label.setText("limit # of npl fetches");
       active_job_limit_label.setText("active job limit"); 
       VRD_path_label.setText("VideoRedo path");
       t2extract_label.setText("t2extract"); 
@@ -2019,6 +2061,16 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       tivo_panel.add(bogus, c);
+      
+      // limit_npl_fetches
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      tivo_panel.add(limit_npl_fetches_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      tivo_panel.add(limit_npl_fetches, c);
             
       // wan http port
       gy++;
@@ -2737,6 +2789,7 @@ public class configMain {
       AtomicParsley.setToolTipText(getToolTip("AtomicParsley"));
       wan_http_port.setToolTipText(getToolTip("wan_http_port"));
       wan_https_port.setToolTipText(getToolTip("wan_https_port"));
+      limit_npl_fetches.setToolTipText(getToolTip("limit_npl_fetches"));
       active_job_limit.setToolTipText(getToolTip("active_job_limit"));
       disk_space.setToolTipText(getToolTip("disk_space"));
       customCommand.setToolTipText(getToolTip("customCommand"));
@@ -3162,6 +3215,17 @@ public class configMain {
          text += "you will have to setup port forwarding in your router, then you should specify here the WAN (public) side<br>";
          text += "port number you are using in your router port forwarding settings.<br>";
          text += "NOTE: In order to save this setting you must OK the configuration window once for each TiVo";
+      }
+      else if (component.equals("limit_npl_fetches")) {
+         text =  "<b>limit # of npl fetches</b><br>";
+         text += "Set this option > 0 only if you want to limit the number of show listings to retrieve for a TiVo.<br>";
+         text += "This is useful if your TiVo has a lot recorded shows and you don't care about older shows and<br>";
+         text += "want to speed up NPL retrieval by limiting # of shows retrieved.<br>";
+         text += "Default setting of 0 means no limit.<br>";
+         text += "A setting of 1 means limit to 1 fetch (128 most recent shows max).<br>";
+         text += "A setting of 2 means limit to 2 fetches (256 most recent shows max), etc.<br>";
+         text += "NOTE: In order to save this setting you must OK the configuration window once for each TiVo.<br>";
+         text += "NOTE: The <b>Disk Usage</b> totals will obviously not be complete if you set this > 0";
       }
       else if (component.equals("active_job_limit")) {
          text =  "<b>active job limit</b><br>";

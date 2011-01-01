@@ -17,7 +17,7 @@ import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 
 public class config {
-   public static String kmttg = "kmttg v0p7r";
+   public static String kmttg = "kmttg v0p7s_beta";
    
    // encoding related
    public static String encProfDir = "";
@@ -88,6 +88,8 @@ public class config {
    // Hash to store tivo related information
    public static Hashtable<String,String> TIVOS = new Hashtable<String,String>();
    public static Hashtable<String,String> WAN = new Hashtable<String,String>();
+   // If > 0 limit # npl fetches to this num
+   public static Hashtable<String,String> limit_npl_fetches = new Hashtable<String,String>();
     
    // GUI related
    public static Boolean GUIMODE = false;   // true=>GUI, false=>batch/auto            
@@ -330,6 +332,40 @@ public class config {
       } else {
          if (WAN.containsKey(key)) {
             WAN.remove(key);
+         }
+      }
+   }
+   
+   // Get configured setting in limit_npl_fetches hash for given tivoName
+   public static int getLimitNplSetting(String tivoName) {
+      if (limit_npl_fetches.containsKey(tivoName)) {
+         String setting = limit_npl_fetches.get(tivoName);
+         if (setting.length() == 0)
+            return 0;
+         Integer i;
+         try {
+            i = Integer.valueOf(setting);
+         }
+         catch (Exception e) {
+            i = 0;
+         }
+         if (i == null)
+            i = 0;
+         return i;
+      }
+      else
+         return 0;
+   }
+   
+   // Set configured setting in limit_npl_fetches hash for given tivoName
+   // NOTE: identifier = limit_npl_tivoName
+   public static void setLimitNplSetting(String identifier, String value) {
+      String tivoName = identifier.replaceFirst("limit_npl_", "");
+      if (tivoName.length() > 0) {
+         if (value.length() > 0) {      
+            limit_npl_fetches.put(tivoName, value);
+         } else {
+            limit_npl_fetches.put(tivoName, "");
          }
       }
    }
@@ -652,6 +688,9 @@ public class config {
             if (key.matches("^wan_.+$")) {
                WAN.put(key, line);
             }
+            if (key.matches("^limit_npl_.+$")) {
+               setLimitNplSetting(key, string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("MaxJobs")) {
                MaxJobs = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -795,6 +834,14 @@ public class config {
                ofp.write("<" + name + ">\n");
                ofp.write(WAN.get(name) + "\n\n");
             }
+         }
+         
+         if (limit_npl_fetches.size() > 0) {
+            for (Enumeration<String> e=limit_npl_fetches.keys(); e.hasMoreElements();) {
+               String tivoName = e.nextElement();
+               ofp.write("<limit_npl_" + tivoName + ">\n");
+               ofp.write(limit_npl_fetches.get(tivoName) + "\n\n");
+            }            
          }
          
          ofp.write("<FontSize>\n" + FontSize + "\n\n");

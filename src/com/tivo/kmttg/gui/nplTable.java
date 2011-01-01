@@ -599,6 +599,10 @@ public class nplTable {
    // Compute total size and duration of all given items and return as a string
    private String getTotalsString(Stack<Hashtable<String,String>> h) {
       debug.print("h=" + h);
+      // If limiting NPL fetches then no message
+      if (config.getLimitNplSetting(tivoName) > 0) {
+         return "";
+      }
       String message;
       long totalSize = 0;
       long totalSecs = 0;
