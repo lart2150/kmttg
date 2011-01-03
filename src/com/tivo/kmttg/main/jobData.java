@@ -26,6 +26,7 @@ public class jobData implements Serializable {
    public metadataTivo process_metadataTivo = null;
    public autotune     process_autotune = null;
    public download     process_download = null;
+   public download_decrypt process_download_decrypt = null;
    public javadownload process_javadownload = null;
    public decrypt      process_decrypt = null;
    public qsfix        process_qsfix = null;
@@ -106,6 +107,7 @@ public class jobData implements Serializable {
          "metadataTivo",
          "autotune",
          "download",
+         "download_decrypt",
          "javadownload",
          "decrypt",
          "qsfix",
@@ -149,6 +151,9 @@ public class jobData implements Serializable {
       }      
       else if (type.matches("download")) {
          return process_download.check();
+      }      
+      else if (type.matches("download_decrypt")) {
+         return process_download_decrypt.check();
       }      
       else if (type.matches("javadownload")) {
          return process_javadownload.check();
@@ -197,7 +202,7 @@ public class jobData implements Serializable {
       }         
       return false;
    }
-   
+      
    public backgroundProcess getProcess() {
       if (type.equals("playlist")) {
          return process_npl.getProcess();
@@ -219,6 +224,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("download")) {
          return process_download.getProcess();
+      }
+      else if (type.equals("download_decrypt")) {
+         return null;
       }
       else if (type.equals("javadownload")) {
          return process_javadownload.getProcess();
@@ -291,6 +299,9 @@ public class jobData implements Serializable {
       else if (type.equals("download")) {
          file = url;
       }
+      else if (type.equals("download_decrypt")) {
+         file = url;
+      }
       else if (type.equals("javadownload")) {
          file = url;
       }
@@ -361,6 +372,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("download")) {
          file = tivoFile;
+      }
+      else if (type.equals("download_decrypt")) {
+         file = mpegFile;
       }
       else if (type.equals("javadownload")) {
          file = tivoFile;
@@ -442,6 +456,12 @@ public class jobData implements Serializable {
       
       else if (job.type.equals("download")) {  
          download proc = new download(job);
+         active = 0; // Not CPU active
+         success = proc.launchJob();
+      }
+      
+      else if (job.type.equals("download_decrypt")) {  
+         download_decrypt proc = new download_decrypt(job);
          active = 0; // Not CPU active
          success = proc.launchJob();
       }
@@ -553,6 +573,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("download")) {
          process_download.kill();
+      }
+      else if (type.equals("download_decrypt")) {
+         process_download_decrypt.kill();
       }
       else if (type.equals("javadownload")) {
          process_javadownload.kill();

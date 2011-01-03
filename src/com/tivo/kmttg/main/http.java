@@ -193,5 +193,15 @@ public class http {
 
       return true;
    }
+   
+   public static InputStream downloadStdout(String url, String username, String password, Boolean cookies)
+      throws IOException, InterruptedException, Exception {
+      InputStream in;
+      if (cookies)
+         in = http.cookieInputStream(url, username, password);
+      else
+         in = http.noCookieInputStream(url, username, password);
+      return in;
+   }
 
 }

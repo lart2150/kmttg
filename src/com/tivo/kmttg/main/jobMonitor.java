@@ -177,7 +177,7 @@ public class jobMonitor {
             if ( oneJobAtATime(job.type) ) {
                if ( tivoDownload.containsKey(job.tivoName) ) {
                   if (tivoDownload.get(job.tivoName) > 0) {
-                     if (config.download_delay > 0 && (job.type.equals("download") || job.type.equals("javadownload"))) {
+                     if (config.download_delay > 0 && isDownloadJob(job)) {
                         // Apply a start delay to consecutive download jobs
                         long now = new Date().getTime();
                         job.launch_time = now + config.download_delay*1000;                        
@@ -191,8 +191,7 @@ public class jobMonitor {
          
          // Don't run more than 'MaxJobs' active jobs at a time
          // NOTE: VRD GUI job not considered CPU active
-         if ( ! job.type.equals("download") &&
-              ! job.type.equals("javadownload") &&
+         if ( ! isDownloadJob(job) &&
               ! job.type.equals("metadata") &&
               ! job.type.equals("javametadata") &&
               ! isVideoRedoGUIJob(job)) {
@@ -251,6 +250,7 @@ public class jobMonitor {
    private static Boolean oneJobAtATime(String type) {
       return type.equals("download") ||
              type.equals("javadownload") ||
+             type.equals("download_decrypt") ||
              type.equals("metadata") ||
              type.equals("javametadata") ||
              type.equals("metadataTivo") ||
@@ -322,7 +322,7 @@ public class jobMonitor {
       
       // Get estimated space for this job candidate
       long candidateSpace = 0;
-      if (job.type.equals("download") || job.type.equals("javadownload")) {
+      if (isDownloadJob(job)) {
          candidateSpace = job.tivoFileSize;
       }
       
@@ -348,7 +348,7 @@ public class jobMonitor {
          for (int i=0; i<JOBS.size(); ++i) {
             job = JOBS.get(i);                        
             // Only considering download jobs for now
-            if ( (job.type.equals("download") || job.type.equals("javadownload")) && job.status.equals("running")) {
+            if ( isDownloadJob(job) && job.status.equals("running")) {
                // Estimated size - what is already downloaded
                total += job.tivoFileSize - file.size(job.tivoFile);
             }
@@ -814,7 +814,8 @@ public class jobMonitor {
                log.error("metadata files setting=" + config.metadata_files + " but file(s) not available for this task set");
             }
          }
-         
+
+         // Autotune
          if (autotune.isConfigured(tivoName)) {
             jobData job = new jobData();
             job.source   = source;
@@ -823,16 +824,27 @@ public class jobMonitor {
             job.name     = "telnet";
             submitNewJob(job);
          }
-         
+
+         // Download
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
          if (config.java_downloads == 1) {
+            // Standalone java download
             job.type      = "javadownload";
             job.name      = "java";
          } else {
-            job.type      = "download";
-            job.name      = "curl";
+            if (config.combine_download_decrypt == 1 && decrypt && config.VrdDecrypt == 0) {
+               // Combined curl download & decrypt
+               decrypt = false;
+               job.type = "download_decrypt";
+               job.name = "curl";
+               job.mpegFile = mpegFile;
+            } else {
+               // Standalone curl download
+               job.type      = "download";
+               job.name      = "curl";
+            }
          }
          job.tivoFile     = tivoFile;
          job.url          = entry.get("url");
@@ -1166,6 +1178,10 @@ public class jobMonitor {
       for (int i=0; i<JOBS.size(); ++i) {
          kill(JOBS.get(i));
       }
+   }
+   
+   private static Boolean isDownloadJob(jobData job) {
+      return (job.type.equals("download") || job.type.equals("javadownload") || job.type.equals("download_decrypt"));
    }
 
    // Return true if this job is a VideoRedo COM job that needs to be restricted to 1 at a time

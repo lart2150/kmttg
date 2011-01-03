@@ -72,6 +72,7 @@ public class configMain {
    private static JCheckBox tableColAutoSize = null;
    private static JCheckBox jobMonitorFullPaths = null;
    private static JCheckBox autotune_enabled = null;
+   private static JCheckBox combine_download_decrypt = null;
    private static JTextField tivo_name = null;
    private static JTextField tivo_ip = null;
    private static JTextField files_path = null;
@@ -558,6 +559,12 @@ public class configMain {
       else
          java_downloads.setSelected(false);
       
+      // combine_download_decrypt
+      if (config.combine_download_decrypt == 1)
+         combine_download_decrypt.setSelected(true);
+      else
+         combine_download_decrypt.setSelected(false);
+      
       // toolTips
       if (config.toolTips == 1)
          toolTips.setSelected(true);
@@ -933,6 +940,12 @@ public class configMain {
          config.java_downloads = 1;
       else
          config.java_downloads = 0;
+      
+      // combine_download_decrypt
+      if (combine_download_decrypt.isSelected())
+         config.combine_download_decrypt = 1;
+      else
+         config.combine_download_decrypt = 0;
       
       // toolTips
       if (toolTips.isSelected())
@@ -1496,6 +1509,7 @@ public class configMain {
       HideProtectedFiles = new javax.swing.JCheckBox();
       OverwriteFiles = new javax.swing.JCheckBox();
       java_downloads = new javax.swing.JCheckBox();
+      combine_download_decrypt = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
       JLabel FontSize_label = new javax.swing.JLabel();
       JLabel file_naming_label = new javax.swing.JLabel();
@@ -1598,6 +1612,7 @@ public class configMain {
       HideProtectedFiles.setText("Do not show copy protected files in table");
       OverwriteFiles.setText("Overwrite existing files");
       java_downloads.setText("Use Java for downloads instead of curl");
+      combine_download_decrypt.setText("Combine download and tivodecode decrypt");
       MAK_label.setText("MAK"); 
       FontSize_label.setText("GUI Font Size");
       file_naming_label.setText("File Naming"); 
@@ -2522,6 +2537,12 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(download_time_estimate, c);
       
+      // combine_download_decrypt
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(combine_download_decrypt, c);
+      
       // Visual Panel
       JPanel visual_panel = new JPanel(new GridBagLayout());       
       
@@ -2766,6 +2787,7 @@ public class configMain {
       HideProtectedFiles.setToolTipText(getToolTip("HideProtectedFiles"));
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
       java_downloads.setToolTipText(getToolTip("java_downloads"));
+      combine_download_decrypt.setToolTipText(getToolTip("combine_download_decrypt"));
       files_path.setToolTipText(getToolTip("files_path"));
       MAK.setToolTipText(getToolTip("MAK"));
       FontSize.setToolTipText(getToolTip("FontSize"));
@@ -3031,6 +3053,15 @@ public class configMain {
          text =  "<b>Use Java for downloads instead of curl</b><br>";
          text += "If this option is enabled then kmttg will use native Java methods for retrieving Now Playing<br>";
          text += "lists and downloading shows from TiVos instead of using <b>curl</b>.";
+      }
+      else if (component.equals("combine_download_decrypt")) {
+         text =  "<b>Combine download and tivodecode decrypt</b><br>";
+         text += "If this option is enabled then kmttg will try to combine the curl download and decrypt tasks into<br>";
+         text += "a single step instead of the default 2 step process.<br>";
+         text += "NOTE: You still need to enable both <b>download</b> and <b>decrypt</b> tasks for a show for this<br>";
+         text += "to apply - if you do not enable <b>decrypt</b> task then still only download to TiVo file is performed.<br>";
+         text += "NOTE: This option only applies if using <b>curl</b> downloads & <b>tivodecode</b> to decrypt, so does not apply to<br>";
+         text += "VideoRedo qsfix decrypt which still must be done separately from download.";
       }
       else if (component.equals("files_path")) {
          text =  "<b>FILES Default Path</b><br>";
