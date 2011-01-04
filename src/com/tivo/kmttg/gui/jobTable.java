@@ -20,7 +20,6 @@ import org.jdesktop.swingx.JXTable;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.util.debug;
-import com.tivo.kmttg.util.genericProcess;
 
 public class jobTable {
    private String[] TITLE_cols = {"STATUS", "JOB", "SOURCE", "OUTPUT"};
@@ -63,15 +62,14 @@ public class jobTable {
       if(e.getClickCount() == 2) {
          int row = JobMonitor.rowAtPoint(e.getPoint());
          jobData job = GetRowData(row);
-         genericProcess process = new genericProcess(job.getProcess());
-         if (job.status.equals("running") && process != null) {
+         if (job.status.equals("running") && job.getProcess() != null) {
             new taskInfo(
                config.gui.getJFrame(),
                job.type + ": " + "Tivo=" +
                (String)JobMonitor.getValueAt(row, getColumnIndex("SOURCE")) +
                "---Output=" +
                (String)JobMonitor.getValueAt(row, getColumnIndex("OUTPUT")),
-               process
+               job.getProcess()
             );
          }
       }
