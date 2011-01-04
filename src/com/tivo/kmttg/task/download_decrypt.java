@@ -245,6 +245,9 @@ public class download_decrypt implements Serializable {
       }
       file.delete(cookieFile);
       
+      // Call process.kill() to make sure both process terminate
+      process.kill();
+      
       return false;
    }
 
