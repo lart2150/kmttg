@@ -15,12 +15,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.Timer;
 
+import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
-import com.tivo.kmttg.util.genericProcess;
 
 // This is used for dynamic display of running task stdout/stderr
 public class taskInfo {
-   genericProcess process;
+   backgroundProcess process;
    Timer timer;
    private Stack<String> owatch = new Stack<String>();
    private Stack<String> ewatch = new Stack<String>();
@@ -29,7 +29,7 @@ public class taskInfo {
    private JTextArea stdout = null;
    private JTextArea stderr = null;     
    
-   public taskInfo(JFrame frame, String description, genericProcess process) {
+   public taskInfo(JFrame frame, String description, backgroundProcess process) {
       debug.print("frame=" + frame + " description=" + description + " process=" + process);
       JPanel content;      
       JLabel job_label;
