@@ -19,6 +19,7 @@ import com.tivo.kmttg.util.string;
 
 public class download_decrypt implements Serializable {
    private static final long serialVersionUID = 1L;
+   String command = "";
    String cookieFile = "";
    String script = "";
    private backgroundProcess process;
@@ -95,41 +96,44 @@ public class download_decrypt implements Serializable {
       if (wan_port != null)
          job.url = string.addPort(job.url, wan_port);
       
-      Stack<String> command = new Stack<String>();
       String url = job.url;
       if (config.TSDownload == 1)
          url += "&Format=video/x-tivo-mpeg-ts";
+
+      // Make main piped command string
+      command = "\"" + config.curl + "\" ";
+      if (config.OS.equals("windows"))
+         command += "--retry 3 ";
+      command += "--anyauth --globoff --user tivo:" + config.MAK + " ";
+      command += "--insecure --cookie-jar \"" + cookieFile + "\" --url \"" + url + "\" ";
+      command += "| " + "\"" + config.tivodecode + "\" --mak " + config.MAK + " --out ";
+      command += "\"" + job.mpegFile + "\" -";
       
-      // Make temporary script
+      // Make temporary script containing command
       try {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(script));
-         ofp.write("\"" + config.curl + "\" ");
-         if (config.OS.equals("windows"))
-            ofp.write("--retry 3 ");
-         ofp.write("--anyauth --globoff --user tivo:" + config.MAK + " ");
-         ofp.write("--insecure --cookie-jar \"" + cookieFile + "\" --url \"" + url + "\" ");
-         ofp.write("| " + "\"" + config.tivodecode + "\" --mak " + config.MAK + " --out ");
-         ofp.write("\"" + job.mpegFile + "\" -\r\n");
+         ofp.write(command + "\r\n");
          ofp.close();
       } catch (IOException e) {
          log.error(e.toString());
          return false;
       }
-      
+
+      // Execute above script in native OS shell
+      Stack<String> c = new Stack<String>();      
       if (config.OS.equals("windows")) {
-         command.add("cmd");
-         command.add("/c");
+         c.add("cmd.exe");
+         c.add("/c");
       } else {
-         command.add("sh");
+         c.add("sh");
       }
-      command.add("\"" + script + "\"");
-      process = new backgroundProcess();
-            
+      c.add("\"" + script + "\"");
+      process = new backgroundProcess();            
       log.print(">> DOWNLOADING/DECRYPTING TO " + job.mpegFile + " ...");
-      if ( process.run(command) ) {
-         log.print(process.toString());
+      if ( process.run(c) ) {
+         log.print(command);
       } else {
-         log.error("Failed to start command: " + process.toString());
+         log.error("Failed to start command: " + command);
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
@@ -141,7 +145,7 @@ public class download_decrypt implements Serializable {
    public void kill() {
       debug.print("");
       process.kill();
-      log.warn("Killing '" + job.type + "' job: " + process.toString());
+      log.warn("Killing '" + job.type + "' job: " + command);
       file.delete(cookieFile);
       file.delete(script);
    }
