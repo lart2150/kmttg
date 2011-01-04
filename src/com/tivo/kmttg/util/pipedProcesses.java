@@ -100,37 +100,23 @@ public class pipedProcesses {
       return true;
    }
       
+   // Return true if proc1 still running
    public Boolean isRunning() {
       debug.print("");
       try {
-         if (proc1 != null) {
-            proc1.exitValue();
-            return true;
-         }
-         else if (proc2 != null) {
-            proc2.exitValue();
-            return true;
-         }
-         else
-            return false;
+         proc1.exitValue();
+         return true;
       }
       catch (IllegalThreadStateException i) {
          return false;
       }
    }
    
-   // Return -1 if still running, exit code otherwise
+   // Return -1 if proc1 still running, exit code otherwise
    public int exitStatus() {
       try {
-         if (proc1 != null) {
-            int v = proc1.exitValue();
-            return v;
-         }
-         else if (proc2 != null) {
-            int v = proc2.exitValue();
-            return v;
-         }
-         return 1;
+         int v = proc1.exitValue();
+         return v;
       }
       catch (IllegalThreadStateException i) {
          return -1;
