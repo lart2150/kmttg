@@ -63,7 +63,7 @@ public class pipedProcesses {
       }
       
       // Pipe proc1 stdout to proc2 stdin
-      pipeHandler = new PipeHandler(proc1.getInputStream(), proc2.getOutputStream());
+      pipeHandler = new PipeHandler(proc1.getInputStream(), proc2);
       pipeHandler.start();
       
       return true;
@@ -94,7 +94,7 @@ public class pipedProcesses {
       }
       
       // Pipe inputStream to proc2 stdin
-      pipeHandler = new PipeHandler(inputStream, proc2.getOutputStream());
+      pipeHandler = new PipeHandler(inputStream, proc2);
       pipeHandler.start();
       
       return true;
@@ -129,6 +129,9 @@ public class pipedProcesses {
          proc1.destroy();
       if (proc2 != null)
          proc2.destroy();
+      proc1 = null;
+      proc2 = null;
+      pipeHandler = null;
    }
    
    public Stack<String> getStdout() {
