@@ -1,5 +1,8 @@
 package com.tivo.kmttg.task;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Stack;
@@ -8,27 +11,31 @@ import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.pipedProcesses;
 import com.tivo.kmttg.util.string;
 
 public class download_decrypt implements Serializable {
    private static final long serialVersionUID = 1L;
    String cookieFile = "";
-   private pipedProcesses process;
+   String script = "";
+   private backgroundProcess process;
    public jobData job;
    
    public download_decrypt(jobData job) {
       debug.print("job=" + job);
       this.job = job;
       
-      // Generate unique cookieFile and outputFile names
+      // Generate unique cookieFile and script names
       cookieFile = file.makeTempFile("cookie");
+      script = file.makeTempFile("script");
+      if (config.OS.equals("windows"))
+         script += ".bat";
    }
    
-   public pipedProcesses getProcess() {
+   public backgroundProcess getProcess() {
       return process;
    }
    
@@ -78,6 +85,8 @@ public class download_decrypt implements Serializable {
       if (job.url == null || job.url.length() == 0) {
          log.error("URL not given");
          jobMonitor.removeFromJobList(job);
+         file.delete(cookieFile);
+         file.delete(script);
          return false;
       }
       
@@ -86,39 +95,38 @@ public class download_decrypt implements Serializable {
       if (wan_port != null)
          job.url = string.addPort(job.url, wan_port);
       
-      Stack<String> command1 = new Stack<String>();
-      Stack<String> command2 = new Stack<String>();
+      Stack<String> command = new Stack<String>();
       String url = job.url;
       if (config.TSDownload == 1)
          url += "&Format=video/x-tivo-mpeg-ts";
       
-      command1.add(config.curl);
-      if (config.OS.equals("windows")) {
-         command1.add("--retry");
-         command1.add("3");
+      // Make temporary script
+      try {
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(script));
+         ofp.write("\"" + config.curl + "\" ");
+         if (config.OS.equals("windows"))
+            ofp.write("--retry 3 ");
+         ofp.write("--anyauth --globoff --user tivo:" + config.MAK + " ");
+         ofp.write("--insecure --cookie-jar \"" + cookieFile + "\" --url \"" + url + "\" ");
+         ofp.write("| " + "\"" + config.tivodecode + "\" --mak " + config.MAK + " --out ");
+         ofp.write("\"" + job.mpegFile + "\" -\r\n");
+         ofp.close();
+      } catch (IOException e) {
+         log.error(e.toString());
+         return false;
       }
-      command1.add("--anyauth");
-      command1.add("--globoff");
-      command1.add("--user");
-      command1.add("tivo:" + config.MAK);
-      command1.add("--insecure");
-      command1.add("--cookie-jar");
-      command1.add(cookieFile);
-      command1.add("--url");
-      command1.add(url);
-     
-      command2.add(config.tivodecode);
-      command2.add("--mak");
-      command2.add(config.MAK);
-      command2.add("--out");
-      command2.add(job.mpegFile);
-      command2.add("-");
       
-      process = new pipedProcesses();
-      process.run(command1, command2); 
-      
+      if (config.OS.equals("windows")) {
+         command.add("cmd");
+         command.add("/c");
+      } else {
+         command.add("sh");
+      }
+      command.add("\"" + script + "\"");
+      process = new backgroundProcess();
+            
       log.print(">> DOWNLOADING/DECRYPTING TO " + job.mpegFile + " ...");
-      if ( process.run(command1, command2) ) {
+      if ( process.run(command) ) {
          log.print(process.toString());
       } else {
          log.error("Failed to start command: " + process.toString());
@@ -135,6 +143,7 @@ public class download_decrypt implements Serializable {
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
       file.delete(cookieFile);
+      file.delete(script);
    }
    
    // Check status of a currently running job
@@ -244,9 +253,7 @@ public class download_decrypt implements Serializable {
          }
       }
       file.delete(cookieFile);
-      
-      // Call process.kill() to make sure both process terminate
-      process.kill();
+      file.delete(script);
       
       return false;
    }
