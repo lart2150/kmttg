@@ -112,7 +112,10 @@ public class download_decrypt implements Serializable {
       // Make temporary script containing command
       try {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(script));
-         ofp.write(command + "\r\n");
+         ofp.write(command);
+         if (config.OS.equals("windows"))
+            ofp.write("\r");
+         ofp.write("\n");
          ofp.close();
       } catch (IOException e) {
          log.error(e.toString());
@@ -127,7 +130,7 @@ public class download_decrypt implements Serializable {
       } else {
          c.add("sh");
       }
-      c.add("\"" + script + "\"");
+      c.add(script);
       process = new backgroundProcess();            
       log.print(">> DOWNLOADING/DECRYPTING TO " + job.mpegFile + " ...");
       if ( process.run(c) ) {
