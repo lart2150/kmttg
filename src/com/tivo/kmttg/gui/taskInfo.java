@@ -164,7 +164,7 @@ public class taskInfo {
    }
       
    public void appendStdout(Stack<String> s) {
-      if (s.size() > 0) {
+      if (s != null && s.size() > 0) {
          stdout.setEditable(true);
          for (int i=0; i<s.size(); ++i)
             stdout.append(s.get(i) + "\n");
@@ -173,7 +173,7 @@ public class taskInfo {
    }
    
    public void appendStderr(Stack<String> s) {
-      if (s.size() > 0) {
+      if (s != null && s.size() > 0) {
          stderr.setEditable(true);
          for (int i=0; i<s.size(); ++i)
             stderr.append(s.get(i) + "\n");
