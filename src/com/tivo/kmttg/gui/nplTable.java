@@ -510,6 +510,7 @@ public class nplTable {
    public void RefreshNowPlaying(Stack<Hashtable<String,String>> h) {
       debug.print("h=" + h);
       if (h == null) h = entries;
+      if (h == null) return;
       String message = "";
       if (NowPlaying != null) {
          if ( ! showFolders() ) {
