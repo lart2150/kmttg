@@ -156,7 +156,6 @@ public class string {
       Matcher m = p.matcher(url);
       if (m.matches()) {
          String ip = m.group(1);
-         System.out.println("ip=" + ip);
          url = url.replaceFirst(ip, ip + ":" + port);
       }
       return url;
