@@ -16,7 +16,7 @@ public class ChildDataHandler extends Thread {
    public Stack<String> output;
    public Stack<String> watch = null;
    
-   ChildDataHandler(InputStream inputStream, Stack<String> output) {
+   public ChildDataHandler(InputStream inputStream, Stack<String> output) {
      this.inputStream = inputStream;
      this.output = output;
      inputStreamReader = new InputStreamReader(inputStream);
