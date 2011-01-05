@@ -1,8 +1,5 @@
 package com.tivo.kmttg.task;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Stack;
@@ -11,32 +8,27 @@ import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
-import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.pipedProcesses;
 import com.tivo.kmttg.util.string;
 
 public class download_decrypt implements Serializable {
    private static final long serialVersionUID = 1L;
-   String command = "";
    String cookieFile = "";
-   String script = "";
-   private backgroundProcess process;
+   private pipedProcesses process;
    public jobData job;
    
    public download_decrypt(jobData job) {
       debug.print("job=" + job);
       this.job = job;
       
-      // Generate unique cookieFile and script names
+      // Generate unique cookieFile and outputFile names
       cookieFile = file.makeTempFile("cookie");
-      script = file.makeTempFile("script");
-      if (config.OS.equals("windows"))
-         script += ".bat";
    }
    
-   public backgroundProcess getProcess() {
+   public pipedProcesses getProcess() {
       return process;
    }
    
@@ -86,8 +78,6 @@ public class download_decrypt implements Serializable {
       if (job.url == null || job.url.length() == 0) {
          log.error("URL not given");
          jobMonitor.removeFromJobList(job);
-         file.delete(cookieFile);
-         file.delete(script);
          return false;
       }
       
@@ -96,47 +86,42 @@ public class download_decrypt implements Serializable {
       if (wan_port != null)
          job.url = string.addPort(job.url, wan_port);
       
+      Stack<String> command1 = new Stack<String>();
+      Stack<String> command2 = new Stack<String>();
       String url = job.url;
       if (config.TSDownload == 1)
          url += "&Format=video/x-tivo-mpeg-ts";
-
-      // Make main piped command string
-      command = "\"" + config.curl + "\" ";
-      if (config.OS.equals("windows"))
-         command += "--retry 3 ";
-      command += "--anyauth --globoff --user tivo:" + config.MAK + " ";
-      command += "--insecure --cookie-jar \"" + cookieFile + "\" --url \"" + url + "\" ";
-      command += "| " + "\"" + config.tivodecode + "\" --mak " + config.MAK + " --out ";
-      command += "\"" + job.mpegFile + "\" -";
       
-      // Make temporary script containing command
-      try {
-         BufferedWriter ofp = new BufferedWriter(new FileWriter(script));
-         ofp.write(command);
-         if (config.OS.equals("windows"))
-            ofp.write("\r");
-         ofp.write("\n");
-         ofp.close();
-      } catch (IOException e) {
-         log.error(e.toString());
-         return false;
-      }
-
-      // Execute above script in native OS shell
-      Stack<String> c = new Stack<String>();      
+      command1.add(config.curl);
       if (config.OS.equals("windows")) {
-         c.add("cmd.exe");
-         c.add("/c");
-      } else {
-         c.add("sh");
+         command1.add("--retry");
+         command1.add("3");
       }
-      c.add(script);
-      process = new backgroundProcess();            
+      command1.add("--anyauth");
+      command1.add("--globoff");
+      command1.add("--user");
+      command1.add("tivo:" + config.MAK);
+      command1.add("--insecure");
+      command1.add("--cookie-jar");
+      command1.add(cookieFile);
+      command1.add("--url");
+      command1.add(url);
+     
+      command2.add(config.tivodecode);
+      command2.add("--mak");
+      command2.add(config.MAK);
+      command2.add("--out");
+      command2.add(job.mpegFile);
+      command2.add("-");
+      
+      process = new pipedProcesses();
+      process.run(command1, command2); 
+      
       log.print(">> DOWNLOADING/DECRYPTING TO " + job.mpegFile + " ...");
-      if ( process.run(c) ) {
-         log.print(command);
+      if ( process.run(command1, command2) ) {
+         log.print(process.toString());
       } else {
-         log.error("Failed to start command: " + command);
+         log.error("Failed to start command: " + process.toString());
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
@@ -148,9 +133,8 @@ public class download_decrypt implements Serializable {
    public void kill() {
       debug.print("");
       process.kill();
-      log.warn("Killing '" + job.type + "' job: " + command);
+      log.warn("Killing '" + job.type + "' job: " + process.toString());
       file.delete(cookieFile);
-      file.delete(script);
    }
    
    // Check status of a currently running job
@@ -260,7 +244,9 @@ public class download_decrypt implements Serializable {
          }
       }
       file.delete(cookieFile);
-      file.delete(script);
+      
+      // Call process.kill() to make sure both processes terminate
+      process.kill();
       
       return false;
    }
