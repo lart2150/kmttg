@@ -226,7 +226,7 @@ public class jobData implements Serializable {
          return process_download.getProcess();
       }
       else if (type.equals("download_decrypt")) {
-         return process_download_decrypt.getProcess();
+         return null;
       }
       else if (type.equals("javadownload")) {
          return process_javadownload.getProcess();
