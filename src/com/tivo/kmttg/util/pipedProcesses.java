@@ -1,7 +1,6 @@
 package com.tivo.kmttg.util;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.NoSuchElementException;
 import java.util.Stack;
 
@@ -63,38 +62,7 @@ public class pipedProcesses {
       }
       
       // Pipe proc1 stdout to proc2 stdin
-      pipeHandler = new PipeHandler(proc1.getInputStream(), proc2.getOutputStream());
-      pipeHandler.start();
-      
-      return true;
-   }
-   
-   // Method to start only 2nd runtime command and pipe to existing inputStream
-   public Boolean run(InputStream inputStream, Stack<String>command2) {
-      // Convert String Stack to String array for both commands
-      this.command2 = new String[command2.size()];
-      for (int i=0; i<command2.size(); i++) {
-         this.command2[i] = command2.get(i);
-      }      
-      
-      // Start 2nd process
-      try {
-         proc2 = Runtime.getRuntime().exec(this.command2);
-         stderrHandler2 = new ChildDataHandler(proc2.getErrorStream(), stderr2);
-
-         // Capture stdout/stderr to string stacks
-         stderrHandler2.start();
-         stdoutHandler2.start();
-      } catch (IOException e) {
-         stderr2.add(e.getMessage());
-         return false;
-      } catch (NullPointerException e) {
-         stderr2.add(e.getMessage());
-         return false;
-      }
-      
-      // Pipe inputStream to proc2 stdin
-      pipeHandler = new PipeHandler(inputStream, proc2.getOutputStream());
+      pipeHandler = new PipeHandler(proc1, proc2);
       pipeHandler.start();
       
       return true;
@@ -125,13 +93,12 @@ public class pipedProcesses {
    
    public void kill() {
       debug.print("");
-      if (proc1 != null)
-         proc1.destroy();
-      if (proc2 != null)
-         proc2.destroy();
-      proc1 = null;
-      proc2 = null;
-      pipeHandler = null;
+      log.warn("Calling proc2 destroy");
+      proc2.destroy();
+      log.warn("Calling proc1 destroy");
+      proc1.destroy();
+      log.warn("Calling pipedProcesses stopRunning()");
+      pipeHandler.stopRunning();
    }
    
    public Stack<String> getStdout() {
