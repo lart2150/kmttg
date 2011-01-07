@@ -297,22 +297,25 @@ public class download_decrypt implements Serializable {
          ofp.write("@echo off" + eol);
          ofp.write("set name=" + uniqueName + eol);
          ofp.write("TITLE %name%" + eol);
-         ofp.write("FOR /F \"tokens=2 delims= \" %%A IN ('TASKLIST /V /NH ^| findstr /i \"%name%\"') DO SET my_pid=%%A" + eol);
-         ofp.write("echo pid=%my_pid% >" + "\"" + pidFile + "\"" + eol);
+         ofp.write("TASKLIST /V /NH | findstr /i \"%name%\" > \"" + pidFile + "\"" + eol);
       } catch (IOException e) {
          log.error(e.toString());
       }
    }
   
    // Get pid from file with single line:
-   // pid=#
+   // Sample line looks like (pid is the 2nd column):
+   // cmd.exe 2800 RDP-Tcp#1 0 2,988 K Running INET\moyekj 0:00:00 ...
    private String getPidFromFile() {
       if (file.isFile(pidFile)) {
          try {
             BufferedReader ifp = new BufferedReader(new FileReader(pidFile));
             String line = ifp.readLine();
             ifp.close();
-            String pid = line.replaceFirst("pid=", "");
+            String pid = "";
+            String s[] = line.split("\\s+");
+            if (s.length > 2)
+               pid = s[1];
             if (pid.length() > 0 && pid.matches("^\\d+\\s*")) {
                return pid;
             } else {
