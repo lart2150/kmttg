@@ -28,6 +28,7 @@ public class jobData implements Serializable {
    public download     process_download = null;
    public download_decrypt process_download_decrypt = null;
    public javadownload process_javadownload = null;
+   public jdownload_decrypt process_jdownload_decrypt = null;
    public decrypt      process_decrypt = null;
    public qsfix        process_qsfix = null;
    public comskip      process_comskip = null;
@@ -109,6 +110,7 @@ public class jobData implements Serializable {
          "download",
          "download_decrypt",
          "javadownload",
+         "jdownload_decrypt",
          "decrypt",
          "qsfix",
          "streamfix",
@@ -157,6 +159,9 @@ public class jobData implements Serializable {
       }      
       else if (type.matches("javadownload")) {
          return process_javadownload.check();
+      }      
+      else if (type.matches("jdownload_decrypt")) {
+         return process_jdownload_decrypt.check();
       }      
       else if (type.matches("decrypt")) {
          return process_decrypt.check();
@@ -230,6 +235,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("javadownload")) {
          return process_javadownload.getProcess();
+      }
+      else if (type.equals("jdownload_decrypt")) {
+         return process_jdownload_decrypt.getProcess();
       }
       else if (type.equals("decrypt")) {
          return process_decrypt.getProcess();
@@ -305,6 +313,9 @@ public class jobData implements Serializable {
       else if (type.equals("javadownload")) {
          file = url;
       }
+      else if (type.equals("jdownload_decrypt")) {
+         file = url;
+      }
       else if (type.equals("decrypt")) {
          file = tivoFile;
       }
@@ -378,6 +389,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("javadownload")) {
          file = tivoFile;
+      }
+      else if (type.equals("jdownload_decrypt")) {
+         file = mpegFile;
       }
       else if (type.equals("decrypt")) {
          file = mpegFile;
@@ -468,6 +482,12 @@ public class jobData implements Serializable {
       
       else if (job.type.equals("javadownload")) {  
          javadownload proc = new javadownload(job);
+         active = 0; // Not CPU active
+         success = proc.launchJob();
+      }
+      
+      else if (job.type.equals("jdownload_decrypt")) {  
+         jdownload_decrypt proc = new jdownload_decrypt(job);
          active = 0; // Not CPU active
          success = proc.launchJob();
       }
@@ -579,6 +599,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("javadownload")) {
          process_javadownload.kill();
+      }
+      else if (type.equals("jdownload_decrypt")) {
+         process_jdownload_decrypt.kill();
       }
       else if (type.equals("decrypt")) {
          process_decrypt.kill();
