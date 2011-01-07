@@ -1,11 +1,14 @@
 package com.tivo.kmttg.task;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Stack;
+import java.util.UUID;
 
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
@@ -22,6 +25,8 @@ public class download_decrypt implements Serializable {
    String command = "";
    String cookieFile = "";
    String script = "";
+   String pidFile = "";
+   String uniqueName = "";
    private backgroundProcess process;
    public jobData job;
    
@@ -32,6 +37,8 @@ public class download_decrypt implements Serializable {
       // Generate unique cookieFile and script names
       cookieFile = file.makeTempFile("cookie");
       script = file.makeTempFile("script");
+      pidFile = file.makeTempFile("pid");
+      uniqueName = UUID.randomUUID().toString();
       if (config.OS.equals("windows"))
          script += ".bat";
    }
@@ -86,8 +93,7 @@ public class download_decrypt implements Serializable {
       if (job.url == null || job.url.length() == 0) {
          log.error("URL not given");
          jobMonitor.removeFromJobList(job);
-         file.delete(cookieFile);
-         file.delete(script);
+         cleanup();
          return false;
       }
       
@@ -112,6 +118,8 @@ public class download_decrypt implements Serializable {
       // Make temporary script containing command
       try {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(script));
+         if (config.OS.equals("windows"))
+            hackToGetPid(ofp, uniqueName, pidFile);
          ofp.write(command);
          if (config.OS.equals("windows"))
             ofp.write("\r");
@@ -147,10 +155,24 @@ public class download_decrypt implements Serializable {
    
    public void kill() {
       debug.print("");
-      process.kill();
       log.warn("Killing '" + job.type + "' job: " + command);
-      file.delete(cookieFile);
-      file.delete(script);
+      if (config.OS.equals("windows")) {
+         // process.kill doesn't work in windows (grandchild process not killed) so this is a hack
+         try {
+            String pid = getPidFromFile();
+            log.warn("killing windows pid=" + pid);
+            if (pid != null) {
+               Process p = Runtime.getRuntime().exec("taskkill /f /t /pid " + pid);
+               p.waitFor();
+            }
+         } catch (Exception e) {
+            log.error("Exception finding/killing pid: " + e.getMessage());
+         }
+      } else {
+         // Unix flavors work normal way
+         process.kill();
+      }
+      cleanup();
    }
    
    // Check status of a currently running job
@@ -259,8 +281,7 @@ public class download_decrypt implements Serializable {
                auto.AddHistoryEntry(job);
          }
       }
-      file.delete(cookieFile);
-      file.delete(script);
+      cleanup();
       
       return false;
    }
@@ -268,6 +289,48 @@ public class download_decrypt implements Serializable {
    // Return rate in Mbps (ds=delta bytes, dt=delta time in msecs)
    private String getRate(long ds, long dt) {      
       return String.format("%.1f Mbps", (ds*8000)/(1e6*dt));
+   }
+   
+   // Hack lines to add to Windows script file to obtain pid
+   // This is needed to be able to kill cmd.exe using taskkill
+   private void hackToGetPid(BufferedWriter ofp, String uniqueName, String pidFile) {
+      try {
+         String eol = "\r\n";
+         ofp.write("@echo off" + eol);
+         ofp.write("set name=" + uniqueName + eol);
+         ofp.write("TITLE %name%" + eol);
+         ofp.write("FOR /F \"tokens=2 delims= \" %%A IN ('TASKLIST /FI ^\"WINDOWTITLE eq %name%^\" /NH') DO SET my_pid=%%A" + eol);
+         ofp.write("echo pid=%my_pid% >" + "\"" + pidFile + "\"" + eol);
+      } catch (IOException e) {
+         log.error(e.toString());
+      }
+   }
+  
+   // Get pid from file with single line:
+   // pid=#
+   private String getPidFromFile() {
+      if (file.isFile(pidFile)) {
+         try {
+            BufferedReader ifp = new BufferedReader(new FileReader(pidFile));
+            String line = ifp.readLine();
+            ifp.close();
+            String pid = line.replaceFirst("pid=", "");
+            if (pid.length() > 0) {
+               return pid;
+            }
+         }
+         catch (IOException ex) {
+            log.error("getPidFromFile error: " + ex.toString());
+            return null;
+         }
+      }
+      return null;
+   }
+   
+   private void cleanup() {
+      file.delete(cookieFile);
+      file.delete(script);
+      file.delete(pidFile);
    }
 
 }
