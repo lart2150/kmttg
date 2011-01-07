@@ -299,7 +299,7 @@ public class download_decrypt implements Serializable {
          ofp.write("@echo off" + eol);
          ofp.write("set name=" + uniqueName + eol);
          ofp.write("TITLE %name%" + eol);
-         ofp.write("FOR /F \"tokens=2 delims= \" %%A IN ('TASKLIST /FI ^\"WINDOWTITLE eq %name%^\" /NH') DO SET my_pid=%%A" + eol);
+         ofp.write("FOR /F \"tokens=2 delims= \" %%A IN ('TASKLIST /V /NH ^| findstr /i \"%name%\"') DO SET my_pid=%%A" + eol);
          ofp.write("echo pid=%my_pid% >" + "\"" + pidFile + "\"" + eol);
       } catch (IOException e) {
          log.error(e.toString());
