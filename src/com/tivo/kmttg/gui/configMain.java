@@ -3056,12 +3056,12 @@ public class configMain {
       }
       else if (component.equals("combine_download_decrypt")) {
          text =  "<b>Combine download and tivodecode decrypt</b><br>";
-         text += "If this option is enabled then kmttg will try to combine the curl download and decrypt tasks into<br>";
-         text += "a single step instead of the default 2 step process.<br>";
+         text += "If this option is enabled then kmttg will try to combine the download and decrypt tasks into<br>";
+         text += "a single step instead of the default 2 step process (skipping intermediate TiVo file generation).<br>";
          text += "NOTE: You still need to enable both <b>download</b> and <b>decrypt</b> tasks for a show for this<br>";
          text += "to apply - if you do not enable <b>decrypt</b> task then still only download to TiVo file is performed.<br>";
-         text += "NOTE: This option only applies if using <b>curl</b> downloads & <b>tivodecode</b> to decrypt, so does not apply to<br>";
-         text += "VideoRedo qsfix decrypt which still must be done separately from download.";
+         text += "NOTE: This option only applies if using <b>tivodecode</b> to decrypt, not for<br>";
+         text += "VideoRedo qsfix decrypt which must be performed separately from download.";
       }
       else if (component.equals("files_path")) {
          text =  "<b>FILES Default Path</b><br>";
