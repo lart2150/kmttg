@@ -1,6 +1,7 @@
 package com.tivo.kmttg.util;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.NoSuchElementException;
 import java.util.Stack;
 import java.util.concurrent.TimeoutException;
@@ -180,6 +181,10 @@ public class backgroundProcess {
          }
       }
       return c;
+   }
+   
+   public OutputStream getOutputStream() {
+      return proc.getOutputStream();
    }
 
 }
