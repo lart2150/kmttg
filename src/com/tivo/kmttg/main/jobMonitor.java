@@ -830,9 +830,17 @@ public class jobMonitor {
          job.source       = source;
          job.tivoName     = tivoName;
          if (config.java_downloads == 1) {
-            // Standalone java download
-            job.type      = "javadownload";
-            job.name      = "java";
+            if (config.combine_download_decrypt == 1 && decrypt && config.VrdDecrypt == 0) {
+               // Combined java download & decrypt
+               decrypt = false;
+               job.type = "jdownload_decrypt";
+               job.name = "java";
+               job.mpegFile = mpegFile;
+            } else {
+               // Standalone java download
+               job.type      = "javadownload";
+               job.name      = "java";
+            }
          } else {
             if (config.combine_download_decrypt == 1 && decrypt && config.VrdDecrypt == 0) {
                // Combined curl download & decrypt
