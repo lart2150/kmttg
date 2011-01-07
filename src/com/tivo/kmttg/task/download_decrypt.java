@@ -157,21 +157,19 @@ public class download_decrypt implements Serializable {
       debug.print("");
       log.warn("Killing '" + job.type + "' job: " + command);
       if (config.OS.equals("windows")) {
-         // process.kill doesn't work in windows (grandchild process not killed) so this is a hack
+         // For Windows process.kill doesn't kill grandchild curl/tivodecode processes so this is a hack to do that
          try {
             String pid = getPidFromFile();
-            log.warn("killing windows pid=" + pid);
             if (pid != null) {
+               log.warn("killing windows pid=" + pid);
                Process p = Runtime.getRuntime().exec("taskkill /f /t /pid " + pid);
                p.waitFor();
             }
          } catch (Exception e) {
             log.error("Exception finding/killing pid: " + e.getMessage());
          }
-      } else {
-         // Unix flavors work normal way
-         process.kill();
       }
+      process.kill();
       cleanup();
    }
    
@@ -315,8 +313,11 @@ public class download_decrypt implements Serializable {
             String line = ifp.readLine();
             ifp.close();
             String pid = line.replaceFirst("pid=", "");
-            if (pid.length() > 0) {
+            if (pid.length() > 0 && pid.matches("^\\d+\\s*")) {
                return pid;
+            } else {
+               log.error("Unable to determine windows pid to kill windows process");
+               log.error("(pidFile line is: '" + line + "')");
             }
          }
          catch (IOException ex) {
