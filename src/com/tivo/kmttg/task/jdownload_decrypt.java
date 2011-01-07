@@ -21,7 +21,7 @@ public class jdownload_decrypt implements Serializable {
    private Thread thread = null;
    private Boolean thread_running = false;
    private Boolean success = false;
-   private backgroundProcess process;
+   private backgroundProcess process = null;
    public jobData job;
    
    public jdownload_decrypt(jobData job) {
@@ -90,7 +90,7 @@ public class jdownload_decrypt implements Serializable {
       if (config.TSDownload == 1)
          url += "&Format=video/x-tivo-mpeg-ts";
 
-      // Start tivodecode as background process
+      // Start tivodecode as background process looking at stdin (OutputStream)
       Stack<String> c = new Stack<String>();      
       c.add(config.tivodecode);
       c.add("--mak");
@@ -135,7 +135,6 @@ public class jdownload_decrypt implements Serializable {
    public void kill() {
       debug.print("");
       log.warn("Killing '" + job.type + "' job: " + process.toString());
-      process.kill();
       thread.interrupt();
       thread_running = false;
       cleanup();
@@ -262,6 +261,7 @@ public class jdownload_decrypt implements Serializable {
    }
      
    private void cleanup() {
+      if (process != null) process.kill();
       file.delete(cookieFile);
    }
 
