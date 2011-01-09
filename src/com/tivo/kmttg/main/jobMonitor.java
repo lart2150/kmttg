@@ -672,8 +672,13 @@ public class jobMonitor {
          mpegFile_fix = mpegFile + ".qsfix";
          
          edlFile = string.replaceSuffix(mpegFile, ".edl");
-         
-         mpegFile_cut = string.replaceSuffix(mpegFile, "_cut.mpg");
+
+         if (mpegCutDir.equals(mpegDir)) {
+            mpegFile_cut = string.replaceSuffix(mpegFile, "_cut.mpg");
+         } else {
+            // If mpegCutDir different than mpegDir then no need for _cut
+            mpegFile_cut = mpegFile;
+         }
          mpegFile_cut = mpegCutDir + s + string.basename(mpegFile_cut);
          
          if (comcut) metaFile = mpegFile_cut + ".txt";
@@ -702,7 +707,12 @@ public class jobMonitor {
          
          edlFile = string.replaceSuffix(mpegFile, ".edl");
          
-         mpegFile_cut = string.replaceSuffix(startFile, "_cut.mpg");
+         if (mpegCutDir.equals(mpegDir)) {
+            mpegFile_cut = string.replaceSuffix(startFile, "_cut.mpg");
+         } else {
+            // If mpegCutDir different than mpegDir then no need for _cut
+            mpegFile_cut = mpegFile;
+         }
          mpegFile_cut = mpegCutDir + s + mpegFile_cut;
          
          if (comcut) metaFile = mpegFile_cut + ".txt";
