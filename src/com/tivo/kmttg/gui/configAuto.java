@@ -80,6 +80,7 @@ public class configAuto {
    private static JTextField title = null;
    private static JTextField check_interval = null;
    private static JTextField comskipIni = null;
+   private static JTextField channelFilter = null;
    private static JCheckBox dateFilter = null;
    private static JCheckBox suggestionsFilter = null;
    private static JCheckBox suggestionsFilter_single = null;
@@ -230,6 +231,9 @@ public class configAuto {
       
       JLabel comskipIni_label = new JLabel("comskip.ini override: ");
       comskipIni = new JTextField(30);
+      
+      JLabel channelFilter_label = new JLabel("channel filter: ");
+      channelFilter = new JTextField(30);
       
       JLabel encoding_name_label = new JLabel("Encoding Name: ");
       
@@ -391,20 +395,33 @@ public class configAuto {
       c.weightx = 0.0;
       content.add(row5, c);
       
-      // row 6
-      JPanel row6 = new JPanel();
-      row6.setLayout(new BoxLayout(row6, BoxLayout.X_AXIS));
-      row6.add(comskipIni_label);
-      row6.add(Box.createRigidArea(space_5));
-      row6.add(comskipIni);
+      // comskip.ini override      
+      JPanel row_comskip = new JPanel();
+      row_comskip.setLayout(new BoxLayout(row_comskip, BoxLayout.X_AXIS));
+      row_comskip.add(comskipIni_label);
+      row_comskip.add(Box.createRigidArea(space_5));
+      row_comskip.add(comskipIni);
       
-      // comskip.ini override
       gy++;
       c.gridy = gy;
       c.fill = GridBagConstraints.HORIZONTAL;
       c.anchor = GridBagConstraints.CENTER;
       c.weightx = 0.0;
-      content.add(row6, c); 
+      content.add(row_comskip, c); 
+      
+      // row_channelFilter
+      JPanel row_channelFilter = new JPanel();
+      row_channelFilter.setLayout(new BoxLayout(row_channelFilter, BoxLayout.X_AXIS));
+      row_channelFilter.add(channelFilter_label);
+      row_channelFilter.add(Box.createRigidArea(space_5));
+      row_channelFilter.add(channelFilter);
+      
+      gy++;
+      c.gridy = gy;
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.anchor = GridBagConstraints.CENTER;
+      c.weightx = 0.0;
+      content.add(row_channelFilter, c); 
       
       // Filter out TiVo Suggestions
       gy++;
@@ -461,20 +478,20 @@ public class configAuto {
       c.weightx = 0.0;
       content.add(global_settings, c);
       
-      // row7
-      JPanel row7 = new JPanel();
-      row7.setLayout(new BoxLayout(row7, BoxLayout.X_AXIS));
-      row7.add(dry_run);
-      row7.add(Box.createRigidArea(space_10));
-      row7.add(check_interval_label);
-      row7.add(Box.createRigidArea(space_10));
-      row7.add(check_interval);
+      // row_dry_run
+      JPanel row_dry_run = new JPanel();
+      row_dry_run.setLayout(new BoxLayout(row_dry_run, BoxLayout.X_AXIS));
+      row_dry_run.add(dry_run);
+      row_dry_run.add(Box.createRigidArea(space_10));
+      row_dry_run.add(check_interval_label);
+      row_dry_run.add(Box.createRigidArea(space_10));
+      row_dry_run.add(check_interval);
             
       gy++;
       c.gridy = gy;
       c.fill = GridBagConstraints.HORIZONTAL;
       c.weightx = 0.0;
-      content.add(row7, c);
+      content.add(row_dry_run, c);
       
       // date filter row
       GAP = 0;
@@ -550,6 +567,7 @@ public class configAuto {
       dry_run.setToolTipText(getToolTip("dry_run"));
       title.setToolTipText(getToolTip("title"));
       comskipIni.setToolTipText(getToolTip("comskipIni"));
+      channelFilter.setToolTipText(getToolTip("channelFilter"));
       check_interval.setToolTipText(getToolTip("check_interval"));
       add.setToolTipText(getToolTip("add"));
       update.setToolTipText(getToolTip("update"));
@@ -614,6 +632,12 @@ public class configAuto {
          text += "If you wish to use a specific comskip.ini file to use with <b>comcut</b> for<br>";
          text += "this auto transfer then specify the full path to the file here.<br>";
          text += "This will override the comskip.ini file specified in main kmttg configuration.";
+      }
+      else if (component.equals("channelFilter")) {
+         text =  "<b>channel filter</b><br>";
+         text += "If you wish to filter out by channel number or name for this auto transfer<br>";
+         text += "then enter either channel number or name in this field. Leave it empty if you<br>";
+         text += "do not want to filter by channel number or name.";
       }
       else if (component.equals("check_interval")) {
          text =  "<b>Check Tivos Interval (mins)</b><br>";
@@ -1157,6 +1181,8 @@ public class configAuto {
                ofp.write("useProgramId_unique " + entry.useProgramId_unique + "\n");
                if (entry.encode_name != null && entry.encode_name.length() > 0)
                   ofp.write("encode_name " + entry.encode_name + "\n");
+               if (entry.channelFilter != null && entry.channelFilter.length() > 0)
+                  ofp.write("channelFilter " + entry.channelFilter + "\n");
                if (file.isFile(entry.comskipIni))
                   ofp.write("comskipIni " + entry.comskipIni + "\n");
                else
@@ -1203,6 +1229,11 @@ public class configAuto {
       encoding_name.setSelectedItem(entry.encode_name);
       
       comskipIni.setText(entry.comskipIni);
+      
+      if (entry.channelFilter != null)
+         channelFilter.setText(entry.channelFilter);
+      else
+         channelFilter.setText("");
       
       type.setSelectedItem(entry.type);
       
@@ -1299,6 +1330,10 @@ public class configAuto {
          }
       }
       entry.comskipIni = ini;
+      
+      String cFilter = (String)string.removeLeadingTrailingSpaces(channelFilter.getText());
+      if (cFilter.length() > 0)
+         entry.channelFilter = cFilter;
       
       entry.type = ktype;
       

@@ -313,7 +313,8 @@ public class auto {
                filterByDate(entry)                 ||
                filterTivoSuggestions(entry, auto)  ||
                filterKUID(entry)                   ||
-               filterProgramId(entry);
+               filterProgramId(entry)              ||
+               filterChannel(entry, auto);
    }
    
    // Return true if should be filtered out due to TiVo name, false otherwise
@@ -397,6 +398,27 @@ public class auto {
          }
          if (filter) {
             log.print("NOTE: no match due to no/fake ProgramId Filter - " + entry.get("title"));
+         }
+      }
+      return filter;
+   }
+   
+   // Return true if should be filtered out because auto.channelFilter set and entry does not match it
+   private static Boolean filterChannel(Hashtable<String,String>entry, autoEntry auto) {
+      Boolean filter = false; 
+      if (auto.channelFilter != null) {
+         filter = true;
+         if (entry.containsKey("channelNum")) {
+            if (entry.get("channelNum").equals(auto.channelFilter))
+               filter = false;
+         }
+         if (entry.containsKey("channel")) {
+            if (entry.get("channel").equals(auto.channelFilter))
+               filter = false;
+         }
+         
+         if (filter) {
+            log.print("NOTE: Filtered out due to channel filter = '" + auto.channelFilter + "' - " + entry.get("title"));
          }
       }
       return filter;

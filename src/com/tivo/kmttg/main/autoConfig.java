@@ -145,6 +145,9 @@ public class autoConfig {
                   entry.suggestionsFilter = Integer.parseInt(value);
                if (name.matches("useProgramId_unique"))
                   entry.useProgramId_unique = Integer.parseInt(value);
+               if (name.matches("channelFilter")) {
+                  entry.channelFilter = value;
+               }
                if (name.matches("encode_name")) {
                   // encode_name value can have spaces
                   Pattern p = Pattern.compile("(\\S+)\\s+(.+)");
