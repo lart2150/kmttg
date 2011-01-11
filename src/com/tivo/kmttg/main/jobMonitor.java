@@ -138,12 +138,16 @@ public class jobMonitor {
       // Also count number of cpu intensive jobs currently running
       // Also count number of COM VideoRedo jobs currently running
       // Also count number of GUI VideoRedo jobs currently running
+      // Also count total number of download jobs currently running
       int cpuActiveJobs = 0;
       int VideoRedoCOMJobs = 0;
       int VideoRedoGUIJobs = 0;
+      int totalDownloads = 0;
       Hashtable<String,Integer> tivoDownload = new Hashtable<String,Integer>();
       for (int i=0; i<running.size(); i++) {
          job = running.get(i);
+         if (isDownloadJob(job))
+            totalDownloads++;
          if ( oneJobAtATime(job.type) ) {
             if ( ! tivoDownload.containsKey(job.tivoName) ) {
                tivoDownload.put(job.tivoName, 0);
@@ -189,6 +193,10 @@ public class jobMonitor {
             }
          }
          
+         // If single_download option is set only allow 1 download at a time
+         if (config.single_download == 1 && totalDownloads >= 1)
+            continue;
+      
          // Don't run more than 'MaxJobs' active jobs at a time
          // NOTE: VRD GUI job not considered CPU active
          if ( ! isDownloadJob(job) &&

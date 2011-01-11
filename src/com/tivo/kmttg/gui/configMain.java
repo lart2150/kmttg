@@ -73,6 +73,7 @@ public class configMain {
    private static JCheckBox jobMonitorFullPaths = null;
    private static JCheckBox autotune_enabled = null;
    private static JCheckBox combine_download_decrypt = null;
+   private static JCheckBox single_download = null;
    private static JTextField tivo_name = null;
    private static JTextField tivo_ip = null;
    private static JTextField files_path = null;
@@ -565,6 +566,12 @@ public class configMain {
       else
          combine_download_decrypt.setSelected(false);
       
+      // single_download
+      if (config.single_download == 1)
+         single_download.setSelected(true);
+      else
+         single_download.setSelected(false);
+      
       // toolTips
       if (config.toolTips == 1)
          toolTips.setSelected(true);
@@ -946,6 +953,12 @@ public class configMain {
          config.combine_download_decrypt = 1;
       else
          config.combine_download_decrypt = 0;
+      
+      // single_download
+      if (single_download.isSelected())
+         config.single_download = 1;
+      else
+         config.single_download = 0;
       
       // toolTips
       if (toolTips.isSelected())
@@ -1510,6 +1523,7 @@ public class configMain {
       OverwriteFiles = new javax.swing.JCheckBox();
       java_downloads = new javax.swing.JCheckBox();
       combine_download_decrypt = new javax.swing.JCheckBox();
+      single_download = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
       JLabel FontSize_label = new javax.swing.JLabel();
       JLabel file_naming_label = new javax.swing.JLabel();
@@ -1613,6 +1627,7 @@ public class configMain {
       OverwriteFiles.setText("Overwrite existing files");
       java_downloads.setText("Use Java for downloads instead of curl");
       combine_download_decrypt.setText("Combine download and tivodecode decrypt");
+      single_download.setText("Allow only 1 download at a time");
       MAK_label.setText("MAK"); 
       FontSize_label.setText("GUI Font Size");
       file_naming_label.setText("File Naming"); 
@@ -2543,6 +2558,11 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(combine_download_decrypt, c);
       
+      // single_download
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(single_download, c);
+      
       // Visual Panel
       JPanel visual_panel = new JPanel(new GridBagLayout());       
       
@@ -2788,6 +2808,7 @@ public class configMain {
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
       java_downloads.setToolTipText(getToolTip("java_downloads"));
       combine_download_decrypt.setToolTipText(getToolTip("combine_download_decrypt"));
+      single_download.setToolTipText(getToolTip("single_download"));
       files_path.setToolTipText(getToolTip("files_path"));
       MAK.setToolTipText(getToolTip("MAK"));
       FontSize.setToolTipText(getToolTip("FontSize"));
@@ -3062,6 +3083,13 @@ public class configMain {
          text += "to apply - if you do not enable <b>decrypt</b> task then still only download to TiVo file is performed.<br>";
          text += "NOTE: This option only applies if using <b>tivodecode</b> to decrypt, not for<br>";
          text += "VideoRedo qsfix decrypt which must be performed separately from download.";
+      }
+      else if (component.equals("single_download")) {
+         text =  "<b>Allow only 1 download at a time</b><br>";
+         text += "If this option is enabled then kmttg will only download 1 program at a time no matter how many<br>";
+         text += "TiVos you have and how many download tasks are queued up. The usual restriction is only 1 download<br>";
+         text += "at a time per TiVo, which means you can still have simultaneous downloads for different TiVos. This<br>";
+         text += "option restricts that further to only 1 at a time for all TiVos.";
       }
       else if (component.equals("files_path")) {
          text =  "<b>FILES Default Path</b><br>";

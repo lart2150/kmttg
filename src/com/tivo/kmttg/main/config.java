@@ -68,6 +68,7 @@ public class config {
    public static int HideProtectedFiles = 0;   
    public static int java_downloads = 0;        // Use java instead of curl to download
    public static int combine_download_decrypt = 0; // Combine download and decrypt if possible
+   public static int single_download = 0;  // Allow only one download at a time if enabled
 
    public static String comskipIni = "";
    public static String configIni = "";
@@ -650,6 +651,9 @@ public class config {
             if (key.equals("combine_download_decrypt")) {
                combine_download_decrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("single_download")) {
+               single_download = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("outputDir")) {
                outputDir = line;
             }
@@ -885,6 +889,8 @@ public class config {
          ofp.write("<java_downloads>\n" + java_downloads + "\n\n");
          
          ofp.write("<combine_download_decrypt>\n" + combine_download_decrypt + "\n\n");
+         
+         ofp.write("<single_download>\n" + single_download + "\n\n");
          
          ofp.write("<tivoFileNameFormat>\n" + tivoFileNameFormat + "\n\n");
          
