@@ -1334,6 +1334,8 @@ public class configAuto {
       String cFilter = (String)string.removeLeadingTrailingSpaces(channelFilter.getText());
       if (cFilter.length() > 0)
          entry.channelFilter = cFilter;
+      else
+         entry.channelFilter = null;
       
       entry.type = ktype;
       
