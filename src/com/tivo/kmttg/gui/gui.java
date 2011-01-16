@@ -1647,6 +1647,8 @@ public class gui {
          text =  "<b>Add...</b><br>";
          text += "Brings up a file browser for selecting TiVo or mpeg2 video files to process.<br>";
          text += "Selected files are added to files table below.<br>";
+         text += "NOTE: For Mac OS you can get to other disk volumes by browsing to<br>";
+         text += "<b>/Volumes</b> with the browser.";
       }
       else if (component.equals("remove")) {
          text =  "<b>Remove</b><br>";
