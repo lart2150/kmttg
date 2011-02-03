@@ -685,7 +685,7 @@ public class jobMonitor {
             mpegFile_cut = string.replaceSuffix(mpegFile, "_cut.mpg");
          } else {
             // If mpegCutDir different than mpegDir then no need for _cut
-            mpegFile_cut = mpegFile;
+            mpegFile_cut = string.replaceSuffix(mpegFile, ".mpg");;
          }
          mpegFile_cut = mpegCutDir + s + string.basename(mpegFile_cut);
          
@@ -719,7 +719,7 @@ public class jobMonitor {
             mpegFile_cut = string.replaceSuffix(startFile, "_cut.mpg");
          } else {
             // If mpegCutDir different than mpegDir then no need for _cut
-            mpegFile_cut = mpegFile;
+            mpegFile_cut = string.replaceSuffix(startFile, ".mpg");
          }
          mpegFile_cut = mpegCutDir + s + mpegFile_cut;
          
