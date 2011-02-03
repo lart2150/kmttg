@@ -3,6 +3,8 @@ package com.tivo.kmttg.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -68,6 +70,15 @@ public class nplTable {
          new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                MouseClicked(e);
+            }
+         }
+      );
+      
+      // Add keyboard listener (for delete key)
+      NowPlaying.addKeyListener(
+         new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+               KeyPressed(e);
             }
          }
       );
@@ -365,6 +376,41 @@ public class nplTable {
             folderEntryNum = row;
             RefreshNowPlaying(s.folderData);
          }
+      }
+   }
+   
+   // Handle delete keyboard presses
+   private void KeyPressed(KeyEvent e) {
+      int keyCode = e.getKeyCode();
+      if (keyCode == KeyEvent.VK_DELETE){
+         // Delete key has special action
+         int[] selected = GetSelectedRows();
+         if (selected != null && selected.length > 0) {
+            int row;
+            for (int i=0; i<selected.length; i++) {
+               row = selected[i];
+               sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
+               if (s.folder) {
+                  // Delete all shows in folder
+                  log.warn("FUTURE USE: Delete row=" + row + " folder=" + s.folderName);
+                  for (int j=0; j<s.folderData.size(); j++) {
+                     Hashtable<String,String> entry = s.folderData.get(j);
+                     if (entry.containsKey("url")) {
+                        log.warn("Delete url=" + entry.get("url"));
+                     }
+                  }
+               } else {
+                  // Delete individual show
+                  if (s.data.containsKey("url")) {
+                     log.warn("FUTURE USE: Delete row=" +row + " url=" + s.data.get("url"));
+                  }
+               }
+               // TODO: Code to remove row from table goes here
+            }
+         }
+      } else {
+         // Pass along keyboard action
+         e.consume();
       }
    }
    
