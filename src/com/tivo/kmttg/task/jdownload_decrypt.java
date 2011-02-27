@@ -95,6 +95,7 @@ public class jdownload_decrypt implements Serializable {
       c.add(config.tivodecode);
       c.add("--mak");
       c.add(config.MAK);
+      c.add("--no-verify");
       c.add("--out");
       c.add(job.mpegFile);
       c.add("-");

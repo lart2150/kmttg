@@ -112,7 +112,7 @@ public class download_decrypt implements Serializable {
          command += "--retry 3 ";
       command += "--anyauth --globoff --user tivo:" + config.MAK + " ";
       command += "--insecure --cookie-jar \"" + cookieFile + "\" --url \"" + url + "\" ";
-      command += "| " + "\"" + config.tivodecode + "\" --mak " + config.MAK + " --out ";
+      command += "| " + "\"" + config.tivodecode + "\" --mak " + config.MAK + " --no-verify --out ";
       command += "\"" + job.mpegFile + "\" -";
       
       // Make temporary script containing command

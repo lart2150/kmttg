@@ -71,6 +71,7 @@ public class decrypt implements Serializable {
       command.add(config.tivodecode);
       command.add("--mak");
       command.add(config.MAK);
+      command.add("--no-verify");
       command.add("--out");
       command.add(job.mpegFile);
       command.add(job.tivoFile);
