@@ -241,6 +241,23 @@ public class encodeConfig {
       }
       return command;
    }
+   
+   // Splits the full encoding command into an array of the individual
+   // arguments. Double-quoted strings are considered a single argument.
+   public static String[] splitCommandArgs(String command) {
+      ArrayList<String> args = new ArrayList<String>();
+
+      Pattern regexp = Pattern.compile("([^\\s\"']+)|\"([^\"]*)\"");
+      Matcher matcher = regexp.matcher(command);
+      while ( matcher.find() ) {
+         if ( matcher.group(1) != null) {
+            args.add(matcher.group(1));
+         } else if ( matcher.group(2) != null ) {
+            args.add(matcher.group(2));
+         }
+      }
+      return args.toArray(new String[args.size()]);
+   }
 
    // Return encoder command arguments
    public static Stack<String> getCommandArgs(String encodeName, String inputFile, String outputFile, String srtFile) {
@@ -248,7 +265,7 @@ public class encodeConfig {
       Stack<String> args = new Stack<String>();
       if ( ! config.ENCODE.isEmpty() ) {
          String arg;
-         String[] l = config.ENCODE.get(encodeName).get("command").split("\\s+");
+         String[] l = splitCommandArgs(config.ENCODE.get(encodeName).get("command"));
          for (int i=1; i<l.length; ++i) {
             arg = l[i];
             arg = arg.replaceAll("\"", "");
