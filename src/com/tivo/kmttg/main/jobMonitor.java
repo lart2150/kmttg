@@ -854,6 +854,10 @@ public class jobMonitor {
                job.type = "jdownload_decrypt";
                job.name = "java";
                job.mpegFile = mpegFile;
+               if (twpdelete && entry != null && entry.containsKey("url")) {
+                  job.twpdelete = true;
+                  job.url       = entry.get("url");
+               }
             } else {
                // Standalone java download
                job.type      = "javadownload";
@@ -866,6 +870,10 @@ public class jobMonitor {
                job.type = "download_decrypt";
                job.name = "curl";
                job.mpegFile = mpegFile;
+               if (twpdelete && entry != null && entry.containsKey("url")) {
+                  job.twpdelete = true;
+                  job.url       = entry.get("url");
+               }
             } else {
                // Standalone curl download
                job.type      = "download";
