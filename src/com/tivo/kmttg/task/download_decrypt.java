@@ -278,6 +278,11 @@ public class download_decrypt implements Serializable {
             if (file.isFile(config.autoIni))
                auto.AddHistoryEntry(job);
          }
+         
+         // TivoWebPlus call to delete show on TiVo if configured
+         if (job.twpdelete) {
+            file.TivoWebPlusDelete(job.url);
+         }
       }
       cleanup();
       
