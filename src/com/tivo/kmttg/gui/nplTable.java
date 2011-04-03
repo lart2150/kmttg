@@ -33,6 +33,7 @@ import javax.swing.table.*;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.debug;
+import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
 public class nplTable {
@@ -75,13 +76,15 @@ public class nplTable {
       );
       
       // Add keyboard listener (for delete key)
-      NowPlaying.addKeyListener(
-         new KeyAdapter() {
-            public void keyReleased(KeyEvent e) {
-               KeyPressed(e);
+      if (config.TivoWebPlusDelete == 1) {
+         NowPlaying.addKeyListener(
+            new KeyAdapter() {
+               public void keyReleased(KeyEvent e) {
+                  KeyPressed(e);
+               }
             }
-         }
-      );
+         );
+      }
       
       // Define custom column sorting routines
       Comparator<Object> sortableComparator = new Comparator<Object>() {
@@ -384,28 +387,36 @@ public class nplTable {
       int keyCode = e.getKeyCode();
       if (keyCode == KeyEvent.VK_DELETE){
          // Delete key has special action
+         Boolean success = true;
          int[] selected = GetSelectedRows();
+         Stack<String> urlsToDelete = new Stack<String>();
          if (selected != null && selected.length > 0) {
-            int row;
-            for (int i=0; i<selected.length; i++) {
-               row = selected[i];
+            for (int i=0; i<selected.length; ++i) {
+               int row = selected[i];
                sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
                if (s.folder) {
                   // Delete all shows in folder
-                  log.warn("FUTURE USE: Delete row=" + row + " folder=" + s.folderName);
                   for (int j=0; j<s.folderData.size(); j++) {
                      Hashtable<String,String> entry = s.folderData.get(j);
                      if (entry.containsKey("url")) {
                         log.warn("Delete url=" + entry.get("url"));
+                        urlsToDelete.add(entry.get("url"));
                      }
                   }
                } else {
                   // Delete individual show
                   if (s.data.containsKey("url")) {
-                     log.warn("FUTURE USE: Delete row=" +row + " url=" + s.data.get("url"));
+                     urlsToDelete.add(s.data.get("url"));
                   }
                }
-               // TODO: Code to remove row from table goes here
+            }
+            if (success && urlsToDelete.size() > 0) {
+               // Remove items from entries stack
+               // NOTE: Always revert to top view (not inside a folder)
+               RemoveUrls(urlsToDelete);
+               folderize(entries);
+               inFolder = false;
+               RefreshNowPlaying(entries);
             }
          }
       } else {
@@ -902,12 +913,34 @@ public class nplTable {
       RemoveRow(NowPlaying, row);
 
    }
+   
    public void RemoveRow(JXTable table, int row) {
       debug.print("table=" + table + " row=" + row);
       DefaultTableModel dm = (DefaultTableModel)table.getModel();
       dm.removeRow(row);
    }
    
+   public void RemoveRows(JXTable table, Stack<Integer> rows) {
+      debug.print("table=" + table + " rows=" + rows);
+      DefaultTableModel dm = (DefaultTableModel)table.getModel();
+      // Must remove by highest index first
+      int row, index;
+      while(rows.size() > 0) {
+         row = -1;
+         index = -1;
+         for (int i=0; i<rows.size(); ++i) {
+            if(rows.get(i) > row) {
+               row = rows.get(i);
+               index = i;
+            }
+         }
+         if (index > -1) {
+            dm.removeRow(row);
+            rows.remove(index);
+         }
+      }
+   }
+      
    public void SetNowPlayingHeaders(String[] headers) {
       debug.print("headers=" + headers);
       for (int i=0; i<headers.length; ++i) {
@@ -965,6 +998,34 @@ public class nplTable {
          for (int c=0; c<table.getColumnCount(); c++) {
              packColumn(table, c, 2);
          }
+      }
+   }
+   
+   @SuppressWarnings("unchecked")
+   private void RemoveUrls(Stack<String> urls) {
+      // First update table
+      Stack<Hashtable<String,String>> copy = (Stack<Hashtable<String, String>>) entries.clone();
+      entries.clear();
+      Boolean include;
+      for (int i=0; i<copy.size(); ++i) {
+         include = true;
+         String url;
+         if (copy.get(i).containsKey("url")) {
+            for (int j=0; j<urls.size(); ++j) {
+               url = urls.get(j);
+               if (copy.get(i).get("url").equals(url)) {
+                  include = false;
+               }
+            }
+         }
+         if (include) {
+            entries.add(copy.get(i));
+         }
+      }
+      
+      // TWP delete calls
+      for (int i=0; i<urls.size(); ++i) {
+         file.TivoWebPlusDelete(urls.get(i));
       }
    }
    
