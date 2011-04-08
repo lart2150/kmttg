@@ -57,6 +57,10 @@ while( VideoRedo.IsScanInProgress() )
    percent = "Progress: " & Int(VideoReDo.GetCursorTimeMsec()*100/fileDuration) & "%"
    wscript.echo(percent)
    if not fso.FileExists(lockFile) then
+      VideoReDo.AbortOutput()
+		while( VideoReDo.IsOutputInProgress() )
+			wscript.sleep 500
+		wend
       VideoReDo.Close()
       wscript.quit 5
    end if
