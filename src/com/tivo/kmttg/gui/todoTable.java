@@ -241,6 +241,7 @@ public class todoTable {
              AddRow(data.getJSONObject(i));
           }
           tivo_data.put(tivoName, data);
+          packColumns(TABLE,2);
        } catch (JSONException e) {
           log.error("todoTable AddRows - " + e.getMessage());
        }

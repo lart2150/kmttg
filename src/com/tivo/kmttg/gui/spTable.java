@@ -243,6 +243,7 @@ public class spTable {
              //System.out.println(data.getJSONObject(i));
           }
           tivo_data.put(tivoName, data);
+          packColumns(TABLE,2);
        } catch (JSONException e) {
           log.error("spTable AddRows - " + e.getMessage());
        }
