@@ -23,6 +23,7 @@ import javax.swing.JTabbedPane;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.util.debug;
 
 public class remotegui {
    private JDialog dialog = null;
@@ -81,8 +82,10 @@ public class remotegui {
             }
          }
       });
+      tivo_todo.setToolTipText(getToolTip("tivo_todo"));
 
       JButton refresh_todo = new JButton("Refresh");
+      refresh_todo.setToolTipText(getToolTip("refresh_todo"));
       refresh_todo.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Refresh to do list
@@ -145,8 +148,10 @@ public class remotegui {
             }
          }
       });
+      tivo_sp.setToolTipText(getToolTip("tivo_sp"));
 
       JButton refresh_sp = new JButton("Refresh");
+      refresh_sp.setToolTipText(getToolTip("refresh_sp"));
       refresh_sp.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Refresh to do list
@@ -209,8 +214,10 @@ public class remotegui {
             }
          }
       });
+      tivo_rnpl.setToolTipText(getToolTip("tivo_rnpl"));
 
       JButton refresh_rnpl = new JButton("Refresh");
+      refresh_rnpl.setToolTipText(getToolTip("refresh_rnpl"));
       refresh_rnpl.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Refresh to do list
@@ -233,6 +240,7 @@ public class remotegui {
       
       tab_rnpl = new rnplTable(dialog);
       tab_rnpl.TABLE.setPreferredScrollableViewportSize(tab_rnpl.TABLE.getPreferredSize());
+      tab_rnpl.TABLE.setToolTipText(getToolTip("tab_rnpl"));
       JScrollPane tabScroll_rnpl = new JScrollPane(tab_rnpl.scroll);
       gy++;
       c.gridy = gy;
@@ -354,6 +362,51 @@ public class remotegui {
          tivo_sp.addItem(tivo_stack.get(i));
          tivo_rnpl.addItem(tivo_stack.get(i));
       }
+   }
+   
+   public static String getToolTip(String component) {
+      debug.print("component=" + component);
+      String text = "";
+      if (component.equals("tivo_todo")) {
+         text = "Select TiVo for which to retrieve To Do list.<br>";
+         text += "<b>NOTE: This only works for Premiere models</b>.";
+      }
+      else if (component.equals("refresh_todo")){
+         text = "<b>Refresh</b><br>";
+         text += "Refresh To Do list of selected TiVo.<br>";
+         text += "<b>NOTE: This only works for Premiere models</b>.";
+      }
+      else if (component.equals("tivo_sp")) {
+         text = "Select TiVo for which to retrieve Season Passes list.<br>";
+         text += "<b>NOTE: This only works for Premiere models</b>.";
+      }
+      else if (component.equals("refresh_sp")){
+         text = "<b>Refresh</b><br>";
+         text += "Refresh Season Pass list of selected TiVo.<br>";
+         text += "<b>NOTE: This only works for Premiere models</b>.";
+      }
+      else if (component.equals("tivo_rnpl")) {
+         text = "Select TiVo for which to retrieve My Shows list.<br>";
+         text += "<b>NOTE: This only works for Premiere models</b>.<br>";
+         text += "NOTE: You can select items in table to PLAY or DELETE<br>";
+         text += "using <b>Space bar</b> to play, <b>Delete</b> button to delete.";
+      }
+      else if (component.equals("refresh_rnpl")){
+         text = "<b>Refresh</b><br>";
+         text += "Refresh My Shows list of selected TiVo.<br>";
+         text += "<b>NOTE: This only works for Premiere models</b>.<br>";
+         text += "NOTE: You can select items in table to PLAY or DELETE<br>";
+         text += "using <b>Space bar</b> to play, <b>Delete</b> button to delete.";
+      }
+      else if (component.equals("tab_rnpl")) {
+         text = "NOTE: You can select items in table to PLAY or DELETE<br>";
+         text += "using <b>Space bar</b> to play, <b>Delete</b> button to delete.";
+      }
+      
+      if (text.length() > 0) {
+         text = "<html>" + text + "</html>";
+      }
+      return text;
    }
 
 }
