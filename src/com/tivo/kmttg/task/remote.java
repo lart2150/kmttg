@@ -102,17 +102,14 @@ public class remote implements Serializable {
             if (job.remote_todo & job.todo != null) {
                // ToDo list job => populate ToDo table
                job.todo.AddRows(job.tivoName, data);
-               job.todo.packColumns(job.todo.TABLE, 2);
             }
             if (job.remote_sp & job.sp != null) {
                // SP job => populate SP table
                job.sp.AddRows(job.tivoName, data);
-               job.sp.packColumns(job.sp.TABLE, 2);
             }
-            if (job.remote_rnpl & job.rnpl != null) {
-               // My Shows job => populate rnpl table
-               job.rnpl.AddRows(job.tivoName, data);
-               job.rnpl.packColumns(job.rnpl.TABLE, 2);
+            if (job.remote_rnpl) {
+               // My Shows job => copy data
+               config.gui.remote_gui.setNPLData(job.tivoName, data);
             }
             log.warn("remote job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " TiVo=" + job.tivoName);
