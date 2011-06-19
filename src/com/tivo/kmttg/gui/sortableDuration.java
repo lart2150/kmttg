@@ -49,6 +49,11 @@ public class sortableDuration {
       display = millisecsToHMS(sortable, true);
    }
    
+   sortableDuration(long value, Boolean showSecs) {
+      sortable = value;
+      display = millisecsToHMS(sortable, showSecs);
+   }
+   
    public static String millisecsToHMS(long duration, Boolean showSecs) {
       duration /= 1000;
       long hours = duration/3600;

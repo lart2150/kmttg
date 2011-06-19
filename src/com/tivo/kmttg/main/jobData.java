@@ -2,6 +2,9 @@ package com.tivo.kmttg.main;
 
 import java.io.Serializable;
 
+import com.tivo.kmttg.gui.rnplTable;
+import com.tivo.kmttg.gui.spTable;
+import com.tivo.kmttg.gui.todoTable;
 import com.tivo.kmttg.task.*;
 import com.tivo.kmttg.util.backgroundProcess;
 
@@ -25,6 +28,7 @@ public class jobData implements Serializable {
    public javametadata process_javametadata = null;
    public metadataTivo process_metadataTivo = null;
    public autotune     process_autotune = null;
+   public remote       process_remote = null;
    public download     process_download = null;
    public download_decrypt process_download_decrypt = null;
    public javadownload process_javadownload = null;
@@ -97,6 +101,16 @@ public class jobData implements Serializable {
    public String autotune_chan1 = null;
    public String autotune_chan2 = null;
    
+   // remote jobs & GUI related
+   public Boolean remote_todo = false;
+   public todoTable todo = null;
+   
+   public Boolean remote_sp = false;
+   public spTable sp = null;
+   
+   public Boolean remote_rnpl = false;
+   public rnplTable rnpl = null;
+   
    // NOTE: This used for job insertion purposes
    // ** JOB ORDER IS VERY IMPORTANT **
    public static String[] allTaskNames() {
@@ -107,6 +121,7 @@ public class jobData implements Serializable {
          "javametadata",
          "metadataTivo",
          "autotune",
+         "remote",
          "download",
          "download_decrypt",
          "javadownload",
@@ -150,6 +165,9 @@ public class jobData implements Serializable {
       }      
       else if (type.matches("autotune")) {
          return process_autotune.check();
+      }      
+      else if (type.matches("remote")) {
+         return process_remote.check();
       }      
       else if (type.matches("download")) {
          return process_download.check();
@@ -226,6 +244,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("autotune")) {
          return process_autotune.getProcess();
+      }
+      else if (type.equals("remote")) {
+         return process_remote.getProcess();
       }
       else if (type.equals("download")) {
          return process_download.getProcess();
@@ -304,6 +325,9 @@ public class jobData implements Serializable {
       else if (type.equals("autotune")) {
          file = tivoName;
       }
+      else if (type.equals("remote")) {
+         file = tivoName;
+      }
       else if (type.equals("download")) {
          file = url;
       }
@@ -379,6 +403,9 @@ public class jobData implements Serializable {
          file = metaFile;
       }
       else if (type.equals("autotune")) {
+         file = tivoName;
+      }
+      else if (type.equals("remote")) {
          file = tivoName;
       }
       else if (type.equals("download")) {
@@ -465,6 +492,11 @@ public class jobData implements Serializable {
       
       else if (job.type.equals("autotune")) {  
          autotune proc = new autotune(job);
+         success = proc.launchJob();
+      }
+      
+      else if (job.type.equals("remote")) {  
+         remote proc = new remote(job);
          success = proc.launchJob();
       }
       
@@ -590,6 +622,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("autotune")) {
          process_autotune.kill();
+      }
+      else if (type.equals("remote")) {
+         process_remote.kill();
       }
       else if (type.equals("download")) {
          process_download.kill();

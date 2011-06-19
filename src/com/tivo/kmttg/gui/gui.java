@@ -65,6 +65,7 @@ public class gui {
    private JMenuItem resetServerMenuItem = null;
    private JMenuItem saveJobsMenuItem = null;
    private JMenuItem loadJobsMenuItem = null;
+   private JMenuItem remoteMenuItem = null;
    
    private JComboBox encoding = null;
    private JLabel encoding_label = null;
@@ -88,6 +89,8 @@ public class gui {
    
    private Hashtable<String,tivoTab> tivoTabs = new Hashtable<String,tivoTab>();
    public static Hashtable<String,Icon> Images;
+   
+   public remotegui remote_gui = null;
    
    public tivoTab getTab(String tabName) {
       return tivoTabs.get(tabName);
@@ -437,6 +440,7 @@ public class gui {
          fileMenu.add(getClearMessagesMenuItem());
          fileMenu.add(getResetServerMenuItem());
          fileMenu.add(getJobMenu());
+         fileMenu.add(getRemoteMenuItem());
          fileMenu.add(getExitMenuItem());
       }
       return fileMenu;
@@ -930,6 +934,23 @@ public class gui {
       }
       return backgroundJobDisableMenuItem;
    }
+   
+   private JMenuItem getRemoteMenuItem() {
+      debug.print("");
+      if (remoteMenuItem == null) {
+         remoteMenuItem = new JMenuItem();
+         remoteMenuItem.setText("Remote Control...");
+         remoteMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               if (remote_gui == null)
+                  remote_gui = new remotegui(config.gui.getJFrame());
+               else
+                  remote_gui.display();
+            }
+         });
+      }
+      return remoteMenuItem;
+   }
 
    // This will decide which options are enabled based on current config settings
    // Options are disabled when associated config entry is not setup
@@ -1154,6 +1175,11 @@ public class gui {
          for (int j=0; j<names.length; j++) {
             tivoTabAdd(names[j]);
          }
+         
+         // remote gui
+         if (remote_gui != null)
+            remote_gui.setTivoNames();
+
       } else {
          // Remove all tivo tabs
          while(! tabbed_panel.getTitleAt(0).equals("FILES")) {
