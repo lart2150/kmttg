@@ -252,12 +252,9 @@ public class Remote {
             req = RpcRequest("uiNavigate", false, json);
          }
          else if (type.equals("delete")) {
+            // Expects "recordingId" of type JSONArray in json
             json.put("state", "deleted");
-            JSONArray a = new JSONArray();
-            a.put(json.get("id"));
             json.put("bodyId", "-");
-            json.put("recordingId", a);
-            json.remove("id");
             req = RpcRequest("recordingUpdate", false, json);
          }
          else if (type.equals("MyShows")) {
