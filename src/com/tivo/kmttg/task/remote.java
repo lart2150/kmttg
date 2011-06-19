@@ -109,7 +109,7 @@ public class remote implements Serializable {
             }
             if (job.remote_rnpl) {
                // My Shows job => copy data
-               config.gui.remote_gui.setNPLData(job.tivoName, data);
+               config.gui.getTab(job.tivoName).getTable().setNPLData(job.tivoName, data);
             }
             log.warn("remote job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " TiVo=" + job.tivoName);
