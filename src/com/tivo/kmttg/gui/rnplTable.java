@@ -249,6 +249,7 @@ public class rnplTable {
              //System.out.println(data.getJSONObject(i));
           }
           tivo_data.put(tivoName, data);
+          packColumns(TABLE,2);
        } catch (JSONException e) {
           log.error("rnplTable AddRows - " + e.getMessage());
        }
@@ -329,6 +330,7 @@ public class rnplTable {
           int[] selected = GetSelectedRows();
           if (selected != null && selected.length > 0) {
              int row = selected[0];
+             String recordingId;
              sortableDate s = (sortableDate)TABLE.getValueAt(row,getColumnIndex("DATE"));
              if (s.json.has("recordingId")) {
                 String tivoName = config.gui.remote_gui.getTivoName("rnpl");
@@ -336,21 +338,36 @@ public class rnplTable {
                 if (r.success) {
                    JSONObject json = new JSONObject();
                    try {
-                      json.put("id", s.json.getString("recordingId"));
+                      recordingId = s.json.getString("recordingId");
+                      json.put("id", recordingId);
                       String title = "";
                       if (s.json.has("title"))
                          title += s.json.getString("title");
                       if (s.json.has("subtitle"))
                          title += s.json.getString("subtitle");
                       if (title.length() == 0)
-                         title = s.json.getString("recordingId");
+                         title = recordingId;
                       if (keyCode == KeyEvent.VK_SPACE) {
                          log.warn("Remote control playing show on '" + tivoName + "': " + title);
                          r.Key("playback", json);
                       }
                       if (keyCode == KeyEvent.VK_DELETE) {
                          log.warn("Remote control deleting show on '" + tivoName + "': " + title);
-                         r.Key("delete", json);
+                         JSONObject response = r.Key("delete", json);
+                         if (response != null &&
+                               response.has("type") &&
+                               response.getString("type").equals("success")) {
+                            // Remove table entry
+                            DefaultTableModel dm = (DefaultTableModel)TABLE.getModel();
+                            dm.removeRow(row);
+                            // Remove entry from cache
+                            for (int i=0; i<tivo_data.get(tivoName).length(); ++i) {
+                               json = tivo_data.get(tivoName).getJSONObject(i).getJSONArray("recording").getJSONObject(0);
+                               //log.warn(json.getString("recordingId") + "equals" + recordingId);
+                               if (json.getString("recordingId").equals(recordingId))
+                                  tivo_data.get(tivoName).remove(i);
+                            }
+                         }
                       }
                    } catch (JSONException e1) {
                       log.error("rnplTable KeyPress - " + e1.getMessage());
