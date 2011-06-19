@@ -475,11 +475,10 @@ public class nplTable {
                      }
                   }
                }
-            } // if keyCode == KeyEvent.VK_SPACE
-            
+            } // if keyCode == KeyEvent.VK_SPACE            
          } // if selected != null
       } else {
-         // Pass along keyboard action
+         // Pass along keyboard action for unimplemented key press
          e.consume();
       }
    }
