@@ -389,18 +389,21 @@ public class remotegui {
          text = "Select TiVo for which to retrieve My Shows list.<br>";
          text += "<b>NOTE: This only works for Premiere models</b>.<br>";
          text += "NOTE: You can select items in table to PLAY or DELETE<br>";
-         text += "using <b>Space bar</b> to play, <b>Delete</b> button to delete.";
+         text += "using <b>Space bar</b> to play, <b>Delete</b> button to delete.<br>";
+         text += "NOTE: Only 1 item can be deleted or played at a time.";
       }
       else if (component.equals("refresh_rnpl")){
          text = "<b>Refresh</b><br>";
          text += "Refresh My Shows list of selected TiVo.<br>";
          text += "<b>NOTE: This only works for Premiere models</b>.<br>";
          text += "NOTE: You can select items in table to PLAY or DELETE<br>";
-         text += "using <b>Space bar</b> to play, <b>Delete</b> button to delete.";
+         text += "using <b>Space bar</b> to play, <b>Delete</b> button to delete.<br>";
+         text += "NOTE: Only 1 item can be deleted or played at a time.";
       }
       else if (component.equals("tab_rnpl")) {
          text = "NOTE: You can select items in table to PLAY or DELETE<br>";
-         text += "using <b>Space bar</b> to play, <b>Delete</b> button to delete.";
+         text += "using <b>Space bar</b> to play, <b>Delete</b> button to delete.<br>";
+         text += "NOTE: Only 1 item can be deleted or played at a time.";
       }
       
       if (text.length() > 0) {
