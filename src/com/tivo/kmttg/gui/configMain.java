@@ -74,6 +74,7 @@ public class configMain {
    private static JCheckBox autotune_enabled = null;
    private static JCheckBox combine_download_decrypt = null;
    private static JCheckBox single_download = null;
+   private static JCheckBox enableRpc = null;
    private static JTextField tivo_name = null;
    private static JTextField tivo_ip = null;
    private static JTextField files_path = null;
@@ -267,6 +268,17 @@ public class configMain {
       }
    }
    
+   private static void updateEnableRpcSettings(String setting) {
+      if (setting != null) {
+         String tivoName = setting.replaceFirst("=.+$", "");
+         // Update enableRpc setting according to selected TiVo
+         if (config.getRpcSetting(tivoName).equals("1"))
+            enableRpc.setSelected(true);
+         else
+            enableRpc.setSelected(false);
+      }
+   }
+   
    // Callback for tivo del button
    private static void delCB() {
       debug.print("");
@@ -411,6 +423,17 @@ public class configMain {
             autotune_tivoName.addItem(name);
          }         
       }
+      
+      // enableRpc
+      enableRpc.setSelected(false);
+      name = (String)tivos.getSelectedItem();
+      if (name != null) {
+         String tivoName = name.replaceFirst("=.+$", "");
+         if (config.getRpcSetting(tivoName).equals("1"))
+            enableRpc.setSelected(true);
+         else
+            enableRpc.setSelected(false);
+      }      
       
       // limit_npl_fetches
       limit_npl_fetches.setText("0");
@@ -745,6 +768,16 @@ public class configMain {
          }
       }
       config.setTivoNames(h);
+      
+      // enableRpc
+      name = (String)tivos.getSelectedItem();
+      if (name != null) {
+         String tivoName = name.replaceFirst("=.+$", "");
+         if (enableRpc.isSelected())
+            config.setRpcSetting("enableRpc_" + tivoName, "1");
+         else
+            config.setRpcSetting("enableRpc_" + tivoName, "0");
+      }
       
       // limit_npl_fetches
       name = (String)tivos.getSelectedItem();
@@ -1490,6 +1523,7 @@ public class configMain {
                 if (name != null) {
                    updateWanSettings(name);
                    updateLimitNplSettings(name);
+                   updateEnableRpcSettings(name);
                 }
             }
          }
@@ -1524,6 +1558,7 @@ public class configMain {
       java_downloads = new javax.swing.JCheckBox();
       combine_download_decrypt = new javax.swing.JCheckBox();
       single_download = new javax.swing.JCheckBox();
+      enableRpc = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
       JLabel FontSize_label = new javax.swing.JLabel();
       JLabel file_naming_label = new javax.swing.JLabel();
@@ -1628,6 +1663,7 @@ public class configMain {
       java_downloads.setText("Use Java for downloads instead of curl");
       combine_download_decrypt.setText("Combine download and tivodecode decrypt");
       single_download.setText("Allow only 1 download at a time");
+      enableRpc.setText("Enable iPad style communications with this TiVo");
       MAK_label.setText("MAK"); 
       FontSize_label.setText("GUI Font Size");
       file_naming_label.setText("File Naming"); 
@@ -2091,6 +2127,12 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       tivo_panel.add(bogus, c);
+      
+      // enableRpc
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      tivo_panel.add(enableRpc, c);
       
       // limit_npl_fetches
       gy++;
@@ -2809,6 +2851,7 @@ public class configMain {
       java_downloads.setToolTipText(getToolTip("java_downloads"));
       combine_download_decrypt.setToolTipText(getToolTip("combine_download_decrypt"));
       single_download.setToolTipText(getToolTip("single_download"));
+      enableRpc.setToolTipText(getToolTip("enableRpc"));
       files_path.setToolTipText(getToolTip("files_path"));
       MAK.setToolTipText(getToolTip("MAK"));
       FontSize.setToolTipText(getToolTip("FontSize"));
@@ -3090,6 +3133,13 @@ public class configMain {
          text += "TiVos you have and how many download tasks are queued up. The usual restriction is only 1 download<br>";
          text += "at a time per TiVo, which means you can still have simultaneous downloads for different TiVos. This<br>";
          text += "option restricts that further to only 1 at a time for all TiVos.";
+      }
+      else if (component.equals("enableRpc")) {
+         text =  "<b>Enable iPad style communications with this TiVo</b><br>";
+         text += "If this option is enabled then kmttg will use iPad style communications with the TiVo to enable<br>";
+         text += "extra functionality such as capability to play & delete shows from Now Playing list and also to<br>";
+         text += "allow viewing of To Do list, Season Pass list and direct remote control capabilities.<br>";
+         text += "<b>NOTE: This only works with Series 4 (Premiere) TiVos or later.</b>";
       }
       else if (component.equals("files_path")) {
          text =  "<b>FILES Default Path</b><br>";
