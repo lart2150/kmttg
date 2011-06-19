@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,6 +35,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
@@ -52,6 +54,7 @@ public class nplTable {
    private Stack<Hashtable<String,String>> entries = null;
    private Hashtable<String,Stack<Hashtable<String,String>>> folders = null;
    private Vector<Hashtable<String,String>> sortedOrder = null;
+   private Hashtable<String,JSONArray> rnpldata = new Hashtable<String,JSONArray>();
    private String lastUpdated = null;
    // This needed to flag when calling updateNPLjobStatus so that multiple
    // selection event triggers can be avoided
@@ -386,7 +389,7 @@ public class nplTable {
    
    // Handle delete keyboard presses
    private void KeyPressed(KeyEvent e) {
-      if (config.TivoWebPlusDelete == 0 && config.gui.remote_gui == null) {
+      if (config.TivoWebPlusDelete == 0 && config.getRpcSetting(tivoName).equals("0")) {
          // Nothing to do so just consume & return
          e.consume();
          return;
@@ -411,8 +414,8 @@ public class nplTable {
                            log.warn("Delete url=" + entry.get("url"));
                            if (config.TivoWebPlusDelete == 1)
                               urlsToDelete.add(entry.get("url"));
-                           if (config.gui.remote_gui != null) {
-                              id = config.gui.remote_gui.findRecordingId(tivoName, entry);
+                           if (config.getRpcSetting(tivoName).equals("1")) {
+                              id = findRecordingId(tivoName, entry);
                               if (id != null) {
                                  urlsToDelete.add(entry.get("url"));
                                  idsToDelete.add(id);
@@ -427,8 +430,8 @@ public class nplTable {
                            urlsToDelete.add(s.data.get("url"));
                         }
                      }
-                     if (config.gui.remote_gui != null) {
-                        id = config.gui.remote_gui.findRecordingId(tivoName, s.data);
+                     if (config.getRpcSetting(tivoName).equals("1")) {
+                        id = findRecordingId(tivoName, s.data);
                         if (id != null) {
                            urlsToDelete.add(s.data.get("url"));
                            idsToDelete.add(id);
@@ -445,7 +448,7 @@ public class nplTable {
                      inFolder = false;
                      RefreshNowPlaying(entries);
                   }
-                  if (config.gui.remote_gui != null) {
+                  if (config.getRpcSetting(tivoName).equals("1")) {
                      // Use iPad remote protocol to remove items
                      log.warn("Deleting selected shows on TiVo: '" + tivoName + "'");
                      RemoveIds(urlsToDelete, idsToDelete);
@@ -463,8 +466,8 @@ public class nplTable {
                sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
                if ( ! s.folder ) {
                   // Play individual show
-                  if (config.gui.remote_gui != null) {
-                     id = config.gui.remote_gui.findRecordingId(tivoName, s.data);
+                  if (config.getRpcSetting(tivoName).equals("1")) {
+                     id = findRecordingId(tivoName, s.data);
                      if (id != null) {
                         // Use iPad remote protocol to play given item
                         String title = "";
@@ -1269,6 +1272,97 @@ public class nplTable {
          }
       }
       UpdatingNPL = false;
+   }
+   
+   // ***** Remote NPL related functions
+   
+   // Submit remote NPL request to Job Monitor
+   public void rnplListCB(String tivoName) {
+      // Clear rnpldata for this TiVo
+      rnpldata.put(tivoName, new JSONArray());
+      
+      // Submit job to obtain new data for this TiVo
+      jobData job = new jobData();
+      job.source      = tivoName;
+      job.tivoName    = tivoName;
+      job.type        = "remote";
+      job.name        = "Remote";
+      job.remote_rnpl = true;
+      job.rnpl        = rnpldata.get(tivoName);
+      jobMonitor.submitNewJob(job);
+   }
+   
+   public void setNPLData(String tivoName, JSONArray data) {
+      if (data == null) {
+         if (rnpldata.containsKey(tivoName))
+            rnpldata.remove(tivoName);
+      } else {
+         rnpldata.put(tivoName, data);
+      }
+   }
+   
+   public String findRecordingId(String tivoName, Hashtable<String,String> nplData) {
+      if ( ! rnpldata.containsKey(tivoName) )
+         return null;
+            
+      // Match up the following
+      // title, recording date, size
+      String h_title = null;
+      long h_date = 0;
+      long h_size = 0;
+      if (nplData.containsKey("titleOnly"))
+         h_title = nplData.get("titleOnly");
+      if (nplData.containsKey("gmt"))
+         h_date = Long.parseLong(nplData.get("gmt"));
+      if (nplData.containsKey("size"))
+         h_size = Long.parseLong(nplData.get("size"));
+      if (h_title == null || h_date == 0 || h_size == 0) {
+         log.error("findRecordingId insufficient NPL data");
+         return null;
+      }
+      JSONObject json;
+      String r_title;
+      long r_date;
+      long r_size;
+      try {
+         for (int i=0; i<rnpldata.get(tivoName).length(); ++i) {
+            r_title = "";
+            r_date = 0;
+            r_size = 0;
+            json = rnpldata.get(tivoName).getJSONObject(i).getJSONArray("recording").getJSONObject(0);
+            if (json.has("title"))
+               r_title = json.getString("title");
+            if (json.has("scheduledStartTime"))
+               r_date = getLongDateFromString(json.getString("scheduledStartTime"));
+            else
+               r_date = getLongDateFromString(json.getString("actualStartTime"));               
+            if (json.has("size"))
+               r_size = (long) (json.getLong("size")*Math.pow(2,10));
+            
+            //log.print("title: " + h_title + " : " + r_title);
+            //log.print("date: " + h_date + " : " + r_date);
+            //log.print("size: " + h_size + " : " + r_size);
+            if (r_title.equals(h_title) && r_date == h_date && r_size == h_size) {
+               if (json.has("recordingId"))
+                  return json.getString("recordingId");
+            }
+         }
+         return null;
+      } catch (JSONException e1) {
+         log.error("findRecordingId - " + e1.getMessage());
+         return null;
+      }
+   }
+   
+   private long getLongDateFromString(String date) {
+      try {
+         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz");
+         Date d = format.parse(date + " GMT");
+         return d.getTime();
+      } catch (ParseException e) {
+        log.error("getLongDateFromString - " + e.getMessage());
+        return 0;
+      }
    }
 
 }
