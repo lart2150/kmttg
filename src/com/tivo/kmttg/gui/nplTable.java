@@ -30,8 +30,12 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
 
+import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONException;
+import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -75,16 +79,14 @@ public class nplTable {
          }
       );
       
-      // Add keyboard listener (for delete key)
-      if (config.TivoWebPlusDelete == 1) {
-         NowPlaying.addKeyListener(
-            new KeyAdapter() {
-               public void keyReleased(KeyEvent e) {
-                  KeyPressed(e);
-               }
+      // Add keyboard listener (for delete & space keys)
+      NowPlaying.addKeyListener(
+         new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+               KeyPressed(e);
             }
-         );
-      }
+         }
+      );
       
       // Define custom column sorting routines
       Comparator<Object> sortableComparator = new Comparator<Object>() {
@@ -384,41 +386,98 @@ public class nplTable {
    
    // Handle delete keyboard presses
    private void KeyPressed(KeyEvent e) {
+      if (config.TivoWebPlusDelete == 0 && config.gui.remote_gui == null) {
+         // Nothing to do so just consume & return
+         e.consume();
+         return;
+      }
       int keyCode = e.getKeyCode();
-      if (keyCode == KeyEvent.VK_DELETE){
-         // Delete key has special action
-         Boolean success = true;
-         int[] selected = GetSelectedRows();
-         Stack<String> urlsToDelete = new Stack<String>();
+      if (keyCode == KeyEvent.VK_DELETE || keyCode == KeyEvent.VK_SPACE) {
+         int[] selected = GetSelectedRows();         
          if (selected != null && selected.length > 0) {
-            for (int i=0; i<selected.length; ++i) {
-               int row = selected[i];
+            if (keyCode == KeyEvent.VK_DELETE) {
+               // Delete key has special action
+               Stack<String> urlsToDelete = new Stack<String>();
+               Stack<String> idsToDelete = new Stack<String>();
+               String id;
+               for (int i=0; i<selected.length; ++i) {
+                  int row = selected[i];
+                  sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
+                  if (s.folder) {
+                     // Delete all shows in folder
+                     for (int j=0; j<s.folderData.size(); j++) {
+                        Hashtable<String,String> entry = s.folderData.get(j);
+                        if (entry.containsKey("url")) {
+                           log.warn("Delete url=" + entry.get("url"));
+                           if (config.TivoWebPlusDelete == 1)
+                              urlsToDelete.add(entry.get("url"));
+                           if (config.gui.remote_gui != null) {
+                              id = config.gui.remote_gui.findRecordingId(tivoName, entry);
+                              if (id != null) {
+                                 urlsToDelete.add(entry.get("url"));
+                                 idsToDelete.add(id);
+                              }
+                           }
+                        }
+                     } // for
+                  } else {
+                     // Delete individual show
+                     if (config.TivoWebPlusDelete == 1) {
+                        if (s.data.containsKey("url")) {
+                           urlsToDelete.add(s.data.get("url"));
+                        }
+                     }
+                     if (config.gui.remote_gui != null) {
+                        id = config.gui.remote_gui.findRecordingId(tivoName, s.data);
+                        if (id != null) {
+                           urlsToDelete.add(s.data.get("url"));
+                           idsToDelete.add(id);
+                        }
+                     }
+                  } // else individual show
+               } // for selected
+               if (urlsToDelete.size() > 0) {
+                  if (config.TivoWebPlusDelete == 1) {
+                     // USE TWP to remove items from entries stack
+                     // NOTE: Always revert to top view (not inside a folder)
+                     RemoveUrls(urlsToDelete);
+                     folderize(entries);
+                     inFolder = false;
+                     RefreshNowPlaying(entries);
+                  }
+                  if (config.gui.remote_gui != null) {
+                     // Use iPad remote protocol to remove items
+                     log.warn("Deleting selected shows on TiVo: '" + tivoName + "'");
+                     RemoveIds(urlsToDelete, idsToDelete);
+                     folderize(entries);
+                     inFolder = false;
+                     RefreshNowPlaying(entries);
+                  }
+               } // if urslToDelete
+            } // if keyCode == KeyEvent.VK_DELETE
+            
+            if (keyCode == KeyEvent.VK_SPACE) {
+               // Space key has special action
+               String id;
+               int row = selected[0];
                sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
-               if (s.folder) {
-                  // Delete all shows in folder
-                  for (int j=0; j<s.folderData.size(); j++) {
-                     Hashtable<String,String> entry = s.folderData.get(j);
-                     if (entry.containsKey("url")) {
-                        log.warn("Delete url=" + entry.get("url"));
-                        urlsToDelete.add(entry.get("url"));
+               if ( ! s.folder ) {
+                  // Play individual show
+                  if (config.gui.remote_gui != null) {
+                     id = config.gui.remote_gui.findRecordingId(tivoName, s.data);
+                     if (id != null) {
+                        // Use iPad remote protocol to play given item
+                        String title = "";
+                        if (s.data.containsKey("title"))
+                           title += s.data.get("title");
+                        log.warn("Playing show on TiVo '" + tivoName + "': " + title);
+                        PlayShow(id);
                      }
                   }
-               } else {
-                  // Delete individual show
-                  if (s.data.containsKey("url")) {
-                     urlsToDelete.add(s.data.get("url"));
-                  }
                }
-            }
-            if (success && urlsToDelete.size() > 0) {
-               // Remove items from entries stack
-               // NOTE: Always revert to top view (not inside a folder)
-               RemoveUrls(urlsToDelete);
-               folderize(entries);
-               inFolder = false;
-               RefreshNowPlaying(entries);
-            }
-         }
+            } // if keyCode == KeyEvent.VK_SPACE
+            
+         } // if selected != null
       } else {
          // Pass along keyboard action
          e.consume();
@@ -1027,6 +1086,61 @@ public class nplTable {
       for (int i=0; i<urls.size(); ++i) {
          file.TivoWebPlusDelete(urls.get(i));
       }
+   }
+   
+   @SuppressWarnings("unchecked")
+   private void RemoveIds(Stack<String> urls, Stack<String> ids) {
+      // First update table
+      Stack<Hashtable<String,String>> copy = (Stack<Hashtable<String, String>>) entries.clone();
+      entries.clear();
+      Boolean include;
+      for (int i=0; i<copy.size(); ++i) {
+         include = true;
+         String url;
+         if (copy.get(i).containsKey("url")) {
+            for (int j=0; j<urls.size(); ++j) {
+               url = urls.get(j);
+               if (copy.get(i).get("url").equals(url)) {
+                  include = false;
+               }
+            }
+         }
+         if (include) {
+            entries.add(copy.get(i));
+         }
+      }
+      
+      // Remote delete calls
+      JSONArray a = new JSONArray();
+      JSONObject json = new JSONObject();
+      for (int i=0; i<ids.size(); ++i) {
+         a.put(ids.get(i));
+      }
+      try {
+         json.put("recordingId", a);
+         Remote r = new Remote(config.TIVOS.get(tivoName), config.MAK);
+         if (r.success) {
+            r.Key("delete", json);
+            r.disconnect();
+         }
+      } catch (JSONException e) {
+         log.print("RemoveIds failed - " + e.getMessage());
+      }
+   }
+   
+   private void PlayShow(String id) {
+      JSONObject json = new JSONObject();
+      try {
+         json.put("id", id);
+         Remote r = new Remote(config.TIVOS.get(tivoName), config.MAK);
+         if (r.success) {
+            r.Key("playback", json);
+            r.disconnect();
+         }
+      } catch (JSONException e) {
+         log.print("PlayShow failed - " + e.getMessage());
+      }
+      
    }
    
    // Sets the preferred width of the visible column specified by vColIndex. The column
