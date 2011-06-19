@@ -8,17 +8,12 @@ import java.awt.Image;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Hashtable;
 import java.util.Stack;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -27,14 +22,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
-import com.tivo.kmttg.JSON.JSONArray;
-import com.tivo.kmttg.JSON.JSONException;
-import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.debug;
-import com.tivo.kmttg.util.log;
 
 public class remotegui {
    private JDialog dialog = null;
@@ -45,10 +36,6 @@ public class remotegui {
    
    private spTable tab_sp = null;
    private JComboBox tivo_sp = null;
-   
-   JCheckBox available_rnpl = null;
-   private JComboBox tivo_rnpl = null;
-   public Hashtable<String,JSONArray> rnpldata = new Hashtable<String,JSONArray>();
 
    remotegui(JFrame frame) {
       
@@ -107,7 +94,8 @@ public class remotegui {
             tab_todo.clear();
             dialog.repaint();
             String tivoName = (String)tivo_todo.getSelectedItem();
-            ToDoListCB(tivoName);
+            if (tivoName != null && tivoName.length() > 0)
+               ToDoListCB(tivoName);
          }
       });
       row1_todo.add(Box.createRigidArea(space_40));
@@ -173,7 +161,8 @@ public class remotegui {
             tab_sp.clear();
             dialog.repaint();
             String tivoName = (String)tivo_sp.getSelectedItem();
-            SPListCB(tivoName);
+            if (tivoName != null && tivoName.length() > 0)
+               SPListCB(tivoName);
          }
       });
       row1_sp.add(Box.createRigidArea(space_40));
@@ -198,67 +187,7 @@ public class remotegui {
       panel_sp.add(tabScroll_sp, c);
 
       tabbed_panel.add("Season Passes", panel_sp);
-      
-      // NPL Tab items
-      c.ipady = 0;
-      c.weighty = 0.0;  // default to no vertical stretch
-      c.weightx = 0.0;  // default to no horizontal stretch
-      c.gridx = 0;
-      c.gridy = 0;
-      c.gridwidth = 1;
-      c.gridheight = 1;
-      c.anchor = GridBagConstraints.NORTHWEST;
-      c.fill = GridBagConstraints.NONE;
-      JPanel panel_rnpl = new JPanel();
-      panel_rnpl.setLayout(new GridBagLayout());
-      
-      JPanel row1_rnpl = new JPanel();
-      row1_rnpl.setLayout(new BoxLayout(row1_rnpl, BoxLayout.LINE_AXIS));
-      
-      JLabel title_rnpl = new JLabel("My Shows");
-      
-      JLabel tivo_rnpl_label = new javax.swing.JLabel();
-      
-      tivo_rnpl = new javax.swing.JComboBox();
-      tivo_rnpl.addItemListener(new ItemListener() {
-         public void itemStateChanged(ItemEvent e) {
-             if (e.getStateChange() == ItemEvent.SELECTED) {
-               tivo_rnplCB();
-            }
-         }
-      });
-      tivo_rnpl.setToolTipText(getToolTip("tivo_rnpl"));
-
-      JButton refresh_rnpl = new JButton("Refresh");
-      refresh_rnpl.setToolTipText(getToolTip("refresh_rnpl"));
-      refresh_rnpl.addActionListener(new java.awt.event.ActionListener() {
-         public void actionPerformed(java.awt.event.ActionEvent e) {
-            // Refresh to do list
-            String tivoName = (String)tivo_rnpl.getSelectedItem();
-            rnplListCB(tivoName);
-         }
-      });
-      
-      available_rnpl = new JCheckBox(
-         "Data available for this TiVo. You can play/delete shows from NPL."
-      );
-      available_rnpl.setEnabled(false);
-      
-      row1_rnpl.add(Box.createRigidArea(space_5));
-      row1_rnpl.add(title_rnpl);
-      row1_rnpl.add(Box.createRigidArea(space_5));
-      row1_rnpl.add(tivo_rnpl_label);
-      row1_rnpl.add(Box.createRigidArea(space_5));
-      row1_rnpl.add(tivo_rnpl);
-      row1_rnpl.add(Box.createRigidArea(space_5));
-      row1_rnpl.add(refresh_rnpl);
-      
-      panel_rnpl.add(row1_rnpl, c);
-      c.gridy = 1;
-      panel_rnpl.add(available_rnpl, c);
-
-      tabbed_panel.add("My Shows", panel_rnpl);
-      
+            
       setTivoNames();
 
       // add content to and display dialog window
@@ -313,41 +242,7 @@ public class remotegui {
       job.sp          = tab_sp;
       jobMonitor.submitNewJob(job);
    }
-   
-   // TiVo selection changed for My Shows tab
-   public void tivo_rnplCB() {
-      if (available_rnpl != null) {
-         available_rnpl.setEnabled(true);
-         String tivoName = getTivoName("rnpl");
-         if (rnpldata.containsKey(tivoName))
-            available_rnpl.setSelected(true);
-         else
-            available_rnpl.setSelected(false);
-         available_rnpl.setEnabled(false);
-      }
-   }
-      
-   // Submit remote NPL request to Job Monitor
-   public void rnplListCB(String tivoName) {
-      // Uncheck available_rnpl
-      available_rnpl.setEnabled(true);
-      available_rnpl.setSelected(false);
-      available_rnpl.setEnabled(false);
-      
-      // Clear rnpldata for this TiVo
-      rnpldata.put(tivoName, new JSONArray());
-      
-      // Submit job to obtain new data for this TiVo
-      jobData job = new jobData();
-      job.source      = dialog.toString();
-      job.tivoName    = tivoName;
-      job.type        = "remote";
-      job.name        = "Remote";
-      job.remote_rnpl = true;
-      job.rnpl        = rnpldata.get(tivoName);
-      jobMonitor.submitNewJob(job);
-   }
-   
+         
    public void display() {
       if (dialog != null)
          dialog.setVisible(true);
@@ -358,8 +253,6 @@ public class remotegui {
          return (String)tivo_todo.getSelectedItem();
       if (tab.equals("sp"))
          return (String)tivo_sp.getSelectedItem();
-      if (tab.equals("rnpl"))
-         return (String)tivo_rnpl.getSelectedItem();
       return null;
    }
    
@@ -367,26 +260,14 @@ public class remotegui {
       Stack<String> tivo_stack = config.getTivoNames();
       tivo_todo.removeAllItems();
       tivo_sp.removeAllItems();
-      tivo_rnpl.removeAllItems();
       for (int i=0; i<tivo_stack.size(); ++i) {
-         tivo_todo.addItem(tivo_stack.get(i));
-         tivo_sp.addItem(tivo_stack.get(i));
-         tivo_rnpl.addItem(tivo_stack.get(i));
+         if (config.getRpcSetting(tivo_stack.get(i)).equals("1")) {
+            tivo_todo.addItem(tivo_stack.get(i));
+            tivo_sp.addItem(tivo_stack.get(i));
+         }
       }
    }
-   
-   public void setNPLData(String tivoName, JSONArray data) {
-      available_rnpl.setEnabled(true);
-      if (data == null) {
-         if (rnpldata.containsKey(tivoName))
-            rnpldata.remove(tivoName);
-
-      } else {
-         rnpldata.put(tivoName, data);
-      }
-      tivo_rnplCB();
-   }
-   
+      
    private ImageIcon scale(Image src, double scale) {
       int w = (int)(scale*src.getWidth(dialog));
       int h = (int)(scale*src.getHeight(dialog));
@@ -397,71 +278,7 @@ public class remotegui {
       g2.dispose();
       return new ImageIcon(dst);
    }
-   
-   public String findRecordingId(String tivoName, Hashtable<String,String> nplData) {
-      if ( ! rnpldata.containsKey(tivoName) )
-         return null;
-            
-      // Match up the following
-      // title, recording date, size
-      String h_title = null;
-      long h_date = 0;
-      long h_size = 0;
-      if (nplData.containsKey("titleOnly"))
-         h_title = nplData.get("titleOnly");
-      if (nplData.containsKey("gmt"))
-         h_date = Long.parseLong(nplData.get("gmt"));
-      if (nplData.containsKey("size"))
-         h_size = Long.parseLong(nplData.get("size"));
-      if (h_title == null || h_date == 0 || h_size == 0) {
-         log.error("findRecordingId insufficient NPL data");
-         return null;
-      }
-      JSONObject json;
-      String r_title;
-      long r_date;
-      long r_size;
-      try {
-         for (int i=0; i<rnpldata.get(tivoName).length(); ++i) {
-            r_title = "";
-            r_date = 0;
-            r_size = 0;
-            json = rnpldata.get(tivoName).getJSONObject(i).getJSONArray("recording").getJSONObject(0);
-            if (json.has("title"))
-               r_title = json.getString("title");
-            if (json.has("scheduledStartTime"))
-               r_date = getLongDateFromString(json.getString("scheduledStartTime"));
-            else
-               r_date = getLongDateFromString(json.getString("actualStartTime"));               
-            if (json.has("size"))
-               r_size = (long) (json.getLong("size")*Math.pow(2,10));
-            
-            //log.print("title: " + h_title + " : " + r_title);
-            //log.print("date: " + h_date + " : " + r_date);
-            //log.print("size: " + h_size + " : " + r_size);
-            if (r_title.equals(h_title) && r_date == h_date && r_size == h_size) {
-               if (json.has("recordingId"))
-                  return json.getString("recordingId");
-            }
-         }
-         return null;
-      } catch (JSONException e1) {
-         log.error("findRecordingId - " + e1.getMessage());
-         return null;
-      }
-   }
-
-   private long getLongDateFromString(String date) {
-      try {
-         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz");
-         Date d = format.parse(date + " GMT");
-         return d.getTime();
-      } catch (ParseException e) {
-        log.error("getLongDateFromString - " + e.getMessage());
-        return 0;
-      }
-   }
-   
+      
    private String getToolTip(String component) {
       debug.print("component=" + component);
       String text = "";
