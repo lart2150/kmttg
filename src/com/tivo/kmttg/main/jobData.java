@@ -2,7 +2,7 @@ package com.tivo.kmttg.main;
 
 import java.io.Serializable;
 
-import com.tivo.kmttg.gui.rnplTable;
+import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.gui.spTable;
 import com.tivo.kmttg.gui.todoTable;
 import com.tivo.kmttg.task.*;
@@ -109,7 +109,7 @@ public class jobData implements Serializable {
    public spTable sp = null;
    
    public Boolean remote_rnpl = false;
-   public rnplTable rnpl = null;
+   public JSONArray rnpl = null;
    
    // NOTE: This used for job insertion purposes
    // ** JOB ORDER IS VERY IMPORTANT **
