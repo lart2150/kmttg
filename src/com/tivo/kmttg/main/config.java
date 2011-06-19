@@ -92,6 +92,7 @@ public class config {
    public static Hashtable<String,String> WAN = new Hashtable<String,String>();
    // If > 0 limit # npl fetches to this num
    public static Hashtable<String,String> limit_npl_fetches = new Hashtable<String,String>();
+   public static Hashtable<String,String> enableRpc = new Hashtable<String,String>();
     
    // GUI related
    public static Boolean GUIMODE = false;   // true=>GUI, false=>batch/auto            
@@ -369,6 +370,26 @@ public class config {
          } else {
             limit_npl_fetches.put(tivoName, "");
          }
+      }
+   }
+   
+   // Get configured setting in enableRpc hash for given tivoName
+   public static String getRpcSetting(String tivoName) {
+      if (enableRpc.containsKey(tivoName))
+         return enableRpc.get(tivoName);
+      else
+         return "0";
+   }
+   
+   // Set configured setting in limit_npl_fetches hash for given tivoName
+   // NOTE: identifier = enableRpc_tivoName
+   public static void setRpcSetting(String identifier, String value) {
+      String tivoName = identifier.replaceFirst("enableRpc_", "");
+      if (tivoName.length() > 0) {
+         if (value.length() > 0)     
+            enableRpc.put(tivoName, value);
+         else
+            enableRpc.put(tivoName, "0");
       }
    }
 
@@ -699,6 +720,9 @@ public class config {
             if (key.matches("^limit_npl_.+$")) {
                setLimitNplSetting(key, string.removeLeadingTrailingSpaces(line));
             }
+            if (key.matches("^enableRpc_.+$")) {
+               setRpcSetting(key, string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("MaxJobs")) {
                MaxJobs = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -849,6 +873,14 @@ public class config {
                String tivoName = e.nextElement();
                ofp.write("<limit_npl_" + tivoName + ">\n");
                ofp.write(limit_npl_fetches.get(tivoName) + "\n\n");
+            }            
+         }
+         
+         if (enableRpc.size() > 0) {
+            for (Enumeration<String> e=enableRpc.keys(); e.hasMoreElements();) {
+               String tivoName = e.nextElement();
+               ofp.write("<enableRpc_" + tivoName + ">\n");
+               ofp.write(enableRpc.get(tivoName) + "\n\n");
             }            
          }
          
