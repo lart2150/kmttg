@@ -329,6 +329,11 @@ public class remotegui {
       
    // Submit remote NPL request to Job Monitor
    public void rnplListCB(String tivoName) {
+      // Uncheck available_rnpl
+      available_rnpl.setEnabled(true);
+      available_rnpl.setSelected(false);
+      available_rnpl.setEnabled(false);
+      
       // Clear rnpldata for this TiVo
       rnpldata.put(tivoName, new JSONArray());
       
@@ -429,8 +434,11 @@ public class remotegui {
             else
                r_date = getLongDateFromString(json.getString("actualStartTime"));               
             if (json.has("size"))
-               r_size = json.getLong("size");
+               r_size = (long) (json.getLong("size")*Math.pow(2,10));
             
+            //log.print("title: " + h_title + " : " + r_title);
+            //log.print("date: " + h_date + " : " + r_date);
+            //log.print("size: " + h_size + " : " + r_size);
             if (r_title.equals(h_title) && r_date == h_date && r_size == h_size) {
                if (json.has("recordingId"))
                   return json.getString("recordingId");
