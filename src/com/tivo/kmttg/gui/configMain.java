@@ -3139,6 +3139,10 @@ public class configMain {
          text += "If this option is enabled then kmttg will use iPad style communications with the TiVo to enable<br>";
          text += "extra functionality such as capability to play & delete shows from Now Playing list and also to<br>";
          text += "allow viewing of To Do list, Season Pass list and direct remote control capabilities.<br>";
+         text += "If enabled then you can play/delete shows from Now Playing List table as follows:<br>";
+         text += "<b>PLAY:</b> Select a show in Now Playing List and press <b>space bar</b> key.<br>";
+         text += "<b>DELETE:</b> Select a show in Now Playing List and press <b>delete</b> key.<br>";
+         text += "<b>REMOTE CONTROL:</b> Select <b>File-Remote Control...</b> to bring up Remote Control GUI.<br>";
          text += "<b>NOTE: This only works with Series 4 (Premiere) TiVos or later.</b>";
       }
       else if (component.equals("files_path")) {
