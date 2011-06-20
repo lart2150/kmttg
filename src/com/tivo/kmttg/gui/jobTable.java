@@ -20,6 +20,7 @@ import org.jdesktop.swingx.JXTable;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.util.debug;
+import com.tivo.kmttg.util.log;
 
 public class jobTable {
    private String[] TITLE_cols = {"STATUS", "JOB", "SOURCE", "OUTPUT"};
@@ -145,7 +146,7 @@ public class jobTable {
     public int[] GetSelectedRows() {
        int[] rows = JobMonitor.getSelectedRows();
        if (rows.length <= 0)
-          config.gui.text_error("No rows selected");
+          log.error("No rows selected");
        return rows;
     }
     
@@ -153,7 +154,7 @@ public class jobTable {
     public jobData GetSelectionData(int row) {
        // Get column items for selected row 
        if (row < 0) {
-          config.gui.text_error("Nothing selected");
+          log.error("Nothing selected");
           return null;
        }
        jobEntry s = (jobEntry)JobMonitor.getValueAt(row, getColumnIndex("JOB"));

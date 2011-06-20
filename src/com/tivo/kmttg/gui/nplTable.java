@@ -525,7 +525,7 @@ public class nplTable {
       debug.print("");
       int[] rows = NowPlaying.getSelectedRows();
       if (rows.length <= 0)
-         config.gui.text_error("No rows selected");
+         log.error("No rows selected");
       return rows;
    }
    
@@ -567,8 +567,8 @@ public class nplTable {
                message += "\n" + description;
             }
       
-            config.gui.text_warn("\n" + s.data.get("title"));
-            config.gui.text_print(message);
+            log.warn("\n" + s.data.get("title"));
+            log.print(message);
          }
       }
    }
@@ -578,12 +578,12 @@ public class nplTable {
       debug.print("row=" + row);
       // Get column items for selected row 
       if (row < 0) {
-         config.gui.text_error("Nothing selected");
+         log.error("Nothing selected");
          return null;
       }
       sortableDate s = (sortableDate)NowPlaying.getValueAt(row, getColumnIndex("DATE"));
       if (s.folder) {
-         config.gui.text_warn("Cannot process a folder entry");
+         log.warn("Cannot process a folder entry");
          return null;
       }
       return s.data;
@@ -594,7 +594,7 @@ public class nplTable {
    public String NowPlayingGetSelectionFile(int row) {
       debug.print("row=" + row);
       if (row < 0) {
-         config.gui.text_error("Nothing selected");
+         log.error("Nothing selected");
          return null;
       }
       String s = java.io.File.separator;
@@ -968,7 +968,7 @@ public class nplTable {
    public void RemoveSelectedRow(int row) {
       debug.print("row=" + row);
       if (row < 0) {
-         config.gui.text_error("Nothing selected");
+         log.error("Nothing selected");
          return;
       }
       RemoveRow(NowPlaying, row);
