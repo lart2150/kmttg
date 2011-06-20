@@ -944,8 +944,10 @@ public class gui {
             public void actionPerformed(ActionEvent e) {
                if (remote_gui == null)
                   remote_gui = new remotegui(config.gui.getJFrame());
-               else
+               else {
+                  remote_gui.setTivoNames();
                   remote_gui.display();
+               }
             }
          });
       }
