@@ -257,10 +257,6 @@ public class Remote {
             json.put("bodyId", "-");
             req = RpcRequest("recordingUpdate", false, json);
          }
-         else if (type.equals("MyShows")) {
-            json.put("bodyId", "-");
-            req = RpcRequest("recordingFolderItemSearch", false, json);
-         }
          else if (type.equals("Search")) {
             // Individual item search
             // Expects "recordingId" in json
@@ -281,10 +277,16 @@ public class Remote {
             json.put("bodyId", "-");
             req = RpcRequest("recordingFolderItemSearch", false, json);
          }
+         else if (type.equals("MyShows")) {
+            json.put("bodyId", "-");
+            json.put("noLimit", "true");
+            req = RpcRequest("recordingFolderItemSearch", false, json);
+         }
          else if (type.equals("ToDo")) {
             //json.put("levelOfDetail", "medium");
             json.put("format", "idSequence");
             json.put("bodyId", "-");
+            json.put("noLimit", "true");
             json.put("state", new JSONArray("[\"scheduled\"]"));
             req = RpcRequest("recordingSearch", false, json);
          }
@@ -296,6 +298,7 @@ public class Remote {
          else if (type.equals("SeasonPasses")) {
             json.put("format", "idSequence");
             json.put("bodyId", "-");
+            json.put("noLimit", "true");
             req = RpcRequest("subscriptionSearch", false, json);
          }
          else if (type.equals("SeasonPassIds")) {
@@ -311,6 +314,19 @@ public class Remote {
          else if (type.equals("jump")) {
             // Expects "offset" in json
             req = RpcRequest("videoPlaybackPositionSet", false, json);
+         }
+         else if (type.equals("sysInfo")) {
+            // Returns userDiskSize among other info
+            json.put("bodyId", "-");
+            req = RpcRequest("bodyConfigSearch", false, json);
+         }
+         else if (type.equals("tunerInfo")) {
+            // Returns info about both tuners
+            req = RpcRequest("tunerStateEventRegister", true, json);
+         }
+         else {
+            // Not recognized => just use type
+            req = RpcRequest(type, false, json);
          }
          
          if (req != null) {
@@ -456,11 +472,9 @@ public class Remote {
    
    private void print(String message) {
       log.print(message);
-      //System.out.println(message);
    }
    
    private void error(String message) {
       log.error(message);
-      //System.out.println(message);
    }
 }
