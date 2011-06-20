@@ -9,6 +9,7 @@ import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
+import java.util.Hashtable;
 import java.util.Stack;
 
 import javax.swing.Box;
@@ -23,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -43,6 +45,10 @@ public class remotegui {
    
    private spTable tab_sp = null;
    private JComboBox tivo_sp = null;
+   
+   private JComboBox tivo_info = null;
+   JTextPane text_info = null;
+   private Hashtable<String,String> tivo_info_data = new Hashtable<String,String>();
    
    private JComboBox tivo_rc = null;
    private JTextField rc_jumpto_text = null;
@@ -166,7 +172,7 @@ public class remotegui {
       refresh_sp.setToolTipText(getToolTip("refresh_sp"));
       refresh_sp.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            // Refresh to do list
+            // Refresh SP list
             tab_sp.TABLE.clearSelection();
             tab_sp.clear();
             dialog.repaint();
@@ -195,6 +201,68 @@ public class remotegui {
       c.gridwidth = 8;
       c.fill = GridBagConstraints.BOTH;
       panel_sp.add(tabScroll_sp, c);
+      
+      // System Information tab items      
+      c.ipady = 0;
+      c.weighty = 0.0;  // default to no vertical stretch
+      c.weightx = 0.0;  // default to no horizontal stretch
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      c.gridheight = 1;
+      c.anchor = GridBagConstraints.CENTER;
+      c.fill = GridBagConstraints.HORIZONTAL;
+
+      JPanel panel_info = new JPanel();
+      panel_info.setLayout(new GridBagLayout());
+      
+      JPanel row1_info = new JPanel();
+      row1_info.setLayout(new BoxLayout(row1_info, BoxLayout.LINE_AXIS));
+      
+      JLabel title_info = new JLabel("System Information");
+      
+      JLabel tivo_info_label = new javax.swing.JLabel();
+      
+      tivo_info = new javax.swing.JComboBox();
+      tivo_info.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+               tivo_infoCB();
+            }
+         }
+      });
+      tivo_info.setToolTipText(getToolTip("tivo_info"));
+
+      JButton refresh_info = new JButton("Refresh");
+      refresh_info.setToolTipText(getToolTip("refresh_info"));
+      refresh_info.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Refresh info text
+            String tivoName = (String)tivo_info.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0)
+               RC_infoCB(tivoName);
+         }
+      });
+      row1_info.add(Box.createRigidArea(space_40));
+      row1_info.add(title_info);
+      row1_info.add(Box.createRigidArea(space_40));
+      row1_info.add(tivo_info_label);
+      row1_info.add(Box.createRigidArea(space_5));
+      row1_info.add(tivo_info);
+      row1_info.add(Box.createRigidArea(space_40));
+      row1_info.add(refresh_info);
+      panel_info.add(row1_info, c);
+      
+      text_info = new JTextPane();
+      text_info.setEditable(false);
+      JScrollPane tabScroll_info = new JScrollPane(text_info);
+      gy++;
+      c.gridy = gy;
+      c.weightx = 1.0;
+      c.weighty = 1.0;
+      c.gridwidth = 8;
+      c.fill = GridBagConstraints.BOTH;
+      panel_info.add(tabScroll_info, c);
       
       // Remote Control Tab items
       gy = 0;
@@ -314,6 +382,7 @@ public class remotegui {
       tabbed_panel.add("Remote Control", panel_rc);
       tabbed_panel.add("ToDo", panel_todo);
       tabbed_panel.add("Season Passes", panel_sp);
+      tabbed_panel.add("System Information", panel_info);
             
       setTivoNames();
 
@@ -357,7 +426,22 @@ public class remotegui {
       if (tab_sp.tivo_data.containsKey(tivoName))
          tab_sp.AddRows(tivoName, tab_sp.tivo_data.get(tivoName));
    }
+   
+   // TiVo selection changed for System Information tab
+   public void tivo_infoCB() {
+      // Clear text area
+      text_info.setEditable(true);
+      text_info.setText("");
       
+      // Put cached info in text area if available
+      String tivoName = getTivoName("info");
+      if (tivoName != null && tivoName.length() > 0) {
+         if (tivo_info_data.containsKey(tivoName))
+            text_info.setText(tivo_info_data.get(tivoName));
+      }
+      text_info.setEditable(false);
+   }
+
    // Submit remote SP request to Job Monitor
    public void SPListCB(String tivoName) {
       jobData job = new jobData();
@@ -381,7 +465,8 @@ public class remotegui {
             r.Key("jump", json);
             r.disconnect();
          } catch (JSONException e) {
-            log.print("RC_jumptoCB failed - " + e.getMessage());
+            log.error("RC_jumptoCB failed - " + e.getMessage());
+            return false;
          }
       }
       return true;
@@ -400,7 +485,8 @@ public class remotegui {
                r.Key("jump", json);
                r.disconnect();
             } catch (JSONException e) {
-               log.print("RC_jumptoCB failed - " + e.getMessage());
+               log.error("RC_jumptoCB failed - " + e.getMessage());
+               return false;
             }
          }
       }
@@ -422,13 +508,63 @@ public class remotegui {
                r.Key("jump", json);
                r.disconnect();
             } catch (JSONException e) {
-               log.print("RC_jumptoCB failed - " + e.getMessage());
+               log.error("RC_jumptoCB failed - " + e.getMessage());
+               return false;
             }
          }
       }
       return true;
    }
-         
+   
+   private Boolean RC_infoCB(String tivoName) {
+      Remote r = new Remote(config.TIVOS.get(tivoName), config.MAK);
+      if (r.success) {
+         JSONObject json = new JSONObject();
+         JSONObject reply = r.Key("sysInfo", json);
+         if (reply != null && reply.has("bodyConfig")) {
+            try {
+               String info = "";
+               // System info
+               json = reply.getJSONArray("bodyConfig").getJSONObject(0);
+               String[] fields = {
+                  "softwareVersion", "userDiskSize", "userDiskUsed", "parentalControlsState"
+               };
+               for (int i=0; i<fields.length; ++i) {
+                  if (json.has(fields[i]))
+                     info += String.format("%s\t%s\n", fields[i], json.get(fields[i]));
+               }
+               info += "\n";
+               
+               // Tuner info
+               reply = r.Key("tunerInfo", new JSONObject());
+               if (reply != null && reply.has("state")) {
+                  for (int i=0; i<reply.getJSONArray("state").length(); ++i) {
+                     json = reply.getJSONArray("state").getJSONObject(i);
+                     info += String.format("tunerId\t\t%s\n", json.getString("tunerId"));
+                     info += String.format("channelNumber\t%s (%s)\n",
+                        json.getJSONObject("channel").getString("channelNumber"),
+                        json.getJSONObject("channel").getString("callSign")
+                     );
+                     info += "\n";
+                  }
+               }
+               r.disconnect();
+               
+               // Add info to text_info widget
+               text_info.setEditable(true);
+               text_info.setText(info);
+               text_info.setEditable(false);
+               tivo_info_data.put(tivoName, info);
+
+            } catch (JSONException e) {
+               log.error("RC_infoCB failed - " + e.getMessage());
+               return false;
+            }
+         }
+      }
+      return true;
+   }
+            
    public void display() {
       if (dialog != null)
          dialog.setVisible(true);
@@ -441,6 +577,8 @@ public class remotegui {
          return (String)tivo_sp.getSelectedItem();
       if (tab.equals("rc"))
          return (String)tivo_rc.getSelectedItem();
+      if (tab.equals("info"))
+         return (String)tivo_info.getSelectedItem();
       return null;
    }
    
@@ -449,11 +587,13 @@ public class remotegui {
       tivo_todo.removeAllItems();
       tivo_sp.removeAllItems();
       tivo_rc.removeAllItems();
+      tivo_info.removeAllItems();
       for (int i=0; i<tivo_stack.size(); ++i) {
          if (config.getRpcSetting(tivo_stack.get(i)).equals("1")) {
             tivo_todo.addItem(tivo_stack.get(i));
             tivo_sp.addItem(tivo_stack.get(i));
             tivo_rc.addItem(tivo_stack.get(i));
+            tivo_info.addItem(tivo_stack.get(i));
          }
       }
    }
