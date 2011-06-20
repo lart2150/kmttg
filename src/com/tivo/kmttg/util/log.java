@@ -80,6 +80,10 @@ public class log {
                log = false;
             }
          }
+         else {
+            // Non GUI mode
+            System.out.println(s);
+         }
          
          if (log) {
             logToFile("print", s);
@@ -97,6 +101,10 @@ public class log {
                log = false;
             }
          }
+         else {
+            // Non GUI mode
+            System.out.println(s);
+         }
          
          if (log) {
             logToFile("warn", s);
@@ -113,6 +121,10 @@ public class log {
             if (config.GUI_LOOP == 0) {
                log = false;
             }
+         }
+         else {
+            // Non GUI mode
+            System.out.println("ERROR: " + s);
          }
          
          if (log) {
