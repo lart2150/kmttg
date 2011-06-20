@@ -304,6 +304,14 @@ public class Remote {
             json.put("bodyId", "-");
             req = RpcRequest("subscriptionSearch", false, json);
          }
+         else if (type.equals("position")) {
+            json.put("throttleDelay", 1000);
+            req = RpcRequest("videoPlaybackInfoEventRegister", false, json);
+         }
+         else if (type.equals("jump")) {
+            // Expects "offset" in json
+            req = RpcRequest("videoPlaybackPositionSet", false, json);
+         }
          
          if (req != null) {
             Write(req);
