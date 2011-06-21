@@ -952,7 +952,10 @@ public class gui {
                   remote_gui = new remotegui(config.gui.getJFrame());
                else {
                   remote_gui.setTivoNames();
-                  remote_gui.display();
+                  if (remote_gui.tivo_count > 0)
+                     remote_gui.display();
+                  else
+                     log.warn("No Premieres currently enabled for Remote Control in kmttg configuration");
                }
             }
          });
@@ -1754,9 +1757,11 @@ public class gui {
       }
       else if (component.equals("ipaddelete")) {
          text =  "<b>iPad Delete</b><br>";
-         text += "If you have Series 4 TiVo or later with Network Remote setting enabled<br>";
+         text += "If you have Series 4 (Premiere) TiVo or later with Network Remote setting enabled<br>";
          text += "then if you enable this task, iPad style communications will be used to<br>";
-         text += "delete show on TiVo following successful decrypt of a downloaded .TiVo file.";
+         text += "delete show on TiVo following successful decrypt of a downloaded .TiVo file.<br>";
+         text += "NOTE: You must also have <b>Enable iPad style communications with this TiVo</b> option<br>";
+         text += "enabled under <b>Configuration-TiVos</b> for each Premiere that you want this to work with.";
       }
       else if (component.equals("comskip")) {
          text =  "<b>Ad Detect</b><br>";
