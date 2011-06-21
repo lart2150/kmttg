@@ -20,7 +20,7 @@ public class rnpl {
    // Submit remote NPL request to Job Monitor
    public static void rnplListCB(String tivoName) {
       // Clear rnpldata for this TiVo
-      rnpldata.put(tivoName, new JSONArray());
+      //rnpldata.put(tivoName, new JSONArray());
       
       // Submit job to obtain new data for this TiVo
       jobData job = new jobData();
