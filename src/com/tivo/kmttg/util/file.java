@@ -13,7 +13,11 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONException;
+import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.Remote;
 
 public class file {
    
@@ -270,4 +274,30 @@ public class file {
          }
       }
    }
+   
+   // Use iPad protocol to delete a show
+   public static Boolean iPadDelete(String tivoName, String recordingId) {
+      if (recordingId == null) {
+         log.error("iPad Delete got null recordingId");
+         return false;
+      }
+      JSONArray a = new JSONArray();
+      JSONObject json = new JSONObject();
+      a.put(recordingId);
+      try {
+         json.put("recordingId", a);
+         log.warn(">> Attempting iPad delete for id: " + recordingId);
+         Remote r = new Remote(config.TIVOS.get(tivoName), config.MAK);
+         if (r.success) {
+            if (r.Key("delete", json) != null)
+               log.warn(">> iPad delete succeeded.");
+            r.disconnect();
+         }
+      } catch (JSONException e) {
+         log.error("iPad delete failed - " + e.getMessage());
+         return false;
+      }
+      return true;
+   }
+
 }

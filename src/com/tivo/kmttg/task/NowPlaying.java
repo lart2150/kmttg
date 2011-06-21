@@ -12,6 +12,7 @@ import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.*;
 
 public class NowPlaying implements Serializable {
@@ -54,11 +55,11 @@ public class NowPlaying implements Serializable {
       jobMonitor.submitNewJob(job);
       limit_npl_fetches = config.getLimitNplSetting(tivoName);
       
-      if (config.gui != null && config.getRpcSetting(job.tivoName).equals("1")) {
+      if (config.getRpcSetting(job.tivoName).equals("1")) {
          // Extra iPad communication to retrieve NPL information
          // used to be able to play/delete shows. Only works for Premiere or
          // later models.
-         config.gui.getTab(job.tivoName).getTable().rnplListCB(job.tivoName);
+         rnpl.rnplListCB(job.tivoName);
       }
       return true;      
    }

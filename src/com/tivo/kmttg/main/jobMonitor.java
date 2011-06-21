@@ -591,6 +591,7 @@ public class jobMonitor {
       Boolean decrypt      = (Boolean)specs.get("decrypt");
       Boolean qsfix        = (Boolean)specs.get("qsfix");
       Boolean twpdelete    = (Boolean)specs.get("twpdelete");
+      Boolean ipaddelete   = (Boolean)specs.get("ipaddelete");
       Boolean comskip      = (Boolean)specs.get("comskip");
       Boolean comcut       = (Boolean)specs.get("comcut");
       Boolean captions     = (Boolean)specs.get("captions");
@@ -858,6 +859,10 @@ public class jobMonitor {
                   job.twpdelete = true;
                   job.url       = entry.get("url");
                }
+               if (ipaddelete && entry != null) {
+                  job.ipaddelete  = true;
+                  job.entry = entry;
+               }
             } else {
                // Standalone java download
                job.type      = "javadownload";
@@ -873,6 +878,10 @@ public class jobMonitor {
                if (twpdelete && entry != null && entry.containsKey("url")) {
                   job.twpdelete = true;
                   job.url       = entry.get("url");
+               }
+               if (ipaddelete && entry != null) {
+                  job.ipaddelete  = true;
+                  job.entry = entry;
                }
             } else {
                // Standalone curl download
@@ -928,6 +937,10 @@ public class jobMonitor {
             job.twpdelete = true;
             job.url       = entry.get("url");
          }
+         if (ipaddelete && entry != null) {
+            job.ipaddelete  = true;
+            job.entry = (entry);
+         }
          submitNewJob(job);
       }
       
@@ -944,6 +957,10 @@ public class jobMonitor {
             if (twpdelete && entry != null && entry.containsKey("url")) {
                job.twpdelete = true;
                job.url       = entry.get("url");
+            }
+            if (ipaddelete && entry != null) {
+               job.ipaddelete  = true;
+               job.entry = entry;
             }
          }
          submitNewJob(job);

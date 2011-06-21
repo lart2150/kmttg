@@ -8,6 +8,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
@@ -109,7 +110,7 @@ public class remote implements Serializable {
             }
             if (job.remote_rnpl) {
                // My Shows job => copy data
-               config.gui.getTab(job.tivoName).getTable().setNPLData(job.tivoName, data);
+               rnpl.setNPLData(job.tivoName, data);
             }
             log.warn("remote job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " TiVo=" + job.tivoName);

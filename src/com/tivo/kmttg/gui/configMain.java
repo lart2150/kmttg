@@ -65,6 +65,7 @@ public class configMain {
    private static JCheckBox VrdAllowMultiple = null;
    private static JCheckBox TSDownload = null;
    private static JCheckBox TivoWebPlusDelete = null;
+   private static JCheckBox iPadDelete = null;
    private static JCheckBox HideProtectedFiles = null;
    private static JCheckBox OverwriteFiles = null;
    private static JCheckBox java_downloads = null;
@@ -565,6 +566,12 @@ public class configMain {
       else
          TivoWebPlusDelete.setSelected(false);
       
+      // iPadDelete
+      if (config.iPadDelete == 1)
+         iPadDelete.setSelected(true);
+      else
+         iPadDelete.setSelected(false);
+      
       // HideProtectedFiles
       if (config.HideProtectedFiles == 1)
          HideProtectedFiles.setSelected(true);
@@ -962,6 +969,12 @@ public class configMain {
          config.TivoWebPlusDelete = 1;
       else
          config.TivoWebPlusDelete = 0;
+      
+      // iPadDelete
+      if (iPadDelete.isSelected())
+         config.iPadDelete = 1;
+      else
+         config.iPadDelete = 0;
       
       // HideProtectedFiles
       if (HideProtectedFiles.isSelected())
@@ -1553,6 +1566,7 @@ public class configMain {
       VrdAllowMultiple = new javax.swing.JCheckBox();
       TSDownload = new javax.swing.JCheckBox();
       TivoWebPlusDelete = new javax.swing.JCheckBox();
+      iPadDelete = new javax.swing.JCheckBox();
       HideProtectedFiles = new javax.swing.JCheckBox();
       OverwriteFiles = new javax.swing.JCheckBox();
       java_downloads = new javax.swing.JCheckBox();
@@ -1658,6 +1672,7 @@ public class configMain {
       VrdAllowMultiple.setText("Allow multiple VideoRedo jobs at once");
       TSDownload.setText("Download TiVo files in Transport Stream format");
       TivoWebPlusDelete.setText("Enable TivoWebPlus Delete task");
+      iPadDelete.setText("Enable iPad style delete task");
       HideProtectedFiles.setText("Do not show copy protected files in table");
       OverwriteFiles.setText("Overwrite existing files");
       java_downloads.setText("Use Java for downloads instead of curl");
@@ -2578,30 +2593,36 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(TivoWebPlusDelete, c);
       
-      // TSDownload
+      // iPadDelete
       c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(iPadDelete, c);
+      
+      // TSDownload
+      gy++;
+      c.gridx = 0;
       c.gridy = gy;
       program_options_panel.add(TSDownload, c);
       
       // java_downloads
-      gy++;
-      c.gridx = 0;
+      c.gridx = 1;
       c.gridy = gy;
       program_options_panel.add(java_downloads, c);
       
       // download_time_estimate
-      c.gridx = 1;
+      gy++;
+      c.gridx = 0;
       c.gridy = gy;
       program_options_panel.add(download_time_estimate, c);
       
       // combine_download_decrypt
-      gy++;
-      c.gridx = 0;
+      c.gridx = 1;
       c.gridy = gy;
       program_options_panel.add(combine_download_decrypt, c);
       
       // single_download
-      c.gridx = 1;
+      gy++;
+      c.gridx = 0;
       c.gridy = gy;
       program_options_panel.add(single_download, c);
       
@@ -2846,6 +2867,7 @@ public class configMain {
       VrdAllowMultiple.setToolTipText(getToolTip("VrdAllowMultiple"));
       TSDownload.setToolTipText(getToolTip("TSDownload"));
       TivoWebPlusDelete.setToolTipText(getToolTip("TivoWebPlusDelete"));
+      iPadDelete.setToolTipText(getToolTip("iPadDelete"));
       HideProtectedFiles.setToolTipText(getToolTip("HideProtectedFiles"));
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
       java_downloads.setToolTipText(getToolTip("java_downloads"));
@@ -3098,6 +3120,15 @@ public class configMain {
          text += "an optional <b>TWP Delete</b> task is made available in the kmttg GUI or auto transfers<br>";
          text += "task set. When task is enabled, a TivoWebPlus http call to delete show on TiVo will be<br>";
          text += "issued following successful decrypt of a downloaded .TiVo file.<br>";
+         text += "NOTE: Once you set and save this option you must restart kmttg to see the change.";
+
+      }
+      else if (component.equals("iPadDelete")) {
+         text =  "<b>Enable iPad style delete task</b><br>";
+         text += "For Series 4 TiVos if you have <b>Network Remote</b> option enabled and this option<br>";
+         text += "enabled an optional <b>iPad Delete</b> task is made available in the kmttg GUI or auto transfers<br>";
+         text += "task set. When task is enabled, iPad communications protocol is used to delete show on TiVo<br>";
+         text += "following a successful decrypt of a downloaded .TiVo file.<br>";
          text += "NOTE: Once you set and save this option you must restart kmttg to see the change.";
 
       }

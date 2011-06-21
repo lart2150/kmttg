@@ -324,6 +324,9 @@ public class Remote {
             // Returns info about both tuners
             req = RpcRequest("tunerStateEventRegister", true, json);
          }
+         // Other interesting ones to look at:
+         // unifiedItemSearch
+         //  followed by recordingSearch with offerId & state=[scheduled] to find cancellations
          else {
             // Not recognized => just use type
             req = RpcRequest(type, false, json);

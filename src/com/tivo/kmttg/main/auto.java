@@ -480,7 +480,8 @@ public class auto {
       log.print("START PROCESSING OF ENTRY: " + entry.get("title"));
       
       Hashtable<String,Object> h = new Hashtable<String,Object>();
-      h.put("tivoName", entry.get("tivoName"));
+      String tivoName = entry.get("tivoName");
+      h.put("tivoName", tivoName);
       h.put("mode", "Download");
       if (entry == null) return;
       h.put("entry",               entry);   
@@ -489,6 +490,7 @@ public class auto {
       h.put("decrypt",             (Boolean)(auto.decrypt   == 1));
       h.put("qsfix",               (Boolean)(auto.qsfix     == 1));
       h.put("twpdelete",           (Boolean)(auto.twpdelete == 1 && config.TivoWebPlusDelete == 1));
+      h.put("ipaddelete",          (Boolean)(auto.ipaddelete == 1 && config.getRpcSetting(tivoName).equals("1")));
       h.put("comskip",             (Boolean)(auto.comskip   == 1));
       h.put("comcut",              (Boolean)(auto.comcut    == 1));
       h.put("captions",            (Boolean)(auto.captions  == 1));
@@ -636,6 +638,7 @@ public class auto {
             ofp.write("decrypt "     + config.gui.decrypt_setting()   + "\n");
             ofp.write("qsfix "       + config.gui.qsfix_setting()     + "\n");
             ofp.write("twpdelete "   + config.gui.twpdelete_setting() + "\n");
+            ofp.write("ipaddelete "  + config.gui.ipaddelete_setting() + "\n");
             ofp.write("comskip "     + config.gui.comskip_setting()   + "\n");
             ofp.write("comcut "      + config.gui.comcut_setting()    + "\n");
             ofp.write("captions "    + config.gui.captions_setting()  + "\n");

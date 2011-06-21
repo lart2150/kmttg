@@ -9,6 +9,7 @@ import java.util.Stack;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.ffmpeg;
@@ -225,6 +226,13 @@ public class qsfix implements Serializable {
             // TivoWebPlus call to delete show on TiVo if configured
             if (job.twpdelete) {
                file.TivoWebPlusDelete(job.url);
+            }
+            
+            // iPad style delete show on TiVo if configured
+            if (job.ipaddelete) {
+               String recordingId = rnpl.findRecordingId(job.tivoName, job.entry);
+               if ( ! file.iPadDelete(job.tivoName, recordingId) )
+                  log.error("Failed to delete show on TiVo");
             }
             
             // Rename mpegFile_fix to mpegFile

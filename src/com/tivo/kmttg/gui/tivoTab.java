@@ -362,6 +362,8 @@ public class tivoTab {
             h.put("decrypt",   config.gui.decrypt.isSelected());
             h.put("qsfix",     config.gui.qsfix.isSelected());
             h.put("twpdelete", config.gui.twpdelete.isSelected());
+            h.put("ipaddelete", config.gui.ipaddelete.isSelected() &&
+                  config.getRpcSetting(tivoName).equals("1"));
             h.put("comskip",   config.gui.comskip.isSelected());
             h.put("comcut",    config.gui.comcut.isSelected());
             h.put("captions",  config.gui.captions.isSelected());

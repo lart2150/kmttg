@@ -74,6 +74,7 @@ public class gui {
    public JCheckBox decrypt = null;
    public JCheckBox qsfix = null;
    public JCheckBox twpdelete = null;
+   public JCheckBox ipaddelete = null;
    public JCheckBox comskip = null;
    public JCheckBox comcut = null;
    public JCheckBox captions = null;
@@ -212,6 +213,7 @@ public class gui {
          decrypt = new JCheckBox("decrypt", true);         
          qsfix = new JCheckBox("VRD QS fix", false);         
          twpdelete = new JCheckBox("TWP Delete", false);         
+         ipaddelete = new JCheckBox("iPad Delete", false);         
          comskip = new JCheckBox("Ad Detect", false);         
          comcut = new JCheckBox("Ad Cut", false);         
          captions = new JCheckBox("captions", false);         
@@ -251,6 +253,10 @@ public class gui {
          if (config.TivoWebPlusDelete == 1) {
             tasks_panel.add(Box.createRigidArea(space_5));
             tasks_panel.add(twpdelete);            
+         }
+         if (config.iPadDelete == 1) {
+            tasks_panel.add(Box.createRigidArea(space_5));
+            tasks_panel.add(ipaddelete);            
          }
          tasks_panel.add(Box.createRigidArea(space_5));
          tasks_panel.add(comskip);
@@ -995,6 +1001,13 @@ public class gui {
       } else {
          twpdelete.setEnabled(true);
       }
+      
+      if (config.iPadDelete == 0) {
+         ipaddelete.setSelected(false);
+         ipaddelete.setEnabled(false);
+      } else {
+         ipaddelete.setEnabled(true);
+      }
 
       if (! file.isFile(config.comskip)) {
          comskip.setSelected(false);
@@ -1356,6 +1369,7 @@ public class gui {
             ofp.write("<decrypt>\n"             + decrypt_setting()          + "\n");
             ofp.write("<qsfix>\n"               + qsfix_setting()            + "\n");
             ofp.write("<twpdelete>\n"           + twpdelete_setting()        + "\n");
+            ofp.write("<ipaddelete>\n"          + ipaddelete_setting()       + "\n");
             ofp.write("<comskip>\n"             + comskip_setting()          + "\n");
             ofp.write("<comcut>\n"              + comcut_setting()           + "\n");
             ofp.write("<captions>\n"            + captions_setting()         + "\n");
@@ -1477,6 +1491,12 @@ public class gui {
                   twpdelete.setSelected(true);
                else
                   twpdelete.setSelected(false);
+            }            
+            if (key.equals("ipaddelete")) {
+               if (line.matches("1"))
+                  ipaddelete.setSelected(true);
+               else
+                  ipaddelete.setSelected(false);
             }            
             if (key.equals("comskip")) {
                if (line.matches("1"))
@@ -1641,6 +1661,7 @@ public class gui {
       decrypt.setToolTipText(getToolTip("decrypt"));
       qsfix.setToolTipText(getToolTip("qsfix"));
       twpdelete.setToolTipText(getToolTip("twpdelete"));
+      ipaddelete.setToolTipText(getToolTip("ipaddelete"));
       comskip.setToolTipText(getToolTip("comskip"));
       comcut.setToolTipText(getToolTip("comcut"));
       captions.setToolTipText(getToolTip("captions"));
@@ -1730,6 +1751,12 @@ public class gui {
          text += "If you have TivoWebPlus configured on your TiVo(s) then if you enable this task<br>";
          text += "a TivoWebPlus http call to delete show on TiVo will be issued following<br>";
          text += "successful decrypt of a downloaded .TiVo file.";
+      }
+      else if (component.equals("ipaddelete")) {
+         text =  "<b>iPad Delete</b><br>";
+         text += "If you have Series 4 TiVo or later with Network Remote setting enabled<br>";
+         text += "then if you enable this task, iPad style communications will be used to<br>";
+         text += "delete show on TiVo following successful decrypt of a downloaded .TiVo file.";
       }
       else if (component.equals("comskip")) {
          text =  "<b>Ad Detect</b><br>";
@@ -1895,6 +1922,11 @@ public class gui {
    public int twpdelete_setting() {
       int selected = 0;
       if (twpdelete.isSelected()) selected = 1;
+      return selected;
+   }
+   public int ipaddelete_setting() {
+      int selected = 0;
+      if (ipaddelete.isSelected()) selected = 1;
       return selected;
    }
    public int comskip_setting() {

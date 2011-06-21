@@ -129,6 +129,8 @@ public class autoConfig {
                   entry.qsfix = Integer.parseInt(value);
                if (name.matches("twpdelete"))
                   entry.twpdelete = Integer.parseInt(value);
+               if (name.matches("ipaddelete"))
+                  entry.ipaddelete = Integer.parseInt(value);
                if (name.matches("comskip"))
                   entry.comskip = Integer.parseInt(value);
                if (name.matches("comcut"))

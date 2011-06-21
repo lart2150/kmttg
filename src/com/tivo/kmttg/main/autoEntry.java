@@ -13,6 +13,7 @@ public class autoEntry {
    public int decrypt   = 0;
    public int qsfix     = 0;
    public int twpdelete = 0;
+   public int ipaddelete = 0;
    public int comskip   = 0;
    public int comcut    = 0;
    public int captions  = 0;

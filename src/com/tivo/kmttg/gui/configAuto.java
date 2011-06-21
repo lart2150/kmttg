@@ -70,6 +70,7 @@ public class configAuto {
    private static JCheckBox decrypt = null;
    private static JCheckBox qsfix = null;
    private static JCheckBox twpdelete = null;
+   private static JCheckBox ipaddelete = null;
    private static JCheckBox comskip = null;
    private static JCheckBox comcut = null;
    private static JCheckBox captions = null;
@@ -202,6 +203,7 @@ public class configAuto {
       decrypt   = new JCheckBox("decrypt");
       qsfix     = new JCheckBox("VRD QS fix");
       twpdelete = new JCheckBox("TWP Delete");
+      ipaddelete = new JCheckBox("iPad Delete");
       comskip   = new JCheckBox("Ad Detect");
       comcut    = new JCheckBox("Ad Cut");
       captions  = new JCheckBox("captions");
@@ -354,6 +356,10 @@ public class configAuto {
       if (config.TivoWebPlusDelete == 1) {
          row4.add(Box.createRigidArea(space_5));
          row4.add(twpdelete);         
+      }
+      if (config.iPadDelete == 1) {
+         row4.add(Box.createRigidArea(space_5));
+         row4.add(ipaddelete);         
       }
       row4.add(Box.createRigidArea(space_5));
       row4.add(comskip);
@@ -554,6 +560,7 @@ public class configAuto {
       decrypt.setToolTipText(config.gui.getToolTip("decrypt"));
       qsfix.setToolTipText(config.gui.getToolTip("qsfix"));
       twpdelete.setToolTipText(config.gui.getToolTip("twpdelete"));
+      ipaddelete.setToolTipText(config.gui.getToolTip("ipaddelete"));
       comskip.setToolTipText(config.gui.getToolTip("comskip"));
       comcut.setToolTipText(config.gui.getToolTip("comcut"));
       captions.setToolTipText(config.gui.getToolTip("captions"));
@@ -805,6 +812,13 @@ public class configAuto {
          twpdelete.setEnabled(false);
       } else {
          twpdelete.setEnabled(true);
+      }
+      
+      if (config.iPadDelete == 0) {
+         ipaddelete.setSelected(false);
+         ipaddelete.setEnabled(false);
+      } else {
+         ipaddelete.setEnabled(true);
       }
 
       if (! file.isFile(config.comskip)) {
@@ -1171,6 +1185,7 @@ public class configAuto {
                ofp.write("decrypt "             + entry.decrypt             + "\n");               
                ofp.write("qsfix "               + entry.qsfix               + "\n");               
                ofp.write("twpdelete "           + entry.twpdelete           + "\n");               
+               ofp.write("ipaddelete "          + entry.ipaddelete          + "\n");               
                ofp.write("comskip "             + entry.comskip             + "\n");               
                ofp.write("comcut "              + entry.comcut              + "\n");               
                ofp.write("captions "            + entry.captions            + "\n");               
@@ -1217,6 +1232,7 @@ public class configAuto {
       decrypt.setSelected((Boolean)(entry.decrypt == 1));
       qsfix.setSelected((Boolean)(entry.qsfix == 1));
       twpdelete.setSelected((Boolean)(entry.twpdelete == 1));
+      ipaddelete.setSelected((Boolean)(entry.ipaddelete == 1));
       comskip.setSelected((Boolean)(entry.comskip == 1));
       comcut.setSelected((Boolean)(entry.comcut == 1));
       captions.setSelected((Boolean)(entry.captions == 1));
@@ -1280,6 +1296,11 @@ public class configAuto {
          entry.twpdelete = 1;
       else
          entry.twpdelete = 0;
+      
+      if (ipaddelete.isSelected())
+         entry.ipaddelete = 1;
+      else
+         entry.ipaddelete = 0;
       
       if (comskip.isSelected())
          entry.comskip = 1;

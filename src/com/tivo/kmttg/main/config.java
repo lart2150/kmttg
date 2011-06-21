@@ -56,6 +56,7 @@ public class config {
    public static int CheckBeacon = 1;
    public static int UseOldBeacon = 0;
    public static int TivoWebPlusDelete = 0;
+   public static int iPadDelete = 0;
    public static int UseAdscan = 0;
    public static int VrdReview = 0;
    public static int VrdEncode = 0;
@@ -787,6 +788,9 @@ public class config {
             if (key.equals("TivoWebPlusDelete")) {
                TivoWebPlusDelete = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("iPadDelete")) {
+               iPadDelete = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("cpu_cores")) {
                cpu_cores = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -985,6 +989,8 @@ public class config {
          ofp.write("<UseOldBeacon>\n" + UseOldBeacon + "\n\n");
          
          ofp.write("<TivoWebPlusDelete>\n" + TivoWebPlusDelete + "\n\n");
+         
+         ofp.write("<iPadDelete>\n" + iPadDelete + "\n\n");
          
          ofp.write("<cpu_cores>\n" + cpu_cores + "\n\n");
          

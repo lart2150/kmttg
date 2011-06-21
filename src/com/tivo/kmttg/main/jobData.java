@@ -1,6 +1,7 @@
 package com.tivo.kmttg.main;
 
 import java.io.Serializable;
+import java.util.Hashtable;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.gui.spTable;
@@ -91,6 +92,10 @@ public class jobData implements Serializable {
    
    // TWP delete related
    public Boolean twpdelete = false;
+   
+   // iPad delete related
+   public Boolean ipaddelete = false;
+   public Hashtable<String,String> entry = null;
    
    // comskip related
    public String comskipIni = null;
