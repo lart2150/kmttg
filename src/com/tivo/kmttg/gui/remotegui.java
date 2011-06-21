@@ -39,6 +39,7 @@ import com.tivo.kmttg.util.string;
 public class remotegui {
    private JDialog dialog = null;
    private JTabbedPane tabbed_panel = null;
+   public int tivo_count = 0;
    
    private todoTable tab_todo = null;
    private JComboBox tivo_todo = null;
@@ -393,8 +394,11 @@ public class remotegui {
       dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
       tab_todo.packColumns(tab_todo.TABLE, 2);
       tab_sp.packColumns(tab_sp.TABLE, 2);
-      dialog.setVisible(true);
-      
+      if (tivo_count == 0) {
+         log.warn("No Premieres currently enabled for Remote Control in kmttg configuration");
+         return;
+      }
+      dialog.setVisible(true);      
    }
    
    // TiVo selection changed for ToDo tab
@@ -582,7 +586,8 @@ public class remotegui {
       return null;
    }
    
-   public void setTivoNames() {      
+   public void setTivoNames() { 
+      tivo_count = 0;
       Stack<String> tivo_stack = config.getTivoNames();
       tivo_todo.removeAllItems();
       tivo_sp.removeAllItems();
@@ -590,12 +595,13 @@ public class remotegui {
       tivo_info.removeAllItems();
       for (int i=0; i<tivo_stack.size(); ++i) {
          if (config.getRpcSetting(tivo_stack.get(i)).equals("1")) {
+            tivo_count++;
             tivo_todo.addItem(tivo_stack.get(i));
             tivo_sp.addItem(tivo_stack.get(i));
             tivo_rc.addItem(tivo_stack.get(i));
             tivo_info.addItem(tivo_stack.get(i));
          }
-      }
+      }      
    }
       
    private ImageIcon scale(Image src, double scale) {
