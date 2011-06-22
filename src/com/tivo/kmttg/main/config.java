@@ -393,6 +393,19 @@ public class config {
             enableRpc.put(tivoName, "0");
       }
    }
+   
+   // iPad enabled =>
+   // 1. At least 1 TiVo has RpcSetting of "1"
+   // 2. iPadDelete == 1
+   public static Boolean ipadDeleteEnabled() {
+      Boolean rpcSetting = false;
+      Stack<String> current_tivoNames = getTivoNames();
+      for (int i=0; i<current_tivoNames.size(); ++i) {
+         if (getRpcSetting(current_tivoNames.get(i)).equals("1"))
+            rpcSetting = true;
+      }
+      return rpcSetting && iPadDelete == 1;
+   }
 
    private static void defineDefaults() {
       debug.print("");
