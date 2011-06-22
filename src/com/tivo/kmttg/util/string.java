@@ -180,5 +180,14 @@ public class string {
       }
       return s;
    }
+   
+   public static String utfString(String s) {
+      try {
+         return new String(s.getBytes(), "UTF-8");
+      } catch (UnsupportedEncodingException e) {
+         // Just filter out these exceptions
+      }
+      return s;
+   }
 
 }
