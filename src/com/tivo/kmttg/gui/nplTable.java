@@ -398,6 +398,7 @@ public class nplTable {
          if (selected != null && selected.length > 0) {
             if (keyCode == KeyEvent.VK_DELETE) {
                // Delete key has special action
+               String show_names = "";
                Stack<String> urlsToDelete = new Stack<String>();
                Stack<String> idsToDelete = new Stack<String>();
                String id;
@@ -415,6 +416,7 @@ public class nplTable {
                            if (config.getRpcSetting(tivoName).equals("1")) {
                               id = rnpl.findRecordingId(tivoName, entry);
                               if (id != null) {
+                                 show_names += entry.get("title");
                                  urlsToDelete.add(entry.get("url"));
                                  idsToDelete.add(id);
                               }
@@ -431,6 +433,7 @@ public class nplTable {
                      if (config.getRpcSetting(tivoName).equals("1")) {
                         id = rnpl.findRecordingId(tivoName, s.data);
                         if (id != null) {
+                           show_names += s.data.get("title");
                            urlsToDelete.add(s.data.get("url"));
                            idsToDelete.add(id);
                         }
@@ -448,7 +451,7 @@ public class nplTable {
                   }
                   if (config.getRpcSetting(tivoName).equals("1")) {
                      // Use iPad remote protocol to remove items
-                     log.warn("Deleting selected shows on TiVo: '" + tivoName + "'");
+                     log.warn("Deleting selected shows on TiVo '" + tivoName + "':\n" + show_names);
                      RemoveIds(urlsToDelete, idsToDelete);
                      folderize(entries);
                      inFolder = false;
