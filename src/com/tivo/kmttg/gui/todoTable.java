@@ -31,6 +31,7 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class todoTable {
    private String[] TITLE_cols = {"DATE", "SHOW", "CHANNEL", "DUR"};
@@ -258,9 +259,9 @@ public class todoTable {
           long end = getLongDateFromString(endString);
           String title = " ";
           if (data.has("title"))
-             title += data.getString("title");
+             title += string.utfString(data.getString("title"));
           if (data.has("subtitle"))
-             title += " - " + data.getString("subtitle");
+             title += " - " + string.utfString(data.getString("subtitle"));
           String channel = " ";
           if (data.has("channel")) {
              o = data.getJSONObject("channel");

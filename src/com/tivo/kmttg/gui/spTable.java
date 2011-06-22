@@ -28,6 +28,7 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class spTable {
    private String[] TITLE_cols = {"PRIORITY", "SHOW", "CHANNEL", "NUM"};
@@ -258,7 +259,7 @@ public class spTable {
           Integer priority = data.getInt("priority") - priority_offset;
           String title = " ";
           if (data.has("title"))
-             title += data.getString("title");
+             title += string.utfString(data.getString("title"));
           String channel = " ";
           if (data.has("idSetSource")) {
              o = data.getJSONObject("idSetSource");
@@ -279,7 +280,7 @@ public class spTable {
           info[2] = channel;
           info[3] = max;
           AddRow(TABLE, info);       
-       } catch (JSONException e) {
+       } catch (Exception e) {
           log.error("spTable AddRow - " + e.getMessage());
        }
     }
