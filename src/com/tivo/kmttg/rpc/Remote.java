@@ -31,7 +31,7 @@ public class Remote {
    public Boolean success = true;
    private int port = 1413;
    private String MAK = null;
-   private int timeout = 10; // read timeout in secs
+   private int timeout = 120; // read timeout in secs
    private int rpc_id = 0;
    private int session_id = 0;
    private Socket socket = null;
