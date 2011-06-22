@@ -241,6 +241,7 @@ public class Remote {
          json = new JSONObject();
       try {
          if (type.equals("playback")) {
+            // Play an existing recording
             // Expects "id" in json
             json.put("uri", "x-tivo:classicui:playback");
             JSONObject parameters = new JSONObject();
@@ -252,10 +253,25 @@ public class Remote {
             req = RpcRequest("uiNavigate", false, json);
          }
          else if (type.equals("delete")) {
+            // Delete an existing recording
             // Expects "recordingId" of type JSONArray in json
             json.put("state", "deleted");
             json.put("bodyId", "-");
             req = RpcRequest("recordingUpdate", false, json);
+         }
+         else if (type.equals("cancel")) {
+            // Cancel a recording in ToDo list
+            // Expects "recordingId" of type JSONArray in json
+            json.put("state", "cancelled");
+            json.put("bodyId", "-");
+            req = RpcRequest("recordingUpdate", false, json);
+         }
+         else if (type.equals("prioritize")) {
+            // Re-prioritize a season pass
+            // Expects "subscriptionId" of type JSONArray in json
+            // Also expects "priority" of type int in json (2512=>take place of current 2512)
+            json.put("bodyId", "-");
+            req = RpcRequest("subscriptionsReprioritize", false, json);
          }
          else if (type.equals("Search")) {
             // Individual item search
