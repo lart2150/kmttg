@@ -254,7 +254,7 @@ public class gui {
             tasks_panel.add(Box.createRigidArea(space_5));
             tasks_panel.add(twpdelete);            
          }
-         if (config.iPadDelete == 1) {
+         if (config.ipadDeleteEnabled()) {
             tasks_panel.add(Box.createRigidArea(space_5));
             tasks_panel.add(ipaddelete);            
          }
@@ -1005,7 +1005,7 @@ public class gui {
          twpdelete.setEnabled(true);
       }
       
-      if (config.iPadDelete == 0) {
+      if ( ! config.ipadDeleteEnabled() ) {
          ipaddelete.setSelected(false);
          ipaddelete.setEnabled(false);
       } else {

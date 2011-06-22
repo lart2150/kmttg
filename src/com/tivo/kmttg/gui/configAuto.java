@@ -357,7 +357,7 @@ public class configAuto {
          row4.add(Box.createRigidArea(space_5));
          row4.add(twpdelete);         
       }
-      if (config.iPadDelete == 1) {
+      if (config.ipadDeleteEnabled()) {
          row4.add(Box.createRigidArea(space_5));
          row4.add(ipaddelete);         
       }
@@ -814,7 +814,7 @@ public class configAuto {
          twpdelete.setEnabled(true);
       }
       
-      if (config.iPadDelete == 0) {
+      if ( ! config.ipadDeleteEnabled() ) {
          ipaddelete.setSelected(false);
          ipaddelete.setEnabled(false);
       } else {
