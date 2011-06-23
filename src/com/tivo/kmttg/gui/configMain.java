@@ -95,6 +95,7 @@ public class configMain {
    private static JTextField comskip_ini = null;
    private static JTextField wan_http_port = null;
    private static JTextField wan_https_port = null;
+   private static JTextField wan_ipad_port = null;
    private static JTextField limit_npl_fetches = null;
    private static JTextField active_job_limit = null;
    private static JTextField VRD_path = null;
@@ -256,6 +257,12 @@ public class configMain {
             wan_https_port.setText(https);
          } else {
             wan_https_port.setText("");
+         }
+         String ipad = config.getWanSetting(tivoName, "ipad");
+         if (ipad != null) {
+            wan_ipad_port.setText(ipad);
+         } else {
+            wan_ipad_port.setText("");
          }
       }
    }
@@ -457,6 +464,9 @@ public class configMain {
          String https = config.getWanSetting(tivoName, "https");
          if (https != null)
             wan_https_port.setText(https);
+         String ipad = config.getWanSetting(tivoName, "ipad");
+         if (ipad != null)
+            wan_ipad_port.setText(ipad);
       }
             
       // Beacon
@@ -820,6 +830,7 @@ public class configMain {
          } else {
             config.setWanSetting(tivoName, "http", "");
          }
+         
          value = string.removeLeadingTrailingSpaces(wan_https_port.getText());
          if (value.length() > 0) {
             try {
@@ -831,6 +842,19 @@ public class configMain {
             }
          } else {
             config.setWanSetting(tivoName, "https", "");
+         }
+         
+         value = string.removeLeadingTrailingSpaces(wan_ipad_port.getText());
+         if (value.length() > 0) {
+            try {
+               Integer.parseInt(value);
+               config.setWanSetting(tivoName, "ipad", value);
+            } catch(NumberFormatException e) {
+               textFieldError(wan_ipad_port, "wan ipad port should be a number: '" + value + "'");
+               errors++;
+            }
+         } else {
+            config.setWanSetting(tivoName, "ipad", "");
          }
       }
       
@@ -1515,6 +1539,7 @@ public class configMain {
       MAK = new javax.swing.JTextField(15);
       wan_http_port = new javax.swing.JTextField(15);
       wan_https_port = new javax.swing.JTextField(15);
+      wan_ipad_port = new javax.swing.JTextField(15);
       limit_npl_fetches = new javax.swing.JTextField(15);
       active_job_limit = new javax.swing.JTextField(15);
       toolTipsTimeout = new javax.swing.JTextField(15);
@@ -1590,6 +1615,7 @@ public class configMain {
       JLabel comskip_ini_label = new javax.swing.JLabel();
       JLabel wan_http_port_label = new javax.swing.JLabel();
       JLabel wan_https_port_label = new javax.swing.JLabel();
+      JLabel wan_ipad_port_label = new javax.swing.JLabel();
       JLabel limit_npl_fetches_label = new javax.swing.JLabel();
       JLabel active_job_limit_label = new javax.swing.JLabel();
       JLabel VRD_path_label = new javax.swing.JLabel();
@@ -1696,6 +1722,7 @@ public class configMain {
       comskip_ini_label.setText("comskip.ini"); 
       wan_http_port_label.setText("wan http port"); 
       wan_https_port_label.setText("wan https port");
+      wan_ipad_port_label.setText("wan ipad port"); 
       limit_npl_fetches_label.setText("limit # of npl fetches");
       active_job_limit_label.setText("active job limit"); 
       VRD_path_label.setText("VideoRedo path");
@@ -2178,6 +2205,16 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       tivo_panel.add(wan_https_port, c);
+      
+      // wan ipad port
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      tivo_panel.add(wan_ipad_port_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      tivo_panel.add(wan_ipad_port, c);
       
       // autotune panel
       JPanel autotune_panel = new JPanel(new GridBagLayout());
@@ -2897,6 +2934,7 @@ public class configMain {
       AtomicParsley.setToolTipText(getToolTip("AtomicParsley"));
       wan_http_port.setToolTipText(getToolTip("wan_http_port"));
       wan_https_port.setToolTipText(getToolTip("wan_https_port"));
+      wan_ipad_port.setToolTipText(getToolTip("wan_ipad_port"));
       limit_npl_fetches.setToolTipText(getToolTip("limit_npl_fetches"));
       active_job_limit.setToolTipText(getToolTip("active_job_limit"));
       disk_space.setToolTipText(getToolTip("disk_space"));
@@ -3356,6 +3394,15 @@ public class configMain {
          text += "<b>Advanced Setting - for normal use leave this setting empty</b>.<br>";
          text += "Set this option only if you plan to use kmttg over a WAN instead of your local LAN.<br>";
          text += "By default http port 443 is used to get Now Playing List from the Tivos on the LAN, but from WAN side<br>";
+         text += "you will have to setup port forwarding in your router, then you should specify here the WAN (public) side<br>";
+         text += "port number you are using in your router port forwarding settings.<br>";
+         text += "NOTE: In order to save this setting you must OK the configuration window once for each TiVo";
+      }
+      else if (component.equals("wan_ipad_port")) {
+         text =  "<b>wan ipad port</b><br>";
+         text += "<b>Advanced Setting - for normal use leave this setting empty</b>.<br>";
+         text += "Set this option only if you plan to use kmttg over a WAN instead of your local LAN.<br>";
+         text += "By default http port 1413 for iPad interface to Tivos on the LAN, but from WAN side<br>";
          text += "you will have to setup port forwarding in your router, then you should specify here the WAN (public) side<br>";
          text += "port number you are using in your router port forwarding settings.<br>";
          text += "NOTE: In order to save this setting you must OK the configuration window once for each TiVo";

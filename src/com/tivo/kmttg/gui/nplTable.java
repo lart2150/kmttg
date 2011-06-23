@@ -1121,7 +1121,7 @@ public class nplTable {
       }
       try {
          json.put("recordingId", a);
-         Remote r = new Remote(config.TIVOS.get(tivoName), config.MAK);
+         Remote r = new Remote(tivoName, config.MAK);
          if (r.success) {
             r.Key("delete", json);
             r.disconnect();
@@ -1135,7 +1135,7 @@ public class nplTable {
       JSONObject json = new JSONObject();
       try {
          json.put("id", id);
-         Remote r = new Remote(config.TIVOS.get(tivoName), config.MAK);
+         Remote r = new Remote(tivoName, config.MAK);
          if (r.success) {
             r.Key("playback", json);
             r.disconnect();

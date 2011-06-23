@@ -24,6 +24,7 @@ import javax.net.ssl.X509TrustManager;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.log;
 
 public class Remote {
@@ -86,12 +87,17 @@ public class Remote {
      return sslSocketFactory;
    }
    
-   public Remote(String IP, String MAK) {
+   public Remote(String tivoName, String MAK) {
       try {
          this.MAK = MAK;
+         String IP = config.TIVOS.get(tivoName);
          getSocketFactory();
          session_id = new Random(0x27dc20).nextInt();
-         socket = sslSocketFactory.createSocket(IP, port);
+         int use_port = port;
+         String wan_port = config.getWanSetting(IP, "ipad");
+         if (wan_port != null)
+            use_port = Integer.parseInt(wan_port);
+         socket = sslSocketFactory.createSocket(IP, use_port);
          socket.setSoTimeout(timeout*1000);
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
          out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
