@@ -94,7 +94,7 @@ public class Remote {
          getSocketFactory();
          session_id = new Random(0x27dc20).nextInt();
          int use_port = port;
-         String wan_port = config.getWanSetting(IP, "ipad");
+         String wan_port = config.getWanSetting(tivoName, "ipad");
          if (wan_port != null)
             use_port = Integer.parseInt(wan_port);
          socket = sslSocketFactory.createSocket(IP, use_port);
