@@ -91,6 +91,8 @@ public class Remote {
       try {
          this.MAK = MAK;
          String IP = config.TIVOS.get(tivoName);
+         if (IP == null)
+            IP = tivoName;
          getSocketFactory();
          session_id = new Random(0x27dc20).nextInt();
          int use_port = port;
@@ -321,6 +323,26 @@ public class Remote {
             json.put("bodyId", "-");
             json.put("noLimit", "true");
             req = RpcRequest("subscriptionSearch", false, json);
+         }
+         else if (type.equals("subscribe")) {
+            // Subscribe a season pass
+            // Expects several fields in json, (levelOfDetail=medium)
+            // Usually this will be JSONObject read from a JSONArray of all
+            // season passes that were saved to a file
+            JSONObject o = new JSONObject();
+            if (json.has("recordingQuality"))
+               o.put("recordingQuality", json.getString("recordingQuality"));
+            if (json.has("maxRecordings"))
+               o.put("maxRecordings", json.getInt("maxRecordings"));
+            if (json.has("keepBehavior"))
+               o.put("keepBehavior", json.getString("keepBehavior"));
+            if (json.has("idSetSource"))
+               o.put("idSetSource", json.getJSONObject("idSetSource"));
+            if (json.has("showStatus"))
+               o.put("showStatus", json.getString("showStatus"));
+            o.put("bodyId", "-");
+            o.put("ignoreConflicts", "true");
+            req = RpcRequest("subscribe", false, o);
          }
          else if (type.equals("position")) {
             json.put("throttleDelay", 1000);
