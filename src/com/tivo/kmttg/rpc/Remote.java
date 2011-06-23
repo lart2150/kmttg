@@ -305,7 +305,6 @@ public class Remote {
             req = RpcRequest("recordingFolderItemSearch", false, json);
          }
          else if (type.equals("ToDo")) {
-            //json.put("levelOfDetail", "medium");
             json.put("format", "idSequence");
             json.put("bodyId", "-");
             json.put("noLimit", "true");
@@ -318,15 +317,9 @@ public class Remote {
             req = RpcRequest("recordingSearch", false, json);
          }
          else if (type.equals("SeasonPasses")) {
-            json.put("format", "idSequence");
-            json.put("bodyId", "-");
-            json.put("noLimit", "true");
-            req = RpcRequest("subscriptionSearch", false, json);
-         }
-         else if (type.equals("SeasonPassIds")) {
-            // Expects "objectIdAndType" in json
             json.put("levelOfDetail", "medium");
             json.put("bodyId", "-");
+            json.put("noLimit", "true");
             req = RpcRequest("subscriptionSearch", false, json);
          }
          else if (type.equals("position")) {
@@ -464,35 +457,19 @@ public class Remote {
       return allShows;
    }
    
-   // Get to do list of all shows
+   // Get all season passes
    public JSONArray SeasonPasses() {
-      JSONArray allPasses = new JSONArray();
       JSONObject result = null;
-
-      try {
-         // Top level list
-         result = Key("SeasonPasses", new JSONObject());
-         if (result != null && result.has("objectIdAndType")) {
-            JSONArray items = result.getJSONArray("objectIdAndType");
-            for (int j=0; j<items.length(); ++j) {
-               JSONArray id = new JSONArray();
-               id.put(items.get(j));
-               JSONObject s = new JSONObject();
-               s.put("objectIdAndType",id);
-               result = Key("SeasonPassIds", s);
-               if (result != null && result.has("subscription")) {
-                  s = result.getJSONArray("subscription").getJSONObject(0);
-                  allPasses.put(s);
-                  //print(s.toString());
-               }
-            }
-         } // if
-      } catch (JSONException e) {
-         error("rpc SeasonPasses error - " + e.getMessage());
-         return null;
+      result = Key("SeasonPasses", new JSONObject());
+      if (result != null && result.has("subscription")) {
+         try {
+            return result.getJSONArray("subscription");
+         } catch (JSONException e) {
+            error("rpc SeasonPasses error - " + e.getMessage());
+            return null;
+         }
       }
-
-      return allPasses;
+      return null;
    }
    
    private void print(String message) {
