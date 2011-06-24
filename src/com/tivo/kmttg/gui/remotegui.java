@@ -9,6 +9,7 @@ import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -18,6 +19,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -26,7 +28,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 
+import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
+import com.tivo.kmttg.JSON.JSONFile;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -55,12 +59,17 @@ public class remotegui {
    private JTextField rc_jumpto_text = null;
    private JTextField rc_jumpahead_text = null;
    private JTextField rc_jumpback_text = null;
+   
+   private JFileChooser Browser = null;
 
    remotegui(JFrame frame) {
       
       dialog = new JDialog(frame, false); // non-modal dialog
       //dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE); // Destroy when closed
       dialog.setTitle("Remote Control");
+      
+      Browser = new JFileChooser(config.programDir);
+      Browser.setMultiSelectionEnabled(false);
       
       // Define content for dialog window
       int gy = 0;
@@ -182,14 +191,64 @@ public class remotegui {
                SPListCB(tivoName);
          }
       });
-      row1_sp.add(Box.createRigidArea(space_40));
+      
+      JButton save_sp = new JButton("Save...");
+      save_sp.setToolTipText(getToolTip("save_sp"));
+      save_sp.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Save SP data to a file
+            String tivoName = (String)tivo_sp.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+               Browser.setSelectedFile(new File(config.programDir + File.separator + tivoName + ".sp"));
+               int result = Browser.showDialog(dialog, "Save to file");
+               if (result == JFileChooser.APPROVE_OPTION) {               
+                  File file = Browser.getSelectedFile();
+                  SPListSave(tivoName, file.getAbsolutePath());
+               }
+            }
+         }
+      });         
+      
+      JButton load_sp = new JButton("Load...");
+      load_sp.setToolTipText(getToolTip("load_sp"));
+      load_sp.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Load SP data from a file
+            Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            int result = Browser.showDialog(dialog, "Load from file");
+            if (result == JFileChooser.APPROVE_OPTION) {               
+               File file = Browser.getSelectedFile();
+               SPListLoad(file.getAbsolutePath());
+            }
+         }
+      });         
+      
+      JButton copy_sp = new JButton("Copy to TiVo");
+      copy_sp.setToolTipText(getToolTip("copy_sp"));
+      copy_sp.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Copy selected SPs to a TiVo
+            String tivoName = (String)tivo_sp.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0)
+               SPListCopy(tivoName);
+         }
+      });         
+      
+      row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(title_sp);
-      row1_sp.add(Box.createRigidArea(space_40));
+      row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(tivo_sp_label);
       row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(tivo_sp);
-      row1_sp.add(Box.createRigidArea(space_40));
+      row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(refresh_sp);
+      row1_sp.add(Box.createRigidArea(space_5));
+      row1_sp.add(save_sp);
+      row1_sp.add(Box.createRigidArea(space_5));
+      row1_sp.add(load_sp);
+      row1_sp.add(Box.createRigidArea(space_5));
+      row1_sp.add(copy_sp);
       panel_sp.add(row1_sp, c);
       
       tab_sp = new spTable(dialog);
@@ -568,6 +627,47 @@ public class remotegui {
       }
       return true;
    }
+   
+   private void SPListSave(String tivoName, String file) {
+      if (tab_sp.tivo_data.containsKey(tivoName) && tab_sp.tivo_data.get(tivoName).length() > 0) {
+         log.warn("Saving '" + tivoName + "' SP list to file: " + file);
+         JSONFile.write(tab_sp.tivo_data.get(tivoName), file);
+      } else {
+         log.error("No data available to save.");
+      }
+   }
+   
+   private void SPListLoad(String file) {
+      log.print("Loading data from file: " + file);
+      JSONArray data = JSONFile.readJSONArray(file);
+      if (data != null && data.length() > 0) {
+         tab_sp.clear();
+         tab_sp.AddRows(data);
+         tab_sp.updateTitleCols(" Loaded:");
+      }
+   }
+   
+   private void SPListCopy(String tivoName) {
+      log.print("Copying Season Passes to TiVo: " + tivoName);
+      int[] selected = tab_sp.GetSelectedRows();
+      if (selected.length > 0) {
+         int row;
+         JSONObject json, result;
+         Remote r = new Remote(tivoName, config.MAK);
+         if (r.success) {
+            for (int i=0; i<selected.length; ++i) {
+               row = selected[i];
+               json = tab_sp.GetRowData(row);
+               if (json != null) {
+                  result = r.Key("subscribe", json);
+                  if (result != null)
+                     log.print(result.toString());
+               }
+            }
+            r.disconnect();
+         }
+      }
+   }
             
    public void display() {
       if (dialog != null)
@@ -639,6 +739,30 @@ public class remotegui {
          text = "<b>Refresh</b><br>";
          text += "Refresh Season Pass list of selected TiVo.<br>";
          text += "<b>NOTE: This only works for Premiere models</b>.";
+      }
+      else if (component.equals("save_sp")){
+         text = "<b>Save</b><br>";
+         text += "Save the currently displayed Season Pass list to a file. This file can then be loaded<br>";
+         text += "at a later date into this table, then entries from the table can be copied to your TiVos<br>";
+         text += "if desired by selecting entries in the table and clicking on <b>Copy to TiVo</b> button.<br>";
+         text += "i.e. This is a way to backup your season passes.";
+      }
+      else if (component.equals("load_sp")){
+         text = "<b>Load</b><br>";
+         text += "Load a previously saved Season Pass list from a file. When loaded the table will have a<br>";
+         text += "<b>Loaded: </b> prefix in the TITLE column indicating that these were loaded from a file<br>";
+         text += "to distinguish from normal case where they were obtained from displayed TiVo name.<br>";
+         text += "Note that loaded season passes can then be copied to TiVos by selecting the TiVo you want to<br>";
+         text += "copy to, then selecting rows in the table you want to copy and then clicking on the <b>Copy to TiVo</b><br>";
+         text += "button.";
+      }
+      else if (component.equals("copy_sp")){
+         text = "<b>Copy to TiVo</b><br>";
+         text += "This is used to copy season passes displayed in the Season Pass table to 1 of your TiVos.<br>";
+         text += "Select the TiVo you want to copy to and then select rows in the table that you want copied,<br>";
+         text += "then press this button to perform the copy.<br>";
+         text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
+         text += "checking against the current set of season passes already on the TiVo.";
       }
       else if (component.equals("tivo_rnpl")) {
          text = "Select TiVo for which to retrieve My Shows list.<br>";
