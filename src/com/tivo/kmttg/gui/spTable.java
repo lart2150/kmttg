@@ -26,6 +26,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
@@ -34,6 +35,7 @@ public class spTable {
    private String[] TITLE_cols = {"PRIORITY", "SHOW", "CHANNEL", "NUM"};
    public JXTable TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
+   private String currentTivo = null;
    public JScrollPane scroll = null;
    private JDialog dialog = null;
    private int priority_offset = 0;
@@ -254,8 +256,10 @@ public class spTable {
 
     // Add rows and save to tivo_data
     public void AddRows(String tivoName, JSONArray data) {
-       if (AddRows(data))
+       if (AddRows(data)) {
           tivo_data.put(tivoName, data);
+          currentTivo = tivoName;
+       }
     }
     
     private void AddRow(JSONObject data) {
@@ -334,6 +338,12 @@ public class spTable {
        dm.addRow(data);
     }
     
+    public void RemoveRow(JXTable table, int row) {
+       debug.print("table=" + table + " row=" + row);
+       DefaultTableModel dm = (DefaultTableModel)table.getModel();
+       dm.removeRow(row);
+    }
+    
     // Mouse event handler
     // This will display folder entries in table if folder entry single-clicked
     private void MouseClicked(MouseEvent e) {
@@ -349,7 +359,33 @@ public class spTable {
        int keyCode = e.getKeyCode();
        if (keyCode == KeyEvent.VK_DELETE){
           // Delete key has special action
-          System.out.println("DELETE pressed");
+          int[] selected = GetSelectedRows();
+          if (selected == null || selected.length < 0) {
+             log.error("No rows selected");
+             return;
+          }
+          int row;
+          JSONObject json;
+          Remote r = new Remote(currentTivo, config.MAK);
+          if (r.success) {
+             for (int i=0; i<selected.length; ++i) {
+                row = selected[i];
+                json = GetRowData(row);
+                if (json != null) {
+                   try {
+                      log.warn("Deleting SP on TiVo '" + currentTivo + "': " + json.get("title"));
+                      JSONObject o = new JSONObject();
+                      o.put("subscriptionId", json.getString("subscriptionId"));
+                      if ( r.Key("unsubscribe", o) != null ) {
+                         RemoveRow(TABLE, row);
+                      }
+                   } catch (JSONException e1) {
+                      log.error("SP delete - " + e1.getMessage());
+                   }
+                }
+             }
+             r.disconnect();                   
+          }
        } else {
           // Pass along keyboard action
           e.consume();
