@@ -38,7 +38,6 @@ public class spTable {
    private String currentTivo = null;
    public JScrollPane scroll = null;
    private JDialog dialog = null;
-   private int priority_offset = 0;
 
    spTable(JDialog dialog) {
       this.dialog = dialog;
@@ -237,13 +236,7 @@ public class spTable {
     public Boolean AddRows(JSONArray data) {
        try {
           for (int i=0; i<data.length(); ++i) {
-             if (i==0) {
-                if (data.getJSONObject(i).has("priority"))
-                   priority_offset = data.getJSONObject(i).getInt("priority") - 1;
-             }
-             if (priority_offset < 0)
-                priority_offset = 0;
-             AddRow(data.getJSONObject(i));
+             AddRow(data.getJSONObject(i), i+1);
              //System.out.println(data.getJSONObject(i));
           }
           packColumns(TABLE,2);
@@ -262,13 +255,12 @@ public class spTable {
        }
     }
     
-    private void AddRow(JSONObject data) {
+    private void AddRow(JSONObject data, int priority) {
        debug.print("data=" + data);
        try {
           JSONObject o = new JSONObject();
           JSONObject o2 = new JSONObject();
           Object[] info = new Object[TITLE_cols.length];
-          Integer priority = data.getInt("priority") - priority_offset;
           String title = " ";
           if (data.has("title"))
              title += string.utfString(data.getString("title"));
@@ -320,6 +312,13 @@ public class spTable {
        return null;
     }
     
+    public String GetRowTitle(int row) {
+       String s = (String) TABLE.getValueAt(row, getColumnIndex("SHOW"));
+       if (s != null)
+          return s;
+       return null;
+    }
+    
     public void updateTitleCols(String name) {
        String title;
        int col;
@@ -366,18 +365,24 @@ public class spTable {
           }
           int row;
           JSONObject json;
+          String title;
           Remote r = new Remote(currentTivo, config.MAK);
           if (r.success) {
              for (int i=0; i<selected.length; ++i) {
                 row = selected[i];
                 json = GetRowData(row);
+                title = GetRowTitle(row);
                 if (json != null) {
                    try {
-                      log.warn("Deleting SP on TiVo '" + currentTivo + "': " + json.get("title"));
-                      JSONObject o = new JSONObject();
-                      o.put("subscriptionId", json.getString("subscriptionId"));
-                      if ( r.Key("unsubscribe", o) != null ) {
-                         RemoveRow(TABLE, row);
+                      if (title.startsWith(" Loaded:")) {
+                         log.error("Cannot unsubscribe loaded Season Passes. Refresh list for TiVo passes");
+                      } else {
+                         log.warn("Deleting SP on TiVo '" + currentTivo + "': " + title);
+                         JSONObject o = new JSONObject();
+                         o.put("subscriptionId", json.getString("subscriptionId"));
+                         if ( r.Key("unsubscribe", o) != null ) {
+                            RemoveRow(TABLE, row);
+                         }
                       }
                    } catch (JSONException e1) {
                       log.error("SP delete - " + e1.getMessage());
