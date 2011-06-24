@@ -87,25 +87,36 @@ public class Remote {
      return sslSocketFactory;
    }
    
-   public Remote(String tivoName, String MAK) {
+   // This constructor designed to be use by kmttg
+   public Remote(String tivoName) {
+      this.MAK = config.MAK;
+      String IP = config.TIVOS.get(tivoName);
+      if (IP == null)
+         IP = tivoName;
+      int use_port = port;
+      String wan_port = config.getWanSetting(tivoName, "ipad");
+      if (wan_port != null)
+         use_port = Integer.parseInt(wan_port);
+
+      RemoteInit(IP, use_port, MAK);
+   }
+   
+   // This constructor designed for use without kmttg config
+   public Remote(String IP, int port, String MAK) {
+      this.MAK = MAK;
+      RemoteInit(IP, port, MAK);
+   }
+   
+   private void RemoteInit(String IP, int port, String MAK) {
+      getSocketFactory();
+      session_id = new Random(0x27dc20).nextInt();
       try {
-         this.MAK = MAK;
-         String IP = config.TIVOS.get(tivoName);
-         if (IP == null)
-            IP = tivoName;
-         getSocketFactory();
-         session_id = new Random(0x27dc20).nextInt();
-         int use_port = port;
-         String wan_port = config.getWanSetting(tivoName, "ipad");
-         if (wan_port != null)
-            use_port = Integer.parseInt(wan_port);
-         socket = sslSocketFactory.createSocket(IP, use_port);
+         socket = sslSocketFactory.createSocket(IP, port);
          socket.setSoTimeout(timeout*1000);
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
          out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
          if ( ! Auth() )
             success = false;
-
       } catch (Exception e) {
          error("rpc Remote - " + e.getMessage());
          success = false;
