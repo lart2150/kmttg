@@ -648,20 +648,46 @@ public class remotegui {
    }
    
    private void SPListCopy(String tivoName) {
-      log.print("Copying Season Passes to TiVo: " + tivoName);
+      //SeasonPasses
       int[] selected = tab_sp.GetSelectedRows();
       if (selected.length > 0) {
          int row;
+         JSONArray existing;
          JSONObject json, result;
          Remote r = new Remote(tivoName, config.MAK);
          if (r.success) {
+            // First load existing SPs from tivoName to check against
+            existing = r.SeasonPasses();
+            if (existing == null) {
+               log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
+               return;
+            }
+            // Now proceed with subscriptions
+            log.print("Copying Season Passes to TiVo: " + tivoName);
             for (int i=0; i<selected.length; ++i) {
                row = selected[i];
                json = tab_sp.GetRowData(row);
                if (json != null) {
-                  result = r.Key("subscribe", json);
-                  if (result != null)
-                     log.print(result.toString());
+                  try {
+                     // Check against existing
+                     Boolean schedule = true;
+                     for (int j=0; j<existing.length(); ++j) {
+                        if(json.getString("title").equals(existing.getJSONObject(j).getString("title")))
+                           schedule = false;
+                     }
+                     
+                     // OK to subscribe
+                     if (schedule) {
+                        log.print("Scheduling: " + json.getString("title"));
+                        result = r.Key("subscribe", json);
+                        if (result != null)
+                           log.print(result.toString());
+                     } else {
+                        log.warn("Existing SP with same title found, not scheduling: " + json.getString("title"));
+                     }
+                  } catch (JSONException e) {
+                     log.error("SPListCopy - " + e.getMessage());
+                  }
                }
             }
             r.disconnect();
