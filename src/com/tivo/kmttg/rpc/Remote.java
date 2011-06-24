@@ -271,6 +271,14 @@ public class Remote {
             json.put("parameters", parameters);
             req = RpcRequest("uiNavigate", false, json);
          }
+         else if (type.equals("uidestinations")) {
+            // List available uri destinations for uiNavigate
+            json.put("bodyId", "-");
+            json.put("uiDestinationType", "classicui");
+            json.put("levelOfDetail", "high");
+            json.put("noLimit", "true");
+            req = RpcRequest("uiDestinationInstanceSearch", false, json);
+         }
          else if (type.equals("delete")) {
             // Delete an existing recording
             // Expects "recordingId" of type JSONArray in json
