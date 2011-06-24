@@ -344,6 +344,12 @@ public class Remote {
             o.put("ignoreConflicts", "true");
             req = RpcRequest("subscribe", false, o);
          }
+         else if (type.equals("unsubscribe")) {
+            // Unsubscribe a season pass
+            // Expects subscriptionId in json
+            json.put("bodyId", "-");
+            req = RpcRequest("unsubscribe", false, json);
+         }
          else if (type.equals("position")) {
             json.put("throttleDelay", 1000);
             req = RpcRequest("videoPlaybackInfoEventRegister", false, json);
