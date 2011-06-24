@@ -230,8 +230,9 @@ public class spTable {
        DefaultTableModel model = (DefaultTableModel)TABLE.getModel(); 
        model.setNumRows(0);
     }
-
-    public void AddRows(String tivoName, JSONArray data) {
+    
+    // Add given data to table
+    public Boolean AddRows(JSONArray data) {
        try {
           for (int i=0; i<data.length(); ++i) {
              if (i==0) {
@@ -243,11 +244,18 @@ public class spTable {
              AddRow(data.getJSONObject(i));
              //System.out.println(data.getJSONObject(i));
           }
-          tivo_data.put(tivoName, data);
           packColumns(TABLE,2);
        } catch (JSONException e) {
           log.error("spTable AddRows - " + e.getMessage());
+          return false;
        }
+       return true;
+    }
+
+    // Add rows and save to tivo_data
+    public void AddRows(String tivoName, JSONArray data) {
+       if (AddRows(data))
+          tivo_data.put(tivoName, data);
     }
     
     private void AddRow(JSONObject data) {
@@ -260,6 +268,14 @@ public class spTable {
           String title = " ";
           if (data.has("title"))
              title += string.utfString(data.getString("title"));
+          // Manual recordings need more information added
+          if (title.equals(" Manual")) {
+             String time = data.getJSONObject("idSetSource").getString("timeOfDayLocal");
+             time = time.replaceFirst(":\\d+$", "");
+             String days = data.getJSONObject("idSetSource").getJSONArray("dayOfWeek").toString();
+             days = days.replaceAll("\"", "");
+             title += " (" + time + ", " + days + ")";
+          }
           String channel = " ";
           if (data.has("idSetSource")) {
              o = data.getJSONObject("idSetSource");
@@ -282,6 +298,33 @@ public class spTable {
           AddRow(TABLE, info);       
        } catch (Exception e) {
           log.error("spTable AddRow - " + e.getMessage());
+       }
+    }
+    
+    public int[] GetSelectedRows() {
+       debug.print("");
+       int[] rows = TABLE.getSelectedRows();
+       if (rows.length <= 0)
+          log.error("No rows selected");
+       return rows;
+    }
+    
+    public JSONObject GetRowData(int row) {
+       sortableInt s = (sortableInt) TABLE.getValueAt(row, getColumnIndex("PRIORITY"));
+       if (s != null)
+          return s.json;
+       return null;
+    }
+    
+    public void updateTitleCols(String name) {
+       String title;
+       int col;
+       DefaultTableModel dm = (DefaultTableModel)TABLE.getModel();
+       for (int row=0; row<TABLE.getRowCount(); ++row) {
+          col = getColumnIndex("SHOW");
+          title = (String)TABLE.getValueAt(row,col);
+          title = name + title;
+          dm.setValueAt(title, row, col);
        }
     }
     
