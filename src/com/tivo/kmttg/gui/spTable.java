@@ -366,7 +366,7 @@ public class spTable {
           int row;
           JSONObject json;
           String title;
-          Remote r = new Remote(currentTivo, config.MAK);
+          Remote r = new Remote(currentTivo);
           if (r.success) {
              for (int i=0; i<selected.length; ++i) {
                 row = selected[i];
