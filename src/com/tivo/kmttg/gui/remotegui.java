@@ -763,7 +763,8 @@ public class remotegui {
       }
       else if (component.equals("refresh_sp")){
          text = "<b>Refresh</b><br>";
-         text += "Refresh Season Pass list of selected TiVo.<br>";
+         text += "Refresh Season Pass list of selected TiVo. Note that by selecting 1 or more rows in the<br>";
+         text += "table and using keyboard <b>Delete</b> button you can unsubscribe Season Passes.<br>";
          text += "<b>NOTE: This only works for Premiere models</b>.";
       }
       else if (component.equals("save_sp")){
