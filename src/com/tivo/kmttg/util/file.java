@@ -287,7 +287,7 @@ public class file {
       try {
          json.put("recordingId", a);
          log.warn(">> Attempting iPad delete for id: " + recordingId);
-         Remote r = new Remote(tivoName, config.MAK);
+         Remote r = new Remote(tivoName);
          if (r.success) {
             if (r.Key("delete", json) != null)
                log.warn(">> iPad delete succeeded.");

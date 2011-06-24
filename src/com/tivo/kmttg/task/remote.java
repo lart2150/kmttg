@@ -52,7 +52,7 @@ public class remote implements Serializable {
       class AutoThread implements Runnable {
          AutoThread() {}       
          public void run () {
-            Remote r = new Remote(job.tivoName, config.MAK);
+            Remote r = new Remote(job.tivoName);
             if (r.success) {
                if (job.remote_todo)
                   data = r.ToDo();

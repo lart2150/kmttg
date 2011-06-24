@@ -518,7 +518,7 @@ public class remotegui {
    }
    
    public Boolean RC_jumptoCB(String tivoName, Integer mins) {
-      Remote r = new Remote(tivoName, config.MAK);
+      Remote r = new Remote(tivoName);
       if (r.success) {
          JSONObject json = new JSONObject();
          try {
@@ -536,7 +536,7 @@ public class remotegui {
    }
    
    public Boolean RC_jumpaheadCB(String tivoName, Integer mins) {
-      Remote r = new Remote(tivoName, config.MAK);
+      Remote r = new Remote(tivoName);
       if (r.success) {
          JSONObject json = new JSONObject();
          JSONObject reply = r.Key("position", json);
@@ -557,7 +557,7 @@ public class remotegui {
    }
    
    public Boolean RC_jumpbackCB(String tivoName, Integer mins) {
-      Remote r = new Remote(tivoName, config.MAK);
+      Remote r = new Remote(tivoName);
       if (r.success) {
          JSONObject json = new JSONObject();
          JSONObject reply = r.Key("position", json);
@@ -580,7 +580,7 @@ public class remotegui {
    }
    
    private Boolean RC_infoCB(String tivoName) {
-      Remote r = new Remote(tivoName, config.MAK);
+      Remote r = new Remote(tivoName);
       if (r.success) {
          JSONObject json = new JSONObject();
          JSONObject reply = r.Key("sysInfo", json);
@@ -654,7 +654,7 @@ public class remotegui {
          int row;
          JSONArray existing;
          JSONObject json, result;
-         Remote r = new Remote(tivoName, config.MAK);
+         Remote r = new Remote(tivoName);
          if (r.success) {
             // First load existing SPs from tivoName to check against
             existing = r.SeasonPasses();
