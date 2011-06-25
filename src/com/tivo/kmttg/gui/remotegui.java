@@ -61,9 +61,11 @@ public class remotegui {
    public JLabel label_cancel = null;
    
    private JComboBox tivo_rc = null;
+   private JComboBox hme_rc = null;
    private JTextField rc_jumpto_text = null;
    private JTextField rc_jumpahead_text = null;
    private JTextField rc_jumpback_text = null;
+   private Hashtable<String, String> hme = new Hashtable<String, String>();
    
    private JFileChooser Browser = null;
 
@@ -521,15 +523,46 @@ public class remotegui {
       panel_rc.add(rc_jumpback_button, c);
       c.gridx = 1;
       panel_rc.add(rc_jumpback_text, c);
+   
+      hme_rc = new javax.swing.JComboBox();
+      hme_rc.setToolTipText(getToolTip("hme_rc"));
+
+      JButton rc_hme_button = new JButton("HME Jump:");
+      rc_hme_button.setToolTipText(getToolTip("rc_hme_button"));
+      rc_hme_button.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String name = (String)hme_rc.getSelectedItem();
+            if (name != null && name.length() > 0) {
+               Remote r = new Remote(getTivoName("rc"));
+               if (r.success) {
+                  try {
+                     JSONObject json = new JSONObject();
+                     json.put("uri", hme.get(name));
+                     r.Command("navigate", json);
+                  } catch (JSONException e1) {
+                     log.error("HME Jump - " + e1.getMessage());
+                  }
+                  r.disconnect();
+               }
+            }
+         }
+      });
+      
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      panel_rc.add(rc_hme_button, c);
+      c.gridx = 1;
+      panel_rc.add(hme_rc, c);
       
       tabbed_panel.add("ToDo", panel_todo);
       tabbed_panel.add("Season Passes", panel_sp);
       tabbed_panel.add("Will Not Record", panel_cancel);
-      tabbed_panel.add("Advanced Control", panel_rc);
+      tabbed_panel.add("Advanced Controls", panel_rc);
       tabbed_panel.add("System Information", panel_info);
-            
+      
       setTivoNames();
-
+            
       // add content to and display dialog window
       dialog.setContentPane(tabbed_panel);
       dialog.pack();
@@ -854,7 +887,42 @@ public class remotegui {
             tivo_rc.addItem(tivo_stack.get(i));
             tivo_info.addItem(tivo_stack.get(i));
          }
-      }      
+      }
+      if (tivo_count > 0)
+         setHmeDestinations(getTivoName("rc"));
+   }
+   
+   private String[] getHmeDestinations(String tivoName) {
+      Remote r = new Remote(tivoName);
+      if (r.success) {
+         r.debug = false;
+         JSONObject json = new JSONObject();
+         JSONObject result = r.Command("hmedestinations", json);
+         JSONArray a;
+         try {
+            a = result.getJSONArray("uiDestinationInstance");
+            if (a != null) {
+               String[] hmeNames = new String[a.length()];
+               for (int i=0; i<a.length(); ++i) {
+                  String name = a.getJSONObject(i).getString("name");
+                  hmeNames[i] = name;
+                  hme.put(name, a.getJSONObject(i).getString("uri"));
+               }
+               return hmeNames;
+            }
+         } catch (JSONException e) {
+            log.error("getHmeDestinations - " + e.getMessage());
+         }
+         r.disconnect();
+      }
+      return new String[0];
+   }
+   
+   public void setHmeDestinations(String tivoName) {
+      String[] hmeNames = getHmeDestinations(tivoName);
+      hme_rc.removeAllItems();
+      for (int i=0; i<hmeNames.length; ++i)
+         hme_rc.addItem(hmeNames[i]);
    }
       
    private ImageIcon scale(Image src, double scale) {
@@ -967,6 +1035,12 @@ public class remotegui {
       }
       else if (component.equals("rc_jumpback_text")) {
          text = "Set playback position this number of minutes behind current position.";
+      }
+      else if (component.equals("rc_hme_button")) {
+         text = "Jump to the specified HME application for the selected TiVo.";
+      }
+      else if (component.equals("hme_rc")) {
+         text = "Select which HME application you want to jump to for selected TiVo.";
       }
       
       if (text.length() > 0) {
