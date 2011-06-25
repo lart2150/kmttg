@@ -243,6 +243,8 @@ public class todoTable {
           }
           tivo_data.put(tivoName, data);
           packColumns(TABLE,2);
+          if (config.gui.remote_gui != null)
+             config.gui.remote_gui.setTivoName("todo", tivoName);
        } catch (JSONException e) {
           log.error("todoTable AddRows - " + e.getMessage());
        }

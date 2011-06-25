@@ -252,6 +252,8 @@ public class spTable {
        if (AddRows(data)) {
           tivo_data.put(tivoName, data);
           currentTivo = tivoName;
+          if (config.gui.remote_gui != null)
+             config.gui.remote_gui.setTivoName("sp", tivoName);
        }
     }
     
