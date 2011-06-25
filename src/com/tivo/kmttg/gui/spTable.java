@@ -380,7 +380,7 @@ public class spTable {
                          log.warn("Deleting SP on TiVo '" + currentTivo + "': " + title);
                          JSONObject o = new JSONObject();
                          o.put("subscriptionId", json.getString("subscriptionId"));
-                         if ( r.Key("unsubscribe", o) != null ) {
+                         if ( r.Command("unsubscribe", o) != null ) {
                             RemoveRow(TABLE, row);
                          }
                       }

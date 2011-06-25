@@ -1123,7 +1123,7 @@ public class nplTable {
          json.put("recordingId", a);
          Remote r = new Remote(tivoName);
          if (r.success) {
-            r.Key("delete", json);
+            r.Command("delete", json);
             r.disconnect();
          }
       } catch (JSONException e) {
@@ -1137,7 +1137,7 @@ public class nplTable {
          json.put("id", id);
          Remote r = new Remote(tivoName);
          if (r.success) {
-            r.Key("playback", json);
+            r.Command("playback", json);
             r.disconnect();
          }
       } catch (JSONException e) {

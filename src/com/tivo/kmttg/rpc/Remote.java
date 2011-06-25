@@ -254,7 +254,7 @@ public class Remote {
       }
    }
    
-   public JSONObject Key(String type, JSONObject json) {
+   public JSONObject Command(String type, JSONObject json) {
       String req = null;
       if (json == null)
          json = new JSONObject();
@@ -414,7 +414,7 @@ public class Remote {
 
       try {
          // Top level list
-         result = Key("MyShows", new JSONObject());
+         result = Command("MyShows", new JSONObject());
          if (result != null && result.has("recordingFolderItem")) {
             JSONArray items = (JSONArray) result.get("recordingFolderItem");
             JSONObject item;
@@ -430,7 +430,7 @@ public class Remote {
                      // Skip drilling into "HD Recordings" folder
                      continue;
                   }
-                  result = Key(
+                  result = Command(
                      "FolderIds",
                      new JSONObject("{\"parentRecordingFolderItemId\":\"" + item.get("recordingFolderItemId") + "\"}")
                   );
@@ -441,10 +441,10 @@ public class Remote {
                         id.put(ids.get(j));
                         JSONObject s = new JSONObject();
                         s.put("objectIdAndType",id);
-                        result = Key("SearchIds", s);
+                        result = Command("SearchIds", s);
                         if (result != null) {
                            s = result.getJSONArray("recordingFolderItem").getJSONObject(0);
-                           result = Key(
+                           result = Command(
                                  "Search",
                                  new JSONObject("{\"recordingId\":\"" + s.get("childRecordingId") + "\"}")
                               );
@@ -456,7 +456,7 @@ public class Remote {
                   }
                } else {
                   // Individual entry just add to items array                  
-                  result = Key(
+                  result = Command(
                      "Search",
                      new JSONObject("{\"recordingId\":\"" + item.get("childRecordingId") + "\"}")
                   );
@@ -480,7 +480,7 @@ public class Remote {
 
       try {
          // Top level list
-         result = Key("ToDo", new JSONObject());
+         result = Command("ToDo", new JSONObject());
          if (result != null && result.has("objectIdAndType")) {
             JSONArray items = result.getJSONArray("objectIdAndType");
             for (int j=0; j<items.length(); ++j) {
@@ -488,7 +488,7 @@ public class Remote {
                id.put(items.get(j));
                JSONObject s = new JSONObject();
                s.put("objectIdAndType",id);
-               result = Key("ToDoIds", s);
+               result = Command("ToDoIds", s);
                if (result != null && result.has("recording")) {
                   s = result.getJSONArray("recording").getJSONObject(0);
                   allShows.put(s);
@@ -507,7 +507,7 @@ public class Remote {
    // Get all season passes
    public JSONArray SeasonPasses() {
       JSONObject result = null;
-      result = Key("SeasonPasses", new JSONObject());
+      result = Command("SeasonPasses", new JSONObject());
       if (result != null && result.has("subscription")) {
          try {
             return result.getJSONArray("subscription");

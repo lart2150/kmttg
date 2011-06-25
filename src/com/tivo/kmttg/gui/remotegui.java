@@ -525,7 +525,7 @@ public class remotegui {
             System.out.println("tivoName=" + tivoName + " mins=" + mins);
             Long pos = (long)60000*mins;
             json.put("offset", pos);
-            r.Key("jump", json);
+            r.Command("jump", json);
             r.disconnect();
          } catch (JSONException e) {
             log.error("RC_jumptoCB failed - " + e.getMessage());
@@ -539,13 +539,13 @@ public class remotegui {
       Remote r = new Remote(tivoName);
       if (r.success) {
          JSONObject json = new JSONObject();
-         JSONObject reply = r.Key("position", json);
+         JSONObject reply = r.Command("position", json);
          if (reply != null && reply.has("position")) {
             try {
                Long pos = reply.getLong("position");
                pos += (long)60000*mins;
                json.put("offset", pos);
-               r.Key("jump", json);
+               r.Command("jump", json);
                r.disconnect();
             } catch (JSONException e) {
                log.error("RC_jumptoCB failed - " + e.getMessage());
@@ -560,7 +560,7 @@ public class remotegui {
       Remote r = new Remote(tivoName);
       if (r.success) {
          JSONObject json = new JSONObject();
-         JSONObject reply = r.Key("position", json);
+         JSONObject reply = r.Command("position", json);
          if (reply != null && reply.has("position")) {
             try {
                Long pos = reply.getLong("position");
@@ -568,7 +568,7 @@ public class remotegui {
                if (pos < 0)
                   pos = (long)0;
                json.put("offset", pos);
-               r.Key("jump", json);
+               r.Command("jump", json);
                r.disconnect();
             } catch (JSONException e) {
                log.error("RC_jumptoCB failed - " + e.getMessage());
@@ -583,7 +583,7 @@ public class remotegui {
       Remote r = new Remote(tivoName);
       if (r.success) {
          JSONObject json = new JSONObject();
-         JSONObject reply = r.Key("sysInfo", json);
+         JSONObject reply = r.Command("sysInfo", json);
          if (reply != null && reply.has("bodyConfig")) {
             try {
                String info = "";
@@ -599,7 +599,7 @@ public class remotegui {
                info += "\n";
                
                // Tuner info
-               reply = r.Key("tunerInfo", new JSONObject());
+               reply = r.Command("tunerInfo", new JSONObject());
                if (reply != null && reply.has("state")) {
                   for (int i=0; i<reply.getJSONArray("state").length(); ++i) {
                      json = reply.getJSONArray("state").getJSONObject(i);
@@ -679,7 +679,7 @@ public class remotegui {
                      // OK to subscribe
                      if (schedule) {
                         log.print("Scheduling: " + json.getString("title"));
-                        result = r.Key("subscribe", json);
+                        result = r.Command("subscribe", json);
                         if (result != null)
                            log.print(result.toString());
                      } else {
