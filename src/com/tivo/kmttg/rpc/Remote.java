@@ -332,9 +332,18 @@ public class Remote {
             json.put("state", new JSONArray("[\"scheduled\"]"));
             req = RpcRequest("recordingSearch", false, json);
          }
-         else if (type.equals("ToDoIds")) {
+         else if (type.equals("SearchId")) {
             // Expects "objectIdAndType" in json
             json.put("bodyId", "-");
+            json.put("levelOfDetail", "medium");
+            req = RpcRequest("recordingSearch", false, json);
+         }
+         else if (type.equals("Cancelled")) {
+            // Get list or recording Ids that will not record
+            json.put("format", "idSequence");
+            json.put("bodyId", "-");
+            json.put("noLimit", "true");
+            json.put("state", new JSONArray("[\"cancelled\"]"));
             req = RpcRequest("recordingSearch", false, json);
          }
          else if (type.equals("SeasonPasses")) {
@@ -488,11 +497,45 @@ public class Remote {
                id.put(items.get(j));
                JSONObject s = new JSONObject();
                s.put("objectIdAndType",id);
-               result = Command("ToDoIds", s);
+               result = Command("SearchId", s);
                if (result != null && result.has("recording")) {
                   s = result.getJSONArray("recording").getJSONObject(0);
                   allShows.put(s);
                   //print(s.toString());
+               }
+            }
+         } // if
+      } catch (JSONException e) {
+         error("rpc ToDo error - " + e.getMessage());
+         return null;
+      }
+
+      return allShows;
+   }
+   
+   // Get list of all shows that won't record
+   public JSONArray CancelledShows() {
+      JSONArray allShows = new JSONArray();
+      JSONObject result = null;
+
+      try {
+         // Top level list
+         result = Command("Cancelled", new JSONObject());
+         if (result != null && result.has("objectIdAndType")) {
+            JSONArray items = result.getJSONArray("objectIdAndType");
+            for (int j=0; j<items.length(); ++j) {
+               JSONArray id = new JSONArray();
+               id.put(items.get(j));
+               JSONObject s = new JSONObject();
+               s.put("objectIdAndType",id);
+               result = Command("SearchId", s);
+               if (result != null && result.has("recording")) {
+                  s = result.getJSONArray("recording").getJSONObject(0);
+                  allShows.put(s);
+                  /*if (s.has("cancellationReason")) {
+                     if (s.getString("cancellationReason").equals("programSourceConflict"))
+                        print(s.toString());
+                  }*/
                }
             }
          } // if
