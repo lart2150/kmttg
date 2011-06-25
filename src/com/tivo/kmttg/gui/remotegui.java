@@ -55,6 +55,11 @@ public class remotegui {
    JTextPane text_info = null;
    private Hashtable<String,String> tivo_info_data = new Hashtable<String,String>();
    
+   private cancelledTable tab_cancel = null;
+   private JComboBox tivo_cancel = null;
+   public JButton refresh_cancel = null;
+   public JLabel label_cancel = null;
+   
    private JComboBox tivo_rc = null;
    private JTextField rc_jumpto_text = null;
    private JTextField rc_jumpahead_text = null;
@@ -262,6 +267,84 @@ public class remotegui {
       c.fill = GridBagConstraints.BOTH;
       panel_sp.add(tabScroll_sp, c);
       
+      // Cancelled table items      
+      c.ipady = 0;
+      c.weighty = 0.0;  // default to no vertical stretch
+      c.weightx = 0.0;  // default to no horizontal stretch
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      c.gridheight = 1;
+      c.anchor = GridBagConstraints.CENTER;
+      c.fill = GridBagConstraints.HORIZONTAL;
+      
+      JPanel panel_cancel = new JPanel();
+      panel_cancel.setLayout(new GridBagLayout());
+      
+      JPanel row1_cancel = new JPanel();
+      row1_cancel.setLayout(new BoxLayout(row1_cancel, BoxLayout.LINE_AXIS));
+      
+      JLabel title_cancel = new JLabel("Not Record list");
+      
+      JLabel tivo_cancel_label = new javax.swing.JLabel();
+      
+      tivo_cancel = new javax.swing.JComboBox();
+      tivo_cancel.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+               tivo_cancelCB();
+            }
+         }
+      });
+      tivo_cancel.setToolTipText(getToolTip("tivo_cancel"));
+
+      refresh_cancel = new JButton("Refresh");
+      label_cancel = new JLabel("Top Level View");
+      //ImageIcon image = new ImageIcon("c:/home/tivoapp/pngs/remote-button-TIVO-63x86.png");
+      //JButton refresh_todo = new JButton(scale(image.getImage(),0.5));
+      refresh_cancel.setToolTipText(getToolTip("refresh_cancel_top"));
+      refresh_cancel.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            if (tab_cancel.inFolder) {
+               // Return to top level table display
+               tab_cancel.setFolderState(false);
+               tab_cancel.Refresh(null);
+               if (tab_cancel.folderEntryNum >= 0)
+                  tab_cancel.SelectFolder(tab_cancel.folderName);
+            } else {
+               // Refresh to do list
+               tab_cancel.TABLE.clearSelection();
+               tab_cancel.clear();
+               dialog.repaint();
+               String tivoName = (String)tivo_cancel.getSelectedItem();
+               if (tivoName != null && tivoName.length() > 0)
+                  cancelListCB(tivoName);
+            }
+         }
+      });
+      row1_cancel.add(Box.createRigidArea(space_5));
+      row1_cancel.add(title_cancel);
+      row1_cancel.add(Box.createRigidArea(space_5));
+      row1_cancel.add(tivo_cancel_label);
+      row1_cancel.add(Box.createRigidArea(space_5));
+      row1_cancel.add(tivo_cancel);
+      row1_cancel.add(Box.createRigidArea(space_5));
+      row1_cancel.add(refresh_cancel);
+      row1_cancel.add(Box.createRigidArea(space_5));
+      row1_cancel.add(label_cancel);
+      panel_cancel.add(row1_cancel, c);
+      
+      tab_cancel = new cancelledTable(dialog);
+      tab_cancel.TABLE.setPreferredScrollableViewportSize(tab_cancel.TABLE.getPreferredSize());
+      JScrollPane tabScroll_cancel = new JScrollPane(tab_cancel.scroll);
+      gy++;
+      c.gridy = gy;
+      c.weightx = 1.0;
+      c.weighty = 1.0;
+      c.gridwidth = 8;
+      c.fill = GridBagConstraints.BOTH;
+      panel_cancel.add(tabScroll_cancel, c);
+      
       // System Information tab items      
       c.ipady = 0;
       c.weighty = 0.0;  // default to no vertical stretch
@@ -439,9 +522,10 @@ public class remotegui {
       c.gridx = 1;
       panel_rc.add(rc_jumpback_text, c);
       
-      tabbed_panel.add("Remote Control", panel_rc);
       tabbed_panel.add("ToDo", panel_todo);
       tabbed_panel.add("Season Passes", panel_sp);
+      tabbed_panel.add("Will Not Record", panel_cancel);
+      tabbed_panel.add("Remote Control", panel_rc);
       tabbed_panel.add("System Information", panel_info);
             
       setTivoNames();
@@ -453,6 +537,7 @@ public class remotegui {
       dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
       tab_todo.packColumns(tab_todo.TABLE, 2);
       tab_sp.packColumns(tab_sp.TABLE, 2);
+      tab_cancel.packColumns(tab_sp.TABLE, 2);
       if (tivo_count == 0) {
          log.warn("No Premieres currently enabled for Remote Control in kmttg configuration");
          return;
@@ -577,6 +662,28 @@ public class remotegui {
          }
       }
       return true;
+   }
+   
+   // Submit remote Not Record request to Job Monitor
+   public void cancelListCB(String tivoName) {
+      jobData job = new jobData();
+      job.source        = dialog.toString();
+      job.tivoName      = tivoName;
+      job.type          = "remote";
+      job.name          = "Remote";
+      job.remote_cancel = true;
+      job.cancelled     = tab_cancel;
+      jobMonitor.submitNewJob(job);
+   }
+   
+   // TiVo selection changed for Not Record tab
+   public void tivo_cancelCB() {
+      tab_cancel.setFolderState(false);
+      tab_cancel.TABLE.clearSelection();
+      tab_cancel.clear();
+      String tivoName = getTivoName("cancel");
+      if (tab_cancel.tivo_data.containsKey(tivoName))
+         tab_cancel.AddRows(tivoName, tab_cancel.tivo_data.get(tivoName));
    }
    
    private Boolean RC_infoCB(String tivoName) {
@@ -705,6 +812,8 @@ public class remotegui {
          return (String)tivo_todo.getSelectedItem();
       if (tab.equals("sp"))
          return (String)tivo_sp.getSelectedItem();
+      if (tab.equals("cancel"))
+         return (String)tivo_cancel.getSelectedItem();
       if (tab.equals("rc"))
          return (String)tivo_rc.getSelectedItem();
       if (tab.equals("info"))
@@ -712,11 +821,28 @@ public class remotegui {
       return null;
    }
    
+   public void setTivoName(String tab, String tivoName) {
+      String current = getTivoName(tab);
+      if ( ! tivoName.equals(current)) {
+         if (tab.equals("todo"))
+            tivo_todo.setSelectedItem(tivoName);
+         if (tab.equals("sp"))
+            tivo_sp.setSelectedItem(tivoName);
+         if (tab.equals("cancel"))
+            tivo_cancel.setSelectedItem(tivoName);
+         if (tab.equals("rc"))
+            tivo_rc.setSelectedItem(tivoName);
+         if (tab.equals("info"))
+            tivo_info.setSelectedItem(tivoName);
+      }
+   }
+   
    public void setTivoNames() { 
       tivo_count = 0;
       Stack<String> tivo_stack = config.getTivoNames();
       tivo_todo.removeAllItems();
       tivo_sp.removeAllItems();
+      tivo_cancel.removeAllItems();
       tivo_rc.removeAllItems();
       tivo_info.removeAllItems();
       for (int i=0; i<tivo_stack.size(); ++i) {
@@ -724,6 +850,7 @@ public class remotegui {
             tivo_count++;
             tivo_todo.addItem(tivo_stack.get(i));
             tivo_sp.addItem(tivo_stack.get(i));
+            tivo_cancel.addItem(tivo_stack.get(i));
             tivo_rc.addItem(tivo_stack.get(i));
             tivo_info.addItem(tivo_stack.get(i));
          }
@@ -741,7 +868,7 @@ public class remotegui {
       return new ImageIcon(dst);
    }
       
-   private String getToolTip(String component) {
+   public String getToolTip(String component) {
       debug.print("component=" + component);
       String text = "";
       if (component.equals("tivo_todo")) {
@@ -751,6 +878,20 @@ public class remotegui {
       else if (component.equals("refresh_todo")){
          text = "<b>Refresh</b><br>";
          text += "Refresh To Do list of selected TiVo.<br>";
+         text += "<b>NOTE: This only works for Premiere models</b>.";
+      }
+      else if (component.equals("tivo_cancel")) {
+         text = "Select TiVo for which to display list of shows that will not record.<br>";
+         text += "<b>NOTE: This only works for Premiere models</b>.";
+      }
+      else if (component.equals("refresh_cancel_top")){
+         text = "<b>Refresh</b><br>";
+         text += "Refresh list for selected TiVo.<br>";
+         text += "<b>NOTE: This only works for Premiere models</b>.";
+      }
+      else if (component.equals("refresh_cancel_folder")){
+         text = "<b>Back</b><br>";
+         text += "Return to top level folder view.<br>";
          text += "<b>NOTE: This only works for Premiere models</b>.";
       }
       else if (component.equals("tivo_sp")) {
@@ -765,6 +906,12 @@ public class remotegui {
          text = "<b>Refresh</b><br>";
          text += "Refresh Season Pass list of selected TiVo. Note that by selecting 1 or more rows in the<br>";
          text += "table and using keyboard <b>Delete</b> button you can unsubscribe Season Passes.<br>";
+         text += "<b>NOTE: This only works for Premiere models</b>.";
+      }
+      else if (component.equals("cancel_sp")){
+         text = "<b>Refresh</b><br>";
+         text += "Refresh Not Record list of selected TiVo. Click on folder in table to see all<br>";
+         text += "entries associated with it.<br>";
          text += "<b>NOTE: This only works for Premiere models</b>.";
       }
       else if (component.equals("save_sp")){
