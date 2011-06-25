@@ -58,6 +58,8 @@ public class remote implements Serializable {
                   data = r.ToDo();
                if (job.remote_sp)
                   data = r.SeasonPasses();
+               if (job.remote_cancel)
+                  data = r.CancelledShows();
                if (job.remote_rnpl)
                   data = r.MyShows();
                if (data != null) {
@@ -107,6 +109,9 @@ public class remote implements Serializable {
             if (job.remote_sp & job.sp != null) {
                // SP job => populate SP table
                job.sp.AddRows(job.tivoName, data);
+            }
+            if (job.remote_cancel & job.cancelled != null) {
+               job.cancelled.AddRows(job.tivoName, data);
             }
             if (job.remote_rnpl) {
                // My Shows job => copy data
