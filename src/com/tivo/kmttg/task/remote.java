@@ -21,6 +21,7 @@ public class remote implements Serializable {
    private Boolean success = false;
    private backgroundProcess process;
    private JSONArray data = null;
+   private String jobName;
    
    public remote(jobData job) {
       this.job = job;
@@ -74,7 +75,12 @@ public class remote implements Serializable {
       thread_running = true;
       AutoThread t = new AutoThread();
       thread = new Thread(t);
-      log.print(">> RUNNING 'REMOTE' JOB FOR TiVo: " + job.tivoName);
+      jobName = "REMOTE";
+      if (job.remote_todo)   jobName += " ToDo List";
+      if (job.remote_sp)     jobName += " Season Pass List";
+      if (job.remote_cancel) jobName += " Will Not Record List";
+      if (job.remote_rnpl)   jobName += " NP List";
+      log.print(">> RUNNING '" + jobName + "' JOB FOR TiVo: " + job.tivoName);
       thread.start();
 
       return true;
@@ -83,7 +89,7 @@ public class remote implements Serializable {
    public void kill() {
       debug.print("");
       thread.interrupt();
-      log.warn("Killing '" + job.type + "' TiVo: " + job.tivoName);
+      log.warn("Killing '" + jobName + "' TiVo: " + job.tivoName);
       thread_running = false;
       success = false;
    }
@@ -114,11 +120,10 @@ public class remote implements Serializable {
                job.cancelled.AddRows(job.tivoName, data);
             }
             if (job.remote_rnpl) {
-               // My Shows job => copy data
                rnpl.setNPLData(job.tivoName, data);
             }
-            log.warn("remote job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE--- job=" + job.type + " TiVo=" + job.tivoName);
+            log.warn("REMOTE job completed: " + jobMonitor.getElapsedTime(job.time));
+            log.print("---DONE--- job='" + jobName + "' TiVo=" + job.tivoName);
          }
       }
       return false;
