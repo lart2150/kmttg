@@ -525,7 +525,7 @@ public class remotegui {
       tabbed_panel.add("ToDo", panel_todo);
       tabbed_panel.add("Season Passes", panel_sp);
       tabbed_panel.add("Will Not Record", panel_cancel);
-      tabbed_panel.add("Remote Control", panel_rc);
+      tabbed_panel.add("Advanced Control", panel_rc);
       tabbed_panel.add("System Information", panel_info);
             
       setTivoNames();
@@ -886,7 +886,8 @@ public class remotegui {
       }
       else if (component.equals("refresh_cancel_top")){
          text = "<b>Refresh</b><br>";
-         text += "Refresh list for selected TiVo.<br>";
+         text += "Refresh list for selected TiVo. Click on a folder in table below to see<br>";
+         text += "all shows that will not record for reason matching the folder name.<br>";
          text += "<b>NOTE: This only works for Premiere models</b>.";
       }
       else if (component.equals("refresh_cancel_folder")){
