@@ -279,6 +279,18 @@ public class Remote {
             json.put("noLimit", "true");
             req = RpcRequest("uiDestinationInstanceSearch", false, json);
          }
+         if (type.equals("navigate")) {
+            // Navigation command - expects uri in json
+            req = RpcRequest("uiNavigate", false, json);
+         }
+         else if (type.equals("hmedestinations")) {
+            // List available hme destinations for uiNavigate
+            json.put("bodyId", "-");
+            json.put("uiDestinationType", "hme");
+            json.put("levelOfDetail", "high");
+            json.put("noLimit", "true");
+            req = RpcRequest("uiDestinationInstanceSearch", false, json);
+         }
          else if (type.equals("delete")) {
             // Delete an existing recording
             // Expects "recordingId" of type JSONArray in json
