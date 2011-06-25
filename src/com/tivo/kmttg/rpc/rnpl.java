@@ -109,5 +109,10 @@ public class rnpl {
         return 0;
       }
    }
+   
+   public static String getStringFromLongDate(long date) {
+      SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz");
+      return format.format(date);
+   }
 
 }
