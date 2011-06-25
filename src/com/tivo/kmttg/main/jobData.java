@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Hashtable;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.gui.cancelledTable;
 import com.tivo.kmttg.gui.spTable;
 import com.tivo.kmttg.gui.todoTable;
 import com.tivo.kmttg.task.*;
@@ -112,6 +113,9 @@ public class jobData implements Serializable {
    
    public Boolean remote_sp = false;
    public spTable sp = null;
+   
+   public Boolean remote_cancel = false;
+   public cancelledTable cancelled = null;
    
    public Boolean remote_rnpl = false;
    public JSONArray rnpl = null;
