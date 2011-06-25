@@ -14,6 +14,7 @@ public class sortableDate {
    JSONObject json;
    String folderName = "";
    Stack<Hashtable<String,String>> folderData;
+   Stack<JSONObject> folderData_json;
    Boolean folder = false;
    
    // Single entry constructor
@@ -37,6 +38,15 @@ public class sortableDate {
       this.json = json;
       display = getTime(gmt);
       sortable = "" + gmt;
+   }
+   
+   // Folder entry json & gmt constructor
+   sortableDate(String folderName, Stack<JSONObject> folderEntry) {
+      this.folderName = folderName;
+      folder = true;
+      display = " ";
+      sortable = " "; 
+      folderData_json = folderEntry;
    }
    
    private String getTime(long gmt) {
