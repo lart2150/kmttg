@@ -1170,6 +1170,11 @@ public class configAuto {
             autoEntry entry;
             for (int i=0; i<rows; ++i) {
                entry = GetRowData(i);
+               // Some options may have to be turned off for disabled features
+               if (config.TivoWebPlusDelete == 0)
+                  entry.twpdelete = 0;
+               if ( ! config.ipadDeleteEnabled() )
+                  entry.ipaddelete = 0;
                ofp.write("\n");
                if (entry.type.equals("title")) {
                   ofp.write("<title>\n");
