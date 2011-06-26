@@ -590,7 +590,7 @@ public class remotegui {
    // Submit remote ToDo List request to Job Monitor
    public void ToDoListCB(String tivoName) {
       jobData job = new jobData();
-      job.source      = dialog.toString();
+      job.source      = tivoName;
       job.tivoName    = tivoName;
       job.type        = "remote";
       job.name        = "Remote";
@@ -626,7 +626,7 @@ public class remotegui {
    // Submit remote SP request to Job Monitor
    public void SPListCB(String tivoName) {
       jobData job = new jobData();
-      job.source      = dialog.toString();
+      job.source      = tivoName;
       job.tivoName    = tivoName;
       job.type        = "remote";
       job.name        = "Remote";
@@ -700,7 +700,7 @@ public class remotegui {
    // Submit remote Not Record request to Job Monitor
    public void cancelListCB(String tivoName) {
       jobData job = new jobData();
-      job.source        = dialog.toString();
+      job.source        = tivoName;
       job.tivoName      = tivoName;
       job.type          = "remote";
       job.name          = "Remote";
@@ -778,7 +778,7 @@ public class remotegui {
    }
    
    private void SPListLoad(String file) {
-      log.print("Loading data from file: " + file);
+      log.print("Loading SP data from file: " + file);
       JSONArray data = JSONFile.readJSONArray(file);
       if (data != null && data.length() > 0) {
          tab_sp.clear();
