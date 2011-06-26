@@ -21,6 +21,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.Sorter;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -61,7 +62,6 @@ public class spTable {
             }
          }
       );
-
       
       // Change color & font
       TableColumn tm;
@@ -77,31 +77,27 @@ public class spTable {
       tm = TABLE.getColumnModel().getColumn(3);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
-   }
-   
-   
-   // Define custom column sorting routines
-   Comparator<Object> sortableComparator = new Comparator<Object>() {
-      public int compare(Object o1, Object o2) {
-         if (o1 instanceof sortableDate && o2 instanceof sortableDate) {
-            sortableDate s1 = (sortableDate)o1;
-            sortableDate s2 = (sortableDate)o2;
-            long l1 = Long.parseLong(s1.sortable);
-            long l2 = Long.parseLong(s2.sortable);
-            if (l1 > l2) return 1;
-            if (l1 < l2) return -1;
+      
+      // Define custom column sorting routines
+      Comparator<Object> sortableComparator = new Comparator<Object>() {
+         public int compare(Object o1, Object o2) {
+            if (o1 instanceof sortableInt && o2 instanceof sortableInt) {
+               sortableInt s1 = (sortableInt)o1;
+               sortableInt s2 = (sortableInt)o2;
+               if (s1.sortable > s2.sortable) return 1;
+               if (s1.sortable < s2.sortable) return -1;
+               return 0;
+            }
             return 0;
          }
-         if (o1 instanceof sortableDuration && o2 instanceof sortableDuration) {
-            sortableDuration s1 = (sortableDuration)o1;
-            sortableDuration s2 = (sortableDuration)o2;
-            if (s1.sortable > s2.sortable) return 1;
-            if (s1.sortable < s2.sortable) return -1;
-            return 0;
-         }
-         return 0;
-      }
-   };
+      };
+      
+      // Use custom sorting routines for certain columns
+      Sorter sorter = TABLE.getColumnExt(0).getSorter();
+      sorter.setComparator(sortableComparator);
+      sorter = TABLE.getColumnExt(3).getSorter();
+      sorter.setComparator(sortableComparator);
+   }   
 
    /**
     * Applied background color to single column of a JTable
@@ -292,7 +288,7 @@ public class spTable {
           info[0] = new sortableInt(data, priority);
           info[1] = title;
           info[2] = channel;
-          info[3] = max;
+          info[3] = new sortableInt(null, max);
           AddRow(TABLE, info);       
        } catch (Exception e) {
           log.error("spTable AddRow - " + e.getMessage());
