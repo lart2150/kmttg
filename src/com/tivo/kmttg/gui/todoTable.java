@@ -29,6 +29,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
@@ -37,6 +38,7 @@ public class todoTable {
    private String[] TITLE_cols = {"DATE", "SHOW", "CHANNEL", "DUR"};
    public JXTable TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
+   private String currentTivo = null;
    public JScrollPane scroll = null;
    private JFrame dialog = null;
 
@@ -242,6 +244,7 @@ public class todoTable {
              AddRow(data.getJSONObject(i));
           }
           tivo_data.put(tivoName, data);
+          currentTivo = tivoName;
           packColumns(TABLE,2);
           if (config.gui.remote_gui != null)
              config.gui.remote_gui.setTivoName("todo", tivoName);
@@ -273,7 +276,7 @@ public class todoTable {
                 channel += "=" + o.getString("callSign");
           }
           
-          info[0] = new sortableDate(o, start);
+          info[0] = new sortableDate(data, start);
           info[1] = title;
           info[2] = channel;
           info[3] = new sortableDuration(end-start);
@@ -288,6 +291,34 @@ public class todoTable {
        DefaultTableModel dm = (DefaultTableModel)table.getModel();
        dm.addRow(data);
     }
+        
+    private int[] GetSelectedRows() {
+       debug.print("");
+       int[] rows = TABLE.getSelectedRows();
+       if (rows.length <= 0)
+          log.error("No rows selected");
+       return rows;
+    }
+    
+    private JSONObject GetRowData(int row) {
+       sortableDate s = (sortableDate) TABLE.getValueAt(row, getColumnIndex("DATE"));
+       if (s != null)
+          return s.json;
+       return null;
+    }    
+    
+    public String GetRowTitle(int row) {
+       String s = (String) TABLE.getValueAt(row, getColumnIndex("SHOW"));
+       if (s != null)
+          return s;
+       return null;
+    }
+    
+    public void RemoveRow(JXTable table, int row) {
+       debug.print("table=" + table + " row=" + row);
+       DefaultTableModel dm = (DefaultTableModel)table.getModel();
+       dm.removeRow(row);
+    }
     
     // Mouse event handler
     // This will display folder entries in table if folder entry single-clicked
@@ -295,7 +326,7 @@ public class todoTable {
        if( e.getClickCount() == 1 ) {
           int row = TABLE.rowAtPoint(e.getPoint());
           sortableDate s = (sortableDate)TABLE.getValueAt(row,getColumnIndex("DATE"));
-          System.out.println(s.json);
+          System.out.println(s.json.toString());
        }
     }
     
@@ -304,7 +335,37 @@ public class todoTable {
        int keyCode = e.getKeyCode();
        if (keyCode == KeyEvent.VK_DELETE){
           // Delete key has special action
-          System.out.println("DELETE pressed");
+          int[] selected = GetSelectedRows();
+          if (selected == null || selected.length < 0) {
+             log.error("No rows selected");
+             return;
+          }
+          int row;
+          String title;
+          JSONObject json;
+          Remote r = new Remote(currentTivo);
+          if (r.success) {
+             for (int i=0; i<selected.length; ++i) {
+                row = selected[i];
+                json = GetRowData(row);
+                title = GetRowTitle(row);
+                if (json != null) {
+                   try {
+                      log.warn("Cancelling ToDo show on TiVo '" + currentTivo + "': " + title);
+                      JSONObject o = new JSONObject();
+                      JSONArray a = new JSONArray();
+                      a.put(json.getString("recordingId"));
+                      o.put("recordingId", a);
+                      if ( r.Command("cancel", o) != null ) {
+                         RemoveRow(TABLE, row);
+                      }
+                   } catch (JSONException e1) {
+                      log.error("ToDo cancel - " + e1.getMessage());
+                   }
+                }
+             }
+             r.disconnect();                   
+          }
        } else {
           // Pass along keyboard action
           e.consume();
