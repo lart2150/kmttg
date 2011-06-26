@@ -36,6 +36,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
@@ -299,7 +300,7 @@ public class cancelledTable {
             }
             String d = "";
             if (dur.sortable != null) {
-               d = String.format("%d mins", secsToMins(dur.sortable/1000));
+               d = rnpl.msecsToMins(dur.sortable);
             }
             String message = "";
             if (s.display != null)
@@ -313,8 +314,12 @@ public class cancelledTable {
                message += "\n" + description;
             }
       
+            String title = "\nWill not record: ";
             if (s.json.has("title"))
-               log.warn("\n" + string.utfString(s.json.getString("title")));
+               title += string.utfString(s.json.getString("title"));
+            if (s.json.has("subtitle"))
+               title += " - " + string.utfString(s.json.getString("subtitle"));
+            log.warn(title);
             log.print(message);
          } catch (JSONException e) {
             log.error("TABLERowSelected - " + e.getMessage());
@@ -471,20 +476,6 @@ public class cancelledTable {
          log.error("folderize - " + e1.getMessage());
       }
    }
-      
-   // Convert seconds to mins
-   private long secsToMins(Long secs) {
-      debug.print("secs=" + secs);
-      long mins = secs/60;
-      if (mins > 0) {
-         secs -= mins*60;
-      }
-      // Round mins +1 if secs > 30
-      if (secs > 30) {
-         mins += 1;
-      }
-      return mins;
-   }
    
    // Add a non folder entry to TABLE table
    public void AddTABLERow(JSONObject entry) {
@@ -515,10 +506,10 @@ public class cancelledTable {
                channel += "=" + o.getString("callSign");
          }
    
-         data[1] = string.utfString(entry.getString("title"));
+         data[1] = title;
          data[2] = new sortableDate(entry, start);
          data[3] = channel;
-         data[4] = new sortableDuration(end-start);
+         data[4] = new sortableDuration(end-start, false);
          
          AddRow(TABLE, data);
          
