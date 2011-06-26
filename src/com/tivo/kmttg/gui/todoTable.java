@@ -24,12 +24,14 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.Sorter;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
@@ -64,7 +66,6 @@ public class todoTable {
             }
          }
       );
-
       
       // Change color & font
       TableColumn tm;
@@ -80,31 +81,36 @@ public class todoTable {
       tm = TABLE.getColumnModel().getColumn(3);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
+      
+      // Define custom column sorting routines
+      Comparator<Object> sortableComparator = new Comparator<Object>() {
+         public int compare(Object o1, Object o2) {
+            if (o1 instanceof sortableDate && o2 instanceof sortableDate) {
+               sortableDate s1 = (sortableDate)o1;
+               sortableDate s2 = (sortableDate)o2;
+               long l1 = Long.parseLong(s1.sortable);
+               long l2 = Long.parseLong(s2.sortable);
+               if (l1 > l2) return 1;
+               if (l1 < l2) return -1;
+               return 0;
+            }
+            if (o1 instanceof sortableDuration && o2 instanceof sortableDuration) {
+               sortableDuration s1 = (sortableDuration)o1;
+               sortableDuration s2 = (sortableDuration)o2;
+               if (s1.sortable > s2.sortable) return 1;
+               if (s1.sortable < s2.sortable) return -1;
+               return 0;
+            }
+            return 0;
+         }
+      };
+      
+      // Use custom sorting routines for certain columns
+      Sorter sorter = TABLE.getColumnExt(0).getSorter();
+      sorter.setComparator(sortableComparator);
+      sorter = TABLE.getColumnExt(3).getSorter();
+      sorter.setComparator(sortableComparator);
    }
-   
-   
-   // Define custom column sorting routines
-   Comparator<Object> sortableComparator = new Comparator<Object>() {
-      public int compare(Object o1, Object o2) {
-         if (o1 instanceof sortableDate && o2 instanceof sortableDate) {
-            sortableDate s1 = (sortableDate)o1;
-            sortableDate s2 = (sortableDate)o2;
-            long l1 = Long.parseLong(s1.sortable);
-            long l2 = Long.parseLong(s2.sortable);
-            if (l1 > l2) return 1;
-            if (l1 < l2) return -1;
-            return 0;
-         }
-         if (o1 instanceof sortableDuration && o2 instanceof sortableDuration) {
-            sortableDuration s1 = (sortableDuration)o1;
-            sortableDuration s2 = (sortableDuration)o2;
-            if (s1.sortable > s2.sortable) return 1;
-            if (s1.sortable < s2.sortable) return -1;
-            return 0;
-         }
-         return 0;
-      }
-   };
 
    /**
     * Applied background color to single column of a JTable
@@ -279,7 +285,7 @@ public class todoTable {
           info[0] = new sortableDate(data, start);
           info[1] = title;
           info[2] = channel;
-          info[3] = new sortableDuration(end-start);
+          info[3] = new sortableDuration(end-start, false);
           AddRow(TABLE, info);       
        } catch (JSONException e) {
           log.error("todoTable AddRow - " + e.getMessage());
@@ -324,9 +330,53 @@ public class todoTable {
     // This will display folder entries in table if folder entry single-clicked
     private void MouseClicked(MouseEvent e) {
        if( e.getClickCount() == 1 ) {
-          int row = TABLE.rowAtPoint(e.getPoint());
-          sortableDate s = (sortableDate)TABLE.getValueAt(row,getColumnIndex("DATE"));
-          System.out.println(s.json.toString());
+          try {
+             int row = TABLE.rowAtPoint(e.getPoint());
+             sortableDate s = (sortableDate)TABLE.getValueAt(row,getColumnIndex("DATE"));
+             sortableDuration dur = (sortableDuration)TABLE.getValueAt(row,getColumnIndex("DUR"));
+             JSONObject o;
+             String channelNum = null;
+             String channel = null;
+             if (s.json.has("channel")) {
+                o = s.json.getJSONObject("channel");
+                if ( o.has("channelNumber") ) {
+                   channelNum = o.getString("channelNumber");
+                }
+                if ( o.has("callSign") ) {
+                   channel = o.getString("callSign");
+                }
+             }
+             String description = null;
+             if ( s.json.has("description") ) {
+                description = string.utfString(s.json.getString("description"));
+             }
+             String d = "";
+             if (dur.sortable != null) {
+                d = rnpl.msecsToMins(dur.sortable);
+             }
+             String message = "";
+             if (s.display != null)
+                message = s.display;
+             if (channelNum != null && channel != null) {
+                message += " on " + channelNum + "=" + channel;
+             }
+             message += ", Duration = " + d;
+             
+             if (description != null) {
+                message += "\n" + description;
+             }
+       
+             String title = "\nTo Do recording: ";
+             if (s.json.has("title"))
+                title += string.utfString(s.json.getString("title"));
+             if (s.json.has("subtitle"))
+                title += " - " + string.utfString(s.json.getString("subtitle"));
+             log.warn(title);
+             log.print(message);
+          } catch (JSONException e1) {
+             log.error("MouseClicked - " + e1.getMessage());
+             return;
+          }
        }
     }
     
