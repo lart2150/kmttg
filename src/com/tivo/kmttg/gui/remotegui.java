@@ -1,24 +1,19 @@
 package com.tivo.kmttg.gui;
 
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Hashtable;
 import java.util.Stack;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -41,7 +36,7 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class remotegui {
-   private JDialog dialog = null;
+   private JFrame dialog = null;
    private JTabbedPane tabbed_panel = null;
    public int tivo_count = 0;
    
@@ -71,9 +66,7 @@ public class remotegui {
 
    remotegui(JFrame frame) {
       
-      dialog = new JDialog(frame, false); // non-modal dialog
-      //dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE); // Destroy when closed
-      dialog.setTitle("Remote Control");
+      dialog = new JFrame("kmttg Remote Control");
       
       Browser = new JFileChooser(config.programDir);
       Browser.setMultiSelectionEnabled(false);
@@ -925,7 +918,7 @@ public class remotegui {
          hme_rc.addItem(hmeNames[i]);
    }
       
-   private ImageIcon scale(Image src, double scale) {
+   /*private ImageIcon scale(Image src, double scale) {
       int w = (int)(scale*src.getWidth(dialog));
       int h = (int)(scale*src.getHeight(dialog));
       int type = BufferedImage.TYPE_INT_RGB;
@@ -934,7 +927,7 @@ public class remotegui {
       g2.drawImage(src, 0, 0, w, h, dialog);
       g2.dispose();
       return new ImageIcon(dst);
-   }
+   }*/
       
    public String getToolTip(String component) {
       debug.print("component=" + component);

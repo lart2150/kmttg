@@ -16,7 +16,7 @@ import java.util.Stack;
 import java.util.Vector;
 
 import javax.swing.Icon;
-import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -50,10 +50,10 @@ public class cancelledTable {
    public int folderEntryNum = -1;
    private Hashtable<String,Stack<JSONObject>> folders = null;
    private Vector<JSONObject> sortedOrder = null;
-   private JDialog dialog = null;
+   private JFrame dialog = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
          
-   cancelledTable(JDialog dialog) {
+   cancelledTable(JFrame dialog) {
       this.dialog = dialog;
       Object[][] data = {}; 
       TABLE = new JXTable(data, TITLE_cols);

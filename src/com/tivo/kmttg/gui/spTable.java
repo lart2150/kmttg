@@ -10,7 +10,7 @@ import java.awt.event.MouseEvent;
 import java.util.Comparator;
 import java.util.Hashtable;
 
-import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -37,9 +37,9 @@ public class spTable {
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private String currentTivo = null;
    public JScrollPane scroll = null;
-   private JDialog dialog = null;
+   private JFrame dialog = null;
 
-   spTable(JDialog dialog) {
+   spTable(JFrame dialog) {
       this.dialog = dialog;
       Object[][] data = {};
       TABLE = new JXTable(data, TITLE_cols);

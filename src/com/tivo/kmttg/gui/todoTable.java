@@ -13,7 +13,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
 
-import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -38,9 +38,9 @@ public class todoTable {
    public JXTable TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    public JScrollPane scroll = null;
-   private JDialog dialog = null;
+   private JFrame dialog = null;
 
-   todoTable(JDialog dialog) {
+   todoTable(JFrame dialog) {
       this.dialog = dialog;
       Object[][] data = {};
       TABLE = new JXTable(data, TITLE_cols);
