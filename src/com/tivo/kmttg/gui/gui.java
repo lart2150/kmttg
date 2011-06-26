@@ -92,6 +92,7 @@ public class gui {
    public static Hashtable<String,Icon> Images;
    
    public remotegui remote_gui = null;
+   public Hashtable<String,Integer> remote_gui_dimensions = new Hashtable<String,Integer>();
    
    public tivoTab getTab(String tabName) {
       return tivoTabs.get(tabName);
@@ -1389,6 +1390,14 @@ public class gui {
             ofp.write("<y>\n"                   + p.y                        + "\n");
             ofp.write("<centerDivider>\n"       + centerDivider              + "\n");
             ofp.write("<bottomDivider>\n"       + bottomDivider              + "\n");
+            if (remote_gui != null) {
+               d = remote_gui.getDimension();
+               p = remote_gui.getLocation();
+               ofp.write("<width_remote>\n"     + d.width                    + "\n");
+               ofp.write("<height_remote>\n"    + d.height                   + "\n");
+               ofp.write("<x_remote>\n"         + p.x                        + "\n");
+               ofp.write("<y_remote>\n"         + p.y                        + "\n");
+            }
             ofp.write("<tab>\n"                 + tabName                    + "\n");
             
             ofp.write("<columnOrder>\n");
@@ -1456,6 +1465,7 @@ public class gui {
          int height = -1;
          int x = -1;
          int y = -1;
+         int value;
          int centerDivider = -1, bottomDivider = -1;
          BufferedReader ifp = new BufferedReader(new FileReader(config.gui_settings));
          String line = null;
@@ -1589,6 +1599,38 @@ public class gui {
                } catch (NumberFormatException e) {
                   y = -1;
                }
+            }
+            if (key.equals("width_remote")) {
+               try {
+                  value = Integer.parseInt(line);
+               } catch (NumberFormatException e) {
+                  value = -1;
+               }
+               remote_gui_dimensions.put("width", value);
+            }
+            if (key.equals("height_remote")) {
+               try {
+                  value = Integer.parseInt(line);
+               } catch (NumberFormatException e) {
+                  value = -1;
+               }
+               remote_gui_dimensions.put("height", value);
+            }
+            if (key.equals("x_remote")) {
+               try {
+                  value = Integer.parseInt(line);
+               } catch (NumberFormatException e) {
+                  value = -1;
+               }
+               remote_gui_dimensions.put("x", value);
+            }
+            if (key.equals("y_remote")) {
+               try {
+                  value = Integer.parseInt(line);
+               } catch (NumberFormatException e) {
+                  value = -1;
+               }
+               remote_gui_dimensions.put("y", value);
             }
             if (key.equals("centerDivider")) {
                try {
