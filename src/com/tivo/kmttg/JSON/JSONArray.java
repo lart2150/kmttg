@@ -86,13 +86,15 @@ public class JSONArray {
     /**
      * The arrayList where the JSONArray's properties are kept.
      */
-    private ArrayList myArrayList;
+   @SuppressWarnings("unchecked")
+   private ArrayList myArrayList;
 
 
     /**
      * Construct an empty JSONArray.
      */
-    public JSONArray() {
+   @SuppressWarnings("unchecked")
+   public JSONArray() {
         this.myArrayList = new ArrayList();
     }
 
@@ -101,7 +103,8 @@ public class JSONArray {
      * @param x A JSONTokener
      * @throws JSONException If there is a syntax error.
      */
-    public JSONArray(JSONTokener x) throws JSONException {
+   @SuppressWarnings("unchecked")
+   public JSONArray(JSONTokener x) throws JSONException {
         this();
         if (x.nextClean() != '[') {
             throw x.syntaxError("A JSONArray text must start with '['");
@@ -150,7 +153,8 @@ public class JSONArray {
      * Construct a JSONArray from a Collection.
      * @param collection     A Collection.
      */
-    public JSONArray(Collection collection) {
+   @SuppressWarnings("unchecked")
+   public JSONArray(Collection collection) {
       this.myArrayList = new ArrayList();
       if (collection != null) {
          Iterator iter = collection.iterator();
@@ -577,7 +581,8 @@ public class JSONArray {
      * @param value A Collection value.
      * @return      this.
      */
-    public JSONArray put(Collection value) {
+   @SuppressWarnings("unchecked")
+   public JSONArray put(Collection value) {
         put(new JSONArray(value));
         return this;
     }
@@ -628,7 +633,8 @@ public class JSONArray {
      * @param value A Map value.
      * @return      this.
      */
-    public JSONArray put(Map value) {
+   @SuppressWarnings("unchecked")
+   public JSONArray put(Map value) {
         put(new JSONObject(value));
         return this;
     }
@@ -641,7 +647,8 @@ public class JSONArray {
      *  JSONObject.NULL object.
      * @return this.
      */
-    public JSONArray put(Object value) {
+   @SuppressWarnings("unchecked")
+   public JSONArray put(Object value) {
         this.myArrayList.add(value);
         return this;
     }
@@ -671,7 +678,8 @@ public class JSONArray {
      * @throws JSONException If the index is negative or if the value is
      * not finite.
      */
-    public JSONArray put(int index, Collection value) throws JSONException {
+   @SuppressWarnings("unchecked")
+   public JSONArray put(int index, Collection value) throws JSONException {
         put(index, new JSONArray(value));
         return this;
     }
@@ -732,7 +740,8 @@ public class JSONArray {
      * @throws JSONException If the index is negative or if the the value is
      *  an invalid number.
      */
-    public JSONArray put(int index, Map value) throws JSONException {
+   @SuppressWarnings("unchecked")
+   public JSONArray put(int index, Map value) throws JSONException {
         put(index, new JSONObject(value));
         return this;
     }
@@ -750,7 +759,8 @@ public class JSONArray {
      * @throws JSONException If the index is negative or if the the value is
      *  an invalid number.
      */
-    public JSONArray put(int index, Object value) throws JSONException {
+   @SuppressWarnings("unchecked")
+   public JSONArray put(int index, Object value) throws JSONException {
         JSONObject.testValidity(value);
         if (index < 0) {
             throw new JSONException("JSONArray[" + index + "] not found.");

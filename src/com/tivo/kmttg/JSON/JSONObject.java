@@ -129,7 +129,8 @@ public class JSONObject {
     /**
      * The map where the JSONObject's properties are kept.
      */
-    private Map map;
+   @SuppressWarnings("unchecked")
+   private Map map;
 
 
     /**
@@ -144,7 +145,8 @@ public class JSONObject {
     /**
      * Construct an empty JSONObject.
      */
-    public JSONObject() {
+   @SuppressWarnings("unchecked")
+   public JSONObject() {
         this.map = new HashMap();
     }
 
@@ -233,7 +235,8 @@ public class JSONObject {
      *  the JSONObject.
      * @throws JSONException 
      */
-    public JSONObject(Map map) {
+   @SuppressWarnings("unchecked")
+   public JSONObject(Map map) {
         this.map = new HashMap();
         if (map != null) {
             Iterator i = map.entrySet().iterator();
@@ -284,7 +287,8 @@ public class JSONObject {
      * @param names An array of strings, the names of the fields to be obtained
      * from the object.
      */
-    public JSONObject(Object object, String names[]) {
+   @SuppressWarnings("unchecked")
+   public JSONObject(Object object, String names[]) {
         this();
         Class c = object.getClass();
         for (int i = 0; i < names.length; i += 1) {
@@ -317,7 +321,8 @@ public class JSONObject {
      * @param locale The Locale to load the ResourceBundle for.
      * @throws JSONException If any JSONExceptions are detected.
      */
-    public JSONObject(String baseName, Locale locale) throws JSONException {
+   @SuppressWarnings("unchecked")
+   public JSONObject(String baseName, Locale locale) throws JSONException {
         this();
         ResourceBundle bundle = ResourceBundle.getBundle(baseName, locale, 
                 Thread.currentThread().getContextClassLoader());
@@ -585,7 +590,8 @@ public class JSONObject {
      *
      * @return An array of field names, or null if there are no names.
      */
-    public static String[] getNames(JSONObject jo) {
+   @SuppressWarnings("unchecked")
+   public static String[] getNames(JSONObject jo) {
         int length = jo.length();
         if (length == 0) {
             return null;
@@ -606,7 +612,8 @@ public class JSONObject {
      *
      * @return An array of field names, or null if there are no names.
      */
-    public static String[] getNames(Object object) {
+   @SuppressWarnings("unchecked")
+   public static String[] getNames(Object object) {
         if (object == null) {
             return null;
         }
@@ -696,7 +703,8 @@ public class JSONObject {
      *
      * @return An iterator of the keys.
      */
-    public Iterator keys() {
+   @SuppressWarnings("unchecked")
+   public Iterator keys() {
         return this.map.keySet().iterator();
     }
 
@@ -717,7 +725,8 @@ public class JSONObject {
      * @return A JSONArray containing the key strings, or null if the JSONObject
      * is empty.
      */
-    public JSONArray names() {
+   @SuppressWarnings("unchecked")
+   public JSONArray names() {
         JSONArray ja = new JSONArray();
         Iterator  keys = this.keys();
         while (keys.hasNext()) {
@@ -950,7 +959,8 @@ public class JSONObject {
     }
 
 
-    private void populateMap(Object bean) {
+   @SuppressWarnings("unchecked")
+   private void populateMap(Object bean) {
         Class klass = bean.getClass();
 
 // If klass is a System class then set includeSuperClass to false. 
@@ -1019,7 +1029,8 @@ public class JSONObject {
      * @return      this.
      * @throws JSONException
      */
-    public JSONObject put(String key, Collection value) throws JSONException {
+   @SuppressWarnings("unchecked")
+   public JSONObject put(String key, Collection value) throws JSONException {
         put(key, new JSONArray(value));
         return this;
     }
@@ -1075,7 +1086,8 @@ public class JSONObject {
      * @return      this.
      * @throws JSONException
      */
-    public JSONObject put(String key, Map value) throws JSONException {
+   @SuppressWarnings("unchecked")
+   public JSONObject put(String key, Map value) throws JSONException {
         put(key, new JSONObject(value));
         return this;
     }
@@ -1092,7 +1104,8 @@ public class JSONObject {
      * @throws JSONException If the value is non-finite number
      *  or if the key is null.
      */
-    public JSONObject put(String key, Object value) throws JSONException {
+   @SuppressWarnings("unchecked")
+   public JSONObject put(String key, Object value) throws JSONException {
         if (key == null) {
             throw new JSONException("Null key.");
         }
@@ -1329,7 +1342,8 @@ public class JSONObject {
      *  with <code>{</code>&nbsp;<small>(left brace)</small> and ending
      *  with <code>}</code>&nbsp;<small>(right brace)</small>.
      */
-    public String toString() {
+   @SuppressWarnings("unchecked")
+   public String toString() {
         try {
             Iterator     keys = this.keys();
             StringBuffer sb = new StringBuffer("{");
@@ -1381,7 +1395,8 @@ public class JSONObject {
      *  with <code>}</code>&nbsp;<small>(right brace)</small>.
      * @throws JSONException If the object contains an invalid number.
      */
-    String toString(int indentFactor, int indent) throws JSONException {
+   @SuppressWarnings("unchecked")
+   String toString(int indentFactor, int indent) throws JSONException {
         int i;
         int length = this.length();
         if (length == 0) {
@@ -1446,7 +1461,8 @@ public class JSONObject {
      *  with <code>}</code>&nbsp;<small>(right brace)</small>.
      * @throws JSONException If the value is or contains an invalid number.
      */
-    public static String valueToString(Object value) throws JSONException {
+   @SuppressWarnings("unchecked")
+   public static String valueToString(Object value) throws JSONException {
         if (value == null || value.equals(null)) {
             return "null";
         }
@@ -1496,7 +1512,8 @@ public class JSONObject {
      *  with <code>}</code>&nbsp;<small>(right brace)</small>.
      * @throws JSONException If the object contains an invalid number.
      */
-     static String valueToString(
+   @SuppressWarnings("unchecked")
+   static String valueToString(
          Object value, 
          int    indentFactor, 
          int    indent
@@ -1550,7 +1567,8 @@ public class JSONObject {
       * @param object The object to wrap
       * @return The wrapped value
       */
-     public static Object wrap(Object object) {
+   @SuppressWarnings("unchecked")
+   public static Object wrap(Object object) {
          try {
              if (object == null) {
                  return NULL;
@@ -1600,7 +1618,8 @@ public class JSONObject {
       * @return The writer.
       * @throws JSONException
       */
-     public Writer write(Writer writer) throws JSONException {
+   @SuppressWarnings("unchecked")
+   public Writer write(Writer writer) throws JSONException {
         try {
             boolean  commanate = false;
             Iterator keys = this.keys();
