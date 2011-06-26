@@ -4,14 +4,14 @@ import com.tivo.kmttg.JSON.JSONObject;
 
 public class sortableInt {
    String display;
-   String sortable;
+   int sortable;
    JSONObject json;
    
    // json & priority constructor
    sortableInt(JSONObject json, int priority) {
       this.json = json;
       display = "" + priority;
-      sortable = display;
+      sortable = priority;
    }
 
    public String toString() {
