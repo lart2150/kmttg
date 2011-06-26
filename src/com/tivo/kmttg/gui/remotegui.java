@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
@@ -568,6 +569,23 @@ public class remotegui {
          log.warn("No Premieres currently enabled for Remote Control in kmttg configuration");
          return;
       }
+      
+      if (config.gui.remote_gui_dimensions.size() > 0) {
+         // Previously saved dimensions for the remote
+         int width = -1, height = -1, x = -1, y = -1;
+         if (config.gui.remote_gui_dimensions.containsKey("width"))
+            width = config.gui.remote_gui_dimensions.get("width");
+         if (config.gui.remote_gui_dimensions.containsKey("height"))
+            height = config.gui.remote_gui_dimensions.get("height");
+         if (config.gui.remote_gui_dimensions.containsKey("x"))
+            x = config.gui.remote_gui_dimensions.get("x");
+         if (config.gui.remote_gui_dimensions.containsKey("y"))
+            y = config.gui.remote_gui_dimensions.get("y");
+         if (width != -1 && height != -1)
+            dialog.setSize(new Dimension(width,height));
+         if (x != -1 && y != -1)
+            dialog.setLocation(new Point(x,y));
+      }
       dialog.setVisible(true);      
    }
    
@@ -928,6 +946,14 @@ public class remotegui {
       g2.dispose();
       return new ImageIcon(dst);
    }*/
+   
+   public Dimension getDimension() {
+      return dialog.getSize();
+   }
+   
+   public Point getLocation() {
+      return dialog.getLocation();
+   }
       
    public String getToolTip(String component) {
       debug.print("component=" + component);
