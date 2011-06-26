@@ -11,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -357,6 +358,20 @@ public class Remote {
             json.put("noLimit", "true");
             json.put("state", new JSONArray("[\"cancelled\"]"));
             req = RpcRequest("recordingSearch", false, json);
+         }
+         else if (type.equals("GridSearch")) {
+            // Search for future recordings
+            // Expects extra search criteria in json, such as:
+            // "title":"The Voice"
+            Date now = new Date();
+            json.put("levelOfDetail", "high");
+            json.put("isReceived", "true");
+            json.put("count", 1000);
+            json.put("orderBy", new JSONArray("[\"channelNumber\"]"));
+            json.put("bodyId", "-");
+            json.put("maxStartTime", rnpl.getStringFromLongDate(now.getTime()+12*24*60*60*1000));
+            json.put("minEndTime", rnpl.getStringFromLongDate(now.getTime()));
+            req = RpcRequest("gridRowSearch", false, json);
          }
          else if (type.equals("SeasonPasses")) {
             json.put("levelOfDetail", "medium");
