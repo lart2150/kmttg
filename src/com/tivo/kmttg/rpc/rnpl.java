@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.TimeZone;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -110,8 +111,10 @@ public class rnpl {
       }
    }
    
+   // Convert to GMT then to TiVo json time string format
    public static String getStringFromLongDate(long date) {
-      SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz");
+      SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      format.setTimeZone(TimeZone.getTimeZone("GMT"));
       return format.format(date);
    }
 
