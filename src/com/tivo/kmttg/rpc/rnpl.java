@@ -117,5 +117,19 @@ public class rnpl {
       format.setTimeZone(TimeZone.getTimeZone("GMT"));
       return format.format(date);
    }
+   
+   // Convert msecs to "N mins"
+   public static String msecsToMins(Long msecs) {
+      long secs = msecs/1000;
+      long mins = secs/60;
+      if (mins > 0) {
+         secs -= mins*60;
+      }
+      // Round mins +1 if secs > 30
+      if (secs > 30) {
+         mins += 1;
+      }
+      return String.format("%d mins", mins);
+   }
 
 }
