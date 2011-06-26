@@ -270,7 +270,7 @@ public class cancelledTable {
       return rows;
    }
    
-   public void TABLERowSelected(int row) {
+   private void TABLERowSelected(int row) {
       debug.print("row=" + row);
       if (row == -1) return;
       // Get column items for selected row 
@@ -278,34 +278,48 @@ public class cancelledTable {
       if (s.folder) {
          // Folder entry - don't display anything
       } else {
-         // Non folder entry so print single entry info
-         String t = s.data.get("date_long");
-         String channelNum = null;
-         if ( s.data.containsKey("channelNum") ) {
-            channelNum = s.data.get("channelNum");
+         try {
+            // Non folder entry so print single entry info
+            sortableDuration dur = (sortableDuration)TABLE.getValueAt(row,getColumnIndex("DUR"));
+            JSONObject o;
+            String channelNum = null;
+            String channel = null;
+            if (s.json.has("channel")) {
+               o = s.json.getJSONObject("channel");
+               if ( o.has("channelNumber") ) {
+                  channelNum = o.getString("channelNumber");
+               }
+               if ( o.has("callSign") ) {
+                  channel = o.getString("callSign");
+               }
+            }
+            String description = null;
+            if ( s.json.has("description") ) {
+               description = string.utfString(s.json.getString("description"));
+            }
+            String d = "";
+            if (dur.sortable != null) {
+               d = String.format("%d mins", secsToMins(dur.sortable/1000));
+            }
+            String message = "";
+            if (s.display != null)
+               message = s.display;
+            if (channelNum != null && channel != null) {
+               message += " on " + channelNum + "=" + channel;
+            }
+            message += ", Duration = " + d;
+            
+            if (description != null) {
+               message += "\n" + description;
+            }
+      
+            if (s.json.has("title"))
+               log.warn("\n" + string.utfString(s.json.getString("title")));
+            log.print(message);
+         } catch (JSONException e) {
+            log.error("TABLERowSelected - " + e.getMessage());
+            return;
          }
-         String channel = null;
-         if ( s.data.containsKey("channel") ) {
-            channel = s.data.get("channel");
-         }
-         String description = null;
-         if ( s.data.containsKey("description") ) {
-            description = s.data.get("description");
-         }
-         int duration = Integer.parseInt(s.data.get("duration"));
-         String d = String.format("%d mins", secsToMins((long)duration/1000));
-         String message = "Recorded " + t;
-         if (channelNum != null && channel != null) {
-            message += " on " + channelNum + "=" + channel;
-         }
-         message += ", Duration = " + d;
-         
-         if (description != null) {
-            message += "\n" + description;
-         }
-   
-         log.warn("\n" + s.data.get("title"));
-         log.print(message);
       }
    }
 
@@ -502,7 +516,7 @@ public class cancelledTable {
          }
    
          data[1] = string.utfString(entry.getString("title"));
-         data[2] = new sortableDate(o, start);
+         data[2] = new sortableDate(entry, start);
          data[3] = channel;
          data[4] = new sortableDuration(end-start);
          
