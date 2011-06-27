@@ -280,7 +280,7 @@ public class Remote {
             json.put("noLimit", "true");
             req = RpcRequest("uiDestinationInstanceSearch", false, json);
          }
-         if (type.equals("navigate")) {
+         else if (type.equals("navigate")) {
             // Navigation command - expects uri in json
             req = RpcRequest("uiNavigate", false, json);
          }
