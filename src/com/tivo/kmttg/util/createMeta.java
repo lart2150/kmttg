@@ -94,9 +94,9 @@ public class createMeta {
             data.put("starRating", "x" + data.get("starRating"));
          if ( data.containsKey("tvRating") )
             data.put("tvRating", "x" + data.get("tvRating"));
-         // Not sure why I had isEpisodic override isEpisode, commenting out for now
-         //if ( data.containsKey("isEpisodic") )
-         //   data.put("isEpisode", data.get("isEpisodic"));
+         // Override isEpisode since it seems to be wrong most of the time
+         if ( data.containsKey("isEpisodic") )
+            data.put("isEpisode", data.get("isEpisodic"));
          if ( data.containsKey("description") )
             data.put("description", ((String) (data.get("description"))).replaceFirst("Copyright Tribune Media Services, Inc.", ""));
          
