@@ -188,10 +188,8 @@ public class tivoTab {
                // Toggle between folder mode and non folder mode display
                public void actionPerformed(ActionEvent e) {
                   // Reset to top level display
-                  nplTab.inFolder = false;
+                  nplTab.setFolderState(false);
                   nplTab.folderEntryNum = -1;
-                  refresh.setText("Refresh");
-                  refresh.setToolTipText(config.gui.getToolTip("refresh"));
                   
                   // Refresh to show top level entries
                   nplTab.RefreshNowPlaying(null);

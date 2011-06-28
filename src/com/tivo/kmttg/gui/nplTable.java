@@ -446,7 +446,7 @@ public class nplTable {
                      // NOTE: Always revert to top view (not inside a folder)
                      RemoveUrls(urlsToDelete);
                      folderize(entries);
-                     inFolder = false;
+                     setFolderState(false);
                      RefreshNowPlaying(entries);
                   }
                   if (config.getRpcSetting(tivoName).equals("1")) {
@@ -454,7 +454,7 @@ public class nplTable {
                      log.warn("Deleting selected shows on TiVo '" + tivoName + "':\n" + show_names);
                      RemoveIds(urlsToDelete, idsToDelete);
                      folderize(entries);
-                     inFolder = false;
+                     setFolderState(false);
                      RefreshNowPlaying(entries);
                   }
                } // if urslToDelete
