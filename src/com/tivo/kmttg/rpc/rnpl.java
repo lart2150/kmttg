@@ -1,5 +1,7 @@
 package com.tivo.kmttg.rpc;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -9,6 +11,7 @@ import java.util.TimeZone;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.JSON.JSONTokener;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.log;
@@ -130,6 +133,25 @@ public class rnpl {
          mins += 1;
       }
       return String.format("%d mins", mins);
+   }
+   
+   public static JSONArray loadWillNotRecordData(String fileName) {
+      JSONArray a = new JSONArray();
+      JSONObject o;
+      try {
+         BufferedReader is = new BufferedReader(new FileReader(fileName));
+         String line;
+         while ( (line=is.readLine()) != null ) {
+            o = new JSONObject(new JSONTokener(line));
+            a.put(o.getJSONArray("recording").get(0));
+         }
+         is.close();
+         return a;
+      } catch (Exception e) {
+         log.error("loadWillNotRecordData - " + e.getMessage());
+         return null;
+      }
+
    }
 
 }
