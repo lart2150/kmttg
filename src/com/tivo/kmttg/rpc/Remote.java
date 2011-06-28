@@ -334,14 +334,14 @@ public class Remote {
             req = RpcRequest("recordingFolderItemSearch", false, json);
          }
          else if (type.equals("MyShows")) {
+            // Expects count=# in initial json, offset=# after first call
             json.put("bodyId", "-");
-            json.put("noLimit", "true");
             req = RpcRequest("recordingFolderItemSearch", false, json);
          }
          else if (type.equals("ToDo")) {
+            // Expects count=# in initial json, offset=# after first call
             json.put("format", "idSequence");
             json.put("bodyId", "-");
-            json.put("noLimit", "true");
             json.put("state", new JSONArray("[\"scheduled\"]"));
             req = RpcRequest("recordingSearch", false, json);
          }
@@ -353,9 +353,9 @@ public class Remote {
          }
          else if (type.equals("Cancelled")) {
             // Get list or recording Ids that will not record
+            // Expects count=# in initial json, offset=# after first call
             json.put("format", "idSequence");
             json.put("bodyId", "-");
-            json.put("noLimit", "true");
             json.put("state", new JSONArray("[\"cancelled\"]"));
             req = RpcRequest("recordingSearch", false, json);
          }
@@ -449,58 +449,71 @@ public class Remote {
       JSONObject result = null;
 
       try {
-         // Top level list
-         result = Command("MyShows", new JSONObject());
-         if (result != null && result.has("recordingFolderItem")) {
-            JSONArray items = (JSONArray) result.get("recordingFolderItem");
-            JSONObject item;
-            String title;
-            for (int i=0; i<items.length(); ++i) {
-               title = null;
-               item = items.getJSONObject(i);
-               if (item.has("folderItemCount")) {
-                  // Type folder has to be further drilled down
-                  if (item.has("title"))
-                     title = item.getString("title");
-                  if (title != null && title.equals("HD Recordings")) {
-                     // Skip drilling into "HD Recordings" folder
-                     continue;
-                  }
-                  result = Command(
-                     "FolderIds",
-                     new JSONObject("{\"parentRecordingFolderItemId\":\"" + item.get("recordingFolderItemId") + "\"}")
-                  );
-                  if (result != null) {
-                     JSONArray ids = result.getJSONArray("objectIdAndType");
-                     for (int j=0; j<ids.length(); ++j) {
-                        JSONArray id = new JSONArray();
-                        id.put(ids.get(j));
-                        JSONObject s = new JSONObject();
-                        s.put("objectIdAndType",id);
-                        result = Command("SearchIds", s);
-                        if (result != null) {
-                           s = result.getJSONArray("recordingFolderItem").getJSONObject(0);
-                           result = Command(
+         // Top level list - run in a loop to grab all items
+         Boolean stop = false;
+         int offset = 0;
+         JSONObject json = new JSONObject();
+         json.put("count", 100);
+         while ( ! stop ) {
+            result = Command("MyShows", json);
+            if (result != null && result.has("recordingFolderItem")) {
+               JSONArray items = (JSONArray) result.get("recordingFolderItem");
+               offset += items.length();
+               json.put("offset", offset);
+               if (items.length() == 0)
+                  stop = true;
+               JSONObject item;
+               String title;
+               for (int i=0; i<items.length(); ++i) {
+                  title = null;
+                  item = items.getJSONObject(i);
+                  if (item.has("folderItemCount")) {
+                     // Type folder has to be further drilled down
+                     if (item.has("title"))
+                        title = item.getString("title");
+                     if (title != null && title.equals("HD Recordings")) {
+                        // Skip drilling into "HD Recordings" folder
+                        continue;
+                     }
+                     result = Command(
+                        "FolderIds",
+                        new JSONObject("{\"parentRecordingFolderItemId\":\"" + item.get("recordingFolderItemId") + "\"}")
+                     );
+                     if (result != null) {
+                        JSONArray ids = result.getJSONArray("objectIdAndType");
+                        for (int j=0; j<ids.length(); ++j) {
+                           JSONArray id = new JSONArray();
+                           id.put(ids.get(j));
+                           JSONObject s = new JSONObject();
+                           s.put("objectIdAndType",id);
+                           result = Command("SearchIds", s);
+                           if (result != null) {
+                              s = result.getJSONArray("recordingFolderItem").getJSONObject(0);
+                              result = Command(
                                  "Search",
                                  new JSONObject("{\"recordingId\":\"" + s.get("childRecordingId") + "\"}")
                               );
-                           if (result != null) {
-                              allShows.put(result);
+                              if (result != null) {
+                                 allShows.put(result);
+                              }
                            }
                         }
                      }
+                  } else {
+                     // Individual entry just add to items array                  
+                     result = Command(
+                        "Search",
+                        new JSONObject("{\"recordingId\":\"" + item.get("childRecordingId") + "\"}")
+                     );
+                     if (result != null)
+                        allShows.put(result);
                   }
-               } else {
-                  // Individual entry just add to items array                  
-                  result = Command(
-                     "Search",
-                     new JSONObject("{\"recordingId\":\"" + item.get("childRecordingId") + "\"}")
-                  );
-                  if (result != null)
-                     allShows.put(result);
-               }
-            } // for
-         } // if
+               } // for
+            } else {
+               // result == null
+               stop = true;
+            } // if
+         } // while
       } catch (JSONException e) {
          error("rpc MyShows error - " + e.getMessage());
          return null;
@@ -515,23 +528,47 @@ public class Remote {
       JSONObject result = null;
 
       try {
-         // Top level list
-         result = Command("ToDo", new JSONObject());
-         if (result != null && result.has("objectIdAndType")) {
-            JSONArray items = result.getJSONArray("objectIdAndType");
-            for (int j=0; j<items.length(); ++j) {
-               JSONArray id = new JSONArray();
-               id.put(items.get(j));
-               JSONObject s = new JSONObject();
-               s.put("objectIdAndType",id);
-               result = Command("SearchId", s);
-               if (result != null && result.has("recording")) {
-                  s = result.getJSONArray("recording").getJSONObject(0);
-                  allShows.put(s);
-                  //print(s.toString());
-               }
+         // Top level list - run in a loop to grab all items
+         JSONArray items = new JSONArray();
+         Boolean stop = false;
+         JSONObject json = new JSONObject();
+         json.put("count", 100);
+         int offset = 0;
+         while ( ! stop ) {
+            result = Command("ToDo", json);
+            if (result != null && result.has("objectIdAndType")) {
+               JSONArray a = result.getJSONArray("objectIdAndType");
+               for (int i=0; i<a.length(); ++i)
+                  items.put(a.get(i));
+               offset += a.length();
+               json.put("offset", offset);
+               if (a.length() == 0)
+                  stop = true;
+            } else {
+               stop = true;
             }
-         } // if
+         } // while
+         
+         // Now collect info on individual items, 50 at a time
+         int total = items.length();
+         int max=50;
+         int index=0, num=0;
+         while (index < total) {
+            num += max;
+            if (num > total)
+               num = total;
+            JSONArray id = new JSONArray();
+            while (index < num)
+               id.put(items.get(index++));
+            JSONObject s = new JSONObject();
+            s.put("objectIdAndType",id);
+            result = Command("SearchId", s);
+            if (result != null && result.has("recording")) {
+               id = result.getJSONArray("recording");
+               for (int j=0; j<id.length(); ++j)
+                  allShows.put(id.getJSONObject(j));
+            } // if
+         } // while
       } catch (JSONException e) {
          error("rpc ToDo error - " + e.getMessage());
          return null;
@@ -546,28 +583,49 @@ public class Remote {
       JSONObject result = null;
 
       try {
-         // Top level list
-         result = Command("Cancelled", new JSONObject());
-         if (result != null && result.has("objectIdAndType")) {
-            JSONArray items = result.getJSONArray("objectIdAndType");
-            for (int j=0; j<items.length(); ++j) {
-               JSONArray id = new JSONArray();
-               id.put(items.get(j));
-               JSONObject s = new JSONObject();
-               s.put("objectIdAndType",id);
-               result = Command("SearchId", s);
-               if (result != null && result.has("recording")) {
-                  s = result.getJSONArray("recording").getJSONObject(0);
-                  allShows.put(s);
-                  /*if (s.has("cancellationReason")) {
-                     if (s.getString("cancellationReason").equals("programSourceConflict"))
-                        print(s.toString());
-                  }*/
-               }
+         // Top level list - run in a loop to grab all items
+         JSONArray items = new JSONArray();
+         Boolean stop = false;
+         JSONObject json = new JSONObject();
+         json.put("count", 100);
+         int offset = 0;
+         while ( ! stop ) {
+            result = Command("Cancelled", json);
+            if (result != null && result.has("objectIdAndType")) {
+               JSONArray a = result.getJSONArray("objectIdAndType");
+               for (int i=0; i<a.length(); ++i)
+                  items.put(a.get(i));
+               offset += a.length();
+               json.put("offset", offset);
+               if (a.length() == 0)
+                  stop = true;
+            } else {
+               stop = true;
             }
-         } // if
+         } // while
+         
+         // Now collect info on individual items, 50 at a time
+         int total = items.length();
+         int max=50;
+         int index=0, num=0;
+         while (index < total) {
+            num += max;
+            if (num > total)
+               num = total;
+            JSONArray id = new JSONArray();
+            while (index < num)
+               id.put(items.get(index++));
+            JSONObject s = new JSONObject();
+            s.put("objectIdAndType",id);
+            result = Command("SearchId", s);
+            if (result != null && result.has("recording")) {
+               id = result.getJSONArray("recording");
+               for (int j=0; j<id.length(); ++j)
+                  allShows.put(id.getJSONObject(j));
+            } // if
+         } // while
       } catch (JSONException e) {
-         error("rpc ToDo error - " + e.getMessage());
+         error("rpc CancelledShows error - " + e.getMessage());
          return null;
       }
 
