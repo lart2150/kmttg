@@ -38,7 +38,7 @@ public class tivoFileName {
       // Enter values for these names into keys hash
       String[] names = {
          "title", "titleOnly", "episodeTitle", "channelNum", "channel",
-         "EpisodeNumber", "description"
+         "EpisodeNumber", "description", "tivoName"
       };
       for (int i=0; i<names.length; ++i) {
          if (entry.containsKey(names[i])) {
@@ -148,6 +148,7 @@ public class tivoFileName {
             text = text.replaceFirst("^year$",          removeSpecialChars(keys.get("year")));
             text = text.replaceFirst("^EpisodeNumber$", removeSpecialChars(keys.get("EpisodeNumber")));
             text = text.replaceFirst("^description$",   removeSpecialChars(keys.get("description")));
+            text = text.replaceFirst("^tivoName$",      removeSpecialChars(keys.get("tivoName")));
             if (text.length() == 0) exists = false;
          }
          newFields.add(text);
