@@ -584,6 +584,8 @@ public class gui {
       if (resetServerMenuItem == null) {
          resetServerMenuItem = new JMenuItem();
          resetServerMenuItem.setText("Reset TiVo web server");
+         resetServerMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
+               Event.CTRL_MASK, true));
          resetServerMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                String tivoName = getSelectedTivoName();
