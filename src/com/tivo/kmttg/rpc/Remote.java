@@ -647,6 +647,27 @@ public class Remote {
       return null;
    }
    
+   // Get list of channels received
+   public JSONArray ChannelList() {
+      JSONObject result = null;
+      try {
+         // Top level list
+         JSONObject json = new JSONObject();
+         json.put("noLimit", "true");
+         json.put("bodyId", "-");
+         result = Command("channelSearch", json);
+         if (result != null && result.has("channel")) {
+            return result.getJSONArray("channel");
+         } else {
+            error("rpc ChannelList error - no channels obtained");
+         }
+      } catch (JSONException e) {
+         error("rpc ChannelList error - " + e.getMessage());
+         return null;
+      }
+      return null;
+   }
+   
    private void print(String message) {
       log.print(message);
    }
