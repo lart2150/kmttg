@@ -379,7 +379,7 @@ public class Remote {
             json.put("noLimit", "true");
             req = RpcRequest("subscriptionSearch", false, json);
          }
-         else if (type.equals("subscribe")) {
+         else if (type.equals("seasonpass")) {
             // Subscribe a season pass
             // Expects several fields in json, (levelOfDetail=medium)
             // Usually this will be JSONObject read from a JSONArray of all
@@ -397,6 +397,19 @@ public class Remote {
                o.put("showStatus", json.getString("showStatus"));
             o.put("bodyId", "-");
             o.put("ignoreConflicts", "true");
+            req = RpcRequest("subscribe", false, o);
+         }
+         else if (type.equals("singlerecording")) {
+            // Subscribe a single recording
+            // Expects both contentId & offerId in json:
+            JSONObject o = new JSONObject();
+            json.put("type", "singleOfferSource");
+            o.put("bodyId", "-");
+            o.put("idSetSource", json);
+            o.put("recordingQuality", "best");
+            o.put("maxRecordings", 1);
+            o.put("keepBehavior", "fifo");
+            o.put("ignoreConflicts", "false");
             req = RpcRequest("subscribe", false, o);
          }
          else if (type.equals("unsubscribe")) {
