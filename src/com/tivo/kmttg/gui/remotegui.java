@@ -54,6 +54,7 @@ public class remotegui {
    private cancelledTable tab_cancel = null;
    private JComboBox tivo_cancel = null;
    public JButton refresh_cancel = null;
+   private JButton record_cancel = null;
    public JLabel label_cancel = null;
    
    private JComboBox tivo_rc = null;
@@ -318,6 +319,17 @@ public class remotegui {
             }
          }
       });
+
+      record_cancel = new JButton("Record");
+      record_cancel.setToolTipText(getToolTip("record_cancel"));
+      record_cancel.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_cancel.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0)
+               record_cancelCB(tivoName);
+         }
+      });
+      
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(title_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
@@ -326,6 +338,8 @@ public class remotegui {
       row1_cancel.add(tivo_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(refresh_cancel);
+      row1_cancel.add(Box.createRigidArea(space_5));
+      row1_cancel.add(record_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(label_cancel);
       panel_cancel.add(row1_cancel, c);
@@ -730,6 +744,46 @@ public class remotegui {
          tab_cancel.AddRows(tivoName, tab_cancel.tivo_data.get(tivoName));
    }
    
+   // Schedule to record selected entries in tab_cancel.TABLE
+   private void record_cancelCB(String tivoName) {
+      int[] selected = tab_cancel.GetSelectedRows();
+      if (selected.length > 0) {
+         try {
+            log.print("Scheduling individual recordings on TiVo: " + tivoName);
+            int row;
+            String title;
+            JSONObject json;
+            Remote r = new Remote(tivoName);
+            if (r.success) {
+               for (int i=0; i<selected.length; ++i) {
+                  row = selected[i];
+                  json = tab_cancel.GetRowData(row);
+                  title = tab_cancel.GetRowTitle(row);
+                  if (json != null) {
+                     JSONObject o = new JSONObject();
+                     if (json.has("contentId") && json.has("offerId")) {
+                        o.put("contentId", json.getString("contentId"));
+                        o.put("offerId", json.getString("offerId"));
+                        json = r.Command("singlerecording", o);
+                        if (json == null) {
+                           log.error("Failed to schedule recording for: '" + title + "'");
+                        } else {
+                           log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
+                        }
+                     } else {
+                        log.error("Missing contentId and/or offerId for: '" + title + "'");
+                     }
+                  }
+               }
+               r.disconnect();
+            }
+         } catch (JSONException e) {
+            log.error("record_cancelCB failed - " + e.getMessage());
+            return;
+         }
+      }
+   }
+   
    private Boolean RC_infoCB(String tivoName) {
       Remote r = new Remote(tivoName);
       if (r.success) {
@@ -975,6 +1029,13 @@ public class remotegui {
          text = "<b>Refresh</b><br>";
          text += "Refresh list for selected TiVo. Click on a folder in table below to see<br>";
          text += "all shows that will not record for reason matching the folder name.<br>";
+         text += "<b>NOTE: This only works for Premiere models</b>.";
+      }
+      else if (component.equals("record_cancel")){
+         text = "<b>Record</b><br>";
+         text += "Schedule to record selected individual show(s) in table on specified TiVo.<br>";
+         text += "NOTE: The scheduling uses low priority such that if there are no time slots available<br>";
+         text += "then the scheduling will fail. i.e. Only schedules to record if there are no conflicts.<br>";
          text += "<b>NOTE: This only works for Premiere models</b>.";
       }
       else if (component.equals("refresh_cancel_folder")){
