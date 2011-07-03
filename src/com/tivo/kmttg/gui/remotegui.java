@@ -830,7 +830,7 @@ public class remotegui {
                      // OK to subscribe
                      if (schedule) {
                         log.print("Scheduling: " + json.getString("title"));
-                        result = r.Command("subscribe", json);
+                        result = r.Command("seasonpass", json);
                         if (result != null)
                            log.print(result.toString());
                      } else {
