@@ -549,6 +549,20 @@ public class cancelledTable {
       DefaultTableModel dm = (DefaultTableModel)table.getModel();
       dm.addRow(data);
    }
+      
+   public JSONObject GetRowData(int row) {
+      sortableDate s = (sortableDate) TABLE.getValueAt(row, getColumnIndex("DATE"));
+      if (s != null)
+         return s.json;
+      return null;
+   }    
+   
+   public String GetRowTitle(int row) {
+      String s = (String) TABLE.getValueAt(row, getColumnIndex("SHOW"));
+      if (s != null)
+         return s;
+      return null;
+   }
 
    // Look for entry with given folder name and select it
    // (This used when returning back from folder mode to top level mode)
