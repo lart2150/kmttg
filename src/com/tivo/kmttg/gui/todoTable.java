@@ -385,40 +385,44 @@ public class todoTable {
        int keyCode = e.getKeyCode();
        if (keyCode == KeyEvent.VK_DELETE){
           // Delete key has special action
-          int[] selected = GetSelectedRows();
-          if (selected == null || selected.length < 0) {
-             log.error("No rows selected");
-             return;
-          }
-          int row;
-          String title;
-          JSONObject json;
-          Remote r = new Remote(currentTivo);
-          if (r.success) {
-             for (int i=0; i<selected.length; ++i) {
-                row = selected[i];
-                json = GetRowData(row);
-                title = GetRowTitle(row);
-                if (json != null) {
-                   try {
-                      log.warn("Cancelling ToDo show on TiVo '" + currentTivo + "': " + title);
-                      JSONObject o = new JSONObject();
-                      JSONArray a = new JSONArray();
-                      a.put(json.getString("recordingId"));
-                      o.put("recordingId", a);
-                      if ( r.Command("cancel", o) != null ) {
-                         RemoveRow(TABLE, row);
-                      }
-                   } catch (JSONException e1) {
-                      log.error("ToDo cancel - " + e1.getMessage());
-                   }
-                }
-             }
-             r.disconnect();                   
-          }
+          DeleteCB();
        } else {
           // Pass along keyboard action
           e.consume();
+       }
+    }
+    
+    public void DeleteCB() {
+       int[] selected = GetSelectedRows();
+       if (selected == null || selected.length < 0) {
+          log.error("No rows selected");
+          return;
+       }
+       int row;
+       String title;
+       JSONObject json;
+       Remote r = new Remote(currentTivo);
+       if (r.success) {
+          for (int i=0; i<selected.length; ++i) {
+             row = selected[i];
+             json = GetRowData(row);
+             title = GetRowTitle(row);
+             if (json != null) {
+                try {
+                   log.warn("Cancelling ToDo show on TiVo '" + currentTivo + "': " + title);
+                   JSONObject o = new JSONObject();
+                   JSONArray a = new JSONArray();
+                   a.put(json.getString("recordingId"));
+                   o.put("recordingId", a);
+                   if ( r.Command("cancel", o) != null ) {
+                      RemoveRow(TABLE, row);
+                   }
+                } catch (JSONException e1) {
+                   log.error("ToDo cancel - " + e1.getMessage());
+                }
+             }
+          }
+          r.disconnect();                   
        }
     }
 
