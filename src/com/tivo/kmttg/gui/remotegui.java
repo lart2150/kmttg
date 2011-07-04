@@ -54,7 +54,6 @@ public class remotegui {
    private cancelledTable tab_cancel = null;
    private JComboBox tivo_cancel = null;
    public JButton refresh_cancel = null;
-   private JButton record_cancel = null;
    public JLabel label_cancel = null;
    
    private JComboBox tivo_rc = null;
@@ -128,14 +127,25 @@ public class remotegui {
                ToDoListCB(tivoName);
          }
       });
+
+      JButton cancel_todo = new JButton("Cancel");
+      cancel_todo.setToolTipText(getToolTip("cancel_todo"));
+      cancel_todo.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            tab_todo.DeleteCB();
+         }
+      });
+      
       row1_todo.add(Box.createRigidArea(space_40));
       row1_todo.add(title_todo);
-      row1_todo.add(Box.createRigidArea(space_40));
+      row1_todo.add(Box.createRigidArea(space_5));
       row1_todo.add(tivo_todo_label);
       row1_todo.add(Box.createRigidArea(space_5));
       row1_todo.add(tivo_todo);
-      row1_todo.add(Box.createRigidArea(space_40));
+      row1_todo.add(Box.createRigidArea(space_5));
       row1_todo.add(refresh_todo);
+      row1_todo.add(Box.createRigidArea(space_5));
+      row1_todo.add(cancel_todo);
       panel_todo.add(row1_todo, c);
       
       tab_todo = new todoTable(dialog);
@@ -320,7 +330,7 @@ public class remotegui {
          }
       });
 
-      record_cancel = new JButton("Record");
+      JButton record_cancel = new JButton("Record");
       record_cancel.setToolTipText(getToolTip("record_cancel"));
       record_cancel.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1013,55 +1023,50 @@ public class remotegui {
       debug.print("component=" + component);
       String text = "";
       if (component.equals("tivo_todo")) {
-         text = "Select TiVo for which to retrieve To Do list.<br>";
-         text += "<b>NOTE: This only works for Premiere models</b>.";
+         text = "Select TiVo for which to retrieve To Do list.";
       }
       else if (component.equals("refresh_todo")){
          text = "<b>Refresh</b><br>";
-         text += "Refresh To Do list of selected TiVo.<br>";
-         text += "<b>NOTE: This only works for Premiere models</b>.";
+         text += "Refresh To Do list of selected TiVo.";
+      }
+      else if (component.equals("cancel_todo")){
+         text = "<b>Cancel</b><br>";
+         text += "Cancel ToDo recordings selected in table below. As a shortcut you can also use the<br>";
+         text += "<b>Delete</b> keyboard button to cancel selected shows in the table as well.";
       }
       else if (component.equals("tivo_cancel")) {
-         text = "Select TiVo for which to display list of shows that will not record.<br>";
-         text += "<b>NOTE: This only works for Premiere models</b>.";
+         text = "Select TiVo for which to display list of shows that will not record.";
       }
       else if (component.equals("refresh_cancel_top")){
          text = "<b>Refresh</b><br>";
          text += "Refresh list for selected TiVo. Click on a folder in table below to see<br>";
-         text += "all shows that will not record for reason matching the folder name.<br>";
-         text += "<b>NOTE: This only works for Premiere models</b>.";
+         text += "all shows that will not record for reason matching the folder name.";
       }
       else if (component.equals("record_cancel")){
          text = "<b>Record</b><br>";
          text += "Schedule to record selected individual show(s) in table on specified TiVo.<br>";
          text += "NOTE: The scheduling uses low priority such that if there are no time slots available<br>";
-         text += "then the scheduling will fail. i.e. Only schedules to record if there are no conflicts.<br>";
-         text += "<b>NOTE: This only works for Premiere models</b>.";
+         text += "then the scheduling will fail. i.e. Only schedules to record if there are no conflicts.";
       }
       else if (component.equals("refresh_cancel_folder")){
          text = "<b>Back</b><br>";
-         text += "Return to top level folder view.<br>";
-         text += "<b>NOTE: This only works for Premiere models</b>.";
+         text += "Return to top level folder view.";
       }
       else if (component.equals("tivo_sp")) {
-         text = "Select TiVo for which to retrieve Season Passes list.<br>";
-         text += "<b>NOTE: This only works for Premiere models</b>.";
+         text = "Select TiVo for which to retrieve Season Passes list.";
       }
       else if (component.equals("tivo_rc")) {
-         text = "Select which TiVo you want to control.<br>";
-         text += "<b>NOTE: This only works for Premiere models</b>.";
+         text = "Select which TiVo you want to control.";
       }
       else if (component.equals("refresh_sp")){
          text = "<b>Refresh</b><br>";
          text += "Refresh Season Pass list of selected TiVo. Note that by selecting 1 or more rows in the<br>";
-         text += "table and using keyboard <b>Delete</b> button you can unsubscribe Season Passes.<br>";
-         text += "<b>NOTE: This only works for Premiere models</b>.";
+         text += "table and using keyboard <b>Delete</b> button you can unsubscribe Season Passes.";
       }
       else if (component.equals("cancel_sp")){
          text = "<b>Refresh</b><br>";
          text += "Refresh Not Record list of selected TiVo. Click on folder in table to see all<br>";
-         text += "entries associated with it.<br>";
-         text += "<b>NOTE: This only works for Premiere models</b>.";
+         text += "entries associated with it.";
       }
       else if (component.equals("save_sp")){
          text = "<b>Save</b><br>";
@@ -1089,7 +1094,6 @@ public class remotegui {
       }
       else if (component.equals("tivo_rnpl")) {
          text = "Select TiVo for which to retrieve My Shows list.<br>";
-         text += "<b>NOTE: This only works for Premiere models</b>.<br>";
          text += "NOTE: You can select items in table to PLAY or DELETE<br>";
          text += "using <b>Space bar</b> to play, <b>Delete</b> button to delete.<br>";
          text += "NOTE: Only 1 item can be deleted or played at a time.";
@@ -1097,7 +1101,6 @@ public class remotegui {
       else if (component.equals("refresh_rnpl")){
          text = "<b>Refresh</b><br>";
          text += "Refresh My Shows list of selected TiVo.<br>";
-         text += "<b>NOTE: This only works for Premiere models</b>.<br>";
          text += "NOTE: You can select items in table to PLAY or DELETE<br>";
          text += "using <b>Space bar</b> to play, <b>Delete</b> button to delete.<br>";
          text += "NOTE: Only 1 item can be deleted or played at a time.";
