@@ -278,20 +278,20 @@ public class download_decrypt implements Serializable {
             // Add auto history entry if auto downloads configured
             if (file.isFile(config.autoIni))
                auto.AddHistoryEntry(job);
+            
+            // TivoWebPlus call to delete show on TiVo if configured
+            if (job.twpdelete) {
+               file.TivoWebPlusDelete(job.url);
+            }
+            
+            // iPad style delete show on TiVo if configured
+            if (job.ipaddelete) {
+               String recordingId = rnpl.findRecordingId(job.tivoName, job.entry);
+               if ( ! file.iPadDelete(job.tivoName, recordingId) )
+                  log.error("Failed to delete show on TiVo");
+            }
          }
-         
-         // TivoWebPlus call to delete show on TiVo if configured
-         if (job.twpdelete) {
-            file.TivoWebPlusDelete(job.url);
-         }
-         
-         // iPad style delete show on TiVo if configured
-         if (job.ipaddelete) {
-            String recordingId = rnpl.findRecordingId(job.tivoName, job.entry);
-            if ( ! file.iPadDelete(job.tivoName, recordingId) )
-               log.error("Failed to delete show on TiVo");
-         }
-      }
+      } // job finished
       cleanup();
       
       return false;
