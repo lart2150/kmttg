@@ -804,6 +804,11 @@ public class remotegui {
                String info = "";
                // System info
                json = reply.getJSONArray("bodyConfig").getJSONObject(0);
+               if (json.has("userDiskSize") && json.has("userDiskUsed")) {
+                  Float pct = (float)100*json.getLong("userDiskUsed")/json.getLong("userDiskSize");
+                  String pct_string = String.format("%s (%5.2f%%)", json.get("userDiskUsed"), pct);
+                  json.put("userDiskUsed", pct_string);
+               }
                String[] fields = {
                   "softwareVersion", "userDiskSize", "userDiskUsed", "parentalControlsState"
                };
