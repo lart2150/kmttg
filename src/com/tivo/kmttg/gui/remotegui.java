@@ -411,7 +411,7 @@ public class remotegui {
       });
       tivo_premiere.setToolTipText(getToolTip("tivo_premiere"));
 
-      JButton refresh_premiere = new JButton("Refresh");
+      JButton refresh_premiere = new JButton("Search");
       refresh_premiere.setToolTipText(getToolTip("refresh_premiere"));
       refresh_premiere.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1048,7 +1048,7 @@ public class remotegui {
       jobMonitor.submitNewJob(job);
    }
    
-   // Callback for Premieres tab Refresh button
+   // Callback for Premieres tab Search button
    public void premiereListCB(String tivoName) {
       // This updates premiere_channel_info "isSelected" settings
       if ( ! updateSelectedChannels(tivoName) )
@@ -1270,26 +1270,6 @@ public class remotegui {
       return true;
    }
    
-         
-   /*private ImageIcon scale(Image src, double scale) {
-      int w = (int)(scale*src.getWidth(dialog));
-      int h = (int)(scale*src.getHeight(dialog));
-      int type = BufferedImage.TYPE_INT_RGB;
-      BufferedImage dst = new BufferedImage(w, h, type);
-      Graphics2D g2 = dst.createGraphics();
-      g2.drawImage(src, 0, 0, w, h, dialog);
-      g2.dispose();
-      return new ImageIcon(dst);
-   }*/
-   
-   public Dimension getDimension() {
-      return dialog.getSize();
-   }
-   
-   public Point getLocation() {
-      return dialog.getLocation();
-   }
-   
    // Return channel information for selected entries in channel list
    // NOTE: This is called from remote "premieres" task
    public JSONArray getSelectedChannelData(String tivoName) {
@@ -1309,7 +1289,16 @@ public class remotegui {
    
    // Populate channel list for given TiVo in Premieres tab
    // NOTE: This is called from remote "channels" task
-   public void putChannelData(String tivoName, JSONArray channelInfo) {
+   public void putChannelData(String tivoName, JSONArray channelInfo) {      
+      // 1st save selected channels list in a hash for easy access
+      int[] selected = premiere_channels.getSelectedIndices();
+      Hashtable<String,Boolean> h = new Hashtable<String,Boolean>();
+      for (int j=0; j<selected.length; ++j) {
+         String channelNumber = premiere_model.get(selected[j]).toString();
+         h.put(channelNumber, true);
+      }
+      
+      // Now reset GUI list and global
       premiere_channel_info.put(tivoName, channelInfo);
       premiere_model.clear();
       try {
@@ -1319,9 +1308,40 @@ public class remotegui {
             callSign = channelInfo.getJSONObject(i).getString("callSign");
             premiere_model.add(i, channelNumber + "=" + callSign);
          }
+         
+         // Re-select channels if available
+         for (int k=0; k<premiere_model.getSize(); ++k) {
+            channelNumber = premiere_model.get(k).toString();
+            JSONObject json = premiere_channel_info.get(tivoName).getJSONObject(k);
+            if (h.containsKey(channelNumber)) {
+               premiere_channels.addSelectionInterval(k,k);
+               json.put("isSelected", "true");
+            } else {
+               json.put("isSelected", "false");
+            }
+         }
       } catch (JSONException e) {
          log.error("putChannelData - " + e.getMessage());
       }
+   }   
+         
+   /*private ImageIcon scale(Image src, double scale) {
+      int w = (int)(scale*src.getWidth(dialog));
+      int h = (int)(scale*src.getHeight(dialog));
+      int type = BufferedImage.TYPE_INT_RGB;
+      BufferedImage dst = new BufferedImage(w, h, type);
+      Graphics2D g2 = dst.createGraphics();
+      g2.drawImage(src, 0, 0, w, h, dialog);
+      g2.dispose();
+      return new ImageIcon(dst);
+   }*/
+   
+   public Dimension getDimension() {
+      return dialog.getSize();
+   }
+   
+   public Point getLocation() {
+      return dialog.getLocation();
    }
       
    public String getToolTip(String component) {
@@ -1367,9 +1387,9 @@ public class remotegui {
          text = "Select TiVo to use for finding shows that are Season or Series premieres.";
       }
       else if (component.equals("refresh_premiere")){
-         text = "<b>Refresh</b><br>";
+         text = "<b>Search</b><br>";
          text += "Find season & series premieres on all the channels selected in the<br>";
-         text += "channels list.";
+         text += "channels list. NOTE: This saves currently selected channel list to file as well.";
       }
       else if (component.equals("premiere_channels_update")){
          text = "<b>Channels</b><br>";
