@@ -63,6 +63,10 @@ public class remote implements Serializable {
                   data = r.CancelledShows();
                if (job.remote_rnpl)
                   data = r.MyShows();
+               if (job.remote_channels)
+                  data = r.ChannelList();
+               if (job.remote_premiere)
+                  data = r.SeasonPremieres(config.gui.remote_gui.getSelectedChannelData(job.tivoName));
                if (data != null) {
                   success = true;
                } else {
@@ -76,10 +80,12 @@ public class remote implements Serializable {
       AutoThread t = new AutoThread();
       thread = new Thread(t);
       jobName = "REMOTE";
-      if (job.remote_todo)   jobName += " ToDo List";
-      if (job.remote_sp)     jobName += " Season Pass List";
-      if (job.remote_cancel) jobName += " Will Not Record List";
-      if (job.remote_rnpl)   jobName += " NP List";
+      if (job.remote_todo)     jobName += " ToDo List";
+      if (job.remote_sp)       jobName += " Season Pass List";
+      if (job.remote_cancel)   jobName += " Will Not Record List";
+      if (job.remote_rnpl)     jobName += " NP List";
+      if (job.remote_channels) jobName += " Channels List";
+      if (job.remote_premiere) jobName += " Season Premieres";
       log.print(">> RUNNING '" + jobName + "' JOB FOR TiVo: " + job.tivoName);
       thread.start();
 
@@ -122,6 +128,13 @@ public class remote implements Serializable {
             if (job.remote_rnpl) {
                rnpl.setNPLData(job.tivoName, data);
             }
+            if (job.remote_channels && data != null) {
+               config.gui.remote_gui.putChannelData(job.tivoName, data);
+            }
+            if (job.remote_premiere & job.premiere != null) {
+               job.premiere.AddRows(job.tivoName, data);
+            }
+
             log.warn("REMOTE job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job='" + jobName + "' TiVo=" + job.tivoName);
          }
