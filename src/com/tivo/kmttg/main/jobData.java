@@ -5,6 +5,7 @@ import java.util.Hashtable;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.gui.cancelledTable;
+import com.tivo.kmttg.gui.premiereTable;
 import com.tivo.kmttg.gui.spTable;
 import com.tivo.kmttg.gui.todoTable;
 import com.tivo.kmttg.task.*;
@@ -119,6 +120,10 @@ public class jobData implements Serializable {
    
    public Boolean remote_rnpl = false;
    public JSONArray rnpl = null;
+   
+   public Boolean remote_premiere = false;
+   public Boolean remote_channels = false;
+   public premiereTable premiere = null;
    
    // NOTE: This used for job insertion purposes
    // ** JOB ORDER IS VERY IMPORTANT **
