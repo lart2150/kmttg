@@ -1051,7 +1051,8 @@ public class remotegui {
    // Callback for Premieres tab Refresh button
    public void premiereListCB(String tivoName) {
       // This updates premiere_channel_info "isSelected" settings
-      updateSelectedChannels(tivoName);
+      if ( ! updateSelectedChannels(tivoName) )
+         return;
       
       // Save channel information to file
       saveChannelInfo(tivoName);
@@ -1241,7 +1242,7 @@ public class remotegui {
       }
    }
    
-   public void updateSelectedChannels(String tivoName) {
+   public Boolean updateSelectedChannels(String tivoName) {
       try {
          // Reset "isSelected" entries for premiere_channel_info for this TiVo
          if (premiere_channel_info.containsKey(tivoName)) {
@@ -1253,15 +1254,20 @@ public class remotegui {
             int[] selected = premiere_channels.getSelectedIndices();
             if (selected.length < 1) {
                log.error("No channels selected in channel list for processing.");
-               return;
+               return false;
             }
             for (int i=0; i<selected.length; ++i) {
                premiere_channel_info.get(tivoName).getJSONObject(selected[i]).put("isSelected", "true");
             }
+         } else {
+            log.error("No channel information available - use Channels button to get list of channels");
+            return false;
          }
       } catch (JSONException e1) {
          log.error("channelInfoToArray - " + e1.getMessage());
+         return false;
       }
+      return true;
    }
    
          
@@ -1365,9 +1371,17 @@ public class remotegui {
          text += "Find season & series premieres on all the channels selected in the<br>";
          text += "channels list.";
       }
+      else if (component.equals("premiere_channels_update")){
+         text = "<b>Channels</b><br>";
+         text += "Use this button to obtain list of channels received from selected TiVo.<br>";
+         text += "Once you have the list then you can select which channels to include in the<br>";
+         text += "search for season & series premieres";
+      }
       else if (component.equals("premiere_channels")) {
          text = "Select which channels you want to include in the search for Season & Series<br>";
-         text += "premieres. NOTE: The more channels you include the longer the search will take.";
+         text += "premieres. NOTE: The more channels you include the longer the search will take.<br>";
+         text += "Use shift and left mouse button to select a range of channels or control + left<br>";
+         text += "mouse button to add individual channels to selected set.";
       }
       else if (component.equals("refresh_sp")){
          text = "<b>Refresh</b><br>";
