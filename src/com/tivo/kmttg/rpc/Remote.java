@@ -26,6 +26,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.util.log;
 
 public class Remote {
@@ -688,7 +689,7 @@ public class Remote {
       return null;
    }
    
-   public JSONArray SeasonPremieres(JSONArray channelNumbers) {
+   public JSONArray SeasonPremieres(JSONArray channelNumbers, jobData job) {
       if (channelNumbers == null)
          return null;
       if (channelNumbers.length() == 0)
@@ -707,7 +708,11 @@ public class Remote {
             c.put("type", "channelIdentifier");
             c.put("sourceType", channel.getString("sourceType"));
             json.put("anchorChannelIdentifier", c);
-            log.warn("  Processing channel: " + c.toString());
+            
+            // Update status in job monitor
+            String message = "Processing: " + channel.getString("channelNumber") + "=" + channel.getString("callSign");
+            config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+            
             result = Command("GridSearch", json);
             if (result != null && result.has("gridRow")) {
                JSONArray a = result.getJSONArray("gridRow").getJSONObject(0).getJSONArray("offer");
