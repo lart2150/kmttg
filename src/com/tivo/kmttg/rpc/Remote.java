@@ -360,13 +360,13 @@ public class Remote {
             req = RpcRequest("recordingSearch", false, json);
          }
          else if (type.equals("GridSearch")) {
-            // Search for future recordings
+            // Search for future recordings (12 days from now)
             // Expects extra search criteria in json, such as:
             // "title":"The Voice"
+            // "anchorChannelIdentifier":{"channelNumber":"761","type":"channelIdentifier","sourceType":"cable"}
             Date now = new Date();
-            json.put("levelOfDetail", "high");
+            json.put("levelOfDetail", "medium");
             json.put("isReceived", "true");
-            json.put("count", 1000);
             json.put("orderBy", new JSONArray("[\"channelNumber\"]"));
             json.put("bodyId", "-");
             json.put("maxStartTime", rnpl.getStringFromLongDate(now.getTime()+12*24*60*60*1000));
@@ -670,7 +670,14 @@ public class Remote {
          json.put("bodyId", "-");
          result = Command("channelSearch", json);
          if (result != null && result.has("channel")) {
-            return result.getJSONArray("channel");
+            // Only want received channels returned
+            JSONArray a = new JSONArray();
+            for (int i=0; i<result.getJSONArray("channel").length(); ++i) {
+               json = result.getJSONArray("channel").getJSONObject(i);
+               if (json.getBoolean("isReceived"))
+                  a.put(json);
+            }
+            return a;
          } else {
             error("rpc ChannelList error - no channels obtained");
          }
@@ -679,6 +686,52 @@ public class Remote {
          return null;
       }
       return null;
+   }
+   
+   public JSONArray SeasonPremieres(JSONArray channelNumbers) {
+      if (channelNumbers == null)
+         return null;
+      if (channelNumbers.length() == 0)
+         return null;   
+      
+      JSONObject json;
+      JSONArray data = new JSONArray();
+      try {         
+         // Now do searches for each channel
+         JSONObject channel, result;
+         for (int i=0; i<channelNumbers.length(); ++i) {
+            channel = channelNumbers.getJSONObject(i);
+            json = new JSONObject();
+            JSONObject c = new JSONObject();
+            c.put("channelNumber", channel.getString("channelNumber"));
+            c.put("type", "channelIdentifier");
+            c.put("sourceType", channel.getString("sourceType"));
+            json.put("anchorChannelIdentifier", c);
+            log.warn("  Processing channel: " + c.toString());
+            result = Command("GridSearch", json);
+            if (result != null && result.has("gridRow")) {
+               JSONArray a = result.getJSONArray("gridRow").getJSONObject(0).getJSONArray("offer");
+               for (int j=0; j<a.length(); ++j) {
+                  json = a.getJSONObject(j);
+                  // Filter out entries we want
+                  // collectionType == "series"
+                  if (json.has("collectionType") && json.getString("collectionType").equals("series")) {
+                     // episodeNum == 1
+                     if (json.has("episodeNum") && json.getJSONArray("episodeNum").getInt(0) == 1) {
+                        // repeat != true
+                        if ( ! json.has("repeat") || (json.has("repeat") && ! json.getBoolean("repeat")) ) {
+                           data.put(json);
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      } catch (JSONException e) {
+         error("SeasonPremieres - " + e.getMessage());
+         return null;
+      }  
+      return data;
    }
    
    private void print(String message) {
