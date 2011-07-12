@@ -1924,6 +1924,9 @@ public class gui {
    public void jobTab_UpdateJobMonitorRowStatus(jobData job, String status) {
       jobTab.UpdateJobMonitorRowStatus(job, status);
    }
+   public void jobTab_UpdateJobMonitorRowOutput(jobData job, String status) {
+      jobTab.UpdateJobMonitorRowOutput(job, status);
+   }
    public void jobTab_AddJobMonitorRow(jobData job, String source, String output) {
       jobTab.AddJobMonitorRow(job, source, output);
    }

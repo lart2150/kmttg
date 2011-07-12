@@ -229,6 +229,19 @@ public class jobTable {
           }
        }
     }
+    
+    public void UpdateJobMonitorRowOutput(jobData job, String text) {
+       TableModel model = JobMonitor.getModel(); 
+       int numrows = model.getRowCount(); 
+       for(int i=0; i<numrows; i++) {
+          jobEntry e = (jobEntry)JobMonitor.getValueAt(i,getColumnIndex("JOB"));
+          if (e.job == job) {
+             JobMonitor.setValueAt(text, i, getColumnIndex("OUTPUT"));
+             packColumns(JobMonitor,2);
+             return;
+          }
+       }
+    }
        
     public void clear(JTable table) {
        debug.print("table=" + table);
