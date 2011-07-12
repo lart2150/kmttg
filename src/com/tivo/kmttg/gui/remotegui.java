@@ -425,7 +425,7 @@ public class remotegui {
          }
       });
       
-      JButton premiere_channels_update = new JButton("Channels:");
+      JButton premiere_channels_update = new JButton("Update Channels");
       premiere_channels_update.setToolTipText(getToolTip("premiere_channels_update"));
       premiere_channels_update.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -450,24 +450,36 @@ public class remotegui {
       row1_premiere.add(tivo_premiere);
       row1_premiere.add(Box.createRigidArea(space_5));
       row1_premiere.add(refresh_premiere);
-      row1_premiere.add(Box.createRigidArea(space_5));
+      row1_premiere.add(Box.createRigidArea(space_40));
       row1_premiere.add(premiere_channels_update);
-      row1_premiere.add(Box.createRigidArea(space_5));
       panel_premiere.add(row1_premiere, c);
-      c.gridx = 1;
-      panel_premiere.add(listScroller, c);
-      c.gridx = 0;
+      gy++;
+      c.gridy = gy;
       
       tab_premiere = new premiereTable(dialog);
       tab_premiere.TABLE.setPreferredScrollableViewportSize(tab_premiere.TABLE.getPreferredSize());
       JScrollPane tabScroll_premiere = new JScrollPane(tab_premiere.scroll);
+      
+      JPanel row2_premiere = new JPanel();
+      row2_premiere.setLayout(new GridBagLayout());
+      c.gridy = 0;
+      c.gridx = 0;
+      c.weightx = 0.9;
+      c.weighty = 1.0;
+      c.fill = GridBagConstraints.BOTH;
+      row2_premiere.add(tabScroll_premiere, c);
+      c.gridx = 1;
+      c.weightx = 0.1;      
+      row2_premiere.add(listScroller, c);
+
       gy++;
+      c.gridx = 0;
       c.gridy = gy;
       c.weightx = 1.0;
       c.weighty = 1.0;
       c.gridwidth = 8;
       c.fill = GridBagConstraints.BOTH;
-      panel_premiere.add(tabScroll_premiere, c);
+      panel_premiere.add(row2_premiere, c);
       
       // System Information tab items      
       c.ipady = 0;
@@ -1389,13 +1401,15 @@ public class remotegui {
       else if (component.equals("refresh_premiere")){
          text = "<b>Search</b><br>";
          text += "Find season & series premieres on all the channels selected in the<br>";
-         text += "channels list. NOTE: This saves currently selected channel list to file as well.";
+         text += "channels list. This saves currently selected channel list to file as well.<br>";
+         text += "<b>NOTE: TiVo guide data does not have episode number information for some shows,<br>";
+         text += "and hence those shows cannot be identified as premieres.</b>.";
       }
       else if (component.equals("premiere_channels_update")){
-         text = "<b>Channels</b><br>";
+         text = "<b>Update Channels</b><br>";
          text += "Use this button to obtain list of channels received from selected TiVo.<br>";
          text += "Once you have the list then you can select which channels to include in the<br>";
-         text += "search for season & series premieres";
+         text += "search for season & series premieres (in list to right of the table below).";
       }
       else if (component.equals("premiere_channels")) {
          text = "Select which channels you want to include in the search for Season & Series<br>";
