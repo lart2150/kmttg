@@ -710,6 +710,7 @@ public class Remote {
             json.put("anchorChannelIdentifier", c);
             
             // Update status in job monitor
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Season & Series premieres");
             String message = "Processing: " + channel.getString("channelNumber") + "=" + channel.getString("callSign");
             config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
             
@@ -730,6 +731,9 @@ public class Remote {
                      }
                   }
                }
+            }
+            if (data.length() == 0) {
+               log.warn("No show premieres found.");
             }
          }
       } catch (JSONException e) {
