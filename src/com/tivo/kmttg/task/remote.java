@@ -56,15 +56,15 @@ public class remote implements Serializable {
             Remote r = new Remote(job.tivoName);
             if (r.success) {
                if (job.remote_todo)
-                  data = r.ToDo();
+                  data = r.ToDo(job);
                if (job.remote_sp)
-                  data = r.SeasonPasses();
+                  data = r.SeasonPasses(job);
                if (job.remote_cancel)
-                  data = r.CancelledShows();
+                  data = r.CancelledShows(job);
                if (job.remote_rnpl)
-                  data = r.MyShows();
+                  data = r.MyShows(job);
                if (job.remote_channels)
-                  data = r.ChannelList();
+                  data = r.ChannelList(job);
                if (job.remote_premiere)
                   data = r.SeasonPremieres(config.gui.remote_gui.getSelectedChannelData(job.tivoName), job);
                if (data != null) {
@@ -105,7 +105,7 @@ public class remote implements Serializable {
    public Boolean check() {
       if (thread_running) {
          // Still running
-         if (config.GUIMODE && ! job.remote_premiere) {
+         if (config.GUIMODE && ! job.remote_premiere && ! job.remote_cancel) {
             // Update STATUS column
             config.gui.jobTab_UpdateJobMonitorRowStatus(job, "running");
          }
