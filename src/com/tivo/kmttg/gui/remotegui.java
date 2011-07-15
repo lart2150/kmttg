@@ -1006,7 +1006,7 @@ public class remotegui {
          Remote r = new Remote(tivoName);
          if (r.success) {
             // First load existing SPs from tivoName to check against
-            existing = r.SeasonPasses();
+            existing = r.SeasonPasses(null);
             if (existing == null) {
                log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
                return;
@@ -1102,7 +1102,7 @@ public class remotegui {
          Remote r = new Remote(tivoName);
          if (r.success) {
             // First load existing SPs from tivoName to check against
-            existing = r.SeasonPasses();
+            existing = r.SeasonPasses(null);
             if (existing == null) {
                log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
                return;
