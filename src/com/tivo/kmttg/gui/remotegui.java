@@ -425,6 +425,16 @@ public class remotegui {
          }
       });
       
+      JButton record_premiere = new JButton("Record");
+      record_premiere.setToolTipText(getToolTip("record_premiere"));
+      record_premiere.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_premiere.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0)
+               record_premiereCB(tivoName);
+         }
+      });
+      
       JButton premiere_channels_update = new JButton("Update Channels");
       premiere_channels_update.setToolTipText(getToolTip("premiere_channels_update"));
       premiere_channels_update.addActionListener(new java.awt.event.ActionListener() {
@@ -450,6 +460,8 @@ public class remotegui {
       row1_premiere.add(tivo_premiere);
       row1_premiere.add(Box.createRigidArea(space_5));
       row1_premiere.add(refresh_premiere);
+      row1_premiere.add(Box.createRigidArea(space_5));
+      row1_premiere.add(record_premiere);
       row1_premiere.add(Box.createRigidArea(space_40));
       row1_premiere.add(premiere_channels_update);
       panel_premiere.add(row1_premiere, c);
@@ -1079,6 +1091,66 @@ public class remotegui {
       job.premiere        = tab_premiere;
       jobMonitor.submitNewJob(job);
    }
+   
+   // Schedule to record selected entries in tab_premiere.TABLE
+   private void record_premiereCB(String tivoName) {
+      int[] selected = tab_premiere.GetSelectedRows();
+      if (selected.length > 0) {
+         int row;
+         JSONArray existing;
+         JSONObject json, result;
+         Remote r = new Remote(tivoName);
+         if (r.success) {
+            // First load existing SPs from tivoName to check against
+            existing = r.SeasonPasses();
+            if (existing == null) {
+               log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
+               return;
+            }
+            // Now proceed with subscriptions
+            log.print("Scheduling Season Passes on TiVo: " + tivoName);
+            for (int i=0; i<selected.length; ++i) {
+               row = selected[i];
+               json = tab_premiere.GetRowData(row);
+               if (json != null) {
+                  try {
+                     // Check against existing
+                     Boolean schedule = true;
+                     for (int j=0; j<existing.length(); ++j) {
+                        if(json.getString("title").equals(existing.getJSONObject(j).getString("title")))
+                           schedule = false;
+                     }
+                     
+                     // OK to subscribe
+                     if (schedule) {
+                        log.print("Scheduling: " + json.getString("title"));
+                        JSONObject o = new JSONObject();
+                        JSONObject idSetSource = new JSONObject();
+                        o.put("recordingQuality", "best");
+                        o.put("maxRecordings", 25);
+                        o.put("keepBehavior", "fifo");
+                        o.put("showStatus", "firstRunOnly");
+                        idSetSource.put("collectionId", json.getString("collectionId"));
+                        idSetSource.put("type", "seasonPassSource");
+                        idSetSource.put("channel", json.getJSONObject("channel"));
+                        o.put("idSetSource", idSetSource);
+
+                        result = r.Command("seasonpass", o);
+                        log.print(json.toString());
+                        if (result != null)
+                           log.print("success");
+                     } else {
+                        log.warn("Existing SP with same title found, not scheduling: " + json.getString("title"));
+                     }
+                  } catch (JSONException e) {
+                     log.error("record_premiereCB - " + e.getMessage());
+                  }
+               }
+            }
+            r.disconnect();
+         }
+      }
+   }
             
    public void display() {
       if (dialog != null)
@@ -1418,6 +1490,15 @@ public class remotegui {
          text += "premieres. NOTE: The more channels you include the longer the search will take.<br>";
          text += "Use shift and left mouse button to select a range of channels or control + left<br>";
          text += "mouse button to add individual channels to selected set.";
+      }
+      else if (component.equals("record_premiere")){
+         text = "<b>Record</b><br>";
+         text += "Schedule season passes selected in the table below on selected TiVo.<br>";
+         text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
+         text += "checking against the current set of season passes already on the TiVo.<br>";
+         text += "NOTE: By default the following settings are used to record Season Passes, so you may want<br>";
+         text += "adjust the SP settings on the TiVo after scheduling:<br>";
+         text += "lowest priority, recordingQuality=best, maxRecordings=25, keepBehavior=fifo, first run only";
       }
       else if (component.equals("refresh_sp")){
          text = "<b>Refresh</b><br>";
