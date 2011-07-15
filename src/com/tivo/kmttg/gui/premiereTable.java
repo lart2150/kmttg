@@ -3,8 +3,6 @@ package com.tivo.kmttg.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.ParseException;
@@ -31,7 +29,6 @@ import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.rnpl;
-import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
@@ -54,14 +51,6 @@ public class premiereTable {
          new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                MouseClicked(e);
-            }
-         }
-      );
-      // Add keyboard listener
-      TABLE.addKeyListener(
-         new KeyAdapter() {
-            public void keyReleased(KeyEvent e) {
-               KeyPressed(e);
             }
          }
       );
@@ -276,15 +265,14 @@ public class premiereTable {
        dm.addRow(data);
     }
     
-    private int[] GetSelectedRows() {
-       debug.print("");
+    public int[] GetSelectedRows() {
        int[] rows = TABLE.getSelectedRows();
        if (rows.length <= 0)
           log.error("No rows selected");
        return rows;
     }
     
-    private JSONObject GetRowData(int row) {
+    public JSONObject GetRowData(int row) {
        sortableDate s = (sortableDate) TABLE.getValueAt(row, getColumnIndex("DATE"));
        if (s != null)
           return s.json;
@@ -354,19 +342,6 @@ public class premiereTable {
              log.error("MouseClicked - " + e1.getMessage());
              return;
           }
-       }
-    }
-    
-    // Handle delete keyboard presses
-    private void KeyPressed(KeyEvent e) {
-       int keyCode = e.getKeyCode();
-       if (keyCode == KeyEvent.VK_SPACE){
-          // Space key has special action
-          log.print("Space key pressed");
-          // TODO
-       } else {
-          // Pass along keyboard action
-          e.consume();
        }
     }
 
