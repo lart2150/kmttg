@@ -51,11 +51,9 @@ public class cancelledTable {
    public int folderEntryNum = -1;
    private Hashtable<String,Stack<JSONObject>> folders = null;
    private Vector<JSONObject> sortedOrder = null;
-   private JFrame dialog = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
          
    cancelledTable(JFrame dialog) {
-      this.dialog = dialog;
       Object[][] data = {}; 
       TABLE = new JXTable(data, TITLE_cols);
       TABLE.setModel(new CancelledTableModel(data, TITLE_cols));
@@ -604,7 +602,6 @@ public class cancelledTable {
    // margin pixels are added to the left and right
    // (resulting in an additional width of 2*margin pixels).
    public void packColumn(JXTable table, int vColIndex, int margin) {
-      debug.print("table=" + table + " vColIndex=" + vColIndex + " margin=" + margin);
        DefaultTableColumnModel colModel = (DefaultTableColumnModel)table.getColumnModel();
        TableColumn col = colModel.getColumn(vColIndex);
        int width = 0;
@@ -631,18 +628,6 @@ public class cancelledTable {
               
        // Set the width
        col.setPreferredWidth(width);
-       
-       // Adjust SHOW column to fit available space
-       int last = getColumnIndex("SHOW");
-       if (vColIndex == last) {
-          int twidth = table.getPreferredSize().width;
-          int awidth = dialog.getWidth();
-          int offset = 3*scroll.getVerticalScrollBar().getPreferredSize().width+2*margin;
-          if ((awidth-offset) > twidth) {
-             width += awidth-offset-twidth;
-             col.setPreferredWidth(width);
-          }
-       }
    }
    
    // Compute and return all table column widths as an integer array
