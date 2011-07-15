@@ -1320,6 +1320,7 @@ public class remotegui {
             callSign = channelInfo.getJSONObject(i).getString("callSign");
             premiere_model.add(i, channelNumber + "=" + callSign);
          }
+         tabbed_panel.revalidate();
          
          // Re-select channels if available
          for (int k=0; k<premiere_model.getSize(); ++k) {
@@ -1332,6 +1333,7 @@ public class remotegui {
                json.put("isSelected", "false");
             }
          }
+         saveChannelInfo(tivoName);
       } catch (JSONException e) {
          log.error("putChannelData - " + e.getMessage());
       }
