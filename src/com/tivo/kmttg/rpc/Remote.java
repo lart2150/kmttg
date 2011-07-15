@@ -458,7 +458,7 @@ public class Remote {
    }
    
    // Get list of all shows (drilling down into folders for individual shows)
-   public JSONArray MyShows() {
+   public JSONArray MyShows(jobData job) {
       JSONArray allShows = new JSONArray();
       JSONObject result = null;
 
@@ -469,6 +469,8 @@ public class Remote {
          JSONObject json = new JSONObject();
          json.put("count", 100);
          while ( ! stop ) {
+            if (job != null)
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List");
             result = Command("MyShows", json);
             if (result != null && result.has("recordingFolderItem")) {
                JSONArray items = (JSONArray) result.get("recordingFolderItem");
@@ -537,7 +539,7 @@ public class Remote {
    }
    
    // Get to do list of all shows
-   public JSONArray ToDo() {
+   public JSONArray ToDo(jobData job) {
       JSONArray allShows = new JSONArray();
       JSONObject result = null;
 
@@ -549,6 +551,8 @@ public class Remote {
          json.put("count", 100);
          int offset = 0;
          while ( ! stop ) {
+            if (job != null)
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "ToDo List");
             result = Command("ToDo", json);
             if (result != null && result.has("objectIdAndType")) {
                JSONArray a = result.getJSONArray("objectIdAndType");
@@ -592,7 +596,7 @@ public class Remote {
    }
    
    // Get list of all shows that won't record
-   public JSONArray CancelledShows() {
+   public JSONArray CancelledShows(jobData job) {
       JSONArray allShows = new JSONArray();
       JSONObject result = null;
 
@@ -604,6 +608,8 @@ public class Remote {
          json.put("count", 100);
          int offset = 0;
          while ( ! stop ) {
+            if (job != null)
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Will Not Record list");
             result = Command("Cancelled", json);
             if (result != null && result.has("objectIdAndType")) {
                JSONArray a = result.getJSONArray("objectIdAndType");
@@ -631,6 +637,14 @@ public class Remote {
                id.put(items.get(index++));
             JSONObject s = new JSONObject();
             s.put("objectIdAndType",id);
+            
+            // Update status in job monitor
+            if (job != null) {
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Will Not Record list");
+               String message = "Processing: " + index + "/" + total;
+               config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+            }
+            
             result = Command("SearchId", s);
             if (result != null && result.has("recording")) {
                id = result.getJSONArray("recording");
@@ -647,8 +661,10 @@ public class Remote {
    }
    
    // Get all season passes
-   public JSONArray SeasonPasses() {
+   public JSONArray SeasonPasses(jobData job) {
       JSONObject result = null;
+      if (job != null)
+         config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Season Passes");
       result = Command("SeasonPasses", new JSONObject());
       if (result != null && result.has("subscription")) {
          try {
@@ -662,13 +678,15 @@ public class Remote {
    }
    
    // Get list of channels received
-   public JSONArray ChannelList() {
+   public JSONArray ChannelList(jobData job) {
       JSONObject result = null;
       try {
          // Top level list
          JSONObject json = new JSONObject();
          json.put("noLimit", "true");
          json.put("bodyId", "-");
+         if (job != null)
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Channel List");
          result = Command("channelSearch", json);
          if (result != null && result.has("channel")) {
             // Only want received channels returned
@@ -710,9 +728,11 @@ public class Remote {
             json.put("anchorChannelIdentifier", c);
             
             // Update status in job monitor
-            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Season & Series premieres");
-            String message = "Processing: " + channel.getString("channelNumber") + "=" + channel.getString("callSign");
-            config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+            if (job != null) {
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Season & Series premieres");
+               String message = "Processing: " + channel.getString("channelNumber") + "=" + channel.getString("callSign");
+               config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+            }
             
             result = Command("GridSearch", json);
             if (result != null && result.has("gridRow")) {
