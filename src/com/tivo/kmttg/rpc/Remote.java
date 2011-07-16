@@ -469,7 +469,7 @@ public class Remote {
          JSONObject json = new JSONObject();
          json.put("count", 100);
          while ( ! stop ) {
-            if (job != null)
+            if (job != null && config.GUIMODE)
                config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List");
             result = Command("MyShows", json);
             if (result != null && result.has("recordingFolderItem")) {
@@ -551,7 +551,7 @@ public class Remote {
          json.put("count", 100);
          int offset = 0;
          while ( ! stop ) {
-            if (job != null)
+            if (job != null && config.GUIMODE)
                config.gui.jobTab_UpdateJobMonitorRowOutput(job, "ToDo List");
             result = Command("ToDo", json);
             if (result != null && result.has("objectIdAndType")) {
@@ -608,7 +608,7 @@ public class Remote {
          json.put("count", 100);
          int offset = 0;
          while ( ! stop ) {
-            if (job != null)
+            if (job != null && config.GUIMODE)
                config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Will Not Record list");
             result = Command("Cancelled", json);
             if (result != null && result.has("objectIdAndType")) {
@@ -639,7 +639,7 @@ public class Remote {
             s.put("objectIdAndType",id);
             
             // Update status in job monitor
-            if (job != null) {
+            if (job != null && config.GUIMODE) {
                config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Will Not Record list");
                String message = "Processing: " + index + "/" + total;
                config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
@@ -663,7 +663,7 @@ public class Remote {
    // Get all season passes
    public JSONArray SeasonPasses(jobData job) {
       JSONObject result = null;
-      if (job != null)
+      if (job != null && config.GUIMODE)
          config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Season Passes");
       result = Command("SeasonPasses", new JSONObject());
       if (result != null && result.has("subscription")) {
@@ -685,7 +685,7 @@ public class Remote {
          JSONObject json = new JSONObject();
          json.put("noLimit", "true");
          json.put("bodyId", "-");
-         if (job != null)
+         if (job != null && config.GUIMODE)
             config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Channel List");
          result = Command("channelSearch", json);
          if (result != null && result.has("channel")) {
@@ -728,7 +728,7 @@ public class Remote {
             json.put("anchorChannelIdentifier", c);
             
             // Update status in job monitor
-            if (job != null) {
+            if (job != null && config.GUIMODE) {
                config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Season & Series premieres");
                String message = "Processing: " + channel.getString("channelNumber") + "=" + channel.getString("callSign");
                config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
