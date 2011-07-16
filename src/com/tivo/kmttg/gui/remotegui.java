@@ -1030,7 +1030,7 @@ public class remotegui {
                         log.print("Scheduling: " + json.getString("title"));
                         result = r.Command("seasonpass", json);
                         if (result != null)
-                           log.print(result.toString());
+                           log.print("success");
                      } else {
                         log.warn("Existing SP with same title found, not scheduling: " + json.getString("title"));
                      }
@@ -1136,7 +1136,6 @@ public class remotegui {
                         o.put("idSetSource", idSetSource);
 
                         result = r.Command("seasonpass", o);
-                        log.print(json.toString());
                         if (result != null)
                            log.print("success");
                      } else {
