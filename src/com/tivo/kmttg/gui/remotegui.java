@@ -934,8 +934,11 @@ public class remotegui {
                // System info
                json = reply.getJSONArray("bodyConfig").getJSONObject(0);
                if (json.has("userDiskSize") && json.has("userDiskUsed")) {
+                  Float sizeGB = (float)json.getLong("userDiskSize")/(1024*1024);
                   Float pct = (float)100*json.getLong("userDiskUsed")/json.getLong("userDiskSize");
                   String pct_string = String.format("%s (%5.2f%%)", json.get("userDiskUsed"), pct);
+                  String size_string = String.format("%s (%5.2f GB)", json.get("userDiskSize"), sizeGB);
+                  json.put("userDiskSize", size_string);
                   json.put("userDiskUsed", pct_string);
                }
                String[] fields = {
