@@ -1212,7 +1212,6 @@ public class remotegui {
       }
       if (tivo_count > 0) {
          setHmeDestinations(getTivoName("rc"));
-         loadChannelInfo(getTivoName("premiere"));
       }
    }
    
@@ -1404,7 +1403,6 @@ public class remotegui {
                json.put("isSelected", "false");
             }
          }
-         saveChannelInfo(tivoName);
       } catch (JSONException e) {
          log.error("putChannelData - " + e.getMessage());
       }
