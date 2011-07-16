@@ -130,6 +130,7 @@ public class remote implements Serializable {
             }
             if (job.remote_channels && data != null) {
                config.gui.remote_gui.putChannelData(job.tivoName, data);
+               config.gui.remote_gui.saveChannelInfo(job.tivoName);
             }
             if (job.remote_premiere & job.premiere != null) {
                job.premiere.AddRows(job.tivoName, data);
