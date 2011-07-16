@@ -748,9 +748,12 @@ public class Remote {
                         if (json.getJSONArray("episodeNum").getInt(0) == 1)
                            match = true;
                      } else {
-                        // Some series don't have episode information
-                        if (json.has("subtitle") && json.getString("subtitle").equals("Pilot"))
-                           match = true;
+                        // Some series don't have episode information, so look at subtitle
+                        if ( json.has("subtitle") ) {
+                           String subtitle = json.getString("subtitle");
+                           if (subtitle.equals("Pilot") || subtitle.equals("Series Premiere"))
+                              match = true;
+                        }
                      }
                      if (match) {
                         // repeat != true
