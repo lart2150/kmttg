@@ -742,12 +742,21 @@ public class Remote {
                   // Filter out entries we want
                   // collectionType == "series"
                   if (json.has("collectionType") && json.getString("collectionType").equals("series")) {
-                     // episodeNum == 1
-                     if (json.has("episodeNum") && json.getJSONArray("episodeNum").getInt(0) == 1) {
+                     Boolean match = false;
+                     if (json.has("episodeNum")) {
+                        // episodeNum == 1
+                        if (json.getJSONArray("episodeNum").getInt(0) == 1)
+                           match = true;
+                     } else {
+                        // Some series don't have episode information
+                        if (json.has("subtitle") && json.getString("subtitle").equals("Pilot"))
+                           match = true;
+                     }
+                     if (match) {
                         // repeat != true
                         if ( ! json.has("repeat") || (json.has("repeat") && ! json.getBoolean("repeat")) ) {
                            data.put(json);
-                        }
+                        }   
                      }
                   }
                }
