@@ -57,6 +57,7 @@ public class cancelledTable {
       Object[][] data = {}; 
       TABLE = new JXTable(data, TITLE_cols);
       TABLE.setModel(new CancelledTableModel(data, TITLE_cols));
+      TABLE.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
       scroll = new JScrollPane(TABLE);
       
       // Add listener for click handling (for folder entries)
