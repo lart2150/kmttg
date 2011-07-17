@@ -875,12 +875,15 @@ public class remotegui {
    
    // TiVo selection changed for Not Record tab
    public void tivo_cancelCB() {
+      // NOTE: Don't want to reset table in case we want to record a show on another TiVo
+      /*
       tab_cancel.setFolderState(false);
       tab_cancel.TABLE.clearSelection();
       tab_cancel.clear();
       String tivoName = getTivoName("cancel");
       if (tab_cancel.tivo_data.containsKey(tivoName))
          tab_cancel.AddRows(tivoName, tab_cancel.tivo_data.get(tivoName));
+      */
    }
    
    // Schedule to record selected entries in tab_cancel.TABLE
