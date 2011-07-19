@@ -129,7 +129,10 @@ public class gui {
          config.GUIMODE = true;
          
          // Create NowPlaying icons
-         CreateImages();         
+         CreateImages();
+         
+         // Start NPL jobs
+         initialNPL(config.TIVOS);
       }
       return jFrame;
    }
@@ -1208,6 +1211,17 @@ public class gui {
          }
       }
    }
+
+   // Start NPL jobs for 1st time
+   public void initialNPL(Hashtable<String,String> values) {
+      String value;         
+      for (Enumeration<String> e=values.keys(); e.hasMoreElements();) {
+         value = e.nextElement();
+         if (! value.equals("FILES")) {
+            jobMonitor.getNPL(value);
+         }
+      }
+   }
    
    private String getCurrentTabName() {
       return tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
@@ -1242,9 +1256,6 @@ public class gui {
          tabbed_panel.add(tab.getPanel(), 0);
          tabbed_panel.setTitleAt(0, name);
          tivoTabs.put(name,tab);
-         
-         // Populate table
-         jobMonitor.getNPL(name);
       }
    }
    
