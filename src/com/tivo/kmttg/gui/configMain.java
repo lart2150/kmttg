@@ -54,6 +54,7 @@ public class configMain {
    private static JCheckBox QSFixBackupMpegFile = null;
    private static JCheckBox check_space = null;
    private static JCheckBox beacon = null;
+   private static JCheckBox npl_when_started = null;
    private static JCheckBox UseOldBeacon = null;
    private static JCheckBox download_time_estimate = null;
    private static JCheckBox UseAdscan = null;
@@ -481,6 +482,12 @@ public class configMain {
       else
          UseOldBeacon.setSelected(false);
       
+      // npl_when_started
+      if (config.npl_when_started == 1)
+         npl_when_started.setSelected(true);
+      else
+         npl_when_started.setSelected(false);
+      
       // download_time_estimate
       if (config.download_time_estimate == 1)
          download_time_estimate.setSelected(true);
@@ -870,6 +877,13 @@ public class configMain {
          config.download_time_estimate = 1;
       } else {
          config.download_time_estimate = 0;
+      }
+      
+      // npl_when_started
+      if (npl_when_started.isSelected()) {
+         config.npl_when_started = 1;
+      } else {
+         config.npl_when_started = 0;
       }
       
       // Beacon
@@ -1648,6 +1662,7 @@ public class configMain {
       JLabel disk_space_label = new javax.swing.JLabel();
       beacon = new javax.swing.JCheckBox();
       UseOldBeacon = new javax.swing.JCheckBox();
+      npl_when_started = new javax.swing.JCheckBox();
       download_time_estimate = new javax.swing.JCheckBox();
       toolTips = new javax.swing.JCheckBox();
       tableColAutoSize = new javax.swing.JCheckBox();
@@ -1801,6 +1816,8 @@ public class configMain {
       disk_space_label.setText("Min requested space (GB)"); 
       beacon.setText("Look for Tivos on network");
       UseOldBeacon.setText("Detect with TiVo Beacon instead of Bonjour");
+      
+      npl_when_started.setText("Start NPL jobs when starting kmttg GUI");
       
       download_time_estimate.setText("Show estimated time remaining for downloads");
       
@@ -2111,8 +2128,14 @@ public class configMain {
 
       // Tivos Panel
       JPanel tivo_panel = new JPanel(new GridBagLayout());      
-      // Look for Tivos on network
+      // npl_when_started
       gy = 0;
+      c.gridx = 1;
+      c.gridy = gy;
+      tivo_panel.add(npl_when_started, c);
+      
+      // Look for Tivos on network
+      gy++;
       c.gridx = 1;
       c.gridy = gy;
       tivo_panel.add(beacon, c);
@@ -2894,6 +2917,7 @@ public class configMain {
       check_space.setToolTipText(getToolTip("check_space"));
       beacon.setToolTipText(getToolTip("beacon"));
       UseOldBeacon.setToolTipText(getToolTip("UseOldBeacon"));
+      npl_when_started.setToolTipText(getToolTip("npl_when_started"));
       download_time_estimate.setToolTipText(getToolTip("download_time_estimate"));
       UseAdscan.setToolTipText(getToolTip("UseAdscan"));
       VrdReview.setToolTipText(getToolTip("VrdReview"));
@@ -3068,6 +3092,13 @@ public class configMain {
          text =  "<b>Detect with TiVo Beacon instead of Bonjour</b><br>";
          text += "Use the old TiVo Beacon method for detecting TiVos on the network instead of the<br>";
          text += "newer Bonjour method. You can try this method if Bonjour is not working for you.";
+      }
+      else if (component.equals("npl_when_started")) {
+         text =  "<b>Start NPL jobs when starting kmttg GUI</b><br>";
+         text += "If this option is enabled then kmttg will start NPL jobs for configured TiVos<br>";
+         text += "right away when starting kmttg GUI. Otherwise no NPL jobs are started and you<br>";
+         text += "can manually select TiVos and click on <b>Refresh</b> button to selectively start<br>";
+         text += "NPL jobs.";
       }
       else if (component.equals("download_time_estimate")) {
          text =  "<b>Show estimated time remaining for downloads</b><br>";

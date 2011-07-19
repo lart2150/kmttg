@@ -70,6 +70,7 @@ public class config {
    public static int java_downloads = 0;        // Use java instead of curl to download
    public static int combine_download_decrypt = 0; // Combine download and decrypt if possible
    public static int single_download = 0;  // Allow only one download at a time if enabled
+   public static int npl_when_started = 1; // Start NPL jobs when kmttg GUI starts
 
    public static String comskipIni = "";
    public static String configIni = "";
@@ -822,6 +823,9 @@ public class config {
             if (key.equals("autoLogSizeMB")) {
                autoLogSizeMB = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("npl_when_started")) {
+               npl_when_started = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("diskSpace")) {
                String[] l = line.split("=");
                if (l.length == 2) {
@@ -1016,6 +1020,8 @@ public class config {
          ofp.write("<download_time_estimate>\n" + download_time_estimate + "\n\n");
          
          ofp.write("<autoLogSizeMB>\n" + autoLogSizeMB + "\n\n");
+         
+         ofp.write("<npl_when_started>\n" + npl_when_started + "\n\n");
          
          if (autotune != null ) {
             Enumeration<String> tivos = autotune.keys();
