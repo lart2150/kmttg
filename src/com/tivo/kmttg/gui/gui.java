@@ -132,7 +132,8 @@ public class gui {
          CreateImages();
          
          // Start NPL jobs
-         initialNPL(config.TIVOS);
+         if (config.npl_when_started == 1)
+            initialNPL(config.TIVOS);
       }
       return jFrame;
    }
