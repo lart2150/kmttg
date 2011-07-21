@@ -3,17 +3,23 @@ package com.tivo.kmttg.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.Hashtable;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.TransferHandler;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
@@ -44,19 +50,14 @@ public class spTable {
       TABLE = new JXTable(data, TITLE_cols);
       TABLE.setModel(new MyTableModel(data, TITLE_cols));
       TABLE.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+      TABLE.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+      TABLE.setDragEnabled(true);
+      TABLE.setTransferHandler(new TableTransferHandler());
       scroll = new JScrollPane(TABLE);
-      // Add listener for click handling (for folder entries)
-      TABLE.addMouseListener(
-         new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-               MouseClicked(e);
-            }
-         }
-      );
       // Add keyboard listener
       TABLE.addKeyListener(
          new KeyAdapter() {
-            public void keyReleased(KeyEvent e) {
+            public void keyPressed(KeyEvent e) {
                KeyPressed(e);
             }
          }
@@ -131,7 +132,138 @@ public class spTable {
           return cell;
        }
     } 
-    
+
+    // Define clipboard data for drag & drop as string (JSON->string)
+    abstract class StringTransferHandler extends TransferHandler {
+      private static final long serialVersionUID = 1L;
+
+      protected abstract String exportString(JComponent c);
+      protected abstract void importString(JComponent c, String str);
+      protected abstract void cleanup(JComponent c, boolean remove);
+      protected Transferable createTransferable(JComponent c) {
+        return new StringSelection(exportString(c));
+      }
+      public int getSourceActions(JComponent c) {
+        return COPY_OR_MOVE;
+      }
+      public boolean importData(JComponent c, Transferable t) {
+        if (canImport(c, t.getTransferDataFlavors())) {
+          try {
+            String str = (String) t.getTransferData(DataFlavor.stringFlavor);
+            importString(c, str);
+            return true;
+          } catch (UnsupportedFlavorException ufe) {
+          } catch (IOException ioe) {
+          }
+        }
+        return false;
+      }
+
+      protected void exportDone(JComponent c, Transferable data, int action) {
+        cleanup(c, action == MOVE);
+      }
+
+      public boolean canImport(JComponent c, DataFlavor[] flavors) {
+        for (int i = 0; i < flavors.length; i++) {
+          if (DataFlavor.stringFlavor.equals(flavors[i])) {
+            return true;
+          }
+        }
+        return false;
+      }
+    }
+
+    // This handles table row drag & drop data transfer
+    // Export->JSON->String->Import->String->JSON
+    class TableTransferHandler extends StringTransferHandler {
+      private static final long serialVersionUID = 1L;
+      private int[] rows = null;
+      private int addIndex = -1; //Location where items were added
+      private int addCount = 0; //Number of items added.
+
+      protected String exportString(JComponent c) {
+        JTable table = (JTable) c;
+        rows = table.getSelectedRows();
+
+        StringBuffer buff = new StringBuffer();
+        JSONObject json;
+
+        for (int i = 0; i < rows.length; i++) {
+           json = GetRowData(rows[i]);
+           buff.append(json.toString());
+           if (i != rows.length - 1) {
+              buff.append("\n");
+           }
+        }
+
+        return buff.toString();
+      }
+
+      protected void importString(JComponent c, String str) {
+        JTable target = (JTable) c;
+        MyTableModel model = (MyTableModel) target.getModel();
+        int index = target.getSelectedRow();
+
+        //Prevent the user from dropping data back on itself.
+        //For example, if the user is moving rows #4,#5,#6 and #7 and
+        //attempts to insert the rows after row #5, this would
+        //be problematic when removing the original rows.
+        //So this is not allowed.
+        if (rows != null && index >= rows[0] - 1
+            && index <= rows[rows.length - 1]) {
+          rows = null;
+          return;
+        }
+
+        int max = model.getRowCount();
+        if (index < 0) {
+          index = max;
+        } else {
+          index++;
+          if (index > max) {
+            index = max;
+          }
+        }
+        addIndex = index;
+        String[] values = str.split("\n");
+        addCount = values.length;
+        JSONObject json;
+        try {
+           for (int i = 0; i < values.length; i++) {
+              json = new JSONObject(values[i]);
+              Object[] info = jsonToTableData(json, json.getInt("__priority__"));
+              if (info != null)
+                 InsertRow(TABLE, index++, info);
+           }
+        } catch (JSONException e1) {
+           log.error("importString - " + e1.getMessage());
+        }
+      }
+
+      protected void cleanup(JComponent c, boolean remove) {
+        JTable source = (JTable) c;
+        if (remove && rows != null) {
+          MyTableModel model = (MyTableModel) source.getModel();
+
+          //If we are moving items around in the same table, we
+          //need to adjust the rows accordingly, since those
+          //after the insertion point have moved.
+          if (addCount > 0) {
+            for (int i = 0; i < rows.length; i++) {
+              if (rows[i] > addIndex) {
+                rows[i] += addCount;
+              }
+            }
+          }
+          for (int i = rows.length - 1; i >= 0; i--) {
+            model.removeRow(rows[i]);
+          }
+        }
+        rows = null;
+        addCount = 0;
+        addIndex = -1;
+      }
+    }
     
     // Override some default table model actions
     class MyTableModel extends DefaultTableModel {
@@ -210,7 +342,7 @@ public class spTable {
     
     public void clear() {
        debug.print("");
-       DefaultTableModel model = (DefaultTableModel)TABLE.getModel(); 
+       MyTableModel model = (MyTableModel)TABLE.getModel(); 
        model.setNumRows(0);
     }
     
@@ -239,12 +371,11 @@ public class spTable {
        }
     }
     
-    private void AddRow(JSONObject data, int priority) {
-       debug.print("data=" + data);
+    private Object[] jsonToTableData(JSONObject data, int priority) {
+       Object[] info = new Object[TITLE_cols.length];
        try {
           JSONObject o = new JSONObject();
           JSONObject o2 = new JSONObject();
-          Object[] info = new Object[TITLE_cols.length];
           String title = " ";
           if (data.has("title"))
              title += string.utfString(data.getString("title"));
@@ -275,10 +406,22 @@ public class spTable {
           info[1] = title;
           info[2] = channel;
           info[3] = new sortableInt(null, max);
-          AddRow(TABLE, info);       
+          return info;
        } catch (Exception e) {
-          log.error("spTable AddRow - " + e.getMessage());
+          log.error("jsonToTableData - " + e.getMessage());
+          return null;
        }
+    }
+    
+    private void AddRow(JSONObject data, int priority) {
+       try {
+         data.put("__priority__", priority);
+      } catch (JSONException e) {
+         log.error("AddRow - " + e.getMessage());
+      }
+       Object[] info = jsonToTableData(data, priority);
+       if (info != null)
+          AddRow(TABLE, info);
     }
     
     public int[] GetSelectedRows() {
@@ -306,7 +449,7 @@ public class spTable {
     public void updateTitleCols(String name) {
        String title;
        int col;
-       DefaultTableModel dm = (DefaultTableModel)TABLE.getModel();
+       MyTableModel dm = (MyTableModel)TABLE.getModel();
        for (int row=0; row<TABLE.getRowCount(); ++row) {
           col = getColumnIndex("SHOW");
           title = (String)TABLE.getValueAt(row,col);
@@ -316,32 +459,25 @@ public class spTable {
     }
     
     private void AddRow(JTable table, Object[] data) {
-       debug.print("table=" + table + " data=" + data);
-       DefaultTableModel dm = (DefaultTableModel)table.getModel();
+       MyTableModel dm = (MyTableModel)table.getModel();
        dm.addRow(data);
     }
     
+    private void InsertRow(JXTable table, int row, Object[] data) {
+       MyTableModel dm = (MyTableModel)table.getModel();
+       dm.insertRow(row, data);
+    }
+    
     public void RemoveRow(JXTable table, int row) {
-       debug.print("table=" + table + " row=" + row);
-       DefaultTableModel dm = (DefaultTableModel)table.getModel();
+       MyTableModel dm = (MyTableModel)table.getModel();
        dm.removeRow(row);
     }
     
-    // Mouse event handler
-    // This will display folder entries in table if folder entry single-clicked
-    private void MouseClicked(MouseEvent e) {
-       if( e.getClickCount() == 1 ) {
-          int row = TABLE.rowAtPoint(e.getPoint());
-          sortableInt s = (sortableInt)TABLE.getValueAt(row,getColumnIndex("PRIORITY"));
-          System.out.println(s.json);
-       }
-    }
-    
-    // Handle delete keyboard presses
+    // Handle keyboard presses
     private void KeyPressed(KeyEvent e) {
        int keyCode = e.getKeyCode();
-       if (keyCode == KeyEvent.VK_DELETE){
-          // Delete key has special action
+       if (keyCode == KeyEvent.VK_DELETE) {
+          // Remove selected row from TiVo and table
           int[] selected = GetSelectedRows();
           if (selected == null || selected.length < 0) {
              log.error("No rows selected");
@@ -374,6 +510,56 @@ public class spTable {
                 }
              }
              r.disconnect();                   
+          }
+       } else if (keyCode == KeyEvent.VK_UP) {
+          // Move selected row up
+          int[] selected = GetSelectedRows();
+          if (selected == null || selected.length < 0) {
+             log.error("No rows selected");
+             return;
+          }
+          int row;
+          JSONObject json;
+          try {
+             for (int i=0; i<selected.length; ++i) {
+                row = selected[i];
+                if (row-1 >= 0) {
+                   json = GetRowData(row);
+                   Object[] info = jsonToTableData(json, json.getInt("__priority__"));
+                   if (info != null) {
+                      RemoveRow(TABLE, row);
+                      InsertRow(TABLE, row-1, info);
+                      TABLE.setRowSelectionInterval(row, row);
+                   }
+                }
+             }
+          } catch (JSONException e1) {
+             log.error("KeyPressed - " + e1.getMessage());
+          }
+       } else if (keyCode == KeyEvent.VK_DOWN) {
+          // Move selected row down
+          int[] selected = GetSelectedRows();
+          if (selected == null || selected.length < 0) {
+             log.error("No rows selected");
+             return;
+          }
+          int row;
+          JSONObject json;
+          try {
+             for (int i=0; i<selected.length; ++i) {
+                row = selected[i];
+                if (row < TABLE.getRowCount()-1) {
+                   json = GetRowData(row);
+                   Object[] info = jsonToTableData(json, json.getInt("__priority__"));
+                   if (info != null) {
+                      RemoveRow(TABLE, row);
+                      InsertRow(TABLE, row+1, info);
+                      TABLE.setRowSelectionInterval(row, row);
+                   }
+                }
+             }
+          } catch (JSONException e1) {
+             log.error("KeyPressed - " + e1.getMessage());
           }
        } else {
           // Pass along keyboard action
