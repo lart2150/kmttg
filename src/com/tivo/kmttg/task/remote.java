@@ -59,6 +59,8 @@ public class remote implements Serializable {
                   data = r.ToDo(job);
                if (job.remote_sp)
                   data = r.SeasonPasses(job);
+               if (job.remote_spreorder)
+                  data = r.SPReorder(job);
                if (job.remote_cancel)
                   data = r.CancelledShows(job);
                if (job.remote_rnpl)
@@ -80,12 +82,13 @@ public class remote implements Serializable {
       AutoThread t = new AutoThread();
       thread = new Thread(t);
       jobName = "REMOTE";
-      if (job.remote_todo)     jobName += " ToDo List";
-      if (job.remote_sp)       jobName += " Season Pass List";
-      if (job.remote_cancel)   jobName += " Will Not Record List";
-      if (job.remote_rnpl)     jobName += " NP List";
-      if (job.remote_channels) jobName += " Channels List";
-      if (job.remote_premiere) jobName += " Season Premieres";
+      if (job.remote_todo)      jobName += " ToDo List";
+      if (job.remote_sp)        jobName += " Season Pass List";
+      if (job.remote_spreorder) jobName += " Season Pass Re-order";
+      if (job.remote_cancel)    jobName += " Will Not Record List";
+      if (job.remote_rnpl)      jobName += " NP List";
+      if (job.remote_channels)  jobName += " Channels List";
+      if (job.remote_premiere)  jobName += " Season Premieres";
       log.print(">> RUNNING '" + jobName + "' JOB FOR TiVo: " + job.tivoName);
       thread.start();
 
@@ -114,15 +117,15 @@ public class remote implements Serializable {
          // Job finished
          jobMonitor.removeFromJobList(job);
          if (success) {
-            if (job.remote_todo & job.todo != null) {
+            if (job.remote_todo && job.todo != null) {
                // ToDo list job => populate ToDo table
                job.todo.AddRows(job.tivoName, data);
             }
-            if (job.remote_sp & job.sp != null) {
+            if (job.remote_sp && job.sp != null) {
                // SP job => populate SP table
                job.sp.AddRows(job.tivoName, data);
             }
-            if (job.remote_cancel & job.cancelled != null) {
+            if (job.remote_cancel && job.cancelled != null) {
                job.cancelled.AddRows(job.tivoName, data);
             }
             if (job.remote_rnpl) {
@@ -132,7 +135,7 @@ public class remote implements Serializable {
                config.gui.remote_gui.putChannelData(job.tivoName, data);
                config.gui.remote_gui.saveChannelInfo(job.tivoName);
             }
-            if (job.remote_premiere & job.premiere != null) {
+            if (job.remote_premiere && job.premiere != null) {
                job.premiere.AddRows(job.tivoName, data);
             }
 
