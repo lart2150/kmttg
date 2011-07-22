@@ -472,6 +472,32 @@ public class spTable {
        MyTableModel dm = (MyTableModel)table.getModel();
        dm.removeRow(row);
     }
+
+    // Return array of subscriptionId's according to current table row order
+    public JSONArray GetOrderedIds() {
+       int count = TABLE.getRowCount();
+       if (count == 0) {
+          log.error("Table is empty");
+          return null;
+       }
+       JSONArray array = new JSONArray();
+       sortableInt s;
+       for (int row=0; row<count; ++row) {
+          s = (sortableInt) TABLE.getValueAt(row, getColumnIndex("PRIORITY"));
+          if (s != null && s.json.has("subscriptionId")) {
+             try {
+                array.put(s.json.getString("subscriptionId"));
+             } catch (JSONException e) {
+                log.error("GetOrderedIds - " + e.getMessage());
+                return null;
+             }
+          }
+       }
+       if (array.length() == count)
+          return array;
+       else
+          return null;
+    }
     
     // Handle keyboard presses
     private void KeyPressed(KeyEvent e) {
