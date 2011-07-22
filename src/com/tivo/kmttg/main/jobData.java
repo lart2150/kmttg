@@ -115,6 +115,9 @@ public class jobData implements Serializable {
    public Boolean remote_sp = false;
    public spTable sp = null;
    
+   public Boolean remote_spreorder = false;
+   public JSONArray remote_orderIds = null;
+   
    public Boolean remote_cancel = false;
    public cancelledTable cancelled = null;
    
