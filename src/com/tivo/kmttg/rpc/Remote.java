@@ -308,9 +308,8 @@ public class Remote {
             req = RpcRequest("recordingUpdate", false, json);
          }
          else if (type.equals("prioritize")) {
-            // Re-prioritize a season pass
-            // Expects "subscriptionId" of type JSONArray in json
-            // Also expects "priority" of type int in json (2512=>take place of current 2512)
+            // Re-prioritize season passes
+            // Expects JSONArray of all SP's "subscriptionId" in the order you want them
             json.put("bodyId", "-");
             req = RpcRequest("subscriptionsReprioritize", false, json);
          }
