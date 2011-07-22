@@ -677,6 +677,27 @@ public class Remote {
       return null;
    }
    
+   // Re-order season passes
+   public JSONArray SPReorder(jobData job) {
+      JSONObject json = new JSONObject();
+      try {
+         json.put("subscriptionId", job.remote_orderIds);
+      } catch (JSONException e1) {
+         log.error("ReorderCB - " + e1.getMessage());
+         return null;
+      }
+      if (job != null && config.GUIMODE)
+         config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Re-order Season Passes");
+      JSONObject result = Command("prioritize", json);
+      if (result != null) {
+         log.warn("Season Pass priority order updated for TiVo: " + job.tivoName);
+      } else {
+         log.error("Failed to update Season Pass priority order for TiVo: " + job.tivoName);
+         return null;
+      }
+      return new JSONArray();
+   }
+   
    // Get list of channels received
    public JSONArray ChannelList(jobData job) {
       JSONObject result = null;
