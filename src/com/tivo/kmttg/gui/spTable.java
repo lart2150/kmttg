@@ -480,6 +480,11 @@ public class spTable {
           log.error("Table is empty");
           return null;
        }
+       String title = GetRowTitle(0);
+       if (title.startsWith(" Loaded:")) {
+          log.error("Cannot re-order SPs from loaded file.");
+          return null;
+       }
        JSONArray array = new JSONArray();
        sortableInt s;
        for (int row=0; row<count; ++row) {
