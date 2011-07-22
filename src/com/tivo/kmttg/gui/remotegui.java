@@ -262,6 +262,17 @@ public class remotegui {
          }
       });         
       
+      JButton reorder_sp = new JButton("Reorder");
+      reorder_sp.setToolTipText(getToolTip("reorder_sp"));
+      reorder_sp.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Re-prioritize SPs on TiVo to match current table row order
+            String tivoName = (String)tivo_sp.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0)
+               SPReorderCB(tivoName);
+         }
+      });         
+      
       row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(title_sp);
       row1_sp.add(Box.createRigidArea(space_5));
@@ -276,6 +287,8 @@ public class remotegui {
       row1_sp.add(load_sp);
       row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(copy_sp);
+      row1_sp.add(Box.createRigidArea(space_5));
+      row1_sp.add(reorder_sp);
       panel_sp.add(row1_sp, c);
       
       tab_sp = new spTable(dialog);
@@ -1049,6 +1062,27 @@ public class remotegui {
          }
       }
    }
+   
+   // Update SP priority order to match current SP table
+   private void SPReorderCB(String tivoName) {
+      JSONArray order = tab_sp.GetOrderedIds();
+      if (order != null) {
+         Remote r = new Remote(tivoName);
+         if (r.success) {
+            JSONObject json = new JSONObject();
+            try {
+               JSONObject result = json.put("subscriptionId", order);
+               if (result != null) {
+                  log.warn("Season Pass priority order changed for TiVo: " + tivoName);
+               }
+            } catch (JSONException e1) {
+               log.error("ReorderCB - " + e1.getMessage());
+            }
+            r.Command("prioritize", json);
+            r.disconnect();
+         }
+      }
+   }
       
    // TiVo selection changed for Premieres tab
    public void tivo_premiereCB() {
@@ -1536,6 +1570,14 @@ public class remotegui {
          text += "then press this button to perform the copy.<br>";
          text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
          text += "checking against the current set of season passes already on the TiVo.";
+      }
+      else if (component.equals("reorder_sp")){
+         text = "<b>Reorder</b><br>";
+         text += "This is used to change priority order of season passes on selected TiVo to match the current<br>";
+         text += "order displayed in the table. In order to change row order in the table you can use the mouse<br>";
+         text += "to drag and drop rows to new locations. You can also select a row in the table and use the keyboard<br>";
+         text += "<b>Up</b> and <b>Down</b> keys to move the row up and down. Once you are happy with priority order<br>";
+         text += "displayed in the table use this button to have kmttg change the priority order on your TiVo.";
       }
       else if (component.equals("tivo_rnpl")) {
          text = "Select TiVo for which to retrieve My Shows list.<br>";
