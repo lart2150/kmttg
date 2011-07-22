@@ -262,7 +262,7 @@ public class remotegui {
          }
       });         
       
-      JButton reorder_sp = new JButton("Reorder");
+      JButton reorder_sp = new JButton("Re-order");
       reorder_sp.setToolTipText(getToolTip("reorder_sp"));
       reorder_sp.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1067,20 +1067,14 @@ public class remotegui {
    private void SPReorderCB(String tivoName) {
       JSONArray order = tab_sp.GetOrderedIds();
       if (order != null) {
-         Remote r = new Remote(tivoName);
-         if (r.success) {
-            JSONObject json = new JSONObject();
-            try {
-               JSONObject result = json.put("subscriptionId", order);
-               if (result != null) {
-                  log.warn("Season Pass priority order changed for TiVo: " + tivoName);
-               }
-            } catch (JSONException e1) {
-               log.error("ReorderCB - " + e1.getMessage());
-            }
-            r.Command("prioritize", json);
-            r.disconnect();
-         }
+         jobData job = new jobData();
+         job.source           = tivoName;
+         job.tivoName         = tivoName;
+         job.type             = "remote";
+         job.name             = "Remote";
+         job.remote_spreorder = true;
+         job.remote_orderIds  = order;
+         jobMonitor.submitNewJob(job);
       }
    }
       
