@@ -1,12 +1,17 @@
 package com.tivo.kmttg.gui;
 
+import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,6 +23,7 @@ import java.util.Stack;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -722,6 +728,33 @@ public class remotegui {
       tabbed_panel.add("System Information", panel_info);
       
       setTivoNames();
+      
+      // RC
+      JPanel pane = new JPanel();
+      pane.setLayout(null);
+      pane.setBackground(Color.black);
+      Insets insets = pane.getInsets();
+      Object[][] Buttons = {
+         {"tvpower", "tvpower.png", 0.7,   0,  30,  0, 0},
+         {"tivo",    "tivo.png",    0.7,  50,   0,  0, 0},
+         {"livetv",  "livetv.png",  0.7, 110,  30,  0, 0},
+         {"up",      "up.png",      0.5,  60,  40, 20, 0},
+         {"left",    "left.png",    0.5,  10,  85, 20, 0},
+         {"select",  "select.png",  0.5,  55,  85,  0, 0},
+         {"right",   "right.png",   0.5, 110,  85, 20, 0},
+         {"down",    "down.png",    0.5,  60, 125, 20, 0},
+      };
+      for (int i=0; i<Buttons.length; ++i) {
+         JButton b = ImageButton(pane, (String)Buttons[i][0], (String)Buttons[i][1], (Double)Buttons[i][2]);
+         int x = (Integer)Buttons[i][3];
+         int y = (Integer)Buttons[i][4];
+         int cropx = (Integer)Buttons[i][5];
+         int cropy = (Integer)Buttons[i][6];
+         pane.add(b);
+         Dimension size = b.getPreferredSize();
+         b.setBounds(x+insets.left, y+insets.top, size.width-cropx, size.height-cropy);
+      }
+      tabbed_panel.add("RC", pane);
             
       // add content to and display dialog window
       dialog.setContentPane(tabbed_panel);
@@ -1441,8 +1474,8 @@ public class remotegui {
          log.error("putChannelData - " + e.getMessage());
       }
    }   
-         
-   /*private ImageIcon scale(Image src, double scale) {
+   
+   private static ImageIcon scale(Container dialog, Image src, double scale) {
       int w = (int)(scale*src.getWidth(dialog));
       int h = (int)(scale*src.getHeight(dialog));
       int type = BufferedImage.TYPE_INT_RGB;
@@ -1451,7 +1484,16 @@ public class remotegui {
       g2.drawImage(src, 0, 0, w, h, dialog);
       g2.dispose();
       return new ImageIcon(dst);
-   }*/
+   }
+
+   private static JButton ImageButton(Container pane, String name, String imageFile, double scale) {
+      String base = "C:/home/kmttg java testing/images";
+      ImageIcon image = new ImageIcon(base + File.separator + imageFile);
+      JButton b = new JButton(scale(pane, image.getImage(),scale));
+      b.setBackground(Color.black);
+      b.setBorderPainted(false);
+      return b;
+   }
    
    public Dimension getDimension() {
       return dialog.getSize();
