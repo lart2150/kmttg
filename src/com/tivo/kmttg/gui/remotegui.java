@@ -1,5 +1,6 @@
 package com.tivo.kmttg.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -76,7 +77,7 @@ public class remotegui {
    private JList premiere_channels = null;
    private DefaultListModel premiere_model = new DefaultListModel();
    public Hashtable<String,JSONArray> premiere_channel_info = new Hashtable<String,JSONArray>();
-   
+
    private JComboBox tivo_rc = null;
    private JComboBox hme_rc = null;
    private JTextField rc_jumpto_text = null;
@@ -575,31 +576,123 @@ public class remotegui {
       panel_info.add(tabScroll_info, c);
       
       // Remote Control Tab items
-      gy = 0;
-      c.insets = new Insets(0, 2, 0, 2);
-      c.ipady = 0;
-      c.weighty = 0.0;  // default to no vertical stretch
-      c.weightx = 0.0;  // default to no horizontal stretch
-      c.gridx = 0;
-      c.gridy = gy;
-      c.gridwidth = 1;
-      c.gridheight = 1;
-      c.anchor = GridBagConstraints.NORTHWEST;
-      c.fill = GridBagConstraints.HORIZONTAL;
-
-      JPanel panel_rc = new JPanel(new GridBagLayout());
       
-      JLabel title_rc = new JLabel("Advanced Remote Controls");            
+      // TiVo Remote control panel
+      JPanel panel_controls = new JPanel();
+      panel_controls.setLayout(null);
+      panel_controls.setBackground(Color.black);
+      Insets insets = panel_controls.getInsets();      
+      Dimension size;      
+      Object[][] Buttons = {
+         {"channelUp",   "channel_up.png",   0.5,   5,  10,  0, 0},
+         {"lab_channel", "channel_label.png",0.7,  20,  40,  0, 0},
+         {"channelDown", "channel_down.png", 0.5,   5,  55,  0, 0},
+         {"left",        "left.png",         0.5,  10,  85, 20, 0},
+         {"zoom",        "zoom.png",         0.7,   5, 130,  0, 0},
+         {"tivo",        "tivo.png",         0.7,  55,   0,  0, 0},
+         {"up",          "up.png",           0.5,  65,  40, 20, 0},
+         {"select",      "select.png",       0.5,  60,  85,  0, 0},
+         {"down",        "down.png",         0.5,  65, 125, 20, 0},
+         {"liveTv",      "livetv.png",       0.7, 115,  20,  0, 0},
+         {"info",        "info.png",         0.7, 115,  55,  0, 0},
+         {"right",       "right.png",        0.5, 120,  85, 20, 0},
+         {"guide",       "guide.png",        0.7, 115, 130,  0, 0},
+         {"num1",        "1.png",            0.7, 200,   0, 10, 0},
+         {"num2",        "2.png",            0.7, 245,   0, 10, 0},
+         {"num3",        "3.png",            0.7, 290,   0, 10, 0},
+         {"num4",        "4.png",            0.7, 200,  35, 10, 0},
+         {"num5",        "5.png",            0.7, 245,  35, 10, 0},
+         {"num6",        "6.png",            0.7, 290,  35, 10, 0},
+         {"num7",        "7.png",            0.7, 200,  70, 10, 0},
+         {"num8",        "8.png",            0.7, 245,  70, 10, 0},
+         {"num9",        "9.png",            0.7, 290,  70, 10, 0},
+         {"clear",       "clear.png",        0.7, 200, 105, 10, 0},
+         {"num0",        "0.png",            0.7, 245, 105, 10, 0},
+         {"enter",       "enter.png",        0.7, 290, 105, 10, 0},
+         {"actionA",     "A.png",            0.7, 185, 135, 10, 0},
+         {"actionB",     "B.png",            0.7, 225, 135, 10, 0},
+         {"actionC",     "C.png",            0.7, 265, 135, 10, 0},
+         {"actionD",     "D.png",            0.7, 305, 135, 10, 0},
+         {"thumbsDown",  "thumbsdown.png",   0.7, 355,   0, 10, 0},
+         {"reverse",     "reverse.png",      0.5, 355,  55, 10, 0},
+         {"replay",      "replay.png",       0.7, 355, 105, 10, 0},
+         {"play",        "play.png",         0.7, 400,  10, 20, 0},
+         {"pause",       "pause.png",        0.4, 400,  50, 10, 0},
+         {"slow",        "slow.png",         0.7, 400,  90, 20, 0},
+         {"record",      "record.png",       0.7, 400, 130, 10, 0},
+         {"thumbsUp",    "thumbsup.png",     0.7, 445,   0, 10, 0},
+         {"forward",     "forward.png",      0.5, 445,  55, 10, 0},
+         {"advance",     "advance.png",      0.7, 445, 105, 10, 0},
+      };
+      for (int i=0; i<Buttons.length; ++i) {
+         final String event = (String)Buttons[i][0];
+         int x = (Integer)Buttons[i][3];
+         int y = (Integer)Buttons[i][4];
+         if (event.startsWith("lab_")) {
+            JLabel l = ImageLabel(panel_controls, (String)Buttons[i][1], (Double)Buttons[i][2]);
+            if (l == null) continue;
+            panel_controls.add(l);
+            size = l.getPreferredSize();
+            l.setBounds(x+insets.left, y+insets.top, size.width, size.height);
+         } else {
+            JButton b = ImageButton(panel_controls, (String)Buttons[i][1], (Double)Buttons[i][2]);
+            if (b == null) continue;
+            int cropx = (Integer)Buttons[i][5];
+            int cropy = (Integer)Buttons[i][6];
+            panel_controls.add(b);
+            size = b.getPreferredSize();
+            b.setBounds(x+insets.left, y+insets.top, size.width-cropx, size.height-cropy);
+            b.addActionListener(new java.awt.event.ActionListener() {
+               public void actionPerformed(java.awt.event.ActionEvent e) {
+                  String tivoName = (String)tivo_rc.getSelectedItem();
+                  if (tivoName != null && tivoName.length() > 0) {
+                     Remote r = new Remote(tivoName);
+                     if (r.success) {
+                        try {
+                           JSONObject json = new JSONObject();
+                           json.put("event", event);
+                           r.Command("keyEventSend", json);
+                        } catch (JSONException e1) {
+                           log.error("RC - " + e1.getMessage());
+                        }
+                        r.disconnect();
+                     }
+                  }
+               }
+            });
+         }
+      }
+            
+      // Other components for the panel      
+      JLabel label_rc = new JLabel("TiVo");
+      
       tivo_rc = new javax.swing.JComboBox();
       tivo_rc.setToolTipText(getToolTip("tivo_rc"));
 
-      c.gridx = 0;
-      c.gridy = gy;
-      panel_rc.add(title_rc, c);
-      c.gridx = 1;
-      c.gridy = gy;
-      panel_rc.add(tivo_rc, c);
-
+      JButton rc_hme_button = new JButton("HME Jump:");
+      rc_hme_button.setToolTipText(getToolTip("rc_hme_button"));
+      rc_hme_button.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String name = (String)hme_rc.getSelectedItem();
+            if (name != null && name.length() > 0) {
+               Remote r = new Remote(getTivoName("rc"));
+               if (r.success) {
+                  try {
+                     JSONObject json = new JSONObject();
+                     json.put("uri", hme.get(name));
+                     r.Command("navigate", json);
+                  } catch (JSONException e1) {
+                     log.error("HME Jump - " + e1.getMessage());
+                  }
+                  r.disconnect();
+               }
+            }
+         }
+      });
+      
+      hme_rc = new javax.swing.JComboBox();
+      hme_rc.setToolTipText(getToolTip("hme_rc"));
+      
       JButton rc_jumpto_button = new JButton("Jump to minute:");
       rc_jumpto_button.setToolTipText(getToolTip("rc_jumpto_text"));
       rc_jumpto_button.addActionListener(new java.awt.event.ActionListener() {
@@ -622,13 +715,6 @@ public class remotegui {
       rc_jumpto_text = new JTextField(15);
       rc_jumpto_text.setToolTipText(getToolTip("rc_jumpto_text"));
       rc_jumpto_text.setText("0");
-      
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      panel_rc.add(rc_jumpto_button, c);
-      c.gridx = 1;
-      panel_rc.add(rc_jumpto_text, c);
 
       JButton rc_jumpahead_button = new JButton("Skip minutes ahead:");
       rc_jumpahead_button.setToolTipText(getToolTip("rc_jumpahead_text"));
@@ -652,13 +738,6 @@ public class remotegui {
       rc_jumpahead_text = new JTextField(15);
       rc_jumpahead_text.setToolTipText(getToolTip("rc_jumpahead_text"));
       rc_jumpahead_text.setText("5");
-      
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;      
-      panel_rc.add(rc_jumpahead_button, c);
-      c.gridx = 1;
-      panel_rc.add(rc_jumpahead_text, c);
 
       JButton rc_jumpback_button = new JButton("Skip minutes back:");
       rc_jumpback_button.setToolTipText(getToolTip("rc_jumpback_text"));
@@ -682,79 +761,50 @@ public class remotegui {
       rc_jumpback_text = new JTextField(15);
       rc_jumpback_text.setToolTipText(getToolTip("rc_jumpback_text"));
       rc_jumpback_text.setText("5");
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;      
-      panel_rc.add(rc_jumpback_button, c);
-      c.gridx = 1;
-      panel_rc.add(rc_jumpback_text, c);
-   
-      hme_rc = new javax.swing.JComboBox();
-      hme_rc.setToolTipText(getToolTip("hme_rc"));
+      
+      // Top panel
+      JPanel rctop = new JPanel();
+      rctop.setLayout(new BoxLayout(rctop, BoxLayout.LINE_AXIS));
+      rctop.add(Box.createRigidArea(space_5));
+      rctop.add(label_rc);
+      rctop.add(Box.createRigidArea(space_5));
+      rctop.add(tivo_rc);
+      rctop.add(Box.createRigidArea(space_5));
+      rctop.add(rc_hme_button);
+      rctop.add(Box.createRigidArea(space_5));
+      rctop.add(hme_rc);
 
-      JButton rc_hme_button = new JButton("HME Jump:");
-      rc_hme_button.setToolTipText(getToolTip("rc_hme_button"));
-      rc_hme_button.addActionListener(new java.awt.event.ActionListener() {
-         public void actionPerformed(java.awt.event.ActionEvent e) {
-            String name = (String)hme_rc.getSelectedItem();
-            if (name != null && name.length() > 0) {
-               Remote r = new Remote(getTivoName("rc"));
-               if (r.success) {
-                  try {
-                     JSONObject json = new JSONObject();
-                     json.put("uri", hme.get(name));
-                     r.Command("navigate", json);
-                  } catch (JSONException e1) {
-                     log.error("HME Jump - " + e1.getMessage());
-                  }
-                  r.disconnect();
-               }
-            }
-         }
-      });
+      // Bottom panel
+      JPanel rcbot = new JPanel();
+      rcbot.setLayout(new BoxLayout(rcbot, BoxLayout.LINE_AXIS));
+      rcbot.add(rc_jumpto_button);
+      rcbot.add(Box.createRigidArea(space_5));
+      rcbot.add(rc_jumpto_text);
+      rcbot.add(Box.createRigidArea(space_5));
+      rcbot.add(rc_jumpback_button);
+      rcbot.add(Box.createRigidArea(space_5));
+      rcbot.add(rc_jumpback_text);
+      rcbot.add(Box.createRigidArea(space_5));
+      rcbot.add(rc_jumpahead_button);
+      rcbot.add(Box.createRigidArea(space_5));
+      rcbot.add(rc_jumpahead_text);
+
+      // Combine all RC panels together
+      JPanel panel_rc = new JPanel(new BorderLayout());
+      panel_rc.add(rctop, BorderLayout.PAGE_START);
+      panel_rc.add(panel_controls, BorderLayout.CENTER);
+      panel_rc.add(rcbot, BorderLayout.PAGE_END);
       
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      panel_rc.add(rc_hme_button, c);
-      c.gridx = 1;
-      panel_rc.add(hme_rc, c);
-      
+      // Add all panels to tabbed panel
       tabbed_panel.add("ToDo", panel_todo);
       tabbed_panel.add("Season Passes", panel_sp);
       tabbed_panel.add("Will Not Record", panel_cancel);
       tabbed_panel.add("Season Premieres", panel_premiere);
-      tabbed_panel.add("Advanced Controls", panel_rc);
+      tabbed_panel.add("Remote Control", panel_rc);
       tabbed_panel.add("System Information", panel_info);
       
+      // Init the tivo comboboxes
       setTivoNames();
-      
-      // RC
-      JPanel pane = new JPanel();
-      pane.setLayout(null);
-      pane.setBackground(Color.black);
-      Insets insets = pane.getInsets();
-      Object[][] Buttons = {
-         {"tvpower", "tvpower.png", 0.7,   0,  30,  0, 0},
-         {"tivo",    "tivo.png",    0.7,  50,   0,  0, 0},
-         {"livetv",  "livetv.png",  0.7, 110,  30,  0, 0},
-         {"up",      "up.png",      0.5,  60,  40, 20, 0},
-         {"left",    "left.png",    0.5,  10,  85, 20, 0},
-         {"select",  "select.png",  0.5,  55,  85,  0, 0},
-         {"right",   "right.png",   0.5, 110,  85, 20, 0},
-         {"down",    "down.png",    0.5,  60, 125, 20, 0},
-      };
-      for (int i=0; i<Buttons.length; ++i) {
-         JButton b = ImageButton(pane, (String)Buttons[i][0], (String)Buttons[i][1], (Double)Buttons[i][2]);
-         int x = (Integer)Buttons[i][3];
-         int y = (Integer)Buttons[i][4];
-         int cropx = (Integer)Buttons[i][5];
-         int cropy = (Integer)Buttons[i][6];
-         pane.add(b);
-         Dimension size = b.getPreferredSize();
-         b.setBounds(x+insets.left, y+insets.top, size.width-cropx, size.height-cropy);
-      }
-      tabbed_panel.add("RC", pane);
             
       // add content to and display dialog window
       dialog.setContentPane(tabbed_panel);
@@ -1486,13 +1536,29 @@ public class remotegui {
       return new ImageIcon(dst);
    }
 
-   private static JButton ImageButton(Container pane, String name, String imageFile, double scale) {
-      String base = config.programDir + File.separator + "images";
-      ImageIcon image = new ImageIcon(base + File.separator + imageFile);
-      JButton b = new JButton(scale(pane, image.getImage(),scale));
-      b.setBackground(Color.black);
-      b.setBorderPainted(false);
-      return b;
+   private static JButton ImageButton(Container pane, String imageFile, double scale) {
+      String f = config.programDir + File.separator + "rc_images" + File.separator + imageFile;
+      if (file.isFile(f)) {
+         ImageIcon image = new ImageIcon(f);
+         JButton b = new JButton(scale(pane, image.getImage(),scale));
+         b.setBackground(Color.black);
+         b.setBorderPainted(false);
+         return b;
+      }
+      log.error("Installation issue: image file not found: " + f);
+      return null;
+   }
+
+   private static JLabel ImageLabel(Container pane, String imageFile, double scale) {
+      String f = config.programDir + File.separator + "rc_images" + File.separator + imageFile;
+      if (file.isFile(f)) {
+         ImageIcon image = new ImageIcon(f);
+         JLabel l = new JLabel(scale(pane, image.getImage(),scale));
+         l.setBackground(Color.black);
+         return l;
+      }
+      log.error("Installation issue: image file not found: " + f);
+      return null;
    }
    
    public Dimension getDimension() {
