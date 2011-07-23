@@ -1487,7 +1487,7 @@ public class remotegui {
    }
 
    private static JButton ImageButton(Container pane, String name, String imageFile, double scale) {
-      String base = "C:/home/kmttg java testing/images";
+      String base = config.programDir + File.separator + "images";
       ImageIcon image = new ImageIcon(base + File.separator + imageFile);
       JButton b = new JButton(scale(pane, image.getImage(),scale));
       b.setBackground(Color.black);
