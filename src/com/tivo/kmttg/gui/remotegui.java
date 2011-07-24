@@ -829,11 +829,11 @@ public class remotegui {
       panel_rc.add(panel_controls, BorderLayout.CENTER);
       panel_rc.add(rcbot, BorderLayout.PAGE_END);
       
-      // Keyboard shortcuts without buttons
-      char[] a = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-      for (int i=0; i<a.length; ++i) {
-         AddPanelShortcut(panel_rc, "" + a[i], (int)a[i]-32);
+      // RC tab keyboard shortcuts without buttons
+      for (int i=KeyEvent.VK_A; i<=KeyEvent.VK_Z; ++i) {
+         AddPanelShortcut(panel_rc, "" + i, i);
       }
+      AddPanelShortcut(panel_rc, "Shift8", KeyEvent.VK_8);      
       AddPanelShortcut(panel_rc, "SPACE", KeyEvent.VK_SPACE);      
       AddPanelShortcut(panel_rc, "BACKSPACE", KeyEvent.VK_BACK_SPACE);
       panel_rc.setFocusable(true);
@@ -1616,7 +1616,8 @@ public class remotegui {
          modifier = ActionEvent.SHIFT_MASK;
       if (actionName.startsWith("Alt"))
          modifier = ActionEvent.ALT_MASK;
-      inputMap.put(KeyStroke.getKeyStroke(key, modifier), actionName);
+      KeyStroke k = KeyStroke.getKeyStroke(key, modifier);
+      inputMap.put(k, actionName);
       p.getActionMap().put(actionName, new ClickAction(p, key));
    }
 
@@ -1632,6 +1633,7 @@ public class remotegui {
       return null;
    }
    
+   // This handles key presses in RC panel not bound to buttons
    private void RC_keyPress(int key) {
       String tivoName = (String)tivo_rc.getSelectedItem();
       if (tivoName != null && tivoName.length() > 0) {
@@ -1644,6 +1646,10 @@ public class remotegui {
                }
                if (key == KeyEvent.VK_BACK_SPACE) {
                   json.put("event", "reverse");
+               }
+               if (key == KeyEvent.VK_8) {
+                  json.put("event", "ascii");
+                  json.put("value", '*');
                }
                if (key >= KeyEvent.VK_A && key <= KeyEvent.VK_Z) {
                   json.put("event", "ascii");
