@@ -402,6 +402,7 @@ public class todoTable {
                    o.put("recordingId", a);
                    if ( r.Command("cancel", o) != null ) {
                       RemoveRow(TABLE, row);
+                      tivo_data.get(currentTivo).remove(row);
                    }
                 } catch (JSONException e1) {
                    log.error("ToDo cancel - " + e1.getMessage());

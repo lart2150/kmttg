@@ -472,6 +472,22 @@ public class spTable {
        MyTableModel dm = (MyTableModel)table.getModel();
        dm.removeRow(row);
     }
+    
+    private Boolean removeJson(String tivoName, JSONObject json) {
+       Boolean removed = false;
+       try {
+          for (int i=0; i<tivo_data.get(tivoName).length(); ++i) {
+            if (tivo_data.get(tivoName).get(i) == json) {
+                tivo_data.get(tivoName).remove(i);
+                removed = true;
+                break;
+            }
+          }
+       } catch (JSONException e) {
+          log.print("removeJson - " + e.getMessage());
+       }
+       return removed;
+    }
 
     // Return array of subscriptionId's according to current table row order
     public JSONArray GetOrderedIds() {
@@ -533,6 +549,8 @@ public class spTable {
                          o.put("subscriptionId", json.getString("subscriptionId"));
                          if ( r.Command("unsubscribe", o) != null ) {
                             RemoveRow(TABLE, row);
+                            // Find and remove data entry
+                            removeJson(currentTivo, json);
                          }
                       }
                    } catch (JSONException e1) {
