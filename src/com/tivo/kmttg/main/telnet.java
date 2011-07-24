@@ -25,6 +25,7 @@ public class telnet {
        "PLAY", "REVERSE", "PAUSE", "FORWARD", "REPLAY", "SLOW", "ADVANCE",
        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
        "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+       "CC_ON", "CC_OFF",
    };
    
    // Constructor for dual tuner channel change
