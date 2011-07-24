@@ -20,7 +20,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Stack;
 
 import javax.swing.AbstractAction;
@@ -51,6 +53,7 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.main.telnet;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -89,6 +92,7 @@ public class remotegui {
    private JTextField rc_jumpahead_text = null;
    private JTextField rc_jumpback_text = null;
    private Hashtable<String, String> hme = new Hashtable<String, String>();
+   private Boolean cc_state = false;
    
    private JFileChooser Browser = null;
    
@@ -692,6 +696,65 @@ public class remotegui {
             }
          }
       }
+      
+      // Special buttons
+      JButton sps9s = new JButton("Clock: SPS9S");
+      setMacroCB(sps9s, new String[] {"select", "play", "select", "9", "select", "clear"});
+      size = sps9s.getPreferredSize();
+      sps9s.setBackground(Color.black);
+      sps9s.setBorderPainted(false);
+      sps9s.setForeground(Color.white);
+      panel_controls.add(sps9s);
+      sps9s.setBounds(500+insets.left, 10+insets.top, size.width, size.height);
+      
+      JButton sps30s = new JButton("30ss: SPS30");
+      setMacroCB(sps30s, new String[] {"select", "play", "select", "3", "0", "select", "clear"});
+      size = sps30s.getPreferredSize();
+      sps30s.setBackground(Color.black);
+      sps30s.setBorderPainted(false);
+      sps30s.setForeground(Color.white);
+      panel_controls.add(sps30s);
+      sps30s.setBounds(500+insets.left, 40+insets.top, size.width, size.height);
+      
+      JButton spsps = new JButton("Banner: SPSPS");
+      setMacroCB(spsps, new String[] {"select", "play", "select", "pause", "select", "clear"});
+      size = spsps.getPreferredSize();
+      spsps.setBackground(Color.black);
+      spsps.setBorderPainted(false);
+      spsps.setForeground(Color.white);
+      panel_controls.add(spsps);
+      spsps.setBounds(500+insets.left, 70+insets.top, size.width, size.height);
+      
+      JButton standby = new JButton("Toggle standby");
+      setMacroCB(standby, new String[] {"standby"});
+      size = standby.getPreferredSize();
+      standby.setBackground(Color.black);
+      standby.setBorderPainted(false);
+      standby.setForeground(Color.white);
+      panel_controls.add(standby);
+      standby.setBounds(500+insets.left, 100+insets.top, size.width, size.height);
+      
+      JButton toggle_cc = new JButton("Toggle CC");
+      toggle_cc.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_rc.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               String IP = config.TIVOS.get(tivoName);
+               if (cc_state)
+                  new telnet(IP, new String[]{"CC_OFF"});
+               else
+                  new telnet(IP, new String[]{"CC_ON"});
+               cc_state = ! cc_state;
+            }
+         }
+      });
+
+      size = toggle_cc.getPreferredSize();
+      toggle_cc.setBackground(Color.black);
+      toggle_cc.setBorderPainted(false);
+      toggle_cc.setForeground(Color.white);
+      panel_controls.add(toggle_cc);
+      toggle_cc.setBounds(500+insets.left, 130+insets.top, size.width, size.height);
             
       // Other components for the panel      
       JLabel label_rc = new JLabel("TiVo");
@@ -1619,6 +1682,36 @@ public class remotegui {
       KeyStroke k = KeyStroke.getKeyStroke(key, modifier);
       inputMap.put(k, actionName);
       p.getActionMap().put(actionName, new ClickAction(p, key));
+   }
+   
+   private void setMacroCB(JButton b, final String[] sequence) {
+      b.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_rc.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               Remote r = new Remote(tivoName);
+               if (r.success) {
+                  try {
+                     JSONObject result;
+                     for (int i=0; i<sequence.length; ++i) {
+                        JSONObject json = new JSONObject();
+                        if (sequence[i].matches("^[0-9]")) {
+                           json.put("event", "ascii");
+                           json.put("value", sequence[i].toCharArray()[0]);
+                        } else {
+                           json.put("event", sequence[i]);
+                        }
+                        result = r.Command("keyEventSend", json);
+                        if (result == null) break;
+                     }
+                  } catch (JSONException e1) {
+                     log.error("Macro CB - " + e1.getMessage());
+                  }
+                  r.disconnect();
+               }
+            }
+         }
+      });
    }
 
    private JLabel ImageLabel(Container pane, String imageFile, double scale) {
