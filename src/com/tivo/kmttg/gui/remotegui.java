@@ -10,8 +10,10 @@ import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,10 +23,12 @@ import java.io.FileWriter;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -36,6 +40,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
@@ -86,6 +91,25 @@ public class remotegui {
    private Hashtable<String, String> hme = new Hashtable<String, String>();
    
    private JFileChooser Browser = null;
+   
+   public class ClickAction extends AbstractAction {
+      private static final long serialVersionUID = 1L;
+      private JButton button = null;
+      private int key;
+      public ClickAction(JButton button) {
+         this.button = button;
+      }
+      public ClickAction(JPanel panel, int key) {
+         this.key = key;
+      }
+       
+      public void actionPerformed(ActionEvent e) {
+         if (button != null)
+            button.doClick();
+         else
+            RC_keyPress(key);
+      }
+   }
 
    remotegui(JFrame frame) {
       
@@ -135,8 +159,6 @@ public class remotegui {
       tivo_todo.setToolTipText(getToolTip("tivo_todo"));
 
       JButton refresh_todo = new JButton("Refresh");
-      //ImageIcon image = new ImageIcon("c:/home/tivoapp/pngs/remote-button-TIVO-63x86.png");
-      //JButton refresh_todo = new JButton(scale(image.getImage(),0.5));
       refresh_todo.setToolTipText(getToolTip("refresh_todo"));
       refresh_todo.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -584,61 +606,66 @@ public class remotegui {
       Insets insets = panel_controls.getInsets();      
       Dimension size;      
       Object[][] Buttons = {
-         {"channelUp",   "channel_up.png",   0.5,   5,  10,  0, 0},
-         {"lab_channel", "channel_label.png",0.7,  20,  40,  0, 0},
-         {"channelDown", "channel_down.png", 0.5,   5,  55,  0, 0},
-         {"left",        "left.png",         0.5,  10,  85, 20, 0},
-         {"zoom",        "zoom.png",         0.7,   5, 130,  0, 0},
-         {"tivo",        "tivo.png",         0.7,  55,   0,  0, 0},
-         {"up",          "up.png",           0.5,  65,  40, 20, 0},
-         {"select",      "select.png",       0.5,  60,  85,  0, 0},
-         {"down",        "down.png",         0.5,  65, 125, 20, 0},
-         {"liveTv",      "livetv.png",       0.7, 115,  20,  0, 0},
-         {"info",        "info.png",         0.7, 115,  55,  0, 0},
-         {"right",       "right.png",        0.5, 120,  85, 20, 0},
-         {"guide",       "guide.png",        0.7, 115, 130,  0, 0},
-         {"num1",        "1.png",            0.7, 200,   0, 10, 0},
-         {"num2",        "2.png",            0.7, 245,   0, 10, 0},
-         {"num3",        "3.png",            0.7, 290,   0, 10, 0},
-         {"num4",        "4.png",            0.7, 200,  35, 10, 0},
-         {"num5",        "5.png",            0.7, 245,  35, 10, 0},
-         {"num6",        "6.png",            0.7, 290,  35, 10, 0},
-         {"num7",        "7.png",            0.7, 200,  70, 10, 0},
-         {"num8",        "8.png",            0.7, 245,  70, 10, 0},
-         {"num9",        "9.png",            0.7, 290,  70, 10, 0},
-         {"clear",       "clear.png",        0.7, 200, 105, 10, 0},
-         {"num0",        "0.png",            0.7, 245, 105, 10, 0},
-         {"enter",       "enter.png",        0.7, 290, 105, 10, 0},
-         {"actionA",     "A.png",            0.7, 185, 135, 10, 0},
-         {"actionB",     "B.png",            0.7, 225, 135, 10, 0},
-         {"actionC",     "C.png",            0.7, 265, 135, 10, 0},
-         {"actionD",     "D.png",            0.7, 305, 135, 10, 0},
-         {"thumbsDown",  "thumbsdown.png",   0.7, 355,   0, 10, 0},
-         {"reverse",     "reverse.png",      0.5, 355,  55, 10, 0},
-         {"replay",      "replay.png",       0.7, 355, 105, 10, 0},
-         {"play",        "play.png",         0.7, 400,  10, 20, 0},
-         {"pause",       "pause.png",        0.4, 400,  50, 10, 0},
-         {"slow",        "slow.png",         0.7, 400,  90, 20, 0},
-         {"record",      "record.png",       0.7, 400, 130, 10, 0},
-         {"thumbsUp",    "thumbsup.png",     0.7, 445,   0, 10, 0},
-         {"forward",     "forward.png",      0.5, 445,  55, 10, 0},
-         {"advance",     "advance.png",      0.7, 445, 105, 10, 0},
+         {"channelUp",   "channel_up.png",   0.5,   5,  10,  0, 0, "PAGE_UP",   KeyEvent.VK_PAGE_UP},
+         {"lab_channel", "channel_label.png",0.7,  20,  40,  0, 0, null,        -1},
+         {"channelDown", "channel_down.png", 0.5,   5,  55,  0, 0, "PAGE_DOWN", KeyEvent.VK_PAGE_DOWN},
+         {"left",        "left.png",         0.5,  10,  85, 20, 0, "AltLEFT",   KeyEvent.VK_LEFT},
+         {"zoom",        "zoom.png",         0.7,   5, 130,  0, 0, "AltZ",      KeyEvent.VK_Z},
+         {"tivo",        "tivo.png",         0.7,  55,   0,  0, 0, "AltT",      KeyEvent.VK_T},
+         {"up",          "up.png",           0.5,  65,  40, 20, 0, "AltUP",     KeyEvent.VK_UP},
+         {"select",      "select.png",       0.5,  60,  85,  0, 0, "AltS",      KeyEvent.VK_S},
+         {"down",        "down.png",         0.5,  65, 125, 20, 0, "AltDOWN",   KeyEvent.VK_DOWN},
+         {"liveTv",      "livetv.png",       0.7, 115,  20,  0, 0, "AltL",      KeyEvent.VK_L},
+         {"info",        "info.png",         0.7, 115,  55,  0, 0, "AltI",      KeyEvent.VK_I},
+         {"right",       "right.png",        0.5, 120,  85, 20, 0, "AltRIGHT",  KeyEvent.VK_RIGHT},
+         {"guide",       "guide.png",        0.7, 115, 130,  0, 0, "AltG",      KeyEvent.VK_G},
+         {"num1",        "1.png",            0.7, 200,   0, 10, 0, "1",         KeyEvent.VK_1},
+         {"num2",        "2.png",            0.7, 245,   0, 10, 0, "2",         KeyEvent.VK_2},
+         {"num3",        "3.png",            0.7, 290,   0, 10, 0, "3",         KeyEvent.VK_3},
+         {"num4",        "4.png",            0.7, 200,  35, 10, 0, "4",         KeyEvent.VK_4},
+         {"num5",        "5.png",            0.7, 245,  35, 10, 0, "5",         KeyEvent.VK_5},
+         {"num6",        "6.png",            0.7, 290,  35, 10, 0, "6",         KeyEvent.VK_6},
+         {"num7",        "7.png",            0.7, 200,  70, 10, 0, "7",         KeyEvent.VK_7},
+         {"num8",        "8.png",            0.7, 245,  70, 10, 0, "8",         KeyEvent.VK_8},
+         {"num9",        "9.png",            0.7, 290,  70, 10, 0, "9",         KeyEvent.VK_9},
+         {"clear",       "clear.png",        0.7, 200, 105, 10, 0, "DELETE",    KeyEvent.VK_DELETE},
+         {"num0",        "0.png",            0.7, 245, 105, 10, 0, "0",         KeyEvent.VK_0},
+         {"enter",       "enter.png",        0.7, 290, 105, 10, 0, "ENTER",     KeyEvent.VK_ENTER},
+         {"actionA",     "A.png",            0.7, 185, 135, 10, 0, "AltA",      KeyEvent.VK_A},
+         {"actionB",     "B.png",            0.7, 225, 135, 10, 0, "AltB",      KeyEvent.VK_B},
+         {"actionC",     "C.png",            0.7, 265, 135, 10, 0, "AltC",      KeyEvent.VK_C},
+         {"actionD",     "D.png",            0.7, 305, 135, 10, 0, "AltD",      KeyEvent.VK_D},
+         {"thumbsDown",  "thumbsdown.png",   0.7, 355,   0, 10, 0, "SUBTRACT",  KeyEvent.VK_SUBTRACT},
+         {"reverse",     "reverse.png",      0.5, 355,  55, 10, 0, "ShiftCOMMA",KeyEvent.VK_COMMA},
+         {"replay",      "replay.png",       0.7, 355, 105, 10, 0, "Shift9",    KeyEvent.VK_9},
+         {"play",        "play.png",         0.7, 400,  10, 20, 0, "CLOSEB",    KeyEvent.VK_CLOSE_BRACKET},
+         {"pause",       "pause.png",        0.4, 400,  50, 10, 0, "OPENB",     KeyEvent.VK_OPEN_BRACKET},
+         {"slow",        "slow.png",         0.7, 400,  90, 20, 0, "ShiftBACK", KeyEvent.VK_BACK_SLASH},
+         {"record",      "record.png",       0.7, 400, 130, 10, 0, "AltR",      KeyEvent.VK_R},
+         {"thumbsUp",    "thumbsup.png",     0.7, 445,   0, 10, 0, "ADD",       KeyEvent.VK_ADD},
+         {"forward",     "forward.png",      0.5, 445,  55, 10, 0, "ShiftPER",  KeyEvent.VK_PERIOD},
+         {"advance",     "advance.png",      0.7, 445, 105, 10, 0, "Shift0",    KeyEvent.VK_0},
       };
       for (int i=0; i<Buttons.length; ++i) {
          final String event = (String)Buttons[i][0];
+         String imageName = (String)Buttons[i][1];
+         double scale = (Double)Buttons[i][2];
          int x = (Integer)Buttons[i][3];
          int y = (Integer)Buttons[i][4];
+         int cropx = (Integer)Buttons[i][5];
+         int cropy = (Integer)Buttons[i][6];
+         String keyName = (String)Buttons[i][7];
+         int keyEvent = (Integer)Buttons[i][8];
          if (event.startsWith("lab_")) {
-            JLabel l = ImageLabel(panel_controls, (String)Buttons[i][1], (Double)Buttons[i][2]);
+            JLabel l = ImageLabel(panel_controls, imageName, scale);
             if (l == null) continue;
             panel_controls.add(l);
             size = l.getPreferredSize();
             l.setBounds(x+insets.left, y+insets.top, size.width, size.height);
          } else {
-            JButton b = ImageButton(panel_controls, (String)Buttons[i][1], (Double)Buttons[i][2]);
+            JButton b = ImageButton(panel_controls, imageName, scale);
             if (b == null) continue;
-            int cropx = (Integer)Buttons[i][5];
-            int cropy = (Integer)Buttons[i][6];
+            b.setToolTipText(getToolTip(event));
             panel_controls.add(b);
             size = b.getPreferredSize();
             b.setBounds(x+insets.left, y+insets.top, size.width-cropx, size.height-cropy);
@@ -660,6 +687,9 @@ public class remotegui {
                   }
                }
             });
+            if (keyName != null && keyEvent != -1) {
+               AddButtonShortcut(b, keyName, keyEvent);
+            }
          }
       }
             
@@ -670,6 +700,7 @@ public class remotegui {
       tivo_rc.setToolTipText(getToolTip("tivo_rc"));
 
       JButton rc_hme_button = new JButton("HME Jump:");
+      disableSpaceAction(rc_hme_button);
       rc_hme_button.setToolTipText(getToolTip("rc_hme_button"));
       rc_hme_button.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -694,6 +725,7 @@ public class remotegui {
       hme_rc.setToolTipText(getToolTip("hme_rc"));
       
       JButton rc_jumpto_button = new JButton("Jump to minute:");
+      disableSpaceAction(rc_jumpto_button);
       rc_jumpto_button.setToolTipText(getToolTip("rc_jumpto_text"));
       rc_jumpto_button.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -717,6 +749,7 @@ public class remotegui {
       rc_jumpto_text.setText("0");
 
       JButton rc_jumpahead_button = new JButton("Skip minutes ahead:");
+      disableSpaceAction(rc_jumpahead_button);
       rc_jumpahead_button.setToolTipText(getToolTip("rc_jumpahead_text"));
       rc_jumpahead_button.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -740,6 +773,7 @@ public class remotegui {
       rc_jumpahead_text.setText("5");
 
       JButton rc_jumpback_button = new JButton("Skip minutes back:");
+      disableSpaceAction(rc_jumpback_button);
       rc_jumpback_button.setToolTipText(getToolTip("rc_jumpback_text"));
       rc_jumpback_button.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -794,6 +828,15 @@ public class remotegui {
       panel_rc.add(rctop, BorderLayout.PAGE_START);
       panel_rc.add(panel_controls, BorderLayout.CENTER);
       panel_rc.add(rcbot, BorderLayout.PAGE_END);
+      
+      // Keyboard shortcuts without buttons
+      char[] a = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+      for (int i=0; i<a.length; ++i) {
+         AddPanelShortcut(panel_rc, "" + a[i], (int)a[i]-32);
+      }
+      AddPanelShortcut(panel_rc, "SPACE", KeyEvent.VK_SPACE);      
+      AddPanelShortcut(panel_rc, "BACKSPACE", KeyEvent.VK_BACK_SPACE);
+      panel_rc.setFocusable(true);
       
       // Add all panels to tabbed panel
       tabbed_panel.add("ToDo", panel_todo);
@@ -900,7 +943,6 @@ public class remotegui {
       if (r.success) {
          JSONObject json = new JSONObject();
          try {
-            System.out.println("tivoName=" + tivoName + " mins=" + mins);
             Long pos = (long)60000*mins;
             json.put("offset", pos);
             r.Command("jump", json);
@@ -1536,20 +1578,49 @@ public class remotegui {
       return new ImageIcon(dst);
    }
 
-   private static JButton ImageButton(Container pane, String imageFile, double scale) {
+   private JButton ImageButton(Container pane, String imageFile, double scale) {
       String f = config.programDir + File.separator + "rc_images" + File.separator + imageFile;
       if (file.isFile(f)) {
          ImageIcon image = new ImageIcon(f);
          JButton b = new JButton(scale(pane, image.getImage(),scale));
          b.setBackground(Color.black);
          b.setBorderPainted(false);
+         disableSpaceAction(b);
          return b;
       }
       log.error("Installation issue: image file not found: " + f);
       return null;
    }
+   
+   private void AddButtonShortcut(JButton b, String actionName, int key) {
+      InputMap inputMap = b.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW);
+      int modifier = 0;
+      if (actionName.startsWith("Shift"))
+         modifier = ActionEvent.SHIFT_MASK;
+      if (actionName.startsWith("Alt"))
+         modifier = ActionEvent.ALT_MASK;
+      inputMap.put(KeyStroke.getKeyStroke(key, modifier), actionName);
+      b.getActionMap().put(actionName, new ClickAction(b));
+   }
+   
+   private void disableSpaceAction(JButton b) {
+      InputMap im = b.getInputMap();
+      im.put(KeyStroke.getKeyStroke("pressed SPACE"), "none");
+      im.put(KeyStroke.getKeyStroke("released SPACE"), "none");
+   }
+   
+   private void AddPanelShortcut(JPanel p, String actionName, int key) {
+      InputMap inputMap = p.getInputMap(JPanel.WHEN_IN_FOCUSED_WINDOW);
+      int modifier = 0;
+      if (actionName.startsWith("Shift"))
+         modifier = ActionEvent.SHIFT_MASK;
+      if (actionName.startsWith("Alt"))
+         modifier = ActionEvent.ALT_MASK;
+      inputMap.put(KeyStroke.getKeyStroke(key, modifier), actionName);
+      p.getActionMap().put(actionName, new ClickAction(p, key));
+   }
 
-   private static JLabel ImageLabel(Container pane, String imageFile, double scale) {
+   private JLabel ImageLabel(Container pane, String imageFile, double scale) {
       String f = config.programDir + File.separator + "rc_images" + File.separator + imageFile;
       if (file.isFile(f)) {
          ImageIcon image = new ImageIcon(f);
@@ -1559,6 +1630,32 @@ public class remotegui {
       }
       log.error("Installation issue: image file not found: " + f);
       return null;
+   }
+   
+   private void RC_keyPress(int key) {
+      String tivoName = (String)tivo_rc.getSelectedItem();
+      if (tivoName != null && tivoName.length() > 0) {
+         Remote r = new Remote(tivoName);
+         if (r.success) {
+            try {
+               JSONObject json = new JSONObject();
+               if (key == KeyEvent.VK_SPACE) {
+                  json.put("event", "forward");
+               }
+               if (key == KeyEvent.VK_BACK_SPACE) {
+                  json.put("event", "reverse");
+               }
+               if (key >= KeyEvent.VK_A && key <= KeyEvent.VK_Z) {
+                  json.put("event", "ascii");
+                  json.put("value", key);
+               }
+               r.Command("keyEventSend", json);
+            } catch (JSONException e1) {
+               log.error("RC keyPressed - " + e1.getMessage());
+            }
+            r.disconnect();
+         }
+      }                
    }
    
    public Dimension getDimension() {
@@ -1714,7 +1811,120 @@ public class remotegui {
       else if (component.equals("hme_rc")) {
          text = "Select which HME application you want to jump to for selected TiVo.";
       }
-      
+      else if (component.equals("channelUp")) {
+         text += "pg up";
+      }
+      else if (component.equals("channelDown")) {
+         text += "pg down";
+      }
+      else if (component.equals("left")) {
+         text += "Alt left arrow";
+      }
+      else if (component.equals("zoom")) {
+         text += "Alt z";
+      }
+      else if (component.equals("tivo")) {
+         text += "Alt t";
+      }
+      else if (component.equals("up")) {
+         text += "Alt up arrow";
+      }
+      else if (component.equals("select")) {
+         text += "Alt s";
+      }
+      else if (component.equals("down")) {
+         text += "Alt down arrow";
+      }
+      else if (component.equals("liveTv")) {
+         text += "Alt l";
+      }
+      else if (component.equals("info")) {
+         text += "Alt i";
+      }
+      else if (component.equals("right")) {
+         text += "Alt right arrow";
+      }
+      else if (component.equals("guide")) {
+         text += "Alt g";
+      }
+      else if (component.equals("num1")) {
+         text += "1";
+      }
+      else if (component.equals("num2")) {
+         text += "2";
+      }
+      else if (component.equals("num3")) {
+         text += "3";
+      }
+      else if (component.equals("num4")) {
+         text += "4";
+      }
+      else if (component.equals("num5")) {
+         text += "5";
+      }
+      else if (component.equals("num6")) {
+         text += "6";
+      }
+      else if (component.equals("num7")) {
+         text += "7";
+      }
+      else if (component.equals("num8")) {
+         text += "8";
+      }
+      else if (component.equals("num9")) {
+         text += "9";
+      }
+      else if (component.equals("clear")) {
+         text += "delete";
+      }
+      else if (component.equals("num0")) {
+         text += "0";
+      }
+      else if (component.equals("enter")) {
+         text += "enter";
+      }
+      else if (component.equals("actionA")) {
+         text += "Alt a";
+      }
+      else if (component.equals("actionB")) {
+         text += "Alt b";
+      }
+      else if (component.equals("actionC")) {
+         text += "Alt c";
+      }
+      else if (component.equals("actionD")) {
+         text += "Alt d";
+      }
+      else if (component.equals("thumbsDown")) {
+         text += "KP -";
+      }
+      else if (component.equals("reverse")) {
+         text += "&lt";
+      }
+      else if (component.equals("replay")) {
+         text += "(";
+      }
+      else if (component.equals("play")) {
+         text += "]";
+      }
+      else if (component.equals("pause")) {
+         text += "[";
+      }
+      else if (component.equals("slow")) {
+         text += "|";
+      }
+      else if (component.equals("record")) {
+         text += "Alt r";
+      }
+      else if (component.equals("thumbsUp")) {
+         text += "KP +";
+      }
+      else if (component.equals("forward")) {
+         text += "&gt";
+      }
+      else if (component.equals("advance")) {
+         text += ")";
+      }      
       if (text.length() > 0) {
          text = "<html>" + text + "</html>";
       }
