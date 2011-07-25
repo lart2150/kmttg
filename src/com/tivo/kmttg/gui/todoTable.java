@@ -309,7 +309,7 @@ public class todoTable {
     public void RemoveRow(JXTable table, int row) {
        debug.print("table=" + table + " row=" + row);
        DefaultTableModel dm = (DefaultTableModel)table.getModel();
-       dm.removeRow(row);
+       dm.removeRow(table.convertRowIndexToModel(row));
     }
     
     // Mouse event handler

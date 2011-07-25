@@ -471,7 +471,7 @@ public class spTable {
     
     public void RemoveRow(JXTable table, int row) {
        MyTableModel dm = (MyTableModel)table.getModel();
-       dm.removeRow(row);
+       dm.removeRow(table.convertRowIndexToModel(row));
     }
     
     private Boolean removeJson(String tivoName, JSONObject json) {
