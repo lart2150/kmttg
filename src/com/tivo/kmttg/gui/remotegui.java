@@ -706,7 +706,7 @@ public class remotegui {
       panel_controls.add(sps9s);
       sps9s.setBounds(500+insets.left, 10+insets.top, size.width, size.height);
       
-      JButton sps30s = new JButton("30ss: SPS30S");
+      /*JButton sps30s = new JButton("30ss: SPS30S");
       sps30s.setToolTipText(getToolTip("sps30s"));
       setMacroCB(sps30s, new String[] {"select", "play", "select", "3", "0", "select", "clear"});
       size = sps30s.getPreferredSize();
@@ -714,7 +714,7 @@ public class remotegui {
       sps30s.setBorderPainted(false);
       sps30s.setForeground(Color.white);
       panel_controls.add(sps30s);
-      sps30s.setBounds(500+insets.left, 40+insets.top, size.width, size.height);
+      sps30s.setBounds(500+insets.left, 40+insets.top, size.width, size.height);*/
       
       JButton spsps = new JButton("Banner: SPSPS");
       spsps.setToolTipText(getToolTip("spsps"));
@@ -724,7 +724,7 @@ public class remotegui {
       spsps.setBorderPainted(false);
       spsps.setForeground(Color.white);
       panel_controls.add(spsps);
-      spsps.setBounds(500+insets.left, 70+insets.top, size.width, size.height);
+      spsps.setBounds(500+insets.left, 40+insets.top, size.width, size.height);
       
       JButton standby = new JButton("Toggle standby");
       standby.setToolTipText(getToolTip("standby"));
@@ -734,7 +734,7 @@ public class remotegui {
       standby.setBorderPainted(false);
       standby.setForeground(Color.white);
       panel_controls.add(standby);
-      standby.setBounds(500+insets.left, 100+insets.top, size.width, size.height);
+      standby.setBounds(500+insets.left, 70+insets.top, size.width, size.height);
       
       JButton toggle_cc = new JButton("Toggle CC");
       toggle_cc.setToolTipText(getToolTip("toggle_cc"));
@@ -757,7 +757,7 @@ public class remotegui {
       toggle_cc.setBorderPainted(false);
       toggle_cc.setForeground(Color.white);
       panel_controls.add(toggle_cc);
-      toggle_cc.setBounds(500+insets.left, 130+insets.top, size.width, size.height);
+      toggle_cc.setBounds(500+insets.left, 100+insets.top, size.width, size.height);
             
       // Other components for the panel      
       JLabel label_rc = new JLabel("TiVo");
