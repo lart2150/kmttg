@@ -380,8 +380,12 @@ public class todoTable {
     
     public void DeleteCB() {
        int[] selected = GetSelectedRows();
-       if (selected == null || selected.length < 0) {
+       if (selected == null || selected.length < 1) {
           log.error("No rows selected");
+          return;
+       }
+       if (currentTivo == null) {
+          log.error("Table not initialized");
           return;
        }
        int row;
