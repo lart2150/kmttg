@@ -97,19 +97,21 @@ public class remotegui {
    public class ClickAction extends AbstractAction {
       private static final long serialVersionUID = 1L;
       private JButton button = null;
-      private int key;
+      private Boolean isAscii;
+      private String command;
       public ClickAction(JButton button) {
          this.button = button;
       }
-      public ClickAction(JPanel panel, int key) {
-         this.key = key;
+      public ClickAction(Boolean isAscii, String command) {
+         this.isAscii = isAscii;
+         this.command = command;
       }
        
       public void actionPerformed(ActionEvent e) {
          if (button != null)
             button.doClick();
          else
-            RC_keyPress(key);
+            RC_keyPress(isAscii, command);
       }
    }
 
@@ -897,16 +899,33 @@ public class remotegui {
       
       // RC tab keyboard shortcuts without buttons
       for (int i=KeyEvent.VK_A; i<=KeyEvent.VK_Z; ++i) {
-         AddPanelShortcut(panel_rc, "" + i, i);
+         AddPanelShortcut(panel_rc, "" + i, i, true, "" + Character.toChars(i)[0]);
       }
       Object[][] kb_shortcuts = new Object[][] {
-         {"Shift8",    KeyEvent.VK_8},
-         {"SPACE",     KeyEvent.VK_SPACE},
-         {"BACKSPACE", KeyEvent.VK_BACK_SPACE},
-         {"COMMA",     KeyEvent.VK_COMMA},
+         // NAME       Keyboard KeyEvent       isAscii action
+         {"SPACE",     KeyEvent.VK_SPACE,      false, "forward"},
+         {"BACKSPACE", KeyEvent.VK_BACK_SPACE, false, "reverse"},
+         {"Shift8",    KeyEvent.VK_8,          true,  "*"},
+         {"COMMA",     KeyEvent.VK_COMMA,      true,  ","},
+         {"NUMPAD0",   KeyEvent.VK_NUMPAD0,    true,  "0"},
+         {"NUMPAD1",   KeyEvent.VK_NUMPAD1,    true,  "1"},
+         {"NUMPAD2",   KeyEvent.VK_NUMPAD2,    true,  "2"},
+         {"NUMPAD3",   KeyEvent.VK_NUMPAD3,    true,  "3"},
+         {"NUMPAD4",   KeyEvent.VK_NUMPAD4,    true,  "4"},
+         {"NUMPAD5",   KeyEvent.VK_NUMPAD5,    true,  "5"},
+         {"NUMPAD6",   KeyEvent.VK_NUMPAD6,    true,  "6"},
+         {"NUMPAD7",   KeyEvent.VK_NUMPAD7,    true,  "7"},
+         {"NUMPAD8",   KeyEvent.VK_NUMPAD8,    true,  "8"},
+         {"NUMPAD9",   KeyEvent.VK_NUMPAD9,    true,  "9"},
       };
       for (int i=0; i<kb_shortcuts.length; ++i) {
-         AddPanelShortcut(panel_rc, (String)kb_shortcuts[i][0], (Integer)kb_shortcuts[i][1]);
+         AddPanelShortcut(
+            panel_rc,
+            (String)kb_shortcuts[i][0],
+            (Integer)kb_shortcuts[i][1],
+            (Boolean)kb_shortcuts[i][2],
+            (String)kb_shortcuts[i][3]
+         );
       }
       panel_rc.setFocusable(true);
       
@@ -1681,7 +1700,7 @@ public class remotegui {
       im.put(KeyStroke.getKeyStroke("released SPACE"), "none");
    }
    
-   private void AddPanelShortcut(JPanel p, String actionName, int key) {
+   private void AddPanelShortcut(JPanel p, String actionName, int key, Boolean isAscii, String command) {
       InputMap inputMap = p.getInputMap(JPanel.WHEN_IN_FOCUSED_WINDOW);
       int modifier = 0;
       if (actionName.startsWith("Shift"))
@@ -1690,7 +1709,7 @@ public class remotegui {
          modifier = ActionEvent.ALT_MASK;
       KeyStroke k = KeyStroke.getKeyStroke(key, modifier);
       inputMap.put(k, actionName);
-      p.getActionMap().put(actionName, new ClickAction(p, key));
+      p.getActionMap().put(actionName, new ClickAction(isAscii, command));
    }
    
    private void setMacroCB(JButton b, final String[] sequence) {
@@ -1736,26 +1755,19 @@ public class remotegui {
    }
    
    // This handles key presses in RC panel not bound to buttons
-   private void RC_keyPress(int key) {
+   private void RC_keyPress(Boolean isAscii, String command) {
       String tivoName = (String)tivo_rc.getSelectedItem();
       if (tivoName != null && tivoName.length() > 0) {
          Remote r = new Remote(tivoName);
          if (r.success) {
             try {
                JSONObject json = new JSONObject();
-               if (key == KeyEvent.VK_SPACE) {
-                  json.put("event", "forward");
-               }
-               else if (key == KeyEvent.VK_BACK_SPACE) {
-                  json.put("event", "reverse");
-               }
-               else if (key == KeyEvent.VK_8) {
+               if (isAscii) {
                   json.put("event", "ascii");
-                  json.put("value", '*');
+                  json.put("value", command.toCharArray()[0]);
                }
                else {
-                  json.put("event", "ascii");
-                  json.put("value", key);
+                  json.put("event", command);
                }
                r.Command("keyEventSend", json);
             } catch (JSONException e1) {
@@ -1763,7 +1775,7 @@ public class remotegui {
             }
             r.disconnect();
          }
-      }                
+      }
    }
    
    public Dimension getDimension() {
