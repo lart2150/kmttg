@@ -899,9 +899,15 @@ public class remotegui {
       for (int i=KeyEvent.VK_A; i<=KeyEvent.VK_Z; ++i) {
          AddPanelShortcut(panel_rc, "" + i, i);
       }
-      AddPanelShortcut(panel_rc, "Shift8", KeyEvent.VK_8);      
-      AddPanelShortcut(panel_rc, "SPACE", KeyEvent.VK_SPACE);      
-      AddPanelShortcut(panel_rc, "BACKSPACE", KeyEvent.VK_BACK_SPACE);
+      Object[][] kb_shortcuts = new Object[][] {
+         {"Shift8",    KeyEvent.VK_8},
+         {"SPACE",     KeyEvent.VK_SPACE},
+         {"BACKSPACE", KeyEvent.VK_BACK_SPACE},
+         {"COMMA",     KeyEvent.VK_COMMA},
+      };
+      for (int i=0; i<kb_shortcuts.length; ++i) {
+         AddPanelShortcut(panel_rc, (String)kb_shortcuts[i][0], (Integer)kb_shortcuts[i][1]);
+      }
       panel_rc.setFocusable(true);
       
       // Add all panels to tabbed panel
@@ -1740,14 +1746,14 @@ public class remotegui {
                if (key == KeyEvent.VK_SPACE) {
                   json.put("event", "forward");
                }
-               if (key == KeyEvent.VK_BACK_SPACE) {
+               else if (key == KeyEvent.VK_BACK_SPACE) {
                   json.put("event", "reverse");
                }
-               if (key == KeyEvent.VK_8) {
+               else if (key == KeyEvent.VK_8) {
                   json.put("event", "ascii");
                   json.put("value", '*');
                }
-               if (key >= KeyEvent.VK_A && key <= KeyEvent.VK_Z) {
+               else {
                   json.put("event", "ascii");
                   json.put("value", key);
                }
