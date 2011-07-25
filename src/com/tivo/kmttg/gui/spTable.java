@@ -50,6 +50,7 @@ public class spTable {
       TABLE = new JXTable(data, TITLE_cols);
       TABLE.setModel(new MyTableModel(data, TITLE_cols));
       TABLE.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+      TABLE.setSortable(false); // disable sorting to avoid problems with re-prioritize
       TABLE.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       TABLE.setDragEnabled(true);
       TABLE.setTransferHandler(new TableTransferHandler());
