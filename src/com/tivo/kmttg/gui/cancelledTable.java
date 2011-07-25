@@ -357,7 +357,8 @@ public class cancelledTable {
    // Refresh table with given given entries
    public void Refresh(Stack<JSONObject> o) {
       if (o == null) {
-         AddRows(currentTivo, tivo_data.get(currentTivo));
+         if (currentTivo != null)
+            AddRows(currentTivo, tivo_data.get(currentTivo));
          return;
       }
       if (TABLE != null) {
