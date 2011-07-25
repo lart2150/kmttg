@@ -267,7 +267,7 @@ public class channelTable {
     
     public void RemoveRow(JXTable table, int row) {
        DefaultTableModel dm = (DefaultTableModel)table.getModel();
-       dm.removeRow(row);
+       dm.removeRow(table.convertRowIndexToModel(row));
     }
         
 }

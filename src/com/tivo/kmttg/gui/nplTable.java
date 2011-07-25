@@ -979,7 +979,7 @@ public class nplTable {
    public void RemoveRow(JXTable table, int row) {
       debug.print("table=" + table + " row=" + row);
       DefaultTableModel dm = (DefaultTableModel)table.getModel();
-      dm.removeRow(row);
+      dm.removeRow(table.convertRowIndexToModel(row));
    }
    
    public void RemoveRows(JXTable table, Stack<Integer> rows) {
@@ -997,7 +997,7 @@ public class nplTable {
             }
          }
          if (index > -1) {
-            dm.removeRow(row);
+            dm.removeRow(table.convertRowIndexToModel(row));
             rows.remove(index);
          }
       }
