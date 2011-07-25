@@ -697,6 +697,7 @@ public class remotegui {
       
       // Special buttons
       JButton sps9s = new JButton("Clock: SPS9S");
+      sps9s.setToolTipText(getToolTip("sps9s"));
       setMacroCB(sps9s, new String[] {"select", "play", "select", "9", "select", "clear"});
       size = sps9s.getPreferredSize();
       sps9s.setBackground(Color.black);
@@ -705,7 +706,8 @@ public class remotegui {
       panel_controls.add(sps9s);
       sps9s.setBounds(500+insets.left, 10+insets.top, size.width, size.height);
       
-      JButton sps30s = new JButton("30ss: SPS30");
+      JButton sps30s = new JButton("30ss: SPS30S");
+      sps30s.setToolTipText(getToolTip("sps30s"));
       setMacroCB(sps30s, new String[] {"select", "play", "select", "3", "0", "select", "clear"});
       size = sps30s.getPreferredSize();
       sps30s.setBackground(Color.black);
@@ -715,6 +717,7 @@ public class remotegui {
       sps30s.setBounds(500+insets.left, 40+insets.top, size.width, size.height);
       
       JButton spsps = new JButton("Banner: SPSPS");
+      spsps.setToolTipText(getToolTip("spsps"));
       setMacroCB(spsps, new String[] {"select", "play", "select", "pause", "select", "clear"});
       size = spsps.getPreferredSize();
       spsps.setBackground(Color.black);
@@ -724,6 +727,7 @@ public class remotegui {
       spsps.setBounds(500+insets.left, 70+insets.top, size.width, size.height);
       
       JButton standby = new JButton("Toggle standby");
+      standby.setToolTipText(getToolTip("standby"));
       setMacroCB(standby, new String[] {"standby"});
       size = standby.getPreferredSize();
       standby.setBackground(Color.black);
@@ -733,6 +737,7 @@ public class remotegui {
       standby.setBounds(500+insets.left, 100+insets.top, size.width, size.height);
       
       JButton toggle_cc = new JButton("Toggle CC");
+      toggle_cc.setToolTipText(getToolTip("toggle_cc"));
       toggle_cc.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             String tivoName = (String)tivo_rc.getSelectedItem();
@@ -2022,6 +2027,37 @@ public class remotegui {
       else if (component.equals("advance")) {
          text += ")";
       }      
+      else if (component.equals("sps9s")){
+         text = "<b>Clock: SPS9S</b><br>";
+         text += "Select, Play, Select, 9, Select, Clear<br>";
+         text += "Toggle on screen clock on bottom right corner.<br>";
+         text += "Should be used when watching live tv or video playback.";
+      }
+      else if (component.equals("sps30s")){
+         text = "<b>30ss: SPS30S</b><br>";
+         text += "Select, Play, Select, 3, 0, Select, Clear<br>";
+         text += "Toggle 30 sec skip binding of advance button.<br>";
+         text += "Should be used when watching live tv or video playback.";
+      }
+      else if (component.equals("spsps")){
+         text = "<b>Banner: SPSPS</b><br>";
+         text += "Select, Play, Select, Pause, Select, Clear<br>";
+         text += "Toggle 'clear banner quickly' setting.<br>";
+         text += "Should be used when watching live tv or video playback.<br>";
+         text += "NOTE: Before enable you need to pause program and hide pause banner first and<br>.";
+         text += "then resume play, then press this button.";
+      }
+      else if (component.equals("standby")){
+         text = "<b>Toggle standby</b><br>";
+         text += "Toggle standby mode. In off mode audio/video outputs are disabled on the TiVo<br>";
+         text += "and possible recording interruptions by Emergency Alert System (EAS) are avoided.";
+      }
+      else if (component.equals("toggle_cc")){
+         text = "<b>Toggle CC</b><br>";
+         text += "Toggle closed caption display.<br>";
+         text += "NOTE: Assumes initial state of off.<br>";
+         text += "NOTE: Actually uses 'telnet' interface rather than iPad protocol.";
+      }
       if (text.length() > 0) {
          text = "<html>" + text + "</html>";
       }
