@@ -906,6 +906,8 @@ public class remotegui {
          {"SPACE",     KeyEvent.VK_SPACE,      false, "forward"},
          {"BACKSPACE", KeyEvent.VK_BACK_SPACE, false, "reverse"},
          {"Shift8",    KeyEvent.VK_8,          true,  "*"},
+         {"Shift-",    KeyEvent.VK_MINUS,      true,  "_"},
+         {"Shift7",    KeyEvent.VK_7,          true,  "&"},
          {"COMMA",     KeyEvent.VK_COMMA,      true,  ","},
          {"NUMPAD0",   KeyEvent.VK_NUMPAD0,    true,  "0"},
          {"NUMPAD1",   KeyEvent.VK_NUMPAD1,    true,  "1"},
