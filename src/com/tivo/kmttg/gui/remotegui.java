@@ -136,6 +136,15 @@ public class remotegui {
       c.fill = GridBagConstraints.HORIZONTAL;
       
       tabbed_panel = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+      InputMap im = tabbed_panel.getInputMap();
+      im.put(KeyStroke.getKeyStroke("pressed RIGHT"), "none");
+      im.put(KeyStroke.getKeyStroke("released RIGHT"), "none");
+      im.put(KeyStroke.getKeyStroke("pressed LEFT"), "none");
+      im.put(KeyStroke.getKeyStroke("released LEFT"), "none");
+      im.put(KeyStroke.getKeyStroke("pressed UP"), "none");
+      im.put(KeyStroke.getKeyStroke("released UP"), "none");
+      im.put(KeyStroke.getKeyStroke("pressed DOWN"), "none");
+      im.put(KeyStroke.getKeyStroke("released DOWN"), "none");
             
       // ToDo Title + Tivo Selector + Refresh button
       Dimension space_40 = new Dimension(40,0);
@@ -613,15 +622,15 @@ public class remotegui {
          {"channelUp",   "channel_up.png",   0.5,   5,  10,  0, 0, "PAGE_UP",   KeyEvent.VK_PAGE_UP},
          {"lab_channel", "channel_label.png",0.7,  20,  40,  0, 0, null,        -1},
          {"channelDown", "channel_down.png", 0.5,   5,  55,  0, 0, "PAGE_DOWN", KeyEvent.VK_PAGE_DOWN},
-         {"left",        "left.png",         0.5,  10,  85, 20, 0, "AltLEFT",   KeyEvent.VK_LEFT},
+         {"left",        "left.png",         0.5,  10,  85, 20, 0, "LEFT",      KeyEvent.VK_LEFT},
          {"zoom",        "zoom.png",         0.7,   5, 130,  0, 0, "AltZ",      KeyEvent.VK_Z},
          {"tivo",        "tivo.png",         0.7,  55,   0,  0, 0, "AltT",      KeyEvent.VK_T},
-         {"up",          "up.png",           0.5,  65,  40, 20, 0, "AltUP",     KeyEvent.VK_UP},
+         {"up",          "up.png",           0.5,  65,  40, 20, 0, "UP",        KeyEvent.VK_UP},
          {"select",      "select.png",       0.5,  60,  85,  0, 0, "AltS",      KeyEvent.VK_S},
-         {"down",        "down.png",         0.5,  65, 125, 20, 0, "AltDOWN",   KeyEvent.VK_DOWN},
+         {"down",        "down.png",         0.5,  65, 125, 20, 0, "DOWN",      KeyEvent.VK_DOWN},
          {"liveTv",      "livetv.png",       0.7, 115,  20,  0, 0, "AltL",      KeyEvent.VK_L},
          {"info",        "info.png",         0.7, 115,  55,  0, 0, "AltI",      KeyEvent.VK_I},
-         {"right",       "right.png",        0.5, 120,  85, 20, 0, "AltRIGHT",  KeyEvent.VK_RIGHT},
+         {"right",       "right.png",        0.5, 120,  85, 20, 0, "RIGHT",     KeyEvent.VK_RIGHT},
          {"guide",       "guide.png",        0.7, 115, 130,  0, 0, "AltG",      KeyEvent.VK_G},
          {"num1",        "1.png",            0.7, 200,   0, 10, 0, "1",         KeyEvent.VK_1},
          {"num2",        "2.png",            0.7, 245,   0, 10, 0, "2",         KeyEvent.VK_2},
@@ -1940,7 +1949,7 @@ public class remotegui {
          text += "pg down";
       }
       else if (component.equals("left")) {
-         text += "Alt left arrow";
+         text += "left arrow";
       }
       else if (component.equals("zoom")) {
          text += "Alt z";
@@ -1949,13 +1958,13 @@ public class remotegui {
          text += "Alt t";
       }
       else if (component.equals("up")) {
-         text += "Alt up arrow";
+         text += "up arrow";
       }
       else if (component.equals("select")) {
          text += "Alt s";
       }
       else if (component.equals("down")) {
-         text += "Alt down arrow";
+         text += "down arrow";
       }
       else if (component.equals("liveTv")) {
          text += "Alt l";
@@ -1964,7 +1973,7 @@ public class remotegui {
          text += "Alt i";
       }
       else if (component.equals("right")) {
-         text += "Alt right arrow";
+         text += "right arrow";
       }
       else if (component.equals("guide")) {
          text += "Alt g";
