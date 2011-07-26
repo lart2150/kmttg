@@ -953,6 +953,8 @@ public class gui {
       if (remoteMenuItem == null) {
          remoteMenuItem = new JMenuItem();
          remoteMenuItem.setText("Remote Control...");
+         remoteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I,
+               Event.CTRL_MASK, true));
          remoteMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                if (remote_gui == null)
