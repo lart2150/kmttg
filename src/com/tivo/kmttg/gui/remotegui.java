@@ -729,7 +729,7 @@ public class remotegui {
       
       JButton spsps = new JButton("Banner: SPSPS");
       spsps.setToolTipText(getToolTip("spsps"));
-      setMacroCB(spsps, new String[] {"select", "play", "select", "pause", "select", "clear"});
+      setMacroCB(spsps, new String[] {"select", "play", "select", "pause", "select", "play"});
       size = spsps.getPreferredSize();
       spsps.setBackground(Color.black);
       spsps.setBorderPainted(false);
@@ -2070,7 +2070,7 @@ public class remotegui {
       }
       else if (component.equals("spsps")){
          text = "<b>Banner: SPSPS</b><br>";
-         text += "Select, Play, Select, Pause, Select, Clear<br>";
+         text += "Select, Play, Select, Pause, Select, Play<br>";
          text += "Toggle 'clear banner quickly' setting.<br>";
          text += "Should be used when watching live tv or video playback.<br>";
          text += "NOTE: Before enable you need to pause program and hide pause banner first and<br>.";
