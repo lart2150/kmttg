@@ -784,9 +784,9 @@ public class Remote {
                   }
                }
             }
-            if (data.length() == 0) {
-               log.warn("No show premieres found.");
-            }
+         }
+         if (data.length() == 0) {
+            log.warn("No show premieres found.");
          }
       } catch (JSONException e) {
          error("SeasonPremieres - " + e.getMessage());
