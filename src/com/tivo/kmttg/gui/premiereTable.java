@@ -126,6 +126,13 @@ public class premiereTable {
           if (bkgndColor != null && ! isSelected)
              cell.setBackground( bkgndColor );
           
+          if ( ! isSelected ) {
+             // Indicate with different background color entries that already have season passes
+             JSONObject json = GetRowData(row);
+             if (json.has("__SPscheduled__"))
+                cell.setBackground(config.tableBkgndProtected);
+          }
+          
           cell.setFont(config.tableFont);
          
           return cell;
