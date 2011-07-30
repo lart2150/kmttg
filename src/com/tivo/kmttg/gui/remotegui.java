@@ -1476,6 +1476,14 @@ public class remotegui {
       }
    }
    
+   private String[] getTivoNames(JComboBox component) {
+      String[] names = new String[component.getItemCount()];
+      for (int i=0; i<component.getItemCount(); ++i) {
+         names[i] = (String)component.getItemAt(i);
+      }
+      return names;
+   }
+   
    private String[] getHmeDestinations(String tivoName) {
       Remote r = new Remote(tivoName);
       if (r.success) {
@@ -1667,7 +1675,36 @@ public class remotegui {
       } catch (JSONException e) {
          log.error("putChannelData - " + e.getMessage());
       }
-   }   
+   }  
+   
+   public void TagPremieresWithSeasonPasses(JSONArray data) {
+      String[] tivoNames = getTivoNames(tivo_premiere);
+      for (int t=0; t<tivoNames.length; ++t) {
+         Remote r = new Remote(tivoNames[t]);
+         if (r.success) {
+            JSONArray existing = r.SeasonPasses(null);
+            if (existing != null) {
+               // Add special json entry to mark entries that already have season passes
+               String sp_title, entry_title;
+               try {
+                  for (int i=0; i<existing.length(); ++i) {
+                     sp_title = existing.getJSONObject(i).getString("title");
+                     for (int j=0; j<data.length(); ++j) {
+                        entry_title = data.getJSONObject(j).getString("title");
+                        if (sp_title.equals(entry_title)) {
+                           // Add flag to JSON object indicating it's already a scheduled SP on this TiVo
+                           data.getJSONObject(j).put("__SPscheduled__", true);
+                        }
+                     }
+                  }
+               } catch (JSONException e1) {
+                  log.error("RC keyPressed - " + e1.getMessage());
+               }
+            }
+            r.disconnect();
+         }
+      }
+   }
    
    private static ImageIcon scale(Container dialog, Image src, double scale) {
       int w = (int)(scale*src.getWidth(dialog));
