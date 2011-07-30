@@ -787,6 +787,9 @@ public class Remote {
          }
          if (data.length() == 0) {
             log.warn("No show premieres found.");
+         } else {
+            // Tag json entries in data that already have Season Passes scheduled
+            config.gui.remote_gui.TagPremieresWithSeasonPasses(data);
          }
       } catch (JSONException e) {
          error("SeasonPremieres - " + e.getMessage());
