@@ -1415,6 +1415,17 @@ public class gui {
                ofp.write("<x_remote>\n"         + p.x                        + "\n");
                ofp.write("<y_remote>\n"         + p.y                        + "\n");
                ofp.write("<tab_remote>\n"       + tabIndex_r                 + "\n");
+            } else if (remote_gui_dimensions.size() > 0) {
+               if (remote_gui_dimensions.containsKey("width"))
+                  ofp.write("<width_remote>\n"     + remote_gui_dimensions.get("width")  + "\n");
+               if (remote_gui_dimensions.containsKey("height"))
+                  ofp.write("<height_remote>\n"    + remote_gui_dimensions.get("height") + "\n");
+               if (remote_gui_dimensions.containsKey("x"))
+                  ofp.write("<x_remote>\n"         + remote_gui_dimensions.get("x")      + "\n");
+               if (remote_gui_dimensions.containsKey("y"))
+                  ofp.write("<y_remote>\n"         + remote_gui_dimensions.get("y")      + "\n");
+               if (remote_gui_dimensions.containsKey("tab"))
+                  ofp.write("<tab_remote>\n"       + remote_gui_dimensions.get("tab")    + "\n");               
             }
             ofp.write("<tab>\n"                 + tabName                    + "\n");
             
