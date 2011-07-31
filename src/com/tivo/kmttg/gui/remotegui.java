@@ -1063,8 +1063,8 @@ public class remotegui {
       jobMonitor.submitNewJob(job);
    }
    
-   public Boolean RC_jumptoCB(final String tivoName, final Integer mins) {
-      class backgroundRun extends SwingWorker<Boolean, Object> {
+   public void RC_jumptoCB(final String tivoName, final Integer mins) {
+      class backgroundRun extends SwingWorker<Object, Object> {
          protected Boolean doInBackground() {
             Remote r = new Remote(tivoName);
             if (r.success) {
@@ -1073,27 +1073,20 @@ public class remotegui {
                   Long pos = (long)60000*mins;
                   json.put("offset", pos);
                   r.Command("jump", json);
-                  r.disconnect();
                } catch (JSONException e) {
                   log.error("RC_jumptoCB failed - " + e.getMessage());
-                  return false;
                }
+               r.disconnect();
             }
-            return true;
+            return null;
          }
       }
       backgroundRun b = new backgroundRun();
       b.execute();
-      try {
-         return b.get();
-      } catch (Exception e) {
-         log.error("RC_jumptoCB - " + e.getMessage());
-         return false;
-      }
    }
    
-   public Boolean RC_jumpaheadCB(final String tivoName, final Integer mins) {
-      class backgroundRun extends SwingWorker<Boolean, Object> {
+   public void RC_jumpaheadCB(final String tivoName, final Integer mins) {
+      class backgroundRun extends SwingWorker<Object, Object> {
          protected Boolean doInBackground() {
             Remote r = new Remote(tivoName);
             if (r.success) {
@@ -1105,28 +1098,21 @@ public class remotegui {
                      pos += (long)60000*mins;
                      json.put("offset", pos);
                      r.Command("jump", json);
-                     r.disconnect();
                   } catch (JSONException e) {
                      log.error("RC_jumpaheadCB failed - " + e.getMessage());
-                     return false;
                   }
                }
+               r.disconnect();
             }
-            return true;
+            return null;
          }
       }
       backgroundRun b = new backgroundRun();
       b.execute();
-      try {
-         return b.get();
-      } catch (Exception e) {
-         log.error("RC_jumpaheadCB - " + e.getMessage());
-         return false;
-      }
    }
    
-   public Boolean RC_jumpbackCB(final String tivoName, final Integer mins) {
-      class backgroundRun extends SwingWorker<Boolean, Object> {
+   public void RC_jumpbackCB(final String tivoName, final Integer mins) {
+      class backgroundRun extends SwingWorker<Object, Object> {
          protected Boolean doInBackground() {
             Remote r = new Remote(tivoName);
             if (r.success) {
@@ -1140,24 +1126,17 @@ public class remotegui {
                         pos = (long)0;
                      json.put("offset", pos);
                      r.Command("jump", json);
-                     r.disconnect();
                   } catch (JSONException e) {
                      log.error("RC_jumpbackCB failed - " + e.getMessage());
-                     return false;
                   }
                }
+               r.disconnect();
             }
-            return true;
+            return null;
          }
       }
       backgroundRun b = new backgroundRun();
       b.execute();
-      try {
-         return b.get();
-      } catch (Exception e) {
-         log.error("RC_jumpbackCB - " + e.getMessage());
-         return false;
-      }   
    }
    
    // Submit remote Not Record request to Job Monitor
@@ -1231,8 +1210,8 @@ public class remotegui {
       }
    }
    
-   private Boolean RC_infoCB(final String tivoName) {
-      class backgroundRun extends SwingWorker<Boolean, Object> {
+   private void RC_infoCB(final String tivoName) {
+      class backgroundRun extends SwingWorker<Object, Object> {
          protected Boolean doInBackground() {
             Remote r = new Remote(tivoName);
             if (r.success) {
@@ -1273,7 +1252,6 @@ public class remotegui {
                            info += "\n";
                         }
                      }
-                     r.disconnect();
                      
                      // Add info to text_info widget
                      text_info.setEditable(true);
@@ -1283,21 +1261,15 @@ public class remotegui {
 
                   } catch (JSONException e) {
                      log.error("RC_infoCB failed - " + e.getMessage());
-                     return false;
                   }
                }
+               r.disconnect();
             }
-            return true;
+            return null;
          }
       }
       backgroundRun b = new backgroundRun();
       b.execute();
-      try {
-         return b.get();
-      } catch (Exception e) {
-         log.error("RC_jumpbackCB - " + e.getMessage());
-         return false;
-      }
    }
    
    private void SPListSave(String tivoName, String file) {
