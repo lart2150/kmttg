@@ -107,6 +107,13 @@ public class remotegui {
       }
        
       public void actionPerformed(ActionEvent e) {
+         // Don't execute panel event if focus is in one of the text widgets
+         if (rc_jumpto_text.isFocusOwner())
+            return;
+         if (rc_jumpahead_text.isFocusOwner())
+            return;
+         if (rc_jumpback_text.isFocusOwner())
+            return;
          if (button != null)
             button.doClick();
          else
@@ -683,19 +690,26 @@ public class remotegui {
             b.setBounds(x+insets.left, y+insets.top, size.width-cropx, size.height-cropy);
             b.addActionListener(new java.awt.event.ActionListener() {
                public void actionPerformed(java.awt.event.ActionEvent e) {
-                  String tivoName = (String)tivo_rc.getSelectedItem();
+                  final String tivoName = (String)tivo_rc.getSelectedItem();
                   if (tivoName != null && tivoName.length() > 0) {
-                     Remote r = new Remote(tivoName);
-                     if (r.success) {
-                        try {
-                           JSONObject json = new JSONObject();
-                           json.put("event", event);
-                           r.Command("keyEventSend", json);
-                        } catch (JSONException e1) {
-                           log.error("RC - " + e1.getMessage());
+                     class backgroundRun extends SwingWorker<Object, Object> {
+                        protected Object doInBackground() {
+                           Remote r = new Remote(tivoName);
+                           if (r.success) {
+                              try {
+                                 JSONObject json = new JSONObject();
+                                 json.put("event", event);
+                                 r.Command("keyEventSend", json);
+                              } catch (JSONException e1) {
+                                 log.error("RC - " + e1.getMessage());
+                              }
+                              r.disconnect();
+                           }
+                           return null;
                         }
-                        r.disconnect();
                      }
+                     backgroundRun b = new backgroundRun();
+                     b.execute();
                   }
                }
             });
@@ -780,19 +794,26 @@ public class remotegui {
       rc_hme_button.setToolTipText(getToolTip("rc_hme_button"));
       rc_hme_button.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            String name = (String)hme_rc.getSelectedItem();
+            final String name = (String)hme_rc.getSelectedItem();
             if (name != null && name.length() > 0) {
-               Remote r = new Remote(getTivoName("rc"));
-               if (r.success) {
-                  try {
-                     JSONObject json = new JSONObject();
-                     json.put("uri", hme.get(name));
-                     r.Command("navigate", json);
-                  } catch (JSONException e1) {
-                     log.error("HME Jump - " + e1.getMessage());
+               class backgroundRun extends SwingWorker<Object, Object> {
+                  protected Object doInBackground() {
+                     Remote r = new Remote(getTivoName("rc"));
+                     if (r.success) {
+                        try {
+                           JSONObject json = new JSONObject();
+                           json.put("uri", hme.get(name));
+                           r.Command("navigate", json);
+                        } catch (JSONException e1) {
+                           log.error("HME Jump - " + e1.getMessage());
+                        }
+                        r.disconnect();
+                     }
+                     return null;
                   }
-                  r.disconnect();
                }
+               backgroundRun b = new backgroundRun();
+               b.execute();
             }
          }
       });
@@ -1042,65 +1063,101 @@ public class remotegui {
       jobMonitor.submitNewJob(job);
    }
    
-   public Boolean RC_jumptoCB(String tivoName, Integer mins) {
-      Remote r = new Remote(tivoName);
-      if (r.success) {
-         JSONObject json = new JSONObject();
-         try {
-            Long pos = (long)60000*mins;
-            json.put("offset", pos);
-            r.Command("jump", json);
-            r.disconnect();
-         } catch (JSONException e) {
-            log.error("RC_jumptoCB failed - " + e.getMessage());
-            return false;
+   public Boolean RC_jumptoCB(final String tivoName, final Integer mins) {
+      class backgroundRun extends SwingWorker<Boolean, Object> {
+         protected Boolean doInBackground() {
+            Remote r = new Remote(tivoName);
+            if (r.success) {
+               JSONObject json = new JSONObject();
+               try {
+                  Long pos = (long)60000*mins;
+                  json.put("offset", pos);
+                  r.Command("jump", json);
+                  r.disconnect();
+               } catch (JSONException e) {
+                  log.error("RC_jumptoCB failed - " + e.getMessage());
+                  return false;
+               }
+            }
+            return true;
          }
       }
-      return true;
+      backgroundRun b = new backgroundRun();
+      b.execute();
+      try {
+         return b.get();
+      } catch (Exception e) {
+         log.error("RC_jumptoCB - " + e.getMessage());
+         return false;
+      }
    }
    
-   public Boolean RC_jumpaheadCB(String tivoName, Integer mins) {
-      Remote r = new Remote(tivoName);
-      if (r.success) {
-         JSONObject json = new JSONObject();
-         JSONObject reply = r.Command("position", json);
-         if (reply != null && reply.has("position")) {
-            try {
-               Long pos = reply.getLong("position");
-               pos += (long)60000*mins;
-               json.put("offset", pos);
-               r.Command("jump", json);
-               r.disconnect();
-            } catch (JSONException e) {
-               log.error("RC_jumptoCB failed - " + e.getMessage());
-               return false;
+   public Boolean RC_jumpaheadCB(final String tivoName, final Integer mins) {
+      class backgroundRun extends SwingWorker<Boolean, Object> {
+         protected Boolean doInBackground() {
+            Remote r = new Remote(tivoName);
+            if (r.success) {
+               JSONObject json = new JSONObject();
+               JSONObject reply = r.Command("position", json);
+               if (reply != null && reply.has("position")) {
+                  try {
+                     Long pos = reply.getLong("position");
+                     pos += (long)60000*mins;
+                     json.put("offset", pos);
+                     r.Command("jump", json);
+                     r.disconnect();
+                  } catch (JSONException e) {
+                     log.error("RC_jumpaheadCB failed - " + e.getMessage());
+                     return false;
+                  }
+               }
             }
+            return true;
          }
       }
-      return true;
+      backgroundRun b = new backgroundRun();
+      b.execute();
+      try {
+         return b.get();
+      } catch (Exception e) {
+         log.error("RC_jumpaheadCB - " + e.getMessage());
+         return false;
+      }
    }
    
-   public Boolean RC_jumpbackCB(String tivoName, Integer mins) {
-      Remote r = new Remote(tivoName);
-      if (r.success) {
-         JSONObject json = new JSONObject();
-         JSONObject reply = r.Command("position", json);
-         if (reply != null && reply.has("position")) {
-            try {
-               Long pos = reply.getLong("position");
-               pos -= (long)60000*mins;
-               if (pos < 0)
-                  pos = (long)0;
-               json.put("offset", pos);
-               r.Command("jump", json);
-               r.disconnect();
-            } catch (JSONException e) {
-               log.error("RC_jumptoCB failed - " + e.getMessage());
-               return false;
+   public Boolean RC_jumpbackCB(final String tivoName, final Integer mins) {
+      class backgroundRun extends SwingWorker<Boolean, Object> {
+         protected Boolean doInBackground() {
+            Remote r = new Remote(tivoName);
+            if (r.success) {
+               JSONObject json = new JSONObject();
+               JSONObject reply = r.Command("position", json);
+               if (reply != null && reply.has("position")) {
+                  try {
+                     Long pos = reply.getLong("position");
+                     pos -= (long)60000*mins;
+                     if (pos < 0)
+                        pos = (long)0;
+                     json.put("offset", pos);
+                     r.Command("jump", json);
+                     r.disconnect();
+                  } catch (JSONException e) {
+                     log.error("RC_jumpbackCB failed - " + e.getMessage());
+                     return false;
+                  }
+               }
             }
+            return true;
          }
       }
-      return true;
+      backgroundRun b = new backgroundRun();
+      b.execute();
+      try {
+         return b.get();
+      } catch (Exception e) {
+         log.error("RC_jumpbackCB - " + e.getMessage());
+         return false;
+      }   
    }
    
    // Submit remote Not Record request to Job Monitor
@@ -1129,100 +1186,118 @@ public class remotegui {
    }
    
    // Schedule to record selected entries in tab_cancel.TABLE
-   private void record_cancelCB(String tivoName) {
-      int[] selected = tab_cancel.GetSelectedRows();
+   private void record_cancelCB(final String tivoName) {
+      final int[] selected = tab_cancel.GetSelectedRows();
       if (selected.length > 0) {
-         try {
-            log.print("Scheduling individual recordings on TiVo: " + tivoName);
-            int row;
-            String title;
-            JSONObject json;
-            Remote r = new Remote(tivoName);
-            if (r.success) {
-               for (int i=0; i<selected.length; ++i) {
-                  row = selected[i];
-                  json = tab_cancel.GetRowData(row);
-                  title = tab_cancel.GetRowTitle(row);
-                  if (json != null) {
-                     JSONObject o = new JSONObject();
-                     if (json.has("contentId") && json.has("offerId")) {
-                        o.put("contentId", json.getString("contentId"));
-                        o.put("offerId", json.getString("offerId"));
-                        json = r.Command("singlerecording", o);
-                        if (json == null) {
-                           log.error("Failed to schedule recording for: '" + title + "'");
-                        } else {
-                           log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
+         log.print("Scheduling individual recordings on TiVo: " + tivoName);
+         class backgroundRun extends SwingWorker<Object, Object> {
+            protected Object doInBackground() {
+               int row;
+               JSONObject json;
+               String title;
+               Remote r = new Remote(tivoName);
+               if (r.success) {
+                  try {
+                     for (int i=0; i<selected.length; ++i) {
+                        row = selected[i];
+                        json = tab_cancel.GetRowData(row);
+                        title = tab_cancel.GetRowTitle(row);
+                        if (json != null) {
+                           JSONObject o = new JSONObject();
+                           if (json.has("contentId") && json.has("offerId")) {
+                              o.put("contentId", json.getString("contentId"));
+                              o.put("offerId", json.getString("offerId"));
+                              json = r.Command("singlerecording", o);
+                              if (json == null) {
+                                 log.error("Failed to schedule recording for: '" + title + "'");
+                              } else {
+                                 log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
+                              }
+                           } else {
+                              log.error("Missing contentId and/or offerId for: '" + title + "'");
+                           }
                         }
-                     } else {
-                        log.error("Missing contentId and/or offerId for: '" + title + "'");
                      }
+                  } catch (JSONException e) {
+                     log.error("record_cancelCB failed - " + e.getMessage());
                   }
+                  r.disconnect();
                }
-               r.disconnect();
+               return null;
             }
-         } catch (JSONException e) {
-            log.error("record_cancelCB failed - " + e.getMessage());
-            return;
          }
+         backgroundRun b = new backgroundRun();
+         b.execute();
       }
    }
    
-   private Boolean RC_infoCB(String tivoName) {
-      Remote r = new Remote(tivoName);
-      if (r.success) {
-         JSONObject json = new JSONObject();
-         JSONObject reply = r.Command("sysInfo", json);
-         if (reply != null && reply.has("bodyConfig")) {
-            try {
-               String info = "";
-               // System info
-               json = reply.getJSONArray("bodyConfig").getJSONObject(0);
-               if (json.has("userDiskSize") && json.has("userDiskUsed")) {
-                  Float sizeGB = (float)json.getLong("userDiskSize")/(1024*1024);
-                  Float pct = (float)100*json.getLong("userDiskUsed")/json.getLong("userDiskSize");
-                  String pct_string = String.format("%s (%5.2f%%)", json.get("userDiskUsed"), pct);
-                  String size_string = String.format("%s (%5.2f GB)", json.get("userDiskSize"), sizeGB);
-                  json.put("userDiskSize", size_string);
-                  json.put("userDiskUsed", pct_string);
-               }
-               String[] fields = {
-                  "softwareVersion", "userDiskSize", "userDiskUsed", "parentalControlsState"
-               };
-               for (int i=0; i<fields.length; ++i) {
-                  if (json.has(fields[i]))
-                     info += String.format("%s\t%s\n", fields[i], json.get(fields[i]));
-               }
-               info += "\n";
-               
-               // Tuner info
-               reply = r.Command("tunerInfo", new JSONObject());
-               if (reply != null && reply.has("state")) {
-                  for (int i=0; i<reply.getJSONArray("state").length(); ++i) {
-                     json = reply.getJSONArray("state").getJSONObject(i);
-                     info += String.format("tunerId\t\t%s\n", json.getString("tunerId"));
-                     info += String.format("channelNumber\t%s (%s)\n",
-                        json.getJSONObject("channel").getString("channelNumber"),
-                        json.getJSONObject("channel").getString("callSign")
-                     );
+   private Boolean RC_infoCB(final String tivoName) {
+      class backgroundRun extends SwingWorker<Boolean, Object> {
+         protected Boolean doInBackground() {
+            Remote r = new Remote(tivoName);
+            if (r.success) {
+               JSONObject json = new JSONObject();
+               JSONObject reply = r.Command("sysInfo", json);
+               if (reply != null && reply.has("bodyConfig")) {
+                  try {
+                     String info = "";
+                     // System info
+                     json = reply.getJSONArray("bodyConfig").getJSONObject(0);
+                     if (json.has("userDiskSize") && json.has("userDiskUsed")) {
+                        Float sizeGB = (float)json.getLong("userDiskSize")/(1024*1024);
+                        Float pct = (float)100*json.getLong("userDiskUsed")/json.getLong("userDiskSize");
+                        String pct_string = String.format("%s (%5.2f%%)", json.get("userDiskUsed"), pct);
+                        String size_string = String.format("%s (%5.2f GB)", json.get("userDiskSize"), sizeGB);
+                        json.put("userDiskSize", size_string);
+                        json.put("userDiskUsed", pct_string);
+                     }
+                     String[] fields = {
+                        "softwareVersion", "userDiskSize", "userDiskUsed", "parentalControlsState"
+                     };
+                     for (int i=0; i<fields.length; ++i) {
+                        if (json.has(fields[i]))
+                           info += String.format("%s\t%s\n", fields[i], json.get(fields[i]));
+                     }
                      info += "\n";
+                     
+                     // Tuner info
+                     reply = r.Command("tunerInfo", new JSONObject());
+                     if (reply != null && reply.has("state")) {
+                        for (int i=0; i<reply.getJSONArray("state").length(); ++i) {
+                           json = reply.getJSONArray("state").getJSONObject(i);
+                           info += String.format("tunerId\t\t%s\n", json.getString("tunerId"));
+                           info += String.format("channelNumber\t%s (%s)\n",
+                              json.getJSONObject("channel").getString("channelNumber"),
+                              json.getJSONObject("channel").getString("callSign")
+                           );
+                           info += "\n";
+                        }
+                     }
+                     r.disconnect();
+                     
+                     // Add info to text_info widget
+                     text_info.setEditable(true);
+                     text_info.setText(info);
+                     text_info.setEditable(false);
+                     tivo_info_data.put(tivoName, info);
+
+                  } catch (JSONException e) {
+                     log.error("RC_infoCB failed - " + e.getMessage());
+                     return false;
                   }
                }
-               r.disconnect();
-               
-               // Add info to text_info widget
-               text_info.setEditable(true);
-               text_info.setText(info);
-               text_info.setEditable(false);
-               tivo_info_data.put(tivoName, info);
-
-            } catch (JSONException e) {
-               log.error("RC_infoCB failed - " + e.getMessage());
-               return false;
             }
+            return true;
          }
       }
-      return true;
+      backgroundRun b = new backgroundRun();
+      b.execute();
+      try {
+         return b.get();
+      } catch (Exception e) {
+         log.error("RC_jumpbackCB - " + e.getMessage());
+         return false;
+      }
    }
    
    private void SPListSave(String tivoName, String file) {
@@ -1244,52 +1319,60 @@ public class remotegui {
       }
    }
    
-   private void SPListCopy(String tivoName) {
-      //SeasonPasses
-      int[] selected = tab_sp.GetSelectedRows();
-      if (selected.length > 0) {
-         int row;
-         JSONArray existing;
-         JSONObject json, result;
-         Remote r = new Remote(tivoName);
-         if (r.success) {
-            // First load existing SPs from tivoName to check against
-            existing = r.SeasonPasses(null);
-            if (existing == null) {
-               log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
-               return;
-            }
-            // Now proceed with subscriptions
-            log.print("Copying Season Passes to TiVo: " + tivoName);
-            for (int i=0; i<selected.length; ++i) {
-               row = selected[i];
-               json = tab_sp.GetRowData(row);
-               if (json != null) {
-                  try {
-                     // Check against existing
-                     Boolean schedule = true;
-                     for (int j=0; j<existing.length(); ++j) {
-                        if(json.getString("title").equals(existing.getJSONObject(j).getString("title")))
-                           schedule = false;
-                     }
-                     
-                     // OK to subscribe
-                     if (schedule) {
-                        log.print("Scheduling: " + json.getString("title"));
-                        result = r.Command("seasonpass", json);
-                        if (result != null)
-                           log.print("success");
-                     } else {
-                        log.warn("Existing SP with same title found, not scheduling: " + json.getString("title"));
-                     }
-                  } catch (JSONException e) {
-                     log.error("SPListCopy - " + e.getMessage());
+   private void SPListCopy(final String tivoName) {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            //SeasonPasses
+            int[] selected = tab_sp.GetSelectedRows();
+            if (selected.length > 0) {
+               int row;
+               JSONArray existing;
+               JSONObject json, result;
+               Remote r = new Remote(tivoName);
+               if (r.success) {
+                  // First load existing SPs from tivoName to check against
+                  existing = r.SeasonPasses(null);
+                  if (existing == null) {
+                     log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
+                     r.disconnect();
+                     return null;
                   }
+                  // Now proceed with subscriptions
+                  log.print("Copying Season Passes to TiVo: " + tivoName);
+                  for (int i=0; i<selected.length; ++i) {
+                     row = selected[i];
+                     json = tab_sp.GetRowData(row);
+                     if (json != null) {
+                        try {
+                           // Check against existing
+                           Boolean schedule = true;
+                           for (int j=0; j<existing.length(); ++j) {
+                              if(json.getString("title").equals(existing.getJSONObject(j).getString("title")))
+                                 schedule = false;
+                           }
+                           
+                           // OK to subscribe
+                           if (schedule) {
+                              log.print("Scheduling: " + json.getString("title"));
+                              result = r.Command("seasonpass", json);
+                              if (result != null)
+                                 log.print("success");
+                           } else {
+                              log.warn("Existing SP with same title found, not scheduling: " + json.getString("title"));
+                           }
+                        } catch (JSONException e) {
+                           log.error("SPListCopy - " + e.getMessage());
+                        }
+                     }
+                  }
+                  r.disconnect();
                }
             }
-            r.disconnect();
+            return null;
          }
       }
+      backgroundRun b = new backgroundRun();
+      b.execute();
    }
    
    // Update SP priority order to match current SP table
@@ -1356,62 +1439,70 @@ public class remotegui {
    }
    
    // Schedule to record selected entries in tab_premiere.TABLE
-   private void record_premiereCB(String tivoName) {
-      int[] selected = tab_premiere.GetSelectedRows();
-      if (selected.length > 0) {
-         int row;
-         JSONArray existing;
-         JSONObject json, result;
-         Remote r = new Remote(tivoName);
-         if (r.success) {
-            // First load existing SPs from tivoName to check against
-            existing = r.SeasonPasses(null);
-            if (existing == null) {
-               log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
-               return;
-            }
-            // Now proceed with subscriptions
-            log.print("Scheduling Season Passes on TiVo: " + tivoName);
-            for (int i=0; i<selected.length; ++i) {
-               row = selected[i];
-               json = tab_premiere.GetRowData(row);
-               if (json != null) {
-                  try {
-                     // Check against existing
-                     Boolean schedule = true;
-                     for (int j=0; j<existing.length(); ++j) {
-                        if(json.getString("title").equals(existing.getJSONObject(j).getString("title")))
-                           schedule = false;
-                     }
-                     
-                     // OK to subscribe
-                     if (schedule) {
-                        log.print("Scheduling: " + json.getString("title"));
-                        JSONObject o = new JSONObject();
-                        JSONObject idSetSource = new JSONObject();
-                        o.put("recordingQuality", "best");
-                        o.put("maxRecordings", 25);
-                        o.put("keepBehavior", "fifo");
-                        o.put("showStatus", "firstRunOnly");
-                        idSetSource.put("collectionId", json.getString("collectionId"));
-                        idSetSource.put("type", "seasonPassSource");
-                        idSetSource.put("channel", json.getJSONObject("channel"));
-                        o.put("idSetSource", idSetSource);
-
-                        result = r.Command("seasonpass", o);
-                        if (result != null)
-                           log.print("success");
-                     } else {
-                        log.warn("Existing SP with same title found, not scheduling: " + json.getString("title"));
-                     }
-                  } catch (JSONException e) {
-                     log.error("record_premiereCB - " + e.getMessage());
+   private void record_premiereCB(final String tivoName) {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            int[] selected = tab_premiere.GetSelectedRows();
+            if (selected.length > 0) {
+               int row;
+               JSONArray existing;
+               JSONObject json, result;
+               Remote r = new Remote(tivoName);
+               if (r.success) {
+                  // First load existing SPs from tivoName to check against
+                  existing = r.SeasonPasses(null);
+                  if (existing == null) {
+                     log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
+                     r.disconnect();
+                     return null;
                   }
+                  // Now proceed with subscriptions
+                  log.print("Scheduling Season Passes on TiVo: " + tivoName);
+                  for (int i=0; i<selected.length; ++i) {
+                     row = selected[i];
+                     json = tab_premiere.GetRowData(row);
+                     if (json != null) {
+                        try {
+                           // Check against existing
+                           Boolean schedule = true;
+                           for (int j=0; j<existing.length(); ++j) {
+                              if(json.getString("title").equals(existing.getJSONObject(j).getString("title")))
+                                 schedule = false;
+                           }
+                           
+                           // OK to subscribe
+                           if (schedule) {
+                              log.print("Scheduling: " + json.getString("title"));
+                              JSONObject o = new JSONObject();
+                              JSONObject idSetSource = new JSONObject();
+                              o.put("recordingQuality", "best");
+                              o.put("maxRecordings", 25);
+                              o.put("keepBehavior", "fifo");
+                              o.put("showStatus", "firstRunOnly");
+                              idSetSource.put("collectionId", json.getString("collectionId"));
+                              idSetSource.put("type", "seasonPassSource");
+                              idSetSource.put("channel", json.getJSONObject("channel"));
+                              o.put("idSetSource", idSetSource);
+
+                              result = r.Command("seasonpass", o);
+                              if (result != null)
+                                 log.print("success");
+                           } else {
+                              log.warn("Existing SP with same title found, not scheduling: " + json.getString("title"));
+                           }
+                        } catch (JSONException e) {
+                           log.error("record_premiereCB - " + e.getMessage());
+                        }
+                     }
+                  }
+                  r.disconnect();
                }
             }
-            r.disconnect();
+            return null;
          }
       }
+      backgroundRun b = new backgroundRun();
+      b.execute();
    }
             
    public void display() {
@@ -1486,6 +1577,7 @@ public class remotegui {
       return names;
    }
    
+   // NOTE: This already called in swing worker, so no need to background
    private String[] getHmeDestinations(String tivoName) {
       Remote r = new Remote(tivoName);
       if (r.success) {
@@ -1681,6 +1773,7 @@ public class remotegui {
       }
    }  
    
+   // NOTE: This called as part of a background job
    public void TagPremieresWithSeasonPasses(JSONArray data) {
       String[] tivoNames = getTivoNames(tivo_premiere);
       for (int t=0; t<tivoNames.length; ++t) {
@@ -1767,28 +1860,35 @@ public class remotegui {
    private void setMacroCB(JButton b, final String[] sequence) {
       b.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            String tivoName = (String)tivo_rc.getSelectedItem();
+            final String tivoName = (String)tivo_rc.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               Remote r = new Remote(tivoName);
-               if (r.success) {
-                  try {
-                     JSONObject result;
-                     for (int i=0; i<sequence.length; ++i) {
-                        JSONObject json = new JSONObject();
-                        if (sequence[i].matches("^[0-9]")) {
-                           json.put("event", "ascii");
-                           json.put("value", sequence[i].toCharArray()[0]);
-                        } else {
-                           json.put("event", sequence[i]);
+               class backgroundRun extends SwingWorker<Object, Object> {
+                  protected Object doInBackground() {
+                     Remote r = new Remote(tivoName);
+                     if (r.success) {
+                        try {
+                           JSONObject result;
+                           for (int i=0; i<sequence.length; ++i) {
+                              JSONObject json = new JSONObject();
+                              if (sequence[i].matches("^[0-9]")) {
+                                 json.put("event", "ascii");
+                                 json.put("value", sequence[i].toCharArray()[0]);
+                              } else {
+                                 json.put("event", sequence[i]);
+                              }
+                              result = r.Command("keyEventSend", json);
+                              if (result == null) break;
+                           }
+                        } catch (JSONException e1) {
+                           log.error("Macro CB - " + e1.getMessage());
                         }
-                        result = r.Command("keyEventSend", json);
-                        if (result == null) break;
+                        r.disconnect();
                      }
-                  } catch (JSONException e1) {
-                     log.error("Macro CB - " + e1.getMessage());
+                     return null;
                   }
-                  r.disconnect();
                }
+               backgroundRun b = new backgroundRun();
+               b.execute();
             }
          }
       });
@@ -1807,27 +1907,34 @@ public class remotegui {
    }
    
    // This handles key presses in RC panel not bound to buttons
-   private void RC_keyPress(Boolean isAscii, String command) {
-      String tivoName = (String)tivo_rc.getSelectedItem();
-      if (tivoName != null && tivoName.length() > 0) {
-         Remote r = new Remote(tivoName);
-         if (r.success) {
-            try {
-               JSONObject json = new JSONObject();
-               if (isAscii) {
-                  json.put("event", "ascii");
-                  json.put("value", command.toCharArray()[0]);
+   private void RC_keyPress(final Boolean isAscii, final String command) {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            String tivoName = (String)tivo_rc.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               Remote r = new Remote(tivoName);
+               if (r.success) {
+                  try {
+                     JSONObject json = new JSONObject();
+                     if (isAscii) {
+                        json.put("event", "ascii");
+                        json.put("value", command.toCharArray()[0]);
+                     }
+                     else {
+                        json.put("event", command);
+                     }
+                     r.Command("keyEventSend", json);
+                  } catch (JSONException e1) {
+                     log.error("RC keyPressed - " + e1.getMessage());
+                  }
+                  r.disconnect();
                }
-               else {
-                  json.put("event", command);
-               }
-               r.Command("keyEventSend", json);
-            } catch (JSONException e1) {
-               log.error("RC keyPressed - " + e1.getMessage());
             }
-            r.disconnect();
+            return null;
          }
       }
+      backgroundRun b = new backgroundRun();
+      b.execute();
    }
    
    public Dimension getDimension() {
