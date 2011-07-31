@@ -60,7 +60,7 @@ import com.tivo.kmttg.util.string;
 
 public class remotegui {
    private JFrame dialog = null;
-   private JTabbedPane tabbed_panel = null;
+   public JTabbedPane tabbed_panel = null;
    public int tivo_count = 0;
    
    private todoTable tab_todo = null;
@@ -979,6 +979,9 @@ public class remotegui {
             dialog.setSize(new Dimension(width,height));
          if (x != -1 && y != -1)
             dialog.setLocation(new Point(x,y));
+         if (config.gui.remote_gui_dimensions.containsKey("tab")) {
+            tabbed_panel.setSelectedIndex(config.gui.remote_gui_dimensions.get("tab"));
+         }
       }
       dialog.setVisible(true);      
    }
