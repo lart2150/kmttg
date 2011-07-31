@@ -1407,12 +1407,14 @@ public class gui {
             ofp.write("<centerDivider>\n"       + centerDivider              + "\n");
             ofp.write("<bottomDivider>\n"       + bottomDivider              + "\n");
             if (remote_gui != null) {
+               int tabIndex_r = remote_gui.tabbed_panel.getSelectedIndex();
                d = remote_gui.getDimension();
                p = remote_gui.getLocation();
                ofp.write("<width_remote>\n"     + d.width                    + "\n");
                ofp.write("<height_remote>\n"    + d.height                   + "\n");
                ofp.write("<x_remote>\n"         + p.x                        + "\n");
                ofp.write("<y_remote>\n"         + p.y                        + "\n");
+               ofp.write("<tab_remote>\n"       + tabIndex_r                 + "\n");
             }
             ofp.write("<tab>\n"                 + tabName                    + "\n");
             
@@ -1647,6 +1649,14 @@ public class gui {
                   value = -1;
                }
                remote_gui_dimensions.put("y", value);
+            }
+            if (key.equals("tab_remote")) {
+               try {
+                  value = Integer.parseInt(line);
+               } catch (NumberFormatException e) {
+                  value = 0;
+               }
+               remote_gui_dimensions.put("tab", value);
             }
             if (key.equals("centerDivider")) {
                try {
