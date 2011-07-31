@@ -42,7 +42,6 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -1515,15 +1514,17 @@ public class remotegui {
    
    public void setHmeDestinations(final String tivoName) {
       // NOTE: Run in background mode so as not to slow down remotegui display
-      Runnable r = new Runnable() {
-         public void run() {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
             String[] hmeNames = getHmeDestinations(tivoName);
             hme_rc.removeAllItems();
             for (int i=0; i<hmeNames.length; ++i)
                hme_rc.addItem(hmeNames[i]);
+            return null;
          }
-     };
-     SwingUtilities.invokeLater(r);
+      }
+      backgroundRun b = new backgroundRun();
+      b.execute();
    }
    
    // Write channel info to a file
