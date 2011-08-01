@@ -13,8 +13,7 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jdesktop.swingx.util.SwingWorker;
-
+import com.tivo.kmttg.gui.SwingWorker;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
