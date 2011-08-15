@@ -54,13 +54,6 @@ public class NowPlaying implements Serializable {
       job.ip                 = ip;
       jobMonitor.submitNewJob(job);
       limit_npl_fetches = config.getLimitNplSetting(tivoName);
-      
-      if (config.getRpcSetting(job.tivoName).equals("1")) {
-         // Extra iPad communication to retrieve NPL information
-         // used to be able to play/delete shows. Only works for Premiere or
-         // later models.
-         rnpl.rnplListCB(job.tivoName);
-      }
       return true;      
    }
    
@@ -278,6 +271,13 @@ public class NowPlaying implements Serializable {
          }
          com.tivo.kmttg.util.file.delete(cookieFile);
          com.tivo.kmttg.util.file.delete(outputFile);
+         
+         if (config.getRpcSetting(job.tivoName).equals("1")) {
+            // Extra iPad communication to retrieve NPL information
+            // used to be able to play/delete shows. Only works for Premiere or
+            // later models.
+            rnpl.rnplListCB(job.tivoName);
+         }
          return false;
       }
    }

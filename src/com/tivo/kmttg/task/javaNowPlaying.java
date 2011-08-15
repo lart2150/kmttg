@@ -59,13 +59,6 @@ public class javaNowPlaying implements Serializable {
       job.ip                 = ip;
       jobMonitor.submitNewJob(job);
       limit_npl_fetches = config.getLimitNplSetting(tivoName);
-      
-      if (config.getRpcSetting(job.tivoName).equals("1")) {
-         // Extra iPad communication to retrieve NPL information
-         // used to be able to play/delete shows. Only works for Premiere or
-         // later models.
-         rnpl.rnplListCB(job.tivoName);
-      }
       return true;      
    }
    
@@ -192,6 +185,13 @@ public class javaNowPlaying implements Serializable {
          } else {
             log.warn("NPL job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " tivo=" + job.tivoName);
+            
+            if (config.getRpcSetting(job.tivoName).equals("1")) {
+               // Extra iPad communication to retrieve NPL information
+               // used to be able to play/delete shows. Only works for Premiere or
+               // later models.
+               rnpl.rnplListCB(job.tivoName);
+            }
             
             // Success, so parse the result
             return parseNPL(outputFile);
