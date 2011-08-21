@@ -3,6 +3,7 @@ package com.tivo.kmttg.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
@@ -433,6 +434,11 @@ public class spTable {
        return rows;
     }
     
+    public void setSelectedRow(int row) {
+       TABLE.setRowSelectionInterval(row,row);
+       TABLE.scrollRectToVisible(new Rectangle(TABLE.getCellRect(row, 0, true)));
+    }
+    
     public JSONObject GetRowData(int row) {
        sortableInt s = (sortableInt) TABLE.getValueAt(row, getColumnIndex("PRIORITY"));
        if (s != null)
@@ -524,6 +530,15 @@ public class spTable {
     // Handle keyboard presses
     private void KeyPressed(KeyEvent e) {
        int keyCode = e.getKeyCode();
+       if (keyCode == KeyEvent.VK_J) {
+          // Print json of selected row to log window
+          int[] selected = GetSelectedRows();
+          if (selected == null || selected.length < 1)
+             return;
+          JSONObject json = GetRowData(selected[0]);
+          if (json != null)
+             log.print(json.toString());
+       }
        if (keyCode == KeyEvent.VK_DELETE) {
           // Remove selected row from TiVo and table
           int[] selected = GetSelectedRows();
