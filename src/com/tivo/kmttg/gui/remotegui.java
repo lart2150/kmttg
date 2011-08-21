@@ -1391,7 +1391,7 @@ public class remotegui {
                   String title;
                   try {
                      title = json.getString("title");
-                     if (title.startsWith(" Loaded:")) {
+                     if (tab_sp.isTableLoaded()) {
                         log.error("Cannot modify SPs from loaded file.");
                         return null;
                      }
