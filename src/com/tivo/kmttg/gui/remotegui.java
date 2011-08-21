@@ -275,12 +275,17 @@ public class remotegui {
             // Save SP data to a file
             String tivoName = (String)tivo_sp.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-               Browser.setSelectedFile(new File(config.programDir + File.separator + tivoName + ".sp"));
-               int result = Browser.showDialog(dialog, "Save to file");
-               if (result == JFileChooser.APPROVE_OPTION) {               
-                  File file = Browser.getSelectedFile();
-                  SPListSave(tivoName, file.getAbsolutePath());
+               if (tab_sp.isTableLoaded()) {
+                  log.error("Cannot save loaded Season Passes");
+                  return;
+               }  else {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  Browser.setSelectedFile(new File(config.programDir + File.separator + tivoName + ".sp"));
+                  int result = Browser.showDialog(dialog, "Save to file");
+                  if (result == JFileChooser.APPROVE_OPTION) {               
+                     File file = Browser.getSelectedFile();
+                     SPListSave(tivoName, file.getAbsolutePath());
+                  }
                }
             }
          }
@@ -317,8 +322,14 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Modify selected SP
             String tivoName = (String)tivo_sp.getSelectedItem();
-            if (tivoName != null && tivoName.length() > 0)
-               SPListModify(tivoName);
+            if (tivoName != null && tivoName.length() > 0) {
+               if (tab_sp.isTableLoaded()) {
+                  log.error("Cannot modify loaded Season Passes");
+                  return;
+               }  else {
+                  SPListModify(tivoName);
+               }
+            }
          }
       });         
       
@@ -328,8 +339,14 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Re-prioritize SPs on TiVo to match current table row order
             String tivoName = (String)tivo_sp.getSelectedItem();
-            if (tivoName != null && tivoName.length() > 0)
-               SPReorderCB(tivoName);
+            if (tivoName != null && tivoName.length() > 0) {
+               if (tab_sp.isTableLoaded()) {
+                  log.error("Cannot re-order loaded Season Passes");
+                  return;
+               }  else {
+                  SPReorderCB(tivoName);
+               }
+            }
          }
       });         
       
