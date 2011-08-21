@@ -1578,6 +1578,25 @@ public class remotegui {
       }
    }
    
+   public void clearTable(String tableName) {
+      if (tableName.equals("sp")) {
+         tab_sp.TABLE.clearSelection();
+         tab_sp.clear();
+      }
+      if (tableName.equals("todo")) {
+         tab_todo.TABLE.clearSelection();
+         tab_todo.clear();
+      }
+      if (tableName.equals("cancel")) {
+         tab_cancel.TABLE.clearSelection();
+         tab_cancel.clear();
+      }
+      if (tableName.equals("premiere")) {
+         tab_premiere.TABLE.clearSelection();
+         tab_premiere.clear();
+      }
+   }
+   
    public void setTivoNames() { 
       tivo_count = 0;
       Stack<String> tivo_stack = config.getTivoNames();
