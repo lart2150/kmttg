@@ -166,6 +166,8 @@ public class spTable {
       }
 
       public boolean canImport(JComponent c, DataFlavor[] flavors) {
+        if (isTableLoaded())
+           return false;
         for (int i = 0; i < flavors.length; i++) {
           if (DataFlavor.stringFlavor.equals(flavors[i])) {
             return true;
@@ -480,6 +482,17 @@ public class spTable {
        dm.removeRow(table.convertRowIndexToModel(row));
     }
     
+    public Boolean isTableLoaded() {
+       int count = TABLE.getRowCount();
+       if (count == 0)
+          return false;
+       String title = GetRowTitle(0);
+       if (title.startsWith(" Loaded:")) {
+          return true;
+       }
+       return false;
+    }
+    
     private Boolean removeJson(String tivoName, JSONObject json) {
        Boolean removed = false;
        try {
@@ -503,8 +516,7 @@ public class spTable {
           log.error("Table is empty");
           return null;
        }
-       String title = GetRowTitle(0);
-       if (title.startsWith(" Loaded:")) {
+       if (isTableLoaded()) {
           log.error("Cannot re-order SPs from loaded file.");
           return null;
        }
@@ -561,7 +573,7 @@ public class spTable {
                 title = GetRowTitle(row);
                 if (json != null) {
                    try {
-                      if (title.startsWith(" Loaded:")) {
+                      if (isTableLoaded()) {
                          log.error("Cannot unsubscribe loaded Season Passes. Refresh list for TiVo passes");
                       } else {
                          log.warn("Deleting SP on TiVo '" + currentTivo + "': " + title);
@@ -587,6 +599,10 @@ public class spTable {
              log.error("No rows selected");
              return;
           }
+          if (isTableLoaded()) {
+             log.error("Cannot re-order loaded season passes");
+             return;
+          }
           int row;
           JSONObject json;
           try {
@@ -610,6 +626,10 @@ public class spTable {
           int[] selected = GetSelectedRows();
           if (selected == null || selected.length < 0) {
              log.error("No rows selected");
+             return;
+          }
+          if (isTableLoaded()) {
+             log.error("Cannot re-order loaded season passes");
              return;
           }
           int row;
