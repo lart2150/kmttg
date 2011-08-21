@@ -125,6 +125,12 @@ public class remote implements Serializable {
                // SP job => populate SP table
                job.sp.AddRows(job.tivoName, data);
             }
+            if (job.remote_spreorder && data != null) {
+               // Refresh SP list for TiVo SPs that were just re-ordered
+               config.gui.remote_gui.clearTable("sp");
+               config.gui.remote_gui.setTivoName("sp", job.tivoName);
+               config.gui.remote_gui.SPListCB(job.tivoName);
+            }
             if (job.remote_cancel && job.cancelled != null) {
                job.cancelled.AddRows(job.tivoName, data);
             }
