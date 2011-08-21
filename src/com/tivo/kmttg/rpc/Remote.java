@@ -395,6 +395,28 @@ public class Remote {
                o.put("idSetSource", json.getJSONObject("idSetSource"));
             if (json.has("showStatus"))
                o.put("showStatus", json.getString("showStatus"));
+            if (json.has("endTimePadding"))
+               o.put("endTimePadding", json.getInt("endTimePadding"));
+            if (json.has("startTimePadding"))
+               o.put("startTimePadding", json.getInt("startTimePadding"));
+            o.put("bodyId", "-");
+            o.put("ignoreConflicts", "true");
+            req = RpcRequest("subscribe", false, o);
+         }
+         else if (type.equals("modifySP")) {
+            // Modify a season pass
+            // Expects several fields in json, (levelOfDetail=medium)
+            // NOTE: Expects collectionId inside idSetSource
+            // NOTE: Expects subscriptionId of existing SP
+            JSONObject o = new JSONObject();
+            o.put("recordingQuality", json.getString("recordingQuality"));
+            o.put("maxRecordings", json.getInt("maxRecordings"));
+            o.put("keepBehavior", json.getString("keepBehavior"));
+            o.put("showStatus", json.getString("showStatus"));
+            o.put("endTimePadding", json.getInt("endTimePadding"));
+            o.put("startTimePadding", json.getInt("startTimePadding"));
+            o.put("idSetSource", json.getJSONObject("idSetSource"));
+            o.put("subscriptionId", json.getString("subscriptionId"));
             o.put("bodyId", "-");
             o.put("ignoreConflicts", "true");
             req = RpcRequest("subscribe", false, o);
