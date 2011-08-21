@@ -67,6 +67,7 @@ public class remotegui {
    
    private spTable tab_sp = null;
    private JComboBox tivo_sp = null;
+   private spOptions spOpt = null;
    
    private JComboBox tivo_info = null;
    JTextPane text_info = null;
@@ -299,7 +300,7 @@ public class remotegui {
          }
       });         
       
-      JButton copy_sp = new JButton("Copy to TiVo");
+      JButton copy_sp = new JButton("Copy");
       copy_sp.setToolTipText(getToolTip("copy_sp"));
       copy_sp.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -307,6 +308,17 @@ public class remotegui {
             String tivoName = (String)tivo_sp.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0)
                SPListCopy(tivoName);
+         }
+      });         
+      
+      JButton modify_sp = new JButton("Modify");
+      modify_sp.setToolTipText(getToolTip("modify_sp"));
+      modify_sp.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Modify selected SP
+            String tivoName = (String)tivo_sp.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0)
+               SPListModify(tivoName);
          }
       });         
       
@@ -335,6 +347,8 @@ public class remotegui {
       row1_sp.add(load_sp);
       row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(copy_sp);
+      row1_sp.add(Box.createRigidArea(space_5));
+      row1_sp.add(modify_sp);
       row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(reorder_sp);
       panel_sp.add(row1_sp, c);
@@ -1347,6 +1361,55 @@ public class remotegui {
       b.execute();
    }
    
+   private void SPListModify(final String tivoName) {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            int[] selected = tab_sp.GetSelectedRows();
+            if (selected.length > 0) {
+               int row = selected[0];
+               JSONObject json = tab_sp.GetRowData(row);
+               if (json != null) {
+                  if (spOpt == null)
+                     spOpt = new spOptions();
+                  String title;
+                  try {
+                     title = json.getString("title");
+                     if (title.startsWith(" Loaded:")) {
+                        log.error("Cannot modify SPs from loaded file.");
+                        return null;
+                     }
+                     JSONObject result = spOpt.promptUser("Modify SP - " + title, json);
+                     if (result != null) {
+                        Remote r = new Remote(tivoName);
+                        if (r.success) {
+                           if (r.Command("modifySP", result) != null) {
+                              log.warn("Modified SP '" + title + "' for TiVo: " + tivoName);
+                           }
+                           
+                           // Update SP table
+                           JSONArray a = r.SeasonPasses(null);
+                           if( a != null) {
+                              tab_sp.clear();
+                              tab_sp.AddRows(tivoName, a);
+                              tab_sp.setSelectedRow(row);
+                           }
+                           
+                           r.disconnect();
+                        }
+                     }
+                  } catch (JSONException e) {
+                     log.error("SPListModify error: " + e.getMessage());
+                     return null;
+                  }
+               }
+            }
+            return null;
+         }
+      }
+      backgroundRun b = new backgroundRun();
+      b.execute();
+   }
+   
    // Update SP priority order to match current SP table
    private void SPReorderCB(String tivoName) {
       JSONArray order = tab_sp.GetOrderedIds();
@@ -1429,38 +1492,37 @@ public class remotegui {
                      return null;
                   }
                   // Now proceed with subscriptions
-                  log.print("Scheduling Season Passes on TiVo: " + tivoName);
                   for (int i=0; i<selected.length; ++i) {
                      row = selected[i];
                      json = tab_premiere.GetRowData(row);
                      if (json != null) {
                         try {
+                           String title = json.getString("title");
                            // Check against existing
                            Boolean schedule = true;
                            for (int j=0; j<existing.length(); ++j) {
-                              if(json.getString("title").equals(existing.getJSONObject(j).getString("title")))
+                              if(title.equals(existing.getJSONObject(j).getString("title")))
                                  schedule = false;
                            }
                            
                            // OK to subscribe
                            if (schedule) {
-                              log.print("Scheduling: " + json.getString("title"));
-                              JSONObject o = new JSONObject();
-                              JSONObject idSetSource = new JSONObject();
-                              o.put("recordingQuality", "best");
-                              o.put("maxRecordings", 25);
-                              o.put("keepBehavior", "fifo");
-                              o.put("showStatus", "firstRunOnly");
-                              idSetSource.put("collectionId", json.getString("collectionId"));
-                              idSetSource.put("type", "seasonPassSource");
-                              idSetSource.put("channel", json.getJSONObject("channel"));
-                              o.put("idSetSource", idSetSource);
-
-                              result = r.Command("seasonpass", o);
-                              if (result != null)
-                                 log.print("success");
+                              if (spOpt == null)
+                                 spOpt = new spOptions();
+                              JSONObject o = spOpt.promptUser("Create SP - " + title, null);
+                              if (o != null) {
+                                 log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
+                                 JSONObject idSetSource = new JSONObject();
+                                 idSetSource.put("collectionId", json.getString("collectionId"));
+                                 idSetSource.put("type", "seasonPassSource");
+                                 idSetSource.put("channel", json.getJSONObject("channel"));
+                                 o.put("idSetSource", idSetSource);   
+                                 result = r.Command("seasonpass", o);
+                                 if (result != null)
+                                    log.print("success");
+                              }
                            } else {
-                              log.warn("Existing SP with same title found, not scheduling: " + json.getString("title"));
+                              log.warn("Existing SP with same title found, not scheduling: " + title);
                            }
                         } catch (JSONException e) {
                            log.error("record_premiereCB - " + e.getMessage());
@@ -2001,7 +2063,7 @@ public class remotegui {
          text = "<b>Save</b><br>";
          text += "Save the currently displayed Season Pass list to a file. This file can then be loaded<br>";
          text += "at a later date into this table, then entries from the table can be copied to your TiVos<br>";
-         text += "if desired by selecting entries in the table and clicking on <b>Copy to TiVo</b> button.<br>";
+         text += "if desired by selecting entries in the table and clicking on <b>Copy</b> button.<br>";
          text += "i.e. This is a way to backup your season passes.";
       }
       else if (component.equals("load_sp")){
@@ -2010,16 +2072,22 @@ public class remotegui {
          text += "<b>Loaded: </b> prefix in the TITLE column indicating that these were loaded from a file<br>";
          text += "to distinguish from normal case where they were obtained from displayed TiVo name.<br>";
          text += "Note that loaded season passes can then be copied to TiVos by selecting the TiVo you want to<br>";
-         text += "copy to, then selecting rows in the table you want to copy and then clicking on the <b>Copy to TiVo</b><br>";
+         text += "copy to, then selecting rows in the table you want to copy and then clicking on the <b>Copy</b><br>";
          text += "button.";
       }
       else if (component.equals("copy_sp")){
-         text = "<b>Copy to TiVo</b><br>";
-         text += "This is used to copy season passes displayed in the Season Pass table to 1 of your TiVos.<br>";
+         text = "<b>Copy</b><br>";
+         text += "This is used to copy season passes displayed in the Season Pass table to one of your TiVos.<br>";
          text += "Select the TiVo you want to copy to and then select rows in the table that you want copied,<br>";
          text += "then press this button to perform the copy.<br>";
          text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
          text += "checking against the current set of season passes already on the TiVo.";
+      }
+      else if (component.equals("modify_sp")){
+         text = "<b>Modify</b><br>";
+         text += "This is used to modify a season passes selected in the Season Pass table.<br>";
+         text += "Select the season pass you want to modify in the table and then press this button to bring<br>";
+         text += "up a dialog with season pass options that can be modified.";
       }
       else if (component.equals("reorder_sp")){
          text = "<b>Reorder</b><br>";
