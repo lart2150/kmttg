@@ -28,7 +28,7 @@ public class createMeta {
       try {
          String[] nameValues = {
                "title", "seriesTitle", "description", "time",
-               "mpaaRating", "movieYear", "isEpisode",
+               "mpaaRating", "movieYear", "isEpisode", "duration",
                "originalAirDate", "episodeTitle", "isEpisodic"
          };
          String[] valuesOnly = {"showingBits", "starRating", "tvRating"};
@@ -136,8 +136,12 @@ public class createMeta {
          for (int i=0; i<nameValues.length; ++i) {
             key = nameValues[i];
             if (data.containsKey(key)) {
-               if (data.get(key).toString().length() > 0)
-                  ofp.write(key + " : " + data.get(key) + eol);
+               if (data.get(key).toString().length() > 0) {
+                  if (key.equals("duration"))
+                     ofp.write("iso_duration : " + data.get(key) + eol);
+                  else
+                     ofp.write(key + " : " + data.get(key) + eol);
+               }
             }
          }
          for (int i=0; i<valuesOnly.length; ++i) {

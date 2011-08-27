@@ -182,7 +182,7 @@ public class metadataTivo implements Serializable {
       try {
          String[] nameValues = {
                "title", "seriesTitle", "description", "time",
-               "movieYear", "isEpisode",
+               "movieYear", "isEpisode", "duration",
                "originalAirDate", "episodeTitle", "isEpisodic",
                "episodeNumber"
          };
@@ -291,7 +291,9 @@ public class metadataTivo implements Serializable {
          for (int i=0; i<nameValues.length; ++i) {
             key = nameValues[i];
             if (data.containsKey(key)) {
-               if (data.get(key).toString().length() > 0)
+               if (key.equals("duration"))
+                  ofp.write("iso_duration : " + data.get(key) + eol);
+               else
                   ofp.write(key + " : " + data.get(key) + eol);
             }
          }
