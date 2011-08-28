@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="kmttg" basedir="." default="all">
-	<property name="rversion" value="v0p8f"/>
+	<property name="rversion" value="v0p8g"/>
 	<tstamp/>
 	<property name="bversion" value="${DSTAMP}-${TSTAMP}"/>
 	<property name="lib" value="lib"/>
