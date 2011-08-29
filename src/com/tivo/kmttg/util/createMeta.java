@@ -28,7 +28,7 @@ public class createMeta {
       try {
          String[] nameValues = {
                "title", "seriesTitle", "description", "time",
-               "mpaaRating", "movieYear", "isEpisode", "duration",
+               "mpaaRating", "movieYear", "isEpisode", "recordedDuration",
                "originalAirDate", "episodeTitle", "isEpisodic"
          };
          String[] valuesOnly = {"showingBits", "starRating", "tvRating"};
@@ -42,6 +42,19 @@ public class createMeta {
          DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
          DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
          Document doc = docBuilder.parse(outputFile);
+
+         // Search for <recordedDuration> elements
+         NodeList rdList = doc.getElementsByTagName("recordedDuration");
+         if (rdList.getLength() > 0) {
+            String value;
+            Node n = rdList.item(0);
+            if ( n != null) {
+               value = n.getTextContent();
+               value = Entities.replaceHtmlEntities(value);
+               data.put("recordedDuration", value);
+               debug.print("recordedDuration" + "=" + value);
+            }
+         }
          
          // Search for everything under <showing>
          NodeList nlist = doc.getElementsByTagName("showing");
@@ -137,7 +150,7 @@ public class createMeta {
             key = nameValues[i];
             if (data.containsKey(key)) {
                if (data.get(key).toString().length() > 0) {
-                  if (key.equals("duration"))
+                  if (key.equals("recordedDuration"))
                      ofp.write("iso_duration : " + data.get(key) + eol);
                   else
                      ofp.write(key + " : " + data.get(key) + eol);
