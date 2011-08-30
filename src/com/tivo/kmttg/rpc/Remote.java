@@ -27,6 +27,7 @@ import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
+import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.log;
 
 public class Remote {
@@ -664,6 +665,9 @@ public class Remote {
                config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Will Not Record list");
                String message = "Processing: " + index + "/" + total;
                config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+               if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                  config.gui.setTitle("Not rec: " + index + "/" + total + " " + config.kmttg);
+               }
             }
             
             result = Command("SearchId", s);
@@ -774,6 +778,11 @@ public class Remote {
                config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Season & Series premieres");
                String message = "Processing: " + channel.getString("channelNumber") + "=" + channel.getString("callSign");
                config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+               if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                  int pct = (int) ((float)(i)/channelNumbers.length()*100);
+                  config.gui.setTitle("Premieres: " + pct + "% " + config.kmttg);
+                  config.gui.progressBar_setValue(pct);
+               }
             }
             
             result = Command("GridSearch", json);
