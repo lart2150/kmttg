@@ -115,6 +115,12 @@ public class remote implements Serializable {
          return true;
       } else {
          // Job finished
+         if (config.GUIMODE) {
+            if ( jobMonitor.isFirstJobInMonitor(job) ) {
+               config.gui.setTitle(config.kmttg);
+               config.gui.progressBar_setValue(0);
+            }
+         }
          jobMonitor.removeFromJobList(job);
          if (success) {
             if (job.remote_todo && job.todo != null) {
