@@ -190,6 +190,9 @@ public class atomic implements Serializable {
          if (h.containsKey("originalAirDate") ) {
             args.add("--year");
             args.add(h.get("originalAirDate"));
+         } else if (h.containsKey("movieYear")) {
+            args.add("--year");
+            args.add(h.get("movieYear"));
          }
          if (h.containsKey("description") ) {
             args.add("--description");
