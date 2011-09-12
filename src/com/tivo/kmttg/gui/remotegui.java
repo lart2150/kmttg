@@ -414,8 +414,6 @@ public class remotegui {
 
       refresh_cancel = new JButton("Refresh");
       label_cancel = new JLabel("Top Level View");
-      //ImageIcon image = new ImageIcon("c:/home/tivoapp/pngs/remote-button-TIVO-63x86.png");
-      //JButton refresh_todo = new JButton(scale(image.getImage(),0.5));
       refresh_cancel.setToolTipText(getToolTip("refresh_cancel_top"));
       refresh_cancel.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1444,18 +1442,23 @@ public class remotegui {
       
    // TiVo selection changed for Premieres tab
    public void tivo_premiereCB() {
-      // Clear channel list & table
+      // Clear channel list
       premiere_model.clear();
-      tab_premiere.TABLE.clearSelection();
-      tab_premiere.clear();
       
       String tivoName = getTivoName("premiere");
       // Load channel list for this TiVo
       loadChannelInfo(tivoName);
       
-      // Update table for this TiVo
+      // NOTE: Don't want to reset premieres table in case we want to record a show on another TiVo
+      /*
+      // Clear premieres table
+      tab_premiere.TABLE.clearSelection();
+      tab_premiere.clear();
+      
+      // Update premieres table
       if (tab_premiere.tivo_data.containsKey(tivoName))
          tab_premiere.AddRows(tivoName, tab_premiere.tivo_data.get(tivoName));
+      */
    }
    
    // Callback for Premieres tab Channels button
