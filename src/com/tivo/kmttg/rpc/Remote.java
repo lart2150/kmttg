@@ -288,7 +288,7 @@ public class Remote {
          }
          else if (type.equals("hmedestinations")) {
             // List available hme destinations for uiNavigate
-            json.put("bodyId", "-");
+            //json.put("bodyId", "-");
             json.put("uiDestinationType", "hme");
             json.put("levelOfDetail", "high");
             json.put("noLimit", "true");
