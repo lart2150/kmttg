@@ -33,6 +33,7 @@ import com.tivo.kmttg.util.log;
 public class Remote {
    public Boolean debug = false;
    public Boolean success = true;
+   private String IP = null;
    private int port = 1413;
    private String MAK = null;
    private int timeout = 120; // read timeout in secs
@@ -111,6 +112,8 @@ public class Remote {
    }
    
    private void RemoteInit(String IP, int port, String MAK) {
+      this.IP = IP;
+      this.port = port;
       getSocketFactory();
       session_id = new Random(0x27dc20).nextInt();
       try {
@@ -118,12 +121,41 @@ public class Remote {
          socket.setSoTimeout(timeout*1000);
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
          out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-         if ( ! Auth() )
+         if ( ! Auth() ) {
             success = false;
+            return;
+         }
+         bodyId_get();
       } catch (Exception e) {
          error("rpc Remote - " + e.getMessage());
          success = false;
       }
+   }
+   
+   // NOTE: This retrieves and stores bodyId in config hashtable if not previously stored
+   private String bodyId_get() {
+      String id = config.bodyId_get(IP, port);
+      if (id.equals("")) {
+         JSONObject json = new JSONObject();
+         try {
+            json.put("bodyId", "-");
+            JSONObject reply = Command("bodyConfigSearch", json);
+            if (reply != null && reply.has("bodyConfig")) {
+               json = reply.getJSONArray("bodyConfig").getJSONObject(0);
+               if (json.has("bodyId")) {
+                  id = json.getString("bodyId");
+                  config.bodyId_set(IP, port, id);
+               } else {
+                  log.error("Failed to determine bodyId: IP=" + IP + " port=" + port);
+               }
+            }
+         } catch (JSONException e) {
+            log.error("bodyId_get failed - " + e.getMessage());
+         }
+      }
+      if (id.equals(""))
+         id = "-";
+      return id;
    }
    
    public String RpcRequest(String type, Boolean monitor, JSONObject data) {
@@ -131,9 +163,9 @@ public class Remote {
          String ResponseCount = "single";
          if (monitor)
             ResponseCount = "multiple";
-         String body_id = "";
-         if (data.has("body_id"))
-            body_id = (String) data.get("body_id");
+         String bodyId = "";
+         if (data.has("bodyId"))
+            bodyId = (String) data.get("bodyId");
          rpc_id++;
          String eol = "\r\n";
          String headers =
@@ -143,7 +175,7 @@ public class Remote {
             "Content-Type: application/json" + eol +
             "RequestType: " + type + eol +
             "ResponseCount: " + ResponseCount + eol +
-            "BodyId: " + body_id + eol +
+            "BodyId: " + bodyId + eol +
             "X-ApplicationName: Quicksilver" + eol +
             "X-ApplicationVersion: 1.2" + eol +
             String.format("X-ApplicationSessionId: 0x%x", session_id) + eol;
@@ -276,7 +308,7 @@ public class Remote {
          }
          else if (type.equals("uidestinations")) {
             // List available uri destinations for uiNavigate
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             json.put("uiDestinationType", "classicui");
             json.put("levelOfDetail", "high");
             json.put("noLimit", "true");
@@ -288,7 +320,7 @@ public class Remote {
          }
          else if (type.equals("hmedestinations")) {
             // List available hme destinations for uiNavigate
-            //json.put("bodyId", "-");
+            //json.put("bodyId", bodyId_get());
             json.put("uiDestinationType", "hme");
             json.put("levelOfDetail", "high");
             json.put("noLimit", "true");
@@ -298,57 +330,57 @@ public class Remote {
             // Delete an existing recording
             // Expects "recordingId" of type JSONArray in json
             json.put("state", "deleted");
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             req = RpcRequest("recordingUpdate", false, json);
          }
          else if (type.equals("cancel")) {
             // Cancel a recording in ToDo list
             // Expects "recordingId" of type JSONArray in json
             json.put("state", "cancelled");
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             req = RpcRequest("recordingUpdate", false, json);
          }
          else if (type.equals("prioritize")) {
             // Re-prioritize season passes
             // Expects JSONArray of all SP's "subscriptionId" in the order you want them
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             req = RpcRequest("subscriptionsReprioritize", false, json);
          }
          else if (type.equals("Search")) {
             // Individual item search
             // Expects "recordingId" in json
             json.put("levelOfDetail", "medium");
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             req = RpcRequest("recordingSearch", false, json);
          }
          else if (type.equals("FolderIds")) {
             // Folder id search
             // Expects "parentRecordingFolderItemId" in json
             json.put("format", "idSequence");
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             // NOTE: Since this format is idSequence perhaps monitor should be true?
             req = RpcRequest("recordingFolderItemSearch", false, json);
          }
          else if (type.equals("SearchIds")) {
             // Expects "objectIdAndType" in json
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             req = RpcRequest("recordingFolderItemSearch", false, json);
          }
          else if (type.equals("MyShows")) {
             // Expects count=# in initial json, offset=# after first call
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             req = RpcRequest("recordingFolderItemSearch", false, json);
          }
          else if (type.equals("ToDo")) {
             // Expects count=# in initial json, offset=# after first call
             json.put("format", "idSequence");
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             json.put("state", new JSONArray("[\"scheduled\"]"));
             req = RpcRequest("recordingSearch", false, json);
          }
          else if (type.equals("SearchId")) {
             // Expects "objectIdAndType" in json
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             json.put("levelOfDetail", "medium");
             req = RpcRequest("recordingSearch", false, json);
          }
@@ -356,7 +388,7 @@ public class Remote {
             // Get list or recording Ids that will not record
             // Expects count=# in initial json, offset=# after first call
             json.put("format", "idSequence");
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             json.put("state", new JSONArray("[\"cancelled\"]"));
             req = RpcRequest("recordingSearch", false, json);
          }
@@ -366,17 +398,17 @@ public class Remote {
             // "title":"The Voice"
             // "anchorChannelIdentifier":{"channelNumber":"761","type":"channelIdentifier","sourceType":"cable"}
             Date now = new Date();
+            json.put("bodyId", bodyId_get());
             json.put("levelOfDetail", "medium");
             json.put("isReceived", "true");
             json.put("orderBy", new JSONArray("[\"channelNumber\"]"));
-            json.put("bodyId", "-");
             json.put("maxStartTime", rnpl.getStringFromLongDate(now.getTime()+12*24*60*60*1000));
             json.put("minEndTime", rnpl.getStringFromLongDate(now.getTime()));
             req = RpcRequest("gridRowSearch", false, json);
          }
          else if (type.equals("SeasonPasses")) {
             json.put("levelOfDetail", "medium");
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             json.put("noLimit", "true");
             req = RpcRequest("subscriptionSearch", false, json);
          }
@@ -400,7 +432,7 @@ public class Remote {
                o.put("endTimePadding", json.getInt("endTimePadding"));
             if (json.has("startTimePadding"))
                o.put("startTimePadding", json.getInt("startTimePadding"));
-            o.put("bodyId", "-");
+            o.put("bodyId", bodyId_get());
             o.put("ignoreConflicts", "true");
             req = RpcRequest("subscribe", false, o);
          }
@@ -418,7 +450,7 @@ public class Remote {
             o.put("startTimePadding", json.getInt("startTimePadding"));
             o.put("idSetSource", json.getJSONObject("idSetSource"));
             o.put("subscriptionId", json.getString("subscriptionId"));
-            o.put("bodyId", "-");
+            o.put("bodyId", bodyId_get());
             o.put("ignoreConflicts", "true");
             req = RpcRequest("subscribe", false, o);
          }
@@ -427,7 +459,7 @@ public class Remote {
             // Expects both contentId & offerId in json:
             JSONObject o = new JSONObject();
             json.put("type", "singleOfferSource");
-            o.put("bodyId", "-");
+            o.put("bodyId", bodyId_get());
             o.put("idSetSource", json);
             o.put("recordingQuality", "best");
             o.put("maxRecordings", 1);
@@ -438,7 +470,7 @@ public class Remote {
          else if (type.equals("unsubscribe")) {
             // Unsubscribe a season pass
             // Expects subscriptionId in json
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             req = RpcRequest("unsubscribe", false, json);
          }
          else if (type.equals("position")) {
@@ -451,7 +483,7 @@ public class Remote {
          }
          else if (type.equals("sysInfo")) {
             // Returns userDiskSize among other info
-            json.put("bodyId", "-");
+            json.put("bodyId", bodyId_get());
             req = RpcRequest("bodyConfigSearch", false, json);
          }
          else if (type.equals("tunerInfo")) {
@@ -730,7 +762,7 @@ public class Remote {
          // Top level list
          JSONObject json = new JSONObject();
          json.put("noLimit", "true");
-         json.put("bodyId", "-");
+         json.put("bodyId", bodyId_get());
          if (job != null && config.GUIMODE)
             config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Channel List");
          result = Command("channelSearch", json);
