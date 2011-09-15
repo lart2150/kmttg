@@ -152,6 +152,9 @@ public class config {
    // autotune related
    public static Hashtable<String,Hashtable<String,String>> autotune = null;
    
+   // iPad remote related
+   private static Hashtable<String,String> bodyId = null;
+   
    public static Stack<String> parse() {
       debug.print("");
       String result;
@@ -1087,6 +1090,25 @@ public class config {
          }
       }
       return null;
+   }
+   
+   // bodyId used by iPad remote
+   public static String bodyId_get(String IP, int port) {
+      if (bodyId == null)
+         bodyId = new Hashtable<String,String>();
+      String id = IP + port;
+      if (bodyId.containsKey(id))
+         return bodyId.get(id);
+      else
+         return "";
+   }
+   
+   // bodyId used by iPad remote
+   public static void bodyId_set(String IP, int port, String bid) {
+      if (bodyId == null)
+         bodyId = new Hashtable<String,String>();
+      String id = IP + port;
+      bodyId.put(id, bid);
    }
     
 }
