@@ -1259,6 +1259,11 @@ public class remotegui {
                         json.put("userDiskSize", size_string);
                         json.put("userDiskUsed", pct_string);
                      }
+                     if (json.has("bodyId")) {
+                        info += String.format("%s\t\t%s\n", "tsn",
+                           json.getString("bodyId").replaceFirst("tsn:", "")
+                        );
+                     }
                      String[] fields = {
                         "softwareVersion", "userDiskSize", "userDiskUsed", "parentalControlsState"
                      };
