@@ -481,6 +481,20 @@ public class nplTable {
                }
             } // if keyCode == KeyEvent.VK_SPACE            
          } // if selected != null
+      } else if (keyCode == KeyEvent.VK_J) {
+         // Print all data of selected row to log window by sorted keys
+         int[] selected = GetSelectedRows();
+         if (selected == null || selected.length < 1)
+            return;
+         sortableDate s = (sortableDate)NowPlaying.getValueAt(selected[0],getColumnIndex("DATE"));
+         if ( ! s.folder && s.data != null ) {
+            Vector<String> v = new Vector<String>(s.data.keySet());
+            Collections.sort(v);            
+            for (Enumeration<String> it = v.elements(); it.hasMoreElements();) {
+              String name = it.nextElement();
+              log.print(name + " = " + s.data.get(name));
+            }
+         }
       } else {
          // Pass along keyboard action for unimplemented key press
          e.consume();
