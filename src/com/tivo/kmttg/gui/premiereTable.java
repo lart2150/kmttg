@@ -3,6 +3,8 @@ package com.tivo.kmttg.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.ParseException;
@@ -33,7 +35,7 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class premiereTable {
-   private String[] TITLE_cols = {"DATE", "SHOW", "CHANNEL", "DUR"};
+   private String[] TITLE_cols = {"DATE", "SHOW", "SEA", "CHANNEL", "DUR"};
    public JXTable TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    public JScrollPane scroll = null;
@@ -54,6 +56,15 @@ public class premiereTable {
          }
       );
       
+      // Add keyboard listener
+      TABLE.addKeyListener(
+         new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+               KeyPressed(e);
+            }
+         }
+      );
+      
       // Change color & font
       TableColumn tm;
       tm = TABLE.getColumnModel().getColumn(0);
@@ -67,6 +78,9 @@ public class premiereTable {
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
       tm = TABLE.getColumnModel().getColumn(3);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+      ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
+      tm = TABLE.getColumnModel().getColumn(4);
+      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
       
       // Define custom column sorting routines
@@ -153,7 +167,7 @@ public class premiereTable {
           if (col == 1) {
              return sortableDate.class;
           }
-          if (col == 4) {
+          if (col == 5) {
              return sortableDuration.class;
           }
           return Object.class;
@@ -255,11 +269,16 @@ public class premiereTable {
              if (o.has("callSign"))
                 channel += "=" + o.getString("callSign");
           }
+          String season = " ";
+          if (data.has("seasonNumber")) {
+             season = String.format("%02d", data.getInt("seasonNumber"));
+          }
           
           info[0] = new sortableDate(data, start);
           info[1] = title;
-          info[2] = channel;
-          info[3] = new sortableDuration(duration, false);
+          info[2] = season;
+          info[3] = channel;
+          info[4] = new sortableDuration(duration, false);
           AddRow(TABLE, info);       
        } catch (JSONException e) {
           log.error("premiereTable AddRow - " + e.getMessage());
@@ -348,6 +367,23 @@ public class premiereTable {
              log.error("MouseClicked - " + e1.getMessage());
              return;
           }
+       }
+    }
+    
+    // Handle keyboard presses
+    private void KeyPressed(KeyEvent e) {
+       int keyCode = e.getKeyCode();
+       if (keyCode == KeyEvent.VK_J) {
+          // Print json of selected row to log window
+          int[] selected = GetSelectedRows();
+          if (selected == null || selected.length < 1)
+             return;
+          JSONObject json = GetRowData(selected[0]);
+          if (json != null)
+             log.print(json.toString());
+       } else {
+          // Pass along keyboard action
+          e.consume();
        }
     }
 
