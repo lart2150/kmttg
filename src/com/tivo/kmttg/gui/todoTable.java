@@ -372,6 +372,14 @@ public class todoTable {
        if (keyCode == KeyEvent.VK_DELETE){
           // Delete key has special action
           DeleteCB();
+       } else if (keyCode == KeyEvent.VK_J) {
+          // Print json of selected row to log window
+          int[] selected = GetSelectedRows();
+          if (selected == null || selected.length < 1)
+             return;
+          JSONObject json = GetRowData(selected[0]);
+          if (json != null)
+             log.print(json.toString());
        } else {
           // Pass along keyboard action
           e.consume();
