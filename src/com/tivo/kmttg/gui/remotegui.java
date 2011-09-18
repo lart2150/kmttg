@@ -128,6 +128,7 @@ public class remotegui {
       
       Browser = new JFileChooser(config.programDir);
       Browser.setMultiSelectionEnabled(false);
+      Browser.addChoosableFileFilter(new FileFilterSP());
       
       // Define content for dialog window
       int gy = 0;
