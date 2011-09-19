@@ -699,6 +699,8 @@ public class Remote {
                config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
                if ( jobMonitor.isFirstJobInMonitor(job) ) {
                   config.gui.setTitle("Not rec: " + index + "/" + total + " " + config.kmttg);
+                  float pct = (float)index*100/total;
+                  config.gui.progressBar_setValue((int)pct);
                }
             }
             
