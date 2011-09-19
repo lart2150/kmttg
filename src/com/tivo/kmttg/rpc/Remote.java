@@ -499,8 +499,10 @@ public class Remote {
          }
          
          if (req != null) {
-            Write(req);
-            return Read();
+            if ( Write(req) )
+               return Read();
+            else
+               return null;
          } else {
             error("rpc: unhandled Key type: " + type);
             return null;
