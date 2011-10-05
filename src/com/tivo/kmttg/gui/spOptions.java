@@ -51,6 +51,11 @@ public class spOptions {
       stopHash.add("4 minutes late",  240);
       stopHash.add("5 minutes late",  300);
       stopHash.add("10 minutes late", 600);
+      stopHash.add("15 minutes late", 900);
+      stopHash.add("30 minutes late", 1800);
+      stopHash.add("60 minutes late", 3600);
+      stopHash.add("90 minutes late", 5400);
+      stopHash.add("180 minutes late", 10800);
       
       createComponents();      
    }
@@ -79,7 +84,9 @@ public class spOptions {
 
       stop = new JComboBox(new String[] {
          "On time", "1 minute late", "2 minutes late", "3 minutes late",
-         "4 minutes late", "5 minutes late", "10 minutes late"}
+         "4 minutes late", "5 minutes late", "10 minutes late",
+         "15 minutes late", "30 minutes late", "60 minutes late",
+         "90 minutes late", "180 minutes late"}
       );
       stop.setSelectedItem("On time");
       
