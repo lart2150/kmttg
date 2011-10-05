@@ -406,6 +406,27 @@ public class Remote {
             json.put("minEndTime", rnpl.getStringFromLongDate(now.getTime()));
             req = RpcRequest("gridRowSearch", false, json);
          }
+         else if (type.equals("OfferSearch")) {
+            // Keyword search
+            // Expects "keyword" JSON object in json, such as:
+            // "keyword":"house"
+            // Also expects "count" and "offset" to be set
+            json.put("bodyId", bodyId_get());
+            if ( ! json.has("includeUnifiedItemType") ) {
+               JSONArray a = new JSONArray();
+               a.put("collection"); a.put("content"); a.put("person");
+               json.put("includeUnifiedItemType", a);               
+            }
+            json.put("levelOfDetail", "medium");
+            json.put("mergeOverridingCollections", true);
+            json.put("namespace", "refserver");
+            if ( ! json.has("orderBy") )
+               json.put("orderBy", new JSONArray("[\"relevance\"]"));
+            json.put("searchable", true);
+            Date now = new Date();
+            json.put("minStartTime", rnpl.getStringFromLongDate(now.getTime()));
+            req = RpcRequest("offerSearch", false, json);
+         }
          else if (type.equals("SeasonPasses")) {
             json.put("levelOfDetail", "medium");
             json.put("bodyId", bodyId_get());
@@ -463,8 +484,15 @@ public class Remote {
             o.put("idSetSource", json);
             o.put("recordingQuality", "best");
             o.put("maxRecordings", 1);
-            o.put("keepBehavior", "fifo");
             o.put("ignoreConflicts", "false");
+            if ( json.has("keepBehavior"))
+               o.put("keepBehavior", json.getString("keepBehavior"));
+            else
+               o.put("keepBehavior", "fifo");
+            if (json.has("endTimePadding"))
+               o.put("endTimePadding", json.getInt("endTimePadding"));
+            if (json.has("startTimePadding"))
+               o.put("startTimePadding", json.getInt("startTimePadding"));
             req = RpcRequest("subscribe", false, o);
          }
          else if (type.equals("unsubscribe")) {
@@ -865,6 +893,102 @@ public class Remote {
       return data;
    }
    
+   // This returns JSONArray of JSON objects each of following structure:
+   // String    title
+   // String    type
+   // String    collectionId
+   // JSONArray entries
+   public JSONArray searchKeywords(String keyword, jobData job, int max) {
+      JSONObject collections = new JSONObject();
+      int order = 0;
+      try {
+         Boolean stop = false;
+         int offset = 0;
+         int count = 50;
+         
+         // Update job monitor output column name
+         if (job != null && config.GUIMODE) {
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Keyword Search: " + keyword);
+         }
+         
+         while ( ! stop ) {
+            // Loop OfferSearch queries until no more results returned
+            JSONObject json = new JSONObject();
+            json.put("count", count);
+            json.put("offset", offset);
+            json.put("keyword", keyword);
+            JSONObject result = Command("OfferSearch", json);
+            if (result == null) {
+               log.error("Keyword search failed for: '" + keyword + "'");
+               stop = true;
+            } else {                        
+               // Filter out non-TiVo entries and get full info on them
+               if (result.has("offer")) {
+                  JSONArray entries = result.getJSONArray("offer");
+                  for (int i=0; i<entries.length(); ++i) {
+                     // Filter out non-TiVo entries
+                     json = entries.getJSONObject(i);
+                     if (json.has("partnerCollectionId") && json.has("title") && json.has("collectionId")) {
+                        String partner = json.getString("partnerCollectionId");
+                        if ( ! partner.startsWith("epg") )
+                           continue;
+                        String title = json.getString("title");
+                        String collectionId = json.getString("collectionId");
+                        String collectionType = "";
+                        if (json.has("collectionType"))
+                           collectionType = json.getString("collectionType");
+                        if (! collections.has(collectionId)) {
+                           JSONObject new_json = new JSONObject();
+                           new_json.put("collectionId", collectionId);
+                           new_json.put("title", title);
+                           new_json.put("type", collectionType);
+                           new_json.put("entries", new JSONArray());
+                           new_json.put("order", order);
+                           collections.put(collectionId, new_json);
+                           order++;
+                        }
+                        collections.getJSONObject(collectionId).getJSONArray("entries").put(json);
+                     }
+                  }
+                  offset += entries.length();
+                  String message = "Matches: " + offset ;
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+                  if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                     config.gui.setTitle("Search: " + offset + " " + config.kmttg);
+                  }
+                  if (offset >= max-1)
+                     stop = true;
+                  if (entries.length() == 0)
+                     stop = true;
+               } else {
+                  // result did not return unifiedItem so must be done or errored out
+                  stop = true;
+               }                        
+            }
+         } // while
+         log.warn(">> Keyword search completed: '" + keyword + "' on TiVo: " + job.tivoName);
+         
+         // Now generate table_entries in priority order
+         if (collections.length() > 0) {
+            JSONArray table_entries = new JSONArray();
+            JSONArray keys = collections.names();
+            for (int i=0; i<order; ++i) {
+               for (int j=0; j<keys.length(); ++j) {
+                  if (collections.getJSONObject(keys.getString(j)).getInt("order") == i) {
+                     table_entries.put(collections.getJSONObject(keys.getString(j)));
+                     break;
+                  }
+               }
+            }
+            return table_entries;
+         }
+      } catch (JSONException e) {
+         log.error("searchButtonCB failed - " + e.getMessage());
+      }
+      
+      return null;
+   }
+      
    private void print(String message) {
       log.print(message);
    }

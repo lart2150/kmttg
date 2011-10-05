@@ -49,6 +49,15 @@ public class sortableDate {
       folderData_json = folderEntry;
    }
    
+   // Alternate folder entry with JSONObject
+   sortableDate(String folderName, JSONObject json, long gmt) {
+      this.folderName = folderName;
+      this.json = json;
+      folder = true;
+      display = getTime(gmt);
+      sortable = "" + gmt;
+   }
+   
    private String getTime(long gmt) {
       debug.print("gmt=" + gmt);
       SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy HH:mm");

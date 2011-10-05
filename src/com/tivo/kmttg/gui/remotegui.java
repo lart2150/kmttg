@@ -13,6 +13,7 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -37,11 +38,16 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -68,6 +74,7 @@ public class remotegui {
    private spTable tab_sp = null;
    private JComboBox tivo_sp = null;
    private spOptions spOpt = null;
+   private recordOptions recordOpt = null;
    
    private JComboBox tivo_info = null;
    JTextPane text_info = null;
@@ -83,6 +90,13 @@ public class remotegui {
    private JList premiere_channels = null;
    private DefaultListModel premiere_model = new DefaultListModel();
    public Hashtable<String,JSONArray> premiere_channel_info = new Hashtable<String,JSONArray>();
+   
+   private JComboBox tivo_search = null;
+   private searchTable tab_search = null;
+   private JTextField text_search = null;
+   public JButton button_search = null;
+   private JSpinner max_search = null;
+   public Hashtable<String,JSONArray> search_info = new Hashtable<String,JSONArray>();
 
    private JComboBox tivo_rc = null;
    private JComboBox hme_rc = null;
@@ -144,6 +158,16 @@ public class remotegui {
       c.fill = GridBagConstraints.HORIZONTAL;
       
       tabbed_panel = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+      tabbed_panel.addChangeListener(new ChangeListener() {
+         public void stateChanged(ChangeEvent e) {
+            String selected = tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
+            if (selected.equals("Search")) {
+               // Set focus on text_search field
+               text_search.requestFocusInWindow();
+            }
+         }
+     });
+
       InputMap im = tabbed_panel.getInputMap();
       im.put(KeyStroke.getKeyStroke("pressed RIGHT"), "none");
       im.put(KeyStroke.getKeyStroke("released RIGHT"), "none");
@@ -646,6 +670,130 @@ public class remotegui {
       c.fill = GridBagConstraints.BOTH;
       panel_info.add(tabScroll_info, c);
       
+      // Search tab items      
+      c.ipady = 0;
+      c.weighty = 0.0;  // default to no vertical stretch
+      c.weightx = 0.0;  // default to no horizontal stretch
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      c.gridheight = 1;
+      c.anchor = GridBagConstraints.CENTER;
+      c.fill = GridBagConstraints.HORIZONTAL;
+      
+      JPanel panel_search = new JPanel();
+      panel_search.setLayout(new GridBagLayout());
+      
+      JPanel row1_search = new JPanel();
+      row1_search.setLayout(new BoxLayout(row1_search, BoxLayout.LINE_AXIS));
+      
+      JLabel title_search = new JLabel("Search");
+      
+      JLabel tivo_search_label = new javax.swing.JLabel();
+      
+      tivo_search = new javax.swing.JComboBox();
+      tivo_search.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+               tivo_searchCB();
+            }
+         }
+      });
+      tivo_search.setToolTipText(getToolTip("tivo_search"));
+
+      button_search = new JButton("Search");
+      button_search.setToolTipText(getToolTip("button_search"));
+      button_search.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            if (tab_search.inFolder) {
+               // Return to top level table display
+               tab_search.setFolderState(false);
+               tab_search.Refresh((JSONArray)null);
+               if (tab_search.folderEntryNum >= 0)
+                  tab_search.SelectFolder(tab_search.folderName);
+            } else {
+               // New search
+               tab_search.TABLE.clearSelection();
+               tab_search.clear();
+               dialog.repaint();
+               String tivoName = (String)tivo_search.getSelectedItem();
+               if (tivoName != null && tivoName.length() > 0)
+                  searchButtonCB(tivoName);
+            }
+         }
+      });
+
+      text_search = new JTextField(15);
+      text_search.setMinimumSize(text_search.getPreferredSize());
+      // Press "Search" button when enter pressed in search text field
+      text_search.addKeyListener( new KeyAdapter() {
+         public void keyReleased( KeyEvent e ) {
+            if( e.getKeyCode() == KeyEvent.VK_ENTER ) {
+               button_search.doClick();
+            }
+         }
+      });
+
+      text_search.setToolTipText(getToolTip("text_search"));
+
+      JButton record_search = new JButton("Record");
+      record_search.setToolTipText(getToolTip("record_search"));
+      record_search.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_search.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               search_recordCB(tivoName);
+            }
+         }
+      });
+
+      JButton record_sp_search = new JButton("Season Pass");
+      record_sp_search.setToolTipText(getToolTip("record_sp_search"));
+      record_sp_search.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_search.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               search_sp_recordCB(tivoName);
+            }
+         }
+      });
+
+      JLabel max_search_label = new JLabel("Max");
+      SpinnerModel spinner_model = new SpinnerNumberModel(100, 50, 800, 50);      
+      max_search = new JSpinner(spinner_model);
+      max_search.setToolTipText(getToolTip("max_search"));
+      
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(title_search);
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(tivo_search_label);
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(tivo_search);
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(button_search);
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(text_search);
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(max_search_label);
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(max_search);
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(record_search);
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(record_sp_search);
+      panel_search.add(row1_search, c);
+      
+      tab_search = new searchTable(dialog);
+      tab_search.TABLE.setPreferredScrollableViewportSize(tab_search.TABLE.getPreferredSize());
+      JScrollPane tabScroll_search = new JScrollPane(tab_search.scroll);
+      gy++;
+      c.gridy = gy;
+      c.weightx = 1.0;
+      c.weighty = 1.0;
+      c.gridwidth = 8;
+      c.fill = GridBagConstraints.BOTH;
+      panel_search.add(tabScroll_search, c);
+
       // Remote Control Tab items
       
       // TiVo Remote control panel
@@ -993,10 +1141,11 @@ public class remotegui {
       // Add all panels to tabbed panel
       tabbed_panel.add("ToDo", panel_todo);
       tabbed_panel.add("Season Passes", panel_sp);
-      tabbed_panel.add("Will Not Record", panel_cancel);
+      tabbed_panel.add("Won't Record", panel_cancel);
       tabbed_panel.add("Season Premieres", panel_premiere);
-      tabbed_panel.add("Remote Control", panel_rc);
-      tabbed_panel.add("System Information", panel_info);
+      tabbed_panel.add("Search", panel_search);
+      tabbed_panel.add("Remote", panel_rc);
+      tabbed_panel.add("Info", panel_info);
       
       // Init the tivo comboboxes
       setTivoNames();
@@ -1009,6 +1158,7 @@ public class remotegui {
       tab_todo.packColumns(tab_todo.TABLE, 2);
       tab_sp.packColumns(tab_sp.TABLE, 2);
       tab_cancel.packColumns(tab_sp.TABLE, 2);
+      tab_search.packColumns(tab_search.TABLE, 2);
       if (tivo_count == 0) {
          log.warn("No Premieres currently enabled for Remote Control in kmttg configuration");
          return;
@@ -1212,8 +1362,11 @@ public class remotegui {
                         json = tab_cancel.GetRowData(row);
                         title = tab_cancel.GetRowTitle(row);
                         if (json != null) {
-                           JSONObject o = new JSONObject();
-                           if (json.has("contentId") && json.has("offerId")) {
+                           if (recordOpt == null)
+                              recordOpt = new recordOptions();
+                           JSONObject o = recordOpt.promptUser("Schedule Recording - " + title, null);
+                           if (o != null) {
+                              log.print("Scheduling Recording: '" + title + "' on TiVo: " + tivoName);
                               o.put("contentId", json.getString("contentId"));
                               o.put("offerId", json.getString("offerId"));
                               json = r.Command("singlerecording", o);
@@ -1222,8 +1375,6 @@ public class remotegui {
                               } else {
                                  log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
                               }
-                           } else {
-                              log.error("Missing contentId and/or offerId for: '" + title + "'");
                            }
                         }
                      }
@@ -1445,7 +1596,161 @@ public class remotegui {
          jobMonitor.submitNewJob(job);
       }
    }
+   
+   // TiVo selection changed for Search tab
+   public void tivo_searchCB() {
+      // NOTE: Don't want to reset table in case we want to record a show on another TiVo
+      /*
+      tab_search.TABLE.clearSelection();
+      tab_search.clear();
+      String tivoName = getTivoName("search");
+      if (tab_search.tivo_data.containsKey(tivoName))
+         tab_search.AddRows(tivoName, tab_search.tivo_data.get(tivoName));
+      */
+   }
+   
+   // Callback for Search tab "Search" button
+   // Submit a new keyword search job to job monitor
+   private void searchButtonCB(final String tivoName) {
+      String keyword = string.removeLeadingTrailingSpaces(text_search.getText());
+      if (keyword == null || keyword.length() == 0)
+         return;
+      int max = (Integer)max_search.getValue();
       
+      jobData job = new jobData();
+      job.source                = tivoName;
+      job.tivoName              = tivoName;
+      job.type                  = "remote";
+      job.name                  = "Remote";
+      job.search                = tab_search;
+      job.remote_search_max     = max;
+      job.remote_search         = true;
+      job.remote_search_keyword = keyword;
+      jobMonitor.submitNewJob(job);
+   }
+   
+   // Callback for Search tab "Record" button
+   private void search_recordCB(final String tivoName) {
+      final int[] selected = tab_search.GetSelectedRows();
+      if (selected.length > 0) {
+         log.print("Scheduling individual recordings on TiVo: " + tivoName);
+         class backgroundRun extends SwingWorker<Object, Object> {
+            protected Object doInBackground() {
+               int row;
+               JSONObject json;
+               String title;
+               Remote r = new Remote(tivoName);
+               if (r.success) {
+                  try {
+                     for (int i=0; i<selected.length; ++i) {
+                        row = selected[i];
+                        json = tab_search.GetRowData(row);
+                        title = tab_search.GetRowTitle(row);
+                        if (json != null) {
+                           if (json.has("contentId") && json.has("offerId")) {
+                              if (recordOpt == null)
+                                 recordOpt = new recordOptions();
+                              JSONObject o = recordOpt.promptUser("Schedule Recording - " + title, null);
+                              if (o != null) {
+                                 log.print("Scheduling Recording: '" + title + "' on TiVo: " + tivoName);
+                                 o.put("contentId", json.getString("contentId"));
+                                 o.put("offerId", json.getString("offerId"));
+                                 json = r.Command("singlerecording", o);
+                                 if (json == null) {
+                                    log.error("Failed to schedule recording for: '" + title + "'");
+                                 } else {
+                                    log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
+                                 }
+                              }
+                           } else {
+                              log.error("Missing contentId and/or offerId for: '" + title + "'");
+                           }
+                        }
+                     }
+                  } catch (JSONException e) {
+                     log.error("search_recordCB failed - " + e.getMessage());
+                  }
+                  r.disconnect();
+               }
+               return null;
+            }
+         }
+         backgroundRun b = new backgroundRun();
+         b.execute();
+      }
+   }
+   
+   // Callback for Search tab "Season Pass" button
+   private void search_sp_recordCB(final String tivoName) {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            int[] selected = tab_search.GetSelectedRows();
+            if (selected.length > 0) {
+               int row;
+               JSONArray existing;
+               JSONObject json, result;
+               Remote r = new Remote(tivoName);
+               if (r.success) {
+                  // First load existing SPs from tivoName to check against
+                  existing = r.SeasonPasses(null);
+                  if (existing == null) {
+                     log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
+                     r.disconnect();
+                     return null;
+                  }
+                  // Now proceed with subscriptions
+                  for (int i=0; i<selected.length; ++i) {
+                     row = selected[i];
+                     json = tab_search.GetRowData(row);
+                     if (json != null) {
+                        try {
+                           String type = json.getString("collectionType");
+                           if (type.equals("series")) {
+                              String title = json.getString("title");
+                              // Check against existing
+                              Boolean schedule = true;
+                              for (int j=0; j<existing.length(); ++j) {
+                                 if(title.equals(existing.getJSONObject(j).getString("title")))
+                                    schedule = false;
+                              }
+                              
+                              // OK to subscribe
+                              if (schedule) {
+                                 if (spOpt == null)
+                                    spOpt = new spOptions();
+                                 JSONObject o = spOpt.promptUser("Create SP - " + title, null);
+                                 if (o != null) {
+                                    log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
+                                    JSONObject idSetSource = new JSONObject();
+                                    idSetSource.put("collectionId", json.getString("collectionId"));
+                                    idSetSource.put("type", "seasonPassSource");
+                                    idSetSource.put("channel", json.getJSONObject("channel"));
+                                    o.put("idSetSource", idSetSource);   
+                                    result = r.Command("seasonpass", o);
+                                    if (result != null)
+                                       log.print("success");
+                                 }
+                              } else {
+                                 log.warn("Existing SP with same title found, not scheduling: " + title);
+                              }
+                           } else {
+                              log.error("Selected title is not of type 'series'");
+                           }
+                        } catch (JSONException e) {
+                           log.error("search_sp_recordCB - " + e.getMessage());
+                        }
+                     }
+                  }
+                  r.disconnect();
+               }
+            }
+            return null;
+         }
+      }
+      backgroundRun b = new backgroundRun();
+      b.execute();
+   }
+
    // TiVo selection changed for Premieres tab
    public void tivo_premiereCB() {
       // Clear channel list
@@ -1577,6 +1882,8 @@ public class remotegui {
          return (String)tivo_sp.getSelectedItem();
       if (tab.equals("cancel"))
          return (String)tivo_cancel.getSelectedItem();
+      if (tab.equals("search"))
+         return (String)tivo_search.getSelectedItem();
       if (tab.equals("rc"))
          return (String)tivo_rc.getSelectedItem();
       if (tab.equals("info"))
@@ -1595,6 +1902,8 @@ public class remotegui {
             tivo_sp.setSelectedItem(tivoName);
          if (tab.equals("cancel"))
             tivo_cancel.setSelectedItem(tivoName);
+         if (tab.equals("search"))
+            tivo_search.setSelectedItem(tivoName);
          if (tab.equals("rc"))
             tivo_rc.setSelectedItem(tivoName);
          if (tab.equals("info"))
@@ -1617,6 +1926,10 @@ public class remotegui {
          tab_cancel.TABLE.clearSelection();
          tab_cancel.clear();
       }
+      if (tableName.equals("search")) {
+         tab_search.TABLE.clearSelection();
+         tab_search.clear();
+      }
       if (tableName.equals("premiere")) {
          tab_premiere.TABLE.clearSelection();
          tab_premiere.clear();
@@ -1629,6 +1942,7 @@ public class remotegui {
       tivo_todo.removeAllItems();
       tivo_sp.removeAllItems();
       tivo_cancel.removeAllItems();
+      tivo_search.removeAllItems();
       tivo_rc.removeAllItems();
       tivo_info.removeAllItems();
       tivo_premiere.removeAllItems();
@@ -1638,6 +1952,7 @@ public class remotegui {
             tivo_todo.addItem(tivo_stack.get(i));
             tivo_sp.addItem(tivo_stack.get(i));
             tivo_cancel.addItem(tivo_stack.get(i));
+            tivo_search.addItem(tivo_stack.get(i));
             tivo_rc.addItem(tivo_stack.get(i));
             tivo_info.addItem(tivo_stack.get(i));
             tivo_premiere.addItem(tivo_stack.get(i));
@@ -2054,6 +2369,35 @@ public class remotegui {
          text += "then the scheduling will fail. i.e. Only schedules to record if there are no conflicts.";
       }
       else if (component.equals("refresh_cancel_folder")){
+         text = "<b>Back</b><br>";
+         text += "Return to top level folder view.";
+      }
+      else if (component.equals("tivo_search")) {
+         text = "Select TiVo for which to perform search with.";
+      }
+      else if (component.equals("button_search")) {
+         text = "Start a search of specified keywords.";
+      }
+      else if (component.equals("text_search")) {
+         text = "Specify keywords to search for. NOTE: Multiple words mean logical AND operation.<br>";
+         text += "To shorten search times include more words in the search. Very generic/short<br>";
+         text += "keywords will lead to much longer search times.";
+      }
+      else if (component.equals("max_search")) {
+         text = "Specify maximum number of hits to limit search to.<br>";
+         text += "Depending on keywords the higher you set this limit the longer the search will take.";
+      }
+      else if (component.equals("record_search")) {
+         text = "Schedule a one time recording of show selected in table below.";
+      }
+      else if (component.equals("record_sp_search")) {
+         text = "Create a season pass for show selected in table below.";
+      }
+      else if (component.equals("refresh_search_top")){
+         text = "<b>Refresh</b><br>";
+         text += "Click on a folder in table below to show related search matches.";
+      }
+      else if (component.equals("refresh_search_folder")){
          text = "<b>Back</b><br>";
          text += "Return to top level folder view.";
       }
