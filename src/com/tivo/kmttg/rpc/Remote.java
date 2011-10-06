@@ -133,7 +133,7 @@ public class Remote {
    }
    
    // NOTE: This retrieves and stores bodyId in config hashtable if not previously stored
-   private String bodyId_get() {
+   public String bodyId_get() {
       String id = config.bodyId_get(IP, port);
       if (id.equals("")) {
          JSONObject json = new JSONObject();
