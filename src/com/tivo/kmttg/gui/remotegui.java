@@ -1682,6 +1682,25 @@ public class remotegui {
    
    // Callback for Search tab "Season Pass" button
    private void search_sp_recordCB(final String tivoName) {
+      final int[] selected = tab_search.GetSelectedRows();
+      // First check if all selected entries are of type 'series'
+      for (int i=0; i<selected.length; ++i) {
+         int row = selected[i];
+         JSONObject json = tab_search.GetRowData(row);
+         if (json != null) {
+            try {
+               String type = json.getString("collectionType");
+               if (! type.equals("series")) {
+                  log.error("Selected entry not of type 'series': " + json.getString("title"));
+                  return;
+               }
+            } catch (JSONException e) {
+               log.error("search_sp_recordCB - " + e.getMessage());
+            }
+         }
+      }
+      
+      // Proceed with SP scheduling
       class backgroundRun extends SwingWorker<Object, Object> {
          protected Object doInBackground() {
             int[] selected = tab_search.GetSelectedRows();
@@ -1704,37 +1723,32 @@ public class remotegui {
                      json = tab_search.GetRowData(row);
                      if (json != null) {
                         try {
-                           String type = json.getString("collectionType");
-                           if (type.equals("series")) {
-                              String title = json.getString("title");
-                              // Check against existing
-                              Boolean schedule = true;
-                              for (int j=0; j<existing.length(); ++j) {
-                                 if(title.equals(existing.getJSONObject(j).getString("title")))
-                                    schedule = false;
-                              }
-                              
-                              // OK to subscribe
-                              if (schedule) {
-                                 if (spOpt == null)
-                                    spOpt = new spOptions();
-                                 JSONObject o = spOpt.promptUser("Create SP - " + title, null);
-                                 if (o != null) {
-                                    log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
-                                    JSONObject idSetSource = new JSONObject();
-                                    idSetSource.put("collectionId", json.getString("collectionId"));
-                                    idSetSource.put("type", "seasonPassSource");
-                                    idSetSource.put("channel", json.getJSONObject("channel"));
-                                    o.put("idSetSource", idSetSource);   
-                                    result = r.Command("seasonpass", o);
-                                    if (result != null)
-                                       log.print("success");
-                                 }
-                              } else {
-                                 log.warn("Existing SP with same title found, not scheduling: " + title);
+                           String title = json.getString("title");
+                           // Check against existing
+                           Boolean schedule = true;
+                           for (int j=0; j<existing.length(); ++j) {
+                              if(title.equals(existing.getJSONObject(j).getString("title")))
+                                 schedule = false;
+                           }
+                           
+                           // OK to subscribe
+                           if (schedule) {
+                              if (spOpt == null)
+                                 spOpt = new spOptions();
+                              JSONObject o = spOpt.promptUser("Create SP - " + title, null);
+                              if (o != null) {
+                                 log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
+                                 JSONObject idSetSource = new JSONObject();
+                                 idSetSource.put("collectionId", json.getString("collectionId"));
+                                 idSetSource.put("type", "seasonPassSource");
+                                 idSetSource.put("channel", json.getJSONObject("channel"));
+                                 o.put("idSetSource", idSetSource);   
+                                 result = r.Command("seasonpass", o);
+                                 if (result != null)
+                                    log.print("success");
                               }
                            } else {
-                              log.error("Selected title is not of type 'series'");
+                              log.warn("Existing SP with same title found, not scheduling: " + title);
                            }
                         } catch (JSONException e) {
                            log.error("search_sp_recordCB - " + e.getMessage());
