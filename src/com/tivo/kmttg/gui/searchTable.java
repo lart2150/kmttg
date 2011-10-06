@@ -406,7 +406,7 @@ public class searchTable {
       }
    }
       
-   // Add a non folder entry to table
+   // Add a row to table
    public void AddTABLERow(JSONObject entry, Boolean folder) {
       try {
          int cols = TITLE_cols.length;
