@@ -54,8 +54,13 @@ public class sortableDate {
       this.folderName = folderName;
       this.json = json;
       folder = true;
-      display = getTime(gmt);
-      sortable = "" + gmt;
+      if (gmt == 0) {
+         display = "";
+         sortable = "0";
+      } else {
+         display = getTime(gmt);
+         sortable = "" + gmt;
+      }
    }
    
    private String getTime(long gmt) {
