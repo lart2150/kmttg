@@ -30,6 +30,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
@@ -396,5 +397,73 @@ public class premiereTable {
          log.error("premiereTable getLongDate - " + e.getMessage());
          return 0;
        }
+    }
+    
+    // Schedule to record selected entries in tab_premiere.TABLE
+    public void recordSP(final String tivoName) {
+       class backgroundRun extends SwingWorker<Object, Object> {
+          protected Object doInBackground() {
+             int[] selected = GetSelectedRows();
+             if (selected.length > 0) {
+                int row;
+                JSONArray existing;
+                JSONObject json, result;
+                Remote r = new Remote(tivoName);
+                if (r.success) {
+                   // First load existing SPs from tivoName to check against
+                   existing = r.SeasonPasses(null);
+                   if (existing == null) {
+                      log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
+                      r.disconnect();
+                      return null;
+                   }
+                   // Now proceed with subscriptions
+                   for (int i=0; i<selected.length; ++i) {
+                      row = selected[i];
+                      json = GetRowData(row);
+                      if (json != null) {
+                         try {
+                            String title = json.getString("title");
+                            // Check against existing
+                            Boolean schedule = true;
+                            for (int j=0; j<existing.length(); ++j) {
+                               if(title.equals(existing.getJSONObject(j).getString("title")))
+                                  schedule = false;
+                            }
+                            
+                            // OK to subscribe
+                            if (schedule) {
+                               if (config.gui.remote_gui.spOpt == null)
+                                  config.gui.remote_gui.spOpt = new spOptions();
+                               JSONObject o = config.gui.remote_gui.spOpt.promptUser(
+                                  "Create SP - " + title, null
+                               );
+                               if (o != null) {
+                                  log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
+                                  JSONObject idSetSource = new JSONObject();
+                                  idSetSource.put("collectionId", json.getString("collectionId"));
+                                  idSetSource.put("type", "seasonPassSource");
+                                  idSetSource.put("channel", json.getJSONObject("channel"));
+                                  o.put("idSetSource", idSetSource);   
+                                  result = r.Command("seasonpass", o);
+                                  if (result != null)
+                                     log.print("success");
+                               }
+                            } else {
+                               log.warn("Existing SP with same title found, not scheduling: " + title);
+                            }
+                         } catch (JSONException e) {
+                            log.error("record_premiereCB - " + e.getMessage());
+                         }
+                      }
+                   }
+                   r.disconnect();
+                }
+             }
+             return null;
+          }
+       }
+       backgroundRun b = new backgroundRun();
+       b.execute();
     }
 }

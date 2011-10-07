@@ -32,8 +32,11 @@ import org.jdesktop.swingx.decorator.Sorter;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
+import com.tivo.kmttg.JSON.JSONFile;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.jobData;
+import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
@@ -653,6 +656,147 @@ public class spTable {
        } else {
           // Pass along keyboard action
           e.consume();
+       }
+    }
+    
+    public void SPListSave(String tivoName, String file) {
+       if (tivo_data.containsKey(tivoName) && tivo_data.get(tivoName).length() > 0) {
+          log.warn("Saving '" + tivoName + "' SP list to file: " + file);
+          JSONFile.write(tivo_data.get(tivoName), file);
+       } else {
+          log.error("No data available to save.");
+       }
+    }
+    
+    public void SPListLoad(String file) {
+       log.print("Loading SP data from file: " + file);
+       JSONArray data = JSONFile.readJSONArray(file);
+       if (data != null && data.length() > 0) {
+          clear();
+          AddRows(data);
+          updateTitleCols(" Loaded:");
+       }
+    }
+    
+    public void SPListCopy(final String tivoName) {
+       class backgroundRun extends SwingWorker<Object, Object> {
+          protected Object doInBackground() {
+             //SeasonPasses
+             int[] selected = GetSelectedRows();
+             if (selected.length > 0) {
+                int row;
+                JSONArray existing;
+                JSONObject json, result;
+                Remote r = new Remote(tivoName);
+                if (r.success) {
+                   // First load existing SPs from tivoName to check against
+                   existing = r.SeasonPasses(null);
+                   if (existing == null) {
+                      log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
+                      r.disconnect();
+                      return null;
+                   }
+                   // Now proceed with subscriptions
+                   log.print("Copying Season Passes to TiVo: " + tivoName);
+                   for (int i=0; i<selected.length; ++i) {
+                      row = selected[i];
+                      json = GetRowData(row);
+                      if (json != null) {
+                         try {
+                            // Check against existing
+                            Boolean schedule = true;
+                            for (int j=0; j<existing.length(); ++j) {
+                               if(json.getString("title").equals(existing.getJSONObject(j).getString("title")))
+                                  schedule = false;
+                            }
+                            
+                            // OK to subscribe
+                            if (schedule) {
+                               log.print("Scheduling: " + json.getString("title"));
+                               result = r.Command("seasonpass", json);
+                               if (result != null)
+                                  log.print("success");
+                            } else {
+                               log.warn("Existing SP with same title found, not scheduling: " + json.getString("title"));
+                            }
+                         } catch (JSONException e) {
+                            log.error("SPListCopy - " + e.getMessage());
+                         }
+                      }
+                   }
+                   r.disconnect();
+                }
+             }
+             return null;
+          }
+       }
+       backgroundRun b = new backgroundRun();
+       b.execute();
+    }
+    
+    public void SPListModify(final String tivoName) {
+       class backgroundRun extends SwingWorker<Object, Object> {
+          protected Object doInBackground() {
+             int[] selected = GetSelectedRows();
+             if (selected.length > 0) {
+                int row = selected[0];
+                JSONObject json = GetRowData(row);
+                if (json != null) {
+                   if (config.gui.remote_gui.spOpt == null)
+                      config.gui.remote_gui.spOpt = new spOptions();
+                   String title;
+                   try {
+                      title = json.getString("title");
+                      if (isTableLoaded()) {
+                         log.error("Cannot modify SPs from loaded file.");
+                         return null;
+                      }
+                      JSONObject result = config.gui.remote_gui.spOpt.promptUser(
+                         "Modify SP - " + title, json
+                      );
+                      if (result != null) {
+                         Remote r = new Remote(tivoName);
+                         if (r.success) {
+                            if (r.Command("modifySP", result) != null) {
+                               log.warn("Modified SP '" + title + "' for TiVo: " + tivoName);
+                            }
+                            
+                            // Update SP table
+                            JSONArray a = r.SeasonPasses(null);
+                            if( a != null) {
+                               clear();
+                               AddRows(tivoName, a);
+                               setSelectedRow(row);
+                            }
+                            
+                            r.disconnect();
+                         }
+                      }
+                   } catch (JSONException e) {
+                      log.error("SPListModify error: " + e.getMessage());
+                      return null;
+                   }
+                }
+             }
+             return null;
+          }
+       }
+       backgroundRun b = new backgroundRun();
+       b.execute();
+    }
+    
+    // Update SP priority order to match current SP table
+    public void SPReorderCB(String tivoName) {
+       JSONArray order = GetOrderedIds();
+       if (order != null) {
+          jobData job = new jobData();
+          job.source           = tivoName;
+          job.tivoName         = tivoName;
+          job.type             = "remote";
+          job.name             = "Remote";
+          job.remote_spreorder = true;
+          job.remote_orderIds  = order;
+          jobMonitor.submitNewJob(job);
        }
     }
 }

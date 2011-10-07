@@ -34,6 +34,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
@@ -628,5 +629,145 @@ public class searchTable {
         return 0;
       }
    }
+   
+   // Schedule a single recording
+   public void recordSingle(final String tivoName) {
+      final int[] selected = GetSelectedRows();
+      if (selected.length > 0) {
+         log.print("Scheduling individual recordings on TiVo: " + tivoName);
+         class backgroundRun extends SwingWorker<Object, Object> {
+            protected Object doInBackground() {
+               int row;
+               JSONObject json;
+               String title;
+               Remote r = new Remote(tivoName);
+               if (r.success) {
+                  try {
+                     for (int i=0; i<selected.length; ++i) {
+                        row = selected[i];
+                        json = GetRowData(row);
+                        title = GetRowTitle(row);
+                        if (json != null) {
+                           if (json.has("contentId") && json.has("offerId")) {
+                              if (config.gui.remote_gui.recordOpt == null)
+                                 config.gui.remote_gui.recordOpt = new recordOptions();
+                              JSONObject o = config.gui.remote_gui.recordOpt.promptUser(
+                                 "Schedule Recording - " + title, null
+                              );
+                              if (o != null) {
+                                 log.print("Scheduling Recording: '" + title + "' on TiVo: " + tivoName);
+                                 o.put("contentId", json.getString("contentId"));
+                                 o.put("offerId", json.getString("offerId"));
+                                 json = r.Command("singlerecording", o);
+                                 if (json == null) {
+                                    log.error("Failed to schedule recording for: '" + title + "'");
+                                 } else {
+                                    log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
+                                 }
+                              }
+                           } else {
+                              log.error("Missing contentId and/or offerId for: '" + title + "'");
+                           }
+                        }
+                     }
+                  } catch (JSONException e) {
+                     log.error("search_recordCB failed - " + e.getMessage());
+                  }
+                  r.disconnect();
+               }
+               return null;
+            }
+         }
+         backgroundRun b = new backgroundRun();
+         b.execute();
+      }
+   }
+   
+   // Create a Season Pass
+   public void recordSP(final String tivoName) {
+      final int[] selected = GetSelectedRows();
+      // First check if all selected entries are of type 'series'
+      for (int i=0; i<selected.length; ++i) {
+         int row = selected[i];
+         JSONObject json = GetRowData(row);
+         if (json != null) {
+            try {
+               String type = json.getString("collectionType");
+               if (! type.equals("series")) {
+                  log.error("Selected entry not of type 'series': " + json.getString("title"));
+                  return;
+               }
+            } catch (JSONException e) {
+               log.error("search_sp_recordCB - " + e.getMessage());
+               return;
+            }
+         }
+      }
 
+      // Proceed with SP scheduling
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            int[] selected = GetSelectedRows();
+            if (selected.length > 0) {
+               int row;
+               JSONArray existing;
+               JSONObject json, result;
+               Remote r = new Remote(tivoName);
+               if (r.success) {
+                  // First load existing SPs from tivoName to check against
+                  existing = r.SeasonPasses(null);
+                  if (existing == null) {
+                     log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
+                     r.disconnect();
+                     return null;
+                  }
+                  // Now proceed with subscriptions
+                  for (int i=0; i<selected.length; ++i) {
+                     row = selected[i];
+                     json = GetRowData(row);
+                     if (json != null) {
+                        try {
+                           String title = json.getString("title");
+                           // Check against existing
+                           Boolean schedule = true;
+                           for (int j=0; j<existing.length(); ++j) {
+                              if(title.equals(existing.getJSONObject(j).getString("title")))
+                                 schedule = false;
+                           }
+                           
+                           // OK to subscribe
+                           if (schedule) {
+                              if (config.gui.remote_gui.spOpt == null)
+                                 config.gui.remote_gui.spOpt = new spOptions();
+                              JSONObject o = config.gui.remote_gui.spOpt.promptUser(
+                                 "Create SP - " + title, null
+                              );
+                              if (o != null) {
+                                 log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
+                                 JSONObject idSetSource = new JSONObject();
+                                 idSetSource.put("collectionId", json.getString("collectionId"));
+                                 idSetSource.put("type", "seasonPassSource");
+                                 idSetSource.put("channel", json.getJSONObject("channel"));
+                                 o.put("idSetSource", idSetSource);   
+                                 result = r.Command("seasonpass", o);
+                                 if (result != null)
+                                    log.print("success");
+                              }
+                           } else {
+                              log.warn("Existing SP with same title found, not scheduling: " + title);
+                           }
+                        } catch (JSONException e) {
+                           log.error("search_sp_recordCB - " + e.getMessage());
+                        }
+                     }
+                  }
+                  r.disconnect();
+               }
+            }
+            return null;
+         }
+      }
+      backgroundRun b = new backgroundRun();
+      b.execute();
+   }
 }
