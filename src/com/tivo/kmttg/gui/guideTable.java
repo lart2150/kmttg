@@ -632,7 +632,7 @@ public class guideTable {
    private Stack<String> getDisplayTimeRange(long gmt, int hourIncrement, int numDays) {
       Stack<String> range = new Stack<String>();
       long increment = hourIncrement*60*60*1000;
-      long stop = gmt + numDays*24*60*60*1000;
+      long stop = gmt + (long)numDays*24*60*60*1000;
       long time = gmt;
       while (time <= stop) {
          range.add(getDisplayTime(time));
@@ -716,14 +716,22 @@ public class guideTable {
                   JSONObject result = r.Command("gridRowSearch", json);
                   r.disconnect();
                   if( result != null ) {
-                     clear();
-                     JSONArray matches = result.getJSONArray("gridRow").getJSONObject(0).getJSONArray("offer");
-                     for (int i=0; i<matches.length(); ++i) {
-                        AddTABLERow(matches.getJSONObject(i), false);
+                     if (result.has("gridRow")) {
+                        clear();
+                        JSONArray matches = result.getJSONArray("gridRow").getJSONObject(0).getJSONArray("offer");
+                        for (int i=0; i<matches.length(); ++i) {
+                           AddTABLERow(matches.getJSONObject(i), false);
+                        }
+                     } else {
+                        log.error(
+                           "No guide data available: start=" + minEndTime +
+                           ", channel=" + channel.getString("channelNumber")
+                        );
+                        
                      }
                   }                  
                } catch (JSONException e1) {
-                  log.error("RC keyPressed - " + e1.getMessage());
+                  log.error("updateFolder - " + e1.getMessage());
                }
             } // if r.success
             return null;
