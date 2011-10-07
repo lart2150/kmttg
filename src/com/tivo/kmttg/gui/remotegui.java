@@ -2172,10 +2172,17 @@ public class remotegui {
          text = "Select TiVo for which to retrieve guide listings.";
       }
       if (component.equals("guide_start")) {
-         text = "Select guide start date.";
+         text = "<b>Start</b><br>";
+         text += "Select guide start time to use when obtaining listings.<br>";
+         text += "NOTE: If you are inside a channel folder when you change this setting<br>";
+         text += "the guide listings will automatically update to new date.";
       }
       if (component.equals("guide_range")) {
-         text = "Select how many hours of guide information to retrieve.";
+         text = "<b>Range</b><br>";
+         text += "Select how many hours of guide information to retrieve.<br>";
+         text += "NOTE: You can type in a number (up to 12) and then press enter to update.<br>";
+         text += "NOTE: If you are inside a channel folder when you change this setting<br>";
+         text += "the guide listings will automatically update to new date.";
       }
       else if (component.equals("refresh_guide")){
          text = "<b>Channels</b><br>";
