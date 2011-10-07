@@ -51,7 +51,6 @@ import javax.swing.event.ChangeListener;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
-import com.tivo.kmttg.JSON.JSONFile;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -71,10 +70,18 @@ public class remotegui {
    private todoTable tab_todo = null;
    private JComboBox tivo_todo = null;
    
+   private guideTable tab_guide = null;
+   public  JButton refresh_guide = null;
+   private JComboBox tivo_guide = null;
+   private JComboBox guide_start = null;
+   private JSpinner  guide_range = null;
+   private int guide_hour_increment = 12; // Number of hours for date increment
+   private int guide_total_range = 11;    // Number of days
+   
    private spTable tab_sp = null;
    private JComboBox tivo_sp = null;
-   private spOptions spOpt = null;
-   private recordOptions recordOpt = null;
+   public  spOptions spOpt = null;
+   public  recordOptions recordOpt = null;
    
    private JComboBox tivo_info = null;
    JTextPane text_info = null;
@@ -165,6 +172,10 @@ public class remotegui {
                // Set focus on text_search field
                text_search.requestFocusInWindow();
             }
+            if (selected.equals("Guide")) {
+               // Reset date range in Guide start time combo box
+               tab_guide.setComboBoxDates(guide_start, guide_hour_increment, guide_total_range);
+            }
          }
      });
 
@@ -247,8 +258,157 @@ public class remotegui {
       c.gridwidth = 8;
       c.fill = GridBagConstraints.BOTH;
       panel_todo.add(tabScroll_todo, c);
+      
+      // Guide Tab items
+      gy = 0;
+      c.ipady = 0;
+      c.weighty = 0.0;  // default to no vertical stretch
+      c.weightx = 0.0;  // default to no horizontal stretch
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      c.gridheight = 1;
+      c.anchor = GridBagConstraints.CENTER;
+      c.fill = GridBagConstraints.HORIZONTAL;
+      JPanel panel_guide = new JPanel();
+      
+      panel_guide.setLayout(new GridBagLayout());
+      
+      JPanel row1_guide = new JPanel();
+      row1_guide.setLayout(new BoxLayout(row1_guide, BoxLayout.LINE_AXIS));
+      
+      JLabel title_guide = new JLabel("Guide");
+      
+      JLabel tivo_guide_label = new javax.swing.JLabel();
+      
+      tivo_guide = new javax.swing.JComboBox();
+      tivo_guide.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+                tab_guide.TABLE.clearSelection();
+                tab_guide.clear();
+                String tivoName = getTivoName("guide");
+                if (tab_guide.tivo_data.containsKey(tivoName))
+                   tab_guide.AddRows(tivoName, tab_guide.tivo_data.get(tivoName));
+            }
+         }
+      });
+      tivo_guide.setToolTipText(getToolTip("tivo_guide"));
+      
+      JLabel guide_start_label = new JLabel("Start");
+      guide_start = new javax.swing.JComboBox();
+      guide_start.setToolTipText(getToolTip("guide_start"));
+      guide_start.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+                if (tab_guide.inFolder) {
+                   String start = (String)guide_start.getSelectedItem();
+                   if (start != null && start.length() > 0) {
+                      int range = (Integer)guide_range.getValue();
+                      tab_guide.updateFolder(start, range);
+                   }
+                }
+            }
+         }
+      });
+
+      
+      JLabel guide_range_label = new JLabel("Range");
+      SpinnerModel guide_range_spinner = new SpinnerNumberModel(6, 1, 12, 1);
+      guide_range = new javax.swing.JSpinner(guide_range_spinner);
+      guide_range.setToolTipText(getToolTip("guide_range"));
+      guide_range.addChangeListener(new ChangeListener() {
+         public void stateChanged(ChangeEvent e) {
+            if (tab_guide.inFolder) {
+               String start = (String)guide_start.getSelectedItem();
+               if (start != null && start.length() > 0) {
+                  int range = (Integer)guide_range.getValue();
+                  tab_guide.updateFolder(start, range);
+               }
+            }
+         }
+      });
+
+      refresh_guide = new JButton("Channels");
+      refresh_guide.setToolTipText(getToolTip("refresh_guide"));
+      refresh_guide.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            if (tab_guide.inFolder) {
+               // Return from inside a folder to top level table display
+               tab_guide.setFolderState(false);
+               tab_guide.Refresh((JSONArray)null);
+               if (tab_guide.folderEntryNum >= 0)
+                  tab_guide.SelectFolder(tab_guide.folderName);
+            } else {
+               // At top level => Update current folder contents
+               tab_guide.TABLE.clearSelection();
+               tab_guide.clear();
+               String tivoName = (String)tivo_guide.getSelectedItem();
+               if (tivoName != null && tivoName.length() > 0) {
+                  // Obtain and display channel list only if necessary
+                  tab_guide.updateChannels(tivoName);
+               }
+            }
+         }
+      });
+
+      JButton guide_record = new JButton("Record");
+      guide_record.setToolTipText(getToolTip("guide_record"));
+      guide_record.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_guide.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               tab_guide.recordSingle(tivoName);
+            }
+         }
+      });
+
+      JButton guide_recordSP = new JButton("Season Pass");
+      guide_recordSP.setToolTipText(getToolTip("guide_recordSP"));
+      guide_recordSP.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_guide.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               tab_guide.recordSingle(tivoName);
+            }
+         }
+      });
+      
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(title_guide);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(tivo_guide_label);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(tivo_guide);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(guide_start_label);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(guide_start);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(guide_range_label);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(guide_range);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(refresh_guide);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(guide_record);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(guide_recordSP);
+      panel_guide.add(row1_guide, c);
+      
+      tab_guide = new guideTable(dialog);
+      tab_guide.TABLE.setPreferredScrollableViewportSize(tab_guide.TABLE.getPreferredSize());
+      JScrollPane tabScroll_guide = new JScrollPane(tab_guide.scroll);
+      gy++;
+      c.gridy = gy;
+      c.weightx = 1.0;
+      c.weighty = 1.0;
+      c.gridwidth = 8;
+      c.fill = GridBagConstraints.BOTH;
+      panel_guide.add(tabScroll_guide, c);
             
       // Season Passes Tab items      
+      gy = 0;
       c.ipady = 0;
       c.weighty = 0.0;  // default to no vertical stretch
       c.weightx = 0.0;  // default to no horizontal stretch
@@ -309,7 +469,7 @@ public class remotegui {
                   int result = Browser.showDialog(dialog, "Save to file");
                   if (result == JFileChooser.APPROVE_OPTION) {               
                      File file = Browser.getSelectedFile();
-                     SPListSave(tivoName, file.getAbsolutePath());
+                     tab_sp.SPListSave(tivoName, file.getAbsolutePath());
                   }
                }
             }
@@ -325,7 +485,7 @@ public class remotegui {
             int result = Browser.showDialog(dialog, "Load from file");
             if (result == JFileChooser.APPROVE_OPTION) {               
                File file = Browser.getSelectedFile();
-               SPListLoad(file.getAbsolutePath());
+               tab_sp.SPListLoad(file.getAbsolutePath());
             }
          }
       });         
@@ -337,7 +497,7 @@ public class remotegui {
             // Copy selected SPs to a TiVo
             String tivoName = (String)tivo_sp.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0)
-               SPListCopy(tivoName);
+               tab_sp.SPListCopy(tivoName);
          }
       });         
       
@@ -352,7 +512,7 @@ public class remotegui {
                   log.error("Cannot modify loaded Season Passes");
                   return;
                }  else {
-                  SPListModify(tivoName);
+                  tab_sp.SPListModify(tivoName);
                }
             }
          }
@@ -369,7 +529,7 @@ public class remotegui {
                   log.error("Cannot re-order loaded Season Passes");
                   return;
                }  else {
-                  SPReorderCB(tivoName);
+                  tab_sp.SPReorderCB(tivoName);
                }
             }
          }
@@ -407,6 +567,7 @@ public class remotegui {
       panel_sp.add(tabScroll_sp, c);
       
       // Cancelled table items      
+      gy = 0;
       c.ipady = 0;
       c.weighty = 0.0;  // default to no vertical stretch
       c.weightx = 0.0;  // default to no horizontal stretch
@@ -466,7 +627,7 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             String tivoName = (String)tivo_cancel.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0)
-               record_cancelCB(tivoName);
+               tab_cancel.recordSingle(tivoName);
          }
       });
       
@@ -496,6 +657,7 @@ public class remotegui {
       panel_cancel.add(tabScroll_cancel, c);
       
       // Premiere tab items      
+      gy = 0;
       c.ipady = 0;
       c.weighty = 0.0;  // default to no vertical stretch
       c.weightx = 0.0;  // default to no horizontal stretch
@@ -546,7 +708,7 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             String tivoName = (String)tivo_premiere.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0)
-               record_premiereCB(tivoName);
+               tab_premiere.recordSP(tivoName);
          }
       });
       
@@ -609,6 +771,7 @@ public class remotegui {
       panel_premiere.add(row2_premiere, c);
       
       // System Information tab items      
+      gy = 0;
       c.ipady = 0;
       c.weighty = 0.0;  // default to no vertical stretch
       c.weightx = 0.0;  // default to no horizontal stretch
@@ -671,6 +834,7 @@ public class remotegui {
       panel_info.add(tabScroll_info, c);
       
       // Search tab items      
+      gy = 0;
       c.ipady = 0;
       c.weighty = 0.0;  // default to no vertical stretch
       c.weightx = 0.0;  // default to no horizontal stretch
@@ -742,7 +906,7 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             String tivoName = (String)tivo_search.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               search_recordCB(tivoName);
+               tab_search.recordSingle(tivoName);
             }
          }
       });
@@ -753,7 +917,7 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             String tivoName = (String)tivo_search.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               search_sp_recordCB(tivoName);
+               tab_search.recordSP(tivoName);
             }
          }
       });
@@ -795,6 +959,7 @@ public class remotegui {
       panel_search.add(tabScroll_search, c);
 
       // Remote Control Tab items
+      gy = 0;
       
       // TiVo Remote control panel
       JPanel panel_controls = new JPanel();
@@ -1144,6 +1309,7 @@ public class remotegui {
       tabbed_panel.add("Won't Record", panel_cancel);
       tabbed_panel.add("Season Premieres", panel_premiere);
       tabbed_panel.add("Search", panel_search);
+      tabbed_panel.add("Guide", panel_guide);
       tabbed_panel.add("Remote", panel_rc);
       tabbed_panel.add("Info", panel_info);
       
@@ -1156,6 +1322,7 @@ public class remotegui {
       dialog.setSize((int)(frame.getSize().width/1.3), (int)(frame.getSize().height/2));
       dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
       tab_todo.packColumns(tab_todo.TABLE, 2);
+      tab_guide.packColumns(tab_guide.TABLE, 2);
       tab_sp.packColumns(tab_sp.TABLE, 2);
       tab_cancel.packColumns(tab_sp.TABLE, 2);
       tab_search.packColumns(tab_search.TABLE, 2);
@@ -1344,53 +1511,6 @@ public class remotegui {
       */
    }
    
-   // Schedule to record selected entries in tab_cancel.TABLE
-   private void record_cancelCB(final String tivoName) {
-      final int[] selected = tab_cancel.GetSelectedRows();
-      if (selected.length > 0) {
-         log.print("Scheduling individual recordings on TiVo: " + tivoName);
-         class backgroundRun extends SwingWorker<Object, Object> {
-            protected Object doInBackground() {
-               int row;
-               JSONObject json;
-               String title;
-               Remote r = new Remote(tivoName);
-               if (r.success) {
-                  try {
-                     for (int i=0; i<selected.length; ++i) {
-                        row = selected[i];
-                        json = tab_cancel.GetRowData(row);
-                        title = tab_cancel.GetRowTitle(row);
-                        if (json != null) {
-                           if (recordOpt == null)
-                              recordOpt = new recordOptions();
-                           JSONObject o = recordOpt.promptUser("Schedule Recording - " + title, null);
-                           if (o != null) {
-                              log.print("Scheduling Recording: '" + title + "' on TiVo: " + tivoName);
-                              o.put("contentId", json.getString("contentId"));
-                              o.put("offerId", json.getString("offerId"));
-                              json = r.Command("singlerecording", o);
-                              if (json == null) {
-                                 log.error("Failed to schedule recording for: '" + title + "'");
-                              } else {
-                                 log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
-                              }
-                           }
-                        }
-                     }
-                  } catch (JSONException e) {
-                     log.error("record_cancelCB failed - " + e.getMessage());
-                  }
-                  r.disconnect();
-               }
-               return null;
-            }
-         }
-         backgroundRun b = new backgroundRun();
-         b.execute();
-      }
-   }
-   
    private void RC_infoCB(final String tivoName) {
       class backgroundRun extends SwingWorker<Object, Object> {
          protected Boolean doInBackground() {
@@ -1458,145 +1578,6 @@ public class remotegui {
       b.execute();
    }
    
-   private void SPListSave(String tivoName, String file) {
-      if (tab_sp.tivo_data.containsKey(tivoName) && tab_sp.tivo_data.get(tivoName).length() > 0) {
-         log.warn("Saving '" + tivoName + "' SP list to file: " + file);
-         JSONFile.write(tab_sp.tivo_data.get(tivoName), file);
-      } else {
-         log.error("No data available to save.");
-      }
-   }
-   
-   private void SPListLoad(String file) {
-      log.print("Loading SP data from file: " + file);
-      JSONArray data = JSONFile.readJSONArray(file);
-      if (data != null && data.length() > 0) {
-         tab_sp.clear();
-         tab_sp.AddRows(data);
-         tab_sp.updateTitleCols(" Loaded:");
-      }
-   }
-   
-   private void SPListCopy(final String tivoName) {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Object doInBackground() {
-            //SeasonPasses
-            int[] selected = tab_sp.GetSelectedRows();
-            if (selected.length > 0) {
-               int row;
-               JSONArray existing;
-               JSONObject json, result;
-               Remote r = new Remote(tivoName);
-               if (r.success) {
-                  // First load existing SPs from tivoName to check against
-                  existing = r.SeasonPasses(null);
-                  if (existing == null) {
-                     log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
-                     r.disconnect();
-                     return null;
-                  }
-                  // Now proceed with subscriptions
-                  log.print("Copying Season Passes to TiVo: " + tivoName);
-                  for (int i=0; i<selected.length; ++i) {
-                     row = selected[i];
-                     json = tab_sp.GetRowData(row);
-                     if (json != null) {
-                        try {
-                           // Check against existing
-                           Boolean schedule = true;
-                           for (int j=0; j<existing.length(); ++j) {
-                              if(json.getString("title").equals(existing.getJSONObject(j).getString("title")))
-                                 schedule = false;
-                           }
-                           
-                           // OK to subscribe
-                           if (schedule) {
-                              log.print("Scheduling: " + json.getString("title"));
-                              result = r.Command("seasonpass", json);
-                              if (result != null)
-                                 log.print("success");
-                           } else {
-                              log.warn("Existing SP with same title found, not scheduling: " + json.getString("title"));
-                           }
-                        } catch (JSONException e) {
-                           log.error("SPListCopy - " + e.getMessage());
-                        }
-                     }
-                  }
-                  r.disconnect();
-               }
-            }
-            return null;
-         }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
-   }
-   
-   private void SPListModify(final String tivoName) {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Object doInBackground() {
-            int[] selected = tab_sp.GetSelectedRows();
-            if (selected.length > 0) {
-               int row = selected[0];
-               JSONObject json = tab_sp.GetRowData(row);
-               if (json != null) {
-                  if (spOpt == null)
-                     spOpt = new spOptions();
-                  String title;
-                  try {
-                     title = json.getString("title");
-                     if (tab_sp.isTableLoaded()) {
-                        log.error("Cannot modify SPs from loaded file.");
-                        return null;
-                     }
-                     JSONObject result = spOpt.promptUser("Modify SP - " + title, json);
-                     if (result != null) {
-                        Remote r = new Remote(tivoName);
-                        if (r.success) {
-                           if (r.Command("modifySP", result) != null) {
-                              log.warn("Modified SP '" + title + "' for TiVo: " + tivoName);
-                           }
-                           
-                           // Update SP table
-                           JSONArray a = r.SeasonPasses(null);
-                           if( a != null) {
-                              tab_sp.clear();
-                              tab_sp.AddRows(tivoName, a);
-                              tab_sp.setSelectedRow(row);
-                           }
-                           
-                           r.disconnect();
-                        }
-                     }
-                  } catch (JSONException e) {
-                     log.error("SPListModify error: " + e.getMessage());
-                     return null;
-                  }
-               }
-            }
-            return null;
-         }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
-   }
-   
-   // Update SP priority order to match current SP table
-   private void SPReorderCB(String tivoName) {
-      JSONArray order = tab_sp.GetOrderedIds();
-      if (order != null) {
-         jobData job = new jobData();
-         job.source           = tivoName;
-         job.tivoName         = tivoName;
-         job.type             = "remote";
-         job.name             = "Remote";
-         job.remote_spreorder = true;
-         job.remote_orderIds  = order;
-         jobMonitor.submitNewJob(job);
-      }
-   }
-   
    // TiVo selection changed for Search tab
    public void tivo_searchCB() {
       // NOTE: Don't want to reset table in case we want to record a show on another TiVo
@@ -1627,142 +1608,6 @@ public class remotegui {
       job.remote_search         = true;
       job.remote_search_keyword = keyword;
       jobMonitor.submitNewJob(job);
-   }
-   
-   // Callback for Search tab "Record" button
-   private void search_recordCB(final String tivoName) {
-      final int[] selected = tab_search.GetSelectedRows();
-      if (selected.length > 0) {
-         log.print("Scheduling individual recordings on TiVo: " + tivoName);
-         class backgroundRun extends SwingWorker<Object, Object> {
-            protected Object doInBackground() {
-               int row;
-               JSONObject json;
-               String title;
-               Remote r = new Remote(tivoName);
-               if (r.success) {
-                  try {
-                     for (int i=0; i<selected.length; ++i) {
-                        row = selected[i];
-                        json = tab_search.GetRowData(row);
-                        title = tab_search.GetRowTitle(row);
-                        if (json != null) {
-                           if (json.has("contentId") && json.has("offerId")) {
-                              if (recordOpt == null)
-                                 recordOpt = new recordOptions();
-                              JSONObject o = recordOpt.promptUser("Schedule Recording - " + title, null);
-                              if (o != null) {
-                                 log.print("Scheduling Recording: '" + title + "' on TiVo: " + tivoName);
-                                 o.put("contentId", json.getString("contentId"));
-                                 o.put("offerId", json.getString("offerId"));
-                                 json = r.Command("singlerecording", o);
-                                 if (json == null) {
-                                    log.error("Failed to schedule recording for: '" + title + "'");
-                                 } else {
-                                    log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
-                                 }
-                              }
-                           } else {
-                              log.error("Missing contentId and/or offerId for: '" + title + "'");
-                           }
-                        }
-                     }
-                  } catch (JSONException e) {
-                     log.error("search_recordCB failed - " + e.getMessage());
-                  }
-                  r.disconnect();
-               }
-               return null;
-            }
-         }
-         backgroundRun b = new backgroundRun();
-         b.execute();
-      }
-   }
-   
-   // Callback for Search tab "Season Pass" button
-   private void search_sp_recordCB(final String tivoName) {
-      final int[] selected = tab_search.GetSelectedRows();
-      // First check if all selected entries are of type 'series'
-      for (int i=0; i<selected.length; ++i) {
-         int row = selected[i];
-         JSONObject json = tab_search.GetRowData(row);
-         if (json != null) {
-            try {
-               String type = json.getString("collectionType");
-               if (! type.equals("series")) {
-                  log.error("Selected entry not of type 'series': " + json.getString("title"));
-                  return;
-               }
-            } catch (JSONException e) {
-               log.error("search_sp_recordCB - " + e.getMessage());
-            }
-         }
-      }
-      
-      // Proceed with SP scheduling
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Object doInBackground() {
-            int[] selected = tab_search.GetSelectedRows();
-            if (selected.length > 0) {
-               int row;
-               JSONArray existing;
-               JSONObject json, result;
-               Remote r = new Remote(tivoName);
-               if (r.success) {
-                  // First load existing SPs from tivoName to check against
-                  existing = r.SeasonPasses(null);
-                  if (existing == null) {
-                     log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
-                     r.disconnect();
-                     return null;
-                  }
-                  // Now proceed with subscriptions
-                  for (int i=0; i<selected.length; ++i) {
-                     row = selected[i];
-                     json = tab_search.GetRowData(row);
-                     if (json != null) {
-                        try {
-                           String title = json.getString("title");
-                           // Check against existing
-                           Boolean schedule = true;
-                           for (int j=0; j<existing.length(); ++j) {
-                              if(title.equals(existing.getJSONObject(j).getString("title")))
-                                 schedule = false;
-                           }
-                           
-                           // OK to subscribe
-                           if (schedule) {
-                              if (spOpt == null)
-                                 spOpt = new spOptions();
-                              JSONObject o = spOpt.promptUser("Create SP - " + title, null);
-                              if (o != null) {
-                                 log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
-                                 JSONObject idSetSource = new JSONObject();
-                                 idSetSource.put("collectionId", json.getString("collectionId"));
-                                 idSetSource.put("type", "seasonPassSource");
-                                 idSetSource.put("channel", json.getJSONObject("channel"));
-                                 o.put("idSetSource", idSetSource);   
-                                 result = r.Command("seasonpass", o);
-                                 if (result != null)
-                                    log.print("success");
-                              }
-                           } else {
-                              log.warn("Existing SP with same title found, not scheduling: " + title);
-                           }
-                        } catch (JSONException e) {
-                           log.error("search_sp_recordCB - " + e.getMessage());
-                        }
-                     }
-                  }
-                  r.disconnect();
-               }
-            }
-            return null;
-         }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
    }
 
    // TiVo selection changed for Premieres tab
@@ -1817,81 +1662,28 @@ public class remotegui {
       job.premiere        = tab_premiere;
       jobMonitor.submitNewJob(job);
    }
-   
-   // Schedule to record selected entries in tab_premiere.TABLE
-   private void record_premiereCB(final String tivoName) {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Object doInBackground() {
-            int[] selected = tab_premiere.GetSelectedRows();
-            if (selected.length > 0) {
-               int row;
-               JSONArray existing;
-               JSONObject json, result;
-               Remote r = new Remote(tivoName);
-               if (r.success) {
-                  // First load existing SPs from tivoName to check against
-                  existing = r.SeasonPasses(null);
-                  if (existing == null) {
-                     log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
-                     r.disconnect();
-                     return null;
-                  }
-                  // Now proceed with subscriptions
-                  for (int i=0; i<selected.length; ++i) {
-                     row = selected[i];
-                     json = tab_premiere.GetRowData(row);
-                     if (json != null) {
-                        try {
-                           String title = json.getString("title");
-                           // Check against existing
-                           Boolean schedule = true;
-                           for (int j=0; j<existing.length(); ++j) {
-                              if(title.equals(existing.getJSONObject(j).getString("title")))
-                                 schedule = false;
-                           }
-                           
-                           // OK to subscribe
-                           if (schedule) {
-                              if (spOpt == null)
-                                 spOpt = new spOptions();
-                              JSONObject o = spOpt.promptUser("Create SP - " + title, null);
-                              if (o != null) {
-                                 log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
-                                 JSONObject idSetSource = new JSONObject();
-                                 idSetSource.put("collectionId", json.getString("collectionId"));
-                                 idSetSource.put("type", "seasonPassSource");
-                                 idSetSource.put("channel", json.getJSONObject("channel"));
-                                 o.put("idSetSource", idSetSource);   
-                                 result = r.Command("seasonpass", o);
-                                 if (result != null)
-                                    log.print("success");
-                              }
-                           } else {
-                              log.warn("Existing SP with same title found, not scheduling: " + title);
-                           }
-                        } catch (JSONException e) {
-                           log.error("record_premiereCB - " + e.getMessage());
-                        }
-                     }
-                  }
-                  r.disconnect();
-               }
-            }
-            return null;
-         }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
-   }
             
    public void display() {
-      if (dialog != null)
+      if (dialog != null) {
          dialog.setVisible(true);
+         // Reset date range in Guide start time combo box
+         tab_guide.setComboBoxDates(guide_start, guide_hour_increment, guide_total_range);
+      }
+   }
+   
+   public String getGuideStartTime() {
+      return (String)guide_start.getSelectedItem();
+   }
+   
+   public int getGuideRange() {
+      return (Integer)guide_range.getValue();
    }
    
    public String getTivoName(String tab) {
       if (tab.equals("todo"))
          return (String)tivo_todo.getSelectedItem();
+      if (tab.equals("guide"))
+         return (String)tivo_guide.getSelectedItem();
       if (tab.equals("sp"))
          return (String)tivo_sp.getSelectedItem();
       if (tab.equals("cancel"))
@@ -1912,6 +1704,8 @@ public class remotegui {
       if ( ! tivoName.equals(current)) {
          if (tab.equals("todo"))
             tivo_todo.setSelectedItem(tivoName);
+         if (tab.equals("guide"))
+            tivo_guide.setSelectedItem(tivoName);
          if (tab.equals("sp"))
             tivo_sp.setSelectedItem(tivoName);
          if (tab.equals("cancel"))
@@ -1936,6 +1730,10 @@ public class remotegui {
          tab_todo.TABLE.clearSelection();
          tab_todo.clear();
       }
+      if (tableName.equals("guide")) {
+         tab_guide.TABLE.clearSelection();
+         tab_guide.clear();
+      }
       if (tableName.equals("cancel")) {
          tab_cancel.TABLE.clearSelection();
          tab_cancel.clear();
@@ -1954,6 +1752,7 @@ public class remotegui {
       tivo_count = 0;
       Stack<String> tivo_stack = config.getTivoNames();
       tivo_todo.removeAllItems();
+      tivo_guide.removeAllItems();
       tivo_sp.removeAllItems();
       tivo_cancel.removeAllItems();
       tivo_search.removeAllItems();
@@ -1964,6 +1763,7 @@ public class remotegui {
          if (config.getRpcSetting(tivo_stack.get(i)).equals("1")) {
             tivo_count++;
             tivo_todo.addItem(tivo_stack.get(i));
+            tivo_guide.addItem(tivo_stack.get(i));
             tivo_sp.addItem(tivo_stack.get(i));
             tivo_cancel.addItem(tivo_stack.get(i));
             tivo_search.addItem(tivo_stack.get(i));
@@ -2368,6 +2168,33 @@ public class remotegui {
          text += "Cancel ToDo recordings selected in table below. As a shortcut you can also use the<br>";
          text += "<b>Delete</b> keyboard button to cancel selected shows in the table as well.";
       }
+      if (component.equals("tivo_guide")) {
+         text = "Select TiVo for which to retrieve guide listings.";
+      }
+      if (component.equals("guide_start")) {
+         text = "Select guide start date.";
+      }
+      if (component.equals("guide_range")) {
+         text = "Select how many hours of guide information to retrieve.";
+      }
+      else if (component.equals("refresh_guide")){
+         text = "<b>Channels</b><br>";
+         text += "Retrieve list of channels for this TiVo if necessary.";
+      }
+      else if (component.equals("refresh_search_folder")){
+         text = "<b>Back</b><br>";
+         text += "Return to top level folder view.";
+      }
+      else if (component.equals("guide_record")){
+         text = "<b>Record</b><br>";
+         text += "Schedule to record selected individual show(s) in table on specified TiVo.<br>";
+         text += "NOTE: The scheduling uses low priority such that if there are no time slots available<br>";
+         text += "then the scheduling will fail. i.e. Only schedules to record if there are no conflicts.";
+      }
+      else if (component.equals("guide_recordSP")){
+         text = "<b>Season Pass</b><br>";
+         text += "Create a season pass for show selected in table below.";
+      }
       else if (component.equals("tivo_cancel")) {
          text = "Select TiVo for which to display list of shows that will not record.";
       }
@@ -2390,7 +2217,8 @@ public class remotegui {
          text = "Select TiVo for which to perform search with.";
       }
       else if (component.equals("button_search")) {
-         text = "Start a search of specified keywords.";
+         text = "<b>Search</b><br>";
+         text += "Start a search of specified keywords.";
       }
       else if (component.equals("text_search")) {
          text = "Specify keywords to search for. NOTE: Multiple words mean logical AND operation.<br>";
@@ -2398,14 +2226,19 @@ public class remotegui {
          text += "keywords will lead to much longer search times.";
       }
       else if (component.equals("max_search")) {
-         text = "Specify maximum number of hits to limit search to.<br>";
+         text = "<b>Max</b><br>";
+         text += "Specify maximum number of hits to limit search to.<br>";
          text += "Depending on keywords the higher you set this limit the longer the search will take.";
       }
       else if (component.equals("record_search")) {
-         text = "Schedule a one time recording of show selected in table below.";
+         text = "<b>Record</b><br>";
+         text += "Schedule a one time recording of show selected in table below.";
       }
       else if (component.equals("record_sp_search")) {
-         text = "Create a season pass for show selected in table below.";
+         text = "<b>Season Pass</b><br>";
+         text += "Create a season pass for show selected in table below.<br>";
+         text += "NOTE: The scheduling uses low priority such that if there are no time slots available<br>";
+         text += "then the scheduling will fail. i.e. Only schedules to record if there are no conflicts.";
       }
       else if (component.equals("refresh_search_top")){
          text = "<b>Refresh</b><br>";
@@ -2493,7 +2326,7 @@ public class remotegui {
          text += "up a dialog with season pass options that can be modified.";
       }
       else if (component.equals("reorder_sp")){
-         text = "<b>Reorder</b><br>";
+         text = "<b>Re-order</b><br>";
          text += "This is used to change priority order of season passes on selected TiVo to match the current<br>";
          text += "order displayed in the table. In order to change row order in the table you can use the mouse<br>";
          text += "to drag and drop rows to new locations. You can also select a row in the table and use the keyboard<br>";
@@ -2518,134 +2351,142 @@ public class remotegui {
          text += "using <b>Space bar</b> to play, <b>Delete</b> button to delete.<br>";
          text += "NOTE: Only 1 item can be deleted or played at a time.";
       }
+      else if (component.equals("refresh_info")){
+         text = "<b>Refresh</b><br>";
+         text += "Retrieve system information for selected TiVo.";
+      }
       else if (component.equals("rc_jumpto_text")) {
-         text = "Set playback position to exactly this number of minutes into the show.";
+         text = "<b>Jump to minute</b><br>";
+         text += "Set playback position to exactly this number of minutes into the show.";
       }
       else if (component.equals("rc_jumpahead_text")) {
-         text = "Set playback position this number of minutes ahead of current position.";
+         text = "<b>Skip minutes ahead</b><br>";
+         text += "Set playback position this number of minutes ahead of current position.";
       }
       else if (component.equals("rc_jumpback_text")) {
-         text = "Set playback position this number of minutes behind current position.";
+         text = "<b>Skip minutes back</b><br>";
+         text += "Set playback position this number of minutes behind current position.";
       }
       else if (component.equals("rc_hme_button")) {
-         text = "Jump to the specified HME application for the selected TiVo.";
+         text = "<b>HME Jump</b><br>";
+         text += "Jump to the specified HME application for the selected TiVo.";
       }
       else if (component.equals("hme_rc")) {
          text = "Select which HME application you want to jump to for selected TiVo.";
       }
       else if (component.equals("channelUp")) {
-         text += "pg up";
+         text = "pg up";
       }
       else if (component.equals("channelDown")) {
-         text += "pg down";
+         text = "pg down";
       }
       else if (component.equals("left")) {
-         text += "left arrow";
+         text = "left arrow";
       }
       else if (component.equals("zoom")) {
-         text += "Alt z";
+         text = "Alt z";
       }
       else if (component.equals("tivo")) {
-         text += "Alt t";
+         text = "Alt t";
       }
       else if (component.equals("up")) {
-         text += "up arrow";
+         text = "up arrow";
       }
       else if (component.equals("select")) {
-         text += "Alt s";
+         text = "Alt s";
       }
       else if (component.equals("down")) {
-         text += "down arrow";
+         text = "down arrow";
       }
       else if (component.equals("liveTv")) {
-         text += "Alt l";
+         text = "Alt l";
       }
       else if (component.equals("info")) {
-         text += "Alt i";
+         text = "Alt i";
       }
       else if (component.equals("right")) {
-         text += "right arrow";
+         text = "right arrow";
       }
       else if (component.equals("guide")) {
-         text += "Alt g";
+         text = "Alt g";
       }
       else if (component.equals("num1")) {
-         text += "1";
+         text = "1";
       }
       else if (component.equals("num2")) {
-         text += "2";
+         text = "2";
       }
       else if (component.equals("num3")) {
-         text += "3";
+         text = "3";
       }
       else if (component.equals("num4")) {
-         text += "4";
+         text = "4";
       }
       else if (component.equals("num5")) {
-         text += "5";
+         text = "5";
       }
       else if (component.equals("num6")) {
-         text += "6";
+         text = "6";
       }
       else if (component.equals("num7")) {
-         text += "7";
+         text = "7";
       }
       else if (component.equals("num8")) {
-         text += "8";
+         text = "8";
       }
       else if (component.equals("num9")) {
-         text += "9";
+         text = "9";
       }
       else if (component.equals("clear")) {
-         text += "delete";
+         text = "delete";
       }
       else if (component.equals("num0")) {
-         text += "0";
+         text = "0";
       }
       else if (component.equals("enter")) {
-         text += "enter";
+         text = "enter";
       }
       else if (component.equals("actionA")) {
-         text += "Alt a";
+         text = "Alt a";
       }
       else if (component.equals("actionB")) {
-         text += "Alt b";
+         text = "Alt b";
       }
       else if (component.equals("actionC")) {
-         text += "Alt c";
+         text = "Alt c";
       }
       else if (component.equals("actionD")) {
-         text += "Alt d";
+         text = "Alt d";
       }
       else if (component.equals("thumbsDown")) {
-         text += "KP -";
+         text = "KP -";
       }
       else if (component.equals("reverse")) {
-         text += "&lt";
+         text = "&lt";
       }
       else if (component.equals("replay")) {
-         text += "(";
+         text = "(";
       }
       else if (component.equals("play")) {
-         text += "]";
+         text = "]";
       }
       else if (component.equals("pause")) {
-         text += "[";
+         text = "[";
       }
       else if (component.equals("slow")) {
-         text += "|";
+         text = "|";
       }
       else if (component.equals("record")) {
-         text += "Alt r";
+         text = "Alt r";
       }
       else if (component.equals("thumbsUp")) {
-         text += "KP +";
+         text = "KP +";
       }
       else if (component.equals("forward")) {
-         text += "&gt";
+         text = "&gt";
       }
       else if (component.equals("advance")) {
-         text += ")";
+         text = ")";
       }      
       else if (component.equals("sps9s")){
          text = "<b>Clock: SPS9S</b><br>";
