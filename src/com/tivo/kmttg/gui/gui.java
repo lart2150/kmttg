@@ -65,7 +65,6 @@ public class gui {
    private JMenuItem resetServerMenuItem = null;
    private JMenuItem saveJobsMenuItem = null;
    private JMenuItem loadJobsMenuItem = null;
-   private JMenuItem remoteMenuItem = null;
    
    private JComboBox encoding = null;
    private JLabel encoding_label = null;
@@ -92,7 +91,6 @@ public class gui {
    public static Hashtable<String,Icon> Images;
    
    public remotegui remote_gui = null;
-   public Hashtable<String,Integer> remote_gui_dimensions = new Hashtable<String,Integer>();
    
    public tivoTab getTab(String tabName) {
       return tivoTabs.get(tabName);
@@ -105,6 +103,13 @@ public class gui {
          jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
          jFrame.setJMenuBar(getJJMenuBar());
          jFrame.setContentPane(getJContentPane());
+         
+         // Add additional ipad remote tab if at least 1 TiVo is configured for it
+         if (config.ipadEnabled()) {
+            remote_gui = new remotegui(jFrame);
+            tabbed_panel.add("Remote", remote_gui.getPanel());
+         }
+         
          //jFrame.setMinimumSize(new Dimension(700,600));
          //jFrame.setPreferredSize(jFrame.getMinimumSize());
          setFontSize(config.FontSize);
@@ -451,7 +456,6 @@ public class gui {
          fileMenu.add(getClearMessagesMenuItem());
          fileMenu.add(getResetServerMenuItem());
          fileMenu.add(getJobMenu());
-         fileMenu.add(getRemoteMenuItem());
          fileMenu.add(getExitMenuItem());
       }
       return fileMenu;
@@ -947,30 +951,6 @@ public class gui {
       }
       return backgroundJobDisableMenuItem;
    }
-   
-   private JMenuItem getRemoteMenuItem() {
-      debug.print("");
-      if (remoteMenuItem == null) {
-         remoteMenuItem = new JMenuItem();
-         remoteMenuItem.setText("Remote Control...");
-         remoteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I,
-               Event.CTRL_MASK, true));
-         remoteMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               if (remote_gui == null)
-                  remote_gui = new remotegui(config.gui.getJFrame());
-               else {
-                  remote_gui.setTivoNames();
-                  if (remote_gui.tivo_count > 0)
-                     remote_gui.display();
-                  else
-                     log.warn("No Premieres currently enabled for Remote Control in kmttg configuration");
-               }
-            }
-         });
-      }
-      return remoteMenuItem;
-   }
 
    // This will decide which options are enabled based on current config settings
    // Options are disabled when associated config entry is not setup
@@ -1408,24 +1388,7 @@ public class gui {
             ofp.write("<bottomDivider>\n"       + bottomDivider              + "\n");
             if (remote_gui != null) {
                int tabIndex_r = remote_gui.tabbed_panel.getSelectedIndex();
-               d = remote_gui.getDimension();
-               p = remote_gui.getLocation();
-               ofp.write("<width_remote>\n"     + d.width                    + "\n");
-               ofp.write("<height_remote>\n"    + d.height                   + "\n");
-               ofp.write("<x_remote>\n"         + p.x                        + "\n");
-               ofp.write("<y_remote>\n"         + p.y                        + "\n");
                ofp.write("<tab_remote>\n"       + tabIndex_r                 + "\n");
-            } else if (remote_gui_dimensions.size() > 0) {
-               if (remote_gui_dimensions.containsKey("width"))
-                  ofp.write("<width_remote>\n"     + remote_gui_dimensions.get("width")  + "\n");
-               if (remote_gui_dimensions.containsKey("height"))
-                  ofp.write("<height_remote>\n"    + remote_gui_dimensions.get("height") + "\n");
-               if (remote_gui_dimensions.containsKey("x"))
-                  ofp.write("<x_remote>\n"         + remote_gui_dimensions.get("x")      + "\n");
-               if (remote_gui_dimensions.containsKey("y"))
-                  ofp.write("<y_remote>\n"         + remote_gui_dimensions.get("y")      + "\n");
-               if (remote_gui_dimensions.containsKey("tab"))
-                  ofp.write("<tab_remote>\n"       + remote_gui_dimensions.get("tab")    + "\n");               
             }
             ofp.write("<tab>\n"                 + tabName                    + "\n");
             
@@ -1629,45 +1592,14 @@ public class gui {
                   y = -1;
                }
             }
-            if (key.equals("width_remote")) {
-               try {
-                  value = Integer.parseInt(line);
-               } catch (NumberFormatException e) {
-                  value = -1;
-               }
-               remote_gui_dimensions.put("width", value);
-            }
-            if (key.equals("height_remote")) {
-               try {
-                  value = Integer.parseInt(line);
-               } catch (NumberFormatException e) {
-                  value = -1;
-               }
-               remote_gui_dimensions.put("height", value);
-            }
-            if (key.equals("x_remote")) {
-               try {
-                  value = Integer.parseInt(line);
-               } catch (NumberFormatException e) {
-                  value = -1;
-               }
-               remote_gui_dimensions.put("x", value);
-            }
-            if (key.equals("y_remote")) {
-               try {
-                  value = Integer.parseInt(line);
-               } catch (NumberFormatException e) {
-                  value = -1;
-               }
-               remote_gui_dimensions.put("y", value);
-            }
             if (key.equals("tab_remote")) {
                try {
                   value = Integer.parseInt(line);
                } catch (NumberFormatException e) {
                   value = 0;
                }
-               remote_gui_dimensions.put("tab", value);
+               if (remote_gui != null)
+                  remote_gui.getPanel().setSelectedIndex(value);
             }
             if (key.equals("centerDivider")) {
                try {

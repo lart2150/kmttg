@@ -9,7 +9,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -63,7 +62,6 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class remotegui {
-   private JFrame dialog = null;
    public JTabbedPane tabbed_panel = null;
    public int tivo_count = 0;
    
@@ -143,15 +141,12 @@ public class remotegui {
       }
    }
 
-   remotegui(JFrame frame) {
-      
-      dialog = new JFrame("kmttg Remote Control");
-      
+   remotegui(JFrame frame) {      
       Browser = new JFileChooser(config.programDir);
       Browser.setMultiSelectionEnabled(false);
       Browser.addChoosableFileFilter(new FileFilterSP());
       
-      // Define content for dialog window
+      // Define content for main tabbed pane
       int gy = 0;
       GridBagConstraints c = new GridBagConstraints();
       c.ipady = 0;
@@ -221,7 +216,6 @@ public class remotegui {
             // Refresh to do list
             tab_todo.TABLE.clearSelection();
             tab_todo.clear();
-            dialog.repaint();
             String tivoName = (String)tivo_todo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0)
                ToDoListCB(tivoName);
@@ -248,7 +242,7 @@ public class remotegui {
       row1_todo.add(cancel_todo);
       panel_todo.add(row1_todo, c);
       
-      tab_todo = new todoTable(dialog);
+      tab_todo = new todoTable(config.gui.getJFrame());
       tab_todo.TABLE.setPreferredScrollableViewportSize(tab_todo.TABLE.getPreferredSize());
       JScrollPane tabScroll_todo = new JScrollPane(tab_todo.scroll);
       gy++;
@@ -396,7 +390,7 @@ public class remotegui {
       row1_guide.add(guide_recordSP);
       panel_guide.add(row1_guide, c);
       
-      tab_guide = new guideTable(dialog);
+      tab_guide = new guideTable(config.gui.getJFrame());
       tab_guide.TABLE.setPreferredScrollableViewportSize(tab_guide.TABLE.getPreferredSize());
       JScrollPane tabScroll_guide = new JScrollPane(tab_guide.scroll);
       gy++;
@@ -446,7 +440,6 @@ public class remotegui {
             // Refresh SP list
             tab_sp.TABLE.clearSelection();
             tab_sp.clear();
-            dialog.repaint();
             String tivoName = (String)tivo_sp.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0)
                SPListCB(tivoName);
@@ -466,7 +459,7 @@ public class remotegui {
                }  else {
                   Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                   Browser.setSelectedFile(new File(config.programDir + File.separator + tivoName + ".sp"));
-                  int result = Browser.showDialog(dialog, "Save to file");
+                  int result = Browser.showDialog(config.gui.getJFrame(), "Save to file");
                   if (result == JFileChooser.APPROVE_OPTION) {               
                      File file = Browser.getSelectedFile();
                      tab_sp.SPListSave(tivoName, file.getAbsolutePath());
@@ -482,7 +475,7 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Load SP data from a file
             Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            int result = Browser.showDialog(dialog, "Load from file");
+            int result = Browser.showDialog(config.gui.getJFrame(), "Load from file");
             if (result == JFileChooser.APPROVE_OPTION) {               
                File file = Browser.getSelectedFile();
                tab_sp.SPListLoad(file.getAbsolutePath());
@@ -555,7 +548,7 @@ public class remotegui {
       row1_sp.add(reorder_sp);
       panel_sp.add(row1_sp, c);
       
-      tab_sp = new spTable(dialog);
+      tab_sp = new spTable(config.gui.getJFrame());
       tab_sp.TABLE.setPreferredScrollableViewportSize(tab_sp.TABLE.getPreferredSize());
       JScrollPane tabScroll_sp = new JScrollPane(tab_sp.scroll);
       gy++;
@@ -613,7 +606,6 @@ public class remotegui {
                // Refresh to do list
                tab_cancel.TABLE.clearSelection();
                tab_cancel.clear();
-               dialog.repaint();
                String tivoName = (String)tivo_cancel.getSelectedItem();
                if (tivoName != null && tivoName.length() > 0)
                   cancelListCB(tivoName);
@@ -645,7 +637,7 @@ public class remotegui {
       row1_cancel.add(label_cancel);
       panel_cancel.add(row1_cancel, c);
       
-      tab_cancel = new cancelledTable(dialog);
+      tab_cancel = new cancelledTable(config.gui.getJFrame());
       tab_cancel.TABLE.setPreferredScrollableViewportSize(tab_cancel.TABLE.getPreferredSize());
       JScrollPane tabScroll_cancel = new JScrollPane(tab_cancel.scroll);
       gy++;
@@ -695,7 +687,6 @@ public class remotegui {
             // Refresh table
             tab_premiere.TABLE.clearSelection();
             tab_premiere.clear();
-            dialog.repaint();
             String tivoName = (String)tivo_premiere.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0)
                premiereListCB(tivoName);
@@ -745,7 +736,7 @@ public class remotegui {
       gy++;
       c.gridy = gy;
       
-      tab_premiere = new premiereTable(dialog);
+      tab_premiere = new premiereTable(config.gui.getJFrame());
       tab_premiere.TABLE.setPreferredScrollableViewportSize(tab_premiere.TABLE.getPreferredSize());
       JScrollPane tabScroll_premiere = new JScrollPane(tab_premiere.scroll);
       
@@ -879,7 +870,6 @@ public class remotegui {
                // New search
                tab_search.TABLE.clearSelection();
                tab_search.clear();
-               dialog.repaint();
                String tivoName = (String)tivo_search.getSelectedItem();
                if (tivoName != null && tivoName.length() > 0)
                   searchButtonCB(tivoName);
@@ -947,7 +937,7 @@ public class remotegui {
       row1_search.add(record_sp_search);
       panel_search.add(row1_search, c);
       
-      tab_search = new searchTable(dialog);
+      tab_search = new searchTable(config.gui.getJFrame());
       tab_search.TABLE.setPreferredScrollableViewportSize(tab_search.TABLE.getPreferredSize());
       JScrollPane tabScroll_search = new JScrollPane(tab_search.scroll);
       gy++;
@@ -1316,11 +1306,7 @@ public class remotegui {
       // Init the tivo comboboxes
       setTivoNames();
             
-      // add content to and display dialog window
-      dialog.setContentPane(tabbed_panel);
-      dialog.pack();
-      dialog.setSize((int)(frame.getSize().width/1.3), (int)(frame.getSize().height/2));
-      dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
+      // Pack table columns
       tab_todo.packColumns(tab_todo.TABLE, 2);
       tab_guide.packColumns(tab_guide.TABLE, 2);
       tab_sp.packColumns(tab_sp.TABLE, 2);
@@ -1330,28 +1316,12 @@ public class remotegui {
          log.warn("No Premieres currently enabled for Remote Control in kmttg configuration");
          return;
       }
-      
-      if (config.gui.remote_gui_dimensions.size() > 0) {
-         // Previously saved dimensions for the remote
-         int width = -1, height = -1, x = -1, y = -1;
-         if (config.gui.remote_gui_dimensions.containsKey("width"))
-            width = config.gui.remote_gui_dimensions.get("width");
-         if (config.gui.remote_gui_dimensions.containsKey("height"))
-            height = config.gui.remote_gui_dimensions.get("height");
-         if (config.gui.remote_gui_dimensions.containsKey("x"))
-            x = config.gui.remote_gui_dimensions.get("x");
-         if (config.gui.remote_gui_dimensions.containsKey("y"))
-            y = config.gui.remote_gui_dimensions.get("y");
-         if (width != -1 && height != -1)
-            dialog.setSize(new Dimension(width,height));
-         if (x != -1 && y != -1)
-            dialog.setLocation(new Point(x,y));
-         if (config.gui.remote_gui_dimensions.containsKey("tab")) {
-            tabbed_panel.setSelectedIndex(config.gui.remote_gui_dimensions.get("tab"));
-         }
-      }
-      dialog.setVisible(true);      
    }
+      
+   public JTabbedPane getPanel() {
+      return tabbed_panel;
+   }
+
    
    // TiVo selection changed for ToDo tab
    public void tivo_todoCB() {
@@ -1661,14 +1631,6 @@ public class remotegui {
       job.remote_premiere = true;
       job.premiere        = tab_premiere;
       jobMonitor.submitNewJob(job);
-   }
-            
-   public void display() {
-      if (dialog != null) {
-         dialog.setVisible(true);
-         // Reset date range in Guide start time combo box
-         tab_guide.setComboBoxDates(guide_start, guide_hour_increment, guide_total_range);
-      }
    }
    
    public String getGuideStartTime() {
@@ -2143,14 +2105,6 @@ public class remotegui {
       }
       backgroundRun b = new backgroundRun();
       b.execute();
-   }
-   
-   public Dimension getDimension() {
-      return dialog.getSize();
-   }
-   
-   public Point getLocation() {
-      return dialog.getLocation();
    }
       
    public String getToolTip(String component) {
