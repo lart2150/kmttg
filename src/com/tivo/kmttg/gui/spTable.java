@@ -40,7 +40,6 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class spTable {
    private String[] TITLE_cols = {"PRIORITY", "SHOW", "CHANNEL", "NUM"};
@@ -385,7 +384,7 @@ public class spTable {
           JSONObject o2 = new JSONObject();
           String title = " ";
           if (data.has("title"))
-             title += string.utfString(data.getString("title"));
+             title += data.getString("title");
           // Manual recordings need more information added
           if (title.equals(" Manual")) {
              String time = data.getJSONObject("idSetSource").getString("timeOfDayLocal");

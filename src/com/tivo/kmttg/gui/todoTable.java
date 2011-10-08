@@ -35,7 +35,6 @@ import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class todoTable {
    private String[] TITLE_cols = {"DATE", "SHOW", "CHANNEL", "DUR"};
@@ -258,9 +257,9 @@ public class todoTable {
           long end = getLongDateFromString(endString);
           String title = " ";
           if (data.has("title"))
-             title += string.utfString(data.getString("title"));
+             title += data.getString("title");
           if (data.has("subtitle"))
-             title += " - " + string.utfString(data.getString("subtitle"));
+             title += " - " + data.getString("subtitle");
           String channel = " ";
           if (data.has("channel")) {
              o = data.getJSONObject("channel");
@@ -336,7 +335,7 @@ public class todoTable {
              }
              String description = null;
              if ( s.json.has("description") ) {
-                description = string.utfString(s.json.getString("description"));
+                description = s.json.getString("description");
              }
              String d = "";
              if (dur.sortable != null) {
@@ -356,9 +355,9 @@ public class todoTable {
        
              String title = "\nTo Do recording: ";
              if (s.json.has("title"))
-                title += string.utfString(s.json.getString("title"));
+                title += s.json.getString("title");
              if (s.json.has("subtitle"))
-                title += " - " + string.utfString(s.json.getString("subtitle"));
+                title += " - " + s.json.getString("subtitle");
              log.warn(title);
              log.print(message);
           } catch (JSONException e1) {

@@ -40,7 +40,6 @@ import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class guideTable {
    private String currentTivo = null;
@@ -307,7 +306,7 @@ public class guideTable {
             }
             String description = null;
             if ( s.json.has("description") ) {
-               description = string.utfString(s.json.getString("description"));
+               description = s.json.getString("description");
             }
             String d = "";
             if (dur.sortable != null) {
@@ -327,9 +326,9 @@ public class guideTable {
       
             String title = "\nGuide: ";
             if (s.json.has("title"))
-               title += string.utfString(s.json.getString("title"));
+               title += s.json.getString("title");
             if (s.json.has("subtitle"))
-               title += " - " + string.utfString(s.json.getString("subtitle"));
+               title += " - " + s.json.getString("subtitle");
             log.warn(title);
             log.print(message);
          } catch (JSONException e) {
@@ -453,9 +452,9 @@ public class guideTable {
          long duration = entry.getLong("duration")*1000;
          String title = " ";
          if (entry.has("title"))
-            title += string.utfString(entry.getString("title"));
+            title += entry.getString("title");
          if (entry.has("subtitle"))
-            title += " - " + string.utfString(entry.getString("subtitle"));
+            title += " - " + entry.getString("subtitle");
          String channel = " ";
          if (entry.has("channel")) {
             o = entry.getJSONObject("channel");

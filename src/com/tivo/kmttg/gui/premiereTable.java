@@ -33,7 +33,6 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class premiereTable {
    private String[] TITLE_cols = {"DATE", "SHOW", "SEA", "CHANNEL", "DUR"};
@@ -259,9 +258,9 @@ public class premiereTable {
           long duration = data.getLong("duration")*1000;
           String title = " ";
           if (data.has("title"))
-             title += string.utfString(data.getString("title"));
+             title += data.getString("title");
           if (data.has("subtitle"))
-             title += " - " + string.utfString(data.getString("subtitle"));
+             title += " - " + data.getString("subtitle");
           String channel = " ";
           if (data.has("channel")) {
              o = data.getJSONObject("channel");
@@ -339,7 +338,7 @@ public class premiereTable {
              }
              String description = null;
              if ( s.json.has("description") ) {
-                description = string.utfString(s.json.getString("description"));
+                description = s.json.getString("description");
              }
              String d = "";
              if (dur.sortable != null) {
@@ -359,9 +358,9 @@ public class premiereTable {
        
              String title = "\nShow Premiere: ";
              if (s.json.has("title"))
-                title += string.utfString(s.json.getString("title"));
+                title += s.json.getString("title");
              if (s.json.has("subtitle"))
-                title += " - " + string.utfString(s.json.getString("subtitle"));
+                title += " - " + s.json.getString("subtitle");
              log.warn(title);
              log.print(message);
           } catch (JSONException e1) {
