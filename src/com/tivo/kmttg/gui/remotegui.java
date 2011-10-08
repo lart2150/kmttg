@@ -203,7 +203,11 @@ public class remotegui {
       tivo_todo.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
-               tivo_todoCB();
+                tab_todo.TABLE.clearSelection();
+                tab_todo.clear();
+                String tivoName = getTivoName("todo");
+                if (tab_todo.tivo_data.containsKey(tivoName))
+                   tab_todo.AddRows(tivoName, tab_todo.tivo_data.get(tivoName));
             }
          }
       });
@@ -217,8 +221,16 @@ public class remotegui {
             tab_todo.TABLE.clearSelection();
             tab_todo.clear();
             String tivoName = (String)tivo_todo.getSelectedItem();
-            if (tivoName != null && tivoName.length() > 0)
-               ToDoListCB(tivoName);
+            if (tivoName != null && tivoName.length() > 0) {
+               jobData job = new jobData();
+               job.source      = tivoName;
+               job.tivoName    = tivoName;
+               job.type        = "remote";
+               job.name        = "Remote";
+               job.remote_todo = true;
+               job.todo        = tab_todo;
+               jobMonitor.submitNewJob(job);
+            }
          }
       });
 
@@ -279,11 +291,14 @@ public class remotegui {
       tivo_guide.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
+                // NOTE: Don't want to reset table in case we want to record a show on another TiVo
+                /*
                 tab_guide.TABLE.clearSelection();
                 tab_guide.clear();
                 String tivoName = getTivoName("guide");
                 if (tab_guide.tivo_data.containsKey(tivoName))
                    tab_guide.AddRows(tivoName, tab_guide.tivo_data.get(tivoName));
+                */
             }
          }
       });
@@ -427,7 +442,11 @@ public class remotegui {
       tivo_sp.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
-               tivo_spCB();
+                tab_sp.TABLE.clearSelection();
+                tab_sp.clear();
+                String tivoName = getTivoName("sp");
+                if (tab_sp.tivo_data.containsKey(tivoName))
+                   tab_sp.AddRows(tivoName, tab_sp.tivo_data.get(tivoName));
             }
          }
       });
@@ -441,8 +460,7 @@ public class remotegui {
             tab_sp.TABLE.clearSelection();
             tab_sp.clear();
             String tivoName = (String)tivo_sp.getSelectedItem();
-            if (tivoName != null && tivoName.length() > 0)
-               SPListCB(tivoName);
+            SPListCB(tivoName);
          }
       });
       
@@ -584,8 +602,17 @@ public class remotegui {
       tivo_cancel = new javax.swing.JComboBox();
       tivo_cancel.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
-             if (e.getStateChange() == ItemEvent.SELECTED) {
-               tivo_cancelCB();
+             if (e.getStateChange() == ItemEvent.SELECTED) {               
+               // TiVo selection changed for Not Record tab
+               // NOTE: Don't want to reset table in case we want to record a show on another TiVo
+               /*
+               tab_cancel.setFolderState(false);
+               tab_cancel.TABLE.clearSelection();
+               tab_cancel.clear();
+               String tivoName = getTivoName("cancel");
+               if (tab_cancel.tivo_data.containsKey(tivoName))
+                  tab_cancel.AddRows(tivoName, tab_cancel.tivo_data.get(tivoName));
+               */
             }
          }
       });
@@ -607,8 +634,16 @@ public class remotegui {
                tab_cancel.TABLE.clearSelection();
                tab_cancel.clear();
                String tivoName = (String)tivo_cancel.getSelectedItem();
-               if (tivoName != null && tivoName.length() > 0)
-                  cancelListCB(tivoName);
+               if (tivoName != null && tivoName.length() > 0) {
+                  jobData job = new jobData();
+                  job.source        = tivoName;
+                  job.tivoName      = tivoName;
+                  job.type          = "remote";
+                  job.name          = "Remote";
+                  job.remote_cancel = true;
+                  job.cancelled     = tab_cancel;
+                  jobMonitor.submitNewJob(job);
+               }
             }
          }
       });
@@ -674,7 +709,23 @@ public class remotegui {
       tivo_premiere.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
-               tivo_premiereCB();
+               // Clear channel list
+               premiere_model.clear();
+               
+               String tivoName = getTivoName("premiere");
+               // Load channel list for this TiVo
+               loadChannelInfo(tivoName);
+               
+               // NOTE: Don't want to reset premieres table in case we want to record a show on another TiVo
+               /*
+               // Clear premieres table
+               tab_premiere.TABLE.clearSelection();
+               tab_premiere.clear();
+               
+               // Update premieres table
+               if (tab_premiere.tivo_data.containsKey(tivoName))
+                  tab_premiere.AddRows(tivoName, tab_premiere.tivo_data.get(tivoName));
+               */
             }
          }
       });
@@ -688,8 +739,24 @@ public class remotegui {
             tab_premiere.TABLE.clearSelection();
             tab_premiere.clear();
             String tivoName = (String)tivo_premiere.getSelectedItem();
-            if (tivoName != null && tivoName.length() > 0)
-               premiereListCB(tivoName);
+            if (tivoName != null && tivoName.length() > 0) {            
+               // This updates premiere_channel_info "isSelected" settings
+               if ( ! updateSelectedChannels(tivoName) )
+                  return;
+               
+               // Save channel information to file
+               saveChannelInfo(tivoName);
+               
+               // Now search for Premieres in background mode
+               jobData job = new jobData();
+               job.source          = tivoName;
+               job.tivoName        = tivoName;
+               job.type            = "remote";
+               job.name            = "Remote";
+               job.remote_premiere = true;
+               job.premiere        = tab_premiere;
+               jobMonitor.submitNewJob(job);
+            }
          }
       });
       
@@ -707,7 +774,17 @@ public class remotegui {
       premiere_channels_update.setToolTipText(getToolTip("premiere_channels_update"));
       premiere_channels_update.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            premiereChannelsCB((String)tivo_premiere.getSelectedItem());
+            String tivoName = (String)tivo_premiere.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               // Build list of received channels for this TiVo
+               jobData job = new jobData();
+               job.source          = tivoName;
+               job.tivoName        = tivoName;
+               job.type            = "remote";
+               job.name            = "Remote";
+               job.remote_channels = true;
+               jobMonitor.submitNewJob(job);
+            }
          }
       });
       
@@ -787,7 +864,17 @@ public class remotegui {
       tivo_info.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
-               tivo_infoCB();
+               // Clear text area
+               text_info.setEditable(true);
+               text_info.setText("");
+               
+               // Put cached info in text area if available
+               String tivoName = getTivoName("info");
+               if (tivoName != null && tivoName.length() > 0) {
+                  if (tivo_info_data.containsKey(tivoName))
+                     text_info.setText(tivo_info_data.get(tivoName));
+               }
+               text_info.setEditable(false);
             }
          }
       });
@@ -850,7 +937,14 @@ public class remotegui {
       tivo_search.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
-               tivo_searchCB();
+               // NOTE: Don't want to reset table in case we want to record a show on another TiVo
+               /*
+               tab_search.TABLE.clearSelection();
+               tab_search.clear();
+               String tivoName = getTivoName("search");
+               if (tab_search.tivo_data.containsKey(tivoName))
+                  tab_search.AddRows(tivoName, tab_search.tivo_data.get(tivoName));
+               */
             }
          }
       });
@@ -871,8 +965,23 @@ public class remotegui {
                tab_search.TABLE.clearSelection();
                tab_search.clear();
                String tivoName = (String)tivo_search.getSelectedItem();
-               if (tivoName != null && tivoName.length() > 0)
-                  searchButtonCB(tivoName);
+               if (tivoName != null && tivoName.length() > 0) {
+                  String keyword = string.removeLeadingTrailingSpaces(text_search.getText());
+                  if (keyword == null || keyword.length() == 0)
+                     return;
+                  int max = (Integer)max_search.getValue();
+                  
+                  jobData job = new jobData();
+                  job.source                = tivoName;
+                  job.tivoName              = tivoName;
+                  job.type                  = "remote";
+                  job.name                  = "Remote";
+                  job.search                = tab_search;
+                  job.remote_search_max     = max;
+                  job.remote_search         = true;
+                  job.remote_search_keyword = keyword;
+                  jobMonitor.submitNewJob(job);
+               }
             }
          }
       });
@@ -1159,15 +1268,33 @@ public class remotegui {
       rc_jumpto_button.setToolTipText(getToolTip("rc_jumpto_text"));
       rc_jumpto_button.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            String tivoName = (String)tivo_rc.getSelectedItem();
+            final String tivoName = (String)tivo_rc.getSelectedItem();
             String mins_string = string.removeLeadingTrailingSpaces(rc_jumpto_text.getText());
             if (tivoName == null || tivoName.length() == 0)
                return;
             if (mins_string == null || mins_string.length() == 0)
                return;
             try {
-               int mins = Integer.parseInt(mins_string);
-               RC_jumptoCB(tivoName, mins);
+               final int mins = Integer.parseInt(mins_string);
+               class backgroundRun extends SwingWorker<Object, Object> {
+                  protected Boolean doInBackground() {
+                     Remote r = new Remote(tivoName);
+                     if (r.success) {
+                        JSONObject json = new JSONObject();
+                        try {
+                           Long pos = (long)60000*mins;
+                           json.put("offset", pos);
+                           r.Command("jump", json);
+                        } catch (JSONException e) {
+                           log.error("Jump to minute failed - " + e.getMessage());
+                        }
+                        r.disconnect();
+                     }
+                     return null;
+                  }
+               }
+               backgroundRun b = new backgroundRun();
+               b.execute();
             } catch (NumberFormatException e1) {
                log.error("Illegal number of minutes specified: " + mins_string);
                return;
@@ -1183,15 +1310,37 @@ public class remotegui {
       rc_jumpahead_button.setToolTipText(getToolTip("rc_jumpahead_text"));
       rc_jumpahead_button.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            String tivoName = (String)tivo_rc.getSelectedItem();
+            final String tivoName = (String)tivo_rc.getSelectedItem();
             String mins_string = string.removeLeadingTrailingSpaces(rc_jumpahead_text.getText());
             if (tivoName == null || tivoName.length() == 0)
                return;
             if (mins_string == null || mins_string.length() == 0)
                return;
             try {
-               int mins = Integer.parseInt(mins_string);
-               RC_jumpaheadCB(tivoName, mins);
+               final int mins = Integer.parseInt(mins_string);
+               class backgroundRun extends SwingWorker<Object, Object> {
+                  protected Boolean doInBackground() {
+                     Remote r = new Remote(tivoName);
+                     if (r.success) {
+                        JSONObject json = new JSONObject();
+                        JSONObject reply = r.Command("position", json);
+                        if (reply != null && reply.has("position")) {
+                           try {
+                              Long pos = reply.getLong("position");
+                              pos += (long)60000*mins;
+                              json.put("offset", pos);
+                              r.Command("jump", json);
+                           } catch (JSONException e) {
+                              log.error("Skip minutes ahead failed - " + e.getMessage());
+                           }
+                        }
+                        r.disconnect();
+                     }
+                     return null;
+                  }
+               }
+               backgroundRun b = new backgroundRun();
+               b.execute();
             } catch (NumberFormatException e1) {
                log.error("Illegal number of minutes specified: " + mins_string);
                return;
@@ -1207,15 +1356,39 @@ public class remotegui {
       rc_jumpback_button.setToolTipText(getToolTip("rc_jumpback_text"));
       rc_jumpback_button.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            String tivoName = (String)tivo_rc.getSelectedItem();
+            final String tivoName = (String)tivo_rc.getSelectedItem();
             String mins_string = string.removeLeadingTrailingSpaces(rc_jumpback_text.getText());
             if (tivoName == null || tivoName.length() == 0)
                return;
             if (mins_string == null || mins_string.length() == 0)
                return;
             try {
-               int mins = Integer.parseInt(mins_string);
-               RC_jumpbackCB(tivoName, mins);
+               final int mins = Integer.parseInt(mins_string);
+               class backgroundRun extends SwingWorker<Object, Object> {
+                  protected Boolean doInBackground() {
+                     Remote r = new Remote(tivoName);
+                     if (r.success) {
+                        JSONObject json = new JSONObject();
+                        JSONObject reply = r.Command("position", json);
+                        if (reply != null && reply.has("position")) {
+                           try {
+                              Long pos = reply.getLong("position");
+                              pos -= (long)60000*mins;
+                              if (pos < 0)
+                                 pos = (long)0;
+                              json.put("offset", pos);
+                              r.Command("jump", json);
+                           } catch (JSONException e) {
+                              log.error("Skip minutes back failed - " + e.getMessage());
+                           }
+                        }
+                        r.disconnect();
+                     }
+                     return null;
+                  }
+               }
+               backgroundRun b = new backgroundRun();
+               b.execute();
             } catch (NumberFormatException e1) {
                log.error("Illegal number of minutes specified: " + mins_string);
                return;
@@ -1321,53 +1494,7 @@ public class remotegui {
    public JTabbedPane getPanel() {
       return tabbed_panel;
    }
-
    
-   // TiVo selection changed for ToDo tab
-   public void tivo_todoCB() {
-      tab_todo.TABLE.clearSelection();
-      tab_todo.clear();
-      String tivoName = getTivoName("todo");
-      if (tab_todo.tivo_data.containsKey(tivoName))
-         tab_todo.AddRows(tivoName, tab_todo.tivo_data.get(tivoName));
-   }
-      
-   // Submit remote ToDo List request to Job Monitor
-   public void ToDoListCB(String tivoName) {
-      jobData job = new jobData();
-      job.source      = tivoName;
-      job.tivoName    = tivoName;
-      job.type        = "remote";
-      job.name        = "Remote";
-      job.remote_todo = true;
-      job.todo        = tab_todo;
-      jobMonitor.submitNewJob(job);
-   }
-   
-   // TiVo selection changed for Season Passes tab
-   public void tivo_spCB() {
-      tab_sp.TABLE.clearSelection();
-      tab_sp.clear();
-      String tivoName = getTivoName("sp");
-      if (tab_sp.tivo_data.containsKey(tivoName))
-         tab_sp.AddRows(tivoName, tab_sp.tivo_data.get(tivoName));
-   }
-   
-   // TiVo selection changed for System Information tab
-   public void tivo_infoCB() {
-      // Clear text area
-      text_info.setEditable(true);
-      text_info.setText("");
-      
-      // Put cached info in text area if available
-      String tivoName = getTivoName("info");
-      if (tivoName != null && tivoName.length() > 0) {
-         if (tivo_info_data.containsKey(tivoName))
-            text_info.setText(tivo_info_data.get(tivoName));
-      }
-      text_info.setEditable(false);
-   }
-
    // Submit remote SP request to Job Monitor
    public void SPListCB(String tivoName) {
       jobData job = new jobData();
@@ -1378,107 +1505,6 @@ public class remotegui {
       job.remote_sp   = true;
       job.sp          = tab_sp;
       jobMonitor.submitNewJob(job);
-   }
-   
-   public void RC_jumptoCB(final String tivoName, final Integer mins) {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Boolean doInBackground() {
-            Remote r = new Remote(tivoName);
-            if (r.success) {
-               JSONObject json = new JSONObject();
-               try {
-                  Long pos = (long)60000*mins;
-                  json.put("offset", pos);
-                  r.Command("jump", json);
-               } catch (JSONException e) {
-                  log.error("RC_jumptoCB failed - " + e.getMessage());
-               }
-               r.disconnect();
-            }
-            return null;
-         }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
-   }
-   
-   public void RC_jumpaheadCB(final String tivoName, final Integer mins) {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Boolean doInBackground() {
-            Remote r = new Remote(tivoName);
-            if (r.success) {
-               JSONObject json = new JSONObject();
-               JSONObject reply = r.Command("position", json);
-               if (reply != null && reply.has("position")) {
-                  try {
-                     Long pos = reply.getLong("position");
-                     pos += (long)60000*mins;
-                     json.put("offset", pos);
-                     r.Command("jump", json);
-                  } catch (JSONException e) {
-                     log.error("RC_jumpaheadCB failed - " + e.getMessage());
-                  }
-               }
-               r.disconnect();
-            }
-            return null;
-         }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
-   }
-   
-   public void RC_jumpbackCB(final String tivoName, final Integer mins) {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Boolean doInBackground() {
-            Remote r = new Remote(tivoName);
-            if (r.success) {
-               JSONObject json = new JSONObject();
-               JSONObject reply = r.Command("position", json);
-               if (reply != null && reply.has("position")) {
-                  try {
-                     Long pos = reply.getLong("position");
-                     pos -= (long)60000*mins;
-                     if (pos < 0)
-                        pos = (long)0;
-                     json.put("offset", pos);
-                     r.Command("jump", json);
-                  } catch (JSONException e) {
-                     log.error("RC_jumpbackCB failed - " + e.getMessage());
-                  }
-               }
-               r.disconnect();
-            }
-            return null;
-         }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
-   }
-   
-   // Submit remote Not Record request to Job Monitor
-   public void cancelListCB(String tivoName) {
-      jobData job = new jobData();
-      job.source        = tivoName;
-      job.tivoName      = tivoName;
-      job.type          = "remote";
-      job.name          = "Remote";
-      job.remote_cancel = true;
-      job.cancelled     = tab_cancel;
-      jobMonitor.submitNewJob(job);
-   }
-   
-   // TiVo selection changed for Not Record tab
-   public void tivo_cancelCB() {
-      // NOTE: Don't want to reset table in case we want to record a show on another TiVo
-      /*
-      tab_cancel.setFolderState(false);
-      tab_cancel.TABLE.clearSelection();
-      tab_cancel.clear();
-      String tivoName = getTivoName("cancel");
-      if (tab_cancel.tivo_data.containsKey(tivoName))
-         tab_cancel.AddRows(tivoName, tab_cancel.tivo_data.get(tivoName));
-      */
    }
    
    private void RC_infoCB(final String tivoName) {
@@ -1547,92 +1573,7 @@ public class remotegui {
       backgroundRun b = new backgroundRun();
       b.execute();
    }
-   
-   // TiVo selection changed for Search tab
-   public void tivo_searchCB() {
-      // NOTE: Don't want to reset table in case we want to record a show on another TiVo
-      /*
-      tab_search.TABLE.clearSelection();
-      tab_search.clear();
-      String tivoName = getTivoName("search");
-      if (tab_search.tivo_data.containsKey(tivoName))
-         tab_search.AddRows(tivoName, tab_search.tivo_data.get(tivoName));
-      */
-   }
-   
-   // Callback for Search tab "Search" button
-   // Submit a new keyword search job to job monitor
-   private void searchButtonCB(final String tivoName) {
-      String keyword = string.removeLeadingTrailingSpaces(text_search.getText());
-      if (keyword == null || keyword.length() == 0)
-         return;
-      int max = (Integer)max_search.getValue();
-      
-      jobData job = new jobData();
-      job.source                = tivoName;
-      job.tivoName              = tivoName;
-      job.type                  = "remote";
-      job.name                  = "Remote";
-      job.search                = tab_search;
-      job.remote_search_max     = max;
-      job.remote_search         = true;
-      job.remote_search_keyword = keyword;
-      jobMonitor.submitNewJob(job);
-   }
 
-   // TiVo selection changed for Premieres tab
-   public void tivo_premiereCB() {
-      // Clear channel list
-      premiere_model.clear();
-      
-      String tivoName = getTivoName("premiere");
-      // Load channel list for this TiVo
-      loadChannelInfo(tivoName);
-      
-      // NOTE: Don't want to reset premieres table in case we want to record a show on another TiVo
-      /*
-      // Clear premieres table
-      tab_premiere.TABLE.clearSelection();
-      tab_premiere.clear();
-      
-      // Update premieres table
-      if (tab_premiere.tivo_data.containsKey(tivoName))
-         tab_premiere.AddRows(tivoName, tab_premiere.tivo_data.get(tivoName));
-      */
-   }
-   
-   // Callback for Premieres tab Channels button
-   public void premiereChannelsCB(String tivoName) {
-      // Build list of received channels for this TiVo
-      jobData job = new jobData();
-      job.source          = tivoName;
-      job.tivoName        = tivoName;
-      job.type            = "remote";
-      job.name            = "Remote";
-      job.remote_channels = true;
-      jobMonitor.submitNewJob(job);
-   }
-   
-   // Callback for Premieres tab Search button
-   public void premiereListCB(String tivoName) {
-      // This updates premiere_channel_info "isSelected" settings
-      if ( ! updateSelectedChannels(tivoName) )
-         return;
-      
-      // Save channel information to file
-      saveChannelInfo(tivoName);
-      
-      // Now search for Premieres in background mode
-      jobData job = new jobData();
-      job.source          = tivoName;
-      job.tivoName        = tivoName;
-      job.type            = "remote";
-      job.name            = "Remote";
-      job.remote_premiere = true;
-      job.premiere        = tab_premiere;
-      jobMonitor.submitNewJob(job);
-   }
-   
    public String getGuideStartTime() {
       return (String)guide_start.getSelectedItem();
    }
