@@ -3198,7 +3198,7 @@ public class configMain {
          text += "enabled an optional <b>iPad Delete</b> task is made available in the kmttg GUI or auto transfers<br>";
          text += "task set. When task is enabled, iPad communications protocol is used to delete show on TiVo<br>";
          text += "following a successful decrypt of a downloaded .TiVo file.<br>";
-         text += "NOTE: Once you set and save this option you must restart kmttg to see the change.";
+         text += "<b>NOTE: Once you set and save this option you must restart kmttg to see the change.</b>";
 
       }
       else if (component.equals("HideProtectedFiles")) {
@@ -3236,13 +3236,14 @@ public class configMain {
       }
       else if (component.equals("enableRpc")) {
          text =  "<b>Enable iPad style communications with this TiVo</b><br>";
+         text += "<b>NOTE: Once you change this option you must restart kmttg to see the change.</b>";
          text += "If this option is enabled then kmttg will use iPad style communications with the TiVo to enable<br>";
          text += "extra functionality such as capability to play & delete shows from Now Playing list and also to<br>";
          text += "allow viewing of To Do list, Season Pass list and direct remote control capabilities.<br>";
          text += "If enabled then you can play/delete shows from Now Playing List table as follows:<br>";
          text += "<b>PLAY:</b> Select a show in Now Playing List and press <b>space bar</b> key.<br>";
          text += "<b>DELETE:</b> Select a show in Now Playing List and press <b>delete</b> key.<br>";
-         text += "<b>REMOTE CONTROL:</b> Select <b>File-Remote Control...</b> to bring up Remote Control GUI.<br>";
+         text += "<b>If enabled, once you re-start kmttg you will see an additional 'Remote' tab</b>.<br>";
          text += "<b>NOTE: This only works with Series 4 (Premiere) TiVos or later.</b>";
       }
       else if (component.equals("files_path")) {
