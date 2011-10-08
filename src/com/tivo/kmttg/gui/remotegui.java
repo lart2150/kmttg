@@ -365,9 +365,11 @@ public class remotegui {
       guide_record.setToolTipText(getToolTip("guide_record"));
       guide_record.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            String tivoName = (String)tivo_guide.getSelectedItem();
-            if (tivoName != null && tivoName.length() > 0) {
-               tab_guide.recordSingle(tivoName);
+            if (tab_guide.inFolder) {
+               String tivoName = (String)tivo_guide.getSelectedItem();
+               if (tivoName != null && tivoName.length() > 0) {
+                  tab_guide.recordSingle(tivoName);
+               }
             }
          }
       });
@@ -376,9 +378,11 @@ public class remotegui {
       guide_recordSP.setToolTipText(getToolTip("guide_recordSP"));
       guide_recordSP.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            String tivoName = (String)tivo_guide.getSelectedItem();
-            if (tivoName != null && tivoName.length() > 0) {
-               tab_guide.recordSingle(tivoName);
+            if (tab_guide.inFolder) {
+               String tivoName = (String)tivo_guide.getSelectedItem();
+               if (tivoName != null && tivoName.length() > 0) {
+                  tab_guide.recordSingle(tivoName);
+               }
             }
          }
       });
@@ -652,9 +656,11 @@ public class remotegui {
       record_cancel.setToolTipText(getToolTip("record_cancel"));
       record_cancel.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            String tivoName = (String)tivo_cancel.getSelectedItem();
-            if (tivoName != null && tivoName.length() > 0)
-               tab_cancel.recordSingle(tivoName);
+            if (tab_cancel.inFolder) {
+               String tivoName = (String)tivo_cancel.getSelectedItem();
+               if (tivoName != null && tivoName.length() > 0)
+                  tab_cancel.recordSingle(tivoName);
+            }
          }
       });
       
@@ -1003,9 +1009,11 @@ public class remotegui {
       record_search.setToolTipText(getToolTip("record_search"));
       record_search.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            String tivoName = (String)tivo_search.getSelectedItem();
-            if (tivoName != null && tivoName.length() > 0) {
-               tab_search.recordSingle(tivoName);
+            if (tab_search.inFolder) {
+               String tivoName = (String)tivo_search.getSelectedItem();
+               if (tivoName != null && tivoName.length() > 0) {
+                  tab_search.recordSingle(tivoName);
+               }
             }
          }
       });
@@ -1014,9 +1022,11 @@ public class remotegui {
       record_sp_search.setToolTipText(getToolTip("record_sp_search"));
       record_sp_search.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            String tivoName = (String)tivo_search.getSelectedItem();
-            if (tivoName != null && tivoName.length() > 0) {
-               tab_search.recordSP(tivoName);
+            if (tab_search.inFolder) {
+               String tivoName = (String)tivo_search.getSelectedItem();
+               if (tivoName != null && tivoName.length() > 0) {
+                  tab_search.recordSP(tivoName);
+               }
             }
          }
       });
