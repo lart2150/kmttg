@@ -704,14 +704,19 @@ public class cancelledTable {
                               "Schedule Recording - " + title, null
                            );
                            if (o != null) {
-                              log.print("Scheduling Recording: '" + title + "' on TiVo: " + tivoName);
+                              log.warn("Scheduling Recording: '" + title + "' on TiVo: " + tivoName);
                               o.put("contentId", json.getString("contentId"));
                               o.put("offerId", json.getString("offerId"));
                               json = r.Command("singlerecording", o);
                               if (json == null) {
                                  log.error("Failed to schedule recording for: '" + title + "'");
                               } else {
-                                 log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
+                                 String conflicts = rnpl.recordingConflicts(json);
+                                 if (conflicts == null) {
+                                    log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
+                                 } else {
+                                    log.error(conflicts);
+                                 }
                               }
                            }
                         }
