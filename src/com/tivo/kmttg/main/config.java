@@ -304,7 +304,7 @@ public class config {
       if (h.size() > 0) {
          for (Enumeration<String> e=h.keys(); e.hasMoreElements();) {
             String name = e.nextElement();
-            if ( ! name.matches("FILES") ) {
+            if ( ! name.matches("FILES") && ! name.matches("Remote") ) {
                TIVOS.put(name, h.get(name));
             }
          }

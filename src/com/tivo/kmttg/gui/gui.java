@@ -1169,7 +1169,7 @@ public class gui {
          
          for (Enumeration<String> e=values.keys(); e.hasMoreElements();) {
             value = e.nextElement();
-            if (! value.equals("FILES")) {
+            if (! value.equals("FILES") && ! value.equals("Remote")) {
                names[i] = value;
                i++;
             }
@@ -1189,7 +1189,7 @@ public class gui {
 
       } else {
          // Remove all tivo tabs
-         while(! tabbed_panel.getTitleAt(0).equals("FILES")) {
+         while(! tabbed_panel.getTitleAt(0).equals("FILES") && ! tabbed_panel.getTitleAt(0).equals("Remote")) {
             tivoTabRemove(tabbed_panel.getTitleAt(0));
          }
       }
@@ -1200,7 +1200,7 @@ public class gui {
       String value;         
       for (Enumeration<String> e=values.keys(); e.hasMoreElements();) {
          value = e.nextElement();
-         if (! value.equals("FILES")) {
+         if (! value.equals("FILES") && ! value.equals("Remote")) {
             jobMonitor.getNPL(value);
          }
       }
@@ -1212,7 +1212,7 @@ public class gui {
    
    public String getSelectedTivoName() {
       String tabName = getCurrentTabName();
-      if (! tabName.equals("FILES")) {
+      if (! tabName.equals("FILES") && ! tabName.equals("Remote")) {
          return tabName;
       }
       return null;
@@ -1260,7 +1260,7 @@ public class gui {
          Boolean remove;
          for (int i=0; i<numTabs; i++) {
             tabName = tabbed_panel.getTitleAt(i);
-            if (! tabName.equals("FILES")) {
+            if (! tabName.equals("FILES") && ! tabName.equals("Remote")) {
                remove = true;
                for (int j=0; j<names.length; j++) {
                   if (names[j].equals(tabName)) {
@@ -1431,7 +1431,7 @@ public class gui {
             ofp.write("<showFolders>\n");
             for (Enumeration<String> e=tivoTabs.keys(); e.hasMoreElements();) {
                name = e.nextElement();
-               if ( ! name.equals("FILES") ) {
+               if ( ! name.equals("FILES") && ! name.equals("Remote") ) {
                   if (tivoTabs.get(name).showFolders()) {
                      ofp.write(name + "=" + 1 + "\n");
                   } else {
