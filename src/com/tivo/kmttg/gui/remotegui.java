@@ -291,14 +291,14 @@ public class remotegui {
       tivo_guide.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
-                // NOTE: Don't want to reset table in case we want to record a show on another TiVo
-                /*
-                tab_guide.TABLE.clearSelection();
-                tab_guide.clear();
-                String tivoName = getTivoName("guide");
-                if (tab_guide.tivo_data.containsKey(tivoName))
-                   tab_guide.AddRows(tivoName, tab_guide.tivo_data.get(tivoName));
-                */
+                if ( ! tab_guide.inFolder ) {
+                   // Refresh channel list only if not inside a folder
+                   tab_guide.TABLE.clearSelection();
+                   tab_guide.clear();
+                   String tivoName = getTivoName("guide");
+                   if (tab_guide.tivo_data.containsKey(tivoName))
+                      tab_guide.AddRows(tivoName, tab_guide.tivo_data.get(tivoName));
+                }
             }
          }
       });
