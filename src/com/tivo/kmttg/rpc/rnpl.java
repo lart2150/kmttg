@@ -151,7 +151,40 @@ public class rnpl {
          log.error("loadWillNotRecordData - " + e.getMessage());
          return null;
       }
+   }
+   
+   // Return null if no conflicts, error string with details if conflicts exist
+   public static String recordingConflicts(JSONObject json) {
+      try {
+         if (json.has("conflicts")) {
+            String message = "Will not record due to conflicts. Recordings in conflict:";
+            JSONObject o = json.getJSONObject("conflicts");
+            JSONArray a;
+            if (o.has("willCancel")) {
+               a = o.getJSONArray("willCancel");
+               for (int j=0; j<a.length(); ++j) {
+                  JSONObject jr = a.getJSONObject(j);
+                  if (jr.has("losingOffer")) {
+                     JSONArray ar = jr.getJSONArray("losingOffer");
+                     for (int k=0; k<ar.length(); ++k) {
+                        message += "\n" + ar.getJSONObject(k).getString("title");
+                     }
+                  }
+                  if (jr.has("winningOffer")) {
+                     JSONArray ar = jr.getJSONArray("winningOffer");
+                     for (int k=0; k<ar.length(); ++k) {
+                        message += "\n" + ar.getJSONObject(k).getString("title");
+                     }
+                  }
+               }
+            }
+            return message;
+         }
+      } catch (JSONException e1) {
+         return "recordingConflicts - " + e1.getMessage();
+      }
 
+      return null;
    }
 
 }
