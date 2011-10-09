@@ -779,6 +779,16 @@ public class configMain {
       String value;
       String name;
       
+      // enableRpc
+      name = (String)tivos.getSelectedItem();
+      if (name != null) {
+         String tivoName = name.replaceFirst("=.+$", "");
+         if (enableRpc.isSelected())
+            config.setRpcSetting("enableRpc_" + tivoName, "1");
+         else
+            config.setRpcSetting("enableRpc_" + tivoName, "0");
+      }
+      
       // Tivos
       int count = tivos.getItemCount();
       Hashtable<String,String> h = new Hashtable<String,String>();
@@ -792,16 +802,6 @@ public class configMain {
          }
       }
       config.setTivoNames(h);
-      
-      // enableRpc
-      name = (String)tivos.getSelectedItem();
-      if (name != null) {
-         String tivoName = name.replaceFirst("=.+$", "");
-         if (enableRpc.isSelected())
-            config.setRpcSetting("enableRpc_" + tivoName, "1");
-         else
-            config.setRpcSetting("enableRpc_" + tivoName, "0");
-      }
       
       // limit_npl_fetches
       name = (String)tivos.getSelectedItem();
@@ -3236,14 +3236,13 @@ public class configMain {
       }
       else if (component.equals("enableRpc")) {
          text =  "<b>Enable iPad style communications with this TiVo</b><br>";
-         text += "<b>NOTE: Once you change this option you must restart kmttg to see the change.</b>";
          text += "If this option is enabled then kmttg will use iPad style communications with the TiVo to enable<br>";
          text += "extra functionality such as capability to play & delete shows from Now Playing list and also to<br>";
          text += "allow viewing of To Do list, Season Pass list and direct remote control capabilities.<br>";
          text += "If enabled then you can play/delete shows from Now Playing List table as follows:<br>";
          text += "<b>PLAY:</b> Select a show in Now Playing List and press <b>space bar</b> key.<br>";
          text += "<b>DELETE:</b> Select a show in Now Playing List and press <b>delete</b> key.<br>";
-         text += "<b>If enabled, once you re-start kmttg you will see an additional 'Remote' tab</b>.<br>";
+         text += "<b>If enabled, you will see an additional 'Remote' tab</b>.<br>";
          text += "<b>NOTE: This only works with Series 4 (Premiere) TiVos or later.</b>";
       }
       else if (component.equals("files_path")) {
