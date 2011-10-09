@@ -1046,7 +1046,13 @@ public class gui {
       }
       
       // Refresh encoding profiles in case toggled between VRD & regular
-      if (config.GUIMODE) refreshEncodingProfilesCB();    
+      if (config.GUIMODE) refreshEncodingProfilesCB();
+      
+      // Add remote tab if appropriate
+      if (config.GUIMODE && config.ipadEnabled() && remote_gui == null) {
+         remote_gui = new remotegui(jFrame);
+         tabbed_panel.add("Remote", remote_gui.getPanel());
+      }
    }
    
    // Callback for "Refresh Encoding Profiles" File menu entry
