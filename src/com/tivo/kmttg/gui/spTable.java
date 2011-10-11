@@ -47,6 +47,7 @@ public class spTable {
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private String currentTivo = null;
    public JScrollPane scroll = null;
+   private Boolean loaded = false;
 
    spTable(JFrame dialog) {
       Object[][] data = {};
@@ -348,6 +349,7 @@ public class spTable {
     
     public void clear() {
        debug.print("");
+       setLoaded(false);
        MyTableModel model = (MyTableModel)TABLE.getModel(); 
        model.setNumRows(0);
     }
@@ -485,14 +487,17 @@ public class spTable {
     }
     
     public Boolean isTableLoaded() {
-       int count = TABLE.getRowCount();
-       if (count == 0)
-          return false;
-       String title = GetRowTitle(0);
-       if (title.startsWith(" Loaded:")) {
-          return true;
+       return loaded;
+    }
+    
+    public void setLoaded(Boolean flag) {
+       if (flag) {
+          loaded = true;
+          TABLE.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+       } else {
+          loaded = false;
+          TABLE.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
        }
-       return false;
     }
     
     private Boolean removeJson(String tivoName, JSONObject json) {
@@ -674,6 +679,7 @@ public class spTable {
           clear();
           AddRows(data);
           updateTitleCols(" Loaded:");
+          setLoaded(true);
        }
     }
     
