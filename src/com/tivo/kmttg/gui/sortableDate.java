@@ -44,8 +44,8 @@ public class sortableDate {
    sortableDate(String folderName, Stack<JSONObject> folderEntry) {
       this.folderName = folderName;
       folder = true;
-      display = " ";
-      sortable = " "; 
+      display = "";
+      sortable = "0"; 
       folderData_json = folderEntry;
    }
    
