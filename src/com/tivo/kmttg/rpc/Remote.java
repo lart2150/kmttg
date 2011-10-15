@@ -375,7 +375,7 @@ public class Remote {
             // Expects count=# in initial json, offset=# after first call
             json.put("format", "idSequence");
             json.put("bodyId", bodyId_get());
-            json.put("state", new JSONArray("[\"scheduled\"]"));
+            json.put("state", new JSONArray("[\"inProgress\",\"scheduled\"]"));
             req = RpcRequest("recordingSearch", false, json);
          }
          else if (type.equals("SearchId")) {
@@ -518,9 +518,6 @@ public class Remote {
             // Returns info about both tuners
             req = RpcRequest("tunerStateEventRegister", true, json);
          }
-         // Other interesting ones to look at:
-         // unifiedItemSearch
-         //  followed by recordingSearch with offerId & state=[scheduled] to find cancellations
          else {
             // Not recognized => just use type
             req = RpcRequest(type, false, json);
