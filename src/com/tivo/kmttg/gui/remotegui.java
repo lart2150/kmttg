@@ -163,7 +163,7 @@ public class remotegui {
       tabbed_panel = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
       tabbed_panel.addChangeListener(new ChangeListener() {
          public void stateChanged(ChangeEvent e) {
-            String selected = tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
+            String selected = getCurrentTabName();
             if (selected.equals("Search")) {
                // Set focus on text_search field
                text_search.requestFocusInWindow();
