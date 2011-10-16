@@ -1022,11 +1022,9 @@ public class remotegui {
       record_search.setToolTipText(getToolTip("record_search"));
       record_search.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            if (tab_search.inFolder) {
-               String tivoName = (String)tivo_search.getSelectedItem();
-               if (tivoName != null && tivoName.length() > 0) {
-                  tab_search.recordSingle(tivoName);
-               }
+            String tivoName = (String)tivo_search.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               tab_search.recordSingle(tivoName);
             }
          }
       });
@@ -1035,11 +1033,9 @@ public class remotegui {
       record_sp_search.setToolTipText(getToolTip("record_sp_search"));
       record_sp_search.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            if (tab_search.inFolder) {
-               String tivoName = (String)tivo_search.getSelectedItem();
-               if (tivoName != null && tivoName.length() > 0) {
-                  tab_search.recordSP(tivoName);
-               }
+            String tivoName = (String)tivo_search.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               tab_search.recordSP(tivoName);
             }
          }
       });
@@ -1947,6 +1943,29 @@ public class remotegui {
             r.disconnect();
          }
       }
+   }
+   
+   // Obtain todo lists for specified tivo names
+   // Used by Search and Guide tabs to mark recordings
+   // NOTE: This called as part of a background job
+   public Hashtable<String,JSONArray> getTodoLists(String tab) {
+      String[] tivoNames;
+      if (tab.equals("Guide"))
+         tivoNames = getTivoNames(tivo_guide);
+      else
+         tivoNames = getTivoNames(tivo_search);
+      Hashtable<String,JSONArray> todoLists = new Hashtable<String,JSONArray>();
+      for (int t=0; t<tivoNames.length; ++t) {
+         Remote r = new Remote(tivoNames[t]);
+         if (r.success) {
+            JSONArray todo = r.ToDo(null);
+            if (todo != null) {
+               todoLists.put(tivoNames[t], todo);
+            }
+            r.disconnect();
+         }
+      }
+      return todoLists;
    }
    
    private static ImageIcon scale(Container dialog, Image src, double scale) {
