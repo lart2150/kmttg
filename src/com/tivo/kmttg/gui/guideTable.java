@@ -51,6 +51,7 @@ public class guideTable {
    private JSONObject currentChannel = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
+   private Hashtable<String,JSONArray> tivo_todo = new Hashtable<String,JSONArray>();
          
    guideTable(JFrame dialog) {
       Object[][] data = {}; 
@@ -235,6 +236,9 @@ public class guideTable {
                cell.setBackground(config.tableBkgndLight);
             else
                cell.setBackground(config.tableBkgndDarker);            
+            JSONObject json = GetRowData(row);
+            if (json != null && json.has("__inTodo__"))
+               cell.setBackground(config.tableBkgndProtected);
          }         
          cell.setFont(config.tableFont);
         
@@ -446,6 +450,8 @@ public class guideTable {
          for (int i=0; i<cols; ++i) {
             data[i] = "";
          }
+         // If entry is in 1 of todo lists then add special __inTodo__ JSON entry
+         flagIfInTodo(entry);
          JSONObject o = new JSONObject();
          String startString = entry.getString("startTime");
          long start = getLongDateFromString(startString);
@@ -472,6 +478,30 @@ public class guideTable {
          log.error("AddTABLERow - " + e1.getMessage());
       }
       return null;
+   }
+   
+   private void flagIfInTodo(JSONObject entry) {
+      try {
+         String startTime = entry.getString("startTime");
+         String channelNumber = entry.getJSONObject("channel").getString("channelNumber");
+         java.util.Enumeration<String> keys = tivo_todo.keys();
+         while (keys.hasMoreElements()) {
+            String key = keys.nextElement();
+            for (int i=0; i<tivo_todo.get(key).length(); ++i) {
+               String start = "";
+               String chan = "";
+               if (tivo_todo.get(key).getJSONObject(i).has("startTime"))
+                  start = tivo_todo.get(key).getJSONObject(i).getString("startTime");
+               if (tivo_todo.get(key).getJSONObject(i).has("channel"))
+                  chan = tivo_todo.get(key).getJSONObject(i).getJSONObject("channel").getString("channelNumber");
+               if (start.equals(startTime) && chan.equals(channelNumber)) {
+                  entry.put("__inTodo__", true);
+               }
+            }
+         }
+      } catch (JSONException e) {
+         log.error("flagIfInTodo - " + e.getMessage());
+      }
    }
    
    public void clear() {
@@ -676,6 +706,8 @@ public class guideTable {
             if (r.success) {
                tivo_data.put(tivoName, r.ChannelList(null));
                if( tivo_data.get(tivoName) != null ) {
+                  log.warn("Obtaining todo lists");
+                  tivo_todo = config.gui.remote_gui.getTodoLists("Guide");
                   clear();
                   AddRows(tivoName, tivo_data.get(tivoName));
                }                  
@@ -775,6 +807,10 @@ public class guideTable {
                                     String conflicts = rnpl.recordingConflicts(json);
                                     if (conflicts == null) {
                                        log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
+                                       // Add to todo list for this tivo
+                                       if (tivo_todo.containsKey(tivoName)) {
+                                          tivo_todo.get(tivoName).put(GetRowData(row));
+                                       }
                                     } else {
                                        log.error(conflicts);
                                     }
