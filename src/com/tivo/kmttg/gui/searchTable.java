@@ -48,6 +48,7 @@ public class searchTable {
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
+   private Hashtable<String,JSONArray> tivo_todo = new Hashtable<String,JSONArray>();
          
    searchTable(JFrame dialog) {
       Object[][] data = {}; 
@@ -235,6 +236,9 @@ public class searchTable {
                cell.setBackground(config.tableBkgndLight);
             else
                cell.setBackground(config.tableBkgndDarker);            
+            JSONObject json = GetRowData(row);
+            if (json != null && json.has("__inTodo__"))
+               cell.setBackground(config.tableBkgndProtected);
          }         
          cell.setFont(config.tableFont);
         
@@ -341,6 +345,12 @@ public class searchTable {
    // String    type
    // JSONArray entries
    public void AddRows(String tivoName, JSONArray data) {
+      // Get to do list if necessary
+      if (tivo_todo.size() == 0) {
+         log.warn("Obtaining todo lists");
+         tivo_todo = config.gui.remote_gui.getTodoLists("Search");
+      }
+
       Refresh(data);
       packColumns(TABLE, 2);
       
@@ -451,6 +461,8 @@ public class searchTable {
          for (int i=0; i<cols; ++i) {
             data[i] = "";
          }
+         // If entry is in 1 of todo lists then add special __inTodo__ JSON entry
+         flagIfInTodo(entry);
          JSONObject o = new JSONObject();
          String startString = entry.getString("startTime");
          long start = getLongDateFromString(startString);
@@ -484,6 +496,30 @@ public class searchTable {
       return null;
    }
    
+   private void flagIfInTodo(JSONObject entry) {
+      try {
+         String startTime = entry.getString("startTime");
+         String channelNumber = entry.getJSONObject("channel").getString("channelNumber");
+         java.util.Enumeration<String> keys = tivo_todo.keys();
+         while (keys.hasMoreElements()) {
+            String key = keys.nextElement();
+            for (int i=0; i<tivo_todo.get(key).length(); ++i) {
+               String start = "";
+               String chan = "";
+               if (tivo_todo.get(key).getJSONObject(i).has("startTime"))
+                  start = tivo_todo.get(key).getJSONObject(i).getString("startTime");
+               if (tivo_todo.get(key).getJSONObject(i).has("channel"))
+                  chan = tivo_todo.get(key).getJSONObject(i).getJSONObject("channel").getString("channelNumber");
+               if (start.equals(startTime) && chan.equals(channelNumber)) {
+                  entry.put("__inTodo__", true);
+               }
+            }
+         }
+      } catch (JSONException e) {
+         log.error("flagIfInTodo - " + e.getMessage());
+      }
+   }
+   
    public void clear() {
       debug.print("");
       DefaultTableModel model = (DefaultTableModel)TABLE.getModel(); 
@@ -508,6 +544,11 @@ public class searchTable {
       if (s != null)
          return s;
       return null;
+   }
+   
+   public Boolean isFolder(int row) {
+      sortableDate s = (sortableDate)TABLE.getValueAt(row,getColumnIndex("DATE"));
+      return s.folder;
    }
 
    // Look for entry with given folder name and select it
@@ -644,6 +685,8 @@ public class searchTable {
                   try {
                      for (int i=0; i<selected.length; ++i) {
                         row = selected[i];
+                        if ( isFolder(row) )
+                           continue;
                         json = GetRowData(row);
                         title = GetRowTitle(row);
                         if (json != null) {
@@ -664,6 +707,10 @@ public class searchTable {
                                     String conflicts = rnpl.recordingConflicts(json);
                                     if (conflicts == null) {
                                        log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
+                                       // Add to todo list for this tivo
+                                       if (tivo_todo.containsKey(tivoName)) {
+                                          tivo_todo.get(tivoName).put(GetRowData(row));
+                                       }
                                     } else {
                                        log.error(conflicts);
                                     }
@@ -693,6 +740,8 @@ public class searchTable {
       // First check if all selected entries are of type 'series'
       for (int i=0; i<selected.length; ++i) {
          int row = selected[i];
+         if ( isFolder(row) )
+            continue;
          JSONObject json = GetRowData(row);
          if (json != null) {
             try {
@@ -728,6 +777,8 @@ public class searchTable {
                   // Now proceed with subscriptions
                   for (int i=0; i<selected.length; ++i) {
                      row = selected[i];
+                     if ( isFolder(row) )
+                        continue;
                      json = GetRowData(row);
                      if (json != null) {
                         try {
