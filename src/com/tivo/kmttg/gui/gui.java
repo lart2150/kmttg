@@ -14,6 +14,8 @@ import java.util.Hashtable;
 import java.util.Stack;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.plaf.FontUIResource;
 
 import com.tivo.kmttg.main.auto;
@@ -328,6 +330,16 @@ public class gui {
                   
          // Tabbed panel
          tabbed_panel = new JTabbedPane();
+         tabbed_panel.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+               if (getCurrentTabName().equals("Remote")) {
+                  // Set focus on remote pane
+                  remote_gui.tabbed_panel.requestFocusInWindow();
+               }
+            }
+        });
+
+
          // Add permanent tabs
          tivoTabs.put("FILES", new tivoTab("FILES"));
          tabbed_panel.add("FILES", tivoTabs.get("FILES").getPanel());
