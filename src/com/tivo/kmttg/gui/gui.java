@@ -217,7 +217,10 @@ public class gui {
          start.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {
                String tivoName = getCurrentTabName();
-               tivoTabs.get(tivoName).startCB();
+               if (tivoName.equals("Remote"))
+                  log.error("START JOBS invalid with Remote tab selected.");
+               else
+                  tivoTabs.get(tivoName).startCB();
             }
          });
          // Tasks
