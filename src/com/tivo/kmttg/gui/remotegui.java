@@ -84,6 +84,7 @@ public class remotegui {
    private JComboBox tivo_info = null;
    JTextPane text_info = null;
    private Hashtable<String,String> tivo_info_data = new Hashtable<String,String>();
+   public Hashtable<String, JButton> buttons = new Hashtable<String, JButton>();
    
    private cancelledTable tab_cancel = null;
    private JComboBox tivo_cancel = null;
@@ -171,18 +172,30 @@ public class remotegui {
                // Reset date range in Guide start time combo box
                tab_guide.setComboBoxDates(guide_start, guide_hour_increment, guide_total_range);
             }
+            if (selected.equals("Remote")) {
+               // Set focus on tabbed_panel
+               tabbed_panel.requestFocusInWindow();
+            }
          }
-     });
+      });
 
-      InputMap im = tabbed_panel.getInputMap();
-      im.put(KeyStroke.getKeyStroke("pressed RIGHT"), "none");
-      im.put(KeyStroke.getKeyStroke("released RIGHT"), "none");
-      im.put(KeyStroke.getKeyStroke("pressed LEFT"), "none");
-      im.put(KeyStroke.getKeyStroke("released LEFT"), "none");
-      im.put(KeyStroke.getKeyStroke("pressed UP"), "none");
-      im.put(KeyStroke.getKeyStroke("released UP"), "none");
-      im.put(KeyStroke.getKeyStroke("pressed DOWN"), "none");
-      im.put(KeyStroke.getKeyStroke("released DOWN"), "none");
+      // Want arrow keys to click corresponding buttons
+      class ButtonPressed extends AbstractAction {
+         private static final long serialVersionUID = 1L;
+         private String name;
+         public ButtonPressed(String name) {
+            this.name = name;
+         }
+         public void actionPerformed(ActionEvent e) {
+            if (getCurrentTabName().equals("Remote"))
+               buttons.get(name).doClick();
+        }
+      }
+      String []arrows = {"RIGHT", "LEFT", "UP", "DOWN"};
+      for (int i=0; i<arrows.length; ++i) {
+         tabbed_panel.getInputMap().put(KeyStroke.getKeyStroke(arrows[i]), arrows[i]);
+         tabbed_panel.getActionMap().put(arrows[i], new ButtonPressed(arrows[i]));
+      }
             
       // ToDo Title + Tivo Selector + Refresh button
       Dimension space_40 = new Dimension(40,0);
@@ -1137,6 +1150,14 @@ public class remotegui {
             JButton b = ImageButton(panel_controls, imageName, scale);
             if (b == null) continue;
             b.setToolTipText(getToolTip(event));
+            if (event.equals("left"))
+               buttons.put("LEFT", b);
+            if (event.equals("right"))
+               buttons.put("RIGHT", b);
+            if (event.equals("up"))
+               buttons.put("UP", b);
+            if (event.equals("down"))
+               buttons.put("DOWN", b);
             panel_controls.add(b);
             size = b.getPreferredSize();
             b.setBounds(x+insets.left, y+insets.top, size.width-cropx, size.height-cropy);
@@ -1582,6 +1603,10 @@ public class remotegui {
       }
       backgroundRun b = new backgroundRun();
       b.execute();
+   }
+      
+   private String getCurrentTabName() {
+      return tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
    }
 
    public String getGuideStartTime() {
