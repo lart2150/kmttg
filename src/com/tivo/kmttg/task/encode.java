@@ -304,9 +304,28 @@ public class encode implements Serializable {
       if (last.contains("time=")) {
          String[] l = last.split("time=");
          String[] ll = l[l.length-1].split("\\s+");
-         float sec  = Float.parseFloat(ll[0]);
-         long ms = (long)sec*1000;
-         return ms;
+         float sec = (float)0;
+         try {
+            if (ll[0].contains(":")) {
+               // "HH:MM:SS.MS" format
+               Pattern p = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");
+               Matcher m = p.matcher(ll[0]);
+               if (m.matches()) {
+                  long HH = Long.parseLong(m.group(1));
+                  long MM = Long.parseLong(m.group(2));
+                  long SS = Long.parseLong(m.group(3));
+                  long MS = Long.parseLong(m.group(4));
+                  long ms = MS + 1000*(SS+60*MM+60*60*HH);
+                  return ms;
+               }
+
+            } else {
+               sec  = Float.parseFloat(ll[0]);
+            }
+         }
+         catch (NumberFormatException n) {
+         }
+         return (long)sec*1000;
       }
       return 0;
    }
