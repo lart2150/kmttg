@@ -287,11 +287,15 @@ public class encode implements Serializable {
             String[] l = line.split("\\s+");
             String d = l[2].replaceFirst(",", "");
             String[] ll = d.split(":");
-            float hour = Float.parseFloat(ll[0]);
-            float min  = Float.parseFloat(ll[1]);
-            float sec  = Float.parseFloat(ll[2]);
-            long ms = (long)(3600*hour + 60*min + sec)*1000;
-            return ms;
+            try {
+               float hour = Float.parseFloat(ll[0]);
+               float min  = Float.parseFloat(ll[1]);
+               float sec  = Float.parseFloat(ll[2]);
+               long ms = (long)(3600*hour + 60*min + sec)*1000;
+               return ms;
+            }
+            catch (NumberFormatException n) {
+            }
          }
       }
       return 0;
