@@ -127,7 +127,7 @@ public class Remote {
          }
          bodyId_get();
       } catch (Exception e) {
-         error("rpc Remote - " + e.getMessage());
+         error("rpc Remote - (IP=" + IP + ", port=" + port + ")" + e.getMessage());
          success = false;
       }
    }
@@ -752,9 +752,12 @@ public class Remote {
       if (job != null && config.GUIMODE)
          config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Season Passes");
       result = Command("SeasonPasses", new JSONObject());
-      if (result != null && result.has("subscription")) {
+      if (result != null) {
          try {
-            return result.getJSONArray("subscription");
+            if (result.has("subscription"))
+               return result.getJSONArray("subscription");
+            else
+               return new JSONArray();
          } catch (JSONException e) {
             error("rpc SeasonPasses error - " + e.getMessage());
             return null;
