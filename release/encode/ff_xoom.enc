@@ -1,0 +1,12 @@
+# Description (single line, keep short)
+<description>
+mpeg4 container, same res up to 5 Mbps h.264 video, 128k aac audio 
+	
+# Encode command or script (single line)
+# Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
+<command>
+FFMPEG -y -i INPUT -threads CPU_CORES -acodec aac -ab 128k -ac 2 -vcodec libx264 -flags +loop -coder ac -level 41 -b 5000k -refs 3 -bf 3 -me_method umh -subq 9 -me_range 16 -qmin 10 -qmax 50 -qscale 1 -sameq -g 24 -f mp4 OUTPUT
+
+# Encoded output file extension
+<extension>
+mp4
