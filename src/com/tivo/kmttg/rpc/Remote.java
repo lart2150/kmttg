@@ -29,6 +29,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class Remote {
    public Boolean debug = false;
@@ -453,6 +454,11 @@ public class Remote {
                o.put("endTimePadding", json.getInt("endTimePadding"));
             if (json.has("startTimePadding"))
                o.put("startTimePadding", json.getInt("startTimePadding"));
+            // These are required for wishlist types
+            if (json.has("title"))
+               o.put("title", string.utfString(json.getString("title")));
+            if (json.has("folderingRules"))
+               o.put("folderingRules", json.getString("folderingRules"));
             o.put("bodyId", bodyId_get());
             o.put("ignoreConflicts", "true");
             req = RpcRequest("subscribe", false, o);
