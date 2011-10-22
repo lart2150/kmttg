@@ -1,17 +1,19 @@
 package com.tivo.kmttg.JSON;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.Reader;
+import java.io.Writer;
 
 import com.tivo.kmttg.util.log;
 
 public class JSONFile {
    public static Boolean write(JSONObject json, String fileName) {
       try {
-         OutputStream os = new FileOutputStream(fileName);
-         os.write(json.toString().getBytes());
+         Writer os = new BufferedWriter(new FileWriter(fileName));
+         os.write(json.toString());
          os.close();
          return true;
       } catch (Exception e) {
@@ -22,8 +24,8 @@ public class JSONFile {
    
    public static Boolean write(JSONArray json, String fileName) {
       try {
-         OutputStream os = new FileOutputStream(fileName);
-         os.write(json.toString().getBytes());
+         Writer os = new BufferedWriter(new FileWriter(fileName));
+         os.write(json.toString());
          os.close();
          return true;
       } catch (Exception e) {
@@ -34,7 +36,7 @@ public class JSONFile {
    
    public static JSONObject readJSONObject(String fileName) {
       try {
-         InputStream is = new FileInputStream(fileName);
+         Reader is = new BufferedReader(new FileReader(fileName));
          JSONObject json = new JSONObject(new JSONTokener(is));
          is.close();
          return json;
@@ -46,7 +48,7 @@ public class JSONFile {
    
    public static JSONArray readJSONArray(String fileName) {
       try {
-         InputStream is = new FileInputStream(fileName);
+         Reader is = new BufferedReader(new FileReader(fileName));
          JSONArray json = new JSONArray(new JSONTokener(is));
          is.close();
          return json;
