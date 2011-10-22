@@ -40,6 +40,7 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class spTable {
    private String[] TITLE_cols = {"PRIORITY", "SHOW", "CHANNEL", "NUM"};
@@ -386,7 +387,7 @@ public class spTable {
           JSONObject o2 = new JSONObject();
           String title = " ";
           if (data.has("title"))
-             title += data.getString("title");
+             title += string.utfString(data.getString("title"));
           // Manual recordings need more information added
           if (title.equals(" Manual")) {
              String time = data.getJSONObject("idSetSource").getString("timeOfDayLocal");
@@ -411,7 +412,7 @@ public class spTable {
              max = data.getInt("maxRecordings");
           
           info[0] = new sortableInt(data, priority);
-          info[1] = title;
+          info[1] = string.utfString(title);
           info[2] = channel;
           info[3] = new sortableInt(null, max);
           return info;
@@ -717,12 +718,14 @@ public class spTable {
                             
                             // OK to subscribe
                             if (schedule) {
-                               log.print("Scheduling: " + json.getString("title"));
+                               log.print("Scheduling: " + string.utfString(json.getString("title")));
                                result = r.Command("seasonpass", json);
                                if (result != null)
                                   log.print("success");
                             } else {
-                               log.warn("Existing SP with same title found, not scheduling: " + json.getString("title"));
+                               log.warn("Existing SP with same title found, not scheduling: " +
+                                  string.utfString(json.getString("title"))
+                               );
                             }
                          } catch (JSONException e) {
                             log.error("SPListCopy - " + e.getMessage());
@@ -751,7 +754,7 @@ public class spTable {
                       config.gui.remote_gui.spOpt = new spOptions();
                    String title;
                    try {
-                      title = json.getString("title");
+                      title = string.utfString(json.getString("title"));
                       if (isTableLoaded()) {
                          log.error("Cannot modify SPs from loaded file.");
                          return null;
