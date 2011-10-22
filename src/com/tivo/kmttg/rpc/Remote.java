@@ -455,6 +455,7 @@ public class Remote {
             if (json.has("startTimePadding"))
                o.put("startTimePadding", json.getInt("startTimePadding"));
             // These are required for wishlist types
+            // NOTE: Advanced wishlist SPs don't contain idSetSource so don't work
             if (json.has("title"))
                o.put("title", string.utfString(json.getString("title")));
             if (json.has("folderingRules"))
@@ -477,6 +478,10 @@ public class Remote {
             o.put("startTimePadding", json.getInt("startTimePadding"));
             o.put("idSetSource", json.getJSONObject("idSetSource"));
             o.put("subscriptionId", json.getString("subscriptionId"));
+            if (json.has("title"))
+               o.put("title", json.getString("title"));
+            if (json.has("folderingRules"))
+               o.put("folderingRules", json.getString("folderingRules"));
             o.put("bodyId", bodyId_get());
             o.put("ignoreConflicts", "true");
             req = RpcRequest("subscribe", false, o);
