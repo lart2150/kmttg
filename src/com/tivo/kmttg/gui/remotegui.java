@@ -785,6 +785,16 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             String tivoName = (String)tivo_premiere.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0)
+               tab_premiere.recordSingle(tivoName);
+         }
+      });
+      
+      JButton recordSP_premiere = new JButton("Season Pass");
+      recordSP_premiere.setToolTipText(getToolTip("recordSP_premiere"));
+      recordSP_premiere.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_premiere.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0)
                tab_premiere.recordSP(tivoName);
          }
       });
@@ -826,6 +836,8 @@ public class remotegui {
       row1_premiere.add(refresh_premiere);
       row1_premiere.add(Box.createRigidArea(space_5));
       row1_premiere.add(record_premiere);
+      row1_premiere.add(Box.createRigidArea(space_5));
+      row1_premiere.add(recordSP_premiere);
       row1_premiere.add(Box.createRigidArea(space_40));
       row1_premiere.add(premiere_channels_update);
       panel_premiere.add(row1_premiere, c);
@@ -2234,12 +2246,17 @@ public class remotegui {
       }
       else if (component.equals("record_premiere")){
          text = "<b>Record</b><br>";
-         text += "Schedule season passes selected in the table below on selected TiVo.<br>";
+         text += "Schedule individual recording for items selected in the table below on selected TiVo.<br>";
+         text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
+         text += "shows and will not schedule the recording.";
+      }
+      else if (component.equals("recordSP_premiere")){
+         text = "<b>Record</b><br>";
+         text += "Schedule season passes for shows selected in the table below on selected TiVo.<br>";
          text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
          text += "checking against the current set of season passes already on the TiVo.<br>";
-         text += "NOTE: By default the following settings are used to record Season Passes, so you may want<br>";
-         text += "adjust the SP settings on the TiVo after scheduling:<br>";
-         text += "lowest priority, recordingQuality=best, maxRecordings=25, keepBehavior=fifo, first run only";
+         text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
+         text += "priority after creating it.";
       }
       else if (component.equals("refresh_sp")){
          text = "<b>Refresh</b><br>";
