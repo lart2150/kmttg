@@ -398,6 +398,64 @@ public class premiereTable {
        }
     }
     
+    // Schedule a single recording
+    public void recordSingle(final String tivoName) {
+       final int[] selected = GetSelectedRows();
+       if (selected.length > 0) {
+          log.print("Scheduling individual recordings on TiVo: " + tivoName);
+          class backgroundRun extends SwingWorker<Object, Object> {
+             protected Object doInBackground() {
+                int row;
+                JSONObject json;
+                String title;
+                Remote r = new Remote(tivoName);
+                if (r.success) {
+                   try {
+                      for (int i=0; i<selected.length; ++i) {
+                         row = selected[i];
+                         json = GetRowData(row);
+                         title = GetRowTitle(row);
+                         if (json != null) {
+                            if (json.has("contentId") && json.has("offerId")) {
+                               if (config.gui.remote_gui.recordOpt == null)
+                                  config.gui.remote_gui.recordOpt = new recordOptions();
+                               JSONObject o = config.gui.remote_gui.recordOpt.promptUser(
+                                  "Schedule Recording - " + title, null
+                               );
+                               if (o != null) {
+                                  log.warn("Scheduling Recording: '" + title + "' on TiVo: " + tivoName);
+                                  o.put("contentId", json.getString("contentId"));
+                                  o.put("offerId", json.getString("offerId"));
+                                  json = r.Command("singlerecording", o);
+                                  if (json == null) {
+                                     log.error("Failed to schedule recording for: '" + title + "'");
+                                  } else {
+                                     String conflicts = rnpl.recordingConflicts(json);
+                                     if (conflicts == null) {
+                                        log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
+                                     } else {
+                                        log.error(conflicts);
+                                     }
+                                  }
+                               }
+                            } else {
+                               log.error("Missing contentId and/or offerId for: '" + title + "'");
+                            }
+                         }
+                      }
+                   } catch (JSONException e) {
+                      log.error("search_recordCB failed - " + e.getMessage());
+                   }
+                   r.disconnect();
+                }
+                return null;
+             }
+          }
+          backgroundRun b = new backgroundRun();
+          b.execute();
+       }
+    }
+    
     // Schedule to record selected entries in tab_premiere.TABLE
     public void recordSP(final String tivoName) {
        class backgroundRun extends SwingWorker<Object, Object> {
