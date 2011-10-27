@@ -145,8 +145,8 @@ public class tivoTab {
                   }
                } else {
                   // Refresh now playing list mode
-                  getTable().NowPlaying.clearSelection();
-                  getTable().clear();
+                  //getTable().NowPlaying.clearSelection();
+                  //getTable().clear();
                   jobMonitor.getNPL(name);
                }
             }
