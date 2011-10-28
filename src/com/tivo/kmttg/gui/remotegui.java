@@ -1186,6 +1186,8 @@ public class remotegui {
                               }
                               r.disconnect();
                            }
+                           // Set focus on tabbed_panel
+                           tabbed_panel.requestFocusInWindow();
                            return null;
                         }
                      }
@@ -2061,6 +2063,8 @@ public class remotegui {
                         }
                         r.disconnect();
                      }
+                     // Set focus on tabbed_panel
+                     tabbed_panel.requestFocusInWindow();
                      return null;
                   }
                }
