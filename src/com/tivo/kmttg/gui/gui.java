@@ -177,6 +177,42 @@ public class gui {
       }
    }
    
+   public void setLookAndFeel(String name) {
+      if (name == null)
+         name = "default";
+      config.lookAndFeel = name;
+      try {
+         JDialog d = configMain.getDialog();
+         JDialog a = configAuto.getDialog();
+         if (name.equals("default")) {
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            SwingUtilities.updateComponentTreeUI(jFrame);
+            if (d != null) {
+               SwingUtilities.updateComponentTreeUI(d);
+               d.pack();
+            }
+            if (a != null) {
+               SwingUtilities.updateComponentTreeUI(a);
+               a.pack();
+            }
+         }
+         if (name.equals("native")) {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            SwingUtilities.updateComponentTreeUI(jFrame);
+            if (d != null) {
+               SwingUtilities.updateComponentTreeUI(d);
+               d.pack();
+            }
+            if (a != null) {
+               SwingUtilities.updateComponentTreeUI(a);
+               a.pack();
+            }
+         }
+      } catch (Exception e) {
+         log.error("setLookAndFeel - " + e.getMessage());
+      }
+   }
+   
    public void grabFocus() {
       if (jFrame != null)
          if(! jFrame.hasFocus()) { jFrame.requestFocus(); }
