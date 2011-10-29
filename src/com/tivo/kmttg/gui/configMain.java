@@ -126,6 +126,7 @@ public class configMain {
    private static JComboBox keywords = null;
    private static JComboBox customFiles = null;
    private static JComboBox autotune_tivoName = null;
+   private static JComboBox lookAndFeel = null;
    private static JFileChooser Browser = null;
    private static JTabbedPane tabbed_panel = null;
       
@@ -753,6 +754,9 @@ public class configMain {
       
       // metadata_files
       metadata_files.setSelectedItem(config.metadata_files);
+      
+      // lookAndFeel
+      lookAndFeel.setSelectedItem(config.lookAndFeel);
       
       // autotune settings
       if (autotune_tivoName != null) {
@@ -1498,6 +1502,9 @@ public class configMain {
       // metadata_files
       config.metadata_files = (String)metadata_files.getSelectedItem();
       
+      // lookAndFeel
+      config.lookAndFeel = (String)lookAndFeel.getSelectedItem();
+      
       // autotune settings
       if (autotune_tivoName != null && autotune_tivoName.getComponentCount() > 0) {
          name = (String)autotune_tivoName.getSelectedItem();
@@ -1651,10 +1658,12 @@ public class configMain {
       JLabel MinChanDigits_label = new javax.swing.JLabel();
       JLabel pyTivo_files_label = new javax.swing.JLabel();
       JLabel metadata_files_label = new javax.swing.JLabel();
+      JLabel lookAndFeel_label = new javax.swing.JLabel();
       MinChanDigits = new javax.swing.JComboBox();
       pyTivo_tivo = new javax.swing.JComboBox();
       pyTivo_files = new javax.swing.JComboBox();
       metadata_files = new javax.swing.JComboBox();
+      lookAndFeel = new javax.swing.JComboBox();
       keywords = new javax.swing.JComboBox();
       customFiles = new javax.swing.JComboBox();
       autotune_tivoName = new javax.swing.JComboBox();
@@ -1758,6 +1767,7 @@ public class configMain {
       pyTivo_tivo_label.setText("pyTivo push destination");
       pyTivo_files_label.setText("Files to push");
       metadata_files_label.setText("metadata files");
+      lookAndFeel_label.setText("look and feel");
       MinChanDigits_label.setText("Min # Channel Digits");
 
       keywords.setModel(new javax.swing.DefaultComboBoxModel(
@@ -1800,6 +1810,16 @@ public class configMain {
          new String[] { "tivoFile", "mpegFile", "mpegFile_cut", "encodeFile", "last", "all" }
       ));
       metadata_files.setName("metadata_files");
+      
+      lookAndFeel.setModel(new javax.swing.DefaultComboBoxModel(new String[] {"default", "native"}));
+      lookAndFeel.setName("lookAndFeel");
+      lookAndFeel.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+               config.gui.setLookAndFeel((String)lookAndFeel.getSelectedItem()); 
+            }
+         }
+      });
 
       customFiles_label.setText("Available file args:");
       customFiles.setModel(new javax.swing.DefaultComboBoxModel(
@@ -2689,8 +2709,18 @@ public class configMain {
       // Visual Panel
       JPanel visual_panel = new JPanel(new GridBagLayout());       
       
-      // FontSize
+      // lookAndFeel
       gy=0;
+      c.gridx = 0;
+      c.gridy = gy;
+      visual_panel.add(lookAndFeel_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      visual_panel.add(lookAndFeel, c);
+      
+      // FontSize
+      gy++;
       c.gridx = 0;
       c.gridy = gy;
       visual_panel.add(FontSize_label, c);
@@ -2982,6 +3012,7 @@ public class configMain {
       pyTivo_tivo.setToolTipText(getToolTip("pyTivo_tivo"));
       pyTivo_files.setToolTipText(getToolTip("pyTivo_files"));
       metadata_files.setToolTipText(getToolTip("metadata_files"));
+      lookAndFeel.setToolTipText(getToolTip("lookAndFeel"));
       MinChanDigits.setToolTipText(getToolTip("MinChanDigits"));
    }
    
@@ -3576,6 +3607,11 @@ public class configMain {
          text += "<b>encodeFile: </b>Only for encoded file after encode task if that task is enabled.<br>";
          text += "<b>last: </b>Only last video file in sequence of tasks (this is default setting).<br>";
          text += "<b>all: </b>For all available video files for the task set (except for .TiVo files).";
+      }
+      else if (component.equals("lookAndFeel")) {
+         text =  "<b>look and feel</b><br>";
+         text += "Select look and feel to use for GUI in general.<br>";
+         text += "NOTE: Anything other than 'default' may not look as intended.";
       }
       else if (component.equals("MinChanDigits")) {
          text =  "<b>Min # Channel Digits</b><br>";
