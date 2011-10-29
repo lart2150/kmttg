@@ -3611,7 +3611,8 @@ public class configMain {
       else if (component.equals("lookAndFeel")) {
          text =  "<b>look and feel</b><br>";
          text += "Select look and feel to use for GUI in general.<br>";
-         text += "NOTE: Anything other than 'default' may not look as intended.";
+         text += "NOTE: Anything other than 'default' may not look as intended.<br>";
+         text += "NOTE: For some OS's (like Linux) 'native' may not look any different.";
       }
       else if (component.equals("MinChanDigits")) {
          text =  "<b>Min # Channel Digits</b><br>";
