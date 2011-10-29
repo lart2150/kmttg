@@ -105,6 +105,7 @@ public class config {
    public static int jobMonitorFullPaths = 1; // If 1 then show full paths in job monitor
    public static int toolTipsTimeout = 20;  // Set # seconds for tooltip display to timeout
    public static int FontSize = 12;
+   public static String lookAndFeel = "default";
 
    // GUI table related
    public static Color tableBkgndDarker = new Color(235,235,235); // light grey
@@ -642,6 +643,9 @@ public class config {
             if (key.equals("FontSize")) {
                FontSize = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("lookAndFeel")) {
+               lookAndFeel = string.removeLeadingTrailingSpaces(line);
+            }
             if (key.equals("tableColAutoSize")) {
                tableColAutoSize = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -915,6 +919,8 @@ public class config {
          }
          
          ofp.write("<FontSize>\n" + FontSize + "\n\n");
+         
+         ofp.write("<lookAndFeel>\n" + lookAndFeel + "\n\n");
          
          ofp.write("<tableColAutoSize>\n" + tableColAutoSize + "\n\n");
          
