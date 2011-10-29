@@ -64,6 +64,8 @@ public class kmttg {
                   
                   // Create and display main frame
                   config.gui.getJFrame().setVisible(true);
+                  if (! config.lookAndFeel.equals("default"))
+                     config.gui.setLookAndFeel(config.lookAndFeel);
                   
                   // Download tools if necessary
                   mainInstall.install();
