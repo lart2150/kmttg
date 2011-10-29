@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -141,6 +142,38 @@ public class remotegui {
             RC_keyPress(isAscii, command);
       }
    }
+   
+   private class CustomButton extends JButton {
+      private static final long serialVersionUID = 1L;
+      public CustomButton(ImageIcon image) {
+         super(image);
+         setBackground(Color.black);
+         setContentAreaFilled(false);
+      }
+      public CustomButton(String label, String toolTip, String[] macro) {
+         super(label);
+         setToolTipText(getToolTip(toolTip));
+         if (macro != null)
+            setMacroCB(this, macro);
+         setBackground(Color.black);
+         setForeground(Color.white);
+         setContentAreaFilled(false);
+      }
+      protected void paintComponent(Graphics g) {
+         if (getModel().isArmed()) {
+            setContentAreaFilled(true);
+            g.setColor(Color.lightGray);
+         } else {
+            setContentAreaFilled(false);
+            g.setColor(getBackground());
+         }
+         super.paintComponent(g);
+      }
+      protected void paintBorder(Graphics g) {
+         g.setColor(getBackground());
+      }
+   }
+   
 
    remotegui(JFrame frame) {      
       Browser = new JFileChooser(config.programDir);
@@ -1171,6 +1204,8 @@ public class remotegui {
             b.setBounds(x+insets.left, y+insets.top, size.width-cropx, size.height-cropy);
             b.addActionListener(new java.awt.event.ActionListener() {
                public void actionPerformed(java.awt.event.ActionEvent e) {
+                  // Set focus on tabbed_panel
+                  tabbed_panel.requestFocusInWindow();
                   final String tivoName = (String)tivo_rc.getSelectedItem();
                   if (tivoName != null && tivoName.length() > 0) {
                      class backgroundRun extends SwingWorker<Object, Object> {
@@ -1203,48 +1238,35 @@ public class remotegui {
       }
       
       // Special buttons
-      JButton sps9s = new JButton("Clock: SPS9S");
-      sps9s.setToolTipText(getToolTip("sps9s"));
-      setMacroCB(sps9s, new String[] {"select", "play", "select", "9", "select", "clear"});
+      JButton sps9s = new CustomButton(
+         "Clock: SPS9S", "sps9s",
+         new String[] {"select", "play", "select", "9", "select", "clear"}
+      );
       size = sps9s.getPreferredSize();
-      sps9s.setBackground(Color.black);
-      sps9s.setBorderPainted(false);
-      sps9s.setForeground(Color.white);
       panel_controls.add(sps9s);
       sps9s.setBounds(500+insets.left, 10+insets.top, size.width, size.height);
       
-      /*JButton sps30s = new JButton("30ss: SPS30S");
-      sps30s.setToolTipText(getToolTip("sps30s"));
-      setMacroCB(sps30s, new String[] {"select", "play", "select", "3", "0", "select", "clear"});
-      size = sps30s.getPreferredSize();
-      sps30s.setBackground(Color.black);
-      sps30s.setBorderPainted(false);
-      sps30s.setForeground(Color.white);
-      panel_controls.add(sps30s);
-      sps30s.setBounds(500+insets.left, 40+insets.top, size.width, size.height);*/
-      
-      JButton spsps = new JButton("Banner: SPSPS");
-      spsps.setToolTipText(getToolTip("spsps"));
-      setMacroCB(spsps, new String[] {"select", "play", "select", "pause", "select", "play"});
+      JButton spsps = new CustomButton(
+         "Banner: SPSPS", "spsps",
+         new String[] {"select", "play", "select", "pause", "select", "play"}
+      );
       size = spsps.getPreferredSize();
-      spsps.setBackground(Color.black);
-      spsps.setBorderPainted(false);
-      spsps.setForeground(Color.white);
       panel_controls.add(spsps);
       spsps.setBounds(500+insets.left, 40+insets.top, size.width, size.height);
       
-      JButton standby = new JButton("Toggle standby");
-      standby.setToolTipText(getToolTip("standby"));
-      setMacroCB(standby, new String[] {"standby"});
+      JButton standby = new CustomButton(
+         "Toggle standby", "standby",
+         new String[] {"standby"}
+      );
       size = standby.getPreferredSize();
-      standby.setBackground(Color.black);
-      standby.setBorderPainted(false);
-      standby.setForeground(Color.white);
       panel_controls.add(standby);
       standby.setBounds(500+insets.left, 70+insets.top, size.width, size.height);
       
-      JButton toggle_cc = new JButton("Toggle CC");
-      toggle_cc.setToolTipText(getToolTip("toggle_cc"));
+      // NOTE: This one uses telnet interface instead of iPad
+      JButton toggle_cc = new CustomButton("Toggle CC", "toggle_cc", null);
+      size = toggle_cc.getPreferredSize();
+      panel_controls.add(toggle_cc);
+      toggle_cc.setBounds(500+insets.left, 100+insets.top, size.width, size.height);
       toggle_cc.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             String tivoName = (String)tivo_rc.getSelectedItem();
@@ -1258,13 +1280,6 @@ public class remotegui {
             }
          }
       });
-
-      size = toggle_cc.getPreferredSize();
-      toggle_cc.setBackground(Color.black);
-      toggle_cc.setBorderPainted(false);
-      toggle_cc.setForeground(Color.white);
-      panel_controls.add(toggle_cc);
-      toggle_cc.setBounds(500+insets.left, 100+insets.top, size.width, size.height);
             
       // Other components for the panel      
       JLabel label_rc = new JLabel("TiVo");
@@ -1997,9 +2012,7 @@ public class remotegui {
       String f = config.programDir + File.separator + "rc_images" + File.separator + imageFile;
       if (file.isFile(f)) {
          ImageIcon image = new ImageIcon(f);
-         JButton b = new JButton(scale(pane, image.getImage(),scale));
-         b.setBackground(Color.black);
-         b.setBorderPainted(false);
+         JButton b = new CustomButton(scale(pane, image.getImage(),scale));
          disableSpaceAction(b);
          return b;
       }
@@ -2039,6 +2052,8 @@ public class remotegui {
    private void setMacroCB(JButton b, final String[] sequence) {
       b.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Set focus on tabbed_panel
+            tabbed_panel.requestFocusInWindow();
             final String tivoName = (String)tivo_rc.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                class backgroundRun extends SwingWorker<Object, Object> {
