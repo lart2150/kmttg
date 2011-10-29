@@ -259,6 +259,7 @@ public class jobMonitor {
       return type.equals("download") ||
              type.equals("javadownload") ||
              type.equals("download_decrypt") ||
+             type.equals("jdownload_decrypt") ||
              type.equals("metadata") ||
              type.equals("javametadata") ||
              type.equals("metadataTivo") ||
@@ -1232,7 +1233,10 @@ public class jobMonitor {
    }
    
    private static Boolean isDownloadJob(jobData job) {
-      return (job.type.equals("download") || job.type.equals("javadownload") || job.type.equals("download_decrypt"));
+      return (job.type.equals("download") ||
+              job.type.equals("javadownload") ||
+              job.type.equals("download_decrypt") ||
+              job.type.equals("jdownload_decrypt"));
    }
 
    // Return true if this job is a VideoRedo COM job that needs to be restricted to 1 at a time
