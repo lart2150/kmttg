@@ -65,7 +65,7 @@ public class sortableDate {
    
    private String getTime(long gmt) {
       debug.print("gmt=" + gmt);
-      SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy HH:mm");
+      SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy hh:mm a");
       return sdf.format(gmt);
    }
 
