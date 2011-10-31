@@ -1811,7 +1811,7 @@ public class configMain {
       ));
       metadata_files.setName("metadata_files");
       
-      lookAndFeel.setModel(new javax.swing.DefaultComboBoxModel(new String[] {"default", "native"}));
+      lookAndFeel.setModel(new javax.swing.DefaultComboBoxModel(config.gui.getAvailableLooks()));
       lookAndFeel.setName("lookAndFeel");
       lookAndFeel.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
@@ -3611,8 +3611,7 @@ public class configMain {
       else if (component.equals("lookAndFeel")) {
          text =  "<b>look and feel</b><br>";
          text += "Select look and feel to use for GUI in general.<br>";
-         text += "NOTE: Anything other than 'default' may not look as intended.<br>";
-         text += "NOTE: For some OS's (like Linux) 'native' may not look any different.";
+         text += "NOTE: Anything other than 'default' may not look as intended.";
       }
       else if (component.equals("MinChanDigits")) {
          text =  "<b>Min # Channel Digits</b><br>";
