@@ -181,36 +181,35 @@ public class gui {
       if (name == null)
          name = "default";
       config.lookAndFeel = name;
+      if (name.equals("default"))
+         name = UIManager.getCrossPlatformLookAndFeelClassName();
       try {
          JDialog d = configMain.getDialog();
          JDialog a = configAuto.getDialog();
-         if (name.equals("default")) {
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-            SwingUtilities.updateComponentTreeUI(jFrame);
-            if (d != null) {
-               SwingUtilities.updateComponentTreeUI(d);
-               d.pack();
-            }
-            if (a != null) {
-               SwingUtilities.updateComponentTreeUI(a);
-               a.pack();
-            }
+         UIManager.setLookAndFeel(name);
+         SwingUtilities.updateComponentTreeUI(jFrame);
+         if (d != null) {
+            SwingUtilities.updateComponentTreeUI(d);
+            d.pack();
          }
-         if (name.equals("native")) {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            SwingUtilities.updateComponentTreeUI(jFrame);
-            if (d != null) {
-               SwingUtilities.updateComponentTreeUI(d);
-               d.pack();
-            }
-            if (a != null) {
-               SwingUtilities.updateComponentTreeUI(a);
-               a.pack();
-            }
+         if (a != null) {
+            SwingUtilities.updateComponentTreeUI(a);
+            a.pack();
          }
       } catch (Exception e) {
          log.error("setLookAndFeel - " + e.getMessage());
       }
+   }
+   
+   public String[] getAvailableLooks() {
+      UIManager.LookAndFeelInfo[] info = UIManager.getInstalledLookAndFeels();
+      String[] looks = new String [info.length+1];
+      looks[0] = "default";
+      int k = 1;
+      for (int i=0; i<info.length; i++) {
+          looks[k++] = info[i].getClassName();
+      }
+      return looks;
    }
    
    public void grabFocus() {
