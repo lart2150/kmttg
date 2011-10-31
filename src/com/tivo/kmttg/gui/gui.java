@@ -90,6 +90,7 @@ public class gui {
    private ToolTipManager toolTips = null;
    
    private Hashtable<String,tivoTab> tivoTabs = new Hashtable<String,tivoTab>();
+   private Hashtable<String,String> looksMap = new Hashtable<String,String>();
    public static Hashtable<String,Icon> Images;
    
    public remotegui remote_gui = null;
@@ -181,8 +182,12 @@ public class gui {
       if (name == null)
          name = "default";
       config.lookAndFeel = name;
+      if (looksMap.size() == 0)
+         getAvailableLooks();
       if (name.equals("default"))
          name = UIManager.getCrossPlatformLookAndFeelClassName();
+      else
+         name = looksMap.get(name);
       try {
          JDialog d = configMain.getDialog();
          JDialog a = configAuto.getDialog();
@@ -207,7 +212,8 @@ public class gui {
       looks[0] = "default";
       int k = 1;
       for (int i=0; i<info.length; i++) {
-          looks[k++] = info[i].getClassName();
+          looks[k++] = info[i].getName();
+          looksMap.put(info[i].getName(), info[i].getClassName());
       }
       return looks;
    }
