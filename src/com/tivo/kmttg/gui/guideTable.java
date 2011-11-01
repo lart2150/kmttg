@@ -396,7 +396,7 @@ public class guideTable {
          if (config.gui.remote_gui != null) {
             config.gui.remote_gui.refresh_guide.setText("Back");
             config.gui.remote_gui.refresh_guide.setToolTipText(
-               config.gui.remote_gui.getToolTip("refresh_guide_folder")
+               config.gui.remote_gui.getToolTip("back_guide")
             );
          }
       } else {
@@ -404,7 +404,7 @@ public class guideTable {
          if (config.gui.remote_gui != null) {
             config.gui.remote_gui.refresh_guide.setText("Channels");
             config.gui.remote_gui.refresh_guide.setToolTipText(
-               config.gui.remote_gui.getToolTip("tivo_guide")
+               config.gui.remote_gui.getToolTip("refresh_guide")
             );
          }
       }
