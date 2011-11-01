@@ -2168,6 +2168,10 @@ public class remotegui {
          text = "<b>Channels</b><br>";
          text += "Retrieve list of channels for this TiVo if necessary.";
       }
+      else if (component.equals("back_guide")){
+         text = "<b>Back</b><br>";
+         text += "Return to top level folder view..";
+      }
       else if (component.equals("refresh_search_folder")){
          text = "<b>Back</b><br>";
          text += "Return to top level folder view.";
