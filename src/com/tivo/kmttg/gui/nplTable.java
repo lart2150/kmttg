@@ -578,6 +578,9 @@ public class nplTable {
             }
             message += ", Duration = " + d;
             
+            if (s.data.containsKey("EpisodeNumber"))
+               message += ", EpisodeNumber = " + s.data.get("EpisodeNumber");
+            
             if (description != null) {
                message += "\n" + description;
             }
