@@ -32,7 +32,7 @@ public class myExceptionHandler implements Thread.UncaughtExceptionHandler {
          detailMessage = ee.getMessage();
       }
       // Filter out certain messages
-      if (detailMessage.matches("java.lang.ClassCastException"))
+      if( detailMessage.contains("java.lang.ClassCastException"))
          return;
       log.error(detailMessage);
    }
