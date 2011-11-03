@@ -309,6 +309,11 @@ public class cancelledTable {
             }
             message += ", Duration = " + d;
             
+            if (s.json.has("seasonNumber"))
+               message += ", season " + s.json.get("seasonNumber");
+            if (s.json.has("episodeNum"))
+               message += " episode " + s.json.getJSONArray("episodeNum").get(0);
+            
             if (description != null) {
                message += "\n" + description;
             }
