@@ -5,8 +5,6 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
@@ -17,6 +15,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
@@ -32,6 +33,7 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
+import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class premiereTable {
@@ -45,17 +47,7 @@ public class premiereTable {
       TABLE = new JXTable(data, TITLE_cols);
       TABLE.setModel(new MyTableModel(data, TITLE_cols));
       TABLE.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-      scroll = new JScrollPane(TABLE);
-      
-      // Add listener for click handling (for folder entries)
-      TABLE.addMouseListener(
-         new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-               MouseClicked(e);
-            }
-         }
-      );
-      
+      scroll = new JScrollPane(TABLE);      
       // Add keyboard listener
       TABLE.addKeyListener(
          new KeyAdapter() {
@@ -111,6 +103,18 @@ public class premiereTable {
       sorter.setComparator(sortableComparator);
       sorter = TABLE.getColumnExt(3).getSorter();
       sorter.setComparator(sortableComparator);
+      
+      // Define selection listener to detect table row selection changes
+      TABLE.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+         public void valueChanged(ListSelectionEvent e) {
+            if (e.getValueIsAdjusting()) return;
+            ListSelectionModel rowSM = (ListSelectionModel)e.getSource();
+            int row = rowSM.getMinSelectionIndex();
+            if (row > -1) {
+               TABLERowSelected(row);
+            }
+         }
+      });
    }
 
    /**
@@ -297,32 +301,16 @@ public class premiereTable {
        return rows;
     }
     
-    public JSONObject GetRowData(int row) {
-       sortableDate s = (sortableDate) TABLE.getValueAt(row, getColumnIndex("DATE"));
-       if (s != null)
-          return s.json;
-       return null;
-    }    
-    
-    public String GetRowTitle(int row) {
-       String s = (String) TABLE.getValueAt(row, getColumnIndex("SHOW"));
-       if (s != null)
-          return s;
-       return null;
-    }
-    
-    public void RemoveRow(JXTable table, int row) {
-       DefaultTableModel dm = (DefaultTableModel)table.getModel();
-       dm.removeRow(table.convertRowIndexToModel(row));
-    }
-    
-    // Mouse event handler
-    // This will display additional show information when entry single-clicked
-    private void MouseClicked(MouseEvent e) {
-       if( e.getClickCount() == 1 ) {
+    private void TABLERowSelected(int row) {
+       debug.print("row=" + row);
+       if (row == -1) return;
+       // Get column items for selected row 
+       sortableDate s = (sortableDate)TABLE.getValueAt(row,getColumnIndex("DATE"));
+       if (s.folder) {
+          // Folder entry - don't display anything
+       } else {
           try {
-             int row = TABLE.rowAtPoint(e.getPoint());
-             sortableDate s = (sortableDate)TABLE.getValueAt(row,getColumnIndex("DATE"));
+             // Non folder entry so print single entry info
              sortableDuration dur = (sortableDuration)TABLE.getValueAt(row,getColumnIndex("DUR"));
              JSONObject o;
              String channelNum = null;
@@ -352,22 +340,46 @@ public class premiereTable {
              }
              message += ", Duration = " + d;
              
+             if (s.json.has("seasonNumber"))
+                message += ", season " + s.json.get("seasonNumber");
+             if (s.json.has("episodeNum"))
+                message += " episode " + s.json.getJSONArray("episodeNum").get(0);
+             
              if (description != null) {
                 message += "\n" + description;
              }
        
-             String title = "\nShow Premiere: ";
+             String title = "\nGuide: ";
              if (s.json.has("title"))
                 title += s.json.getString("title");
              if (s.json.has("subtitle"))
                 title += " - " + s.json.getString("subtitle");
              log.warn(title);
              log.print(message);
-          } catch (JSONException e1) {
-             log.error("MouseClicked - " + e1.getMessage());
+          } catch (JSONException e) {
+             log.error("TABLERowSelected - " + e.getMessage());
              return;
           }
        }
+    }
+    
+    public JSONObject GetRowData(int row) {
+       sortableDate s = (sortableDate) TABLE.getValueAt(row, getColumnIndex("DATE"));
+       if (s != null)
+          return s.json;
+       return null;
+    }    
+    
+    public String GetRowTitle(int row) {
+       String s = (String) TABLE.getValueAt(row, getColumnIndex("SHOW"));
+       if (s != null)
+          return s;
+       return null;
+    }
+    
+    public void RemoveRow(JXTable table, int row) {
+       DefaultTableModel dm = (DefaultTableModel)table.getModel();
+       dm.removeRow(table.convertRowIndexToModel(row));
     }
     
     // Handle keyboard presses
