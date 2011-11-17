@@ -17,7 +17,7 @@ import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 
 public class config {
-   public static String kmttg = "kmttg v0p8k";
+   public static String kmttg = "kmttg v0p8l_beta";
    
    // encoding related
    public static String encProfDir = "";
@@ -34,6 +34,7 @@ public class config {
    public static String mpegCutDir = "";
    public static String encodeDir = "";
    public static String ffmpeg = "";
+   public static String projectx = "";
    public static String mencoder = "";
    public static String handbrake = "";
    public static String comskip = "";
@@ -205,6 +206,11 @@ public class config {
          result = getProgramDefault("ffmpeg");
          if ( file.isFile(result) )
             ffmpeg = result;
+      }
+      if ( ! file.isFile(projectx) ) {
+         result = getProgramDefault("projectx");
+         if ( file.isFile(result) )
+            projectx = result;
       }
       if ( ! file.isFile(mencoder) ) {
          result = getProgramDefault("mencoder");
@@ -481,6 +487,7 @@ public class config {
       curl          = getProgramDefault("curl");
       tivodecode    = getProgramDefault("tivodecode");
       ffmpeg        = getProgramDefault("ffmpeg");
+      projectx      = getProgramDefault("projectx");
       mencoder      = getProgramDefault("mencoder");
       handbrake     = getProgramDefault("handbrake");
       comskip       = getProgramDefault("comskip");
@@ -531,6 +538,10 @@ public class config {
                ffmpeg = result;
          }
          return ffmpeg;
+      }
+      
+      else if (programName.equals("projectx")) {
+         return programDir + s + "ProjectX" + s + "ProjectX.jar";
       }
       
       else if (programName.equals("mencoder")) {
@@ -723,6 +734,9 @@ public class config {
             }
             if (key.equals("ffmpeg")) {
                ffmpeg = line;
+            }
+            if (key.equals("projectx")) {
+               projectx = line;
             }
             if (key.equals("mencoder")) {
                mencoder = line;
@@ -975,6 +989,8 @@ public class config {
          ofp.write("<curl>\n" + curl + "\n\n");
          
          ofp.write("<ffmpeg>\n" + ffmpeg + "\n\n");
+         
+         ofp.write("<projectx>\n" + projectx + "\n\n");
          
          ofp.write("<mencoder>\n" + mencoder + "\n\n");
          
