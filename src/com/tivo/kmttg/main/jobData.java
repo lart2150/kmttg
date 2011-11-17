@@ -2,6 +2,7 @@ package com.tivo.kmttg.main;
 
 import java.io.Serializable;
 import java.util.Hashtable;
+import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.gui.cancelledTable;
@@ -39,6 +40,8 @@ public class jobData implements Serializable {
    public jdownload_decrypt process_jdownload_decrypt = null;
    public decrypt      process_decrypt = null;
    public qsfix        process_qsfix = null;
+   public demux        process_demux = null;
+   public remux        process_remux = null;
    public comskip      process_comskip = null;
    public adscan       process_adscan = null;
    public vrdreview    process_vrdreview = null;
@@ -113,6 +116,9 @@ public class jobData implements Serializable {
    public Boolean remote_todo = false;
    public todoTable todo = null;
    
+   // demux/remux related
+   public Stack<String> demuxFiles = null;
+   
    public Boolean remote_sp = false;
    public spTable sp = null;
    
@@ -151,6 +157,8 @@ public class jobData implements Serializable {
          "jdownload_decrypt",
          "decrypt",
          "qsfix",
+         "demux",
+         "remux",
          "streamfix",
          "comskip",
          "adscan",
@@ -209,6 +217,12 @@ public class jobData implements Serializable {
       }         
       else if (type.matches("qsfix")) {
          return process_qsfix.check();
+      }         
+      else if (type.matches("demux")) {
+         return process_demux.check();
+      }         
+      else if (type.matches("remux")) {
+         return process_remux.check();
       }         
       else if (type.matches("comskip")) {
          return process_comskip.check();
@@ -288,6 +302,12 @@ public class jobData implements Serializable {
       }
       else if (type.equals("qsfix")) {
          return process_qsfix.getProcess();
+      }
+      else if (type.equals("demux")) {
+         return process_demux.getProcess();
+      }
+      else if (type.equals("remux")) {
+         return process_remux.getProcess();
       }
       else if (type.equals("comskip")) {
          return process_comskip.getProcess();
@@ -369,6 +389,12 @@ public class jobData implements Serializable {
       else if (type.equals("qsfix")) {
          file = mpegFile;
       }
+      else if (type.equals("demux")) {
+         file = mpegFile;
+      }
+      else if (type.equals("remux")) {
+         file = mpegFile;
+      }
       else if (type.equals("captions")) {
          file = videoFile;
       }
@@ -447,6 +473,12 @@ public class jobData implements Serializable {
          file = mpegFile;
       }
       else if (type.equals("qsfix")) {
+         file = mpegFile_fix;
+      }
+      else if (type.equals("demux")) {
+         file = mpegFile_fix;
+      }
+      else if (type.equals("remux")) {
          file = mpegFile_fix;
       }
       else if (type.equals("captions")) {
@@ -554,6 +586,16 @@ public class jobData implements Serializable {
       
       else if (job.type.equals("qsfix")) {  
          qsfix proc = new qsfix(job);
+         success = proc.launchJob();
+      }
+      
+      else if (job.type.equals("demux")) {  
+         demux proc = new demux(job);
+         success = proc.launchJob();
+      }
+      
+      else if (job.type.equals("remux")) {  
+         remux proc = new remux(job);
          success = proc.launchJob();
       }
       
@@ -666,6 +708,12 @@ public class jobData implements Serializable {
       }
       else if (type.equals("qsfix")) {
          process_qsfix.kill();
+      }
+      else if (type.equals("demux")) {
+         process_demux.kill();
+      }
+      else if (type.equals("remux")) {
+         process_remux.kill();
       }
       else if (type.equals("comskip")) {
          process_comskip.kill();
