@@ -107,6 +107,7 @@ public class config {
    public static int toolTipsTimeout = 20;  // Set # seconds for tooltip display to timeout
    public static int FontSize = 12;
    public static String lookAndFeel = "default";
+   public static Boolean resumeDownloads = false;
 
    // GUI table related
    public static Color tableBkgndDarker = new Color(235,235,235); // light grey
