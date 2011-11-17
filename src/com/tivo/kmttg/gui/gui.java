@@ -267,7 +267,7 @@ public class gui {
          // Tasks
          metadata = new JCheckBox("metadata", false);         
          decrypt = new JCheckBox("decrypt", true);         
-         qsfix = new JCheckBox("VRD QS fix", false);         
+         qsfix = new JCheckBox("QS fix", false);         
          twpdelete = new JCheckBox("TWP Delete", false);         
          ipaddelete = new JCheckBox("iPad Delete", false);         
          comskip = new JCheckBox("Ad Detect", false);         
@@ -1036,7 +1036,7 @@ public class gui {
          qsfix.setEnabled(true);
       }
       */
-      if (! file.isDir(config.VRD)) {
+      if (! file.isDir(config.VRD) && ! file.isFile(config.projectx)) {
          qsfix.setSelected(false);
          qsfix.setEnabled(false);
       } else {
@@ -1814,12 +1814,12 @@ public class gui {
          text += "with kmttg, so most often you should leave this option enabled.";
       }
       else if (component.equals("qsfix")) {
-         text =  "<b>VRD QS fix</b><br>";
+         text =  "<b>QS fix</b><br>";
          text += "If you have VideoRedo available and configured in kmttg, this<br>";
          text += "runs the extremely useful <b>VideoRedo Quick Stream Fix</b> utility.<br>";
-         //text += "Without VideoRedo this will run mpeg through mencoder filter.<br>";
+         text += "Without VideoRedo this will run mpeg through projectx demux filter.<br>";
          text += "Cleans up any potential glitches/errors in mpeg2 video files.<br>";
-         text += "Highly recommended step if you have VideoRedo installed.<br>";
+         text += "Highly recommended step if you have VideoRedo and/or projectx installed.<br>";
          text += "Very highly recommended step if you will be running encode.";
       }
       else if (component.equals("twpdelete")) {
