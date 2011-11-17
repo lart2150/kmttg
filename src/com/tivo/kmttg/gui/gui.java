@@ -48,6 +48,7 @@ public class gui {
    private JMenuItem autoConfigMenuItem = null;
    private JMenuItem runInGuiMenuItem = null;
    private JCheckBoxMenuItem loopInGuiMenuItem = null;
+   private JCheckBoxMenuItem resumeDownloadsMenuItem = null;
    private JCheckBoxMenuItem toggleLaunchingJobsMenuItem = null;
    private JMenuItem addSelectedTitlesMenuItem = null;
    private JMenuItem addSelectedHistoryMenuItem = null;
@@ -511,6 +512,7 @@ public class gui {
          fileMenu.add(getSaveMessagesMenuItem());
          fileMenu.add(getClearMessagesMenuItem());
          fileMenu.add(getResetServerMenuItem());
+         fileMenu.add(getResumeDownloadsMenuItem());
          fileMenu.add(getJobMenu());
          fileMenu.add(getExitMenuItem());
       }
@@ -753,6 +755,21 @@ public class gui {
          });
       }
       return loopInGuiMenuItem;
+   }
+   
+   private JMenuItem getResumeDownloadsMenuItem() {
+      debug.print("");
+      if (resumeDownloadsMenuItem == null) {
+         resumeDownloadsMenuItem = new JCheckBoxMenuItem();
+         resumeDownloadsMenuItem.setText("Resume Downloads");
+         resumeDownloadsMenuItem.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+               AbstractButton button = (AbstractButton) e.getItem();
+               config.resumeDownloads = button.isSelected();
+            }
+         });
+      }
+      return resumeDownloadsMenuItem;
    }
    
    private JMenuItem getAddSelectedTitlesMenuItem() {
