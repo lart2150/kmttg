@@ -605,6 +605,7 @@ public class jobMonitor {
       }
       
       Boolean streamfix    = false;
+      Boolean demux        = false;
       
       if (metadataTivo) {
          // In FILES mode can only get metadata from .tivo files
@@ -741,14 +742,12 @@ public class jobMonitor {
          if (encode)  srtFile = string.replaceSuffix(encodeFile, ".srt");
       }
       
-      // Decide if streamfix should be enabled
-      // windows AND qsfix AND ! vrd AND encode => enable
-      /* This intentionally disabled for now
-      if (config.OS.equals("windows") && qsfix && ! file.isDir(config.VRD)) {
+      // Decide if demux should be enabled
+      // if projectx available & qsfix enabled AND ! vrd => enable
+      if (file.isFile(config.projectx) && qsfix && ! file.isDir(config.VRD)) {
          qsfix = false;
-         streamfix = true;
+         demux = true;
       }
-      */
       
       // Check task dependencies and enable prior tasks if necessary
       
@@ -965,6 +964,17 @@ public class jobMonitor {
             }
          }
          submitNewJob(job);
+      }
+      
+      if (demux) {
+         jobData job = new jobData();
+         job.source       = source;
+         job.tivoName     = tivoName;
+         job.type         = "demux";
+         job.name         = config.projectx;
+         job.mpegFile     = mpegFile;
+         job.mpegFile_fix = mpegFile_fix;
+         submitNewJob(job);         
       }
       
       if (streamfix) {
