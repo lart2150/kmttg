@@ -848,6 +848,9 @@ public class jobMonitor {
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
+         if (config.resumeDownloads && entry.containsKey("ByteOffset")) {
+            job.offset = entry.get("ByteOffset");
+         }
          if (config.java_downloads == 1) {
             if (config.combine_download_decrypt == 1 && decrypt && config.VrdDecrypt == 0) {
                // Combined java download & decrypt
