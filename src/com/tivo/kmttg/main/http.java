@@ -63,7 +63,7 @@ public class http {
       return connection;
    }
    
-   private static InputStream noCookieInputStream(final String urlString, final String username, final String password) {
+   private static InputStream noCookieInputStream(final String urlString, final String username, final String password, final String offset) {
       InputStream in = null;
       Authenticator authenticator = new Authenticator() {
          protected PasswordAuthentication getPasswordAuthentication() {
@@ -74,6 +74,9 @@ public class http {
          URL url = new URL(urlString);
          URLConnection conn = getConnection(url);         
          conn.setReadTimeout(READ_TIMEOUT*1000);
+         if (offset != null) {
+            conn.setRequestProperty("Range", "bytes=" + offset + "-");
+         }
          
          // Set authentication and get input stream
          synchronized (Authenticator.class) {
@@ -97,7 +100,7 @@ public class http {
       return in;
    }
    
-   private static InputStream cookieInputStream(final String urlString, final String username, final String password) {
+   private static InputStream cookieInputStream(final String urlString, final String username, final String password, final String offset) {
       InputStream in = null;
       CookieManager cm = new CookieManager();
       Authenticator authenticator = new Authenticator() {
@@ -116,6 +119,9 @@ public class http {
          // Connect again and init cookies with connection
          conn = getConnection(url);
          conn.setReadTimeout(READ_TIMEOUT*1000);
+         if (offset != null) {
+            conn.setRequestProperty("Range", "bytes=" + offset + "-");
+         }
          cm.setCookies(conn);
          
          // Set authentication and get input stream
@@ -141,13 +147,13 @@ public class http {
       return in;
    }
    
-   public static Boolean download(String url, String username, String password, String outFile, Boolean cookies)
+   public static Boolean download(String url, String username, String password, String outFile, Boolean cookies, String offset)
       throws IOException, InterruptedException, Exception {
       InputStream in;
       if (cookies)
-         in = http.cookieInputStream(url, username, password);
+         in = http.cookieInputStream(url, username, password, offset);
       else
-         in = http.noCookieInputStream(url, username, password);
+         in = http.noCookieInputStream(url, username, password, offset);
       if (in == null) {
          return false;
       } else {
@@ -195,13 +201,13 @@ public class http {
       return true;
    }
    
-   public static Boolean downloadPiped(String url, String username, String password, OutputStream out, Boolean cookies)
+   public static Boolean downloadPiped(String url, String username, String password, OutputStream out, Boolean cookies, String offset)
       throws IOException, InterruptedException, Exception {
       InputStream in;
       if (cookies)
-         in = http.cookieInputStream(url, username, password);
+         in = http.cookieInputStream(url, username, password, offset);
       else
-         in = http.noCookieInputStream(url, username, password);
+         in = http.noCookieInputStream(url, username, password, offset);
       if (in == null)
          return false;
       

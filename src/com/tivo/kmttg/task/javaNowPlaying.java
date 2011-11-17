@@ -101,7 +101,7 @@ public class javaNowPlaying implements Serializable {
       Runnable r = new Runnable() {
          public void run () {
             try {
-               success = http.download(url, "tivo", config.MAK, outputFile, false);
+               success = http.download(url, "tivo", config.MAK, outputFile, false, job.offset);
                thread_running = false;
             }
             catch (Exception e) {

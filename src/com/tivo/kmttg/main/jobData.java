@@ -90,6 +90,7 @@ public class jobData implements Serializable {
    String ProgramId = null;
    String ProgramId_unique = null;
    String title = null;
+   public String offset = null;
    public Long time1=null, time2=null, size1=null, size2=null;
    public String rate = "n/a";
    

@@ -101,7 +101,10 @@ public class jdownload_decrypt implements Serializable {
       c.add(job.mpegFile);
       c.add("-");
       process = new backgroundProcess();            
-      log.print(">> DOWNLOADING/DECRYPTING TO " + job.mpegFile + " ...");
+      String message = "DOWNLOADING/DECRYPTING";
+      if (job.offset != null)
+         message = "RESUMING DOWNLOAD/DECRYPT WITH OFFSET=" + job.offset;
+      log.print(">> " + message + " TO " + job.mpegFile + " ...");
       if ( process.run(c) ) {
          log.print(process.toString());
       } else {
@@ -117,7 +120,7 @@ public class jdownload_decrypt implements Serializable {
       Runnable r = new Runnable() {
          public void run () {
             try {
-               success = http.downloadPiped(urlString, "tivo", config.MAK, process.getOutputStream(), true);
+               success = http.downloadPiped(urlString, "tivo", config.MAK, process.getOutputStream(), true, job.offset);
                thread_running = false;
             }
             catch (Exception e) {

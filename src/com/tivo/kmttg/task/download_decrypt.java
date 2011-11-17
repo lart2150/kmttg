@@ -113,6 +113,9 @@ public class download_decrypt implements Serializable {
          command += "--retry 3 ";
       command += "--anyauth --globoff --user tivo:" + config.MAK + " ";
       command += "--insecure --cookie-jar \"" + cookieFile + "\" --url \"" + url + "\" ";
+      if (job.offset != null) {
+         command += "-C " + job.offset + " ";
+      }
       command += "| " + "\"" + config.tivodecode + "\" --mak " + config.MAK + " --no-verify --out ";
       command += "\"" + job.mpegFile + "\" -";
       
@@ -140,8 +143,11 @@ public class download_decrypt implements Serializable {
          c.add("sh");
       }
       c.add(script);
-      process = new backgroundProcess();            
-      log.print(">> DOWNLOADING/DECRYPTING TO " + job.mpegFile + " ...");
+      process = new backgroundProcess();
+      String message = "DOWNLOADING/DECRYPTING";
+      if (job.offset != null)
+         message = "RESUMING DOWNLOAD/DECRYPT WITH OFFSET=" + job.offset;
+      log.print(">> " + message + " TO " + job.mpegFile + " ...");
       if ( process.run(c) ) {
          log.print(command);
       } else {

@@ -102,10 +102,17 @@ public class download implements Serializable {
       command.add(cookieFile);
       command.add("--url");
       command.add(url);
+      if (job.offset != null) {
+         command.add("-C");
+         command.add(job.offset);
+      }
       command.add("--output");
       command.add(job.tivoFile);
       process = new backgroundProcess();
-      log.print(">> DOWNLOADING " + job.tivoFile + " ...");
+      String message = "DOWNLOADING";
+      if (job.offset != null)
+         message = "RESUMING DOWNLOAD WITH OFFSET=" + job.offset;
+      log.print(">> " + message + " " + job.tivoFile + " ...");
       if ( process.run(command) ) {
          log.print(process.toString());
       } else {

@@ -86,7 +86,7 @@ public class javametadata implements Serializable {
       Runnable r = new Runnable() {
          public void run () {
             try {
-               success = http.download(job.url, "tivo", config.MAK, outputFile, false);
+               success = http.download(job.url, "tivo", config.MAK, outputFile, false, null);
                thread_running = false;
             }
             catch (Exception e) {
