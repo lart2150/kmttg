@@ -115,6 +115,7 @@ public class download_decrypt implements Serializable {
       command += "--insecure --cookie-jar \"" + cookieFile + "\" --url \"" + url + "\" ";
       if (job.offset != null) {
          command += "-C " + job.offset + " ";
+         job.tivoFileSize -= Long.parseLong(job.offset);
       }
       command += "| " + "\"" + config.tivodecode + "\" --mak " + config.MAK + " --no-verify --out ";
       command += "\"" + job.mpegFile + "\" -";

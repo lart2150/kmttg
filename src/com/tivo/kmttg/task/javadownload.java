@@ -82,8 +82,10 @@ public class javadownload implements Serializable {
          url += "&Format=video/x-tivo-mpeg-ts";
       final String urlString = url;
       String message = "DOWNLOADING";
-      if (job.offset != null)
+      if (job.offset != null) {
          message = "RESUMING DOWNLOAD WITH OFFSET=" + job.offset;
+         job.tivoFileSize -= Long.parseLong(job.offset);
+      }
       log.print(">> " + message + " " + job.tivoFile + " ...");
       log.print(urlString);
       // Run download method in a separate thread

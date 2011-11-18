@@ -105,6 +105,7 @@ public class download implements Serializable {
       if (job.offset != null) {
          command.add("-C");
          command.add(job.offset);
+         job.tivoFileSize -= Long.parseLong(job.offset);
       }
       command.add("--output");
       command.add(job.tivoFile);

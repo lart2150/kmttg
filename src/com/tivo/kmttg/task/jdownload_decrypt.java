@@ -102,8 +102,10 @@ public class jdownload_decrypt implements Serializable {
       c.add("-");
       process = new backgroundProcess();            
       String message = "DOWNLOADING/DECRYPTING";
-      if (job.offset != null)
+      if (job.offset != null) {
          message = "RESUMING DOWNLOAD/DECRYPT WITH OFFSET=" + job.offset;
+         job.tivoFileSize -= Long.parseLong(job.offset);
+      }
       log.print(">> " + message + " TO " + job.mpegFile + " ...");
       if ( process.run(c) ) {
          log.print(process.toString());
