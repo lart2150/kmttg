@@ -488,7 +488,7 @@ public class config {
       curl          = getProgramDefault("curl");
       tivodecode    = getProgramDefault("tivodecode");
       ffmpeg        = getProgramDefault("ffmpeg");
-      projectx      = getProgramDefault("projectx");
+      //projectx      = getProgramDefault("projectx");
       mencoder      = getProgramDefault("mencoder");
       handbrake     = getProgramDefault("handbrake");
       comskip       = getProgramDefault("comskip");
