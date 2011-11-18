@@ -201,7 +201,7 @@ public class configAuto {
       enabled   = new JCheckBox("enabled", true);
       metadata  = new JCheckBox("metadata");
       decrypt   = new JCheckBox("decrypt");
-      qsfix     = new JCheckBox("VRD QS fix");
+      qsfix     = new JCheckBox("QS Fix");
       twpdelete = new JCheckBox("TWP Delete");
       ipaddelete = new JCheckBox("iPad Delete");
       comskip   = new JCheckBox("Ad Detect");

@@ -268,7 +268,7 @@ public class gui {
          // Tasks
          metadata = new JCheckBox("metadata", false);         
          decrypt = new JCheckBox("decrypt", true);         
-         qsfix = new JCheckBox("QS fix", false);         
+         qsfix = new JCheckBox("QS Fix", false);         
          twpdelete = new JCheckBox("TWP Delete", false);         
          ipaddelete = new JCheckBox("iPad Delete", false);         
          comskip = new JCheckBox("Ad Detect", false);         
@@ -1831,7 +1831,7 @@ public class gui {
          text += "with kmttg, so most often you should leave this option enabled.";
       }
       else if (component.equals("qsfix")) {
-         text =  "<b>QS fix</b><br>";
+         text =  "<b>QS Fix</b><br>";
          text += "If you have VideoRedo available and configured in kmttg, this<br>";
          text += "runs the extremely useful <b>VideoRedo Quick Stream Fix</b> utility.<br>";
          text += "Without VideoRedo this will run mpeg through *ProjectX* demux filter followed<br>";
