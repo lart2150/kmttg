@@ -1834,10 +1834,13 @@ public class gui {
          text =  "<b>QS fix</b><br>";
          text += "If you have VideoRedo available and configured in kmttg, this<br>";
          text += "runs the extremely useful <b>VideoRedo Quick Stream Fix</b> utility.<br>";
-         text += "Without VideoRedo this will run mpeg through projectx demux filter.<br>";
-         text += "Cleans up any potential glitches/errors in mpeg2 video files.<br>";
-         text += "Highly recommended step if you have VideoRedo and/or projectx installed.<br>";
-         text += "Very highly recommended step if you will be running encode.";
+         text += "Without VideoRedo this will run mpeg through *ProjectX* demux filter followed<br>";
+         text += "by a remux with ffmpeg instead if ProjectX is configured in kmttg.<br>";
+         text += "If neither tool is configured then this task is unavailable.<br>";
+         text += "This task cleans up any potential glitches/errors in mpeg2 video files.<br>";
+         text += "Highly recommended step if you have VideoRedo and/or ProjectX installed.<br>";
+         text += "Very highly recommended step if you will be further processing mpeg2 files<br>";
+         text += "for cutting out commercials and/or encoding to new formats.";
       }
       else if (component.equals("twpdelete")) {
          text =  "<b>TWP Delete</b><br>";
