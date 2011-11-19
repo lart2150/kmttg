@@ -1840,7 +1840,9 @@ public class gui {
          text += "This task cleans up any potential glitches/errors in mpeg2 video files.<br>";
          text += "Highly recommended step if you have VideoRedo and/or ProjectX installed.<br>";
          text += "Very highly recommended step if you will be further processing mpeg2 files<br>";
-         text += "for cutting out commercials and/or encoding to new formats.";
+         text += "for cutting out commercials and/or encoding to new formats.<br>";
+         text += "<b>NOTE: ProjectX does not process closed captions, so if captions are important<br>";
+         text += "to you then you should only use QS Fix with VideoRedo.</b>";
       }
       else if (component.equals("twpdelete")) {
          text =  "<b>TWP Delete</b><br>";
