@@ -46,6 +46,7 @@ public class jobData implements Serializable {
    public adscan       process_adscan = null;
    public vrdreview    process_vrdreview = null;
    public comcut       process_comcut = null;
+   public projectxcut  process_projectxcut = null;
    public adcut        process_adcut = null;
    public captions     process_captions = null;
    public encode       process_encode = null;
@@ -119,6 +120,7 @@ public class jobData implements Serializable {
    
    // demux/remux related
    public Stack<String> demuxFiles = null;
+   public String xclFile = null;
    
    public Boolean remote_sp = false;
    public spTable sp = null;
@@ -165,6 +167,7 @@ public class jobData implements Serializable {
          "adscan",
          "vrdreview",
          "comcut",
+         "projectxcut",
          "adcut",
          "captions",
          "encode",
@@ -236,6 +239,9 @@ public class jobData implements Serializable {
       }         
       else if (type.matches("comcut")) {
          return process_comcut.check();
+      }         
+      else if (type.matches("projectxcut")) {
+         return process_projectxcut.check();
       }         
       else if (type.matches("adcut")) {
          return process_adcut.check();
@@ -321,6 +327,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("comcut")) {
          return process_comcut.getProcess();
+      }
+      else if (type.equals("projectxcut")) {
+         return process_projectxcut.getProcess();
       }
       else if (type.equals("adcut")) {
          return process_adcut.getProcess();
@@ -411,6 +420,9 @@ public class jobData implements Serializable {
       else if (type.equals("comcut")) {
          file = mpegFile;
       }
+      else if (type.equals("projectxcut")) {
+         file = mpegFile;
+      }
       else if (type.equals("adcut")) {
          file = vprjFile;
       }
@@ -497,6 +509,9 @@ public class jobData implements Serializable {
          file = vprjFile;
       }
       else if (type.equals("comcut")) {
+         file = mpegFile_cut;
+      }
+      else if (type.equals("projectxcut")) {
          file = mpegFile_cut;
       }
       else if (type.equals("adcut")) {
@@ -620,6 +635,11 @@ public class jobData implements Serializable {
          success = proc.launchJob();
       }
       
+      else if (job.type.equals("projectxcut")) {  
+         projectxcut proc = new projectxcut(job);
+         success = proc.launchJob();
+      }
+      
       else if (job.type.equals("adcut")) {  
          adcut proc = new adcut(job);
          success = proc.launchJob();
@@ -727,6 +747,9 @@ public class jobData implements Serializable {
       }
       else if (type.equals("comcut")) {
          process_comcut.kill();
+      }
+      else if (type.equals("projectxcut")) {
+         process_projectxcut.kill();
       }
       else if (type.equals("adcut")) {
          process_adcut.kill();
