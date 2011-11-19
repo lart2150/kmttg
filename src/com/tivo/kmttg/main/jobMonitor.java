@@ -747,6 +747,9 @@ public class jobMonitor {
       if (file.isFile(config.projectx) && qsfix && ! file.isDir(config.VRD)) {
          qsfix = false;
          demux = true;
+         // demux can only operate on mpeg files not TiVo files
+         if ( ! decrypt && ! file.isFile(mpegFile) && ! file.isFile(mpegFile_cut) )
+            decrypt = true;
       }
       
       // Check task dependencies and enable prior tasks if necessary
