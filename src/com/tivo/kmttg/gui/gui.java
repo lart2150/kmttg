@@ -1871,10 +1871,12 @@ public class gui {
       else if (component.equals("comcut")) {
          text =  "<b>Ad Cut</b><br>";
          text += "Automatically cut out commercials detected in <b>Ad Detect</b> step.<br>";
-         text += "NOTE: By default uses <b>mencoder</b> program to make the cuts which can.<br>";
-         text += "cause audio/video sync problems in the resulting files.<br>";
+         text += "NOTE: By default uses <b>ProjectX</b> program to make the cuts if available/configured<br>";
+         text += "in kmttg and VideoRedo not available/configured.<br>";
+         text += "NOTE: If ProjectX not available then uses <b>mencoder</b> program to make the cuts which can<br>";
+         text += "cause audio/video sync problems in the resulting files - so ProjectX recommended instead.<br>";
          text += "If you have <b>VideoRedo</b> enabled then this step uses VideoRedo for making<br>";
-         text += "the cuts which is a much better solution for preserving proper audio/video sync.";
+         text += "the cuts which is a much better solution than mencoder for preserving proper audio/video sync.";
       }
       else if (component.equals("captions")) {
          text =  "<b>captions</b><br>";
