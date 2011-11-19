@@ -15,6 +15,7 @@ public class remux {
    private static final long serialVersionUID = 1L;
    private backgroundProcess process;
    private jobData job;
+   private String mpegFile;
 
    // constructor
    public remux(jobData job) {
@@ -53,6 +54,11 @@ public class remux {
             schedule = false;
          }
       }
+            
+      mpegFile = job.mpegFile;
+      // job.mpegFile_cut != null => this is projectx remux instead of qsfix remux
+      if (job.mpegFile_cut != null)
+         mpegFile = job.mpegFile_cut;
       
       if (schedule) {
          if ( start() ) {
@@ -161,39 +167,44 @@ public class remux {
             
             // Remove the demuxed files
             removeDemuxFiles();
+            // Remove original .mpg file if this is remux for projectxcut and remove option enabled
+            if ( job.mpegFile_cut != null && config.RemoveComcutFiles_mpeg == 1 ) {
+               if (file.delete(job.mpegFile))
+                  log.print("(Deleted mpeg file: " + job.mpegFile + ")");
+            }
             
-            // Rename mpegFile_fix to mpegFile
+            // Rename job.mpegFile_fix to mpegFile
             Boolean result;
-            if (file.isFile(job.mpegFile)) {
+            if (file.isFile(mpegFile)) {
                if (config.QSFixBackupMpegFile == 1) {
                   // Rename mpegFile to backupFile if it exists
-                  String backupFile = job.mpegFile + ".bak";
+                  String backupFile = mpegFile + ".bak";
                   int count = 1;
                   while (file.isFile(backupFile)) {
-                     backupFile = job.mpegFile + ".bak" + count++;
+                     backupFile = mpegFile + ".bak" + count++;
                   }
-                  result = file.rename(job.mpegFile, backupFile);
+                  result = file.rename(mpegFile, backupFile);
                   if ( result ) {
-                     log.print("(Renamed " + job.mpegFile + " to " + backupFile + ")");
+                     log.print("(Renamed " + mpegFile + " to " + backupFile + ")");
                   } else {
-                     log.error("Failed to rename " + job.mpegFile + " to " + backupFile);
+                     log.error("Failed to rename " + mpegFile + " to " + backupFile);
                      return false;                     
                   }
                } else {
                   // Remove mpegFile if it exists
-                  result = file.delete(job.mpegFile);
+                  result = file.delete(mpegFile);
                   if ( ! result ) {
-                     log.error("Failed to delete file in preparation for rename: " + job.mpegFile);
+                     log.error("Failed to delete file in preparation for rename: " + mpegFile);
                      return false;
                   }
                }
             }
             // Now do the file rename
-            result = file.rename(job.mpegFile_fix, job.mpegFile);
+            result = file.rename(job.mpegFile_fix, mpegFile);
             if (result)
-               log.print("(Renamed " + job.mpegFile_fix + " to " + job.mpegFile + ")");
+               log.print("(Renamed " + job.mpegFile_fix + " to " + mpegFile + ")");
             else
-               log.error("Failed to rename " + job.mpegFile_fix + " to " + job.mpegFile);
+               log.error("Failed to rename " + job.mpegFile_fix + " to " + mpegFile);
          }
       }
       return false;
