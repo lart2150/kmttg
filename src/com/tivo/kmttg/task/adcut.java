@@ -197,6 +197,9 @@ public class adcut implements Serializable {
                   log.print("(Deleted vprj file: " + job.vprjFile + ")");
                if (file.delete(job.edlFile))
                   log.print("(Deleted edl file: " + job.edlFile + ")");
+               String xclFile = job.mpegFile + ".Xcl";
+               if (file.isFile(xclFile) && file.delete(xclFile))
+                  log.print("(Deleted xcl file: " + xclFile + ")");
             }
             // Remove .mpg file if option enabled
             if ( config.RemoveComcutFiles_mpeg == 1 ) {

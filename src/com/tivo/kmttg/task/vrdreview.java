@@ -164,6 +164,9 @@ public class vrdreview implements Serializable {
                if (config.RemoveComcutFiles == 1) {
                   if (file.delete(job.vprjFile))
                      log.print("(Deleted vprj file: " + job.vprjFile + ")");
+                  String xclFile = job.mpegFile + ".Xcl";
+                  if (file.isFile(xclFile) && file.delete(xclFile))
+                     log.print("(Deleted xcl file: " + xclFile + ")");
                }
                
                // Remove .mpg file if option enabled
