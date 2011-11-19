@@ -798,6 +798,11 @@ public class jobMonitor {
             decrypt = true;
          }
       }
+      
+      if (demux && comcut) {
+         // Skip QS Fix with ProjectX (demux) if comcut task also enabled
+         demux = false;
+      }
                            
       // Launch jobs depending on selections
       Hashtable<String,String> entry = (Hashtable<String,String>)specs.get("entry");
@@ -1042,6 +1047,7 @@ public class jobMonitor {
       
       if (comcut) {
          if ( file.isFile(config.VRD + File.separator + "vp.vbs") ) {
+            // Use VRD
             jobData job = new jobData();
             job.source       = source;
             job.tivoName     = tivoName;
@@ -1053,16 +1059,29 @@ public class jobMonitor {
             submitNewJob(job);
          } else {
             jobData job = new jobData();
-            job.source       = source;
-            job.tivoName     = tivoName;
-            job.type         = "comcut";
-            job.name         = config.mencoder;
-            if (streamfix)
-               job.mpegFile  = mpegFile_fix;
-            else
-               job.mpegFile  = mpegFile;
-            job.mpegFile_cut = mpegFile_cut;
-            job.edlFile      = edlFile;
+            if (file.isFile(config.projectx)) {
+               // Use projectx
+               job.source       = source;
+               job.tivoName     = tivoName;
+               job.type         = "projectxcut";
+               job.name         = config.projectx;
+               job.mpegFile     = mpegFile;
+               job.mpegFile_cut = mpegFile_cut;
+               job.edlFile      = edlFile;
+               job.xclFile      = mpegFile + ".Xcl";               
+            } else {
+               // Use mencoder
+               job.source       = source;
+               job.tivoName     = tivoName;
+               job.type         = "comcut";
+               job.name         = config.mencoder;
+               if (streamfix)
+                  job.mpegFile  = mpegFile_fix;
+               else
+                  job.mpegFile  = mpegFile;
+               job.mpegFile_cut = mpegFile_cut;
+               job.edlFile      = edlFile;
+            }
             submitNewJob(job);            
          }
       }
