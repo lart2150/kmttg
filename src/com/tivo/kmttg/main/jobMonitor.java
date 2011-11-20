@@ -626,6 +626,7 @@ public class jobMonitor {
       String mpegFile     = null;
       String mpegFile_fix = null;
       String edlFile      = null;
+      String xclFile      = null;
       String mpegFile_cut = null;
       String videoFile    = null;
       String srtFile      = null;
@@ -683,6 +684,7 @@ public class jobMonitor {
          mpegFile_fix = mpegFile + ".qsfix";
          
          edlFile = string.replaceSuffix(mpegFile, ".edl");
+         xclFile = mpegFile + ".Xcl";
 
          if (mpegCutDir.equals(mpegDir)) {
             mpegFile_cut = string.replaceSuffix(mpegFile, "_cut.mpg");
@@ -717,6 +719,7 @@ public class jobMonitor {
          mpegFile_fix = mpegFile + ".qsfix";
          
          edlFile = string.replaceSuffix(mpegFile, ".edl");
+         xclFile = mpegFile + ".Xcl";
          
          if (mpegCutDir.equals(mpegDir)) {
             mpegFile_cut = string.replaceSuffix(startFile, "_cut.mpg");
@@ -1020,6 +1023,8 @@ public class jobMonitor {
             else
                job.mpegFile  = mpegFile;
             job.edlFile      = edlFile;
+            if (file.isFile(config.projectx) && ! file.isDir(config.VRD))
+               job.xclFile   = xclFile;
             if (file.isDir(config.VRD))
                job.vprjFile = string.replaceSuffix(mpegFile, ".VPrj");
             if (specs.containsKey("comskipIni"))
@@ -1068,7 +1073,7 @@ public class jobMonitor {
                job.mpegFile     = mpegFile;
                job.mpegFile_cut = mpegFile_cut;
                job.edlFile      = edlFile;
-               job.xclFile      = mpegFile + ".Xcl";               
+               job.xclFile      = xclFile;               
             } else {
                // Use mencoder
                job.source       = source;
