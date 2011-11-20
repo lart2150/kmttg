@@ -1873,6 +1873,8 @@ public class gui {
          text += "Automatically cut out commercials detected in <b>Ad Detect</b> step.<br>";
          text += "NOTE: By default uses <b>ProjectX</b> program to make the cuts if available/configured<br>";
          text += "in kmttg and VideoRedo not available/configured.<br>";
+         text += "<b>NOTE: ProjectX does not process closed captions, so if captions are important<br>";
+         text += "to you then you should use VideoRedo or mencoder instead.</b><br>";
          text += "NOTE: If ProjectX not available then uses <b>mencoder</b> program to make the cuts which can<br>";
          text += "cause audio/video sync problems in the resulting files - so ProjectX recommended instead.<br>";
          text += "If you have <b>VideoRedo</b> enabled then this step uses VideoRedo for making<br>";
@@ -1883,7 +1885,9 @@ public class gui {
          text += "Generates a <b>.srt</b> captions file which is a text file containing<br>";
          text += "closed captioning text. This file can be used with several<br>";
          text += "video playback tools to display closed captions during playback.<br>";
-         text += "Also for example <b>streambaby</b> can use this file.";
+         text += "Also for example <b>streambaby</b> can use this file.<br>";
+         text += "<b>NOTE: ProjectX does not process closed captions, so if ProjectX was part of your flow<br>";
+         text += "there will be no captions to extract from the mpeg2 file so this task won't work.</b>";
       }
       else if (component.equals("encode")) {
          text =  "<b>encode</b><br>";
