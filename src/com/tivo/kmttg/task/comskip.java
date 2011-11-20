@@ -37,6 +37,9 @@ public class comskip implements Serializable {
          outputFile = job.vprjFile;
          options = "--videoredo";
       }
+      if (job.xclFile != null) {
+         outputFile = job.xclFile;
+      }
    }
    
    public backgroundProcess getProcess() {
