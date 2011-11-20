@@ -16,6 +16,7 @@ public class remux {
    private backgroundProcess process;
    private jobData job;
    private String mpegFile;
+   private long totalSize = 0L;
 
    // constructor
    public remux(jobData job) {
@@ -59,6 +60,8 @@ public class remux {
       // job.mpegFile_cut != null => this is projectx remux instead of qsfix remux
       if (job.mpegFile_cut != null)
          mpegFile = job.mpegFile_cut;
+      
+      totalSize = getDemuxFilesSize();
       
       if (schedule) {
          if ( start() ) {
@@ -122,7 +125,7 @@ public class remux {
          // Still running
          if (config.GUIMODE) {
             // Update STATUS column
-            int pct = Integer.parseInt(String.format("%d", file.size(job.mpegFile_fix)*100/file.size(job.mpegFile)));
+            int pct = Integer.parseInt(String.format("%d", file.size(job.mpegFile_fix)*100/totalSize));
             // Update status in job table
             String status = String.format("%d%%",pct);
             config.gui.jobTab_UpdateJobMonitorRowStatus(job, status);
@@ -229,5 +232,13 @@ public class remux {
          }
       }
       return success;
+   }
+   
+   private long getDemuxFilesSize() {
+      long total = 0L;
+      for (int i=0; i<job.demuxFiles.size(); ++i) {
+         total += file.size(job.demuxFiles.get(i));
+      }
+      return total;
    }
 }
