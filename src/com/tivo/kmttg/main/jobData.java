@@ -501,6 +501,8 @@ public class jobData implements Serializable {
          file = edlFile;
          if (vprjFile != null)
             file = vprjFile;
+         if (xclFile != null)
+            file = xclFile;
       }
       else if (type.equals("adscan")) {
          file = vprjFile;
