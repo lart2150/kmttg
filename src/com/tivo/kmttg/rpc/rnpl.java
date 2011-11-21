@@ -80,9 +80,14 @@ public class rnpl {
             json = rnpldata.get(tivoName).getJSONObject(i).getJSONArray("recording").getJSONObject(0);
             if (json.has("title"))
                r_title = string.utfString(json.getString("title"));
-            if (json.has("scheduledStartTime"))
-               r_date = getLongDateFromString(json.getString("scheduledStartTime"));
+            if (json.has("startTime"))
+               r_date = getLongDateFromString(json.getString("startTime"));
             else
+               if (json.has("requestedStartTime"))
+                  r_date = getLongDateFromString(json.getString("requestedStartTime"));
+            if (r_date == 0 && json.has("scheduledStartTime"))
+               r_date = getLongDateFromString(json.getString("scheduledStartTime"));               
+            if (r_date == 0 && json.has("actualStartTime"))
                r_date = getLongDateFromString(json.getString("actualStartTime"));               
             if (json.has("size"))
                r_size = (long) (json.getLong("size")*Math.pow(2,10));
