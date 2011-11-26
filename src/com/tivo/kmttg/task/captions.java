@@ -116,16 +116,20 @@ public class captions implements Serializable {
       debug.print("");
       Stack<String> command = new Stack<String>();
       if (file.isFile(config.t2extract)) {
-    	  executable = "t2extract";
+         executable = "t2extract";
+         if (config.t2extract.contains("ccextractor"))
+            executable = "ccextractor";
 	      command.add(config.t2extract);
-	      command.add("-f");
-	      command.add("srt");
+	      if (executable.equals("t2extract")) {
+   	      command.add("-f");
+   	      command.add("srt");
+	      }
 	      if (config.t2extract_args.length() > 0) {
 	         String[] args = config.t2extract_args.split("\\s+");
 	         for (int i=0; i<args.length; i++)
 	            command.add(args[i]);
 	      }
-	      log.print(">> Running t2extract on " + job.videoFile + " ...");
+	      log.print(">> Running " + executable + " on " + job.videoFile + " ...");
       } else {
     	  executable = "ccextractor";
     	  command.add(config.ccextractor);
