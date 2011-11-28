@@ -646,6 +646,10 @@ public class jobMonitor {
       } else {
          encodeName = encodeConfig.getEncodeName();
       }
+      if (encode && ! encodeConfig.isValidEncodeName(encodeName) ) {
+         log.error("Cancelling encode task");
+         encode = false;
+      }
 
       String outputDir = config.outputDir;
       if ( ! file.isDir(outputDir) ) {
