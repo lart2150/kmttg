@@ -38,6 +38,7 @@ import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class searchTable {
    private String currentTivo = null;
@@ -335,8 +336,8 @@ public class searchTable {
                title += s.json.getString("title");
             if (s.json.has("subtitle"))
                title += " - " + s.json.getString("subtitle");
-            log.warn(title);
-            log.print(message);
+            log.warn(string.utfString(title));
+            log.print(string.utfString(message));
          } catch (JSONException e) {
             log.error("TABLERowSelected - " + e.getMessage());
             return;
@@ -437,7 +438,7 @@ public class searchTable {
                // Multiple items => display as folder
                data[0] = gui.Images.get("folder");
                data[1] = entry.getString("type");
-               data[2] = " " + entry.getString("title") + " (" + num + ")";
+               data[2] = " " + string.utfString(entry.getString("title")) + " (" + num + ")";
                String startString = entry.getJSONArray("entries").getJSONObject(0).getString("startTime");
                long start = getLongDateFromString(startString);
                data[3] = new sortableDate(entry.getString("title"), entry, start);
@@ -490,7 +491,7 @@ public class searchTable {
                channel += "=" + o.getString("callSign");
          }
          data[1] = type;
-         data[2] = title;
+         data[2] = string.utfString(title);
          data[3] = new sortableDate(entry, start);
          data[4] = channel;
          data[5] = new sortableDuration(duration, false);
