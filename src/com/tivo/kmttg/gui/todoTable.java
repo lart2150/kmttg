@@ -35,6 +35,7 @@ import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class todoTable {
    private String[] TITLE_cols = {"DATE", "SHOW", "CHANNEL", "DUR"};
@@ -274,7 +275,7 @@ public class todoTable {
           }
           
           info[0] = new sortableDate(data, start);
-          info[1] = title;
+          info[1] = string.utfString(title);
           info[2] = channel;
           info[3] = new sortableDuration(end-start, false);
           AddRow(TABLE, info);       
@@ -345,13 +346,13 @@ public class todoTable {
                 message += "\n" + description;
              }
        
-             String title = "\nGuide: ";
+             String title = "\nToDo: ";
              if (s.json.has("title"))
                 title += s.json.getString("title");
              if (s.json.has("subtitle"))
                 title += " - " + s.json.getString("subtitle");
-             log.warn(title);
-             log.print(message);
+             log.warn(string.utfString(title));
+             log.print(string.utfString(message));
           } catch (JSONException e) {
              log.error("TABLERowSelected - " + e.getMessage());
              return;

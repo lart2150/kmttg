@@ -35,6 +35,7 @@ import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class premiereTable {
    private String[] TITLE_cols = {"DATE", "SHOW", "SEA", "CHANNEL", "DUR"};
@@ -279,7 +280,7 @@ public class premiereTable {
           }
           
           info[0] = new sortableDate(data, start);
-          info[1] = title;
+          info[1] = string.utfString(title);
           info[2] = season;
           info[3] = channel;
           info[4] = new sortableDuration(duration, false);
@@ -354,8 +355,8 @@ public class premiereTable {
                 title += s.json.getString("title");
              if (s.json.has("subtitle"))
                 title += " - " + s.json.getString("subtitle");
-             log.warn(title);
-             log.print(message);
+             log.warn(string.utfString(title));
+             log.print(string.utfString(message));
           } catch (JSONException e) {
              log.error("TABLERowSelected - " + e.getMessage());
              return;
@@ -501,6 +502,7 @@ public class premiereTable {
                             }
                             
                             // OK to subscribe
+                            title = string.utfString(title);
                             if (schedule) {
                                if (config.gui.remote_gui.spOpt == null)
                                   config.gui.remote_gui.spOpt = new spOptions();

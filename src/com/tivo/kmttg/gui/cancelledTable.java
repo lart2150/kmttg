@@ -40,6 +40,7 @@ import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class cancelledTable {
    private String currentTivo = null;
@@ -323,8 +324,8 @@ public class cancelledTable {
                title += s.json.getString("title");
             if (s.json.has("subtitle"))
                title += " - " + s.json.getString("subtitle");
-            log.warn(title);
-            log.print(message);
+            log.warn(string.utfString(title));
+            log.print(string.utfString(message));
          } catch (JSONException e) {
             log.error("TABLERowSelected - " + e.getMessage());
             return;
@@ -511,7 +512,7 @@ public class cancelledTable {
                channel += "=" + o.getString("callSign");
          }
    
-         data[1] = title;
+         data[1] = string.utfString(title);
          data[2] = new sortableDate(entry, start);
          data[3] = channel;
          data[4] = new sortableDuration(end-start, false);

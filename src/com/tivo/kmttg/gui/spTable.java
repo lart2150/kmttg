@@ -387,7 +387,7 @@ public class spTable {
           JSONObject o2 = new JSONObject();
           String title = " ";
           if (data.has("title"))
-             title += string.utfString(data.getString("title"));
+             title += data.getString("title");
           // Manual recordings need more information added
           if (title.equals(" Manual")) {
              String time = data.getJSONObject("idSetSource").getString("timeOfDayLocal");

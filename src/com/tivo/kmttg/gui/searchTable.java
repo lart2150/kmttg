@@ -753,7 +753,7 @@ public class searchTable {
             try {
                String type = json.getString("collectionType");
                if (! type.equals("series")) {
-                  log.error("Selected entry not of type 'series': " + json.getString("title"));
+                  log.error("Selected entry not of type 'series': " + string.utfString(json.getString("title")));
                   return;
                }
             } catch (JSONException e) {
@@ -797,6 +797,7 @@ public class searchTable {
                            }
                            
                            // OK to subscribe
+                           title = string.utfString(title);
                            if (schedule) {
                               if (config.gui.remote_gui.spOpt == null)
                                  config.gui.remote_gui.spOpt = new spOptions();
