@@ -1279,7 +1279,7 @@ public class configMain {
          value = "";
       } else {
          if ( ! file.isFile(value) ) {
-            textFieldError(t2extract, "t2extract setting not a valid file: '" + value  + "'");
+            textFieldError(t2extract, "t2extract/ccextractor setting not a valid file: '" + value  + "'");
             errors++;
          }
       }
@@ -1769,7 +1769,7 @@ public class configMain {
       limit_npl_fetches_label.setText("limit # of npl fetches");
       active_job_limit_label.setText("active job limit"); 
       VRD_path_label.setText("VideoRedo path");
-      t2extract_label.setText("t2extract"); 
+      t2extract_label.setText("t2extract/ccextractor"); 
       t2extract_args_label.setText("t2extract extra arguments");
       ccextractor_label.setText("ccextractor");
       AtomicParsley_label.setText("AtomicParsley");
@@ -3439,12 +3439,10 @@ public class configMain {
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("t2extract")) {
-         text =  "<b>t2extract</b><br>";
-         text += "<b>REQUIRED</b> if you plan to use <b>captions</b> task (and don't define ccextractor).<br>";
+         text =  "<b>t2extract/ccextractor</b><br>";
+         text += "<b>REQUIRED</b> if you plan to use <b>captions</b> task.<br>";
          text += "For Windows systems this program is used for generating closed captions <b>.srt</b> files.<br>";
-         text += "This is the full path to the <b>T2Sami t2extract</b> program.<br>";
-         text += "NOTE: For Windows this is a better, more robust solution compared to cross-platform ccextractor.<br>";
-         text += "NOTE: kmttg will use t2extract over ccextractor if possible.<br>";
+         text += "This is the full path to either <b>T2Sami t2extract</b> or <b>ccextractor</b> program.<br>";
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("t2extract_args")) {
