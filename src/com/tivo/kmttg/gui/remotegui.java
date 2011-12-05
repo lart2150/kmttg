@@ -1776,6 +1776,7 @@ public class remotegui {
    }
    
    public void setHmeDestinations(final String tivoName) {
+      /*
       // NOTE: Run in background mode so as not to slow down remotegui display
       class backgroundRun extends SwingWorker<Object, Object> {
          protected Object doInBackground() {
@@ -1788,6 +1789,11 @@ public class remotegui {
       }
       backgroundRun b = new backgroundRun();
       b.execute();
+      */
+      String[] hmeNames = {"YouTube", "Netflix", "Amazon", "BLOCKBUSTER"};
+      hme_rc.removeAllItems();
+      for (int i=0; i<hmeNames.length; ++i)
+         hme_rc.addItem(hmeNames[i]);
    }
    
    // Write channel info to a file
