@@ -411,7 +411,7 @@ public class nplTable {
                         Hashtable<String,String> entry = s.folderData.get(j);
                         if (entry.containsKey("url")) {
                            log.warn("Delete url=" + entry.get("url"));
-                           if (config.TivoWebPlusDelete == 1)
+                           if (config.TivoWebPlusDelete == 1 && config.getRpcSetting(tivoName).equals("0"))
                               urlsToDelete.add(entry.get("url"));
                            if (config.getRpcSetting(tivoName).equals("1")) {
                               id = rnpl.findRecordingId(tivoName, entry);
@@ -425,7 +425,7 @@ public class nplTable {
                      } // for
                   } else {
                      // Delete individual show
-                     if (config.TivoWebPlusDelete == 1) {
+                     if (config.TivoWebPlusDelete == 1 && config.getRpcSetting(tivoName).equals("0")) {
                         if (s.data.containsKey("url")) {
                            urlsToDelete.add(s.data.get("url"));
                         }
@@ -441,7 +441,7 @@ public class nplTable {
                   } // else individual show
                } // for selected
                if (urlsToDelete.size() > 0) {
-                  if (config.TivoWebPlusDelete == 1) {
+                  if (config.TivoWebPlusDelete == 1 && config.getRpcSetting(tivoName).equals("0")) {
                      // USE TWP to remove items from entries stack
                      // NOTE: Always revert to top view (not inside a folder)
                      RemoveUrls(urlsToDelete);
