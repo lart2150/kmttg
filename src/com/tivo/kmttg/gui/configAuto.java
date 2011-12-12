@@ -78,6 +78,7 @@ public class configAuto {
    private static JCheckBox push = null;
    private static JCheckBox custom = null;
    private static JCheckBox dry_run = null;
+   private static JCheckBox noJobWait = null;
    private static JTextField title = null;
    private static JTextField check_interval = null;
    private static JTextField comskipIni = null;
@@ -252,6 +253,9 @@ public class configAuto {
       dry_run = new JCheckBox("Dry Run Mode (test keywords only)");
       dry_run.setSelected((Boolean)(autoConfig.dryrun == 1));
       
+      noJobWait = new JCheckBox("Do not wait for all jobs to finish before processing new ones");
+      noJobWait.setSelected((Boolean)(autoConfig.noJobWait == 1));
+      
       dateFilter = new JCheckBox("Date Filter");
       dateOperator = new JComboBox();
       dateOperator.addItem("more than");
@@ -421,37 +425,27 @@ public class configAuto {
       row_channelFilter.add(channelFilter_label);
       row_channelFilter.add(Box.createRigidArea(space_5));
       row_channelFilter.add(channelFilter);
-      
+
       gy++;
       c.gridy = gy;
       c.fill = GridBagConstraints.HORIZONTAL;
       c.anchor = GridBagConstraints.CENTER;
       c.weightx = 0.0;
       content.add(row_channelFilter, c); 
+            
+      // row_misc
+      JPanel row_misc = new JPanel();
+      row_misc.setLayout(new BoxLayout(row_misc, BoxLayout.X_AXIS));
+      row_misc.add(enabled);
+      row_misc.add(suggestionsFilter_single);
+      row_misc.add(useProgramId_unique);
       
-      // Filter out TiVo Suggestions
       gy++;
       c.gridy = gy;
       c.fill = GridBagConstraints.NONE;
       c.anchor = GridBagConstraints.WEST;
       c.weightx = 0.0;
-      content.add(suggestionsFilter_single, c);
-      
-      // Treat each recording as unique
-      gy++;
-      c.gridy = gy;
-      c.fill = GridBagConstraints.NONE;
-      c.anchor = GridBagConstraints.WEST;
-      c.weightx = 0.0;
-      content.add(useProgramId_unique, c);
-      
-      // enabled
-      gy++;
-      c.gridy = gy;
-      c.fill = GridBagConstraints.NONE;
-      c.anchor = GridBagConstraints.WEST;
-      c.weightx = 0.0;
-      content.add(enabled, c);
+      content.add(row_misc, c);
       
       // Add, Update, Del
       JPanel buttons = new JPanel();
@@ -530,6 +524,17 @@ public class configAuto {
       c.fill = GridBagConstraints.NONE;
       c.weightx = 0.0;
       content.add(filter_panel, c);
+      
+      // Other panel
+      JPanel other_panel = new JPanel();
+      other_panel.setLayout(new BoxLayout(other_panel, BoxLayout.X_AXIS));
+      other_panel.add(noJobWait);
+      
+      gy++;
+      c.gridy = gy;
+      c.fill = GridBagConstraints.NONE;
+      c.weightx = 0.0;
+      content.add(other_panel, c);
             
       // OK & CANCEL
       GAP = 0;
@@ -572,6 +577,7 @@ public class configAuto {
       type.setToolTipText(getToolTip("type"));
       tivo.setToolTipText(getToolTip("tivo"));
       dry_run.setToolTipText(getToolTip("dry_run"));
+      noJobWait.setToolTipText(getToolTip("noJobWait"));
       title.setToolTipText(getToolTip("title"));
       comskipIni.setToolTipText(getToolTip("comskipIni"));
       channelFilter.setToolTipText(getToolTip("channelFilter"));
@@ -627,6 +633,13 @@ public class configAuto {
          text += "not actually run any transfers. This is useful for testing your auto<br>";
          text += "transfers setup to ensure it will do what you want.<br>";
          text += "<b>NOTE: Use Auto Transfers->Run Once in GUI with this option set to test</b>.";
+      }
+      else if (component.equals("noJobWait")) {
+         text =  "<b>Do not wait for all jobs to finish before processing new ones</b><br>";
+         text += "With this option enabled kmttg will not wait for all jobs to complete<br>";
+         text += "to check TiVos for new potential shows to process. The default behavior of<br>";
+         text += "kmttg (this option off) is to wait until all tasks have completed on every TiVo<br>";
+         text += "before looking for new shows to process.";
       }
       else if (component.equals("title")) {
          text =  "<b>title/keywords</b><br>";
@@ -998,6 +1011,7 @@ public class configAuto {
       setTivoFilterNames();
       check_interval.setText("" + autoConfig.CHECK_TIVOS_INTERVAL);      
       dry_run.setSelected((Boolean)(autoConfig.dryrun == 1));
+      noJobWait.setSelected((Boolean)(autoConfig.noJobWait == 1));
       dateFilter.setSelected((Boolean)(autoConfig.dateFilter == 1));
       dateOperator.setSelectedItem(autoConfig.dateOperator);
       dateHours.setText("" + autoConfig.dateHours);
@@ -1138,6 +1152,11 @@ public class configAuto {
          ofp.write("<check_tivos_interval>\n" + interval + "\n\n");
          ofp.write("<dryrun>\n");
          if (dry_run.isSelected())
+            ofp.write("1\n\n");
+         else
+            ofp.write("0\n\n");
+         ofp.write("<noJobWait>\n");
+         if (noJobWait.isSelected())
             ofp.write("1\n\n");
          else
             ofp.write("0\n\n");

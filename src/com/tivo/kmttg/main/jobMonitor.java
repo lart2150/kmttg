@@ -1445,11 +1445,19 @@ public class jobMonitor {
             launch.put(tivoName, (long)-1);
          }
          
-         if ( ! jobsRemain(tivoName) && launchTime == -1 ) {
+         if ( ! waitForJobs(tivoName) && launchTime == -1 ) {
             // Setup to launch new jobs after user configured sleep time
             launch.put(tivoName, now + autoConfig.CHECK_TIVOS_INTERVAL*60*1000);
             log.print("\n'" + tivoName + "' AUTO TRANSFERS PROCESSING SLEEPING " + autoConfig.CHECK_TIVOS_INTERVAL + " mins ...");
          }
       }
+   }
+   
+   // Return true if should wait for running/queued jobs to complete, false otherwise
+   public static Boolean waitForJobs(String tivoName) {
+      if (autoConfig.noJobWait == 0)
+         return jobsRemain(tivoName);
+      else
+         return false;
    }
 }

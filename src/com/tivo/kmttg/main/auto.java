@@ -85,7 +85,7 @@ public class auto {
                   launch.put(tivoName, (long)-1);
                }
                
-               if ( ! jobMonitor.jobsRemain(tivoName) && launchTime == -1 ) {
+               if ( ! jobMonitor.waitForJobs(tivoName) && launchTime == -1 ) {
                   // Setup to launch new jobs after user configured sleep time
                   launch.put(tivoName, now + autoConfig.CHECK_TIVOS_INTERVAL*60*1000);
                   log.print("\n'" + tivoName + "' PROCESSING SLEEPING " + autoConfig.CHECK_TIVOS_INTERVAL + " mins ...");

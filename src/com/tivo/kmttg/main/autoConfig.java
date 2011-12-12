@@ -13,6 +13,7 @@ import com.tivo.kmttg.util.log;
 
 public class autoConfig {
    public static Stack<autoEntry> KEYWORDS = new Stack<autoEntry>();
+   public static int noJobWait = 0;
    public static int dryrun = 0;
    public static int CHECK_TIVOS_INTERVAL = 60;
    public static int dateFilter = 0;
@@ -80,6 +81,9 @@ public class autoConfig {
             }
             if (key.equals("dryrun")) {
                dryrun = Integer.parseInt(line);
+            }
+            if (key.equals("noJobWait")) {
+               noJobWait = Integer.parseInt(line);
             }
             if (key.equals("dateFilter")) {
                dateFilter = Integer.parseInt(line);
