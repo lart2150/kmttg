@@ -805,11 +805,6 @@ public class jobMonitor {
             decrypt = true;
          }
       }
-      
-      if (demux && comcut) {
-         // Skip QS Fix with ProjectX (demux) if comcut task also enabled
-         demux = false;
-      }
                            
       // Launch jobs depending on selections
       Hashtable<String,String> entry = (Hashtable<String,String>)specs.get("entry");
