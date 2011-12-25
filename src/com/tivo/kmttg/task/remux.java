@@ -81,6 +81,8 @@ public class remux {
       Stack<String> command = new Stack<String>();
       command.add(config.ffmpeg);
       command.add("-y");
+      command.add("-fflags");
+      command.add("genpts");
       for (int i=0; i<job.demuxFiles.size(); ++i) {
          command.add("-i");
          command.add(job.demuxFiles.get(i));
