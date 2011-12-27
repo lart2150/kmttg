@@ -350,7 +350,7 @@ public class premiereTable {
                 message += "\n" + description;
              }
        
-             String title = "\nGuide: ";
+             String title = "\nPremiere: ";
              if (s.json.has("title"))
                 title += s.json.getString("title");
              if (s.json.has("subtitle"))
