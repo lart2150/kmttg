@@ -125,7 +125,7 @@ public class remux {
       int exit_code = process.exitStatus();
       if (exit_code == -1) {
          // Still running
-         if (config.GUIMODE) {
+         if (config.GUIMODE && totalSize > 0) {
             // Update STATUS column
             int pct = Integer.parseInt(String.format("%d", file.size(job.mpegFile_fix)*100/totalSize));
             // Update status in job table
