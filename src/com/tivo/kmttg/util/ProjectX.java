@@ -51,8 +51,10 @@ public class ProjectX {
             if (m.matches()) {
                String f = m.group(1);
                // Strip off quotes
-               f = f.replaceAll("'", "");
-               f = f.replaceAll("\"", "");
+               if (f.matches("^'.+'$"))
+                  f = f.substring(1, f.length()-1);
+               //f = f.replaceAll("'", "");
+               //f = f.replaceAll("\"", "");
                outputFiles.add(f);
             }
          }
