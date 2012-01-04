@@ -181,11 +181,6 @@ public class jobMonitor {
             if ( oneJobAtATime(job.type) ) {
                if ( tivoDownload.containsKey(job.tivoName) ) {
                   if (tivoDownload.get(job.tivoName) > 0) {
-                     if (config.download_delay > 0 && isDownloadJob(job)) {
-                        // Apply a start delay to consecutive download jobs
-                        long now = new Date().getTime();
-                        job.launch_time = now + config.download_delay*1000;                        
-                     }
                      // Cannot launch this download yet
                      continue;
                   }
@@ -214,6 +209,11 @@ public class jobMonitor {
          // Don't launch more than one VideoRedo GUI job at a time
          if ( isVideoRedoGUIJob(job) ) {
             if (VideoRedoGUIJobs > 0) continue;
+         }
+         if (config.download_delay > 0 && isDownloadJob(job) && job.launch_time == null) {
+            // Apply a start delay to download jobs
+            long now = new Date().getTime();
+            job.launch_time = now + config.download_delay*1000;
          }
          
          // If there is a launch time setup for this job then don't launch until
