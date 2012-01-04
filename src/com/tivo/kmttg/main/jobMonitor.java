@@ -331,7 +331,7 @@ public class jobMonitor {
       
       // Get estimated space for this job candidate
       long candidateSpace = 0;
-      if (isDownloadJob(job)) {
+      if (isDownloadJob(job) && job.tivoFileSize != null) {
          candidateSpace = job.tivoFileSize;
       }
       
@@ -1275,7 +1275,8 @@ public class jobMonitor {
       return (job.type.equals("download") ||
               job.type.equals("javadownload") ||
               job.type.equals("download_decrypt") ||
-              job.type.equals("jdownload_decrypt"));
+              job.type.equals("jdownload_decrypt") ||
+              job.type.equals("metadata"));
    }
 
    // Return true if this job is a VideoRedo COM job that needs to be restricted to 1 at a time
