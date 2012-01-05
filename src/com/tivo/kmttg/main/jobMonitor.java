@@ -182,6 +182,7 @@ public class jobMonitor {
                if ( tivoDownload.containsKey(job.tivoName) ) {
                   if (tivoDownload.get(job.tivoName) > 0) {
                      // Cannot launch this download yet
+                     job.launch_time = null;
                      continue;
                   }
                }
@@ -210,8 +211,9 @@ public class jobMonitor {
          if ( isVideoRedoGUIJob(job) ) {
             if (VideoRedoGUIJobs > 0) continue;
          }
+         
+         // Apply a start delay to download jobs (to avoid TiVo server overload)
          if (config.download_delay > 0 && isDownloadJob(job) && job.launch_time == null) {
-            // Apply a start delay to download jobs
             long now = new Date().getTime();
             job.launch_time = now + config.download_delay*1000;
          }
