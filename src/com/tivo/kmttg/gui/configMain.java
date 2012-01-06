@@ -1780,7 +1780,7 @@ public class configMain {
       cpu_cores_label.setText("encoding cpu cores");
       download_tries_label.setText("# download attempts");
       download_retry_delay_label.setText("seconds between download retry attempts");
-      download_delay_label.setText("delay in seconds between multiple downloads");
+      download_delay_label.setText("start delay in seconds for download tasks");
       autoLogSizeMB_label.setText("auto log file size limit (MB)");
       pyTivo_host_label.setText("pyTivo host name");
       pyTivo_config_label.setText("pyTivo.conf file");
@@ -3611,8 +3611,8 @@ public class configMain {
          text += "number of seconds before trying a download again.";
       }
       else if (component.equals("download_delay")) {
-         text =  "<b>delay in seconds between multiple downloads</b><br>";
-         text += "For multiple downloads from same TiVo use this delay between consecutive download attempts.<br>";
+         text =  "<b>start delay in seconds for download tasks</b><br>";
+         text += "For any download task delay the start of the task by this number of seconds.<br>";
          text += "This helps take stress off TiVo web server to avoid potential <b>server busy</b> messages.";
       }
       else if (component.equals("autoLogSizeMB")) {
