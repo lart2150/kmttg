@@ -813,7 +813,7 @@ public class configAuto {
          qsfix.setEnabled(true);
       }
       */
-      if (! file.isDir(config.VRD)) {
+      if (! file.isDir(config.VRD) && ! file.isFile(config.projectx)) {
          qsfix.setSelected(false);
          qsfix.setEnabled(false);
       } else {
