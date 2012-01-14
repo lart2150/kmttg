@@ -163,10 +163,11 @@ public class todoTable {
        @SuppressWarnings("unchecked")
        // This is used to define columns as specific classes
        public Class getColumnClass(int col) {
-          if (col == 1) {
+          // NOTE: col index starts at 0
+          if (col == 0) {
              return sortableDate.class;
           }
-          if (col == 4) {
+          if (col == 3) {
              return sortableDuration.class;
           }
           return Object.class;
