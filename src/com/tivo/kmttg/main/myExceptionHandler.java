@@ -34,6 +34,9 @@ public class myExceptionHandler implements Thread.UncaughtExceptionHandler {
       // Filter out certain messages
       if( detailMessage.contains("java.lang.ClassCastException"))
          return;
+      if (detailMessage.contains("org.jdesktop.swingx.decorator"))
+         return;
+      
       log.error(detailMessage);
    }
 
