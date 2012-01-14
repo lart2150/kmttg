@@ -49,7 +49,7 @@ public class searchTable {
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
-   private Hashtable<String,JSONArray> tivo_todo = new Hashtable<String,JSONArray>();
+   public Hashtable<String,JSONArray> tivo_todo = new Hashtable<String,JSONArray>();
          
    searchTable(JFrame dialog) {
       Object[][] data = {}; 
@@ -351,12 +351,6 @@ public class searchTable {
    // String    type
    // JSONArray entries
    public void AddRows(String tivoName, JSONArray data) {
-      // Get to do list if necessary
-      if (tivo_todo.size() == 0) {
-         log.warn("Obtaining todo lists");
-         tivo_todo = config.gui.remote_gui.getTodoLists("Search");
-      }
-
       Refresh(data);
       packColumns(TABLE, 2);
       
