@@ -69,8 +69,13 @@ public class remote implements Serializable {
                   data = r.ChannelList(job);
                if (job.remote_premiere)
                   data = r.SeasonPremieres(config.gui.remote_gui.getSelectedChannelData(job.tivoName), job);
-               if (job.remote_search)
+               if (job.remote_search) {
                   data = r.searchKeywords(job.remote_search_keyword, job, job.remote_search_max);
+                  if (job.search.tivo_todo.size() == 0) {
+                     log.warn("Obtaining todo lists");
+                     job.search.tivo_todo = config.gui.remote_gui.getTodoLists("Search");
+                  }
+               }
                if (data != null) {
                   success = true;
                } else {
