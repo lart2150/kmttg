@@ -52,7 +52,7 @@ public class guideTable {
    private JSONObject currentChannel = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
-   private Hashtable<String,JSONArray> tivo_todo = new Hashtable<String,JSONArray>();
+   public Hashtable<String,JSONArray> tivo_todo = new Hashtable<String,JSONArray>();
          
    guideTable(JFrame dialog) {
       Object[][] data = {}; 
