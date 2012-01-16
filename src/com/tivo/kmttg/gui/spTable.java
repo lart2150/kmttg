@@ -559,48 +559,11 @@ public class spTable {
           if (json != null)
              log.print(json.toString());
        }
-       if (keyCode == KeyEvent.VK_DELETE) {
+       else if (keyCode == KeyEvent.VK_DELETE) {
           // Remove selected row from TiVo and table
-          int[] selected = GetSelectedRows();
-          if (selected == null || selected.length < 1) {
-             log.error("No rows selected");
-             return;
-          }
-          if (currentTivo == null) {
-             log.error("Table not initialized");
-             return;
-          }
-          int row;
-          JSONObject json;
-          String title;
-          Remote r = new Remote(currentTivo);
-          if (r.success) {
-             for (int i=0; i<selected.length; ++i) {
-                row = selected[i];
-                json = GetRowData(row);
-                title = GetRowTitle(row);
-                if (json != null) {
-                   try {
-                      if (isTableLoaded()) {
-                         log.error("Cannot unsubscribe loaded Season Passes. Refresh list for TiVo passes");
-                      } else {
-                         log.warn("Deleting SP on TiVo '" + currentTivo + "': " + title);
-                         JSONObject o = new JSONObject();
-                         o.put("subscriptionId", json.getString("subscriptionId"));
-                         if ( r.Command("unsubscribe", o) != null ) {
-                            RemoveRow(TABLE, row);
-                            // Find and remove data entry
-                            removeJson(currentTivo, json);
-                         }
-                      }
-                   } catch (JSONException e1) {
-                      log.error("SP delete - " + e1.getMessage());
-                   }
-                }
-             }
-             r.disconnect();                   
-          }
-       } else if (keyCode == KeyEvent.VK_UP) {
+          SPListDelete();
+       }
+       else if (keyCode == KeyEvent.VK_UP) {
           // Move selected row up
           int[] selected = GetSelectedRows();
           if (selected == null || selected.length < 0) {
@@ -629,7 +592,8 @@ public class spTable {
           } catch (JSONException e1) {
              log.error("KeyPressed - " + e1.getMessage());
           }
-       } else if (keyCode == KeyEvent.VK_DOWN) {
+       }
+       else if (keyCode == KeyEvent.VK_DOWN) {
           // Move selected row down
           int[] selected = GetSelectedRows();
           if (selected == null || selected.length < 0) {
@@ -658,9 +622,54 @@ public class spTable {
           } catch (JSONException e1) {
              log.error("KeyPressed - " + e1.getMessage());
           }
-       } else {
+       }
+       else {
           // Pass along keyboard action
           e.consume();
+       }
+    }
+    
+    // Delete selected Season Pass entries from TiVo and table
+    public void SPListDelete() {
+       // Remove selected row from TiVo and table
+       int[] selected = GetSelectedRows();
+       if (selected == null || selected.length < 1) {
+          log.error("No rows selected");
+          return;
+       }
+       if (currentTivo == null) {
+          log.error("Table not initialized");
+          return;
+       }
+       int row;
+       JSONObject json;
+       String title;
+       Remote r = new Remote(currentTivo);
+       if (r.success) {
+          for (int i=0; i<selected.length; ++i) {
+             row = selected[i];
+             json = GetRowData(row);
+             title = GetRowTitle(row);
+             if (json != null) {
+                try {
+                   if (isTableLoaded()) {
+                      log.error("Cannot unsubscribe loaded Season Passes. Refresh list for TiVo passes");
+                   } else {
+                      log.warn("Deleting SP on TiVo '" + currentTivo + "': " + title);
+                      JSONObject o = new JSONObject();
+                      o.put("subscriptionId", json.getString("subscriptionId"));
+                      if ( r.Command("unsubscribe", o) != null ) {
+                         RemoveRow(TABLE, row);
+                         // Find and remove data entry
+                         removeJson(currentTivo, json);
+                      }
+                   }
+                } catch (JSONException e1) {
+                   log.error("SP delete - " + e1.getMessage());
+                }
+             }
+          }
+          r.disconnect();                   
        }
     }
     
