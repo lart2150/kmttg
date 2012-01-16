@@ -228,6 +228,9 @@ public class cancelledTable {
                cell.setBackground(config.tableBkgndLight);
             else
                cell.setBackground(config.tableBkgndDarker);            
+            JSONObject json = GetRowData(row);
+            if (json != null && json.has("__inTodo__"))
+               cell.setBackground(config.tableBkgndProtected);
          }         
          cell.setFont(config.tableFont);
         
@@ -493,6 +496,8 @@ public class cancelledTable {
          data[i] = "";
       }
       try {
+         // If entry is in 1 of todo lists then add special __inTodo__ JSON entry
+         config.gui.remote_gui.flagIfInTodo(entry);
          JSONObject o = new JSONObject();
          String startString = entry.getString("scheduledStartTime");
          long start = getLongDateFromString(startString);
@@ -720,6 +725,10 @@ public class cancelledTable {
                                  String conflicts = rnpl.recordingConflicts(json);
                                  if (conflicts == null) {
                                     log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
+                                    // Add to todo list for this tivo
+                                    if (config.gui.remote_gui.all_todo.containsKey(tivoName)) {
+                                       config.gui.remote_gui.all_todo.get(tivoName).put(GetRowData(row));
+                                    }
                                  } else {
                                     log.error(conflicts);
                                  }
