@@ -113,6 +113,8 @@ public class remotegui {
    private Hashtable<String, String> hme = new Hashtable<String, String>();
    private Boolean cc_state = false;
    
+   public Hashtable<String,JSONArray> all_todo = new Hashtable<String,JSONArray>();
+   
    private JFileChooser Browser = null;
    
    public class ClickAction extends AbstractAction {
@@ -385,6 +387,7 @@ public class remotegui {
       });
 
       refresh_guide = new JButton("Channels");
+      refresh_guide.setMargin(new Insets(1,1,1,1));
       refresh_guide.setToolTipText(getToolTip("refresh_guide"));
       refresh_guide.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -408,6 +411,7 @@ public class remotegui {
       });
 
       JButton guide_record = new JButton("Record");
+      guide_record.setMargin(new Insets(1,1,1,1));
       guide_record.setToolTipText(getToolTip("guide_record"));
       guide_record.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -421,6 +425,7 @@ public class remotegui {
       });
 
       JButton guide_recordSP = new JButton("Season Pass");
+      guide_recordSP.setMargin(new Insets(1,1,1,1));
       guide_recordSP.setToolTipText(getToolTip("guide_recordSP"));
       guide_recordSP.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -429,6 +434,27 @@ public class remotegui {
                if (tivoName != null && tivoName.length() > 0) {
                   tab_guide.recordSingle(tivoName);
                }
+            }
+         }
+      });
+
+      JButton guide_refresh_todo = new JButton("Refresh ToDo");
+      guide_refresh_todo.setMargin(new Insets(1,1,1,1));
+      guide_refresh_todo.setToolTipText(getToolTip("guide_refresh_todo"));
+      guide_refresh_todo.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_guide.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               class backgroundRun extends SwingWorker<Object, Object> {
+                  protected Object doInBackground() {
+                     log.warn("Refreshing ToDo list for Guide entries...");
+                     all_todo = getTodoLists("Guide");
+                     log.warn("Refresh ToDo list for Guide entries completed.");
+                     return null;
+                  }
+               }
+               backgroundRun b = new backgroundRun();
+               b.execute();
             }
          }
       });
@@ -453,6 +479,8 @@ public class remotegui {
       row1_guide.add(guide_record);
       row1_guide.add(Box.createRigidArea(space_5));
       row1_guide.add(guide_recordSP);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(guide_refresh_todo);
       panel_guide.add(row1_guide, c);
       
       tab_guide = new guideTable(config.gui.getJFrame());
@@ -503,6 +531,7 @@ public class remotegui {
       tivo_sp.setToolTipText(getToolTip("tivo_sp"));
 
       JButton refresh_sp = new JButton("Refresh");
+      refresh_sp.setMargin(new Insets(1,1,1,1));
       refresh_sp.setToolTipText(getToolTip("refresh_sp"));
       refresh_sp.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -515,6 +544,7 @@ public class remotegui {
       });
       
       JButton save_sp = new JButton("Save...");
+      save_sp.setMargin(new Insets(1,1,1,1));
       save_sp.setToolTipText(getToolTip("save_sp"));
       save_sp.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -538,6 +568,7 @@ public class remotegui {
       });         
       
       JButton load_sp = new JButton("Load...");
+      load_sp.setMargin(new Insets(1,1,1,1));
       load_sp.setToolTipText(getToolTip("load_sp"));
       load_sp.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -552,6 +583,7 @@ public class remotegui {
       });         
       
       JButton copy_sp = new JButton("Copy");
+      copy_sp.setMargin(new Insets(1,1,1,1));
       copy_sp.setToolTipText(getToolTip("copy_sp"));
       copy_sp.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -562,7 +594,18 @@ public class remotegui {
          }
       });         
       
+      JButton delete_sp = new JButton("Delete");
+      delete_sp.setMargin(new Insets(1,1,1,1));
+      delete_sp.setToolTipText(getToolTip("delete_sp"));
+      delete_sp.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Delete selected SPs from a TiVo
+            tab_sp.SPListDelete();
+         }
+      });         
+      
       JButton modify_sp = new JButton("Modify");
+      modify_sp.setMargin(new Insets(1,1,1,1));
       modify_sp.setToolTipText(getToolTip("modify_sp"));
       modify_sp.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -580,6 +623,7 @@ public class remotegui {
       });         
       
       JButton reorder_sp = new JButton("Re-order");
+      reorder_sp.setMargin(new Insets(1,1,1,1));
       reorder_sp.setToolTipText(getToolTip("reorder_sp"));
       reorder_sp.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -608,6 +652,8 @@ public class remotegui {
       row1_sp.add(save_sp);
       row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(load_sp);
+      row1_sp.add(Box.createRigidArea(space_5));
+      row1_sp.add(delete_sp);
       row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(copy_sp);
       row1_sp.add(Box.createRigidArea(space_5));
@@ -669,6 +715,7 @@ public class remotegui {
       tivo_cancel.setToolTipText(getToolTip("tivo_cancel"));
 
       refresh_cancel = new JButton("Refresh");
+      refresh_cancel.setMargin(new Insets(1,1,1,1));
       label_cancel = new JLabel("Top Level View");
       refresh_cancel.setToolTipText(getToolTip("refresh_cancel_top"));
       refresh_cancel.addActionListener(new java.awt.event.ActionListener() {
@@ -699,6 +746,7 @@ public class remotegui {
       });
 
       JButton record_cancel = new JButton("Record");
+      record_cancel.setMargin(new Insets(1,1,1,1));
       record_cancel.setToolTipText(getToolTip("record_cancel"));
       record_cancel.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -706,6 +754,27 @@ public class remotegui {
                String tivoName = (String)tivo_cancel.getSelectedItem();
                if (tivoName != null && tivoName.length() > 0)
                   tab_cancel.recordSingle(tivoName);
+            }
+         }
+      });
+
+      JButton refresh_todo_cancel = new JButton("Refresh ToDo");
+      refresh_todo_cancel.setMargin(new Insets(1,1,1,1));
+      refresh_todo_cancel.setToolTipText(getToolTip("refresh_todo_cancel"));
+      refresh_todo_cancel.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_cancel.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               class backgroundRun extends SwingWorker<Object, Object> {
+                  protected Object doInBackground() {
+                     log.warn("Refreshing ToDo list for Will Not Record matches...");
+                     all_todo = getTodoLists("Cancel");
+                     log.warn("Refresh ToDo list for Will Not Record matches completed.");
+                     return null;
+                  }
+               }
+               backgroundRun b = new backgroundRun();
+               b.execute();
             }
          }
       });
@@ -720,6 +789,8 @@ public class remotegui {
       row1_cancel.add(refresh_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(record_cancel);
+      row1_cancel.add(Box.createRigidArea(space_5));
+      row1_cancel.add(refresh_todo_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(label_cancel);
       panel_cancel.add(row1_cancel, c);
@@ -1015,6 +1086,7 @@ public class remotegui {
       tivo_search.setToolTipText(getToolTip("tivo_search"));
 
       button_search = new JButton("Search");
+      button_search.setMargin(new Insets(1,1,1,1));
       button_search.setToolTipText(getToolTip("button_search"));
       button_search.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1064,6 +1136,7 @@ public class remotegui {
       text_search.setToolTipText(getToolTip("text_search"));
 
       JButton record_search = new JButton("Record");
+      record_search.setMargin(new Insets(1,1,1,1));
       record_search.setToolTipText(getToolTip("record_search"));
       record_search.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1075,12 +1148,34 @@ public class remotegui {
       });
 
       JButton record_sp_search = new JButton("Season Pass");
+      record_sp_search.setMargin(new Insets(1,1,1,1));
       record_sp_search.setToolTipText(getToolTip("record_sp_search"));
       record_sp_search.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             String tivoName = (String)tivo_search.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                tab_search.recordSP(tivoName);
+            }
+         }
+      });
+
+      JButton refresh_todo_search = new JButton("Refresh ToDo");
+      refresh_todo_search.setMargin(new Insets(1,1,1,1));
+      refresh_todo_search.setToolTipText(getToolTip("refresh_todo_search"));
+      refresh_todo_search.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_search.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               class backgroundRun extends SwingWorker<Object, Object> {
+                  protected Object doInBackground() {
+                     log.warn("Refreshing ToDo list for Search matches...");
+                     all_todo = getTodoLists("Search");
+                     log.warn("Refresh ToDo list for Search matches completed.");
+                     return null;
+                  }
+               }
+               backgroundRun b = new backgroundRun();
+               b.execute();
             }
          }
       });
@@ -1108,6 +1203,8 @@ public class remotegui {
       row1_search.add(record_search);
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(record_sp_search);
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(refresh_todo_search);
       panel_search.add(row1_search, c);
       
       tab_search = new searchTable(config.gui.getJFrame());
@@ -1749,7 +1846,7 @@ public class remotegui {
    }
    
    // NOTE: This already called in swing worker, so no need to background
-   private String[] getHmeDestinations(String tivoName) {
+   /*private String[] getHmeDestinations(String tivoName) {
       Remote r = new Remote(tivoName);
       if (r.success) {
          r.debug = false;
@@ -1773,7 +1870,7 @@ public class remotegui {
          r.disconnect();
       }
       return new String[0];
-   }
+   }*/
    
    public void setHmeDestinations(final String tivoName) {
       /*
@@ -1987,6 +2084,8 @@ public class remotegui {
       String[] tivoNames;
       if (tab.equals("Guide"))
          tivoNames = getTivoNames(tivo_guide);
+      else if (tab.equals("Cancel"))
+         tivoNames = getTivoNames(tivo_cancel);
       else
          tivoNames = getTivoNames(tivo_search);
       Hashtable<String,JSONArray> todoLists = new Hashtable<String,JSONArray>();
@@ -2001,6 +2100,31 @@ public class remotegui {
          }
       }
       return todoLists;
+   }
+      
+   // See if given JSON entry matches any of the entries in all_todo hashtable
+   public void flagIfInTodo(JSONObject entry) {
+      try {
+         String startTime = entry.getString("startTime");
+         String channelNumber = entry.getJSONObject("channel").getString("channelNumber");
+         java.util.Enumeration<String> keys = all_todo.keys();
+         while (keys.hasMoreElements()) {
+            String key = keys.nextElement();
+            for (int i=0; i<all_todo.get(key).length(); ++i) {
+               String start = "";
+               String chan = "";
+               if (all_todo.get(key).getJSONObject(i).has("startTime"))
+                  start = all_todo.get(key).getJSONObject(i).getString("startTime");
+               if (all_todo.get(key).getJSONObject(i).has("channel"))
+                  chan = all_todo.get(key).getJSONObject(i).getJSONObject("channel").getString("channelNumber");
+               if (start.equals(startTime) && chan.equals(channelNumber)) {
+                  entry.put("__inTodo__", true);
+               }
+            }
+         }
+      } catch (JSONException e) {
+         log.error("flagIfInTodo - " + e.getMessage());
+      }
    }
    
    private static ImageIcon scale(Container dialog, Image src, double scale) {
@@ -2196,6 +2320,14 @@ public class remotegui {
          text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
          text += "priority after creating it.";
       }
+      else if (component.equals("guide_refresh_todo")) {
+         text = "<b>Refresh ToDo</b><br>";
+         text += "Obtain fresh ToDo list from all TiVos. kmttg will obtain ToDo list automatically when you<br>";
+         text += "obtain channel list, but subsequent guide searches use that same ToDo list to highlight<br>";
+         text += "programs that are scheduled to record already.<br>";
+         text += "This button will refresh ToDo list in case you are actively cancelling or scheduling new<br>";
+         text += "recordings while browsing guide entries.";
+      }
       else if (component.equals("tivo_cancel")) {
          text = "Select TiVo for which to display list of shows that will not record.<br>";
          text += "When changing TiVo selection the table below is NOT automatically updated so that you are<br>";
@@ -2215,6 +2347,14 @@ public class remotegui {
       else if (component.equals("refresh_cancel_folder")){
          text = "<b>Back</b><br>";
          text += "Return to top level folder view.";
+      }
+      else if (component.equals("refresh_todo_cancel")) {
+         text = "<b>Refresh ToDo</b><br>";
+         text += "Obtain fresh ToDo list from all TiVos. kmttg will obtain ToDo list automatically when you<br>";
+         text += "refresh the Will Not Record list, but subsequent browsing of results will use that same ToDo list<br>";
+         text += "to highlight shows scheduled to record on other TiVos.<br>";
+         text += "This button will refresh ToDo list in case you are actively cancelling or scheduling new<br>";
+         text += "recordings since last refresh of Will Not Record list.";
       }
       else if (component.equals("tivo_search")) {
          text = "Select TiVo for which to perform search with.<br>";
@@ -2248,6 +2388,14 @@ public class remotegui {
          text += "checking against the current set of season passes already on the TiVo.<br>";
          text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
          text += "priority after creating it.";
+      }
+      else if (component.equals("refresh_todo_search")) {
+         text = "<b>Refresh ToDo</b><br>";
+         text += "Obtain fresh ToDo list from all TiVos. kmttg will obtain ToDo list automatically when you<br>";
+         text += "perform the first search, but subsequent searches will use that same ToDo list to highlight<br>";
+         text += "programs in search results that are scheduled to record already.<br>";
+         text += "This button will refresh ToDo list in case you are actively cancelling or scheduling new<br>";
+         text += "recordings since running the first search.";
       }
       else if (component.equals("refresh_search_top")){
          text = "<b>Refresh</b><br>";
@@ -2326,6 +2474,13 @@ public class remotegui {
          text += "Note that loaded season passes can then be copied to TiVos by selecting the TiVo you want to<br>";
          text += "copy to, then selecting rows in the table you want to copy and then clicking on the <b>Copy</b><br>";
          text += "button.";
+      }
+      else if (component.equals("delete_sp")){
+         text = "<b>Delete</b><br>";
+         text += "This is used to remove a season pass currently selected in the table from one of your TiVos.<br>";
+         text += "Select the Season Pass entry in the table and then click on this button to remove it.<br>";
+         text += "This will cancel the Season Pass on the TiVo as well as remove the entry from the table.<br>";
+         text += "NOTE: You can also use the keyboard <b>Delete</b> button instead if you wish.";
       }
       else if (component.equals("copy_sp")){
          text = "<b>Copy</b><br>";
