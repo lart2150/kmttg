@@ -61,8 +61,13 @@ public class remote implements Serializable {
                   data = r.SeasonPasses(job);
                if (job.remote_spreorder)
                   data = r.SPReorder(job);
-               if (job.remote_cancel)
+               if (job.remote_cancel) {
                   data = r.CancelledShows(job);
+                  if (data != null && config.gui.remote_gui.all_todo.size() == 0) {
+                     log.warn("Obtaining todo lists");
+                     config.gui.remote_gui.all_todo = config.gui.remote_gui.getTodoLists("Cancel");
+                  }
+               }
                if (job.remote_rnpl)
                   data = r.MyShows(job);
                if (job.remote_channels)
@@ -71,9 +76,9 @@ public class remote implements Serializable {
                   data = r.SeasonPremieres(config.gui.remote_gui.getSelectedChannelData(job.tivoName), job);
                if (job.remote_search) {
                   data = r.searchKeywords(job.remote_search_keyword, job, job.remote_search_max);
-                  if (job.search.tivo_todo.size() == 0) {
+                  if (data != null && config.gui.remote_gui.all_todo.size() == 0) {
                      log.warn("Obtaining todo lists");
-                     job.search.tivo_todo = config.gui.remote_gui.getTodoLists("Search");
+                     config.gui.remote_gui.all_todo = config.gui.remote_gui.getTodoLists("Search");
                   }
                }
                if (data != null) {
