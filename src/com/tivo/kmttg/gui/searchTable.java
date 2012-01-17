@@ -334,7 +334,9 @@ public class searchTable {
             if (s.json.has("title"))
                title += s.json.getString("title");
             if (s.json.has("subtitle"))
-               title += " - " + s.json.getString("subtitle");
+               title += " - " + s.json.getString("subtitle");            
+            if (s.json.has("__inTodo__"))
+               title += " (to be recorded on " + s.json.getString("__inTodo__") + ")";
             log.warn(string.utfString(title));
             log.print(string.utfString(message));
          } catch (JSONException e) {
