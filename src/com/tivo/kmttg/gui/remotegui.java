@@ -2109,16 +2109,17 @@ public class remotegui {
          String channelNumber = entry.getJSONObject("channel").getString("channelNumber");
          java.util.Enumeration<String> keys = all_todo.keys();
          while (keys.hasMoreElements()) {
-            String key = keys.nextElement();
-            for (int i=0; i<all_todo.get(key).length(); ++i) {
+            String tivo = keys.nextElement();
+            for (int i=0; i<all_todo.get(tivo).length(); ++i) {
                String start = "";
                String chan = "";
-               if (all_todo.get(key).getJSONObject(i).has("startTime"))
-                  start = all_todo.get(key).getJSONObject(i).getString("startTime");
-               if (all_todo.get(key).getJSONObject(i).has("channel"))
-                  chan = all_todo.get(key).getJSONObject(i).getJSONObject("channel").getString("channelNumber");
+               if (all_todo.get(tivo).getJSONObject(i).has("startTime"))
+                  start = all_todo.get(tivo).getJSONObject(i).getString("startTime");
+               if (all_todo.get(tivo).getJSONObject(i).has("channel"))
+                  chan = all_todo.get(tivo).getJSONObject(i).getJSONObject("channel").getString("channelNumber");
                if (start.equals(startTime) && chan.equals(channelNumber)) {
-                  entry.put("__inTodo__", true);
+                  // Add __inTodo__ flag indicating tivo name scheduled to record this show
+                  entry.put("__inTodo__", tivo);
                }
             }
          }
