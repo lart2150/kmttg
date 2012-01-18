@@ -81,6 +81,13 @@ public class remote implements Serializable {
                      config.gui.remote_gui.all_todo = config.gui.remote_gui.getTodoLists("Search");
                   }
                }
+               if (job.remote_guideChannels) {
+                  data = r.ChannelList(job);
+                  if (config.gui.remote_gui.all_todo.size() == 0) {
+                     log.warn("Obtaining todo lists");
+                     config.gui.remote_gui.all_todo = config.gui.remote_gui.getTodoLists("Guide");
+                  }
+               }
                if (data != null) {
                   success = true;
                } else {
@@ -94,14 +101,15 @@ public class remote implements Serializable {
       AutoThread t = new AutoThread();
       thread = new Thread(t);
       jobName = "REMOTE";
-      if (job.remote_todo)      jobName += " ToDo List";
-      if (job.remote_sp)        jobName += " Season Pass List";
-      if (job.remote_spreorder) jobName += " Season Pass Re-order";
-      if (job.remote_cancel)    jobName += " Will Not Record List";
-      if (job.remote_rnpl)      jobName += " NP List";
-      if (job.remote_channels)  jobName += " Channels List";
-      if (job.remote_premiere)  jobName += " Season Premieres";
-      if (job.remote_search)    jobName += " Keyword Search";
+      if (job.remote_todo)          jobName += " ToDo List";
+      if (job.remote_sp)            jobName += " Season Pass List";
+      if (job.remote_spreorder)     jobName += " Season Pass Re-order";
+      if (job.remote_cancel)        jobName += " Will Not Record List";
+      if (job.remote_rnpl)          jobName += " NP List";
+      if (job.remote_channels)      jobName += " Channels List";
+      if (job.remote_premiere)      jobName += " Season Premieres";
+      if (job.remote_search)        jobName += " Keyword Search";
+      if (job.remote_guideChannels) jobName += " Guide Channel List";
       log.print(">> RUNNING '" + jobName + "' JOB FOR TiVo: " + job.tivoName);
       thread.start();
 
@@ -166,6 +174,10 @@ public class remote implements Serializable {
             }
             if (job.remote_search && job.search != null && data != null) {
                job.search.AddRows(job.tivoName, data);
+            }
+            if (job.remote_guideChannels && job.gTable != null && data != null) {
+               job.gTable.clear();
+               job.gTable.AddRows(job.tivoName, data);
             }
 
             log.warn("REMOTE job completed: " + jobMonitor.getElapsedTime(job.time));
