@@ -36,6 +36,8 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.jobData;
+import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
@@ -682,27 +684,16 @@ public class guideTable {
          AddRows(tivoName, tivo_data.get(tivoName));
          return;
       }
+      // No data available so queue up a job to get channel list
       log.warn("Obtaining list of channels for TiVo: " + tivoName);
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Object doInBackground() {
-            Remote r = new Remote(tivoName);
-            if (r.success) {
-               tivo_data.put(tivoName, r.ChannelList(null));
-               if( tivo_data.get(tivoName) != null ) {
-                  if (config.gui.remote_gui.all_todo.size() == 0) {
-                     log.warn("Obtaining todo lists");
-                     config.gui.remote_gui.all_todo = config.gui.remote_gui.getTodoLists("Guide");
-                  }
-                  clear();
-                  AddRows(tivoName, tivo_data.get(tivoName));
-               }                  
-               r.disconnect();
-            }
-            return null;
-         }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
+      jobData job = new jobData();
+      job.source                = tivoName;
+      job.tivoName              = tivoName;
+      job.type                  = "remote";
+      job.name                  = "Remote";
+      job.gTable                = this;
+      job.remote_guideChannels  = true;
+      jobMonitor.submitNewJob(job);
    }
    
    public void updateFolder(String startDisplayString, int range) {
