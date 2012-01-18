@@ -6,6 +6,7 @@ import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.gui.cancelledTable;
+import com.tivo.kmttg.gui.guideTable;
 import com.tivo.kmttg.gui.premiereTable;
 import com.tivo.kmttg.gui.searchTable;
 import com.tivo.kmttg.gui.spTable;
@@ -135,6 +136,9 @@ public class jobData implements Serializable {
    public String remote_search_keyword = null;
    public searchTable search = null;
    public int remote_search_max = 200;
+   
+   public Boolean remote_guideChannels = false;
+   public guideTable gTable = null;
    
    public Boolean remote_rnpl = false;
    public JSONArray rnpl = null;
