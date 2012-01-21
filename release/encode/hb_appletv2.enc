@@ -5,7 +5,7 @@ Handbrake AppleTV: m4v container, AppleTV 2 preset (h.264 video, aac & ac3 audio
 # Encode command or script (single line)
 # Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
-HANDBRAKE -i INPUT --cpu CPU_CORES --preset "AppleTV 3" -f m4v -D 1,1 -A "Stereo","AC3" --rate 29.97 -v -o OUTPUT
+HANDBRAKE -i INPUT --cpu CPU_CORES --preset "AppleTV 2" -f m4v -D 1,1 -A "Stereo","AC3" --rate 29.97 -v -o OUTPUT
 
 # Encoded output file extension
 <extension>
