@@ -95,4 +95,33 @@ public class ProjectX {
          }
       }
    }
+   
+   public static Boolean removeDemuxFiles(Stack<String> demuxFiles) {
+      Boolean success = true;
+      if (demuxFiles != null) {
+         for (int i=0; i<demuxFiles.size(); ++i) {
+            if ( ! file.delete(demuxFiles.get(i)) ) {
+               try {
+                  // Sleep 1 second and try deleting again
+                  Thread.sleep(1000);
+                  if ( ! file.delete(demuxFiles.get(i)) ) {
+                     log.error("Failed to delete demux file: " + demuxFiles.get(i));
+                     success = false;                     
+                  }
+               } catch (InterruptedException e) {
+                  log.error(e.getMessage());
+               }
+            }
+         }
+      }
+      return success;
+   }
+   
+   public static long getDemuxFilesSize(Stack<String> demuxFiles) {
+      long total = 0L;
+      for (int i=0; i<demuxFiles.size(); ++i) {
+         total += file.size(demuxFiles.get(i));
+      }
+      return total;
+   }
 }
