@@ -985,7 +985,7 @@ public class jobMonitor {
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
-         job.type         = "demux";
+         job.type         = "projectx";
          job.name         = config.projectx;
          job.mpegFile     = mpegFile;
          job.mpegFile_fix = mpegFile_fix;
