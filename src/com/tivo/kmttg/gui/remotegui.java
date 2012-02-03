@@ -2105,6 +2105,10 @@ public class remotegui {
    // See if given JSON entry matches any of the entries in all_todo hashtable
    public void flagIfInTodo(JSONObject entry) {
       try {
+         String title = entry.getString("title");
+         if (entry.has("subtitle")) {
+            title = title + " - " + entry.getString("subtitle");
+         }
          String startTime = entry.getString("startTime");
          String channelNumber = entry.getJSONObject("channel").getString("channelNumber");
          java.util.Enumeration<String> keys = all_todo.keys();
@@ -2113,13 +2117,24 @@ public class remotegui {
             for (int i=0; i<all_todo.get(tivo).length(); ++i) {
                String start = "";
                String chan = "";
+               String name = "";
                if (all_todo.get(tivo).getJSONObject(i).has("startTime"))
                   start = all_todo.get(tivo).getJSONObject(i).getString("startTime");
                if (all_todo.get(tivo).getJSONObject(i).has("channel"))
                   chan = all_todo.get(tivo).getJSONObject(i).getJSONObject("channel").getString("channelNumber");
-               if (start.equals(startTime) && chan.equals(channelNumber)) {
-                  // Add __inTodo__ flag indicating tivo name scheduled to record this show
-                  entry.put("__inTodo__", tivo);
+               if (all_todo.get(tivo).getJSONObject(i).has("title")) {
+                  name = all_todo.get(tivo).getJSONObject(i).getString("title");
+                  if (all_todo.get(tivo).getJSONObject(i).has("subtitle"))
+                     name = name + " - " + all_todo.get(tivo).getJSONObject(i).getString("subtitle");
+               }
+               // Add __inTodo__ flag indicating tivo name scheduled to record this show
+               if (start.equals(startTime)) {
+                  // Start time & channel match
+                  if (chan.equals(channelNumber))
+                     entry.put("__inTodo__", tivo);
+                  // Start time & title match (same program on another channel)
+                  else if (name.equals(title))
+                     entry.put("__inTodo__", tivo + ": " + chan);
                }
             }
          }
