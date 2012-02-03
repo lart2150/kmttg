@@ -361,7 +361,8 @@ public class jobMonitor {
             // Only considering download jobs for now
             if ( isDownloadJob(job) && job.status.equals("running")) {
                // Estimated size - what is already downloaded
-               total += job.tivoFileSize - file.size(job.tivoFile);
+               if (job.tivoFileSize != null && job.tivoFile != null)
+                  total += job.tivoFileSize - file.size(job.tivoFile);
             }
          }
       }
