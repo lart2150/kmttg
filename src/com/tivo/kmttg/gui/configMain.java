@@ -77,6 +77,7 @@ public class configMain {
    private static JCheckBox combine_download_decrypt = null;
    private static JCheckBox single_download = null;
    private static JCheckBox enableRpc = null;
+   private static JCheckBox persistQueue = null;
    private static JTextField tivo_name = null;
    private static JTextField tivo_ip = null;
    private static JTextField files_path = null;
@@ -621,6 +622,12 @@ public class configMain {
       else
          single_download.setSelected(false);
       
+      // persistQueue
+      if (config.persistQueue)
+    	  persistQueue.setSelected(true);
+      else
+    	  persistQueue.setSelected(false);
+      
       // toolTips
       if (config.toolTips == 1)
          toolTips.setSelected(true);
@@ -1051,6 +1058,12 @@ public class configMain {
          config.single_download = 1;
       else
          config.single_download = 0;
+      
+      // persistQueue
+      if (persistQueue.isSelected())
+         config.persistQueue = true;
+      else
+         config.persistQueue = false;
       
       // toolTips
       if (toolTips.isSelected())
@@ -1637,6 +1650,7 @@ public class configMain {
       combine_download_decrypt = new javax.swing.JCheckBox();
       single_download = new javax.swing.JCheckBox();
       enableRpc = new javax.swing.JCheckBox();
+      persistQueue = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
       JLabel FontSize_label = new javax.swing.JLabel();
       JLabel file_naming_label = new javax.swing.JLabel();
@@ -1748,6 +1762,7 @@ public class configMain {
       combine_download_decrypt.setText("Combine download and tivodecode decrypt");
       single_download.setText("Allow only 1 download at a time");
       enableRpc.setText("Enable iPad style communications with this TiVo");
+      persistQueue.setText("Automatically restore job queue between sessions");
       MAK_label.setText("MAK"); 
       FontSize_label.setText("GUI Font Size");
       file_naming_label.setText("File Naming"); 
@@ -2750,6 +2765,11 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(single_download, c);
       
+      // persistJobQueue
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(persistQueue, c);
+      
       // Visual Panel
       JPanel visual_panel = new JPanel(new GridBagLayout());       
       
@@ -3009,6 +3029,7 @@ public class configMain {
       combine_download_decrypt.setToolTipText(getToolTip("combine_download_decrypt"));
       single_download.setToolTipText(getToolTip("single_download"));
       enableRpc.setToolTipText(getToolTip("enableRpc"));
+      persistQueue.setToolTipText(getToolTip("persistQueue"));
       files_path.setToolTipText(getToolTip("files_path"));
       MAK.setToolTipText(getToolTip("MAK"));
       FontSize.setToolTipText(getToolTip("FontSize"));
@@ -3676,6 +3697,14 @@ public class configMain {
          text += "3 => channel 2 = 002;  channel 704 = 704<br>";
          text += "4 => channel 2 = 0002; channel 704 = 0704";
       }
+      else if (component.equals("persistQueue")) {
+          text =  "<b>Persist Job Queue</b><br>";
+          text += "Upon exiting, this will auto save the job queue to a data file.<br>";
+          text += "The next time kmttg is opened, it will restore the previous job queue and resume<br>";
+          text += "the processing. This is particularly useful for running kmttg as a service<br>";
+          text += "and the service or host system stops for some reason, then any work it has<br>";
+          text += "queued up will not be lost.";
+       }
       
       if (text.length() > 0) {
          text = "<html>" + text + "</html>";

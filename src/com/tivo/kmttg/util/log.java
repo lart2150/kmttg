@@ -49,7 +49,7 @@ public class log {
          logger.addHandler(handler);
          return true;
       } catch (Exception e) {
-         System.out.println("Failed to initialize logger handler.");
+         System.out.println("Failed to initialize logger handler. Reason: " + e);
          return false;
       }      
    }

@@ -31,8 +31,14 @@ public class kmttg {
                 // Shut down message in in batch mode
                 log.warn("SHUTTING DOWN");
              }
-             // Kill any running background jobs
+             
              config.GUIMODE = false;
+             
+             // Before shutdown, try and save the job queue
+             if (config.persistQueue)
+            	 jobMonitor.saveAllJobs();
+             
+             // Kill any running background jobs
              jobMonitor.killRunning();
              if (debug.enabled) debug.close();
              
@@ -51,7 +57,7 @@ public class kmttg {
       
       // Parse command lines and set options accordingly
       getopt(argv);
-            
+      
       if (gui_mode) {
          // GUI mode
          config.gui = new gui();
@@ -84,6 +90,10 @@ public class kmttg {
          // Batch/auto mode
          auto.startBatchMode();
       }
+      
+		// Upon startup, try and load saved queue
+      	if (config.persistQueue)
+      		jobMonitor.loadAllJobs();
    }
    
    private static void getopt(String[] argv) {

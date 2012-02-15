@@ -17,7 +17,7 @@ import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 
 public class config {
-   public static String kmttg = "kmttg v0p8q";
+   public static String kmttg = "kmttg v0p8r_beta";
    
    // encoding related
    public static String encProfDir = "";
@@ -72,6 +72,7 @@ public class config {
    public static int combine_download_decrypt = 0; // Combine download and decrypt if possible
    public static int single_download = 0;  // Allow only one download at a time if enabled
    public static int npl_when_started = 1; // Start NPL jobs when kmttg GUI starts
+   public static boolean persistQueue = false;	// Save job queue between sessions
 
    public static String comskipIni = "";
    public static String configIni = "";
@@ -715,6 +716,9 @@ public class config {
             if (key.equals("single_download")) {
                single_download = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("persistQueue")) {
+                persistQueue = Boolean.parseBoolean(string.removeLeadingTrailingSpaces(line));
+             }
             if (key.equals("outputDir")) {
                outputDir = line;
             }
@@ -974,6 +978,8 @@ public class config {
          ofp.write("<combine_download_decrypt>\n" + combine_download_decrypt + "\n\n");
          
          ofp.write("<single_download>\n" + single_download + "\n\n");
+         
+         ofp.write("<persistQueue>\n" + persistQueue + "\n\n");
          
          ofp.write("<tivoFileNameFormat>\n" + tivoFileNameFormat + "\n\n");
          

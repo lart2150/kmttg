@@ -1,5 +1,6 @@
 package com.tivo.kmttg.main;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -413,6 +414,10 @@ public class jobMonitor {
       // Add job to master job list
       JOBS.add(job);
       updateNPLjobStatus();
+      
+      // Save job queue backup upon change in case of an unclean exit
+      if (config.persistQueue)
+    		jobMonitor.saveAllJobs();
    }
    
    public static void removeFromJobList(jobData job) {
@@ -433,6 +438,10 @@ public class jobMonitor {
          config.gui.jobTab_RemoveJobMonitorRow(job); 
          updateNPLjobStatus();
       }
+      
+      // Save job queue backup upon change in case of an unclean exit
+      if (config.persistQueue)
+    		jobMonitor.saveAllJobs();
    }
    
    // Change job status
@@ -1384,6 +1393,131 @@ public class jobMonitor {
          log.error("You can only load queued jobs from file when there are no active or queued jobs.");
       }
    }
+   
+	/**
+	 * Saves all jobs, including those that are in progress to the data file.
+	 * Any in progress jobs will be saved as "queued" like the rest. When the
+	 * data file is loaded it will appear to kmttg as though the job has not yet
+	 * been processed. Excludes playlist jobs. Mainly targeting file processing
+	 * jobs.
+	 */
+	public static void saveAllJobs() {
+		if (JOBS.isEmpty()) {
+			log.warn("There are currently no queued jobs to save.");
+		}
+
+		// We do not want to leave an old queue file laying around to prevent
+		// loading old jobs upon next start, so we will simply write a blank
+		// file with just a '0' in it. Upon load, it will load nothing.
+		try {
+			FileOutputStream fos = new FileOutputStream(config.programDir
+					+ File.separator + jobDataFile);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+
+			int queueSize = JOBS.size();
+			oos.writeInt(queueSize);
+
+			int savedJobs = 0;
+			for (int i = 0; i < queueSize; ++i) {
+				jobData job = JOBS.get(i);
+
+				// Exclude non file related jobs
+				if (job.type.matches("playlist")) {
+					continue;
+				} else if (job.type.matches("javaplaylist")) {
+					continue;
+				} else if (job.type.matches("remote")) {
+					continue;
+				}
+
+				// Kill job if running
+				if (job.status.equals("running")) {
+					job.kill();
+				}
+
+				// When restoring the jobs, all jobs get added as queued, so no need to do this.
+				//updateJobStatus(job, "queued"); // ensure it is "queued" status
+												// so kmttg knows to start it
+												// over
+				oos.writeObject(job);
+				savedJobs++;
+			}
+			oos.flush();
+			fos.flush();
+			oos.close();
+			fos.close();
+
+			// If the daemon/service is running under a different user name than
+			// the GUI, make sure the data file is readable by everyone so the
+			// file is interchangable with the service and the GUI. ie One can
+			// save it in the GUI and then load it in the service.
+			// Edit: Only really an issue in *nix, exec chmod for < j1.6
+			//new File(config.programDir + File.separator + jobDataFile).setReadable(true, false);
+			if (!config.OS.equals("windows")) {
+				try {
+					Runtime.getRuntime().exec(
+							"chmod ugo+r \"" + config.programDir
+									+ File.separator + jobDataFile + "\"");
+				} catch (Exception e) {
+					// quiet...
+				}
+			}
+
+			if (savedJobs > 0)
+				log.warn("Saved " + savedJobs + " queued jobs to file: "
+						+ jobDataFile);
+		} catch (Exception ex) {
+			log.error("Failed to save queued jobs to file");
+			ex.printStackTrace(System.err);
+		}
+	}
+
+	/**
+	 * Loads all jobs from data file, corresponds to {@link #saveAllJobs()}.
+	 * This function does the same as {@link #loadQueuedJobs()}, but appends all
+	 * jobs even if the current queue is not empty.
+	 */
+	public static void loadAllJobs() {
+		String jobFile = config.programDir + File.separator + jobDataFile;
+		if (!new File(jobFile).exists())
+			return;
+
+		// If it does exist, but don't have permission to read, let the user
+		// know
+		if (!new File(jobFile).canRead()) {
+			log.error("Can't load job queue data file, do not have permission to read.");
+			return;
+		}
+		
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			log.error("Loading previous job queue got interrupted while waiting for app to load");
+		}
+
+		try {
+			FileInputStream fis = new FileInputStream(jobFile);
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			int n = ois.readInt();
+			for (int i = 0; i < n; ++i) {
+				try {
+					submitNewJob((jobData) ois.readObject());
+				} catch (EOFException eof) {
+					// reached end of file unexpectedly, haven't decided if we
+					// should notify user or not
+				}
+			}
+			ois.close();
+			fis.close();
+			log.warn("Loaded " + n + " queued jobs from file: " + jobDataFile);
+			// Should we delete file after load?
+			// file.delete(jobFile);
+		} catch (Exception ex) {
+			log.error("Failed to load queued jobs from file");
+			ex.printStackTrace(System.err);
+		}
+
+	}
     
    // Identify NPL table items associated with queued/running jobs
    public static void updateNPLjobStatus() {

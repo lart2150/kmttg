@@ -678,86 +678,114 @@ public class jobData implements Serializable {
 
    
    public void kill() {
+	   // TODO This code could be a lot cleaner if these objects inherited from one parent type
       if (type.equals("playlist")) {
          process_npl.kill();
+         process_npl = null;
       }
       else if (type.equals("javaplaylist")) {
          process_javanpl.kill();
+         process_javanpl = null;
       }
       else if (type.equals("metadata")) {
          process_metadata.kill();
+         process_metadata = null;
       }
       else if (type.equals("javametadata")) {
          process_javametadata.kill();
+         process_javametadata = null;
       }
       else if (type.equals("metadataTivo")) {
          process_metadataTivo.kill();
+         process_metadataTivo = null;
       }
       else if (type.equals("autotune")) {
          process_autotune.kill();
+         process_autotune = null;
       }
       else if (type.equals("remote")) {
          process_remote.kill();
+         process_remote = null;
       }
       else if (type.equals("download")) {
          process_download.kill();
+         process_download = null;
       }
       else if (type.equals("download_decrypt")) {
          process_download_decrypt.kill();
+         process_download_decrypt = null;
       }
       else if (type.equals("javadownload")) {
          process_javadownload.kill();
+         process_javadownload = null;
       }
       else if (type.equals("jdownload_decrypt")) {
          process_jdownload_decrypt.kill();
+         process_jdownload_decrypt = null;
       }
       else if (type.equals("decrypt")) {
          process_decrypt.kill();
+         process_decrypt = null;
       }
       else if (type.equals("qsfix")) {
          process_qsfix.kill();
+         process_qsfix = null;
       }
       else if (type.equals("projectx")) {
          process_projectx.kill();
+         process_projectx = null;
       }
       else if (type.equals("comskip")) {
          process_comskip.kill();
+         process_comskip = null;
       }
       else if (type.equals("adscan")) {
          process_adscan.kill();
+         process_adscan = null;
       }
       else if (type.equals("vrdreview")) {
          process_vrdreview.kill();
+         process_vrdreview = null;
       }
       else if (type.equals("comcut")) {
          process_comcut.kill();
+         process_comcut = null;
       }
       else if (type.equals("projectxcut")) {
          process_projectxcut.kill();
+         process_projectxcut = null;
       }
       else if (type.equals("adcut")) {
          process_adcut.kill();
+         process_adcut = null;
       }
       else if (type.equals("captions")) {
          process_captions.kill();
+         process_captions = null;
       }
       else if (type.equals("encode")) {
          process_encode.kill();
+         process_encode = null;
       }
       else if (type.equals("vrdencode")) {
          process_vrdencode.kill();
+         process_vrdencode = null;
       }
       else if (type.equals("atomic")) {
          process_atomic.kill();
+         process_atomic = null;
       }
       else if (type.equals("push")) {
          process_push.kill();
+         process_push = null;
       }
       else if (type.equals("custom")) {
          process_custom.kill();
+         process_custom = null;
       }
       else if (type.equals("streamfix")) {
          process_streamfix.kill();
+         process_streamfix = null;
       }
    }
 
