@@ -1403,7 +1403,7 @@ public class jobMonitor {
 	 */
 	public static void saveAllJobs() {
 		if (JOBS.isEmpty()) {
-			log.warn("There are currently no queued jobs to save.");
+			log.print("There are currently no queued jobs to save.");
 		}
 
 		// We do not want to leave an old queue file laying around to prevent
@@ -1419,7 +1419,7 @@ public class jobMonitor {
 
 			int savedJobs = 0;
 			for (int i = 0; i < queueSize; ++i) {
-				jobData job = JOBS.get(i);
+				jobData job = JOBS.get(i).clone();	// background process removed from job during the clone
 
 				// Exclude non file related jobs
 				if (job.type.matches("playlist")) {
@@ -1428,11 +1428,6 @@ public class jobMonitor {
 					continue;
 				} else if (job.type.matches("remote")) {
 					continue;
-				}
-
-				// Kill job if running
-				if (job.status.equals("running")) {
-					job.kill();
 				}
 
 				// When restoring the jobs, all jobs get added as queued, so no need to do this.
@@ -1464,7 +1459,7 @@ public class jobMonitor {
 			}
 
 			if (savedJobs > 0)
-				log.warn("Saved " + savedJobs + " queued jobs to file: "
+				log.print("Saved " + savedJobs + " queued jobs to file: "
 						+ jobDataFile);
 		} catch (Exception ex) {
 			log.error("Failed to save queued jobs to file");
