@@ -13,6 +13,8 @@ import com.tivo.kmttg.install.mainInstall;
 public class kmttg {
    static Timer timer;
    static Boolean gui_mode = true;
+   public static boolean _shuttingDown = false;
+   public static boolean _startingUp = true;
       
    public static void main(String[] argv) {
       debug.enabled = false;
@@ -35,8 +37,12 @@ public class kmttg {
              config.GUIMODE = false;
              
              // Before shutdown, try and save the job queue
-             if (config.persistQueue)
-            	 jobMonitor.saveAllJobs();
+             // 2/16/2012 - Don't need to save on exit, saved on queue change.
+             // Because we clear up the jobs before exiting, we *don't* want
+             // to save those changes so set flag to tell it not to save.
+             _shuttingDown = true;
+             /*if (config.persistQueue)
+            	 jobMonitor.saveAllJobs();*/
              
              // Kill any running background jobs
              jobMonitor.killRunning();
@@ -94,6 +100,7 @@ public class kmttg {
 		// Upon startup, try and load saved queue
       	if (config.persistQueue)
       		jobMonitor.loadAllJobs();
+      	_startingUp = false;
    }
    
    private static void getopt(String[] argv) {

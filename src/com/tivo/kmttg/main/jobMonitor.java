@@ -27,6 +27,7 @@ public class jobMonitor {
    private static int FAMILY_ID = 0;
    public static Boolean NoNewJobs = false;
    private static String jobDataFile = "jobData.dat";
+   private static boolean _isLoadingQueue = false;
    
    // These used for Auto Transfers->Loop in GUI mode
    private static Hashtable<String,Long> launch = new Hashtable<String,Long>();
@@ -416,7 +417,9 @@ public class jobMonitor {
       updateNPLjobStatus();
       
       // Save job queue backup upon change in case of an unclean exit
-      if (config.persistQueue)
+      // Do not save queue if loading jobs from the queue file
+      // Do not save queue during the initial addition of the NPL jobs
+      if (config.persistQueue && !_isLoadingQueue && !kmttg._startingUp)
     		jobMonitor.saveAllJobs();
    }
    
@@ -440,7 +443,9 @@ public class jobMonitor {
       }
       
       // Save job queue backup upon change in case of an unclean exit
-      if (config.persistQueue)
+      // Do not save job queue if shutting down and cleaning up queue
+      // Do not save job queue if starting up and initial NPL jobs finish early
+      if (config.persistQueue && !kmttg._shuttingDown && !kmttg._startingUp)
     		jobMonitor.saveAllJobs();
    }
    
@@ -1490,6 +1495,8 @@ public class jobMonitor {
 			log.error("Loading previous job queue got interrupted while waiting for app to load");
 		}
 
+		_isLoadingQueue = true;
+		
 		try {
 			FileInputStream fis = new FileInputStream(jobFile);
 			ObjectInputStream ois = new ObjectInputStream(fis);
@@ -1512,6 +1519,7 @@ public class jobMonitor {
 			ex.printStackTrace(System.err);
 		}
 
+		_isLoadingQueue = false;
 	}
     
    // Identify NPL table items associated with queued/running jobs
