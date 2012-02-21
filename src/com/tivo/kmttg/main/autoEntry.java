@@ -22,6 +22,8 @@ public class autoEntry {
    public int custom    = 0;
    public int enabled   = 1;
    public String encode_name = null;
+   public String encode_name2 = null;
+   public String encode_name2_suffix = null;
    public String comskipIni = "none";
    public int suggestionsFilter = 0;
    public int useProgramId_unique = 0;

@@ -162,6 +162,22 @@ public class autoConfig {
                      entry.encode_name = m.group(2);
                   }
                }
+               if (name.matches("encode_name2")) {
+                   // encode_name value can have spaces
+                   Pattern p = Pattern.compile("(\\S+)\\s+(.+)");
+                   Matcher m = p.matcher(line);
+                   if (m.matches()) {
+                      entry.encode_name2 = m.group(2);
+                   }
+                }
+               if (name.matches("encode_name2_suffix")) {
+                   // encode_name value can have spaces
+                   Pattern p = Pattern.compile("(\\S+)\\s+(.+)");
+                   Matcher m = p.matcher(line);
+                   if (m.matches()) {
+                      entry.encode_name2_suffix = m.group(2);
+                   }
+                }
             }
          }
          if ( entry.type != null ) {

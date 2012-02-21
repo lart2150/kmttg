@@ -65,6 +65,8 @@ public class configAuto {
    private static JComboBox type = null;
    private static JComboBox tivo = null;
    private static JComboBox encoding_name = null;
+   private static JComboBox encoding_name2 = null;
+   private static JTextField encoding_name2_suffix = null;
    private static JCheckBox enabled = null;
    private static JCheckBox metadata = null;
    private static JCheckBox decrypt = null;
@@ -93,6 +95,8 @@ public class configAuto {
    private static JTextField dateHours = null;
    private static JButton OK = null;
    private static JButton CANCEL = null;
+   
+   private static final String _noSecondEncodingTxt = "Do not encode twice";
 
    public void display(JFrame frame) {
       debug.print("frame=" + frame);
@@ -241,6 +245,17 @@ public class configAuto {
       JLabel encoding_name_label = new JLabel("Encoding Name: ");
       
       encoding_name = new JComboBox();
+      encoding_name2 = new JComboBox();
+      /*encoding_name2.addActionListener(new java.awt.event.ActionListener() {
+          public void actionPerformed(java.awt.event.ActionEvent e) {
+              if (encoding_name2.getSelectedItem() == null || ((String)encoding_name2.getSelectedItem()).equals(_noSecondEncodingTxt)) {
+            	  encoding_name2_suffix.setVisible(false);
+              } else {
+            	  encoding_name2_suffix.setVisible(true);
+              }
+           }
+        });*/
+      encoding_name2_suffix = new JTextField(15);
       SetEncodings(encodeConfig.getValidEncodeNames());
       
       JLabel global_settings = new JLabel("GLOBAL SETTINGS:");
@@ -391,6 +406,10 @@ public class configAuto {
       row5.add(encoding_name_label);
       row5.add(Box.createRigidArea(space_10));
       row5.add(encoding_name);
+      row5.add(Box.createRigidArea(space_10));
+      row5.add(encoding_name2);
+      row5.add(Box.createRigidArea(space_10));
+      row5.add(encoding_name2_suffix);
       row5.add(Box.createRigidArea(space_50));
       row5.add(add);
       row5.add(Box.createRigidArea(space_10));
@@ -573,6 +592,8 @@ public class configAuto {
       push.setToolTipText(config.gui.getToolTip("push"));
       custom.setToolTipText(config.gui.getToolTip("custom"));
       encoding_name.setToolTipText(config.gui.getToolTip("encoding"));
+      encoding_name2.setToolTipText(config.gui.getToolTip("encoding2"));
+      encoding_name2_suffix.setToolTipText(config.gui.getToolTip("encoding2_suffix"));
       table.setToolTipText(getToolTip("table"));
       type.setToolTipText(getToolTip("type"));
       tivo.setToolTipText(getToolTip("tivo"));
@@ -1025,8 +1046,14 @@ public class configAuto {
       debug.print("values=" + values);
       
       encoding_name.removeAllItems();
+      encoding_name2.removeAllItems();
+      
+      // Second encoding optional
+      encoding_name2.addItem(_noSecondEncodingTxt);
+      
       for (int i=0; i<values.size(); ++i) {
          encoding_name.addItem(values.get(i));
+         encoding_name2.addItem(values.get(i));
       }
       
    }
@@ -1220,6 +1247,10 @@ public class configAuto {
                ofp.write("useProgramId_unique " + entry.useProgramId_unique + "\n");
                if (entry.encode_name != null && entry.encode_name.length() > 0)
                   ofp.write("encode_name " + entry.encode_name + "\n");
+               if (entry.encode_name2 != null && entry.encode_name2.length() > 0)
+                   ofp.write("encode_name2 " + entry.encode_name2 + "\n");
+               if (entry.encode_name2_suffix != null && entry.encode_name2_suffix.length() > 0)
+                   ofp.write("encode_name2_suffix " + entry.encode_name2_suffix + "\n");
                if (entry.channelFilter != null && entry.channelFilter.length() > 0)
                   ofp.write("channelFilter " + entry.channelFilter + "\n");
                if (file.isFile(entry.comskipIni))
@@ -1267,6 +1298,12 @@ public class configAuto {
       useProgramId_unique.setSelected((Boolean)(entry.useProgramId_unique == 1));
       
       encoding_name.setSelectedItem(entry.encode_name);
+      
+      if (entry.encode_name2 != null) {
+    	  encoding_name2.setSelectedItem(entry.encode_name2);
+    	  encoding_name2_suffix.setText(entry.encode_name2_suffix);
+      } else
+    	  encoding_name2.setSelectedItem(_noSecondEncodingTxt);
       
       comskipIni.setText(entry.comskipIni);
       
@@ -1367,6 +1404,14 @@ public class configAuto {
          entry.useProgramId_unique = 0;
       
       entry.encode_name = (String)encoding_name.getSelectedItem();
+      
+      // Does user want to encode second time? save profile name
+      if (encoding_name2.getSelectedItem().equals(_noSecondEncodingTxt))
+    	  entry.encode_name2 = null;
+      else {
+    	  entry.encode_name2 = (String)encoding_name2.getSelectedItem();
+    	  entry.encode_name2_suffix = encoding_name2_suffix.getText();
+      }
 
       String ini = (String)string.removeLeadingTrailingSpaces(comskipIni.getText());
       if (ini.length() > 0 && ! ini.equals("none")) {

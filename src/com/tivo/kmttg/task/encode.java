@@ -230,7 +230,9 @@ public class encode implements Serializable {
             }
             
             // Remove .mpg file if option enabled
-            if (config.RemoveMpegFile == 1) {
+            // If there is a second encode job working off the same source file,
+            // then the source should not be removed.
+            if (!job.hasMoreEncodingJobs && config.RemoveMpegFile == 1) {
                if ( file.delete(job.inputFile) ) {
                   log.print("(Deleted file: " + job.inputFile + ")");
                } else {

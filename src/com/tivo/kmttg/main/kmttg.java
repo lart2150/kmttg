@@ -92,15 +92,21 @@ public class kmttg {
             }    
          });
          timer.start();
+         
+			// Upon startup, try and load saved queue
+			if (config.persistQueue)
+				jobMonitor.loadAllJobs(10);	// delay load to give gui time to setup
+       	_startingUp = false;
+       	
       } else {         
          // Batch/auto mode
+    	  config.parse();	// persist queue held in main config file
+    	// Upon startup, try and load saved queue. Must be done before starting auto loop
+        	if (config.persistQueue)
+        		jobMonitor.loadAllJobs(1);	// doesn't need any time to setup
+        	_startingUp = false;
          auto.startBatchMode();
       }
-      
-		// Upon startup, try and load saved queue
-      	if (config.persistQueue)
-      		jobMonitor.loadAllJobs();
-      	_startingUp = false;
    }
    
    private static void getopt(String[] argv) {

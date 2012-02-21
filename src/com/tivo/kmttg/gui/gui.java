@@ -1920,6 +1920,26 @@ public class gui {
          text += "<b>hb_</b> indicates <b>handbrake</b> encoding tool is used.<br>";
          text += "NOTE: You can create your own custom encoding profiles.";
       }
+      else if (component.equals("encoding2")) {
+          text =  "<b>2nd Encoding Profile</b><br>";
+          text += "This will let you select a second encoding profile to use<br>";
+          text += "that will create a second file.<br>";
+          text += "Choose one of the pre-defined encoding profiles to<br>";
+          text += "use when running <b>encode</b> step to encode to a<br>";
+          text += "different video format. By convention there are 2 different<br>";
+          text += "prefix names used for encoding profiles by kmttg:<br>";
+          text += "<b>ff_</b> indicates <b>ffmpeg</b> encoding tool is used.<br>";
+          text += "<b>hb_</b> indicates <b>handbrake</b> encoding tool is used.<br>";
+          text += "NOTE: You can create your own custom encoding profiles.";
+       }
+      else if (component.equals("encoding2_suffix")) {
+          text =  "<b>Second Encoding Suffix</b><br>";
+          text += "This will add a suffix to your second encoding file to <br>";
+          text += "differentiate it from the first encoding. It will only be used<br>";
+          text += "if you select an encoding profile for a second encoding.<br>";
+          text += "If you enter 'iPhone' here then your second encoding will turn<br>";
+          text += "out being named <i>filename_iPhone.ext</i>";
+       }
       else if (component.equals("start")) {
          text =  "<b>START JOBS</b><br>";
          text += "Run selected tasks for all selected items in the programs/files table below.<br>";

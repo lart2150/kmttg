@@ -638,6 +638,8 @@ public class jobMonitor {
       String source       = null;
       String tivoName     = null;
       String encodeName   = null;
+      String encodeName2   = null;
+      String encodeName2_suffix = null;
       String tivoFile     = null;
       String metaFile     = null;
       String mpegFile     = null;
@@ -648,6 +650,7 @@ public class jobMonitor {
       String videoFile    = null;
       String srtFile      = null;
       String encodeFile   = null;
+      String encodeFile2   = null;
  
       // Init tivoName
       if (specs.containsKey("tivoName")) {
@@ -666,6 +669,17 @@ public class jobMonitor {
       if (encode && ! encodeConfig.isValidEncodeName(encodeName) ) {
          log.error("Cancelling encode task");
          encode = false;
+      }
+      
+      // Init encodeName2
+      if (specs.containsKey("encodeName2")) {
+         encodeName2 = (String)specs.get("encodeName2");
+         encodeName2_suffix = (String)specs.get("encodeName2_suffix");
+      } else {
+         encodeName2 = null;	// null will = no second encoding later on
+      }
+      if (encode && encodeName2 != null && ! encodeConfig.isValidEncodeName(encodeName2) ) {
+         log.error("Cancelling second encode task");
       }
 
       String outputDir = config.outputDir;
@@ -721,6 +735,13 @@ public class jobMonitor {
          encodeFile = string.replaceSuffix(mpegFile, "." + encodeExt);
          encodeFile = encodeDir + s + string.basename(encodeFile);
          
+         // Add indicated extension to differentiate this file from first
+         if (encodeName2 != null) {
+        	 String encodeExt2 = encodeConfig.getExtension(encodeName2);
+             encodeFile2 = string.replaceSuffix(mpegFile, "_" + encodeName2_suffix + "." + encodeExt2);
+             encodeFile2 = encodeDir + s + string.basename(encodeFile2);
+         }
+         
          if (encode) metaFile = encodeFile + ".txt";
          
          // For captions decide on source and srtFile
@@ -755,6 +776,13 @@ public class jobMonitor {
          String encodeExt = encodeConfig.getExtension(encodeName);
          encodeFile = string.replaceSuffix(startFile, "." + encodeExt);
          encodeFile = encodeDir + s + encodeFile;
+         
+         // Add indicated extension to differentiate this file from first
+         if (encodeName2 != null) {
+        	 String encodeExt2 = encodeConfig.getExtension(encodeName2);
+        	 encodeFile2 = string.replaceSuffix(startFile, "_" + encodeName2_suffix + "." + encodeExt2);
+             encodeFile2 = encodeDir + s + encodeFile2;
+         }
          
          if (encode) metaFile = encodeFile + ".txt";
          
@@ -1147,7 +1175,33 @@ public class jobMonitor {
             job.type      = "vrdencode";
             job.tivoFile  = tivoFile;
          }
+         // Indicate we need to keep source file longer
+         if (encodeName2 != null)
+        	 job.hasMoreEncodingJobs = true;
          submitNewJob(job);
+         
+         // TODO Second encoding is not pushed or sent to custom script
+         if (encodeName2 != null) {
+        	 job = new jobData();
+             job.source       = source;
+             job.tivoName     = tivoName;
+             job.type         = "encode";
+             job.name         = encodeName2;
+             job.encodeName   = encodeName2;
+             if (streamfix)
+                job.mpegFile  = mpegFile_fix;
+             else
+                job.mpegFile  = mpegFile;
+             job.mpegFile_cut = mpegFile_cut;
+             job.encodeFile   = encodeFile2;
+             job.srtFile      = srtFile;
+             if (config.VrdEncode == 1 && encodeConfig.getCommandName(encodeName2) == null) {
+                // VRD encode selected => vrdencode job
+                job.type      = "vrdencode";
+                job.tivoFile  = tivoFile;
+             }
+             submitNewJob(job);
+         }
       }
             
       if (push) {
@@ -1476,8 +1530,9 @@ public class jobMonitor {
 	 * Loads all jobs from data file, corresponds to {@link #saveAllJobs()}.
 	 * This function does the same as {@link #loadQueuedJobs()}, but appends all
 	 * jobs even if the current queue is not empty.
+	 * @param delayInSec The number of seconds to wait before loading saved queue
 	 */
-	public static void loadAllJobs() {
+	public static void loadAllJobs(int delayInSec) {
 		String jobFile = config.programDir + File.separator + jobDataFile;
 		if (!new File(jobFile).exists())
 			return;
@@ -1490,7 +1545,7 @@ public class jobMonitor {
 		}
 		
 		try {
-			Thread.sleep(10000);
+			Thread.sleep(delayInSec*1000);
 		} catch (InterruptedException e) {
 			log.error("Loading previous job queue got interrupted while waiting for app to load");
 		}

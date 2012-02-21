@@ -86,6 +86,9 @@ public class jobData implements Serializable, Cloneable {
    public String callsign = null;
    public String seriesId = null;
    
+   // Encode related
+   public boolean hasMoreEncodingJobs = false;	// Are there additional encoding jobs after this that require the source file be kept longer
+   
    // download related
    public Long tivoFileSize = null;
    String ProgramId = null;

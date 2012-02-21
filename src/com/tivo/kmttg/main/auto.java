@@ -500,6 +500,10 @@ public class auto {
       h.put("useProgramId_unique", (Boolean)(auto.useProgramId_unique == 1));
       if (auto.encode_name != null)
          h.put("encodeName",   auto.encode_name);
+      if (auto.encode_name2 != null) {
+          h.put("encodeName2",   auto.encode_name2);
+          h.put("encodeName2_suffix", auto.encode_name2_suffix);
+      }
       
       if (file.isFile(auto.comskipIni)) {
          h.put("comskipIni", auto.comskipIni);

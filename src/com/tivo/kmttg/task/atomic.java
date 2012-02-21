@@ -1,7 +1,9 @@
 package com.tivo.kmttg.task;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
@@ -11,12 +13,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.encodeConfig;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class atomic implements Serializable {
    private static final long serialVersionUID = 1L;
@@ -140,6 +144,22 @@ public class atomic implements Serializable {
             // Print statistics for the job
             log.warn("AtomicParsley job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " output=" + job.encodeFile);
+            
+            // Remove atomic parsley's temp file if left around
+            // Ex: The Body (Recorded 02_15_2012)-temp-48968.mp4
+            // Look for '-temp-\d+'
+				File dir = new File(new File(job.encodeFile).getParent());	// get directory holding file
+				File[] files = dir.listFiles(new FilenameFilter() {			// search directory for -temp files
+							public boolean accept(File dir, String name) {
+								return name.matches(".*-temp-\\d+.*");
+							}
+						});
+
+				for (File tempfile : files) {
+					log.print("Found temporary file left over from AtomicParsley job");
+					log.warn("Removing " + tempfile.getName());
+					tempfile.delete();
+				}
          }
       }
       return false;
