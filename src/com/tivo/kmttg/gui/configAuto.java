@@ -862,7 +862,7 @@ public class configAuto {
          comskip.setEnabled(true);
       }
 
-      if (! file.isFile(config.mencoder) && ! file.isDir(config.VRD)) {
+      if (! file.isFile(config.mencoder) && ! file.isDir(config.VRD) && ! file.isFile(config.projectx)) {
          comcut.setSelected(false);
          comcut.setEnabled(false);
       } else {
