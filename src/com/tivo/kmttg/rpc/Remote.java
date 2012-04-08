@@ -2,13 +2,17 @@ package com.tivo.kmttg.rpc;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.Socket;
 import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -16,8 +20,9 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -40,7 +45,7 @@ public class Remote {
    private int timeout = 120; // read timeout in secs
    private int rpc_id = 0;
    private int session_id = 0;
-   private Socket socket = null;
+   private SSLSocket socket = null;
    private BufferedReader in = null;
    private BufferedWriter out = null;
    private SSLSocketFactory sslSocketFactory = null;
@@ -74,22 +79,36 @@ public class Remote {
      }
    }
    
-   public final SSLSocketFactory getSocketFactory() {
+   public final void createSocketFactory() {
      if ( sslSocketFactory == null ) {
        try {
-         TrustManager[] tm = new TrustManager[] { new NaiveTrustManager() };
-         SSLContext context = SSLContext.getInstance("SSL");
-         context.init( new KeyManager[0], tm, new SecureRandom( ) );
-
-         sslSocketFactory = (SSLSocketFactory) context.getSocketFactory ();
-
+          KeyStore keyStore = KeyStore.getInstance("PKCS12");
+          String password = "mpE7Qy8cSqdf";
+          InputStream keyInput = getClass().getResourceAsStream("/cdata.p12");
+          keyStore.load(keyInput, password.toCharArray());
+          keyInput.close();
+          KeyManagerFactory fac = KeyManagerFactory.getInstance("SunX509");
+          fac.init(keyStore, password.toCharArray());
+          SSLContext context = SSLContext.getInstance("TLS");
+          TrustManager[] tm = new TrustManager[] { new NaiveTrustManager() };
+          context.init(fac.getKeyManagers(), tm, new SecureRandom());
+          sslSocketFactory = context.getSocketFactory();
        } catch (KeyManagementException e) {
-         error("No SSL algorithm support: " + e.getMessage()); 
+         error("KeyManagementException - " + e.getMessage()); 
        } catch (NoSuchAlgorithmException e) {
-         error("Exception when setting up the Naive key management." + e.getMessage());
+         error("NoSuchAlgorithmException - " + e.getMessage());
+       } catch (KeyStoreException e) {
+          error("KeyStoreException - " + e.getMessage());
+       } catch (FileNotFoundException e) {
+          error("FileNotFoundException - " + e.getMessage());
+       } catch (CertificateException e) {
+          error("CertificateException - " + e.getMessage());
+       } catch (IOException e) {
+          error("IOException - " + e.getMessage());
+       } catch (UnrecoverableKeyException e) {
+          error("UnrecoverableKeyException - " + e.getMessage());
        }
      }
-     return sslSocketFactory;
    }
    
    // This constructor designed to be use by kmttg
@@ -115,11 +134,14 @@ public class Remote {
    private void RemoteInit(String IP, int port, String MAK) {
       this.IP = IP;
       this.port = port;
-      getSocketFactory();
+      createSocketFactory();
       session_id = new Random(0x27dc20).nextInt();
       try {
-         socket = sslSocketFactory.createSocket(IP, port);
+         socket = (SSLSocket) sslSocketFactory.createSocket(IP, port);
+         socket.setNeedClientAuth(true);
+         socket.setEnableSessionCreation(true);
          socket.setSoTimeout(timeout*1000);
+         socket.startHandshake();
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
          out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
          if ( ! Auth() ) {
@@ -128,7 +150,7 @@ public class Remote {
          }
          bodyId_get();
       } catch (Exception e) {
-         error("rpc Remote - (IP=" + IP + ", port=" + port + ")" + e.getMessage());
+         error("RemoteInit - (IP=" + IP + ", port=" + port + "): " + e.getMessage());
          success = false;
       }
    }
