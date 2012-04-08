@@ -433,9 +433,20 @@ public class nplTable {
                      if (config.getRpcSetting(tivoName).equals("1")) {
                         id = rnpl.findRecordingId(tivoName, s.data);
                         if (id != null) {
-                           show_names += s.data.get("title");
-                           urlsToDelete.add(s.data.get("url"));
-                           idsToDelete.add(id);
+                           if (s.data.containsKey("InProgress") && s.data.get("InProgress").equals("Yes")) {
+                              // Still recording => stop recording instead of deleting
+                              if (StopRecording(id)) {
+                                 log.warn("Stopped recording: " + s.data.get("title"));
+                                 s.data.put("InProgress", "No");
+                                 s.data.remove("ExpirationImage");
+                                 RefreshNowPlaying(entries);
+                              }
+                           } else {
+                              // Not recording so go ahead and delete it
+                              show_names += s.data.get("title");
+                              urlsToDelete.add(s.data.get("url"));
+                              idsToDelete.add(id);
+                           }
                         }
                      }
                   } // else individual show
@@ -1148,6 +1159,24 @@ public class nplTable {
       }
    }
    
+   private Boolean StopRecording(String id) {
+      Boolean deleted = false;
+      JSONObject json = new JSONObject();
+      try {
+         json.put("recordingId", id);
+         Remote r = new Remote(tivoName);
+         if (r.success) {
+            JSONObject result = r.Command("StopRecording", json);
+            if(result != null && result.has("type") && result.getString("type").equals("success"))
+               deleted = true;
+            r.disconnect();
+         }
+      } catch (JSONException e) {
+         log.print("StopRecording failed - " + e.getMessage());
+      }
+      return deleted;
+   }
+   
    private void PlayShow(String id) {
       JSONObject json = new JSONObject();
       try {
@@ -1159,8 +1188,7 @@ public class nplTable {
          }
       } catch (JSONException e) {
          log.print("PlayShow failed - " + e.getMessage());
-      }
-      
+      }      
    }
    
    // Sets the preferred width of the visible column specified by vColIndex. The column
