@@ -356,6 +356,20 @@ public class Remote {
             json.put("bodyId", bodyId_get());
             req = RpcRequest("recordingUpdate", false, json);
          }
+         else if (type.equals("StopRecording")) {
+            // Stop an existing recording
+            // Expects "recordingId" of type JSONArray in json
+            json.put("state", "complete");
+            json.put("bodyId", bodyId_get());
+            req = RpcRequest("recordingUpdate", false, json);
+         }
+         else if (type.equals("SetBookmark")) {
+            // Set bookmark position for a recording
+            // Expects "recordingId" of type JSONArray in json
+            // Expects "bookmarkPosition" of type JSONInteger in json
+            json.put("bodyId", bodyId_get());
+            req = RpcRequest("recordingUpdate", false, json);
+         }
          else if (type.equals("cancel")) {
             // Cancel a recording in ToDo list
             // Expects "recordingId" of type JSONArray in json
