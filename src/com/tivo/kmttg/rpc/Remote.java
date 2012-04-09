@@ -2,6 +2,7 @@ package com.tivo.kmttg.rpc;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +41,7 @@ public class Remote {
    public Boolean debug = false;
    public Boolean success = true;
    private String IP = null;
+   private String cdata = null;
    private int port = 1413;
    private String MAK = null;
    private int timeout = 120; // read timeout in secs
@@ -84,7 +86,11 @@ public class Remote {
        try {
           KeyStore keyStore = KeyStore.getInstance("PKCS12");
           String password = "mpE7Qy8cSqdf";
-          InputStream keyInput = com.tivo.kmttg.rpc.Remote.class.getResourceAsStream("/cdata.p12");
+          InputStream keyInput;
+          if (cdata == null)
+             keyInput = getClass().getResourceAsStream("/cdata.p12");
+          else
+             keyInput = new FileInputStream(cdata);
           keyStore.load(keyInput, password.toCharArray());
           keyInput.close();
           KeyManagerFactory fac = KeyManagerFactory.getInstance("SunX509");
@@ -126,8 +132,9 @@ public class Remote {
    }
    
    // This constructor designed for use without kmttg config
-   public Remote(String IP, int port, String MAK) {
+   public Remote(String IP, int port, String MAK, String cdata) {
       this.MAK = MAK;
+      this.cdata = cdata;
       RemoteInit(IP, port, MAK);
    }
    
