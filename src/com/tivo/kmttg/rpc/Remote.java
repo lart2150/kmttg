@@ -84,7 +84,7 @@ public class Remote {
        try {
           KeyStore keyStore = KeyStore.getInstance("PKCS12");
           String password = "mpE7Qy8cSqdf";
-          InputStream keyInput = getClass().getResourceAsStream("/cdata.p12");
+          InputStream keyInput = com.tivo.kmttg.rpc.Remote.class.getResourceAsStream("/cdata.p12");
           keyStore.load(keyInput, password.toCharArray());
           keyInput.close();
           KeyManagerFactory fac = KeyManagerFactory.getInstance("SunX509");
