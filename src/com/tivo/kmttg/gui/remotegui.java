@@ -55,7 +55,6 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
-import com.tivo.kmttg.main.telnet;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -1359,7 +1358,6 @@ public class remotegui {
       panel_controls.add(standby);
       standby.setBounds(500+insets.left, 70+insets.top, size.width, size.height);
       
-      // NOTE: This one uses telnet interface instead of iPad
       JButton toggle_cc = new CustomButton("Toggle CC", "toggle_cc", null);
       size = toggle_cc.getPreferredSize();
       panel_controls.add(toggle_cc);
@@ -1368,12 +1366,23 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             String tivoName = (String)tivo_rc.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               String IP = config.TIVOS.get(tivoName);
+               String event;
                if (cc_state)
-                  new telnet(IP, new String[]{"CC_OFF"});
+                  event = "ccOff";
                else
-                  new telnet(IP, new String[]{"CC_ON"});
+                  event = "ccOn";
                cc_state = ! cc_state;
+               Remote r = new Remote(tivoName);
+               if (r.success) {
+                  try {
+                     JSONObject json = new JSONObject();
+                     json.put("event", event);
+                     r.Command("keyEventSend", json);
+                  } catch (JSONException e1) {
+                     log.error("RC - " + e1.getMessage());
+                  }
+                  r.disconnect();
+               }
             }
          }
       });
@@ -2709,8 +2718,7 @@ public class remotegui {
       else if (component.equals("toggle_cc")){
          text = "<b>Toggle CC</b><br>";
          text += "Toggle closed caption display.<br>";
-         text += "NOTE: Assumes initial state of off.<br>";
-         text += "NOTE: Actually uses 'telnet' interface rather than iPad protocol.";
+         text += "NOTE: Assumes initial state of off.";
       }
       if (text.length() > 0) {
          text = "<html>" + text + "</html>";
