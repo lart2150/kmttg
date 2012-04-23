@@ -336,6 +336,15 @@ public class Remote {
             json.put("parameters", parameters);
             req = RpcRequest("uiNavigate", false, json);
          }
+         else if (type.equals("Flash")) {
+            // Run a flash swf (ActionScript 2)
+            // Expects swf uri in json.
+            // Example: http://www.bbc.co.uk/science/humanbody/sleep/sheep/reaction_version5.swf
+            json.put("bodyId", bodyId_get());
+            json.put("uiDestinationType", "flash");
+            json.put("uri", "x-tivo:flash:" + json.getString("uri"));
+            req = RpcRequest("uiNavigate", false, json);
+         }
          else if (type.equals("uidestinations")) {
             // List available uri destinations for uiNavigate
             json.put("bodyId", bodyId_get());
@@ -352,6 +361,14 @@ public class Remote {
             // List available hme destinations for uiNavigate
             //json.put("bodyId", bodyId_get());
             json.put("uiDestinationType", "hme");
+            json.put("levelOfDetail", "high");
+            json.put("noLimit", "true");
+            req = RpcRequest("uiDestinationInstanceSearch", false, json);
+         }
+         else if (type.equals("flashdestinations")) {
+            // List available flash destinations for uiNavigate
+            //json.put("bodyId", bodyId_get());
+            json.put("uiDestinationType", "flash");
             json.put("levelOfDetail", "high");
             json.put("noLimit", "true");
             req = RpcRequest("uiDestinationInstanceSearch", false, json);
