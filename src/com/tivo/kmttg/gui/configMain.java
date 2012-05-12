@@ -3278,7 +3278,9 @@ public class configMain {
          text += "the faster Transport Stream format instead of the default Program Stream format by adding<br>";
          text += "<b>&Format=video/x-tivo-mpeg-ts</b> tag to the download URL.<br>";
          text += "NOTE: Currently only Premiere, Australia, and New Zealand TiVos support this format and this will<br>";
-         text += "have no effect on other TiVos.";
+         text += "have no effect on other TiVos.<br>";
+         text += "<b>NOTE: 'tivodecode' cannot properly decrypt TS TiVo files so don't enable this option<br>";
+         text += "if you are using it to decrypt TiVo files.</b>";
       }
       else if (component.equals("TivoWebPlusDelete")) {
          text =  "<b>Enable TivoWebPlus Delete task</b><br>";
