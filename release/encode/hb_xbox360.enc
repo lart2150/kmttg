@@ -5,7 +5,7 @@ Handbrake xbox360: mpeg4 container, same res h.264 video, aac audio
 # Encode command or script (single line)
 # Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
-HANDBRAKE -i INPUT --cpu CPU_CORES -t 1 -c 1 -f mp4 --large-file -e x264 -b 2000 -a 1 -E faac -B 160 -R 48 -6 dpl2 -D 1 -x level=40:ref=2:mixed-refs=1:bframes=3:weightb=1:subq=9:direct=auto:b-pyramid=1:me=umh:analyse=all:no-fast-pskip=1:deblock=-2,-1 -v -o OUTPUT
+HANDBRAKE -i INPUT -t 1 -c 1 -f mp4 --large-file -e x264 -b 2000 -a 1 -E faac -B 160 -R 48 -6 dpl2 -D 1 -x level=40:ref=2:mixed-refs=1:bframes=3:weightb=1:subq=9:direct=auto:b-pyramid=1:me=umh:analyse=all:no-fast-pskip=1:deblock=-2,-1 -v -o OUTPUT
 
 # Encoded output file extension
 <extension>
