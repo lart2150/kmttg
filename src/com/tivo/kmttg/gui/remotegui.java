@@ -1406,7 +1406,14 @@ public class remotegui {
                      if (r.success) {
                         try {
                            JSONObject json = new JSONObject();
-                           json.put("uri", hme.get(name));
+                           String uri="";
+                           if (name.equals("Netflix"))
+                              uri = "x-tivo:flash:uuid:F23D193D-D2C2-4D18-9ABE-FA6B8488302F";
+                           if (name.equals("YouTube"))
+                              uri = "x-tivo:flash:uuid:B8CEA236-0C3D-41DA-9711-ED220480778E";
+                           if (name.equals("Amazon"))
+                              uri = "x-tivo:hme:uuid:35FE011C-3850-2228-FBC5-1B9EDBBE5863";
+                           json.put("uri", uri);
                            r.Command("navigate", json);
                         } catch (JSONException e1) {
                            log.error("HME Jump - " + e1.getMessage());
@@ -1896,7 +1903,7 @@ public class remotegui {
       backgroundRun b = new backgroundRun();
       b.execute();
       */
-      String[] hmeNames = {"YouTube", "Netflix", "Amazon", "BLOCKBUSTER"};
+      String[] hmeNames = {"Netflix", "YouTube", "Amazon"};
       hme_rc.removeAllItems();
       for (int i=0; i<hmeNames.length; ++i)
          hme_rc.addItem(hmeNames[i]);
