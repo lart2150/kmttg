@@ -109,7 +109,6 @@ public class remotegui {
    private JTextField rc_jumpto_text = null;
    private JTextField rc_jumpahead_text = null;
    private JTextField rc_jumpback_text = null;
-   private Hashtable<String, String> hme = new Hashtable<String, String>();
    private Boolean cc_state = false;
    
    public Hashtable<String,JSONArray> all_todo = new Hashtable<String,JSONArray>();
