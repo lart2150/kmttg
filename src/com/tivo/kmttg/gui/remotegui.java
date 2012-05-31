@@ -2473,7 +2473,7 @@ public class remotegui {
          text += "shows and will not schedule the recording.";
       }
       else if (component.equals("recordSP_premiere")){
-         text = "<b>Record</b><br>";
+         text = "<b>Season Pass</b><br>";
          text += "Schedule season passes for shows selected in the table below on selected TiVo.<br>";
          text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
          text += "checking against the current set of season passes already on the TiVo.<br>";
