@@ -430,7 +430,7 @@ public class remotegui {
             if (tab_guide.inFolder) {
                String tivoName = (String)tivo_guide.getSelectedItem();
                if (tivoName != null && tivoName.length() > 0) {
-                  tab_guide.recordSingle(tivoName);
+                  tab_guide.recordSP(tivoName);
                }
             }
          }
