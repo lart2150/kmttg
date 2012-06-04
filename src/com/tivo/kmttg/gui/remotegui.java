@@ -92,6 +92,7 @@ public class remotegui {
    public JLabel label_cancel = null;
    
    private JComboBox tivo_premiere = null;
+   private JComboBox premiere_days = null;
    private premiereTable tab_premiere = null;
    private JList premiere_channels = null;
    private DefaultListModel premiere_model = new DefaultListModel();
@@ -852,7 +853,16 @@ public class remotegui {
       });
       tivo_premiere.setToolTipText(getToolTip("tivo_premiere"));
 
+      JLabel premiere_days_label = new javax.swing.JLabel("Days");      
+      premiere_days = new javax.swing.JComboBox();
+      premiere_days.setToolTipText(getToolTip("premiere_days"));
+      for (int i=1; i<=12; ++i) {
+         premiere_days.addItem(i);
+      }
+      premiere_days.setSelectedItem(12);
+
       JButton refresh_premiere = new JButton("Search");
+      refresh_premiere.setMargin(new Insets(1,1,1,1));
       refresh_premiere.setToolTipText(getToolTip("refresh_premiere"));
       refresh_premiere.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -882,6 +892,7 @@ public class remotegui {
       });
       
       JButton record_premiere = new JButton("Record");
+      record_premiere.setMargin(new Insets(1,1,1,1));
       record_premiere.setToolTipText(getToolTip("record_premiere"));
       record_premiere.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -892,6 +903,7 @@ public class remotegui {
       });
       
       JButton recordSP_premiere = new JButton("Season Pass");
+      recordSP_premiere.setMargin(new Insets(1,1,1,1));
       recordSP_premiere.setToolTipText(getToolTip("recordSP_premiere"));
       recordSP_premiere.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -902,6 +914,7 @@ public class remotegui {
       });
       
       JButton premiere_channels_update = new JButton("Update Channels");
+      premiere_channels_update.setMargin(new Insets(1,1,1,1));
       premiere_channels_update.setToolTipText(getToolTip("premiere_channels_update"));
       premiere_channels_update.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -936,6 +949,10 @@ public class remotegui {
       row1_premiere.add(tivo_premiere);
       row1_premiere.add(Box.createRigidArea(space_5));
       row1_premiere.add(refresh_premiere);
+      row1_premiere.add(Box.createRigidArea(space_5));
+      row1_premiere.add(premiere_days);
+      row1_premiere.add(Box.createRigidArea(space_5));
+      row1_premiere.add(premiere_days_label);
       row1_premiere.add(Box.createRigidArea(space_5));
       row1_premiere.add(record_premiere);
       row1_premiere.add(Box.createRigidArea(space_5));
@@ -1754,6 +1771,10 @@ public class remotegui {
       return (Integer)guide_range.getValue();
    }
    
+   public int getPremiereDays() {
+      return (Integer)premiere_days.getSelectedItem();
+   }
+   
    public String getTivoName(String tab) {
       if (tab.equals("todo"))
          return (String)tivo_todo.getSelectedItem();
@@ -2465,6 +2486,9 @@ public class remotegui {
          text += "premieres. NOTE: The more channels you include the longer the search will take.<br>";
          text += "Use shift and left mouse button to select a range of channels or control + left<br>";
          text += "mouse button to add individual channels to selected set.";
+      }
+      else if (component.equals("premiere_days")) {
+         text = "Select number of days you want to search for Season & Series premieres.";
       }
       else if (component.equals("record_premiere")){
          text = "<b>Record</b><br>";
