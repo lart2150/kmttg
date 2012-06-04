@@ -885,7 +885,7 @@ public class Remote {
       return null;
    }
    
-   public JSONArray SeasonPremieres(JSONArray channelNumbers, jobData job) {
+   public JSONArray SeasonPremieres(JSONArray channelNumbers, jobData job, int total_days) {
       if (channelNumbers == null)
          return null;
       if (channelNumbers.length() == 0)
@@ -897,7 +897,6 @@ public class Remote {
       long start = now.getTime();
       long day_increment = 1*24*60*60*1000;
       long stop = start + day_increment;
-      int total_days = 11;
       try {
          // Set shorter timeout since some requests fail for some reason (especially for Linux)
          socket.setSoTimeout(20*1000);
@@ -922,7 +921,7 @@ public class Remote {
                   String message = "Processing day=" + day + ", channel=" + channel.getString("channelNumber");
                   config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
                   if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                     int pct = (int) ((float)(day)/total_days*100);
+                     int pct = (int) ((float)(day-1)/total_days*100);
                      config.gui.setTitle("Premieres: " + pct + "% " + config.kmttg);
                      config.gui.progressBar_setValue(pct);
                   }
