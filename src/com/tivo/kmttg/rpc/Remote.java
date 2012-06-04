@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.SocketException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -458,13 +459,10 @@ public class Remote {
             // Expects extra search criteria in json, such as:
             // "title":"The Voice"
             // "anchorChannelIdentifier":{"channelNumber":"761","type":"channelIdentifier","sourceType":"cable"}
-            Date now = new Date();
             json.put("bodyId", bodyId_get());
             json.put("levelOfDetail", "medium");
             json.put("isReceived", "true");
             json.put("orderBy", new JSONArray("[\"channelNumber\"]"));
-            json.put("maxStartTime", rnpl.getStringFromLongDate(now.getTime()+12*24*60*60*1000));
-            json.put("minEndTime", rnpl.getStringFromLongDate(now.getTime()));
             req = RpcRequest("gridRowSearch", false, json);
          }
          else if (type.equals("OfferSearch")) {
@@ -896,60 +894,74 @@ public class Remote {
       
       JSONObject json;
       JSONArray data = new JSONArray();
-      try {         
-         // Now do searches for each channel
-         JSONObject channel, result;
-         for (int i=0; i<channelNumbers.length(); ++i) {
-            channel = channelNumbers.getJSONObject(i);
-            json = new JSONObject();
-            JSONObject c = new JSONObject();
-            c.put("channelNumber", channel.getString("channelNumber"));
-            c.put("type", "channelIdentifier");
-            c.put("sourceType", channel.getString("sourceType"));
-            json.put("anchorChannelIdentifier", c);
-            
-            // Update status in job monitor
-            if (job != null && config.GUIMODE) {
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Season & Series premieres");
-               String message = "Processing: " + channel.getString("channelNumber") + "=" + channel.getString("callSign");
-               config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
-               if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                  int pct = (int) ((float)(i)/channelNumbers.length()*100);
-                  config.gui.setTitle("Premieres: " + pct + "% " + config.kmttg);
-                  config.gui.progressBar_setValue(pct);
+      Date now = new Date();
+      long start = now.getTime();
+      long day_increment = 1*24*60*60*1000;
+      long stop = start + day_increment;
+      int total_days = 11;
+      try {
+         // Set shorter timeout since some requests fail for some reason (especially for Linux)
+         socket.setSoTimeout(20*1000);
+         // Search 1 day at a time
+         for (int day=1; day<=total_days; ++day) {
+            // Now do searches for each channel
+            JSONObject channel, result;
+            for (int i=0; i<channelNumbers.length(); ++i) {
+               channel = channelNumbers.getJSONObject(i);
+               json = new JSONObject();
+               JSONObject c = new JSONObject();
+               c.put("channelNumber", channel.getString("channelNumber"));
+               c.put("type", "channelIdentifier");
+               c.put("sourceType", channel.getString("sourceType"));
+               json.put("anchorChannelIdentifier", c);
+               json.put("maxStartTime", rnpl.getStringFromLongDate(stop));
+               json.put("minEndTime", rnpl.getStringFromLongDate(start));
+               
+               // Update status in job monitor
+               if (job != null && config.GUIMODE) {
+                  config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Season & Series premieres");
+                  String message = "Processing day=" + day + ", channel=" + channel.getString("channelNumber");
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+                  if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                     int pct = (int) ((float)(day)/total_days*100);
+                     config.gui.setTitle("Premieres: " + pct + "% " + config.kmttg);
+                     config.gui.progressBar_setValue(pct);
+                  }
                }
-            }
-            
-            result = Command("GridSearch", json);
-            if (result != null && result.has("gridRow")) {
-               JSONArray a = result.getJSONArray("gridRow").getJSONObject(0).getJSONArray("offer");
-               for (int j=0; j<a.length(); ++j) {
-                  json = a.getJSONObject(j);
-                  // Filter out entries we want
-                  // collectionType == "series"
-                  if (json.has("collectionType") && json.getString("collectionType").equals("series")) {
-                     Boolean match = false;
-                     if (json.has("episodeNum")) {
-                        // episodeNum == 1
-                        if (json.getJSONArray("episodeNum").getInt(0) == 1)
-                           match = true;
-                     } else {
-                        // Some series don't have episode information, so look at subtitle
-                        if ( json.has("subtitle") ) {
-                           String subtitle = json.getString("subtitle");
-                           if (subtitle.equals("Pilot") || subtitle.equals("Series Premiere"))
+               
+               result = Command("GridSearch", json);
+               if (result != null && result.has("gridRow")) {
+                  JSONArray a = result.getJSONArray("gridRow").getJSONObject(0).getJSONArray("offer");
+                  for (int j=0; j<a.length(); ++j) {
+                     json = a.getJSONObject(j);
+                     // Filter out entries we want
+                     // collectionType == "series"
+                     if (json.has("collectionType") && json.getString("collectionType").equals("series")) {
+                        Boolean match = false;
+                        if (json.has("episodeNum")) {
+                           // episodeNum == 1
+                           if (json.getJSONArray("episodeNum").getInt(0) == 1)
                               match = true;
+                        } else {
+                           // Some series don't have episode information, so look at subtitle
+                           if ( json.has("subtitle") ) {
+                              String subtitle = json.getString("subtitle");
+                              if (subtitle.equals("Pilot") || subtitle.equals("Series Premiere"))
+                                 match = true;
+                           }
                         }
-                     }
-                     if (match) {
-                        // repeat != true
-                        if ( ! json.has("repeat") || (json.has("repeat") && ! json.getBoolean("repeat")) ) {
-                           data.put(json);
-                        }   
+                        if (match) {
+                           // repeat != true
+                           if ( ! json.has("repeat") || (json.has("repeat") && ! json.getBoolean("repeat")) ) {
+                              data.put(json);
+                           }   
+                        }
                      }
                   }
                }
             }
+            start += day_increment;
+            stop += day_increment;
          }
          if (data.length() == 0) {
             log.warn("No show premieres found.");
@@ -957,10 +969,10 @@ public class Remote {
             // Tag json entries in data that already have Season Passes scheduled
             config.gui.remote_gui.TagPremieresWithSeasonPasses(data);
          }
-      } catch (JSONException e) {
+      } catch (Exception e) {
          error("SeasonPremieres - " + e.getMessage());
          return null;
-      }  
+      }
       return data;
    }
    
