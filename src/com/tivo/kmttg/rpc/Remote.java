@@ -1,13 +1,11 @@
 package com.tivo.kmttg.rpc;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -18,8 +16,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -48,8 +44,8 @@ public class Remote {
    private int rpc_id = 0;
    private int session_id = 0;
    private SSLSocket socket = null;
-   private BufferedReader in = null;
-   private BufferedWriter out = null;
+   private DataInputStream in = null;
+   private DataOutputStream out = null;
    private SSLSocketFactory sslSocketFactory = null;
    
    public class NaiveTrustManager implements X509TrustManager {
@@ -149,8 +145,8 @@ public class Remote {
          socket.setEnableSessionCreation(true);
          socket.setSoTimeout(timeout*1000);
          socket.startHandshake();
-         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-         out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+         in = new DataInputStream(socket.getInputStream());
+         out = new DataOutputStream(socket.getOutputStream());
          if ( ! Auth() ) {
             success = false;
             return;
@@ -244,9 +240,9 @@ public class Remote {
    public Boolean Write(String data) {
       try {
          if (debug) {
-            print("WRITE " + data);
+            print("WRITE: " + data);
          }
-         out.write(data);
+         out.write(data.getBytes());
          out.flush();
       } catch (IOException e) {
          error("rpc Write error - " + e.getMessage());
@@ -255,59 +251,65 @@ public class Remote {
       return true;
    }
    
+   @SuppressWarnings("deprecation")
    public JSONObject Read() {
       String buf = "";
-      Integer head_len = null;
-      Integer body_len = null;
+      Integer head_len;
+      Integer body_len;
       
-      Pattern p = Pattern.compile("MRPC/2\\s+(\\d+)\\s+(\\d+)");
-      Matcher match;
       try {
-         while(true) {
-            buf += in.readLine();
-            match = p.matcher(buf);
-            if (match.matches()) {
-               head_len = Integer.parseInt(match.group(1));
-               body_len = Integer.parseInt(match.group(2));
-               break;
-            }
+         // Expect line of format: MRPC/2 76 1870
+         // 1st number is header length, 2nd number body length
+         buf = in.readLine();
+         if (debug) {
+            print("READ: " + buf);
          }
-         buf = "";
-      
-         if (head_len != null && body_len != null) {
-            char[] cb = new char[1024];
-            int num;
-            while(buf.length() < head_len + body_len) {
-               num = in.read(cb, 0, cb.length);
-               buf += String.copyValueOf(cb, 0, num);
-            }
+         if (buf != null && buf.matches("^.*MRPC/2.+$")) {
+            String[] split = buf.split(" ");
+            head_len = Integer.parseInt(split[1]);
+            body_len = Integer.parseInt(split[2]);
+            
+            byte[] headers = new byte[head_len];
+            readBytes(headers, head_len);
+   
+            byte[] body = new byte[body_len];
+            readBytes(body, body_len);
+            
             if (debug) {
-               print("READ " + buf);
+               print("READ: " + new String(headers) + new String(body));
             }
+            
             // Pull out IsFinal value from header
             Boolean IsFinal;
-            if (buf.substring(0, head_len-1).contains("IsFinal: true"))
+            buf = new String(headers, "UTF8");
+            if (buf.contains("IsFinal: true"))
                IsFinal = true;
             else
                IsFinal = false;
             
             // Return json contents with IsFinal flag added
-            buf = buf.substring(head_len, head_len + body_len);
+            buf = new String(body, "UTF8");
             JSONObject j = new JSONObject(buf);
             if (j.has("type") && j.getString("type").equals("error")) {
                error("RPC error response: " + j.getString("text"));
                return null;
             }
-
             j.put("IsFinal", IsFinal);
             return j;
-         }
-         
+
+         }         
       } catch (Exception e) {
          error("rpc Read error - " + e.getMessage());
          return null;
       }
       return null;
+   }
+   
+   private void readBytes(byte[] body, int len) throws IOException {
+      int bytesRead = 0;
+      while (bytesRead < len) {
+         bytesRead += in.read(body, bytesRead, len - bytesRead);
+      }
    }
    
    public void disconnect() {
