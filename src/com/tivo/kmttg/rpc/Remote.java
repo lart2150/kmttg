@@ -901,6 +901,8 @@ public class Remote {
          // Set shorter timeout since some requests fail for some reason (especially for Linux)
          socket.setSoTimeout(20*1000);
          // Search 1 day at a time
+         int item = 0;
+         int total_items = total_days*channelNumbers.length();
          for (int day=1; day<=total_days; ++day) {
             // Now do searches for each channel
             JSONObject channel, result;
@@ -921,7 +923,7 @@ public class Remote {
                   String message = "Processing day=" + day + ", channel=" + channel.getString("channelNumber");
                   config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
                   if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                     int pct = (int) ((float)(day-1)/total_days*100);
+                     int pct = (int) ((float)(item)/total_items*100);
                      config.gui.setTitle("Premieres: " + pct + "% " + config.kmttg);
                      config.gui.progressBar_setValue(pct);
                   }
@@ -957,6 +959,7 @@ public class Remote {
                      }
                   }
                }
+               item += 1;
             }
             start += day_increment;
             stop += day_increment;
