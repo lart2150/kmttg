@@ -111,16 +111,34 @@ public class nplTable {
             if (o1 instanceof sortableShow && o2 instanceof sortableShow) {
                sortableShow s1 = (sortableShow)o1;
                sortableShow s2 = (sortableShow)o2;
+               int e1=-1, e2=-1;
+               if (s1.episodeNum.length() > 0 && s2.episodeNum.length() > 0) {
+                  e1 = Integer.parseInt(s1.episodeNum);
+                  e2 = Integer.parseInt(s2.episodeNum);
+               }
                if (inFolder) {
-                  // Alphabetical sort only inside a folder
-                  return s1.title.compareToIgnoreCase(s2.title);
+                  // Sort by episodeNum if available
+                  // Else alphabetical sort
+                  int result=0;
+                  if (e1 > 0 && e2 >0) {
+                     if (e1 > e2) result = 1;
+                     if (e1 < e2) result = -1;
+                  } else {
+                     result = s1.title.compareToIgnoreCase(s2.title);
+                  }
+                  return result;
                } else {
                   // Sort 1st by titleOnly, then by date
                   int result = s1.titleOnly.compareToIgnoreCase(s2.titleOnly);
-                  if (result != 0) return result;
-                  if (s1.gmt > s2.gmt) return 1;
-                  if (s1.gmt < s2.gmt) return -1;
-                  return 0;
+                  if (result == 0) {
+                     if (e1 > e2) result = 1;
+                     if (e1 < e2) result = -1;
+                  }
+                  if (result == 0) {
+                     if (s1.gmt > s2.gmt) result = 1;
+                     if (s1.gmt < s2.gmt) result = -1;
+                  }
+                  return result;
                }
             }
             if (o1 instanceof sortableDuration && o2 instanceof sortableDuration) {
