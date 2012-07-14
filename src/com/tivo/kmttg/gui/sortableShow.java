@@ -6,6 +6,8 @@ import java.util.Stack;
 public class sortableShow {
    String titleOnly;
    String title;
+   String episodeTitle = "";
+   String episodeNum = "";
    long gmt;
    Boolean folder = false;
    int numEntries = 0;
@@ -16,6 +18,12 @@ public class sortableShow {
       title = (String)entry.get("title");
       titleOnly = (String)entry.get("titleOnly");
       gmt = Long.parseLong(entry.get("gmt"));
+      if (entry.containsKey("episodeTitle"))
+         episodeTitle = entry.get("episodeTitle");
+      if (entry.containsKey("EpisodeNumber"))
+         episodeNum = entry.get("EpisodeNumber");
+      if (episodeNum.matches("^[0]+$"))
+         episodeNum = "";
    }
    
    // Folder entry constructor
@@ -32,6 +40,12 @@ public class sortableShow {
       if (folder) {
          return folderName + " (" + numEntries + ")";
       } else {
+         if (episodeNum.length() > 0 && titleOnly.length() > 0) {
+            String s = titleOnly + " [Ep " + episodeNum + "]";
+            if (episodeTitle.length() > 0)
+               s += " - " + episodeTitle;
+            return s;
+         }
          return title;
       }
    }
