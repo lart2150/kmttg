@@ -9,6 +9,8 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 //import java.awt.event.ActionEvent;
 //import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
 import java.io.BufferedWriter;
@@ -212,6 +214,12 @@ public class configAuto {
       comskip   = new JCheckBox("Ad Detect");
       comcut    = new JCheckBox("Ad Cut");
       captions  = new JCheckBox("captions");
+      qsfix.addActionListener(new ActionListener() {
+         // Call refreshOptions whenever this is toggled
+         public void actionPerformed(ActionEvent e) {
+            refreshOptions();
+         }
+      });
       encode    = new JCheckBox("encode");
       push      = new JCheckBox("push");
       suggestionsFilter_single = new JCheckBox("Filter out TiVo Suggestions");
@@ -874,6 +882,10 @@ public class configAuto {
          captions.setEnabled(false);
       } else {
          captions.setEnabled(true);
+      }
+      if (! file.isDir(config.VRD) && qsfix.isSelected()) {
+         captions.setSelected(false);
+         captions.setEnabled(false);         
       }
 
       if (! file.isFile(config.ffmpeg) &&

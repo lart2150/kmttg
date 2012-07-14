@@ -269,6 +269,12 @@ public class gui {
          metadata = new JCheckBox("metadata", false);         
          decrypt = new JCheckBox("decrypt", true);         
          qsfix = new JCheckBox("QS Fix", false);         
+         qsfix.addActionListener(new ActionListener() {
+            // Call refreshOptions whenever this is toggled
+            public void actionPerformed(ActionEvent e) {
+               refreshOptions();
+            }
+         });
          twpdelete = new JCheckBox("TWP Delete", false);         
          ipaddelete = new JCheckBox("iPad Delete", false);         
          comskip = new JCheckBox("Ad Detect", false);         
@@ -1093,6 +1099,10 @@ public class gui {
          captions.setEnabled(false);
       } else {
          captions.setEnabled(true);
+      }
+      if (! file.isDir(config.VRD) && qsfix.isSelected()) {
+         captions.setSelected(false);
+         captions.setEnabled(false);         
       }
 
       if (! file.isFile(config.ffmpeg) &&
