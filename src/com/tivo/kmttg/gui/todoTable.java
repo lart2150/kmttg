@@ -264,8 +264,12 @@ public class todoTable {
           String title = " ";
           if (data.has("title"))
              title += data.getString("title");
+          if (data.has("seasonNumber") && data.has("episodeNum")) {
+             title += " [Ep " + data.get("seasonNumber") +
+             String.format("%02d]", data.getJSONArray("episodeNum").get(0));
+          }
           if (data.has("subtitle"))
-             title += " - " + data.getString("subtitle");
+          title += " - " + data.getString("subtitle");
           String channel = " ";
           if (data.has("channel")) {
              o = data.getJSONObject("channel");

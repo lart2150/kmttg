@@ -475,6 +475,10 @@ public class searchTable {
          }
          if (entry.has("title"))
             title += entry.getString("title");
+         if (entry.has("seasonNumber") && entry.has("episodeNum")) {
+            title += " [Ep " + entry.get("seasonNumber") +
+            String.format("%02d]", entry.getJSONArray("episodeNum").get(0));
+         }
          if (entry.has("subtitle"))
             title += " - " + entry.getString("subtitle");
          String channel = " ";
