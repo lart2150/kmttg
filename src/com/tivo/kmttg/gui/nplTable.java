@@ -611,8 +611,10 @@ public class nplTable {
                message += ", EpisodeNumber = " + s.data.get("EpisodeNumber");
             
             if (s.data.containsKey("ByteOffset") && s.data.containsKey("size")) {
-               Double pct = Double.valueOf(s.data.get("ByteOffset"))/Double.valueOf(s.data.get("size"));
-               message += ", PAUSE POINT: " + String.format("%.1f%%", pct*100);
+               if (! s.data.get("ByteOffset").startsWith("0")) {
+                  Double pct = Double.valueOf(s.data.get("ByteOffset"))/Double.valueOf(s.data.get("size"));
+                  message += ", PAUSE POINT: " + String.format("%.1f%%", pct*100);
+               }
             }
             
             if (description != null) {
