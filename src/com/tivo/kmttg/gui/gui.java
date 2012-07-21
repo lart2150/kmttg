@@ -1530,10 +1530,9 @@ public class gui {
             }
             if (remote_gui != null) {
                String[]names = {"todo", "guide", "sp", "cancel", "search", "rc", "info", "premiere"};
-               for (int j=0; j<names.length; ++j) {
-                  ofp.write("<rpc_tivo>\n");
+               ofp.write("\n<rpc_tivo>\n");
+               for (int j=0; j<names.length; ++j)
                   ofp.write(names[j] + "=" + remote_gui.getTivoName(names[j]) + "\n");
-               }
             }
             ofp.write("\n");
             ofp.close();
