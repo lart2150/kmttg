@@ -1528,7 +1528,13 @@ public class gui {
                   }
                }
             }
-            
+            if (remote_gui != null) {
+               String[]names = {"todo", "guide", "sp", "cancel", "search", "rc", "info", "premiere"};
+               for (int j=0; j<names.length; ++j) {
+                  ofp.write("<tab_tivo>\n");
+                  ofp.write(names[j] + "=" + remote_gui.getTivoName(names[j]) + "\n");
+               }
+            }
             ofp.write("\n");
             ofp.close();
          }         
@@ -1735,6 +1741,11 @@ public class gui {
                   if (tivoTabs.containsKey(l[0]))
                      tivoTabs.get(l[0]).showFoldersSet(true);
                }
+            }
+            if (key.equals("tab_tivo") && remote_gui != null) {
+               String[] l = line.split("=");
+               if (tivoTabs.containsKey(l[1]))
+                  remote_gui.setTivoName(l[0], l[1]);
             }
          }
          ifp.close();
