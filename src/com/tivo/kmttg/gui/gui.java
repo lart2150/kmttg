@@ -1743,7 +1743,7 @@ public class gui {
             }
             if (key.equals("rpc_tivo") && remote_gui != null) {
                String[] l = line.split("=");
-               if (tivoTabs.containsKey(l[1]))
+               if (l.length == 2 && tivoTabs.containsKey(l[1]))
                   remote_gui.setTivoName(l[0], l[1]);
             }
          }
