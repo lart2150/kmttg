@@ -492,7 +492,7 @@ public class premiereTable {
                       row = selected[i];
                       json = GetRowData(row);
                       if (json != null)
-                         r.SPschedule(tivoName, r, json, existing);
+                         r.SPschedule(tivoName, json, existing);
                    }
                    r.disconnect();
                 }
