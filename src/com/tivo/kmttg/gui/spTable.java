@@ -719,10 +719,22 @@ public class spTable {
                       if (json != null) {
                          try {
                             // Check against existing
+                            String title = json.getString("title");
+                            String channel = "";
+                            if (json.has("channel")) {
+                               JSONObject o = json.getJSONObject("channel");
+                               if (o.has("callSign"))
+                                  channel = o.getString("callSign");
+                            }
                             Boolean schedule = true;
                             for (int j=0; j<existing.length(); ++j) {
-                               if(json.getString("title").equals(existing.getJSONObject(j).getString("title")))
-                                  schedule = false;
+                               if(title.equals(existing.getJSONObject(j).getString("title"))) {
+                                  if (channel.length() > 0 && existing.getJSONObject(j).has("channel")) {
+                                     if(channel.equals(existing.getJSONObject(j).getString("channel")))
+                                        schedule = false;
+                                  } else
+                                     schedule = false;
+                               }
                             }
                             
                             // OK to subscribe
