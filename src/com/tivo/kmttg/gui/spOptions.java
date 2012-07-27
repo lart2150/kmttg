@@ -19,7 +19,7 @@ public class spOptions {
    TwoWayHashmap<String,Integer> startHash = new TwoWayHashmap<String,Integer>();
    TwoWayHashmap<String,Integer> stopHash = new TwoWayHashmap<String,Integer>();
    
-   spOptions() {      
+   public spOptions() {      
       recordHash.add("Repeats & first-run",   "rerunsAllowed");
       recordHash.add("First-run only",        "firstRunOnly");
       recordHash.add("All (with duplicates)", "everyEpisode");
