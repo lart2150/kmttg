@@ -27,6 +27,7 @@ import javax.net.ssl.X509TrustManager;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.spOptions;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -1073,6 +1074,56 @@ public class Remote {
       }
       
       return null;
+   }
+   
+   // Method use by various RPC tables for SP scheduling
+   public void SPschedule(String tivoName, JSONObject json, JSONArray existing) {
+      try {
+         String title = json.getString("title");
+         String channel = "";
+         if (json.has("channel")) {
+            JSONObject o = json.getJSONObject("channel");
+            if (o.has("callSign"))
+               channel = o.getString("callSign");
+         }
+         // Check against existing
+         Boolean schedule = true;
+         for (int j=0; j<existing.length(); ++j) {
+            if(title.equals(existing.getJSONObject(j).getString("title"))) {
+               if (channel.length() > 0 && existing.getJSONObject(j).has("channel")) {
+                  if(channel.equals(existing.getJSONObject(j).getString("channel")))
+                     schedule = false;
+               } else
+                  schedule = false;
+            }
+         }
+         
+         // OK to subscribe
+         title = string.utfString(title);
+         if (schedule) {
+            if (config.gui.remote_gui.spOpt == null)
+               config.gui.remote_gui.spOpt = new spOptions();
+            JSONObject o = config.gui.remote_gui.spOpt.promptUser(
+               "Create SP - " + title, null
+            );
+            if (o != null) {
+               log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
+               JSONObject idSetSource = new JSONObject();
+               idSetSource.put("collectionId", json.getString("collectionId"));
+               idSetSource.put("type", "seasonPassSource");
+               idSetSource.put("channel", json.getJSONObject("channel"));
+               o.put("idSetSource", idSetSource);   
+               JSONObject result = Command("seasonpass", o);
+               if (result != null) {
+                  log.print("success");
+               }
+            }
+         } else {
+            log.warn("Existing SP with same title found, not scheduling: " + title);
+         }
+      } catch (JSONException e) {
+         log.error("SPschedule - " + e.getMessage());
+      }
    }
       
    private void print(String message) {
