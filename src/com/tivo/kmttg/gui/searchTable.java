@@ -745,7 +745,7 @@ public class searchTable {
             if (selected.length > 0) {
                int row;
                JSONArray existing;
-               JSONObject json, result;
+               JSONObject json;
                Remote r = new Remote(tivoName);
                if (r.success) {
                   // First load existing SPs from tivoName to check against
@@ -761,43 +761,9 @@ public class searchTable {
                      if ( isFolder(row) )
                         continue;
                      json = GetRowData(row);
-                     if (json != null) {
-                        try {
-                           String title = json.getString("title");
-                           // Check against existing
-                           Boolean schedule = true;
-                           for (int j=0; j<existing.length(); ++j) {
-                              if(title.equals(existing.getJSONObject(j).getString("title")))
-                                 schedule = false;
-                           }
-                           
-                           // OK to subscribe
-                           title = string.utfString(title);
-                           if (schedule) {
-                              if (config.gui.remote_gui.spOpt == null)
-                                 config.gui.remote_gui.spOpt = new spOptions();
-                              JSONObject o = config.gui.remote_gui.spOpt.promptUser(
-                                 "Create SP - " + title, null
-                              );
-                              if (o != null) {
-                                 log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
-                                 JSONObject idSetSource = new JSONObject();
-                                 idSetSource.put("collectionId", json.getString("collectionId"));
-                                 idSetSource.put("type", "seasonPassSource");
-                                 idSetSource.put("channel", json.getJSONObject("channel"));
-                                 o.put("idSetSource", idSetSource);   
-                                 result = r.Command("seasonpass", o);
-                                 if (result != null)
-                                    log.print("success");
-                              }
-                           } else {
-                              log.warn("Existing SP with same title found, not scheduling: " + title);
-                           }
-                        } catch (JSONException e) {
-                           log.error("search_sp_recordCB - " + e.getMessage());
-                        }
-                     }
-                  }
+                     if (json != null)
+                        r.SPschedule(tivoName, json, existing);
+                }
                   r.disconnect();
                }
             }
