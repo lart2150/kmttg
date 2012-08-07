@@ -636,42 +636,44 @@ public class Remote {
                   title = null;
                   item = items.getJSONObject(i);
                   if (item.has("folderItemCount")) {
-                     // Type folder has to be further drilled down
-                     if (item.has("title"))
-                        title = item.getString("title");
-                     if (title != null && title.equals("HD Recordings")) {
-                        // Skip drilling into "HD Recordings" folder
-                        continue;
-                     }
-                     result = Command(
-                        "FolderIds",
-                        new JSONObject("{\"parentRecordingFolderItemId\":\"" + item.get("recordingFolderItemId") + "\"}")
-                     );
-                     if (result != null) {
-                        JSONArray ids = result.getJSONArray("objectIdAndType");
-                        for (int j=0; j<ids.length(); ++j) {
-                           JSONArray id = new JSONArray();
-                           id.put(ids.get(j));
-                           JSONObject s = new JSONObject();
-                           s.put("objectIdAndType",id);
-                           result = Command("SearchIds", s);
-                           if (result != null) {
-                              s = result.getJSONArray("recordingFolderItem").getJSONObject(0);
-                              result = Command(
-                                 "Search",
-                                 new JSONObject("{\"recordingId\":\"" + s.get("childRecordingId") + "\"}")
-                              );
+                     if (item.getInt("folderItemCount") > 0) {
+                        // Type folder has to be further drilled down
+                        if (item.has("title"))
+                           title = item.getString("title");
+                        if (title != null && title.equals("HD Recordings")) {
+                           // Skip drilling into "HD Recordings" folder
+                           continue;
+                        }
+                        result = Command(
+                           "FolderIds",
+                           new JSONObject("{\"parentRecordingFolderItemId\":\"" + item.get("recordingFolderItemId") + "\"}")
+                        );
+                        if (result != null) {
+                           JSONArray ids = result.getJSONArray("objectIdAndType");
+                           for (int j=0; j<ids.length(); ++j) {
+                              JSONArray id = new JSONArray();
+                              id.put(ids.get(j));
+                              JSONObject s = new JSONObject();
+                              s.put("objectIdAndType",id);
+                              result = Command("SearchIds", s);
                               if (result != null) {
-                                 allShows.put(result);
+                                 s = result.getJSONArray("recordingFolderItem").getJSONObject(0);
+                                 result = Command(
+                                    "Search",
+                                    new JSONObject("{\"recordingId\":\"" + s.get("childRecordingId") + "\"}")
+                                 );
+                                 if (result != null) {
+                                    allShows.put(result);
+                                 }
                               }
                            }
                         }
                      }
                   } else {
-                     // Individual entry just add to items array                  
+                     // Individual entry just add to items array
                      result = Command(
                         "Search",
-                        new JSONObject("{\"recordingId\":\"" + item.get("childRecordingId") + "\"}")
+                        new JSONObject("{\"recordingId\":\"" + item.getString("childRecordingId") + "\"}")
                      );
                      if (result != null)
                         allShows.put(result);
