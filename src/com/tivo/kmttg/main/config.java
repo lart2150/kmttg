@@ -72,6 +72,7 @@ public class config {
    public static int combine_download_decrypt = 0; // Combine download and decrypt if possible
    public static int single_download = 0;  // Allow only one download at a time if enabled
    public static int npl_when_started = 1; // Start NPL jobs when kmttg GUI starts
+   public static int npl_click_details = 0; // If 1 clicking on NPL item gets extra show details
    public static boolean persistQueue = false;	// Save job queue between sessions
 
    public static String comskipIni = "";
