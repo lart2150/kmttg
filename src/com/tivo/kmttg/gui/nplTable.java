@@ -7,6 +7,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -25,6 +27,7 @@ import javax.swing.ListSelectionModel;
 
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Sorter;
+import org.w3c.dom.Document;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -34,12 +37,15 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
+import com.tivo.kmttg.util.Xml;
 
 public class nplTable {
    public String tivoName = null;
@@ -586,6 +592,32 @@ public class nplTable {
             // Folder entry - don't display anything
          } else {
             // Non folder entry so print single entry info
+            if (config.npl_click_details == 1 && s.data.containsKey("url_TiVoVideoDetails") && ! s.data.containsKey("originalAirDate")) {
+               // Get show details to display if necessary
+               ByteArrayOutputStream info = new ByteArrayOutputStream();
+               try {
+                  String url = s.data.get("url_TiVoVideoDetails");
+                  String wan_port = config.getWanSetting(tivoName, "https");
+                  if (wan_port != null)
+                     url = string.addPort(url, wan_port);
+                  Boolean result = http.downloadPiped(url, "tivo", config.MAK, info, false, null);
+                  if(result) {
+                     // Read data from info
+                     byte[] b = info.toByteArray();
+                     Document doc = Xml.getDocument(new ByteArrayInputStream(b));
+                     if (doc != null) {
+                        String oad = Xml.getElement(doc, "originalAirDate");
+                        if (oad != null)
+                           s.data.put("originalAirDate", oad);
+                     }
+                  }
+               } catch (Exception e) {
+                  if (e.getMessage() != null)
+                     log.error("Error retrieving extended metadata: " + e.getMessage());
+                  else
+                     log.error("Error retrieving extended metadata");
+               }
+            }
             String t = s.data.get("date_long");
             String channelNum = null;
             if ( s.data.containsKey("channelNum") ) {
@@ -605,16 +637,20 @@ public class nplTable {
             if (channelNum != null && channel != null) {
                message += " on " + channelNum + "=" + channel;
             }
-            message += ", Duration = " + d;
+            message += ", Duration=" + d;
             
             if (s.data.containsKey("EpisodeNumber"))
-               message += ", EpisodeNumber = " + s.data.get("EpisodeNumber");
+               message += ", EpisodeNumber=" + s.data.get("EpisodeNumber");
             
             if (s.data.containsKey("ByteOffset") && s.data.containsKey("size")) {
                if (! s.data.get("ByteOffset").startsWith("0")) {
                   Double pct = Double.valueOf(s.data.get("ByteOffset"))/Double.valueOf(s.data.get("size"));
                   message += ", PAUSE POINT: " + String.format("%.1f%%", pct*100);
                }
+            }
+            
+            if (s.data.containsKey("originalAirDate")) {
+               message += "\n" + "originalAirDate=" + s.data.get("originalAirDate");
             }
             
             if (description != null) {
