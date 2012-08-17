@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 //import java.util.Date;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -14,6 +15,7 @@ import com.tivo.kmttg.util.log;
 
 public class mdns {
    private JmDNS jmdns = null;
+   private Hashtable<String,ServiceInfo> RPC = new Hashtable<String,ServiceInfo>();
    //private int timeout = 5;          // ~mins after which mdns listening disabled
    //private long start_time;
    
@@ -45,6 +47,8 @@ public class mdns {
       */
       
       if (jmdns == null) return;
+      // Uncomment this to log RPC host information
+      //printRPC();
       ServiceInfo info[] = jmdns.list("_http._tcp.local.");
       if (info.length > 0) {
          Stack<String> tivoNames = config.getTivoNames();
@@ -79,6 +83,25 @@ public class mdns {
                   b.put("ip", info[i].getHostAddress());
                   b.put("machine", name);
                   config.addTivo(b);
+               }
+            }
+         }
+      }
+   }
+   
+   // This method useful for discovering RPC servers on the LAN
+   @SuppressWarnings("unchecked")
+   public void printRPC() {
+      ServiceInfo info[] = jmdns.list("_tivo-mindrpc._tcp.local.");
+      if (info.length > 0) {
+         for (int i=0; i<info.length; ++i) {
+            if ( ! RPC.containsKey(info[i].getName()) ) {
+               RPC.put(info[i].getName(), info[i]);
+               log.warn("MDNS: " + info[i].getName() + " (" + info[i].getHostAddress() + ":" + info[i].getPort() + ")");
+               Enumeration e = info[i].getPropertyNames();
+               while (e.hasMoreElements()) {
+                  String key = (String) e.nextElement();
+                  log.print(key + "=" + info[i].getPropertyString(key));
                }
             }
          }
