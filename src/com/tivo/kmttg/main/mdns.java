@@ -15,7 +15,7 @@ import com.tivo.kmttg.util.log;
 
 public class mdns {
    private JmDNS jmdns = null;
-   private Hashtable<String,ServiceInfo> RPC = new Hashtable<String,ServiceInfo>();
+   private Hashtable<String,ServiceInfo> SERVICE = new Hashtable<String,ServiceInfo>();
    //private int timeout = 5;          // ~mins after which mdns listening disabled
    //private long start_time;
    
@@ -47,8 +47,11 @@ public class mdns {
       */
       
       if (jmdns == null) return;
-      // Uncomment this to log RPC host information
-      //printRPC();
+      
+      // Uncomment this to print/log specific service information
+      //printService("_tivo-mindrpc._tcp.local.");
+      //printService("_tivo-videostream._tcp.local.");
+      
       ServiceInfo info[] = jmdns.list("_http._tcp.local.");
       if (info.length > 0) {
          Stack<String> tivoNames = config.getTivoNames();
@@ -91,12 +94,15 @@ public class mdns {
    
    // This method useful for discovering RPC servers on the LAN
    @SuppressWarnings("unchecked")
-   public void printRPC() {
-      ServiceInfo info[] = jmdns.list("_tivo-mindrpc._tcp.local.");
+   // Sample names:
+   // "_tivo-mindrpc._tcp.local."
+   // "_tivo-videostream._tcp.local."
+   public void printService(String service) {
+      ServiceInfo info[] = jmdns.list(service);
       if (info.length > 0) {
          for (int i=0; i<info.length; ++i) {
-            if ( ! RPC.containsKey(info[i].getName()) ) {
-               RPC.put(info[i].getName(), info[i]);
+            if ( ! SERVICE.containsKey(info[i].getName()) ) {
+               SERVICE.put(info[i].getName(), info[i]);
                log.warn("MDNS: " + info[i].getName() + " (" + info[i].getHostAddress() + ":" + info[i].getPort() + ")");
                Enumeration e = info[i].getPropertyNames();
                while (e.hasMoreElements()) {
