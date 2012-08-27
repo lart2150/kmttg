@@ -269,6 +269,20 @@ public class metadataTivo implements Serializable {
                   }
                }
             }
+
+            // Look for programId under <showing><program><uniqueId>            
+            nlist = doc.getElementsByTagName("uniqueId");
+            if (nlist.getLength() > 0) {
+               if (data.containsKey("seriesId")) {
+                  for (int i=0; i<nlist.getLength(); ++i) {
+                     String val = nlist.item(i).getTextContent();
+                     if (! val.equals(data.get("seriesId")))
+                        data.put("programId", val);
+                  }
+               } else {
+                  data.put("programId", nlist.item(0).getTextContent());
+               }
+            }
          }
                                                 
          // Post-process some of the data
@@ -317,7 +331,7 @@ public class metadataTivo implements Serializable {
                   ofp.write(key + " : " + data.get(key) + eol);
             }
          }
-         String[] additional = {"seriesId", "displayMajorNumber", "callsign"};
+         String[] additional = {"programId", "seriesId", "displayMajorNumber", "callsign"};
          for (int i=0; i<additional.length; ++i) {
             key = additional[i];
             if (data.containsKey(key)) {
