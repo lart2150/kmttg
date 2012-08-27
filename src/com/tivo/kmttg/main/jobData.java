@@ -91,7 +91,7 @@ public class jobData implements Serializable, Cloneable {
    
    // download related
    public Long tivoFileSize = null;
-   String ProgramId = null;
+   public String ProgramId = null;
    String ProgramId_unique = null;
    String title = null;
    public String offset = null;
