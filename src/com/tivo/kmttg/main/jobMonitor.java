@@ -882,6 +882,8 @@ public class jobMonitor {
                      job.callsign = entry.get("channel");
                   if (entry.containsKey("SeriesId"))
                      job.seriesId = entry.get("SeriesId");
+                  if (entry.containsKey("ProgramId"))
+                     job.ProgramId = entry.get("ProgramId");
                   submitNewJob(job);
                }
             } else {
