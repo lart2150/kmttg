@@ -140,6 +140,8 @@ public class createMeta {
             data.put("callsign", job.callsign);
          if ( job.seriesId != null )
             data.put("seriesId", job.seriesId);
+         if ( job.ProgramId != null )
+            data.put("programId", job.ProgramId);
          
          // Now write all data to metaFile in pyTivo format
          BufferedWriter ofp = new BufferedWriter(new FileWriter(job.metaFile));
@@ -164,7 +166,7 @@ public class createMeta {
                   ofp.write(key + " : " + data.get(key) + eol);
             }
          }
-         String[] additional = {"episodeNumber", "displayMajorNumber", "callsign", "seriesId"};
+         String[] additional = {"episodeNumber", "displayMajorNumber", "callsign", "seriesId", "programId"};
          for (int i=0; i<additional.length; ++i) {
             key = additional[i];
             if (data.containsKey(key)) {
