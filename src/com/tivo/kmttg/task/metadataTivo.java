@@ -256,31 +256,26 @@ public class metadataTivo implements Serializable {
                }
             }
             
-            // Look for seriesId under <showing><program><series><uniqueId>
             Node programNode = getNodeByName(doc, showingNode, "program");
             if (programNode != null) {
-               Node seriesNode = getNodeByName(doc, programNode, "series");
-               if (seriesNode != null) {
-                  Node n = getNodeByName(doc, seriesNode, "uniqueId");
-                  if (n != null) {
-                     value = n.getTextContent();
-                     data.put("seriesId", value);
-                     debug.print("seriesId=" + value);                     
+               // Look for programId under <showing><program><uniqueId>
+               nlist = programNode.getChildNodes();
+               if (nlist.getLength() > 0) {
+                  for (int i=0; i<nlist.getLength(); ++i) {
+                     if (nlist.item(i).getNodeName().equals("uniqueId"))
+                        data.put("programId", nlist.item(i).getTextContent());
                   }
                }
-            }
-
-            // Look for programId under <showing><program><uniqueId>            
-            nlist = doc.getElementsByTagName("uniqueId");
-            if (nlist.getLength() > 0) {
-               if (data.containsKey("seriesId")) {
-                  for (int i=0; i<nlist.getLength(); ++i) {
-                     String val = nlist.item(i).getTextContent();
-                     if (! val.equals(data.get("seriesId")))
-                        data.put("programId", val);
+               // Look for seriesId under <showing><program><series><uniqueId>
+               Node seriesNode = getNodeByName(doc, programNode, "series");
+               if (seriesNode != null) {
+                  nlist = seriesNode.getChildNodes();
+                  if (nlist.getLength() > 0) {
+                     for (int i=0; i<nlist.getLength(); ++i) {
+                        if (nlist.item(i).getNodeName().equals("uniqueId"))
+                           data.put("seriesId", nlist.item(i).getTextContent());
+                     }
                   }
-               } else {
-                  data.put("programId", nlist.item(0).getTextContent());
                }
             }
          }
