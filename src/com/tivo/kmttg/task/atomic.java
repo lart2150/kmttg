@@ -274,6 +274,13 @@ public class atomic implements Serializable {
             args.add("--artwork");
             args.add(h.get("artwork"));
          }
+         if (h.containsKey("image")) {
+            String image = string.dirname(job.metaFile) + File.separator + h.get("image");
+            if (file.isFile(image)) {
+               args.add("--artwork");
+               args.add(image);
+            }
+         }
          return;
       }
       catch (IOException ex) {
