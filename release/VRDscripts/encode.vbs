@@ -56,6 +56,7 @@ outputFlag = false
 outputXML = VideoReDo.FileSaveProfile( destFile, profileName )
 if ( left(outputXML,1) = "*" ) then
    wscript.stderr.writeline("? Problem opening output file: " + outputXML )
+   wscript.stderr.writeline(outputXML)
    wscript.quit 4
 else
    outputFlag = true

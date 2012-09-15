@@ -46,6 +46,7 @@ VideoReDo.AddToJoiner()
 version = GetVersion(VideoReDo.VersionNumber)
 if version < 4205604 then
    outputFlag = VideoReDo.SaveJoinerAs( destFile )
+   outputXML = ""
 else
    outputFlag = true
    profileName = "MPEG2 Program Stream"
@@ -57,6 +58,7 @@ end if
 
 if outputFlag = false then
    wscript.stderr.writeline("? Problem opening output file: " + destFile )
+   wscript.stderr.writeline(outputXML)
    wscript.quit 4
 end if
 
