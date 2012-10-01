@@ -23,7 +23,6 @@ public class jobMonitor {
    public static Stack<jobData> JOBS = new Stack<jobData>();
    //private static Stack<jobData> JOB_HISTORY = new Stack<jobData>();
    private static int JOB_COUNT = 0;
-   private static int JOB = 0;
    private static int FAMILY_ID = 0;
    public static Boolean NoNewJobs = false;
    private static String jobDataFile = "jobData.dat";
@@ -464,7 +463,6 @@ public class jobMonitor {
       // The job monitor will decide when to actually launch it
       job.monitor  = -1;
       job.status   = "queued";      
-      JOB++;            
       addToJobList(job);
    }
    
@@ -1416,6 +1414,7 @@ public class jobMonitor {
             int n = getNumQueuedJobs();
             if (n == 0) {
                log.error("There are currently no queued jobs to save.");
+               oos.close();
                return;
             }
             oos.writeInt(n);
