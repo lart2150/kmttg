@@ -55,7 +55,8 @@ public class rnpl {
             
       // Match up the following
       // title, recording date, size
-      String h_title = null, date_long = "";
+      String h_title = null;
+      //String date_long = "";
       long h_date = 0;
       long h_size = 0;
       if (nplData.containsKey("titleOnly"))
@@ -64,14 +65,15 @@ public class rnpl {
          h_date = Long.parseLong(nplData.get("gmt"));
       if (nplData.containsKey("size"))
          h_size = Long.parseLong(nplData.get("size"));
-      if (nplData.containsKey("date_long"))
-         date_long = nplData.get("date_long");
+      //if (nplData.containsKey("date_long"))
+         //date_long = nplData.get("date_long");
       if (h_title == null || h_date == 0 || h_size == 0) {
          log.error("findRecordingId insufficient NPL data");
          return null;
       }
       JSONObject json;
-      String r_title, r_sdate = "";
+      String r_title;
+      //String r_sdate = "";
       long r_date, r_diff;
       long r_size;
       long r_date_leeway = 60000; // 60 second leeway
@@ -87,12 +89,12 @@ public class rnpl {
             if (json.has("startTime")) {
                r_date = getLongDateFromString(json.getString("startTime"));
                r_diff = Math.abs(r_date - h_date);
-               r_sdate = json.getString("startTime");
+               //r_sdate = json.getString("startTime");
             } else {
                if (json.has("requestedStartTime")) {
                   r_date = getLongDateFromString(json.getString("requestedStartTime"));
                   r_diff = Math.abs(r_date - h_date);
-                  r_sdate = json.getString("requestedStartTime");
+                  //r_sdate = json.getString("requestedStartTime");
                }
             }
             if (r_date == 0 && json.has("scheduledStartTime"))
