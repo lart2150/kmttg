@@ -460,6 +460,7 @@ public class auto {
    
    private static void keywordMatchJobInit(Hashtable<String,String> entry, autoEntry auto) {
       debug.print("entry=" + entry + " auto=" + auto);
+      if (entry == null) return;
       
       // Need to check ProgramId_unique if enabled to see if we already have processed this previously
       if (auto.useProgramId_unique == 1 && entry.containsKey("ProgramId_unique")) {
@@ -483,7 +484,6 @@ public class auto {
       String tivoName = entry.get("tivoName");
       h.put("tivoName", tivoName);
       h.put("mode", "Download");
-      if (entry == null) return;
       h.put("entry",               entry);   
       h.put("metadata",            (Boolean)(auto.metadata  == 1));
       h.put("metadataTivo",        false);
