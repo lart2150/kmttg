@@ -800,7 +800,8 @@ public class jobData implements Serializable, Cloneable {
 		return (jobData) clone(this);
 	}
    
-   private static Object clone(Object o)
+@SuppressWarnings("rawtypes")
+private static Object clone(Object o)
    {
      Object clone = null;
     
