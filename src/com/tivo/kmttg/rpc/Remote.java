@@ -517,7 +517,7 @@ public class Remote {
             // These are required for wishlist types
             // NOTE: Advanced wishlist SPs don't contain idSetSource so don't work
             if (json.has("title"))
-               o.put("title", string.utfString(json.getString("title")));
+               o.put("title", json.getString("title"));
             if (json.has("folderingRules"))
                o.put("folderingRules", json.getString("folderingRules"));
             o.put("bodyId", bodyId_get());
@@ -1101,7 +1101,6 @@ public class Remote {
          }
          
          // OK to subscribe
-         title = string.utfString(title);
          if (schedule) {
             if (config.gui.remote_gui.spOpt == null)
                config.gui.remote_gui.spOpt = new spOptions();

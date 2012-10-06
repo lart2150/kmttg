@@ -15,7 +15,6 @@ import com.tivo.kmttg.JSON.JSONTokener;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class rnpl {
    private static Hashtable<String,JSONArray> rnpldata = new Hashtable<String,JSONArray>();
@@ -85,7 +84,7 @@ public class rnpl {
             r_size = 0;
             json = rnpldata.get(tivoName).getJSONObject(i).getJSONArray("recording").getJSONObject(0);
             if (json.has("title"))
-               r_title = string.utfString(json.getString("title"));
+               r_title = json.getString("title");
             if (json.has("startTime")) {
                r_date = getLongDateFromString(json.getString("startTime"));
                r_diff = Math.abs(r_date - h_date);

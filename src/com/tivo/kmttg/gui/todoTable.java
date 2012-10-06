@@ -35,7 +35,6 @@ import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class todoTable {
    private String[] TITLE_cols = {"DATE", "SHOW", "CHANNEL", "DUR"};
@@ -160,7 +159,7 @@ public class todoTable {
           super(data, columnNames);
        }
        
-       @SuppressWarnings("unchecked")
+       @SuppressWarnings({ "unchecked", "rawtypes" })
        // This is used to define columns as specific classes
        public Class getColumnClass(int col) {
           // NOTE: col index starts at 0
@@ -280,7 +279,7 @@ public class todoTable {
           }
           
           info[0] = new sortableDate(data, start);
-          info[1] = string.utfString(title);
+          info[1] = title;
           info[2] = channel;
           info[3] = new sortableDuration(end-start, false);
           AddRow(TABLE, info);       

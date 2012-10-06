@@ -42,7 +42,6 @@ import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class guideTable {
    private String currentTivo = null;
@@ -186,7 +185,7 @@ public class guideTable {
          super(data, columnNames);
       }
       
-      @SuppressWarnings("unchecked")
+      @SuppressWarnings({ "unchecked", "rawtypes" })
       // This is used to define columns as specific classes
       public Class getColumnClass(int col) {
          if (col == 0) {
@@ -483,7 +482,7 @@ public class guideTable {
                channel += "=" + o.getString("callSign");
          }
          data[1] = new sortableDate(entry, start);
-         data[2] = string.utfString(title);
+         data[2] = title;
          data[3] = channel;
          data[4] = new sortableDuration(duration, false);
          return data;
@@ -825,7 +824,7 @@ public class guideTable {
             try {
                String type = json.getString("collectionType");
                if (! type.equals("series")) {
-                  log.error("Selected entry not of type 'series': " + string.utfString(json.getString("title")));
+                  log.error("Selected entry not of type 'series': " + json.getString("title"));
                   return;
                }
             } catch (JSONException e) {

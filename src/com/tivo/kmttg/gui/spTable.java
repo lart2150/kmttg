@@ -40,7 +40,6 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class spTable {
    private String[] TITLE_cols = {"PRIORITY", "SHOW", "CHANNEL", "NUM"};
@@ -281,7 +280,7 @@ public class spTable {
           super(data, columnNames);
        }
        
-       @SuppressWarnings("unchecked")
+       @SuppressWarnings({ "unchecked", "rawtypes" })
        // This is used to define columns as specific classes
        public Class getColumnClass(int col) {
           if (col == 1) {
@@ -412,7 +411,7 @@ public class spTable {
              max = data.getInt("maxRecordings");
           
           info[0] = new sortableInt(data, priority);
-          info[1] = string.utfString(title);
+          info[1] = title;
           info[2] = channel;
           info[3] = new sortableInt(null, max);
           return info;
@@ -739,13 +738,13 @@ public class spTable {
                             
                             // OK to subscribe
                             if (schedule) {
-                               log.print("Scheduling: " + string.utfString(json.getString("title")));
+                               log.print("Scheduling: " + json.getString("title"));
                                result = r.Command("seasonpass", json);
                                if (result != null)
                                   log.print("success");
                             } else {
                                log.warn("Existing SP with same title found, not scheduling: " +
-                                  string.utfString(json.getString("title"))
+                                  json.getString("title")
                                );
                             }
                          } catch (JSONException e) {
@@ -775,7 +774,7 @@ public class spTable {
                       config.gui.remote_gui.spOpt = new spOptions();
                    String title;
                    try {
-                      title = string.utfString(json.getString("title"));
+                      title = json.getString("title");
                       if (isTableLoaded()) {
                          log.error("Cannot modify SPs from loaded file.");
                          return null;

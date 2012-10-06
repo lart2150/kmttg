@@ -147,7 +147,7 @@ public class gui {
       return jFrame;
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public void setFontSize(int fontSize) {
       Enumeration keys = UIManager.getDefaults().keys();
       while (keys.hasMoreElements()) {

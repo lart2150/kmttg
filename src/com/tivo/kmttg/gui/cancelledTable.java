@@ -40,7 +40,6 @@ import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class cancelledTable {
    private String currentTivo = null;
@@ -176,7 +175,7 @@ public class cancelledTable {
          super(data, columnNames);
       }
       
-      @SuppressWarnings("unchecked")
+      @SuppressWarnings({ "unchecked", "rawtypes" })
       // This is used to define columns as specific classes
       public Class getColumnClass(int col) {
          if (col == 0) {
@@ -523,7 +522,7 @@ public class cancelledTable {
                channel += "=" + o.getString("callSign");
          }
    
-         data[1] = string.utfString(title);
+         data[1] = title;
          data[2] = new sortableDate(entry, start);
          data[3] = channel;
          data[4] = new sortableDuration(end-start, false);

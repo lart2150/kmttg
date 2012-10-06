@@ -283,7 +283,7 @@ public class nplTable {
          super(data, columnNames);
       }
       
-      @SuppressWarnings("unchecked")
+      @SuppressWarnings({ "unchecked", "rawtypes" })
       // This is used to define columns as specific classes
       public Class getColumnClass(int col) {
          if (col == 0) {
@@ -321,7 +321,7 @@ public class nplTable {
          super(data, columnNames);
       }
       
-      @SuppressWarnings("unchecked")
+      @SuppressWarnings({ "unchecked", "rawtypes" })
       // This is used to define columns as specific classes
       public Class getColumnClass(int col) {
          if (col == 1) {
@@ -814,12 +814,12 @@ public class nplTable {
       }
       String message;
       long totalSize = 0;
-      long totalSecs = 0;
+      //long totalSecs = 0;
       Hashtable<String,String> entry;
       for (int i=0; i<h.size(); ++i) {
          entry = h.get(i);
          if (entry.containsKey("size")) totalSize += Long.parseLong(entry.get("size"));
-         if (entry.containsKey("duration")) totalSecs += Long.parseLong(entry.get("duration"))/1000;
+         //if (entry.containsKey("duration")) totalSecs += Long.parseLong(entry.get("duration"))/1000;
       }
       message = String.format(
          "%d SHOWS, %.0f GB USED",

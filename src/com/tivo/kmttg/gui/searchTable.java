@@ -38,7 +38,6 @@ import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class searchTable {
    private String currentTivo = null;
@@ -184,7 +183,7 @@ public class searchTable {
          super(data, columnNames);
       }
       
-      @SuppressWarnings("unchecked")
+      @SuppressWarnings({ "unchecked", "rawtypes" })
       // This is used to define columns as specific classes
       public Class getColumnClass(int col) {
          if (col == 0) {
@@ -433,7 +432,7 @@ public class searchTable {
                // Multiple items => display as folder
                data[0] = gui.Images.get("folder");
                data[1] = entry.getString("type");
-               data[2] = " " + string.utfString(entry.getString("title")) + " (" + num + ")";
+               data[2] = " " + entry.getString("title") + " (" + num + ")";
                String startString = entry.getJSONArray("entries").getJSONObject(0).getString("startTime");
                long start = getLongDateFromString(startString);
                data[3] = new sortableDate(entry.getString("title"), entry, start);
@@ -490,7 +489,7 @@ public class searchTable {
                channel += "=" + o.getString("callSign");
          }
          data[1] = type;
-         data[2] = string.utfString(title);
+         data[2] = title;
          data[3] = new sortableDate(entry, start);
          data[4] = channel;
          data[5] = new sortableDuration(duration, false);
@@ -728,7 +727,7 @@ public class searchTable {
             try {
                String type = json.getString("collectionType");
                if (! type.equals("series")) {
-                  log.error("Selected entry not of type 'series': " + string.utfString(json.getString("title")));
+                  log.error("Selected entry not of type 'series': " + json.getString("title"));
                   return;
                }
             } catch (JSONException e) {

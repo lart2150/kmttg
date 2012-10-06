@@ -35,7 +35,6 @@ import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class premiereTable {
    private String[] TITLE_cols = {"DATE", "SHOW", "SEA", "CHANNEL", "DUR"};
@@ -166,7 +165,7 @@ public class premiereTable {
           super(data, columnNames);
        }
        
-       @SuppressWarnings("unchecked")
+       @SuppressWarnings({ "unchecked", "rawtypes" })
        // This is used to define columns as specific classes
        public Class getColumnClass(int col) {
           if (col == 1) {
@@ -280,7 +279,7 @@ public class premiereTable {
           }
           
           info[0] = new sortableDate(data, start);
-          info[1] = string.utfString(title);
+          info[1] = title;
           info[2] = season;
           info[3] = channel;
           info[4] = new sortableDuration(duration, false);
