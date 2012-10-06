@@ -36,6 +36,8 @@ public class myExceptionHandler implements Thread.UncaughtExceptionHandler {
          return;
       if (detailMessage.contains("org.jdesktop.swingx.decorator"))
          return;
+      if (detailMessage.contains("Comparison method violates its general contract"))
+    	 return;
       
       log.error(detailMessage);
    }
