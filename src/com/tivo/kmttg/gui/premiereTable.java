@@ -355,8 +355,8 @@ public class premiereTable {
                 title += s.json.getString("title");
              if (s.json.has("subtitle"))
                 title += " - " + s.json.getString("subtitle");
-             log.warn(string.utfString(title));
-             log.print(string.utfString(message));
+             log.warn(title);
+             log.print(message);
           } catch (JSONException e) {
              log.error("TABLERowSelected - " + e.getMessage());
              return;

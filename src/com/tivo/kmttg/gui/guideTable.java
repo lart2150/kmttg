@@ -342,8 +342,8 @@ public class guideTable {
                title += " - " + s.json.getString("subtitle");
             if (s.json.has("__inTodo__"))
                title += " (to be recorded on " + s.json.getString("__inTodo__") + ")";
-            log.warn(string.utfString(title));
-            log.print(string.utfString(message));
+            log.warn(title);
+            log.print(message);
          } catch (JSONException e) {
             log.error("TABLERowSelected - " + e.getMessage());
             return;
