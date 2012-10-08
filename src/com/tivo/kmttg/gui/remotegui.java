@@ -1764,7 +1764,12 @@ public class remotegui {
    }
 
    public String getGuideStartTime() {
-      return (String)guide_start.getSelectedItem();
+	  String start = (String)guide_start.getSelectedItem();
+	  if (start == null || start.length() == 0) {
+		  tab_guide.setComboBoxDates(guide_start, guide_hour_increment, guide_total_range);
+		  start = (String)guide_start.getSelectedItem();
+	  }
+      return start;
    }
    
    public int getGuideRange() {
