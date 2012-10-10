@@ -72,7 +72,7 @@ public class remotegui {
    public  JButton refresh_guide = null;
    private JComboBox tivo_guide = null;
    private JComboBox guide_start = null;
-   private JSpinner  guide_range = null;
+   private JComboBox guide_range = null;
    private int guide_hour_increment = 12; // Number of hours for date increment
    private int guide_total_range = 11;    // Number of days
    
@@ -360,7 +360,7 @@ public class remotegui {
                 if (tab_guide.inFolder) {
                    String start = (String)guide_start.getSelectedItem();
                    if (start != null && start.length() > 0) {
-                      int range = (Integer)guide_range.getValue();
+                      int range = (Integer)guide_range.getSelectedItem();
                       tab_guide.updateFolder(start, range);
                    }
                 }
@@ -370,16 +370,17 @@ public class remotegui {
 
       
       JLabel guide_range_label = new JLabel("Range");
-      SpinnerModel guide_range_spinner = new SpinnerNumberModel(6, 1, 12, 1);
-      guide_range = new javax.swing.JSpinner(guide_range_spinner);
+      guide_range = new javax.swing.JComboBox(new Integer[] {6, 12});
       guide_range.setToolTipText(getToolTip("guide_range"));
-      guide_range.addChangeListener(new ChangeListener() {
-         public void stateChanged(ChangeEvent e) {
-            if (tab_guide.inFolder) {
-               String start = (String)guide_start.getSelectedItem();
-               if (start != null && start.length() > 0) {
-                  int range = (Integer)guide_range.getValue();
-                  tab_guide.updateFolder(start, range);
+      guide_range.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+               if (tab_guide.inFolder) {
+                  String start = (String)guide_start.getSelectedItem();
+                  if (start != null && start.length() > 0) {
+                     int range = (Integer)guide_range.getSelectedItem();
+                     tab_guide.updateFolder(start, range);
+                  }
                }
             }
          }
@@ -1773,7 +1774,7 @@ public class remotegui {
    }
    
    public int getGuideRange() {
-      return (Integer)guide_range.getValue();
+      return (Integer)guide_range.getSelectedItem();
    }
    
    public int getPremiereDays() {
