@@ -2347,8 +2347,7 @@ public class remotegui {
       }
       if (component.equals("guide_range")) {
          text = "<b>Range</b><br>";
-         text += "Select how many hours of guide information to retrieve.<br>";
-         text += "NOTE: You can type in a number (up to 12) and then press enter to update.<br>";
+         text += "Select how many hours of guide information to retrieve at a time: 6 or 12.<br>";
          text += "NOTE: If you are inside a channel folder when you change this setting<br>";
          text += "the guide listings will automatically update to new date.";
       }
