@@ -84,7 +84,7 @@ public class jobTable {
          super(data, columnNames);
       }
 
-      @SuppressWarnings({ "unchecked", "rawtypes" })
+      @SuppressWarnings("unchecked")
       // This is used to define columns as specific classes
       public Class getColumnClass(int col) {
          if (col == 1) {

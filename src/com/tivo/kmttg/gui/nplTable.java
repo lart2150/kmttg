@@ -283,7 +283,7 @@ public class nplTable {
          super(data, columnNames);
       }
       
-      @SuppressWarnings({ "unchecked", "rawtypes" })
+      @SuppressWarnings("unchecked")
       // This is used to define columns as specific classes
       public Class getColumnClass(int col) {
          if (col == 0) {
@@ -321,7 +321,7 @@ public class nplTable {
          super(data, columnNames);
       }
       
-      @SuppressWarnings({ "unchecked", "rawtypes" })
+      @SuppressWarnings("unchecked")
       // This is used to define columns as specific classes
       public Class getColumnClass(int col) {
          if (col == 1) {

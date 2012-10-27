@@ -93,7 +93,7 @@ public class mdns {
    }
    
    // This method useful for discovering RPC servers on the LAN
-   @SuppressWarnings("rawtypes")
+   @SuppressWarnings("unchecked")
    // Sample names:
    // "_tivo-mindrpc._tcp.local."
    // "_tivo-videostream._tcp.local."

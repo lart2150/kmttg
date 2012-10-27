@@ -159,7 +159,7 @@ public class todoTable {
           super(data, columnNames);
        }
        
-       @SuppressWarnings({ "unchecked", "rawtypes" })
+       @SuppressWarnings("unchecked")
        // This is used to define columns as specific classes
        public Class getColumnClass(int col) {
           // NOTE: col index starts at 0

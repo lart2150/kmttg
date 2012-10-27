@@ -32,7 +32,6 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class Remote {
    public Boolean debug = false;

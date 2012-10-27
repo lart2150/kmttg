@@ -10,7 +10,7 @@ import com.tivo.kmttg.util.log;
 
 public class Unzip {
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings("unchecked")
 public static Boolean unzip(String dir, String file) {
    debug.print("dir=" + dir + " file=" + file);
     Enumeration entries;
