@@ -1,9 +1,14 @@
 package com.tivo.kmttg.gui;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Hashtable;
 
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
@@ -65,6 +70,40 @@ public class bitrateTable {
          return 0;
       }
    };    
+
+   /**
+    * Applied background color to single column of a JTable
+    * in order to distinguish it apart from other columns.
+    */ 
+    class ColorColumnRenderer extends DefaultTableCellRenderer 
+    {
+       private static final long serialVersionUID = 1L;
+       Color bkgndColor;
+       Font font;
+       
+       public ColorColumnRenderer(Color bkgnd, Font font) {
+          super();
+          // Center text in cells
+          setHorizontalAlignment(CENTER);
+          bkgndColor = bkgnd;
+          this.font = font;
+       }
+       
+       public Component getTableCellRendererComponent
+           (JTable table, Object value, boolean isSelected,
+            boolean hasFocus, int row, int column) 
+       {
+          Component cell = super.getTableCellRendererComponent
+             (table, value, isSelected, hasFocus, row, column);
+     
+          if (bkgndColor != null && ! isSelected)
+             cell.setBackground( bkgndColor );
+          
+          cell.setFont(config.tableFont);
+         
+          return cell;
+       }
+    }
     
     // Override some default table model actions
     class MyTableModel extends DefaultTableModel {
