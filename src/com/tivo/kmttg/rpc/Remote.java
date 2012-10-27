@@ -383,6 +383,13 @@ public class Remote {
             json.put("bodyId", bodyId_get());
             req = RpcRequest("recordingUpdate", false, json);
          }
+         else if (type.equals("undelete")) {
+            // Recover a recording from Recently Deleted
+            // Expects "recordingId" of type JSONArray in json
+            json.put("state", "complete");
+            json.put("bodyId", bodyId_get());
+            req = RpcRequest("recordingUpdate", false, json);
+         }
          else if (type.equals("StopRecording")) {
             // Stop an existing recording
             // Expects "recordingId" of type JSONArray in json
@@ -454,6 +461,14 @@ public class Remote {
             json.put("format", "idSequence");
             json.put("bodyId", bodyId_get());
             json.put("state", new JSONArray("[\"cancelled\"]"));
+            req = RpcRequest("recordingSearch", false, json);
+         }
+         else if (type.equals("Deleted")) {
+            // Get list or recording Ids that are in Recently Deleted
+            // Expects count=# in initial json, offset=# after first call
+            json.put("format", "idSequence");
+            json.put("bodyId", bodyId_get());
+            json.put("state", new JSONArray("[\"deleted\"]"));
             req = RpcRequest("recordingSearch", false, json);
          }
          else if (type.equals("GridSearch")) {
@@ -813,6 +828,76 @@ public class Remote {
          } // while
       } catch (JSONException e) {
          error("rpc CancelledShows error - " + e.getMessage());
+         return null;
+      }
+
+      return allShows;
+   }
+   
+   // Get list of all shows in Deleted state
+   public JSONArray DeletedShows(jobData job) {
+      JSONArray allShows = new JSONArray();
+      JSONObject result = null;
+
+      try {
+         // Top level list - run in a loop to grab all items
+         JSONArray items = new JSONArray();
+         Boolean stop = false;
+         JSONObject json = new JSONObject();
+         json.put("count", 100);
+         int offset = 0;
+         while ( ! stop ) {
+            if (job != null && config.GUIMODE)
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Deleted list");
+            result = Command("Deleted", json);
+            if (result != null && result.has("objectIdAndType")) {
+               JSONArray a = result.getJSONArray("objectIdAndType");
+               for (int i=0; i<a.length(); ++i)
+                  items.put(a.get(i));
+               offset += a.length();
+               json.put("offset", offset);
+               if (a.length() == 0)
+                  stop = true;
+            } else {
+               stop = true;
+            }
+         } // while
+         
+         // Now collect info on individual items, 50 at a time
+         int total = items.length();
+         int max=50;
+         int index=0, num=0;
+         while (index < total) {
+            num += max;
+            if (num > total)
+               num = total;
+            JSONArray id = new JSONArray();
+            while (index < num)
+               id.put(items.get(index++));
+            JSONObject s = new JSONObject();
+            s.put("objectIdAndType",id);
+            
+            // Update status in job monitor
+            if (job != null && config.GUIMODE) {
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Deleted list");
+               String message = "Processing: " + index + "/" + total;
+               config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+               if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                  config.gui.setTitle("Deleted: " + index + "/" + total + " " + config.kmttg);
+                  float pct = (float)index*100/total;
+                  config.gui.progressBar_setValue((int)pct);
+               }
+            }
+            
+            result = Command("SearchId", s);
+            if (result != null && result.has("recording")) {
+               id = result.getJSONArray("recording");
+               for (int j=0; j<id.length(); ++j)
+                  allShows.put(id.getJSONObject(j));
+            } // if
+         } // while
+      } catch (JSONException e) {
+         error("rpc DeletedShows error - " + e.getMessage());
          return null;
       }
 

@@ -91,6 +91,10 @@ public class remotegui {
    public JButton refresh_cancel = null;
    public JLabel label_cancel = null;
    
+   private deletedTable tab_deleted = null;
+   private JComboBox tivo_deleted = null;
+   public JButton refresh_deleted = null;
+   
    private JComboBox tivo_premiere = null;
    private JComboBox premiere_days = null;
    private premiereTable tab_premiere = null;
@@ -727,7 +731,7 @@ public class remotegui {
                if (tab_cancel.folderEntryNum >= 0)
                   tab_cancel.SelectFolder(tab_cancel.folderName);
             } else {
-               // Refresh to do list
+               // Refresh will not record list
                tab_cancel.TABLE.clearSelection();
                tab_cancel.clear();
                String tivoName = (String)tivo_cancel.getSelectedItem();
@@ -805,6 +809,100 @@ public class remotegui {
       c.gridwidth = 8;
       c.fill = GridBagConstraints.BOTH;
       panel_cancel.add(tabScroll_cancel, c);
+      
+      // Deleted table items      
+      gy = 0;
+      c.ipady = 0;
+      c.weighty = 0.0;  // default to no vertical stretch
+      c.weightx = 0.0;  // default to no horizontal stretch
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      c.gridheight = 1;
+      c.anchor = GridBagConstraints.CENTER;
+      c.fill = GridBagConstraints.HORIZONTAL;
+      
+      JPanel panel_deleted = new JPanel();
+      panel_deleted.setLayout(new GridBagLayout());
+      
+      JPanel row1_deleted = new JPanel();
+      row1_deleted.setLayout(new BoxLayout(row1_deleted, BoxLayout.LINE_AXIS));
+      
+      JLabel title_deleted = new JLabel("Deleted list");
+      
+      JLabel tivo_deleted_label = new javax.swing.JLabel();
+      
+      tivo_deleted = new javax.swing.JComboBox();
+      tivo_deleted.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {               
+               // TiVo selection changed for Deleted tab
+               tab_deleted.TABLE.clearSelection();
+               tab_deleted.clear();
+               String tivoName = getTivoName("deleted");
+               if (tab_deleted.tivo_data.containsKey(tivoName))
+                  tab_deleted.AddRows(tivoName, tab_deleted.tivo_data.get(tivoName));
+            }
+         }
+      });
+      tivo_deleted.setToolTipText(getToolTip("tivo_deleted"));
+
+      refresh_deleted = new JButton("Refresh");
+      refresh_deleted.setMargin(new Insets(1,1,1,1));
+      refresh_deleted.setToolTipText(getToolTip("refresh_deleted"));
+      refresh_deleted.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Refresh deleted list
+            tab_deleted.TABLE.clearSelection();
+            tab_deleted.clear();
+            String tivoName = (String)tivo_deleted.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               jobData job = new jobData();
+               job.source         = tivoName;
+               job.tivoName       = tivoName;
+               job.type           = "remote";
+               job.name           = "Remote";
+               job.remote_deleted = true;
+               job.deleted        = tab_deleted;
+               jobMonitor.submitNewJob(job);
+            }
+         }
+      });
+
+      JButton recover_deleted = new JButton("Recover");
+      recover_deleted.setMargin(new Insets(1,1,1,1));
+      recover_deleted.setToolTipText(getToolTip("recover_deleted"));
+      recover_deleted.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_deleted.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               tab_deleted.recoverSingle(tivoName);
+            }
+         }
+      });
+      
+      row1_deleted.add(Box.createRigidArea(space_5));
+      row1_deleted.add(title_deleted);
+      row1_deleted.add(Box.createRigidArea(space_5));
+      row1_deleted.add(tivo_deleted_label);
+      row1_deleted.add(Box.createRigidArea(space_5));
+      row1_deleted.add(tivo_deleted);
+      row1_deleted.add(Box.createRigidArea(space_5));
+      row1_deleted.add(refresh_deleted);
+      row1_deleted.add(Box.createRigidArea(space_5));
+      row1_deleted.add(recover_deleted);
+      panel_deleted.add(row1_deleted, c);
+      
+      tab_deleted = new deletedTable(config.gui.getJFrame());
+      tab_deleted.TABLE.setPreferredScrollableViewportSize(tab_deleted.TABLE.getPreferredSize());
+      JScrollPane tabScroll_deleted = new JScrollPane(tab_deleted.scroll);
+      gy++;
+      c.gridy = gy;
+      c.weightx = 1.0;
+      c.weighty = 1.0;
+      c.gridwidth = 8;
+      c.fill = GridBagConstraints.BOTH;
+      panel_deleted.add(tabScroll_deleted, c);
       
       // Premiere tab items      
       gy = 0;
@@ -1659,6 +1757,7 @@ public class remotegui {
       tabbed_panel.add("Season Premieres", panel_premiere);
       tabbed_panel.add("Search", panel_search);
       tabbed_panel.add("Guide", panel_guide);
+      tabbed_panel.add("Deleted", panel_deleted);
       tabbed_panel.add("Remote", panel_rc);
       tabbed_panel.add("Info", panel_info);
       
@@ -1669,7 +1768,8 @@ public class remotegui {
       tab_todo.packColumns(tab_todo.TABLE, 2);
       tab_guide.packColumns(tab_guide.TABLE, 2);
       tab_sp.packColumns(tab_sp.TABLE, 2);
-      tab_cancel.packColumns(tab_sp.TABLE, 2);
+      tab_cancel.packColumns(tab_cancel.TABLE, 2);
+      tab_deleted.packColumns(tab_deleted.TABLE, 2);
       tab_search.packColumns(tab_search.TABLE, 2);
       if (tivo_count == 0) {
          log.warn("No Premieres currently enabled for Remote Control in kmttg configuration");
@@ -1790,6 +1890,8 @@ public class remotegui {
          return (String)tivo_sp.getSelectedItem();
       if (tab.equals("cancel"))
          return (String)tivo_cancel.getSelectedItem();
+      if (tab.equals("deleted"))
+         return (String)tivo_deleted.getSelectedItem();
       if (tab.equals("search"))
          return (String)tivo_search.getSelectedItem();
       if (tab.equals("rc"))
@@ -1812,6 +1914,8 @@ public class remotegui {
             tivo_sp.setSelectedItem(tivoName);
          if (tab.equals("cancel"))
             tivo_cancel.setSelectedItem(tivoName);
+         if (tab.equals("deleted"))
+            tivo_deleted.setSelectedItem(tivoName);
          if (tab.equals("search"))
             tivo_search.setSelectedItem(tivoName);
          if (tab.equals("rc"))
@@ -1840,6 +1944,10 @@ public class remotegui {
          tab_cancel.TABLE.clearSelection();
          tab_cancel.clear();
       }
+      if (tableName.equals("deleted")) {
+         tab_deleted.TABLE.clearSelection();
+         tab_deleted.clear();
+      }
       if (tableName.equals("search")) {
          tab_search.TABLE.clearSelection();
          tab_search.clear();
@@ -1857,6 +1965,7 @@ public class remotegui {
       tivo_guide.removeAllItems();
       tivo_sp.removeAllItems();
       tivo_cancel.removeAllItems();
+      tivo_deleted.removeAllItems();
       tivo_search.removeAllItems();
       tivo_rc.removeAllItems();
       tivo_info.removeAllItems();
@@ -1868,6 +1977,7 @@ public class remotegui {
             tivo_guide.addItem(tivo_stack.get(i));
             tivo_sp.addItem(tivo_stack.get(i));
             tivo_cancel.addItem(tivo_stack.get(i));
+            tivo_deleted.addItem(tivo_stack.get(i));
             tivo_search.addItem(tivo_stack.get(i));
             tivo_rc.addItem(tivo_stack.get(i));
             tivo_info.addItem(tivo_stack.get(i));
@@ -2412,6 +2522,17 @@ public class remotegui {
          text += "to highlight shows scheduled to record on other TiVos.<br>";
          text += "This button will refresh ToDo list in case you are actively cancelling or scheduling new<br>";
          text += "recordings since last refresh of Will Not Record list.";
+      }
+      else if (component.equals("tivo_deleted")) {
+         text = "Select TiVo for which to display list of deleted shows (in Recently Deleted state)";
+      }
+      else if (component.equals("refresh_deleted")){
+         text = "<b>Refresh</b><br>";
+         text += "Refresh list for selected TiVo.";
+      }
+      else if (component.equals("recover_deleted")){
+         text = "<b>Recover</b><br>";
+         text += "Recover from Recently Deleted selected individual show(s) in table on specified TiVo.";
       }
       else if (component.equals("tivo_search")) {
          text = "Select TiVo for which to perform search with.<br>";

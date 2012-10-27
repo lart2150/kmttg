@@ -6,6 +6,7 @@ import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.gui.cancelledTable;
+import com.tivo.kmttg.gui.deletedTable;
 import com.tivo.kmttg.gui.guideTable;
 import com.tivo.kmttg.gui.premiereTable;
 import com.tivo.kmttg.gui.searchTable;
@@ -133,6 +134,9 @@ public class jobData implements Serializable, Cloneable {
    
    public Boolean remote_cancel = false;
    public cancelledTable cancelled = null;
+   
+   public Boolean remote_deleted = false;
+   public deletedTable deleted = null;
    
    public Boolean remote_search = false;
    public String remote_search_keyword = null;
