@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.gui.TableUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -185,7 +186,7 @@ public class remote implements Serializable {
                job.search.AddRows(job.tivoName, data);
             }
             if (job.remote_guideChannels && job.gTable != null && data != null) {
-               job.gTable.clear();
+               TableUtil.clear(job.gTable.TABLE);
                job.gTable.AddRows(job.tivoName, data);
             }
 

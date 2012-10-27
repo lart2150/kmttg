@@ -254,8 +254,7 @@ public class remotegui {
       tivo_todo.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
-                tab_todo.TABLE.clearSelection();
-                tab_todo.clear();
+                TableUtil.clear(tab_todo.TABLE);
                 String tivoName = getTivoName("todo");
                 if (tab_todo.tivo_data.containsKey(tivoName))
                    tab_todo.AddRows(tivoName, tab_todo.tivo_data.get(tivoName));
@@ -269,8 +268,7 @@ public class remotegui {
       refresh_todo.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Refresh to do list
-            tab_todo.TABLE.clearSelection();
-            tab_todo.clear();
+            TableUtil.clear(tab_todo.TABLE);
             String tivoName = (String)tivo_todo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                jobData job = new jobData();
@@ -344,8 +342,7 @@ public class remotegui {
              if (e.getStateChange() == ItemEvent.SELECTED) {
                 if ( ! tab_guide.inFolder ) {
                    // Refresh channel list only if not inside a folder
-                   tab_guide.TABLE.clearSelection();
-                   tab_guide.clear();
+                   TableUtil.clear(tab_guide.TABLE);
                    String tivoName = getTivoName("guide");
                    if (tab_guide.tivo_data.containsKey(tivoName))
                       tab_guide.AddRows(tivoName, tab_guide.tivo_data.get(tivoName));
@@ -403,8 +400,7 @@ public class remotegui {
                   tab_guide.SelectFolder(tab_guide.folderName);
             } else {
                // At top level => Update current folder contents
-               tab_guide.TABLE.clearSelection();
-               tab_guide.clear();
+               TableUtil.clear(tab_guide.TABLE);
                String tivoName = (String)tivo_guide.getSelectedItem();
                if (tivoName != null && tivoName.length() > 0) {
                   // Obtain and display channel list only if necessary
@@ -524,8 +520,7 @@ public class remotegui {
       tivo_sp.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
-                tab_sp.TABLE.clearSelection();
-                tab_sp.clear();
+                TableUtil.clear(tab_sp.TABLE);
                 String tivoName = getTivoName("sp");
                 if (tab_sp.tivo_data.containsKey(tivoName))
                    tab_sp.AddRows(tivoName, tab_sp.tivo_data.get(tivoName));
@@ -540,8 +535,7 @@ public class remotegui {
       refresh_sp.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Refresh SP list
-            tab_sp.TABLE.clearSelection();
-            tab_sp.clear();
+            TableUtil.clear(tab_sp.TABLE);
             String tivoName = (String)tivo_sp.getSelectedItem();
             SPListCB(tivoName);
          }
@@ -732,8 +726,7 @@ public class remotegui {
                   tab_cancel.SelectFolder(tab_cancel.folderName);
             } else {
                // Refresh will not record list
-               tab_cancel.TABLE.clearSelection();
-               tab_cancel.clear();
+               TableUtil.clear(tab_cancel.TABLE);
                String tivoName = (String)tivo_cancel.getSelectedItem();
                if (tivoName != null && tivoName.length() > 0) {
                   jobData job = new jobData();
@@ -828,7 +821,7 @@ public class remotegui {
       JPanel row1_deleted = new JPanel();
       row1_deleted.setLayout(new BoxLayout(row1_deleted, BoxLayout.LINE_AXIS));
       
-      JLabel title_deleted = new JLabel("Deleted list");
+      JLabel title_deleted = new JLabel("Recently Deleted list");
       
       JLabel tivo_deleted_label = new javax.swing.JLabel();
       
@@ -837,8 +830,7 @@ public class remotegui {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {               
                // TiVo selection changed for Deleted tab
-               tab_deleted.TABLE.clearSelection();
-               tab_deleted.clear();
+               TableUtil.clear(tab_deleted.TABLE);
                String tivoName = getTivoName("deleted");
                if (tab_deleted.tivo_data.containsKey(tivoName))
                   tab_deleted.AddRows(tivoName, tab_deleted.tivo_data.get(tivoName));
@@ -853,8 +845,7 @@ public class remotegui {
       refresh_deleted.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Refresh deleted list
-            tab_deleted.TABLE.clearSelection();
-            tab_deleted.clear();
+            TableUtil.clear(tab_deleted.TABLE);
             String tivoName = (String)tivo_deleted.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                jobData job = new jobData();
@@ -966,8 +957,7 @@ public class remotegui {
       refresh_premiere.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Refresh table
-            tab_premiere.TABLE.clearSelection();
-            tab_premiere.clear();
+            TableUtil.clear(tab_premiere.TABLE);
             String tivoName = (String)tivo_premiere.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {            
                // This updates premiere_channel_info "isSelected" settings
@@ -1212,8 +1202,7 @@ public class remotegui {
                   tab_search.SelectFolder(tab_search.folderName);
             } else {
                // New search
-               tab_search.TABLE.clearSelection();
-               tab_search.clear();
+               TableUtil.clear(tab_search.TABLE);
                String tivoName = (String)tivo_search.getSelectedItem();
                if (tivoName != null && tivoName.length() > 0) {
                   String keyword = string.removeLeadingTrailingSpaces(text_search.getText());
@@ -1765,12 +1754,12 @@ public class remotegui {
       setTivoNames();
             
       // Pack table columns
-      tab_todo.packColumns(tab_todo.TABLE, 2);
-      tab_guide.packColumns(tab_guide.TABLE, 2);
-      tab_sp.packColumns(tab_sp.TABLE, 2);
-      tab_cancel.packColumns(tab_cancel.TABLE, 2);
-      tab_deleted.packColumns(tab_deleted.TABLE, 2);
-      tab_search.packColumns(tab_search.TABLE, 2);
+      TableUtil.packColumns(tab_todo.TABLE, 2);
+      TableUtil.packColumns(tab_guide.TABLE, 2);
+      TableUtil.packColumns(tab_sp.TABLE, 2);
+      TableUtil.packColumns(tab_cancel.TABLE, 2);
+      TableUtil.packColumns(tab_deleted.TABLE, 2);
+      TableUtil.packColumns(tab_search.TABLE, 2);
       if (tivo_count == 0) {
          log.warn("No Premieres currently enabled for Remote Control in kmttg configuration");
          return;
@@ -1929,32 +1918,25 @@ public class remotegui {
    
    public void clearTable(String tableName) {
       if (tableName.equals("sp")) {
-         tab_sp.TABLE.clearSelection();
-         tab_sp.clear();
+         TableUtil.clear(tab_sp.TABLE);
       }
       if (tableName.equals("todo")) {
-         tab_todo.TABLE.clearSelection();
-         tab_todo.clear();
+         TableUtil.clear(tab_todo.TABLE);
       }
       if (tableName.equals("guide")) {
-         tab_guide.TABLE.clearSelection();
-         tab_guide.clear();
+         TableUtil.clear(tab_guide.TABLE);
       }
       if (tableName.equals("cancel")) {
-         tab_cancel.TABLE.clearSelection();
-         tab_cancel.clear();
+         TableUtil.clear(tab_cancel.TABLE);
       }
       if (tableName.equals("deleted")) {
-         tab_deleted.TABLE.clearSelection();
-         tab_deleted.clear();
+         TableUtil.clear(tab_deleted.TABLE);
       }
       if (tableName.equals("search")) {
-         tab_search.TABLE.clearSelection();
-         tab_search.clear();
+         TableUtil.clear(tab_search.TABLE);
       }
       if (tableName.equals("premiere")) {
-         tab_premiere.TABLE.clearSelection();
-         tab_premiere.clear();
+         TableUtil.clear(tab_premiere.TABLE);
       }
    }
    

@@ -1236,7 +1236,7 @@ public class gui {
    // Kill and remove selected jobs from job monitor
    private void cancelCB() {
       debug.print("");
-      int[] rows = jobTab.GetSelectedRows();
+      int[] rows = TableUtil.GetSelectedRows(jobTab.JobMonitor);
 
       if (rows.length > 0) {
          int row;
