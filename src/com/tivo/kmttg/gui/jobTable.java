@@ -1,13 +1,10 @@
 package com.tivo.kmttg.gui;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -67,9 +64,9 @@ public class jobTable {
             new taskInfo(
                config.gui.getJFrame(),
                job.type + ": " + "Tivo=" +
-               (String)JobMonitor.getValueAt(row, getColumnIndex("SOURCE")) +
+               (String)JobMonitor.getValueAt(row, TableUtil.getColumnIndex(JobMonitor, "SOURCE")) +
                "---Output=" +
-               (String)JobMonitor.getValueAt(row, getColumnIndex("OUTPUT")),
+               (String)JobMonitor.getValueAt(row, TableUtil.getColumnIndex(JobMonitor, "OUTPUT")),
                job.getProcess()
             );
          }
@@ -99,57 +96,6 @@ public class jobTable {
       }
    }
 
-   /**
-    * Applied background color to single column of a JTable
-    * in order to distinguish it apart from other columns.
-    */ 
-    class ColorColumnRenderer extends DefaultTableCellRenderer 
-    {
-       /**
-        * 
-        */
-       private static final long serialVersionUID = 1L;
-       Color bkgndColor;
-       Font font;
-       
-       public ColorColumnRenderer(Color bkgnd, Font font) {
-          super(); 
-          bkgndColor = bkgnd;
-          this.font = font;
-       }
-       
-       public Component getTableCellRendererComponent
-           (JTable table, Object value, boolean isSelected,
-            boolean hasFocus, int row, int column) 
-       {
-          Component cell = super.getTableCellRendererComponent
-             (table, value, isSelected, hasFocus, row, column);
-     
-          if (bkgndColor != null && ! isSelected)
-             cell.setBackground( bkgndColor );
-          
-          cell.setFont(config.tableFont);
-         
-          return cell;
-       }
-    } 
-    
-    public int getColumnIndex(String name) {
-       String cname;
-       for (int i=0; i<JobMonitor.getColumnCount(); i++) {
-          cname = (String)JobMonitor.getColumnModel().getColumn(i).getHeaderValue();
-          if (cname.equals(name)) return i;
-       }
-       return -1;
-    }
-        
-    public int[] GetSelectedRows() {
-       int[] rows = JobMonitor.getSelectedRows();
-       if (rows.length <= 0)
-          log.error("No rows selected");
-       return rows;
-    }
-    
     // Return job hash of selected entry
     public jobData GetSelectionData(int row) {
        // Get column items for selected row 
@@ -157,7 +103,7 @@ public class jobTable {
           log.error("Nothing selected");
           return null;
        }
-       jobEntry s = (jobEntry)JobMonitor.getValueAt(row, getColumnIndex("JOB"));
+       jobEntry s = (jobEntry)JobMonitor.getValueAt(row, TableUtil.getColumnIndex(JobMonitor, "JOB"));
        return s.job;
     }
     
@@ -165,7 +111,7 @@ public class jobTable {
     public jobData GetRowData(int row) {
        // Get column items for given row 
        if ( JobMonitor.getRowCount() > row ) {
-          jobEntry s = (jobEntry)JobMonitor.getValueAt(row, getColumnIndex("JOB"));
+          jobEntry s = (jobEntry)JobMonitor.getValueAt(row, TableUtil.getColumnIndex(JobMonitor, "JOB"));
           return s.job;
        }
        return null;
@@ -208,7 +154,7 @@ public class jobTable {
        TableModel model = JobMonitor.getModel(); 
        int numrows = model.getRowCount(); 
        for(int i=0; i<numrows; i++) {
-          jobEntry e = (jobEntry)JobMonitor.getValueAt(i,getColumnIndex("JOB"));
+          jobEntry e = (jobEntry)JobMonitor.getValueAt(i,TableUtil.getColumnIndex(JobMonitor, "JOB"));
           if (e.job == job) {
              RemoveRow(JobMonitor, i);
              return;
@@ -221,9 +167,9 @@ public class jobTable {
        TableModel model = JobMonitor.getModel(); 
        int numrows = model.getRowCount(); 
        for(int i=0; i<numrows; i++) {
-          jobEntry e = (jobEntry)JobMonitor.getValueAt(i,getColumnIndex("JOB"));
+          jobEntry e = (jobEntry)JobMonitor.getValueAt(i,TableUtil.getColumnIndex(JobMonitor, "JOB"));
           if (e.job == job) {
-             JobMonitor.setValueAt(status, i, getColumnIndex("STATUS"));
+             JobMonitor.setValueAt(status, i, TableUtil.getColumnIndex(JobMonitor, "STATUS"));
              packColumns(JobMonitor,2);
              return;
           }
@@ -234,9 +180,9 @@ public class jobTable {
        TableModel model = JobMonitor.getModel(); 
        int numrows = model.getRowCount(); 
        for(int i=0; i<numrows; i++) {
-          jobEntry e = (jobEntry)JobMonitor.getValueAt(i,getColumnIndex("JOB"));
+          jobEntry e = (jobEntry)JobMonitor.getValueAt(i,TableUtil.getColumnIndex(JobMonitor, "JOB"));
           if (e.job == job) {
-             JobMonitor.setValueAt(text, i, getColumnIndex("OUTPUT"));
+             JobMonitor.setValueAt(text, i, TableUtil.getColumnIndex(JobMonitor, "OUTPUT"));
              packColumns(JobMonitor,2);
              return;
           }
@@ -345,7 +291,7 @@ public class jobTable {
        for (int i=0; i<order.length; ++i) {
           colName = order[i];
           if (colName.equals("ICON")) colName = "";
-          index = getColumnIndex(colName);
+          index = TableUtil.getColumnIndex(JobMonitor, colName);
           if ( index != -1)
              moveColumn(index, i);
        }

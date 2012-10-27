@@ -19,9 +19,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTable;
@@ -155,7 +153,11 @@ public class premiereTable {
          
           return cell;
        }
-    }   
+    }
+    
+    private JSONObject GetRowData(int row) {
+       return TableUtil.GetRowData(TABLE, row, "DATE");
+    }
     
     // Override some default table model actions
     class MyTableModel extends DefaultTableModel {
@@ -183,69 +185,13 @@ public class premiereTable {
        }
     }
 
-    // Pack all table columns to fit widest cell element
-    public void packColumns(JXTable table, int margin) {
-       //if (config.tableColAutoSize == 1) {
-          for (int c=0; c<table.getColumnCount(); c++) {
-              packColumn(table, c, 2);
-          }
-       //}
-    }
-
-    // Sets the preferred width of the visible column specified by vColIndex. The column
-    // will be just wide enough to show the column head and the widest cell in the column.
-    // margin pixels are added to the left and right
-    // (resulting in an additional width of 2*margin pixels).
-    public void packColumn(JXTable table, int vColIndex, int margin) {
-        DefaultTableColumnModel colModel = (DefaultTableColumnModel)table.getColumnModel();
-        TableColumn col = colModel.getColumn(vColIndex);
-        int width = 0;
-    
-        // Get width of column header
-        TableCellRenderer renderer = col.getHeaderRenderer();
-        if (renderer == null) {
-            renderer = table.getTableHeader().getDefaultRenderer();
-        }
-        Component comp = renderer.getTableCellRendererComponent(
-            table, col.getHeaderValue(), false, false, 0, 0);
-        width = comp.getPreferredSize().width;
-    
-        // Get maximum width of column data
-        for (int r=0; r<table.getRowCount(); r++) {
-            renderer = table.getCellRenderer(r, vColIndex);
-            comp = renderer.getTableCellRendererComponent(
-                table, table.getValueAt(r, vColIndex), false, false, r, vColIndex);
-            width = Math.max(width, comp.getPreferredSize().width);
-        }
-    
-        // Add margin
-        width += 2*margin;
-               
-        // Set the width
-        col.setPreferredWidth(width);
-    }
-    
-    public int getColumnIndex(String name) {
-       String cname;
-       for (int i=0; i<TABLE.getColumnCount(); i++) {
-          cname = (String)TABLE.getColumnModel().getColumn(i).getHeaderValue();
-          if (cname.equals(name)) return i;
-       }
-       return -1;
-    }
-    
-    public void clear() {
-       DefaultTableModel model = (DefaultTableModel)TABLE.getModel(); 
-       model.setNumRows(0);
-    }
-
     public void AddRows(String tivoName, JSONArray data) {
        try {
           for (int i=0; i<data.length(); ++i) {
              AddRow(data.getJSONObject(i));
           }
           tivo_data.put(tivoName, data);
-          packColumns(TABLE,2);
+          TableUtil.packColumns(TABLE,2);
           if (config.gui.remote_gui != null)
              config.gui.remote_gui.setTivoName("premiere", tivoName);
        } catch (JSONException e) {
@@ -283,35 +229,23 @@ public class premiereTable {
           info[2] = season;
           info[3] = channel;
           info[4] = new sortableDuration(duration, false);
-          AddRow(TABLE, info);       
+          TableUtil.AddRow(TABLE, info);       
        } catch (JSONException e) {
           log.error("premiereTable AddRow - " + e.getMessage());
        }
-    }
-    
-    private void AddRow(JTable table, Object[] data) {
-       DefaultTableModel dm = (DefaultTableModel)table.getModel();
-       dm.addRow(data);
-    }
-    
-    public int[] GetSelectedRows() {
-       int[] rows = TABLE.getSelectedRows();
-       if (rows.length <= 0)
-          log.error("No rows selected");
-       return rows;
     }
     
     private void TABLERowSelected(int row) {
        debug.print("row=" + row);
        if (row == -1) return;
        // Get column items for selected row 
-       sortableDate s = (sortableDate)TABLE.getValueAt(row,getColumnIndex("DATE"));
+       sortableDate s = (sortableDate)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "DATE"));
        if (s.folder) {
           // Folder entry - don't display anything
        } else {
           try {
              // Non folder entry so print single entry info
-             sortableDuration dur = (sortableDuration)TABLE.getValueAt(row,getColumnIndex("DUR"));
+             sortableDuration dur = (sortableDuration)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "DUR"));
              JSONObject o;
              String channelNum = null;
              String channel = null;
@@ -363,31 +297,12 @@ public class premiereTable {
        }
     }
     
-    public JSONObject GetRowData(int row) {
-       sortableDate s = (sortableDate) TABLE.getValueAt(row, getColumnIndex("DATE"));
-       if (s != null)
-          return s.json;
-       return null;
-    }    
-    
-    public String GetRowTitle(int row) {
-       String s = (String) TABLE.getValueAt(row, getColumnIndex("SHOW"));
-       if (s != null)
-          return s;
-       return null;
-    }
-    
-    public void RemoveRow(JXTable table, int row) {
-       DefaultTableModel dm = (DefaultTableModel)table.getModel();
-       dm.removeRow(table.convertRowIndexToModel(row));
-    }
-    
     // Handle keyboard presses
     private void KeyPressed(KeyEvent e) {
        int keyCode = e.getKeyCode();
        if (keyCode == KeyEvent.VK_J) {
           // Print json of selected row to log window
-          int[] selected = GetSelectedRows();
+          int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
              return;
           JSONObject json = GetRowData(selected[0]);
@@ -412,7 +327,7 @@ public class premiereTable {
     
     // Schedule a single recording
     public void recordSingle(final String tivoName) {
-       final int[] selected = GetSelectedRows();
+       final int[] selected = TableUtil.GetSelectedRows(TABLE);
        if (selected.length > 0) {
           log.print("Scheduling individual recordings on TiVo: " + tivoName);
           class backgroundRun extends SwingWorker<Object, Object> {
@@ -426,7 +341,7 @@ public class premiereTable {
                       for (int i=0; i<selected.length; ++i) {
                          row = selected[i];
                          json = GetRowData(row);
-                         title = GetRowTitle(row);
+                         title = TableUtil.GetRowTitle(TABLE, row, "SHOW");
                          if (json != null) {
                             if (json.has("contentId") && json.has("offerId")) {
                                if (config.gui.remote_gui.recordOpt == null)
@@ -472,7 +387,7 @@ public class premiereTable {
     public void recordSP(final String tivoName) {
        class backgroundRun extends SwingWorker<Object, Object> {
           protected Object doInBackground() {
-             int[] selected = GetSelectedRows();
+             int[] selected = TableUtil.GetSelectedRows(TABLE);
              if (selected.length > 0) {
                 int row;
                 JSONArray existing;

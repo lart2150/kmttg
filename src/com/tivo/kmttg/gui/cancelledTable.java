@@ -5,8 +5,6 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -24,9 +22,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTable;
@@ -235,14 +231,18 @@ public class cancelledTable {
         
          return cell;
       }
-   }   
+   }
+   
+   private JSONObject GetRowData(int row) {
+      return TableUtil.GetRowData(TABLE, row, "DATE");
+   }
    
    // Mouse event handler
    // This will display folder entries in table if folder entry single-clicked
    private void MouseClicked(MouseEvent e) {
       if( e.getClickCount() == 1 ) {
          int row = TABLE.rowAtPoint(e.getPoint());
-         sortableDate s = (sortableDate)TABLE.getValueAt(row,getColumnIndex("DATE"));
+         sortableDate s = (sortableDate)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "DATE"));
          if (s.folder) {
             folderName = s.folderName;
             folderEntryNum = row;
@@ -251,39 +251,18 @@ public class cancelledTable {
          }
       }
    }
-      
-   public String getColumnName(int c) {
-      return (String)TABLE.getColumnModel().getColumn(c).getHeaderValue();
-   }
-   
-   public int getColumnIndex(String name) {
-      String cname;
-      for (int i=0; i<TABLE.getColumnCount(); i++) {
-         cname = (String)TABLE.getColumnModel().getColumn(i).getHeaderValue();
-         if (cname.equals(name)) return i;
-      }
-      return -1;
-   }
-   
-   public int[] GetSelectedRows() {
-      debug.print("");
-      int[] rows = TABLE.getSelectedRows();
-      if (rows.length <= 0)
-         log.error("No rows selected");
-      return rows;
-   }
-   
+         
    private void TABLERowSelected(int row) {
       debug.print("row=" + row);
       if (row == -1) return;
       // Get column items for selected row 
-      sortableDate s = (sortableDate)TABLE.getValueAt(row,getColumnIndex("DATE"));
+      sortableDate s = (sortableDate)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "DATE"));
       if (s.folder) {
          // Folder entry - don't display anything
       } else {
          try {
             // Non folder entry so print single entry info
-            sortableDuration dur = (sortableDuration)TABLE.getValueAt(row,getColumnIndex("DUR"));
+            sortableDuration dur = (sortableDuration)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "DUR"));
             JSONObject o;
             String channelNum = null;
             String channel = null;
@@ -354,7 +333,7 @@ public class cancelledTable {
          // Reset local entries/folders hashes to new entries
          folderize(o); // create folder structure
          Refresh(o);
-         packColumns(TABLE, 2);
+         TableUtil.packColumns(TABLE, 2);
          tivo_data.put(tivoName, data);
          currentTivo = tivoName;
          if (config.gui.remote_gui != null)
@@ -385,7 +364,7 @@ public class cancelledTable {
    
    // Update table display to show either top level flat structure or inside a folder
    private void displayFlatStructure(Stack<JSONObject> o) {
-      clear();
+      TableUtil.clear(TABLE);
       for (int i=0; i<o.size(); ++i) {
          AddTABLERow(o.get(i));
       }
@@ -394,7 +373,7 @@ public class cancelledTable {
    // Update table display to show top level folderized entries
    public void displayFolderStructure() {
       debug.print("");
-      clear();
+      TableUtil.clear(TABLE);
       // Folder based structure
       String name;
       // Add all folders
@@ -501,9 +480,9 @@ public class cancelledTable {
          config.gui.remote_gui.flagIfInTodo(entry);
          JSONObject o = new JSONObject();
          String startString = entry.getString("scheduledStartTime");
-         long start = getLongDateFromString(startString);
+         long start = TableUtil.getLongDateFromString(startString);
          String endString = entry.getString("scheduledEndTime");
-         long end = getLongDateFromString(endString);
+         long end = TableUtil.getLongDateFromString(endString);
          String title = " ";
          if (entry.has("title"))
             title += entry.getString("title");
@@ -527,10 +506,10 @@ public class cancelledTable {
          data[3] = channel;
          data[4] = new sortableDuration(end-start, false);
          
-         AddRow(TABLE, data);
+         TableUtil.AddRow(TABLE, data);
          
          // Adjust column widths to data
-         packColumns(TABLE, 2);
+         TableUtil.packColumns(TABLE, 2);
       } catch (JSONException e1) {
          log.error("AddTABLERow - " + e1.getMessage());
       }      
@@ -548,36 +527,10 @@ public class cancelledTable {
       data[0] = gui.Images.get("folder");      
       data[1] = fName;
       data[2] = new sortableDate(fName, folderEntry);
-      AddRow(TABLE, data);
+      TableUtil.AddRow(TABLE, data);
       
       // Adjust column widths to data
-      packColumns(TABLE, 2);
-   }
-   
-   public void clear() {
-      debug.print("");
-      DefaultTableModel model = (DefaultTableModel)TABLE.getModel(); 
-      model.setNumRows(0);
-   }
-   
-   public void AddRow(JXTable table, Object[] data) {
-      debug.print("data=" + data);
-      DefaultTableModel dm = (DefaultTableModel)table.getModel();
-      dm.addRow(data);
-   }
-      
-   public JSONObject GetRowData(int row) {
-      sortableDate s = (sortableDate) TABLE.getValueAt(row, getColumnIndex("DATE"));
-      if (s != null)
-         return s.json;
-      return null;
-   }    
-   
-   public String GetRowTitle(int row) {
-      String s = (String) TABLE.getValueAt(row, getColumnIndex("SHOW"));
-      if (s != null)
-         return s;
-      return null;
+      TableUtil.packColumns(TABLE, 2);
    }
 
    // Look for entry with given folder name and select it
@@ -585,7 +538,7 @@ public class cancelledTable {
    public void SelectFolder(String folderName) {
       debug.print("folderName=" + folderName);
       for (int i=0; i<TABLE.getRowCount(); ++i) {
-         sortableDate s = (sortableDate)TABLE.getValueAt(i,getColumnIndex("DATE"));
+         sortableDate s = (sortableDate)TABLE.getValueAt(i,TableUtil.getColumnIndex(TABLE, "DATE"));
          if (s.folder) {
             if (s.folderName.equals(folderName)) {
                TABLE.clearSelection();
@@ -604,79 +557,13 @@ public class cancelledTable {
          }
       }
    }
-
-   // Pack all table columns to fit widest cell element
-   public void packColumns(JXTable table, int margin) {
-      debug.print("table=" + table + " margin=" + margin);
-      //if (config.tableColAutoSize == 1) {
-         for (int c=0; c<table.getColumnCount(); c++) {
-             packColumn(table, c, 2);
-         }
-      //}
-   }
-
-   // Sets the preferred width of the visible column specified by vColIndex. The column
-   // will be just wide enough to show the column head and the widest cell in the column.
-   // margin pixels are added to the left and right
-   // (resulting in an additional width of 2*margin pixels).
-   public void packColumn(JXTable table, int vColIndex, int margin) {
-       DefaultTableColumnModel colModel = (DefaultTableColumnModel)table.getColumnModel();
-       TableColumn col = colModel.getColumn(vColIndex);
-       int width = 0;
-   
-       // Get width of column header
-       TableCellRenderer renderer = col.getHeaderRenderer();
-       if (renderer == null) {
-           renderer = table.getTableHeader().getDefaultRenderer();
-       }
-       Component comp = renderer.getTableCellRendererComponent(
-           table, col.getHeaderValue(), false, false, 0, 0);
-       width = comp.getPreferredSize().width;
-   
-       // Get maximum width of column data
-       for (int r=0; r<table.getRowCount(); r++) {
-           renderer = table.getCellRenderer(r, vColIndex);
-           comp = renderer.getTableCellRendererComponent(
-               table, table.getValueAt(r, vColIndex), false, false, r, vColIndex);
-           width = Math.max(width, comp.getPreferredSize().width);
-       }
-   
-       // Add margin
-       width += 2*margin;
-              
-       // Set the width
-       col.setPreferredWidth(width);
-   }
-   
-   // Compute and return all table column widths as an integer array
-   public int[] getColWidths() {
-      int[] widths = new int[TABLE.getColumnCount()];
-      DefaultTableColumnModel colModel = (DefaultTableColumnModel)TABLE.getColumnModel();
-      for (int i=0; i<widths.length; ++i) {
-         TableColumn col = colModel.getColumn(i);
-         widths[i] = col.getWidth();
-      }
-      return widths;
-   }
-   
-   // Compute and return all table column widths as an integer array
-   public void setColWidths(int[] widths) {
-      if (widths.length != TABLE.getColumnCount()) {
-         return;
-      }
-      DefaultTableColumnModel colModel = (DefaultTableColumnModel)TABLE.getColumnModel();
-      for (int i=0; i<widths.length; ++i) {
-         TableColumn col = colModel.getColumn(i);
-         col.setPreferredWidth(widths[i]);
-      }
-   }
-   
+      
    private long getStartTime(JSONObject entry) {
       String startString;
       try {
          if (entry.has("scheduledStartTime")) {
             startString = entry.getString("scheduledStartTime");
-            return getLongDateFromString(startString);
+            return TableUtil.getLongDateFromString(startString);
          } else
             return 0;
       } catch (JSONException e) {
@@ -684,21 +571,10 @@ public class cancelledTable {
          return 0;
       }
    }
-
-   private long getLongDateFromString(String date) {
-      try {
-         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz");
-         Date d = format.parse(date + " GMT");
-         return d.getTime();
-      } catch (ParseException e) {
-        log.error("cancelledTable getLongDate - " + e.getMessage());
-        return 0;
-      }
-   }
    
    // Schedule a single recording
    public void recordSingle(final String tivoName) {
-      final int[] selected = GetSelectedRows();
+      final int[] selected = TableUtil.GetSelectedRows(TABLE);
       if (selected.length > 0) {
          log.print("Scheduling individual recordings on TiVo: " + tivoName);
          class backgroundRun extends SwingWorker<Object, Object> {
@@ -712,7 +588,7 @@ public class cancelledTable {
                      for (int i=0; i<selected.length; ++i) {
                         row = selected[i];
                         json = GetRowData(row);
-                        title = GetRowTitle(row);
+                        title = TableUtil.GetRowTitle(TABLE, row, "SHOW");
                         if (json != null) {
                            if (config.gui.remote_gui.recordOpt == null)
                               config.gui.remote_gui.recordOpt = new recordOptions();

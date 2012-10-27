@@ -22,9 +22,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTable;
@@ -294,58 +292,6 @@ public class spTable {
           return false;
        }
     }
-
-    // Pack all table columns to fit widest cell element
-    public void packColumns(JXTable table, int margin) {
-       debug.print("table=" + table + " margin=" + margin);
-       //if (config.tableColAutoSize == 1) {
-          for (int c=0; c<table.getColumnCount(); c++) {
-              packColumn(table, c, 2);
-          }
-       //}
-    }
-
-    // Sets the preferred width of the visible column specified by vColIndex. The column
-    // will be just wide enough to show the column head and the widest cell in the column.
-    // margin pixels are added to the left and right
-    // (resulting in an additional width of 2*margin pixels).
-    public void packColumn(JXTable table, int vColIndex, int margin) {
-        DefaultTableColumnModel colModel = (DefaultTableColumnModel)table.getColumnModel();
-        TableColumn col = colModel.getColumn(vColIndex);
-        int width = 0;
-    
-        // Get width of column header
-        TableCellRenderer renderer = col.getHeaderRenderer();
-        if (renderer == null) {
-            renderer = table.getTableHeader().getDefaultRenderer();
-        }
-        Component comp = renderer.getTableCellRendererComponent(
-            table, col.getHeaderValue(), false, false, 0, 0);
-        width = comp.getPreferredSize().width;
-    
-        // Get maximum width of column data
-        for (int r=0; r<table.getRowCount(); r++) {
-            renderer = table.getCellRenderer(r, vColIndex);
-            comp = renderer.getTableCellRendererComponent(
-                table, table.getValueAt(r, vColIndex), false, false, r, vColIndex);
-            width = Math.max(width, comp.getPreferredSize().width);
-        }
-    
-        // Add margin
-        width += 2*margin;
-               
-        // Set the width
-        col.setPreferredWidth(width);
-    }
-    
-    public int getColumnIndex(String name) {
-       String cname;
-       for (int i=0; i<TABLE.getColumnCount(); i++) {
-          cname = (String)TABLE.getColumnModel().getColumn(i).getHeaderValue();
-          if (cname.equals(name)) return i;
-       }
-       return -1;
-    }
     
     public void clear() {
        debug.print("");
@@ -361,7 +307,7 @@ public class spTable {
              AddRow(data.getJSONObject(i), i+1);
              //System.out.println(data.getJSONObject(i));
           }
-          packColumns(TABLE,2);
+          TableUtil.packColumns(TABLE,2);
        } catch (JSONException e) {
           log.error("spTable AddRows - " + e.getMessage());
           return false;
@@ -432,28 +378,20 @@ public class spTable {
           AddRow(TABLE, info);
     }
     
-    public int[] GetSelectedRows() {
-       debug.print("");
-       int[] rows = TABLE.getSelectedRows();
-       if (rows.length <= 0)
-          log.error("No rows selected");
-       return rows;
-    }
-    
     public void setSelectedRow(int row) {
        TABLE.setRowSelectionInterval(row,row);
        TABLE.scrollRectToVisible(new Rectangle(TABLE.getCellRect(row, 0, true)));
     }
     
     public JSONObject GetRowData(int row) {
-       sortableInt s = (sortableInt) TABLE.getValueAt(row, getColumnIndex("PRIORITY"));
+       sortableInt s = (sortableInt) TABLE.getValueAt(row, TableUtil.getColumnIndex(TABLE, "PRIORITY"));
        if (s != null)
           return s.json;
        return null;
     }
     
     public String GetRowTitle(int row) {
-       String s = (String) TABLE.getValueAt(row, getColumnIndex("SHOW"));
+       String s = (String) TABLE.getValueAt(row, TableUtil.getColumnIndex(TABLE, "SHOW"));
        if (s != null)
           return s;
        return null;
@@ -464,7 +402,7 @@ public class spTable {
        int col;
        MyTableModel dm = (MyTableModel)TABLE.getModel();
        for (int row=0; row<TABLE.getRowCount(); ++row) {
-          col = getColumnIndex("SHOW");
+          col = TableUtil.getColumnIndex(TABLE, "SHOW");
           title = (String)TABLE.getValueAt(row,col);
           title = name + title;
           dm.setValueAt(title, row, col);
@@ -530,7 +468,7 @@ public class spTable {
        JSONArray array = new JSONArray();
        sortableInt s;
        for (int row=0; row<count; ++row) {
-          s = (sortableInt) TABLE.getValueAt(row, getColumnIndex("PRIORITY"));
+          s = (sortableInt) TABLE.getValueAt(row, TableUtil.getColumnIndex(TABLE, "PRIORITY"));
           if (s != null && s.json.has("subscriptionId")) {
              try {
                 array.put(s.json.getString("subscriptionId"));
@@ -551,7 +489,7 @@ public class spTable {
        int keyCode = e.getKeyCode();
        if (keyCode == KeyEvent.VK_J) {
           // Print json of selected row to log window
-          int[] selected = GetSelectedRows();
+          int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
              return;
           JSONObject json = GetRowData(selected[0]);
@@ -564,7 +502,7 @@ public class spTable {
        }
        else if (keyCode == KeyEvent.VK_UP) {
           // Move selected row up
-          int[] selected = GetSelectedRows();
+          int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 0) {
              log.error("No rows selected");
              return;
@@ -594,7 +532,7 @@ public class spTable {
        }
        else if (keyCode == KeyEvent.VK_DOWN) {
           // Move selected row down
-          int[] selected = GetSelectedRows();
+          int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 0) {
              log.error("No rows selected");
              return;
@@ -631,7 +569,7 @@ public class spTable {
     // Delete selected Season Pass entries from TiVo and table
     public void SPListDelete() {
        // Remove selected row from TiVo and table
-       int[] selected = GetSelectedRows();
+       int[] selected = TableUtil.GetSelectedRows(TABLE);
        if (selected == null || selected.length < 1) {
           log.error("No rows selected");
           return;
@@ -696,7 +634,7 @@ public class spTable {
        class backgroundRun extends SwingWorker<Object, Object> {
           protected Object doInBackground() {
              //SeasonPasses
-             int[] selected = GetSelectedRows();
+             int[] selected = TableUtil.GetSelectedRows(TABLE);
              if (selected.length > 0) {
                 int row;
                 JSONArray existing;
@@ -765,7 +703,7 @@ public class spTable {
     public void SPListModify(final String tivoName) {
        class backgroundRun extends SwingWorker<Object, Object> {
           protected Object doInBackground() {
-             int[] selected = GetSelectedRows();
+             int[] selected = TableUtil.GetSelectedRows(TABLE);
              if (selected.length > 0) {
                 int row = selected[0];
                 JSONObject json = GetRowData(row);

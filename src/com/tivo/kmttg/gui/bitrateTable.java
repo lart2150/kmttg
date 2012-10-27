@@ -1,14 +1,9 @@
 package com.tivo.kmttg.gui;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Hashtable;
 
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
@@ -69,42 +64,7 @@ public class bitrateTable {
          }
          return 0;
       }
-   };
-
-   /**
-    * Applied background color to single column of a JTable
-    * in order to distinguish it apart from other columns.
-    */ 
-    class ColorColumnRenderer extends DefaultTableCellRenderer 
-    {
-       private static final long serialVersionUID = 1L;
-       Color bkgndColor;
-       Font font;
-       
-       public ColorColumnRenderer(Color bkgnd, Font font) {
-          super();
-          // Center text in cells
-          setHorizontalAlignment(CENTER);
-          bkgndColor = bkgnd;
-          this.font = font;
-       }
-       
-       public Component getTableCellRendererComponent
-           (JTable table, Object value, boolean isSelected,
-            boolean hasFocus, int row, int column) 
-       {
-          Component cell = super.getTableCellRendererComponent
-             (table, value, isSelected, hasFocus, row, column);
-     
-          if (bkgndColor != null && ! isSelected)
-             cell.setBackground( bkgndColor );
-          
-          cell.setFont(config.tableFont);
-         
-          return cell;
-       }
-    } 
-    
+   };    
     
     // Override some default table model actions
     class MyTableModel extends DefaultTableModel {
@@ -153,18 +113,11 @@ public class bitrateTable {
        info[3] = new sortableDouble(bitRate(data.get("bytes"), data.get("duration")));
        // Rate in GB/hour = (bytes/2^30)/(secs/3600)
        info[4] = new sortableDouble((data.get("bytes")/Math.pow(2,30))/(data.get("duration")/3600.0));       
-       AddRow(TABLE, info);       
-    }
-    
-    public void AddRow(JTable table, Object[] data) {
-       debug.print("table=" + table + " data=" + data);
-       DefaultTableModel dm = (DefaultTableModel)table.getModel();
-       dm.addRow(data);
+       TableUtil.AddRow(TABLE, info);       
     }
     
     // Mbps = (bytes*8)/(1e6*secs)
     public static Double bitRate(Double bytes, Double secs) {
        return (bytes*8)/(1e6*secs);
     }
-
 }

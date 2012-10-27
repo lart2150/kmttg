@@ -1,14 +1,8 @@
 package com.tivo.kmttg.gui;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Hashtable;
 
 import javax.swing.JFrame;
@@ -18,10 +12,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTable;
@@ -114,42 +105,7 @@ public class todoTable {
             }
          }
       });
-   }
-
-   /**
-    * Applied background color to single column of a JTable
-    * in order to distinguish it apart from other columns.
-    */ 
-    class ColorColumnRenderer extends DefaultTableCellRenderer 
-    {
-       private static final long serialVersionUID = 1L;
-       Color bkgndColor;
-       Font font;
-       
-       public ColorColumnRenderer(Color bkgnd, Font font) {
-          super();
-          // Center text in cells
-          setHorizontalAlignment(CENTER);
-          bkgndColor = bkgnd;
-          this.font = font;
-       }
-       
-       public Component getTableCellRendererComponent
-           (JTable table, Object value, boolean isSelected,
-            boolean hasFocus, int row, int column) 
-       {
-          Component cell = super.getTableCellRendererComponent
-             (table, value, isSelected, hasFocus, row, column);
-     
-          if (bkgndColor != null && ! isSelected)
-             cell.setBackground( bkgndColor );
-          
-          cell.setFont(config.tableFont);
-         
-          return cell;
-       }
-    } 
-    
+   }    
     
     // Override some default table model actions
     class MyTableModel extends DefaultTableModel {
@@ -178,64 +134,6 @@ public class todoTable {
        }
     }
 
-    // Pack all table columns to fit widest cell element
-    public void packColumns(JXTable table, int margin) {
-       debug.print("table=" + table + " margin=" + margin);
-       //if (config.tableColAutoSize == 1) {
-          for (int c=0; c<table.getColumnCount(); c++) {
-              packColumn(table, c, 2);
-          }
-       //}
-    }
-
-    // Sets the preferred width of the visible column specified by vColIndex. The column
-    // will be just wide enough to show the column head and the widest cell in the column.
-    // margin pixels are added to the left and right
-    // (resulting in an additional width of 2*margin pixels).
-    public void packColumn(JXTable table, int vColIndex, int margin) {
-        DefaultTableColumnModel colModel = (DefaultTableColumnModel)table.getColumnModel();
-        TableColumn col = colModel.getColumn(vColIndex);
-        int width = 0;
-    
-        // Get width of column header
-        TableCellRenderer renderer = col.getHeaderRenderer();
-        if (renderer == null) {
-            renderer = table.getTableHeader().getDefaultRenderer();
-        }
-        Component comp = renderer.getTableCellRendererComponent(
-            table, col.getHeaderValue(), false, false, 0, 0);
-        width = comp.getPreferredSize().width;
-    
-        // Get maximum width of column data
-        for (int r=0; r<table.getRowCount(); r++) {
-            renderer = table.getCellRenderer(r, vColIndex);
-            comp = renderer.getTableCellRendererComponent(
-                table, table.getValueAt(r, vColIndex), false, false, r, vColIndex);
-            width = Math.max(width, comp.getPreferredSize().width);
-        }
-    
-        // Add margin
-        width += 2*margin;
-               
-        // Set the width
-        col.setPreferredWidth(width);
-    }
-    
-    public int getColumnIndex(String name) {
-       String cname;
-       for (int i=0; i<TABLE.getColumnCount(); i++) {
-          cname = (String)TABLE.getColumnModel().getColumn(i).getHeaderValue();
-          if (cname.equals(name)) return i;
-       }
-       return -1;
-    }
-    
-    public void clear() {
-       debug.print("");
-       DefaultTableModel model = (DefaultTableModel)TABLE.getModel(); 
-       model.setNumRows(0);
-    }
-
     public void AddRows(String tivoName, JSONArray data) {
        try {
           for (int i=0; i<data.length(); ++i) {
@@ -243,7 +141,7 @@ public class todoTable {
           }
           tivo_data.put(tivoName, data);
           currentTivo = tivoName;
-          packColumns(TABLE,2);
+          TableUtil.packColumns(TABLE,2);
           if (config.gui.remote_gui != null)
              config.gui.remote_gui.setTivoName("todo", tivoName);
        } catch (JSONException e) {
@@ -257,9 +155,9 @@ public class todoTable {
           JSONObject o = new JSONObject();
           Object[] info = new Object[TITLE_cols.length];
           String startString = data.getString("scheduledStartTime");
-          long start = getLongDateFromString(startString);
+          long start = TableUtil.getLongDateFromString(startString);
           String endString = data.getString("scheduledEndTime");
-          long end = getLongDateFromString(endString);
+          long end = TableUtil.getLongDateFromString(endString);
           String title = " ";
           if (data.has("title"))
              title += data.getString("title");
@@ -282,37 +180,23 @@ public class todoTable {
           info[1] = title;
           info[2] = channel;
           info[3] = new sortableDuration(end-start, false);
-          AddRow(TABLE, info);       
+          TableUtil.AddRow(TABLE, info);       
        } catch (JSONException e) {
           log.error("todoTable AddRow - " + e.getMessage());
        }
-    }
-    
-    private void AddRow(JTable table, Object[] data) {
-       debug.print("table=" + table + " data=" + data);
-       DefaultTableModel dm = (DefaultTableModel)table.getModel();
-       dm.addRow(data);
-    }
-        
-    private int[] GetSelectedRows() {
-       debug.print("");
-       int[] rows = TABLE.getSelectedRows();
-       if (rows.length <= 0)
-          log.error("No rows selected");
-       return rows;
     }
     
     private void TABLERowSelected(int row) {
        debug.print("row=" + row);
        if (row == -1) return;
        // Get column items for selected row 
-       sortableDate s = (sortableDate)TABLE.getValueAt(row,getColumnIndex("DATE"));
+       sortableDate s = (sortableDate)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "DATE"));
        if (s.folder) {
           // Folder entry - don't display anything
        } else {
           try {
              // Non folder entry so print single entry info
-             sortableDuration dur = (sortableDuration)TABLE.getValueAt(row,getColumnIndex("DUR"));
+             sortableDuration dur = (sortableDuration)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "DUR"));
              JSONObject o;
              String channelNum = null;
              String channel = null;
@@ -364,26 +248,6 @@ public class todoTable {
        }
     }
     
-    private JSONObject GetRowData(int row) {
-       sortableDate s = (sortableDate) TABLE.getValueAt(row, getColumnIndex("DATE"));
-       if (s != null)
-          return s.json;
-       return null;
-    }    
-    
-    public String GetRowTitle(int row) {
-       String s = (String) TABLE.getValueAt(row, getColumnIndex("SHOW"));
-       if (s != null)
-          return s;
-       return null;
-    }
-    
-    public void RemoveRow(JXTable table, int row) {
-       debug.print("table=" + table + " row=" + row);
-       DefaultTableModel dm = (DefaultTableModel)table.getModel();
-       dm.removeRow(table.convertRowIndexToModel(row));
-    }
-    
     // Handle delete keyboard presses
     private void KeyPressed(KeyEvent e) {
        int keyCode = e.getKeyCode();
@@ -392,7 +256,7 @@ public class todoTable {
           DeleteCB();
        } else if (keyCode == KeyEvent.VK_J) {
           // Print json of selected row to log window
-          int[] selected = GetSelectedRows();
+          int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
              return;
           JSONObject json = GetRowData(selected[0]);
@@ -404,8 +268,12 @@ public class todoTable {
        }
     }
     
+    private JSONObject GetRowData(int row) {
+       return TableUtil.GetRowData(TABLE, row, "DATE");
+    }
+    
     public void DeleteCB() {
-       int[] selected = GetSelectedRows();
+       int[] selected = TableUtil.GetSelectedRows(TABLE);
        if (selected == null || selected.length != 1) {
           log.error("Must select a single table row.");
           return;
@@ -422,7 +290,7 @@ public class todoTable {
           // NOTE: Intentionally only remove 1 row at a time because removing rows from table
           row = selected[0];
           json = GetRowData(row);
-          title = GetRowTitle(row);
+          title = TableUtil.GetRowTitle(TABLE, row, "SHOW");
           if (json != null) {
              try {
                 log.warn("Cancelling ToDo show on TiVo '" + currentTivo + "': " + title);
@@ -431,7 +299,7 @@ public class todoTable {
                 a.put(json.getString("recordingId"));
                 o.put("recordingId", a);
                 if ( r.Command("cancel", o) != null ) {
-                   RemoveRow(TABLE, row);
+                   TableUtil.RemoveRow(TABLE, row);
                    tivo_data.get(currentTivo).remove(row);
                 }
              } catch (JSONException e1) {
@@ -440,17 +308,5 @@ public class todoTable {
           }
           r.disconnect();                   
        }
-    }
-
-    private long getLongDateFromString(String date) {
-       try {
-          SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz");
-          Date d = format.parse(date + " GMT");
-          return d.getTime();
-       } catch (ParseException e) {
-         log.error("todoTable getLongDate - " + e.getMessage());
-         return 0;
-       }
-    }
-    
+    }    
 }
