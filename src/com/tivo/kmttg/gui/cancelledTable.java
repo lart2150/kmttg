@@ -323,12 +323,18 @@ public class cancelledTable {
          JSONObject json;
          long now = new Date().getTime();
          long start;
-         // Filter out past recordings
+         Boolean includePast = config.gui.remote_gui.includePast_cancel.isSelected();
          for (int i=0; i<data.length(); ++i) {
             json = data.getJSONObject(i);
-            start = getStartTime(json);
-            if (start >= now)
+            if (includePast) {
+               // No filter - include all
                o.add(json);
+            } else {
+               // Filter out past recordings
+               start = getStartTime(json);
+               if (start >= now)
+                  o.add(json);
+            }
          }
          // Reset local entries/folders hashes to new entries
          folderize(o); // create folder structure
