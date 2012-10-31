@@ -1533,6 +1533,11 @@ public class gui {
                ofp.write("\n<rpc_tivo>\n");
                for (int j=0; j<names.length; ++j)
                   ofp.write(names[j] + "=" + remote_gui.getTivoName(names[j]) + "\n");
+               ofp.write("\n<rpc_includePast>\n");
+               if (remote_gui.includePast_cancel.isSelected())
+                  ofp.write("1\n");
+               else
+                  ofp.write("0\n");
             }
             ofp.write("\n");
             ofp.close();
@@ -1745,6 +1750,10 @@ public class gui {
                String[] l = line.split("=");
                if (l.length == 2 && tivoTabs.containsKey(l[1]))
                   remote_gui.setTivoName(l[0], l[1]);
+            }
+            if (key.equals("rpc_includePast") && remote_gui != null) {
+               if (line.matches("1"))
+                  remote_gui.includePast_cancel.setSelected(true);
             }
          }
          ifp.close();
