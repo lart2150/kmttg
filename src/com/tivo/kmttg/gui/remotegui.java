@@ -31,6 +31,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -90,6 +91,7 @@ public class remotegui {
    private JComboBox tivo_cancel = null;
    public JButton refresh_cancel = null;
    public JLabel label_cancel = null;
+   public JCheckBox includePast_cancel = null;
    
    private deletedTable tab_deleted = null;
    private JComboBox tivo_deleted = null;
@@ -776,6 +778,9 @@ public class remotegui {
          }
       });
       
+      includePast_cancel = new JCheckBox("Include Past", false);
+      includePast_cancel.setToolTipText(getToolTip("includePast_cancel"));
+      
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(title_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
@@ -788,6 +793,8 @@ public class remotegui {
       row1_cancel.add(record_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(refresh_todo_cancel);
+      row1_cancel.add(Box.createRigidArea(space_5));
+      row1_cancel.add(includePast_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(label_cancel);
       panel_cancel.add(row1_cancel, c);
@@ -2244,7 +2251,9 @@ public class remotegui {
             title = title + " - " + entry.getString("subtitle");
          }
          String startTime = entry.getString("startTime");
-         String channelNumber = entry.getJSONObject("channel").getString("channelNumber");
+         String channelNumber = null;
+         if (entry.has("channel"))
+            channelNumber = entry.getJSONObject("channel").getString("channelNumber");
          java.util.Enumeration<String> keys = all_todo.keys();
          while (keys.hasMoreElements()) {
             String tivo = keys.nextElement();
@@ -2264,7 +2273,7 @@ public class remotegui {
                // Add __inTodo__ flag indicating tivo name scheduled to record this show
                if (start.equals(startTime)) {
                   // Start time & channel match
-                  if (chan.equals(channelNumber))
+                  if (channelNumber != null && chan.equals(channelNumber))
                      entry.put("__inTodo__", tivo);
                   // Start time & title match (same program on another channel)
                   else if (name.equals(title))
@@ -2496,6 +2505,10 @@ public class remotegui {
       else if (component.equals("refresh_cancel_folder")){
          text = "<b>Back</b><br>";
          text += "Return to top level folder view.";
+      }
+      else if (component.equals("includePast_cancel")){
+         text = "<b>Include Past</b><br>";
+         text += "Include past history prior to current time if enabled.";
       }
       else if (component.equals("refresh_todo_cancel")) {
          text = "<b>Refresh ToDo</b><br>";
