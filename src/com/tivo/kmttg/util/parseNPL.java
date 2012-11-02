@@ -94,8 +94,8 @@ public class parseNPL {
                h.put("duration", value);
             }
 
-            // CaptureDate
-            if (l.matches("^<CaptureDate.*$")) {
+            // ShowingStartTime
+            if (l.matches("^<ShowingStartTime.*$")) {
                j++;
                value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
                h.put("gmt_hex", value);
