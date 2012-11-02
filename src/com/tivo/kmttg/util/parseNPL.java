@@ -94,7 +94,22 @@ public class parseNPL {
                h.put("duration", value);
             }
 
-            // ShowingStartTime
+            // CaptureDate
+            if (l.matches("^<CaptureDate.*$")) {
+               j++;
+               value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
+               h.put("gmt_hex", value);
+               String hex = value;
+               hex = hex.replaceFirst("^0x(.+)$", "$1");
+               int dec = Integer.parseInt(hex,16);
+               long gmt = (long)dec*1000;
+               h.put("gmt", "" + gmt);
+               h.put("date", getTime(gmt));
+               h.put("date_long", getDetailedTime(gmt));
+            }
+
+            // ShowingStartTime (assumes it's after CaptureDate and will override)
+            // This was introduced by TiVo in 20.2.2 software
             if (l.matches("^<ShowingStartTime.*$")) {
                j++;
                value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
