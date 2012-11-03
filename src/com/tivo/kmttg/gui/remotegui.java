@@ -91,7 +91,7 @@ public class remotegui {
    private JComboBox tivo_cancel = null;
    public JButton refresh_cancel = null;
    public JLabel label_cancel = null;
-   public JCheckBox includePast_cancel = null;
+   public JCheckBox includeHistory_cancel = null;
    
    private deletedTable tab_deleted = null;
    private JComboBox tivo_deleted = null;
@@ -755,8 +755,8 @@ public class remotegui {
          }
       });
       
-      includePast_cancel = new JCheckBox("Include Past", false);
-      includePast_cancel.setToolTipText(getToolTip("includePast_cancel"));
+      includeHistory_cancel = new JCheckBox("Include History", false);
+      includeHistory_cancel.setToolTipText(getToolTip("includeHistory_cancel"));
       
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(title_cancel);
@@ -771,7 +771,7 @@ public class remotegui {
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(refresh_todo_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
-      row1_cancel.add(includePast_cancel);
+      row1_cancel.add(includeHistory_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(label_cancel);
       panel_cancel.add(row1_cancel, c);
@@ -2473,8 +2473,8 @@ public class remotegui {
          text = "<b>Back</b><br>";
          text += "Return to top level folder view.";
       }
-      else if (component.equals("includePast_cancel")){
-         text = "<b>Include Past</b><br>";
+      else if (component.equals("includeHistory_cancel")){
+         text = "<b>Include History</b><br>";
          text += "Include past history prior to current time if enabled.";
       }
       else if (component.equals("refresh_todo_cancel")) {

@@ -323,7 +323,7 @@ public class cancelledTable {
          JSONObject json;
          long now = new Date().getTime();
          long start;
-         Boolean includePast = config.gui.remote_gui.includePast_cancel.isSelected();
+         Boolean includePast = config.gui.remote_gui.includeHistory_cancel.isSelected();
          for (int i=0; i<data.length(); ++i) {
             json = data.getJSONObject(i);
             if (includePast) {

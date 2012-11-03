@@ -1534,7 +1534,7 @@ public class gui {
                for (int j=0; j<names.length; ++j)
                   ofp.write(names[j] + "=" + remote_gui.getTivoName(names[j]) + "\n");
                ofp.write("\n<rpc_includePast>\n");
-               if (remote_gui.includePast_cancel.isSelected())
+               if (remote_gui.includeHistory_cancel.isSelected())
                   ofp.write("1\n");
                else
                   ofp.write("0\n");
@@ -1753,7 +1753,7 @@ public class gui {
             }
             if (key.equals("rpc_includePast") && remote_gui != null) {
                if (line.matches("1"))
-                  remote_gui.includePast_cancel.setSelected(true);
+                  remote_gui.includeHistory_cancel.setSelected(true);
             }
          }
          ifp.close();
