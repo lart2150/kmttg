@@ -261,7 +261,7 @@ public class guideTable {
             setFolderState(true);
             currentChannel = s.json;
             String start = config.gui.remote_gui.getGuideStartTime();
-            int range = config.gui.remote_gui.getGuideRange();
+            int range = config.gui.remote_gui.guide_range;
             updateFolder(start, range);
          }
       }
