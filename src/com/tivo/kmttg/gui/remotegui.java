@@ -73,7 +73,7 @@ public class remotegui {
    public  JButton refresh_guide = null;
    private JComboBox tivo_guide = null;
    private JComboBox guide_start = null;
-   private JComboBox guide_range = null;
+   public  int guide_range = 12; // Number of hours to show in guide at a time
    private int guide_hour_increment = 12; // Number of hours for date increment
    private int guide_total_range = 11;    // Number of days
    
@@ -363,28 +363,9 @@ public class remotegui {
                 if (tab_guide.inFolder) {
                    String start = (String)guide_start.getSelectedItem();
                    if (start != null && start.length() > 0) {
-                      int range = (Integer)guide_range.getSelectedItem();
-                      tab_guide.updateFolder(start, range);
+                      tab_guide.updateFolder(start, guide_range);
                    }
                 }
-            }
-         }
-      });
-
-      
-      JLabel guide_range_label = new JLabel("Range");
-      guide_range = new javax.swing.JComboBox(new Integer[] {6, 12});
-      guide_range.setToolTipText(getToolTip("guide_range"));
-      guide_range.addItemListener(new ItemListener() {
-         public void itemStateChanged(ItemEvent e) {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-               if (tab_guide.inFolder) {
-                  String start = (String)guide_start.getSelectedItem();
-                  if (start != null && start.length() > 0) {
-                     int range = (Integer)guide_range.getSelectedItem();
-                     tab_guide.updateFolder(start, range);
-                  }
-               }
             }
          }
       });
@@ -471,10 +452,6 @@ public class remotegui {
       row1_guide.add(guide_start_label);
       row1_guide.add(Box.createRigidArea(space_5));
       row1_guide.add(guide_start);
-      row1_guide.add(Box.createRigidArea(space_5));
-      row1_guide.add(guide_range_label);
-      row1_guide.add(Box.createRigidArea(space_5));
-      row1_guide.add(guide_range);
       row1_guide.add(Box.createRigidArea(space_5));
       row1_guide.add(refresh_guide);
       row1_guide.add(Box.createRigidArea(space_5));
@@ -1868,11 +1845,7 @@ public class remotegui {
 	  }
       return start;
    }
-   
-   public int getGuideRange() {
-      return (Integer)guide_range.getSelectedItem();
-   }
-   
+      
    public int getPremiereDays() {
       return (Integer)premiere_days.getSelectedItem();
    }
@@ -2443,12 +2416,6 @@ public class remotegui {
       if (component.equals("guide_start")) {
          text = "<b>Start</b><br>";
          text += "Select guide start time to use when obtaining listings.<br>";
-         text += "NOTE: If you are inside a channel folder when you change this setting<br>";
-         text += "the guide listings will automatically update to new date.";
-      }
-      if (component.equals("guide_range")) {
-         text = "<b>Range</b><br>";
-         text += "Select how many hours of guide information to retrieve at a time: 6 or 12.<br>";
          text += "NOTE: If you are inside a channel folder when you change this setting<br>";
          text += "the guide listings will automatically update to new date.";
       }
