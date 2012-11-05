@@ -282,8 +282,8 @@ public class deletedTable {
       
    // Undelete selected recordings
    public void recoverSingle(final String tivoName) {
-      final int[] selected = TableUtil.GetSelectedRows(TABLE);
-      if (selected.length > 0) {
+      int[] test = TableUtil.GetSelectedRows(TABLE);
+      if (test.length > 0) {
          log.print("Recovering individual recordings on TiVo: " + tivoName);
          class backgroundRun extends SwingWorker<Object, Object> {
             protected Object doInBackground() {
@@ -292,27 +292,83 @@ public class deletedTable {
                String title;
                Remote r = new Remote(tivoName);
                if (r.success) {
-                  try {
-                     for (int i=0; i<selected.length; ++i) {
-                        row = selected[i];
-                        json = GetRowData(row);
-                        title = TableUtil.GetRowTitle(TABLE, row, "SHOW");
-                        if (json != null) {
-                           JSONObject o = new JSONObject();
-                           JSONArray a = new JSONArray();
-                           a.put(json.getString("recordingId"));
-                           o.put("recordingId", a);
-                           json = r.Command("undelete", o);
-                           if (json == null) {
-                              log.error("Failed to recover recording: '" + title + "'");
-                           } else {
-                              log.warn("Recovered recording: '" + title + "' on TiVo: " + tivoName);
-                              TableUtil.RemoveRow(TABLE, row);
+                  Boolean cont = true;
+                  while (cont) {
+                     int[] selected = TABLE.getSelectedRows();
+                     if (selected.length > 0) {
+                        row = selected[0];
+                        try {
+                           json = GetRowData(row);
+                           title = TableUtil.GetRowTitle(TABLE, row, "SHOW");
+                           if (json != null) {
+                              JSONObject o = new JSONObject();
+                              JSONArray a = new JSONArray();
+                              a.put(json.getString("recordingId"));
+                              o.put("recordingId", a);
+                              json = r.Command("undelete", o);
+                              if (json == null) {
+                                 log.error("Failed to recover recording: '" + title + "'");
+                              } else {
+                                 log.warn("Recovered recording: '" + title + "' on TiVo: " + tivoName);
+                                 TableUtil.RemoveRow(TABLE, row);
+                              }
                            }
+                        } catch (JSONException e) {
+                           log.error("recoverSingle failed - " + e.getMessage());
                         }
+                     } else {
+                        cont = false;
                      }
-                  } catch (JSONException e) {
-                     log.error("recoverSingle failed - " + e.getMessage());
+                  }
+                  r.disconnect();
+               }
+               return null;
+            }
+         }
+         backgroundRun b = new backgroundRun();
+         b.execute();
+      }
+   }
+   
+   // Permanently delete selected recordings
+   public void permanentlyDelete(final String tivoName) {
+      int[] test = TableUtil.GetSelectedRows(TABLE);
+      if (test.length > 0) {
+         log.print("Permanently deleting individual recordings on TiVo: " + tivoName);
+         class backgroundRun extends SwingWorker<Object, Object> {
+            protected Object doInBackground() {
+               int row;
+               JSONObject json;
+               String title;
+               Remote r = new Remote(tivoName);
+               if (r.success) {
+                  Boolean cont = true;
+                  while (cont) {
+                     int[] selected = TABLE.getSelectedRows();
+                     if (selected.length > 0) {
+                        row = selected[0];
+                        try {
+                           json = GetRowData(row);
+                           title = TableUtil.GetRowTitle(TABLE, row, "SHOW");
+                           if (json != null) {
+                              JSONObject o = new JSONObject();
+                              JSONArray a = new JSONArray();
+                              a.put(json.getString("recordingId"));
+                              o.put("recordingId", a);
+                              json = r.Command("permanentlyDelete", o);
+                              if (json == null) {
+                                 log.error("Failed to permanently delete recording: '" + title + "'");
+                              } else {
+                                 log.warn("Permanently deleted recording: '" + title + "' on TiVo: " + tivoName);
+                                 TableUtil.RemoveRow(TABLE, row);
+                              }
+                           }
+                        } catch (JSONException e) {
+                           log.error("permanentlyDelete failed - " + e.getMessage());
+                        }
+                     } else {
+                        cont = false;
+                     }
                   }
                   r.disconnect();
                }
