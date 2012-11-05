@@ -389,6 +389,13 @@ public class Remote {
             json.put("bodyId", bodyId_get());
             req = RpcRequest("recordingUpdate", false, json);
          }
+         else if (type.equals("permanentlyDelete")) {
+            // Permanently delete an existing recording (usually from Recently Deleted)
+            // Expects "recordingId" of type JSONArray in json
+            json.put("state", "contentDeleted");
+            json.put("bodyId", bodyId_get());
+            req = RpcRequest("recordingUpdate", false, json);
+         }
          else if (type.equals("StopRecording")) {
             // Stop an existing recording
             // Expects "recordingId" of type JSONArray in json
