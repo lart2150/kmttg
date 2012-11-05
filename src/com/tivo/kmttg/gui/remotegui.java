@@ -855,6 +855,18 @@ public class remotegui {
             }
          }
       });
+
+      JButton permDelete_deleted = new JButton("Permanently Delete");
+      permDelete_deleted.setMargin(new Insets(1,1,1,1));
+      permDelete_deleted.setToolTipText(getToolTip("permDelete_deleted"));
+      permDelete_deleted.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_deleted.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               tab_deleted.permanentlyDelete(tivoName);
+            }
+         }
+      });
       
       row1_deleted.add(Box.createRigidArea(space_5));
       row1_deleted.add(title_deleted);
@@ -866,6 +878,8 @@ public class remotegui {
       row1_deleted.add(refresh_deleted);
       row1_deleted.add(Box.createRigidArea(space_5));
       row1_deleted.add(recover_deleted);
+      row1_deleted.add(Box.createRigidArea(space_5));
+      row1_deleted.add(permDelete_deleted);
       panel_deleted.add(row1_deleted, c);
       
       tab_deleted = new deletedTable(config.gui.getJFrame());
@@ -2495,6 +2509,11 @@ public class remotegui {
       else if (component.equals("recover_deleted")){
          text = "<b>Recover</b><br>";
          text += "Recover from Recently Deleted selected individual show(s) in table on specified TiVo.";
+      }
+      else if (component.equals("permDelete_deleted")){
+         text = "<b>Permanently Delete</b><br>";
+         text += "Permanently delete selected individual show(s) in table on specified TiVo.<br>";
+         text += "NOTE: Once deleted these shows are removed from Recently Deleted and can't be recovered.";
       }
       else if (component.equals("tivo_search")) {
          text = "Select TiVo for which to perform search with.<br>";
