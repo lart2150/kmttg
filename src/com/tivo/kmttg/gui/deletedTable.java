@@ -307,6 +307,7 @@ public class deletedTable {
                               o.put("recordingId", a);
                               json = r.Command("undelete", o);
                               if (json == null) {
+                                 TableUtil.DeselectRow(TABLE, row);
                                  log.error("Failed to recover recording: '" + title + "'");
                               } else {
                                  log.warn("Recovered recording: '" + title + "' on TiVo: " + tivoName);
@@ -357,6 +358,7 @@ public class deletedTable {
                               o.put("recordingId", a);
                               json = r.Command("permanentlyDelete", o);
                               if (json == null) {
+                                 TableUtil.DeselectRow(TABLE, row);
                                  log.error("Failed to permanently delete recording: '" + title + "'");
                               } else {
                                  log.warn("Permanently deleted recording: '" + title + "' on TiVo: " + tivoName);
