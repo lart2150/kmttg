@@ -39,6 +39,10 @@ public class TableUtil {
       return rows;
    }
    
+   public static void DeselectRow(JXTable TABLE, int row) {
+      TABLE.removeRowSelectionInterval(row,row);
+   }
+   
    public static void clear(JXTable TABLE) {
       debug.print("");
       TABLE.clearSelection();
