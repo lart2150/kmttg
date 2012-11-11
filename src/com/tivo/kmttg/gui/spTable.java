@@ -708,8 +708,6 @@ public class spTable {
                 int row = selected[0];
                 JSONObject json = GetRowData(row);
                 if (json != null) {
-                   if (config.gui.remote_gui.spOpt == null)
-                      config.gui.remote_gui.spOpt = new spOptions();
                    String title;
                    try {
                       title = json.getString("title");
