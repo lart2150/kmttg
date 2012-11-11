@@ -278,6 +278,8 @@ public class premiereTable {
                 message += ", season " + s.json.get("seasonNumber");
              if (s.json.has("episodeNum"))
                 message += " episode " + s.json.getJSONArray("episodeNum").get(0);
+             if (s.json.has("originalAirdate"))
+                message += ", originalAirdate: " + s.json.getString("originalAirdate");
              
              if (description != null) {
                 message += "\n" + description;
