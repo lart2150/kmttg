@@ -27,7 +27,6 @@ import javax.net.ssl.X509TrustManager;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.spOptions;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -1171,6 +1170,7 @@ public class Remote {
    
    // Method use by various RPC tables for SP scheduling
    public void SPschedule(String tivoName, JSONObject json, JSONArray existing) {
+      JSONObject existingSP = null;
       try {
          String title = json.getString("title");
          String channel = "";
@@ -1184,17 +1184,19 @@ public class Remote {
          for (int j=0; j<existing.length(); ++j) {
             if(title.equals(existing.getJSONObject(j).getString("title"))) {
                if (channel.length() > 0 && existing.getJSONObject(j).has("channel")) {
-                  if(channel.equals(existing.getJSONObject(j).getString("channel")))
+                  if (channel.equals(existing.getJSONObject(j).getString("channel"))) {
                      schedule = false;
-               } else
+                     existingSP = existing.getJSONObject(j);
+                  }
+               } else {
                   schedule = false;
+                  existingSP = existing.getJSONObject(j);
+               }
             }
          }
          
          // OK to subscribe
          if (schedule) {
-            if (config.gui.remote_gui.spOpt == null)
-               config.gui.remote_gui.spOpt = new spOptions();
             JSONObject o = config.gui.remote_gui.spOpt.promptUser(
                "Create SP - " + title, null
             );
@@ -1211,7 +1213,17 @@ public class Remote {
                }
             }
          } else {
-            log.warn("Existing SP with same title found, not scheduling: " + title);
+            log.warn("Existing SP with same title found, prompting to modify instead.");
+            if (existingSP != null) {
+               JSONObject result = config.gui.remote_gui.spOpt.promptUser(
+                  "Modify SP - " + title, existingSP
+               );
+               if (result != null) {
+                  if (Command("modifySP", result) != null) {
+                     log.warn("Modified SP '" + title + "' for TiVo: " + tivoName);
+                  }
+               }
+            }
          }
       } catch (JSONException e) {
          log.error("SPschedule - " + e.getMessage());
