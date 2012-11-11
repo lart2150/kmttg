@@ -2455,7 +2455,8 @@ public class remotegui {
          text = "<b>Season Pass</b><br>";
          text += "Create a season pass for show selected in table below.<br>";
          text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
-         text += "checking against the current set of season passes already on the TiVo.<br>";
+         text += "checking against the current set of season passes already on the TiVo and will prompt<br>";
+         text += "to modify existing season pass if found.<br>";
          text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
          text += "priority after creating it.";
       }
@@ -2544,7 +2545,8 @@ public class remotegui {
          text = "<b>Season Pass</b><br>";
          text += "Create a season pass for show selected in table below.<br>";
          text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
-         text += "checking against the current set of season passes already on the TiVo.<br>";
+         text += "checking against the current set of season passes already on the TiVo and will prompt<br>";
+         text += "to modify existing season pass if found.<br>";
          text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
          text += "priority after creating it.";
       }
@@ -2607,7 +2609,8 @@ public class remotegui {
          text = "<b>Season Pass</b><br>";
          text += "Schedule season passes for shows selected in the table below on selected TiVo.<br>";
          text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
-         text += "checking against the current set of season passes already on the TiVo.<br>";
+         text += "checking against the current set of season passes already on the TiVo and will prompt<br>";
+         text += "to modify existing season pass if found.<br>";
          text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
          text += "priority after creating it.";
       }
