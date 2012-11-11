@@ -79,7 +79,7 @@ public class remotegui {
    
    private spTable tab_sp = null;
    private JComboBox tivo_sp = null;
-   public  spOptions spOpt = null;
+   public  spOptions spOpt = new spOptions();
    public  recordOptions recordOpt = null;
    
    private JComboBox tivo_info = null;
