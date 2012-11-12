@@ -586,6 +586,44 @@ public class Remote {
                o.put("startTimePadding", json.getInt("startTimePadding"));
             req = RpcRequest("subscribe", false, o);
          }
+         else if (type.equals("wishlist")) {
+            // Create an auto-record wishlist
+            // Expects json such as following which will be idSetSource:
+            // "title":"LAKERS", (This is required)
+            // "keywordOp":["required"],"keyword":["LAKERS"],
+            // "titleKeywordOp":["required"],"titleKeyword":["NBA BASKETBALL"],
+            // Other: creditOp,credit,categoryId
+            JSONObject o = new JSONObject();
+            json.put("type", "wishListSource");
+            o.put("bodyId", bodyId_get());
+            o.put("title", json.getString("title"));
+            json.remove("title");
+            o.put("type", "subscription");
+            o.put("folderingRules", "subscriptionOnly");
+            o.put("bodyGeneratesCandidates", true);
+            o.put("idSetSource", json);
+            o.put("ignoreConflicts", "true");
+            o.put("recordingQuality", "best");
+            if (json.has("maxRecordings")) {
+               o.put("maxRecordings", json.getString("maxRecordings"));
+               json.remove("maxRecordings");
+            } else
+               o.put("maxRecordings", 5);
+            if ( json.has("keepBehavior")) {
+               o.put("keepBehavior", json.getString("keepBehavior"));
+               json.remove("keepBehavior");
+            } else
+               o.put("keepBehavior", "fifo");
+            if (json.has("endTimePadding")) {
+               o.put("endTimePadding", json.getInt("endTimePadding"));
+               json.remove("endTimePadding");
+            }
+            if (json.has("startTimePadding")) {
+               o.put("startTimePadding", json.getInt("startTimePadding"));
+               json.remove("startTimePadding");
+            }
+            req = RpcRequest("subscribe", false, o);
+         }
          else if (type.equals("unsubscribe")) {
             // Unsubscribe a season pass
             // Expects subscriptionId in json
