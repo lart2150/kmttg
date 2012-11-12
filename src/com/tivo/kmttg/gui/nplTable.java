@@ -425,14 +425,14 @@ public class nplTable {
                            metadataFromXML(b, s.data);
                            s.data.put("metadata", "acquired");
                            log.warn("extended metadata acquired");
-                           // Select row
-                           NowPlaying.setRowSelectionInterval(row, row);
                         }
                      } catch (Exception e1) {
                         log.error("metadata error: " + e1.getMessage());
                      }
                   }
                }
+               // Select row
+               NowPlaying.setRowSelectionInterval(row, row);
             }
          }
       }
