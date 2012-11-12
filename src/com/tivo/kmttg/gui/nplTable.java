@@ -29,6 +29,7 @@ import javax.swing.SwingUtilities;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Sorter;
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -1357,11 +1358,13 @@ public class nplTable {
    private void metadataFromXML(byte[] b, Hashtable<String,String> h) {
       Document doc = Xml.getDocument(new ByteArrayInputStream(b));
       if (doc != null) {
-         String oad = Xml.getElement(doc, "originalAirDate");
-         if (oad != null)
+         NodeList nl = doc.getElementsByTagName("originalAirDate");
+         if (nl.getLength() > 0) {
+            String oad = nl.item(0).getTextContent();
             // Strip off time portion. Example: 2012-11-08T00:00:00Z
             oad = oad.replaceFirst("T.+$", "");
             h.put("originalAirDate", oad);
+         }
       }
    }
    
