@@ -604,6 +604,11 @@ public class Remote {
             o.put("idSetSource", json);
             o.put("ignoreConflicts", "true");
             o.put("recordingQuality", "best");
+            if (json.has("autoRecord")) {
+               o.put("autoRecord", json.getBoolean("autoRecord"));
+               json.remove("autoRecord");
+            } else
+               o.put("autoRecord", false);
             if (json.has("maxRecordings")) {
                o.put("maxRecordings", json.getString("maxRecordings"));
                json.remove("maxRecordings");
