@@ -24,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Sorter;
@@ -264,7 +265,6 @@ public class nplTable {
          Component cell = super.getTableCellRendererComponent(
             table, value, isSelected, hasFocus, row, column
          );
-        
          if ( ! isSelected ) {
             if (column % 2 == 0)
                cell.setBackground(config.tableBkgndLight);
@@ -371,10 +371,10 @@ public class nplTable {
                else
                   cell.setBackground(config.tableBkgndDarker);
                
-               if ( ! d.folder && d.data.containsKey("CopyProtected") )
+               if ( d != null && ! d.folder && d.data.containsKey("CopyProtected") )
                   cell.setBackground( config.tableBkgndProtected );
                
-               if ( ! d.folder && d.data.containsKey("ExpirationImage") &&
+               if ( d != null && ! d.folder && d.data.containsKey("ExpirationImage") &&
                    (d.data.get("ExpirationImage").equals("in-progress-recording") ||
                     d.data.get("ExpirationImage").equals("in-progress-transfer")))
                   cell.setBackground( config.tableBkgndRecording );
@@ -396,6 +396,7 @@ public class nplTable {
    
    // Mouse event handler
    // This will display folder entries in table if folder entry single-clicked
+   // Otherwise obtains and displays extended show info if right button clicked
    private void MouseClicked(MouseEvent e) {
       if( ! tivoName.equals("FILES") && e.getClickCount() == 1 ) {
          int row = NowPlaying.rowAtPoint(e.getPoint());
@@ -405,6 +406,34 @@ public class nplTable {
             folderName = s.folderName;
             folderEntryNum = row;
             RefreshNowPlaying(s.folderData);
+         } else {
+            if (SwingUtilities.isRightMouseButton(e)) {
+               if (s.data != null && s.data.containsKey("url_TiVoVideoDetails")) {
+                  if (! s.data.containsKey("metadata")) {
+                     log.warn("Obtaining extended metadata for: " + s.data.get("title"));
+                     // Obtain and add metadata
+                     ByteArrayOutputStream info = new ByteArrayOutputStream();
+                     try {
+                        String url = s.data.get("url_TiVoVideoDetails");
+                        String wan_port = config.getWanSetting(tivoName, "https");
+                        if (wan_port != null)
+                           url = string.addPort(url, wan_port);
+                        Boolean result = http.downloadPiped(url, "tivo", config.MAK, info, false, null);
+                        if(result) {
+                           // Read data from info
+                           byte[] b = info.toByteArray();
+                           metadataFromXML(b, s.data);
+                           s.data.put("metadata", "acquired");
+                           log.warn("extended metadata acquired");
+                           // Select row
+                           NowPlaying.setRowSelectionInterval(row, row);
+                        }
+                     } catch (Exception e1) {
+                        log.error("metadata error: " + e1.getMessage());
+                     }
+                  }
+               }
+            }
          }
       }
    }
@@ -592,32 +621,6 @@ public class nplTable {
             // Folder entry - don't display anything
          } else {
             // Non folder entry so print single entry info
-            if (config.npl_click_details == 1 && s.data.containsKey("url_TiVoVideoDetails") && ! s.data.containsKey("originalAirDate")) {
-               // Get show details to display if necessary
-               ByteArrayOutputStream info = new ByteArrayOutputStream();
-               try {
-                  String url = s.data.get("url_TiVoVideoDetails");
-                  String wan_port = config.getWanSetting(tivoName, "https");
-                  if (wan_port != null)
-                     url = string.addPort(url, wan_port);
-                  Boolean result = http.downloadPiped(url, "tivo", config.MAK, info, false, null);
-                  if(result) {
-                     // Read data from info
-                     byte[] b = info.toByteArray();
-                     Document doc = Xml.getDocument(new ByteArrayInputStream(b));
-                     if (doc != null) {
-                        String oad = Xml.getElement(doc, "originalAirDate");
-                        if (oad != null)
-                           s.data.put("originalAirDate", oad);
-                     }
-                  }
-               } catch (Exception e) {
-                  if (e.getMessage() != null)
-                     log.error("Error retrieving extended metadata: " + e.getMessage());
-                  else
-                     log.error("Error retrieving extended metadata");
-               }
-            }
             String t = s.data.get("date_long");
             String channelNum = null;
             if ( s.data.containsKey("channelNum") ) {
@@ -1348,6 +1351,18 @@ public class nplTable {
          rate = 0.0;
       }
       return rate;
+   }
+   
+   // Extract data of interest from extended metadata and add to Hashtable
+   private void metadataFromXML(byte[] b, Hashtable<String,String> h) {
+      Document doc = Xml.getDocument(new ByteArrayInputStream(b));
+      if (doc != null) {
+         String oad = Xml.getElement(doc, "originalAirDate");
+         if (oad != null)
+            // Strip off time portion. Example: 2012-11-08T00:00:00Z
+            oad = oad.replaceFirst("T.+$", "");
+            h.put("originalAirDate", oad);
+      }
    }
    
    // Return true if this entry should not be displayed, false otherwise
