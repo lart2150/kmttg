@@ -423,6 +423,18 @@ public class remotegui {
             }
          }
       });
+      
+      JButton wishlist_guide = new JButton("WL");
+      wishlist_guide.setMargin(new Insets(1,1,1,1));
+      wishlist_guide.setToolTipText(getToolTip("wishlist_search"));
+      wishlist_guide.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_guide.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               createWishlist(tivoName, tab_guide.TABLE);
+            }
+         }
+      });
 
       JButton guide_refresh_todo = new JButton("Refresh ToDo");
       guide_refresh_todo.setMargin(new Insets(1,1,1,1));
@@ -461,6 +473,8 @@ public class remotegui {
       row1_guide.add(guide_record);
       row1_guide.add(Box.createRigidArea(space_5));
       row1_guide.add(guide_recordSP);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(wishlist_guide);
       row1_guide.add(Box.createRigidArea(space_5));
       row1_guide.add(guide_refresh_todo);
       panel_guide.add(row1_guide, c);
@@ -1003,6 +1017,18 @@ public class remotegui {
          }
       });
       
+      JButton wishlist_premiere = new JButton("WL");
+      wishlist_premiere.setMargin(new Insets(1,1,1,1));
+      wishlist_premiere.setToolTipText(getToolTip("wishlist_search"));
+      wishlist_premiere.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_premiere.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               createWishlist(tivoName, tab_premiere.TABLE);
+            }
+         }
+      });
+      
       JButton premiere_channels_update = new JButton("Update Channels");
       premiere_channels_update.setMargin(new Insets(1,1,1,1));
       premiere_channels_update.setToolTipText(getToolTip("premiere_channels_update"));
@@ -1047,6 +1073,8 @@ public class remotegui {
       row1_premiere.add(record_premiere);
       row1_premiere.add(Box.createRigidArea(space_5));
       row1_premiere.add(recordSP_premiere);
+      row1_premiere.add(Box.createRigidArea(space_5));
+      row1_premiere.add(wishlist_premiere);
       row1_premiere.add(Box.createRigidArea(space_40));
       row1_premiere.add(premiere_channels_update);
       panel_premiere.add(row1_premiere, c);
@@ -2419,10 +2447,8 @@ public class remotegui {
                Remote r = new Remote(tivoName);
                if (r.success) {
                   JSONObject result = r.Command("wishlist", fjson);
-                  if (result != null) {
+                  if (result != null)
                      log.warn("Wishlist created successfully.");
-                     log.print(result.toString());
-                  }
                   else
                      log.error("Wishlist creation failed.");
                   r.disconnect();
@@ -2715,10 +2741,10 @@ public class remotegui {
       }
       else if (component.equals("wishlist_search")) {
          text = "<b>Create Wishlist</b><br>";
-         text += "Create a wishlist. If a show is selected in search table then the title will be set<br>";
+         text += "Create a wishlist. If a show is selected in table then the title will be set<br>";
          text += "automatically to that title in the wishlist dialog that comes up.<br>";
          text += "You are prompted with wishlist dialog where you can define wishlist with boolean logic<br>";
-         text += "for keywords and title keywords, and you can also define a category.";
+         text += "for keywords, title keywords, actors and directors.";
       }
       else if (component.equals("refresh_todo_search")) {
          text = "<b>Refresh ToDo</b><br>";
