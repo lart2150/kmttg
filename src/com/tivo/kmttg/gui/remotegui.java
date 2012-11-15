@@ -2419,8 +2419,10 @@ public class remotegui {
                Remote r = new Remote(tivoName);
                if (r.success) {
                   JSONObject result = r.Command("wishlist", fjson);
-                  if (result != null)
+                  if (result != null) {
                      log.warn("Wishlist created successfully.");
+                     log.print(result.toString());
+                  }
                   else
                      log.error("Wishlist creation failed.");
                   r.disconnect();
