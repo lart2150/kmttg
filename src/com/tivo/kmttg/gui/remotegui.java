@@ -50,6 +50,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.jdesktop.swingx.JXTable;
+
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -81,6 +83,7 @@ public class remotegui {
    private JComboBox tivo_sp = null;
    public  spOptions spOpt = new spOptions();
    public  recordOptions recordOpt = null;
+   public  wlOptions wlOpt = new wlOptions();
    
    private JComboBox tivo_info = null;
    JTextPane text_info = null;
@@ -1259,6 +1262,18 @@ public class remotegui {
             }
          }
       });
+      
+      JButton wishlist_search = new JButton("WL");
+      wishlist_search.setMargin(new Insets(1,1,1,1));
+      wishlist_search.setToolTipText(getToolTip("wishlist_search"));
+      wishlist_search.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_search.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               createWishlist(tivoName, tab_search.TABLE);
+            }
+         }
+      });
 
       JButton refresh_todo_search = new JButton("Refresh ToDo");
       refresh_todo_search.setMargin(new Insets(1,1,1,1));
@@ -1304,6 +1319,8 @@ public class remotegui {
       row1_search.add(record_search);
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(record_sp_search);
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(wishlist_search);
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(refresh_todo_search);
       panel_search.add(row1_search, c);
@@ -2273,6 +2290,90 @@ public class remotegui {
       }
    }
    
+   // Prompt user to create a wishlist
+   public Boolean createWishlist(String tivoName, JXTable TABLE) {
+      Hashtable<String,String> hash = new Hashtable<String,String>();
+      // Take title from selected table entry if there is one
+      int[] selected = TABLE.getSelectedRows();
+      if (selected.length > 0) {
+         int row = selected[0];
+         JSONObject json = TableUtil.GetRowData(TABLE, row, "DATE");
+         if (json != null && json.has("title")) {
+            try {
+               hash.put("title", json.getString("title"));
+               hash.put("title_keyword", json.getString("title"));
+            } catch (JSONException e) {
+               log.error("createWishlist error: " + e.getMessage());
+               return false;
+            }
+         }
+      }
+      
+      // Bring up Create Wishlist dialog
+      Hashtable<String,String> h = wlOpt.promptUser("Create Wishlist", hash);
+      if (h == null)
+         return false;
+      if ( ! h.containsKey("title")) {
+         log.error("Wishlist title is required to be specified. Aborting.");
+      }
+      JSONObject json = new JSONObject();
+      if (h.containsKey("autorecord")) {
+         // Need to prompt for season pass options
+         json = spOpt.promptUser("Create ARWL - " + h.get("title"), null);
+      }
+      
+      // Need to parse h and set json wishlist elements
+      if (json != null) {
+         try {
+            // Title is always required
+            json.put("title", h.get("title"));
+            
+            // auto record
+            if (h.containsKey("autorecord"))
+               json.put("autoRecord", true);
+            
+            String []s = {"title_keyword", "keyword"};
+            for (int j=0; j<s.length; ++j) {
+               if (h.containsKey(s[j])) {
+                  JSONArray opt = new JSONArray();
+                  JSONArray val = new JSONArray();
+                  String []fields = h.get(s[j]).split(",");
+                  for (int i=0; i<fields.length; ++i) {
+                     String field = fields[i];
+                     if (field.length() > 0) {
+                        String type = "required";
+                        if (field.startsWith("(")) {
+                           type = "optional";
+                           field = field.replaceAll("\\(", "");
+                           field = field.replaceAll("\\)", "");
+                        }
+                        if (field.startsWith("-")) {
+                           type = "not";
+                           field = field.replaceFirst("-", "");
+                        }
+                        opt.put(type);
+                        val.put(field);
+                        if (s[j].equals("title_keyword")) {
+                           json.put("titleKeywordOp", opt);
+                           json.put("titleKeyword", val);
+                        }
+                        if (s[j].equals("keyword")) {
+                           json.put("keywordOp", opt);
+                           json.put("keyword", val);
+                        }
+                     }
+                  }
+               }
+            }
+         } catch (JSONException e) {
+            log.error("createWishlist error: " + e.getMessage());
+            return false;
+         }
+      }
+      log.print(json.toString());
+      return true;
+   }
+   
    private static ImageIcon scale(Container dialog, Image src, double scale) {
       int w = (int)(scale*src.getWidth(dialog));
       int h = (int)(scale*src.getHeight(dialog));
@@ -2549,6 +2650,13 @@ public class remotegui {
          text += "to modify existing season pass if found.<br>";
          text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
          text += "priority after creating it.";
+      }
+      else if (component.equals("wishlist_search")) {
+         text = "<b>Create Wishlist</b><br>";
+         text += "Create a wishlist. If a show is selected in search table then the title will be set<br>";
+         text += "automatically to that title in the wishlist dialog that comes up.<br>";
+         text += "You are prompted with wishlist dialog where you can define wishlist with boolean logic<br>";
+         text += "for keywords and title keywords, and you can also define a category.";
       }
       else if (component.equals("refresh_todo_search")) {
          text = "<b>Refresh ToDo</b><br>";
