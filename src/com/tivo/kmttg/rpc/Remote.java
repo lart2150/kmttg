@@ -592,6 +592,7 @@ public class Remote {
             // "title":"LAKERS", (This is required)
             // "keywordOp":["required"],"keyword":["LAKERS"],
             // "titleKeywordOp":["required"],"titleKeyword":["NBA BASKETBALL"],
+            // Op types: required, optional, not
             // Other: creditOp,credit,categoryId
             JSONObject o = new JSONObject();
             json.put("type", "wishListSource");
