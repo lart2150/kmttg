@@ -46,8 +46,10 @@ public class wlOptions {
    }
    
    public Hashtable<String,String> promptUser(String title, Hashtable<String,String> h) {
-      if (h != null)
+      if (h != null && h.size() > 0) {
+         clearFields();
          setValues(h);
+      }
       int response = JOptionPane.showConfirmDialog(
          null, components, title, JOptionPane.OK_CANCEL_OPTION
       );
@@ -90,5 +92,13 @@ public class wlOptions {
          tf_actor.setText(h.get("actor"));
       if (h.containsKey("director") && h.get("director").length() > 0)
          tf_director.setText(h.get("director"));
+   }
+   
+   private void clearFields() {
+      tf_title.setText("");
+      tf_keyword.setText("");
+      tf_title_keyword.setText("");
+      tf_actor.setText("");
+      tf_director.setText("");
    }
 }
