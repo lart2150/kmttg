@@ -2291,7 +2291,7 @@ public class remotegui {
    }
    
    // Prompt user to create a wishlist
-   public Boolean createWishlist(String tivoName, JXTable TABLE) {
+   public Boolean createWishlist(final String tivoName, JXTable TABLE) {
       Hashtable<String,String> hash = new Hashtable<String,String>();
       // Take title from selected table entry if there is one
       int[] selected = TABLE.getSelectedRows();
@@ -2315,6 +2315,7 @@ public class remotegui {
          return false;
       if ( ! h.containsKey("title")) {
          log.error("Wishlist title is required to be specified. Aborting.");
+         return false;
       }
       JSONObject json = new JSONObject();
       if (h.containsKey("autorecord")) {
@@ -2365,12 +2366,71 @@ public class remotegui {
                   }
                }
             }
+            
+            String []s2 = {"actor", "director"};
+            for (int j=0; j<s.length; ++j) {
+               if (h.containsKey(s2[j])) {
+                  JSONArray opt = new JSONArray();
+                  JSONArray val = new JSONArray();
+                  String []fields = h.get(s2[j]).split(",");
+                  for (int i=0; i<fields.length; ++i) {
+                     String field = fields[i];
+                     if (field.length() > 0) {
+                        String type = "required";
+                        if (field.startsWith("(")) {
+                           type = "optional";
+                           field = field.replaceAll("\\(", "");
+                           field = field.replaceAll("\\)", "");
+                        }
+                        if (field.startsWith("-")) {
+                           type = "not";
+                           field = field.replaceFirst("-", "");
+                        }
+                        String []name = field.split("\\s+");
+                        if (name.length == 2) {
+                           JSONObject js = new JSONObject();
+                           js.put("type", "credit");
+                           js.put("role", s2[j]);
+                           js.put("first", name[0]);
+                           js.put("last", name[1]);
+                           opt.put(type);
+                           val.put(js);
+                           json.put("creditOp", opt);
+                           json.put("credit", val);
+                        } else {
+                           log.error("Ignoring actor/director not specified as 'First Last'");
+                        }
+                     }
+                  }
+               }
+            }
          } catch (JSONException e) {
             log.error("createWishlist error: " + e.getMessage());
             return false;
          }
       }
-      log.print(json.toString());
+      if (json.length() > 0) {
+         // Good to go, so run the RPC command in background mode
+         //log.print(json.toString());
+         log.warn("Creating wishlist: " + h.get("title"));
+         final JSONObject fjson = json;
+         class backgroundRun extends SwingWorker<Object, Object> {
+            protected Boolean doInBackground() {
+               Remote r = new Remote(tivoName);
+               if (r.success) {
+                  JSONObject result = r.Command("wishlist", fjson);
+                  if (result != null)
+                     log.warn("Wishlist created successfully.");
+                  else
+                     log.error("Wishlist creation failed.");
+                  r.disconnect();
+               }
+               return false;
+            }
+         }
+         backgroundRun b = new backgroundRun();
+         b.execute();
+      }
       return true;
    }
    
