@@ -586,6 +586,15 @@ public class Remote {
                o.put("startTimePadding", json.getInt("startTimePadding"));
             req = RpcRequest("subscribe", false, o);
          }
+         else if (type.equals("manual")) {
+            // Create a manual recording
+            // Expects json such as following:
+            // repeating - "idSetSource":
+            //   "duration":1800,"timeOfDayLocal":"02:00:00","type":"repeatingTimeChannelSource",
+            //   "channel":{channel info},"dayOfWeek":["monday","tuesday","wednesday","thursday","friday"]
+            // single - "idSetSource":
+            //   "duration":1800,"time":"2012-11-16 09:30:00","channel":{channel info}
+         }
          else if (type.equals("wishlist")) {
             // Create an auto-record wishlist
             // Expects json such as following which will be idSetSource:
@@ -604,35 +613,41 @@ public class Remote {
             o.put("bodyId", bodyId_get());
             o.put("title", json.getString("title"));
             json.remove("title");
-            o.put("type", "subscription");
-            o.put("folderingRules", "subscriptionOnly");
-            o.put("bodyGeneratesCandidates", true);
-            o.put("idSetSource", json);
             o.put("ignoreConflicts", "true");
-            o.put("recordingQuality", "best");
             if (json.has("autoRecord")) {
                o.put("autoRecord", json.getBoolean("autoRecord"));
                json.remove("autoRecord");
             } else
                o.put("autoRecord", false);
-            if (json.has("maxRecordings")) {
-               o.put("maxRecordings", json.getString("maxRecordings"));
-               json.remove("maxRecordings");
-            } else
-               o.put("maxRecordings", 5);
-            if ( json.has("keepBehavior")) {
-               o.put("keepBehavior", json.getString("keepBehavior"));
-               json.remove("keepBehavior");
-            } else
-               o.put("keepBehavior", "fifo");
-            if (json.has("endTimePadding")) {
-               o.put("endTimePadding", json.getInt("endTimePadding"));
-               json.remove("endTimePadding");
+            
+            if (o.getBoolean("autoRecord")) {
+               o.put("recordingQuality", "best");
+               if (json.has("maxRecordings")) {
+                  o.put("maxRecordings", json.getInt("maxRecordings"));
+                  json.remove("maxRecordings");
+               } else
+                  o.put("maxRecordings", 5);
+               if ( json.has("keepBehavior")) {
+                  o.put("keepBehavior", json.getString("keepBehavior"));
+                  json.remove("keepBehavior");
+               } else
+                  o.put("keepBehavior", "fifo");
+               if (json.has("showStatus")) {
+                  o.put("showStatus", json.getString("showStatus"));
+                  json.remove("showStatus");
+               } else {
+                  o.put("showStatus", "firstRunOnly");
+               }
+               if (json.has("endTimePadding")) {
+                  o.put("endTimePadding", json.getInt("endTimePadding"));
+                  json.remove("endTimePadding");
+               }
+               if (json.has("startTimePadding")) {
+                  o.put("startTimePadding", json.getInt("startTimePadding"));
+                  json.remove("startTimePadding");
+               }
             }
-            if (json.has("startTimePadding")) {
-               o.put("startTimePadding", json.getInt("startTimePadding"));
-               json.remove("startTimePadding");
-            }
+            o.put("idSetSource", json);
             req = RpcRequest("subscribe", false, o);
          }
          else if (type.equals("unsubscribe")) {
