@@ -196,7 +196,7 @@ public class Remote {
          String headers =
             "Type: request" + eol +
             "RpcId: " + rpc_id + eol +
-            "SchemaVersion: 7" + eol +
+            "SchemaVersion: 9" + eol +
             "Content-Type: application/json" + eol +
             "RequestType: " + type + eol +
             "ResponseCount: " + ResponseCount + eol +
