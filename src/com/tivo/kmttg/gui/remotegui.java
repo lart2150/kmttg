@@ -2805,7 +2805,9 @@ public class remotegui {
          text += "Create a wishlist. If a show is selected in table then the title will be set<br>";
          text += "automatically to that title in the wishlist dialog that comes up.<br>";
          text += "You are prompted with wishlist dialog where you can define wishlist with boolean logic<br>";
-         text += "for keywords, title keywords, actors and directors.";
+         text += "for keywords, title keywords, actors and directors.<br>";
+         text += "NOTE: Even though a title is required to be specified, the Wishlist will be named by<br>";
+         text += "TiVo according to the search elements you setup";
       }
       else if (component.equals("refresh_todo_search")) {
          text = "<b>Refresh ToDo</b><br>";
