@@ -289,7 +289,7 @@ public class file {
          log.warn(">> Attempting iPad delete for id: " + recordingId);
          Remote r = new Remote(tivoName);
          if (r.success) {
-            if (r.Command("delete", json) != null)
+            if (r.Command("Delete", json) != null)
                log.warn(">> iPad delete succeeded.");
             r.disconnect();
          }

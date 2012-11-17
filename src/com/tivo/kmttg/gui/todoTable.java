@@ -300,7 +300,7 @@ public class todoTable {
                 JSONArray a = new JSONArray();
                 a.put(json.getString("recordingId"));
                 o.put("recordingId", a);
-                if ( r.Command("cancel", o) != null ) {
+                if ( r.Command("Cancel", o) != null ) {
                    TableUtil.RemoveRow(TABLE, row);
                    tivo_data.get(currentTivo).remove(row);
                 }

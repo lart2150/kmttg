@@ -607,7 +607,7 @@ public class cancelledTable {
                               log.warn("Scheduling Recording: '" + title + "' on TiVo: " + tivoName);
                               o.put("contentId", json.getString("contentId"));
                               o.put("offerId", json.getString("offerId"));
-                              json = r.Command("singlerecording", o);
+                              json = r.Command("Singlerecording", o);
                               if (json == null) {
                                  log.error("Failed to schedule recording for: '" + title + "'");
                               } else {

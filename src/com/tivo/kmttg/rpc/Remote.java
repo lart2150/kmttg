@@ -320,12 +320,15 @@ public class Remote {
       }
    }
    
+   // RPC command set
+   // NOTE: By convention upper case commands are ones for which I have
+   // wrappers in place, lower case are native RPC calls
    public JSONObject Command(String type, JSONObject json) {
       String req = null;
       if (json == null)
          json = new JSONObject();
       try {
-         if (type.equals("playback")) {
+         if (type.equals("Playback")) {
             // Play an existing recording
             // Expects "id" in json
             json.put("uri", "x-tivo:classicui:playback");
@@ -346,7 +349,7 @@ public class Remote {
             json.put("uri", "x-tivo:flash:" + json.getString("uri"));
             req = RpcRequest("uiNavigate", false, json);
          }
-         else if (type.equals("uidestinations")) {
+         else if (type.equals("Uidestinations")) {
             // List available uri destinations for uiNavigate
             json.put("bodyId", bodyId_get());
             json.put("uiDestinationType", "classicui");
@@ -354,11 +357,11 @@ public class Remote {
             json.put("noLimit", "true");
             req = RpcRequest("uiDestinationInstanceSearch", false, json);
          }
-         else if (type.equals("navigate")) {
+         else if (type.equals("Navigate")) {
             // Navigation command - expects uri in json
             req = RpcRequest("uiNavigate", false, json);
          }
-         else if (type.equals("hmedestinations")) {
+         else if (type.equals("Hmedestinations")) {
             // List available hme destinations for uiNavigate
             //json.put("bodyId", bodyId_get());
             json.put("uiDestinationType", "hme");
@@ -366,7 +369,7 @@ public class Remote {
             json.put("noLimit", "true");
             req = RpcRequest("uiDestinationInstanceSearch", false, json);
          }
-         else if (type.equals("flashdestinations")) {
+         else if (type.equals("Flashdestinations")) {
             // List available flash destinations for uiNavigate
             //json.put("bodyId", bodyId_get());
             json.put("uiDestinationType", "flash");
@@ -374,21 +377,21 @@ public class Remote {
             json.put("noLimit", "true");
             req = RpcRequest("uiDestinationInstanceSearch", false, json);
          }
-         else if (type.equals("delete")) {
+         else if (type.equals("Delete")) {
             // Delete an existing recording
             // Expects "recordingId" of type JSONArray in json
             json.put("state", "deleted");
             json.put("bodyId", bodyId_get());
             req = RpcRequest("recordingUpdate", false, json);
          }
-         else if (type.equals("undelete")) {
+         else if (type.equals("Undelete")) {
             // Recover a recording from Recently Deleted
             // Expects "recordingId" of type JSONArray in json
             json.put("state", "complete");
             json.put("bodyId", bodyId_get());
             req = RpcRequest("recordingUpdate", false, json);
          }
-         else if (type.equals("permanentlyDelete")) {
+         else if (type.equals("PermanentlyDelete")) {
             // Permanently delete an existing recording (usually from Recently Deleted)
             // Expects "recordingId" of type JSONArray in json
             json.put("state", "contentDeleted");
@@ -409,14 +412,14 @@ public class Remote {
             json.put("bodyId", bodyId_get());
             req = RpcRequest("recordingUpdate", false, json);
          }
-         else if (type.equals("cancel")) {
+         else if (type.equals("Cancel")) {
             // Cancel a recording in ToDo list
             // Expects "recordingId" of type JSONArray in json
             json.put("state", "cancelled");
             json.put("bodyId", bodyId_get());
             req = RpcRequest("recordingUpdate", false, json);
          }
-         else if (type.equals("prioritize")) {
+         else if (type.equals("Prioritize")) {
             // Re-prioritize season passes
             // Expects JSONArray of all SP's "subscriptionId" in the order you want them
             json.put("bodyId", bodyId_get());
@@ -514,7 +517,7 @@ public class Remote {
             json.put("noLimit", "true");
             req = RpcRequest("subscriptionSearch", false, json);
          }
-         else if (type.equals("seasonpass")) {
+         else if (type.equals("Seasonpass")) {
             // Subscribe a season pass
             // Expects several fields in json, (levelOfDetail=medium)
             // Usually this will be JSONObject read from a JSONArray of all
@@ -544,7 +547,7 @@ public class Remote {
             o.put("ignoreConflicts", "true");
             req = RpcRequest("subscribe", false, o);
          }
-         else if (type.equals("modifySP")) {
+         else if (type.equals("ModifySP")) {
             // Modify a season pass
             // Expects several fields in json, (levelOfDetail=medium)
             // NOTE: Expects collectionId inside idSetSource
@@ -566,7 +569,7 @@ public class Remote {
             o.put("ignoreConflicts", "true");
             req = RpcRequest("subscribe", false, o);
          }
-         else if (type.equals("singlerecording")) {
+         else if (type.equals("Singlerecording")) {
             // Subscribe a single recording
             // Expects both contentId & offerId in json:
             JSONObject o = new JSONObject();
@@ -586,7 +589,7 @@ public class Remote {
                o.put("startTimePadding", json.getInt("startTimePadding"));
             req = RpcRequest("subscribe", false, o);
          }
-         else if (type.equals("manual")) {
+         else if (type.equals("Manual")) {
             // Create a manual recording
             // Expects json such as following:
             // repeating - "idSetSource":
@@ -595,7 +598,7 @@ public class Remote {
             // single - "idSetSource":
             //   "duration":1800,"time":"2012-11-16 09:30:00","channel":{channel info}
          }
-         else if (type.equals("wishlist")) {
+         else if (type.equals("Wishlist")) {
             // Create an auto-record wishlist
             // Expects json such as following which will be idSetSource:
             // "title":"LAKERS", (This is required)
@@ -650,28 +653,33 @@ public class Remote {
             o.put("idSetSource", json);
             req = RpcRequest("subscribe", false, o);
          }
-         else if (type.equals("unsubscribe")) {
+         else if (type.equals("Unsubscribe")) {
             // Unsubscribe a season pass
             // Expects subscriptionId in json
             json.put("bodyId", bodyId_get());
             req = RpcRequest("unsubscribe", false, json);
          }
-         else if (type.equals("position")) {
+         else if (type.equals("Position")) {
             json.put("throttleDelay", 1000);
             req = RpcRequest("videoPlaybackInfoEventRegister", false, json);
          }
-         else if (type.equals("jump")) {
+         else if (type.equals("Jump")) {
             // Expects "offset" in json
             req = RpcRequest("videoPlaybackPositionSet", false, json);
          }
-         else if (type.equals("sysInfo")) {
+         else if (type.equals("SysInfo")) {
             // Returns userDiskSize among other info
             json.put("bodyId", bodyId_get());
             req = RpcRequest("bodyConfigSearch", false, json);
          }
-         else if (type.equals("tunerInfo")) {
+         else if (type.equals("TunerInfo")) {
             // Returns info about both tuners
             req = RpcRequest("tunerStateEventRegister", true, json);
+         }
+         else if (type.equals("NetworkConnection")) {
+            // Request a network connection
+            json.put("bodyId", bodyId_get());
+            req = RpcRequest("phoneHomeRequest", true, json);
          }
          else {
             // Not recognized => just use type
@@ -1004,7 +1012,7 @@ public class Remote {
       }
       if (job != null && config.GUIMODE)
          config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Re-order Season Passes");
-      JSONObject result = Command("prioritize", json);
+      JSONObject result = Command("Prioritize", json);
       if (result != null) {
          log.warn("Season Pass priority order updated for TiVo: " + job.tivoName);
       } else {
@@ -1271,7 +1279,7 @@ public class Remote {
                idSetSource.put("type", "seasonPassSource");
                idSetSource.put("channel", json.getJSONObject("channel"));
                o.put("idSetSource", idSetSource);   
-               JSONObject result = Command("seasonpass", o);
+               JSONObject result = Command("Seasonpass", o);
                if (result != null) {
                   log.print("success");
                }
@@ -1283,7 +1291,7 @@ public class Remote {
                   "Modify SP - " + title, existingSP
                );
                if (result != null) {
-                  if (Command("modifySP", result) != null) {
+                  if (Command("ModifySP", result) != null) {
                      log.warn("Modified SP '" + title + "' for TiVo: " + tivoName);
                   }
                }

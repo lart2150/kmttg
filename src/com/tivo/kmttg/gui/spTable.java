@@ -595,7 +595,7 @@ public class spTable {
                       log.warn("Deleting SP on TiVo '" + currentTivo + "': " + title);
                       JSONObject o = new JSONObject();
                       o.put("subscriptionId", json.getString("subscriptionId"));
-                      if ( r.Command("unsubscribe", o) != null ) {
+                      if ( r.Command("Unsubscribe", o) != null ) {
                          RemoveRow(TABLE, row);
                          // Find and remove data entry
                          removeJson(currentTivo, json);
@@ -677,7 +677,7 @@ public class spTable {
                             // OK to subscribe
                             if (schedule) {
                                log.print("Scheduling: " + json.getString("title"));
-                               result = r.Command("seasonpass", json);
+                               result = r.Command("Seasonpass", json);
                                if (result != null)
                                   log.print("success");
                             } else {
@@ -721,7 +721,7 @@ public class spTable {
                       if (result != null) {
                          Remote r = new Remote(tivoName);
                          if (r.success) {
-                            if (r.Command("modifySP", result) != null) {
+                            if (r.Command("ModifySP", result) != null) {
                                log.warn("Modified SP '" + title + "' for TiVo: " + tivoName);
                             }
                             

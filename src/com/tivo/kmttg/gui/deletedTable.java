@@ -307,7 +307,7 @@ public class deletedTable {
                               JSONArray a = new JSONArray();
                               a.put(json.getString("recordingId"));
                               o.put("recordingId", a);
-                              json = r.Command("undelete", o);
+                              json = r.Command("Undelete", o);
                               if (json == null) {
                                  TableUtil.DeselectRow(TABLE, row);
                                  log.error("Failed to recover recording: '" + title + "'");
@@ -358,7 +358,7 @@ public class deletedTable {
                               JSONArray a = new JSONArray();
                               a.put(json.getString("recordingId"));
                               o.put("recordingId", a);
-                              json = r.Command("permanentlyDelete", o);
+                              json = r.Command("PermanentlyDelete", o);
                               if (json == null) {
                                  TableUtil.DeselectRow(TABLE, row);
                                  log.error("Failed to permanently delete recording: '" + title + "'");

@@ -1561,7 +1561,7 @@ public class remotegui {
                            if (name.equals("Amazon"))
                               uri = "x-tivo:hme:uuid:35FE011C-3850-2228-FBC5-1B9EDBBE5863";
                            json.put("uri", uri);
-                           r.Command("navigate", json);
+                           r.Command("Navigate", json);
                         } catch (JSONException e1) {
                            log.error("HME Jump - " + e1.getMessage());
                         }
@@ -1600,7 +1600,7 @@ public class remotegui {
                         try {
                            Long pos = (long)60000*mins;
                            json.put("offset", pos);
-                           r.Command("jump", json);
+                           r.Command("Jump", json);
                         } catch (JSONException e) {
                            log.error("Jump to minute failed - " + e.getMessage());
                         }
@@ -1639,13 +1639,13 @@ public class remotegui {
                      Remote r = new Remote(tivoName);
                      if (r.success) {
                         JSONObject json = new JSONObject();
-                        JSONObject reply = r.Command("position", json);
+                        JSONObject reply = r.Command("Position", json);
                         if (reply != null && reply.has("position")) {
                            try {
                               Long pos = reply.getLong("position");
                               pos += (long)60000*mins;
                               json.put("offset", pos);
-                              r.Command("jump", json);
+                              r.Command("Jump", json);
                            } catch (JSONException e) {
                               log.error("Skip minutes ahead failed - " + e.getMessage());
                            }
@@ -1685,7 +1685,7 @@ public class remotegui {
                      Remote r = new Remote(tivoName);
                      if (r.success) {
                         JSONObject json = new JSONObject();
-                        JSONObject reply = r.Command("position", json);
+                        JSONObject reply = r.Command("Position", json);
                         if (reply != null && reply.has("position")) {
                            try {
                               Long pos = reply.getLong("position");
@@ -1693,7 +1693,7 @@ public class remotegui {
                               if (pos < 0)
                                  pos = (long)0;
                               json.put("offset", pos);
-                              r.Command("jump", json);
+                              r.Command("Jump", json);
                            } catch (JSONException e) {
                               log.error("Skip minutes back failed - " + e.getMessage());
                            }
@@ -1831,7 +1831,7 @@ public class remotegui {
             Remote r = new Remote(tivoName);
             if (r.success) {
                JSONObject json = new JSONObject();
-               JSONObject reply = r.Command("sysInfo", json);
+               JSONObject reply = r.Command("SysInfo", json);
                if (reply != null && reply.has("bodyConfig")) {
                   try {
                      String info = "";
@@ -1860,7 +1860,7 @@ public class remotegui {
                      info += "\n";
                      
                      // Tuner info
-                     reply = r.Command("tunerInfo", new JSONObject());
+                     reply = r.Command("TunerInfo", new JSONObject());
                      if (reply != null && reply.has("state")) {
                         for (int i=0; i<reply.getJSONArray("state").length(); ++i) {
                            json = reply.getJSONArray("state").getJSONObject(i);
@@ -2024,7 +2024,7 @@ public class remotegui {
       if (r.success) {
          r.debug = false;
          JSONObject json = new JSONObject();
-         JSONObject result = r.Command("hmedestinations", json);
+         JSONObject result = r.Command("Hmedestinations", json);
          JSONArray a;
          try {
             a = result.getJSONArray("uiDestinationInstance");
@@ -2446,7 +2446,7 @@ public class remotegui {
             protected Boolean doInBackground() {
                Remote r = new Remote(tivoName);
                if (r.success) {
-                  JSONObject result = r.Command("wishlist", fjson);
+                  JSONObject result = r.Command("Wishlist", fjson);
                   if (result != null)
                      log.warn("Wishlist created successfully.");
                   else
