@@ -1158,6 +1158,24 @@ public class remotegui {
                RC_infoCB(tivoName);
          }
       });
+
+      JButton netconnect_info = new JButton("Network Connect");
+      netconnect_info.setToolTipText(getToolTip("netconnect_info"));
+      netconnect_info.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Initiate a net connect on selected TiVo
+            String tivoName = (String)tivo_info.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               Remote r = new Remote(tivoName);
+               if (r.success) {
+                  JSONObject result = r.Command("PhoneHome", new JSONObject());
+                  if (result != null)
+                     log.warn("Network Connection initiated on: " + tivoName);
+               }
+            }
+         }
+      });
+      
       row1_info.add(Box.createRigidArea(space_40));
       row1_info.add(title_info);
       row1_info.add(Box.createRigidArea(space_40));
@@ -1166,6 +1184,8 @@ public class remotegui {
       row1_info.add(tivo_info);
       row1_info.add(Box.createRigidArea(space_40));
       row1_info.add(refresh_info);
+      row1_info.add(Box.createRigidArea(space_5));
+      row1_info.add(netconnect_info);
       panel_info.add(row1_info, c);
       
       text_info = new JTextPane();
@@ -1857,6 +1877,18 @@ public class remotegui {
                         if (json.has(fields[i]))
                            info += String.format("%s\t%s\n", fields[i], json.get(fields[i]));
                      }
+                     
+                     // What's On info
+                     String [] whatson = getWhatsOn(tivoName);
+                     if (whatson != null) {
+                        info += String.format("%s\t\t", "What's On");
+                        for (int i=0; i<whatson.length; ++i) {
+                           if (i>0)
+                              info += "; ";
+                           info += whatson[i];
+                        }
+                        info += "\n";
+                     }
                      info += "\n";
                      
                      // Tuner info
@@ -1890,6 +1922,35 @@ public class remotegui {
       }
       backgroundRun b = new backgroundRun();
       b.execute();
+   }
+   
+   private String[] getWhatsOn(String tivoName) {
+      Remote r = new Remote(tivoName);
+      if (r.success) {
+         JSONObject result = r.Command("WhatsOn", new JSONObject());
+         if (result != null && result.has("whatsOn")) {
+            try {
+               JSONArray a = result.getJSONArray("whatsOn");
+               String display[] = new String[a.length()];
+               for (int i=0; i<a.length(); ++i) {
+                  JSONObject o = a.getJSONObject(i);
+                  if (o.has("playbackType")) {
+                     display[i] = "" + o.getString("playbackType");
+                     if (! o.getString("playbackType").equals("idle") && o.has("channelIdentifier")) {
+                        JSONObject c = o.getJSONObject("channelIdentifier");
+                        if (c.has("channelNumber"))
+                           display[i] = display[i] + " (channel " + c.getString("channelNumber") + ")";
+                     }
+                  }
+               }
+               return display;
+            } catch (JSONException e1) {
+               log.error("getWhatsOn json error: " + e1.getMessage());
+               return null;
+            }
+         }
+      }
+      return null;
    }
       
    private String getCurrentTabName() {
@@ -2892,6 +2953,10 @@ public class remotegui {
       else if (component.equals("refresh_info")){
          text = "<b>Refresh</b><br>";
          text += "Retrieve system information for selected TiVo.";
+      }
+      else if (component.equals("netconnect_info")){
+         text = "<b>Network Connect</b><br>";
+         text += "Start a Network Connection (call home) for selected TiVo.";
       }
       else if (component.equals("rc_jumpto_text")) {
          text = "<b>Jump to minute</b><br>";
