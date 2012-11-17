@@ -676,10 +676,15 @@ public class Remote {
             // Returns info about both tuners
             req = RpcRequest("tunerStateEventRegister", true, json);
          }
-         else if (type.equals("NetworkConnection")) {
+         else if (type.equals("PhoneHome")) {
             // Request a network connection
             json.put("bodyId", bodyId_get());
             req = RpcRequest("phoneHomeRequest", true, json);
+         }
+         else if (type.equals("WhatsOn")) {
+            // Request info on what is currently playing on the TiVo
+            json.put("bodyId", bodyId_get());
+            req = RpcRequest("whatsOnSearch", true, json);
          }
          else {
             // Not recognized => just use type
