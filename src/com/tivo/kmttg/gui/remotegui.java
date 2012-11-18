@@ -2807,7 +2807,9 @@ public class remotegui {
          text += "You are prompted with wishlist dialog where you can define wishlist with boolean logic<br>";
          text += "for keywords, title keywords, actors and directors.<br>";
          text += "NOTE: Even though a title is required to be specified, the Wishlist will be named by<br>";
-         text += "TiVo according to the search elements you setup";
+         text += "TiVo according to the search elements you setup.<br>";
+         text += "NOTE: Existing non-autorecord wishlists are not visible or editable via RPC and have to<br>";
+         text += "be managed on the TiVo itself.";
       }
       else if (component.equals("refresh_todo_search")) {
          text = "<b>Refresh ToDo</b><br>";
