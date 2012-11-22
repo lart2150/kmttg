@@ -59,6 +59,9 @@ public class mdns {
          for (int i=0; i<info.length; ++i) {
             // No tsn => not a tivo
             String tsn = info[i].getPropertyString("TSN");
+            // Ignore certain devices like TiVo Stream which starts with TSN "A94"
+            if (tsn != null && tsn.startsWith("A94"))
+               tsn = null;
             if (tsn != null) {
                Boolean add = true;
                String name = info[i].getName();
