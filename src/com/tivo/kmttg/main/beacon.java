@@ -44,7 +44,6 @@ public class beacon {
             String ip = packet.getAddress().toString().replaceFirst("/", "");
             h.put("ip", ip);
             String s = new String(packet.getData());
-            log.print("beacon:" + s);
             String[] l = s.split("\n");
             String name, value;
             for (int i=0; i<l.length; ++i) {
