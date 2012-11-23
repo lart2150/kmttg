@@ -187,6 +187,9 @@ public class projectxcut implements Serializable {
                      log.print("(Deleted edl file: " + job.edlFile + ")");
                   if (file.delete(job.xclFile))
                      log.print("(Deleted xcl file: " + job.xclFile + ")");
+                  String txtFile = string.replaceSuffix(job.mpegFile, ".txt");
+                  if (file.isFile(txtFile) && file.delete(txtFile))
+                     log.print("(Deleted comskip txt file: " + txtFile + ")");
                }
                
                // Start remux background job               

@@ -11,6 +11,7 @@ import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class comcut implements Serializable {
    private static final long serialVersionUID = 1L;
@@ -178,6 +179,9 @@ public class comcut implements Serializable {
                String xclFile = job.mpegFile + ".Xcl";
                if (file.isFile(xclFile) && file.delete(xclFile))
                   log.print("(Deleted xcl file: " + xclFile + ")");
+               String txtFile = string.replaceSuffix(job.mpegFile, ".txt");
+               if (file.isFile(txtFile) && file.delete(txtFile))
+                  log.print("(Deleted comskip txt file: " + txtFile + ")");
 
             }
             // Remove .mpg file if option enabled

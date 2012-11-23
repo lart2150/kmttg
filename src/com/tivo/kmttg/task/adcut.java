@@ -200,6 +200,9 @@ public class adcut implements Serializable {
                String xclFile = job.mpegFile + ".Xcl";
                if (file.isFile(xclFile) && file.delete(xclFile))
                   log.print("(Deleted xcl file: " + xclFile + ")");
+               String txtFile = string.replaceSuffix(job.mpegFile, ".txt");
+               if (file.isFile(txtFile) && file.delete(txtFile))
+                  log.print("(Deleted comskip txt file: " + txtFile + ")");
             }
             // Remove .mpg file if option enabled
             if ( config.RemoveComcutFiles_mpeg == 1 ) {
