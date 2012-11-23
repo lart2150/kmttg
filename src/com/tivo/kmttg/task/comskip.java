@@ -193,7 +193,7 @@ public class comskip implements Serializable {
             log.warn("comskip job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " output=" + outputFile);
             // Cleanup
-            String[] extensions = {".log", ".logo.txt", ".txt"};
+            String[] extensions = {".log", ".logo.txt"};
             String f;
             for (int i=0; i<extensions.length; ++i) {
                f = string.replaceSuffix(job.mpegFile, extensions[i]);
