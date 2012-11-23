@@ -44,6 +44,7 @@ public class beacon {
             String ip = packet.getAddress().toString().replaceFirst("/", "");
             h.put("ip", ip);
             String s = new String(packet.getData());
+            log.print("beacon:" + s);
             String[] l = s.split("\n");
             String name, value;
             for (int i=0; i<l.length; ++i) {
@@ -53,6 +54,8 @@ public class beacon {
             }
             // Filter out pyTivo broadcasts (for tivos: platform = tcd/...)
             if (h.containsKey("platform") && ! h.get("platform").matches("^tcd.+$") ) return null;
+            // Filter out TiVo Stream device with TSN starting with "A94"
+            if (h.containsKey("identity") && h.get("identity").startsWith("A94")) return null;
             if (h.containsKey("machine")) return h;
          }
       }
