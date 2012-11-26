@@ -140,6 +140,7 @@ public class config {
    
    // metadata related
    public static String metadata_files = "last";
+   public static String metadata_entries = "";
    
    // pyTivo push related
    public static String pyTivo_config = "";
@@ -484,6 +485,7 @@ public class config {
       pyTivo_config      = "";
       pyTivo_files       = "last";
       metadata_files     = "last";
+      metadata_entries   = "";
       
       // 3rd party executable defaults
       curl          = getProgramDefault("curl");
@@ -806,6 +808,9 @@ public class config {
             if (key.equals("metadata_files")) {
                metadata_files = line;
             }
+            if (key.equals("metadata_entries")) {
+               metadata_entries = string.removeLeadingTrailingSpaces(line);
+            }
             if (key.equals("autotune_tivoName")) {
                autotune_tivoName = line;
             }
@@ -1034,6 +1039,8 @@ public class config {
          ofp.write("<pyTivo_files>\n" + pyTivo_files + "\n\n");
          
          ofp.write("<metadata_files>\n" + metadata_files + "\n\n");
+         
+         ofp.write("<metadata_entries>\n" + metadata_entries + "\n\n");
          
          ofp.write("<CheckDiskSpace>\n" + CheckDiskSpace + "\n\n");
          

@@ -114,6 +114,7 @@ public class configMain {
    private static JTextField download_tries = null;
    private static JTextField download_retry_delay = null;
    private static JTextField download_delay = null;
+   private static JTextField metadata_entries = null;
    private static JTextField autoLogSizeMB = null;
    private static JTextField pyTivo_host = null;
    private static JTextField pyTivo_config = null;
@@ -738,6 +739,9 @@ public class configMain {
       
       // download_delay
       download_delay.setText("" + config.download_delay);
+      
+      // metadata_entries
+      metadata_entries.setText("" + config.metadata_entries);
       
       // autoLogSizeMB
       autoLogSizeMB.setText("" + config.autoLogSizeMB);
@@ -1451,6 +1455,14 @@ public class configMain {
          config.download_retry_delay = 10;
       }
       
+      // metadata_entries
+      value = string.removeLeadingTrailingSpaces(metadata_entries.getText());
+      if (value.length() > 0) {
+         config.metadata_entries = value;
+      } else {
+         config.metadata_entries = "";
+      }
+      
       // download_delay
       value = string.removeLeadingTrailingSpaces(download_delay.getText());
       if (value.length() > 0) {
@@ -1599,6 +1611,7 @@ public class configMain {
       download_tries = new javax.swing.JTextField(15);
       download_retry_delay = new javax.swing.JTextField(15);
       download_delay = new javax.swing.JTextField(15);
+      metadata_entries = new javax.swing.JTextField(15);
       autoLogSizeMB = new javax.swing.JTextField(15);
       
       disk_space = new javax.swing.JTextField(5);
@@ -1683,6 +1696,7 @@ public class configMain {
       JLabel download_tries_label = new javax.swing.JLabel();
       JLabel download_retry_delay_label = new javax.swing.JLabel();
       JLabel download_delay_label = new javax.swing.JLabel();
+      JLabel metadata_entries_label = new javax.swing.JLabel();
       JLabel autoLogSizeMB_label = new javax.swing.JLabel();
       JLabel available_keywords_label = new javax.swing.JLabel();
       JLabel pyTivo_host_label = new javax.swing.JLabel();
@@ -1796,6 +1810,7 @@ public class configMain {
       download_tries_label.setText("# download attempts");
       download_retry_delay_label.setText("seconds between download retry attempts");
       download_delay_label.setText("start delay in seconds for download tasks");
+      metadata_entries_label.setText("extra metadata entries (comma separated)");
       autoLogSizeMB_label.setText("auto log file size limit (MB)");
       pyTivo_host_label.setText("pyTivo host name");
       pyTivo_config_label.setText("pyTivo.conf file");
@@ -2726,6 +2741,16 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(metadata_files, c);
       
+      // metadata_entries
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(metadata_entries_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(metadata_entries, c);
+      
       // TivoWebPlusDelete
       gy++;
       c.gridx = 0;
@@ -3072,6 +3097,7 @@ public class configMain {
       download_tries.setToolTipText(getToolTip("download_tries"));
       download_retry_delay.setToolTipText(getToolTip("download_retry_delay"));
       download_delay.setToolTipText(getToolTip("download_delay"));
+      metadata_entries.setToolTipText(getToolTip("metadata_entries"));
       autoLogSizeMB.setToolTipText(getToolTip("autoLogSizeMB"));
       pyTivo_host.setToolTipText(getToolTip("pyTivo_host"));
       pyTivo_config.setToolTipText(getToolTip("pyTivo_config"));
@@ -3683,6 +3709,12 @@ public class configMain {
          text += "<b>encodeFile: </b>Only for encoded file after encode task if that task is enabled.<br>";
          text += "<b>last: </b>Only last video file in sequence of tasks (this is default setting).<br>";
          text += "<b>all: </b>For all available video files for the task set (except for .TiVo files).";
+      }
+      else if (component.equals("metadata_entries")) {
+         text =  "<b>extra metadata entries (comma separated)</b><br>";
+         text += "Extra metadata entries you want added automatically to all metadata files that kmttg<br>";
+         text += "creates. You should use the required metadata file syntax of name : value and if there is<br>";
+         text += "more that 1 line you should separate each pair of entries with a comma (,).";
       }
       else if (component.equals("lookAndFeel")) {
          text =  "<b>look and feel</b><br>";
