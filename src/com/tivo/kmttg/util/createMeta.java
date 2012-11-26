@@ -16,6 +16,7 @@ import org.w3c.dom.traversal.DocumentTraversal;
 import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.traversal.TreeWalker;
 
+import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 
 public class createMeta {
@@ -183,6 +184,14 @@ public class createMeta {
                }
             }
          }
+         
+         // Extra name : value data specified in kmttg config
+         String extra[] = getExtraMetadata();
+         if (extra != null) {
+            for (int i=0; i<extra.length; ++i) {
+               ofp.write(extra[i] + eol);
+            }
+         }
          ofp.close();
          
       }
@@ -224,6 +233,27 @@ public class createMeta {
          value = data.get(name);
          log.print(name + "=" + value);
       }
+   }
+   
+   public static String[] getExtraMetadata() {
+      if (config.metadata_entries != null && config.metadata_entries.length() > 0) {
+         String entries = string.removeLeadingTrailingSpaces(config.metadata_entries);
+         String tokens[] = entries.split(",");
+         String data[] = new String[tokens.length];
+         for (int i=0; i<tokens.length; ++i) {
+            String nv[] = tokens[i].split(":");
+            if (nv.length == 2) {
+               String name = string.removeLeadingTrailingSpaces(nv[0]);
+               String value = string.removeLeadingTrailingSpaces(nv[1]);
+               data[i] = name + " : " + value;
+            } else {
+               log.error("Invalid setting for 'extra metadata entries': " + config.metadata_entries);
+               return null;
+            }
+         }
+         return data;
+      }
+      return null;
    }
 
 }

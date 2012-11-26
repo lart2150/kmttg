@@ -26,6 +26,7 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.Entities;
 import com.tivo.kmttg.util.backgroundProcess;
+import com.tivo.kmttg.util.createMeta;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -341,6 +342,14 @@ public class metadataTivo implements Serializable {
                for (int j=0; j<values.size(); ++j) {
                   ofp.write(key + " : " + values.get(j) + eol);
                }
+            }
+         }
+         
+         // Extra name : value data specified in kmttg config
+         String extra[] = createMeta.getExtraMetadata();
+         if (extra != null) {
+            for (int i=0; i<extra.length; ++i) {
+               ofp.write(extra[i] + eol);
             }
          }
          ofp.close();
