@@ -207,7 +207,7 @@ public class createMeta {
       return true;
    }
       
-   private static Node getNodeByName(Document doc, Node n, String name) {
+   public static Node getNodeByName(Document doc, Node n, String name) {
       DocumentTraversal docTraversal = (DocumentTraversal)doc;
       TreeWalker iter = docTraversal.createTreeWalker(
          n,
