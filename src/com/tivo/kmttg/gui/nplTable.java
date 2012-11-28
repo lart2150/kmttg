@@ -29,6 +29,7 @@ import javax.swing.SwingUtilities;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Sorter;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.swing.event.ListSelectionEvent;
@@ -43,6 +44,7 @@ import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
+import com.tivo.kmttg.util.createMeta;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -1358,12 +1360,17 @@ public class nplTable {
    private void metadataFromXML(byte[] b, Hashtable<String,String> h) {
       Document doc = Xml.getDocument(new ByteArrayInputStream(b));
       if (doc != null) {
-         NodeList nl = doc.getElementsByTagName("originalAirDate");
-         if (nl.getLength() > 0) {
-            String oad = nl.item(0).getTextContent();
-            // Strip off time portion. Example: 2012-11-08T00:00:00Z
-            oad = oad.replaceFirst("T.+$", "");
-            h.put("originalAirDate", oad);
+         // Search for everything under <showing>
+         NodeList nlist = doc.getElementsByTagName("showing");
+         if (nlist.getLength() > 0) {
+            Node showingNode = nlist.item(0);
+            Node n = createMeta.getNodeByName(doc, showingNode, "originalAirDate");
+            if ( n != null) {
+               String oad = n.getTextContent();
+               // Strip off time portion. Example: 2012-11-08T00:00:00Z
+               oad = oad.replaceFirst("T.+$", "");
+               h.put("originalAirDate", oad);
+            }
          }
       }
    }
