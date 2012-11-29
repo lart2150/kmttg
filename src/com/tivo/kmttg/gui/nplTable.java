@@ -426,6 +426,8 @@ public class nplTable {
                            // Read data from info
                            byte[] b = info.toByteArray();
                            metadataFromXML(b, s.data);
+                           if (config.getRpcSetting(tivoName).equals("1"))
+                              addRpcData(s.data, row);
                            s.data.put("metadata", "acquired");
                            log.warn("extended metadata acquired");
                         }
@@ -1371,6 +1373,27 @@ public class nplTable {
                oad = oad.replaceFirst("T.+$", "");
                h.put("originalAirDate", oad);
             }
+         }
+      }
+   }
+   
+   // Grab RPC data for given row data and add to hash data
+   private void addRpcData(Hashtable<String,String> h, int row) {
+      JSONObject json = rnpl.findRpcData(tivoName, h);
+      if (json != null) {
+         try {
+            if (! h.containsKey("originalAirDate") && json.has("originalAirdate"))
+               h.put("originalAirDate", json.getString("originalAirdate"));
+            if (! h.containsKey("EpisodeNumber") && json.has("episodeNum") && json.has("seasonNumber")) {
+               h.put(
+                  "EpisodeNumber",
+                  "" + json.get("seasonNumber") + 
+                  String.format("%02d", json.getJSONArray("episodeNum").get(0))
+               );
+               NowPlaying.setValueAt(new sortableShow(h), row, getColumnIndex("SHOW"));
+            }
+         } catch (JSONException e) {
+            log.error("addRpcData error - " + e.getMessage());
          }
       }
    }
