@@ -46,9 +46,9 @@ public class rnpl {
       }
    }
    
-   public static String findRecordingId(String tivoName, Hashtable<String,String> nplData) {
+   public static JSONObject findRpcData(String tivoName, Hashtable<String,String> nplData) {      
       if ( ! rnpldata.containsKey(tivoName) ) {
-         log.error("No data available for findRecordingId");
+         log.error("No data available for findRpcData");
          return null;
       }
             
@@ -107,16 +107,27 @@ public class rnpl {
             //log.print("date: " + h_date + " (" + date_long + ") : " + r_date + " (" + r_sdate + ")");
             //log.print("size: " + h_size + " : " + r_size);
             if (r_title.equals(h_title) && r_diff <= r_date_leeway && r_size == h_size) {
-               if (json.has("recordingId"))
-                  return json.getString("recordingId");
+               return json;
             }
          }
-         log.error("findRecordingId failed to find a match");
+         log.error("findRpcData failed to find a match");
          return null;
       } catch (JSONException e1) {
-         log.error("findRecordingId - " + e1.getMessage());
+         log.error("findRpcData - " + e1.getMessage());
          return null;
       }
+   }
+   
+   public static String findRecordingId(String tivoName, Hashtable<String,String> nplData) {
+      JSONObject json = findRpcData(tivoName, nplData);
+      if (json != null && json.has("recordingId")) {
+         try {
+            return json.getString("recordingId");
+         } catch (JSONException e) {
+            log.error("findRecordingId error - " + e.getMessage());
+         }
+      }
+      return null;
    }
    
    private static long getLongDateFromString(String date) {
