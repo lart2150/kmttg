@@ -426,8 +426,6 @@ public class nplTable {
                            // Read data from info
                            byte[] b = info.toByteArray();
                            metadataFromXML(b, s.data);
-                           if (config.getRpcSetting(tivoName).equals("1"))
-                              addRpcData(s.data, row);
                            s.data.put("metadata", "acquired");
                            log.warn("extended metadata acquired");
                         }
@@ -514,17 +512,13 @@ public class nplTable {
                      // USE TWP to remove items from entries stack
                      // NOTE: Always revert to top view (not inside a folder)
                      RemoveUrls(urlsToDelete);
-                     folderize(entries);
-                     setFolderState(false);
-                     RefreshNowPlaying(entries);
+                     RefreshTable();
                   }
                   if (config.getRpcSetting(tivoName).equals("1")) {
                      // Use iPad remote protocol to remove items
                      log.warn("Deleting selected shows on TiVo '" + tivoName + "':\n" + show_names);
                      RemoveIds(urlsToDelete, idsToDelete);
-                     folderize(entries);
-                     setFolderState(false);
-                     RefreshNowPlaying(entries);
+                     RefreshTable();
                   }
                } // if urslToDelete
             } // if keyCode == KeyEvent.VK_DELETE
@@ -568,6 +562,12 @@ public class nplTable {
          // Pass along keyboard action for unimplemented key press
          e.consume();
       }
+   }
+   
+   public void RefreshTable() {
+      folderize(entries);
+      setFolderState(false);
+      RefreshNowPlaying(entries);
    }
    
    public void setFolderState(Boolean state) {
@@ -1377,25 +1377,33 @@ public class nplTable {
       }
    }
    
-   // Grab RPC data for given row data and add to hash data
-   private void addRpcData(Hashtable<String,String> h, int row) {
-      JSONObject json = rnpl.findRpcData(tivoName, h);
-      if (json != null) {
-         try {
-            if (! h.containsKey("originalAirDate") && json.has("originalAirdate"))
-               h.put("originalAirDate", json.getString("originalAirdate"));
-            if (! h.containsKey("EpisodeNumber") && json.has("episodeNum") && json.has("seasonNumber")) {
-               h.put(
-                  "EpisodeNumber",
-                  "" + json.get("seasonNumber") + 
-                  String.format("%02d", json.getJSONArray("episodeNum").get(0))
-               );
-               NowPlaying.setValueAt(new sortableShow(h), row, getColumnIndex("SHOW"));
+   // Add RPC data to entries hashes where information may be missing
+   // such as originalAirDate & EpisodeNumber
+   public void addRpcData() {
+      Boolean changed = false;
+      for (int i=0; i<entries.size(); ++i) {
+         Hashtable<String,String> h = entries.get(i);
+         JSONObject json = rnpl.findRpcData(tivoName, h, true);
+         if (json != null) {
+            try {
+               if (! h.containsKey("originalAirDate") && json.has("originalAirdate"))
+                  h.put("originalAirDate", json.getString("originalAirdate"));
+               if (! h.containsKey("EpisodeNumber") && json.has("episodeNum") && json.has("seasonNumber")) {
+                  h.put(
+                     "EpisodeNumber",
+                     "" + json.get("seasonNumber") + 
+                     String.format("%02d", json.getJSONArray("episodeNum").get(0))
+                  );
+                  changed = true;
+               }
+            } catch (JSONException e) {
+               log.error("addRpcData error - " + e.getMessage());
             }
-         } catch (JSONException e) {
-            log.error("addRpcData error - " + e.getMessage());
          }
       }
+      // Update table GUI if anything GUI related needs to change
+      if (changed)
+         RefreshTable();
    }
    
    // Return true if this entry should not be displayed, false otherwise
