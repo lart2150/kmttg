@@ -12,6 +12,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.JSON.JSONTokener;
+import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.log;
@@ -43,12 +44,16 @@ public class rnpl {
             rnpldata.remove(tivoName);
       } else {
          rnpldata.put(tivoName, data);
+         // Add RPC data to XML data to enrich information such as originalAirDate & EpisodeNumber
+         if (config.GUIMODE)
+            config.gui.getTab(tivoName).getTable().addRpcData();
       }
    }
    
-   public static JSONObject findRpcData(String tivoName, Hashtable<String,String> nplData) {      
+   public static JSONObject findRpcData(String tivoName, Hashtable<String,String> nplData, Boolean silent) {      
       if ( ! rnpldata.containsKey(tivoName) ) {
-         log.error("No data available for findRpcData");
+         if (! silent)
+            log.error("No data available for findRpcData");
          return null;
       }
             
@@ -67,7 +72,8 @@ public class rnpl {
       //if (nplData.containsKey("date_long"))
          //date_long = nplData.get("date_long");
       if (h_title == null || h_date == 0 || h_size == 0) {
-         log.error("findRecordingId insufficient NPL data");
+         if (! silent)
+            log.error("findRecordingId insufficient NPL data");
          return null;
       }
       JSONObject json;
@@ -110,16 +116,18 @@ public class rnpl {
                return json;
             }
          }
-         log.error("findRpcData failed to find a match");
+         if (! silent)
+            log.error("findRpcData failed to find a match");
          return null;
       } catch (JSONException e1) {
-         log.error("findRpcData - " + e1.getMessage());
+         if (! silent)
+            log.error("findRpcData - " + e1.getMessage());
          return null;
       }
    }
    
    public static String findRecordingId(String tivoName, Hashtable<String,String> nplData) {
-      JSONObject json = findRpcData(tivoName, nplData);
+      JSONObject json = findRpcData(tivoName, nplData, false);
       if (json != null && json.has("recordingId")) {
          try {
             return json.getString("recordingId");
