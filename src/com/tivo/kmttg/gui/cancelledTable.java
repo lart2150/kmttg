@@ -3,6 +3,8 @@ package com.tivo.kmttg.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collections;
@@ -55,6 +57,14 @@ public class cancelledTable {
       TABLE.setModel(new CancelledTableModel(data, TITLE_cols));
       TABLE.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
       scroll = new JScrollPane(TABLE);
+      // Add keyboard listener
+      TABLE.addKeyListener(
+         new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+               KeyPressed(e);
+            }
+         }
+      );
       
       // Add listener for click handling (for folder entries)
       TABLE.addMouseListener(
@@ -235,6 +245,23 @@ public class cancelledTable {
    
    private JSONObject GetRowData(int row) {
       return TableUtil.GetRowData(TABLE, row, "DATE");
+   }
+   
+   // Handle keyboard presses
+   private void KeyPressed(KeyEvent e) {
+      int keyCode = e.getKeyCode();
+      if (keyCode == KeyEvent.VK_J) {
+         // Print json of selected row to log window
+         int[] selected = TableUtil.GetSelectedRows(TABLE);
+         if (selected == null || selected.length < 1)
+            return;
+         JSONObject json = GetRowData(selected[0]);
+         if (json != null)
+            rnpl.printJSON(json);
+      } else {
+         // Pass along keyboard action
+         e.consume();
+      }
    }
    
    // Mouse event handler

@@ -1,5 +1,7 @@
 package com.tivo.kmttg.gui;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -42,6 +44,14 @@ public class deletedTable {
       TABLE.setModel(new DeletedTableModel(data, TITLE_cols));
       TABLE.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
       scroll = new JScrollPane(TABLE);
+      // Add keyboard listener
+      TABLE.addKeyListener(
+         new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+               KeyPressed(e);
+            }
+         }
+      );
       
       // Define custom column sorting routines
       Comparator<Object> sortableComparator = new Comparator<Object>() {
@@ -134,6 +144,23 @@ public class deletedTable {
    
    private JSONObject GetRowData(int row) {
       return TableUtil.GetRowData(TABLE, row, "DATE");
+   }
+   
+   // Handle keyboard presses
+   private void KeyPressed(KeyEvent e) {
+      int keyCode = e.getKeyCode();
+      if (keyCode == KeyEvent.VK_J) {
+         // Print json of selected row to log window
+         int[] selected = TableUtil.GetSelectedRows(TABLE);
+         if (selected == null || selected.length < 1)
+            return;
+         JSONObject json = GetRowData(selected[0]);
+         if (json != null)
+            rnpl.printJSON(json);
+      } else {
+         // Pass along keyboard action
+         e.consume();
+      }
    }
    
    private void TABLERowSelected(int row) {
