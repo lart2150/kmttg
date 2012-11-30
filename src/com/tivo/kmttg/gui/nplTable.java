@@ -433,6 +433,8 @@ public class nplTable {
                         log.error("metadata error: " + e1.getMessage());
                      }
                   }
+                  // De-select all
+                  NowPlaying.getSelectionModel().clearSelection();
                }
                // Select row
                NowPlaying.setRowSelectionInterval(row, row);
