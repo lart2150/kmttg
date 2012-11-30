@@ -520,7 +520,7 @@ public class searchTable {
             return;
          JSONObject json = GetRowData(selected[0]);
          if (json != null)
-            log.print(json.toString());
+            rnpl.printJSON(json);
       } else {
          // Pass along keyboard action
          e.consume();

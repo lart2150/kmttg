@@ -36,6 +36,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
@@ -494,7 +495,7 @@ public class spTable {
              return;
           JSONObject json = GetRowData(selected[0]);
           if (json != null)
-             log.print(json.toString());
+             rnpl.printJSON(json);
        }
        else if (keyCode == KeyEvent.VK_DELETE) {
           // Remove selected row from TiVo and table
