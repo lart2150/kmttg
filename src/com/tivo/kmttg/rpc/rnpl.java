@@ -4,8 +4,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.TimeZone;
 
 import com.tivo.kmttg.JSON.JSONArray;
@@ -220,6 +224,23 @@ public class rnpl {
       }
 
       return null;
+   }
+   
+   // Dump JSON contents to message window as 1 line per key/value pair
+   @SuppressWarnings("unchecked")
+   public static void printJSON(JSONObject json) {
+      Iterator<String> keys = json.keys();
+      List<String> sortKey = new ArrayList<String>();
+      while(keys.hasNext())
+         sortKey.add(keys.next());
+      Collections.sort(sortKey);
+      for (int i=0; i<sortKey.size(); ++i) {
+         try {
+            log.print(sortKey.get(i) + "=" + json.get(sortKey.get(i)));
+         } catch (JSONException e) {
+            log.error("printJSON error - " + e.getMessage());
+         }
+      }
    }
 
 }
