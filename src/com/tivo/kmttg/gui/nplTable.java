@@ -1388,6 +1388,8 @@ public class nplTable {
          JSONObject json = rnpl.findRpcData(tivoName, h, true);
          if (json != null) {
             try {
+               if (json.has("recordingId"))
+                  h.put("recordingId", json.getString("recordingId"));
                if (! h.containsKey("originalAirDate") && json.has("originalAirdate"))
                   h.put("originalAirDate", json.getString("originalAirdate"));
                if (! h.containsKey("EpisodeNumber") && json.has("episodeNum") && json.has("seasonNumber")) {
