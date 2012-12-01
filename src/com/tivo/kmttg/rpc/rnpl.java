@@ -131,15 +131,12 @@ public class rnpl {
    }
    
    public static String findRecordingId(String tivoName, Hashtable<String,String> nplData) {
-      JSONObject json = findRpcData(tivoName, nplData, false);
-      if (json != null && json.has("recordingId")) {
-         try {
-            return json.getString("recordingId");
-         } catch (JSONException e) {
-            log.error("findRecordingId error - " + e.getMessage());
-         }
+      if (nplData.containsKey("recordingId")) {
+         return nplData.get("recordingId");
+      } else {
+         log.error("recordingId not available for this entry");
+         return null;
       }
-      return null;
    }
    
    private static long getLongDateFromString(String date) {
