@@ -12,6 +12,7 @@ import com.tivo.kmttg.util.log;
 
 public class spOptions {
    JComponent[] components;
+   JLabel label;
    JComboBox record, number, until, start, stop;
    TwoWayHashmap<String,String> recordHash = new TwoWayHashmap<String,String>();
    TwoWayHashmap<String,Integer> numberHash = new TwoWayHashmap<String,Integer>();
@@ -60,7 +61,8 @@ public class spOptions {
       createComponents();      
    }
    
-   private void createComponents() {      
+   private void createComponents() {
+      label = new JLabel();
       record = new JComboBox(new String[] {
          "Repeats & first-run", "First-run only", "All (with duplicates)"}
       );
@@ -91,6 +93,7 @@ public class spOptions {
       stop.setSelectedItem("On time");
       
       components = new JComponent[] {
+         label,
          new JLabel("Record"),          record,
          new JLabel("Keep at most"),    number,
          new JLabel("Keep until"),      until,
@@ -103,8 +106,9 @@ public class spOptions {
       try {
          if (json != null)
             setValues(json);
+         label.setText(title);
          int response = JOptionPane.showConfirmDialog(
-            null, components, title, JOptionPane.OK_CANCEL_OPTION
+            null, components, "Season Pass Options", JOptionPane.OK_CANCEL_OPTION
          );
          if (response == JOptionPane.OK_OPTION) {
             // NOTE: Make a copy of json so we don't change existing one

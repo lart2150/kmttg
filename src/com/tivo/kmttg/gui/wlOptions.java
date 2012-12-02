@@ -12,6 +12,7 @@ import com.tivo.kmttg.util.log;
 
 public class wlOptions {
    JComponent[] components;
+   JLabel label;
    JLabel l_help, l_title, l_keyword, l_title_keyword, l_actor, l_director;
    JTextField tf_title, tf_keyword, tf_title_keyword, tf_actor, tf_director;
    JCheckBox cb_autorecord;
@@ -21,6 +22,7 @@ public class wlOptions {
    }
    
    private void createComponents() {
+      label = new JLabel();
       l_help = new JLabel("KEYWORD LOGIC: keywords=>REQ, -keywords=>NOT, (keywords)=>OPT");
       l_title = new JLabel("Wishlist Title");
       tf_title = new JTextField(15);      
@@ -35,6 +37,7 @@ public class wlOptions {
       cb_autorecord = new JCheckBox("Auto Record", false);
       
       components = new JComponent[] {
+         label,
          l_help,
          l_title, tf_title,
          l_keyword, tf_keyword,
@@ -50,8 +53,9 @@ public class wlOptions {
          clearFields();
          setValues(h);
       }
+      label.setText(title);
       int response = JOptionPane.showConfirmDialog(
-         null, components, title, JOptionPane.OK_CANCEL_OPTION
+         null, components, "Create Wishlist", JOptionPane.OK_CANCEL_OPTION
       );
       if (response == JOptionPane.OK_OPTION) {
          if (h == null)
@@ -95,6 +99,7 @@ public class wlOptions {
    }
    
    private void clearFields() {
+      label.setText("");
       tf_title.setText("");
       tf_keyword.setText("");
       tf_title_keyword.setText("");

@@ -12,6 +12,7 @@ import com.tivo.kmttg.util.log;
 
 public class recordOptions {
    JComponent[] components;
+   JLabel label;
    JComboBox record, number, until, start, stop;
    TwoWayHashmap<String,String> untilHash = new TwoWayHashmap<String,String>();
    TwoWayHashmap<String,Integer> startHash = new TwoWayHashmap<String,Integer>();
@@ -46,6 +47,7 @@ public class recordOptions {
    }
    
    private void createComponents() {
+      label = new JLabel();
       until = new JComboBox(new String[] {"Space needed", "Until I delete"});
       until.setSelectedItem("Space needed");
 
@@ -64,6 +66,7 @@ public class recordOptions {
       stop.setSelectedItem("On time");
       
       components = new JComponent[] {
+         label,
          new JLabel("Keep until"),      until,
          new JLabel("Start recording"), start,
          new JLabel("Stop recording"),  stop
@@ -74,8 +77,9 @@ public class recordOptions {
       try {
          if (json != null)
             setValues(json);
+         label.setText(title);
          int response = JOptionPane.showConfirmDialog(
-            null, components, title, JOptionPane.OK_CANCEL_OPTION
+            null, components, "Recording Options", JOptionPane.OK_CANCEL_OPTION
          );
          if (response == JOptionPane.OK_OPTION) {
             // NOTE: Make a copy of json so we don't change existing one
