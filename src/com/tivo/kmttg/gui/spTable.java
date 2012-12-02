@@ -717,7 +717,7 @@ public class spTable {
                          return null;
                       }
                       JSONObject result = config.gui.remote_gui.spOpt.promptUser(
-                         "Modify SP - " + title, json
+                         "(" + tivoName + ")" + "Modify SP - " + title, json
                       );
                       if (result != null) {
                          Remote r = new Remote(tivoName);
