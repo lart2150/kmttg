@@ -5,7 +5,7 @@ Zune HD: mpeg4 container, 480x272, mp4 video, aac audio
 # Encode command or script (single line)
 # Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
-FFMPEG -y -i INPUT -threads CPU_CORES -f mp4 -vcodec mpeg4 -b 1000k -r 23.976 -s 480x272 -acodec aac -ab 128k -ar 48000 -ac 2 OUTPUT
+FFMPEG -y -i INPUT -threads CPU_CORES -f mp4 -vcodec mpeg4 -b 1000k -r 23.976 -s 480x272 -acodec aac -strict -2 -ab 128k -ar 48000 -ac 2 OUTPUT
 
 # Encoded output file extension
 <extension>
