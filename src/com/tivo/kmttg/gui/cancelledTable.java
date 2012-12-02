@@ -34,7 +34,6 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
-import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
@@ -608,60 +607,18 @@ public class cancelledTable {
    }
    
    // Schedule a single recording
-   public void recordSingle(final String tivoName) {
-      final int[] selected = TableUtil.GetSelectedRows(TABLE);
+   public void recordSingle(String tivoName) {
+      int[] selected = TableUtil.GetSelectedRows(TABLE);
       if (selected.length > 0) {
-         log.print("Scheduling individual recordings on TiVo: " + tivoName);
-         class backgroundRun extends SwingWorker<Object, Object> {
-            protected Object doInBackground() {
-               int row;
-               JSONObject json;
-               String title;
-               Remote r = new Remote(tivoName);
-               if (r.success) {
-                  try {
-                     for (int i=0; i<selected.length; ++i) {
-                        row = selected[i];
-                        json = GetRowData(row);
-                        title = TableUtil.GetRowTitle(TABLE, row, "SHOW");
-                        if (json != null) {
-                           if (config.gui.remote_gui.recordOpt == null)
-                              config.gui.remote_gui.recordOpt = new recordOptions();
-                           JSONObject o = config.gui.remote_gui.recordOpt.promptUser(
-                              "Schedule Recording - " + title, null
-                           );
-                           if (o != null) {
-                              log.warn("Scheduling Recording: '" + title + "' on TiVo: " + tivoName);
-                              o.put("contentId", json.getString("contentId"));
-                              o.put("offerId", json.getString("offerId"));
-                              json = r.Command("Singlerecording", o);
-                              if (json == null) {
-                                 log.error("Failed to schedule recording for: '" + title + "'");
-                              } else {
-                                 String conflicts = rnpl.recordingConflicts(json);
-                                 if (conflicts == null) {
-                                    log.warn("Scheduled recording: '" + title + "' on Tivo: " + tivoName);
-                                    // Add to todo list for this tivo
-                                    if (config.gui.remote_gui.all_todo.containsKey(tivoName)) {
-                                       config.gui.remote_gui.all_todo.get(tivoName).put(GetRowData(row));
-                                    }
-                                 } else {
-                                    log.error(conflicts);
-                                 }
-                              }
-                           }
-                        }
-                     }
-                  } catch (JSONException e) {
-                     log.error("record_cancelCB failed - " + e.getMessage());
-                  }
-                  r.disconnect();
-               }
-               return null;
-            }
+         int row;
+         JSONArray entries = new JSONArray();
+         JSONObject json;
+         for (int i=0; i<selected.length; ++i) {
+            row = selected[i];
+            json = GetRowData(row);
+            entries.put(json);
          }
-         backgroundRun b = new backgroundRun();
-         b.execute();
+         TableUtil.recordSingleCB(tivoName, entries);
       }
    }
 }
