@@ -107,8 +107,12 @@ public class recordOptions {
             until.setSelectedItem(untilHash.getK(json.getString("keepBehavior")));
          if(json.has("startTimePadding"))
             start.setSelectedItem(startHash.getK(json.getInt("startTimePadding")));
+         else if(json.has("requestedStartPadding"))
+            start.setSelectedItem(startHash.getK(json.getInt("requestedStartPadding")));
          if(json.has("endTimePadding"))
             stop.setSelectedItem(stopHash.getK(json.getInt("endTimePadding")));
+         else if(json.has("requestedEndPadding"))
+            stop.setSelectedItem(stopHash.getK(json.getInt("requestedEndPadding")));
       } catch (JSONException e) {
          log.error("Record dialog setValues error: " + e.getMessage());
       }
