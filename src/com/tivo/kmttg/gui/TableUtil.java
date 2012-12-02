@@ -12,7 +12,12 @@ import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTable;
 
+import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
@@ -149,6 +154,105 @@ public class TableUtil {
       } catch (ParseException e) {
         log.error("getLongDateFromString - " + e.getMessage());
         return 0;
+      }
+   }
+
+   // Check if given json is a show scheduled to record on this TiVo
+   private static Boolean isRecordingScheduled(JSONObject json) {
+      try {
+         if (json != null && json.has("state")) {
+            if (json.getString("state").equals("scheduled") || json.getString("state").equals("inProgress"))
+               return(true);
+         }
+      } catch (JSONException e) {
+         log.error("isRecordingScheduled error - " + e.getMessage());
+      }
+      return(false);
+   }
+   
+   // Main engine for single show scheduling. This can be a new show
+   // or an existing show for which to modify recording options.
+   private static Boolean recordSingle(final String tivoName, JSONObject json) {
+      try {
+         String title = "UNTITLED";
+         if (json.has("title"))
+            title = json.getString("title");
+         String message = "";
+         if (json.has("contentId") && json.has("offerId")) {
+            JSONObject existing = null;
+            if ( isRecordingScheduled(json) )
+               existing = json;
+            message = "(" + tivoName + ") " + "Schedule Recording: ";
+            if (existing != null) {
+               message = "(" + tivoName + ") " + "Modify Recording: ";
+            }
+            message += "'" + title + "'";
+            final JSONObject o = config.gui.remote_gui.recordOpt.promptUser(
+               message, existing
+            );
+            if (o != null) {
+               o.put("contentId", json.getString("contentId"));
+               o.put("offerId", json.getString("offerId"));
+               final String _title = title;
+               if (existing == null)
+                  message = "Scheduled recording: '" + title + "' on Tivo: " + tivoName;
+               else
+                  message = "Modified recording: '" + title + "' on Tivo: " + tivoName;
+               final String _message = message;
+               class backgroundRun extends SwingWorker<Object, Object> {
+                  protected Object doInBackground() {
+                     Remote r = new Remote(tivoName);
+                     if (r.success) {
+                        JSONObject result = r.Command("Singlerecording", o);
+                        if (result == null) {
+                           log.error("Failed to schedule/modify recording for: '" + _title + "'");
+                        } else {
+                           String conflicts = rnpl.recordingConflicts(result);
+                           if (conflicts == null) {
+                              log.warn(_message);
+                           } else {
+                              log.error(conflicts);
+                              return(false);
+                           }
+                        }
+                        r.disconnect();
+                     }
+                     return null;
+                  }
+               }
+               backgroundRun b = new backgroundRun();
+               b.execute();
+            }
+         } else {
+            log.error("Missing contentId and/or offerId for: '" + title + "'");
+            return(false);
+         }
+      } catch (JSONException e) {
+         log.error("recordSingle failed - " + e.getMessage());
+         return(false);
+      }
+      return(true);
+   }
+   
+   // Method used by various RPC tables for single item recording
+   public static void recordSingleCB(final String tivoName, final JSONArray entries) {
+      if (entries.length() > 0) {
+         JSONObject json;
+         for (int i=0; i<entries.length(); ++i) {
+            try {
+               json = entries.getJSONObject(i);
+               if (json != null) {
+                  if (recordSingle(tivoName, json) && ! isRecordingScheduled(json)) {
+                     // Add to todo list for this tivo
+                     if (config.gui.remote_gui.all_todo.containsKey(tivoName)) {
+                        config.gui.remote_gui.all_todo.get(tivoName).put(json);
+                     }
+                  }
+               }
+            } catch (JSONException e) {
+               log.error("recordSingleCB error - " + e.getMessage());
+            }
+         }
       }
    }
 
