@@ -27,6 +27,7 @@ import javax.net.ssl.X509TrustManager;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.SwingWorker;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -1246,6 +1247,7 @@ public class Remote {
    }
    
    // Method use by various RPC tables for SP scheduling
+   // NOTE: This should be called in a separate thread
    public void SPschedule(String tivoName, JSONObject json, JSONArray existing) {
       JSONObject existingSP = null;
       try {
@@ -1275,7 +1277,7 @@ public class Remote {
          // OK to subscribe
          if (schedule) {
             JSONObject o = config.gui.remote_gui.spOpt.promptUser(
-               "Create SP - " + title, null
+               "(" + tivoName + ") " + "Create SP - " + title, null
             );
             if (o != null) {
                log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
@@ -1293,7 +1295,7 @@ public class Remote {
             log.warn("Existing SP with same title found, prompting to modify instead.");
             if (existingSP != null) {
                JSONObject result = config.gui.remote_gui.spOpt.promptUser(
-                  "Modify SP - " + title, existingSP
+                  "(" + tivoName + ") " + "Modify SP - " + title, existingSP
                );
                if (result != null) {
                   if (Command("ModifySP", result) != null) {
