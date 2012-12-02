@@ -82,7 +82,7 @@ public class remotegui {
    private spTable tab_sp = null;
    private JComboBox tivo_sp = null;
    public  spOptions spOpt = new spOptions();
-   public  recordOptions recordOpt = null;
+   public  recordOptions recordOpt = new recordOptions();
    public  wlOptions wlOpt = new wlOptions();
    
    private JComboBox tivo_info = null;
@@ -295,6 +295,17 @@ public class remotegui {
             tab_todo.DeleteCB();
          }
       });
+
+      JButton modify_todo = new JButton("Modify");
+      modify_todo.setToolTipText(getToolTip("modify_todo"));
+      modify_todo.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_todo.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               tab_todo.recordSingle(tivoName);
+            }
+         }
+      });
       
       row1_todo.add(Box.createRigidArea(space_40));
       row1_todo.add(title_todo);
@@ -306,6 +317,8 @@ public class remotegui {
       row1_todo.add(refresh_todo);
       row1_todo.add(Box.createRigidArea(space_5));
       row1_todo.add(cancel_todo);
+      row1_todo.add(Box.createRigidArea(space_5));
+      row1_todo.add(modify_todo);
       panel_todo.add(row1_todo, c);
       
       tab_todo = new todoTable(config.gui.getJFrame());
@@ -2399,7 +2412,7 @@ public class remotegui {
       }
       
       // Bring up Create Wishlist dialog
-      Hashtable<String,String> h = wlOpt.promptUser("Create Wishlist", hash);
+      Hashtable<String,String> h = wlOpt.promptUser("(" + tivoName + ") " + "Create Wishlist", hash);
       if (h == null)
          return false;
       if ( ! h.containsKey("title")) {
@@ -2409,7 +2422,7 @@ public class remotegui {
       JSONObject json = new JSONObject();
       if (h.containsKey("autorecord")) {
          // Need to prompt for season pass options
-         json = spOpt.promptUser("Create ARWL - " + h.get("title"), null);
+         json = spOpt.promptUser("(" + tivoName + ") " + "Create ARWL - " + h.get("title"), null);
       }
       
       // Need to parse h and set json wishlist elements
@@ -2498,7 +2511,7 @@ public class remotegui {
             return false;
          }
       }
-      if (json.length() > 0) {
+      if (json != null && json.length() > 0) {
          // Good to go, so run the RPC command in background mode
          //log.print(json.toString());
          log.warn("Creating wishlist: " + h.get("title"));
@@ -2673,6 +2686,10 @@ public class remotegui {
          text = "<b>Cancel</b><br>";
          text += "Cancel ToDo recordings selected in table below. As a shortcut you can also use the<br>";
          text += "<b>Delete</b> keyboard button to cancel selected shows in the table as well.";
+      }
+      else if (component.equals("modify_todo")){
+         text = "<b>Modify</b><br>";
+         text += "Modify recording options of selected show in table below.";
       }
       if (component.equals("tivo_guide")) {
          text = "Select TiVo for which to retrieve guide listings.";
