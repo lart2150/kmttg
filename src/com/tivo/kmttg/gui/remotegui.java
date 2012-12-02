@@ -2714,13 +2714,15 @@ public class remotegui {
       }
       else if (component.equals("guide_record")){
          text = "<b>Record</b><br>";
-         text += "Schedule to record selected individual show(s) in table on specified TiVo.<br>";
+         text += "Schedule to record selected individual show(s) in table on selected TiVo.<br>";
+         text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
          text += "shows and will not schedule the recording.";
       }
       else if (component.equals("guide_recordSP")){
          text = "<b>Season Pass</b><br>";
-         text += "Create a season pass for show selected in table below.<br>";
+         text += "Create a season pass for show selected in table below on selected TiVo.<br>";
+         text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
          text += "checking against the current set of season passes already on the TiVo and will prompt<br>";
          text += "to modify existing season pass if found.<br>";
@@ -2747,7 +2749,8 @@ public class remotegui {
       }
       else if (component.equals("record_cancel")){
          text = "<b>Record</b><br>";
-         text += "Schedule to record selected individual show(s) in table on specified TiVo.<br>";
+         text += "Schedule to record selected individual show(s) in table on selected TiVo.<br>";
+         text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
          text += "shows and will not schedule the recording.";
       }
@@ -2804,13 +2807,15 @@ public class remotegui {
       }
       else if (component.equals("record_search")) {
          text = "<b>Record</b><br>";
-         text += "Schedule a one time recording of show selected in table below.<br>";
+         text += "Schedule a one time recording of show selected in table below on selected TiVo.<br>";
+         text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
          text += "shows and will not schedule the recording.";
       }
       else if (component.equals("record_sp_search")) {
          text = "<b>Season Pass</b><br>";
-         text += "Create a season pass for show selected in table below.<br>";
+         text += "Create a season pass for show selected in table below on selected TiVo.<br>";
+         text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
          text += "checking against the current set of season passes already on the TiVo and will prompt<br>";
          text += "to modify existing season pass if found.<br>";
@@ -2819,7 +2824,8 @@ public class remotegui {
       }
       else if (component.equals("wishlist_search")) {
          text = "<b>Create Wishlist</b><br>";
-         text += "Create a wishlist. If a show is selected in table then the title will be set<br>";
+         text += "Create a wishlist on selected TiVo. If a show is selected in table then the title will be set<br>";
+         text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "automatically to that title in the wishlist dialog that comes up.<br>";
          text += "You are prompted with wishlist dialog where you can define wishlist with boolean logic<br>";
          text += "for keywords, title keywords, actors and directors.<br>";
@@ -2880,12 +2886,14 @@ public class remotegui {
       else if (component.equals("record_premiere")){
          text = "<b>Record</b><br>";
          text += "Schedule individual recording for items selected in the table below on selected TiVo.<br>";
+         text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
          text += "shows and will not schedule the recording.";
       }
       else if (component.equals("recordSP_premiere")){
          text = "<b>Season Pass</b><br>";
          text += "Schedule season passes for shows selected in the table below on selected TiVo.<br>";
+         text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
          text += "checking against the current set of season passes already on the TiVo and will prompt<br>";
          text += "to modify existing season pass if found.<br>";
