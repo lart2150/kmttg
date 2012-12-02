@@ -311,4 +311,20 @@ public class todoTable {
           r.disconnect();                   
        }
     }    
+    
+    // Schedule a single recording
+    public void recordSingle(String tivoName) {
+       int[] selected = TableUtil.GetSelectedRows(TABLE);
+       if (selected.length > 0) {
+          int row;
+          JSONArray entries = new JSONArray();
+          JSONObject json;
+          for (int i=0; i<selected.length; ++i) {
+             row = selected[i];
+             json = GetRowData(row);
+             entries.put(json);
+          }
+          TableUtil.recordSingleCB(tivoName, entries);
+       }
+    }
 }
