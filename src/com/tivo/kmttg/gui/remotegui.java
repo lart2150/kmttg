@@ -70,6 +70,7 @@ public class remotegui {
    
    private todoTable tab_todo = null;
    private JComboBox tivo_todo = null;
+   public JLabel label_todo = null;
    
    private guideTable tab_guide = null;
    public  JButton refresh_guide = null;
@@ -99,6 +100,7 @@ public class remotegui {
    private deletedTable tab_deleted = null;
    private JComboBox tivo_deleted = null;
    public JButton refresh_deleted = null;
+   public JLabel label_deleted = null;
    
    private JComboBox tivo_premiere = null;
    private JComboBox premiere_days = null;
@@ -260,6 +262,7 @@ public class remotegui {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
                 TableUtil.clear(tab_todo.TABLE);
+                label_todo.setText("");
                 String tivoName = getTivoName("todo");
                 if (tab_todo.tivo_data.containsKey(tivoName))
                    tab_todo.AddRows(tivoName, tab_todo.tivo_data.get(tivoName));
@@ -274,6 +277,7 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Refresh to do list
             TableUtil.clear(tab_todo.TABLE);
+            label_todo.setText("");
             String tivoName = (String)tivo_todo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                jobData job = new jobData();
@@ -307,6 +311,8 @@ public class remotegui {
          }
       });
       
+      label_todo = new JLabel();
+      
       row1_todo.add(Box.createRigidArea(space_40));
       row1_todo.add(title_todo);
       row1_todo.add(Box.createRigidArea(space_5));
@@ -319,6 +325,8 @@ public class remotegui {
       row1_todo.add(cancel_todo);
       row1_todo.add(Box.createRigidArea(space_5));
       row1_todo.add(modify_todo);
+      row1_todo.add(Box.createRigidArea(space_5));
+      row1_todo.add(label_todo);
       panel_todo.add(row1_todo, c);
       
       tab_todo = new todoTable(config.gui.getJFrame());
@@ -845,6 +853,7 @@ public class remotegui {
              if (e.getStateChange() == ItemEvent.SELECTED) {               
                // TiVo selection changed for Deleted tab
                TableUtil.clear(tab_deleted.TABLE);
+               label_deleted.setText("");
                String tivoName = getTivoName("deleted");
                if (tab_deleted.tivo_data.containsKey(tivoName))
                   tab_deleted.AddRows(tivoName, tab_deleted.tivo_data.get(tivoName));
@@ -860,6 +869,7 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Refresh deleted list
             TableUtil.clear(tab_deleted.TABLE);
+            label_deleted.setText("");
             String tivoName = (String)tivo_deleted.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                jobData job = new jobData();
@@ -898,6 +908,8 @@ public class remotegui {
          }
       });
       
+      label_deleted = new JLabel();
+      
       row1_deleted.add(Box.createRigidArea(space_5));
       row1_deleted.add(title_deleted);
       row1_deleted.add(Box.createRigidArea(space_5));
@@ -910,6 +922,8 @@ public class remotegui {
       row1_deleted.add(recover_deleted);
       row1_deleted.add(Box.createRigidArea(space_5));
       row1_deleted.add(permDelete_deleted);
+      row1_deleted.add(Box.createRigidArea(space_5));
+      row1_deleted.add(label_deleted);
       panel_deleted.add(row1_deleted, c);
       
       tab_deleted = new deletedTable(config.gui.getJFrame());
