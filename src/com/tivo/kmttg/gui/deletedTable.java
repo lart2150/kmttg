@@ -235,8 +235,10 @@ public class deletedTable {
          TableUtil.packColumns(TABLE, 2);
          tivo_data.put(tivoName, data);
          currentTivo = tivoName;
-         if (config.gui.remote_gui != null)
+         if (config.gui.remote_gui != null) {
             config.gui.remote_gui.setTivoName("deleted", tivoName);
+            refreshNumber();
+         }
       } catch (JSONException e) {
          log.print("Deleted AddRows - " + e.getMessage());
       }      
@@ -308,6 +310,11 @@ public class deletedTable {
          log.error("AddTABLERow - " + e1.getMessage());
       }      
    }   
+   
+   // Refresh the # SHOWS label in the ToDo tab
+   public void refreshNumber() {
+      config.gui.remote_gui.label_deleted.setText("" + tivo_data.get(currentTivo).length() + " SHOWS");
+   }
       
    // Undelete selected recordings
    public void recoverSingle(final String tivoName) {
@@ -341,6 +348,8 @@ public class deletedTable {
                               } else {
                                  log.warn("Recovered recording: '" + title + "' on TiVo: " + tivoName);
                                  TableUtil.RemoveRow(TABLE, row);
+                                 tivo_data.get(currentTivo).remove(row);
+                                 refreshNumber();
                               }
                            }
                         } catch (JSONException e) {
@@ -392,6 +401,8 @@ public class deletedTable {
                               } else {
                                  log.warn("Permanently deleted recording: '" + title + "' on TiVo: " + tivoName);
                                  TableUtil.RemoveRow(TABLE, row);
+                                 tivo_data.get(currentTivo).remove(row);
+                                 refreshNumber();
                               }
                            }
                         } catch (JSONException e) {

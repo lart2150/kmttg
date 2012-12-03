@@ -142,8 +142,10 @@ public class todoTable {
           tivo_data.put(tivoName, data);
           currentTivo = tivoName;
           TableUtil.packColumns(TABLE,2);
-          if (config.gui.remote_gui != null)
+          if (config.gui.remote_gui != null) {
              config.gui.remote_gui.setTivoName("todo", tivoName);
+             refreshNumber();
+          }
        } catch (JSONException e) {
           log.error("todoTable AddRows - " + e.getMessage());
        }
@@ -303,6 +305,7 @@ public class todoTable {
                 if ( r.Command("Cancel", o) != null ) {
                    TableUtil.RemoveRow(TABLE, row);
                    tivo_data.get(currentTivo).remove(row);
+                   refreshNumber();
                 }
              } catch (JSONException e1) {
                 log.error("ToDo cancel - " + e1.getMessage());
@@ -310,7 +313,12 @@ public class todoTable {
           }
           r.disconnect();                   
        }
-    }    
+    }
+    
+    // Refresh the # SHOWS label in the ToDo tab
+    public void refreshNumber() {
+       config.gui.remote_gui.label_todo.setText("" + tivo_data.get(currentTivo).length() + " SHOWS");
+    }
     
     // Schedule a single recording
     public void recordSingle(String tivoName) {
