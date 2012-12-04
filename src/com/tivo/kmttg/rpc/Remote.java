@@ -2,6 +2,7 @@ package com.tivo.kmttg.rpc;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Random;
+import java.util.Scanner;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -30,6 +32,7 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
 public class Remote {
@@ -80,10 +83,23 @@ public class Remote {
      if ( sslSocketFactory == null ) {
        try {
           KeyStore keyStore = KeyStore.getInstance("PKCS12");
+          // This is default USA password
           String password = "mpE7Qy8cSqdf";
           InputStream keyInput;
-          if (cdata == null)
-             keyInput = getClass().getResourceAsStream("/cdata.p12");
+          if (cdata == null) {
+             // Installation dir cdata.p12 file takes priority if it exists
+             String cdata = config.programDir + "/cdata.p12";
+             if ( file.isFile(cdata) ) {
+                keyInput = new FileInputStream(cdata);
+                cdata = config.programDir + "/cdata.password";
+                if (file.isFile(cdata)) {
+                   password = new Scanner(new File(cdata)).useDelimiter("\\A").next();
+                }
+             } else {
+                // Read default USA cdata.p12 from kmttg.jar
+                keyInput = getClass().getResourceAsStream("/cdata.p12");
+             }
+          }
           else
              keyInput = new FileInputStream(cdata);
           keyStore.load(keyInput, password.toCharArray());
