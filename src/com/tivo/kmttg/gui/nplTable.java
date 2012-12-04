@@ -1121,6 +1121,15 @@ public class nplTable {
       DefaultTableModel dm = (DefaultTableModel)table.getModel();
       dm.addRow(data);
    }
+   
+   // Refresh all titles currently displayed in table for non-folder entries
+   private void refreshTitles() {
+      for (int row=0; row<NowPlaying.getRowCount(); ++row) {
+         sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
+         if (! s.folder && s.data != null)
+            NowPlaying.setValueAt(new sortableShow(s.data), row, getColumnIndex("SHOW"));
+      }
+   }
 
    // Look for entry with given folder name and select it
    // (This used when returning back from folder mode to top level mode)
@@ -1405,9 +1414,9 @@ public class nplTable {
             }
          }
       }
-      // Update table GUI if anything GUI related needs to change
+      // Update displayed table titles with added episode data
       if (changed)
-         RefreshTable();
+         refreshTitles();
    }
    
    // Return true if this entry should not be displayed, false otherwise
