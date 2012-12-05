@@ -3012,7 +3012,9 @@ public class remotegui {
       }
       else if (component.equals("upcoming_sp")){
          text = "<b>Upcoming</b><br>";
-         text += "Retrieve and show upcoming episodes of selected Season Pass entry in the table in the ToDo tab.";
+         text += "Retrieve and show upcoming episodes of selected Season Pass entry in the table in the ToDo tab.<br>";
+         text += "NOTE: Season pass titles with upcoming shows are displayed with (#) after the title indicating the<br>";
+         text += "number of upcoming recordings. Titles without the (#) at the end have no upcoming recordings";
       }
       else if (component.equals("tivo_rnpl")) {
          text = "Select TiVo for which to retrieve My Shows list.<br>";
