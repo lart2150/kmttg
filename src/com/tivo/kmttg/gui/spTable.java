@@ -342,6 +342,11 @@ public class spTable {
              days = days.replaceAll("\"", "");
              title += " (" + time + ", " + days + ")";
           }
+          // Add upcoming episode counts to title if available
+          if (data.has("__upcoming")) {
+             int count = data.getJSONArray("__upcoming").length();
+             title += " (" + count + ")";
+          }
           String channel = " ";
           if (data.has("idSetSource")) {
              o = data.getJSONObject("idSetSource");
@@ -624,6 +629,17 @@ public class spTable {
        log.print("Loading SP data from file: " + file);
        JSONArray data = JSONFile.readJSONArray(file);
        if (data != null && data.length() > 0) {
+          // Remove __upcoming entries if there are any
+          try {
+             for (int i=0; i<data.length(); ++i) {
+                if (data.getJSONObject(i).has("__upcoming"))
+                   data.getJSONObject(i).remove("__upcoming");
+             }
+          } catch (JSONException e1) {
+             log.error("SPListLoad - " + e1.getMessage());
+          }
+
+          // Now clear table and display loaded data
           clear();
           AddRows(data);
           updateTitleCols(" Loaded:");
