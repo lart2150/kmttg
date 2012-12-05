@@ -120,6 +120,7 @@ public class jobData implements Serializable, Cloneable {
    
    // remote jobs & GUI related
    public Boolean remote_todo = false;
+   public Boolean remote_upcoming = false;
    public todoTable todo = null;
    
    // demux/remux related
