@@ -58,6 +58,8 @@ public class remote implements Serializable {
             if (r.success) {
                if (job.remote_todo)
                   data = r.ToDo(job);
+               if (job.remote_upcoming)
+                  data = r.Upcoming(job);
                if (job.remote_sp)
                   data = r.SeasonPasses(job);
                if (job.remote_spreorder)
@@ -108,6 +110,7 @@ public class remote implements Serializable {
       thread = new Thread(t);
       jobName = "REMOTE";
       if (job.remote_todo)          jobName += " ToDo List";
+      if (job.remote_upcoming)      jobName += " Upcoming List";
       if (job.remote_sp)            jobName += " Season Pass List";
       if (job.remote_spreorder)     jobName += " Season Pass Re-order";
       if (job.remote_cancel)        jobName += " Will Not Record List";
@@ -155,6 +158,12 @@ public class remote implements Serializable {
             if (job.remote_todo && job.todo != null) {
                // ToDo list job => populate ToDo table
                job.todo.AddRows(job.tivoName, data);
+            }
+            if (job.remote_upcoming && job.todo != null) {
+               // Upcoming list job => populate ToDo table
+               job.todo.AddRows(job.tivoName, data);
+               // Make the ToDo tab the currently selected tab
+               config.gui.remote_gui.getPanel().setSelectedIndex(0);
             }
             if (job.remote_sp && job.sp != null) {
                // SP job => populate SP table
