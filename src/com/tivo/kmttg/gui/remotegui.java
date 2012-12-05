@@ -690,6 +690,41 @@ public class remotegui {
             }
          }
       });
+
+      JButton conflicts_sp = new JButton("Conflicts");
+      conflicts_sp.setMargin(new Insets(1,1,1,1));
+      conflicts_sp.setToolTipText(getToolTip("conflicts_sp"));
+      conflicts_sp.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            int selected[] = TableUtil.GetSelectedRows(tab_sp.TABLE);
+            if (selected.length > 0) {
+               int row = selected[0];
+               JSONObject json = tab_sp.GetRowData(row);
+               if (json.has("__conflicts")) {
+                  // Get conflict SP episodes and display in Won't Record table
+                  TableUtil.clear(tab_cancel.TABLE);
+                  String tivoName = (String)tivo_sp.getSelectedItem();
+                  try {
+                     if (tivoName != null && tivoName.length() > 0) {
+                        jobData job = new jobData();
+                        job.source           = tivoName;
+                        job.tivoName         = tivoName;
+                        job.type             = "remote";
+                        job.name             = "Remote";
+                        job.remote_conflicts = true;
+                        job.rnpl             = json.getJSONArray("__conflicts");
+                        job.cancelled        = tab_cancel;
+                        jobMonitor.submitNewJob(job);
+                     }
+                  } catch (JSONException e1) {
+                     log.error("conflicts_sp error - " + e1.getMessage());
+                  }
+               } else {
+                  log.warn("No conflicting episodes for selected Season Pass");
+               }
+            }
+         }
+      });
       
       row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(title_sp);
@@ -713,6 +748,8 @@ public class remotegui {
       row1_sp.add(reorder_sp);
       row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(upcoming_sp);
+      row1_sp.add(Box.createRigidArea(space_5));
+      row1_sp.add(conflicts_sp);
       panel_sp.add(row1_sp, c);
       
       tab_sp = new spTable(config.gui.getJFrame());
@@ -3014,7 +3051,13 @@ public class remotegui {
          text = "<b>Upcoming</b><br>";
          text += "Retrieve and show upcoming episodes of selected Season Pass entry in the table in the ToDo tab.<br>";
          text += "NOTE: Season pass titles with upcoming shows are displayed with (#) after the title indicating the<br>";
-         text += "number of upcoming recordings. Titles without the (#) at the end have no upcoming recordings";
+         text += "number of upcoming recordings. Titles without the (#) at the end have no upcoming recordings.";
+      }
+      else if (component.equals("conflicts_sp")){
+         text = "<b>Conflicts</b><br>";
+         text += "Retrieve and show conflicting episodes that won't record for selected Season Pass.<br>";
+         text += "Any found entries will be displayed in the Won't Record table.<br>";
+         text += "NOTE: Season pass entries with conflicting shows are displayed with a darker background color.";
       }
       else if (component.equals("tivo_rnpl")) {
          text = "Select TiVo for which to retrieve My Shows list.<br>";
