@@ -131,6 +131,10 @@ public class spTable {
           if (bkgndColor != null && ! isSelected)
              cell.setBackground( bkgndColor );
           
+          JSONObject json = GetRowData(row);
+          if (json != null && json.has("__conflicts"))
+             cell.setBackground(config.tableBkgndProtected);
+          
           cell.setFont(config.tableFont);
          
           return cell;
@@ -629,11 +633,13 @@ public class spTable {
        log.print("Loading SP data from file: " + file);
        JSONArray data = JSONFile.readJSONArray(file);
        if (data != null && data.length() > 0) {
-          // Remove __upcoming entries if there are any
+          // Remove __upcoming && __conflicts entries if there are any
           try {
              for (int i=0; i<data.length(); ++i) {
                 if (data.getJSONObject(i).has("__upcoming"))
                    data.getJSONObject(i).remove("__upcoming");
+                if (data.getJSONObject(i).has("__conflicts"))
+                   data.getJSONObject(i).remove("__conflicts");
              }
           } catch (JSONException e1) {
              log.error("SPListLoad - " + e1.getMessage());
