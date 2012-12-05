@@ -862,6 +862,27 @@ public class Remote {
       return allShows;
    }
    
+   // Similar to ToDo but for upcoming episode IDs obtain from a Season Pass
+   // It's assumed job.rnpl has JSONArray of objectIdAndType
+   public JSONArray Upcoming(jobData job) {
+      JSONArray allShows = new JSONArray();
+      try {
+         JSONObject json = new JSONObject();
+         json.put("objectIdAndType", job.rnpl);
+         JSONObject result = Command("SearchId", json);
+         if (result != null && result.has("recording")) {
+            JSONArray id = result.getJSONArray("recording");
+            for (int j=0; j<id.length(); ++j)
+               allShows.put(id.getJSONObject(j));
+         }
+      } catch (JSONException e) {
+         error("rpc Upcoming error - " + e.getMessage());
+         return null;
+      }
+
+      return allShows;
+   }
+   
    // Get list of all shows that won't record
    public JSONArray CancelledShows(jobData job) {
       JSONArray allShows = new JSONArray();
@@ -1010,8 +1031,22 @@ public class Remote {
       result = Command("SeasonPasses", new JSONObject());
       if (result != null) {
          try {
-            if (result.has("subscription"))
-               return result.getJSONArray("subscription");
+            if (result.has("subscription")) {
+               JSONArray entries = new JSONArray();
+               for (int i=0; i<result.getJSONArray("subscription").length(); ++i) {
+                  // Find #upcoming entries to each SP and add data to each JSON
+                  JSONObject j = result.getJSONArray("subscription").getJSONObject(i);
+                  if (j.has("subscriptionId")) {
+                     JSONObject json = new JSONObject();
+                     json.put("subscriptionId", j.getString("subscriptionId"));
+                     JSONObject r = Command("ToDo", json);
+                     if (r != null && r.has("objectIdAndType"))
+                        j.put("__upcoming", r.getJSONArray("objectIdAndType"));
+                  }
+                  entries.put(j);
+               }
+               return entries;
+            }
             else
                return new JSONArray();
          } catch (JSONException e) {
