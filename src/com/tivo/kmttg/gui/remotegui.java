@@ -654,6 +654,42 @@ public class remotegui {
             }
          }
       });         
+
+      JButton upcoming_sp = new JButton("Upcoming");
+      upcoming_sp.setMargin(new Insets(1,1,1,1));
+      upcoming_sp.setToolTipText(getToolTip("upcoming_sp"));
+      upcoming_sp.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            int selected[] = TableUtil.GetSelectedRows(tab_sp.TABLE);
+            if (selected.length > 0) {
+               int row = selected[0];
+               JSONObject json = tab_sp.GetRowData(row);
+               if (json.has("__upcoming")) {
+                  // Get upcoming SP episodes and display in ToDo table
+                  TableUtil.clear(tab_todo.TABLE);
+                  label_todo.setText("");
+                  String tivoName = (String)tivo_sp.getSelectedItem();
+                  try {
+                     if (tivoName != null && tivoName.length() > 0) {
+                        jobData job = new jobData();
+                        job.source          = tivoName;
+                        job.tivoName        = tivoName;
+                        job.type            = "remote";
+                        job.name            = "Remote";
+                        job.remote_upcoming = true;
+                        job.rnpl            = json.getJSONArray("__upcoming");
+                        job.todo            = tab_todo;
+                        jobMonitor.submitNewJob(job);
+                     }
+                  } catch (JSONException e1) {
+                     log.error("upcoming_sp error - " + e1.getMessage());
+                  }
+               } else {
+                  log.warn("No upcoming episodes scheduled for selected Season Pass");
+               }
+            }
+         }
+      });
       
       row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(title_sp);
@@ -675,6 +711,8 @@ public class remotegui {
       row1_sp.add(modify_sp);
       row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(reorder_sp);
+      row1_sp.add(Box.createRigidArea(space_5));
+      row1_sp.add(upcoming_sp);
       panel_sp.add(row1_sp, c);
       
       tab_sp = new spTable(config.gui.getJFrame());
@@ -2971,6 +3009,10 @@ public class remotegui {
          text += "to drag and drop rows to new locations. You can also select a row in the table and use the keyboard<br>";
          text += "<b>Up</b> and <b>Down</b> keys to move the row up and down. Once you are happy with priority order<br>";
          text += "displayed in the table use this button to have kmttg change the priority order on your TiVo.";
+      }
+      else if (component.equals("upcoming_sp")){
+         text = "<b>Upcoming</b><br>";
+         text += "Retrieve and show upcoming episodes of selected Season Pass entry in the table in the ToDo tab.";
       }
       else if (component.equals("tivo_rnpl")) {
          text = "Select TiVo for which to retrieve My Shows list.<br>";
