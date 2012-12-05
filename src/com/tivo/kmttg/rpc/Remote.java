@@ -862,7 +862,7 @@ public class Remote {
       return allShows;
    }
    
-   // Similar to ToDo but for upcoming episode IDs obtain from a Season Pass
+   // Similar to ToDo but for upcoming episode IDs obtained from a Season Pass
    // It's assumed job.rnpl has JSONArray of objectIdAndType
    public JSONArray Upcoming(jobData job) {
       JSONArray allShows = new JSONArray();
@@ -1034,7 +1034,7 @@ public class Remote {
             if (result.has("subscription")) {
                JSONArray entries = new JSONArray();
                for (int i=0; i<result.getJSONArray("subscription").length(); ++i) {
-                  // Find #upcoming entries to each SP and add data to each JSON
+                  // Find upcoming & conflicts entries for each SP and add data to each JSON
                   JSONObject j = result.getJSONArray("subscription").getJSONObject(i);
                   if (j.has("subscriptionId")) {
                      JSONObject json = new JSONObject();
@@ -1042,6 +1042,9 @@ public class Remote {
                      JSONObject r = Command("ToDo", json);
                      if (r != null && r.has("objectIdAndType"))
                         j.put("__upcoming", r.getJSONArray("objectIdAndType"));
+                     r = Command("Cancelled", json);
+                     if (r != null && r.has("objectIdAndType"))
+                        j.put("__conflicts", r.getJSONArray("objectIdAndType"));
                   }
                   entries.put(j);
                }
