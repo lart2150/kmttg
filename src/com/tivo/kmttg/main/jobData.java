@@ -134,6 +134,7 @@ public class jobData implements Serializable, Cloneable {
    public JSONArray remote_orderIds = null;
    
    public Boolean remote_cancel = false;
+   public Boolean remote_conflicts = false;
    public cancelledTable cancelled = null;
    
    public Boolean remote_deleted = false;
