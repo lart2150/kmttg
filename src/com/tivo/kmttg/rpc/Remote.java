@@ -603,6 +603,11 @@ public class Remote {
                o.put("endTimePadding", json.getInt("endTimePadding"));
             if (json.has("startTimePadding"))
                o.put("startTimePadding", json.getInt("startTimePadding"));
+            // conflictsOnly=true => don't actually subscribe, but check for conflicts
+            if (json.has("conflictsOnly")) {
+               o.put("conflictsOnly", json.get("conflictsOnly"));
+               json.remove("conflictsOnly");
+            }
             req = RpcRequest("subscribe", false, o);
          }
          else if (type.equals("Manual")) {
