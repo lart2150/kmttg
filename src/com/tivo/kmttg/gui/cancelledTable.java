@@ -34,6 +34,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
@@ -277,6 +278,18 @@ public class cancelledTable {
          }
       }
    }
+   
+   // Procedure to mimic clicking on folder entry in row 0
+   public void enterFirstFolder() {
+      int row = 0;
+      sortableDate s = (sortableDate)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "DATE"));
+      if (s.folder) {
+         folderName = s.folderName;
+         folderEntryNum = row;
+         setFolderState(true);
+         Refresh(s.folderData_json);
+      }
+   }
          
    private void TABLERowSelected(int row) {
       debug.print("row=" + row);
@@ -429,7 +442,7 @@ public class cancelledTable {
             config.gui.remote_gui.refresh_cancel.setToolTipText(
                config.gui.remote_gui.getToolTip("refresh_cancel_folder")
             );
-            config.gui.remote_gui.label_cancel.setText("Viewing folder: '" + folderName + "'");
+            config.gui.remote_gui.label_cancel.setText("Viewing '" + folderName + "'");
          }
       } else {
          inFolder = false;
@@ -620,5 +633,41 @@ public class cancelledTable {
          }
          TableUtil.recordSingleCB(tivoName, entries);
       }
+   }
+   
+   // For show in given row try and obtain and print conflict details to message window
+   // This only applies to entries under programSourceConflict folder
+   public void getConflictDetails(final String tivoName, final int row) {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            JSONObject json = GetRowData(row);
+            try {
+               if (json != null && json.getString("cancellationReason").equals("programSourceConflict")) {
+                  if (json.has("offerId") && json.has("contentId")) {
+                     JSONObject j = new JSONObject();
+                     j.put("offerId", json.getString("offerId"));
+                     j.put("contentId", json.getString("contentId"));
+                     // This signifies to check conflicts only, don't subscribe
+                     j.put("conflictsOnly", true);
+                     Remote r = new Remote(tivoName);
+                     if (r.success) {
+                        JSONObject result = r.Command("Singlerecording", j);
+                        if (result != null) {
+                           log.print(rnpl.recordingConflicts(result));
+                        }
+                        r.disconnect();
+                     }
+                  }
+               } else {
+                  log.warn("Explain button is only relevant for 'programSourceConflict' entries");
+               }
+            } catch (JSONException e) {
+               log.error("getConflictDetails error - " + e.getMessage());
+            }
+            return null;
+         }
+      }
+      backgroundRun b = new backgroundRun();
+      b.execute();
    }
 }
