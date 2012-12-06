@@ -204,12 +204,16 @@ public class rnpl {
                      JSONArray ar = jr.getJSONArray("losingOffer");
                      for (int k=0; k<ar.length(); ++k) {
                         message += "\n" + ar.getJSONObject(k).getString("title");
+                        if (ar.getJSONObject(k).has("subtitle"))
+                           message += " - " + ar.getJSONObject(k).getString("subtitle");
                      }
                   }
                   if (jr.has("winningOffer")) {
                      JSONArray ar = jr.getJSONArray("winningOffer");
                      for (int k=0; k<ar.length(); ++k) {
                         message += "\n" + ar.getJSONObject(k).getString("title");
+                        if (ar.getJSONObject(k).has("subtitle"))
+                           message += " - " + ar.getJSONObject(k).getString("subtitle");
                      }
                   }
                }
