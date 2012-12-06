@@ -232,7 +232,6 @@ public class rnpl {
    }
    
    private static String formatEntry(JSONObject json) {
-      log.print(json.toString());
       String message = "";
       try {
          if (json.has("startTime") && json.has("duration")) {
