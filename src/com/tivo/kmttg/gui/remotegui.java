@@ -847,6 +847,21 @@ public class remotegui {
          }
       });
 
+      JButton explain_cancel = new JButton("Explain");
+      explain_cancel.setMargin(new Insets(1,1,1,1));
+      explain_cancel.setToolTipText(getToolTip("explain_cancel"));
+      explain_cancel.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_cancel.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0 && tab_cancel.inFolder) {
+               int selected[] = TableUtil.GetSelectedRows(tab_cancel.TABLE);
+               if (selected.length > 0) {
+                  tab_cancel.getConflictDetails(tivoName, selected[0]);
+               }
+            }
+         }
+      });
+
       JButton refresh_todo_cancel = new JButton("Refresh ToDo");
       refresh_todo_cancel.setMargin(new Insets(1,1,1,1));
       refresh_todo_cancel.setToolTipText(getToolTip("refresh_todo_cancel"));
@@ -881,6 +896,8 @@ public class remotegui {
       row1_cancel.add(refresh_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(record_cancel);
+      row1_cancel.add(Box.createRigidArea(space_5));
+      row1_cancel.add(explain_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(refresh_todo_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
@@ -2850,6 +2867,11 @@ public class remotegui {
       else if (component.equals("includeHistory_cancel")){
          text = "<b>Include History</b><br>";
          text += "Include past history prior to current time if enabled.";
+      }
+      else if (component.equals("explain_cancel")) {
+         text = "<b>Explain</b><br>";
+         text += "Obtains and shows conflict details in the message window for the selected show in the table.<br>";
+         text += "NOTE: This is only works for shows under 'programSourceConflict' folder.";
       }
       else if (component.equals("refresh_todo_cancel")) {
          text = "<b>Refresh ToDo</b><br>";
