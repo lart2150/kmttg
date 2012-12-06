@@ -173,6 +173,8 @@ public class remote implements Serializable {
                job.cancelled.AddRows(job.tivoName, data);
                // Make the Won't Record tab the currently selected tab
                config.gui.remote_gui.getPanel().setSelectedIndex(2);
+               // Enter the 1st folder in Won't Record table
+               job.cancelled.enterFirstFolder();
             }
             if (job.remote_sp && job.sp != null) {
                // SP job => populate SP table
