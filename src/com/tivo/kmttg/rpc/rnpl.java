@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -196,25 +197,27 @@ public class rnpl {
             String message = "Will not record due to conflicts. Recordings in conflict:";
             JSONObject o = json.getJSONObject("conflicts");
             JSONArray a;
+            // Using this type of hash to guarantee unique entries
+            LinkedHashSet<String> h = new LinkedHashSet<String>();
             if (o.has("willCancel")) {
                a = o.getJSONArray("willCancel");
                for (int j=0; j<a.length(); ++j) {
                   JSONObject jr = a.getJSONObject(j);
                   if (jr.has("losingOffer")) {
                      JSONArray ar = jr.getJSONArray("losingOffer");
-                     for (int k=0; k<ar.length(); ++k) {
-                        message += "\n" + ar.getJSONObject(k).getString("title");
-                        if (ar.getJSONObject(k).has("subtitle"))
-                           message += " - " + ar.getJSONObject(k).getString("subtitle");
-                     }
+                     for (int k=0; k<ar.length(); ++k)
+                        h.add(formatEntry(ar.getJSONObject(k)));
                   }
                   if (jr.has("winningOffer")) {
                      JSONArray ar = jr.getJSONArray("winningOffer");
-                     for (int k=0; k<ar.length(); ++k) {
-                        message += "\n" + ar.getJSONObject(k).getString("title");
-                        if (ar.getJSONObject(k).has("subtitle"))
-                           message += " - " + ar.getJSONObject(k).getString("subtitle");
-                     }
+                     for (int k=0; k<ar.length(); ++k)
+                        h.add(formatEntry(ar.getJSONObject(k)));
+                  }
+               }
+               if (h.size() > 0) {
+                  Iterator<String> itr = h.iterator();
+                  while( itr.hasNext() ) {
+                     message += "\n   " + itr.next();
                   }
                }
             }
@@ -225,6 +228,24 @@ public class rnpl {
       }
 
       return null;
+   }
+   
+   private static String formatEntry(JSONObject json) {
+      String message = "";
+      try {
+         if(json.has("title"))
+            message += json.getString("title");
+         if(json.has("subtitle"))
+            message += " - " + json.getString("subtitle");
+         if (json.has("channel")) {
+            JSONObject c = json.getJSONObject("channel");
+            if (c.has("callSign") && c.has("channelNumber"))
+               message += ", channel: " + c.getString("channelNumber") + "=" + c.getString("callSign");
+         }
+      } catch (JSONException e) {
+         log.error("formatEntry error - " + e.getMessage());
+      }
+      return message;
    }
    
    // Dump JSON contents to message window as 1 line per key/value pair
