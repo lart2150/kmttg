@@ -17,6 +17,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.JSON.JSONTokener;
+import com.tivo.kmttg.gui.TableUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -231,8 +232,14 @@ public class rnpl {
    }
    
    private static String formatEntry(JSONObject json) {
+      log.print(json.toString());
       String message = "";
       try {
+         if (json.has("startTime") && json.has("duration")) {
+            String start = jsonTimeToLocalTime(json.getString("startTime"), 0);
+            String stop = jsonTimeToLocalTime(json.getString("startTime"), json.getLong("duration"));
+            message += start + "-" + stop + " -- ";
+         }
          if(json.has("title"))
             message += json.getString("title");
          if(json.has("subtitle"))
@@ -240,12 +247,18 @@ public class rnpl {
          if (json.has("channel")) {
             JSONObject c = json.getJSONObject("channel");
             if (c.has("callSign") && c.has("channelNumber"))
-               message += ", channel: " + c.getString("channelNumber") + "=" + c.getString("callSign");
+               message += " on " + c.getString("channelNumber") + "=" + c.getString("callSign");
          }
       } catch (JSONException e) {
          log.error("formatEntry error - " + e.getMessage());
       }
       return message;
+   }
+   
+   private static String jsonTimeToLocalTime(String jsonTime, long offset) {
+      long gmt = TableUtil.getLongDateFromString(jsonTime) + offset*1000;
+      SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy hh:mm a");
+      return sdf.format(gmt);
    }
    
    // Dump JSON contents to message window as 1 line per key/value pair
