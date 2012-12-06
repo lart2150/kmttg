@@ -133,7 +133,7 @@ public class spTable {
           
           JSONObject json = GetRowData(row);
           if (json != null && json.has("__conflicts"))
-             cell.setBackground(config.tableBkgndProtected);
+             cell.setBackground(config.lightRed);
           
           cell.setFont(config.tableFont);
          
