@@ -207,7 +207,7 @@ public class TableUtil {
                         if (result == null) {
                            log.error("Failed to schedule/modify recording for: '" + _title + "'");
                         } else {
-                           String conflicts = rnpl.recordingConflicts(result);
+                           String conflicts = rnpl.recordingConflicts(result, o);
                            if (conflicts == null) {
                               log.warn(_message);
                            } else {
