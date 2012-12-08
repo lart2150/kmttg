@@ -647,13 +647,17 @@ public class cancelledTable {
                      JSONObject j = new JSONObject();
                      j.put("offerId", json.getString("offerId"));
                      j.put("contentId", json.getString("contentId"));
+                     if (json.has("requestedStartPadding"))
+                        j.put("startTimePadding", json.getInt("requestedStartPadding"));
+                     if (json.has("requestedEndPadding"))
+                        j.put("endTimePadding", json.getInt("requestedEndPadding"));
                      // This signifies to check conflicts only, don't subscribe
                      j.put("conflictsOnly", true);
                      Remote r = new Remote(tivoName);
                      if (r.success) {
                         JSONObject result = r.Command("Singlerecording", j);
                         if (result != null) {
-                           log.print(rnpl.recordingConflicts(result));
+                           log.print(rnpl.recordingConflicts(result,json));
                         }
                         r.disconnect();
                      }
