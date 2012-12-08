@@ -192,27 +192,41 @@ public class rnpl {
    }
    
    // Return null if no conflicts, error string with details if conflicts exist
-   public static String recordingConflicts(JSONObject json) {
+   public static String recordingConflicts(JSONObject json, JSONObject original) {
       try {
          if (json.has("conflicts")) {
             String message = "Will not record due to conflicts. Recordings in conflict:";
             JSONObject o = json.getJSONObject("conflicts");
             JSONArray a;
+            // Get original duration
+            int duration = original.getInt("duration");
+            String title="", subtitle="";
+            if (original.has("title"))
+               title = original.getString("title");
+            if (original.has("subtitle"))
+               subtitle = original.getString("subtitle");
             // Using this type of hash to guarantee unique entries
             LinkedHashSet<String> h = new LinkedHashSet<String>();
             if (o.has("willCancel")) {
                a = o.getJSONArray("willCancel");
                for (int j=0; j<a.length(); ++j) {
                   JSONObject jr = a.getJSONObject(j);
-                  if (jr.has("losingOffer")) {
-                     JSONArray ar = jr.getJSONArray("losingOffer");
-                     for (int k=0; k<ar.length(); ++k)
-                        h.add(formatEntry(ar.getJSONObject(k)));
-                  }
-                  if (jr.has("winningOffer")) {
-                     JSONArray ar = jr.getJSONArray("winningOffer");
-                     for (int k=0; k<ar.length(); ++k)
-                        h.add(formatEntry(ar.getJSONObject(k)));
+                  String[] fields = {"losingOffer", "winningOffer"};
+                  for (int f=0; f<fields.length; ++f) {
+                     if (jr.has(fields[f])) {
+                        JSONArray ar = jr.getJSONArray(fields[f]);
+                        for (int k=0; k<ar.length(); ++k) {
+                           JSONObject js = ar.getJSONObject(k);
+                           String t="", s="";
+                           if (js.has("title"))
+                              t = js.getString("title");
+                           if (js.has("subtitle"))
+                              s = js.getString("subtitle");
+                           if (t.equals(title) && s.equals(subtitle))
+                              js.put("duration", duration);
+                           h.add(formatEntry(js));
+                        }
+                     }
                   }
                }
                if (h.size() > 0) {
