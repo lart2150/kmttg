@@ -60,8 +60,13 @@ public class remote implements Serializable {
                   data = r.ToDo(job);
                if (job.remote_upcoming)
                   data = r.Upcoming(job);
-               if (job.remote_conflicts)
+               if (job.remote_conflicts) {
                   data = r.Upcoming(job);
+                  if (data != null && config.gui.remote_gui.all_todo.size() == 0) {
+                     log.warn("Obtaining todo lists");
+                     config.gui.remote_gui.all_todo = config.gui.remote_gui.getTodoLists("Cancel");
+                  }
+               }
                if (job.remote_sp)
                   data = r.SeasonPasses(job);
                if (job.remote_spreorder)
