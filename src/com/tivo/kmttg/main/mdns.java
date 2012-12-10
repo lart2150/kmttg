@@ -31,7 +31,13 @@ public class mdns {
    }
    
    public void close() {
-      if (jmdns != null) jmdns.close();
+      if (jmdns != null) {
+         try {
+            jmdns.close();
+         } catch (Exception e) {
+            log.error("jmdns close - " + e.getMessage());
+         }
+      }
       jmdns = null;
    }
    
