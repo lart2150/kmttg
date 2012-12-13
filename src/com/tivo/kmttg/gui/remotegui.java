@@ -23,6 +23,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Hashtable;
 import java.util.Stack;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.AbstractAction;
 import javax.swing.Box;
@@ -2433,6 +2436,9 @@ public class remotegui {
    // Obtain todo lists for specified tivo names
    // Used by Search and Guide tabs to mark recordings
    // NOTE: This called as part of a background job
+   // NOTE: This uses CountDownLatch to enable waiting for multiple
+   // parallel background jobs to finish before returning so that
+   // ToDo lists are retrieved in parallel instead of sequentially
    public Hashtable<String,JSONArray> getTodoLists(String tab) {
       String[] tivoNames;
       if (tab.equals("Guide"))
@@ -2441,16 +2447,50 @@ public class remotegui {
          tivoNames = getTivoNames(tivo_cancel);
       else
          tivoNames = getTivoNames(tivo_search);
+
+      // This used to run a background Remote job
+      class Counter extends SwingWorker<Void, Void> {
+         CountDownLatch latch;
+         String tivoName;
+         Hashtable<String,JSONArray> h;
+
+         public Counter(String tivoName, Hashtable<String,JSONArray> h, CountDownLatch latch) {
+            this.latch = latch;
+            this.tivoName = tivoName;
+            this.h = h;
+         }
+
+         protected Void doInBackground() throws Exception {
+            Remote r = new Remote(tivoName);
+            if (r.success) {
+               JSONArray todo = r.ToDo(null);
+               // Add todo to hash
+               if (todo != null)
+                  h.put(tivoName, todo);
+               r.disconnect();
+            }
+            return null;
+         }
+
+         protected void done() {
+            // Job done so decrement latch
+            latch.countDown();
+         }
+      }
+      
+      // Launch background Remote jobs and wait for latch
+      // counter to reach 0 before returning todoLists hash
+      int N = tivoNames.length;
+      CountDownLatch latch = new CountDownLatch(N);
+      ExecutorService executor = Executors.newFixedThreadPool(N);      
       Hashtable<String,JSONArray> todoLists = new Hashtable<String,JSONArray>();
       for (int t=0; t<tivoNames.length; ++t) {
-         Remote r = new Remote(tivoNames[t]);
-         if (r.success) {
-            JSONArray todo = r.ToDo(null);
-            if (todo != null) {
-               todoLists.put(tivoNames[t], todo);
-            }
-            r.disconnect();
-         }
+         executor.execute(new Counter(tivoNames[t], todoLists, latch));
+      }
+      try {
+         latch.await();
+      } catch (InterruptedException e) {
+         log.error("getTodoLists exception - " + e.getMessage());
       }
       return todoLists;
    }
