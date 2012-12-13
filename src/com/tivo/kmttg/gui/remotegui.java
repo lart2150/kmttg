@@ -2492,6 +2492,7 @@ public class remotegui {
       } catch (InterruptedException e) {
          log.error("getTodoLists exception - " + e.getMessage());
       }
+      executor.shutdown();
       return todoLists;
    }
       
