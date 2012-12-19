@@ -6,6 +6,7 @@ import java.io.StringReader;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -33,6 +34,7 @@ public class Pushes {
    private JDialog dialog = null;
    private pushTable tab = null;
    private JSONArray data = null;
+   private Mind mind = null;
    
    public Pushes(String tivoName, JFrame frame) {
       this.frame = frame;
@@ -61,7 +63,11 @@ public class Pushes {
    
    // Retrieve queue data from TiVo mind server
    private void getPushes() {
-      Mind mind = new Mind();
+      if (tab != null)
+         tab.clear();
+      data = new JSONArray();
+      if (mind == null)
+         mind = new Mind();
       if (!mind.login(config.pyTivo_username, config.pyTivo_password)) {
          mind.printErrors();
          log.error("Failed to login to Mind");
@@ -74,6 +80,7 @@ public class Pushes {
          Hashtable<String,String> h = new Hashtable<String,String>();
          h.put("bodyId", bodyId);
          h.put("pcBodyId", pcBodyId);
+         h.put("noLimit", "true");
          s = mind.dict_request(command + "&bodyId=" + bodyId, h);
          if (s != null && s.size() > 0) {
             parseSearchXML(s.get(0));
@@ -157,6 +164,16 @@ public class Pushes {
       c.anchor = GridBagConstraints.CENTER;
       c.fill = GridBagConstraints.NONE;
 
+      // Refresh button
+      JButton refresh = new JButton("Refresh");
+      refresh.setToolTipText("<html><b>Refresh</b><br>Query queued pushes and refresh table.</html>");
+      refresh.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            getPushes();
+            tab.AddRows(data);
+         }
+      });
+
       // Remove button
       JButton remove = new JButton("Remove");
       remove.setToolTipText("<html><b>Remove</b><br>Attempt to remove selected entry in the table from push queue.</html>");
@@ -166,7 +183,7 @@ public class Pushes {
             if (selected.length > 0) {
                JSONArray entries = new JSONArray();
                for (int i=0; i<selected.length; ++i) {
-                  JSONObject json = TableUtil.GetRowData(tab.getTable(), selected[i], "DATE");
+                  JSONObject json = tab.GetRowData(selected[i]);
                   if (json != null)
                      entries.put(json);
                   tab.RemoveRow(selected[i]);
@@ -175,7 +192,13 @@ public class Pushes {
             }
          }
       });
-      content.add(remove, c);
+      
+      // Row 1 = 2 buttons
+      JPanel row1 = new JPanel();
+      row1.setLayout(new BoxLayout(row1, BoxLayout.LINE_AXIS));
+      row1.add(refresh);
+      row1.add(remove);
+      content.add(row1, c);
       
       // Table
       tab = new pushTable();
@@ -184,7 +207,7 @@ public class Pushes {
       JScrollPane tabScroll = new JScrollPane(tab.getTable());
       gy++;
       c.gridy = gy;
-      c.weighty = 0.3;
+      c.weighty = 1.0;
       c.weightx = 1.0;
       c.fill = GridBagConstraints.BOTH;
       content.add(tabScroll, c);
@@ -194,7 +217,7 @@ public class Pushes {
       dialog.setTitle("Push Queue");
       dialog.setContentPane(content);
       dialog.pack();
-      dialog.setSize((int)(frame.getSize().width), (int)(dialog.getSize().height));
+      dialog.setSize((int)(frame.getSize().width), (int)(frame.getSize().height/3));
       dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
       dialog.setVisible(true);      
    }
