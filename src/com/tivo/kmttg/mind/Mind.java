@@ -25,11 +25,11 @@ import com.tivo.kmttg.mind.SimpleCookieManager;
 import com.tivo.kmttg.util.log;
 
 public class Mind {
+   private Boolean debug = false;
    public String server;
    private String mindVer = "mind9";
    
    public static final String DEFAULT_MIND_SERVER = config.pyTivo_mind;
-   private Stack<String> errors = new Stack<String>();
    SimpleCookieManager cm = new SimpleCookieManager();
    
    public Mind(String mindServer) {
@@ -65,17 +65,22 @@ public class Mind {
          while ((inputLine = in.readLine()) != null) {
             if (inputLine.matches("^.+success.+$")) {
                success = true;
+            } else {
+               log.error(inputLine);
             }
-            //log.print(inputLine);
+            if (debug) log.print(inputLine);
+         }
+         if ( ! success ) {
+            log.error("urlString=" + urlString + " urlData=" + urlData);
          }
          return success;
       }
       catch (MalformedURLException e) {
-         errors.push(e.toString() + " - " + urlString);
+         log.error(e.toString() + " - " + urlString);
          return false;
       } 
       catch (IOException e) {
-         errors.push(e.toString() + " - " + urlString);
+         log.error(e.toString() + " - " + urlString);
          return false;
       }
    }
@@ -103,16 +108,16 @@ public class Mind {
          String inputLine;
          while ((inputLine = in.readLine()) != null) {
             s.add(inputLine);
-            //log.print(inputLine);
+            if (debug) log.print(inputLine);
          }
          return s;
       }
       catch (MalformedURLException e) {
-         errors.push(e.toString() + " - " + urlString);
+         log.error(e.toString() + " - " + urlString);
          return null;
       } 
       catch (IOException e) {
-         errors.push(e.toString() + " - " + urlString);
+         log.error(e.toString() + " - " + urlString);
          return null;
       }
    }
@@ -236,9 +241,7 @@ public class Mind {
    }
    
    @SuppressWarnings("unchecked")
-   public Stack<String> subscribe(String offerId, String contentId, String tsn) {
-      errors.clear();
-      
+   public Stack<String> subscribe(String offerId, String contentId, String tsn) {      
       Hashtable source = new Hashtable();
       source.put("contentId", contentId);
       source.put("offerId",   offerId);
@@ -255,7 +258,6 @@ public class Mind {
    
    @SuppressWarnings("unchecked")
    public Stack<String> pcBodySearch() {
-      errors.clear();
       Hashtable h = new Hashtable();
       Stack<String> s = dict_request("pcBodySearch", h);
       Boolean pc = false;
@@ -281,7 +283,6 @@ public class Mind {
 
    @SuppressWarnings("unchecked")
    public Stack<String> bodyOfferModify(Hashtable h) {
-      errors.clear();
       Stack<String> s = dict_request(
          "bodyOfferModify&bodyId=" + h.get("bodyId"), h
       );
@@ -354,11 +355,4 @@ public class Mind {
       }
       return null;
    }
-   
-   public void printErrors() {
-      for (int i=0; i<errors.size(); ++i)
-         //System.out.println("ERROR: " + errors.get(i));
-       log.error("ERROR: " + errors.get(i));
-   }
-
 }
