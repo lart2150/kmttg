@@ -148,4 +148,9 @@ public class pushTable {
          log.error("pushTable AddRow - " + e.getMessage());
       }
     }
+    
+    public void RemoveRow(int row) {
+       MyTableModel dm = (MyTableModel)TABLE.getModel();
+       dm.removeRow(TABLE.convertRowIndexToModel(row));
+    }
 }
