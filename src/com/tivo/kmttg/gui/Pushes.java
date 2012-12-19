@@ -51,10 +51,11 @@ public class Pushes {
          log.error("pyTivo username and/or password not set in " + config.pyTivo_config);
          return;
       }
-      //getPushes();
-      parseSearchXML("<?xml version=\"1.0\" encoding=\"utf-8\"?><bodyOfferList><bodyOffer><bodyId>tsn:7460001XXXXXXXX</bodyId><bodyOfferId>tivo:bo.15000371</bodyOfferId><duration>72</duration><encodingType>mpeg2ProgramStream</encodingType><levelOfDetail>low</levelOfDetail><offerId>tivo:of.bs.15000371</offerId><partnerId>tivo:pt.3187</partnerId><pcBodyId>tivo:pc.1001087441</pcBodyId><publishDate>2012-12-20 14:39:00</publishDate><size>30672896</size><source>Daylight_Sat_Mar_08</source><state>complete</state><title>Daylight_Sat_Mar_08</title><tvRating>nr</tvRating><type>bodyOffer</type><url>http://192.168.10.198:9032/videos/Daylight_Sat_Mar_08.mpg?Format=video/mpeg</url></bodyOffer><isBottom>true</isBottom><isTop>true</isTop></bodyOfferList>");
+      getPushes();
       if (data != null) {
          init();
+      } else {
+         log.warn("No pending pushes found to display");
       }
    }
    
@@ -168,6 +169,7 @@ public class Pushes {
                   JSONObject json = TableUtil.GetRowData(tab.getTable(), selected[i], "DATE");
                   if (json != null)
                      entries.put(json);
+                  tab.RemoveRow(selected[i]);
                }
                removePushes(entries);
             }
