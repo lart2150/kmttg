@@ -93,6 +93,7 @@ public class config {
    
    // Hash to store tivo related information
    public static Hashtable<String,String> TIVOS = new Hashtable<String,String>();
+   public static Hashtable<String,String> TSN = new Hashtable<String,String>();
    public static Hashtable<String,String> WAN = new Hashtable<String,String>();
    // If > 0 limit # npl fetches to this num
    public static Hashtable<String,String> limit_npl_fetches = new Hashtable<String,String>();
@@ -143,10 +144,13 @@ public class config {
    public static String metadata_entries = "";
    
    // pyTivo push related
-   public static String pyTivo_config = "";
+   public static String pyTivo_config = null;
    public static String pyTivo_host = "localhost";
    public static String pyTivo_tivo = "";
    public static String pyTivo_files = "last";
+   public static String pyTivo_port = "9032";
+   public static String pyTivo_username = null;
+   public static String pyTivo_password = null;
    
    // download related
    public static int download_delay = 10;       // Delay in secs to apply to each download attempt
@@ -329,6 +333,8 @@ public class config {
    public static void addTivo(Hashtable<String,String> b) {
       log.warn("Adding detected tivo: " + b.get("machine"));
       TIVOS.put(b.get("machine"), b.get("ip"));
+      if (b.containsKey("identity"))
+         setTsn(b.get("machine"), b.get("identity"));
       save(configIni);
       if (GUIMODE) {
          config.gui.AddTivo(b.get("machine"), b.get("ip"));
@@ -352,6 +358,18 @@ public class config {
             WAN.remove(key);
          }
       }
+   }
+   
+   public static String getTsn(String tivoName) {
+      String tsn = null;
+      if (TSN.containsKey(tivoName))
+         tsn = TSN.get(tivoName);
+      return tsn;
+   }
+   
+   public static void setTsn(String tivoName, String tsn) {
+      log.warn("Updating TSN for TiVo: " + tivoName);
+      TSN.put(tivoName, tsn);
    }
    
    // Get configured setting in limit_npl_fetches hash for given tivoName
@@ -766,6 +784,9 @@ public class config {
             if (key.matches("^wan_.+$")) {
                WAN.put(key, line);
             }
+            if (key.matches("^tsn_.+$")) {
+               TSN.put(key.replaceFirst("tsn_", ""), line);
+            }
             if (key.matches("^limit_npl_.+$")) {
                setLimitNplSetting(key, string.removeLeadingTrailingSpaces(line));
             }
@@ -923,6 +944,14 @@ public class config {
                String name = e.nextElement();
                ofp.write("<" + name + ">\n");
                ofp.write(WAN.get(name) + "\n\n");
+            }
+         }
+         
+         if (TSN.size() > 0) {
+            for (Enumeration<String> e=TSN.keys(); e.hasMoreElements();) {
+               String name = e.nextElement();
+               ofp.write("<tsn_" + name + ">\n");
+               ofp.write(TSN.get(name) + "\n\n");
             }
          }
          
