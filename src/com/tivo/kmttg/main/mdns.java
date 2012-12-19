@@ -91,6 +91,7 @@ public class mdns {
                      String config_tsn = config.getTsn(name);
                      if (config_tsn == null) {
                         config.setTsn(name, tsn);
+                        config_tsn = tsn;
                         config.save(config.configIni);
                      }
                      if ( ! config_tsn.equals(tsn) ) {

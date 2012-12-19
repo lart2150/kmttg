@@ -90,6 +90,7 @@ public class beacon {
                String tsn = b.get("identity");
                if (config_tsn == null) {
                   config.setTsn(name, tsn);
+                  config_tsn = tsn;
                   config.save(config.configIni);
                }
                if ( ! config_tsn.equals(tsn) ) {
