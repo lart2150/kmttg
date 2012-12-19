@@ -151,6 +151,7 @@ public class config {
    public static String pyTivo_tivo = "";
    public static String pyTivo_files = "last";
    public static String pyTivo_port = "9032";
+   public static String pyTivo_mind = "mind.tivo.com:8181";
    public static String pyTivo_username = null;
    public static String pyTivo_password = null;
    
