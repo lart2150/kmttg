@@ -86,6 +86,18 @@ public class mdns {
                         config.save(config.configIni);
                      }
                   }
+                  // Update TSN if necessary
+                  if (add == false) {
+                     String config_tsn = config.getTsn(name);
+                     if (config_tsn == null) {
+                        config.setTsn(name, tsn);
+                        config.save(config.configIni);
+                     }
+                     if ( ! config_tsn.equals(tsn) ) {
+                        config.setTsn(name, tsn);
+                        config.save(config.configIni);
+                     }
+                  }
                } else {
                   add = false;
                }
@@ -94,6 +106,7 @@ public class mdns {
                   Hashtable<String,String> b = new Hashtable<String,String>();
                   b.put("ip", info[i].getHostAddress());
                   b.put("machine", name);
+                  b.put("identity", tsn);
                   config.addTivo(b);
                }
             }

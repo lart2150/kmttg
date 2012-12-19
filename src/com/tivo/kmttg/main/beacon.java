@@ -84,6 +84,19 @@ public class beacon {
                config.TIVOS.put(name, ip);
                config.save(config.configIni);
             }
+            // Update TSN if necessary
+            if (b.containsKey("identity")) {
+               String config_tsn = config.getTsn(name);
+               String tsn = b.get("identity");
+               if (config_tsn == null) {
+                  config.setTsn(name, tsn);
+                  config.save(config.configIni);
+               }
+               if ( ! config_tsn.equals(tsn) ) {
+                  config.setTsn(name, tsn);
+                  config.save(config.configIni);
+               }
+            }
          }
       }
    }
