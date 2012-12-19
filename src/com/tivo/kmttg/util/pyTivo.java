@@ -14,6 +14,7 @@ public class pyTivo {
       Stack<Hashtable<String,String>> s = new Stack<Hashtable<String,String>>();
       String username = null;
       String password = null;
+      String mind = null;
       
       try {
          BufferedReader ifp = new BufferedReader(new FileReader(conf));
@@ -58,6 +59,12 @@ public class pyTivo {
                      password = string.removeLeadingTrailingSpaces(l[1]);
                   }
                }
+               if (line.matches("(?i)^tivo_mind\\s*=.+")) {
+                  String[] l = line.split("=");
+                  if (l.length > 1) {
+                     mind = string.removeLeadingTrailingSpaces(l[1]);
+                  }
+               }
                continue;
             }
             if (line.matches("(?i)^type\\s*=.+")) {
@@ -100,6 +107,8 @@ public class pyTivo {
          }
          config.pyTivo_username = username;
          config.pyTivo_password = password;
+         if (mind != null)
+            config.pyTivo_mind = mind;
 
       }
       catch (Exception ex) {
