@@ -188,7 +188,10 @@ public class Pushes {
 
       // Refresh button
       JButton refresh = new JButton("Refresh");
-      refresh.setToolTipText("<html><b>Refresh</b><br>Query queued pushes and refresh table.</html>");
+      String tip = "<html><b>Refresh</b><br>Query queued pushes and refresh table.<br>";
+      tip += "NOTE: The mind server listings can be several seconds off compared to what is currently happening.";
+      tip += "</html>";
+      refresh.setToolTipText(tip);
       refresh.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             if (getPushes())
@@ -198,7 +201,12 @@ public class Pushes {
 
       // Remove button
       JButton remove = new JButton("Remove");
-      remove.setToolTipText("<html><b>Remove</b><br>Attempt to remove selected entry in the table from push queue.</html>");
+      tip = "<html><b>Remove</b><br>Attempt to remove selected entry in the table from push queue.<br>";
+      tip += "NOTE: This will not cancel pushes already in progress or very close to starting.<br>";
+      tip += "NOTE: The response to this operation from mind server is always 'success' so there<br>";
+      tip += "is no guarantee that removing an entry actually works or not.";
+      tip += "</html>";
+      remove.setToolTipText(tip);
       remove.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             int[] selected = TableUtil.GetSelectedRows(tab.getTable());
