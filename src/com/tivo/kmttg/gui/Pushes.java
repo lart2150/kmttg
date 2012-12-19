@@ -24,6 +24,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.mind.Mind;
+import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.pyTivo;
@@ -38,12 +39,27 @@ public class Pushes {
    
    public Pushes(String tivoName, JFrame frame) {
       this.frame = frame;
+      
+      // Determine bodyId = tsn for this TiVo
       bodyId = config.getTsn(tivoName);
       if (bodyId == null) {
-         log.error("tsn could not be determined for: " + tivoName);
-         return;
+         // Try using RPC to get tsn instead
+         if (config.getRpcSetting(tivoName).equals("1")) {
+            Remote r = new Remote(tivoName);
+            if (r.success) {
+               bodyId = r.bodyId_get();
+               r.disconnect();
+            }
+         }
+         if (bodyId == null) {
+            log.error("tsn could not be determined for: " + tivoName);
+            return;
+         }
       }
-      bodyId = "tsn:" + bodyId;
+      if ( ! bodyId.startsWith("tsn") )
+         bodyId = "tsn:" + bodyId;
+      
+      // Determine mind server username & password by parsing pyTivo.conf
       if (! file.isFile(config.pyTivo_config)) {
          log.error("You have not configured valid path to pyTivo.conf file (needed for username & password)");
          return;
@@ -53,7 +69,10 @@ public class Pushes {
          log.error("pyTivo username and/or password not set in " + config.pyTivo_config);
          return;
       }
+      
+      // Query mind server for pushes and store in data
       getPushes();
+      
       if (data != null) {
          init();
       } else {
@@ -67,7 +86,7 @@ public class Pushes {
          tab.clear();
       data = new JSONArray();
       if (mind == null)
-         mind = new Mind();
+         mind = new Mind(config.pyTivo_mind);
       if (!mind.login(config.pyTivo_username, config.pyTivo_password)) {
          mind.printErrors();
          log.error("Failed to login to Mind");
@@ -95,7 +114,7 @@ public class Pushes {
    
    private void removePushes(JSONArray entries) {
       try {
-         Mind mind = new Mind();
+         Mind mind = new Mind(config.pyTivo_mind);
          if (!mind.login(config.pyTivo_username, config.pyTivo_password)) {
             mind.printErrors();
             log.error("Failed to login to Mind");
