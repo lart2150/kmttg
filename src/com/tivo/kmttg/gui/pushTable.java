@@ -144,7 +144,9 @@ public class pushTable {
           // TiVo
           String tsn = json.getString("bodyId");
           tsn = tsn.replaceFirst("tsn:", "");
-          info[2] = config.getTiVoFromTsn(tsn);
+          String tivo = config.getTiVoFromTsn(tsn);
+          if (tivo == null) tivo = tsn;
+          info[2] = tivo;
           TableUtil.AddRow(TABLE, info);       
        } catch (Exception e) {
           log.error("pushTable AddRow - " + e.getMessage());
