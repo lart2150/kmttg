@@ -19,7 +19,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.log;
 
 public class pushTable {
-   private String[] TITLE_cols = {"TITLE", "DATE", "DEST TSN"};
+   private String[] TITLE_cols = {"NUM", "TITLE", "DEST TiVo"};
    public JXTable TABLE = null;
    
    pushTable() {
@@ -38,20 +38,18 @@ public class pushTable {
                
       TABLE.setAutoResizeMode(JXTable.AUTO_RESIZE_ALL_COLUMNS);
       
-      // Set custom sorting routine for DATE column
-      TABLE.getColumnExt(1).getSorter().setComparator(sortableComparator);
+      // Set custom sorting routine for NUM column
+      TABLE.getColumnExt(0).getSorter().setComparator(sortableComparator);
    }
    
    // Define custom column sorting routines
    Comparator<Object> sortableComparator = new Comparator<Object>() {
       public int compare(Object o1, Object o2) {
-         if (o1 instanceof sortableDate && o2 instanceof sortableDate) {
-            sortableDate s1 = (sortableDate)o1;
-            sortableDate s2 = (sortableDate)o2;
-            long l1 = Long.parseLong(s1.sortable);
-            long l2 = Long.parseLong(s2.sortable);
-            if (l1 > l2) return 1;
-            if (l1 < l2) return -1;
+         if (o1 instanceof sortableInt && o2 instanceof sortableInt) {
+            sortableInt s1 = (sortableInt)o1;
+            sortableInt s2 = (sortableInt)o2;
+            if (s1.sortable > s2.sortable) return 1;
+            if (s1.sortable < s2.sortable) return -1;
             return 0;
          }
          return 0;
@@ -103,8 +101,8 @@ public class pushTable {
        @SuppressWarnings("unchecked")
        // This is used to define columns as specific classes
        public Class getColumnClass(int col) {
-          if (col == 1) {
-             return sortableDate.class;
+          if (col == 0) {
+             return sortableInt.class;
           }
           return Object.class;
        } 
@@ -119,38 +117,49 @@ public class pushTable {
        return TABLE;
     }
     
+    public void clear() {
+       MyTableModel model = (MyTableModel)TABLE.getModel(); 
+       model.setNumRows(0);
+    }
+    
     public void AddRows(JSONArray data) {
        for (int i=0; i<data.length(); ++i) {
           try {
-            AddRow(data.getJSONObject(i));
+            AddRow(data.getJSONObject(i), i+1);
          } catch (JSONException e) {
             log.error("pushTable AddRows - " + e.getMessage());
             return;
          }
        }
+       TableUtil.packColumns(TABLE,2);
     }
     
-    public void AddRow(JSONObject json) {
+    public void AddRow(JSONObject json, int num) {
        Object[] info = new Object[TITLE_cols.length];
        try {
+          // NUM
+          info[0] = new sortableInt(json, num);
           // Title
-         info[0] = json.getString("source");
-         // Date
-         String dateString = json.getString("publishDate");
-         long d = TableUtil.getLongDateFromString(dateString);
-         info[1] = new sortableDate(json, d);
-         // TSN
-         String tsn = json.getString("bodyId");
-         tsn = tsn.replaceFirst("tsn:", "");
-         info[2] = tsn;
-         TableUtil.AddRow(TABLE, info);       
-      } catch (JSONException e) {
-         log.error("pushTable AddRow - " + e.getMessage());
-      }
+          info[1] = json.getString("source");
+          // TiVo
+          String tsn = json.getString("bodyId");
+          tsn = tsn.replaceFirst("tsn:", "");
+          info[2] = config.getTiVoFromTsn(tsn);
+          TableUtil.AddRow(TABLE, info);       
+       } catch (Exception e) {
+          log.error("pushTable AddRow - " + e.getMessage());
+       }
     }
     
     public void RemoveRow(int row) {
        MyTableModel dm = (MyTableModel)TABLE.getModel();
        dm.removeRow(TABLE.convertRowIndexToModel(row));
     }
+    
+    public JSONObject GetRowData(int row) {
+       sortableInt s = (sortableInt) TABLE.getValueAt(row, TableUtil.getColumnIndex(TABLE, "NUM"));
+       if (s != null)
+          return s.json;
+       return null;
+    }    
 }
