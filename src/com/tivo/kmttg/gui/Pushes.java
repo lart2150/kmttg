@@ -71,7 +71,8 @@ public class Pushes {
       }
       
       // Query mind server for pushes and store in data
-      getPushes();
+      if ( ! getPushes() )
+         return;
       
       if (data != null && data.length() > 0) {
          init();
@@ -81,16 +82,15 @@ public class Pushes {
    }
    
    // Retrieve queue data from TiVo mind server
-   private void getPushes() {
+   private Boolean getPushes() {
       if (tab != null)
          tab.clear();
       data = new JSONArray();
       if (mind == null)
          mind = new Mind(config.pyTivo_mind);
       if (!mind.login(config.pyTivo_username, config.pyTivo_password)) {
-         mind.printErrors();
          log.error("Failed to login to Mind");
-         return;
+         return false;
       }
       Stack<String> s = mind.pcBodySearch();
       if (s != null && s.size() > 0) {
@@ -108,17 +108,17 @@ public class Pushes {
          }
       } else {
          log.error("getPushes - Unable to retrieve pcBodyId");
-         return;
+         return false;
       }
+      return true;
    }
    
-   private void removePushes(JSONArray entries) {
+   private Boolean removePushes(JSONArray entries) {
       try {
          Mind mind = new Mind(config.pyTivo_mind);
          if (!mind.login(config.pyTivo_username, config.pyTivo_password)) {
-            mind.printErrors();
             log.error("Failed to login to Mind");
-            return;
+            return false;
          }
          for (int i=0; i<entries.length(); ++i) {
             String command = "bodyOfferRemove";
@@ -130,11 +130,14 @@ public class Pushes {
                log.print(s.get(0));
             } else {
                log.error("push item remove failed");
+               return false;
             }
          }
       } catch (Exception e) {
          log.error("removePushes - " + e.getMessage());
+         return false;
       }
+      return true;
    }
    
    // Parse given bodyOfferList xml and populate data JSONArray with its contents
@@ -188,8 +191,8 @@ public class Pushes {
       refresh.setToolTipText("<html><b>Refresh</b><br>Query queued pushes and refresh table.</html>");
       refresh.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            getPushes();
-            tab.AddRows(data);
+            if (getPushes())
+               tab.AddRows(data);
          }
       });
 
