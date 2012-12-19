@@ -19,23 +19,16 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.mind.EasySSLHelper;
 import com.tivo.kmttg.mind.SimpleCookieManager;
 import com.tivo.kmttg.util.log;
 
-/*
-Mind mind = new Mind();
-if (!mind.login(username, password)) {
-   mind.printErrors();
-   log.error("Failed to login to Mind");
-   return false;
-}
-*/
 public class Mind {
    public String server;
    private String mindVer = "mind9";
    
-   public static final String DEFAULT_MIND_SERVER = "mind.tivo.com:8181";
+   public static final String DEFAULT_MIND_SERVER = config.pyTivo_mind;
    private Stack<String> errors = new Stack<String>();
    SimpleCookieManager cm = new SimpleCookieManager();
    
