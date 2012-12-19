@@ -73,7 +73,7 @@ public class Pushes {
       // Query mind server for pushes and store in data
       getPushes();
       
-      if (data != null) {
+      if (data != null && data.length() > 0) {
          init();
       } else {
          log.warn("No pending pushes found to display");
