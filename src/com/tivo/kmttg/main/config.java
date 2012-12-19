@@ -11,6 +11,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.Stack;
 
 import com.tivo.kmttg.util.*;
@@ -365,6 +367,17 @@ public class config {
       if (TSN.containsKey(tivoName))
          tsn = TSN.get(tivoName);
       return tsn;
+   }
+   
+   public static String getTiVoFromTsn(String tsn) {
+      Set<String> set = TSN.keySet();
+      Iterator<String> itr = set.iterator();
+      while(itr.hasNext()) {
+         String tivoName = itr.next();
+         if (TSN.get(tivoName).equals(tsn))
+            return tivoName;
+      }
+      return null;
    }
    
    public static void setTsn(String tivoName, String tsn) {
