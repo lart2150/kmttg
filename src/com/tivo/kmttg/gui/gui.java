@@ -66,6 +66,7 @@ public class gui {
    private JMenuItem saveMessagesMenuItem = null;
    private JMenuItem clearMessagesMenuItem = null;
    private JMenuItem resetServerMenuItem = null;
+   private JMenuItem pushesMenuItem = null;
    private JMenuItem saveJobsMenuItem = null;
    private JMenuItem loadJobsMenuItem = null;
    
@@ -518,6 +519,7 @@ public class gui {
          fileMenu.add(getSaveMessagesMenuItem());
          fileMenu.add(getClearMessagesMenuItem());
          fileMenu.add(getResetServerMenuItem());
+         fileMenu.add(getPushesMenuItem());
          fileMenu.add(getResumeDownloadsMenuItem());
          fileMenu.add(getJobMenu());
          fileMenu.add(getExitMenuItem());
@@ -682,6 +684,24 @@ public class gui {
          });
       }
       return resetServerMenuItem;
+   }
+
+   private JMenuItem getPushesMenuItem() {
+      debug.print("");
+      if (pushesMenuItem == null) {
+         pushesMenuItem = new JMenuItem();
+         pushesMenuItem.setText("Show pending pyTivo pushes");
+         pushesMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               String tivoName = getSelectedTivoName();
+               if (tivoName == null)
+                  log.error("This command must be run with a TiVo tab selected.");
+               else
+                  new Pushes(tivoName, getJFrame());
+            }
+         });
+      }
+      return pushesMenuItem;
    }
    
    private JMenuItem getToggleLaunchingJobsMenuItem() {
