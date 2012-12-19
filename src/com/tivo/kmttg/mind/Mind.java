@@ -73,7 +73,7 @@ public class Mind {
             if (inputLine.matches("^.+success.+$")) {
                success = true;
             }
-            log.print(inputLine);
+            //log.print(inputLine);
          }
          return success;
       }
@@ -110,7 +110,7 @@ public class Mind {
          String inputLine;
          while ((inputLine = in.readLine()) != null) {
             s.add(inputLine);
-            log.print(inputLine);
+            //log.print(inputLine);
          }
          return s;
       }
