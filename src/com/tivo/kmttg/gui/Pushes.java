@@ -71,73 +71,95 @@ public class Pushes {
       }
       
       // Query mind server for pushes and store in data
-      if ( ! getPushes() )
-         return;
-      
-      if (data != null && data.length() > 0) {
-         init();
-      } else {
-         log.warn("No pending pushes found to display");
-      }
+      getPushes();
    }
    
    // Retrieve queue data from TiVo mind server
-   private Boolean getPushes() {
-      if (tab != null)
-         tab.clear();
-      data = new JSONArray();
-      if (mind == null)
-         mind = new Mind(config.pyTivo_mind);
-      if (!mind.login(config.pyTivo_username, config.pyTivo_password)) {
-         log.error("Failed to login to Mind");
-         return false;
-      }
-      Stack<String> s = mind.pcBodySearch();
-      if (s != null && s.size() > 0) {
-         String pcBodyId = mind.getElement(s.get(0), "pcBodyId");
-         String command = "bodyOfferSearch";
-         Hashtable<String,String> h = new Hashtable<String,String>();
-         h.put("bodyId", bodyId);
-         h.put("pcBodyId", pcBodyId);
-         h.put("noLimit", "true");
-         s = mind.dict_request(command + "&bodyId=" + bodyId, h);
-         if (s != null && s.size() > 0) {
-            parseSearchXML(s.get(0));
-         } else {
-            log.warn("No queued entries found");
+   private void getPushes() {
+      // Run in separate background thread
+      class backgroundRun extends SwingWorker<Void, Void> {
+         protected Void doInBackground() {
+            if (tab != null)
+               tab.clear();
+            data = new JSONArray();
+            if (mind == null)
+               mind = new Mind(config.pyTivo_mind);
+            if (!mind.login(config.pyTivo_username, config.pyTivo_password)) {
+               log.error("Failed to login to Mind");
+               return null;
+            }
+            Stack<String> s = mind.pcBodySearch();
+            if (s != null && s.size() > 0) {
+               String pcBodyId = mind.getElement(s.get(0), "pcBodyId");
+               String command = "bodyOfferSearch";
+               Hashtable<String,String> h = new Hashtable<String,String>();
+               h.put("bodyId", bodyId);
+               h.put("pcBodyId", pcBodyId);
+               h.put("noLimit", "true");
+               s = mind.dict_request(command + "&bodyId=" + bodyId, h);
+               if (s != null && s.size() > 0) {
+                  parseSearchXML(s.get(0));
+               } else {
+                  log.warn("No queued entries found");
+               }
+            } else {
+               log.error("getPushes - Unable to retrieve pcBodyId");
+               return null;
+            }
+            
+            if (data != null && data.length() > 0) {
+               if (dialog == null)
+                  init();
+               else
+                  tab.AddRows(data);
+            } else {
+               log.warn("No pending pushes found to display");
+            }
+            return null;
          }
-      } else {
-         log.error("getPushes - Unable to retrieve pcBodyId");
-         return false;
       }
-      return true;
+      backgroundRun b = new backgroundRun();
+      b.execute();
    }
    
-   private Boolean removePushes(JSONArray entries) {
-      try {
-         Mind mind = new Mind(config.pyTivo_mind);
-         if (!mind.login(config.pyTivo_username, config.pyTivo_password)) {
-            log.error("Failed to login to Mind");
-            return false;
+   private void removePushes(JSONArray entries) {
+      // Run in separate background thread
+      class backgroundRun extends SwingWorker<Void, Void> {
+         JSONArray entries;
+         
+         public backgroundRun(JSONArray entries) {
+            this.entries = entries;
          }
-         for (int i=0; i<entries.length(); ++i) {
-            String command = "bodyOfferRemove";
-            Hashtable<String,String> h = new Hashtable<String,String>();
-            h.put("bodyId", bodyId);
-            h.put("bodyOfferId", entries.getJSONObject(i).getString("bodyOfferId"));
-            Stack<String> s = mind.dict_request(command + "&bodyId=" + bodyId, h);
-            if (s != null && s.size() > 0) {
-               log.print(s.get(0));
-            } else {
-               log.error("push item remove failed");
-               return false;
+         
+         protected Void doInBackground() {
+            try {
+               Mind mind = new Mind(config.pyTivo_mind);
+               if (!mind.login(config.pyTivo_username, config.pyTivo_password)) {
+                  log.error("Failed to login to Mind");
+                  return null;
+               }
+               for (int i=0; i<entries.length(); ++i) {
+                  String command = "bodyOfferRemove";
+                  Hashtable<String,String> h = new Hashtable<String,String>();
+                  h.put("bodyId", bodyId);
+                  h.put("bodyOfferId", entries.getJSONObject(i).getString("bodyOfferId"));
+                  Stack<String> s = mind.dict_request(command + "&bodyId=" + bodyId, h);
+                  if (s != null && s.size() > 0) {
+                     log.print(s.get(0));
+                  } else {
+                     log.error("push item remove failed");
+                     return null;
+                  }
+               }
+            } catch (Exception e) {
+               log.error("removePushes - " + e.getMessage());
+               return null;
             }
+            return null;
          }
-      } catch (Exception e) {
-         log.error("removePushes - " + e.getMessage());
-         return false;
       }
-      return true;
+      backgroundRun b = new backgroundRun(entries);
+      b.execute();
    }
    
    // Parse given bodyOfferList xml and populate data JSONArray with its contents
@@ -194,8 +216,7 @@ public class Pushes {
       refresh.setToolTipText(tip);
       refresh.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            if (getPushes())
-               tab.AddRows(data);
+            getPushes();
          }
       });
 
