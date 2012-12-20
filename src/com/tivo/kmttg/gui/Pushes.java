@@ -230,17 +230,22 @@ public class Pushes {
       remove.setToolTipText(tip);
       remove.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            int[] selected = TableUtil.GetSelectedRows(tab.getTable());
-            if (selected.length > 0) {
-               JSONArray entries = new JSONArray();
-               for (int i=0; i<selected.length; ++i) {
-                  JSONObject json = tab.GetRowData(selected[i]);
+            JSONArray entries = new JSONArray();
+            Boolean cont = true;
+            while (cont) {
+               int[] selected = TableUtil.GetSelectedRows(tab.getTable());
+               if (selected.length > 0) {
+                  int row = selected[0];
+                  JSONObject json = tab.GetRowData(row);
                   if (json != null)
                      entries.put(json);
-                  tab.RemoveRow(selected[i]);
+                  tab.RemoveRow(row);
+               } else {
+                  cont = false;
                }
-               removePushes(entries);
             }
+            if (entries.length() > 0)
+               removePushes(entries);
          }
       });
       
