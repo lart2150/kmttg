@@ -233,7 +233,7 @@ public class Pushes {
             JSONArray entries = new JSONArray();
             Boolean cont = true;
             while (cont) {
-               int[] selected = TableUtil.GetSelectedRows(tab.getTable());
+               int[] selected = tab.getTable().getSelectedRows();
                if (selected.length > 0) {
                   int row = selected[0];
                   JSONObject json = tab.GetRowData(row);
