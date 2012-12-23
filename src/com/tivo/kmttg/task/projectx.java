@@ -52,12 +52,11 @@ public class projectx implements Serializable {
          schedule = false;
       }
       
-      // Check for illegal mp4/H.264 input file
-      Hashtable<String,String> info = null;
-      info = ffmpeg.getVideoInfo(job.mpegFile);
+      // Check for non-mpeg2 input file
+      Hashtable<String,String> info = ffmpeg.getVideoInfo(job.mpegFile);
       if (info != null) {
-         if (info.get("container").equals("mp4") || info.get("video").equals("h264")) {
-            log.error("projectx does not support mp4 files or h264 video");
+         if (! info.get("video").equals("mpeg2video")) {
+            log.error("input video=" + info.get("video") + ": projectx only supports mpeg2 video");
             schedule = false;
          }
       }      
