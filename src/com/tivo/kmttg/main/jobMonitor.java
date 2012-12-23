@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -545,6 +546,30 @@ public class jobMonitor {
          }
       }
       return false;
+   }
+   
+   // Search through all jobData class variable names for given name and set
+   // it to given value. Do this for all pending jobs only.
+   // This is for update file names that may have to change for pending jobs
+   // like jobData.mpegFile for example.
+   public static void updatePendingJobFieldValue(String name, String value) {
+      if ( JOBS != null && ! JOBS.isEmpty() ) {
+         Field[] fields = jobData.class.getFields();
+         for (int i=0; i<JOBS.size(); ++i) {
+            if (JOBS.get(i).status.equals("queued")) {
+               for (int j=0; j<fields.length; ++j) {
+                  if (fields[j].getName().equals(name)) {
+                     try {
+                        if (fields[j].get(JOBS.get(i)) != null)
+                           fields[j].set(JOBS.get(i), value);
+                     } catch (Exception e) {
+                        log.error("updatePendingJobFieldValue - " + e.getMessage());
+                     }
+                  }
+               }
+            }
+         }
+      }
    }
 
    // Return elapsed time of a job in h:mm:ss format
