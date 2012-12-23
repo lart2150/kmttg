@@ -2,6 +2,7 @@ package com.tivo.kmttg.task;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Stack;
 
 import com.tivo.kmttg.main.config;
@@ -10,6 +11,7 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.ProjectX;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
+import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
@@ -50,6 +52,16 @@ public class projectx implements Serializable {
          schedule = false;
       }
       
+      // Check for illegal mp4/H.264 input file
+      Hashtable<String,String> info = null;
+      info = ffmpeg.getVideoInfo(job.mpegFile);
+      if (info != null) {
+         if (info.get("container").equals("mp4") || info.get("video").equals("h264")) {
+            log.error("projectx does not support mp4 files or h264 video");
+            schedule = false;
+         }
+      }      
+      
       if (schedule) {
          // Create sub-folders for output file if needed
          if ( ! jobMonitor.createSubFolders(job.mpegFile, job) ) {
@@ -71,7 +83,7 @@ public class projectx implements Serializable {
 
    // Return false if starting command fails, true otherwise
    private Boolean start() {
-      debug.print("");
+      debug.print("");      
       Stack<String> command = new Stack<String>();
       command.add("java");
       command.add("-jar");
