@@ -12,7 +12,7 @@ public class ffmpeg {
    // Use ffmpeg to get video dimensions from given mpeg video file
    // Returns null if undetermined, a hash with x, y members otherwise
    // Also grabs Display Aspect Ratio numbers if available
-   public static Hashtable<String,String> getVideoDimensions(String videoFile) {      
+   public static Hashtable<String,String> getVideoInfo(String videoFile) {      
       // Use ffmpeg command to get video information      
       Stack<String> command = new Stack<String>();
       command.add(config.ffmpeg);
@@ -26,24 +26,39 @@ public class ffmpeg {
          // Parse stderr
          Stack<String> l = process.getStderr();
          if (l.size() > 0) {
+            Hashtable<String,String> info = new Hashtable<String,String>();
+            String line;
+            info.put("container", "mpeg");
+            info.put("video", "mpeg2video");
             for (int i=0; i<l.size(); ++i) {
-               if (l.get(i).matches("^.+\\s+Video:\\s+.+$")) {
+               line = l.get(i);
+               if (line.matches("^Input.+$")) {
+                  line = line.replaceFirst("from.+$", "");
+                  if (line.contains("mpegts"))
+                     info.put("container", "mpegts");
+                  if (line.contains("mp4"))
+                     info.put("container", "mp4");
+               }
+               if (line.matches("^.+\\s+Video:\\s+.+$")) {
+                  if (line.contains("h264"))
+                     info.put("video", "h264");
                   Pattern p = Pattern.compile(".*Video: .+, (\\d+)x(\\d+)[, ].*");
-                  Matcher m = p.matcher(l.get(i));
+                  Matcher m = p.matcher(line);
                   if (m.matches()) {
-                     Hashtable<String,String> dimensions = new Hashtable<String,String>();
-                     dimensions.put("x", m.group(1));
-                     dimensions.put("y", m.group(2));
+                     info.put("x", m.group(1));
+                     info.put("y", m.group(2));
                      p = Pattern.compile(".*Video: .+\\s+DAR\\s+(\\d+):(\\d+).*");
-                     m = p.matcher(l.get(i));
+                     m = p.matcher(line);
                      if (m.matches()) {
-                        dimensions.put("DAR_x", m.group(1));
-                        dimensions.put("DAR_y", m.group(2));
+                        info.put("DAR_x", m.group(1));
+                        info.put("DAR_y", m.group(2));
                      }
-                     return dimensions;
                   }
                }
             }
+            if (info.size() == 0)
+               info = null;
+            return info;
          }
       }
       return null;
@@ -53,25 +68,25 @@ public class ffmpeg {
    // i.e. If output_known is "width" then return computed height, else if "height" return computed width
    // Return 0 on failure
    private static int computeOutputDimensions(String videoFile, String output_known, int output_dim) {
-      Hashtable<String,String> source_dimensions = getVideoDimensions(videoFile);
-      if (source_dimensions == null) {
+      Hashtable<String,String> source_info = getVideoInfo(videoFile);
+      if (source_info == null) {
          // Try once again in case of transient issue
          log.warn("2nd try to obtain video file dimensions from file: " + videoFile);
-         source_dimensions = getVideoDimensions(videoFile);
+         source_info = getVideoInfo(videoFile);
       }
-      if (source_dimensions == null) {
+      if (source_info == null) {
          log.error("Failed to determine video dimensions from video file: " + videoFile);
       } else {
          int DAR_x=0, DAR_y=0;
          // Use detected DAR if available
-         if (source_dimensions.containsKey("DAR_x")) {
-            DAR_x = Integer.parseInt(source_dimensions.get("DAR_x"));
-            DAR_y = Integer.parseInt(source_dimensions.get("DAR_y"));
+         if (source_info.containsKey("DAR_x")) {
+            DAR_x = Integer.parseInt(source_info.get("DAR_x"));
+            DAR_y = Integer.parseInt(source_info.get("DAR_y"));
          }
          
          // Assume DAR = source video dimensions if not found from videoFile
-         if (DAR_x == 0) DAR_x = Integer.parseInt(source_dimensions.get("x"));
-         if (DAR_y == 0) DAR_y = Integer.parseInt(source_dimensions.get("y"));
+         if (DAR_x == 0) DAR_x = Integer.parseInt(source_info.get("x"));
+         if (DAR_y == 0) DAR_y = Integer.parseInt(source_info.get("y"));
          
          if (output_known.equals("width")) {              
             int output_height = output_dim*DAR_y/DAR_x;
