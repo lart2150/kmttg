@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,6 +17,7 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
+import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
@@ -87,6 +89,15 @@ public class comskip implements Serializable {
          if ( ! enableXcl() )
             schedule = false;
       }
+      
+      // Check for non-mpeg2 input file
+      Hashtable<String,String> info = ffmpeg.getVideoInfo(job.mpegFile);
+      if (info != null) {
+         if (! info.get("video").equals("mpeg2video")) {
+            log.error("input video=" + info.get("video") + ": comskip only supports mpeg2 video");
+            schedule = false;
+         }
+      }      
       
       if (schedule) {
          // Create sub-folders for output file if needed
