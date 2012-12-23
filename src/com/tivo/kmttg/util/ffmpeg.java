@@ -34,19 +34,28 @@ public class ffmpeg {
                line = l.get(i);
                if (line.matches("^Input.+$")) {
                   line = line.replaceFirst("from.+$", "");
+                  String fields[] = line.split("\\s+");
+                  String container = fields[2];
+                  container = container.replaceAll(",", "");
+                  info.put("container", container);
                   if (line.contains("mpegts"))
                      info.put("container", "mpegts");
                   if (line.contains("mp4"))
                      info.put("container", "mp4");
                }
                if (line.matches("^.+\\s+Video:\\s+.+$")) {
-                  if (line.contains("h264"))
-                     info.put("video", "h264");
-                  Pattern p = Pattern.compile(".*Video: .+, (\\d+)x(\\d+)[, ].*");
+                  Pattern p = Pattern.compile(".*Video: (.+), (\\d+)x(\\d+)[, ].*");
                   Matcher m = p.matcher(line);
                   if (m.matches()) {
-                     info.put("x", m.group(1));
-                     info.put("y", m.group(2));
+                     String video = m.group(1);
+                     video = video.replaceFirst("\\s+.+$", "");
+                     info.put("video", video);
+                     if (line.contains("mpeg2video"))
+                        info.put("video", "mpeg2video");
+                     if (line.contains("h264"))
+                        info.put("video", "h264");
+                     info.put("x", m.group(2));
+                     info.put("y", m.group(3));
                      p = Pattern.compile(".*Video: .+\\s+DAR\\s+(\\d+):(\\d+).*");
                      m = p.matcher(line);
                      if (m.matches()) {
