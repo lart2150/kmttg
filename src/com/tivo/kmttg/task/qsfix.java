@@ -112,7 +112,7 @@ public class qsfix implements Serializable {
          }    
       }
       
-      // Handle .TiVo files different than mpeg2 program stream
+      // Handle input files different than mpeg2 program stream
       // which changes output file suffix from .mpg to something else
       Boolean isFileChanged = false;
       if (info != null && info.get("container").equals("mpegts")) {
