@@ -15,6 +15,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class qsfix implements Serializable {
    private static final long serialVersionUID = 1L;
@@ -93,23 +94,54 @@ public class qsfix implements Serializable {
    // Return false if starting command fails, true otherwise
    private Boolean start() {
       debug.print("");
-      // Check to see if dimension filter is enabled and figure out dimensions if so
-      Hashtable<String,String> dimensions = null;
+      // Obtain some info on input video
+      Hashtable<String,String> info = null;
+      info = ffmpeg.getVideoInfo(sourceFile);
       if (config.VrdQsFilter == 1) {
          // Create script with video dimensions filter enabled
          log.warn("VideoRedo video dimensions filter is enabled");
-         dimensions = ffmpeg.getVideoDimensions(sourceFile);
-         if (dimensions == null) {
-            log.warn("ffmpeg on source file didn't work - trying to get dimensions from 2 sec clip");
+         if (info == null) {
+            log.warn("ffmpeg on source file didn't work - trying to get info from 2 sec clip");
             String destFile = file.makeTempFile("mpegFile", ".mpg");
-            dimensions = getDimensionsFromShortClip(sourceFile, destFile);
+            info = getDimensionsFromShortClip(sourceFile, destFile);
          }
-         if (dimensions == null) {
-            log.error("VRD QS Filter enabled but unable to determine video dimensions of file: " + sourceFile);
+         if (info == null) {
+            log.error("Unable to determine info on file: " + sourceFile);
             jobMonitor.removeFromJobList(job);
             return false;
          }    
       }
+      
+      // Handle .TiVo files different than mpeg2 program stream
+      // which changes output file suffix from .mpg to something else
+      Boolean isFileChanged = false;
+      if (info != null && info.get("container").equals("mpegts")) {
+         if (job.mpegFile.endsWith(".mpg")) {
+            job.mpegFile = string.replaceSuffix(job.mpegFile, ".ts");
+            job.mpegFile_fix = job.mpegFile + ".qsfix";
+            isFileChanged = true;
+         }
+      }      
+      if (info != null && info.get("container").equals("mp4")) {
+         if (job.mpegFile.endsWith(".mpg")) {
+            job.mpegFile = string.replaceSuffix(job.mpegFile, ".mp4");
+            job.mpegFile_fix = job.mpegFile + ".qsfix";
+            isFileChanged = true;
+         }
+      }      
+      if (isFileChanged) {            
+         // If in GUI mode, update job monitor output field
+         if (config.GUIMODE) {
+            String output = string.basename(job.mpegFile_fix);
+            if (config.jobMonitorFullPaths == 1)
+               output = job.mpegFile_fix;
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, output);
+         }
+         
+         // Subsequent jobs need to have mpegFile updated
+         jobMonitor.updatePendingJobFieldValue("mpegFile", job.mpegFile);
+      }
+
       // Create the vbs script
       vrdscript = config.programDir + "\\VRDscripts\\qsfix.vbs";      
       if ( ! file.isFile(vrdscript) ) {
@@ -129,10 +161,17 @@ public class qsfix implements Serializable {
       if (config.VrdAllowMultiple == 1) {
          command.add("/m");
       }
-      if (dimensions != null) {
-         command.add("/x:" + dimensions.get("x"));
-         command.add("/y:" + dimensions.get("y"));
-         log.warn("VideoRedo video dimensions filter set to: x=" + dimensions.get("x") + ", y=" + dimensions.get("y"));
+      if (info != null) {
+         String message;
+         command.add("/c:" + info.get("container"));
+         command.add("/v:" + info.get("video"));
+         message = "container=" + info.get("container") + ", video=" + info.get("video");
+         if (config.VrdQsFilter == 1 && info.containsKey("x") && info.containsKey("y")) {
+            command.add("/x:" + info.get("x"));
+            command.add("/y:" + info.get("y"));
+            message += ", x=" + info.get("x") + ", y=" + info.get("y");
+         }
+         log.warn(message);
       }
       process = new backgroundProcess();
       log.print(">> Running qsfix on " + sourceFile + " ...");
@@ -307,8 +346,8 @@ public class qsfix implements Serializable {
             return null;
          }
       } 
-      Hashtable<String,String> dimensions = ffmpeg.getVideoDimensions(destFile);
+      Hashtable<String,String> info = ffmpeg.getVideoInfo(destFile);
       file.delete(destFile);
-      return(dimensions);
+      return(info);
    }
 }
