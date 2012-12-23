@@ -7,12 +7,18 @@ end if
 ' Check for flags.
 VrdAllowMultiple = false
 lockFile = ""
+profileName = "MPEG2 Program Stream"
+profileNum = 1
+c = "mpeg"
+v = "mpeg2video"
 x = ""
 y = ""
 dimensions = false
 for i = 1 to args.Count
    p = args(i-1)
    if left(p,3)="/l:" then lockFile = mid(p,4)
+   if left(p,3)="/c:" then c = mid(p,4)
+   if left(p,3)="/v:" then v = mid(p,4)
    if left(p,3)="/x:" then x = mid(p,4)
    if left(p,3)="/y:" then y = mid(p,4)
    if p = "/m" then VrdAllowMultiple = true
@@ -29,6 +35,18 @@ if ( not x = "" ) then
    if ( not y = "" ) then
       dimensions = true
    end if
+end if
+
+'  Decide on output types
+if ( c = "mpegts" ) then
+   profileName = "MPEG2 Transport Stream"
+   profileNum = 4
+   if ( v = "h264" ) then
+      profileName = "H.264 Transport Stream"
+   end if
+end if
+if ( c = "mp4" ) then
+   profileName = "H.264 MP4"
 end if
 
 Set fso = CreateObject("Scripting.FileSystemObject")
@@ -63,11 +81,10 @@ end if
 'NOTE: NEWER VRD TVSUITE4 NO LONGER SUPPORTS FileSaveAsEx so have to use FileSaveProfile
 version = GetVersion(VideoReDo.VersionNumber)
 if version < 4205604 then
-   outputFlag = VideoReDo.FileSaveAsEx( destFile, 1 )
+   outputFlag = VideoReDo.FileSaveAsEx( destFile, profileNum )
    outputXML = ""
 else
    outputFlag = true
-   profileName = "MPEG2 Program Stream"
    outputXML = VideoReDo.FileSaveProfile( destFile, profileName )
    if ( left(outputXML,1) = "*" ) then
       outputFlag = false
