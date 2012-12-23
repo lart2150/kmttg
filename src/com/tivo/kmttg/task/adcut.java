@@ -3,6 +3,7 @@ package com.tivo.kmttg.task;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Stack;
 
 import com.tivo.kmttg.main.config;
@@ -10,6 +11,7 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
+import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
@@ -101,6 +103,36 @@ public class adcut implements Serializable {
    // Return false if starting command fails, true otherwise
    private Boolean start() {
       debug.print("");
+      
+      Hashtable<String,String> info = ffmpeg.getVideoInfo(job.mpegFile);
+      // Handle input files different than mpeg2 program stream
+      // which changes output file suffix from .mpg to something else
+      Boolean isFileChanged = false;
+      if (info != null && info.get("container").equals("mpegts")) {
+         if (job.mpegFile_cut.endsWith(".mpg")) {
+            job.mpegFile_cut = string.replaceSuffix(job.mpegFile_cut, ".ts");
+            isFileChanged = true;
+         }
+      }      
+      if (info != null && info.get("container").equals("mp4")) {
+         if (job.mpegFile_cut.endsWith(".mpg")) {
+            job.mpegFile_cut = string.replaceSuffix(job.mpegFile_cut, ".mp4");
+            isFileChanged = true;
+         }
+      }      
+      if (isFileChanged) {            
+         // If in GUI mode, update job monitor output field
+         if (config.GUIMODE) {
+            String output = string.basename(job.mpegFile_cut);
+            if (config.jobMonitorFullPaths == 1)
+               output = job.mpegFile_cut;
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, output);
+         }
+         
+         // Subsequent jobs need to have mpegFile updated
+         jobMonitor.updatePendingJobFieldValue("mpegFile_cut", job.mpegFile_cut);
+      }
+
       Stack<String> command = new Stack<String>();
       command.add(cscript);
       command.add("//nologo");
@@ -110,6 +142,11 @@ public class adcut implements Serializable {
       command.add("/l:" + lockFile);
       if (config.VrdAllowMultiple == 1) {
          command.add("/m");
+      }
+      if (info != null) {
+         log.warn("container=" + info.get("container") + ", video=" + info.get("video"));
+         command.add("/c:" + info.get("container"));
+         command.add("/v:" + info.get("video"));
       }
       process = new backgroundProcess();
       log.print(">> Running adcut on " + job.mpegFile + " ...");
