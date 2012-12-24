@@ -2,7 +2,6 @@ package com.tivo.kmttg.task;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.Stack;
 
 import com.tivo.kmttg.main.config;
@@ -10,7 +9,6 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
-import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
@@ -70,28 +68,19 @@ public class captions implements Serializable {
             videoFile = tryit;
          }
       }
-      if ( ! file.isFile(videoFile) ) {
-         tryit = string.replaceSuffix(videoFile, "_cut.mpg");
-         if (file.isFile(tryit)) {
-            videoFile = tryit;
+      String[] suffixes = {".mpg", ".ts", ".mp4", ".TiVo"};
+      for (int i=0; i<suffixes.length; ++i) {
+         if ( ! file.isFile(videoFile) ) {
+            tryit = string.replaceSuffix(videoFile, "_cut" + suffixes[i]);
+            if (file.isFile(tryit)) {
+               videoFile = tryit;
+            }
          }
-      }
-      if ( ! file.isFile(videoFile)) {
-         tryit = string.replaceSuffix(videoFile, ".mpg");
-         if (file.isFile(tryit)) {
-            videoFile = tryit;
-         }
-      }
-      if ( ! file.isFile(videoFile)) {
-         tryit = string.replaceSuffix(videoFile, ".ts");
-         if (file.isFile(tryit)) {
-            videoFile = tryit;
-         }
-      }
-      if ( ! file.isFile(videoFile)) {
-         tryit = string.replaceSuffix(videoFile, ".TiVo");
-         if (file.isFile(tryit)) {
-            videoFile = tryit;
+         if ( ! file.isFile(videoFile) ) {
+            tryit = string.replaceSuffix(videoFile, suffixes[i]);
+            if (file.isFile(tryit)) {
+               videoFile = tryit;
+            }
          }
       }
       
@@ -101,15 +90,6 @@ public class captions implements Serializable {
          log.error("cannot find an input file to process");
          schedule = false;
       }
-      
-      // Check for non-mpeg2 input file
-      Hashtable<String,String> info = ffmpeg.getVideoInfo(job.videoFile);
-      if (info != null) {
-         if (! info.get("video").equals("mpeg2video")) {
-            log.error("input video=" + info.get("video") + ": captions can only be extracted from mpeg2 video");
-            schedule = false;
-         }
-      }      
       
       if (schedule) {
          // Create sub-folders for output file if needed
