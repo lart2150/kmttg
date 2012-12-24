@@ -24,14 +24,16 @@ public class fileBrowser {
         if (f.isDirectory())
           return true;
         String s = f.getName().toLowerCase();
-        if ( s.endsWith(".tivo") || s.endsWith(".mpeg") || s.endsWith(".mpg") ) {
-           return true;
+        String[] supported = {".tivo", ".mpeg", ".mpg", ".ts"};
+        for (int i=0; i<supported.length; ++i) {
+           if (s.endsWith(supported[i]))
+              return true;
         }
         return false;
       }
 
       public String getDescription() {
-        return "tivo and mpg";
+        return "tivo, mpg and ts";
       }
     }
    
