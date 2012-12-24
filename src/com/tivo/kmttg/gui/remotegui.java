@@ -556,6 +556,7 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Refresh SP list
             TableUtil.clear(tab_sp.TABLE);
+            tab_sp.setLoaded(false);
             String tivoName = (String)tivo_sp.getSelectedItem();
             SPListCB(tivoName);
          }
