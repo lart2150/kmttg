@@ -12,7 +12,9 @@ public class ffmpeg {
    // Use ffmpeg to get video dimensions from given mpeg video file
    // Returns null if undetermined, a hash with x, y members otherwise
    // Also grabs Display Aspect Ratio numbers if available
-   public static Hashtable<String,String> getVideoInfo(String videoFile) {      
+   public static Hashtable<String,String> getVideoInfo(String videoFile) {
+      if (! file.isFile(config.ffmpeg))
+         return null;
       // Use ffmpeg command to get video information      
       Stack<String> command = new Stack<String>();
       command.add(config.ffmpeg);
