@@ -519,7 +519,8 @@ public class gui {
          fileMenu.add(getSaveMessagesMenuItem());
          fileMenu.add(getClearMessagesMenuItem());
          fileMenu.add(getResetServerMenuItem());
-         fileMenu.add(getPushesMenuItem());
+         if (config.pyTivo_config != null && file.isFile(config.pyTivo_config))
+            fileMenu.add(getPushesMenuItem());
          fileMenu.add(getResumeDownloadsMenuItem());
          fileMenu.add(getJobMenu());
          fileMenu.add(getExitMenuItem());
