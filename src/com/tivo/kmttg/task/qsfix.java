@@ -139,7 +139,7 @@ public class qsfix implements Serializable {
          }
          
          // Subsequent jobs need to have mpegFile updated
-         jobMonitor.updatePendingJobFieldValue("mpegFile", job.mpegFile);
+         jobMonitor.updatePendingJobFieldValue(job, "mpegFile", job.mpegFile);
       }
 
       // Create the vbs script

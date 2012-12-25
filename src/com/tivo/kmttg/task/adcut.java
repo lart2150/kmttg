@@ -130,7 +130,7 @@ public class adcut implements Serializable {
          }
          
          // Subsequent jobs need to have mpegFile updated
-         jobMonitor.updatePendingJobFieldValue("mpegFile_cut", job.mpegFile_cut);
+         jobMonitor.updatePendingJobFieldValue(job, "mpegFile_cut", job.mpegFile_cut);
       }
 
       Stack<String> command = new Stack<String>();
