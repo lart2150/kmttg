@@ -448,6 +448,17 @@ public class spTable {
        }
     }
     
+    public void updateLoadedStatus() {
+       if (TABLE.getRowCount() > 0) {
+          int col = TableUtil.getColumnIndex(TABLE, "SHOW");
+          String title = (String)TABLE.getValueAt(0,col);
+          if (title != null && title.startsWith(" Loaded"))
+             setLoaded(true);
+          else
+             setLoaded(false);
+       }
+    }
+    
     private Boolean removeJson(String tivoName, JSONObject json) {
        Boolean removed = false;
        try {
