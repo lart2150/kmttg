@@ -552,18 +552,20 @@ public class jobMonitor {
    // it to given value. Do this for all pending jobs only.
    // This is for update file names that may have to change for pending jobs
    // like jobData.mpegFile for example.
-   public static void updatePendingJobFieldValue(String name, String value) {
+   public static void updatePendingJobFieldValue(jobData job, String name, String value) {
       if ( JOBS != null && ! JOBS.isEmpty() ) {
          Field[] fields = jobData.class.getFields();
          for (int i=0; i<JOBS.size(); ++i) {
             if (JOBS.get(i).status.equals("queued")) {
-               for (int j=0; j<fields.length; ++j) {
-                  if (fields[j].getName().equals(name)) {
-                     try {
-                        if (fields[j].get(JOBS.get(i)) != null)
-                           fields[j].set(JOBS.get(i), value);
-                     } catch (Exception e) {
-                        log.error("updatePendingJobFieldValue - " + e.getMessage());
+               if (isInSameFamily(job, JOBS.get(i))) {
+                  for (int j=0; j<fields.length; ++j) {
+                     if (fields[j].getName().equals(name)) {
+                        try {
+                           if (fields[j].get(JOBS.get(i)) != null)
+                              fields[j].set(JOBS.get(i), value);
+                        } catch (Exception e) {
+                           log.error("updatePendingJobFieldValue - " + e.getMessage());
+                        }
                      }
                   }
                }
@@ -1358,6 +1360,17 @@ public class jobMonitor {
             removeFromJobList(JOBS.get(i));
          }
       }
+   }
+   
+   private static Boolean isInSameFamily(jobData job1, jobData job2) {
+      Boolean same = false;
+      float mf1 = job1.familyId;
+      int m1 = (int)mf1;
+      float mf2 = job2.familyId;
+      int m2 = (int)mf2;
+      if (m1 == m2)
+         same = true;
+      return same;
    }
    
    // Kill all running jobs - called on program exit
