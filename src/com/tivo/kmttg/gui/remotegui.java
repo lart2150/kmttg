@@ -544,6 +544,7 @@ public class remotegui {
                 String tivoName = getTivoName("sp");
                 if (tab_sp.tivo_data.containsKey(tivoName))
                    tab_sp.AddRows(tivoName, tab_sp.tivo_data.get(tivoName));
+                tab_sp.updateLoadedStatus();
             }
          }
       });
