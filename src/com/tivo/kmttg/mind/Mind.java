@@ -19,6 +19,9 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.JSON.XML;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.mind.EasySSLHelper;
 import com.tivo.kmttg.mind.SimpleCookieManager;
@@ -354,5 +357,78 @@ public class Mind {
          }
       }
       return null;
+   }
+   
+   public JSONArray ToDo(String tivoName) {
+      if (! login(config.pyTivo_username, config.pyTivo_password)) {
+         log.error("Login to server failed: " + server);
+         return null;
+      }
+      String tsn = config.getTsn(tivoName);
+      if (tsn == null) {
+         log.error("Can't determine TSN for TiVo: " + tivoName);
+         return null;
+      }
+      String bodyId = "tsn:" + tsn;
+
+      JSONArray allShows = new JSONArray();
+      try {   
+         // Top level list - run in a loop to grab all items
+         JSONArray items = new JSONArray();
+         Boolean stop = false;
+         String command = "recordingSearch";
+         Hashtable<String,Object> h = new Hashtable<String,Object>();
+         h.put("bodyId", bodyId);
+         h.put("state", "scheduled");
+         h.put("format", "idSequence");
+         h.put("count", "100");
+         int offset = 0;
+         while ( ! stop ) {
+            h.put("offset", "" + offset);
+            Stack<String> s = dict_request(command + "&bodyId=" + bodyId, h);
+            if (s != null && s.size() > 0) {
+               JSONObject result = XML.toJSONObject(s.get(0));
+               if (result != null && result.has("idSequence")) {
+                  if (result.getJSONObject("idSequence").has("objectIdAndType")) {
+                     JSONArray a = result.getJSONObject("idSequence").getJSONArray("objectIdAndType");
+                     if (a.length() > 0) {
+                        for (int i=0; i<a.length(); ++i)
+                           items.put(a.get(i));
+                        offset += a.length();
+                     } else
+                        stop = true;
+                  } else
+                     stop = true;
+               } else
+                  stop = true;
+            } else
+               stop = true;
+         } // while
+         
+         if (items.length() > 0) {
+            h.clear();
+            h.put("bodyId", bodyId);
+            h.put("levelOfDetail", "medium");
+            for (int i=0; i<items.length(); ++i) {
+               h.put("objectIdAndType", "" + items.get(i));
+               Stack<String> s = dict_request(command + "&bodyId=" + bodyId, h);
+               if (s != null && s.size() > 0) {
+                  JSONObject json = XML.toJSONObject(s.get(0));
+                  if (json != null && json.has("recordingList")) {
+                     if (json.getJSONObject("recordingList").has("recording")) {
+                        JSONObject j = json.getJSONObject("recordingList").getJSONObject("recording");
+                        allShows.put(j);
+                     }
+                  }
+               }
+            }
+         } else
+            return null;
+      } catch(Exception e) {
+         log.error("Mind ToDo - " + e.getMessage());
+         e.printStackTrace();
+         return null;
+      }
+      return allShows;
    }
 }
