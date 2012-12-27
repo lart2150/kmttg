@@ -156,16 +156,32 @@ public class todoTable {
        try {
           JSONObject o = new JSONObject();
           Object[] info = new Object[TITLE_cols.length];
-          String startString = data.getString("scheduledStartTime");
-          long start = TableUtil.getLongDateFromString(startString);
-          String endString = data.getString("scheduledEndTime");
-          long end = TableUtil.getLongDateFromString(endString);
+          String startString=null, endString=null;
+          long start=0, end=0;
+          if (data.has("scheduledStartTime")) {
+             startString = data.getString("scheduledStartTime");
+             start = TableUtil.getLongDateFromString(startString);
+             endString = data.getString("scheduledEndTime");
+             end = TableUtil.getLongDateFromString(endString);
+          } else if (data.has("startTime")) {
+             startString = data.getString("startTime");
+             start = TableUtil.getLongDateFromString(startString);
+             if (data.has("requestedStartPadding"))
+                start -= data.getInt("requestedStartPadding")*1000;
+             end = start + data.getInt("duration")*1000;
+             if (data.has("requestedEndPadding"))
+                end += data.getInt("requestedEndPadding")*1000;
+          }
           String title = " ";
           if (data.has("title"))
              title += data.getString("title");
           if (data.has("seasonNumber") && data.has("episodeNum")) {
-             title += " [Ep " + data.get("seasonNumber") +
-             String.format("%02d]", data.getJSONArray("episodeNum").get(0));
+             title += " [Ep " + data.get("seasonNumber");
+             JSONArray a = data.optJSONArray("episodeNum");
+             if (a != null)
+                title += String.format("%02d]", a.get(0));
+             else
+                title += String.format("%02d]", data.getInt("episodeNum"));
           }
           if (data.has("subtitle"))
           title += " - " + data.getString("subtitle");
@@ -173,7 +189,7 @@ public class todoTable {
           if (data.has("channel")) {
              o = data.getJSONObject("channel");
              if (o.has("channelNumber"))
-                channel += o.getString("channelNumber");
+                channel += "" + o.get("channelNumber");
              if (o.has("callSign"))
                 channel += "=" + o.getString("callSign");
           }
@@ -183,7 +199,7 @@ public class todoTable {
           info[2] = channel;
           info[3] = new sortableDuration(end-start, false);
           TableUtil.AddRow(TABLE, info);       
-       } catch (JSONException e) {
+       } catch (Exception e) {
           log.error("todoTable AddRow - " + e.getMessage());
        }
     }
@@ -205,7 +221,7 @@ public class todoTable {
              if (s.json.has("channel")) {
                 o = s.json.getJSONObject("channel");
                 if ( o.has("channelNumber") ) {
-                   channelNum = o.getString("channelNumber");
+                   channelNum = "" + o.get("channelNumber");
                 }
                 if ( o.has("callSign") ) {
                    channel = o.getString("callSign");
