@@ -25,7 +25,9 @@ import com.tivo.kmttg.JSON.XML;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.mind.EasySSLHelper;
 import com.tivo.kmttg.mind.SimpleCookieManager;
+import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.pyTivo;
 
 public class Mind {
    private Boolean debug = false;
@@ -37,6 +39,12 @@ public class Mind {
    
    public Mind(String mindServer) {
       server = mindServer;
+      if (! file.isFile(config.pyTivo_config)) {
+         log.error("pyTivo config not specified");
+         return;
+      }
+      if (config.pyTivo_username == null)
+         pyTivo.parsePyTivoConf(config.pyTivo_config);
    }
 
    public Mind() {
@@ -374,29 +382,24 @@ public class Mind {
       JSONArray allShows = new JSONArray();
       try {   
          // Top level list - run in a loop to grab all items
-         JSONArray items = new JSONArray();
          Boolean stop = false;
          String command = "recordingSearch";
          Hashtable<String,Object> h = new Hashtable<String,Object>();
          h.put("bodyId", bodyId);
          h.put("state", "scheduled");
-         h.put("format", "idSequence");
-         h.put("count", "100");
+         h.put("levelOfDetail", "medium");
+         h.put("count", "1");
          int offset = 0;
          while ( ! stop ) {
             h.put("offset", "" + offset);
+            offset += 1;
             Stack<String> s = dict_request(command + "&bodyId=" + bodyId, h);
             if (s != null && s.size() > 0) {
                JSONObject result = XML.toJSONObject(s.get(0));
-               if (result != null && result.has("idSequence")) {
-                  if (result.getJSONObject("idSequence").has("objectIdAndType")) {
-                     JSONArray a = result.getJSONObject("idSequence").getJSONArray("objectIdAndType");
-                     if (a.length() > 0) {
-                        for (int i=0; i<a.length(); ++i)
-                           items.put(a.get(i));
-                        offset += a.length();
-                     } else
-                        stop = true;
+               if (result != null && result.has("recordingList")) {
+                  if (result.getJSONObject("recordingList").has("recording")) {
+                     JSONObject j = result.getJSONObject("recordingList").getJSONObject("recording");
+                     allShows.put(j);
                   } else
                      stop = true;
                } else
@@ -404,25 +407,7 @@ public class Mind {
             } else
                stop = true;
          } // while
-         
-         if (items.length() > 0) {
-            h.clear();
-            h.put("bodyId", bodyId);
-            h.put("levelOfDetail", "medium");
-            for (int i=0; i<items.length(); ++i) {
-               h.put("objectIdAndType", "" + items.get(i));
-               Stack<String> s = dict_request(command + "&bodyId=" + bodyId, h);
-               if (s != null && s.size() > 0) {
-                  JSONObject json = XML.toJSONObject(s.get(0));
-                  if (json != null && json.has("recordingList")) {
-                     if (json.getJSONObject("recordingList").has("recording")) {
-                        JSONObject j = json.getJSONObject("recordingList").getJSONObject("recording");
-                        allShows.put(j);
-                     }
-                  }
-               }
-            }
-         } else
+         if (allShows.length() == 0)
             return null;
       } catch(Exception e) {
          log.error("Mind ToDo - " + e.getMessage());
