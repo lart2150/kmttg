@@ -34,12 +34,15 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.pyTivo;
 
 public class Remote {
    public Boolean debug = false;
    public Boolean success = true;
    private String IP = null;
    private String cdata = null;
+   private String tivoName = null;
+   private Boolean away = false;
    private int port = 1413;
    private String MAK = null;
    private int timeout = 120; // read timeout in secs
@@ -142,8 +145,26 @@ public class Remote {
       RemoteInit(IP, use_port, MAK);
    }
    
+   // This constructor designed to be use by kmttg
+   public Remote(String tivoName, Boolean away) {
+      this.tivoName = tivoName;
+      this.away = away;
+      this.MAK = config.MAK;
+      String IP = config.middlemind_host;
+      int port = config.middlemind_port;
+      RemoteInit(IP, port, MAK);
+   }
+   
    // This constructor designed for use without kmttg config
    public Remote(String IP, int port, String MAK, String cdata) {
+      this.MAK = MAK;
+      this.cdata = cdata;
+      RemoteInit(IP, port, MAK);
+   }
+   
+   // This constructor designed for use without kmttg config
+   public Remote(String tivoName, String IP, int port, String MAK, String cdata) {
+      this.tivoName = tivoName;
       this.MAK = MAK;
       this.cdata = cdata;
       RemoteInit(IP, port, MAK);
@@ -162,11 +183,18 @@ public class Remote {
          socket.startHandshake();
          in = new DataInputStream(socket.getInputStream());
          out = new DataOutputStream(socket.getOutputStream());
-         if ( ! Auth() ) {
-            success = false;
-            return;
+         if (IP.endsWith("tivo.com")) {
+            if ( ! Auth_web() ) {
+               success = false;
+               return;
+            }
+         } else {
+            if ( ! Auth() ) {
+               success = false;
+               return;
+            }
+            bodyId_get();
          }
-         bodyId_get();
       } catch (Exception e) {
          error("RemoteInit - (IP=" + IP + ", port=" + port + "): " + e.getMessage());
          success = false;
@@ -252,6 +280,43 @@ public class Remote {
       return false;
    }
    
+   private Boolean Auth_web() {
+      try {
+         if (! file.isFile(config.pyTivo_config)) {
+            log.error("pyTivo config not specified");
+            return false;
+         }
+         if (config.pyTivo_username == null) {
+            if (pyTivo.parsePyTivoConf(config.pyTivo_config) == null)
+               return false;
+         }
+         String tsn = config.getTsn(tivoName);
+         if (tsn == null) {
+            log.error("Can't determine TSN for TiVo: " + tivoName);
+            return null;
+         }
+         config.bodyId_set(IP, port, "tsn:" + tsn);
+
+         JSONObject credential = new JSONObject();
+         JSONObject h = new JSONObject();
+         credential.put("type", "mmaCredential");
+         credential.put("username", config.pyTivo_username);
+         credential.put("password", config.pyTivo_password);
+         h.put("credential", credential);
+         String req = RpcRequest("bodyAuthenticate", false, h);
+         if (Write(req) ) {
+            JSONObject result = Read();
+            if (result.has("status")) {
+               if (result.get("status").equals("success"))
+                  return true;
+            }
+         }
+      } catch (Exception e) {
+         error("rpc Auth error - " + e.getMessage());
+      }
+      return false;
+   }
+   
    public Boolean Write(String data) {
       try {
          if (debug) {
@@ -318,6 +383,10 @@ public class Remote {
          return null;
       }
       return null;
+   }
+   
+   public Boolean awayMode() {
+      return away;
    }
    
    private void readBytes(byte[] body, int len) throws IOException {
