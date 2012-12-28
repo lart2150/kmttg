@@ -166,6 +166,8 @@ public class config {
    
    // iPad remote related
    private static Hashtable<String,String> bodyId = null;
+   public static String middlemind_host = "middlemind.tivo.com";
+   public static int middlemind_port = 443;
    
    public static Stack<String> parse() {
       debug.print("");
