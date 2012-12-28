@@ -14,14 +14,19 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.JSON.XML;
+import com.tivo.kmttg.gui.TableUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.mind.EasySSLHelper;
 import com.tivo.kmttg.mind.SimpleCookieManager;
@@ -379,7 +384,8 @@ public class Mind {
       }
       String bodyId = "tsn:" + tsn;
 
-      JSONArray allShows = new JSONArray();
+      List<JSONObject> allShows = new ArrayList<JSONObject>();
+      JSONArray sorted = new JSONArray();
       try {   
          // Top level list - run in a loop to grab all items
          Boolean stop = false;
@@ -399,7 +405,7 @@ public class Mind {
                if (result != null && result.has("recordingList")) {
                   if (result.getJSONObject("recordingList").has("recording")) {
                      JSONObject j = result.getJSONObject("recordingList").getJSONObject("recording");
-                     allShows.put(j);
+                     allShows.add(j);
                   } else
                      stop = true;
                } else
@@ -407,13 +413,34 @@ public class Mind {
             } else
                stop = true;
          } // while
-         if (allShows.length() == 0)
+         if (allShows.size() == 0)
             return null;
+         
+         // Sort allShows by start time
+         DateComparator comparator = new DateComparator();
+         Collections.sort(allShows, comparator);
+         for (JSONObject ajson : allShows) {
+            sorted.put(ajson);
+         }
       } catch(Exception e) {
          log.error("Mind ToDo - " + e.getMessage());
          e.printStackTrace();
          return null;
       }
-      return allShows;
+      return sorted;
+   }
+   
+   public class DateComparator implements Comparator<JSONObject> {      
+      public int compare(JSONObject j1, JSONObject j2) {
+         long start1 = TableUtil.getStartTime(j1);
+         long start2 = TableUtil.getStartTime(j2);
+         if (start1 > start2){
+            return 1;
+         } else if (start1 < start2){
+            return -1;
+         } else {
+            return 0;
+         }
+      }
    }
 }
