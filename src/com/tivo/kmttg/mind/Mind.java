@@ -430,6 +430,52 @@ public class Mind {
       return sorted;
    }
    
+   public JSONArray SeasonPasses(String tivoName) {
+      if (! login(config.pyTivo_username, config.pyTivo_password)) {
+         log.error("Login to server failed: " + server);
+         return null;
+      }
+      String tsn = config.getTsn(tivoName);
+      if (tsn == null) {
+         log.error("Can't determine TSN for TiVo: " + tivoName);
+         return null;
+      }
+      String bodyId = "tsn:" + tsn;
+
+      JSONArray sorted = new JSONArray();
+      try {   
+         String command = "subscriptionSearch";
+         Hashtable<String,Object> h = new Hashtable<String,Object>();
+         h.put("bodyId", bodyId);
+         h.put("noLimit", "true");
+         h.put("levelOfDetail", "medium");
+         h.put("orderBy", "priority");
+         Stack<String> s = dict_request(command + "&bodyId=" + bodyId, h);
+         if (s != null && s.size() > 0) {
+            JSONObject result = XML.toJSONObject(s.get(0));
+            if (result != null && result.has("subscriptionList")) {
+               JSONArray a = result.getJSONObject("subscriptionList").getJSONArray("subscription");
+               for (int i=0; i<a.length(); ++i) {
+                  JSONObject o = a.getJSONObject(i);
+                  if (o.has("idSetSource")) {
+                     JSONObject id = o.getJSONObject("idSetSource");
+                     if (id.getString("type").equals("seasonPassSource"))
+                        sorted.put(o);
+                  }
+               }
+            }
+         }
+         if (sorted.length() == 0)
+            return null;
+         
+      } catch(Exception e) {
+         log.error("Mind SeasonPasses - " + e.getMessage());
+         e.printStackTrace();
+         return null;
+      }
+      return sorted;
+   }
+   
    public class DateComparator implements Comparator<JSONObject> {      
       public int compare(JSONObject j1, JSONObject j2) {
          long start1 = TableUtil.getStartTime(j1);
