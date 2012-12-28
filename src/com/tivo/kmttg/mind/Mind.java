@@ -459,7 +459,7 @@ public class Mind {
                   JSONObject o = a.getJSONObject(i);
                   if (o.has("idSetSource")) {
                      JSONObject id = o.getJSONObject("idSetSource");
-                     if (id.getString("type").equals("seasonPassSource"))
+                     if (! id.getString("type").equals("singleOfferSource"))
                         sorted.put(o);
                   }
                }
