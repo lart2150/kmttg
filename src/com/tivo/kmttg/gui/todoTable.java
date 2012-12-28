@@ -164,13 +164,8 @@ public class todoTable {
              endString = data.getString("scheduledEndTime");
              end = TableUtil.getLongDateFromString(endString);
           } else if (data.has("startTime")) {
-             startString = data.getString("startTime");
-             start = TableUtil.getLongDateFromString(startString);
-             if (data.has("requestedStartPadding"))
-                start -= data.getInt("requestedStartPadding")*1000;
-             end = start + data.getInt("duration")*1000;
-             if (data.has("requestedEndPadding"))
-                end += data.getInt("requestedEndPadding")*1000;
+             start = TableUtil.getStartTime(data);
+             end = TableUtil.getEndTime(data);
           }
           String title = " ";
           if (data.has("title"))
