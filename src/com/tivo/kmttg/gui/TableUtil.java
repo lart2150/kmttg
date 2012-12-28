@@ -156,6 +156,32 @@ public class TableUtil {
         return 0;
       }
    }
+      
+   public static long getStartTime(JSONObject json) {
+      try {
+         String startString = json.getString("startTime");
+         long start = getLongDateFromString(startString);
+         if (json.has("requestedStartPadding"))
+            start -= json.getInt("requestedStartPadding")*1000;
+         return start;
+      } catch (Exception e) {
+         log.error("getStartTime - " + e.getMessage());
+         return 0;
+      }
+   }
+   
+   public static long getEndTime(JSONObject json) {
+      try {
+         long start = getStartTime(json);
+         long end = start + json.getInt("duration")*1000;
+         if (json.has("requestedEndPadding"))
+            end += json.getInt("requestedEndPadding")*1000;
+         return end;
+      } catch (Exception e) {
+         log.error("getEndTime - " + e.getMessage());
+         return 0;
+      }
+   }
 
    // Check if given json is a show scheduled to record on this TiVo
    private static Boolean isRecordingScheduled(JSONObject json) {
