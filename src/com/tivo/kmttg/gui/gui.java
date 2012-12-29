@@ -109,11 +109,9 @@ public class gui {
          jFrame.setJMenuBar(getJJMenuBar());
          jFrame.setContentPane(getJContentPane());
          
-         // Add additional ipad remote tab if at least 1 TiVo is configured for it
-         if (config.ipadEnabled()) {
-            remote_gui = new remotegui(jFrame);
-            tabbed_panel.add("Remote", remote_gui.getPanel());
-         }
+         // Add additional ipad remote tab
+         remote_gui = new remotegui(jFrame);
+         tabbed_panel.add("Remote", remote_gui.getPanel());
          
          //jFrame.setMinimumSize(new Dimension(700,600));
          //jFrame.setPreferredSize(jFrame.getMinimumSize());
@@ -1153,7 +1151,7 @@ public class gui {
       if (config.GUIMODE) refreshEncodingProfilesCB();
       
       // Add remote tab if appropriate
-      if (config.GUIMODE && config.ipadEnabled() && remote_gui == null) {
+      if (config.GUIMODE && remote_gui == null) {
          remote_gui = new remotegui(jFrame);
          tabbed_panel.add("Remote", remote_gui.getPanel());
       }
