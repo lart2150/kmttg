@@ -581,13 +581,14 @@ public class Remote {
             // "keyword":"house"
             // Also expects "count" and "offset" to be set
             json.put("bodyId", bodyId_get());
-            if ( ! json.has("includeUnifiedItemType") ) {
+            if ( ! away && ! json.has("includeUnifiedItemType") ) {
                JSONArray a = new JSONArray();
                a.put("collection"); a.put("content"); a.put("person");
                json.put("includeUnifiedItemType", a);               
             }
             json.put("levelOfDetail", "medium");
-            json.put("mergeOverridingCollections", true);
+            if ( ! away )
+               json.put("mergeOverridingCollections", true);
             json.put("namespace", "refserver");
             if ( ! json.has("orderBy") )
                json.put("orderBy", new JSONArray("[\"relevance\"]"));

@@ -287,7 +287,7 @@ public class file {
       try {
          json.put("recordingId", a);
          log.warn(">> Attempting iPad delete for id: " + recordingId);
-         Remote r = new Remote(tivoName);
+         Remote r = config.gui.remote_gui.initRemote(tivoName);
          if (r.success) {
             if (r.Command("Delete", json) != null)
                log.warn(">> iPad delete succeeded.");

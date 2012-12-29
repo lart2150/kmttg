@@ -54,7 +54,7 @@ public class remote implements Serializable {
       class AutoThread implements Runnable {
          AutoThread() {}       
          public void run () {
-            Remote r = new Remote(job.tivoName);
+            Remote r = config.gui.remote_gui.initRemote(job.tivoName);
             if (r.success) {
                if (job.remote_todo)
                   data = r.ToDo(job);

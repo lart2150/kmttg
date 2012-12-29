@@ -275,10 +275,17 @@ public class deletedTable {
       }
       try {
          JSONObject o = new JSONObject();
-         String startString = entry.getString("scheduledStartTime");
-         long start = TableUtil.getLongDateFromString(startString);
-         String endString = entry.getString("scheduledEndTime");
-         long end = TableUtil.getLongDateFromString(endString);
+         String startString=null, endString=null;
+         long start=0, end=0;
+         if (entry.has("scheduledStartTime")) {
+            startString = entry.getString("scheduledStartTime");
+            start = TableUtil.getLongDateFromString(startString);
+            endString = entry.getString("scheduledEndTime");
+            end = TableUtil.getLongDateFromString(endString);
+         } else {
+            start = TableUtil.getStartTime(entry);
+            end = TableUtil.getEndTime(entry);
+         }
          String title = " ";
          if (entry.has("title"))
             title += entry.getString("title");
@@ -326,7 +333,7 @@ public class deletedTable {
                int row;
                JSONObject json;
                String title;
-               Remote r = new Remote(tivoName);
+               Remote r = config.gui.remote_gui.initRemote(tivoName);
                if (r.success) {
                   Boolean cont = true;
                   while (cont) {
@@ -379,7 +386,7 @@ public class deletedTable {
                int row;
                JSONObject json;
                String title;
-               Remote r = new Remote(tivoName);
+               Remote r = config.gui.remote_gui.initRemote(tivoName);
                if (r.success) {
                   Boolean cont = true;
                   while (cont) {

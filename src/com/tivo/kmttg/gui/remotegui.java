@@ -126,6 +126,16 @@ public class remotegui {
    private JTextField rc_jumpback_text = null;
    private Boolean cc_state = false;
    
+   // These buttons selectively disabled
+   private JButton cancel_todo = null;
+   private JButton modify_todo = null;
+   private JButton reorder_sp = null;
+   private JButton wishlist_premiere = null;
+   private JButton wishlist_search = null;    
+   private JButton wishlist_guide = null;
+   private JButton recover_deleted = null;
+   private JButton permDelete_deleted = null;  
+   
    public Hashtable<String,JSONArray> all_todo = new Hashtable<String,JSONArray>();
    
    private JFileChooser Browser = null;
@@ -267,6 +277,7 @@ public class remotegui {
                 TableUtil.clear(tab_todo.TABLE);
                 label_todo.setText("");
                 String tivoName = getTivoName("todo");
+                updateButtonStates(tivoName, "ToDo");
                 if (tab_todo.tivo_data.containsKey(tivoName))
                    tab_todo.AddRows(tivoName, tab_todo.tivo_data.get(tivoName));
             }
@@ -295,7 +306,7 @@ public class remotegui {
          }
       });
 
-      JButton cancel_todo = new JButton("Cancel");
+      cancel_todo = new JButton("Cancel");
       cancel_todo.setToolTipText(getToolTip("cancel_todo"));
       cancel_todo.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -303,7 +314,7 @@ public class remotegui {
          }
       });
 
-      JButton modify_todo = new JButton("Modify");
+      modify_todo = new JButton("Modify");
       modify_todo.setToolTipText(getToolTip("modify_todo"));
       modify_todo.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -373,6 +384,7 @@ public class remotegui {
                    // Refresh channel list only if not inside a folder
                    TableUtil.clear(tab_guide.TABLE);
                    String tivoName = getTivoName("guide");
+                   updateButtonStates(tivoName, "Guide");
                    if (tab_guide.tivo_data.containsKey(tivoName))
                       tab_guide.AddRows(tivoName, tab_guide.tivo_data.get(tivoName));
                 }
@@ -448,7 +460,7 @@ public class remotegui {
          }
       });
       
-      JButton wishlist_guide = new JButton("WL");
+      wishlist_guide = new JButton("WL");
       wishlist_guide.setMargin(new Insets(1,1,1,1));
       wishlist_guide.setToolTipText(getToolTip("wishlist_search"));
       wishlist_guide.addActionListener(new java.awt.event.ActionListener() {
@@ -542,6 +554,7 @@ public class remotegui {
              if (e.getStateChange() == ItemEvent.SELECTED) {
                 TableUtil.clear(tab_sp.TABLE);
                 String tivoName = getTivoName("sp");
+                updateButtonStates(tivoName, "Season Passes");
                 if (tab_sp.tivo_data.containsKey(tivoName))
                    tab_sp.AddRows(tivoName, tab_sp.tivo_data.get(tivoName));
                 tab_sp.updateLoadedStatus();
@@ -642,7 +655,7 @@ public class remotegui {
          }
       });         
       
-      JButton reorder_sp = new JButton("Re-order");
+      reorder_sp = new JButton("Re-order");
       reorder_sp.setMargin(new Insets(1,1,1,1));
       reorder_sp.setToolTipText(getToolTip("reorder_sp"));
       reorder_sp.addActionListener(new java.awt.event.ActionListener() {
@@ -952,6 +965,7 @@ public class remotegui {
                TableUtil.clear(tab_deleted.TABLE);
                label_deleted.setText("");
                String tivoName = getTivoName("deleted");
+               updateButtonStates(tivoName, "Deleted");
                if (tab_deleted.tivo_data.containsKey(tivoName))
                   tab_deleted.AddRows(tivoName, tab_deleted.tivo_data.get(tivoName));
             }
@@ -981,7 +995,7 @@ public class remotegui {
          }
       });
 
-      JButton recover_deleted = new JButton("Recover");
+      recover_deleted = new JButton("Recover");
       recover_deleted.setMargin(new Insets(1,1,1,1));
       recover_deleted.setToolTipText(getToolTip("recover_deleted"));
       recover_deleted.addActionListener(new java.awt.event.ActionListener() {
@@ -993,7 +1007,7 @@ public class remotegui {
          }
       });
 
-      JButton permDelete_deleted = new JButton("Permanently Delete");
+      permDelete_deleted = new JButton("Permanently Delete");
       permDelete_deleted.setMargin(new Insets(1,1,1,1));
       permDelete_deleted.setToolTipText(getToolTip("permDelete_deleted"));
       permDelete_deleted.addActionListener(new java.awt.event.ActionListener() {
@@ -1064,6 +1078,7 @@ public class remotegui {
                premiere_model.clear();
                
                String tivoName = getTivoName("premiere");
+               updateButtonStates(tivoName, "Season Premieres");
                // Load channel list for this TiVo
                loadChannelInfo(tivoName);
                
@@ -1141,7 +1156,7 @@ public class remotegui {
          }
       });
       
-      JButton wishlist_premiere = new JButton("WL");
+      wishlist_premiere = new JButton("WL");
       wishlist_premiere.setMargin(new Insets(1,1,1,1));
       wishlist_premiere.setToolTipText(getToolTip("wishlist_search"));
       wishlist_premiere.addActionListener(new java.awt.event.ActionListener() {
@@ -1290,7 +1305,7 @@ public class remotegui {
             // Initiate a net connect on selected TiVo
             String tivoName = (String)tivo_info.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               Remote r = new Remote(tivoName);
+               Remote r = initRemote(tivoName);
                if (r.success) {
                   JSONObject result = r.Command("PhoneHome", new JSONObject());
                   if (result != null)
@@ -1349,6 +1364,8 @@ public class remotegui {
       tivo_search.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
+                String tivoName = getTivoName("search");
+                updateButtonStates(tivoName, "Search");
                // NOTE: Don't want to reset table in case we want to record a show on another TiVo
                /*
                tab_search.TABLE.clearSelection();
@@ -1435,7 +1452,7 @@ public class remotegui {
          }
       });
       
-      JButton wishlist_search = new JButton("WL");
+      wishlist_search = new JButton("WL");
       wishlist_search.setMargin(new Insets(1,1,1,1));
       wishlist_search.setToolTipText(getToolTip("wishlist_search"));
       wishlist_search.addActionListener(new java.awt.event.ActionListener() {
@@ -1597,7 +1614,7 @@ public class remotegui {
                   if (tivoName != null && tivoName.length() > 0) {
                      class backgroundRun extends SwingWorker<Object, Object> {
                         protected Object doInBackground() {
-                           Remote r = new Remote(tivoName);
+                           Remote r = initRemote(tivoName);
                            if (r.success) {
                               try {
                                  JSONObject json = new JSONObject();
@@ -1663,7 +1680,7 @@ public class remotegui {
                else
                   event = "ccOn";
                cc_state = ! cc_state;
-               Remote r = new Remote(tivoName);
+               Remote r = initRemote(tivoName);
                if (r.success) {
                   try {
                      JSONObject json = new JSONObject();
@@ -1693,7 +1710,7 @@ public class remotegui {
             if (name != null && name.length() > 0) {
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Object doInBackground() {
-                     Remote r = new Remote(getTivoName("rc"));
+                     Remote r = initRemote(getTivoName("rc"));
                      if (r.success) {
                         try {
                            JSONObject json = new JSONObject();
@@ -1738,7 +1755,7 @@ public class remotegui {
                final int mins = Integer.parseInt(mins_string);
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Boolean doInBackground() {
-                     Remote r = new Remote(tivoName);
+                     Remote r = initRemote(tivoName);
                      if (r.success) {
                         JSONObject json = new JSONObject();
                         try {
@@ -1780,7 +1797,7 @@ public class remotegui {
                final int mins = Integer.parseInt(mins_string);
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Boolean doInBackground() {
-                     Remote r = new Remote(tivoName);
+                     Remote r = initRemote(tivoName);
                      if (r.success) {
                         JSONObject json = new JSONObject();
                         JSONObject reply = r.Command("Position", json);
@@ -1826,7 +1843,7 @@ public class remotegui {
                final int mins = Integer.parseInt(mins_string);
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Boolean doInBackground() {
-                     Remote r = new Remote(tivoName);
+                     Remote r = initRemote(tivoName);
                      if (r.success) {
                         JSONObject json = new JSONObject();
                         JSONObject reply = r.Command("Position", json);
@@ -1972,7 +1989,7 @@ public class remotegui {
    private void RC_infoCB(final String tivoName) {
       class backgroundRun extends SwingWorker<Object, Object> {
          protected Boolean doInBackground() {
-            Remote r = new Remote(tivoName);
+            Remote r = initRemote(tivoName);
             if (r.success) {
                JSONObject json = new JSONObject();
                JSONObject reply = r.Command("SysInfo", json);
@@ -2001,31 +2018,33 @@ public class remotegui {
                         if (json.has(fields[i]))
                            info += String.format("%s\t%s\n", fields[i], json.get(fields[i]));
                      }
-                     
-                     // What's On info
-                     String [] whatson = getWhatsOn(tivoName);
-                     if (whatson != null) {
-                        info += String.format("%s\t\t", "What's On");
-                        for (int i=0; i<whatson.length; ++i) {
-                           if (i>0)
-                              info += "; ";
-                           info += whatson[i];
+
+                     if (! r.awayMode() ) {
+                        // What's On info
+                        String [] whatson = getWhatsOn(tivoName);
+                        if (whatson != null) {
+                           info += String.format("%s\t\t", "What's On");
+                           for (int i=0; i<whatson.length; ++i) {
+                              if (i>0)
+                                 info += "; ";
+                              info += whatson[i];
+                           }
+                           info += "\n";
                         }
                         info += "\n";
-                     }
-                     info += "\n";
                      
-                     // Tuner info
-                     reply = r.Command("TunerInfo", new JSONObject());
-                     if (reply != null && reply.has("state")) {
-                        for (int i=0; i<reply.getJSONArray("state").length(); ++i) {
-                           json = reply.getJSONArray("state").getJSONObject(i);
-                           info += String.format("tunerId\t\t%s\n", json.getString("tunerId"));
-                           info += String.format("channelNumber\t%s (%s)\n",
-                              json.getJSONObject("channel").getString("channelNumber"),
-                              json.getJSONObject("channel").getString("callSign")
-                           );
-                           info += "\n";
+                        // Tuner info
+                        reply = r.Command("TunerInfo", new JSONObject());
+                        if (reply != null && reply.has("state")) {
+                           for (int i=0; i<reply.getJSONArray("state").length(); ++i) {
+                              json = reply.getJSONArray("state").getJSONObject(i);
+                              info += String.format("tunerId\t\t%s\n", json.getString("tunerId"));
+                              info += String.format("channelNumber\t%s (%s)\n",
+                                 json.getJSONObject("channel").getString("channelNumber"),
+                                 json.getJSONObject("channel").getString("callSign")
+                              );
+                              info += "\n";
+                           }
                         }
                      }
                      
@@ -2049,7 +2068,7 @@ public class remotegui {
    }
    
    private String[] getWhatsOn(String tivoName) {
-      Remote r = new Remote(tivoName);
+      Remote r = initRemote(tivoName);
       if (r.success) {
          JSONObject result = r.Command("WhatsOn", new JSONObject());
          if (result != null && result.has("whatsOn")) {
@@ -2177,7 +2196,7 @@ public class remotegui {
       tivo_info.removeAllItems();
       tivo_premiere.removeAllItems();
       for (int i=0; i<tivo_stack.size(); ++i) {
-         if (config.getRpcSetting(tivo_stack.get(i)).equals("1")) {
+         //if (config.getRpcSetting(tivo_stack.get(i)).equals("1")) {
             tivo_count++;
             tivo_todo.addItem(tivo_stack.get(i));
             tivo_guide.addItem(tivo_stack.get(i));
@@ -2188,7 +2207,7 @@ public class remotegui {
             tivo_rc.addItem(tivo_stack.get(i));
             tivo_info.addItem(tivo_stack.get(i));
             tivo_premiere.addItem(tivo_stack.get(i));
-         }
+         //}
       }
       if (tivo_count > 0) {
          setHmeDestinations(getTivoName("rc"));
@@ -2203,9 +2222,37 @@ public class remotegui {
       return names;
    }
    
+   private void updateButtonStates(String tivoName, String tab) {
+      Boolean state;
+      if (config.getRpcSetting(tivoName).equals("1"))
+         state = true;
+      else
+         state = false;
+      if (tab.equals("ToDo")) {
+         cancel_todo.setEnabled(state);
+         modify_todo.setEnabled(state);
+      }
+      if (tab.equals("Season Passes")) {
+         reorder_sp.setEnabled(state);
+      }
+      if (tab.equals("Season Premieres")) {
+         wishlist_premiere.setEnabled(state);
+      }
+      if (tab.equals("Search")) {
+         wishlist_search.setEnabled(state);
+      }
+      if (tab.equals("Guide")) {
+         wishlist_guide.setEnabled(state);
+      }
+      if (tab.equals("Deleted")) {
+         recover_deleted.setEnabled(state);
+         permDelete_deleted.setEnabled(state);
+      }
+   }
+   
    // NOTE: This already called in swing worker, so no need to background
    /*private String[] getHmeDestinations(String tivoName) {
-      Remote r = new Remote(tivoName);
+      Remote r = getRemote(tivoName);
       if (r.success) {
          r.debug = false;
          JSONObject json = new JSONObject();
@@ -2409,7 +2456,7 @@ public class remotegui {
    public void TagPremieresWithSeasonPasses(JSONArray data) {
       String[] tivoNames = getTivoNames(tivo_premiere);
       for (int t=0; t<tivoNames.length; ++t) {
-         Remote r = new Remote(tivoNames[t]);
+         Remote r = initRemote(tivoNames[t]);
          if (r.success) {
             JSONArray existing = r.SeasonPasses(null);
             if (existing != null) {
@@ -2463,7 +2510,7 @@ public class remotegui {
          }
 
          protected Void doInBackground() throws Exception {
-            Remote r = new Remote(tivoName);
+            Remote r = initRemote(tivoName);
             if (r.success) {
                JSONArray todo = r.ToDo(null);
                // Add todo to hash
@@ -2667,7 +2714,7 @@ public class remotegui {
          final JSONObject fjson = json;
          class backgroundRun extends SwingWorker<Object, Object> {
             protected Boolean doInBackground() {
-               Remote r = new Remote(tivoName);
+               Remote r = initRemote(tivoName);
                if (r.success) {
                   JSONObject result = r.Command("Wishlist", fjson);
                   if (result != null)
@@ -2746,7 +2793,7 @@ public class remotegui {
             if (tivoName != null && tivoName.length() > 0) {
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Object doInBackground() {
-                     Remote r = new Remote(tivoName);
+                     Remote r = initRemote(tivoName);
                      if (r.success) {
                         try {
                            JSONObject result;
@@ -2796,7 +2843,7 @@ public class remotegui {
          protected Object doInBackground() {
             String tivoName = (String)tivo_rc.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               Remote r = new Remote(tivoName);
+               Remote r = initRemote(tivoName);
                if (r.success) {
                   try {
                      JSONObject json = new JSONObject();
@@ -2819,6 +2866,16 @@ public class remotegui {
       }
       backgroundRun b = new backgroundRun();
       b.execute();
+   }
+   
+   public Remote initRemote(String tivoName) {
+      if (config.getRpcSetting(tivoName).equals("1")) {
+         Remote r = new Remote(tivoName);
+         return(r);
+      } else {
+         Remote r = new Remote(tivoName, true);
+         return(r);
+      }
    }
       
    public String getToolTip(String component) {

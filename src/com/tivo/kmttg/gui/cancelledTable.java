@@ -653,7 +653,7 @@ public class cancelledTable {
                         j.put("endTimePadding", json.getInt("requestedEndPadding"));
                      // This signifies to check conflicts only, don't subscribe
                      j.put("conflictsOnly", true);
-                     Remote r = new Remote(tivoName);
+                     Remote r = config.gui.remote_gui.initRemote(tivoName);
                      if (r.success) {
                         JSONObject result = r.Command("Singlerecording", j);
                         if (result != null) {
