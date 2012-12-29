@@ -540,6 +540,8 @@ public class Remote {
             json.put("format", "idSequence");
             json.put("bodyId", bodyId_get());
             json.put("state", new JSONArray("[\"inProgress\",\"scheduled\"]"));
+            if (away)
+               json.put("orderBy", "startTime");
             req = RpcRequest("recordingSearch", false, json);
          }
          else if (type.equals("SearchId")) {
