@@ -140,6 +140,7 @@ public class remotegui {
    private JButton rc_jumpto_button = null;
    private JButton rc_jumpahead_button = null;
    private JButton rc_jumpback_button = null;
+   private JButton netconnect_info = null;
    
    public Hashtable<String,JSONArray> all_todo = new Hashtable<String,JSONArray>();
    
@@ -1283,6 +1284,7 @@ public class remotegui {
                // Put cached info in text area if available
                String tivoName = getTivoName("info");
                if (tivoName != null && tivoName.length() > 0) {
+                  updateButtonStates(tivoName, "Info");
                   if (tivo_info_data.containsKey(tivoName))
                      text_info.setText(tivo_info_data.get(tivoName));
                }
@@ -1303,7 +1305,7 @@ public class remotegui {
          }
       });
 
-      JButton netconnect_info = new JButton("Network Connect");
+      netconnect_info = new JButton("Network Connect");
       netconnect_info.setToolTipText(getToolTip("netconnect_info"));
       netconnect_info.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -2282,6 +2284,9 @@ public class remotegui {
          rc_jumpahead_button.setEnabled(state);
          rc_jumpback_button.setEnabled(state);
       }
+      if (tab.equals("Info")) {
+         netconnect_info.setEnabled(state);
+      }
    }
    
    // NOTE: This already called in swing worker, so no need to background
@@ -2983,7 +2988,9 @@ public class remotegui {
          text += "Schedule to record selected individual show(s) in table on selected TiVo.<br>";
          text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
-         text += "shows and will not schedule the recording.";
+         text += "shows and will not schedule the recording.<br>";
+         text += "NOTE: For units older than series 4 this will schedule show similarly to tivo.com<br>";
+         text += "or other online guides with email confirmations.";
       }
       else if (component.equals("guide_recordSP")){
          text = "<b>Season Pass</b><br>";
@@ -2993,7 +3000,9 @@ public class remotegui {
          text += "checking against the current set of season passes already on the TiVo and will prompt<br>";
          text += "to modify existing season pass if found.<br>";
          text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
-         text += "priority after creating it.";
+         text += "priority after creating it.<br>";
+         text += "NOTE: For units older than series 4 this will schedule season pass similarly to tivo.com<br>";
+         text += "or other online guides with email confirmations.";
       }
       else if (component.equals("guide_refresh_todo")) {
          text = "<b>Refresh ToDo</b><br>";
@@ -3018,7 +3027,9 @@ public class remotegui {
          text += "Schedule to record selected individual show(s) in table on selected TiVo.<br>";
          text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
-         text += "shows and will not schedule the recording.";
+         text += "shows and will not schedule the recording.<br>";
+         text += "NOTE: For units older than series 4 this will schedule show similarly to tivo.com<br>";
+         text += "or other online guides with email confirmations.";
       }
       else if (component.equals("refresh_cancel_folder")){
          text = "<b>Back</b><br>";
@@ -3081,7 +3092,9 @@ public class remotegui {
          text += "Schedule a one time recording of show selected in table below on selected TiVo.<br>";
          text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
-         text += "shows and will not schedule the recording.";
+         text += "shows and will not schedule the recording.<br>";
+         text += "NOTE: For units older than series 4 this will schedule show similarly to tivo.com<br>";
+         text += "or other online guides with email confirmations.";
       }
       else if (component.equals("record_sp_search")) {
          text = "<b>Season Pass</b><br>";
@@ -3091,7 +3104,9 @@ public class remotegui {
          text += "checking against the current set of season passes already on the TiVo and will prompt<br>";
          text += "to modify existing season pass if found.<br>";
          text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
-         text += "priority after creating it.";
+         text += "priority after creating it.<br>";
+         text += "NOTE: For units older than series 4 this will schedule season pass similarly to tivo.com<br>";
+         text += "or other online guides with email confirmations.";
       }
       else if (component.equals("wishlist_search")) {
          text = "<b>Create Wishlist</b><br>";
@@ -3159,7 +3174,9 @@ public class remotegui {
          text += "Schedule individual recording for items selected in the table below on selected TiVo.<br>";
          text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
-         text += "shows and will not schedule the recording.";
+         text += "shows and will not schedule the recording.<br>";
+         text += "NOTE: For units older than series 4 this will schedule show similarly to tivo.com<br>";
+         text += "or other online guides with email confirmations.";
       }
       else if (component.equals("recordSP_premiere")){
          text = "<b>Season Pass</b><br>";
@@ -3169,7 +3186,9 @@ public class remotegui {
          text += "checking against the current set of season passes already on the TiVo and will prompt<br>";
          text += "to modify existing season pass if found.<br>";
          text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
-         text += "priority after creating it.";
+         text += "priority after creating it.<br>";
+         text += "NOTE: For units older than series 4 this will schedule season pass similarly to tivo.com<br>";
+         text += "or other online guides with email confirmations.";
       }
       else if (component.equals("refresh_sp")){
          text = "<b>Refresh</b><br>";
