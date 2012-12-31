@@ -140,7 +140,6 @@ public class remotegui {
    private JButton rc_jumpto_button = null;
    private JButton rc_jumpahead_button = null;
    private JButton rc_jumpback_button = null;
-   private JButton netconnect_info = null;
    
    public Hashtable<String,JSONArray> all_todo = new Hashtable<String,JSONArray>();
    
@@ -1284,7 +1283,6 @@ public class remotegui {
                // Put cached info in text area if available
                String tivoName = getTivoName("info");
                if (tivoName != null && tivoName.length() > 0) {
-                  updateButtonStates(tivoName, "Info");
                   if (tivo_info_data.containsKey(tivoName))
                      text_info.setText(tivo_info_data.get(tivoName));
                }
@@ -1305,7 +1303,7 @@ public class remotegui {
          }
       });
 
-      netconnect_info = new JButton("Network Connect");
+      JButton netconnect_info = new JButton("Network Connect");
       netconnect_info.setToolTipText(getToolTip("netconnect_info"));
       netconnect_info.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -2283,9 +2281,6 @@ public class remotegui {
          rc_jumpto_button.setEnabled(state);
          rc_jumpahead_button.setEnabled(state);
          rc_jumpback_button.setEnabled(state);
-      }
-      if (tab.equals("Info")) {
-         netconnect_info.setEnabled(state);
       }
    }
    

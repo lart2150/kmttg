@@ -772,7 +772,10 @@ public class Remote {
          else if (type.equals("PhoneHome")) {
             // Request a network connection
             json.put("bodyId", bodyId_get());
-            req = RpcRequest("phoneHomeRequest", true, json);
+            if (away)
+               req = RpcRequest("phoneHomeSend", false, json);
+            else
+               req = RpcRequest("phoneHomeRequest", true, json);
          }
          else if (type.equals("WhatsOn")) {
             // Request info on what is currently playing on the TiVo
