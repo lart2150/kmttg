@@ -61,6 +61,7 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.main.telnet;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -135,6 +136,10 @@ public class remotegui {
    private JButton wishlist_guide = null;
    private JButton recover_deleted = null;
    private JButton permDelete_deleted = null;  
+   private JButton rc_hme_button = null;
+   private JButton rc_jumpto_button = null;
+   private JButton rc_jumpahead_button = null;
+   private JButton rc_jumpback_button = null;
    
    public Hashtable<String,JSONArray> all_todo = new Hashtable<String,JSONArray>();
    
@@ -1614,16 +1619,21 @@ public class remotegui {
                   if (tivoName != null && tivoName.length() > 0) {
                      class backgroundRun extends SwingWorker<Object, Object> {
                         protected Object doInBackground() {
-                           Remote r = initRemote(tivoName);
-                           if (r.success) {
-                              try {
-                                 JSONObject json = new JSONObject();
-                                 json.put("event", event);
-                                 r.Command("keyEventSend", json);
-                              } catch (JSONException e1) {
-                                 log.error("RC - " + e1.getMessage());
+                           if (config.getRpcSetting(tivoName).equals("1")) {
+                              Remote r = initRemote(tivoName);
+                              if (r.success) {
+                                 try {
+                                    JSONObject json = new JSONObject();
+                                    json.put("event", event);
+                                    r.Command("keyEventSend", json);
+                                 } catch (JSONException e1) {
+                                    log.error("RC - " + e1.getMessage());
+                                 }
+                                 r.disconnect();
                               }
-                              r.disconnect();
+                           } else {
+                              // Use telnet protocol
+                              new telnet(config.TIVOS.get(tivoName), mapToTelnet(new String[] {event}));
                            }
                            // Set focus on tabbed_panel
                            tabbed_panel.requestFocusInWindow();
@@ -1680,16 +1690,26 @@ public class remotegui {
                else
                   event = "ccOn";
                cc_state = ! cc_state;
-               Remote r = initRemote(tivoName);
-               if (r.success) {
-                  try {
-                     JSONObject json = new JSONObject();
-                     json.put("event", event);
-                     r.Command("keyEventSend", json);
-                  } catch (JSONException e1) {
-                     log.error("RC - " + e1.getMessage());
+               if (config.getRpcSetting(tivoName).equals("1")) {
+                  Remote r = initRemote(tivoName);
+                  if (r.success) {
+                     try {
+                        JSONObject json = new JSONObject();
+                        json.put("event", event);
+                        r.Command("keyEventSend", json);
+                     } catch (JSONException e1) {
+                        log.error("RC - " + e1.getMessage());
+                     }
+                     r.disconnect();
                   }
-                  r.disconnect();
+               } else {
+                  // Use telnet interface
+                  String[] sequence = new String[1];
+                  if (event.equals("ccOff"))
+                     sequence[0] = "CC_OFF";
+                  if (event.equals("ccOn"))
+                     sequence[0] = "CC_ON";
+                  new telnet(config.TIVOS.get(tivoName), sequence);                     
                }
             }
          }
@@ -1699,9 +1719,17 @@ public class remotegui {
       JLabel label_rc = new JLabel("TiVo");
       
       tivo_rc = new javax.swing.JComboBox();
+      tivo_rc.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+            if (e.getStateChange() == ItemEvent.SELECTED) {               
+               String tivoName = getTivoName("rc");
+               updateButtonStates(tivoName, "Remote");
+            }
+         }
+      });
       tivo_rc.setToolTipText(getToolTip("tivo_rc"));
 
-      JButton rc_hme_button = new JButton("HME Jump:");
+      rc_hme_button = new JButton("HME Jump:");
       disableSpaceAction(rc_hme_button);
       rc_hme_button.setToolTipText(getToolTip("rc_hme_button"));
       rc_hme_button.addActionListener(new java.awt.event.ActionListener() {
@@ -1740,7 +1768,7 @@ public class remotegui {
       hme_rc = new javax.swing.JComboBox();
       hme_rc.setToolTipText(getToolTip("hme_rc"));
       
-      JButton rc_jumpto_button = new JButton("Jump to minute:");
+      rc_jumpto_button = new JButton("Jump to minute:");
       disableSpaceAction(rc_jumpto_button);
       rc_jumpto_button.setToolTipText(getToolTip("rc_jumpto_text"));
       rc_jumpto_button.addActionListener(new java.awt.event.ActionListener() {
@@ -1782,7 +1810,7 @@ public class remotegui {
       rc_jumpto_text.setToolTipText(getToolTip("rc_jumpto_text"));
       rc_jumpto_text.setText("0");
 
-      JButton rc_jumpahead_button = new JButton("Skip minutes ahead:");
+      rc_jumpahead_button = new JButton("Skip minutes ahead:");
       disableSpaceAction(rc_jumpahead_button);
       rc_jumpahead_button.setToolTipText(getToolTip("rc_jumpahead_text"));
       rc_jumpahead_button.addActionListener(new java.awt.event.ActionListener() {
@@ -1828,7 +1856,7 @@ public class remotegui {
       rc_jumpahead_text.setToolTipText(getToolTip("rc_jumpahead_text"));
       rc_jumpahead_text.setText("5");
 
-      JButton rc_jumpback_button = new JButton("Skip minutes back:");
+      rc_jumpback_button = new JButton("Skip minutes back:");
       disableSpaceAction(rc_jumpback_button);
       rc_jumpback_button.setToolTipText(getToolTip("rc_jumpback_text"));
       rc_jumpback_button.addActionListener(new java.awt.event.ActionListener() {
@@ -2247,6 +2275,12 @@ public class remotegui {
       if (tab.equals("Deleted")) {
          recover_deleted.setEnabled(state);
          permDelete_deleted.setEnabled(state);
+      }
+      if (tab.equals("Remote")) {
+         rc_hme_button.setEnabled(state);
+         rc_jumpto_button.setEnabled(state);
+         rc_jumpahead_button.setEnabled(state);
+         rc_jumpback_button.setEnabled(state);
       }
    }
    
@@ -2784,6 +2818,22 @@ public class remotegui {
       p.getActionMap().put(actionName, new ClickAction(isAscii, command));
    }
    
+   private String[] mapToTelnet(String[] sequence) {
+      Stack<String> n = new Stack<String>();
+      for (int i=0; i<sequence.length; ++i) {
+         String u = sequence[i].toUpperCase();
+         if (! u.startsWith("ACTION")) {
+            if (u.equals("ZOOM"))
+               u = "WINDOW";
+            n.add(u);
+         }
+      }
+      String[] mapped = new String[n.size()];
+      for (int i=0; i<n.size(); ++i)
+         mapped[i] = n.get(i);
+      return mapped;
+   }
+   
    private void setMacroCB(JButton b, final String[] sequence) {
       b.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -2793,25 +2843,30 @@ public class remotegui {
             if (tivoName != null && tivoName.length() > 0) {
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Object doInBackground() {
-                     Remote r = initRemote(tivoName);
-                     if (r.success) {
-                        try {
-                           JSONObject result;
-                           for (int i=0; i<sequence.length; ++i) {
-                              JSONObject json = new JSONObject();
-                              if (sequence[i].matches("^[0-9]")) {
-                                 json.put("event", "ascii");
-                                 json.put("value", sequence[i].toCharArray()[0]);
-                              } else {
-                                 json.put("event", sequence[i]);
+                     if (config.getRpcSetting(tivoName).equals("1")) {
+                        Remote r = initRemote(tivoName);
+                        if (r.success) {
+                           try {
+                              JSONObject result;
+                              for (int i=0; i<sequence.length; ++i) {
+                                 JSONObject json = new JSONObject();
+                                 if (sequence[i].matches("^[0-9]")) {
+                                    json.put("event", "ascii");
+                                    json.put("value", sequence[i].toCharArray()[0]);
+                                 } else {
+                                    json.put("event", sequence[i]);
+                                 }
+                                 result = r.Command("keyEventSend", json);
+                                 if (result == null) break;
                               }
-                              result = r.Command("keyEventSend", json);
-                              if (result == null) break;
+                           } catch (JSONException e1) {
+                              log.error("Macro CB - " + e1.getMessage());
                            }
-                        } catch (JSONException e1) {
-                           log.error("Macro CB - " + e1.getMessage());
+                           r.disconnect();
                         }
-                        r.disconnect();
+                     } else {
+                        // Use telnet protocol
+                        new telnet(config.TIVOS.get(tivoName), mapToTelnet(sequence));
                      }
                      // Set focus on tabbed_panel
                      tabbed_panel.requestFocusInWindow();
@@ -2843,22 +2898,27 @@ public class remotegui {
          protected Object doInBackground() {
             String tivoName = (String)tivo_rc.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               Remote r = initRemote(tivoName);
-               if (r.success) {
-                  try {
-                     JSONObject json = new JSONObject();
-                     if (isAscii) {
-                        json.put("event", "ascii");
-                        json.put("value", command.toCharArray()[0]);
+               if (config.getRpcSetting(tivoName).equals("1")) {
+                  Remote r = initRemote(tivoName);
+                  if (r.success) {
+                     try {
+                        JSONObject json = new JSONObject();
+                        if (isAscii) {
+                           json.put("event", "ascii");
+                           json.put("value", command.toCharArray()[0]);
+                        }
+                        else {
+                           json.put("event", command);
+                        }
+                        r.Command("keyEventSend", json);
+                     } catch (JSONException e1) {
+                        log.error("RC keyPressed - " + e1.getMessage());
                      }
-                     else {
-                        json.put("event", command);
-                     }
-                     r.Command("keyEventSend", json);
-                  } catch (JSONException e1) {
-                     log.error("RC keyPressed - " + e1.getMessage());
+                     r.disconnect();
                   }
-                  r.disconnect();
+               } else {
+                  // Use telnet protocol
+                  new telnet(config.TIVOS.get(tivoName), mapToTelnet(new String[] {command}));
                }
             }
             return null;
