@@ -2640,7 +2640,7 @@ public class remotegui {
             }
          }
       }
-      
+
       // Bring up Create Wishlist dialog
       Hashtable<String,String> h = wlOpt.promptUser("(" + tivoName + ") " + "Create Wishlist", hash);
       if (h == null)
@@ -2664,6 +2664,9 @@ public class remotegui {
             // auto record
             if (h.containsKey("autorecord"))
                json.put("autoRecord", true);
+            
+            if (h.containsKey("categoryId"))
+               json.put("categoryId", h.get("categoryId"));
             
             String []s = {"title_keyword", "keyword"};
             for (int j=0; j<s.length; ++j) {
