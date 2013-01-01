@@ -18,6 +18,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.table.TableColumnModel;
 
@@ -28,6 +29,7 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.pyTivo;
 import com.tivo.kmttg.util.string;
 
 public class tivoTab {
@@ -36,6 +38,7 @@ public class tivoTab {
    private JButton add = null;
    private JButton remove = null;
    private JButton atomic = null;
+   private JButton pyTivo_stream = null;
    private JButton refresh = null;
    private JButton disk_usage = null;
    private JLabel status = null;
@@ -120,6 +123,20 @@ public class tivoTab {
             });
             row.add(Box.createRigidArea(space2));
             row.add(atomic);
+         }
+         
+         // pyTivo stream button
+         if ( file.isFile(config.pyTivo_config) ) {
+            pyTivo_stream = new JButton("pyTivo stream");
+            pyTivo_stream.setMargin(new Insets(0,5,0,5));
+            pyTivo_stream.setToolTipText(config.gui.getToolTip("pyTivo_stream"));
+            pyTivo_stream.addActionListener(new java.awt.event.ActionListener() {
+               public void actionPerformed(java.awt.event.ActionEvent e) {
+                  pyTivo_streamCB();
+               }
+            });
+            row.add(Box.createRigidArea(space2));
+            row.add(pyTivo_stream);
          }
          
          c.gridx = gx;
@@ -321,6 +338,53 @@ public class tivoTab {
                   log.error("File does not have mp4 or m4v suffix: " + encodeFile);
                }
             }
+         }
+      }
+   }
+
+   // FILES mode pyTivo stream button callback
+   private void pyTivo_streamCB() {
+      if ( tivoName.equals("FILES") ) {
+         if (! file.isFile(config.pyTivo_config)) {
+            log.error("pyTivo config file does not exist: " + config.pyTivo_config);
+            return;
+         }
+         int[] rows = nplTab.GetSelectedRows();
+         if (rows.length <= 0)
+            return;
+         
+         // NOTE: This is only valid for RPC enabled TiVos
+         Stack<String> n = config.getTivoNames();
+         for (int j=0; j<n.size(); ++j) {
+            if ( ! config.getRpcSetting(n.get(j)).equals("1") )
+               n.remove(j);
+         }
+         if (n.size() > 0) {
+            Object[] tivos = n.toArray();   
+            int row;
+            for (int i=rows.length-1; i>=0; i--) {
+               row = rows[i];
+               String videoFile = nplTab.NowPlayingGetSelectionFile(row);
+               // NOTE: This is only valid for RPC enabled TiVos
+               Stack<String> names = config.getTivoNames();
+               for (int j=0; j<names.size(); ++j) {
+                  if ( ! config.getRpcSetting(names.get(j)).equals("1") )
+                     names.remove(j);
+               }
+               String tivoName = (String)JOptionPane.showInputDialog(
+                 config.gui.getJFrame(),
+                 videoFile,
+                 "Choose destination TiVo",
+                 JOptionPane.PLAIN_MESSAGE,
+                 null,
+                 tivos,
+                 tivos[0]
+               );
+               if (tivoName != null && tivoName.length() > 0)
+                  pyTivo.streamFile(tivoName, videoFile);
+            }
+         } else {
+            log.error("No RPC enabled TiVos found in kmttg config");
          }
       }
    }
