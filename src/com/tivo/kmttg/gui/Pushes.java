@@ -27,7 +27,6 @@ import com.tivo.kmttg.mind.Mind;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.pyTivo;
 
 public class Pushes {
    private String bodyId = null;
@@ -64,7 +63,6 @@ public class Pushes {
          log.error("You have not configured valid path to pyTivo.conf file (needed for username & password)");
          return;
       }
-      pyTivo.parsePyTivoConf(config.pyTivo_config);
       if (config.getTivoUsername() == null || config.getTivoPassword() == null) {
          log.error("tivo.com username and/or password not set in config or " + config.pyTivo_config);
          return;

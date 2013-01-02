@@ -261,6 +261,10 @@ public class config {
       // Parse encoding profiles
       encodeConfig.parseEncodingProfiles();
       
+      // Parse pyTivo config if specified
+      if (file.isFile(pyTivo_config))
+         pyTivo.parsePyTivoConf(pyTivo_config);
+      
       // Error checking
       if (MAK.equals(""))
          errors.add("MAK not defined!");
@@ -467,8 +471,6 @@ public class config {
    }
    
    public static String getTivoUsername() {
-      if (tivo_username.length() == 0 && file.isFile(pyTivo_config))
-         pyTivo.parsePyTivoConf(pyTivo_config);
       if (tivo_username.length() == 0)
          return null;
       return tivo_username;
@@ -479,8 +481,6 @@ public class config {
    }
    
    public static String getTivoPassword() {
-      if (tivo_password.length() == 0 && file.isFile(pyTivo_config))
-         pyTivo.parsePyTivoConf(pyTivo_config);
       if (tivo_password.length() == 0)
          return null;
       return tivo_password;

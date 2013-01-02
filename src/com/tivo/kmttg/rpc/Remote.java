@@ -282,7 +282,7 @@ public class Remote {
    private Boolean Auth_web() {
       try {
          if (config.getTivoUsername() == null) {
-            log.error("tivo.com username & password not set in config or in pyTivo setup");
+            log.error("tivo.com username & password not set in kmttg or pyTivo config");
             return false;
          }
          String tsn = config.getTsn(tivoName);
