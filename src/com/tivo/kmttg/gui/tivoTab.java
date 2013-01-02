@@ -126,7 +126,7 @@ public class tivoTab {
          }
          
          // pyTivo stream button
-         if ( file.isFile(config.pyTivo_config) ) {
+         if ( config.ipadEnabled() && file.isFile(config.pyTivo_config) ) {
             pyTivo_stream = new JButton("pyTivo stream");
             pyTivo_stream.setMargin(new Insets(0,5,0,5));
             pyTivo_stream.setToolTipText(config.gui.getToolTip("pyTivo_stream"));
