@@ -30,9 +30,7 @@ import com.tivo.kmttg.gui.TableUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.mind.EasySSLHelper;
 import com.tivo.kmttg.mind.SimpleCookieManager;
-import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.pyTivo;
 
 public class Mind {
    private Boolean debug = false;
@@ -43,13 +41,9 @@ public class Mind {
    SimpleCookieManager cm = new SimpleCookieManager();
    
    public Mind(String mindServer) {
-      server = mindServer;
-      if (! file.isFile(config.pyTivo_config)) {
-         log.error("pyTivo config not specified");
-         return;
+      if (config.getTivoUsername() == null) {
+         log.error("tivo.com username & password not set in config or in pyTivo");
       }
-      if (config.pyTivo_username == null)
-         pyTivo.parsePyTivoConf(config.pyTivo_config);
    }
 
    public Mind() {
@@ -373,7 +367,7 @@ public class Mind {
    }
    
    public JSONArray ToDo(String tivoName) {
-      if (! login(config.pyTivo_username, config.pyTivo_password)) {
+      if (! login(config.getTivoUsername(), config.getTivoPassword())) {
          log.error("Login to server failed: " + server);
          return null;
       }
@@ -431,7 +425,7 @@ public class Mind {
    }
    
    public JSONArray SeasonPasses(String tivoName) {
-      if (! login(config.pyTivo_username, config.pyTivo_password)) {
+      if (! login(config.getTivoUsername(), config.getTivoPassword())) {
          log.error("Login to server failed: " + server);
          return null;
       }

@@ -152,8 +152,6 @@ public class config {
    public static String pyTivo_files = "last";
    public static String pyTivo_port = "9032";
    public static String pyTivo_mind = "mind.tivo.com:8181";
-   public static String pyTivo_username = null;
-   public static String pyTivo_password = null;
    
    // download related
    public static int download_delay = 10;       // Delay in secs to apply to each download attempt
@@ -168,6 +166,8 @@ public class config {
    private static Hashtable<String,String> bodyId = null;
    public static String middlemind_host = "middlemind.tivo.com";
    public static int middlemind_port = 443;
+   private static String tivo_username = "";
+   private static String tivo_password = "";
    
    public static Stack<String> parse() {
       debug.print("");
@@ -464,6 +464,30 @@ public class config {
    // 2. iPadDelete == 1
    public static Boolean ipadDeleteEnabled() {
       return ipadEnabled() && iPadDelete == 1;
+   }
+   
+   public static String getTivoUsername() {
+      if (tivo_username.length() == 0 && file.isFile(pyTivo_config))
+         pyTivo.parsePyTivoConf(pyTivo_config);
+      if (tivo_username.length() == 0)
+         return null;
+      return tivo_username;
+   }
+   
+   public static void setTivoUsername(String username) {
+      tivo_username = username;
+   }
+   
+   public static String getTivoPassword() {
+      if (tivo_password.length() == 0 && file.isFile(pyTivo_config))
+         pyTivo.parsePyTivoConf(pyTivo_config);
+      if (tivo_password.length() == 0)
+         return null;
+      return tivo_password;
+   }
+   
+   public static void setTivoPassword(String password) {
+      tivo_password = password;
    }
 
    private static void defineDefaults() {
@@ -835,6 +859,12 @@ public class config {
             if (key.equals("custom")) {
                customCommand = line;
             }
+            if (key.equals("tivo_username")) {
+               tivo_username = line;
+            }
+            if (key.equals("tivo_password")) {
+               tivo_password = line;
+            }
             if (key.equals("pyTivo_config")) {
                pyTivo_config = line;
             }
@@ -1079,6 +1109,10 @@ public class config {
          ofp.write("<ccextractor>\n" + ccextractor + "\n\n");
          
          ofp.write("<custom>\n" + customCommand + "\n\n");
+         
+         ofp.write("<tivo_username>\n" + tivo_username + "\n\n");
+         
+         ofp.write("<tivo_password>\n" + tivo_password + "\n\n");
          
          ofp.write("<pyTivo_config>\n" + pyTivo_config + "\n\n");
          

@@ -12,8 +12,8 @@ import javax.swing.JTextField;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.main.config;
-import com.tivo.kmttg.rpc.Remote;
+//import com.tivo.kmttg.main.config;
+//import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
@@ -74,7 +74,7 @@ public class wlOptions {
       }
    }
    
-   private void createCategories() {
+   /*private void createCategories() {
       if (wishlistCategories == null) {
          wishlistCategories = getWishlistCategoryIds(config.getTivoNames().firstElement());
       }
@@ -98,7 +98,7 @@ public class wlOptions {
             log.error("createCategories - " + e.getMessage());
          }
       }
-   }
+   }*/
    
    public Hashtable<String,String> promptUser(String title, Hashtable<String,String> h) {
       if (h != null && h.size() > 0) {
@@ -167,7 +167,7 @@ public class wlOptions {
    
    // Build list of top level categories plus sub-categories which can be used
    // for Wishlist creation
-   private JSONArray getWishlistCategoryIds(String tivoName) {
+   /*private JSONArray getWishlistCategoryIds(String tivoName) {
       Remote r = new Remote(tivoName, true);
       if (r.success) {
          try {
@@ -220,7 +220,7 @@ public class wlOptions {
          }
       }
       return null;
-   }
+   }*/
    
    private String findCategoryId(String name) {
       String main, sub=null;

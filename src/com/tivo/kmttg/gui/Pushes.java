@@ -65,8 +65,8 @@ public class Pushes {
          return;
       }
       pyTivo.parsePyTivoConf(config.pyTivo_config);
-      if (config.pyTivo_username == null || config.pyTivo_password == null) {
-         log.error("pyTivo username and/or password not set in " + config.pyTivo_config);
+      if (config.getTivoUsername() == null || config.getTivoPassword() == null) {
+         log.error("tivo.com username and/or password not set in config or " + config.pyTivo_config);
          return;
       }
       
@@ -84,7 +84,7 @@ public class Pushes {
             data = new JSONArray();
             if (mind == null)
                mind = new Mind(config.pyTivo_mind);
-            if (!mind.login(config.pyTivo_username, config.pyTivo_password)) {
+            if (!mind.login(config.getTivoUsername(), config.getTivoPassword())) {
                log.error("Failed to login to Mind");
                return null;
             }
@@ -134,7 +134,7 @@ public class Pushes {
          protected Void doInBackground() {
             try {
                Mind mind = new Mind(config.pyTivo_mind);
-               if (!mind.login(config.pyTivo_username, config.pyTivo_password)) {
+               if (!mind.login(config.getTivoUsername(), config.getTivoPassword())) {
                   log.error("Failed to login to Mind");
                   return null;
                }

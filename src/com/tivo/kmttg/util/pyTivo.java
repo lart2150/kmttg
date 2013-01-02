@@ -115,8 +115,10 @@ public class pyTivo {
          if (username == null || password == null) {
             return null;
          }
-         config.pyTivo_username = username;
-         config.pyTivo_password = password;
+         if (config.getTivoUsername() == null)
+            config.setTivoUsername(username);
+         if (config.getTivoPassword() == null)
+            config.setTivoPassword(password);
          if (mind != null)
             config.pyTivo_mind = mind;
 

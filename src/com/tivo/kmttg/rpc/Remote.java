@@ -34,7 +34,6 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.pyTivo;
 
 public class Remote {
    public Boolean debug = false;
@@ -282,13 +281,9 @@ public class Remote {
    
    private Boolean Auth_web() {
       try {
-         if (! file.isFile(config.pyTivo_config)) {
-            log.error("pyTivo config not specified");
+         if (config.getTivoUsername() == null) {
+            log.error("tivo.com username & password not set in config or in pyTivo setup");
             return false;
-         }
-         if (config.pyTivo_username == null) {
-            if (pyTivo.parsePyTivoConf(config.pyTivo_config) == null)
-               return false;
          }
          String tsn = config.getTsn(tivoName);
          if (tsn == null) {
@@ -300,8 +295,8 @@ public class Remote {
          JSONObject credential = new JSONObject();
          JSONObject h = new JSONObject();
          credential.put("type", "mmaCredential");
-         credential.put("username", config.pyTivo_username);
-         credential.put("password", config.pyTivo_password);
+         credential.put("username", config.getTivoUsername());
+         credential.put("password", config.getTivoPassword());
          h.put("credential", credential);
          String req = RpcRequest("bodyAuthenticate", false, h);
          if (Write(req) ) {
