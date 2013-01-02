@@ -1107,8 +1107,17 @@ public class Remote {
             if (result.has("subscription")) {
                JSONArray entries = new JSONArray();
                for (int i=0; i<result.getJSONArray("subscription").length(); ++i) {
-                  // Find upcoming & conflicts entries for each SP and add data to each JSON
                   JSONObject j = result.getJSONArray("subscription").getJSONObject(i);
+                  if (away) {
+                     // Filter out certain season pass titles in away mode
+                     if (j.has("title")) {
+                        if (j.getString("title").equals("Music Choice"))
+                           continue;
+                        if (j.getString("title").equals("Amazon Video On Demand"))
+                           continue;
+                     }
+                  }
+                  // Find upcoming & conflicts entries for each SP and add data to each JSON
                   if (j.has("subscriptionId")) {
                      JSONObject json = new JSONObject();
                      json.put("subscriptionId", j.getString("subscriptionId"));
