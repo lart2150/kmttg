@@ -333,7 +333,7 @@ public class deletedTable {
                int row;
                JSONObject json;
                String title;
-               Remote r = config.gui.remote_gui.initRemote(tivoName);
+               Remote r = config.initRemote(tivoName);
                if (r.success) {
                   Boolean cont = true;
                   while (cont) {
@@ -386,7 +386,7 @@ public class deletedTable {
                int row;
                JSONObject json;
                String title;
-               Remote r = config.gui.remote_gui.initRemote(tivoName);
+               Remote r = config.initRemote(tivoName);
                if (r.success) {
                   Boolean cont = true;
                   while (cont) {

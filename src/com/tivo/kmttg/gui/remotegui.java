@@ -1309,7 +1309,7 @@ public class remotegui {
             // Initiate a net connect on selected TiVo
             String tivoName = (String)tivo_info.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               Remote r = initRemote(tivoName);
+               Remote r = config.initRemote(tivoName);
                if (r.success) {
                   JSONObject result = r.Command("PhoneHome", new JSONObject());
                   if (result != null)
@@ -1619,7 +1619,7 @@ public class remotegui {
                      class backgroundRun extends SwingWorker<Object, Object> {
                         protected Object doInBackground() {
                            if (config.rpcEnabled(tivoName)) {
-                              Remote r = initRemote(tivoName);
+                              Remote r = config.initRemote(tivoName);
                               if (r.success) {
                                  try {
                                     JSONObject json = new JSONObject();
@@ -1690,7 +1690,7 @@ public class remotegui {
                   event = "ccOn";
                cc_state = ! cc_state;
                if (config.rpcEnabled(tivoName)) {
-                  Remote r = initRemote(tivoName);
+                  Remote r = config.initRemote(tivoName);
                   if (r.success) {
                      try {
                         JSONObject json = new JSONObject();
@@ -1737,7 +1737,7 @@ public class remotegui {
             if (name != null && name.length() > 0) {
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Object doInBackground() {
-                     Remote r = initRemote(getTivoName("rc"));
+                     Remote r = config.initRemote(getTivoName("rc"));
                      if (r.success) {
                         try {
                            JSONObject json = new JSONObject();
@@ -1782,7 +1782,7 @@ public class remotegui {
                final int mins = Integer.parseInt(mins_string);
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Boolean doInBackground() {
-                     Remote r = initRemote(tivoName);
+                     Remote r = config.initRemote(tivoName);
                      if (r.success) {
                         JSONObject json = new JSONObject();
                         try {
@@ -1824,7 +1824,7 @@ public class remotegui {
                final int mins = Integer.parseInt(mins_string);
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Boolean doInBackground() {
-                     Remote r = initRemote(tivoName);
+                     Remote r = config.initRemote(tivoName);
                      if (r.success) {
                         JSONObject json = new JSONObject();
                         JSONObject reply = r.Command("Position", json);
@@ -1870,7 +1870,7 @@ public class remotegui {
                final int mins = Integer.parseInt(mins_string);
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Boolean doInBackground() {
-                     Remote r = initRemote(tivoName);
+                     Remote r = config.initRemote(tivoName);
                      if (r.success) {
                         JSONObject json = new JSONObject();
                         JSONObject reply = r.Command("Position", json);
@@ -2012,7 +2012,7 @@ public class remotegui {
    private void RC_infoCB(final String tivoName) {
       class backgroundRun extends SwingWorker<Object, Object> {
          protected Boolean doInBackground() {
-            Remote r = initRemote(tivoName);
+            Remote r = config.initRemote(tivoName);
             if (r.success) {
                JSONObject json = new JSONObject();
                JSONObject reply = r.Command("SysInfo", json);
@@ -2091,7 +2091,7 @@ public class remotegui {
    }
    
    private String[] getWhatsOn(String tivoName) {
-      Remote r = initRemote(tivoName);
+      Remote r = config.initRemote(tivoName);
       if (r.success) {
          JSONObject result = r.Command("WhatsOn", new JSONObject());
          if (result != null && result.has("whatsOn")) {
@@ -2482,7 +2482,7 @@ public class remotegui {
    public void TagPremieresWithSeasonPasses(JSONArray data) {
       String[] tivoNames = getTivoNames(tivo_premiere);
       for (int t=0; t<tivoNames.length; ++t) {
-         Remote r = initRemote(tivoNames[t]);
+         Remote r = config.initRemote(tivoNames[t]);
          if (r.success) {
             JSONArray existing = r.SeasonPasses(null);
             if (existing != null) {
@@ -2536,7 +2536,7 @@ public class remotegui {
          }
 
          protected Void doInBackground() throws Exception {
-            Remote r = initRemote(tivoName);
+            Remote r = config.initRemote(tivoName);
             if (r.success) {
                JSONArray todo = r.ToDo(null);
                // Add todo to hash
@@ -2743,7 +2743,7 @@ public class remotegui {
          final JSONObject fjson = json;
          class backgroundRun extends SwingWorker<Object, Object> {
             protected Boolean doInBackground() {
-               Remote r = initRemote(tivoName);
+               Remote r = config.initRemote(tivoName);
                if (r.success) {
                   JSONObject result = r.Command("Wishlist", fjson);
                   if (result != null)
@@ -2839,7 +2839,7 @@ public class remotegui {
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Object doInBackground() {
                      if (config.rpcEnabled(tivoName)) {
-                        Remote r = initRemote(tivoName);
+                        Remote r = config.initRemote(tivoName);
                         if (r.success) {
                            try {
                               JSONObject result;
@@ -2894,7 +2894,7 @@ public class remotegui {
             String tivoName = (String)tivo_rc.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                if (config.rpcEnabled(tivoName)) {
-                  Remote r = initRemote(tivoName);
+                  Remote r = config.initRemote(tivoName);
                   if (r.success) {
                      try {
                         JSONObject json = new JSONObject();
@@ -2921,16 +2921,6 @@ public class remotegui {
       }
       backgroundRun b = new backgroundRun();
       b.execute();
-   }
-   
-   public Remote initRemote(String tivoName) {
-      if (config.rpcEnabled(tivoName)) {
-         Remote r = new Remote(tivoName);
-         return(r);
-      } else {
-         Remote r = new Remote(tivoName, true);
-         return(r);
-      }
    }
       
    public String getToolTip(String component) {

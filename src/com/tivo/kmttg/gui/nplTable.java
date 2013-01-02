@@ -1229,7 +1229,7 @@ public class nplTable {
       }
       try {
          json.put("recordingId", a);
-         Remote r = config.gui.remote_gui.initRemote(tivoName);
+         Remote r = config.initRemote(tivoName);
          if (r.success) {
             r.Command("Delete", json);
             r.disconnect();
@@ -1244,7 +1244,7 @@ public class nplTable {
       JSONObject json = new JSONObject();
       try {
          json.put("recordingId", id);
-         Remote r = config.gui.remote_gui.initRemote(tivoName);
+         Remote r = config.initRemote(tivoName);
          if (r.success) {
             JSONObject result = r.Command("StopRecording", json);
             if(result != null && result.has("type") && result.getString("type").equals("success"))
@@ -1261,7 +1261,7 @@ public class nplTable {
       JSONObject json = new JSONObject();
       try {
          json.put("id", id);
-         Remote r = config.gui.remote_gui.initRemote(tivoName);
+         Remote r = config.initRemote(tivoName);
          if (r.success) {
             r.Command("Playback", json);
             r.disconnect();

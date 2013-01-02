@@ -300,7 +300,7 @@ public class todoTable {
        int row;
        String title;
        JSONObject json;
-       Remote r = config.gui.remote_gui.initRemote(currentTivo);
+       Remote r = config.initRemote(currentTivo);
        if (r.success) {
           // NOTE: Intentionally only remove 1 row at a time because removing rows from table
           row = selected[0];

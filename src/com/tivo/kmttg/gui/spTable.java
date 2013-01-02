@@ -602,7 +602,7 @@ public class spTable {
        int row;
        JSONObject json;
        String title;
-       Remote r = config.gui.remote_gui.initRemote(currentTivo);
+       Remote r = config.initRemote(currentTivo);
        if (r.success) {
           for (int i=0; i<selected.length; ++i) {
              row = selected[i];
@@ -673,7 +673,7 @@ public class spTable {
                 int row;
                 JSONArray existing;
                 JSONObject json, result;
-                Remote r = config.gui.remote_gui.initRemote(tivoName);
+                Remote r = config.initRemote(tivoName);
                 if (r.success) {
                    // First load existing SPs from tivoName to check against
                    existing = r.SeasonPasses(null);
@@ -753,7 +753,7 @@ public class spTable {
                          "(" + tivoName + ")" + "Modify SP - " + title, json
                       );
                       if (result != null) {
-                         Remote r = config.gui.remote_gui.initRemote(tivoName);
+                         Remote r = config.initRemote(tivoName);
                          if (r.success) {
                             if (r.Command("ModifySP", result) != null) {
                                log.warn("Modified SP '" + title + "' for TiVo: " + tivoName);

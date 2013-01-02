@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Stack;
 
+import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 
@@ -477,6 +478,16 @@ public class config {
    // 2. iPadDelete == 1
    public static Boolean ipadDeleteEnabled() {
       return ipadEnabled() && iPadDelete == 1;
+   }
+      
+   public static Remote initRemote(String tivoName) {
+      if (rpcEnabled(tivoName)) {
+         Remote r = new Remote(tivoName);
+         return(r);
+      } else {
+         Remote r = new Remote(tivoName, true);
+         return(r);
+      }
    }
    
    public static String getTivoUsername() {

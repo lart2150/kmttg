@@ -352,7 +352,7 @@ public class premiereTable {
                 int row;
                 JSONArray existing;
                 JSONObject json;
-                Remote r = config.gui.remote_gui.initRemote(tivoName);
+                Remote r = config.initRemote(tivoName);
                 if (r.success) {
                    // First load existing SPs from tivoName to check against
                    existing = r.SeasonPasses(null);

@@ -227,7 +227,7 @@ public class TableUtil {
                final String _message = message;
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Object doInBackground() {
-                     Remote r = config.gui.remote_gui.initRemote(tivoName);
+                     Remote r = config.initRemote(tivoName);
                      if (r.success) {
                         JSONObject result = r.Command("Singlerecording", o);
                         if (result == null) {

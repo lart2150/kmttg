@@ -588,7 +588,7 @@ public class guideTable {
       
       class backgroundRun extends SwingWorker<Object, Object> {
          protected Object doInBackground() {
-            Remote r = config.gui.remote_gui.initRemote(tivoName);
+            Remote r = config.initRemote(tivoName);
             if (r.success) {
                try {
                   JSONObject json = new JSONObject();
@@ -676,7 +676,7 @@ public class guideTable {
                int row;
                JSONArray existing;
                JSONObject json;
-               Remote r = config.gui.remote_gui.initRemote(tivoName);
+               Remote r = config.initRemote(tivoName);
                if (r.success) {
                   // First load existing SPs from tivoName to check against
                   existing = r.SeasonPasses(null);

@@ -44,7 +44,7 @@ public class Pushes {
       if (bodyId == null) {
          // Try using RPC to get tsn instead
          if (config.rpcEnabled(tivoName)) {
-            Remote r = config.gui.remote_gui.initRemote(tivoName);
+            Remote r = config.initRemote(tivoName);
             if (r.success) {
                bodyId = r.bodyId_get();
                r.disconnect();
