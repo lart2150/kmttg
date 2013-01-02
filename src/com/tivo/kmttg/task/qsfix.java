@@ -228,7 +228,7 @@ public class qsfix implements Serializable {
         return true;
       } else {
          // Job finished         
-         if ( jobMonitor.isFirstJobInMonitor(job) ) {
+         if ( config.GUIMODE && jobMonitor.isFirstJobInMonitor(job) ) {
             config.gui.setTitle(config.kmttg);
             config.gui.progressBar_setValue(0);
          }
