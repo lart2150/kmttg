@@ -70,7 +70,6 @@ import com.tivo.kmttg.util.string;
 
 public class remotegui {
    public JTabbedPane tabbed_panel = null;
-   public int tivo_count = 0;
    
    private todoTable tab_todo = null;
    private JComboBox tivo_todo = null;
@@ -1992,10 +1991,6 @@ public class remotegui {
       TableUtil.packColumns(tab_cancel.TABLE, 2);
       TableUtil.packColumns(tab_deleted.TABLE, 2);
       TableUtil.packColumns(tab_search.TABLE, 2);
-      if (tivo_count == 0) {
-         log.warn("No Premieres currently enabled for Remote Control in kmttg configuration");
-         return;
-      }
    }
       
    public JTabbedPane getPanel() {
@@ -2212,7 +2207,6 @@ public class remotegui {
    }
    
    public void setTivoNames() { 
-      tivo_count = 0;
       Stack<String> tivo_stack = config.getTivoNames();
       tivo_todo.removeAllItems();
       tivo_guide.removeAllItems();
@@ -2224,22 +2218,20 @@ public class remotegui {
       tivo_info.removeAllItems();
       tivo_premiere.removeAllItems();
       for (int i=0; i<tivo_stack.size(); ++i) {
-         //if (config.rpcEnabled(tivo_stack.get(i))) {
-            tivo_count++;
+         if (config.rpcEnabled(tivo_stack.get(i)) || config.getTivoUsername() != null) {
             tivo_todo.addItem(tivo_stack.get(i));
             tivo_guide.addItem(tivo_stack.get(i));
             tivo_sp.addItem(tivo_stack.get(i));
             tivo_cancel.addItem(tivo_stack.get(i));
             tivo_deleted.addItem(tivo_stack.get(i));
             tivo_search.addItem(tivo_stack.get(i));
-            tivo_rc.addItem(tivo_stack.get(i));
             tivo_info.addItem(tivo_stack.get(i));
             tivo_premiere.addItem(tivo_stack.get(i));
-         //}
+         }
+         // Remote tab always valid as it can use RPC or telnet
+         tivo_rc.addItem(tivo_stack.get(i));
       }
-      if (tivo_count > 0) {
-         setHmeDestinations(getTivoName("rc"));
-      }
+      setHmeDestinations(getTivoName("rc"));
    }
    
    private String[] getTivoNames(JComboBox component) {
@@ -2945,7 +2937,10 @@ public class remotegui {
       debug.print("component=" + component);
       String text = "";
       if (component.equals("tivo_todo")) {
-         text = "Select TiVo for which to retrieve To Do list.";
+         text = "Select TiVo for which to retrieve To Do list.<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
+         text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
       else if (component.equals("refresh_todo")){
          text = "<b>Refresh</b><br>";
@@ -2961,7 +2956,10 @@ public class remotegui {
          text += "Modify recording options of selected show in table below.";
       }
       if (component.equals("tivo_guide")) {
-         text = "Select TiVo for which to retrieve guide listings.";
+         text = "Select TiVo for which to retrieve guide listings.<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
+         text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
       if (component.equals("guide_start")) {
          text = "<b>Start</b><br>";
@@ -3013,7 +3011,10 @@ public class remotegui {
       else if (component.equals("tivo_cancel")) {
          text = "Select TiVo for which to display list of shows that will not record.<br>";
          text += "When changing TiVo selection the table below is NOT automatically updated so that you are<br>";
-         text += "able to schedule to record a show on another TiVo.";
+         text += "able to schedule to record a show on another TiVo.<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
+         text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
       else if (component.equals("refresh_cancel_top")){
          text = "<b>Refresh</b><br>";
@@ -3051,7 +3052,10 @@ public class remotegui {
          text += "recordings since last refresh of Will Not Record list.";
       }
       else if (component.equals("tivo_deleted")) {
-         text = "Select TiVo for which to display list of deleted shows (in Recently Deleted state)";
+         text = "Select TiVo for which to display list of deleted shows (in Recently Deleted state)<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
+         text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
       else if (component.equals("refresh_deleted")){
          text = "<b>Refresh</b><br>";
@@ -3069,7 +3073,10 @@ public class remotegui {
       else if (component.equals("tivo_search")) {
          text = "Select TiVo for which to perform search with.<br>";
          text += "When changing TiVo selection the table below is NOT automatically updated so that you are<br>";
-         text += "able to schedule to record a show on another TiVo.";
+         text += "able to schedule to record a show on another TiVo.<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
+         text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
       else if (component.equals("button_search")) {
          text = "<b>Search</b><br>";
@@ -3135,15 +3142,23 @@ public class remotegui {
          text += "Return to top level folder view.";
       }
       else if (component.equals("tivo_sp")) {
-         text = "Select TiVo for which to retrieve Season Passes list.";
+         text = "Select TiVo for which to retrieve Season Passes list.<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
+         text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
       else if (component.equals("tivo_rc")) {
-         text = "Select which TiVo you want to control.";
+         text = "Select which TiVo you want to control.<br>";
+         text += "NOTE: This will use RPC or telnet protocol to communicate with your TiVo(s),<br>";
+         text += "so make sure network remote setting on your TiVo is enabled.";
       }
       else if (component.equals("tivo_premiere")) {
          text = "Select TiVo to use for finding shows that are Season or Series premieres.<br>";
          text += "When changing TiVo selection the table below is NOT automatically updated so that you are<br>";
-         text += "able to schedule to record a show on another TiVo.";
+         text += "able to schedule to record a show on another TiVo.<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
+         text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
       else if (component.equals("refresh_premiere")){
          text = "<b>Search</b><br>";
@@ -3277,7 +3292,10 @@ public class remotegui {
          text += "NOTE: Only 1 item can be deleted or played at a time.";
       }
       if (component.equals("tivo_info")) {
-         text = "Select TiVo for which to retrieve system information.";
+         text = "Select TiVo for which to retrieve system information.<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
+         text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
       else if (component.equals("refresh_info")){
          text = "<b>Refresh</b><br>";
