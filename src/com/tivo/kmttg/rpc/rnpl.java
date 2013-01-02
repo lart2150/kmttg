@@ -94,7 +94,10 @@ public class rnpl {
             r_date = 0;
             r_diff = 10*r_date_leeway;
             r_size = 0;
-            json = rnpldata.get(tivoName).getJSONObject(i).getJSONArray("recording").getJSONObject(0);
+            if (rnpldata.get(tivoName).getJSONObject(i).has("recording"))
+               json = rnpldata.get(tivoName).getJSONObject(i).getJSONArray("recording").getJSONObject(0);
+            else
+               json = rnpldata.get(tivoName).getJSONObject(i);
             if (json.has("title"))
                r_title = json.getString("title");
             if (json.has("startTime")) {
@@ -115,6 +118,7 @@ public class rnpl {
             if (json.has("size"))
                r_size = (long) (json.getLong("size")*Math.pow(2,10));
             
+            if (r_size == 0) h_size = 0;
             //log.print("title: " + h_title + " : " + r_title);
             //log.print("date: " + h_date + " (" + date_long + ") : " + r_date + " (" + r_sdate + ")");
             //log.print("size: " + h_size + " : " + r_size);
