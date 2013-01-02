@@ -117,6 +117,8 @@ public class configMain {
    private static JTextField metadata_entries = null;
    private static JTextField autoLogSizeMB = null;
    private static JTextField pyTivo_host = null;
+   private static JTextField tivo_username = null;
+   private static JTextField tivo_password = null;
    private static JTextField pyTivo_config = null;
    private static JTextField autotune_channel_interval = null;
    private static JTextField autotune_button_interval = null;
@@ -748,6 +750,12 @@ public class configMain {
       
       // pyTivo_host
       pyTivo_host.setText("" + config.pyTivo_host);
+      
+      // tivo_username
+      tivo_username.setText("" + config.getTivoUsername());
+      
+      // tivo_password
+      tivo_password.setText("" + config.getTivoPassword());
       
       // pyTivo_config
       pyTivo_config.setText("" + config.pyTivo_config);
@@ -1527,6 +1535,22 @@ public class configMain {
       }
       config.pyTivo_host = value;
       
+      // tivo_username
+      value = string.removeLeadingTrailingSpaces(tivo_username.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = "";
+      }
+      config.setTivoUsername(value);
+      
+      // tivo_password
+      value = string.removeLeadingTrailingSpaces(tivo_password.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = "";
+      }
+      config.setTivoPassword(value);
+      
       // pyTivo_config
       value = string.removeLeadingTrailingSpaces(pyTivo_config.getText());
       if (value.length() == 0) {
@@ -1590,6 +1614,8 @@ public class configMain {
       AtomicParsley = new javax.swing.JTextField(30);
       projectx = new javax.swing.JTextField(30);
       customCommand = new javax.swing.JTextField(30);
+      tivo_username = new javax.swing.JTextField(30);
+      tivo_password = new javax.swing.JTextField(30);
       pyTivo_config = new javax.swing.JTextField(30);
       
       tivo_name = new javax.swing.JTextField(20);
@@ -1700,6 +1726,8 @@ public class configMain {
       JLabel autoLogSizeMB_label = new javax.swing.JLabel();
       JLabel available_keywords_label = new javax.swing.JLabel();
       JLabel pyTivo_host_label = new javax.swing.JLabel();
+      JLabel tivo_username_label = new javax.swing.JLabel();
+      JLabel tivo_password_label = new javax.swing.JLabel();
       JLabel pyTivo_config_label = new javax.swing.JLabel();
       JLabel pyTivo_tivo_label = new javax.swing.JLabel();
       JLabel MinChanDigits_label = new javax.swing.JLabel();
@@ -1812,6 +1840,8 @@ public class configMain {
       download_delay_label.setText("start delay in seconds for download tasks");
       metadata_entries_label.setText("extra metadata entries (comma separated)");
       autoLogSizeMB_label.setText("auto log file size limit (MB)");
+      tivo_username_label.setText("tivo.com username");
+      tivo_password_label.setText("tivo.com password");
       pyTivo_host_label.setText("pyTivo host name");
       pyTivo_config_label.setText("pyTivo.conf file");
       pyTivo_tivo_label.setText("pyTivo push destination");
@@ -2323,6 +2353,25 @@ public class configMain {
       c.gridy = gy;
       tivo_panel.add(wan_ipad_port, c);
       
+      // tivo.com username & password
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      tivo_panel.add(tivo_username_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      tivo_panel.add(tivo_username, c);
+
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      tivo_panel.add(tivo_password_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      tivo_panel.add(tivo_password, c);
+
       // autotune panel
       JPanel autotune_panel = new JPanel(new GridBagLayout());
       
@@ -3099,6 +3148,8 @@ public class configMain {
       download_delay.setToolTipText(getToolTip("download_delay"));
       metadata_entries.setToolTipText(getToolTip("metadata_entries"));
       autoLogSizeMB.setToolTipText(getToolTip("autoLogSizeMB"));
+      tivo_username.setToolTipText(getToolTip("tivo_username"));
+      tivo_password.setToolTipText(getToolTip("tivo_password"));
       pyTivo_host.setToolTipText(getToolTip("pyTivo_host"));
       pyTivo_config.setToolTipText(getToolTip("pyTivo_config"));
       pyTivo_tivo.setToolTipText(getToolTip("pyTivo_tivo"));
@@ -3671,6 +3722,20 @@ public class configMain {
          text += "kmttg initially logs to <b>auto.log.0</b> file. Once this specified file size limit is reached then<br>";
          text += "contents of <b>auto.log.0</b> are copied to <b>auto.log.1</b> and <b>auto.log.0</b> contents are flushed.<br>";
          text += "This limit prevents auto log file from growing in size indefinitely.";
+      }
+      else if (component.equals("tivo_username")) {
+         text =  "<b>tivo.com username</b><br>";
+         text += "For TiVo models older than series 4 the kmttg Remote can use your tivo.com login to<br>";
+         text += "obtain some of the information needed for kmttg Remote functions.<br>";
+         text += "This setting is optional. For series 4 or later enabling iPad style communications<br>";
+         text += "is a lot more useful.";
+      }
+      else if (component.equals("tivo_password")) {
+         text =  "<b>tivo.com password</b><br>";
+         text += "For TiVo models older than series 4 the kmttg Remote can use your tivo.com login to<br>";
+         text += "obtain some of the information needed for kmttg Remote functions.<br>";
+         text += "This setting is optional. For series 4 or later enabling iPad style communications<br>";
+         text += "is a lot more useful.";
       }
       else if (component.equals("pyTivo_host")) {
          text =  "<b>pyTivo host name</b><br>";
