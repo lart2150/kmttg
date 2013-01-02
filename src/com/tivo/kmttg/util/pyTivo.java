@@ -4,11 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -16,6 +14,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.JSON.XML;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.rpc.Remote;
 
 public class pyTivo {
@@ -205,12 +204,9 @@ public class pyTivo {
 
       String host = config.pyTivo_host;
       if (host.equals("localhost")) {
-         try {
-            InetAddress localhost = InetAddress.getLocalHost();
-            host = localhost.getHostAddress();
-         } catch (UnknownHostException e) {
-            log.error("streamFile - " + e.getMessage());
-         }
+         host = http.getLocalhostIP();
+         if (host == null)
+            return false;
       }
       String mime = "video/x-tivo-mpeg";
       if (file.endsWith(".mp4"))
