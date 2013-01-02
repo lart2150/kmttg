@@ -752,10 +752,16 @@ public class configMain {
       pyTivo_host.setText("" + config.pyTivo_host);
       
       // tivo_username
-      tivo_username.setText("" + config.getTivoUsername());
+      if (config.getTivoUsername() != null)
+         tivo_username.setText("" + config.getTivoUsername());
+      else
+         tivo_username.setText("");
       
       // tivo_password
-      tivo_password.setText("" + config.getTivoPassword());
+      if (config.getTivoPassword() != null)
+         tivo_password.setText("" + config.getTivoPassword());
+      else
+         tivo_password.setText("");
       
       // pyTivo_config
       pyTivo_config.setText("" + config.pyTivo_config);
