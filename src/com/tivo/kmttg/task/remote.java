@@ -54,7 +54,7 @@ public class remote implements Serializable {
       class AutoThread implements Runnable {
          AutoThread() {}       
          public void run () {
-            Remote r = config.gui.remote_gui.initRemote(job.tivoName);
+            Remote r = config.initRemote(job.tivoName);
             if (r.success) {
                if (job.remote_todo)
                   data = r.ToDo(job);
@@ -62,7 +62,7 @@ public class remote implements Serializable {
                   data = r.Upcoming(job);
                if (job.remote_conflicts) {
                   data = r.Upcoming(job);
-                  if (data != null && config.gui.remote_gui.all_todo.size() == 0) {
+                  if (data != null && config.GUIMODE && config.gui.remote_gui.all_todo.size() == 0) {
                      log.warn("Obtaining todo lists");
                      config.gui.remote_gui.all_todo = config.gui.remote_gui.getTodoLists("Cancel");
                   }
@@ -73,7 +73,7 @@ public class remote implements Serializable {
                   data = r.SPReorder(job);
                if (job.remote_cancel) {
                   data = r.CancelledShows(job);
-                  if (data != null && config.gui.remote_gui.all_todo.size() == 0) {
+                  if (data != null && config.GUIMODE && config.gui.remote_gui.all_todo.size() == 0) {
                      log.warn("Obtaining todo lists");
                      config.gui.remote_gui.all_todo = config.gui.remote_gui.getTodoLists("Cancel");
                   }
@@ -84,19 +84,19 @@ public class remote implements Serializable {
                   data = r.MyShows(job);
                if (job.remote_channels)
                   data = r.ChannelList(job);
-               if (job.remote_premiere)
+               if (job.remote_premiere && config.GUIMODE)
                   data = r.SeasonPremieres(
                      config.gui.remote_gui.getSelectedChannelData(job.tivoName),
                      job, config.gui.remote_gui.getPremiereDays()
                   );
-               if (job.remote_search) {
+               if (job.remote_search && config.GUIMODE) {
                   data = r.searchKeywords(job.remote_search_keyword, job, job.remote_search_max);
                   if (data != null && config.gui.remote_gui.all_todo.size() == 0) {
                      log.warn("Obtaining todo lists");
                      config.gui.remote_gui.all_todo = config.gui.remote_gui.getTodoLists("Search");
                   }
                }
-               if (job.remote_guideChannels) {
+               if (job.remote_guideChannels && config.GUIMODE) {
                   data = r.ChannelList(job);
                   if (config.gui.remote_gui.all_todo.size() == 0) {
                      log.warn("Obtaining todo lists");
@@ -167,13 +167,13 @@ public class remote implements Serializable {
                // ToDo list job => populate ToDo table
                job.todo.AddRows(job.tivoName, data);
             }
-            if (job.remote_upcoming && job.todo != null) {
+            if (job.remote_upcoming && job.todo != null && config.GUIMODE) {
                // Upcoming list job => populate ToDo table
                job.todo.AddRows(job.tivoName, data);
                // Make the ToDo tab the currently selected tab
                config.gui.remote_gui.getPanel().setSelectedIndex(0);
             }
-            if (job.remote_conflicts && job.cancelled != null) {
+            if (job.remote_conflicts && job.cancelled != null && config.GUIMODE) {
                // Conflicts list job => populate Won't Record table
                job.cancelled.AddRows(job.tivoName, data);
                // Make the Won't Record tab the currently selected tab
@@ -185,7 +185,7 @@ public class remote implements Serializable {
                // SP job => populate SP table
                job.sp.AddRows(job.tivoName, data);
             }
-            if (job.remote_spreorder && data != null) {
+            if (job.remote_spreorder && data != null && config.GUIMODE) {
                // Refresh SP list for TiVo SPs that were just re-ordered
                config.gui.remote_gui.clearTable("sp");
                config.gui.remote_gui.setTivoName("sp", job.tivoName);
@@ -200,7 +200,7 @@ public class remote implements Serializable {
             if (job.remote_rnpl) {
                rnpl.setNPLData(job.tivoName, data);
             }
-            if (job.remote_channels && data != null) {
+            if (job.remote_channels && data != null && config.GUIMODE) {
                config.gui.remote_gui.putChannelData(job.tivoName, data);
                config.gui.remote_gui.saveChannelInfo(job.tivoName);
             }
