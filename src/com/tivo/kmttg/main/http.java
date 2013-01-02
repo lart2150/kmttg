@@ -6,10 +6,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Authenticator;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
@@ -250,6 +252,30 @@ public class http {
       }
 
       return true;
+   }
+   
+   // Check URL is alive with specificed connection timeout
+   public static Boolean isAlive(String urlString, int timeout) {
+      try {
+         URL url = new URL(urlString);
+         URLConnection conn = getConnection(url);
+         conn.setConnectTimeout(timeout*1000);
+         conn.connect();
+      } catch (Exception e) {
+         log.error("isAlive: " + urlString + " - " + e.getMessage());
+         return false;
+      }
+      return true;
+   }
+   
+   public static String getLocalhostIP() {
+      try {
+         InetAddress localhost = InetAddress.getLocalHost();
+         return localhost.getHostAddress();
+      } catch (UnknownHostException e) {
+         log.error("getLocalhostIP - " + e.getMessage());
+      }
+      return null;
    }
 
 }
