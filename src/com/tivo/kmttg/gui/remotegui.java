@@ -1619,7 +1619,7 @@ public class remotegui {
                   if (tivoName != null && tivoName.length() > 0) {
                      class backgroundRun extends SwingWorker<Object, Object> {
                         protected Object doInBackground() {
-                           if (config.getRpcSetting(tivoName).equals("1")) {
+                           if (config.rpcEnabled(tivoName)) {
                               Remote r = initRemote(tivoName);
                               if (r.success) {
                                  try {
@@ -1690,7 +1690,7 @@ public class remotegui {
                else
                   event = "ccOn";
                cc_state = ! cc_state;
-               if (config.getRpcSetting(tivoName).equals("1")) {
+               if (config.rpcEnabled(tivoName)) {
                   Remote r = initRemote(tivoName);
                   if (r.success) {
                      try {
@@ -2224,7 +2224,7 @@ public class remotegui {
       tivo_info.removeAllItems();
       tivo_premiere.removeAllItems();
       for (int i=0; i<tivo_stack.size(); ++i) {
-         //if (config.getRpcSetting(tivo_stack.get(i)).equals("1")) {
+         //if (config.rpcEnabled(tivo_stack.get(i))) {
             tivo_count++;
             tivo_todo.addItem(tivo_stack.get(i));
             tivo_guide.addItem(tivo_stack.get(i));
@@ -2252,7 +2252,7 @@ public class remotegui {
    
    private void updateButtonStates(String tivoName, String tab) {
       Boolean state;
-      if (config.getRpcSetting(tivoName).equals("1"))
+      if (config.rpcEnabled(tivoName))
          state = true;
       else
          state = false;
@@ -2846,7 +2846,7 @@ public class remotegui {
             if (tivoName != null && tivoName.length() > 0) {
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Object doInBackground() {
-                     if (config.getRpcSetting(tivoName).equals("1")) {
+                     if (config.rpcEnabled(tivoName)) {
                         Remote r = initRemote(tivoName);
                         if (r.success) {
                            try {
@@ -2901,7 +2901,7 @@ public class remotegui {
          protected Object doInBackground() {
             String tivoName = (String)tivo_rc.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               if (config.getRpcSetting(tivoName).equals("1")) {
+               if (config.rpcEnabled(tivoName)) {
                   Remote r = initRemote(tivoName);
                   if (r.success) {
                      try {
@@ -2932,7 +2932,7 @@ public class remotegui {
    }
    
    public Remote initRemote(String tivoName) {
-      if (config.getRpcSetting(tivoName).equals("1")) {
+      if (config.rpcEnabled(tivoName)) {
          Remote r = new Remote(tivoName);
          return(r);
       } else {

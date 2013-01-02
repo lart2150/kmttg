@@ -423,7 +423,7 @@ public class config {
    }
    
    // Get configured setting in enableRpc hash for given tivoName
-   public static String getRpcSetting(String tivoName) {
+   private static String getRpcSetting(String tivoName) {
       if (enableRpc.containsKey(tivoName))
          return enableRpc.get(tivoName);
       else
@@ -442,13 +442,18 @@ public class config {
       }
    }
    
+   // Return true if RPC enabled in config for given TiVo
+   public static Boolean rpcEnabled(String tivoName) {
+      return getRpcSetting(tivoName).equals("1");
+   }
+   
    // iPad enabled =>
    // 1. At least 1 TiVo has RpcSetting of "1"
    public static Boolean ipadEnabled() {
       Boolean rpcSetting = false;
       Stack<String> current_tivoNames = getTivoNames();
       for (int i=0; i<current_tivoNames.size(); ++i) {
-         if (getRpcSetting(current_tivoNames.get(i)).equals("1"))
+         if (rpcEnabled(current_tivoNames.get(i)))
             rpcSetting = true;
       }
       return rpcSetting;

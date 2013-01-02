@@ -285,7 +285,7 @@ public class configMain {
       if (setting != null) {
          String tivoName = setting.replaceFirst("=.+$", "");
          // Update enableRpc setting according to selected TiVo
-         if (config.getRpcSetting(tivoName).equals("1"))
+         if (config.rpcEnabled(tivoName))
             enableRpc.setSelected(true);
          else
             enableRpc.setSelected(false);
@@ -442,7 +442,7 @@ public class configMain {
       name = (String)tivos.getSelectedItem();
       if (name != null) {
          String tivoName = name.replaceFirst("=.+$", "");
-         if (config.getRpcSetting(tivoName).equals("1"))
+         if (config.rpcEnabled(tivoName))
             enableRpc.setSelected(true);
          else
             enableRpc.setSelected(false);

@@ -186,7 +186,7 @@ public class javaNowPlaying implements Serializable {
             log.warn("NPL job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " tivo=" + job.tivoName);
             
-            if (config.getRpcSetting(job.tivoName).equals("1")) {
+            if (config.rpcEnabled(job.tivoName)) {
                // Extra iPad communication to retrieve NPL information
                // used to be able to play/delete shows. Only works for Premiere or
                // later models.

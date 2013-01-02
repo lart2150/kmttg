@@ -356,7 +356,7 @@ public class tivoTab {
          // NOTE: This is only valid for RPC enabled TiVos
          Stack<String> n = config.getTivoNames();
          for (int j=0; j<n.size(); ++j) {
-            if ( ! config.getRpcSetting(n.get(j)).equals("1") )
+            if ( ! config.rpcEnabled(n.get(j)) )
                n.remove(j);
          }
          if (n.size() > 0) {
@@ -368,7 +368,7 @@ public class tivoTab {
                // NOTE: This is only valid for RPC enabled TiVos
                Stack<String> names = config.getTivoNames();
                for (int j=0; j<names.size(); ++j) {
-                  if ( ! config.getRpcSetting(names.get(j)).equals("1") )
+                  if ( ! config.rpcEnabled(names.get(j)) )
                      names.remove(j);
                }
                String tivoName = (String)JOptionPane.showInputDialog(
@@ -424,8 +424,7 @@ public class tivoTab {
             h.put("decrypt",   config.gui.decrypt.isSelected());
             h.put("qsfix",     config.gui.qsfix.isSelected());
             h.put("twpdelete", config.gui.twpdelete.isSelected());
-            h.put("ipaddelete", config.gui.ipaddelete.isSelected() &&
-                  config.getRpcSetting(tivoName).equals("1"));
+            h.put("ipaddelete", config.gui.ipaddelete.isSelected() && config.rpcEnabled(tivoName));
             h.put("comskip",   config.gui.comskip.isSelected());
             h.put("comcut",    config.gui.comcut.isSelected());
             h.put("captions",  config.gui.captions.isSelected());

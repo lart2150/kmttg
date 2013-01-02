@@ -445,7 +445,7 @@ public class nplTable {
    
    // Handle delete keyboard presses
    private void KeyPressed(KeyEvent e) {
-      if (config.TivoWebPlusDelete == 0 && config.getRpcSetting(tivoName).equals("0")) {
+      if (config.TivoWebPlusDelete == 0 && ! config.rpcEnabled(tivoName)) {
          // Nothing to do so just consume & return
          e.consume();
          return;
@@ -469,9 +469,9 @@ public class nplTable {
                         Hashtable<String,String> entry = s.folderData.get(j);
                         if (entry.containsKey("url")) {
                            log.warn("Delete url=" + entry.get("url"));
-                           if (config.TivoWebPlusDelete == 1 && config.getRpcSetting(tivoName).equals("0"))
+                           if (config.TivoWebPlusDelete == 1 && ! config.rpcEnabled(tivoName))
                               urlsToDelete.add(entry.get("url"));
-                           if (config.getRpcSetting(tivoName).equals("1")) {
+                           if (config.rpcEnabled(tivoName)) {
                               id = rnpl.findRecordingId(tivoName, entry);
                               if (id != null) {
                                  show_names += entry.get("title");
@@ -483,12 +483,12 @@ public class nplTable {
                      } // for
                   } else {
                      // Delete individual show
-                     if (config.TivoWebPlusDelete == 1 && config.getRpcSetting(tivoName).equals("0")) {
+                     if (config.TivoWebPlusDelete == 1 && ! config.rpcEnabled(tivoName)) {
                         if (s.data.containsKey("url")) {
                            urlsToDelete.add(s.data.get("url"));
                         }
                      }
-                     if (config.getRpcSetting(tivoName).equals("1")) {
+                     if (config.rpcEnabled(tivoName)) {
                         id = rnpl.findRecordingId(tivoName, s.data);
                         if (id != null) {
                            if (s.data.containsKey("InProgress") && s.data.get("InProgress").equals("Yes")) {
@@ -510,13 +510,13 @@ public class nplTable {
                   } // else individual show
                } // for selected
                if (urlsToDelete.size() > 0) {
-                  if (config.TivoWebPlusDelete == 1 && config.getRpcSetting(tivoName).equals("0")) {
+                  if (config.TivoWebPlusDelete == 1 && ! config.rpcEnabled(tivoName)) {
                      // USE TWP to remove items from entries stack
                      // NOTE: Always revert to top view (not inside a folder)
                      RemoveUrls(urlsToDelete);
                      RefreshTable();
                   }
-                  if (config.getRpcSetting(tivoName).equals("1")) {
+                  if (config.rpcEnabled(tivoName)) {
                      // Use iPad remote protocol to remove items
                      log.warn("Deleting selected shows on TiVo '" + tivoName + "':\n" + show_names);
                      RemoveIds(urlsToDelete, idsToDelete);
@@ -532,7 +532,7 @@ public class nplTable {
                sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
                if ( ! s.folder ) {
                   // Play individual show
-                  if (config.getRpcSetting(tivoName).equals("1")) {
+                  if (config.rpcEnabled(tivoName)) {
                      id = rnpl.findRecordingId(tivoName, s.data);
                      if (id != null) {
                         // Use iPad remote protocol to play given item
