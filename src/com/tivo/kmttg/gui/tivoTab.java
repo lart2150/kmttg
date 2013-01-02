@@ -24,6 +24,7 @@ import javax.swing.table.TableColumnModel;
 
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.debug;
@@ -353,11 +354,25 @@ public class tivoTab {
          if (rows.length <= 0)
             return;
          
+         // Check if pyTivo server is alive
+         String host = config.pyTivo_host;
+         if (host.equals("localhost")) {
+            host = http.getLocalhostIP();
+            if (host == null)
+               return;
+         }
+         String urlString = "http://" + host + ":" + config.pyTivo_port;
+         if (! http.isAlive(urlString, 2)) {
+            log.error("pyTivo server not responding");
+            return;
+         }
+         
          // NOTE: This is only valid for RPC enabled TiVos
-         Stack<String> n = config.getTivoNames();
-         for (int j=0; j<n.size(); ++j) {
-            if ( ! config.rpcEnabled(n.get(j)) )
-               n.remove(j);
+         Stack<String> o = config.getTivoNames();
+         Stack<String> n = new Stack<String>();
+         for (int j=0; j<o.size(); ++j) {
+            if ( config.rpcEnabled(o.get(j)) )
+               n.add(o.get(j));
          }
          if (n.size() > 0) {
             Object[] tivos = n.toArray();   
@@ -365,12 +380,6 @@ public class tivoTab {
             for (int i=rows.length-1; i>=0; i--) {
                row = rows[i];
                String videoFile = nplTab.NowPlayingGetSelectionFile(row);
-               // NOTE: This is only valid for RPC enabled TiVos
-               Stack<String> names = config.getTivoNames();
-               for (int j=0; j<names.size(); ++j) {
-                  if ( ! config.rpcEnabled(names.get(j)) )
-                     names.remove(j);
-               }
                String tivoName = (String)JOptionPane.showInputDialog(
                  config.gui.getJFrame(),
                  videoFile,
