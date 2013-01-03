@@ -41,6 +41,7 @@ public class Mind {
    SimpleCookieManager cm = new SimpleCookieManager();
    
    public Mind(String mindServer) {
+      server = mindServer;
       if (config.getTivoUsername() == null) {
          log.error("tivo.com username & password not set in config or in pyTivo");
       }
