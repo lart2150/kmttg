@@ -526,10 +526,17 @@ public class cancelledTable {
          // If entry is in 1 of todo lists then add special __inTodo__ JSON entry
          config.gui.remote_gui.flagIfInTodo(entry);
          JSONObject o = new JSONObject();
-         String startString = entry.getString("scheduledStartTime");
-         long start = TableUtil.getLongDateFromString(startString);
-         String endString = entry.getString("scheduledEndTime");
-         long end = TableUtil.getLongDateFromString(endString);
+         String startString=null, endString=null;
+         long start=0, end=0;
+         if (entry.has("scheduledStartTime")) {
+            startString = entry.getString("scheduledStartTime");
+            start = TableUtil.getLongDateFromString(startString);
+            endString = entry.getString("scheduledEndTime");
+            end = TableUtil.getLongDateFromString(endString);
+         } else if (entry.has("startTime")) {
+            start = TableUtil.getStartTime(entry);
+            end = TableUtil.getEndTime(entry);
+         }
          String title = " ";
          if (entry.has("title"))
             title += entry.getString("title");
