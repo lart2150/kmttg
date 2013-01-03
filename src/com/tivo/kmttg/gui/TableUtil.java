@@ -3,7 +3,11 @@ package com.tivo.kmttg.gui;
 import java.awt.Component;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
@@ -281,5 +285,34 @@ public class TableUtil {
          }
       }
    }
-
+   // For a given array of JSON objects sort by start date - most recent 1st
+   static public JSONArray sortByLatestStartDate(JSONArray array) {
+      class DateComparator implements Comparator<JSONObject> {      
+         public int compare(JSONObject j1, JSONObject j2) {
+            long start1 = getStartTime(j1);
+            long start2 = getStartTime(j2);
+            if (start1 < start2){
+               return 1;
+            } else if (start1 > start2){
+               return -1;
+            } else {
+               return 0;
+            }
+         }
+      }
+      List<JSONObject> arrayList = new ArrayList<JSONObject>();
+      for (int i=0; i<array.length(); ++i)
+         try {
+            arrayList.add(array.getJSONObject(i));
+         } catch (JSONException e) {
+            log.error("sortByStartDate - " + e.getMessage());
+         }
+      JSONArray sorted = new JSONArray();
+      DateComparator comparator = new DateComparator();
+      Collections.sort(arrayList, comparator);
+      for (JSONObject ajson : arrayList) {
+         sorted.put(ajson);
+      }
+      return sorted;
+   }
 }
