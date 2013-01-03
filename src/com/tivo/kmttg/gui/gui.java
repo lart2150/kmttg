@@ -1857,7 +1857,11 @@ public class gui {
          text += "a series 4 or later TiVo. pyTivo.conf must be configured in kmttg and the video<br>";
          text += "file must be within a pyTivo video share folder structure.<br>";
          text += "NOTE: You must have at least 1 series 4 or later TiVo with iPad style communications<br>";
-         text += "enabled to use as a destination TiVo.";
+         text += "enabled to use as a destination TiVo.<br>";
+         text += "VIDEO RESTRICTIONS: Source video must be either:<br>";
+         text += "<b>Unencrypted mpeg2 program stream</b> (.TiVo files won't work).<br>";
+         text += "<b>mp4 container with H.264 video and either AC3 or AAC audio</b><br>";
+         text += "Any other type of video won't work, and transcoding pyTivo videos won't work.";
       }
       else if (component.equals("refresh")) {
          text =  "<b>Refresh List</b><br>";
