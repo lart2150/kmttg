@@ -29,6 +29,7 @@ import javax.net.ssl.X509TrustManager;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.TableUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -1093,7 +1094,7 @@ public class Remote {
          return null;
       }
 
-      return allShows;
+      return TableUtil.sortByLatestStartDate(allShows);
    }
    
    // Get all season passes
