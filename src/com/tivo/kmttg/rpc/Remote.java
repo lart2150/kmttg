@@ -933,7 +933,7 @@ public class Remote {
          return null;
       }
 
-      return allShows;
+      return TableUtil.sortByOldestStartDate(allShows);
    }
    
    // Similar to ToDo but for upcoming episode IDs obtained from a Season Pass
@@ -954,7 +954,7 @@ public class Remote {
          return null;
       }
 
-      return allShows;
+      return TableUtil.sortByOldestStartDate(allShows);
    }
    
    // Get list of all shows that won't record
@@ -1024,7 +1024,7 @@ public class Remote {
          return null;
       }
 
-      return allShows;
+      return TableUtil.sortByOldestStartDate(allShows);
    }
    
    // Get list of all shows in Deleted state
@@ -1283,7 +1283,7 @@ public class Remote {
          error("SeasonPremieres - " + e.getMessage());
          return null;
       }
-      return data;
+      return TableUtil.sortByOldestStartDate(data);
    }
    
    // This returns JSONArray of JSON objects each of following structure:
