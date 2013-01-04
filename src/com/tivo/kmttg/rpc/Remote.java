@@ -286,12 +286,6 @@ public class Remote {
             log.error("tivo.com username & password not set in kmttg or pyTivo config");
             return false;
          }
-         String tsn = config.getTsn(tivoName);
-         if (tsn == null) {
-            log.error("Can't determine TSN for TiVo: " + tivoName);
-            return null;
-         }
-         config.bodyId_set(IP, port, "tsn:" + tsn);
 
          JSONObject credential = new JSONObject();
          JSONObject h = new JSONObject();
@@ -303,8 +297,32 @@ public class Remote {
          if (Write(req) ) {
             JSONObject result = Read();
             if (result.has("status")) {
-               if (result.get("status").equals("success"))
+               if (result.get("status").equals("success")) {
+                  // Look for tivoName bodyId in deviceId JSONArray
+                  Boolean found = false;
+                  if (result.has("deviceId")) {
+                     JSONArray a = result.getJSONArray("deviceId");
+                     for (int i=0; i<a.length(); ++i) {
+                        JSONObject j = a.getJSONObject(i);
+                        if (j.has("friendlyName")) {
+                           if (j.getString("friendlyName").equals(tivoName) && j.has("id")) {
+                              found = true;
+                              config.bodyId_set(IP, port, j.getString("id"));
+                           }
+                        }
+                     }
+                  }
+                  if (! found) {
+                     // Couldn't get id from response so try getting tsn from kmttg
+                     String tsn = config.getTsn(tivoName);
+                     if (tsn == null) {
+                        log.error("Can't determine bodyId for TiVo: " + tivoName);
+                        return null;
+                     }
+                     config.bodyId_set(IP, port, "tsn:" + tsn);
+                  }
                   return true;
+               }
             }
          }
       } catch (Exception e) {
