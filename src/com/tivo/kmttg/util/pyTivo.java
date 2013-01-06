@@ -10,7 +10,6 @@ import java.net.URLEncoder;
 import java.util.Hashtable;
 import java.util.Stack;
 
-import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.JSON.XML;
 import com.tivo.kmttg.main.config;
@@ -209,8 +208,41 @@ public class pyTivo {
             return false;
       }
       String mime = "video/x-tivo-mpeg";
-      if (file.endsWith(".mp4"))
+      if (file.toLowerCase().endsWith(".mp4"))
          mime = "video/mp4";
+      if (file.toLowerCase().endsWith(".tivo")) {
+         log.error(".TiVo files not supported for streaming");
+         return false;
+      }
+      
+      // Get video info using ffmpeg and set mime
+      int duration = 0;
+      Hashtable<String,String> vInfo = ffmpeg.getVideoInfo(videoFile);
+      if (vInfo != null) {
+         if (vInfo.containsKey("container")) {
+            String c = vInfo.get("container");
+            if (! c.equals("mpeg") && ! c.equals("mp4")) {
+               log.error("Unsupported container for streaming: " + c);
+               return false;
+            }
+            if (c.equals("mp4"))
+               mime = "video/mp4";
+         }
+         if (vInfo.containsKey("video")) {
+            String v = vInfo.get("video");
+            if (! v.equals("mpeg2video") && ! v.equals("h264")) {
+               log.error("Unsupported video for streaming: " + v);
+               return false;
+            }
+            if (v.equals("h264"))
+               mime = "video/mp4";
+         }
+         if (vInfo.containsKey("duration")) {
+            duration = Integer.parseInt(vInfo.get("duration"));
+         }
+      }
+      
+      // Get title, subtitle, description from pyTivo query
       JSONObject videoInfo = getVideoDetails(host, config.pyTivo_port, share, path, file);
       if (videoInfo == null) {
          log.error("Could not determine video information from pyTivo");
@@ -221,7 +253,6 @@ public class pyTivo {
          String title = file;
          String subtitle = "";
          String description = "";
-         int duration = 0;
          if (videoInfo.has("program")) {
             JSONObject program = videoInfo.getJSONObject("program");
             if (program.has("title"))
@@ -230,23 +261,6 @@ public class pyTivo {
                subtitle = program.getString("subtitle");
             if (program.has("description"))
                description = program.getString("description");
-            if (program.has("vHost")) {
-               JSONObject vHost = program.getJSONObject("vHost");
-               if (vHost.has("element")) {
-                  JSONArray element = vHost.getJSONArray("element");
-                  for (int i=0; i<element.length(); ++i) {
-                     String s = element.getString(i);
-                     if (s.contains("millisecs")) {
-                        s = s.replaceFirst("millisecs=", "");
-                        duration = Integer.parseInt(s)/1000;
-                     }
-                     if (s.contains("vCodec")) {
-                        if (s.contains("h264"))
-                           mime = "video/mp4";
-                     }
-                  }
-               }
-            }
          }
          String urlString = "http://" + host + ":" + config.pyTivo_port;
          urlString += shareString;
