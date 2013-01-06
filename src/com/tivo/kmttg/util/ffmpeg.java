@@ -66,6 +66,19 @@ public class ffmpeg {
                      }
                   }
                }
+               if (line.matches("^\\s+Duration.+$")) {
+                  String fields[] = line.split("\\s+");
+                  if (fields.length > 2) {
+                     String t[] = fields[2].split(":");
+                     if (t.length > 2) {
+                        int h = Integer.parseInt(t[0]);
+                        int m = Integer.parseInt(t[1]);
+                        int s = Integer.parseInt(t[2].replaceFirst("\\..+", ""));
+                        int duration = 60*60*h + 60*m + s;
+                        info.put("duration", "" + duration);
+                     }
+                  }
+               }
             }
             if (info.size() == 0)
                info = null;
