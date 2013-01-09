@@ -11,6 +11,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Stack;
 import java.util.TimeZone;
 
 import com.tivo.kmttg.JSON.JSONArray;
@@ -142,6 +143,32 @@ public class rnpl {
       } else {
          log.error("recordingId not available for this entry");
          return null;
+      }
+   }
+
+   // Add RPC data to entries hashes where information may be missing
+   // such as originalAirDate & EpisodeNumber
+   public static void addRpcData(String tivoName, Stack<Hashtable<String,String>> entries) {
+      for (int i=0; i<entries.size(); ++i) {
+         Hashtable<String,String> h = entries.get(i);
+         JSONObject json = findRpcData(tivoName, h, true);
+         if (json != null) {
+            try {
+               if (json.has("recordingId"))
+                  h.put("recordingId", json.getString("recordingId"));
+               if (! h.containsKey("originalAirDate") && json.has("originalAirdate"))
+                  h.put("originalAirDate", json.getString("originalAirdate"));
+               if (! h.containsKey("EpisodeNumber") && json.has("episodeNum") && json.has("seasonNumber")) {
+                  h.put(
+                     "EpisodeNumber",
+                     "" + json.get("seasonNumber") +
+                     String.format("%02d", json.getJSONArray("episodeNum").get(0))
+                  );
+               }
+            } catch (JSONException e) {
+               log.error("addRpcData error - " + e.getMessage());
+            }
+         }
       }
    }
    
