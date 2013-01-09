@@ -253,11 +253,6 @@ public class javaNowPlaying implements Serializable {
             config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
          } else {
             // Batch mode
-            
-            // Add extra rpc data if available
-            if (config.rpcEnabled(job.tivoName))
-               rnpl.addRpcData(job.tivoName, ENTRIES);
-            
             int count = 0;
             for (int j=0; j<ENTRIES.size(); j++) {
                if ( auto.keywordSearch(ENTRIES.get(j)) )
