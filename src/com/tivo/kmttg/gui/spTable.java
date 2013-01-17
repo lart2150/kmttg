@@ -607,9 +607,9 @@ public class spTable {
           for (int i=0; i<selected.length; ++i) {
              row = selected[i];
              json = GetRowData(row);
-             title = GetRowTitle(row);
              if (json != null) {
                 try {
+                   title = json.getString("title");
                    if (isTableLoaded()) {
                       log.error("Cannot unsubscribe loaded Season Passes. Refresh list for TiVo passes");
                    } else {
