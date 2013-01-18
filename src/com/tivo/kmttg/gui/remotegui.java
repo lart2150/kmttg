@@ -2357,7 +2357,6 @@ public class remotegui {
       String fileName = config.programDir + File.separator + tivoName + ".channels";
       if (file.isFile(fileName)) {
          try {
-            log.warn("Loading channel info from file: " + fileName);
             JSONArray a = new JSONArray();
             String line;
             Stack<Integer> selected = new Stack<Integer>();
