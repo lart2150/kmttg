@@ -3,6 +3,7 @@ package com.tivo.kmttg.util;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -20,6 +21,9 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 
 public class createMeta {
+   private static HashMap<String,String> tvRatings = null;
+   private static HashMap<String,String> mpaaRatings = null;
+   private static HashMap<String,String> mpaaMappedRating = null;
    
    // Create a pyTivo compatible metadata file from a TiVoVideoDetails xml download
    @SuppressWarnings("unchecked")
@@ -254,6 +258,108 @@ public class createMeta {
          return data;
       }
       return null;
+   }
+   
+   private static void initHashes() {
+      if (tvRatings == null) {
+         tvRatings = new HashMap<String,String>();
+         tvRatings.put("TV-Y7", "1");
+         tvRatings.put("TVY7",  "1");
+         tvRatings.put("Y7",    "1");
+         tvRatings.put("X1",    "1");
+
+         tvRatings.put("TV-Y",  "2");
+         tvRatings.put("TVY",   "2");
+         tvRatings.put("Y",     "2");
+         tvRatings.put("X2",    "2");
+
+         tvRatings.put("TV-G",  "3");
+         tvRatings.put("TVG",   "3");
+         tvRatings.put("G",     "3");
+         tvRatings.put("X3",    "3");
+
+         tvRatings.put("TV-PG", "4");
+         tvRatings.put("TVPG",  "4");
+         tvRatings.put("PG",    "4");
+         tvRatings.put("X4",    "4");
+
+         tvRatings.put("TV-14", "5");
+         tvRatings.put("TV14",  "5");
+         tvRatings.put("14",    "5");
+         tvRatings.put("X5",    "5");
+
+         tvRatings.put("TV-MA", "6");
+         tvRatings.put("TVMA",  "6");
+         tvRatings.put("MA",    "6");
+         tvRatings.put("X6",    "6");
+
+         tvRatings.put("TV-NR", "7");
+         tvRatings.put("TVNR",  "7");
+         tvRatings.put("NR",    "7");
+         tvRatings.put("X7",    "7");
+      }
+      if (mpaaRatings == null) {
+         mpaaRatings = new HashMap<String,String>();
+         mpaaRatings.put("G",       "1");
+         mpaaRatings.put("G1",      "1");
+
+         mpaaRatings.put("PG",      "2");
+         mpaaRatings.put("P2",      "2");
+
+         mpaaRatings.put("PG-13",   "3");
+         mpaaRatings.put("PG13",    "3");
+         mpaaRatings.put("P3",      "3");
+
+         mpaaRatings.put("R",       "4");
+         mpaaRatings.put("R4",      "4");
+
+         mpaaRatings.put("X",       "5");
+         mpaaRatings.put("X5",      "5");
+
+         mpaaRatings.put("NC-17",   "6");
+         mpaaRatings.put("NC17",    "6");
+         mpaaRatings.put("N6",      "6");
+
+         mpaaRatings.put("NR",      "7");
+         mpaaRatings.put("UNRATED", "7");
+         mpaaRatings.put("N7",      "7");
+         mpaaRatings.put("N8",      "7");
+         mpaaRatings.put("8",       "7");
+      }
+      if (mpaaMappedRating == null) {
+         mpaaMappedRating = new HashMap<String,String>();
+         mpaaMappedRating.put("1", "G");
+         mpaaMappedRating.put("2", "PG");
+         mpaaMappedRating.put("3", "PG-13");
+         mpaaMappedRating.put("4", "R");
+         mpaaMappedRating.put("5", "X");
+         mpaaMappedRating.put("6", "NC-17");
+         mpaaMappedRating.put("7", "NR");
+      }
+   }
+   
+   // This used for mapping to AtomicParsley --contentRating argument
+   public static String tvRating2contentRating(String tvRating) {
+      initHashes();
+      String upperRating = tvRating.toUpperCase();
+      String intermediate = null;
+      if (tvRatings.containsKey(upperRating))
+         intermediate = tvRatings.get(upperRating);
+      if (intermediate != null && mpaaMappedRating.containsKey(intermediate))
+         return mpaaMappedRating.get(intermediate);
+      return tvRating;
+   }
+   
+   // This used for mapping to AtomicParsley --contentRating argument   
+   public static String mpaaRating2contentRating(String mpaaRating) {
+      initHashes();
+      String upperRating = mpaaRating.toUpperCase();
+      String intermediate = null;
+      if (mpaaRatings.containsKey(upperRating))
+         intermediate = mpaaRatings.get(upperRating);
+      if (intermediate != null && mpaaMappedRating.containsKey(intermediate))
+         return mpaaMappedRating.get(intermediate);
+      return mpaaRating;
    }
 
 }
