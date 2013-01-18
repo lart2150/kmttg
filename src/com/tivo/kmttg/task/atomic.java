@@ -16,6 +16,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.backgroundProcess;
+import com.tivo.kmttg.util.createMeta;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -167,6 +168,32 @@ public class atomic implements Serializable {
    // Build arguments for AtomicParsley run based on encode file meta data file
    private void atomicGetArgs() {
       if ( ! file.isFile(job.metaFile) ) return;
+      
+      // Run without any arguments to check on supported options
+      Boolean contentRating = false;
+      Boolean longdesc = false;
+      Boolean hdvideo = false;
+      Stack<String> command = new Stack<String>();
+      command.add(config.AtomicParsley);
+      backgroundProcess process = new backgroundProcess();
+      if ( process.run(command) ) {
+         // Wait for command to terminate
+         process.Wait();
+         Stack<String> l = process.getStdout();
+         if (l.size() > 0) {
+            String line;
+            for (int i=0; i<l.size(); ++i) {
+               line = l.get(i);
+               if (line.contains("--contentRating"))
+                  contentRating = true;
+               if (line.contains("--longdesc"))
+                  longdesc = true;
+               if (line.contains("--hdvideo"))
+                  hdvideo = true;
+            }
+         }
+      }
+      
       Hashtable <String,String> h = new Hashtable<String,String>();
       h.put("MediaKind", "Movie");
       
@@ -216,6 +243,27 @@ public class atomic implements Serializable {
          if (h.containsKey("description") ) {
             args.add("--description");
             args.add(h.get("description"));
+            if (longdesc) {
+               args.add("--longdesc");
+               args.add(h.get("description"));               
+            }
+         }
+         if(contentRating) {
+            if (h.containsKey("tvRating")) {
+               args.add("--contentRating");
+               args.add(createMeta.tvRating2contentRating(h.get("tvRating")));
+            } else if (h.containsKey("mpaaRating")) {
+               args.add("--contentRating");
+               args.add(createMeta.mpaaRating2contentRating(h.get("mpaaRating")));            
+            }
+         }
+         if (hdvideo) {
+            if (h.containsKey("showingBits")) {
+               if (h.get("showingBits").equals("4096")) {
+                  args.add("--hdvideo");
+                  args.add("true");
+               }
+            }
          }
          if (h.containsKey("title") ) {
             String title = h.get("title");
