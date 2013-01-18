@@ -202,7 +202,7 @@ public class atomic implements Serializable {
             args.add("--title");
             args.add(h.get("episodeTitle"));
          }
-         if (h.containsKey("vProgramGenre") ) {
+         if (h.containsKey("vProgramGenre") && h.get("vProgramGenre").length() > 0) {
             args.add("--grouping");
             args.add(h.get("vProgramGenre"));
          }
