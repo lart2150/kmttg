@@ -579,6 +579,7 @@ public class searchTable {
                Remote r = config.initRemote(tivoName);
                if (r.success) {
                   // First load existing SPs from tivoName to check against
+                  log.print("Checking existing season passes on '" + tivoName + "' ...");
                   existing = r.SeasonPasses(null);
                   if (existing == null) {
                      log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
