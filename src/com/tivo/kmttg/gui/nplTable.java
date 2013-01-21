@@ -660,7 +660,11 @@ public class nplTable {
             }
             
             if (s.data.containsKey("originalAirDate")) {
-               message += "\n" + "originalAirDate=" + s.data.get("originalAirDate");
+               message += ", originalAirDate=" + s.data.get("originalAirDate");
+            }
+
+            if (s.data.containsKey("movieYear")) {
+               message += ", movieYear=" + s.data.get("movieYear");
             }
             
             if (description != null) {
@@ -1401,6 +1405,8 @@ public class nplTable {
                   h.put("recordingId", json.getString("recordingId"));
                if (! h.containsKey("originalAirDate") && json.has("originalAirdate"))
                   h.put("originalAirDate", json.getString("originalAirdate"));
+               if (! h.containsKey("movieYear") && json.has("movieYear"))
+                  h.put("movieYear", "" + json.get("movieYear"));
                if (! h.containsKey("EpisodeNumber") && json.has("episodeNum") && json.has("seasonNumber")) {
                   h.put(
                      "EpisodeNumber",
