@@ -1073,10 +1073,14 @@ public class Remote {
                   if (j.has("subscriptionId")) {
                      JSONObject json = new JSONObject();
                      json.put("subscriptionId", j.getString("subscriptionId"));
-                     JSONObject r = Command("ToDo", json);
+                     json.put("bodyId", bodyId_get());
+                     json.put("format", "idSequence");
+                     json.put("state", new JSONArray("[\"inProgress\",\"scheduled\"]"));
+                     JSONObject r = Command("recordingSearch", json);
                      if (r != null && r.has("objectIdAndType"))
                         j.put("__upcoming", r.getJSONArray("objectIdAndType"));
-                     r = Command("Cancelled", json);
+                     json.put("state", new JSONArray("[\"cancelled\"]"));
+                     r = Command("recordingSearch", json);
                      if (r != null && r.has("objectIdAndType"))
                         j.put("__conflicts", r.getJSONArray("objectIdAndType"));
                   }
