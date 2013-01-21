@@ -550,9 +550,10 @@ public class Remote {
             req = RpcRequest("recordingFolderItemSearch", false, json);
          }
          else if (type.equals("ToDo")) {
+            // Get list of recordings that are expected to record
             // Expects count=# in initial json, offset=# after first call
-            json.put("format", "idSequence");
             json.put("bodyId", bodyId_get());
+            json.put("levelOfDetail", "medium");
             json.put("state", new JSONArray("[\"inProgress\",\"scheduled\"]"));
             req = RpcRequest("recordingSearch", false, json);
          }
@@ -563,18 +564,18 @@ public class Remote {
             req = RpcRequest("recordingSearch", false, json);
          }
          else if (type.equals("Cancelled")) {
-            // Get list or recording Ids that will not record
+            // Get list of recordings that will not record
             // Expects count=# in initial json, offset=# after first call
-            json.put("format", "idSequence");
             json.put("bodyId", bodyId_get());
+            json.put("levelOfDetail", "medium");
             json.put("state", new JSONArray("[\"cancelled\"]"));
             req = RpcRequest("recordingSearch", false, json);
          }
          else if (type.equals("Deleted")) {
-            // Get list or recording Ids that are in Recently Deleted
+            // Get list or recordings that are in Recently Deleted
             // Expects count=# in initial json, offset=# after first call
-            json.put("format", "idSequence");
             json.put("bodyId", bodyId_get());
+            json.put("levelOfDetail", "medium");
             json.put("state", new JSONArray("[\"deleted\"]"));
             req = RpcRequest("recordingSearch", false, json);
          }
@@ -903,20 +904,19 @@ public class Remote {
       JSONObject result = null;
 
       try {
-         // Top level list - run in a loop to grab all items
-         JSONArray items = new JSONArray();
+         // Top level list - run in a loop to grab all items, 20 at a time
          Boolean stop = false;
          JSONObject json = new JSONObject();
-         json.put("count", 100);
+         json.put("count", 20);
          int offset = 0;
+         if (job != null && config.GUIMODE)
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "ToDo list");
          while ( ! stop ) {
-            if (job != null && config.GUIMODE)
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "ToDo List");
             result = Command("ToDo", json);
-            if (result != null && result.has("objectIdAndType")) {
-               JSONArray a = result.getJSONArray("objectIdAndType");
+            if (result != null && result.has("recording")) {
+               JSONArray a = result.getJSONArray("recording");
                for (int i=0; i<a.length(); ++i)
-                  items.put(a.get(i));
+                  allShows.put(a.getJSONObject(i));
                offset += a.length();
                json.put("offset", offset);
                if (a.length() == 0)
@@ -924,28 +924,15 @@ public class Remote {
             } else {
                stop = true;
             }
-         } // while
-         
-         // Now collect info on individual items, 50 at a time
-         int total = items.length();
-         int max=50;
-         int index=0, num=0;
-         while (index < total) {
-            num += max;
-            if (num > total)
-               num = total;
-            JSONArray id = new JSONArray();
-            while (index < num)
-               id.put(items.get(index++));
-            JSONObject s = new JSONObject();
-            s.put("objectIdAndType",id);
-            result = Command("SearchId", s);
-            if (result != null && result.has("recording")) {
-               id = result.getJSONArray("recording");
-               for (int j=0; j<id.length(); ++j)
-                  allShows.put(id.getJSONObject(j));
-            } // if
-         } // while
+            
+            // Update status in job monitor
+            if (job != null && config.GUIMODE) {
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "ToDo list: " + offset);
+               if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                  config.gui.setTitle("ToDo: " + offset + " " + config.kmttg);
+               }
+            }
+         } // while         
       } catch (JSONException e) {
          error("rpc ToDo error - " + e.getMessage());
          return null;
@@ -981,20 +968,19 @@ public class Remote {
       JSONObject result = null;
 
       try {
-         // Top level list - run in a loop to grab all items
-         JSONArray items = new JSONArray();
+         // Top level list - run in a loop to grab all items, 20 at a time
          Boolean stop = false;
          JSONObject json = new JSONObject();
-         json.put("count", 100);
+         json.put("count", 20);
          int offset = 0;
+         if (job != null && config.GUIMODE)
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Will Not Record list");
          while ( ! stop ) {
-            if (job != null && config.GUIMODE)
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Will Not Record list");
             result = Command("Cancelled", json);
-            if (result != null && result.has("objectIdAndType")) {
-               JSONArray a = result.getJSONArray("objectIdAndType");
+            if (result != null && result.has("recording")) {
+               JSONArray a = result.getJSONArray("recording");
                for (int i=0; i<a.length(); ++i)
-                  items.put(a.get(i));
+                  allShows.put(a.getJSONObject(i));
                offset += a.length();
                json.put("offset", offset);
                if (a.length() == 0)
@@ -1002,40 +988,14 @@ public class Remote {
             } else {
                stop = true;
             }
-         } // while
-         
-         // Now collect info on individual items, 50 at a time
-         int total = items.length();
-         int max=50;
-         int index=0, num=0;
-         while (index < total) {
-            num += max;
-            if (num > total)
-               num = total;
-            JSONArray id = new JSONArray();
-            while (index < num)
-               id.put(items.get(index++));
-            JSONObject s = new JSONObject();
-            s.put("objectIdAndType",id);
             
             // Update status in job monitor
             if (job != null && config.GUIMODE) {
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Will Not Record list");
-               String message = "Processing: " + index + "/" + total;
-               config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Will Not Record list: " + offset);
                if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                  config.gui.setTitle("Not rec: " + index + "/" + total + " " + config.kmttg);
-                  float pct = (float)index*100/total;
-                  config.gui.progressBar_setValue((int)pct);
+                  config.gui.setTitle("Not rec: " + offset + " " + config.kmttg);
                }
             }
-            
-            result = Command("SearchId", s);
-            if (result != null && result.has("recording")) {
-               id = result.getJSONArray("recording");
-               for (int j=0; j<id.length(); ++j)
-                  allShows.put(id.getJSONObject(j));
-            } // if
          } // while
       } catch (JSONException e) {
          error("rpc CancelledShows error - " + e.getMessage());
@@ -1051,20 +1011,19 @@ public class Remote {
       JSONObject result = null;
 
       try {
-         // Top level list - run in a loop to grab all items
-         JSONArray items = new JSONArray();
+         // Top level list - run in a loop to grab all items, 20 at a time
          Boolean stop = false;
          JSONObject json = new JSONObject();
-         json.put("count", 100);
+         json.put("count", 20);
          int offset = 0;
+         if (job != null && config.GUIMODE)
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Deleted list");
          while ( ! stop ) {
-            if (job != null && config.GUIMODE)
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Deleted list");
             result = Command("Deleted", json);
-            if (result != null && result.has("objectIdAndType")) {
-               JSONArray a = result.getJSONArray("objectIdAndType");
+            if (result != null && result.has("recording")) {
+               JSONArray a = result.getJSONArray("recording");
                for (int i=0; i<a.length(); ++i)
-                  items.put(a.get(i));
+                  allShows.put(a.getJSONObject(i));
                offset += a.length();
                json.put("offset", offset);
                if (a.length() == 0)
@@ -1072,40 +1031,14 @@ public class Remote {
             } else {
                stop = true;
             }
-         } // while
-         
-         // Now collect info on individual items, 50 at a time
-         int total = items.length();
-         int max=50;
-         int index=0, num=0;
-         while (index < total) {
-            num += max;
-            if (num > total)
-               num = total;
-            JSONArray id = new JSONArray();
-            while (index < num)
-               id.put(items.get(index++));
-            JSONObject s = new JSONObject();
-            s.put("objectIdAndType",id);
             
             // Update status in job monitor
             if (job != null && config.GUIMODE) {
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Deleted list");
-               String message = "Processing: " + index + "/" + total;
-               config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Deleted list: " + offset);
                if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                  config.gui.setTitle("Deleted: " + index + "/" + total + " " + config.kmttg);
-                  float pct = (float)index*100/total;
-                  config.gui.progressBar_setValue((int)pct);
+                  config.gui.setTitle("Deleted: " + offset + " " + config.kmttg);
                }
             }
-            
-            result = Command("SearchId", s);
-            if (result != null && result.has("recording")) {
-               id = result.getJSONArray("recording");
-               for (int j=0; j<id.length(); ++j)
-                  allShows.put(id.getJSONObject(j));
-            } // if
          } // while
       } catch (JSONException e) {
          error("rpc DeletedShows error - " + e.getMessage());
