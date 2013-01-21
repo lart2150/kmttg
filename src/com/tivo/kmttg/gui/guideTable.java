@@ -278,45 +278,7 @@ public class guideTable {
          try {
             // Non folder entry so print single entry info
             sortableDuration dur = (sortableDuration)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "DUR"));
-            JSONObject o;
-            String channelNum = null;
-            String channel = null;
-            if (s.json.has("channel")) {
-               o = s.json.getJSONObject("channel");
-               if ( o.has("channelNumber") ) {
-                  channelNum = o.getString("channelNumber");
-               }
-               if ( o.has("callSign") ) {
-                  channel = o.getString("callSign");
-               }
-            }
-            String description = null;
-            if ( s.json.has("description") ) {
-               description = s.json.getString("description");
-            }
-            String d = "";
-            if (dur.sortable != null) {
-               d = rnpl.msecsToMins(dur.sortable);
-            }
-            String message = "";
-            if (s.display != null)
-               message = s.display;
-            if (channelNum != null && channel != null) {
-               message += " on " + channelNum + "=" + channel;
-            }
-            message += ", Duration = " + d;
-            
-            if (s.json.has("seasonNumber"))
-               message += ", season " + s.json.get("seasonNumber");
-            if (s.json.has("episodeNum"))
-               message += " episode " + s.json.getJSONArray("episodeNum").get(0);
-            if (s.json.has("originalAirdate"))
-               message += ", originalAirdate: " + s.json.getString("originalAirdate");
-            
-            if (description != null) {
-               message += "\n" + description;
-            }
-      
+            String message = TableUtil.makeShowSummary(s, dur);
             String title = "\nGuide: ";
             if (s.json.has("title"))
                title += s.json.getString("title");
