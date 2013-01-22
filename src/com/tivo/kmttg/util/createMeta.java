@@ -22,8 +22,9 @@ import com.tivo.kmttg.main.jobData;
 
 public class createMeta {
    private static HashMap<String,String> tvRatings = null;
+   private static HashMap<String,String> humanTvRatings = null;
    private static HashMap<String,String> mpaaRatings = null;
-   private static HashMap<String,String> mpaaMappedRating = null;
+   private static HashMap<String,String> humanMpaaRatings = null;
    
    // Create a pyTivo compatible metadata file from a TiVoVideoDetails xml download
    @SuppressWarnings("unchecked")
@@ -298,6 +299,16 @@ public class createMeta {
          tvRatings.put("NR",    "7");
          tvRatings.put("X7",    "7");
       }
+      if (humanTvRatings == null) {
+         humanTvRatings = new HashMap<String,String>();
+         humanTvRatings.put("1", "Y7");
+         humanTvRatings.put("2", "Y");
+         humanTvRatings.put("3", "G");
+         humanTvRatings.put("4", "PG");
+         humanTvRatings.put("5", "14");
+         humanTvRatings.put("6", "MA");
+         humanTvRatings.put("7", "NR");
+      }
       if (mpaaRatings == null) {
          mpaaRatings = new HashMap<String,String>();
          mpaaRatings.put("G",       "1");
@@ -320,21 +331,20 @@ public class createMeta {
          mpaaRatings.put("NC17",    "6");
          mpaaRatings.put("N6",      "6");
 
-         mpaaRatings.put("NR",      "7");
-         mpaaRatings.put("UNRATED", "7");
-         mpaaRatings.put("N7",      "7");
-         mpaaRatings.put("N8",      "7");
-         mpaaRatings.put("8",       "7");
+         mpaaRatings.put("NR",      "8");
+         mpaaRatings.put("UNRATED", "8");
+         mpaaRatings.put("N8",      "8");
+         mpaaRatings.put("8",       "8");
       }
-      if (mpaaMappedRating == null) {
-         mpaaMappedRating = new HashMap<String,String>();
-         mpaaMappedRating.put("1", "G");
-         mpaaMappedRating.put("2", "PG");
-         mpaaMappedRating.put("3", "PG-13");
-         mpaaMappedRating.put("4", "R");
-         mpaaMappedRating.put("5", "X");
-         mpaaMappedRating.put("6", "NC-17");
-         mpaaMappedRating.put("7", "NR");
+      if (humanMpaaRatings == null) {
+         humanMpaaRatings = new HashMap<String,String>();
+         humanMpaaRatings.put("1", "G");
+         humanMpaaRatings.put("2", "PG");
+         humanMpaaRatings.put("3", "PG-13");
+         humanMpaaRatings.put("4", "R");
+         humanMpaaRatings.put("5", "X");
+         humanMpaaRatings.put("6", "NC-17");
+         humanMpaaRatings.put("8", "NR");
       }
    }
    
@@ -345,8 +355,8 @@ public class createMeta {
       String intermediate = null;
       if (tvRatings.containsKey(upperRating))
          intermediate = tvRatings.get(upperRating);
-      if (intermediate != null && mpaaMappedRating.containsKey(intermediate))
-         return mpaaMappedRating.get(intermediate);
+      if (intermediate != null && humanTvRatings.containsKey(intermediate))
+         return humanTvRatings.get(intermediate);
       return tvRating;
    }
    
@@ -357,8 +367,8 @@ public class createMeta {
       String intermediate = null;
       if (mpaaRatings.containsKey(upperRating))
          intermediate = mpaaRatings.get(upperRating);
-      if (intermediate != null && mpaaMappedRating.containsKey(intermediate))
-         return mpaaMappedRating.get(intermediate);
+      if (intermediate != null && humanMpaaRatings.containsKey(intermediate))
+         return humanMpaaRatings.get(intermediate);
       return mpaaRating;
    }
 
