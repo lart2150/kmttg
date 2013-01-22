@@ -259,7 +259,9 @@ public class atomic implements Serializable {
          }
          if (hdvideo) {
             if (h.containsKey("showingBits")) {
-               if (h.get("showingBits").equals("4096")) {
+               int showingBits = Integer.parseInt(h.get("showingBits"));
+               int hdflag = 0x1000; // bit 12 of 32 bit number
+               if ((hdflag & showingBits) > 0) {
                   args.add("--hdvideo");
                   args.add("true");
                }
