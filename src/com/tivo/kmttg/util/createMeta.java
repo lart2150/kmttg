@@ -298,16 +298,17 @@ public class createMeta {
          tvRatings.put("TVNR",  "7");
          tvRatings.put("NR",    "7");
          tvRatings.put("X7",    "7");
+         tvRatings.put("X0",    "7");
       }
       if (humanTvRatings == null) {
          humanTvRatings = new HashMap<String,String>();
-         humanTvRatings.put("1", "Y7");
-         humanTvRatings.put("2", "Y");
-         humanTvRatings.put("3", "G");
-         humanTvRatings.put("4", "PG");
-         humanTvRatings.put("5", "14");
-         humanTvRatings.put("6", "MA");
-         humanTvRatings.put("7", "NR");
+         humanTvRatings.put("1", "TV-Y7");
+         humanTvRatings.put("2", "TV-Y");
+         humanTvRatings.put("3", "TV-G");
+         humanTvRatings.put("4", "TV-PG");
+         humanTvRatings.put("5", "TV-14");
+         humanTvRatings.put("6", "TV-MA");
+         humanTvRatings.put("7", "Unrated");
       }
       if (mpaaRatings == null) {
          mpaaRatings = new HashMap<String,String>();
@@ -344,7 +345,7 @@ public class createMeta {
          humanMpaaRatings.put("4", "R");
          humanMpaaRatings.put("5", "X");
          humanMpaaRatings.put("6", "NC-17");
-         humanMpaaRatings.put("8", "NR");
+         humanMpaaRatings.put("8", "Unrated");
       }
    }
    
