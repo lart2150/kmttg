@@ -1670,6 +1670,7 @@ public class gui {
                   config.jobMonitorFullPaths = 0;
             }
             if (key.equals("encode_name")) {
+               config.encodeName_orig = line;
                if (encodeConfig.isValidEncodeName(line)) {
                   encoding.setSelectedItem(line);
                   config.encodeName = line;
