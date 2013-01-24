@@ -106,6 +106,7 @@ public class config {
    // GUI related
    public static Boolean GUIMODE = false;   // true=>GUI, false=>batch/auto            
    public static String encodeName = "";    // Saves currently selected encode name
+   public static String encodeName_orig = "";
    public static gui gui;                   // Access to any GUI functions through here
    public static String gui_settings = null; // File in which to save GUI settings on exit
    public static int toolTips = 1;          // If 1 then display component toolTips
