@@ -57,6 +57,24 @@ public class vrdencode implements Serializable {
          schedule = false;
       }
       
+      if (config.VrdCombineCutEncode == 1) {
+         if (job.encodeFile.equals(job.mpegFile)) {
+            // Don't want encodeFile same as input file depending on VRD profile selected
+            if (file.isFile(job.mpegFile)) {
+               job.encodeFile = job.mpegFile_cut;
+               if (config.GUIMODE) {
+                  // Update OUTPUT column in GUI to reflect changed output file name
+                  String output;
+                  if (config.jobMonitorFullPaths == 1)
+                     output = "(" + job.encodeName + ") " + job.encodeFile;
+                  else
+                     output = "(" + job.encodeName + ") " + string.basename(job.encodeFile);
+                  config.gui.jobTab_UpdateJobMonitorRowOutput(job, output);
+               }
+            }
+         }
+      }
+      
       // Don't encode if encodeFile already exists
       if ( file.isFile(job.encodeFile) ) {
          if (config.OverwriteFiles == 0) {
@@ -91,6 +109,15 @@ public class vrdencode implements Serializable {
          schedule = false;
       }
       job.inputFile = mpeg;
+      
+      if (config.VrdCombineCutEncode == 1) {
+         if (file.isFile(job.vprjFile)) {
+            job.inputFile = job.vprjFile;
+         } else {
+            log.error("VRD combine Ad Cut & Encode option selected but .Vprj file doesn't exist: " + job.vprjFile);
+            schedule = false;
+         }
+      }
                   
       if (schedule) {
          // Create sub-folders for output file if needed
@@ -231,6 +258,20 @@ public class vrdencode implements Serializable {
                if ( file.delete(job.mpegFile)) {
                   log.print("(Deleted file: " + job.mpegFile + ")");
                }
+            }
+            
+            // Remove Ad Cut files if option enabled
+            if ( config.VrdCombineCutEncode == 1 && config.RemoveComcutFiles == 1 ) {
+               if (file.isFile(job.vprjFile) && file.delete(job.vprjFile))
+                  log.print("(Deleted vprj file: " + job.vprjFile + ")");
+               if (file.isFile(job.edlFile) && file.delete(job.edlFile))
+                  log.print("(Deleted edl file: " + job.edlFile + ")");
+               String xclFile = job.mpegFile + ".Xcl";
+               if (file.isFile(xclFile) && file.delete(xclFile))
+                  log.print("(Deleted xcl file: " + xclFile + ")");
+               String txtFile = string.replaceSuffix(job.mpegFile, ".txt");
+               if (file.isFile(txtFile) && file.delete(txtFile))
+                  log.print("(Deleted comskip txt file: " + txtFile + ")");
             }
             
             // Schedule an AtomicParsley job if relevant
