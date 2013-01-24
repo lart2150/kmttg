@@ -47,6 +47,10 @@ public class tivoFileName {
             keys.put(names[i], "");
          }
       }
+      // If originalAirDate is empty then use [year]_[monthNum]_[mday] instead
+      if (keys.get("originalAirDate").length() == 0) {
+         keys.put("originalAirDate", keys.get("year") + "-" + keys.get("monthNum") + "-" + keys.get("mday"));
+      }
       
       // Special keyword "[/]" means use sub-folders
       file = file.replaceAll("\\[/\\]", "__separator__");
