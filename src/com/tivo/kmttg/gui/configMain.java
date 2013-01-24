@@ -64,6 +64,7 @@ public class configMain {
    private static JCheckBox VrdDecrypt = null;
    private static JCheckBox VrdEncode = null;
    private static JCheckBox VrdAllowMultiple = null;
+   private static JCheckBox VrdCombineCutEncode = null;
    private static JCheckBox TSDownload = null;
    private static JCheckBox TivoWebPlusDelete = null;
    private static JCheckBox iPadDelete = null;
@@ -577,6 +578,12 @@ public class configMain {
       else
          VrdAllowMultiple.setSelected(false);
       
+      // VrdCombineCutEncode
+      if (config.VrdCombineCutEncode == 1)
+         VrdCombineCutEncode.setSelected(true);
+      else
+         VrdCombineCutEncode.setSelected(false);
+      
       // TSDownload
       if (config.TSDownload == 1)
          TSDownload.setSelected(true);
@@ -1028,6 +1035,12 @@ public class configMain {
          config.VrdAllowMultiple = 1;
       else
          config.VrdAllowMultiple = 0;
+      
+      // VrdCombineCutEncode
+      if (VrdCombineCutEncode.isSelected() && file.isDir(config.VRD))
+         config.VrdCombineCutEncode = 1;
+      else
+         config.VrdCombineCutEncode = 0;
       
       // TSDownload
       if (TSDownload.isSelected())
@@ -1686,6 +1699,7 @@ public class configMain {
       VrdDecrypt = new javax.swing.JCheckBox();
       VrdEncode = new javax.swing.JCheckBox();
       VrdAllowMultiple = new javax.swing.JCheckBox();
+      VrdCombineCutEncode = new javax.swing.JCheckBox();
       TSDownload = new javax.swing.JCheckBox();
       TivoWebPlusDelete = new javax.swing.JCheckBox();
       iPadDelete = new javax.swing.JCheckBox();
@@ -1801,6 +1815,7 @@ public class configMain {
       VrdDecrypt.setText("Decrypt using VideoRedo instead of tivodecode");
       VrdEncode.setText("Show VideoRedo encoding profiles");
       VrdAllowMultiple.setText("Allow multiple VideoRedo jobs at once");
+      VrdCombineCutEncode.setText("Combine Ad Cut & Encode");
       TSDownload.setText("Download TiVo files in Transport Stream format");
       TivoWebPlusDelete.setText("Enable TivoWebPlus Delete task");
       iPadDelete.setText("Enable iPad style delete task");
@@ -2966,6 +2981,12 @@ public class configMain {
       c.gridy = gy;
       vrd_panel.add(VrdEncode, c);
       
+      // VrdCombineCutEncode
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      vrd_panel.add(VrdCombineCutEncode, c);
+      
       // VrdAllowMultiple
       gy++;
       c.gridx = 1;
@@ -3100,6 +3121,7 @@ public class configMain {
       VrdDecrypt.setToolTipText(getToolTip("VrdDecrypt"));
       VrdEncode.setToolTipText(getToolTip("VrdEncode"));
       VrdAllowMultiple.setToolTipText(getToolTip("VrdAllowMultiple"));
+      VrdCombineCutEncode.setToolTipText(getToolTip("VrdCombineCutEncode"));
       TSDownload.setToolTipText(getToolTip("TSDownload"));
       TivoWebPlusDelete.setToolTipText(getToolTip("TivoWebPlusDelete"));
       iPadDelete.setToolTipText(getToolTip("iPadDelete"));
@@ -3354,6 +3376,16 @@ public class configMain {
          text += "time, which is why restricting to 1 at a time in that mode is necessary.<br>";
          text += "<b>NOTE: 'active job limit' setting is still in effect for VideoRedo jobs, so if you want<br>";
          text += "to allow multiple VideoRedo jobs at once you also need to consider that setting.</b>";
+      }
+      else if (component.equals("VrdCombineCutEncode")) {
+         text =  "<b>Combine Ad Cut & Encode</b><br>";
+         text += "If this option is enabled then for the <b>Ad Cut</b> task, kmttg will use VideoRedo<br>";
+         text += "to cut commercials and encode to selected VideoRedo encoding profile in a single step<br>";
+         text += "instead of cutting commercials and outputting mpeg2 _cut.mpg file as is the normal flow.<br>";
+         text += "NOTE: You must set <b>Encoding Profile</b> in GUI to a VideoRedo encoding profile or<br>";
+         text += "else kmttg will generate an error message and the Ad Cut task won't be scheduled.<br>";
+         text += "NOTE: You should also enable <b>Show VideoRedo encoding profles</b> option if you<br>";
+         text += "enable this option.";
       }
       else if (component.equals("TSDownload")) {
          text =  "<b>Download TiVo files in Transport Stream format</b><br>";

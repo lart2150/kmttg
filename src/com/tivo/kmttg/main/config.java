@@ -68,6 +68,7 @@ public class config {
    public static int VrdQsFilter = 0;
    public static int VrdDecrypt = 0;
    public static int VrdAllowMultiple = 0; // Allow multiple VRD instances at once
+   public static int VrdCombineCutEncode = 0; // Combine VRD Ad Cut and encode
    public static int TSDownload = 0;
    public static int OverwriteFiles = 0;
    public static int HideProtectedFiles = 0;   
@@ -783,6 +784,9 @@ public class config {
             if (key.equals("VrdAllowMultiple")) {
                VrdAllowMultiple = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("VrdCombineCutEncode")) {
+               VrdCombineCutEncode = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("TSDownload")) {
                TSDownload = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1071,6 +1075,8 @@ public class config {
          ofp.write("<VrdEncode>\n" + VrdEncode + "\n\n");
          
          ofp.write("<VrdAllowMultiple>\n" + VrdAllowMultiple + "\n\n");
+         
+         ofp.write("<VrdCombineCutEncode>\n" + VrdCombineCutEncode + "\n\n");
          
          ofp.write("<TSDownload>\n" + TSDownload + "\n\n");
          
