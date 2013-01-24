@@ -1125,14 +1125,37 @@ public class jobMonitor {
          if ( file.isFile(config.VRD + File.separator + "vp.vbs") ) {
             // Use VRD
             jobData job = new jobData();
-            job.source       = source;
-            job.tivoName     = tivoName;
-            job.type         = "adcut";
-            job.name         = config.VRD;
-            job.mpegFile     = mpegFile;
-            job.mpegFile_cut = mpegFile_cut;
-            job.edlFile      = edlFile;
-            submitNewJob(job);
+            if (config.VrdCombineCutEncode == 1) {
+               if (config.VrdEncode == 1 && encodeConfig.getCommandName(encodeName) == null) {
+                  // Combine Ad Cut & Encode option set => vrdencode task
+                  encode = false;
+                  job.source       = source;
+                  job.tivoName     = tivoName;
+                  job.type         = "vrdencode";
+                  job.name         = encodeName;
+                  job.encodeName   = encodeName;
+                  job.mpegFile     = mpegFile;
+                  job.mpegFile_cut = mpegFile_cut;
+                  job.encodeFile   = encodeFile;
+                  job.srtFile      = srtFile;
+                  job.edlFile      = edlFile;
+                  job.tivoFile     = tivoFile;
+                  job.vprjFile     = string.replaceSuffix(job.mpegFile, ".VPrj");
+                  submitNewJob(job);
+               } else {
+                  log.error("VRD combine Ad Cut & Encode option set, but VRD encoding profile not selected");
+               }
+            } else {
+               // Ad Cut job using VRD
+               job.source       = source;
+               job.tivoName     = tivoName;
+               job.type         = "adcut";
+               job.name         = config.VRD;
+               job.mpegFile     = mpegFile;
+               job.mpegFile_cut = mpegFile_cut;
+               job.edlFile      = edlFile;
+               submitNewJob(job);
+            }
          } else {
             jobData job = new jobData();
             if (file.isFile(config.projectx)) {
