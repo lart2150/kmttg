@@ -1873,8 +1873,11 @@ public class configMain {
 
       keywords.setModel(new javax.swing.DefaultComboBoxModel(
          new String[] { "[title]", "[mainTitle]", "[episodeTitle]", "[channelNum]",
-               "[channel]", "[min]", "[hour]", "[wday]", "[mday]", "[month]",
-               "[monthNum]", "[year]", "[EpisodeNumber]", "[description]", "[tivoName]", "[/]" }));
+            "[channel]", "[min]", "[hour]", "[wday]", "[mday]", "[month]",
+            "[monthNum]", "[year]", "[originalAirDate]", "[EpisodeNumber]",
+            "[description]", "[tivoName]", "[/]" }
+         )
+      );
       keywords.setSelectedItem(null);
       keywords.setName("keywords"); 
       keywords.addItemListener(new ItemListener() {

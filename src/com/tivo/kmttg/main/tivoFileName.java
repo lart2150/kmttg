@@ -38,7 +38,7 @@ public class tivoFileName {
       // Enter values for these names into keys hash
       String[] names = {
          "title", "titleOnly", "episodeTitle", "channelNum", "channel",
-         "EpisodeNumber", "description", "tivoName"
+         "EpisodeNumber", "description", "tivoName", "originalAirDate"
       };
       for (int i=0; i<names.length; ++i) {
          if (entry.containsKey(names[i])) {
@@ -134,21 +134,22 @@ public class tivoFileName {
          if (text.contains("\"")) {
             text = text.replaceAll("\"", "");
          } else {
-            text = text.replaceFirst("^title$",         removeSpecialChars(keys.get("title")));
-            text = text.replaceFirst("^mainTitle$",     removeSpecialChars(keys.get("titleOnly")));
-            text = text.replaceFirst("^episodeTitle$",  removeSpecialChars(keys.get("episodeTitle")));
-            text = text.replaceFirst("^channelNum$",    removeSpecialChars(keys.get("channelNum")));
-            text = text.replaceFirst("^channel$",       removeSpecialChars(keys.get("channel")));
-            text = text.replaceFirst("^min$",           removeSpecialChars(keys.get("min")));
-            text = text.replaceFirst("^hour$",          removeSpecialChars(keys.get("hour")));
-            text = text.replaceFirst("^wday$",          removeSpecialChars(keys.get("wday")));
-            text = text.replaceFirst("^mday$",          removeSpecialChars(keys.get("mday")));
-            text = text.replaceFirst("^month$",         removeSpecialChars(keys.get("month")));
-            text = text.replaceFirst("^monthNum$",      removeSpecialChars(keys.get("monthNum")));
-            text = text.replaceFirst("^year$",          removeSpecialChars(keys.get("year")));
-            text = text.replaceFirst("^EpisodeNumber$", removeSpecialChars(keys.get("EpisodeNumber")));
-            text = text.replaceFirst("^description$",   removeSpecialChars(keys.get("description")));
-            text = text.replaceFirst("^tivoName$",      removeSpecialChars(keys.get("tivoName")));
+            text = text.replaceFirst("^title$",           removeSpecialChars(keys.get("title")));
+            text = text.replaceFirst("^mainTitle$",       removeSpecialChars(keys.get("titleOnly")));
+            text = text.replaceFirst("^episodeTitle$",    removeSpecialChars(keys.get("episodeTitle")));
+            text = text.replaceFirst("^channelNum$",      removeSpecialChars(keys.get("channelNum")));
+            text = text.replaceFirst("^channel$",         removeSpecialChars(keys.get("channel")));
+            text = text.replaceFirst("^min$",             removeSpecialChars(keys.get("min")));
+            text = text.replaceFirst("^hour$",            removeSpecialChars(keys.get("hour")));
+            text = text.replaceFirst("^wday$",            removeSpecialChars(keys.get("wday")));
+            text = text.replaceFirst("^mday$",            removeSpecialChars(keys.get("mday")));
+            text = text.replaceFirst("^month$",           removeSpecialChars(keys.get("month")));
+            text = text.replaceFirst("^monthNum$",        removeSpecialChars(keys.get("monthNum")));
+            text = text.replaceFirst("^year$",            removeSpecialChars(keys.get("year")));
+            text = text.replaceFirst("^EpisodeNumber$",   removeSpecialChars(keys.get("EpisodeNumber")));
+            text = text.replaceFirst("^description$",     removeSpecialChars(keys.get("description")));
+            text = text.replaceFirst("^tivoName$",        removeSpecialChars(keys.get("tivoName")));
+            text = text.replaceFirst("^originalAirDate$", removeSpecialChars(keys.get("originalAirDate")));
             if (text.length() == 0) exists = false;
          }
          newFields.add(text);
