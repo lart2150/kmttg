@@ -20,6 +20,7 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
 public class encodeConfig {
+   private static Boolean encodeName_reset = true;
 
    // Determine list of encoding profiles to use
    public static void parseEncodingProfiles() {
@@ -89,8 +90,12 @@ public class encodeConfig {
                           // Refresh Encoding Profile combo box
                           log.warn("VideoRedo Profiles refreshed");
                           config.gui.SetEncodings(getValidEncodeNames());
-                          if (config.encodeName_orig != null && getDescription(config.encodeName_orig).length() > 0)
-                             config.gui.SetSelectedEncoding(config.encodeName_orig);
+                          if (config.encodeName_orig != null && getDescription(config.encodeName_orig).length() > 0) {
+                             if (encodeName_reset) {
+                                config.gui.SetSelectedEncoding(config.encodeName_orig);
+                                encodeName_reset = false;
+                             }
+                          }
                        }
                     } catch (Exception e) {
                        log.error(e.getMessage());
