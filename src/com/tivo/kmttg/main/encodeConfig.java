@@ -189,10 +189,10 @@ public class encodeConfig {
             valid = true;
          }
       }
-      if (valid == false) {
-         log.error("Invalid encode name selected: " + encodeName);
-         log.error("Valid names are: " + getValidEncodeNames());
-      }
+      //if ( valid == false) {
+      //   log.error("Invalid encode name selected: " + encodeName);
+      //   log.error("Valid names are: " + getValidEncodeNames());
+      //}
       return valid;
    }
 
