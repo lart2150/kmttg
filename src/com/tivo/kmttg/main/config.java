@@ -69,6 +69,7 @@ public class config {
    public static int VrdDecrypt = 0;
    public static int VrdAllowMultiple = 0; // Allow multiple VRD instances at once
    public static int VrdCombineCutEncode = 0; // Combine VRD Ad Cut and encode
+   public static int VrdQsfixMpeg2ps = 0; // If set force VRD QS Fix to output mpeg2 program stream
    public static int TSDownload = 0;
    public static int OverwriteFiles = 0;
    public static int HideProtectedFiles = 0;   
@@ -788,6 +789,9 @@ public class config {
             if (key.equals("VrdCombineCutEncode")) {
                VrdCombineCutEncode = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("VrdQsfixMpeg2ps")) {
+               VrdQsfixMpeg2ps = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("TSDownload")) {
                TSDownload = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1078,6 +1082,8 @@ public class config {
          ofp.write("<VrdAllowMultiple>\n" + VrdAllowMultiple + "\n\n");
          
          ofp.write("<VrdCombineCutEncode>\n" + VrdCombineCutEncode + "\n\n");
+         
+         ofp.write("<VrdQsfixMpeg2ps>\n" + VrdQsfixMpeg2ps + "\n\n");
          
          ofp.write("<TSDownload>\n" + TSDownload + "\n\n");
          

@@ -112,34 +112,40 @@ public class qsfix implements Serializable {
          }    
       }
       
-      // Handle input files different than mpeg2 program stream
-      // which changes output file suffix from .mpg to something else
-      Boolean isFileChanged = false;
-      if (info != null && info.get("container").equals("mpegts")) {
-         if (job.mpegFile.endsWith(".mpg")) {
-            job.mpegFile = string.replaceSuffix(job.mpegFile, ".ts");
-            job.mpegFile_fix = job.mpegFile + ".qsfix";
-            isFileChanged = true;
+      if (config.VrdQsfixMpeg2ps == 1) {
+         // Force output type to be mpeg2 program stream
+         info.put("container", "mpeg");
+         info.put("video", "mpeg2video");
+      } else {
+         // Handle input files different than mpeg2 program stream
+         // which changes output file suffix from .mpg to something else
+         Boolean isFileChanged = false;
+         if (info != null && info.get("container").equals("mpegts")) {
+            if (job.mpegFile.endsWith(".mpg")) {
+               job.mpegFile = string.replaceSuffix(job.mpegFile, ".ts");
+               job.mpegFile_fix = job.mpegFile + ".qsfix";
+               isFileChanged = true;
+            }
+         }      
+         if (info != null && info.get("container").equals("mp4")) {
+            if (job.mpegFile.endsWith(".mpg")) {
+               job.mpegFile = string.replaceSuffix(job.mpegFile, ".mp4");
+               job.mpegFile_fix = job.mpegFile + ".qsfix";
+               isFileChanged = true;
+            }
+         }      
+         if (isFileChanged) {            
+            // If in GUI mode, update job monitor output field
+            if (config.GUIMODE) {
+               String output = string.basename(job.mpegFile_fix);
+               if (config.jobMonitorFullPaths == 1)
+                  output = job.mpegFile_fix;
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, output);
+            }
+            
+            // Subsequent jobs need to have mpegFile updated
+            jobMonitor.updatePendingJobFieldValue(job, "mpegFile", job.mpegFile);
          }
-      }      
-      if (info != null && info.get("container").equals("mp4")) {
-         if (job.mpegFile.endsWith(".mpg")) {
-            job.mpegFile = string.replaceSuffix(job.mpegFile, ".mp4");
-            job.mpegFile_fix = job.mpegFile + ".qsfix";
-            isFileChanged = true;
-         }
-      }      
-      if (isFileChanged) {            
-         // If in GUI mode, update job monitor output field
-         if (config.GUIMODE) {
-            String output = string.basename(job.mpegFile_fix);
-            if (config.jobMonitorFullPaths == 1)
-               output = job.mpegFile_fix;
-            config.gui.jobTab_UpdateJobMonitorRowOutput(job, output);
-         }
-         
-         // Subsequent jobs need to have mpegFile updated
-         jobMonitor.updatePendingJobFieldValue(job, "mpegFile", job.mpegFile);
       }
 
       // Create the vbs script

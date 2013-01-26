@@ -65,6 +65,7 @@ public class configMain {
    private static JCheckBox VrdEncode = null;
    private static JCheckBox VrdAllowMultiple = null;
    private static JCheckBox VrdCombineCutEncode = null;
+   private static JCheckBox VrdQsfixMpeg2ps = null;
    private static JCheckBox TSDownload = null;
    private static JCheckBox TivoWebPlusDelete = null;
    private static JCheckBox iPadDelete = null;
@@ -584,6 +585,12 @@ public class configMain {
       else
          VrdCombineCutEncode.setSelected(false);
       
+      // VrdQsfixMpeg2ps
+      if (config.VrdQsfixMpeg2ps == 1)
+         VrdQsfixMpeg2ps.setSelected(true);
+      else
+         VrdQsfixMpeg2ps.setSelected(false);
+      
       // TSDownload
       if (config.TSDownload == 1)
          TSDownload.setSelected(true);
@@ -1041,6 +1048,12 @@ public class configMain {
          config.VrdCombineCutEncode = 1;
       else
          config.VrdCombineCutEncode = 0;
+      
+      // VrdQsfixMpeg2ps
+      if (VrdQsfixMpeg2ps.isSelected() && file.isDir(config.VRD))
+         config.VrdQsfixMpeg2ps = 1;
+      else
+         config.VrdQsfixMpeg2ps = 0;
       
       // TSDownload
       if (TSDownload.isSelected())
@@ -1700,6 +1713,7 @@ public class configMain {
       VrdEncode = new javax.swing.JCheckBox();
       VrdAllowMultiple = new javax.swing.JCheckBox();
       VrdCombineCutEncode = new javax.swing.JCheckBox();
+      VrdQsfixMpeg2ps = new javax.swing.JCheckBox();
       TSDownload = new javax.swing.JCheckBox();
       TivoWebPlusDelete = new javax.swing.JCheckBox();
       iPadDelete = new javax.swing.JCheckBox();
@@ -1816,6 +1830,7 @@ public class configMain {
       VrdEncode.setText("Show VideoRedo encoding profiles");
       VrdAllowMultiple.setText("Allow multiple VideoRedo jobs at once");
       VrdCombineCutEncode.setText("Combine Ad Cut & Encode");
+      VrdQsfixMpeg2ps.setText("Force QS Fix output to always be mpeg2 Program Stream");
       TSDownload.setText("Download TiVo files in Transport Stream format");
       TivoWebPlusDelete.setText("Enable TivoWebPlus Delete task");
       iPadDelete.setText("Enable iPad style delete task");
@@ -2990,6 +3005,12 @@ public class configMain {
       c.gridy = gy;
       vrd_panel.add(VrdCombineCutEncode, c);
       
+      // VrdQsfixMpeg2ps
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      vrd_panel.add(VrdQsfixMpeg2ps, c);
+      
       // VrdAllowMultiple
       gy++;
       c.gridx = 1;
@@ -3125,6 +3146,7 @@ public class configMain {
       VrdEncode.setToolTipText(getToolTip("VrdEncode"));
       VrdAllowMultiple.setToolTipText(getToolTip("VrdAllowMultiple"));
       VrdCombineCutEncode.setToolTipText(getToolTip("VrdCombineCutEncode"));
+      VrdQsfixMpeg2ps.setToolTipText(getToolTip("VrdQsfixMpeg2ps"));
       TSDownload.setToolTipText(getToolTip("TSDownload"));
       TivoWebPlusDelete.setToolTipText(getToolTip("TivoWebPlusDelete"));
       iPadDelete.setToolTipText(getToolTip("iPadDelete"));
@@ -3389,6 +3411,13 @@ public class configMain {
          text += "else kmttg will generate an error message and the Ad Cut task won't be scheduled.<br>";
          text += "NOTE: You should also enable <b>Show VideoRedo encoding profles</b> option if you<br>";
          text += "enable this option.";
+      }
+      else if (component.equals("VrdQsfixMpeg2ps")) {
+         text =  "<b>Force QS Fix output to always be mpeg2 Program Stream</b><br>";
+         text += "If this option is enabled then for the <b>QS Fix</b> task, kmttg will force VideoRedo<br>";
+         text += "to output mpeg2 program stream format regardless of the input video format.<br>";
+         text += "Thus for example if the input file is Mpeg2 Transport Stream format then the output<br>";
+         text += "will be Mpeg2 Program Stream.";
       }
       else if (component.equals("TSDownload")) {
          text =  "<b>Download TiVo files in Transport Stream format</b><br>";
