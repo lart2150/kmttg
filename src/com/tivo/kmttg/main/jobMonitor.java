@@ -1128,7 +1128,6 @@ public class jobMonitor {
             if (config.VrdCombineCutEncode == 1) {
                if (config.VrdEncode == 1 && encodeConfig.getCommandName(encodeName) == null) {
                   // Combine Ad Cut & Encode option set => vrdencode task
-                  encode = false;
                   job.source       = source;
                   job.tivoName     = tivoName;
                   job.type         = "vrdencode";
