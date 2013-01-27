@@ -1,5 +1,6 @@
 package com.tivo.kmttg.gui;
 
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -14,6 +15,7 @@ public class recordOptions {
    JComponent[] components;
    JLabel label;
    JComboBox record, number, until, start, stop;
+   JCheckBox anywhere;
    TwoWayHashmap<String,String> untilHash = new TwoWayHashmap<String,String>();
    TwoWayHashmap<String,Integer> startHash = new TwoWayHashmap<String,Integer>();
    TwoWayHashmap<String,Integer> stopHash = new TwoWayHashmap<String,Integer>();
@@ -64,12 +66,14 @@ public class recordOptions {
          "90 minutes late", "180 minutes late"}
       );
       stop.setSelectedItem("On time");
+      anywhere = new JCheckBox("Try scheduling on all TiVos", false);
       
       components = new JComponent[] {
          label,
          new JLabel("Keep until"),      until,
          new JLabel("Start recording"), start,
-         new JLabel("Stop recording"),  stop
+         new JLabel("Stop recording"),  stop,
+         anywhere
       };
    }
    
@@ -91,6 +95,8 @@ public class recordOptions {
             j.put("keepBehavior",     untilHash.getV((String)until.getSelectedItem()));
             j.put("startTimePadding", startHash.getV((String)start.getSelectedItem()));
             j.put("endTimePadding",   stopHash.getV((String)stop.getSelectedItem()));
+            if (anywhere.isSelected())
+               j.put("_anywhere_", "true");
             return j;
          } else {
             return null;
