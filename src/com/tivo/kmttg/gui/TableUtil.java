@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Stack;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
@@ -271,37 +272,93 @@ public class TableUtil {
                message, existing
             );
             if (o != null) {
+               Boolean anywhere = false;
+               if (o.has("_anywhere_")) {
+                  anywhere = true;
+                  o.remove("_anywhere_");
+               }
                o.put("contentId", json.getString("contentId"));
                o.put("offerId", json.getString("offerId"));
                final String _title = title;
-               if (existing == null)
-                  message = "Scheduled recording: '" + title + "' on Tivo: " + tivoName;
-               else
-                  message = "Modified recording: '" + title + "' on Tivo: " + tivoName;
-               final String _message = message;
-               class backgroundRun extends SwingWorker<Object, Object> {
-                  protected Object doInBackground() {
-                     Remote r = config.initRemote(tivoName);
-                     if (r.success) {
-                        JSONObject result = r.Command("Singlerecording", o);
-                        if (result == null) {
-                           log.error("Failed to schedule/modify recording for: '" + _title + "'");
-                        } else {
-                           String conflicts = rnpl.recordingConflicts(result, o);
-                           if (conflicts == null) {
-                              log.warn(_message);
-                           } else {
-                              log.error(conflicts);
-                              return(false);
-                           }
-                        }
-                        r.disconnect();
+               if (! anywhere) {
+                  // Attempt to schedule on tivoName only
+                  if (existing == null)
+                     message = "Scheduled recording: '" + title + "' on Tivo: " + tivoName;
+                  else
+                     message = "Modified recording: '" + title + "' on Tivo: " + tivoName;
+                  final String _message = message;
+                  class backgroundRun extends SwingWorker<Object, Object> {
+                     JSONObject json;
+                     public backgroundRun(JSONObject json) {
+                        this.json = json;
                      }
-                     return null;
+                     protected Object doInBackground() {
+                        Remote r = config.initRemote(tivoName);
+                        if (r.success) {
+                           JSONObject result = r.Command("Singlerecording", o);
+                           if (result == null) {
+                              log.error("Failed to schedule/modify recording for: '" + _title + "'");
+                           } else {
+                              String conflicts = rnpl.recordingConflicts(result, json);
+                              if (conflicts == null) {
+                                 log.warn(_message);
+                              } else {
+                                 log.error(conflicts);
+                                 return(false);
+                              }
+                           }
+                           r.disconnect();
+                        }
+                        return null;
+                     }
+                  }
+                  backgroundRun b = new backgroundRun(json);
+                  b.execute();
+               } else {
+                  if (existing == null) {
+                     // Attempt to schedule using all RPC enabled TiVos
+                     class backgroundRun extends SwingWorker<Object, Object> {
+                        JSONObject json;
+                        public backgroundRun(JSONObject json) {
+                           this.json = json;
+                        }
+                        protected Object doInBackground() {
+                           Stack<String> tivo_stack = config.getTivoNames();
+                           Stack<String> tivos = new Stack<String>();
+                           tivos.add(tivoName); // Put original target tivo 1st in stack
+                           for (int i=0; i<tivo_stack.size(); ++i) {
+                              if ( config.rpcEnabled(tivo_stack.get(i)) ) {
+                                 if (tivos.search(tivo_stack.get(i)) == -1)
+                                    tivos.add(tivo_stack.get(i));
+                              }
+                           }
+                           for (int i=0; i<tivos.size(); ++i) {
+                              String name = tivos.get(i);
+                              String message = "Scheduled recording: '" + _title + "' on Tivo: " + name;
+                              Remote r = config.initRemote(name);
+                              if (r.success) {
+                                 JSONObject result = r.Command("Singlerecording", o);
+                                 if (result == null) {
+                                    log.error("Failed attempt to schedule recording on '" + name + "' for: '" + _title + "'");
+                                 } else {
+                                    String conflicts = rnpl.recordingConflicts(result, json);
+                                    if (conflicts == null) {
+                                       log.warn(message);
+                                       return(true);
+                                    } else {
+                                       log.warn("Cannot schedule '" + _title + "' on '" + name + "' due to conflicts");
+                                    }
+                                 }
+                                 r.disconnect();
+                              }
+                           }
+                           return null;
+                        }
+                     }
+                     backgroundRun b = new backgroundRun(json);
+                     b.execute();                     
                   }
                }
-               backgroundRun b = new backgroundRun();
-               b.execute();
             }
          } else {
             log.error("Missing contentId and/or offerId for: '" + title + "'");
