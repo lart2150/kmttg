@@ -57,7 +57,7 @@ public class vrdencode implements Serializable {
          schedule = false;
       }
       
-      if (config.VrdCombineCutEncode == 1) {
+      if (config.VrdCombineCutEncode == 1 && job.vprjFile != null) {
          if (job.encodeFile.equals(job.mpegFile)) {
             // Don't want encodeFile same as input file depending on VRD profile selected
             if (file.isFile(job.mpegFile)) {
@@ -110,7 +110,7 @@ public class vrdencode implements Serializable {
       }
       job.inputFile = mpeg;
       
-      if (config.VrdCombineCutEncode == 1) {
+      if (config.VrdCombineCutEncode == 1 && job.vprjFile != null) {
          if (file.isFile(job.vprjFile)) {
             job.inputFile = job.vprjFile;
          } else {
