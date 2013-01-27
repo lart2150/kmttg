@@ -124,7 +124,7 @@ public class gui {
          readSettings();
          
          // Enable/disable options according to configuration
-         refreshOptions();
+         refreshOptions(true);
          
          // Create and enable/disable component tooltips
          toolTips = ToolTipManager.sharedInstance();
@@ -271,7 +271,7 @@ public class gui {
          qsfix.addActionListener(new ActionListener() {
             // Call refreshOptions whenever this is toggled
             public void actionPerformed(ActionEvent e) {
-               refreshOptions();
+               refreshOptions(false);
             }
          });
          twpdelete = new JCheckBox("TWP Delete", false);         
@@ -1052,7 +1052,7 @@ public class gui {
 
    // This will decide which options are enabled based on current config settings
    // Options are disabled when associated config entry is not setup
-   public void refreshOptions() {
+   public void refreshOptions(Boolean refreshProfiles) {
       if (! file.isFile(config.curl) && config.java_downloads == 0) {
          metadata.setSelected(false);
          metadata.setEnabled(false);
@@ -1148,7 +1148,7 @@ public class gui {
       }
       
       // Refresh encoding profiles in case toggled between VRD & regular
-      if (config.GUIMODE) refreshEncodingProfilesCB();
+      if (config.GUIMODE && refreshProfiles) refreshEncodingProfilesCB();
       
       // Add remote tab if appropriate
       if (config.GUIMODE && remote_gui == null) {

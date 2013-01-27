@@ -39,7 +39,7 @@ public class mainInstall {
                      config.save(config.configIni);
                      
                      // Refresh available options
-                     config.gui.refreshOptions();
+                     config.gui.refreshOptions(true);
                   }
                }
             }

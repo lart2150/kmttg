@@ -211,7 +211,7 @@ public class configMain {
          config.save(config.configIni);
          dialog.setVisible(false);
       }
-      config.gui.refreshOptions();
+      config.gui.refreshOptions(true);
    }
    
    // Callback for tivo add button
