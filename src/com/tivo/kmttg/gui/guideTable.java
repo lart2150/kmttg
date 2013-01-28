@@ -404,7 +404,7 @@ public class guideTable {
             data[i] = "";
          }
          // If entry is in 1 of todo lists then add special __inTodo__ JSON entry
-         config.gui.remote_gui.flagIfInTodo(entry);
+         config.gui.remote_gui.flagIfInTodo(entry, false);
          JSONObject o = new JSONObject();
          String startString = entry.getString("startTime");
          long start = TableUtil.getLongDateFromString(startString);

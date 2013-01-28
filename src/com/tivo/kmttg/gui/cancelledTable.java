@@ -486,7 +486,7 @@ public class cancelledTable {
       }
       try {
          // If entry is in 1 of todo lists then add special __inTodo__ JSON entry
-         config.gui.remote_gui.flagIfInTodo(entry);
+         config.gui.remote_gui.flagIfInTodo(entry, true);
          JSONObject o = new JSONObject();
          String startString=null, endString=null;
          long start=0, end=0;
