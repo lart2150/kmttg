@@ -2571,7 +2571,8 @@ public class remotegui {
    }
       
    // See if given JSON entry matches any of the entries in all_todo hashtable
-   public void flagIfInTodo(JSONObject entry) {
+   public void flagIfInTodo(JSONObject entry, Boolean includeOtherTimes) {
+      String inTodo = "__inTodo__";
       try {
          String title = entry.getString("title");
          if (entry.has("subtitle")) {
@@ -2585,26 +2586,34 @@ public class remotegui {
          while (keys.hasMoreElements()) {
             String tivo = keys.nextElement();
             for (int i=0; i<all_todo.get(tivo).length(); ++i) {
+               JSONObject todo = all_todo.get(tivo).getJSONObject(i);
                String start = "";
                String chan = "";
                String name = "";
-               if (all_todo.get(tivo).getJSONObject(i).has("startTime"))
-                  start = all_todo.get(tivo).getJSONObject(i).getString("startTime");
-               if (all_todo.get(tivo).getJSONObject(i).has("channel"))
-                  chan = all_todo.get(tivo).getJSONObject(i).getJSONObject("channel").getString("channelNumber");
-               if (all_todo.get(tivo).getJSONObject(i).has("title")) {
-                  name = all_todo.get(tivo).getJSONObject(i).getString("title");
-                  if (all_todo.get(tivo).getJSONObject(i).has("subtitle"))
-                     name = name + " - " + all_todo.get(tivo).getJSONObject(i).getString("subtitle");
+               if (todo.has("startTime"))
+                  start = todo.getString("startTime");
+               if (todo.has("channel"))
+                  chan = todo.getJSONObject("channel").getString("channelNumber");
+               if (todo.has("title")) {
+                  name = todo.getString("title");
+                  if (todo.has("subtitle"))
+                     name = name + " - " + todo.getString("subtitle");
                }
-               // Add __inTodo__ flag indicating tivo name scheduled to record this show
+               // Add inTodo flag indicating tivo name scheduled to record this show
                if (start.equals(startTime)) {
                   // Start time & channel match
                   if (channelNumber != null && chan.equals(channelNumber))
-                     entry.put("__inTodo__", tivo);
+                     entry.put(inTodo, tivo);
                   // Start time & title match (same program on another channel)
                   else if (name.equals(title))
-                     entry.put("__inTodo__", tivo + ": " + chan);
+                     entry.put(inTodo, tivo + ": " + chan);
+               }
+               // Same program recorded at different time
+               if (includeOtherTimes && ! entry.has(inTodo)) {
+                  if (todo.has("contentId") && entry.has("contentId")) {
+                     if (entry.getString("contentId").equals(todo.getString("contentId")))
+                        entry.put(inTodo, tivo + ": " + TableUtil.printableTimeFromJSON(todo));
+                  }
                }
             }
          }
