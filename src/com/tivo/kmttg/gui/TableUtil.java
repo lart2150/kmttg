@@ -326,8 +326,16 @@ public class TableUtil {
                            Stack<String> tivo_stack = config.getTivoNames();
                            Stack<String> tivos = new Stack<String>();
                            tivos.add(tivoName); // Put original target tivo 1st in stack
+                           // RPC only TiVos get priority
                            for (int i=0; i<tivo_stack.size(); ++i) {
                               if ( config.rpcEnabled(tivo_stack.get(i)) ) {
+                                 if (tivos.search(tivo_stack.get(i)) == -1)
+                                    tivos.add(tivo_stack.get(i));
+                              }
+                           }
+                           // Series 3 TiVos are last resort (if tivo.com username & password are available)
+                           if (config.getTivoUsername() != null) {
+                              for (int i=0; i<tivo_stack.size(); ++i) {
                                  if (tivos.search(tivo_stack.get(i)) == -1)
                                     tivos.add(tivo_stack.get(i));
                               }
