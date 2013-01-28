@@ -161,6 +161,12 @@ public class TableUtil {
         return 0;
       }
    }
+   
+   public static String printableTimeFromJSON(JSONObject entry) {
+      long start = getStartTime(entry);
+      SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy hh:mm a");
+      return sdf.format(start);
+   }
       
    public static long getStartTime(JSONObject json) {
       try {
