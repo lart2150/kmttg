@@ -2062,11 +2062,14 @@ public class remotegui {
                            for (int i=0; i<reply.getJSONArray("state").length(); ++i) {
                               json = reply.getJSONArray("state").getJSONObject(i);
                               info += String.format("tunerId\t\t%s\n", json.getString("tunerId"));
-                              info += String.format("channelNumber\t%s (%s)\n",
-                                 json.getJSONObject("channel").getString("channelNumber"),
-                                 json.getJSONObject("channel").getString("callSign")
-                              );
-                              info += "\n";
+                              if (json.has("channel")) {
+                                 info += String.format("channelNumber\t%s",
+                                    json.getJSONObject("channel").getString("channelNumber")
+                                 );
+                                 if (json.getJSONObject("channel").has("callSign"))
+                                    info += " (" + json.getJSONObject("channel").getString("callSign") + ")";
+                              }
+                              info += "\n\n";
                            }
                         }
                      }
