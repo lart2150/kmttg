@@ -1121,6 +1121,22 @@ public class jobMonitor {
          }
       }
       
+      // Schedule comskip commercial cut point review if requested (GUI mode only)
+      if (comskip && config.VrdReview == 0 && config.comskip_review == 1 && config.GUIMODE) {
+         jobData job = new jobData();
+         job.source       = source;
+         job.tivoName     = tivoName;
+         job.type         = "comskip_review";
+         job.name         = "comskip_review";
+         job.mpegFile     = mpegFile;
+         if (file.isDir(config.VRD))
+            job.vprjFile  = string.replaceSuffix(mpegFile, ".VPrj");
+         if (file.isFile(config.projectx) && ! file.isDir(config.VRD))
+            job.xclFile   = xclFile;
+         job.edlFile      = edlFile;
+         submitNewJob(job);         
+      }
+      
       if (comcut) {
          if ( file.isFile(config.VRD + File.separator + "vp.vbs") ) {
             // Use VRD

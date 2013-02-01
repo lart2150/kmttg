@@ -63,6 +63,7 @@ public class config {
    public static int iPadDelete = 0;
    public static int UseAdscan = 0;
    public static int VrdReview = 0;
+   public static int comskip_review = 0;
    public static int VrdEncode = 0;
    public static int VrdReview_noCuts = 0;
    public static int VrdQsFilter = 0;
@@ -771,6 +772,9 @@ public class config {
             if (key.equals("VrdReview")) {
                VrdReview = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("comskip_review")) {
+               comskip_review = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("VrdReview_noCuts")) {
                VrdReview_noCuts = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1070,6 +1074,8 @@ public class config {
          ofp.write("<UseAdscan>\n" + UseAdscan + "\n\n");
          
          ofp.write("<VrdReview>\n" + VrdReview + "\n\n");
+         
+         ofp.write("<comskip_review>\n" + comskip_review + "\n\n");
          
          ofp.write("<VrdReview_noCuts>\n" + VrdReview_noCuts + "\n\n");
          

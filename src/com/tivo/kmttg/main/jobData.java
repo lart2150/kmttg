@@ -44,6 +44,7 @@ public class jobData implements Serializable, Cloneable {
    public qsfix        process_qsfix = null;
    public projectx     process_projectx = null;
    public comskip      process_comskip = null;
+   public comskip_review process_comskip_review = null;
    public adscan       process_adscan = null;
    public vrdreview    process_vrdreview = null;
    public comcut       process_comcut = null;
@@ -176,6 +177,7 @@ public class jobData implements Serializable, Cloneable {
          "streamfix",
          "comskip",
          "adscan",
+         "comskip_review",
          "vrdreview",
          "comcut",
          "projectxcut",
@@ -241,6 +243,9 @@ public class jobData implements Serializable, Cloneable {
       }         
       else if (type.matches("adscan")) {
          return process_adscan.check();
+      }         
+      else if (type.matches("comskip_review")) {
+         return process_comskip_review.check();
       }         
       else if (type.matches("vrdreview")) {
          return process_vrdreview.check();
@@ -326,6 +331,9 @@ public class jobData implements Serializable, Cloneable {
       }
       else if (type.equals("adscan")) {
          return process_adscan.getProcess();
+      }
+      else if (type.equals("comskip_review")) {
+         return process_comskip_review.getProcess();
       }
       else if (type.equals("vrdreview")) {
          return process_vrdreview.getProcess();
@@ -414,6 +422,9 @@ public class jobData implements Serializable, Cloneable {
          file = mpegFile;
       }
       else if (type.equals("adscan")) {
+         file = mpegFile;
+      }
+      else if (type.equals("comskip_review")) {
          file = mpegFile;
       }
       else if (type.equals("vrdreview")) {
@@ -505,6 +516,13 @@ public class jobData implements Serializable, Cloneable {
       }
       else if (type.equals("adscan")) {
          file = vprjFile;
+      }
+      else if (type.equals("comskip_review")) {
+         file = edlFile;
+         if (vprjFile != null)
+            file = vprjFile;
+         if (xclFile != null)
+            file = xclFile;
       }
       else if (type.equals("vrdreview")) {
          file = vprjFile;
@@ -618,6 +636,11 @@ public class jobData implements Serializable, Cloneable {
       
       else if (job.type.equals("adscan")) {  
          adscan proc = new adscan(job);
+         success = proc.launchJob();
+      }
+      
+      else if (job.type.equals("comskip_review")) {  
+         comskip_review proc = new comskip_review(job);
          success = proc.launchJob();
       }
       
@@ -751,6 +774,10 @@ public class jobData implements Serializable, Cloneable {
       else if (type.equals("adscan")) {
          process_adscan.kill();
          process_adscan = null;
+      }
+      else if (type.equals("comskip_review")) {
+         process_comskip_review.kill();
+         process_comskip_review = null;
       }
       else if (type.equals("vrdreview")) {
          process_vrdreview.kill();

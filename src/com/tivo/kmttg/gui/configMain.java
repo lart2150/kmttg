@@ -59,6 +59,7 @@ public class configMain {
    private static JCheckBox download_time_estimate = null;
    private static JCheckBox UseAdscan = null;
    private static JCheckBox VrdReview = null;
+   private static JCheckBox comskip_review = null;
    private static JCheckBox VrdReview_noCuts = null;
    private static JCheckBox VrdQsFilter = null;
    private static JCheckBox VrdDecrypt = null;
@@ -549,6 +550,12 @@ public class configMain {
       else
          VrdReview.setSelected(false);
       
+      // comskip_review
+      if (config.comskip_review == 1)
+         comskip_review.setSelected(true);
+      else
+         comskip_review.setSelected(false);
+      
       // VrdReview_noCuts
       if (config.VrdReview_noCuts == 1)
          VrdReview_noCuts.setSelected(true);
@@ -1012,6 +1019,12 @@ public class configMain {
          config.VrdReview = 1;
       else
          config.VrdReview = 0;
+      
+      // comskip_review
+      if (comskip_review.isSelected() && file.isFile(config.comskip))
+         config.comskip_review = 1;
+      else
+         config.comskip_review = 0;
       
       // VrdReview_noCuts
       if (VrdReview_noCuts.isSelected() && file.isDir(config.VRD))
@@ -1707,6 +1720,7 @@ public class configMain {
       QSFixBackupMpegFile = new javax.swing.JCheckBox();
       UseAdscan = new javax.swing.JCheckBox();
       VrdReview = new javax.swing.JCheckBox();
+      comskip_review = new javax.swing.JCheckBox();
       VrdReview_noCuts = new javax.swing.JCheckBox();
       VrdQsFilter = new javax.swing.JCheckBox();
       VrdDecrypt = new javax.swing.JCheckBox();
@@ -1824,6 +1838,7 @@ public class configMain {
       QSFixBackupMpegFile.setText("For QS Fix of .mpg file backup original .mpg");
       UseAdscan.setText("Use VideoRedo AdScan instead of comskip");
       VrdReview.setText("Use VideoRedo GUI to review detected commercials");
+      comskip_review.setText("Use comskip GUI to review detected commercials");
       VrdReview_noCuts.setText("Bring up VideoRedo GUI to make manual cuts");
       VrdQsFilter.setText("Enable VideoRedo QS Fix video dimension filter");
       VrdDecrypt.setText("Decrypt using VideoRedo instead of tivodecode");
@@ -2883,6 +2898,12 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(persistQueue, c);
       
+      // comskip_review
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(comskip_review, c);
+      
       // Visual Panel
       JPanel visual_panel = new JPanel(new GridBagLayout());       
       
@@ -3140,6 +3161,7 @@ public class configMain {
       download_time_estimate.setToolTipText(getToolTip("download_time_estimate"));
       UseAdscan.setToolTipText(getToolTip("UseAdscan"));
       VrdReview.setToolTipText(getToolTip("VrdReview"));
+      comskip_review.setToolTipText(getToolTip("comskip_review"));
       VrdReview_noCuts.setToolTipText(getToolTip("VrdReview_noCuts"));
       VrdQsFilter.setToolTipText(getToolTip("VrdQsFilter"));
       VrdDecrypt.setToolTipText(getToolTip("VrdDecrypt"));
@@ -3351,6 +3373,18 @@ public class configMain {
          text += "NOTE: If you have <b>Bring up VideoRedo GUI to make manual cuts</b> option set<br>";
          text += "you will need to save the output file from VideoRedo GUI, otherwise without that<br>";
          text += "option set the cuts will be make by kmttg <b>Ad Cut</b> task.";
+      }
+      else if (component.equals("comskip_review")) {
+         text =  "<b>Use comskip GUI to review detected commercials</b><br>";
+         text += "If you have comskip configured in kmttg and <b>Ad Detect</b> task enabled,<br>";
+         text += "when this option is enabled kmttg will start comskip GUI<br>";
+         text += "to allow you to manually review and update the detected commercial segments<br>";
+         text += "before starting the commercial cutting job. kmttg will wait until you close<br>";
+         text += "the comskip GUI before proceeding.<br>";
+         text += "NOTE: Press <b>F1</b> to see list of keyboard shortcuts for comskip GUI which<br>";
+         text += "shows you how to set start/end of a commercial segment or insert a new one, etc.<br>";
+         text += "Make sure you save your changes by pressing <b>w</b> keyboard button before you exit.<br>";
+         text += "NOTE: When done press <b>Esc</b> keyboard button to close comskip GUI.";
       }
       else if (component.equals("VrdReview_noCuts")) {
          text =  "<b>Bring up VideoRedo GUI to make manual cuts</b><br>";
