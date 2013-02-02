@@ -1127,7 +1127,7 @@ public class nplTable {
    }
    
    // Refresh all titles currently displayed in table for non-folder entries
-   private void refreshTitles() {
+   public void refreshTitles() {
       for (int row=0; row<NowPlaying.getRowCount(); ++row) {
          sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
          if (! s.folder && s.data != null)
@@ -1391,40 +1391,7 @@ public class nplTable {
          }
       }
    }
-   
-   // Add RPC data to entries hashes where information may be missing
-   // such as originalAirDate & EpisodeNumber
-   public void addRpcData() {
-      Boolean changed = false;
-      for (int i=0; i<entries.size(); ++i) {
-         Hashtable<String,String> h = entries.get(i);
-         JSONObject json = rnpl.findRpcData(tivoName, h, true);
-         if (json != null) {
-            try {
-               if (json.has("recordingId"))
-                  h.put("recordingId", json.getString("recordingId"));
-               if (! h.containsKey("originalAirDate") && json.has("originalAirdate"))
-                  h.put("originalAirDate", json.getString("originalAirdate"));
-               if (! h.containsKey("movieYear") && json.has("movieYear"))
-                  h.put("movieYear", "" + json.get("movieYear"));
-               if (! h.containsKey("EpisodeNumber") && json.has("episodeNum") && json.has("seasonNumber")) {
-                  h.put(
-                     "EpisodeNumber",
-                     "" + json.get("seasonNumber") + 
-                     String.format("%02d", json.getJSONArray("episodeNum").get(0))
-                  );
-                  changed = true;
-               }
-            } catch (JSONException e) {
-               log.error("addRpcData error - " + e.getMessage());
-            }
-         }
-      }
-      // Update displayed table titles with added episode data
-      if (changed)
-         refreshTitles();
-   }
-   
+      
    // Return true if this entry should not be displayed, false otherwise
    private Boolean shouldHideEntry(Hashtable<String,String> entry) {
       return config.HideProtectedFiles == 1 && entry.containsKey("CopyProtected");
