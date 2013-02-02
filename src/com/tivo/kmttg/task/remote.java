@@ -198,7 +198,7 @@ public class remote implements Serializable {
                job.deleted.AddRows(job.tivoName, data);
             }
             if (job.remote_rnpl) {
-               rnpl.setNPLData(job.tivoName, data);
+               rnpl.setNPLData(job.tivoName, data, job.auto_entries);
             }
             if (job.remote_channels && data != null && config.GUIMODE) {
                config.gui.remote_gui.putChannelData(job.tivoName, data);
