@@ -10,12 +10,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import com.tivo.kmttg.JSON.JSONArray;
-import com.tivo.kmttg.JSON.JSONException;
-import com.tivo.kmttg.JSON.JSONObject;
+//import com.tivo.kmttg.JSON.JSONException;
+//import com.tivo.kmttg.JSON.JSONObject;
 //import com.tivo.kmttg.main.config;
 //import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
+//import com.tivo.kmttg.util.string;
 
 public class wlOptions {
    JComponent[] components;
@@ -221,7 +221,7 @@ public class wlOptions {
       return null;
    }*/
    
-   private String findCategoryId(String name) {
+   /*private String findCategoryId(String name) {
       String main, sub=null;
       if (name.contains(":")) {
          String[] s = name.split(":");
@@ -253,5 +253,5 @@ public class wlOptions {
          log.error("findCategoryId - " + e.getMessage());
       }
       return null;
-   }
+   }*/
 }
