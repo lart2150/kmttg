@@ -151,6 +151,7 @@ public class jobData implements Serializable, Cloneable {
    
    public Boolean remote_rnpl = false;
    public JSONArray rnpl = null;
+   public Stack<Hashtable<String,String>> auto_entries = null;
    
    public Boolean remote_premiere = false;
    public Boolean remote_channels = false;
