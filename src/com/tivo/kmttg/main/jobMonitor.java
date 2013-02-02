@@ -1122,7 +1122,7 @@ public class jobMonitor {
       }
       
       // Schedule comskip commercial cut point review if requested (GUI mode only)
-      if (comskip && config.VrdReview == 0 && config.comskip_review == 1 && config.GUIMODE) {
+      if (comskip && config.UseAdscan == 0 && config.VrdReview == 0 && config.comskip_review == 1 && config.GUIMODE) {
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
