@@ -11,6 +11,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Stack;
 import java.util.TimeZone;
 
 import com.tivo.kmttg.JSON.JSONArray;
@@ -18,6 +19,7 @@ import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.JSON.JSONTokener;
 import com.tivo.kmttg.gui.TableUtil;
+import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -29,30 +31,41 @@ public class rnpl {
    // ***** Remote NPL related functions
    
    // Submit remote NPL request to Job Monitor
-   public static void rnplListCB(String tivoName) {
+   public static void rnplListCB(String tivoName, Stack<Hashtable<String,String>> ENTRIES) {
       // Clear rnpldata for this TiVo
       //rnpldata.put(tivoName, new JSONArray());
       
       // Submit job to obtain new data for this TiVo
       jobData job = new jobData();
-      job.source      = tivoName;
-      job.tivoName    = tivoName;
-      job.type        = "remote";
-      job.name        = "Remote";
-      job.remote_rnpl = true;
-      job.rnpl        = rnpldata.get(tivoName);
+      job.source       = tivoName;
+      job.tivoName     = tivoName;
+      job.type         = "remote";
+      job.name         = "Remote";
+      job.remote_rnpl  = true;
+      job.rnpl         = rnpldata.get(tivoName);
+      job.auto_entries = ENTRIES;
       jobMonitor.submitNewJob(job);
    }
    
-   public static void setNPLData(String tivoName, JSONArray data) {
+   public static void setNPLData(String tivoName, JSONArray data, Stack<Hashtable<String,String>> ENTRIES) {
       if (data == null) {
          if (rnpldata.containsKey(tivoName))
             rnpldata.remove(tivoName);
       } else {
          rnpldata.put(tivoName, data);
          // Add RPC data to XML data to enrich information such as originalAirDate & EpisodeNumber
-         if (config.GUIMODE)
-            config.gui.getTab(tivoName).getTable().addRpcData();
+         for (int i=0; i<ENTRIES.size(); ++i)
+            addRpcData(tivoName, ENTRIES.get(i));
+      }
+      
+      if (config.GUI_AUTO > 0 || config.GUIMODE) {
+         // Refresh GUI table entries with new data
+         config.gui.getTab(tivoName).getTable().refreshTitles();
+      }
+      
+      // auto mode
+      if (config.GUI_AUTO > 0 || ! config.GUIMODE) {
+         auto.processAll(tivoName, ENTRIES);
       }
    }
    
