@@ -18,6 +18,7 @@ public class comskip_review implements Serializable {
    private backgroundProcess process;
    private String txtFile, comskipIni;
    private String outputFile = null;
+   private String options = null;
    private jobData job;
 
    // constructor
@@ -60,8 +61,10 @@ public class comskip_review implements Serializable {
       }
       
       // Decide what the output file of interest is
-      if (job.vprjFile != null && file.isDir(config.VRD))
+      if (job.vprjFile != null && file.isDir(config.VRD)) {
          outputFile = job.vprjFile;
+         options = "--videoredo";
+      }
       if (outputFile == null && job.xclFile != null && file.isFile(config.projectx))
          outputFile = job.xclFile;
       if (outputFile == null)
@@ -95,9 +98,13 @@ public class comskip_review implements Serializable {
       command.add(config.comskip);
       command.add("--ini");
       command.add(comskipIni);
+      if (options != null)
+         command.add(options);
       command.add(txtFile);
       process = new backgroundProcess();
       log.print(">> Running comskip_review on " + txtFile + " ...");
+      log.warn("IMPORTANT: Remember to press Esc to exit comskip_review, don't click on X to close the window");
+      log.warn("If you accidently click on X to close the window you'll have to find and kill comskip in Task Manager");
       if ( process.run(command) ) {
          log.print(process.toString());
       } else {
