@@ -243,31 +243,18 @@ public class NowPlaying implements Serializable {
          // Done
          jobMonitor.removeFromJobList(job);
          if (config.GUI_AUTO > 0) {
-            // Clear NPL
-            //config.gui.nplTab_clear(job.tivoName);
             // Update NPL
             config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
-            
-            // Match auto keywords against entries
-            int count = 0;
-            for (int j=0; j<ENTRIES.size(); j++) {
-               if ( auto.keywordSearch(ENTRIES.get(j)) )
-                  count++;
-            }
-            log.print("TOTAL auto matches for '" + job.tivoName + "' = " + count + "/" + ENTRIES.size());
-            config.GUI_AUTO--;
+            if (! config.rpcEnabled(job.tivoName))
+               auto.processAll(job.tivoName, ENTRIES);
          }
          else if (config.GUIMODE) {
             // GUI mode: populate NPL table
             config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
          } else {
             // Batch mode
-            int count = 0;
-            for (int j=0; j<ENTRIES.size(); j++) {
-               if ( auto.keywordSearch(ENTRIES.get(j)) )
-                  count++;
-            }
-            log.print("TOTAL auto matches for '" + job.tivoName + "' = " + count + "/" + ENTRIES.size());
+            if (! config.rpcEnabled(job.tivoName))
+               auto.processAll(job.tivoName, ENTRIES);            
          }
          com.tivo.kmttg.util.file.delete(cookieFile);
          com.tivo.kmttg.util.file.delete(outputFile);
@@ -276,7 +263,7 @@ public class NowPlaying implements Serializable {
             // Extra iPad communication to retrieve NPL information
             // used to be able to play/delete shows. Only works for Premiere or
             // later models.
-            rnpl.rnplListCB(job.tivoName);
+            rnpl.rnplListCB(job.tivoName, ENTRIES);
          }
          return false;
       }

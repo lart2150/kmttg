@@ -186,13 +186,6 @@ public class javaNowPlaying implements Serializable {
             log.warn("NPL job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " tivo=" + job.tivoName);
             
-            if (config.rpcEnabled(job.tivoName)) {
-               // Extra iPad communication to retrieve NPL information
-               // used to be able to play/delete shows. Only works for Premiere or
-               // later models.
-               rnpl.rnplListCB(job.tivoName);
-            }
-            
             // Success, so parse the result
             return parseNPL(outputFile);
          }
@@ -234,33 +227,27 @@ public class javaNowPlaying implements Serializable {
          // Done
          jobMonitor.removeFromJobList(job);
          if (config.GUI_AUTO > 0) {
-            // Clear NPL
-            //config.gui.nplTab_clear(job.tivoName);
             // Update NPL
             config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
-            
-            // Match auto keywords against entries
-            int count = 0;
-            for (int j=0; j<ENTRIES.size(); j++) {
-               if ( auto.keywordSearch(ENTRIES.get(j)) )
-                  count++;
-            }
-            log.print("TOTAL auto matches for '" + job.tivoName + "' = " + count + "/" + ENTRIES.size());
-            config.GUI_AUTO--;
+            if (! config.rpcEnabled(job.tivoName))
+               auto.processAll(job.tivoName, ENTRIES);
          }
          else if (config.GUIMODE) {
             // GUI mode: populate NPL table
             config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
          } else {
             // Batch mode
-            int count = 0;
-            for (int j=0; j<ENTRIES.size(); j++) {
-               if ( auto.keywordSearch(ENTRIES.get(j)) )
-                  count++;
-            }
-            log.print("TOTAL auto matches for '" + job.tivoName + "' = " + count + "/" + ENTRIES.size());
+            if (! config.rpcEnabled(job.tivoName))
+               auto.processAll(job.tivoName, ENTRIES);            
          }
          com.tivo.kmttg.util.file.delete(outputFile);
+         
+         if (config.rpcEnabled(job.tivoName)) {
+            // Extra iPad communication to retrieve NPL information
+            // used to be able to play/delete shows. Only works for Premiere or
+            // later models.
+            rnpl.rnplListCB(job.tivoName, ENTRIES);
+         }
          return false;
       }
    }   
