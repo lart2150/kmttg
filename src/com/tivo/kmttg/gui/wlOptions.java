@@ -117,14 +117,13 @@ public class wlOptions {
          String title_keyword = (String)tf_title_keyword.getText();
          String actor = (String)tf_actor.getText();
          String director = (String)tf_director.getText();
-         String category = (String)cb_categories.getSelectedItem();
+         //String category = (String)cb_categories.getSelectedItem();
          
          // Check for minimum wishlist specification requirements
          if (keyword.length() < 1 &&
              title_keyword.length() < 1 &&
              actor.length() < 1 &&
-             director.length() < 1 &&
-             category.length() < 1) {
+             director.length() < 1 ) {
             log.error("Wishlist must contain at least 1 keyword");
             return null;
          }
@@ -134,7 +133,7 @@ public class wlOptions {
          if (title_keyword.length() > 0) h.put("title_keyword", title_keyword);
          if (actor.length() > 0) h.put("actor", actor);
          if (director.length() > 0) h.put("director", director);
-         if (category.length() > 0) h.put("categoryId", findCategoryId(category));
+         //if (category.length() > 0) h.put("categoryId", findCategoryId(category));
          if (cb_autorecord.isSelected())
             h.put("autorecord", "yes");
          return h;
