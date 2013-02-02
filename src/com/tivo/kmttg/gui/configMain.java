@@ -3384,7 +3384,8 @@ public class configMain {
          text += "NOTE: Press <b>F1</b> to see list of keyboard shortcuts for comskip GUI which<br>";
          text += "shows you how to set start/end of a commercial segment or insert a new one, etc.<br>";
          text += "Make sure you save your changes by pressing <b>w</b> keyboard button before you exit.<br>";
-         text += "NOTE: When done press <b>Esc</b> keyboard button to close comskip GUI.";
+         text += "<b>IMPORTANT: When done press <b>Esc</b> keyboard button to close comskip GUI.<br>";
+         text += "Just closing the window by clicking on the X will NOT terminate comskip</b>.";
       }
       else if (component.equals("VrdReview_noCuts")) {
          text =  "<b>Bring up VideoRedo GUI to make manual cuts</b><br>";
