@@ -128,6 +128,17 @@ public class auto {
       System.exit(num);
    }
    
+   public static void processAll(String tivoName, Stack<Hashtable<String,String>> ENTRIES) {
+      int count = 0;
+      for (int j=0; j<ENTRIES.size(); j++) {
+         if ( auto.keywordSearch(ENTRIES.get(j)) )
+            count++;
+      }
+      log.print("TOTAL auto matches for '" + tivoName + "' = " + count + "/" + ENTRIES.size());
+      if (config.GUI_AUTO > 0)
+         config.GUI_AUTO--;
+   }
+   
    // Match title & keywords against an entry
    // Return true if this entry should be processed, false otherwise
    public static Boolean keywordSearch(Hashtable<String,String> entry) {
