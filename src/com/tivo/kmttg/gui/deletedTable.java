@@ -236,7 +236,6 @@ public class deletedTable {
          data[i] = "";
       }
       try {
-         JSONObject o = new JSONObject();
          String startString=null, endString=null;
          long start=0, end=0;
          if (entry.has("scheduledStartTime")) {
@@ -248,23 +247,8 @@ public class deletedTable {
             start = TableUtil.getStartTime(entry);
             end = TableUtil.getEndTime(entry);
          }
-         String title = " ";
-         if (entry.has("title"))
-            title += entry.getString("title");
-         if (entry.has("seasonNumber") && entry.has("episodeNum")) {
-            title += " [Ep " + entry.get("seasonNumber") +
-            String.format("%02d]", entry.getJSONArray("episodeNum").get(0));
-         }
-         if (entry.has("subtitle"))
-            title += " - " + entry.getString("subtitle");
-         String channel = " ";
-         if (entry.has("channel")) {
-            o = entry.getJSONObject("channel");
-            if (o.has("channelNumber"))
-               channel += o.getString("channelNumber");
-            if (o.has("callSign"))
-               channel += "=" + o.getString("callSign");
-         }
+         String title = TableUtil.makeShowTitle(entry);
+         String channel = TableUtil.makeChannelName(entry);
    
          data[0] = title;
          data[1] = new sortableDate(entry, start);

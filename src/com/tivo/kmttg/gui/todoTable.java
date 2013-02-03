@@ -154,7 +154,6 @@ public class todoTable {
     private void AddRow(JSONObject data) {
        debug.print("data=" + data);
        try {
-          JSONObject o = new JSONObject();
           Object[] info = new Object[TITLE_cols.length];
           String startString=null, endString=null;
           long start=0, end=0;
@@ -167,27 +166,8 @@ public class todoTable {
              start = TableUtil.getStartTime(data);
              end = TableUtil.getEndTime(data);
           }
-          String title = " ";
-          if (data.has("title"))
-             title += data.getString("title");
-          if (data.has("seasonNumber") && data.has("episodeNum")) {
-             title += " [Ep " + data.get("seasonNumber");
-             JSONArray a = data.optJSONArray("episodeNum");
-             if (a != null)
-                title += String.format("%02d]", a.get(0));
-             else
-                title += String.format("%02d]", data.getInt("episodeNum"));
-          }
-          if (data.has("subtitle"))
-          title += " - " + data.getString("subtitle");
-          String channel = " ";
-          if (data.has("channel")) {
-             o = data.getJSONObject("channel");
-             if (o.has("channelNumber"))
-                channel += "" + o.get("channelNumber");
-             if (o.has("callSign"))
-                channel += "=" + o.getString("callSign");
-          }
+          String title = TableUtil.makeShowTitle(data);
+          String channel = TableUtil.makeChannelName(data);
           
           info[0] = new sortableDate(data, start);
           info[1] = title;

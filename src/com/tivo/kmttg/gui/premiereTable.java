@@ -201,7 +201,6 @@ public class premiereTable {
     
     private void AddRow(JSONObject data) {
        try {
-          JSONObject o = new JSONObject();
           Object[] info = new Object[TITLE_cols.length];
           String startString = data.getString("startTime");
           long start = getLongDateFromString(startString);
@@ -211,14 +210,7 @@ public class premiereTable {
              title += data.getString("title");
           if (data.has("subtitle"))
              title += " - " + data.getString("subtitle");
-          String channel = " ";
-          if (data.has("channel")) {
-             o = data.getJSONObject("channel");
-             if (o.has("channelNumber"))
-                channel += o.getString("channelNumber");
-             if (o.has("callSign"))
-                channel += "=" + o.getString("callSign");
-          }
+          String channel = TableUtil.makeChannelName(data);
           String season = " ";
           if (data.has("seasonNumber")) {
              season = String.format("%02d", data.getInt("seasonNumber"));

@@ -487,7 +487,6 @@ public class cancelledTable {
       try {
          // If entry is in 1 of todo lists then add special __inTodo__ JSON entry
          config.gui.remote_gui.flagIfInTodo(entry, true);
-         JSONObject o = new JSONObject();
          String startString=null, endString=null;
          long start=0, end=0;
          if (entry.has("scheduledStartTime")) {
@@ -499,23 +498,8 @@ public class cancelledTable {
             start = TableUtil.getStartTime(entry);
             end = TableUtil.getEndTime(entry);
          }
-         String title = " ";
-         if (entry.has("title"))
-            title += entry.getString("title");
-         if (entry.has("seasonNumber") && entry.has("episodeNum")) {
-            title += " [Ep " + entry.get("seasonNumber") +
-            String.format("%02d]", entry.getJSONArray("episodeNum").get(0));
-         }
-         if (entry.has("subtitle"))
-            title += " - " + entry.getString("subtitle");
-         String channel = " ";
-         if (entry.has("channel")) {
-            o = entry.getJSONObject("channel");
-            if (o.has("channelNumber"))
-               channel += o.getString("channelNumber");
-            if (o.has("callSign"))
-               channel += "=" + o.getString("callSign");
-         }
+         String title = TableUtil.makeShowTitle(entry);
+         String channel = TableUtil.makeChannelName(entry);
    
          data[1] = title;
          data[2] = new sortableDate(entry, start);

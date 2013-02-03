@@ -405,31 +405,16 @@ public class searchTable {
          }
          // If entry is in 1 of todo lists then add special __inTodo__ JSON entry
          config.gui.remote_gui.flagIfInTodo(entry, false);
-         JSONObject o = new JSONObject();
          String startString = entry.getString("startTime");
          long start = TableUtil.getLongDateFromString(startString);
          long duration = entry.getLong("duration")*1000;
          String type = " ";
-         String title = " ";
          if (entry.has("collectionType")) {
             type = entry.getString("collectionType");
          }
-         if (entry.has("title"))
-            title += entry.getString("title");
-         if (entry.has("seasonNumber") && entry.has("episodeNum")) {
-            title += " [Ep " + entry.get("seasonNumber") +
-            String.format("%02d]", entry.getJSONArray("episodeNum").get(0));
-         }
-         if (entry.has("subtitle"))
-            title += " - " + entry.getString("subtitle");
-         String channel = " ";
-         if (entry.has("channel")) {
-            o = entry.getJSONObject("channel");
-            if (o.has("channelNumber"))
-               channel += o.getString("channelNumber");
-            if (o.has("callSign"))
-               channel += "=" + o.getString("callSign");
-         }
+         String title = TableUtil.makeShowTitle(entry);
+         String channel = TableUtil.makeChannelName(entry);
+         
          data[1] = type;
          data[2] = title;
          data[3] = new sortableDate(entry, start);
