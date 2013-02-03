@@ -8,6 +8,7 @@ public class sortableShow {
    String title;
    String episodeTitle = "";
    String episodeNum = "";
+   String movieYear = null;
    long gmt;
    Boolean folder = false;
    int numEntries = 0;
@@ -24,6 +25,8 @@ public class sortableShow {
          episodeNum = entry.get("EpisodeNumber");
       if (episodeNum.matches("^[0]+$"))
          episodeNum = "";
+      if (entry.containsKey("movieYear"))
+         movieYear = entry.get("movieYear");
    }
    
    // Folder entry constructor
@@ -44,6 +47,10 @@ public class sortableShow {
             String s = titleOnly + " [Ep " + episodeNum + "]";
             if (episodeTitle.length() > 0)
                s += " - " + episodeTitle;
+            return s;
+         }
+         if (movieYear != null) {
+            String s = titleOnly + " [" + movieYear + "]";
             return s;
          }
          return title;
