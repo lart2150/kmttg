@@ -194,6 +194,41 @@ public class TableUtil {
       }
    }
    
+   public static String makeShowTitle(JSONObject entry) {
+      String title = " ";
+      try {
+         if (entry.has("title"))
+            title += entry.getString("title");
+         if (entry.has("seasonNumber") && entry.has("episodeNum")) {
+            title += " [Ep " + entry.get("seasonNumber") +
+            String.format("%02d]", entry.getJSONArray("episodeNum").get(0));
+         }
+         if (entry.has("movieYear"))
+            title += " [" + entry.get("movieYear") + "]";
+         if (entry.has("subtitle"))
+            title += " - " + entry.getString("subtitle");
+      } catch (JSONException e) {
+         log.error("makeShowTitle - " + e.getMessage());
+      }
+      return title;
+   }
+   
+   public static String makeChannelName(JSONObject entry) {
+      String channel = " ";
+      try {
+         if (entry.has("channel")) {
+            JSONObject o = entry.getJSONObject("channel");
+            if (o.has("channelNumber"))
+               channel += o.getString("channelNumber");
+            if (o.has("callSign"))
+               channel += "=" + o.getString("callSign");
+         }
+      } catch (JSONException e) {
+         log.error("makeChannelName - " + e.getMessage());
+      }
+      return channel;
+   }
+   
    // Used by TABLERowSelected callbacks for printing show info to message window
    public static String makeShowSummary(sortableDate s, sortableDuration dur) {
       try {
