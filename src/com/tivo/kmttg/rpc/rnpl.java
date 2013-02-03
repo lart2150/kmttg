@@ -177,6 +177,9 @@ public class rnpl {
                   String.format("%02d", json.getJSONArray("episodeNum").get(0))
                );
             }
+            if (! h.containsKey("movieYear") && json.has("movieYear")) {
+               h.put("movieYear", "" + json.get("movieYear"));
+            }
          } catch (JSONException e) {
             log.error("addRpcData error - " + e.getMessage());
          }
