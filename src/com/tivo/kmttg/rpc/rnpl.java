@@ -344,5 +344,24 @@ public class rnpl {
          log.error("pprintJSON - " + e.getMessage());
       }
    }
+   
+   // Print out schema operation details
+   public static void help(String operationName) {
+      Stack<String> tivoNames = config.getTivoNames();
+      Remote r = new Remote(tivoNames.get(0), true);
+      if (r.success) {
+         JSONObject json = new JSONObject();
+         try {
+            json.put("name", operationName);
+            json.put("levelOfDetail", "high");
+         } catch (JSONException e) {
+            log.error("rnpl help - " + e.getMessage());
+         }
+         JSONObject result = r.Command("schemaElementGet", json);
+         r.disconnect();
+         if (result != null)
+            pprintJSON(result);
+      }
+   }
 
 }
