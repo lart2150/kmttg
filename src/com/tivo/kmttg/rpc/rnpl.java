@@ -335,5 +335,14 @@ public class rnpl {
          }
       }
    }
+   
+   // Pretty print a json that many contain JSONArray, etc.
+   public static void pprintJSON(JSONObject json) {
+      try {
+         log.print(json.toString(3));
+      } catch (JSONException e) {
+         log.error("pprintJSON - " + e.getMessage());
+      }
+   }
 
 }
