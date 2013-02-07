@@ -10,6 +10,8 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.Hashtable;
@@ -661,6 +663,50 @@ public class spTable {
           AddRows(data);
           updateTitleCols(" Loaded:");
           setLoaded(true);
+       }
+    }
+    
+    public void SPListExport(String tivoName, String file) {
+       if (tivo_data.containsKey(tivoName) && tivo_data.get(tivoName).length() > 0) {
+          try {
+             log.warn("Exporting '" + tivoName + "' SP list to csv file: " + file);
+             BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
+             ofp.write("PRIORITY,SHOW,CHANNEL,KEEP\r\n");
+             JSONArray data = tivo_data.get(tivoName);
+             for (int i=0; i<data.length(); ++i) {
+                JSONObject json = data.getJSONObject(i);
+                String priority = "" + i+1;
+                String show = "N/A";
+                String channel = "";
+                String keep = "N/A";
+                if (json.has("__priority__"))
+                   priority = "" + json.get("__priority__");
+                if (json.has("title"))
+                   show = json.getString("title");
+                if (json.has("idSetSource")) {
+                   JSONObject o = json.getJSONObject("idSetSource");
+                   if (o.has("channel")) {
+                      JSONObject o2 = o.getJSONObject("channel");
+                      if (o2.has("channelNumber"))
+                         channel += o2.getString("channelNumber");
+                      if (o2.has("callSign"))
+                         channel += "=" + o2.getString("callSign");
+                   }
+                }
+                if (json.has("maxRecordings"))
+                   keep = "" + json.get("maxRecordings");
+                ofp.write("\"" + priority + "\",");
+                ofp.write("\"" + show + "\",");
+                ofp.write("\"" + channel + "\",");
+                ofp.write("\"" + keep + "\"");
+                ofp.write("\r\n");
+             }
+             ofp.close();
+          } catch (Exception e) {
+             log.error("SPListExport - " + e.getMessage());
+          }
+       } else {
+         log.error("No data available to export.");
        }
     }
     
