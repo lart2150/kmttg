@@ -619,6 +619,30 @@ public class remotegui {
          }
       });         
       
+      JButton export_sp = new JButton("Export...");
+      export_sp.setMargin(new Insets(1,1,1,1));
+      export_sp.setToolTipText(getToolTip("export_sp"));
+      export_sp.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Export SP data to a file in csv format
+            String tivoName = (String)tivo_sp.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               if (tab_sp.isTableLoaded()) {
+                  log.error("Cannot export loaded Season Passes");
+                  return;
+               }  else {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  Browser.setSelectedFile(new File(config.programDir + File.separator + tivoName + ".csv"));
+                  int result = Browser.showDialog(config.gui.getJFrame(), "Export to csv file");
+                  if (result == JFileChooser.APPROVE_OPTION) {               
+                     File file = Browser.getSelectedFile();
+                     tab_sp.SPListExport(tivoName, file.getAbsolutePath());
+                  }
+               }
+            }
+         }
+      });         
+      
       JButton copy_sp = new JButton("Copy");
       copy_sp.setMargin(new Insets(1,1,1,1));
       copy_sp.setToolTipText(getToolTip("copy_sp"));
@@ -760,6 +784,8 @@ public class remotegui {
       row1_sp.add(save_sp);
       row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(load_sp);
+      row1_sp.add(Box.createRigidArea(space_5));
+      row1_sp.add(export_sp);
       row1_sp.add(Box.createRigidArea(space_5));
       row1_sp.add(delete_sp);
       row1_sp.add(Box.createRigidArea(space_5));
@@ -3229,6 +3255,11 @@ public class remotegui {
          text += "Note that loaded season passes can then be copied to TiVos by selecting the TiVo you want to<br>";
          text += "copy to, then selecting rows in the table you want to copy and then clicking on the <b>Copy</b><br>";
          text += "button.";
+      }
+      else if (component.equals("export_sp")){
+         text = "<b>Export</b><br>";
+         text += "Export the currently displayed Season Pass list to a csv file which can be easily<br>";
+         text += "imported into an Excel spreadsheet or equivalent.";
       }
       else if (component.equals("delete_sp")){
          text = "<b>Delete</b><br>";
