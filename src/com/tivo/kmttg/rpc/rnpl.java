@@ -168,16 +168,16 @@ public class rnpl {
          try {
             if (json.has("recordingId"))
                h.put("recordingId", json.getString("recordingId"));
-            if (! h.containsKey("originalAirDate") && json.has("originalAirdate"))
+            if (json.has("originalAirdate"))
                h.put("originalAirDate", json.getString("originalAirdate"));
-            if (! h.containsKey("EpisodeNumber") && json.has("episodeNum") && json.has("seasonNumber")) {
+            if (json.has("episodeNum") && json.has("seasonNumber")) {
                h.put(
                   "EpisodeNumber",
                   "" + json.get("seasonNumber") +
                   String.format("%02d", json.getJSONArray("episodeNum").get(0))
                );
             }
-            if (! h.containsKey("movieYear") && json.has("movieYear")) {
+            if (json.has("movieYear")) {
                h.put("movieYear", "" + json.get("movieYear"));
             }
          } catch (JSONException e) {
