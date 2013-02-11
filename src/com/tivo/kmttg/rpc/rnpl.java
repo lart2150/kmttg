@@ -290,7 +290,7 @@ public class rnpl {
       return null;
    }
    
-   private static String formatEntry(JSONObject json) {
+   public static String formatEntry(JSONObject json) {
       String message = "";
       try {
          if (json.has("startTime") && json.has("duration")) {
