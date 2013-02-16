@@ -3,9 +3,12 @@ package com.tivo.kmttg.util;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.tivo.kmttg.main.config;
 
 public class string {
    
@@ -189,5 +192,37 @@ public class string {
       }
       return s;
    }
-
+   
+   // Use curl with a TiVo download URL to get the session id (sid) cookie which looks
+   // like the example line below:
+   // Set-Cookie: sid=C942F2A72900474; path=/; expires="Saturday, 16-Feb-2013 00:00:00 GMT";
+   public static String getSidUsingCurl(String url) {
+      Stack<String> command = new Stack<String>();
+      command.add(config.curl);
+      command.add("--anyauth");
+      command.add("--globoff");
+      command.add("--user");
+      command.add("tivo:" + config.MAK);
+      command.add("--insecure");
+      command.add("--url");
+      command.add(url);
+      command.add("--head");
+      backgroundProcess process = new backgroundProcess();
+      if (process.run(command) ) {
+         process.Wait();
+         // Parse stdout to get sid
+         Stack<String> output = process.getStdout();
+         for (int i=0; i<output.size(); ++i) {
+            String line = output.get(i);
+            if (line.contains("sid=")) {
+               line = line.replaceFirst("^.+sid=", "");
+               line = line.replaceFirst(";.+$", "");
+               return line;
+            }
+         }
+      } else {
+         log.error("Failed to determine sid using curl");
+      }
+      return null;
+   }
 }
