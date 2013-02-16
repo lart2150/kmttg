@@ -1,6 +1,8 @@
 package com.tivo.kmttg.util;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Stack;
@@ -197,6 +199,7 @@ public class string {
    // like the example line below:
    // Set-Cookie: sid=C942F2A72900474; path=/; expires="Saturday, 16-Feb-2013 00:00:00 GMT";
    public static String getSidUsingCurl(String url) {
+      String tmpFile = file.makeTempFile("cookie");
       Stack<String> command = new Stack<String>();
       command.add(config.curl);
       command.add("--anyauth");
@@ -207,27 +210,36 @@ public class string {
       command.add("--url");
       command.add(url);
       command.add("--head");
+      command.add("--output");
+      command.add(tmpFile);
       backgroundProcess process = new backgroundProcess();
       if (process.run(command) ) {
          process.Wait();
-         // Parse stdout to get sid
-         Stack<String> output = process.getStdout();
-         for (int i=0; i<output.size(); ++i) {
-            String line = output.get(i);
-            if (line.contains("sid=")) {
-               line = line.replaceFirst("^.+sid=", "");
-               line = line.replaceFirst(";.+$", "");
-               return line;
+         // Parse tmpFile to get sid
+         try {
+            BufferedReader ifp = new BufferedReader(new FileReader(tmpFile));
+            String line;
+            while (( line = ifp.readLine()) != null) {
+               if (line.contains("sid=")) {
+                  line = line.replaceFirst("^.+sid=", "");
+                  line = line.replaceFirst(";.+$", "");
+                  ifp.close();
+                  file.delete(tmpFile);
+                  return line;
+               }
             }
+            ifp.close();
+            log.error("Failed to determine sid using curl. Curl command and stderr follow:");
+            log.error(process.toString());
+            log.error(process.getStderr());
+            process = null;
+         } catch (Exception e) {
+            log.error("getSidUsingCurl - " + e.getMessage());
          }
-         log.error("Failed to determine sid using curl. Curl command, stdout and stderr follow:");
-         log.error(process.toString());
-         log.error(output);
-         log.error(process.getStderr());
-         process = null;
       } else {
          log.error("Failed to determine sid using curl");
       }
+      file.delete(tmpFile);
       return null;
    }
 }
