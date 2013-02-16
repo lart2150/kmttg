@@ -197,6 +197,7 @@ public class string {
    // like the example line below:
    // Set-Cookie: sid=C942F2A72900474; path=/; expires="Saturday, 16-Feb-2013 00:00:00 GMT";
    public static String getSidUsingCurl(String url) {
+      url = "bogus" + url;
       Stack<String> command = new Stack<String>();
       command.add(config.curl);
       command.add("--anyauth");
@@ -220,6 +221,10 @@ public class string {
                return line;
             }
          }
+         log.error("Failed to determine sid using curl. Curl command and errors:");
+         log.error(process.toString());
+         log.error(process.getStderr());
+         process = null;
       } else {
          log.error("Failed to determine sid using curl");
       }
