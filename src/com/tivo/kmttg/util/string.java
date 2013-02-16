@@ -220,8 +220,9 @@ public class string {
                return line;
             }
          }
-         log.error("Failed to determine sid using curl. Curl command and errors:");
+         log.error("Failed to determine sid using curl. Curl command, stdout and stderr follow:");
          log.error(process.toString());
+         log.error(output);
          log.error(process.getStderr());
          process = null;
       } else {
