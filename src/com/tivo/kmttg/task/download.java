@@ -82,13 +82,6 @@ public class download implements Serializable {
       
       String url = job.url;
       
-      // Use curl with url to get cookie sid
-      String sid = string.getSidUsingCurl(url);
-      if (sid == null) {
-         jobMonitor.removeFromJobList(job);
-         return false;         
-      }
-      
       // Download using curl and cookie sid
       if (config.TSDownload == 1)
          url += "&Format=video/x-tivo-mpeg-ts";
@@ -104,7 +97,7 @@ public class download implements Serializable {
       command.add("tivo:" + config.MAK);
       command.add("--insecure");
       command.add("--cookie");
-      command.add("sid=" + sid);
+      command.add("sid=abc");
       command.add("--url");
       command.add(url);
       if (job.offset != null) {

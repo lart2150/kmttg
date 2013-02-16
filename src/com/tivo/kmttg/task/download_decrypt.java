@@ -102,14 +102,6 @@ public class download_decrypt implements Serializable {
          job.url = string.addPort(job.url, wan_port);
       
       String url = job.url;
-      
-      // Use curl with url to get cookie sid
-      String sid = string.getSidUsingCurl(url);
-      if (sid == null) {
-         jobMonitor.removeFromJobList(job);
-         cleanup();
-         return false;         
-      }
 
       if (config.TSDownload == 1)
          url += "&Format=video/x-tivo-mpeg-ts";
@@ -119,7 +111,7 @@ public class download_decrypt implements Serializable {
       if (config.OS.equals("windows"))
          command += "--retry 3 ";
       command += "--anyauth --globoff --user tivo:" + config.MAK + " ";
-      command += "--insecure --cookie sid=" + sid + " --url \"" + url + "\" ";
+      command += "--insecure --cookie sid=abc --url \"" + url + "\" ";
       if (job.offset != null) {
          command += "-C " + job.offset + " ";
          job.tivoFileSize -= Long.parseLong(job.offset);
