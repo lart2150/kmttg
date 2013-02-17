@@ -545,9 +545,14 @@ public class Remote {
             req = RpcRequest("recordingFolderItemSearch", false, json);
          }
          else if (type.equals("MyShows")) {
-            // Expects count=# in initial json, offset=# after first call
             json.put("bodyId", bodyId_get());
-            req = RpcRequest("recordingFolderItemSearch", false, json);
+            if (away) {
+               json.put("levelOfDetail", "medium");
+               req = RpcRequest("recordingSearch", false, json);
+            } else {
+               // Expects count=# in initial json, offset=# after first call
+               req = RpcRequest("recordingFolderItemSearch", false, json);
+            }
          }
          else if (type.equals("ToDo")) {
             // Get list of recordings that are expected to record
@@ -825,7 +830,7 @@ public class Remote {
          Boolean stop = false;
          int offset = 0;
          JSONObject json = new JSONObject();
-         json.put("count", 100);
+         json.put("count", 50);
          while ( ! stop ) {
             if (job != null && config.GUIMODE)
                config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List");
@@ -892,6 +897,43 @@ public class Remote {
          } // while
       } catch (JSONException e) {
          error("rpc MyShows error - " + e.getMessage());
+         return null;
+      }
+
+      return allShows;
+   }
+   
+   // Get list of all shows (drilling down into folders for individual shows)
+   public JSONArray MyShowsS3(jobData job) {
+      JSONArray allShows = new JSONArray();
+      JSONObject result = null;
+
+      try {
+         // Top level list - run in a loop to grab all items
+         Boolean stop = false;
+         int offset = 0;
+         JSONObject json = new JSONObject();
+         json.put("count", 50);
+         while ( ! stop ) {
+            if (job != null && config.GUIMODE)
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List");
+            result = Command("MyShows", json);
+            if (result != null && result.has("recording")) {
+               JSONArray items = (JSONArray) result.get("recording");
+               offset += items.length();
+               json.put("offset", offset);
+               if (items.length() == 0)
+                  stop = true;
+               for (int i=0; i<items.length(); ++i) {
+                  allShows.put(items.getJSONObject(i));
+               } // for
+            } else {
+               // result == null
+               stop = true;
+            } // if
+         } // while
+      } catch (JSONException e) {
+         error("rpc MyShowsS3 error - " + e.getMessage());
          return null;
       }
 
