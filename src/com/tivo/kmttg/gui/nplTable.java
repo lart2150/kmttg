@@ -445,11 +445,6 @@ public class nplTable {
    
    // Handle delete keyboard presses
    private void KeyPressed(KeyEvent e) {
-      if (config.TivoWebPlusDelete == 0 && ! config.rpcEnabled(tivoName)) {
-         // Nothing to do so just consume & return
-         e.consume();
-         return;
-      }
       int keyCode = e.getKeyCode();
       if (keyCode == KeyEvent.VK_DELETE || keyCode == KeyEvent.VK_SPACE) {
          int[] selected = GetSelectedRows();         
