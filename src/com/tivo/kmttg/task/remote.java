@@ -80,8 +80,12 @@ public class remote implements Serializable {
                }
                if (job.remote_deleted)
                   data = r.DeletedShows(job);
-               if (job.remote_rnpl)
-                  data = r.MyShows(job);
+               if (job.remote_rnpl) {
+                  if (config.rpcEnabled(job.tivoName))
+                     data = r.MyShows(job);
+                  else
+                     data = r.MyShowsS3(job);
+               }
                if (job.remote_channels)
                   data = r.ChannelList(job);
                if (job.remote_premiere && config.GUIMODE)
