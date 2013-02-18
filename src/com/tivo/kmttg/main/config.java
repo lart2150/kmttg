@@ -477,6 +477,21 @@ public class config {
       return rpcSetting;
    }
    
+   // Return true if this is a series 3 TiVo and tivo.com username & password available
+   public static Boolean mindEnabled(String tivoName) {
+      if (getTivoUsername() != null && getTivoPassword() != null) {
+         String [] supported = {"648", "652", "658"};
+         String tsn = getTsn(tivoName);
+         if (tsn != null) {
+            for (int i=0; i<supported.length; ++i) {
+               if (tsn.startsWith(supported[i]))
+                  return true;
+            }
+         }
+      }
+      return false;
+   }
+   
    // Return true if:
    // 1. At least 1 TiVo has RpcSetting of "1"
    // 2. iPadDelete == 1
