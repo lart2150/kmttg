@@ -2247,7 +2247,7 @@ public class remotegui {
       tivo_info.removeAllItems();
       tivo_premiere.removeAllItems();
       for (int i=0; i<tivo_stack.size(); ++i) {
-         if (config.rpcEnabled(tivo_stack.get(i)) || config.getTivoUsername() != null) {
+         if (config.rpcEnabled(tivo_stack.get(i)) || config.mindEnabled(tivo_stack.get(i))) {
             tivo_todo.addItem(tivo_stack.get(i));
             tivo_guide.addItem(tivo_stack.get(i));
             tivo_sp.addItem(tivo_stack.get(i));

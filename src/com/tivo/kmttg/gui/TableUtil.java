@@ -375,7 +375,7 @@ public class TableUtil {
                               }
                            }
                            // Series 3 TiVos are last resort (if tivo.com username & password are available)
-                           if (config.getTivoUsername() != null) {
+                           if (config.mindEnabled(tivoName)) {
                               for (int i=0; i<tivo_stack.size(); ++i) {
                                  if (tivos.search(tivo_stack.get(i)) == -1)
                                     tivos.add(tivo_stack.get(i));

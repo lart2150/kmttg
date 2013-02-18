@@ -259,7 +259,7 @@ public class NowPlaying implements Serializable {
          com.tivo.kmttg.util.file.delete(cookieFile);
          com.tivo.kmttg.util.file.delete(outputFile);
          
-         if (config.rpcEnabled(job.tivoName) || config.getTivoUsername() != null) {
+         if (config.rpcEnabled(job.tivoName) || config.mindEnabled(job.tivoName)) {
             // Extra iPad communication to retrieve NPL information
             // used to be able to play/delete shows. Only works for Premiere or
             // later models.
