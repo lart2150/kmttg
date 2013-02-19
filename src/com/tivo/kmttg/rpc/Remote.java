@@ -308,6 +308,11 @@ public class Remote {
                            if (j.getString("friendlyName").equals(tivoName) && j.has("id")) {
                               found = true;
                               config.bodyId_set(IP, port, j.getString("id"));
+                              if (config.getTsn(tivoName) == null) {
+                                 String tsn = j.getString("id");
+                                 tsn = tsn.replaceFirst("tsn:", "");
+                                 config.setTsn(tivoName, tsn);
+                              }
                            }
                         }
                      }
