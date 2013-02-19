@@ -482,6 +482,14 @@ public class config {
       if (getTivoUsername() != null && getTivoPassword() != null) {
          String [] supported = {"648", "652", "658"};
          String tsn = getTsn(tivoName);
+         if (tsn == null) {
+            // Try and determine tsn from tivo.com
+            Remote r = new Remote(tivoName, true);
+            if (r.success) {
+               r.disconnect();
+               tsn = getTsn(tivoName);
+            }
+         }
          if (tsn != null) {
             for (int i=0; i<supported.length; ++i) {
                if (tsn.startsWith(supported[i]))
