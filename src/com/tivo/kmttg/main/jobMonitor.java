@@ -196,14 +196,7 @@ public class jobMonitor {
             continue;
       
          // Don't run more than 'MaxJobs' active jobs at a time
-         // NOTE: VRD GUI job not considered CPU active
-         if ( ! isDownloadJob(job) &&
-              ! job.type.equals("metadata") &&
-              ! job.type.equals("javametadata") &&
-              ! isVideoRedoGUIJob(job) &&
-              ! job.type.equals("remote")) {
-            if (cpuActiveJobs >= config.MaxJobs) continue;
-         }
+         if ( isActiveJob(job) && cpuActiveJobs >= config.MaxJobs) continue;
          
          // Don't launch more than one VideoRedo COM job at a time
          if ( isVideoRedoCOMJob(job) ) {
@@ -1417,6 +1410,23 @@ public class jobMonitor {
       for (int i=0; i<JOBS.size(); ++i) {
          kill(JOBS.get(i));
       }
+   }
+   
+   private static Boolean isActiveJob(jobData job) {
+      Boolean active = true;
+      if (isDownloadJob(job))
+         active = false;
+      if (isVideoRedoGUIJob(job))
+         active = false;
+      if (job.type.equals("metadata"))
+         active = false;
+      if (job.type.equals("javametadata"))
+         active = false;
+      if (job.type.equals("remote"))
+         active = false;
+      if (job.type.equals("autotune"))
+         active = false;
+      return active;
    }
    
    private static Boolean isDownloadJob(jobData job) {
