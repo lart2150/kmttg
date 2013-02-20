@@ -200,7 +200,8 @@ public class jobMonitor {
          if ( ! isDownloadJob(job) &&
               ! job.type.equals("metadata") &&
               ! job.type.equals("javametadata") &&
-              ! isVideoRedoGUIJob(job)) {
+              ! isVideoRedoGUIJob(job) &&
+              ! job.type.equals("remote")) {
             if (cpuActiveJobs >= config.MaxJobs) continue;
          }
          
