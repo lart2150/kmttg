@@ -120,6 +120,7 @@ public class configMain {
    private static JTextField metadata_entries = null;
    private static JTextField autoLogSizeMB = null;
    private static JTextField pyTivo_host = null;
+   private static JTextField web_query = null;
    private static JTextField tivo_username = null;
    private static JTextField tivo_password = null;
    private static JTextField pyTivo_config = null;
@@ -771,6 +772,12 @@ public class configMain {
       
       // pyTivo_host
       pyTivo_host.setText("" + config.pyTivo_host);
+      
+      // web_query
+      if (config.web_query.length() > 0)
+         web_query.setText("" + config.web_query);
+      else
+         web_query.setText("http://www.imdb.com/find?s=all&q=");
       
       // tivo_username
       if (config.getTivoUsername() != null)
@@ -1580,6 +1587,14 @@ public class configMain {
       }
       config.pyTivo_host = value;
       
+      // web_query
+      value = string.removeLeadingTrailingSpaces(web_query.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = "http://www.imdb.com/find?s=all&q=";
+      }
+      config.web_query = value;
+      
       // tivo_username
       value = string.removeLeadingTrailingSpaces(tivo_username.getText());
       if (value.length() == 0) {
@@ -1659,6 +1674,7 @@ public class configMain {
       AtomicParsley = new javax.swing.JTextField(30);
       projectx = new javax.swing.JTextField(30);
       customCommand = new javax.swing.JTextField(30);
+      web_query = new javax.swing.JTextField(30);
       tivo_username = new javax.swing.JTextField(30);
       tivo_password = new javax.swing.JTextField(30);
       pyTivo_config = new javax.swing.JTextField(30);
@@ -1774,6 +1790,7 @@ public class configMain {
       JLabel autoLogSizeMB_label = new javax.swing.JLabel();
       JLabel available_keywords_label = new javax.swing.JLabel();
       JLabel pyTivo_host_label = new javax.swing.JLabel();
+      JLabel web_query_label = new javax.swing.JLabel();
       JLabel tivo_username_label = new javax.swing.JLabel();
       JLabel tivo_password_label = new javax.swing.JLabel();
       JLabel pyTivo_config_label = new javax.swing.JLabel();
@@ -1891,6 +1908,7 @@ public class configMain {
       download_delay_label.setText("start delay in seconds for download tasks");
       metadata_entries_label.setText("extra metadata entries (comma separated)");
       autoLogSizeMB_label.setText("auto log file size limit (MB)");
+      web_query_label.setText("web query base url (bindkey q)");
       tivo_username_label.setText("tivo.com username");
       tivo_password_label.setText("tivo.com password");
       pyTivo_host_label.setText("pyTivo host name");
@@ -2971,6 +2989,16 @@ public class configMain {
       c.gridy = gy;
       visual_panel.add(tableColAutoSize, c);      
       
+      // web_query
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      visual_panel.add(web_query_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      visual_panel.add(web_query, c);
+      
       // VRD Panel
       JPanel vrd_panel = new JPanel(new GridBagLayout());       
       
@@ -3223,6 +3251,7 @@ public class configMain {
       download_delay.setToolTipText(getToolTip("download_delay"));
       metadata_entries.setToolTipText(getToolTip("metadata_entries"));
       autoLogSizeMB.setToolTipText(getToolTip("autoLogSizeMB"));
+      web_query.setToolTipText(getToolTip("web_query"));
       tivo_username.setToolTipText(getToolTip("tivo_username"));
       tivo_password.setToolTipText(getToolTip("tivo_password"));
       pyTivo_host.setToolTipText(getToolTip("pyTivo_host"));
@@ -3827,6 +3856,15 @@ public class configMain {
          text += "kmttg initially logs to <b>auto.log.0</b> file. Once this specified file size limit is reached then<br>";
          text += "contents of <b>auto.log.0</b> are copied to <b>auto.log.1</b> and <b>auto.log.0</b> contents are flushed.<br>";
          text += "This limit prevents auto log file from growing in size indefinitely.";
+      }
+      else if (component.equals("web_query")) {
+         text =  "<b>web query base url (bindkey q)</b><br>";
+         text += "For all tables that list shows if you select a table row and press keyboard button<br>";
+         text += "<b>q</b> this will send this base url with the show title and subtitle appended<br>";
+         text += "to a web browser. With the default imdb base url for example imdb.com query is used<br>";
+         text += "in order to provide an easy way to get more information on the show selected in table.<br>";
+         text += "Note that if you want to reset this setting to default imdb query then just completely<br>";
+         text += "clear this field.";
       }
       else if (component.equals("tivo_username")) {
          text =  "<b>tivo.com username</b><br>";
