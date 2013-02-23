@@ -18,6 +18,7 @@ import javax.swing.event.HyperlinkListener;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
+import com.tivo.kmttg.util.log;
 
 public class help {
    private static JDialog dialog = null;
@@ -103,15 +104,15 @@ public class help {
    
    public static boolean showInBrowser(String url) {
       debug.print("url=" + url);
+      log.warn("Web browser query: " + url);
       String os = System.getProperty("os.name").toLowerCase();
       Runtime rt = Runtime.getRuntime();
       try {
          if (os.indexOf( "win" ) >= 0) {
-            String[] cmd = new String[4];
-            cmd[0] = "cmd.exe";
-            cmd[1] = "/C";
-            cmd[2] = "start";
-            cmd[3] = url;
+            String[] cmd = new String[3];
+            cmd[0] = "rundll32";
+            cmd[1] = "url.dll,FileProtocolHandler";
+            cmd[2] = url;
             rt.exec(cmd);
          } else if (os.indexOf( "mac" ) >= 0) {
             rt.exec( "open " + url);
