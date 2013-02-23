@@ -101,7 +101,7 @@ public class help {
       return version;
    }
    
-   private static boolean showInBrowser(String url) {
+   public static boolean showInBrowser(String url) {
       debug.print("url=" + url);
       String os = System.getProperty("os.name").toLowerCase();
       Runtime rt = Runtime.getRuntime();
