@@ -121,6 +121,7 @@ public class configMain {
    private static JTextField autoLogSizeMB = null;
    private static JTextField pyTivo_host = null;
    private static JTextField web_query = null;
+   private static JTextField web_browser = null;
    private static JTextField tivo_username = null;
    private static JTextField tivo_password = null;
    private static JTextField pyTivo_config = null;
@@ -778,6 +779,12 @@ public class configMain {
          web_query.setText("" + config.web_query);
       else
          web_query.setText("http://www.imdb.com/find?s=all&q=");
+      
+      // web_browser
+      if (config.web_browser.length() > 0)
+         web_browser.setText("" + config.web_browser);
+      else
+         web_browser.setText("");
       
       // tivo_username
       if (config.getTivoUsername() != null)
@@ -1595,6 +1602,14 @@ public class configMain {
       }
       config.web_query = value;
       
+      // web_browser
+      value = string.removeLeadingTrailingSpaces(web_browser.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = "";
+      }
+      config.web_browser = value;
+      
       // tivo_username
       value = string.removeLeadingTrailingSpaces(tivo_username.getText());
       if (value.length() == 0) {
@@ -1675,6 +1690,7 @@ public class configMain {
       projectx = new javax.swing.JTextField(30);
       customCommand = new javax.swing.JTextField(30);
       web_query = new javax.swing.JTextField(30);
+      web_browser = new javax.swing.JTextField(30);
       tivo_username = new javax.swing.JTextField(30);
       tivo_password = new javax.swing.JTextField(30);
       pyTivo_config = new javax.swing.JTextField(30);
@@ -1791,6 +1807,7 @@ public class configMain {
       JLabel available_keywords_label = new javax.swing.JLabel();
       JLabel pyTivo_host_label = new javax.swing.JLabel();
       JLabel web_query_label = new javax.swing.JLabel();
+      JLabel web_browser_label = new javax.swing.JLabel();
       JLabel tivo_username_label = new javax.swing.JLabel();
       JLabel tivo_password_label = new javax.swing.JLabel();
       JLabel pyTivo_config_label = new javax.swing.JLabel();
@@ -1909,6 +1926,7 @@ public class configMain {
       metadata_entries_label.setText("extra metadata entries (comma separated)");
       autoLogSizeMB_label.setText("auto log file size limit (MB)");
       web_query_label.setText("web query base url (bindkey q)");
+      web_browser_label.setText("web browser binary");
       tivo_username_label.setText("tivo.com username");
       tivo_password_label.setText("tivo.com password");
       pyTivo_host_label.setText("pyTivo host name");
@@ -2999,6 +3017,18 @@ public class configMain {
       c.gridy = gy;
       visual_panel.add(web_query, c);
       
+      // web_browser - not used for Mac or Windows
+      if (config.OS.equals("other")) {
+         gy++;
+         c.gridx = 0;
+         c.gridy = gy;
+         visual_panel.add(web_browser_label, c);
+         
+         c.gridx = 1;
+         c.gridy = gy;
+         visual_panel.add(web_browser, c);
+      }
+      
       // VRD Panel
       JPanel vrd_panel = new JPanel(new GridBagLayout());       
       
@@ -3252,6 +3282,7 @@ public class configMain {
       metadata_entries.setToolTipText(getToolTip("metadata_entries"));
       autoLogSizeMB.setToolTipText(getToolTip("autoLogSizeMB"));
       web_query.setToolTipText(getToolTip("web_query"));
+      web_browser.setToolTipText(getToolTip("web_browser"));
       tivo_username.setToolTipText(getToolTip("tivo_username"));
       tivo_password.setToolTipText(getToolTip("tivo_password"));
       pyTivo_host.setToolTipText(getToolTip("pyTivo_host"));
@@ -3865,6 +3896,11 @@ public class configMain {
          text += "in order to provide an easy way to get more information on the show selected in table.<br>";
          text += "Note that if you want to reset this setting to default imdb query then just completely<br>";
          text += "clear this field.";
+      }
+      else if (component.equals("web_browser")) {
+         text =  "<b>web browser binary</b><br>";
+         text += "Executable name of web browser to use for web queries.<br>";
+         text += "If you leave this empty kmttg will attempt a sequence of popular browsers on Linux.";
       }
       else if (component.equals("tivo_username")) {
          text =  "<b>tivo.com username</b><br>";
