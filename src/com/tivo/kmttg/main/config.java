@@ -158,6 +158,9 @@ public class config {
    public static String pyTivo_port = "9032";
    public static String pyTivo_mind = "mind.tivo.com:8181";
    
+   // web query related
+   public static String web_query = "http://www.imdb.com/find?s=all&q=";
+   
    // download related
    public static int download_delay = 10;       // Delay in secs to apply to each download attempt
    public static int download_tries = 5;        // Number of times to retry downloads
@@ -915,6 +918,9 @@ public class config {
             if (key.equals("custom")) {
                customCommand = line;
             }
+            if (key.equals("web_query")) {
+               web_query = line;
+            }
             if (key.equals("tivo_username")) {
                tivo_username = line;
             }
@@ -1171,6 +1177,8 @@ public class config {
          ofp.write("<ccextractor>\n" + ccextractor + "\n\n");
          
          ofp.write("<custom>\n" + customCommand + "\n\n");
+         
+         ofp.write("<web_query>\n" + web_query + "\n\n");
          
          ofp.write("<tivo_username>\n" + tivo_username + "\n\n");
          
