@@ -1185,7 +1185,7 @@ public class config {
          ofp.write("<web_query>\n" + web_query + "\n\n");
          
          if (web_browser.length() > 0)
-            ofp.write("<web_broswer>\n" + web_browser + "\n\n");
+            ofp.write("<web_browser>\n" + web_browser + "\n\n");
          
          ofp.write("<tivo_username>\n" + tivo_username + "\n\n");
          
