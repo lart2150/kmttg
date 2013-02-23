@@ -115,16 +115,21 @@ public class help {
             cmd[2] = url;
             rt.exec(cmd);
          } else if (os.indexOf( "mac" ) >= 0) {
-            rt.exec( "open " + url);
+            rt.exec( "open \"" + url + "\"");
          } else {
-            //prioritized 'guess' of users' preference
-            String[] browsers = {"epiphany", "firefox", "mozilla", "opera", "konqueror", "netscape", "links", "lynx"};
-  
-            StringBuffer cmd = new StringBuffer();
-            for (int i=0; i<browsers.length; i++)
-               cmd.append( (i==0  ? "" : " || " ) + browsers[i] +" \"" + url + "\" ");
-  
-            rt.exec(new String[] { "sh", "-c", cmd.toString() });            
+            if (config.web_browser.length() > 0) {
+               // Call user provided browser
+               rt.exec(new String[] {config.web_browser, url});
+            } else {
+               //prioritized 'guess' of users' preference
+               String[] browsers = {"epiphany", "firefox", "mozilla", "opera", "konqueror", "netscape", "links", "lynx"};
+     
+               StringBuffer cmd = new StringBuffer();
+               for (int i=0; i<browsers.length; i++)
+                  cmd.append( (i==0  ? "" : " || " ) + browsers[i] +" \"" + url + "\" ");
+     
+               rt.exec(new String[] { "sh", "-c", cmd.toString() });
+            }
          }
       }
       catch (IOException e) {
