@@ -555,6 +555,15 @@ public class nplTable {
               log.print(name + " = " + s.data.get(name));
             }
          }
+      } else if (keyCode == KeyEvent.VK_Q) {
+         // Web query currently selected entry
+         int[] selected = GetSelectedRows();
+         if (selected == null || selected.length < 1)
+            return;
+         sortableDate s = (sortableDate)NowPlaying.getValueAt(selected[0],getColumnIndex("DATE"));
+         if ( ! s.folder && s.data != null && s.data.containsKey("title")) {
+            TableUtil.webQuery(s.data.get("title"));
+         }
       } else {
          // Pass along keyboard action for unimplemented key press
          e.consume();

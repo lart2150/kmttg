@@ -258,6 +258,22 @@ public class cancelledTable {
          JSONObject json = GetRowData(selected[0]);
          if (json != null)
             rnpl.printJSON(json);
+      } else if (keyCode == KeyEvent.VK_Q) {
+         // Web query currently selected entry
+         int[] selected = TableUtil.GetSelectedRows(TABLE);
+         if (selected == null || selected.length < 1)
+            return;
+         JSONObject json = GetRowData(selected[0]);
+         if (json != null && json.has("title")) {
+            try {
+               String title = json.getString("title");
+               if (json.has("subtitle"))
+                  title = title + " - " + json.getString("subtitle");
+               TableUtil.webQuery(title);
+            } catch (JSONException e1) {
+               log.error("KeyPressed Q - " + e1.getMessage());
+            }  
+         }
       } else {
          // Pass along keyboard action
          e.consume();
