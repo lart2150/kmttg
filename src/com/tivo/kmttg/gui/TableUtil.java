@@ -1,6 +1,8 @@
 package com.tivo.kmttg.gui;
 
 import java.awt.Component;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -502,5 +504,15 @@ public class TableUtil {
          sorted.put(ajson);
       }
       return sorted;
+   }
+   
+   // Send url to web browser
+   static public void webQuery(String title) {
+      try {
+         String url = config.web_query + URLEncoder.encode(title, "UTF-8");
+         help.showInBrowser(url);
+      } catch (UnsupportedEncodingException e) {
+         log.error("webQuery - " + e.getMessage());
+      }
    }
 }
