@@ -1739,6 +1739,29 @@ public class remotegui {
             }
          }
       });
+      
+      JButton myShows = new CustomButton("My Shows", "My Shows", null);
+      size = myShows.getPreferredSize();
+      panel_controls.add(myShows);
+      myShows.setBounds(500+insets.left, 130+insets.top, size.width, size.height);
+      myShows.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_rc.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               Remote r = config.initRemote(tivoName);
+               if (r.success) {
+                  try {
+                     JSONObject json = new JSONObject();
+                     json.put("event", "nowShowing");
+                     r.Command("keyEventSend", json);
+                  } catch (JSONException e1) {
+                     log.error("RC - " + e1.getMessage());
+                  }
+                  r.disconnect();
+               }
+            }
+         }
+      });
             
       // Other components for the panel      
       JLabel label_rc = new JLabel("TiVo");
@@ -3499,6 +3522,10 @@ public class remotegui {
          text = "<b>Toggle CC</b><br>";
          text += "Toggle closed caption display.<br>";
          text += "NOTE: Assumes initial state of off.";
+      }
+      else if (component.equals("My Shows")){
+         text = "<b>My Shows</b><br>";
+         text += "My Shows (AKA Now Playing List).";
       }
       if (text.length() > 0) {
          text = "<html>" + text + "</html>";
