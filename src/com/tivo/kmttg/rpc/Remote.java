@@ -432,7 +432,14 @@ public class Remote {
       if (json == null)
          json = new JSONObject();
       try {
-         if (type.equals("Playback")) {
+         if (type.equals("Help")) {            
+            // Query middlemind.tivo.com for syntax of a particular RPC command
+            // Expects RPC command name as "name" in json, such as "keyEventSend"
+            if (! json.has("levelOfDetail"))
+               json.put("levelOfDetail", "high");
+            req = RpcRequest("schemaElementGet", false, json);
+         }
+         else if (type.equals("Playback")) {
             // Play an existing recording
             // Expects "id" in json
             json.put("uri", "x-tivo:classicui:playback");
