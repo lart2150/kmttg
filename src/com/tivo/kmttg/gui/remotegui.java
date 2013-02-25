@@ -1748,16 +1748,22 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             String tivoName = (String)tivo_rc.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               Remote r = config.initRemote(tivoName);
-               if (r.success) {
-                  try {
-                     JSONObject json = new JSONObject();
-                     json.put("event", "nowShowing");
-                     r.Command("keyEventSend", json);
-                  } catch (JSONException e1) {
-                     log.error("RC - " + e1.getMessage());
+               if (config.rpcEnabled(tivoName)) {
+                  Remote r = config.initRemote(tivoName);
+                  if (r.success) {
+                     try {
+                        JSONObject json = new JSONObject();
+                        json.put("event", "nowShowing");
+                        r.Command("keyEventSend", json);
+                     } catch (JSONException e1) {
+                        log.error("RC - " + e1.getMessage());
+                     }
+                     r.disconnect();
                   }
-                  r.disconnect();
+               } else {
+                  // Use telnet interface
+                  String[] sequence = new String[] {"NOWSHOWING"};
+                  new telnet(config.TIVOS.get(tivoName), sequence);                     
                }
             }
          }
@@ -1987,7 +1993,8 @@ public class remotegui {
       
       // RC tab keyboard shortcuts without buttons
       for (int i=KeyEvent.VK_A; i<=KeyEvent.VK_Z; ++i) {
-         AddPanelShortcut(panel_rc, "" + i, i, true, "" + Character.toChars(i)[0]);
+         AddPanelShortcut(panel_rc, "" + i, i, true, "" + new String("" + Character.toChars(i)[0]).toLowerCase());
+         AddPanelShortcut(panel_rc, "Shift" + i, i, true, "" + Character.toChars(i)[0]);
       }
       Object[][] kb_shortcuts = new Object[][] {
          // NAME       Keyboard KeyEvent       isAscii action
@@ -2959,6 +2966,8 @@ public class remotegui {
                      try {
                         JSONObject json = new JSONObject();
                         if (isAscii) {
+                           json.put("event", "text");
+                           r.Command("keyEventSend", json);
                            json.put("event", "ascii");
                            json.put("value", command.toCharArray()[0]);
                         }
@@ -2973,7 +2982,10 @@ public class remotegui {
                   }
                } else {
                   // Use telnet protocol
-                  new telnet(config.TIVOS.get(tivoName), mapToTelnet(new String[] {command}));
+                  if (isAscii)
+                     new telnet(config.TIVOS.get(tivoName), new String[] {command});
+                  else
+                     new telnet(config.TIVOS.get(tivoName), mapToTelnet(new String[] {command}));
                }
             }
             return null;
