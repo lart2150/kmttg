@@ -23,9 +23,7 @@ public class telnet {
        "LEFT", "UP", "RIGHT", "DOWN", "SELECT", "THUMBSUP", "THUMBSDOWN",
        "CHANNELUP", "CHANNELDOWN", "RECORD", "CLEAR", "ENTER",
        "PLAY", "REVERSE", "PAUSE", "FORWARD", "REPLAY", "SLOW", "ADVANCE",
-       "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
-       "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-       "CC_ON", "CC_OFF", "STANDBY"
+       "CC_ON", "CC_OFF", "STANDBY", "NOWSHOWING"
    };
    
    // Constructor for dual tuner channel change
@@ -55,7 +53,28 @@ public class telnet {
    }
    
    private String mapButton(String code) {
-      String mapped = code.toUpperCase();
+      String mapped = "";
+      if (code.matches("^[a-z]$")) {
+         mapped = "KEYBOARD " + code.toUpperCase();
+         return mapped;
+      }
+      if (code.matches("^[A-Z]$")) {
+         mapped = "KEYBOARD LSHIFT\rKEYBOARD " + code;
+         return mapped;
+      }
+      if (code.equals("*")) {
+         mapped = "KEYBOARD LSHIFT\rKEYBOARD NUM8";
+         return mapped;
+      }
+      if (code.equals("_")) {
+         mapped = "KEYBOARD LSHIFT\rKEYBOARD MINUS";
+         return mapped;
+      }
+      if (code.equals("&")) {
+         mapped = "KEYBOARD LSHIFT\rKEYBOARD NUM7";
+         return mapped;
+      }
+      mapped = code.toUpperCase();
       // [0-9] maps to NUM[0-9]
       if (mapped.matches("^\\d$")) {
          mapped = "NUM" + code;
