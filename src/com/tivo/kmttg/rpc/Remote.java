@@ -664,7 +664,7 @@ public class Remote {
             o.put("bodyId", bodyId_get());
             o.put("ignoreConflicts", "true");
             // This option allows season passes not currently in guide to be scheduled
-            o.put("bodyGeneratesCandidates", true);
+            //o.put("bodyGeneratesCandidates", true);
             req = RpcRequest("subscribe", false, o);
          }
          else if (type.equals("ModifySP")) {
