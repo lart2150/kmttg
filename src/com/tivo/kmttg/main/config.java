@@ -20,7 +20,7 @@ import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 
 public class config {
-   public static String kmttg = "kmttg v0p9m";
+   public static String kmttg = "kmttg v0p9n_beta";
    
    // encoding related
    public static String encProfDir = "";
