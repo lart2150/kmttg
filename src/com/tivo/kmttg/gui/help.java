@@ -114,6 +114,8 @@ public class help {
             cmd[1] = "url.dll,FileProtocolHandler";
             cmd[2] = url;
             rt.exec(cmd);
+         } else if (os.indexOf("mac") >= 0) {
+            rt.exec(new String[] {"open", url});
          } else {
             if (config.web_browser.length() > 0) {
                // Call user provided browser
