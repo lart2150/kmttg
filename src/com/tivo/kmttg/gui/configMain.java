@@ -3017,8 +3017,8 @@ public class configMain {
       c.gridy = gy;
       visual_panel.add(web_query, c);
       
-      // web_browser - not used for Mac or Windows
-      if (config.OS.equals("other")) {
+      // web_browser - not used for Windows
+      if ( ! config.OS.equals("windows")) {
          gy++;
          c.gridx = 0;
          c.gridy = gy;
