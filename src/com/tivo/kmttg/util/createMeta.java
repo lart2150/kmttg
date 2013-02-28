@@ -1,7 +1,13 @@
 package com.tivo.kmttg.util;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
+import java.io.StringWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -9,6 +15,11 @@ import java.util.Stack;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -18,6 +29,7 @@ import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.traversal.TreeWalker;
 
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobData;
 
 public class createMeta {
@@ -372,5 +384,90 @@ public class createMeta {
          return humanMpaaRatings.get(intermediate);
       return mpaaRating;
    }
+   
+   // Get extended metatadata and store in given Hashtable
+   public static void getExtendedMetadata(String tivoName, Hashtable<String,String> data, Boolean verbose) {
+      if (! data.containsKey("metadata") && data.containsKey("url_TiVoVideoDetails")) {
+         if (verbose)
+            log.warn("Obtaining extended metadata for: " + data.get("title"));
+         // Obtain and add metadata
+         ByteArrayOutputStream info = new ByteArrayOutputStream();
+         try {
+            String url = data.get("url_TiVoVideoDetails");
+            String wan_port = config.getWanSetting(tivoName, "https");
+            if (wan_port != null)
+               url = string.addPort(url, wan_port);
+            Boolean result = http.downloadPiped(url, "tivo", config.MAK, info, false, null);
+            if(result) {
+               // Read data from info
+               byte[] b = info.toByteArray();
+               metadataFromXML(b, data);
+               data.put("metadata", "acquired");
+               if (verbose)
+                  log.warn("extended metadata acquired");
+            }
+         } catch (Exception e1) {
+            log.error("extended metadata error: " + e1.getMessage());
+         }
+      }
+   }
+   
+   // Extract data of interest from extended metadata and add to Hashtable
+   private static void metadataFromXML(byte[] b, Hashtable<String,String> h) {
+      Document doc = Xml.getDocument(new ByteArrayInputStream(b));
+      if (doc != null) {
+         // startTime is under main branch
+         NodeList nlist = doc.getElementsByTagName("startTime");
+         if (nlist.getLength() > 0) {
+            String startTime = nlist.item(0).getTextContent();            
+            //log.print("startTime=" + printableDateFromExtendedTime(startTime));
+            h.put("startTime_gmt", "" + getLongDateFromExtendedTime(startTime));
+         }
+         // Search for everything else under <showing>
+         nlist = doc.getElementsByTagName("showing");
+         if (nlist.getLength() > 0) {
+            Node showingNode = nlist.item(0);
+            Node n = createMeta.getNodeByName(doc, showingNode, "originalAirDate");
+            if ( n != null) {
+               String oad = n.getTextContent();
+               // Strip off time portion. Example: 2012-11-08T00:00:00Z
+               oad = oad.replaceFirst("T.+$", "");
+               h.put("originalAirDate", oad);
+            }
+         }
+      }
+   }
 
+   public static String DocToString(Document doc) {
+      try {
+      Transformer transformer = TransformerFactory.newInstance().newTransformer();
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      StreamResult result = new StreamResult(new StringWriter());
+      DOMSource source = new DOMSource(doc);
+      transformer.transform(source, result);
+      return result.getWriter().toString();
+      } catch (Exception e) {
+         log.error("DocToString - " + e.getMessage());
+         return null;
+      }
+   }
+   
+   // Convert given time from TiVo Extended XML to long
+   // Sample date: 2013-02-28T18:15:23Z
+   private static long getLongDateFromExtendedTime(String date) {
+      try {
+         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z' zzz");
+         Date d = format.parse(date + " GMT");
+         return d.getTime();
+      } catch (ParseException e) {
+         log.error("getLongDateFromExtendedTime - " + e.getMessage());
+         return 0;
+      }
+   }
+   
+   public static String printableDateFromExtendedTime(String date) {
+      long start = getLongDateFromExtendedTime(date);
+      SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy hh:mm a");
+      return sdf.format(start);
+   }
 }
