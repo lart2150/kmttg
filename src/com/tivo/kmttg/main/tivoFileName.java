@@ -2,11 +2,13 @@ package com.tivo.kmttg.main;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.tivo.kmttg.util.createMeta;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
@@ -33,6 +35,27 @@ public class tivoFileName {
       keys.put("wday",     t[4]);
       keys.put("month",    t[5]);
       keys.put("year",     t[6]);
+      
+      // If one of these keywords used then need extended metadata
+      // which has real program start time (for partial records)
+      String[] sArray = {"sMin", "sHour", "sMday", "sMonthNum", "sWday", "sMonth", "sYear"};
+      Boolean getExtended = false;
+      for (int i=0; i<sArray.length; ++i) {
+         if (config.tivoFileNameFormat.contains(sArray[i]))
+            getExtended = true;
+      }
+      if (getExtended && entry.containsKey("tivoName"))
+         createMeta.getExtendedMetadata(entry.get("tivoName"), entry, true);
+      // Default all startTime entries to empty string
+      Arrays.fill(t, "");
+      if (entry.containsKey("startTime_gmt")) {
+         gmt = Long.parseLong(entry.get("startTime_gmt"));
+         format = sdf.format(gmt);
+         t = format.split("\\s+");
+      }
+      for (int i=0; i<sArray.length; ++i)
+         keys.put(sArray[i], t[i]);
+
       if ( ! entry.containsKey("EpisodeNumber") ) entry.put("EpisodeNumber", "");
       
       // Enter values for these names into keys hash
@@ -150,6 +173,13 @@ public class tivoFileName {
             text = text.replaceFirst("^month$",           removeSpecialChars(keys.get("month")));
             text = text.replaceFirst("^monthNum$",        removeSpecialChars(keys.get("monthNum")));
             text = text.replaceFirst("^year$",            removeSpecialChars(keys.get("year")));
+            text = text.replaceFirst("^sMin$",            removeSpecialChars(keys.get("sMin")));
+            text = text.replaceFirst("^sHour$",           removeSpecialChars(keys.get("sHour")));
+            text = text.replaceFirst("^sWday$",           removeSpecialChars(keys.get("sWday")));
+            text = text.replaceFirst("^sMday$",           removeSpecialChars(keys.get("sMday")));
+            text = text.replaceFirst("^sMonth$",          removeSpecialChars(keys.get("sMonth")));
+            text = text.replaceFirst("^sMonthNum$",       removeSpecialChars(keys.get("sMonthNum")));
+            text = text.replaceFirst("^sYear$",           removeSpecialChars(keys.get("sYear")));
             text = text.replaceFirst("^EpisodeNumber$",   removeSpecialChars(keys.get("EpisodeNumber")));
             text = text.replaceFirst("^description$",     removeSpecialChars(keys.get("description")));
             text = text.replaceFirst("^tivoName$",        removeSpecialChars(keys.get("tivoName")));
