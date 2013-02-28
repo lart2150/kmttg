@@ -7,8 +7,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -28,9 +26,6 @@ import javax.swing.SwingUtilities;
 
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Sorter;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -40,7 +35,6 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
-import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
@@ -48,8 +42,6 @@ import com.tivo.kmttg.util.createMeta;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
-import com.tivo.kmttg.util.Xml;
 
 public class nplTable {
    public String tivoName = null;
@@ -411,28 +403,8 @@ public class nplTable {
             RefreshNowPlaying(s.folderData);
          } else {
             if (SwingUtilities.isRightMouseButton(e)) {
-               if (s.data != null && s.data.containsKey("url_TiVoVideoDetails")) {
-                  if (! s.data.containsKey("metadata")) {
-                     log.warn("Obtaining extended metadata for: " + s.data.get("title"));
-                     // Obtain and add metadata
-                     ByteArrayOutputStream info = new ByteArrayOutputStream();
-                     try {
-                        String url = s.data.get("url_TiVoVideoDetails");
-                        String wan_port = config.getWanSetting(tivoName, "https");
-                        if (wan_port != null)
-                           url = string.addPort(url, wan_port);
-                        Boolean result = http.downloadPiped(url, "tivo", config.MAK, info, false, null);
-                        if(result) {
-                           // Read data from info
-                           byte[] b = info.toByteArray();
-                           metadataFromXML(b, s.data);
-                           s.data.put("metadata", "acquired");
-                           log.warn("extended metadata acquired");
-                        }
-                     } catch (Exception e1) {
-                        log.error("metadata error: " + e1.getMessage());
-                     }
-                  }
+               if (s.data != null) {
+                  createMeta.getExtendedMetadata(tivoName, s.data, true);
                   // De-select all
                   NowPlaying.getSelectionModel().clearSelection();
                }
@@ -1375,25 +1347,6 @@ public class nplTable {
          rate = 0.0;
       }
       return rate;
-   }
-   
-   // Extract data of interest from extended metadata and add to Hashtable
-   private void metadataFromXML(byte[] b, Hashtable<String,String> h) {
-      Document doc = Xml.getDocument(new ByteArrayInputStream(b));
-      if (doc != null) {
-         // Search for everything under <showing>
-         NodeList nlist = doc.getElementsByTagName("showing");
-         if (nlist.getLength() > 0) {
-            Node showingNode = nlist.item(0);
-            Node n = createMeta.getNodeByName(doc, showingNode, "originalAirDate");
-            if ( n != null) {
-               String oad = n.getTextContent();
-               // Strip off time portion. Example: 2012-11-08T00:00:00Z
-               oad = oad.replaceFirst("T.+$", "");
-               h.put("originalAirDate", oad);
-            }
-         }
-      }
    }
       
    // Return true if this entry should not be displayed, false otherwise
