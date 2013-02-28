@@ -1941,7 +1941,9 @@ public class configMain {
          new String[] { "[title]", "[mainTitle]", "[episodeTitle]", "[channelNum]",
             "[channel]", "[min]", "[hour]", "[wday]", "[mday]", "[month]",
             "[monthNum]", "[year]", "[originalAirDate]", "[EpisodeNumber]",
-            "[description]", "[tivoName]", "[/]" }
+            "[description]", "[tivoName]", "[/]",
+            "[sMin]", "[sHour]", "[sWday]", "[sMday]", "[sMonth]", "[sMonthNum]", "[sYear]"
+            }
          )
       );
       keywords.setSelectedItem(null);
