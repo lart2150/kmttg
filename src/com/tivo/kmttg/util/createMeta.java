@@ -420,8 +420,7 @@ public class createMeta {
          NodeList nlist = doc.getElementsByTagName("startTime");
          if (nlist.getLength() > 0) {
             String startTime = nlist.item(0).getTextContent();            
-            //log.print("startTime=" + printableDateFromExtendedTime(startTime));
-            h.put("startTime_gmt", "" + getLongDateFromExtendedTime(startTime));
+            h.put("startTime", "" + printableDateFromExtendedTime(startTime));
          }
          // Search for everything else under <showing>
          nlist = doc.getElementsByTagName("showing");
@@ -465,9 +464,10 @@ public class createMeta {
       }
    }
    
+   // Return date format such as 2013-02-28_1815
    public static String printableDateFromExtendedTime(String date) {
       long start = getLongDateFromExtendedTime(date);
-      SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy hh:mm a");
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HHmm");
       return sdf.format(start);
    }
 }
