@@ -112,8 +112,10 @@ public class createMeta {
                   NodeList children = n.getChildNodes();
                   for (int c=0; c<children.getLength(); c++) {
                      value = children.item(c).getTextContent();
-                     values.add(value);
-                     debug.print(name + "=" + value);
+                     if (value.length() > 0) {
+                        values.add(value);
+                        debug.print(name + "=" + value);
+                     }
                   }
                   data.put(name, values);
                }
