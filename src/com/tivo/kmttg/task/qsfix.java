@@ -15,6 +15,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.mediainfo;
 import com.tivo.kmttg.util.string;
 
 public class qsfix implements Serializable {
@@ -96,7 +97,10 @@ public class qsfix implements Serializable {
       debug.print("");
       // Obtain some info on input video
       Hashtable<String,String> info = null;
-      info = ffmpeg.getVideoInfo(sourceFile);
+      if (file.isFile(config.mediainfo))
+         info = mediainfo.getVideoInfo(sourceFile);
+      else if (file.isFile(config.ffmpeg))
+         info = ffmpeg.getVideoInfo(sourceFile);
       if (config.VrdQsFilter == 1) {
          // Create script with video dimensions filter enabled
          log.warn("VideoRedo video dimensions filter is enabled");
@@ -352,7 +356,11 @@ public class qsfix implements Serializable {
             return null;
          }
       } 
-      Hashtable<String,String> info = ffmpeg.getVideoInfo(destFile);
+      Hashtable<String,String> info = null;
+      if (file.isFile(config.mediainfo))
+         info = mediainfo.getVideoInfo(destFile);
+      else if (file.isFile(config.ffmpeg))
+         info = ffmpeg.getVideoInfo(destFile);
       file.delete(destFile);
       return(info);
    }

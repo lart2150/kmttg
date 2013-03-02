@@ -14,6 +14,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.mediainfo;
 import com.tivo.kmttg.util.string;
 
 public class adcut implements Serializable {
@@ -104,7 +105,11 @@ public class adcut implements Serializable {
    private Boolean start() {
       debug.print("");
       
-      Hashtable<String,String> info = ffmpeg.getVideoInfo(job.mpegFile);
+      Hashtable<String,String> info = null;
+      if (file.isFile(config.mediainfo))
+         info = mediainfo.getVideoInfo(job.mpegFile);
+      else if (file.isFile(config.ffmpeg))
+         info = ffmpeg.getVideoInfo(job.mpegFile);
       // Handle input files different than mpeg2 program stream
       // which changes output file suffix from .mpg to something else
       Boolean isFileChanged = false;

@@ -14,6 +14,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.mediainfo;
 import com.tivo.kmttg.util.string;
 
 public class projectxcut implements Serializable {
@@ -63,7 +64,11 @@ public class projectxcut implements Serializable {
       }
       
       // Check for non-mpeg2 input file
-      Hashtable<String,String> info = ffmpeg.getVideoInfo(job.mpegFile);
+      Hashtable<String,String> info = null;
+      if (file.isFile(config.mediainfo))
+         info = mediainfo.getVideoInfo(job.mpegFile);
+      else if (file.isFile(config.ffmpeg))
+         info = ffmpeg.getVideoInfo(job.mpegFile);
       if (info != null) {
          if (! info.get("video").equals("mpeg2video")) {
             log.error("input video=" + info.get("video") + ": projectxcut only supports mpeg2 video");
