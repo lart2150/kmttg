@@ -94,6 +94,7 @@ public class configMain {
    private static JTextField tivodecode = null;
    private static JTextField curl = null;
    private static JTextField ffmpeg = null;
+   private static JTextField mediainfo = null;
    private static JTextField mencoder = null;
    private static JTextField handbrake = null;
    private static JTextField comskip = null;
@@ -740,6 +741,9 @@ public class configMain {
       
       // ffmpeg
       ffmpeg.setText(config.ffmpeg);
+      
+      // mediainfo
+      mediainfo.setText(config.mediainfo);
       
       // customCommand
       customCommand.setText(config.customCommand);
@@ -1442,6 +1446,19 @@ public class configMain {
       }
       config.ffmpeg = value;
       
+      // mediainfo
+      value = string.removeLeadingTrailingSpaces(mediainfo.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = "";
+      } else {
+         if ( ! file.isFile(value) ) {
+            textFieldError(mediainfo, "mediainfo setting not a valid file: '" + value + "'");
+            errors++;
+         }
+      }
+      config.mediainfo = value;
+      
       // customCommand
       value = string.removeLeadingTrailingSpaces(customCommand.getText());
       if (value.length() == 0) {
@@ -1677,6 +1694,7 @@ public class configMain {
       tivodecode = new javax.swing.JTextField(30);
       curl = new javax.swing.JTextField(30);
       ffmpeg = new javax.swing.JTextField(30);
+      mediainfo = new javax.swing.JTextField(30);
       mencoder = new javax.swing.JTextField(30);
       mencoder_args = new javax.swing.JTextField(30);
       handbrake = new javax.swing.JTextField(30);
@@ -1780,6 +1798,7 @@ public class configMain {
       JLabel tivodecode_label = new javax.swing.JLabel();
       JLabel curl_label = new javax.swing.JLabel();
       JLabel ffmpeg_label = new javax.swing.JLabel();
+      JLabel mediainfo_label = new javax.swing.JLabel();
       JLabel mencoder_label = new javax.swing.JLabel();
       JLabel mencoder_args_label = new javax.swing.JLabel();
       JLabel handbrake_label = new javax.swing.JLabel();
@@ -1900,6 +1919,7 @@ public class configMain {
       tivodecode_label.setText("tivodecode"); 
       curl_label.setText("curl"); 
       ffmpeg_label.setText("ffmpeg"); 
+      mediainfo_label.setText("mediainfo cli"); 
       mencoder_label.setText("mencoder"); 
       mencoder_args_label.setText("mencoder Ad Cut extra args");
       handbrake_label.setText("handbrake"); 
@@ -2166,6 +2186,20 @@ public class configMain {
                   int result = Browser.showDialog(ffmpeg, "Choose File");
                   if (result == JFileChooser.APPROVE_OPTION) {
                      ffmpeg.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      mediainfo.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(mediainfo, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     mediainfo.setText(Browser.getSelectedFile().getPath());
                   }
                }
             }
@@ -2768,6 +2802,16 @@ public class configMain {
       c.gridy = gy;
       programs_panel.add(projectx, c);
       
+      // mediainfo
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      programs_panel.add(mediainfo_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      programs_panel.add(mediainfo, c);
+      
       // custom command
       gy++;
       c.gridx = 0;
@@ -3249,6 +3293,7 @@ public class configMain {
       tivodecode.setToolTipText(getToolTip("tivodecode"));
       curl.setToolTipText(getToolTip("curl"));
       ffmpeg.setToolTipText(getToolTip("ffmpeg"));
+      mediainfo.setToolTipText(getToolTip("mediainfo"));
       mencoder.setToolTipText(getToolTip("mencoder"));
       mencoder_args.setToolTipText(getToolTip("mencoder_args"));
       handbrake.setToolTipText(getToolTip("handbrake"));
@@ -3463,9 +3508,9 @@ public class configMain {
          text =  "<b>Enable VideoRedo QS Fix video dimension filter</b><br>";
          text += "If you have trouble in VideoRedo editing some files due to <b>Video Dimensions Changed</b><br>";
          text += "error message then enabling this option will apply a Video Dimensions filter as part of kmttg VRD<br>";
-         text += "Quickstream Fix run that will solve that problem. Note that kmttg uses ffmpeg<br>";
-         text += "to automatically detect the mpeg video file dimensions to be used as the filter and<br>";
-         text += "prepares a custom version of VRD vp.vbs file with an added filter line.";
+         text += "Quickstream Fix run that will solve that problem. Note that kmttg uses mediainfo if<br>";
+         text += "available, else ffmpeg to automatically detect the mpeg video file dimensions to be used<br>";
+         text += "as the filter and prepares a custom version of VRD vp.vbs file with an added filter line.";
       }
       else if (component.equals("VrdDecrypt")) {
          text =  "<b>Decrypt using VideoRedo instead of tivodecode</b><br>";
@@ -3660,6 +3705,16 @@ public class configMain {
          text += "use this program, so if you plan on encoding to different video<br>";
          text += "file formats with one of those profiles this setting is required.<br>";
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
+      }
+      else if (component.equals("mediainfo")) {
+         text =  "<b>mediainfo cli</b><br>";
+         text += "This defines the full path to the <b>mediainfo cli</b> program.<br>";
+         text += "When available kmttg will use this program to determine information on videos<br>";
+         text += "such as container, video codec, audio codec, video resolution, etc.<br>";
+         text += "which is needed for some kmttg operations. If this program is not available<br>";
+         text += "to kmttg then ffmpeg will be used instead.<br>";
+         text += "<b>NOTE: This binary should be the Command Line Interface (CLI) version of<br>";
+         text += "mediainfo, not the graphical (GUI) version.</b>";
       }
       else if (component.equals("mencoder")) {
          text =  "<b>mencoder</b><br>";

@@ -37,6 +37,7 @@ public class config {
    public static String mpegCutDir = "";
    public static String encodeDir = "";
    public static String ffmpeg = "";
+   public static String mediainfo = "";
    public static String projectx = "";
    public static String mencoder = "";
    public static String handbrake = "";
@@ -227,6 +228,11 @@ public class config {
          result = getProgramDefault("ffmpeg");
          if ( file.isFile(result) )
             ffmpeg = result;
+      }
+      if ( ! file.isFile(mediainfo) ) {
+         result = getProgramDefault("mediainfo");
+         if ( file.isFile(result) )
+            mediainfo = result;
       }
       if ( ! file.isFile(projectx) ) {
          result = getProgramDefault("projectx");
@@ -658,6 +664,16 @@ public class config {
          return ffmpeg;
       }
       
+      else if (programName.equals("mediainfo")) {
+         String mediainfo = programDir + s + "mediainfo_cli" + s + "mediainfo" + exe;
+         if (OS.equals("other") && ! file.isFile(mediainfo)) {
+            result = file.unixWhich("mediainfo");
+            if (result != null)
+               mediainfo = result;
+         }
+         return mediainfo;
+      }
+      
       else if (programName.equals("projectx")) {
          return programDir + s + "ProjectX" + s + "ProjectX.jar";
       }
@@ -864,6 +880,9 @@ public class config {
             }
             if (key.equals("ffmpeg")) {
                ffmpeg = line;
+            }
+            if (key.equals("mediainfo")) {
+               mediainfo = line;
             }
             if (key.equals("projectx")) {
                projectx = line;
@@ -1153,6 +1172,8 @@ public class config {
          ofp.write("<curl>\n" + curl + "\n\n");
          
          ofp.write("<ffmpeg>\n" + ffmpeg + "\n\n");
+         
+         ofp.write("<mediainfo>\n" + mediainfo + "\n\n");
          
          ofp.write("<projectx>\n" + projectx + "\n\n");
          
