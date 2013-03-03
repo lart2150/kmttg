@@ -1125,8 +1125,10 @@ public class Remote {
                            continue;
                      }
                   }
-                  // Find upcoming & conflicts entries for each SP and add data to each JSON
-                  if (j.has("subscriptionId")) {
+                  // Find upcoming & conflicts entries for each SP and add data to each JSON.
+                  // Only do this when job != null since for other uses just the raw SP data
+                  // is all we want for speed purposes
+                  if (job != null && j.has("subscriptionId")) {
                      JSONObject json = new JSONObject();
                      json.put("subscriptionId", j.getString("subscriptionId"));
                      json.put("bodyId", bodyId_get());
