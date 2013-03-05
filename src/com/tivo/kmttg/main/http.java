@@ -117,6 +117,17 @@ public class http {
          try { conn.connect(); }
          catch (IOException ignore) {};
          cm.storeCookies(conn);
+         // Print header information
+         /*String header = conn.getHeaderField(0);
+         log.print(header);
+         log.print("---Start of headers---");
+         int i = 1;
+         while ((header = conn.getHeaderField(i)) != null) {
+             String key = conn.getHeaderFieldKey(i);
+             log.print(((key==null) ? "" : key + ": ") + header);
+             i++;
+         }
+         log.print("---End of headers---");*/
          
          // Connect again and init cookies with connection
          conn = getConnection(url);
