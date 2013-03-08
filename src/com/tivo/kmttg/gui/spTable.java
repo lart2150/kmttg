@@ -823,7 +823,7 @@ public class spTable {
                             }
                             
                             // Update SP table
-                            JSONArray a = r.SeasonPasses(null);
+                            JSONArray a = r.SeasonPasses(new jobData());
                             if( a != null) {
                                clear();
                                AddRows(tivoName, a);
