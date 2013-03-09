@@ -408,39 +408,49 @@ public class tivoTab {
          int row;
          for (int i=0; i<rows.length; i++) {
             row = rows[i];
-            Hashtable<String,Object> h = new Hashtable<String,Object>();
-            h.put("tivoName", tivoName);
+            Stack<Hashtable<String,Object>> entries = new Stack<Hashtable<String,Object>>();
             if ( tivoName.equals("FILES") ) {
+               Hashtable<String,Object> h = new Hashtable<String,Object>();
+               h.put("tivoName", tivoName);
                h.put("mode", "FILES");
                String fileName = nplTab.NowPlayingGetSelectionFile(row);
-               if (fileName == null) return;
-               h.put("startFile", fileName);
+               if (fileName != null) {
+                  h.put("startFile", fileName);
+                  entries.add(h);
+               }
             } else {
-               h.put("mode", "Download");
-               Hashtable<String,String> entry = nplTab.NowPlayingGetSelectionData(row);
-               if (entry == null) return;
-               h.put("entry", entry);
+               Stack<Hashtable<String,String>> rowData = nplTab.getRowData(row);
+               for (int j=0; j<rowData.size(); ++j) {
+                  Hashtable<String,Object> h = new Hashtable<String,Object>();
+                  h.put("tivoName", tivoName);
+                  h.put("mode", "Download");
+                  h.put("entry", rowData.get(j));
+                  entries.add(h);
+               }
             }
             
             // Launch jobs appropriately
-            if (tivoName.equals("FILES")) {
-               h.put("metadataTivo", config.gui.metadata.isSelected());
-               h.put("metadata", false);
-            } else {
-               h.put("metadata", config.gui.metadata.isSelected());
-               h.put("metadataTivo", false);
+            for (int j=0; j<entries.size(); ++j) {
+               Hashtable<String,Object> h = entries.get(j);
+               if (tivoName.equals("FILES")) {
+                  h.put("metadataTivo", config.gui.metadata.isSelected());
+                  h.put("metadata", false);
+               } else {
+                  h.put("metadata", config.gui.metadata.isSelected());
+                  h.put("metadataTivo", false);
+               }
+               h.put("decrypt",    config.gui.decrypt.isSelected());
+               h.put("qsfix",      config.gui.qsfix.isSelected());
+               h.put("twpdelete",  config.gui.twpdelete.isSelected());
+               h.put("ipaddelete", config.gui.ipaddelete.isSelected() && config.rpcEnabled(tivoName));
+               h.put("comskip",    config.gui.comskip.isSelected());
+               h.put("comcut",     config.gui.comcut.isSelected());
+               h.put("captions",   config.gui.captions.isSelected());
+               h.put("encode",     config.gui.encode.isSelected());
+               h.put("push",       config.gui.push.isSelected());
+               h.put("custom",     config.gui.custom.isSelected());
+               jobMonitor.LaunchJobs(h);
             }
-            h.put("decrypt",   config.gui.decrypt.isSelected());
-            h.put("qsfix",     config.gui.qsfix.isSelected());
-            h.put("twpdelete", config.gui.twpdelete.isSelected());
-            h.put("ipaddelete", config.gui.ipaddelete.isSelected() && config.rpcEnabled(tivoName));
-            h.put("comskip",   config.gui.comskip.isSelected());
-            h.put("comcut",    config.gui.comcut.isSelected());
-            h.put("captions",  config.gui.captions.isSelected());
-            h.put("encode",    config.gui.encode.isSelected());
-            h.put("push",      config.gui.push.isSelected());
-            h.put("custom",    config.gui.custom.isSelected());
-            jobMonitor.LaunchJobs(h);
          }
       }
    }
