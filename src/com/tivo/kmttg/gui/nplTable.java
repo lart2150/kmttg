@@ -683,6 +683,20 @@ public class nplTable {
       String fullName = dirName + s + fileName;
       return fullName;
    }
+   
+   // This is for non FILES tables
+   public Stack<Hashtable<String,String>> getRowData(int row) {
+      Stack<Hashtable<String,String>> data = new Stack<Hashtable<String,String>>();
+      if (row < 0) return data;
+      sortableDate s = (sortableDate)NowPlaying.getValueAt(row, getColumnIndex("DATE"));
+      if (s.folder) {
+         for (int i=0; i<s.folderData.size(); ++i)
+            data.add(s.folderData.get(i));
+      } else {
+         data.add(s.data);
+      }
+      return data;
+   }
 
    // Update table to display NowPlaying entries
    // (Called only when NowPlaying task completes)
