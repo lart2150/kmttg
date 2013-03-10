@@ -2701,131 +2701,51 @@ public class remotegui {
       }
 
       // Bring up Create Wishlist dialog
-      Hashtable<String,String> h = wlOpt.promptUser("(" + tivoName + ") " + "Create Wishlist", hash);
-      if (h == null)
+      JSONObject wl = wlOpt.promptUser("(" + tivoName + ") " + "Create Wishlist", hash);
+      if (wl == null)
          return false;
-      if ( ! h.containsKey("title")) {
+      if ( ! wl.has("title")) {
          log.error("Wishlist title is required to be specified. Aborting.");
          return false;
       }
-      JSONObject json = new JSONObject();
-      if (h.containsKey("autorecord")) {
-         // Need to prompt for season pass options
-         json = spOpt.promptUser("(" + tivoName + ") " + "Create ARWL - " + h.get("title"), null);
-      }
-      
-      // Need to parse h and set json wishlist elements
-      if (json != null) {
-         try {
-            // Title is always required
-            json.put("title", h.get("title"));
-            
-            // auto record
-            if (h.containsKey("autorecord"))
-               json.put("autoRecord", true);
-            
-            if (h.containsKey("categoryId"))
-               json.put("categoryId", h.get("categoryId"));
-            
-            String []s = {"title_keyword", "keyword"};
-            for (int j=0; j<s.length; ++j) {
-               if (h.containsKey(s[j])) {
-                  JSONArray opt = new JSONArray();
-                  JSONArray val = new JSONArray();
-                  String []fields = h.get(s[j]).split(",");
-                  for (int i=0; i<fields.length; ++i) {
-                     String field = fields[i];
-                     if (field.length() > 0) {
-                        String type = "required";
-                        if (field.startsWith("(")) {
-                           type = "optional";
-                           field = field.replaceAll("\\(", "");
-                           field = field.replaceAll("\\)", "");
-                        }
-                        if (field.startsWith("-")) {
-                           type = "not";
-                           field = field.replaceFirst("-", "");
-                        }
-                        opt.put(type);
-                        val.put(field);
-                        if (s[j].equals("title_keyword")) {
-                           json.put("titleKeywordOp", opt);
-                           json.put("titleKeyword", val);
-                        }
-                        if (s[j].equals("keyword")) {
-                           json.put("keywordOp", opt);
-                           json.put("keyword", val);
-                        }
-                     }
-                  }
-               }
-            }
-            
-            String []s2 = {"actor", "director"};
-            for (int j=0; j<s.length; ++j) {
-               if (h.containsKey(s2[j])) {
-                  JSONArray opt = new JSONArray();
-                  JSONArray val = new JSONArray();
-                  String []fields = h.get(s2[j]).split(",");
-                  for (int i=0; i<fields.length; ++i) {
-                     String field = fields[i];
-                     if (field.length() > 0) {
-                        String type = "required";
-                        if (field.startsWith("(")) {
-                           type = "optional";
-                           field = field.replaceAll("\\(", "");
-                           field = field.replaceAll("\\)", "");
-                        }
-                        if (field.startsWith("-")) {
-                           type = "not";
-                           field = field.replaceFirst("-", "");
-                        }
-                        String []name = field.split("\\s+");
-                        if (name.length == 2) {
-                           JSONObject js = new JSONObject();
-                           js.put("type", "credit");
-                           js.put("role", s2[j]);
-                           js.put("first", name[0]);
-                           js.put("last", name[1]);
-                           opt.put(type);
-                           val.put(js);
-                           json.put("creditOp", opt);
-                           json.put("credit", val);
-                        } else {
-                           log.error("Ignoring actor/director not specified as 'First Last'");
-                        }
-                     }
-                  }
-               }
-            }
-         } catch (JSONException e) {
-            log.error("createWishlist error: " + e.getMessage());
-            return false;
+      try {
+         JSONObject json = new JSONObject();
+         if (wl.has("autoRecord")) {
+            // Need to prompt for season pass options
+            json = spOpt.promptUser("(" + tivoName + ") " + "Create ARWL - " + wl.getString("title"), null);
          }
-      }
-      if (json != null && json.length() > 0) {
-         // Good to go, so run the RPC command in background mode
-         //log.print(json.toString());
-         log.warn("Creating wishlist: " + h.get("title"));
-         final JSONObject fjson = json;
-         class backgroundRun extends SwingWorker<Object, Object> {
-            protected Boolean doInBackground() {
-               Remote r = config.initRemote(tivoName);
-               if (r.success) {
-                  JSONObject result = r.Command("Wishlist", fjson);
-                  if (result != null)
-                     log.warn("Wishlist created successfully.");
-                  else
-                     log.error("Wishlist creation failed.");
-                  r.disconnect();
+         
+         if (json != null) {
+            // Merge wl options into json
+            for (String key : JSONObject.getNames(wl))
+               json.put(key, wl.get(key));
+            
+            // Run the RPC command in background mode
+            //log.print(json.toString());
+            log.warn("Creating wishlist: " + wl.getString("title"));
+            final JSONObject fjson = json;
+            class backgroundRun extends SwingWorker<Object, Object> {
+               protected Boolean doInBackground() {
+                  Remote r = config.initRemote(tivoName);
+                  if (r.success) {
+                     JSONObject result = r.Command("Wishlist", fjson);
+                     if (result != null)
+                        log.warn("Wishlist created successfully.");
+                     else
+                        log.error("Wishlist creation failed.");
+                     r.disconnect();
+                  }
+                  return false;
                }
-               return false;
             }
+            backgroundRun b = new backgroundRun();
+            b.execute();
          }
-         backgroundRun b = new backgroundRun();
-         b.execute();
+         return true;
+      } catch (JSONException e) {
+         log.error(e.getStackTrace().toString());
+         return false;
       }
-      return true;
    }
    
    private static ImageIcon scale(Container dialog, Image src, double scale) {
