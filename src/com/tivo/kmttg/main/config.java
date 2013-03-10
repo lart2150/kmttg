@@ -464,7 +464,7 @@ public class config {
    // Return true if RPC enabled in config for given TiVo
    public static Boolean rpcEnabled(String tivoName) {
       // Units starting with these TSN prefixes known to support RPC
-      String [] supported = {"746", "748", "750", "758", "AE2"};
+      String [] supported = {"746", "748", "750", "758"};
       String tsn = getTsn(tivoName);
       if (tsn != null) {
          for (int i=0; i<supported.length; ++i) {
