@@ -10,6 +10,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONException;
+import com.tivo.kmttg.JSON.JSONObject;
 //import com.tivo.kmttg.JSON.JSONException;
 //import com.tivo.kmttg.JSON.JSONObject;
 //import com.tivo.kmttg.main.config;
@@ -100,18 +102,17 @@ public class wlOptions {
       }
    }*/
    
-   public Hashtable<String,String> promptUser(String title, Hashtable<String,String> h) {
-      if (h != null && h.size() > 0) {
+   public JSONObject promptUser(String title, Hashtable<String,String> hash) {
+      if (hash != null && hash.size() > 0) {
          clearFields();
-         setValues(h);
+         setValues(hash);
       }
       label.setText(title);
       int response = JOptionPane.showConfirmDialog(
          null, components, "Create Wishlist", JOptionPane.OK_CANCEL_OPTION
       );
       if (response == JOptionPane.OK_OPTION) {
-         if (h == null)
-            h = new Hashtable<String,String>();
+         Hashtable<String,String> h = new Hashtable<String,String>();
          String t = (String)tf_title.getText();
          String keyword = (String)tf_keyword.getText();
          String title_keyword = (String)tf_title_keyword.getText();
@@ -136,10 +137,101 @@ public class wlOptions {
          //if (category.length() > 0) h.put("categoryId", findCategoryId(category));
          if (cb_autorecord.isSelected())
             h.put("autorecord", "yes");
-         return h;
+         return hashToJson(h);
       } else {
          return null;
       }
+   }
+   
+   private JSONObject hashToJson(Hashtable<String,String> h) {
+      try {
+         JSONObject json = new JSONObject();
+         // Title is always required
+         json.put("title", h.get("title"));
+         
+         // auto record
+         if (h.containsKey("autorecord"))
+            json.put("autoRecord", true);
+         
+         if (h.containsKey("categoryId"))
+            json.put("categoryId", h.get("categoryId"));
+         
+         String []s = {"title_keyword", "keyword"};
+         for (int j=0; j<s.length; ++j) {
+            if (h.containsKey(s[j])) {
+               JSONArray opt = new JSONArray();
+               JSONArray val = new JSONArray();
+               String []fields = h.get(s[j]).split(",");
+               for (int i=0; i<fields.length; ++i) {
+                  String field = fields[i];
+                  if (field.length() > 0) {
+                     String type = "required";
+                     if (field.startsWith("(")) {
+                        type = "optional";
+                        field = field.replaceAll("\\(", "");
+                        field = field.replaceAll("\\)", "");
+                     }
+                     if (field.startsWith("-")) {
+                        type = "not";
+                        field = field.replaceFirst("-", "");
+                     }
+                     opt.put(type);
+                     val.put(field);
+                     if (s[j].equals("title_keyword")) {
+                        json.put("titleKeywordOp", opt);
+                        json.put("titleKeyword", val);
+                     }
+                     if (s[j].equals("keyword")) {
+                        json.put("keywordOp", opt);
+                        json.put("keyword", val);
+                     }
+                  }
+               }
+            }
+         }
+         
+         String []s2 = {"actor", "director"};
+         for (int j=0; j<s.length; ++j) {
+            if (h.containsKey(s2[j])) {
+               JSONArray opt = new JSONArray();
+               JSONArray val = new JSONArray();
+               String []fields = h.get(s2[j]).split(",");
+               for (int i=0; i<fields.length; ++i) {
+                  String field = fields[i];
+                  if (field.length() > 0) {
+                     String type = "required";
+                     if (field.startsWith("(")) {
+                        type = "optional";
+                        field = field.replaceAll("\\(", "");
+                        field = field.replaceAll("\\)", "");
+                     }
+                     if (field.startsWith("-")) {
+                        type = "not";
+                        field = field.replaceFirst("-", "");
+                     }
+                     String []name = field.split("\\s+");
+                     if (name.length == 2) {
+                        JSONObject js = new JSONObject();
+                        js.put("type", "credit");
+                        js.put("role", s2[j]);
+                        js.put("first", name[0]);
+                        js.put("last", name[1]);
+                        opt.put(type);
+                        val.put(js);
+                        json.put("creditOp", opt);
+                        json.put("credit", val);
+                     } else {
+                        log.error("Ignoring actor/director not specified as 'First Last'");
+                     }
+                  }
+               }
+            }
+         }
+         return json;
+      } catch (JSONException e) {
+         log.error(e.getStackTrace().toString());
+      }
+      return null;
    }
    
    private void setValues(Hashtable<String,String> h) {
