@@ -172,11 +172,15 @@ public class TableUtil {
       
    public static long getStartTime(JSONObject json) {
       try {
-         String startString = json.getString("startTime");
-         long start = getLongDateFromString(startString);
-         if (json.has("requestedStartPadding"))
-            start -= json.getInt("requestedStartPadding")*1000;
-         return start;
+         if (json.has("startTime")) {
+            String startString = json.getString("startTime");
+            long start = getLongDateFromString(startString);
+            if (json.has("requestedStartPadding"))
+               start -= json.getInt("requestedStartPadding")*1000;
+            return start;
+         } else {
+            return 0;
+         }
       } catch (Exception e) {
          log.error("getStartTime - " + e.getMessage());
          return 0;
