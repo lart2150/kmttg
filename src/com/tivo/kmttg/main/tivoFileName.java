@@ -45,11 +45,29 @@ public class tivoFileName {
       }
 
       if ( ! entry.containsKey("EpisodeNumber") ) entry.put("EpisodeNumber", "");
+      // Split up into season & episode components (assuming episode # is 2 digits)
+      String epnum = entry.get("EpisodeNumber");
+      String SeriesEpNumber="";
+      if (epnum.length() > 2) {
+         String s="", e="";
+         if (epnum.length() <= 3) {
+            s = epnum.substring(0,1);
+            e = epnum.substring(1);
+         } else {
+            s = epnum.substring(0,2);
+            e = epnum.substring(2);
+         }
+         if (s.length() == 1)
+            s = "0" + s;
+         if (s.length() > 0 && e.length() > 0)
+            SeriesEpNumber = "s" + s + "e" + e;
+      }
+      entry.put("SeriesEpNumber", SeriesEpNumber);
       
       // Enter values for these names into keys hash
       String[] names = {
          "title", "titleOnly", "episodeTitle", "channelNum", "channel",
-         "EpisodeNumber", "description", "tivoName", "originalAirDate"
+         "EpisodeNumber", "SeriesEpNumber", "description", "tivoName", "originalAirDate"
       };
       for (int i=0; i<names.length; ++i) {
          if (entry.containsKey(names[i])) {
@@ -162,6 +180,7 @@ public class tivoFileName {
             text = text.replaceFirst("^monthNum$",        removeSpecialChars(keys.get("monthNum")));
             text = text.replaceFirst("^year$",            removeSpecialChars(keys.get("year")));
             text = text.replaceFirst("^startTime$",       removeSpecialChars(keys.get("startTime")));
+            text = text.replaceFirst("^SeriesEpNumber$",  removeSpecialChars(keys.get("SeriesEpNumber")));
             text = text.replaceFirst("^EpisodeNumber$",   removeSpecialChars(keys.get("EpisodeNumber")));
             text = text.replaceFirst("^description$",     removeSpecialChars(keys.get("description")));
             text = text.replaceFirst("^tivoName$",        removeSpecialChars(keys.get("tivoName")));
