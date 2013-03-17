@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.install.mainInstall;
@@ -15,6 +16,7 @@ public class kmttg {
    static Boolean gui_mode = true;
    public static boolean _shuttingDown = false;
    public static boolean _startingUp = true;
+   static Boolean autoconflicts = false; // Special batch mode run for RPC conflicts
       
    public static void main(String[] argv) {
       debug.enabled = false;
@@ -100,12 +102,19 @@ public class kmttg {
        	
       } else {         
          // Batch/auto mode
-    	  config.parse();	// persist queue held in main config file
-    	// Upon startup, try and load saved queue. Must be done before starting auto loop
-        	if (config.persistQueue)
-        		jobMonitor.loadAllJobs(1);	// doesn't need any time to setup
-        	_startingUp = false;
-         auto.startBatchMode();
+    	   config.parse();	// persist queue held in main config file
+    	   if (autoconflicts) {
+            log.print("START AUTO-CONFLICTS RESOLVER");
+    	      rnpl.AutomaticConflictsHandler();
+    	      log.print("\nEND AUTO-CONFLICTS RESOLVER");
+    	      System.exit(0);
+    	   } else {
+       	   // Upon startup, try and load saved queue. Must be done before starting auto loop
+           	if (config.persistQueue)
+           		jobMonitor.loadAllJobs(1);	// doesn't need any time to setup
+           	_startingUp = false;
+            auto.startBatchMode();
+    	   }
       }
    }
    
@@ -123,6 +132,11 @@ public class kmttg {
             gui_mode = false;
             config.LOOP = false;
          }
+         else if (arg.equals("-c")) {
+            gui_mode = false;
+            config.LOOP = false;
+            autoconflicts = true;
+         }
          else if (arg.equals("-d")) {
             debug.enabled = true;
          }
@@ -138,6 +152,7 @@ public class kmttg {
       System.out.println("-h => Print this help message\n");
       System.out.println("-a => Run in auto download batch mode - loop forever\n");
       System.out.println("-b => Run in auto download batch mode - single loop\n");
+      System.out.println("-c => Run auto-conflict resolver in batch mode - single run\n");
       System.out.println("-d => Enable verbose debug mode\n");
       System.exit(0);
    }   
