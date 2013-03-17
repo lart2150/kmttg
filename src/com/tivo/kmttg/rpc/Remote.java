@@ -961,6 +961,17 @@ public class Remote {
       JSONObject result = null;
 
       try {
+         int total = 0;
+         if (! away) {
+            // Get total count quickly
+            JSONObject j = new JSONObject();
+            j.put("format", "idSequence");
+            j.put("noLimit", "true");
+            result = Command("ToDo", j);
+            if (result != null && result.has("objectIdAndType")) {
+               total = result.getJSONArray("objectIdAndType").length();
+            }
+         }
          // Top level list - run in a loop to grab all items, 20 at a time
          Boolean stop = false;
          JSONObject json = new JSONObject();
@@ -984,9 +995,18 @@ public class Remote {
             
             // Update status in job monitor
             if (job != null && config.GUIMODE) {
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "ToDo list: " + offset);
+               if (away)
+                  config.gui.jobTab_UpdateJobMonitorRowOutput(job, "ToDo list: " + offset);
+               else
+                  config.gui.jobTab_UpdateJobMonitorRowOutput(job, "ToDo list: " + offset + "/" + total);
                if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                  config.gui.setTitle("ToDo: " + offset + " " + config.kmttg);
+                  if (away) {
+                     config.gui.setTitle("ToDo: " + offset + " " + config.kmttg);
+                  } else {
+                     int pct = (int) ((float)(offset)/total*100);
+                     config.gui.setTitle("ToDo: " + pct + "% " + config.kmttg);
+                     config.gui.progressBar_setValue(pct);
+                  }
                }
             }
          } // while         
@@ -1025,6 +1045,17 @@ public class Remote {
       JSONObject result = null;
 
       try {
+         int total = 0;
+         if (! away) {
+            // Get total count quickly
+            JSONObject j = new JSONObject();
+            j.put("format", "idSequence");
+            j.put("noLimit", "true");
+            result = Command("Cancelled", j);
+            if (result != null && result.has("objectIdAndType")) {
+               total = result.getJSONArray("objectIdAndType").length();
+            }
+         }
          // Top level list - run in a loop to grab all items, 20 at a time
          Boolean stop = false;
          JSONObject json = new JSONObject();
@@ -1048,9 +1079,18 @@ public class Remote {
             
             // Update status in job monitor
             if (job != null && config.GUIMODE) {
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Will Not Record list: " + offset);
+               if (away)
+                  config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Will Not Record list: " + offset);
+               else
+                  config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Will Not Record list: " + offset + "/" + total);
                if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                  config.gui.setTitle("Not rec: " + offset + " " + config.kmttg);
+                  if (away) {
+                     config.gui.setTitle("Not rec: " + offset + " " + config.kmttg);
+                  } else {
+                     int pct = (int) ((float)(offset)/total*100);
+                     config.gui.setTitle("Not rec: " + pct + "% " + config.kmttg);
+                     config.gui.progressBar_setValue(pct);
+                  }
                }
             }
          } // while
@@ -1101,6 +1141,17 @@ public class Remote {
       JSONObject result = null;
 
       try {
+         int total = 0;
+         if (! away) {
+            // Get total count quickly
+            JSONObject j = new JSONObject();
+            j.put("format", "idSequence");
+            j.put("noLimit", "true");
+            result = Command("Deleted", j);
+            if (result != null && result.has("objectIdAndType")) {
+               total = result.getJSONArray("objectIdAndType").length();
+            }
+         }
          // Top level list - run in a loop to grab all items, 20 at a time
          Boolean stop = false;
          JSONObject json = new JSONObject();
@@ -1124,9 +1175,18 @@ public class Remote {
             
             // Update status in job monitor
             if (job != null && config.GUIMODE) {
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Deleted list: " + offset);
+               if (away)
+                  config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Deleted list: " + offset);
+               else
+                  config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Deleted list: " + offset + "/" + total);
                if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                  config.gui.setTitle("Deleted: " + offset + " " + config.kmttg);
+                  if (away) {
+                     config.gui.setTitle("Deleted: " + offset + " " + config.kmttg);
+                  } else {
+                     int pct = (int) ((float)(offset)/total*100);
+                     config.gui.setTitle("Deleted: " + pct + "% " + config.kmttg);
+                     config.gui.progressBar_setValue(pct);
+                  }
                }
             }
          } // while
