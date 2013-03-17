@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Stack;
 
 import javax.swing.*;
@@ -1268,15 +1269,12 @@ public class gui {
    }
 
    // Create tivo tabs as needed
-   public void SetTivos(Hashtable<String,String> values) {
+   public void SetTivos(LinkedHashMap<String,String> values) {
       debug.print("values=" + values);
       if ( values.size() > 1 ) {
          String[] names = new String[values.size()-1];
-         int i = 0;
-         String value;
-         
-         for (Enumeration<String> e=values.keys(); e.hasMoreElements();) {
-            value = e.nextElement();
+         int i = 0;         
+         for (String value : values.keySet()) {
             if (! value.equals("FILES") && ! value.equals("Remote")) {
                names[i] = value;
                i++;
@@ -1287,7 +1285,7 @@ public class gui {
          tivoTabRemoveExtra(names);
          
          // Add tabs
-         for (int j=0; j<names.length; j++) {
+         for (int j=names.length-1; j>=0; j--) {
             tivoTabAdd(names[j]);
          }
          
@@ -1304,10 +1302,8 @@ public class gui {
    }
 
    // Start NPL jobs for 1st time
-   public void initialNPL(Hashtable<String,String> values) {
-      String value;         
-      for (Enumeration<String> e=values.keys(); e.hasMoreElements();) {
-         value = e.nextElement();
+   public void initialNPL(LinkedHashMap<String,String> values) {
+      for (String value : values.keySet()) {
          if (! value.equals("FILES") && ! value.equals("Remote")) {
             jobMonitor.getNPL(value);
          }
