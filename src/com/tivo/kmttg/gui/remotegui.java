@@ -2965,7 +2965,10 @@ public class remotegui {
          text += "TiVos and try and automatically schedule them to record on alternate TiVos.<br>";
          text += "NOTE: This operation can take a long time to complete. Progress is periodically<br>";
          text += "printed as 'AutomaticConflictsHandler' messages to the message window. This button<br>";
-         text += "is disabled until operation completes to prevent running more than once at a time.";
+         text += "is disabled until operation completes to prevent running more than once at a time.<br>";
+         text += "NOTE: You can run this operation in kmttg batch mode by starting kmttg with <b>-c</b> argument<br>";
+         text += "i.e: <b>java -jar kmttg.jar -c</b>. That way you can setup a scheduler to run this<br>";
+         text += "automatically without having to run it manually from the GUI.";
       }
       else if (component.equals("tivo_deleted")) {
          text = "Select TiVo for which to display list of deleted shows (in Recently Deleted state)<br>";
