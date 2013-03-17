@@ -23,9 +23,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Hashtable;
 import java.util.Stack;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.swing.AbstractAction;
 import javax.swing.Box;
@@ -63,6 +60,7 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.main.telnet;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -97,6 +95,7 @@ public class remotegui {
    private cancelledTable tab_cancel = null;
    private JComboBox tivo_cancel = null;
    public JButton refresh_cancel = null;
+   private JButton autoresolve = null;
    public JLabel label_cancel = null;
    public JCheckBox includeHistory_cancel = null;
    
@@ -931,6 +930,24 @@ public class remotegui {
          }
       });
       
+      autoresolve = new JButton("Autoresolve");
+      autoresolve.setMargin(new Insets(1,1,1,1));
+      autoresolve.setToolTipText(getToolTip("autoresolve"));
+      autoresolve.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            autoresolve.setEnabled(false);
+            class backgroundRun extends SwingWorker<Object, Object> {
+               protected Object doInBackground() {
+                  rnpl.AutomaticConflictsHandler();
+                  autoresolve.setEnabled(true);
+                  return null;
+               }
+            }
+            backgroundRun b = new backgroundRun();
+            b.execute();
+         }
+      });
+      
       includeHistory_cancel = new JCheckBox("Include History", false);
       includeHistory_cancel.setToolTipText(getToolTip("includeHistory_cancel"));
       
@@ -948,6 +965,8 @@ public class remotegui {
       row1_cancel.add(explain_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(refresh_todo_cancel);
+      row1_cancel.add(Box.createRigidArea(space_5));
+      row1_cancel.add(autoresolve);
       row1_cancel.add(Box.createRigidArea(space_5));
       row1_cancel.add(includeHistory_cancel);
       row1_cancel.add(Box.createRigidArea(space_5));
@@ -2580,105 +2599,12 @@ public class remotegui {
          tivoNames = getTivoNames(tivo_cancel);
       else
          tivoNames = getTivoNames(tivo_search);
-
-      // This used to run a background Remote job
-      class Counter extends SwingWorker<Void, Void> {
-         CountDownLatch latch;
-         String tivoName;
-         Hashtable<String,JSONArray> h;
-
-         public Counter(String tivoName, Hashtable<String,JSONArray> h, CountDownLatch latch) {
-            this.latch = latch;
-            this.tivoName = tivoName;
-            this.h = h;
-         }
-
-         protected Void doInBackground() throws Exception {
-            Remote r = config.initRemote(tivoName);
-            if (r.success) {
-               JSONArray todo = r.ToDo(null);
-               // Add todo to hash
-               if (todo != null)
-                  h.put(tivoName, todo);
-               r.disconnect();
-            }
-            return null;
-         }
-
-         protected void done() {
-            // Job done so decrement latch
-            latch.countDown();
-         }
-      }
-      
-      // Launch background Remote jobs and wait for latch
-      // counter to reach 0 before returning todoLists hash
-      int N = tivoNames.length;
-      CountDownLatch latch = new CountDownLatch(N);
-      ExecutorService executor = Executors.newFixedThreadPool(N);      
-      Hashtable<String,JSONArray> todoLists = new Hashtable<String,JSONArray>();
-      for (int t=0; t<tivoNames.length; ++t) {
-         executor.execute(new Counter(tivoNames[t], todoLists, latch));
-      }
-      try {
-         latch.await();
-      } catch (InterruptedException e) {
-         log.error("getTodoLists exception - " + e.getMessage());
-      }
-      executor.shutdown();
-      return todoLists;
+      return rnpl.getTodoLists(tivoNames);
    }
       
    // See if given JSON entry matches any of the entries in all_todo hashtable
    public void flagIfInTodo(JSONObject entry, Boolean includeOtherTimes) {
-      String inTodo = "__inTodo__";
-      try {
-         String title = entry.getString("title");
-         if (entry.has("subtitle")) {
-            title = title + " - " + entry.getString("subtitle");
-         }
-         String startTime = entry.getString("startTime");
-         String channelNumber = null;
-         if (entry.has("channel"))
-            channelNumber = entry.getJSONObject("channel").getString("channelNumber");
-         java.util.Enumeration<String> keys = all_todo.keys();
-         while (keys.hasMoreElements()) {
-            String tivo = keys.nextElement();
-            for (int i=0; i<all_todo.get(tivo).length(); ++i) {
-               JSONObject todo = all_todo.get(tivo).getJSONObject(i);
-               String start = "";
-               String chan = "";
-               String name = "";
-               if (todo.has("startTime"))
-                  start = todo.getString("startTime");
-               if (todo.has("channel"))
-                  chan = todo.getJSONObject("channel").getString("channelNumber");
-               if (todo.has("title")) {
-                  name = todo.getString("title");
-                  if (todo.has("subtitle"))
-                     name = name + " - " + todo.getString("subtitle");
-               }
-               // Add inTodo flag indicating tivo name scheduled to record this show
-               if (start.equals(startTime)) {
-                  // Start time & channel match
-                  if (channelNumber != null && chan.equals(channelNumber))
-                     entry.put(inTodo, tivo);
-                  // Start time & title match (same program on another channel)
-                  else if (name.equals(title))
-                     entry.put(inTodo, tivo + ": " + chan);
-               }
-               // Same program recorded at different time
-               if (includeOtherTimes && ! entry.has(inTodo)) {
-                  if (todo.has("contentId") && entry.has("contentId")) {
-                     if (entry.getString("contentId").equals(todo.getString("contentId")))
-                        entry.put(inTodo, tivo + ": " + TableUtil.printableTimeFromJSON(todo));
-                  }
-               }
-            }
-         }
-      } catch (JSONException e) {
-         log.error("flagIfInTodo - " + e.getMessage());
-      }
+      rnpl.flagIfInTodo(entry, includeOtherTimes, all_todo);
    }
    
    // Prompt user to create a wishlist
@@ -3032,6 +2958,14 @@ public class remotegui {
          text += "to highlight shows scheduled to record on other TiVos.<br>";
          text += "This button will refresh ToDo list in case you are actively cancelling or scheduling new<br>";
          text += "recordings since last refresh of Will Not Record list.";
+      }
+      else if (component.equals("autoresolve")) {
+         text = "<b>Autoresolve</b><br>";
+         text += "Search for all conflicts of type 'programSourceConflict' on all RPC or Mind enabled<br>";
+         text += "TiVos and try and automatically schedule them to record on alternate TiVos.<br>";
+         text += "NOTE: This operation can take a long time to complete. Progress is periodically<br>";
+         text += "printed as 'AutomaticConflictsHandler' messages to the message window. This button<br>";
+         text += "is disabled until operation completes to prevent running more than once at a time.";
       }
       else if (component.equals("tivo_deleted")) {
          text = "Select TiVo for which to display list of deleted shows (in Recently Deleted state)<br>";
