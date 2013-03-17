@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Stack;
 
@@ -99,7 +100,7 @@ public class config {
    public static Hashtable<String,String> KEYWORDS = new Hashtable<String,String>();
    
    // Hash to store tivo related information
-   public static Hashtable<String,String> TIVOS = new Hashtable<String,String>();
+   public static LinkedHashMap<String,String> TIVOS = new LinkedHashMap<String,String>();
    public static Hashtable<String,String> TSN = new Hashtable<String,String>();
    public static Hashtable<String,String> WAN = new Hashtable<String,String>();
    // If > 0 limit # npl fetches to this num
@@ -314,10 +315,9 @@ public class config {
    }            
    
    public static void printTivosHash() {
-      String name, value;
+      String value;
       log.print("TIVOS:");
-      for (Enumeration<String> e=TIVOS.keys(); e.hasMoreElements();) {
-         name = e.nextElement();
+      for (String name : TIVOS.keySet()) {
          value = TIVOS.get(name);
          log.print(name + "=" + value);
       }
@@ -325,9 +325,7 @@ public class config {
    
    public static Stack<String> getTivoNames() {
       Stack<String> tivos = new Stack<String>();
-      String name;
-      for (Enumeration<String> e=TIVOS.keys(); e.hasMoreElements();) {
-         name = e.nextElement();
+      for (String name : TIVOS.keySet()) {
          if ( ! name.matches("FILES") )
             tivos.add(name);
       }
