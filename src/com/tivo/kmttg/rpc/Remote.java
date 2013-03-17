@@ -16,6 +16,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -1059,6 +1060,39 @@ public class Remote {
       }
 
       return TableUtil.sortByOldestStartDate(allShows);
+   }
+   
+   // Get list of all conflicts with cancellationReason=programSourceConflict
+   public JSONArray GetProgramSourceConflicts(Hashtable<String,JSONArray> all_todo) {
+      JSONArray data = CancelledShows(null);
+      if (data != null) {
+         JSONObject json;
+         try {
+            long now = new Date().getTime();
+            JSONArray conflicts = new JSONArray();
+            for (int i=0; i<data.length(); ++i) {
+               json = data.getJSONObject(i);
+               if (json.has("scheduledStartTime")) {
+                  // Filter out past recordings
+                  Long start = TableUtil.getLongDateFromString(json.getString("scheduledStartTime"));
+                  if (start >= now) {
+                     // Filter out by cancellationReason
+                     if (json.has("cancellationReason") &&
+                         json.getString("cancellationReason").equals("programSourceConflict")) {
+                        rnpl.flagIfInTodo(json, true, all_todo);
+                        if (! json.has("__inTodo__"))
+                           // programSourceConflict not in any todo list => candidate
+                           conflicts.put(json);
+                     }
+                  }
+               }
+            }
+            return conflicts;
+         } catch (JSONException e) {
+            log.error(e.getStackTrace().toString());
+         }
+      }
+      return null;
    }
    
    // Get list of all shows in Deleted state
