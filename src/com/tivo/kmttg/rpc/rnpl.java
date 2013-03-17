@@ -13,11 +13,15 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Stack;
 import java.util.TimeZone;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.JSON.JSONTokener;
+import com.tivo.kmttg.gui.SwingWorker;
 import com.tivo.kmttg.gui.TableUtil;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
@@ -288,6 +292,202 @@ public class rnpl {
       }
 
       return null;
+   }
+   
+   // See if given JSON entry matches any of the entries in all_todo hashtable
+   public static void flagIfInTodo(JSONObject entry, Boolean includeOtherTimes, Hashtable<String,JSONArray> all_todo) {
+      String inTodo = "__inTodo__";
+      try {
+         String title = entry.getString("title");
+         if (entry.has("subtitle")) {
+            title = title + " - " + entry.getString("subtitle");
+         }
+         String startTime = entry.getString("startTime");
+         String channelNumber = null;
+         if (entry.has("channel"))
+            channelNumber = entry.getJSONObject("channel").getString("channelNumber");
+         java.util.Enumeration<String> keys = all_todo.keys();
+         while (keys.hasMoreElements()) {
+            String tivo = keys.nextElement();
+            for (int i=0; i<all_todo.get(tivo).length(); ++i) {
+               JSONObject todo = all_todo.get(tivo).getJSONObject(i);
+               String start = "";
+               String chan = "";
+               String name = "";
+               if (todo.has("startTime"))
+                  start = todo.getString("startTime");
+               if (todo.has("channel"))
+                  chan = todo.getJSONObject("channel").getString("channelNumber");
+               if (todo.has("title")) {
+                  name = todo.getString("title");
+                  if (todo.has("subtitle"))
+                     name = name + " - " + todo.getString("subtitle");
+               }
+               // Add inTodo flag indicating tivo name scheduled to record this show
+               if (start.equals(startTime)) {
+                  // Start time & channel match
+                  if (channelNumber != null && chan.equals(channelNumber))
+                     entry.put(inTodo, tivo);
+                  // Start time & title match (same program on another channel)
+                  else if (name.equals(title))
+                     entry.put(inTodo, tivo + ": " + chan);
+               }
+               // Same program recorded at different time
+               if (includeOtherTimes && ! entry.has(inTodo)) {
+                  if (todo.has("contentId") && entry.has("contentId")) {
+                     if (entry.getString("contentId").equals(todo.getString("contentId")))
+                        entry.put(inTodo, tivo + ": " + TableUtil.printableTimeFromJSON(todo));
+                  }
+               }
+            }
+         }
+      } catch (JSONException e) {
+         log.error("flagIfInTodo - " + e.getMessage());
+      }
+   }
+   
+   
+   // Obtain todo lists for specified tivo names
+   // NOTE: This called as part of a background job
+   // NOTE: This uses CountDownLatch to enable waiting for multiple
+   // parallel background jobs to finish before returning so that
+   // ToDo lists are retrieved in parallel instead of sequentially
+   public static Hashtable<String,JSONArray> getTodoLists(String[] tivoNames) {
+      // This used to run a background Remote job
+      class Counter extends SwingWorker<Void, Void> {
+         CountDownLatch latch;
+         String tivoName;
+         Hashtable<String,JSONArray> h;
+
+         public Counter(String tivoName, Hashtable<String,JSONArray> h, CountDownLatch latch) {
+            this.latch = latch;
+            this.tivoName = tivoName;
+            this.h = h;
+         }
+
+         protected Void doInBackground() throws Exception {
+            Remote r = config.initRemote(tivoName);
+            if (r.success) {
+               JSONArray todo = r.ToDo(null);
+               // Add todo to hash
+               if (todo != null)
+                  h.put(tivoName, todo);
+               r.disconnect();
+            }
+            return null;
+         }
+
+         protected void done() {
+            // Job done so decrement latch
+            latch.countDown();
+         }
+      }
+      
+      // Launch background Remote jobs and wait for latch
+      // counter to reach 0 before returning todoLists hash
+      int N = tivoNames.length;
+      CountDownLatch latch = new CountDownLatch(N);
+      ExecutorService executor = Executors.newFixedThreadPool(N);      
+      Hashtable<String,JSONArray> todoLists = new Hashtable<String,JSONArray>();
+      for (int t=0; t<tivoNames.length; ++t) {
+         executor.execute(new Counter(tivoNames[t], todoLists, latch));
+      }
+      try {
+         latch.await();
+      } catch (InterruptedException e) {
+         log.error("getTodoLists exception - " + e.getMessage());
+      }
+      executor.shutdown();
+      return todoLists;
+   }
+   
+   // For all rpc and/or mind enabled TiVos get conflicts of type programSourceConflict
+   // and try and schedule them to record if not already to be recorded somewhere
+   // This is a lengthy process so should be run in a background thread if in GUI mode
+   public static void AutomaticConflictsHandler() {
+      // Determine candidate tivoNames to use (mind enabled last)
+      Stack<String> allTivos = config.getTivoNames();
+      Stack<String> filteredTivos = new Stack<String>();
+      for (int i=0; i<allTivos.size(); ++i) {
+         if (config.rpcEnabled(allTivos.get(i)))
+            filteredTivos.add(allTivos.get(i));
+      }
+      for (int i=0; i<allTivos.size(); ++i) {
+         if (config.mindEnabled(allTivos.get(i)))
+            filteredTivos.add(allTivos.get(i));
+      }
+      if (filteredTivos.isEmpty())
+         return;
+      
+      String[] tivoNames = new String[filteredTivos.size()];
+      for (int i=0; i<filteredTivos.size(); ++i)
+         tivoNames[i] = filteredTivos.get(i);
+      
+      // Get all todo lists to check against
+      log.warn("AutomaticConflictsHandler - getting todo lists from all TiVos");
+      Hashtable<String,JSONArray> all_todo = getTodoLists(tivoNames);
+      
+      // Get conflicts of type programSourceConflict for each TiVo and try scheduling them
+      for (int i=0; i<tivoNames.length; ++i) {
+         String tivoName = tivoNames[i];
+         log.warn("AutomaticConflictsHandler - looking for conflicts on TiVo: " + tivoName);
+         Remote r = config.initRemote(tivoName);
+         if (r.success) {
+            JSONArray conflicts = r.GetProgramSourceConflicts(all_todo);
+            r.disconnect();
+            if (conflicts != null && conflicts.length() > 0) {
+               try {
+                  log.warn(
+                     "AutomaticConflictsHandler - " +
+                     conflicts.length() +
+                     " unscheduled conflicts found on TiVo: " +
+                     tivoName
+                  );
+                  for (int c=0; c<conflicts.length(); ++c) {
+                     // Step through each conflict
+                     JSONObject json = conflicts.getJSONObject(c);
+                     Boolean keepTrying = true;
+                     for (int j=0; j<tivoNames.length; ++j) {
+                        // Try scheduling on all other available Tivos
+                        if (keepTrying) {
+                           if (! tivoNames[j].equals(tivoName)) {
+                              String onTivo = tivoNames[j];
+                              r = config.initRemote(onTivo);
+                              if (r.success) {
+                                 // Try scheduling this conflicted recording on onTivo
+                                 JSONObject result = r.Command("Singlerecording", json);
+                                 r.disconnect();
+                                 String conflicted = recordingConflicts(result, json);
+                                 if (conflicted == null) {
+                                    // Successfully scheduled this recording
+                                    keepTrying = false;
+                                    log.print(
+                                       "AutomaticConflictsHandler - Scheduled conflicting recording on '" +
+                                       onTivo + "': "
+                                    );
+                                    log.print(formatEntry(json));
+                                 }
+                              }
+                           }
+                        }
+                     }
+                     if (keepTrying) {
+                        // Didn't manage to schedule this conflict anywhere
+                        log.warn("AutomaticConflictsHandler - Could not schedule this recording anywhere:");
+                        log.warn(formatEntry(json));
+                     }
+                  }
+               } catch (JSONException e) {
+                  log.error(e.getStackTrace().toString());
+                  return;
+               }
+            } else {
+               // No conflicts to process on this TiVo
+               log.print("AutomaticConflictsHandler - no unscheduled conflicts found for TiVo: " + tivoName);
+            }
+         }
+      }
+      log.warn("AutomaticConflictsHandler - DONE");
    }
    
    public static String formatEntry(JSONObject json) {
