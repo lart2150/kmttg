@@ -457,15 +457,20 @@ public class rnpl {
                                  // Try scheduling this conflicted recording on onTivo
                                  JSONObject result = r.Command("Singlerecording", json);
                                  r.disconnect();
-                                 String conflicted = recordingConflicts(result, json);
-                                 if (conflicted == null) {
-                                    // Successfully scheduled this recording
-                                    keepTrying = false;
-                                    log.print(
-                                       "AutomaticConflictsHandler - Scheduled conflicting recording on '" +
-                                       onTivo + "': "
-                                    );
-                                    log.print(formatEntry(json));
+                                 if (result != null) {
+                                    String conflicted = recordingConflicts(result, json);
+                                    if (conflicted == null) {
+                                       // Successfully scheduled this recording
+                                       keepTrying = false;
+                                       log.print(
+                                          "AutomaticConflictsHandler - Scheduled conflicting recording on '" +
+                                          onTivo + "': "
+                                       );
+                                       log.print(formatEntry(json));
+                                    }
+                                 } else {
+                                    log.error("Failed to schedule conflicting recording on '" + onTivo + "': ");
+                                    log.error(formatEntry(json));
                                  }
                               }
                            }
