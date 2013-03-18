@@ -962,7 +962,7 @@ public class Remote {
 
       try {
          int total = 0;
-         if (! away) {
+         if (job != null && config.GUIMODE && ! away) {
             // Get total count quickly
             JSONObject j = new JSONObject();
             j.put("format", "idSequence");
@@ -1046,7 +1046,7 @@ public class Remote {
 
       try {
          int total = 0;
-         if (! away) {
+         if (job != null && config.GUIMODE && ! away) {
             // Get total count quickly
             JSONObject j = new JSONObject();
             j.put("format", "idSequence");
@@ -1142,7 +1142,7 @@ public class Remote {
 
       try {
          int total = 0;
-         if (! away) {
+         if (job != null && config.GUIMODE && ! away) {
             // Get total count quickly
             JSONObject j = new JSONObject();
             j.put("format", "idSequence");
