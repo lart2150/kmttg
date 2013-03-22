@@ -1824,6 +1824,8 @@ public class remotegui {
                               uri = "x-tivo:hme:uuid:35FE011C-3850-2228-FBC5-1B9EDBBE5863";
                            if (name.equals("Hulu Plus"))
                               uri = "x-tivo:flash:uuid:802897EB-D16B-40C8-AEEF-0CCADB480559";
+                           if (name.equals("AOL On"))
+                              uri = "x-tivo:flash:uuid:EA1DEF9D-D346-4284-91A0-FEA8EAF4CD39";
                            json.put("uri", uri);
                            r.Command("Navigate", json);
                         } catch (JSONException e1) {
@@ -2398,7 +2400,7 @@ public class remotegui {
       backgroundRun b = new backgroundRun();
       b.execute();
       */
-      String[] hmeNames = {"Netflix", "YouTube", "Amazon", "Hulu Plus"};
+      String[] hmeNames = {"Netflix", "YouTube", "Amazon", "Hulu Plus", "AOL On"};
       hme_rc.removeAllItems();
       for (int i=0; i<hmeNames.length; ++i)
          hme_rc.addItem(hmeNames[i]);
