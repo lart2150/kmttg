@@ -244,6 +244,9 @@ public class premiereTable {
                 title += s.json.getString("title");
              if (s.json.has("subtitle"))
                 title += " - " + s.json.getString("subtitle");
+             if (s.json.has("__SPscheduled__"))
+                title += " (SP on " + s.json.getString("__SPscheduled__") + ")";
+                
              log.warn(title);
              log.print(message);
           } catch (JSONException e) {
