@@ -2578,7 +2578,7 @@ public class remotegui {
                         entry_title = data.getJSONObject(j).getString("title");
                         if (sp_title.equals(entry_title)) {
                            // Add flag to JSON object indicating it's already a scheduled SP on this TiVo
-                           data.getJSONObject(j).put("__SPscheduled__", true);
+                           data.getJSONObject(j).put("__SPscheduled__", tivoNames[t]);
                         }
                      }
                   }
