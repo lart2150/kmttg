@@ -1480,16 +1480,6 @@ public class jobMonitor {
       }
    }
    
-   private static int getNumQueuedJobs() {
-      int num = 0;
-      for (int i=0; i<JOBS.size(); ++i) {
-         if ( JOBS.get(i).status.equals("queued") ) {
-            num++;
-         }
-      }
-      return num;
-   }
-   
    public static void saveQueuedJobs() {
       if ( JOBS.isEmpty() ) {
          log.error("There are currently no queued jobs to save.");
@@ -1498,16 +1488,23 @@ public class jobMonitor {
             FileOutputStream fos = new FileOutputStream(config.programDir + File.separator + jobDataFile);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
 
-            int n = getNumQueuedJobs();
+            // Count queued jobs we actually want to save
+            int n = 0;
+            for (int i=0; i<JOBS.size(); ++i) {
+               jobData job = JOBS.get(i);
+               if ( job.status.equals("queued") && ! job.type.equals("remote") )
+                  n++;
+            }
             if (n == 0) {
-               log.error("There are currently no queued jobs to save.");
+               log.error("There are currently no queued jobs to save (remote jobs can't be saved).");
                oos.close();
                return;
             }
             oos.writeInt(n);
             for (int i=0; i<JOBS.size(); ++i) {
-               if ( JOBS.get(i).status.equals("queued") )
-                  oos.writeObject(JOBS.get(i));
+               jobData job = JOBS.get(i);
+               if ( job.status.equals("queued") && ! job.type.equals("remote") )
+                  oos.writeObject(job);
             }
             oos.close();
             fos.close();
