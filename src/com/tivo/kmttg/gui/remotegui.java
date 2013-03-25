@@ -1357,7 +1357,9 @@ public class remotegui {
                Remote r = config.initRemote(tivoName);
                if (r.success) {
                   JSONObject result = r.Command("PhoneHome", new JSONObject());
-                  if (result != null)
+                  if (result == null)
+                     log.error("NOTE: If this TiVo is in 'Pending Restart' state Network Connect fails.");
+                  else
                      log.warn("Network Connection initiated on: " + tivoName);
                }
             }
