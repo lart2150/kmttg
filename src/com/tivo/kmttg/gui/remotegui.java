@@ -2565,6 +2565,7 @@ public class remotegui {
    
    // NOTE: This called as part of a background job
    public void TagPremieresWithSeasonPasses(JSONArray data) {
+      log.warn("Collecting information on existing Season Passes...");
       String[] tivoNames = getTivoNames(tivo_premiere);
       for (int t=0; t<tivoNames.length; ++t) {
          Remote r = config.initRemote(tivoNames[t]);
