@@ -436,9 +436,7 @@ public class TableUtil {
                if (json != null) {
                   if (recordSingle(tivoName, json) && ! isRecordingScheduled(json)) {
                      // Add to todo list for this tivo
-                     if (config.gui.remote_gui.all_todo.containsKey(tivoName)) {
-                        config.gui.remote_gui.all_todo.get(tivoName).put(json);
-                     }
+                     config.gui.remote_gui.addEntryToTodo(tivoName, json);
                   }
                }
             } catch (JSONException e) {
