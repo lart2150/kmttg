@@ -62,10 +62,8 @@ public class remote implements Serializable {
                   data = r.Upcoming(job);
                if (job.remote_conflicts) {
                   data = r.Upcoming(job);
-                  if (data != null && config.GUIMODE && config.gui.remote_gui.all_todo.size() == 0) {
-                     log.warn("Obtaining todo lists");
-                     config.gui.remote_gui.all_todo = config.gui.remote_gui.getTodoLists("Cancel");
-                  }
+                  if (data != null && config.GUIMODE)
+                     config.gui.remote_gui.updateTodoIfNeeded("Cancel");
                }
                if (job.remote_sp)
                   data = r.SeasonPasses(job);
@@ -73,10 +71,8 @@ public class remote implements Serializable {
                   data = r.SPReorder(job);
                if (job.remote_cancel) {
                   data = r.CancelledShows(job);
-                  if (data != null && config.GUIMODE && config.gui.remote_gui.all_todo.size() == 0) {
-                     log.warn("Obtaining todo lists");
-                     config.gui.remote_gui.all_todo = config.gui.remote_gui.getTodoLists("Cancel");
-                  }
+                  if (data != null && config.GUIMODE)
+                     config.gui.remote_gui.updateTodoIfNeeded("Cancel");
                }
                if (job.remote_deleted)
                   data = r.DeletedShows(job);
@@ -95,17 +91,13 @@ public class remote implements Serializable {
                   );
                if (job.remote_search && config.GUIMODE) {
                   data = r.searchKeywords(job.remote_search_keyword, job, job.remote_search_max);
-                  if (data != null && config.gui.remote_gui.all_todo.size() == 0) {
-                     log.warn("Obtaining todo lists");
-                     config.gui.remote_gui.all_todo = config.gui.remote_gui.getTodoLists("Search");
-                  }
+                  if (data != null)
+                     config.gui.remote_gui.updateTodoIfNeeded("Search");
                }
                if (job.remote_guideChannels && config.GUIMODE) {
                   data = r.ChannelList(job);
-                  if (config.gui.remote_gui.all_todo.size() == 0) {
-                     log.warn("Obtaining todo lists");
-                     config.gui.remote_gui.all_todo = config.gui.remote_gui.getTodoLists("Guide");
-                  }
+                  if (data != null)
+                     config.gui.remote_gui.updateTodoIfNeeded("Guide");
                }
                if (data != null) {
                   success = true;
