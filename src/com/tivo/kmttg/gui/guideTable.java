@@ -569,6 +569,7 @@ public class guideTable {
                   r.disconnect();
                   if( result != null ) {
                      if (result.has("gridRow")) {
+                        config.gui.remote_gui.updateTodoIfNeeded("Guide");
                         TableUtil.clear(TABLE);
                         JSONArray matches = result.getJSONArray("gridRow").getJSONObject(0).getJSONArray("offer");
                         for (int i=0; i<matches.length(); ++i) {
