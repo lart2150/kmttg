@@ -21,6 +21,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -139,7 +140,8 @@ public class remotegui {
    private JButton rc_jumpahead_button = null;
    private JButton rc_jumpback_button = null;
    
-   public Hashtable<String,JSONArray> all_todo = new Hashtable<String,JSONArray>();
+   private Hashtable<String,JSONArray> all_todo = new Hashtable<String,JSONArray>();
+   private long all_todo_time = 0;
    
    private JFileChooser Browser = null;
    
@@ -2608,6 +2610,7 @@ public class remotegui {
          tivoNames = getTivoNames(tivo_cancel);
       else
          tivoNames = getTivoNames(tivo_search);
+      all_todo_time = new Date().getTime();
       return rnpl.getTodoLists(tivoNames);
    }
       
@@ -2848,6 +2851,30 @@ public class remotegui {
       }
       backgroundRun b = new backgroundRun();
       b.execute();
+   }
+   
+   // Check current time vs time of last all_todo refresh to see if we need refreshed
+   // Give a 15 min cushion
+   private Boolean todoNeedsRefresh() {
+      long cushion = 15*60*1000;
+      long now = new Date().getTime();
+      if (all_todo_time == 0)
+         return true;
+      if (now > all_todo_time + cushion)
+         return true;
+      return false;
+   }
+   
+   public void updateTodoIfNeeded(String tabName) {
+      if (todoNeedsRefresh()) {
+         log.warn("Refreshing todo lists");
+         all_todo = getTodoLists(tabName);
+      }
+   }
+   
+   public void addEntryToTodo(String tivoName, JSONObject json) {
+      if (all_todo.containsKey(tivoName))
+         all_todo.get(tivoName).put(json);
    }
       
    public String getToolTip(String component) {
