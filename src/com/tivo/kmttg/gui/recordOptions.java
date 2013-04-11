@@ -102,12 +102,12 @@ public class recordOptions {
             return null;
          }
       } catch (JSONException e) {
-         log.error("Record dialog error: " + e.getMessage());
+         log.error("recordOptions.promptUser - " + e.getMessage());
          return null;
       }
    }
    
-   private void setValues(JSONObject json) {
+   public void setValues(JSONObject json) {
       try {
          if(json.has("keepBehavior"))
             until.setSelectedItem(untilHash.getK(json.getString("keepBehavior")));
@@ -119,8 +119,31 @@ public class recordOptions {
             stop.setSelectedItem(stopHash.getK(json.getInt("endTimePadding")));
          else if(json.has("requestedEndPadding"))
             stop.setSelectedItem(stopHash.getK(json.getInt("requestedEndPadding")));
+         if (json.has("anywhere")) {
+            if (json.getString("anywhere").equals("true"))
+               anywhere.setSelected(true);
+            else
+               anywhere.setSelected(false);
+         }
       } catch (JSONException e) {
-         log.error("Record dialog setValues error: " + e.getMessage());
+         log.error("recordOptions.setValues - " + e.getMessage());
       }
+   }
+   
+   public JSONObject getValues() {
+      JSONObject json = new JSONObject();
+      try {
+         json.put("keepBehavior", untilHash.getV((String)until.getSelectedItem()));
+         json.put("startTimePadding", startHash.getV((String)start.getSelectedItem()));
+         json.put("endTimePadding", stopHash.getV((String)stop.getSelectedItem()));
+         if (anywhere.isSelected())
+            json.put("anywhere", "true");
+         else
+            json.put("anywhere", "false");
+      } catch (JSONException e) {
+         log.error("recordOptions.getValues - " + e.getMessage());
+         return null;
+      }
+      return json;
    }
 }
