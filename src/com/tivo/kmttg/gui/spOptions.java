@@ -127,12 +127,12 @@ public class spOptions {
             return null;
          }
       } catch (JSONException e) {
-         log.error("SP dialog error: " + e.getMessage());
+         log.error("spOptions.promptUser - " + e.getMessage());
          return null;
       }
    }
    
-   private void setValues(JSONObject json) {
+   public void setValues(JSONObject json) {
       try {
          if(json.has("showStatus"))
             record.setSelectedItem(recordHash.getK(json.getString("showStatus")));
@@ -145,7 +145,22 @@ public class spOptions {
          if(json.has("endTimePadding"))
             stop.setSelectedItem(stopHash.getK(json.getInt("endTimePadding")));
       } catch (JSONException e) {
-         log.error("SP dialog setValues error: " + e.getMessage());
+         log.error("spOptions.setValues - " + e.getMessage());
       }
+   }
+   
+   public JSONObject getValues() {
+      JSONObject json = new JSONObject();
+      try {
+         json.put("showStatus", recordHash.getV((String)record.getSelectedItem()));
+         json.put("maxRecordings", numberHash.getV((String)number.getSelectedItem()));
+         json.put("keepBehavior", untilHash.getV((String)until.getSelectedItem()));
+         json.put("startTimePadding", startHash.getV((String)start.getSelectedItem()));
+         json.put("endTimePadding", stopHash.getV((String)stop.getSelectedItem()));
+      } catch (JSONException e) {
+         log.error("spOptions.getValues - " + e.getMessage());
+         return null;
+      }
+      return json;
    }
 }
