@@ -78,7 +78,7 @@ public class javadownload implements Serializable {
          job.url = string.addPort(job.url, wan_port);
       
       String url = job.url;
-      if (config.TSDownload == 1)
+      if (config.TSDownload == 1 && job.offset == null)
          url += "&Format=video/x-tivo-mpeg-ts";
       final String urlString = url;
       String message = "DOWNLOADING";

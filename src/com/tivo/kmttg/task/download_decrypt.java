@@ -103,7 +103,7 @@ public class download_decrypt implements Serializable {
       
       String url = job.url;
 
-      if (config.TSDownload == 1)
+      if (config.TSDownload == 1 && job.offset == null)
          url += "&Format=video/x-tivo-mpeg-ts";
 
       // Make main piped command string

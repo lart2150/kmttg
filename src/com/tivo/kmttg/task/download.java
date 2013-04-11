@@ -83,7 +83,7 @@ public class download implements Serializable {
       String url = job.url;
       
       // Download using curl and cookie sid
-      if (config.TSDownload == 1)
+      if (config.TSDownload == 1 && job.offset == null)
          url += "&Format=video/x-tivo-mpeg-ts";
       Stack<String> command = new Stack<String>();
       command.add(config.curl);

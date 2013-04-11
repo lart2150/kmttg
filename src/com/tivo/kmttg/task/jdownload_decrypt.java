@@ -88,7 +88,7 @@ public class jdownload_decrypt implements Serializable {
          job.url = string.addPort(job.url, wan_port);
       
       String url = job.url;
-      if (config.TSDownload == 1)
+      if (config.TSDownload == 1 && job.offset == null)
          url += "&Format=video/x-tivo-mpeg-ts";
 
       // Start tivodecode as background process looking at stdin (OutputStream)
