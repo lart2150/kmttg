@@ -19,6 +19,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.FontUIResource;
 
+import com.tivo.kmttg.JSON.JSONException;
+import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.autoConfig;
 import com.tivo.kmttg.main.config;
@@ -1553,6 +1555,34 @@ public class gui {
                   ofp.write("1\n");
                else
                   ofp.write("0\n");
+               
+               // Record dialog
+               JSONObject json = remote_gui.recordOpt.getValues();
+               if (json != null) {
+                  try {
+                     ofp.write("\n<rpc_recordOpt>\n");
+                     String[] n = {"keepBehavior", "startTimePadding", "endTimePadding", "anywhere"};
+                     for (int j=0; j<n.length; ++j) {
+                        ofp.write(n[j] + "=" + json.get(n[j]) + "\n");
+                     }
+                  } catch (JSONException e) {
+                     log.error(e.getStackTrace().toString());
+                  }
+               }
+               
+               // SP dialog
+               json = remote_gui.spOpt.getValues();
+               if (json != null) {
+                  try {
+                     ofp.write("\n<rpc_spOpt>\n");
+                     String[] n = {"showStatus", "maxRecordings", "keepBehavior", "startTimePadding", "endTimePadding"};
+                     for (int j=0; j<n.length; ++j) {
+                        ofp.write(n[j] + "=" + json.get(n[j]) + "\n");
+                     }
+                  } catch (JSONException e) {
+                     log.error(e.getStackTrace().toString());
+                  }
+               }
             }
             ofp.write("\n");
             ofp.close();
@@ -1576,6 +1606,8 @@ public class gui {
          BufferedReader ifp = new BufferedReader(new FileReader(config.gui_settings));
          String line = null;
          String key = null;
+         JSONObject rpc_recordOpt = new JSONObject();
+         JSONObject rpc_spOpt = new JSONObject();
          while (( line = ifp.readLine()) != null) {
             // Get rid of leading and trailing white space
             line = line.replaceFirst("^\\s*(.*$)", "$1");
@@ -1771,8 +1803,29 @@ public class gui {
                if (line.matches("1"))
                   remote_gui.includeHistory_cancel.setSelected(true);
             }
+            if (key.equals("rpc_recordOpt") && remote_gui != null) {
+               String[] l = line.split("=");
+               if (l.length == 2) {
+                  rpc_recordOpt.put(l[0], l[1]);
+               }
+            }
+            if (key.equals("rpc_spOpt") && remote_gui != null) {
+               String[] l = line.split("=");
+               if (l.length == 2) {
+                  rpc_spOpt.put(l[0], l[1]);
+               }
+            }
          }
          ifp.close();
+         
+         if (remote_gui != null) {
+            if (rpc_recordOpt.length() > 0) {
+               remote_gui.recordOpt.setValues(rpc_recordOpt);
+            }
+            if (rpc_spOpt.length() > 0) {
+               remote_gui.spOpt.setValues(rpc_spOpt);
+            }
+         }
          
          if (width != -1 && height != -1) {
             getJFrame().setSize(new Dimension(width,height));
