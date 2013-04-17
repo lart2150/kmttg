@@ -297,13 +297,15 @@ public class cancelledTable {
    
    // Procedure to mimic clicking on folder entry in row 0
    public void enterFirstFolder() {
-      int row = 0;
-      sortableDate s = (sortableDate)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "DATE"));
-      if (s.folder) {
-         folderName = s.folderName;
-         folderEntryNum = row;
-         setFolderState(true);
-         Refresh(s.folderData_json);
+      if (TABLE.getRowCount() > 0) {
+         int row = 0;
+         sortableDate s = (sortableDate)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "DATE"));
+         if (s.folder) {
+            folderName = s.folderName;
+            folderEntryNum = row;
+            setFolderState(true);
+            Refresh(s.folderData_json);
+         }
       }
    }
          
