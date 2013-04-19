@@ -38,6 +38,8 @@ public class tivoFileName {
       // If startTime is desired then need extended metadata
       // which has real program start time (for partial records)
       keys.put("startTime", "");
+      keys.put("season", "");
+      keys.put("episode", "");
       if (config.tivoFileNameFormat.contains("startTime") && entry.containsKey("tivoName")) {
          createMeta.getExtendedMetadata(entry.get("tivoName"), entry, true);
          if (entry.containsKey("startTime"))
@@ -59,15 +61,19 @@ public class tivoFileName {
          }
          if (s.length() == 1)
             s = "0" + s;
-         if (s.length() > 0 && e.length() > 0)
+         if (s.length() > 0 && e.length() > 0) {
             SeriesEpNumber = "s" + s + "e" + e;
+            entry.put("season", s);
+            entry.put("episode", e);
+         }
       }
       entry.put("SeriesEpNumber", SeriesEpNumber);
       
       // Enter values for these names into keys hash
       String[] names = {
          "title", "titleOnly", "episodeTitle", "channelNum", "channel",
-         "EpisodeNumber", "SeriesEpNumber", "description", "tivoName", "originalAirDate"
+         "EpisodeNumber", "SeriesEpNumber", "season", "episode", "description",
+         "tivoName", "originalAirDate"
       };
       for (int i=0; i<names.length; ++i) {
          if (entry.containsKey(names[i])) {
@@ -181,6 +187,8 @@ public class tivoFileName {
             text = text.replaceFirst("^year$",            removeSpecialChars(keys.get("year")));
             text = text.replaceFirst("^startTime$",       removeSpecialChars(keys.get("startTime")));
             text = text.replaceFirst("^SeriesEpNumber$",  removeSpecialChars(keys.get("SeriesEpNumber")));
+            text = text.replaceFirst("^season$",          removeSpecialChars(keys.get("season")));
+            text = text.replaceFirst("^episode$",         removeSpecialChars(keys.get("episode")));
             text = text.replaceFirst("^EpisodeNumber$",   removeSpecialChars(keys.get("EpisodeNumber")));
             text = text.replaceFirst("^description$",     removeSpecialChars(keys.get("description")));
             text = text.replaceFirst("^tivoName$",        removeSpecialChars(keys.get("tivoName")));

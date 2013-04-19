@@ -1960,8 +1960,8 @@ public class configMain {
       keywords.setModel(new javax.swing.DefaultComboBoxModel(
          new String[] { "[title]", "[mainTitle]", "[episodeTitle]", "[channelNum]",
             "[channel]", "[min]", "[hour]", "[wday]", "[mday]", "[month]",
-            "[monthNum]", "[year]", "[originalAirDate]", "[EpisodeNumber]",
-            "[SeriesEpNumber]", "[description]", "[tivoName]", "[/]", "[startTime]"
+            "[monthNum]", "[year]", "[originalAirDate]", "[season]", "[episode]", "[EpisodeNumber]",
+            "[SeriesEpNumber]", "[description]", "[tivoName]", "[startTime]", "[/]"
             }
          )
       );
