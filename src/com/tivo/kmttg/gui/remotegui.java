@@ -23,6 +23,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Stack;
 
 import javax.swing.AbstractAction;
@@ -92,6 +93,7 @@ public class remotegui {
    JTextPane text_info = null;
    private Hashtable<String,String> tivo_info_data = new Hashtable<String,String>();
    public Hashtable<String, JButton> buttons = new Hashtable<String, JButton>();
+   private LinkedHashMap<String,String> SPS = new LinkedHashMap<String,String>();
    
    private cancelledTable tab_cancel = null;
    private JComboBox tivo_cancel = null;
@@ -121,6 +123,7 @@ public class remotegui {
 
    private JComboBox tivo_rc = null;
    private JComboBox hme_rc = null;
+   private JComboBox hme_sps = null;
    private JTextField rc_jumpto_text = null;
    private JTextField rc_jumpahead_text = null;
    private JTextField rc_jumpback_text = null;
@@ -136,6 +139,7 @@ public class remotegui {
    private JButton recover_deleted = null;
    private JButton permDelete_deleted = null;  
    private JButton rc_hme_button = null;
+   private JButton rc_sps_button = null;
    private JButton rc_jumpto_button = null;
    private JButton rc_jumpahead_button = null;
    private JButton rc_jumpback_button = null;
@@ -1700,34 +1704,18 @@ public class remotegui {
       }
       
       // Special buttons
-      JButton sps9s = new CustomButton(
-         "Clock: SPS9S", "sps9s",
-         new String[] {"select", "play", "select", "9", "select", "clear"}
-      );
-      size = sps9s.getPreferredSize();
-      panel_controls.add(sps9s);
-      sps9s.setBounds(500+insets.left, 10+insets.top, size.width, size.height);
-      
-      JButton spsps = new CustomButton(
-         "Banner: SPSPS", "spsps",
-         new String[] {"select", "play", "select", "pause", "select", "play"}
-      );
-      size = spsps.getPreferredSize();
-      panel_controls.add(spsps);
-      spsps.setBounds(500+insets.left, 40+insets.top, size.width, size.height);
-      
       JButton standby = new CustomButton(
          "Toggle standby", "standby",
          new String[] {"standby"}
       );
       size = standby.getPreferredSize();
       panel_controls.add(standby);
-      standby.setBounds(500+insets.left, 70+insets.top, size.width, size.height);
+      standby.setBounds(500+insets.left, 10+insets.top, size.width, size.height);
       
       JButton toggle_cc = new CustomButton("Toggle CC", "toggle_cc", null);
       size = toggle_cc.getPreferredSize();
       panel_controls.add(toggle_cc);
-      toggle_cc.setBounds(500+insets.left, 100+insets.top, size.width, size.height);
+      toggle_cc.setBounds(500+insets.left, 40+insets.top, size.width, size.height);
       toggle_cc.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             String tivoName = (String)tivo_rc.getSelectedItem();
@@ -1766,7 +1754,7 @@ public class remotegui {
       JButton myShows = new CustomButton("My Shows", "My Shows", null);
       size = myShows.getPreferredSize();
       panel_controls.add(myShows);
-      myShows.setBounds(500+insets.left, 130+insets.top, size.width, size.height);
+      myShows.setBounds(500+insets.left, 70+insets.top, size.width, size.height);
       myShows.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             String tivoName = (String)tivo_rc.getSelectedItem();
@@ -1850,6 +1838,98 @@ public class remotegui {
       
       hme_rc = new javax.swing.JComboBox();
       hme_rc.setToolTipText(getToolTip("hme_rc"));
+
+      // SPS backdoors
+      String sps_name, sps_text;
+      String sps_text_end = "Should be used while playing back a recorded show.</html>";
+      sps_name = "Quick clear banner: SPSPS";
+      SPS.put(sps_name, "select play select pause select play");
+      sps_text = "<html><b>" + sps_name + "</b><br>";
+      sps_text += SPS.get(sps_name) + "<br>";
+      sps_text += "Toggle 'clear trickplay banner quickly' setting.<br>";
+      sps_text += sps_text_end;
+      SPS.put(sps_name + "_tooltip", sps_text);
+
+      sps_name = "Clock: SPS9S";
+      SPS.put(sps_name, "select play select 9 select clear");
+      sps_text = "<html><b>" + sps_name + "</b><br>";
+      sps_text += SPS.get(sps_name) + "<br>";
+      sps_text += "Toggle on screen clock.<br>";
+      sps_text += "Clock will be at top right corner for series 4 TiVos or later.<br>";
+      sps_text += "Clock will be at bottom right corner for series 3 TiVos.<br>";
+      sps_text += sps_text_end;
+      SPS.put(sps_name + "_tooltip", sps_text);
+            
+      sps_name = "30 sec skip: SPS30S";
+      SPS.put(sps_name, "select play select 3 0 select clear");
+      sps_text = "<html><b>" + sps_name + "</b><br>";
+      sps_text += SPS.get(sps_name) + "<br>";
+      sps_text += "Toggle 30 sec skip binding of advance button.<br>";
+      sps_text += "NOTE: Unlike other backdoors, this one survives a reboot.";
+      sps_text += sps_text_end;
+      SPS.put(sps_name + "_tooltip", sps_text);
+      
+      sps_name = "Information: SPSRS";
+      SPS.put(sps_name, "select play select replay select");
+      sps_text = "<html><b>" + sps_name + "</b><br>";
+      sps_text += SPS.get(sps_name) + "<br>";
+      sps_text += "Display some video information on the screen.<br>";
+      sps_text += sps_text_end;
+      SPS.put(sps_name + "_tooltip", sps_text);
+      
+      sps_name = "Calibration: SPS7S";
+      SPS.put(sps_name, "select play select 7 select clear");
+      sps_text = "<html><b>" + sps_name + "</b><br>";
+      sps_text += SPS.get(sps_name) + "<br>";
+      sps_text += "Display calibration map for centering and overscan.<br>";
+      sps_text += "NOTE: This only works for series 3 TiVos.<br>";
+      sps_text += sps_text_end;
+      SPS.put(sps_name + "_tooltip", sps_text);
+      
+      sps_name = "4x FF: SPS88S";
+      SPS.put(sps_name, "select play select 8 8 select clear");
+      sps_text = "<html><b>" + sps_name + "</b><br>";
+      sps_text += SPS.get(sps_name) + "<br>";
+      sps_text += "Toggles '4th FF press returns to play speed' setting.<br>";
+      sps_text += "14.9.2.x software changed behavior such that beyond 3 FF presses nothing happens.<br>";
+      sps_text += "When enabled a 4th FF press resumes normal play as was the case with older TiVo software.<br>";
+      sps_text += sps_text_end;
+      SPS.put(sps_name + "_tooltip", sps_text);
+     
+      rc_sps_button = new JButton("SPS backdoor:");
+      disableSpaceAction(rc_sps_button);
+      rc_sps_button.setToolTipText(getToolTip("rc_sps_button"));
+      rc_sps_button.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String name = (String)hme_sps.getSelectedItem();
+            String tivoName = (String)tivo_rc.getSelectedItem();
+            if (name != null && name.length() > 0 && tivoName != null && tivoName.length() > 0) {
+               executeMacro(
+                  tivoName,
+                  SPS.get(name).split(" ")
+               );
+            }
+         }
+      });
+      
+      hme_sps = new javax.swing.JComboBox();
+      hme_sps.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+               String item = (String)hme_sps.getSelectedItem();
+               hme_sps.setToolTipText(getToolTip(item));            
+            }
+         }
+      });
+      int sps_count = 0;
+      for (String name : SPS.keySet()) {
+         if (! name.contains("_tooltip")) {
+            hme_sps.addItem(name);
+            if (sps_count == 0)
+               hme_sps.setToolTipText(SPS.get(name + "_tooltip"));
+         }
+         sps_count++;
+      }
       
       rc_jumpto_button = new JButton("Jump to minute:");
       disableSpaceAction(rc_jumpto_button);
@@ -1998,6 +2078,10 @@ public class remotegui {
       rctop.add(rc_hme_button);
       rctop.add(Box.createRigidArea(space_5));
       rctop.add(hme_rc);
+      rctop.add(Box.createRigidArea(space_5));
+      rctop.add(rc_sps_button);
+      rctop.add(Box.createRigidArea(space_5));
+      rctop.add(hme_sps);
 
       // Bottom panel
       JPanel rcbot = new JPanel();
@@ -2754,6 +2838,43 @@ public class remotegui {
       return mapped;
    }
    
+   private void executeMacro(final String tivoName, final String[] sequence) {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            if (config.rpcEnabled(tivoName)) {
+               Remote r = config.initRemote(tivoName);
+               if (r.success) {
+                  try {
+                     JSONObject result;
+                     for (int i=0; i<sequence.length; ++i) {
+                        JSONObject json = new JSONObject();
+                        if (sequence[i].matches("^[0-9]")) {
+                           json.put("event", "ascii");
+                           json.put("value", sequence[i].toCharArray()[0]);
+                        } else {
+                           json.put("event", sequence[i]);
+                        }
+                        result = r.Command("keyEventSend", json);
+                        if (result == null) break;
+                     }
+                  } catch (JSONException e1) {
+                     log.error("Macro CB - " + e1.getMessage());
+                  }
+                  r.disconnect();
+               }
+            } else {
+               // Use telnet protocol
+               new telnet(config.TIVOS.get(tivoName), mapToTelnet(sequence));
+            }
+            // Set focus on tabbed_panel
+            tabbed_panel.requestFocusInWindow();
+            return null;
+         }
+      }
+      backgroundRun b = new backgroundRun();
+      b.execute();      
+   }
+   
    private void setMacroCB(JButton b, final String[] sequence) {
       b.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -2761,40 +2882,7 @@ public class remotegui {
             tabbed_panel.requestFocusInWindow();
             final String tivoName = (String)tivo_rc.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               class backgroundRun extends SwingWorker<Object, Object> {
-                  protected Object doInBackground() {
-                     if (config.rpcEnabled(tivoName)) {
-                        Remote r = config.initRemote(tivoName);
-                        if (r.success) {
-                           try {
-                              JSONObject result;
-                              for (int i=0; i<sequence.length; ++i) {
-                                 JSONObject json = new JSONObject();
-                                 if (sequence[i].matches("^[0-9]")) {
-                                    json.put("event", "ascii");
-                                    json.put("value", sequence[i].toCharArray()[0]);
-                                 } else {
-                                    json.put("event", sequence[i]);
-                                 }
-                                 result = r.Command("keyEventSend", json);
-                                 if (result == null) break;
-                              }
-                           } catch (JSONException e1) {
-                              log.error("Macro CB - " + e1.getMessage());
-                           }
-                           r.disconnect();
-                        }
-                     } else {
-                        // Use telnet protocol
-                        new telnet(config.TIVOS.get(tivoName), mapToTelnet(sequence));
-                     }
-                     // Set focus on tabbed_panel
-                     tabbed_panel.requestFocusInWindow();
-                     return null;
-                  }
-               }
-               backgroundRun b = new backgroundRun();
-               b.execute();
+               executeMacro(tivoName, sequence);
             }
          }
       });
@@ -3284,6 +3372,10 @@ public class remotegui {
       else if (component.equals("hme_rc")) {
          text = "Select which HME application you want to jump to for selected TiVo.";
       }
+      else if (component.equals("rc_sps_button")) {
+         text = "<b>SPS backdoor</b><br>";
+         text += "Execute the selected SPS backdoor on the selected TiVo.";
+      }
       else if (component.equals("channelUp")) {
          text = "pg up";
       }
@@ -3398,26 +3490,6 @@ public class remotegui {
       else if (component.equals("advance")) {
          text = ")";
       }      
-      else if (component.equals("sps9s")){
-         text = "<b>Clock: SPS9S</b><br>";
-         text += "Select, Play, Select, 9, Select, Clear<br>";
-         text += "Toggle on screen clock on bottom right corner.<br>";
-         text += "Should be used when watching live tv or video playback.";
-      }
-      else if (component.equals("sps30s")){
-         text = "<b>30ss: SPS30S</b><br>";
-         text += "Select, Play, Select, 3, 0, Select, Clear<br>";
-         text += "Toggle 30 sec skip binding of advance button.<br>";
-         text += "Should be used when watching live tv or video playback.";
-      }
-      else if (component.equals("spsps")){
-         text = "<b>Banner: SPSPS</b><br>";
-         text += "Select, Play, Select, Pause, Select, Play<br>";
-         text += "Toggle 'clear banner quickly' setting.<br>";
-         text += "Should be used when watching live tv or video playback.<br>";
-         text += "NOTE: Before enable you need to pause program and hide pause banner first and<br>.";
-         text += "then resume play, then press this button.";
-      }
       else if (component.equals("standby")){
          text = "<b>Toggle standby</b><br>";
          text += "Toggle standby mode. In off mode audio/video outputs are disabled on the TiVo<br>";
@@ -3431,6 +3503,9 @@ public class remotegui {
       else if (component.equals("My Shows")){
          text = "<b>My Shows</b><br>";
          text += "My Shows (AKA Now Playing List).";
+      }
+      else if (component.contains("SPS")) {
+         text = SPS.get(component + "_tooltip");
       }
       if (text.length() > 0) {
          text = "<html>" + text + "</html>";
