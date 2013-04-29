@@ -73,7 +73,7 @@ public class tivoFileName {
       String[] names = {
          "title", "titleOnly", "episodeTitle", "channelNum", "channel",
          "EpisodeNumber", "SeriesEpNumber", "season", "episode", "description",
-         "tivoName", "originalAirDate"
+         "tivoName", "originalAirDate", "movieYear"
       };
       for (int i=0; i<names.length; ++i) {
          if (entry.containsKey(names[i])) {
@@ -193,6 +193,7 @@ public class tivoFileName {
             text = text.replaceFirst("^description$",     removeSpecialChars(keys.get("description")));
             text = text.replaceFirst("^tivoName$",        removeSpecialChars(keys.get("tivoName")));
             text = text.replaceFirst("^originalAirDate$", removeSpecialChars(keys.get("originalAirDate")));
+            text = text.replaceFirst("^movieYear$",       removeSpecialChars(keys.get("movieYear")));
             if (text.length() == 0) exists = false;
          }
          newFields.add(text);
