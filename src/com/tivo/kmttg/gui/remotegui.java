@@ -1865,7 +1865,7 @@ public class remotegui {
       sps_text = "<html><b>" + sps_name + "</b><br>";
       sps_text += SPS.get(sps_name) + "<br>";
       sps_text += "Toggle 30 sec skip binding of advance button.<br>";
-      sps_text += "NOTE: Unlike other backdoors, this one survives a reboot.";
+      sps_text += "NOTE: Unlike other backdoors, this one survives a reboot.<br>";
       sps_text += sps_text_end;
       SPS.put(sps_name + "_tooltip", sps_text);
       
@@ -1891,7 +1891,7 @@ public class remotegui {
       sps_text = "<html><b>" + sps_name + "</b><br>";
       sps_text += SPS.get(sps_name) + "<br>";
       sps_text += "Toggles '4th FF press returns to play speed' setting.<br>";
-      sps_text += "14.9.2.x software changed behavior such that beyond 3 FF presses nothing happens.<br>";
+      sps_text += "Series 4 software changed behavior such that beyond 3 FF presses nothing happens.<br>";
       sps_text += "When enabled a 4th FF press resumes normal play as was the case with older TiVo software.<br>";
       sps_text += sps_text_end;
       SPS.put(sps_name + "_tooltip", sps_text);
