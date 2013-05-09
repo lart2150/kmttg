@@ -658,7 +658,15 @@ public class Remote {
                o.put("startTimePadding", json.getInt("startTimePadding"));
             // These are required for wishlist types
             // NOTE: Advanced wishlist SPs don't contain idSetSource so don't work
-            if (json.has("title"))
+            // NOTE: title is not needed for type=seasonPassSource and titles with special
+            // characters can prevent scheduling from working, so don't use title for this type
+            String wltype = null;
+            if (json.has("idSetSource")) {
+               JSONObject temp = json.getJSONObject("idSetSource");
+               if (temp.has("type"))
+                  wltype = temp.getString("type");
+            }            
+            if (json.has("title") && ! wltype.equals("seasonPassSource"))
                o.put("title", json.getString("title"));
             if (json.has("folderingRules"))
                o.put("folderingRules", json.getString("folderingRules"));
