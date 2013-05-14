@@ -527,8 +527,12 @@ public class auto {
    private static Boolean keywordMatchHistory(String ProgramId, String historyFile) {
       try {
          BufferedReader history = new BufferedReader(new FileReader(historyFile));
+         // NOTE: Strip out leading 0s when comparing because sometimes XML includes
+         // leading 0s while other times it does not
+         ProgramId = ProgramId.replaceFirst("^([^\\d]+)0+([1-9]+.+)$", "$1$2");
          String line = null;
          while (( line = history.readLine()) != null) {
+            line = line.replaceFirst("^([^\\d]+)0+([1-9]+.+)$", "$1$2");
             if (line.contains(ProgramId)) {
                history.close();
                return true;
