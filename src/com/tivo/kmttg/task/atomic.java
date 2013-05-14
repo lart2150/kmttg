@@ -281,15 +281,24 @@ public class atomic implements Serializable {
             args.add(h.get("episodeNumber"));
          }
          if (h.containsKey("episode") || h.containsKey("episodeNumber")) {
-            String ep;
-             if (h.containsKey("episode"))
+            String ep, tracknum;
+             if (h.containsKey("episode")) {
                 ep = h.get("episode");
-             else
+                tracknum = ep;
+             }
+             else {
                 ep = h.get("episodeNumber");
+                tracknum = ep;
+                if (ep.length() <= 3) {
+                   ep = ep.substring(1, ep.length());
+                } else {
+                   ep = ep.substring(2, ep.length());
+                }
+             }
              args.add("--TVEpisodeNum");
              args.add(ep);
              args.add("--tracknum");
-             args.add(ep);
+             args.add(tracknum);
          }
          if (h.containsKey("season") || h.containsKey("episodeNumber")) {
             String season;
