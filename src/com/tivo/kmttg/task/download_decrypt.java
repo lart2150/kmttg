@@ -122,9 +122,10 @@ public class download_decrypt implements Serializable {
       // Make temporary script containing command
       try {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(script));
-         if (config.OS.equals("windows"))
+         if (config.OS.equals("windows")) {
             hackToGetPid(ofp, uniqueName, pidFile);
-         ofp.write("chcp 1252>nul\r\n"); // This needed for international character handling in .bat script
+            ofp.write("chcp 1252>nul\r\n"); // This needed for international character handling in .bat script
+         }
          ofp.write(command);
          if (config.OS.equals("windows"))
             ofp.write("\r");
