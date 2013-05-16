@@ -618,6 +618,7 @@ public class spTable {
           log.error("Table not initialized");
           return;
        }
+       int smallest = -1;
        int row;
        JSONObject json;
        String title;
@@ -625,6 +626,10 @@ public class spTable {
        if (r.success) {
           for (int i=0; i<selected.length; ++i) {
              row = selected[i];
+             if (smallest == -1)
+                smallest = row;
+             if (row < smallest)
+                smallest = row;
              json = GetRowData(row);
              if (json != null) {
                 try {
@@ -637,6 +642,11 @@ public class spTable {
                       o.put("subscriptionId", json.getString("subscriptionId"));
                       if ( r.Command("Unsubscribe", o) != null ) {
                          RemoveRow(TABLE, row);
+                         smallest -= 1;
+                         if (smallest < 0)
+                            smallest = 0;
+                         if (TABLE.getRowCount() > 0)
+                            setSelectedRow(smallest);
                          // Find and remove data entry
                          removeJson(currentTivo, json);
                       }
