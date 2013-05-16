@@ -515,11 +515,17 @@ public class guideTable {
    
    // Refresh a combo box with new date range
    public void setComboBoxDates(JComboBox widget, int hourIncrement, int numDays) {
+      // 1st get current setting to restore selection if still relevant
+      String current = (String)widget.getSelectedItem();
+      
       long gmt = new Date().getTime();
       widget.removeAllItems();
       Stack<String> dates = getDisplayTimeRange(gmt, hourIncrement, numDays);
-      for(int i=0; i<dates.size(); ++i)
+      for(int i=0; i<dates.size(); ++i) {
          widget.addItem(dates.get(i));
+         if (dates.get(i).equals(current))
+            widget.setSelectedIndex(i);
+      }
    }
    
    public void updateChannels(final String tivoName) {
