@@ -57,6 +57,7 @@ public class mdns {
       // Uncomment this to print/log specific service information
       //printService("_tivo-mindrpc._tcp.local.");
       //printService("_tivo-videostream._tcp.local.");
+      //printService("_http._tcp.local.");
       
       ServiceInfo info[] = jmdns.list("_http._tcp.local.");
       if (info.length > 0) {
@@ -65,8 +66,11 @@ public class mdns {
          for (int i=0; i<info.length; ++i) {
             // No tsn => not a tivo
             String tsn = info[i].getPropertyString("TSN");
+            String platform = info[i].getPropertyString("platform");
             // Ignore certain devices like TiVo Stream which starts with TSN "A94"
             if (tsn != null && tsn.startsWith("A94"))
+               tsn = null;
+            if (platform != null && platform.contains("Silverstreak"))
                tsn = null;
             if (tsn != null) {
                Boolean add = true;
