@@ -427,6 +427,22 @@ public class nplTable {
                Stack<String> urlsToDelete = new Stack<String>();
                Stack<String> idsToDelete = new Stack<String>();
                String id;
+               
+               // Figure out what selection should be if all selected rows are deleted
+               sortableDate final_select = null;
+               int lowest = -1;
+               for (int i=0; i<selected.length; ++i) {
+                  if (lowest == -1)
+                     lowest = selected[i];
+                  if (selected[i] < lowest)
+                     lowest = selected[i];
+               }
+               if (lowest-1 < 0)
+                  lowest = 0;
+               else
+                  lowest -= 1;
+               final_select = (sortableDate)NowPlaying.getValueAt(lowest,getColumnIndex("DATE"));
+               
                for (int i=0; i<selected.length; ++i) {
                   int row = selected[i];
                   sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
@@ -490,6 +506,17 @@ public class nplTable {
                      RefreshTable();
                   }
                } // if urslToDelete
+               
+               // After table refresh this is the data of the row to look for to select
+               if (final_select != null) {
+                  if (final_select.folder) {
+                     Hashtable<String,String> h = new Hashtable<String,String>();
+                     h.put("folderName", final_select.folderName);
+                     selectRowWithData(h);
+                  } else {
+                     selectRowWithData(final_select.data);
+                  }
+               }
             } // if keyCode == KeyEvent.VK_DELETE
             
             if (keyCode == KeyEvent.VK_SPACE) {
@@ -1145,6 +1172,39 @@ public class nplTable {
                   System.out.println("Exception: " + e.getMessage());
                }
                return;
+            }
+         }
+      }
+   }
+   
+   private void selectRowWithData(Hashtable<String,String> data) {
+      if (data.containsKey("folderName"))
+         SelectFolder(data.get("folderName"));
+      else {
+         // Step through all table rows looking for entry with matching ProgramId to select
+         if (data.containsKey("ProgramId")) {
+            for (int i=0; i<NowPlaying.getRowCount(); ++i) {
+               sortableDate r = (sortableDate)NowPlaying.getValueAt(i, getColumnIndex("DATE"));
+               if (r.folder) {
+                  // Inside a folder so search all folder entries
+                  for (int j=0; j<r.folderData.size(); j++) {
+                     Hashtable<String,String> entry = r.folderData.get(j);
+                     if (entry.containsKey("ProgramId")) {
+                        if (entry.get("ProgramId").equals(data.get("ProgramId"))) {
+                           setFolderState(true);
+                           folderName = r.folderName;
+                           folderEntryNum = i;
+                           RefreshNowPlaying(r.folderData);
+                           NowPlaying.setRowSelectionInterval(j, j);
+                        }
+                     }
+                  }
+               } else {
+                  if (r.data.containsKey("ProgramId")) {
+                     if (r.data.get("ProgramId").equals(data.get("ProgramId")))
+                        NowPlaying.setRowSelectionInterval(i, i);
+                  }
+               }
             }
          }
       }
