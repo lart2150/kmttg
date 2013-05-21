@@ -21,6 +21,9 @@ public class kmttg {
    public static void main(String[] argv) {
       debug.enabled = false;
       
+      // Parse command lines and set options accordingly
+      getopt(argv);
+      
       // Handle any uncaught exceptions
       Thread.setDefaultUncaughtExceptionHandler(new myExceptionHandler());
       
@@ -62,9 +65,6 @@ public class kmttg {
              }*/
           }
       });
-      
-      // Parse command lines and set options accordingly
-      getopt(argv);
       
       if (gui_mode) {
          // GUI mode
@@ -143,6 +143,12 @@ public class kmttg {
          else if (arg.equals("-h")) {
             useage();
          }
+         else if (arg.equals("-v")) {
+            gui_mode = false;
+            String[] s = config.kmttg.split("\\s+");
+            System.out.println(s[1]);
+            System.exit(0);
+         }
       }                
    }
    
@@ -154,6 +160,7 @@ public class kmttg {
       System.out.println("-b => Run in auto download batch mode - single loop\n");
       System.out.println("-c => Run auto-conflict resolver in batch mode - single run\n");
       System.out.println("-d => Enable verbose debug mode\n");
+      System.out.println("-v => Print version and exit\n");
       System.exit(0);
    }   
 }
