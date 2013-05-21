@@ -84,7 +84,7 @@ public class help {
       dialog.setVisible(true);
    }
    
-   private static String getVersion() {
+   public static String getVersion() {
       debug.print("");
       String version = null;
       String version_url = "http://kmttg.googlecode.com/svn/trunk/version";
