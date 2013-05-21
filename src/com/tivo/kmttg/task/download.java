@@ -19,12 +19,16 @@ import com.tivo.kmttg.util.string;
 
 public class download implements Serializable {
    private static final long serialVersionUID = 1L;
+   String cookieFile = "";
    private backgroundProcess process;
    public jobData job;
    
    public download(jobData job) {
       debug.print("job=" + job);
-      this.job = job;      
+      this.job = job;
+      
+      // Generate unique cookieFile and outputFile names
+      cookieFile = file.makeTempFile("cookie");
    }
    
    public backgroundProcess getProcess() {
@@ -98,6 +102,8 @@ public class download implements Serializable {
       command.add("--insecure");
       command.add("--cookie");
       command.add("sid=abc");
+      command.add("--cookie-jar");
+      command.add(cookieFile);
       command.add("--url");
       command.add(url);
       if (job.offset != null) {
@@ -128,6 +134,7 @@ public class download implements Serializable {
       debug.print("");
       process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
+      file.delete(cookieFile);
    }
    
    // Check status of a currently running job
@@ -252,6 +259,7 @@ public class download implements Serializable {
                auto.AddHistoryEntry(job);
          }
       }
+      file.delete(cookieFile);
       
       return false;
    }
