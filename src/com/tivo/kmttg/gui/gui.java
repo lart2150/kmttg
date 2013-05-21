@@ -21,6 +21,7 @@ import javax.swing.plaf.FontUIResource;
 
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.install.update;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.autoConfig;
 import com.tivo.kmttg.main.config;
@@ -47,6 +48,7 @@ public class gui {
    private JMenu serviceMenu = null;
    private JMenu helpMenu = null;
    private JMenuItem helpAboutMenuItem = null;
+   private JMenuItem helpUpdateMenuItem = null;
    private JMenuItem exitMenuItem = null;
    private JMenuItem autoConfigMenuItem = null;
    private JMenuItem runInGuiMenuItem = null;
@@ -565,6 +567,7 @@ public class gui {
          helpMenu = new JMenu();
          helpMenu.setText("Help");
          helpMenu.add(getHelpAboutMenuItem());
+         helpMenu.add(getHelpUpdateMenuItem());
       }
       return helpMenu;
    }
@@ -581,6 +584,20 @@ public class gui {
          });
       }
       return helpAboutMenuItem;
+   }
+
+   private JMenuItem getHelpUpdateMenuItem() {
+      debug.print("");
+      if (helpUpdateMenuItem == null) {
+         helpUpdateMenuItem = new JMenuItem();
+         helpUpdateMenuItem.setText("Update to latest version...");
+         helpUpdateMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               update.update_kmttg_background();
+            }
+         });
+      }
+      return helpUpdateMenuItem;
    }
 
    private JMenuItem getExitMenuItem() {
