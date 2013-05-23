@@ -100,6 +100,7 @@ public class projectxcut implements Serializable {
       debug.print("");
       Stack<String> command = new Stack<String>();
       command.add("java");
+      command.add("-Djava.awt.headless=true");
       command.add("-jar");
       command.add(config.projectx);
       command.add(job.mpegFile);
