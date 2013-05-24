@@ -49,6 +49,7 @@ public class gui {
    private JMenu helpMenu = null;
    private JMenuItem helpAboutMenuItem = null;
    private JMenuItem helpUpdateMenuItem = null;
+   private JMenuItem helpToolsUpdateMenuItem = null;
    private JMenuItem exitMenuItem = null;
    private JMenuItem autoConfigMenuItem = null;
    private JMenuItem runInGuiMenuItem = null;
@@ -568,6 +569,8 @@ public class gui {
          helpMenu.setText("Help");
          helpMenu.add(getHelpAboutMenuItem());
          helpMenu.add(getHelpUpdateMenuItem());
+         if (config.OS.equals("windows") || config.OS.equals("mac"))
+            helpMenu.add(getHelpToolsUpdateMenuItem());
       }
       return helpMenu;
    }
@@ -590,7 +593,7 @@ public class gui {
       debug.print("");
       if (helpUpdateMenuItem == null) {
          helpUpdateMenuItem = new JMenuItem();
-         helpUpdateMenuItem.setText("Update to latest version...");
+         helpUpdateMenuItem.setText("Update kmttg...");
          helpUpdateMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                update.update_kmttg_background();
@@ -598,6 +601,20 @@ public class gui {
          });
       }
       return helpUpdateMenuItem;
+   }
+
+   private JMenuItem getHelpToolsUpdateMenuItem() {
+      debug.print("");
+      if (helpToolsUpdateMenuItem == null) {
+         helpToolsUpdateMenuItem = new JMenuItem();
+         helpToolsUpdateMenuItem.setText("Update tools...");
+         helpToolsUpdateMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               update.update_tools_background();
+            }
+         });
+      }
+      return helpToolsUpdateMenuItem;
    }
 
    private JMenuItem getExitMenuItem() {
