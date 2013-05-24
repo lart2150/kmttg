@@ -39,6 +39,26 @@ public class update {
       b.execute();
    }
    
+   public static void update_tools_background() {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            toolDownload t = new toolDownload();
+            String zipFile = t.download(config.programDir, config.OS);
+            config.gui.progressBar_setValue(0);
+            config.gui.setTitle(config.kmttg);
+            if (zipFile != null) {
+               if (Unzip.unzip(config.programDir, zipFile) ) {
+                  log.warn("Tools update complete");
+                  file.delete(zipFile);
+               }
+            }
+            return null;
+         }
+      }
+      backgroundRun b = new backgroundRun();
+      b.execute();
+   }
+   
    private static void update_kmttg() {
       String kmttg_jar = config.programDir + "/kmttg.jar";
       if (file.isFile(kmttg_jar)) {
