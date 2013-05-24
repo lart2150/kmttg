@@ -88,6 +88,7 @@ public class help {
       debug.print("");
       String version = null;
       String version_url = "http://kmttg.googlecode.com/svn/trunk/version";
+      //String version_url = "http://sourceforge.net/projects/kmttg/files/current_version/download?use_mirror=autoselect";
       try {
          URL url = new URL(version_url);
          URLConnection con = url.openConnection();
