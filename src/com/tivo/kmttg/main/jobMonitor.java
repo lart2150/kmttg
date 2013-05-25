@@ -192,7 +192,7 @@ public class jobMonitor {
          }
          
          // If single_download option is set only allow 1 download at a time
-         if (config.single_download == 1 && totalDownloads >= 1)
+         if (isDownloadJob(job) && config.single_download == 1 && totalDownloads >= 1)
             continue;
       
          // Don't run more than 'MaxJobs' active jobs at a time
