@@ -81,7 +81,8 @@ public class update {
                   JOptionPane.QUESTION_MESSAGE
                );
                if (response == JOptionPane.YES_OPTION) {
-                  String url = "http://kmttg.googlecode.com/files/kmttg_" + current_version + ".zip";
+                  String url = "http://sourceforge.net/projects/kmttg/files/kmttg_" +
+                     current_version + ".zip/download?use_mirror=autoselect";
                   String zipFile = downloadUrl(config.programDir, url);
                   if (zipFile != null) {
                      if ( unzip(config.programDir, zipFile) ) {

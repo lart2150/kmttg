@@ -38,20 +38,20 @@ public class help {
          String text = "<html>";
          text += "<h2 style=\"text-align: center;\">" + config.kmttg + "</h2>";
          if (version != null) {
-            text += "<h3 style=\"text-align: center;\">Latest version: <a href=\"http://kmttg.googlecode.com/files/kmttg_";
+            text += "<h3 style=\"text-align: center;\">Latest version: <a href=\"http://sourceforge.net/projects/kmttg/files/kmttg_";
             text += version + ".zip\">" + version + "</a></h3>";
          }
          text += "<p>LINKS:</p>";
          text += "<table>";
-         text += "<tr><td><a href=\"http://code.google.com/p/kmttg/\">kmttg Home Page</a></td>";
-         text += "<td><a href=\"http://code.google.com/p/kmttg/downloads/list\">kmttg downloads</a></td></tr>";
-         text += "<tr><td><a href=\"http://code.google.com/p/kmttg/wiki/release_notes\">Release Notes</a></td>";
-         text += "<td><a href=\"http://code.google.com/p/kmttg/wiki/configuring_kmttg\">kmttg configuration</a></td></tr>";
-         text += "<tr><td><a href=\"http://code.google.com/p/kmttg/wiki/using_kmttg\">kmttg operation</a></td>";
-         text += "<td><a href=\"http://code.google.com/p/kmttg/wiki/auto_transfers\">Setting up Auto Transfers</a></td></tr>";
-         text += "<tr><td><a href=\"http://code.google.com/p/kmttg/wiki/windows_installation\">Windows Installation</a></td>";
-         text += "<td><a href=\"http://code.google.com/p/kmttg/wiki/mac_osx_installation\">Mac OSX Installation</a></td></tr>";
-         text += "<tr><a href=\"http://code.google.com/p/kmttg/wiki/linux_installation\">Linux Installation</a></tr>";
+         text += "<tr><td><a href=\"http://sourceforge.net/p/kmttg/wiki/Home/\">kmttg Home Page</a></td>";
+         text += "<td><a href=\"http://sourceforge.net/projects/kmttg/files/\">kmttg downloads</a></td></tr>";
+         text += "<tr><td><a href=\"http://sourceforge.net/p/kmttg/wiki/release_notes/\">Release Notes</a></td>";
+         text += "<td><a href=\"http://sourceforge.net/p/kmttg/wiki/configuring_kmttg\">kmttg configuration</a></td></tr>";
+         text += "<tr><td><a href=\"http://sourceforge.net/p/kmttg/wiki/using_kmttg\">kmttg operation</a></td>";
+         text += "<td><a href=\"http://sourceforge.net/p/kmttg/wiki/auto_transfers\">Setting up Auto Transfers</a></td></tr>";
+         text += "<tr><td><a href=\"http://sourceforge.net/p/kmttg/wiki/windows_installation\">Windows Installation</a></td>";
+         text += "<td><a href=\"http://sourceforge.net/p/kmttg/wiki/mac_osx_installation\">Mac OSX Installation</a></td></tr>";
+         text += "<tr><a href=\"http://sourceforge.net/p/kmttg/wiki/linux_installation\">Linux Installation</a></tr>";
          text += "</table></html>";
          pane.setText(text);
          pane.setEditable(false);
@@ -87,8 +87,7 @@ public class help {
    public static String getVersion() {
       debug.print("");
       String version = null;
-      String version_url = "http://kmttg.googlecode.com/svn/trunk/version";
-      //String version_url = "http://sourceforge.net/projects/kmttg/files/current_version/download?use_mirror=autoselect";
+      String version_url = "http://sourceforge.net/projects/kmttg/files/version_info/current_version/download?use_mirror=autoselect";
       try {
          URL url = new URL(version_url);
          URLConnection con = url.openConnection();

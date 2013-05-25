@@ -15,17 +15,21 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class toolDownload {
-   String windows_file = "http://kmttg.googlecode.com/files/kmttg_win32_tools_v0p9s.zip";
-   String mac_file = "http://kmttg.googlecode.com/files/kmttg_MacOSX_tools_v0p8l.zip";
+   String base = "http://sourceforge.net/projects/kmttg/files/tools/";
+   String tail = "/download?use_mirror=autoselect";
+   String windows_file = "kmttg_win32_tools_v0p9s.zip";
+   String mac_file = "kmttg_MacOSX_tools_v0p8l.zip";
    String localFileName = null;
    
    public String download(String dir, String os) {
       debug.print("dir=" + dir + " os=" + os);
       String urlString = null;
       if (os.equals("windows")) {
-         urlString = windows_file;
+         urlString = base + windows_file + tail;
+         localFileName = config.programDir + File.separator + windows_file;
       } else if (os.equals("mac")) {
-         urlString = mac_file;
+         urlString = base + mac_file + tail;
+         localFileName = config.programDir + File.separator + mac_file;
       }
       if (urlString != null) {
          if (downloadUrl(dir, urlString)) {
@@ -49,9 +53,7 @@ public class toolDownload {
           URLConnection con = url.openConnection();
           size = con.getContentLength();
           
-          in = new BufferedInputStream(con.getInputStream());
-          
-          localFileName = getFileName(dir, urlString);
+          in = new BufferedInputStream(con.getInputStream());          
           out = new RandomAccessFile(localFileName, "rw");
           
           Integer howManyBytes;
@@ -96,24 +98,4 @@ public class toolDownload {
       }
       return false;
    }
-      
-   private String getFileName(String dir, String urlString) {
-      debug.print("dir=" + dir + " urlString=" + urlString);
-      String tempString;
-      int lastSlash = urlString.lastIndexOf('/');
-      
-      if (lastSlash >= 0) {
-         tempString = urlString.substring(lastSlash + 1);
-      } else {
-         tempString = new String("");
-      }
-      
-      if (tempString.length() == 0) {
-         tempString = new String("Default.txt");
-      }
-      tempString = dir + File.separator + tempString;
-      
-      return tempString;
-   }
-
 }
