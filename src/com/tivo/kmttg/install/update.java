@@ -43,13 +43,27 @@ public class update {
       class backgroundRun extends SwingWorker<Object, Object> {
          protected Object doInBackground() {
             toolDownload t = new toolDownload();
-            String zipFile = t.download(config.programDir, config.OS);
-            config.gui.progressBar_setValue(0);
-            config.gui.setTitle(config.kmttg);
-            if (zipFile != null) {
-               if (Unzip.unzip(config.programDir, zipFile) ) {
-                  log.warn("Tools update complete");
-                  file.delete(zipFile);
+            String version;
+            if (config.OS.equals("windows"))
+               version = t.windows_file;
+            else
+               version = t.mac_file;
+            int response = JOptionPane.showConfirmDialog(
+               config.gui.getJFrame(),
+               "Install tools file: " + version + " ?",
+               "Confirm",
+               JOptionPane.YES_NO_OPTION,
+               JOptionPane.QUESTION_MESSAGE
+            );
+            if (response == JOptionPane.YES_OPTION) {
+               String zipFile = t.download(config.programDir, config.OS);
+               config.gui.progressBar_setValue(0);
+               config.gui.setTitle(config.kmttg);
+               if (zipFile != null) {
+                  if (Unzip.unzip(config.programDir, zipFile) ) {
+                     log.warn("Tools update complete");
+                     file.delete(zipFile);
+                  }
                }
             }
             return null;
