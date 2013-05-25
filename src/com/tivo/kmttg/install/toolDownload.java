@@ -68,7 +68,6 @@ public class toolDownload {
              String title = String.format("download: %d%% %s", pct, config.kmttg);
              config.gui.progressBar_setValue(pct);
              config.gui.setTitle(title);
-             config.gui.refresh();
           }
           
           // Done
