@@ -52,7 +52,10 @@ public class beacon {
                h.put(name,value);
             }
             // Filter out pyTivo broadcasts (for tivos: platform = tcd/...)
-            if (h.containsKey("platform") && ! h.get("platform").matches("^tcd.+$") ) return null;
+            if (h.containsKey("platform")) {
+               if (! h.get("platform").matches("^tcd.+$") ) return null;
+               if (h.get("platform").contains("Silverstreak")) return null;
+            }
             // Filter out TiVo Stream device with TSN starting with "A94"
             if (h.containsKey("identity") && h.get("identity").startsWith("A94")) return null;
             if (h.containsKey("machine")) return h;
