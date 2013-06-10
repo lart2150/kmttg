@@ -160,7 +160,7 @@ public class createMeta {
             data.put("callsign", job.callsign);
          if ( job.seriesId != null )
             data.put("seriesId", job.seriesId);
-         if ( job.ProgramId != null )
+         if ( job.ProgramId != null  && ! job.ProgramId.contains("_")) // Don't include bogus programId values
             data.put("programId", job.ProgramId);
          
          // Now write all data to metaFile in pyTivo format
