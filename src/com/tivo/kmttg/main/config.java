@@ -332,14 +332,13 @@ public class config {
       return tivos;     
    }
    
-   public static void setTivoNames(Hashtable<String,String> h) {
+   public static void setTivoNames(LinkedHashMap<String,String> h) {
       String path = TIVOS.get("FILES");
       if (path == null) path = config.programDir;
       TIVOS.clear();
       TIVOS.put("FILES", path);
       if (h.size() > 0) {
-         for (Enumeration<String> e=h.keys(); e.hasMoreElements();) {
-            String name = e.nextElement();
+         for (String name : h.keySet()) {
             if ( ! name.matches("FILES") && ! name.matches("Remote") ) {
                TIVOS.put(name, h.get(name));
             }
@@ -1064,13 +1063,8 @@ public class config {
          ofp.write("<MAK>\n" + MAK + "\n\n");
          
          ofp.write("<TIVOS>\n");
-         Stack<String> tivoNames = getTivoNames();
-         if (tivoNames.size() > 0) {
-            for (int i=0; i<tivoNames.size(); ++i) {
-               String name = tivoNames.get(i);
+         for (String name : TIVOS.keySet())
                ofp.write(String.format("%-20s %-20s\n", name, TIVOS.get(name)));
-            }
-         }
          ofp.write(String.format("%-20s %-20s\n", "FILES", TIVOS.get("FILES")));
          ofp.write("\n");
          
