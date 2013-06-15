@@ -9,7 +9,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Stack;
 
 import javax.swing.JButton;
@@ -863,7 +863,7 @@ public class configMain {
       
       // Tivos
       int count = tivos.getItemCount();
-      Hashtable<String,String> h = new Hashtable<String,String>();
+      LinkedHashMap<String,String> h = new LinkedHashMap<String,String>();
       if (count > 0) {
          for (int i=0; i<count; i++) {
             String s = tivos.getItemAt(i).toString();
