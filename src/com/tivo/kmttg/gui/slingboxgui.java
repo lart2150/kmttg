@@ -32,6 +32,7 @@ public class slingboxgui {
    private JTextField ip;
    private JTextField port;
    private JTextField pass;
+   private JComboBox type;
    private JComboBox vbw;
    private JComboBox res;
    jobData job = null;
@@ -104,6 +105,14 @@ public class slingboxgui {
             }
          });
          
+         JButton Help = new JButton("Help");
+         Help.setToolTipText(getToolTip("help"));
+         Help.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+               help.showInBrowser("http://sourceforge.net/p/kmttg/wiki/slingbox_capture/");
+            }
+         });
+         
          JLabel dir_label = new JLabel("Slingbox capture file directory");
          dir = new JTextField(30);
          dir.setToolTipText(getToolTip("dir"));
@@ -171,6 +180,14 @@ public class slingboxgui {
             vbw.addItem(vb[i]);
          vbw.setSelectedItem(config.slingBox_vbw);
          
+         JLabel type_label = new JLabel("Slingbox model");
+         type = new JComboBox();
+         type.setToolTipText(getToolTip("type"));
+         type.addItem("Slingbox 350/500");
+         type.addItem("Slingbox Pro HD");
+         type.addItem("Slingbox Pro");
+         type.setSelectedItem(config.slingBox_type);
+         
          int gy = 0;
          GridBagConstraints c = new GridBagConstraints();
          c.ipady = 0;
@@ -191,6 +208,8 @@ public class slingboxgui {
          row0.add(Box.createRigidArea(space));
          row0.add(stop);
          panel.add(row0, c);
+         c.gridx = 1;
+         panel.add(Help, c);
          
          gy++;
          c.gridy = gy;
@@ -230,6 +249,13 @@ public class slingboxgui {
          gy++;
          c.gridy = gy;
          c.gridx = 0;
+         panel.add(type_label, c);
+         c.gridx = 1;
+         panel.add(type, c);
+         
+         gy++;
+         c.gridy = gy;
+         c.gridx = 0;
          JPanel left_video = new JPanel();
          left_video.setLayout(new BoxLayout(left_video, BoxLayout.LINE_AXIS));
          left_video.add(res_label);
@@ -256,6 +282,7 @@ public class slingboxgui {
       config.slingBox_port = string.removeLeadingTrailingSpaces(port.getText());
       config.slingBox_vbw = (String)vbw.getSelectedItem();
       config.slingBox_res = (String)res.getSelectedItem();
+      config.slingBox_type = (String)type.getSelectedItem();
    }
    
    private String getTimeStamp() {
@@ -284,6 +311,11 @@ public class slingboxgui {
       else if (component.equals("stop")) {
          text = "<b>Stop</b><br>";
          text += "Stop slingbox capture.";
+      }
+      else if (component.equals("help")) {
+         text = "<b>Help</b><br>";
+         text += "Click on this button to visit the kmttg <b>slingbox_capture</b> Wiki page<br>";
+         text += "that has details on how to setup kmttg for Slingbox captures.";
       }
       else if (component.equals("ip")) {
          text = "<b>Slingbox IP or port</b><br>";
@@ -316,6 +348,11 @@ public class slingboxgui {
       else if (component.equals("vbw")) {
          text = "<b>Video bit rate (Kbps)</b><br>";
          text += "Video bit rate in Kbps to use for the capture.";
+      }
+      else if (component.equals("type")) {
+         text = "<b>Slingbox model</b><br>";
+         text += "Choose which Slingbox model you have. kmttg uses a different Perl script and<br>";
+         text += "options for older models vs newer models so it's important to choose the right one.";
       }
       if (text.length() > 0) {
          text = "<html>" + text + "</html>";
