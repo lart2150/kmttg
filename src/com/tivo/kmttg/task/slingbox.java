@@ -49,7 +49,12 @@ public class slingbox implements Serializable {
       debug.print("");
       Boolean schedule = true;
       
-      perl_script = config.programDir + File.separator + "slingbox" + File.separator + "rec350.pl";
+      perl_script = config.programDir + File.separator + "slingbox" + File.separator;
+      if (config.slingBox_type.equals("Slingbox 350/500"))
+         perl_script += "rec350.pl";
+      else
+         perl_script += "rec2.pl";
+      
       if ( ! file.isFile(perl_script) ) {
          log.error("Can't find perl capture script: " + perl_script);
          schedule = false;
@@ -101,11 +106,15 @@ public class slingbox implements Serializable {
    
    private Boolean start() {
       debug.print("");
-      String vs = "16";
+      String vs = "16", hd = null;
       if (config.slingBox_res.equals("1920x1080"))
          vs = "16";
       if (config.slingBox_res.equals("640x480"))
          vs = "5";
+      if (! config.slingBox_type.equals("Slingbox 350/500"))
+         vs = "5";
+      if (config.slingBox_type.equals("Slingbox Pro"))
+         hd = "0";
       // Make main piped command string
       command = "\"" + job.slingbox_perl + "\" \"" + perl_script + "\" " +
          "-stdout " +
@@ -114,6 +123,8 @@ public class slingbox implements Serializable {
          "-pass "   + config.slingBox_pass + " " +
          "-vbw "    + config.slingBox_vbw + " " +
          "-vs "     + vs;
+      if (hd != null)
+         command += " -hd " + hd;
       command += " | \"" + config.ffmpeg + "\" -fflags +genpts -i - ";
       command += "-vcodec copy -acodec ac3 -ab 224k -y -f mpegts \"" + job.slingbox_file + "\"";
       
