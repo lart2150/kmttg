@@ -10,6 +10,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Stack;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -200,7 +202,7 @@ public class slingbox implements Serializable {
             // Update status in job table
             Long size = file.size(job.slingbox_file);
             String s = String.format("%.2f MB", (float)size/Math.pow(2,20));
-            String t = jobMonitor.getElapsedTime(job.time);
+            String t = ffmpegGetTime();
             
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
                // Update STATUS column 
@@ -303,4 +305,32 @@ public class slingbox implements Serializable {
       file.delete(script);
       file.delete(pidFile);
    }
+      
+   // Obtain current length in ms of encoding file from ffmpeg stderr
+   private String ffmpegGetTime() {
+      String zero = "0:00:00";
+      String last = process.getStderrLast();
+      if (last.matches("")) return zero;
+      if (last.contains("time=")) {
+         String[] l = last.split("time=");
+         String[] ll = l[l.length-1].split("\\s+");
+         try {
+            if (ll[0].contains(":")) {
+               // "HH:MM:SS.MS" format
+               Pattern p = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");
+               Matcher m = p.matcher(ll[0]);
+               if (m.matches()) {
+                  long HH = Long.parseLong(m.group(1));
+                  long MM = Long.parseLong(m.group(2));
+                  long SS = Long.parseLong(m.group(3));
+                  return String.format("%d:%02d:%02d",HH,MM,SS);
+               }
+            }
+         }
+         catch (NumberFormatException n) {
+         }
+      }
+      return zero;
+   }
+
 }
