@@ -57,6 +57,7 @@ public class jobData implements Serializable, Cloneable {
    public push         process_push = null;
    public custom       process_custom = null;
    public streamfix    process_streamfix = null;
+   public slingbox     process_slingbox = null;
    
    public String  ip = null;
    public String  inputFile = null;
@@ -157,6 +158,10 @@ public class jobData implements Serializable, Cloneable {
    public Boolean remote_channels = false;
    public premiereTable premiere = null;
    
+   // Slingbox related
+   public String slingbox_perl = null;
+   public String slingbox_file = null;
+   
    // NOTE: This used for job insertion purposes
    // ** JOB ORDER IS VERY IMPORTANT **
    public static String[] allTaskNames() {
@@ -188,7 +193,8 @@ public class jobData implements Serializable, Cloneable {
          "vrdencode",
          "atomic",
          "push",
-         "custom"
+         "custom",
+         "slingbox"
       };
    }
       
@@ -281,6 +287,9 @@ public class jobData implements Serializable, Cloneable {
       else if (type.matches("streamfix")) {
          return process_streamfix.check();
       }         
+      else if (type.matches("slingbox")) {
+         return process_slingbox.check();
+      }         
       return false;
    }
       
@@ -368,6 +377,9 @@ public class jobData implements Serializable, Cloneable {
       }
       else if (type.equals("streamfix")) {
          return process_streamfix.getProcess();
+      }
+      else if (type.equals("slingbox")) {
+         return process_slingbox.getProcess();
       }
       return null;
    }
@@ -557,6 +569,9 @@ public class jobData implements Serializable, Cloneable {
       else if (type.equals("streamfix")) {
          file = mpegFile_fix;
       }
+      else if (type.equals("slingbox")) {
+         file = slingbox_file;
+      }
       return file;
    }
    
@@ -700,6 +715,12 @@ public class jobData implements Serializable, Cloneable {
          success = proc.launchJob();
       }
       
+      else if (job.type.equals("slingbox")) {  
+         slingbox proc = new slingbox(job);
+         active = 0; // Not CPU active
+         success = proc.launchJob();
+      }
+      
       if (success) {
          cpuActiveJobs += active;
       } else {
@@ -823,6 +844,10 @@ public class jobData implements Serializable, Cloneable {
       else if (type.equals("streamfix")) {
          process_streamfix.kill();
          process_streamfix = null;
+      }
+      else if (type.equals("slingbox")) {
+         process_slingbox.kill();
+         process_slingbox = null;
       }
    }
    

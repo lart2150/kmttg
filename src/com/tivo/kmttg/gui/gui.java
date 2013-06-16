@@ -102,6 +102,7 @@ public class gui {
    public static Hashtable<String,Icon> Images;
    
    public remotegui remote_gui = null;
+   public slingboxgui  slingbox_gui = null;
    
    public tivoTab getTab(String tabName) {
       return tivoTabs.get(tabName);
@@ -1192,6 +1193,16 @@ public class gui {
          remote_gui = new remotegui(jFrame);
          tabbed_panel.add("Remote", remote_gui.getPanel());
       }
+      
+      // Add slingbox tab if appropriate
+      if (config.slingBox == 1) {
+         if (slingbox_gui == null)
+            slingbox_gui = new slingboxgui(jFrame);
+         tabbed_panel.add("Slingbox", slingbox_gui.getPanel());
+      }
+      if (config.slingBox == 0 && slingbox_gui != null) {
+         tabbed_panel.remove(slingbox_gui.getPanel());
+      }
    }
    
    // Callback for "Refresh Encoding Profiles" File menu entry
@@ -1497,6 +1508,8 @@ public class gui {
    // Save current GUI settings to a file
    public void saveSettings() {
       if (config.gui_settings != null) {
+         if (slingbox_gui != null)
+            slingbox_gui.updateConfig();
          try {
             Dimension d = getJFrame().getSize();
             Point p = getJFrame().getLocation();
@@ -1519,6 +1532,14 @@ public class gui {
             ofp.write("<encode_name>\n"         + config.encodeName          + "\n");
             ofp.write("<toolTips>\n"            + config.toolTips            + "\n");
             ofp.write("<toolTipsTimeout>\n"     + config.toolTipsTimeout     + "\n");
+            ofp.write("<slingBox>\n"            + config.slingBox            + "\n");
+            ofp.write("<slingBox_perl>\n"       + config.slingBox_perl       + "\n");
+            ofp.write("<slingBox_dir>\n"        + config.slingBox_dir        + "\n");
+            ofp.write("<slingBox_ip>\n"         + config.slingBox_ip         + "\n");
+            ofp.write("<slingBox_port>\n"       + config.slingBox_port       + "\n");
+            ofp.write("<slingBox_pass>\n"       + config.slingBox_pass       + "\n");
+            ofp.write("<slingBox_res>\n"        + config.slingBox_res        + "\n");
+            ofp.write("<slingBox_vbw>\n"        + config.slingBox_vbw        + "\n");
             ofp.write("<jobMonitorFullPaths>\n" + config.jobMonitorFullPaths + "\n");
             ofp.write("<width>\n"               + d.width                    + "\n");
             ofp.write("<height>\n"              + d.height                   + "\n");
@@ -1725,6 +1746,26 @@ public class gui {
                else
                   config.toolTips = 0;
             }
+            if (key.equals("slingBox")) {
+               if (line.matches("1"))
+                  config.slingBox = 1;
+               else
+                  config.slingBox = 0;
+            }
+            if (key.equals("slingBox_pass"))
+               config.slingBox_pass = line;
+            if (key.equals("slingBox_ip"))
+               config.slingBox_ip = line;
+            if (key.equals("slingBox_port"))
+               config.slingBox_port = line;
+            if (key.equals("slingBox_perl"))
+               config.slingBox_perl = line;
+            if (key.equals("slingBox_dir"))
+               config.slingBox_dir = line;
+            if (key.equals("slingBox_res"))
+               config.slingBox_res = line;
+            if (key.equals("slingBox_vbw"))
+               config.slingBox_vbw = line;
             if (key.equals("jobMonitorFullPaths")) {
                if (line.matches("1"))
                   config.jobMonitorFullPaths = 1;

@@ -1424,6 +1424,8 @@ public class jobMonitor {
          active = false;
       if (job.type.equals("remote"))
          active = false;
+      if (job.type.equals("slingbox"))
+         active = false;
       if (job.type.equals("autotune"))
          active = false;
       return active;
@@ -1492,18 +1494,18 @@ public class jobMonitor {
             int n = 0;
             for (int i=0; i<JOBS.size(); ++i) {
                jobData job = JOBS.get(i);
-               if ( job.status.equals("queued") && ! job.type.equals("remote") )
+               if ( job.status.equals("queued") && ! job.type.equals("remote") && ! job.type.equals("slingbox") )
                   n++;
             }
             if (n == 0) {
-               log.error("There are currently no queued jobs to save (remote jobs can't be saved).");
+               log.error("There are currently no queued jobs to save (some jobs can't be saved).");
                oos.close();
                return;
             }
             oos.writeInt(n);
             for (int i=0; i<JOBS.size(); ++i) {
                jobData job = JOBS.get(i);
-               if ( job.status.equals("queued") && ! job.type.equals("remote") )
+               if ( job.status.equals("queued") && ! job.type.equals("remote") && ! job.type.equals("slingbox"))
                   oos.writeObject(job);
             }
             oos.close();
@@ -1572,7 +1574,9 @@ public class jobMonitor {
 					continue;
 				} else if (job.type.matches("remote")) {
 					continue;
-				}
+				} else if (job.type.matches("slingbox")) {
+               continue;
+            }
 
 				// When restoring the jobs, all jobs get added as queued, so no need to do this.
 				//updateJobStatus(job, "queued"); // ensure it is "queued" status

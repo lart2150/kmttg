@@ -119,6 +119,16 @@ public class config {
    public static int FontSize = 12;
    public static String lookAndFeel = "default";
    public static Boolean resumeDownloads = false;
+   
+   // Slingbox related
+   public static int slingBox = 0;         // If 1 then display Slingbox tab
+   public static String slingBox_perl = null;
+   public static String slingBox_dir = null;
+   public static String slingBox_ip = "";
+   public static String slingBox_port = "5201";
+   public static String slingBox_pass = "";
+   public static String slingBox_res = "1920x1080";
+   public static String slingBox_vbw = "4000";
 
    // GUI table related
    public static Color tableBkgndDarker = new Color(235,235,235); // light grey
@@ -616,6 +626,17 @@ public class config {
       comskipIni    = getProgramDefault("comskipIni");
       AtomicParsley = getProgramDefault("AtomicParsley");      
       //ccextractor   = getProgramDefault("ccextractor");
+      
+      // Slingbox settings
+      slingBox_perl = "";
+      String tryit;
+      if (OS.equals("windows"))
+         tryit = "c:\\Perl\\bin\\perl.exe";
+      else
+         tryit = "/usr/bin/perl";
+      if (file.isFile(tryit))
+         slingBox_perl = tryit;
+      slingBox_dir = outputDir;
    }
    
    // Return default setting for a given programName

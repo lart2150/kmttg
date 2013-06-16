@@ -74,6 +74,7 @@ public class configMain {
    private static JCheckBox OverwriteFiles = null;
    private static JCheckBox java_downloads = null;
    private static JCheckBox toolTips = null;
+   private static JCheckBox slingBox = null;
    private static JCheckBox tableColAutoSize = null;
    private static JCheckBox jobMonitorFullPaths = null;
    private static JCheckBox autotune_enabled = null;
@@ -661,6 +662,12 @@ public class configMain {
       else
          toolTips.setSelected(false);
       
+      // slingBox
+      if (config.slingBox == 1)
+         slingBox.setSelected(true);
+      else
+         slingBox.setSelected(false);
+      
       // tableColAutoSize
       if (config.tableColAutoSize == 1)
          tableColAutoSize.setSelected(true);
@@ -1146,6 +1153,12 @@ public class configMain {
       else
          config.toolTips = 0;
       config.gui.enableToolTips(config.toolTips);
+      
+      // slingBox
+      if (slingBox.isSelected())
+         config.slingBox = 1;
+      else
+         config.slingBox = 0;
       
       // tableColAutoSize
       if (tableColAutoSize.isSelected())
@@ -1850,6 +1863,7 @@ public class configMain {
       npl_when_started = new javax.swing.JCheckBox();
       download_time_estimate = new javax.swing.JCheckBox();
       toolTips = new javax.swing.JCheckBox();
+      slingBox = new javax.swing.JCheckBox();
       tableColAutoSize = new javax.swing.JCheckBox();
       jobMonitorFullPaths = new javax.swing.JCheckBox();
       autotune_enabled = new javax.swing.JCheckBox();
@@ -2034,7 +2048,9 @@ public class configMain {
       
       toolTips.setText("Display toolTips");
       toolTipsTimeout_label.setText("toolTip timeout (secs)");
-      
+
+      slingBox.setText("Show Slingbox capture tab");
+
       tableColAutoSize.setText("Auto size NPL column widths");
       
       jobMonitorFullPaths.setText("Show full paths in Job Monitor");
@@ -3052,6 +3068,12 @@ public class configMain {
       c.gridy = gy;
       visual_panel.add(tableColAutoSize, c);      
       
+      // slingBox
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      visual_panel.add(slingBox, c);
+      
       // web_query
       gy++;
       c.gridx = 0;
@@ -3318,6 +3340,7 @@ public class configMain {
       CANCEL.setToolTipText(getToolTip("CANCEL"));
       autotune_test.setToolTipText(getToolTip("autotune_test"));
       toolTips.setToolTipText(getToolTip("toolTips"));
+      slingBox.setToolTipText(getToolTip("slingBox"));
       tableColAutoSize.setToolTipText(getToolTip("tableColAutoSize"));
       jobMonitorFullPaths.setToolTipText(getToolTip("jobMonitorFullPaths"));
       toolTipsTimeout.setToolTipText(getToolTip("toolTipsTimeout")); 
@@ -3899,6 +3922,10 @@ public class configMain {
       else if (component.equals("toolTips")) {
          text =  "<b>Display toolTips</b><br>";
          text += "Enable or disable display of these mouse over popup toolTip messages.";
+      }
+      else if (component.equals("slingBox")) {
+         text =  "<b>Show Slingbox capture tab</b><br>";
+         text += "Enable or disable display of Slingbox capture tab.";
       }
       else if (component.equals("tableColAutoSize")) {
          text =  "<b>Auto size NPL column widths</b><br>";
