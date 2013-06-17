@@ -32,6 +32,7 @@ public class slingboxgui {
    private JTextField ip;
    private JTextField port;
    private JTextField pass;
+   private JTextField dur;
    private JComboBox type;
    private JComboBox vbw;
    private JComboBox res;
@@ -89,6 +90,15 @@ public class slingboxgui {
                   job.tivoName      = "Slingbox";
                   job.slingbox_perl = perl.getText();
                   job.slingbox_file = slingbox_file;
+                  String d = string.removeLeadingTrailingSpaces(dur.getText());
+                  if (d.length() > 0 && ! d.equals("0")) {
+                     try {
+                        int i = Integer.parseInt(d);
+                        job.slingbox_dur = "" + i*60;
+                     } catch (NumberFormatException n) {
+                        // Do nothing here
+                     }
+                  }
                   jobMonitor.submitNewJob(job);
                }
             }
@@ -163,6 +173,11 @@ public class slingboxgui {
          port = new JTextField(30);
          port.setToolTipText(getToolTip("ip"));
          port.setText(config.slingBox_port);
+         
+         JLabel dur_label = new JLabel("Capture # minutes");
+         dur = new JTextField(30);
+         dur.setToolTipText(getToolTip("dur"));
+         dur.setText("0");
          
          JLabel res_label = new JLabel("Video resolution");
          res = new JComboBox();
@@ -270,6 +285,13 @@ public class slingboxgui {
          right_video.add(Box.createRigidArea(space));
          right_video.add(vbw);
          panel.add(right_video, c);
+         
+         gy++;
+         c.gridy = gy;
+         c.gridx = 0;
+         panel.add(dur_label, c);
+         c.gridx = 1;
+         panel.add(dur, c);
       }
       return panel;
    }
@@ -355,6 +377,10 @@ public class slingboxgui {
          text = "<b>Slingbox model</b><br>";
          text += "Choose which Slingbox model you have. kmttg uses a different Perl script and<br>";
          text += "options for older models vs newer models so it's important to choose the right one.";
+      }
+      else if (component.equals("dur")) {
+         text = "<b>Capture # minutes</b><br>";
+         text += "Capture a specified number of minutes. 0 or empty means unlimited.";
       }
       if (text.length() > 0) {
          text = "<html>" + text + "</html>";

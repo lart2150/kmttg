@@ -127,6 +127,8 @@ public class slingbox implements Serializable {
          "-vs "     + vs;
       if (hd != null)
          command += " -hd " + hd;
+      if (job.slingbox_dur != null)
+         command += " -dur " + job.slingbox_dur;
       command += " | \"" + config.ffmpeg + "\" -fflags +genpts -i - ";
       command += "-vcodec copy -acodec ac3 -ab 224k -y -f mpegts \"" + job.slingbox_file + "\"";
       
@@ -242,7 +244,7 @@ public class slingbox implements Serializable {
             // Print statistics for the job
             String s = String.format("%.2f MB", file.size(job.slingbox_file)/Math.pow(2,20));
             String t = jobMonitor.getElapsedTime(job.time);
-            log.warn(job.mpegFile + ": size=" + s + " elapsed=" + t);
+            log.warn(job.slingbox_file + ": size=" + s + " elapsed=" + t);
          }
          
          if (failed == 1) {
