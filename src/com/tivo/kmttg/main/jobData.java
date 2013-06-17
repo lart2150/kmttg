@@ -161,6 +161,7 @@ public class jobData implements Serializable, Cloneable {
    // Slingbox related
    public String slingbox_perl = null;
    public String slingbox_file = null;
+   public String slingbox_dur = null;
    
    // NOTE: This used for job insertion purposes
    // ** JOB ORDER IS VERY IMPORTANT **
