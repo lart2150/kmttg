@@ -93,8 +93,9 @@ public class slingboxgui {
                   String d = string.removeLeadingTrailingSpaces(dur.getText());
                   if (d.length() > 0 && ! d.equals("0")) {
                      try {
-                        int i = Integer.parseInt(d);
-                        job.slingbox_dur = "" + i*60;
+                        float f = Float.parseFloat(d);
+                        if (f > 0)
+                           job.slingbox_dur = "" + f*60;
                      } catch (NumberFormatException n) {
                         // Do nothing here
                      }
@@ -380,7 +381,8 @@ public class slingboxgui {
       }
       else if (component.equals("dur")) {
          text = "<b>Capture # minutes</b><br>";
-         text += "Capture a specified number of minutes. 0 or empty means unlimited.";
+         text += "Capture a specified number of minutes. 0 or empty means unlimited.<br>";
+         text += "NOTE: This can be any number >= 0 including non integers.";
       }
       if (text.length() > 0) {
          text = "<html>" + text + "</html>";
