@@ -95,9 +95,10 @@ public class update {
                   JOptionPane.QUESTION_MESSAGE
                );
                if (response == JOptionPane.YES_OPTION) {
-                  String url = "http://sourceforge.net/projects/kmttg/files/kmttg_" +
-                     current_version + ".zip/download?use_mirror=autoselect";
-                  String zipFile = downloadUrl(config.programDir, url);
+                  String fname = "kmttg_" + current_version + ".zip";
+                  String url = "http://sourceforge.net/projects/kmttg/files/" +
+                     fname + "/download?use_mirror=autoselect";
+                  String zipFile = downloadUrl(config.programDir + File.separator + fname, url);
                   if (zipFile != null) {
                      if ( unzip(config.programDir, zipFile) ) {
                         log.print("Successfully updated kmttg installation.");
@@ -127,7 +128,7 @@ public class update {
       }
    }
       
-   private static String downloadUrl(String dir, String urlString) {
+   private static String downloadUrl(String localFileName, String urlString) {
       BufferedInputStream in = null;
       RandomAccessFile out = null;
       int BLOCK_SIZE = 4096;
@@ -136,9 +137,7 @@ public class update {
           log.print("Downloading file: " + urlString + " ...");
           URLConnection con = url.openConnection();
           
-          in = new BufferedInputStream(con.getInputStream());
-          
-          String localFileName = getFileName(dir, urlString);
+          in = new BufferedInputStream(con.getInputStream());          
           out = new RandomAccessFile(localFileName, "rw");
           
           Integer howManyBytes;
@@ -174,25 +173,7 @@ public class update {
       }
       return null;
    }
-   
-   private static String getFileName(String dir, String urlString) {
-      String tempString;
-      int lastSlash = urlString.lastIndexOf('/');
       
-      if (lastSlash >= 0) {
-         tempString = urlString.substring(lastSlash + 1);
-      } else {
-         tempString = new String("");
-      }
-      
-      if (tempString.length() == 0) {
-         tempString = new String("Default.txt");
-      }
-      tempString = dir + File.separator + tempString;
-      
-      return tempString;
-   }
-   
    @SuppressWarnings("unchecked")
    private static Boolean unzip(String dir, String file) {
        Enumeration entries;
