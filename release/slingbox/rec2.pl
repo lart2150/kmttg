@@ -16,11 +16,13 @@ $vsm = 63;                      # smoothness, 1 .. 64
 $vs = 5;                        # SD res, 3 for QVGA, 4 for 640x240, 5 for VGA
 $sleep = 0;                     # sleep time in seconds before starting capture
 $dur = 0;                       # duration in seconds you want to capture
+$chan = '';                     # tune to a channel before capture
 $output = "rec2.asf";           # output file (use -stdout option for stdout)
 $stdout = 0;
 
 # Parse command line arguments
 my $ok = GetOptions(
+   "chan=s"   => sub {$chan = $_[1];},
    "dur=s"    => sub {$dur = $_[1];},
    "hd=s"     => sub {$hd = $_[1];},
    "ip=s"     => sub {$ip = $_[1];},
@@ -60,6 +62,14 @@ if ($stat) {                        # box in use
 }
 sling_cmd(0xa6, pack("v10 x76", 0x1cf, 0, 0x40, 0x10, 0x5000, 0x180, 1, 0x1e,
                       0, 0x3d));
+if ($chan) {         # want to tune to a channel
+    $ircmds = '';
+#   $ircmds = pack("v4", 0x21, 500, 0x24, 500); # send Menu, Exit (in case power off)
+    for $chdigit (split(//, sprintf("%04d", $chan))) {
+        $ircmds .= pack("v2", $chdigit ? $chdigit + 8 : 18, 500);
+    }
+    sling_cmd(0x87, $ircmds . pack("x448 v4", 3, 0, 0, 0));
+}
 sling_cmd(0xb5, pack("V11 a16 V2 x92", 0xff, 0xff, $hd ? 0x0f : $vs, 1, 0x051e0000 + $vbw, 0x10001 + ($vsm << 8), 3, 1,
                       0x40, 0x4f, 1, $rand, 0x1012020, 1)); # set stream params
 $s_stream = sling_open("Stream"); # open stream connection to SB
@@ -183,4 +193,5 @@ sub useage {
    print "-vs size              video resolution(3=QVGA,4=640x240,5=640x480,16=1920x1080)\n";
    print "-sleep secs           wait this many seconds before starting capture(defaults to 0)\n";
    print "-dur secs             capture only this many seconds (defaults to unlimited)\n";
+   print "-chan channelNum      tune to this channel before capturing\n";
 }

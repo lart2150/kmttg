@@ -129,6 +129,8 @@ public class slingbox implements Serializable {
          command += " -hd " + hd;
       if (job.slingbox_dur != null)
          command += " -dur " + job.slingbox_dur;
+      if (job.slingbox_chan != null)
+         command += " -chan " + job.slingbox_chan;
       command += " | \"" + config.ffmpeg + "\" -fflags +genpts -i - ";
       command += "-vcodec copy -acodec ac3 -ab 224k -y -f mpegts \"" + job.slingbox_file + "\"";
       

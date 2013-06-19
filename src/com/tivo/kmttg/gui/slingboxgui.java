@@ -33,6 +33,7 @@ public class slingboxgui {
    private JTextField port;
    private JTextField pass;
    private JTextField dur;
+   private JTextField chan;
    private JComboBox type;
    private JComboBox vbw;
    private JComboBox res;
@@ -96,7 +97,17 @@ public class slingboxgui {
                         float f = Float.parseFloat(d);
                         if (f > 0)
                            job.slingbox_dur = "" + f*60;
-                     } catch (NumberFormatException n) {
+                     } catch (NumberFormatException ex) {
+                        // Do nothing here
+                     }
+                  }
+                  String c = string.removeLeadingTrailingSpaces(chan.getText());
+                  if (c.length() > 0) {
+                     try {
+                        int n = Integer.parseInt(c);
+                        if (n >= 0)
+                           job.slingbox_chan = "" + n;
+                     } catch (NumberFormatException ex) {
                         // Do nothing here
                      }
                   }
@@ -179,6 +190,11 @@ public class slingboxgui {
          dur = new JTextField(30);
          dur.setToolTipText(getToolTip("dur"));
          dur.setText("0");
+         
+         JLabel chan_label = new JLabel("Tune to channel");
+         chan = new JTextField(30);
+         chan.setToolTipText(getToolTip("chan"));
+         chan.setText("");
          
          JLabel res_label = new JLabel("Video resolution");
          res = new JComboBox();
@@ -293,6 +309,13 @@ public class slingboxgui {
          panel.add(dur_label, c);
          c.gridx = 1;
          panel.add(dur, c);
+         
+         gy++;
+         c.gridy = gy;
+         c.gridx = 0;
+         panel.add(chan_label, c);
+         c.gridx = 1;
+         panel.add(chan, c);
       }
       return panel;
    }
@@ -382,7 +405,12 @@ public class slingboxgui {
       else if (component.equals("dur")) {
          text = "<b>Capture # minutes</b><br>";
          text += "Capture a specified number of minutes. 0 or empty means unlimited.<br>";
-         text += "NOTE: This can be any number >= 0 including non integers.";
+         text += "NOTE: This can be any number > 0 including non integers.";
+      }
+      else if (component.equals("chan")) {
+         text = "<b>Tune to channel</b><br>";
+         text += "Tune to specified channel # before starting capture. Empty means don't tune.<br>";
+         text += "NOTE: This can be any number >= 0 or empty for none.";
       }
       if (text.length() > 0) {
          text = "<html>" + text + "</html>";
