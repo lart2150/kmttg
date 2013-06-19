@@ -1,6 +1,8 @@
 package com.tivo.kmttg.main;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -14,6 +16,7 @@ import com.tivo.kmttg.gui.spTable;
 import com.tivo.kmttg.gui.todoTable;
 import com.tivo.kmttg.task.*;
 import com.tivo.kmttg.util.backgroundProcess;
+import com.tivo.kmttg.util.log;
 
 public class jobData implements Serializable, Cloneable {
    private static final long serialVersionUID = 1L;
@@ -205,187 +208,54 @@ public class jobData implements Serializable, Cloneable {
    }
    
    public Boolean check() {
-      if (type.matches("playlist")) {
-         return process_npl.check();
-      }      
-      else if (type.matches("javaplaylist")) {
-         return process_javanpl.check();
-      }      
-      else if (type.matches("metadata")) {
-         return process_metadata.check();
-      }      
-      else if (type.matches("javametadata")) {
-         return process_javametadata.check();
-      }      
-      else if (type.matches("metadataTivo")) {
-         return process_metadataTivo.check();
-      }      
-      else if (type.matches("autotune")) {
-         return process_autotune.check();
-      }      
-      else if (type.matches("remote")) {
-         return process_remote.check();
-      }      
-      else if (type.matches("download")) {
-         return process_download.check();
-      }      
-      else if (type.matches("download_decrypt")) {
-         return process_download_decrypt.check();
-      }      
-      else if (type.matches("javadownload")) {
-         return process_javadownload.check();
-      }      
-      else if (type.matches("jdownload_decrypt")) {
-         return process_jdownload_decrypt.check();
-      }      
-      else if (type.matches("decrypt")) {
-         return process_decrypt.check();
-      }         
-      else if (type.matches("qsfix")) {
-         return process_qsfix.check();
-      }         
-      else if (type.matches("projectx")) {
-         return process_projectx.check();
-      }         
-      else if (type.matches("comskip")) {
-         return process_comskip.check();
-      }         
-      else if (type.matches("adscan")) {
-         return process_adscan.check();
-      }         
-      else if (type.matches("comskip_review")) {
-         return process_comskip_review.check();
-      }         
-      else if (type.matches("vrdreview")) {
-         return process_vrdreview.check();
-      }         
-      else if (type.matches("comcut")) {
-         return process_comcut.check();
-      }         
-      else if (type.matches("projectxcut")) {
-         return process_projectxcut.check();
-      }         
-      else if (type.matches("adcut")) {
-         return process_adcut.check();
-      }         
-      else if (type.matches("captions")) {
-         return process_captions.check();
-      }        
-      else if (type.matches("encode")) {
-         return process_encode.check();
-      }   
-      else if (type.matches("vrdencode")) {
-         return process_vrdencode.check();
-      }   
-      else if (type.matches("atomic")) {
-         return process_atomic.check();
+      // Go through all the class variables and for ones called process_* if they
+      // are non-null then invoke their check method
+      for (Field field : this.getClass().getDeclaredFields()) {
+         try {
+            if (field.getName().startsWith("process_") && field.get(this) != null) {
+               Method method = field.get(this).getClass().getMethod("check");
+               return (Boolean) method.invoke(field.get(this));
+            }
+         } catch (Exception e) {
+            log.error("jobData check: " + e.getMessage());
+         }
       }
-      else if (type.matches("custom")) {
-         return process_custom.check();
-      }
-      else if (type.matches("push")) {
-         return process_push.check();
-      }
-      else if (type.matches("streamfix")) {
-         return process_streamfix.check();
-      }         
-      else if (type.matches("slingbox")) {
-         return process_slingbox.check();
-      }         
-      return false;
-   }
-      
-   public backgroundProcess getProcess() {
-      if (type.equals("playlist")) {
-         return process_npl.getProcess();
-      }
-      else if (type.equals("javaplaylist")) {
-         return process_javanpl.getProcess();
-      }
-      else if (type.equals("metadata")) {
-         return process_metadata.getProcess();
-      }
-      else if (type.equals("javametadata")) {
-         return process_javametadata.getProcess();
-      }
-      else if (type.equals("metadataTivo")) {
-         return process_metadataTivo.getProcess();
-      }
-      else if (type.equals("autotune")) {
-         return process_autotune.getProcess();
-      }
-      else if (type.equals("remote")) {
-         return process_remote.getProcess();
-      }
-      else if (type.equals("download")) {
-         return process_download.getProcess();
-      }
-      else if (type.equals("download_decrypt")) {
-         return process_download_decrypt.getProcess();
-      }
-      else if (type.equals("javadownload")) {
-         return process_javadownload.getProcess();
-      }
-      else if (type.equals("jdownload_decrypt")) {
-         return process_jdownload_decrypt.getProcess();
-      }
-      else if (type.equals("decrypt")) {
-         return process_decrypt.getProcess();
-      }
-      else if (type.equals("qsfix")) {
-         return process_qsfix.getProcess();
-      }
-      else if (type.equals("projectx")) {
-         return process_projectx.getProcess();
-      }
-      else if (type.equals("comskip")) {
-         return process_comskip.getProcess();
-      }
-      else if (type.equals("adscan")) {
-         return process_adscan.getProcess();
-      }
-      else if (type.equals("comskip_review")) {
-         return process_comskip_review.getProcess();
-      }
-      else if (type.equals("vrdreview")) {
-         return process_vrdreview.getProcess();
-      }
-      else if (type.equals("comcut")) {
-         return process_comcut.getProcess();
-      }
-      else if (type.equals("projectxcut")) {
-         return process_projectxcut.getProcess();
-      }
-      else if (type.equals("adcut")) {
-         return process_adcut.getProcess();
-      }
-      else if (type.equals("captions")) {
-         return process_captions.getProcess();
-      }
-      else if (type.equals("encode")) {
-         return process_encode.getProcess();
-      }
-      else if (type.equals("vrdencode")) {
-         return process_vrdencode.getProcess();
-      }
-      else if (type.equals("atomic")) {
-         return process_atomic.getProcess();
-      }
-      else if (type.equals("push")) {
-         return process_push.getProcess();
-      }
-      else if (type.equals("custom")) {
-         return process_custom.getProcess();
-      }
-      else if (type.equals("streamfix")) {
-         return process_streamfix.getProcess();
-      }
-      else if (type.equals("slingbox")) {
-         return process_slingbox.getProcess();
-      }
-      return null;
+      return false;      
+
    }
    
+   public backgroundProcess getProcess() {
+      // Go through all the class variables and for ones called process_* if they
+      // are non-null then invoke their getProcess method
+      for (Field field : this.getClass().getDeclaredFields()) {
+         try {
+            if (field.getName().startsWith("process_") && field.get(this) != null) {
+               Method method = field.get(this).getClass().getMethod("getProcess");
+               return (backgroundProcess) method.invoke(field.get(this));
+            }
+         } catch (Exception e) {
+            log.error("jobData getProcess: " + e.getMessage());
+         }
+      }
+      return null;      
+   }
+
+   public void kill() {
+      // Go through all the class variables and for ones called process_* if they
+      // are non-null then invoke their kill method
+      for (Field field : this.getClass().getDeclaredFields()) {
+         try {
+            if (field.getName().startsWith("process_") && field.get(this) != null) {
+               Method method = field.get(this).getClass().getMethod("kill");
+               method.invoke(field.get(this));
+               field.set(this, null);
+            }
+         } catch (Exception e) {
+            log.error("jobData kill: " + e.getMessage());
+         }
+      }
+   }
+         
    public String getInputFile() {
       String file = "";
       if (type.equals("playlist")) {
@@ -731,128 +601,7 @@ public class jobData implements Serializable, Cloneable {
       
       return cpuActiveJobs;
    }
-
-   
-   public void kill() {
-	   // TODO This code could be a lot cleaner if these objects inherited from one parent type
-      if (type.equals("playlist")) {
-         process_npl.kill();
-         process_npl = null;
-      }
-      else if (type.equals("javaplaylist")) {
-         process_javanpl.kill();
-         process_javanpl = null;
-      }
-      else if (type.equals("metadata")) {
-         process_metadata.kill();
-         process_metadata = null;
-      }
-      else if (type.equals("javametadata")) {
-         process_javametadata.kill();
-         process_javametadata = null;
-      }
-      else if (type.equals("metadataTivo")) {
-         process_metadataTivo.kill();
-         process_metadataTivo = null;
-      }
-      else if (type.equals("autotune")) {
-         process_autotune.kill();
-         process_autotune = null;
-      }
-      else if (type.equals("remote")) {
-         process_remote.kill();
-         process_remote = null;
-      }
-      else if (type.equals("download")) {
-         process_download.kill();
-         process_download = null;
-      }
-      else if (type.equals("download_decrypt")) {
-         process_download_decrypt.kill();
-         process_download_decrypt = null;
-      }
-      else if (type.equals("javadownload")) {
-         process_javadownload.kill();
-         process_javadownload = null;
-      }
-      else if (type.equals("jdownload_decrypt")) {
-         process_jdownload_decrypt.kill();
-         process_jdownload_decrypt = null;
-      }
-      else if (type.equals("decrypt")) {
-         process_decrypt.kill();
-         process_decrypt = null;
-      }
-      else if (type.equals("qsfix")) {
-         process_qsfix.kill();
-         process_qsfix = null;
-      }
-      else if (type.equals("projectx")) {
-         process_projectx.kill();
-         process_projectx = null;
-      }
-      else if (type.equals("comskip")) {
-         process_comskip.kill();
-         process_comskip = null;
-      }
-      else if (type.equals("adscan")) {
-         process_adscan.kill();
-         process_adscan = null;
-      }
-      else if (type.equals("comskip_review")) {
-         process_comskip_review.kill();
-         process_comskip_review = null;
-      }
-      else if (type.equals("vrdreview")) {
-         process_vrdreview.kill();
-         process_vrdreview = null;
-      }
-      else if (type.equals("comcut")) {
-         process_comcut.kill();
-         process_comcut = null;
-      }
-      else if (type.equals("projectxcut")) {
-         process_projectxcut.kill();
-         process_projectxcut = null;
-      }
-      else if (type.equals("adcut")) {
-         process_adcut.kill();
-         process_adcut = null;
-      }
-      else if (type.equals("captions")) {
-         process_captions.kill();
-         process_captions = null;
-      }
-      else if (type.equals("encode")) {
-         process_encode.kill();
-         process_encode = null;
-      }
-      else if (type.equals("vrdencode")) {
-         process_vrdencode.kill();
-         process_vrdencode = null;
-      }
-      else if (type.equals("atomic")) {
-         process_atomic.kill();
-         process_atomic = null;
-      }
-      else if (type.equals("push")) {
-         process_push.kill();
-         process_push = null;
-      }
-      else if (type.equals("custom")) {
-         process_custom.kill();
-         process_custom = null;
-      }
-      else if (type.equals("streamfix")) {
-         process_streamfix.kill();
-         process_streamfix = null;
-      }
-      else if (type.equals("slingbox")) {
-         process_slingbox.kill();
-         process_slingbox = null;
-      }
-   }
-   
+      
 	/**
 	 * Does a shallow copy of this instance so the fields can be modified
 	 * without touching the original
@@ -890,7 +639,7 @@ public class jobData implements Serializable, Cloneable {
             fields[i].setAccessible(true);
             try
             {
-               // for each class/suerclass, copy all fields
+               // for each class/superclass, copy all fields
                // from this object to the clone
                // exclude copying the process
                if (fields[i].getName().contains("process"))
