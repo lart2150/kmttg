@@ -213,7 +213,7 @@ public class jobData implements Serializable, Cloneable {
    public static int launch(jobData job, int cpuActiveJobs) {
       Boolean success = false;
       try {
-         Class<?> c = Class.forName("com.tivo.kmttg.task." + job.type);
+         Class<?> c = Class.forName(job.typeToTaskClassName());
          Constructor<?> constructor = c.getConstructor(jobData.class);
          Object proc = constructor.newInstance(new Object[] {job});
          Method method = c.getMethod("launchJob");
@@ -278,6 +278,16 @@ public class jobData implements Serializable, Cloneable {
             log.error("jobData kill: " + Arrays.toString(e.getStackTrace()));
          }
       }
+   }
+   
+   // Return the kmttg task class name corresponding to current job type string
+   private String typeToTaskClassName() {
+      String className = type;
+      if (className.equals("playlist"))
+         className = "NowPlaying";
+      if (className.equals("javaplaylist"))
+         className = "javaNowPlaying";
+      return "com.tivo.kmttg.task." + className;
    }
             
    public String getOutputFile() {
