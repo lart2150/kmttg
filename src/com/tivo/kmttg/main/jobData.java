@@ -1,8 +1,10 @@
 package com.tivo.kmttg.main;
 
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -31,7 +33,7 @@ public class jobData implements Serializable, Cloneable {
    public Float   familyId = null;
    public String  job_name = null;
    
-   // process
+   // process (Variable name is required to be process_name)
    public NowPlaying   process_npl = null;
    public javaNowPlaying process_javanpl = null;
    public metadata     process_metadata = null;
@@ -207,6 +209,29 @@ public class jobData implements Serializable, Cloneable {
       return "{source=" + source + " tivoName=" + tivoName + " type=" + type + " status=" + status + " familyId=" + familyId + "}";
    }
    
+   // NOTE: Relies on job.type to be a task name under com.tivo.kmttg.task
+   public static int launch(jobData job, int cpuActiveJobs) {
+      Boolean success = false;
+      try {
+         Class<?> c = Class.forName("com.tivo.kmttg.task." + job.type);
+         Constructor<?> constructor = c.getConstructor(jobData.class);
+         Object proc = constructor.newInstance(new Object[] {job});
+         Method method = c.getMethod("launchJob");
+         success = (Boolean) method.invoke(proc);
+      } catch (Exception e) {
+         log.error("jobData launch: " + Arrays.toString(e.getStackTrace()));
+      }
+      
+      if (success) {
+         if (jobMonitor.isActiveJob(job))
+            cpuActiveJobs += 1;
+      } else {
+         jobMonitor.removeFromJobList(job);
+      }
+      
+      return cpuActiveJobs;
+   }
+   
    public Boolean check() {
       // Go through all the class variables and for ones called process_* if they
       // are non-null then invoke their check method
@@ -217,11 +242,10 @@ public class jobData implements Serializable, Cloneable {
                return (Boolean) method.invoke(field.get(this));
             }
          } catch (Exception e) {
-            log.error("jobData check: " + e.getMessage());
+            log.error("jobData check: " + Arrays.toString(e.getStackTrace()));
          }
       }
-      return false;      
-
+      return false;
    }
    
    public backgroundProcess getProcess() {
@@ -234,7 +258,7 @@ public class jobData implements Serializable, Cloneable {
                return (backgroundProcess) method.invoke(field.get(this));
             }
          } catch (Exception e) {
-            log.error("jobData getProcess: " + e.getMessage());
+            log.error("jobData getProcess: " + Arrays.toString(e.getStackTrace()));
          }
       }
       return null;      
@@ -251,100 +275,11 @@ public class jobData implements Serializable, Cloneable {
                field.set(this, null);
             }
          } catch (Exception e) {
-            log.error("jobData kill: " + e.getMessage());
+            log.error("jobData kill: " + Arrays.toString(e.getStackTrace()));
          }
       }
    }
-         
-   public String getInputFile() {
-      String file = "";
-      if (type.equals("playlist")) {
-         file = tivoName;
-      }
-      else if (type.equals("javaplaylist")) {
-         file = tivoName;
-      }
-      else if (type.equals("metadata")) {
-         file = tivoName;
-      }
-      else if (type.equals("javametadata")) {
-         file = tivoName;
-      }
-      else if (type.equals("metadataTivo")) {
-         file = tivoFile;
-      }
-      else if (type.equals("autotune")) {
-         file = tivoName;
-      }
-      else if (type.equals("remote")) {
-         file = tivoName;
-      }
-      else if (type.equals("download")) {
-         file = url;
-      }
-      else if (type.equals("download_decrypt")) {
-         file = url;
-      }
-      else if (type.equals("javadownload")) {
-         file = url;
-      }
-      else if (type.equals("jdownload_decrypt")) {
-         file = url;
-      }
-      else if (type.equals("decrypt")) {
-         file = tivoFile;
-      }
-      else if (type.equals("qsfix")) {
-         file = mpegFile;
-      }
-      else if (type.equals("projectx")) {
-         file = mpegFile;
-      }
-      else if (type.equals("captions")) {
-         file = videoFile;
-      }
-      else if (type.equals("comskip")) {
-         file = mpegFile;
-      }
-      else if (type.equals("adscan")) {
-         file = mpegFile;
-      }
-      else if (type.equals("comskip_review")) {
-         file = mpegFile;
-      }
-      else if (type.equals("vrdreview")) {
-         file = vprjFile;
-      }
-      else if (type.equals("comcut")) {
-         file = mpegFile;
-      }
-      else if (type.equals("projectxcut")) {
-         file = mpegFile;
-      }
-      else if (type.equals("adcut")) {
-         file = vprjFile;
-      }
-      else if (type.equals("encode")) {
-         file = inputFile;
-      }
-      else if (type.equals("vrdencode")) {
-         file = inputFile;
-      }
-      else if (type.equals("atomic")) {
-         file = encodeFile;
-      }
-      else if (type.equals("push")) {
-         file = videoFile;
-      }
-      else if (type.equals("custom")) {
-         file = tivoFile;
-      }
-      else if (type.equals("streamfix")) {
-         file = mpegFile;
-      }
-      return file;
-   }
-   
+            
    public String getOutputFile() {
       String file = "";
       if (type.equals("playlist")) {
@@ -445,161 +380,6 @@ public class jobData implements Serializable, Cloneable {
          file = slingbox_file;
       }
       return file;
-   }
-   
-   public static int launch(jobData job, int cpuActiveJobs) {
-      Boolean success = false;
-      int active = 1;
-      if (job.type.equals("metadata")) {  
-         metadata proc = new metadata(job);
-         active = 0; // Not CPU active
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("javametadata")) {  
-         javametadata proc = new javametadata(job);
-         active = 0; // Not CPU active
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("metadataTivo")) {  
-         metadataTivo proc = new metadataTivo(job);
-         active = 0; // Not CPU active
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("autotune")) {  
-         autotune proc = new autotune(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("remote")) {  
-         remote proc = new remote(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("download")) {  
-         download proc = new download(job);
-         active = 0; // Not CPU active
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("download_decrypt")) {  
-         download_decrypt proc = new download_decrypt(job);
-         active = 0; // Not CPU active
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("javadownload")) {  
-         javadownload proc = new javadownload(job);
-         active = 0; // Not CPU active
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("jdownload_decrypt")) {  
-         jdownload_decrypt proc = new jdownload_decrypt(job);
-         active = 0; // Not CPU active
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("decrypt")) {  
-         decrypt proc = new decrypt(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("qsfix")) {  
-         qsfix proc = new qsfix(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("projectx")) {  
-         projectx proc = new projectx(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("comskip")) {  
-         comskip proc = new comskip(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("adscan")) {  
-         adscan proc = new adscan(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("comskip_review")) {  
-         comskip_review proc = new comskip_review(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("vrdreview")) {  
-         vrdreview proc = new vrdreview(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("comcut")) {  
-         comcut proc = new comcut(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("projectxcut")) {  
-         projectxcut proc = new projectxcut(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("adcut")) {  
-         adcut proc = new adcut(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("captions")) {  
-         captions proc = new captions(job);
-         success = proc.launchJob();
-      }
-                  
-      else if (job.type.equals("encode")) {  
-         encode proc = new encode(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("vrdencode")) {  
-         vrdencode proc = new vrdencode(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("atomic")) {  
-         atomic proc = new atomic(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("push")) {  
-         push proc = new push(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("custom")) {  
-         custom proc = new custom(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("streamfix")) {  
-         streamfix proc = new streamfix(job);
-         success = proc.launchJob();
-      }
-      
-      else if (job.type.equals("slingbox")) {  
-         slingbox proc = new slingbox(job);
-         active = 0; // Not CPU active
-         success = proc.launchJob();
-      }
-      
-      if (success) {
-         cpuActiveJobs += active;
-      } else {
-         jobMonitor.removeFromJobList(job);
-      }
-      
-      return cpuActiveJobs;
    }
       
 	/**
