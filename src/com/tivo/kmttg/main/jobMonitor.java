@@ -1412,7 +1412,7 @@ public class jobMonitor {
       }
    }
    
-   private static Boolean isActiveJob(jobData job) {
+   public static Boolean isActiveJob(jobData job) {
       Boolean active = true;
       if (isDownloadJob(job))
          active = false;
