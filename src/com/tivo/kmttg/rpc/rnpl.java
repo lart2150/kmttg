@@ -372,6 +372,8 @@ public class rnpl {
                // Add todo to hash
                if (todo != null)
                   h.put(tivoName, todo);
+               else
+                  log.error("Failed to refresh todo list for TiVo: " + tivoName);
                r.disconnect();
             }
             return null;
