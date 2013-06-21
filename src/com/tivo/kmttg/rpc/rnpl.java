@@ -375,6 +375,8 @@ public class rnpl {
                else
                   log.error("Failed to refresh todo list for TiVo: " + tivoName);
                r.disconnect();
+            } else {
+               log.error("Failed to connect to TiVo: " + tivoName);
             }
             return null;
          }
