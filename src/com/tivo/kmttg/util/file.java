@@ -2,13 +2,18 @@ package com.tivo.kmttg.util;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 //import java.net.Authenticator;
 import java.net.HttpURLConnection;
 //import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -134,6 +139,24 @@ public class file {
          log.error(e.getMessage());
          return false;
       }
+   }
+   
+   public static Boolean copy(String source, String dest) {
+      try {
+         InputStream in = new FileInputStream(source);
+         OutputStream out = new FileOutputStream(dest);
+         byte[] buf = new byte[1024];
+         int len;
+         while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+         }
+         in.close();
+         out.close(); 
+      } catch (Exception e) {
+         log.error("file copy: " + Arrays.toString(e.getStackTrace()));
+         return false;
+      }
+      return true;
    }
    
    public static Boolean rename(String fold, String fnew) {
