@@ -322,7 +322,7 @@ public class download_decrypt implements Serializable {
       try {
          String eol = "\r\n";
          ofp.write("@echo off" + eol);
-         ofp.write("wmic process where name=\"cmd.exe\" get commandline,processid | find \"" + script + "\" > \"" + pidFile + "\"" + eol);
+         ofp.write("wmic process where name=\"cmd.exe\" get commandline,processid <NUL | find \"" + script + "\" > \"" + pidFile + "\"" + eol);
       } catch (IOException e) {
          log.error(e.toString());
       }
