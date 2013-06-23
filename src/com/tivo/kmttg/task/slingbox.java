@@ -7,9 +7,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Stack;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +26,6 @@ public class slingbox implements Serializable {
    String command = "";
    String script = "";
    String pidFile = "";
-   String uniqueName = "";
    String perl_script;
    private backgroundProcess process;
    public jobData job;
@@ -38,7 +37,6 @@ public class slingbox implements Serializable {
       // Generate unique script names
       script = file.makeTempFile("script");
       pidFile = file.makeTempFile("pid");
-      uniqueName = UUID.randomUUID().toString();
       if (config.OS.equals("windows"))
          script += ".bat";
    }
@@ -138,7 +136,7 @@ public class slingbox implements Serializable {
       try {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(script));
          if (config.OS.equals("windows")) {
-            hackToGetPid(ofp, uniqueName, pidFile);
+            hackToGetPid(ofp, script, pidFile);
          }
          ofp.write(command);
          if (config.OS.equals("windows"))
@@ -179,15 +177,16 @@ public class slingbox implements Serializable {
       log.warn("Killing '" + job.type + "' job: " + command);
       if (config.OS.equals("windows")) {
          // For Windows process.kill doesn't kill child processes so this is a hack to do that
-         try {
-            String pid = getPidFromFile();
-            if (pid != null) {
-               log.warn("killing windows pid=" + pid);
-               Process p = Runtime.getRuntime().exec("taskkill /f /t /pid " + pid);
+         String pid = getPidFromFile();
+         if (pid != null) {
+            try {
+               String c = "taskkill /f /t /pid " + pid;
+               log.warn(c);
+               Process p = Runtime.getRuntime().exec(c);
                p.waitFor();
+            } catch (Exception e) {
+               log.error("Exception finding/killing pid (" + pid + "): " + Arrays.toString(e.getStackTrace()));
             }
-         } catch (Exception e) {
-            log.error("Exception finding/killing pid: " + e.getMessage());
          }
       }
       process.kill();
@@ -265,36 +264,38 @@ public class slingbox implements Serializable {
    
    // Hack lines to add to Windows script file to obtain pid
    // This is needed to be able to kill cmd.exe using taskkill
-   private void hackToGetPid(BufferedWriter ofp, String uniqueName, String pidFile) {
+   private void hackToGetPid(BufferedWriter ofp, String script, String pidFile) {
       try {
          String eol = "\r\n";
          ofp.write("@echo off" + eol);
-         ofp.write("set name=" + uniqueName + eol);
-         ofp.write("TITLE %name%" + eol);
-         ofp.write("TASKLIST /V /NH | findstr /i \"%name%\" > \"" + pidFile + "\"" + eol);
+         ofp.write("wmic process where name=\"cmd.exe\" get commandline,processid | find \"" + script + "\" > \"" + pidFile + "\"" + eol);
       } catch (IOException e) {
          log.error(e.toString());
       }
    }
   
    // Get pid from file with single line:
-   // Sample line looks like (pid is the 2nd column):
-   // cmd.exe 2800 RDP-Tcp#1 0 2,988 K Running INET\moyekj 0:00:00 ...
+   // Sample line looks like (pid is the last column):
+   // cmd.exe /c "C:\home\kmttg java testing\script.bat"       1180
    private String getPidFromFile() {
       if (file.isFile(pidFile)) {
          try {
             BufferedReader ifp = new BufferedReader(new FileReader(pidFile));
             String line = ifp.readLine();
             ifp.close();
-            String pid = "";
-            String s[] = line.split("\\s+");
-            if (s.length > 2)
-               pid = s[1];
-            if (pid.length() > 0 && pid.matches("^\\d+\\s*")) {
-               return pid;
+            if (line != null && line.length() > 0) {
+               String pid = "";
+               String s[] = line.split("\\s+");
+               if (s.length > 1)
+                  pid = s[s.length-1];
+               if (pid.length() > 0 && pid.matches("^\\d+\\s*")) {
+                  return pid;
+               } else {
+                  log.error("Unable to determine windows pid to kill windows process");
+                  log.error("(pidFile line is: '" + line + "')");
+               }
             } else {
-               log.error("Unable to determine windows pid to kill windows process");
-               log.error("(pidFile line is: '" + line + "')");
+               log.error("slingbox getPidFromFile unable to determine windows pid to kill");
             }
          }
          catch (IOException ex) {
