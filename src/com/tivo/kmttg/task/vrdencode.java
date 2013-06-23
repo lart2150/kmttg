@@ -274,6 +274,18 @@ public class vrdencode implements Serializable {
                   log.print("(Deleted comskip txt file: " + txtFile + ")");
             }
             
+            // If metadata file exists for input file but not output file, then copy it
+            String input_meta = job.inputFile + ".txt";
+            String output_meta = job.encodeFile + ".txt";
+            if ( ! file.isFile(output_meta) ) {
+               if (file.isFile(input_meta)) {
+                  if (file.copy(input_meta, output_meta))
+                     log.warn("Copied metadata file " + input_meta + " to " + output_meta);
+                  else
+                     log.error("Failed to copy metadata file: " + input_meta);
+               }
+            }
+            
             // Schedule an AtomicParsley job if relevant
             scheduleAtomicParsley();
          }
