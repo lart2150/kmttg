@@ -1418,16 +1418,11 @@ public class jobMonitor {
          active = false;
       if (isVideoRedoGUIJob(job))
          active = false;
-      if (job.type.equals("metadata"))
-         active = false;
-      if (job.type.equals("javametadata"))
-         active = false;
-      if (job.type.equals("remote"))
-         active = false;
-      if (job.type.equals("slingbox"))
-         active = false;
-      if (job.type.equals("autotune"))
-         active = false;
+      String[] a = {"atomic", "autotune", "javametadata", "metadata", "push", "remote", "slingbox"};
+      for (int i=0; i<a.length; ++i) {
+         if (job.type.equals(a[i]))
+            active = false;
+      }
       return active;
    }
    
