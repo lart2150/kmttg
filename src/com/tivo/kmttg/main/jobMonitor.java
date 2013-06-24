@@ -1236,30 +1236,30 @@ public class jobMonitor {
          }
          // Indicate we need to keep source file longer
          if (encodeName2 != null)
-        	 job.hasMoreEncodingJobs = true;
+            job.hasMoreEncodingJobs = true;
          submitNewJob(job);
          
          // TODO Second encoding is not pushed or sent to custom script
          if (encodeName2 != null) {
-        	 job = new jobData();
-             job.source       = source;
-             job.tivoName     = tivoName;
-             job.type         = "encode";
-             job.name         = encodeName2;
-             job.encodeName   = encodeName2;
-             if (streamfix)
-                job.mpegFile  = mpegFile_fix;
-             else
-                job.mpegFile  = mpegFile;
-             job.mpegFile_cut = mpegFile_cut;
-             job.encodeFile   = encodeFile2;
-             job.srtFile      = srtFile;
-             if (config.VrdEncode == 1 && encodeConfig.getCommandName(encodeName2) == null) {
-                // VRD encode selected => vrdencode job
-                job.type      = "vrdencode";
-                job.tivoFile  = tivoFile;
-             }
-             submitNewJob(job);
+            job = new jobData();
+            job.source       = source;
+            job.tivoName     = tivoName;
+            job.type         = "encode";
+            job.name         = encodeName2;
+            job.encodeName   = encodeName2;
+            if (streamfix)
+               job.mpegFile  = mpegFile_fix;
+            else
+               job.mpegFile  = mpegFile;
+            job.mpegFile_cut = mpegFile_cut;
+            job.encodeFile   = encodeFile2;
+            job.srtFile      = srtFile;
+            if (config.VrdEncode == 1 && encodeConfig.getCommandName(encodeName2) == null) {
+               // VRD encode selected => vrdencode job
+               job.type      = "vrdencode";
+               job.tivoFile  = tivoFile;
+            }
+            submitNewJob(job);
          }
       }
             
