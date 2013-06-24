@@ -229,21 +229,6 @@ public class encode implements Serializable {
                if (file.delete(fix)) log.print("(Deleted file: " + fix + ")");
             }
             
-            // Remove .mpg file if option enabled
-            // If there is a second encode job working off the same source file,
-            // then the source should not be removed.
-            if (!job.hasMoreEncodingJobs && config.RemoveMpegFile == 1) {
-               if ( file.delete(job.inputFile) ) {
-                  log.print("(Deleted file: " + job.inputFile + ")");
-               } else {
-                  log.error("Failed to delete file: "+ job.inputFile);
-               }
-               
-               if ( file.delete(job.mpegFile)) {
-                  log.print("(Deleted file: " + job.mpegFile + ")");
-               }
-            }
-            
             // If metadata file exists for input file but not output file, then copy it
             String input_meta = job.inputFile + ".txt";
             String output_meta = job.encodeFile + ".txt";
@@ -253,6 +238,23 @@ public class encode implements Serializable {
                      log.warn("Copied metadata file " + input_meta + " to " + output_meta);
                   else
                      log.error("Failed to copy metadata file: " + input_meta);
+               }
+            }
+            
+            // Remove .mpg file if option enabled
+            // If there is a second encode job working off the same source file,
+            // then the source should not be removed.
+            if (!job.hasMoreEncodingJobs && config.RemoveMpegFile == 1) {
+               if ( file.delete(job.inputFile) ) {
+                  log.print("(Deleted file: " + job.inputFile + ")");
+               } else {
+                  log.error("Failed to delete file: "+ job.inputFile);
+               }
+               if ( file.delete(input_meta) ) {
+                  log.print("(Deleted file: " + input_meta + ")");
+               }
+               if ( file.delete(job.mpegFile) ) {
+                  log.print("(Deleted file: " + job.mpegFile + ")");
                }
             }
             

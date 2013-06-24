@@ -247,15 +247,29 @@ public class vrdencode implements Serializable {
                if (file.delete(fix)) log.print("(Deleted file: " + fix + ")");
             }
             
+            // If metadata file exists for input file but not output file, then copy it
+            String input_meta = job.inputFile + ".txt";
+            String output_meta = job.encodeFile + ".txt";
+            if ( ! file.isFile(output_meta) ) {
+               if (file.isFile(input_meta)) {
+                  if (file.copy(input_meta, output_meta))
+                     log.warn("Copied metadata file " + input_meta + " to " + output_meta);
+                  else
+                     log.error("Failed to copy metadata file: " + input_meta);
+               }
+            }
+            
             // Remove .mpg file if option enabled
-            if (config.RemoveMpegFile == 1) {
+            if (!job.hasMoreEncodingJobs && config.RemoveMpegFile == 1) {
                if ( file.delete(job.inputFile) ) {
                   log.print("(Deleted file: " + job.inputFile + ")");
                } else {
                   log.error("Failed to delete file: "+ job.inputFile);
                }
-               
-               if ( file.delete(job.mpegFile)) {
+               if ( file.delete(input_meta) ) {
+                  log.print("(Deleted file: " + input_meta + ")");
+               }               
+               if ( file.delete(job.mpegFile) ) {
                   log.print("(Deleted file: " + job.mpegFile + ")");
                }
             }
@@ -272,18 +286,6 @@ public class vrdencode implements Serializable {
                String txtFile = string.replaceSuffix(job.mpegFile, ".txt");
                if (file.isFile(txtFile) && file.delete(txtFile))
                   log.print("(Deleted comskip txt file: " + txtFile + ")");
-            }
-            
-            // If metadata file exists for input file but not output file, then copy it
-            String input_meta = job.inputFile + ".txt";
-            String output_meta = job.encodeFile + ".txt";
-            if ( ! file.isFile(output_meta) ) {
-               if (file.isFile(input_meta)) {
-                  if (file.copy(input_meta, output_meta))
-                     log.warn("Copied metadata file " + input_meta + " to " + output_meta);
-                  else
-                     log.error("Failed to copy metadata file: " + input_meta);
-               }
             }
             
             // Schedule an AtomicParsley job if relevant
