@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import com.tivo.kmttg.gui.SwingWorker;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -777,7 +778,6 @@ public class auto {
    
    // Windows only: Queries kmttg service using "sc query kmttg"
    public static String serviceStatus() {
-      debug.print("");
       Stack<String> command = new Stack<String>();
       command.add("cmd");
       command.add("/c");
@@ -814,151 +814,172 @@ public class auto {
    }
    
    // Windows only: Starts kmttg service using "install-kmttg-service.bat" script
-   public static Boolean serviceCreate() {
-      debug.print("");
-      Stack<String> command = new Stack<String>();
-      String script = config.programDir + "\\service\\win32\\install-kmttg-service.bat";
-      if (! file.isFile(script) ) {
-         script = config.programDir + "\\release\\service\\win32\\install-kmttg-service.bat";
-      }
-      command.add("cmd");
-      command.add("/c");
-      command.add(script);
-      backgroundProcess process = new backgroundProcess();
-      if ( process.run(command) ) {
-         process.Wait();
-         Stack<String> result = process.getStdout();
-         if (result.size() > 0) {
-            Boolean good = false;
-            // Look for "kmttg installed"
-            for (int i=0; i<result.size(); ++i) {
-               if (result.get(i).matches("^.+kmttg installed.+$")) {
-                  good = true;
-               }
+   public static void serviceCreate() {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            Stack<String> command = new Stack<String>();
+            String script = config.programDir + "\\service\\win32\\install-kmttg-service.bat";
+            if (! file.isFile(script) ) {
+               script = config.programDir + "\\release\\service\\win32\\install-kmttg-service.bat";
             }
-            if (good) {
-               log.warn("kmttg service installed successfully");
-               return true;
+            command.add("cmd");
+            command.add("/c");
+            command.add(script);
+            backgroundProcess process = new backgroundProcess();
+            if ( process.run(command) ) {
+               process.Wait();
+               Stack<String> result = process.getStdout();
+               if (result.size() > 0) {
+                  Boolean good = false;
+                  // Look for "kmttg installed"
+                  for (int i=0; i<result.size(); ++i) {
+                     if (result.get(i).matches("^.+kmttg installed.+$")) {
+                        good = true;
+                     }
+                  }
+                  if (good) {
+                     log.warn("kmttg service installed successfully");
+                     return null;
+                  } else {
+                     log.error("There was a problem installing kmttg service");
+                     log.error(process.getStdout());
+                  }
+               } else {
+                  log.error("Problem running command: " + process.toString());
+                  log.error(process.getStderr());
+               }
             } else {
-               log.error("There was a problem installing kmttg service");
-               log.error(process.getStdout());
+               log.error("Command failed: " + process.toString());
+               log.error(process.getStderr());
             }
-         } else {
-            log.error("Problem running command: " + process.toString());
-            log.error(process.getStderr());
+            return null;
          }
-      } else {
-         log.error("Command failed: " + process.toString());
-         log.error(process.getStderr());
       }
-      return false;
-   }      
+      backgroundRun b = new backgroundRun();
+      b.execute();
+   }
+   
    // Windows only: Starts kmttg service using "sc start kmttg"
-   public static Boolean serviceStart() {
-      debug.print("");
-      Stack<String> command = new Stack<String>();
-      command.add("cmd");
-      command.add("/c");
-      command.add("sc");
-      command.add("start");
-      command.add("kmttg");
-      backgroundProcess process = new backgroundProcess();
-      if ( process.run(command) ) {
-         process.Wait();
-         Stack<String> result = process.getStdout();
-         if (result.size() > 0) {
-            // Look for FAILED
-            for (int i=0; i<result.size(); ++i) {
-               if (result.get(i).matches("^.+FAILED.+$")) {
-                  log.error(result);
-                  return false;
+   public static void serviceStart() {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            Stack<String> command = new Stack<String>();
+            command.add("cmd");
+            command.add("/c");
+            command.add("sc");
+            command.add("start");
+            command.add("kmttg");
+            backgroundProcess process = new backgroundProcess();
+            if ( process.run(command) ) {
+               process.Wait();
+               Stack<String> result = process.getStdout();
+               if (result.size() > 0) {
+                  // Look for FAILED
+                  for (int i=0; i<result.size(); ++i) {
+                     if (result.get(i).matches("^.+FAILED.+$")) {
+                        log.error(result);
+                        return null;
+                     }
+                  }
+                  // Seemed to work so sleep for a couple of seconds and print status
+                  try {
+                     Thread.sleep(4000);
+                     log.warn(serviceStatus());
+                     return null;
+                  } catch (InterruptedException e) {
+                     log.error(e.getMessage());
+                     return null;
+                  }               
                }
+            } else {
+               log.error("Command failed: " + process.toString());
+               log.error(process.getStderr());
             }
-            // Seemed to work so sleep for a couple of seconds and print status
-            try {
-               Thread.sleep(2000);
-               log.warn(serviceStatus());
-               return true;
-            } catch (InterruptedException e) {
-               log.error(e.getMessage());
-               return false;
-            }               
+            return null;
          }
-      } else {
-         log.error("Command failed: " + process.toString());
-         log.error(process.getStderr());
       }
-      return false;
+      backgroundRun b = new backgroundRun();
+      b.execute();
    }
    
    // Windows only: Stops kmttg service using "sc stop kmttg"
-   public static Boolean serviceStop() {
-      debug.print("");
-      Stack<String> command = new Stack<String>();
-      command.add("cmd");
-      command.add("/c");
-      command.add("sc");
-      command.add("stop");
-      command.add("kmttg");
-      backgroundProcess process = new backgroundProcess();
-      if ( process.run(command) ) {
-         process.Wait();
-         Stack<String> result = process.getStdout();
-         if (result.size() > 0) {
-            // Look for FAILED
-            for (int i=0; i<result.size(); ++i) {
-               if (result.get(i).matches("^.+FAILED.+$")) {
-                  log.error(result);
-                  return false;
+   public static void serviceStop() {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            Stack<String> command = new Stack<String>();
+            command.add("cmd");
+            command.add("/c");
+            command.add("sc");
+            command.add("stop");
+            command.add("kmttg");
+            backgroundProcess process = new backgroundProcess();
+            if ( process.run(command) ) {
+               process.Wait();
+               Stack<String> result = process.getStdout();
+               if (result.size() > 0) {
+                  // Look for FAILED
+                  for (int i=0; i<result.size(); ++i) {
+                     if (result.get(i).matches("^.+FAILED.+$")) {
+                        log.error(result);
+                        return null;
+                     }
+                  }
+                  // Seemed to work so sleep for a couple of seconds and print status
+                  try {
+                     Thread.sleep(4000);
+                     log.warn(serviceStatus());
+                     return null;
+                  } catch (InterruptedException e) {
+                     log.error(e.getMessage());
+                     return null;
+                  }               
                }
+            } else {
+               log.error("Command failed: " + process.toString());
+               log.error(process.getStderr());
             }
-            // Seemed to work so sleep for a couple of seconds and print status
-            try {
-               Thread.sleep(2000);
-               log.warn(serviceStatus());
-               return true;
-            } catch (InterruptedException e) {
-               log.error(e.getMessage());
-               return false;
-            }               
+            return null;
          }
-      } else {
-         log.error("Command failed: " + process.toString());
-         log.error(process.getStderr());
       }
-      return false;
+      backgroundRun b = new backgroundRun();
+      b.execute();
    }
    
    // Windows only: Deletes kmttg service using "sc delete kmttg"
-   public static Boolean serviceDelete() {
-      debug.print("");
-      Stack<String> command = new Stack<String>();
-      command.add("cmd");
-      command.add("/c");
-      command.add("sc");
-      command.add("delete");
-      command.add("kmttg");
-      backgroundProcess process = new backgroundProcess();
-      if ( process.run(command) ) {
-         process.Wait();
-         Stack<String> result = process.getStdout();
-         if (result.size() > 0) {
-            // Look for SUCCESS
-            for (int i=0; i<result.size(); ++i) {
-               if (result.get(i).matches("^.+SUCCESS.*$")) {
-                  log.warn("Successfully removed kmttg service");
-                  return true;
+   public static void serviceDelete() {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            Stack<String> command = new Stack<String>();
+            command.add("cmd");
+            command.add("/c");
+            command.add("sc");
+            command.add("delete");
+            command.add("kmttg");
+            backgroundProcess process = new backgroundProcess();
+            if ( process.run(command) ) {
+               process.Wait();
+               Stack<String> result = process.getStdout();
+               if (result.size() > 0) {
+                  // Look for SUCCESS
+                  for (int i=0; i<result.size(); ++i) {
+                     if (result.get(i).matches("^.+SUCCESS.*$")) {
+                        log.warn("Successfully removed kmttg service");
+                        return true;
+                     }
+                  }
+                  // Did not seem to work
+                  log.error(result);
+                  return false;
                }
+            } else {
+               log.error("Command failed: " + process.toString());
+               log.error(process.getStderr());
             }
-            // Did not seem to work
-            log.error(result);
             return false;
          }
-      } else {
-         log.error("Command failed: " + process.toString());
-         log.error(process.getStderr());
       }
-      return false;
+      backgroundRun b = new backgroundRun();
+      b.execute();
    }
 
 }
