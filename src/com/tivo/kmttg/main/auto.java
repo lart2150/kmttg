@@ -813,27 +813,25 @@ public class auto {
       return null;
    }
    
-   // Windows only: Starts kmttg service using "install-kmttg-service.bat" script
+   // Windows only: Starts kmttg service using "sc create kmttg ..."
    public static void serviceCreate() {
       class backgroundRun extends SwingWorker<Object, Object> {
          protected Object doInBackground() {
+            String binPath = "\\\"" + config.programDir + "\\service\\win32\\bin\\wrapper.exe\\\" -s ";
+            binPath += "\\\"" + config.programDir + "\\service\\conf\\wrapper.conf\\\"";
             Stack<String> command = new Stack<String>();
-            String script = config.programDir + "\\service\\win32\\install-kmttg-service.bat";
-            if (! file.isFile(script) ) {
-               script = config.programDir + "\\release\\service\\win32\\install-kmttg-service.bat";
-            }
             command.add("cmd");
             command.add("/c");
-            command.add(script);
+            command.add("sc create kmttg binPath= \"" + binPath + "\" DisplayName= \"kmttg\" start= demand");
             backgroundProcess process = new backgroundProcess();
             if ( process.run(command) ) {
                process.Wait();
                Stack<String> result = process.getStdout();
                if (result.size() > 0) {
                   Boolean good = false;
-                  // Look for "kmttg installed"
+                  // Look for "SUCCESS"
                   for (int i=0; i<result.size(); ++i) {
-                     if (result.get(i).matches("^.+kmttg installed.+$")) {
+                     if (result.get(i).matches("^.+SUCCESS.*$")) {
                         good = true;
                      }
                   }
