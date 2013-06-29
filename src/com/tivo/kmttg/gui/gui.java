@@ -79,6 +79,8 @@ public class gui {
    private JComboBox encoding = null;
    private JLabel encoding_label = null;
    private JLabel encoding_description_label = null;
+   public JButton start = null;
+   public JButton cancel = null;
    public JCheckBox metadata = null;
    public JCheckBox decrypt = null;
    public JCheckBox qsfix = null;
@@ -248,7 +250,7 @@ public class gui {
          int gy=0;
          
          // CANCEL JOBS button
-         JButton cancel = new JButton("CANCEL JOBS");
+         cancel = new JButton("CANCEL JOBS");
          cancel.setMargin(new Insets(0,1,0,1));
          cancel.setToolTipText(getToolTip("cancel"));
          cancel.setBackground(config.lightRed);
@@ -257,20 +259,9 @@ public class gui {
                cancelCB();
             }
          });
-         // Add keyboard shortcut for this button
-         cancel.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(
-            KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), "cancel"
-         );
-         cancel.getActionMap().put("cancel", new AbstractAction() {
-            private static final long serialVersionUID = 1L;
-            public void actionPerformed(ActionEvent e) {
-               JButton button = (JButton)e.getSource();
-               button.doClick();
-            }
-         });
 
          // START JOBS button
-         JButton start = new JButton("START JOBS");
+         start = new JButton("START JOBS");
          start.setMargin(new Insets(0,1,0,1));
          start.setToolTipText(getToolTip("start"));
          start.setBackground(Color.green);
@@ -281,17 +272,6 @@ public class gui {
                   log.error("START JOBS invalid with Remote tab selected.");
                else
                   tivoTabs.get(tivoName).startCB();
-            }
-         });
-         // Add keyboard shortcut for this button
-         start.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(
-            KeyStroke.getKeyStroke(KeyEvent.VK_S, 0), "start"
-         );
-         start.getActionMap().put("start", new AbstractAction() {
-            private static final long serialVersionUID = 1L;
-            public void actionPerformed(ActionEvent e) {
-               JButton button = (JButton)e.getSource();
-               button.doClick();
             }
          });
 
