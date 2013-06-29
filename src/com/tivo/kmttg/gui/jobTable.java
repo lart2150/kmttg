@@ -1,6 +1,8 @@
 package com.tivo.kmttg.gui;
 
 import java.awt.Component;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -49,6 +51,17 @@ public class jobTable {
          new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                MouseClicked(e);
+            }
+         }
+      );
+      
+      JobMonitor.addKeyListener(
+         new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+               if (e.getKeyCode() == KeyEvent.VK_C) {
+                  // c key presses CANCEL JOBS button
+                  config.gui.cancel.doClick();
+               }
             }
          }
       );
