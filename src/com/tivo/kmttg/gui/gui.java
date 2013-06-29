@@ -2136,13 +2136,13 @@ public class gui {
          text =  "<b>START JOBS</b><br>";
          text += "Run selected tasks for all selected items in the programs/files table below.<br>";
          text += "First select 1 or more items in the list below to process.<br>";
-         text += "NOTE: You can press <b>s</b> on keyboard to activate this button";
+         text += "NOTE: You can press <b>s</b> on keyboard when focus is in NPL table to activate this button";
       }
       else if (component.equals("cancel")) {
          text =  "<b>CANCEL JOBS</b><br>";
          text += "Cancel selected jobs in <b>JOB MONITOR</b> table below.<br>";
          text += "First select 1 or more running or queued jobs in list below to abort/cancel.<br>";
-         text += "NOTE: You can press <b>c</b> on keyboard to activate this button";
+         text += "NOTE: You can press <b>c</b> on keyboard when focus is in JOBS table to activate this button";
       }
       else if (component.equals("JobMonitor")) {
          text =  "<b>JOB</b><br>";
