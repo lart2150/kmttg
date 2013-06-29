@@ -247,7 +247,7 @@ public class gui {
 
          int gy=0;
          
-         // Cancel jobs button
+         // CANCEL JOBS button
          JButton cancel = new JButton("CANCEL JOBS");
          cancel.setMargin(new Insets(0,1,0,1));
          cancel.setToolTipText(getToolTip("cancel"));
@@ -257,6 +257,18 @@ public class gui {
                cancelCB();
             }
          });
+         // Add keyboard shortcut for this button
+         cancel.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(
+            KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), "cancel"
+         );
+         cancel.getActionMap().put("cancel", new AbstractAction() {
+            private static final long serialVersionUID = 1L;
+            public void actionPerformed(ActionEvent e) {
+               JButton button = (JButton)e.getSource();
+               button.doClick();
+            }
+         });
+
          // START JOBS button
          JButton start = new JButton("START JOBS");
          start.setMargin(new Insets(0,1,0,1));
@@ -271,6 +283,18 @@ public class gui {
                   tivoTabs.get(tivoName).startCB();
             }
          });
+         // Add keyboard shortcut for this button
+         start.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(
+            KeyStroke.getKeyStroke(KeyEvent.VK_S, 0), "start"
+         );
+         start.getActionMap().put("start", new AbstractAction() {
+            private static final long serialVersionUID = 1L;
+            public void actionPerformed(ActionEvent e) {
+               JButton button = (JButton)e.getSource();
+               button.doClick();
+            }
+         });
+
          // Tasks
          metadata = new JCheckBox("metadata", false);         
          decrypt = new JCheckBox("decrypt", true);         
@@ -2131,12 +2155,14 @@ public class gui {
       else if (component.equals("start")) {
          text =  "<b>START JOBS</b><br>";
          text += "Run selected tasks for all selected items in the programs/files table below.<br>";
-         text += "First select 1 or more items in the list below to process.";
+         text += "First select 1 or more items in the list below to process.<br>";
+         text += "NOTE: You can press <b>s</b> on keyboard to activate this button";
       }
       else if (component.equals("cancel")) {
          text =  "<b>CANCEL JOBS</b><br>";
          text += "Cancel selected jobs in <b>JOB MONITOR</b> table below.<br>";
-         text += "First select 1 or more running or queued jobs in list below to abort/cancel.";
+         text += "First select 1 or more running or queued jobs in list below to abort/cancel.<br>";
+         text += "NOTE: You can press <b>c</b> on keyboard to activate this button";
       }
       else if (component.equals("JobMonitor")) {
          text =  "<b>JOB</b><br>";
