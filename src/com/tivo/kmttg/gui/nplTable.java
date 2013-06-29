@@ -418,7 +418,11 @@ public class nplTable {
    // Handle delete keyboard presses
    private void KeyPressed(KeyEvent e) {
       int keyCode = e.getKeyCode();
-      if (keyCode == KeyEvent.VK_DELETE || keyCode == KeyEvent.VK_SPACE) {
+      if (keyCode == KeyEvent.VK_S) {
+         // s key presses START JOBS button
+         config.gui.start.doClick();
+      }
+      else if (keyCode == KeyEvent.VK_DELETE || keyCode == KeyEvent.VK_SPACE) {
          int[] selected = GetSelectedRows();         
          if (selected != null && selected.length > 0) {
             if (keyCode == KeyEvent.VK_DELETE) {
