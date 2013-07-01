@@ -2298,8 +2298,27 @@ public class remotegui {
       return null;
    }
       
-   private String getCurrentTabName() {
+   public String getCurrentTabName() {
       return tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
+   }
+   
+   public JXTable getCurrentTable() {
+      String tabName = getCurrentTabName();
+      if (tabName.equals("ToDo"))
+         return tab_todo.TABLE;
+      if (tabName.equals("Season Passes"))
+         return tab_sp.TABLE;
+      if (tabName.equals("Won't Record"))
+         return tab_cancel.TABLE;
+      if (tabName.equals("Season Premieres"))
+         return tab_premiere.TABLE;
+      if (tabName.equals("Search"))
+         return tab_search.TABLE;
+      if (tabName.equals("Guide"))
+         return tab_guide.TABLE;
+      if (tabName.equals("Deleted"))
+         return tab_deleted.TABLE;
+      return null;
    }
 
    public String getGuideStartTime() {
