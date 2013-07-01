@@ -75,6 +75,7 @@ public class gui {
    private JMenuItem pushesMenuItem = null;
    private JMenuItem saveJobsMenuItem = null;
    private JMenuItem loadJobsMenuItem = null;
+   private JMenuItem searchMenuItem = null;
    
    private JComboBox encoding = null;
    private JLabel encoding_label = null;
@@ -532,6 +533,7 @@ public class gui {
             fileMenu.add(getPushesMenuItem());
          fileMenu.add(getResumeDownloadsMenuItem());
          fileMenu.add(getJobMenu());
+         fileMenu.add(getSearchMenuItem());
          fileMenu.add(getExitMenuItem());
       }
       return fileMenu;
@@ -659,7 +661,7 @@ public class gui {
       if (saveMessagesMenuItem == null) {
          saveMessagesMenuItem = new JMenuItem();
          saveMessagesMenuItem.setText("Save messages to file");
-         saveMessagesMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+         saveMessagesMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M,
                Event.CTRL_MASK, true));
          saveMessagesMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -1092,6 +1094,22 @@ public class gui {
       return backgroundJobDisableMenuItem;
    }
 
+   private JMenuItem getSearchMenuItem() {
+      debug.print("");
+      if (searchMenuItem == null) {
+         searchMenuItem = new JMenuItem();
+         searchMenuItem.setText("Search Table...");
+         searchMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+               Event.CTRL_MASK, true));
+         searchMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               TableUtil.SearchGUI();
+            }
+         });
+      }
+      return searchMenuItem;
+   }
+
    // This will decide which options are enabled based on current config settings
    // Options are disabled when associated config entry is not setup
    public void refreshOptions(Boolean refreshProfiles) {
@@ -1361,7 +1379,7 @@ public class gui {
       }
    }
    
-   private String getCurrentTabName() {
+   public String getCurrentTabName() {
       return tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
    }
    
