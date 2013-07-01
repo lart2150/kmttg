@@ -12,6 +12,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Stack;
 
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -29,6 +34,9 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class TableUtil {
+   private static JDialog searchDialog = null;
+   private static JTextField searchField = null;
+   private static JButton find = null;
    
    public static String getColumnName(JXTable TABLE, int c) {
       return (String)TABLE.getColumnModel().getColumn(c).getHeaderValue();
@@ -152,7 +160,92 @@ public class TableUtil {
          col.setPreferredWidth(widths[i]);
       }
    }
+   
+   // Bring up a dialog to allow searching SHOW column of given table
+   public static void SearchGUI() {
+      if (searchDialog == null) {
+         // Dialog not created yet, so do so
+         JPanel panel = new JPanel();
+         panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
+         find = new JButton("FIND");
+         find.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+               String text = searchField.getText();
+               if (text.length() > 0) {
+                  JXTable TABLE;
+                  // Issue warning and return for irrelevant tabs/tables
+                  String irrelevant = "Currently selected tab doesn't contain a suitable table to search.";
+                  String tabName = config.gui.getCurrentTabName();
+                  if (tabName.equals("FILES") || tabName.equals("Slingbox")) {
+                     log.warn(irrelevant);
+                     return;
+                  }
+                  if (tabName.equals("Remote")) {
+                     String subTabName = config.gui.remote_gui.getCurrentTabName();
+                     if (subTabName.equals("Remote") || subTabName.equals("Info")) {
+                        log.warn(irrelevant);
+                        return;
+                     }
+                     TABLE = config.gui.remote_gui.getCurrentTable();
+                  } else {
+                     TABLE = config.gui.getTab(tabName).getTable().NowPlaying;
+                  }
+                  if (TABLE != null) {
+                     Search(TABLE, text, "SHOW");
+                  }
+               }
+            }
+         });
+         searchField = new JTextField(20);
+         searchField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+               find.doClick();
+            }
+         });
+         panel.add(find);
+         panel.add(searchField);
+         searchDialog = new JDialog(config.gui.getJFrame(), false); // non-modal dialog
+         searchDialog.setTitle("Search Table");
+         searchDialog.setContentPane(panel);
+         searchDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+         searchDialog.setLocationRelativeTo(config.gui.custom);
+         searchDialog.pack();
+      }
+      
+      // Dialog already created, so display it and highlight any existing search text
+      searchField.requestFocus();
+      searchField.selectAll();
+      searchDialog.setVisible(true);
+   }
+   
+   // Perform a search in given TABLE column name for searchString
+   private static void Search(JXTable TABLE, String searchString, String colName) {
+      int col = TableUtil.getColumnIndex(TABLE, colName);
+      int startRow = 0;
+      int[] sel = TABLE.getSelectedRows();
+      if (sel.length > 0)
+         startRow = sel[0] + 1;
+      Boolean result = searchMatch(TABLE, col, searchString, startRow, TABLE.getRowCount()-1);
+      if (!result && startRow > 0) {
+         searchMatch(TABLE, col, searchString, 0, startRow);
+      }
+   }
 
+   public static Boolean searchMatch(JXTable TABLE, int col, String searchString, int start, int stop) {
+      String v;
+      for (int row=start; row <=stop; row++) {
+         v = (String)TABLE.getValueAt(row, col);
+         v = v.toLowerCase();
+          if (v.matches("^.*" + searchString.toLowerCase() + ".*$")) {
+             // scroll to and set selection to given row
+             TABLE.scrollRectToVisible(TABLE.getCellRect(row, 0, true));
+             TABLE.setRowSelectionInterval(row, row);
+             return true;
+          }
+      }
+      return false;      
+   }
+   
    public static long getLongDateFromString(String date) {
       try {
          SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz");
