@@ -87,13 +87,6 @@ public class TableUtil {
          return s.json;
       return null;
    }    
-   
-   public static String GetRowTitle(JXTable TABLE, int row, String colName) {
-      String s = (String) TABLE.getValueAt(row, getColumnIndex(TABLE, colName));
-      if (s != null)
-         return s;
-      return null;
-   }
 
    // Pack all table columns to fit widest cell element
    public static void packColumns(JXTable table, int margin) {
@@ -202,8 +195,15 @@ public class TableUtil {
                find.doClick();
             }
          });
+         JButton close = new JButton("CLOSE");
+         close.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+               searchDialog.setVisible(false);
+            }
+         });
          panel.add(find);
          panel.add(searchField);
+         panel.add(close);
          searchDialog = new JDialog(config.gui.getJFrame(), false); // non-modal dialog
          searchDialog.setTitle("Search Table");
          searchDialog.setContentPane(panel);
@@ -220,28 +220,36 @@ public class TableUtil {
    
    // Perform a search in given TABLE column name for searchString
    private static void Search(JXTable TABLE, String searchString, String colName) {
-      int col = TableUtil.getColumnIndex(TABLE, colName);
       int startRow = 0;
       int[] sel = TABLE.getSelectedRows();
       if (sel.length > 0)
          startRow = sel[0] + 1;
-      Boolean result = searchMatch(TABLE, col, searchString, startRow, TABLE.getRowCount()-1);
+      Boolean result = searchMatch(TABLE, colName, searchString, startRow, TABLE.getRowCount()-1);
       if (!result && startRow > 0) {
-         searchMatch(TABLE, col, searchString, 0, startRow);
+         searchMatch(TABLE, colName, searchString, 0, startRow);
       }
    }
 
-   public static Boolean searchMatch(JXTable TABLE, int col, String searchString, int start, int stop) {
+   public static Boolean searchMatch(JXTable TABLE, String colName, String searchString, int start, int stop) {
       String v;
-      for (int row=start; row <=stop; row++) {
-         v = (String)TABLE.getValueAt(row, col);
-         v = v.toLowerCase();
-          if (v.matches("^.*" + searchString.toLowerCase() + ".*$")) {
-             // scroll to and set selection to given row
-             TABLE.scrollRectToVisible(TABLE.getCellRect(row, 0, true));
-             TABLE.setRowSelectionInterval(row, row);
-             return true;
-          }
+      for (int row=start; row<=stop; row++) {
+         Object o = TABLE.getValueAt(row, getColumnIndex(TABLE, colName));
+         v = null;
+         if (o instanceof String)
+            v = (String)o;
+         if (o instanceof sortableShow)
+            v = o.toString();
+         if ( v == null ) {
+            log.error("searchMatch: Unimplemented SHOW type found");
+         } else {
+            v = v.toLowerCase();
+            if (v.matches("^.*" + searchString.toLowerCase() + ".*$")) {
+               // scroll to and set selection to given row
+               TABLE.scrollRectToVisible(TABLE.getCellRect(row, 0, true));
+               TABLE.setRowSelectionInterval(row, row);
+               return true;
+            }
+         }
       }
       return false;      
    }
