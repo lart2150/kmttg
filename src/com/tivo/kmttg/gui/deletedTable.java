@@ -304,7 +304,7 @@ public class deletedTable {
                         row = selected[0];
                         try {
                            json = GetRowData(row);
-                           title = TableUtil.GetRowTitle(TABLE, row, "SHOW");
+                           title = json.getString("title");
                            if (json != null) {
                               JSONObject o = new JSONObject();
                               JSONArray a = new JSONArray();
@@ -357,8 +357,10 @@ public class deletedTable {
                         row = selected[0];
                         try {
                            json = GetRowData(row);
-                           title = TableUtil.GetRowTitle(TABLE, row, "SHOW");
                            if (json != null) {
+                              title = json.getString("title");
+                              if (json.has("subtitle"))
+                                 title += " - " + json.getString("subtitle");
                               JSONObject o = new JSONObject();
                               JSONArray a = new JSONArray();
                               a.put(json.getString("recordingId"));

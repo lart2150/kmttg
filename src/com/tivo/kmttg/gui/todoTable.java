@@ -263,9 +263,11 @@ public class todoTable {
           // NOTE: Intentionally only remove 1 row at a time because removing rows from table
           row = selected[0];
           json = GetRowData(row);
-          title = TableUtil.GetRowTitle(TABLE, row, "SHOW");
           if (json != null) {
              try {
+                title = json.getString("title");
+                if (json.has("subtitle"))
+                   title += " - " + json.getString("subtitle");
                 log.warn("Cancelling ToDo show on TiVo '" + currentTivo + "': " + title);
                 JSONObject o = new JSONObject();
                 JSONArray a = new JSONArray();
