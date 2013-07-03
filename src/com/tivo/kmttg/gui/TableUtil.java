@@ -208,7 +208,7 @@ public class TableUtil {
          searchDialog.setTitle("Search Table");
          searchDialog.setContentPane(panel);
          searchDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-         searchDialog.setLocationRelativeTo(config.gui.custom);
+         searchDialog.setLocationRelativeTo(config.gui.captions);
          searchDialog.pack();
       }
       
