@@ -130,6 +130,8 @@ public class gui {
          jFrame.setTitle(title);
          jobTab_packColumns(5);
          
+         addGlobalKeyListener();
+         
          // Restore last GUI run settings from file
          readSettings();
          
@@ -154,6 +156,51 @@ public class gui {
             initialNPL(config.TIVOS);
       }
       return jFrame;
+   }
+   
+   // Adds a universal key listener so that menu shortcuts work as expected
+   public void addGlobalKeyListener() {
+      class KeyDispatcher implements KeyEventDispatcher {
+         public boolean dispatchKeyEvent(KeyEvent e) {
+            String tabName = config.gui.getCurrentTabName();
+            if (tabName.equals("Remote")) {
+               String subTabName = config.gui.remote_gui.getCurrentTabName();
+               if (subTabName.equals("Remote")) {
+                  // For Remote-Remote tab don't want to interfere with anything
+                  return false;
+               }
+            }
+            
+            // Proceed with handling menu keyboard accelerators
+            if (e.getID() == KeyEvent.KEY_PRESSED && e.isControlDown()) {
+               if (e.getKeyCode() == KeyEvent.VK_E) {
+                  refreshEncodingsMenuItem.doClick();
+                  return true;
+               }
+               if (e.getKeyCode() == KeyEvent.VK_M) {
+                  saveMessagesMenuItem.doClick();
+                  return true;
+               }
+               if (e.getKeyCode() == KeyEvent.VK_O) {
+                  configureMenuItem.doClick();
+                  return true;
+               }
+               if (e.getKeyCode() == KeyEvent.VK_R) {
+                  resetServerMenuItem.doClick();
+                  return true;
+               }
+               if (e.getKeyCode() == KeyEvent.VK_S) {
+                  searchMenuItem.doClick();
+                  return true;
+               }
+            }
+            // Allow event to be passed along
+            return false;
+         }
+      }
+           
+      KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+      manager.addKeyEventDispatcher( new KeyDispatcher() );
    }
 
    @SuppressWarnings("unchecked")
@@ -629,8 +676,6 @@ public class gui {
       if (exitMenuItem == null) {
          exitMenuItem = new JMenuItem();
          exitMenuItem.setText("Exit");
-         exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
-               Event.CTRL_MASK, true));
          exitMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                System.exit(0);
