@@ -207,6 +207,8 @@ public class todoTable {
     
     // Handle delete keyboard presses
     private void KeyPressed(KeyEvent e) {
+       if (e.isControlDown())
+          return;
        int keyCode = e.getKeyCode();
        if (keyCode == KeyEvent.VK_DELETE){
           // Delete key has special action

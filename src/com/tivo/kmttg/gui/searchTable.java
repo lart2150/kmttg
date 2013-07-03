@@ -459,6 +459,8 @@ public class searchTable {
    
    // Handle keyboard presses
    private void KeyPressed(KeyEvent e) {
+      if (e.isControlDown())
+         return;
       int keyCode = e.getKeyCode();
       if (keyCode == KeyEvent.VK_J) {
          // Print json of selected row to log window

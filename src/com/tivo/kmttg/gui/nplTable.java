@@ -417,6 +417,8 @@ public class nplTable {
    
    // Handle delete keyboard presses
    private void KeyPressed(KeyEvent e) {
+      if (e.isControlDown())
+         return;
       int keyCode = e.getKeyCode();
       if (keyCode == KeyEvent.VK_S) {
          // s key presses START JOBS button

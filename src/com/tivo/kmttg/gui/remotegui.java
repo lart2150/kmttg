@@ -1477,6 +1477,8 @@ public class remotegui {
       // Press "Search" button when enter pressed in search text field
       text_search.addKeyListener( new KeyAdapter() {
          public void keyReleased( KeyEvent e ) {
+            if (e.isControlDown())
+               return;
             if( e.getKeyCode() == KeyEvent.VK_ENTER ) {
                button_search.doClick();
             }

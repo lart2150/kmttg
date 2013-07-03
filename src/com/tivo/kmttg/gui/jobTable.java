@@ -58,6 +58,8 @@ public class jobTable {
       JobMonitor.addKeyListener(
          new KeyAdapter() {
             public void keyReleased(KeyEvent e) {
+               if (e.isControlDown())
+                  return;
                if (e.getKeyCode() == KeyEvent.VK_C) {
                   // c key presses CANCEL JOBS button
                   config.gui.cancel.doClick();
