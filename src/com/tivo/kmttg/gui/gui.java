@@ -31,7 +31,6 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class gui {
 
