@@ -113,6 +113,12 @@ public class premiereTable {
             }
          }
       });
+      
+      // Add popup menu
+      TableUtil.CreatePopupMenu(TABLE, new PopupPair[] {
+         new PopupPair("Display data", KeyEvent.VK_J),
+         new PopupPair("Web query", KeyEvent.VK_Q)
+      });
    }
 
    /**

@@ -139,6 +139,12 @@ public class cancelledTable {
                
       //TABLE.setFillsViewportHeight(true);
       //TABLE.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+      
+      // Add popup menu
+      TableUtil.CreatePopupMenu(TABLE, new PopupPair[] {
+         new PopupPair("Display data", KeyEvent.VK_J),
+         new PopupPair("Web query", KeyEvent.VK_Q)
+      });
    }   
 
    // Custom table cell renderer to allow for icons
