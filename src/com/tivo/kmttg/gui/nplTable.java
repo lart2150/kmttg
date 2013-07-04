@@ -3,6 +3,8 @@ package com.tivo.kmttg.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -19,6 +21,8 @@ import java.util.Vector;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -46,6 +50,7 @@ import com.tivo.kmttg.util.log;
 public class nplTable {
    public String tivoName = null;
    public JXTable NowPlaying = null;
+   private JPopupMenu popupMenu = null;
    public JScrollPane nplScroll = null;
    public String[] FILE_cols = {"FILE", "SIZE", "DIR"};
    public String[] TIVO_cols = {"", "SHOW", "DATE", "CHANNEL", "DUR", "SIZE", "Mbps"};
@@ -72,6 +77,9 @@ public class nplTable {
          NowPlaying.setModel(new NplTableModel(data, TIVO_cols));
       }
       nplScroll = new JScrollPane(NowPlaying);
+      
+      // Right mouse button popup menu
+      CreatePopupMenu();
       
       // Add listener for click handling (for folder entries)
       NowPlaying.addMouseListener(
@@ -388,6 +396,77 @@ public class nplTable {
          return cell;
       }
    }   
+
+   // Table right mouse click popup menu
+   private void CreatePopupMenu() {      
+      popupMenu = new JPopupMenu();
+      
+      JMenuItem meta = new JMenuItem("Get extended metadata");
+      meta.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String item = ((JMenuItem)e.getSource()).getText();
+            int row = GetSelectedRows()[0];
+            sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
+            if (item.equals("Get extended metadata")) {
+               createMeta.getExtendedMetadata(tivoName, s.data, true);
+            }
+            if (item.equals("Display data")) {
+               // Dispatch j key event so no need to duplicate code here
+               NowPlaying.dispatchEvent(
+                  new KeyEvent(
+                     NowPlaying, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0,
+                     KeyEvent.VK_J, KeyEvent.CHAR_UNDEFINED
+                  )
+               );                
+            }
+            if (item.equals("Web query")) {
+               // Dispatch q key event so no need to duplicate code here
+               NowPlaying.dispatchEvent(
+                  new KeyEvent(
+                     NowPlaying, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0,
+                     KeyEvent.VK_Q, KeyEvent.CHAR_UNDEFINED
+                  )
+               );                
+            }
+            if (item.equals("Delete")) {
+               // Dispatch delete key event so no need to duplicate code here
+               NowPlaying.dispatchEvent(
+                  new KeyEvent(
+                     NowPlaying, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0,
+                     KeyEvent.VK_DELETE, KeyEvent.CHAR_UNDEFINED
+                  )
+               ); 
+            }
+            if (item.equals("Play")) {
+               // Dispatch space key event so no need to duplicate code here
+               NowPlaying.dispatchEvent(
+                  new KeyEvent(
+                     NowPlaying, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0,
+                     KeyEvent.VK_SPACE, KeyEvent.CHAR_UNDEFINED
+                  )
+               ); 
+            }
+         }
+      });
+      
+      JMenuItem delete = new JMenuItem("Delete");
+      delete.addActionListener(meta.getActionListeners()[0]);
+      
+      JMenuItem play = new JMenuItem("Play");
+      play.addActionListener(meta.getActionListeners()[0]);
+      
+      JMenuItem info = new JMenuItem("Display data");
+      info.addActionListener(meta.getActionListeners()[0]);
+      
+      JMenuItem query = new JMenuItem("Web query");
+      query.addActionListener(meta.getActionListeners()[0]);
+      
+      popupMenu.add(info);
+      popupMenu.add(query);
+      popupMenu.add(meta);
+      popupMenu.add(delete);
+      popupMenu.add(play);
+   }
    
    // Mouse event handler
    // This will display folder entries in table if folder entry single-clicked
@@ -404,9 +483,10 @@ public class nplTable {
          } else {
             if (SwingUtilities.isRightMouseButton(e)) {
                if (s.data != null) {
-                  createMeta.getExtendedMetadata(tivoName, s.data, true);
                   // De-select all
                   NowPlaying.getSelectionModel().clearSelection();
+                  // Show popup menu
+                  popupMenu.show(e.getComponent(), e.getX(), e.getY());
                }
                // Select row
                NowPlaying.setRowSelectionInterval(row, row);
