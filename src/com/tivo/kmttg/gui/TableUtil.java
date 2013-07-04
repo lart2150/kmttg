@@ -1,6 +1,11 @@
 package com.tivo.kmttg.gui;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.ParseException;
@@ -15,8 +20,11 @@ import java.util.Stack;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -252,6 +260,43 @@ public class TableUtil {
          }
       }
       return false;      
+   }
+
+   // Table right mouse click popup menu
+   public static void CreatePopupMenu(final JXTable TABLE, final PopupPair[] items) {      
+      final JPopupMenu popupMenu = new JPopupMenu();
+      for (int i=0; i<items.length; ++i) {
+         final int key = items[i].key;
+         JMenuItem item = new JMenuItem(items[i].name);
+         item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               // Dispatch key event
+               TABLE.dispatchEvent(
+                  new KeyEvent(
+                     TABLE, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0,
+                     key, KeyEvent.CHAR_UNDEFINED
+                  )
+               );                
+            }
+         });  
+         popupMenu.add(item);
+      }
+      
+      // Add listener for click handling (for folder entries)
+      TABLE.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if (SwingUtilities.isRightMouseButton(e)) {
+                  int row = TABLE.rowAtPoint(e.getPoint());
+                  // Clear selection
+                  TABLE.getSelectionModel().clearSelection();
+                  // Show popup menu
+                  popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                  TABLE.setRowSelectionInterval(row, row);
+               }
+            }
+         }
+      );
    }
    
    public static long getLongDateFromString(String date) {
