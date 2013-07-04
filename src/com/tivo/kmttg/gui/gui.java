@@ -71,7 +71,7 @@ public class gui {
    private JMenuItem backgroundJobDisableMenuItem = null;
    private JMenuItem saveMessagesMenuItem = null;
    private JMenuItem clearMessagesMenuItem = null;
-   private JMenuItem resetServerMenuItem = null;
+   //private JMenuItem resetServerMenuItem = null;
    private JMenuItem pushesMenuItem = null;
    private JMenuItem saveJobsMenuItem = null;
    private JMenuItem loadJobsMenuItem = null;
@@ -185,10 +185,10 @@ public class gui {
                   configureMenuItem.doClick();
                   return true;
                }
-               if (e.getKeyCode() == KeyEvent.VK_R) {
+               /*if (e.getKeyCode() == KeyEvent.VK_R) {
                   resetServerMenuItem.doClick();
                   return true;
-               }
+               }*/
                if (e.getKeyCode() == KeyEvent.VK_S) {
                   searchMenuItem.doClick();
                   return true;
@@ -575,7 +575,7 @@ public class gui {
          fileMenu.add(getRefreshEncodingsMenuItem());
          fileMenu.add(getSaveMessagesMenuItem());
          fileMenu.add(getClearMessagesMenuItem());
-         fileMenu.add(getResetServerMenuItem());
+         //fileMenu.add(getResetServerMenuItem());
          if (config.pyTivo_config != null && file.isFile(config.pyTivo_config))
             fileMenu.add(getPushesMenuItem());
          fileMenu.add(getResumeDownloadsMenuItem());
@@ -741,13 +741,11 @@ public class gui {
       return clearMessagesMenuItem;
    }
 
-   private JMenuItem getResetServerMenuItem() {
+   /*private JMenuItem getResetServerMenuItem() {
       debug.print("");
       if (resetServerMenuItem == null) {
          resetServerMenuItem = new JMenuItem();
          resetServerMenuItem.setText("Reset TiVo web server");
-         resetServerMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
-               Event.CTRL_MASK, true));
          resetServerMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                String tivoName = getSelectedTivoName();
@@ -772,7 +770,7 @@ public class gui {
          });
       }
       return resetServerMenuItem;
-   }
+   }*/
 
    private JMenuItem getPushesMenuItem() {
       debug.print("");
