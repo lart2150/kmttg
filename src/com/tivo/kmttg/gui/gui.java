@@ -172,6 +172,10 @@ public class gui {
             
             // Proceed with handling menu keyboard accelerators
             if (e.getID() == KeyEvent.KEY_PRESSED && e.isControlDown()) {
+               if (e.getKeyCode() == KeyEvent.VK_A) {
+                  clearMessagesMenuItem.doClick();
+                  return true;
+               }
                if (e.getKeyCode() == KeyEvent.VK_E) {
                   refreshEncodingsMenuItem.doClick();
                   return true;
@@ -729,6 +733,8 @@ public class gui {
       if (clearMessagesMenuItem == null) {
          clearMessagesMenuItem = new JMenuItem();
          clearMessagesMenuItem.setText("Clear all messages");
+         clearMessagesMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,
+               Event.CTRL_MASK, true));
          clearMessagesMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                text.setEditable(true);
