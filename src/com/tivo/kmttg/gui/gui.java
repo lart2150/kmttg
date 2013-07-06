@@ -379,7 +379,7 @@ public class gui {
          tasks_panel.add(decrypt);
          tasks_panel.add(Box.createRigidArea(space_5));
          tasks_panel.add(qsfix);
-         if (config.TivoWebPlusDelete == 1) {
+         if (config.twpDeleteEnabled()) {
             tasks_panel.add(Box.createRigidArea(space_5));
             tasks_panel.add(twpdelete);            
          }
@@ -1198,7 +1198,7 @@ public class gui {
          qsfix.setEnabled(true);
       }
       
-      if (config.TivoWebPlusDelete == 0) {
+      if (!config.twpDeleteEnabled()) {
          twpdelete.setSelected(false);
          twpdelete.setEnabled(false);
       } else {
