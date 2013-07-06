@@ -609,7 +609,7 @@ public class configMain {
          TSDownload.setSelected(false);
       
       // TivoWebPlusDelete
-      if (config.TivoWebPlusDelete == 1)
+      if (config.twpDeleteEnabled())
          TivoWebPlusDelete.setSelected(true);
       else
          TivoWebPlusDelete.setSelected(false);
@@ -1101,9 +1101,9 @@ public class configMain {
       
       // TivoWebPlusDelete
       if (TivoWebPlusDelete.isSelected())
-         config.TivoWebPlusDelete = 1;
+         config.twpDeleteEnabledSet(true);
       else
-         config.TivoWebPlusDelete = 0;
+         config.twpDeleteEnabledSet(false);
       
       // iPadDelete
       if (iPadDelete.isSelected())
