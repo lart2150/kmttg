@@ -2337,23 +2337,23 @@ public class remotegui {
    }
    
    public String getTivoName(String tab) {
-      if (tab.equals("todo"))
+      if (tab.equals("todo") || tab.equals("ToDo"))
          return (String)tivo_todo.getSelectedItem();
-      if (tab.equals("guide"))
+      if (tab.equals("guide") || tab.equals("Guide"))
          return (String)tivo_guide.getSelectedItem();
-      if (tab.equals("sp"))
+      if (tab.equals("sp") || tab.equals("Season Passes"))
          return (String)tivo_sp.getSelectedItem();
-      if (tab.equals("cancel"))
+      if (tab.equals("cancel") || tab.equals("Won't Record"))
          return (String)tivo_cancel.getSelectedItem();
-      if (tab.equals("deleted"))
+      if (tab.equals("deleted") || tab.equals("Deleted"))
          return (String)tivo_deleted.getSelectedItem();
-      if (tab.equals("search"))
+      if (tab.equals("search") || tab.equals("Search"))
          return (String)tivo_search.getSelectedItem();
-      if (tab.equals("rc"))
+      if (tab.equals("rc") || tab.equals("Remote"))
          return (String)tivo_rc.getSelectedItem();
-      if (tab.equals("info"))
+      if (tab.equals("info") || tab.equals("Info"))
          return (String)tivo_info.getSelectedItem();
-      if (tab.equals("premiere"))
+      if (tab.equals("premiere") || tab.equals("Season Premieres"))
          return (String)tivo_premiere.getSelectedItem();
       return null;
    }
