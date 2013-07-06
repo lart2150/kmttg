@@ -525,6 +525,17 @@ public class config {
    public static Boolean ipadDeleteEnabled() {
       return ipadEnabled() && iPadDelete == 1;
    }
+   
+   public static Boolean twpDeleteEnabled() {
+      return TivoWebPlusDelete == 1;
+   }
+   
+   public static void twpDeleteEnabledSet(Boolean state) {
+      if (state)
+         TivoWebPlusDelete = 1;
+      else
+         TivoWebPlusDelete = 0;
+   }
       
    public static Remote initRemote(String tivoName) {
       if (rpcEnabled(tivoName)) {
