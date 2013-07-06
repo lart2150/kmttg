@@ -380,7 +380,7 @@ public class configAuto {
       row4.add(decrypt);
       row4.add(Box.createRigidArea(space_5));
       row4.add(qsfix);
-      if (config.TivoWebPlusDelete == 1) {
+      if (config.twpDeleteEnabled()) {
          row4.add(Box.createRigidArea(space_5));
          row4.add(twpdelete);         
       }
@@ -849,7 +849,7 @@ public class configAuto {
          qsfix.setEnabled(true);
       }
       
-      if (config.TivoWebPlusDelete == 0) {
+      if (!config.twpDeleteEnabled()) {
          twpdelete.setSelected(false);
          twpdelete.setEnabled(false);
       } else {
@@ -1229,7 +1229,7 @@ public class configAuto {
             for (int i=0; i<rows; ++i) {
                entry = GetRowData(i);
                // Some options may have to be turned off for disabled features
-               if (config.TivoWebPlusDelete == 0)
+               if ( ! config.twpDeleteEnabled() )
                   entry.twpdelete = 0;
                if ( ! config.ipadDeleteEnabled() )
                   entry.ipaddelete = 0;
