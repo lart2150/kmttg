@@ -32,7 +32,7 @@ public class ShowDetails {
    private JTextArea actorInfo = null;
    private JLabel image = null;
    private Color backgroundColor = new Color(16,0,76); // dark blue
-   private Color actorColor = new Color(0,233,255);
+   private Color actorColor = new Color(0,233,255); // light blue
    private Color titleColor = Color.yellow;
    private Color textColor = Color.white;
    private Color otherColor = new Color(204,204,204); // light grey
