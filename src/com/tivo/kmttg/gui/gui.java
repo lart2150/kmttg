@@ -106,6 +106,8 @@ public class gui {
    public remotegui remote_gui = null;
    public slingboxgui  slingbox_gui = null;
    
+   public ShowDetails show_details = null;
+   
    public tivoTab getTab(String tabName) {
       return tivoTabs.get(tabName);
    }
@@ -149,6 +151,9 @@ public class gui {
          
          // Create NowPlaying icons
          CreateImages();
+         
+         // Init show_details dialog
+         show_details = new ShowDetails(jFrame, null);
          
          // Start NPL jobs
          if (config.npl_when_started == 1)
