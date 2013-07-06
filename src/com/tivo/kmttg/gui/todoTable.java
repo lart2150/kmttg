@@ -108,6 +108,7 @@ public class todoTable {
       
       // Add popup menu
       TableUtil.CreatePopupMenu(TABLE, new PopupPair[] {
+         new PopupPair("Show Information", KeyEvent.VK_I),
          new PopupPair("Display data", KeyEvent.VK_J),
          new PopupPair("Web query", KeyEvent.VK_Q)
       });
@@ -204,6 +205,9 @@ public class todoTable {
                 title += " - " + s.json.getString("subtitle");
              log.warn(title);
              log.print(message);
+
+             if (config.gui.show_details.isShowing())
+                config.gui.show_details.update(currentTivo, s.json);
           } catch (JSONException e) {
              log.error("TABLERowSelected - " + e.getMessage());
              return;
@@ -219,6 +223,14 @@ public class todoTable {
        if (keyCode == KeyEvent.VK_DELETE){
           // Delete key has special action
           DeleteCB();
+       } else if (keyCode == KeyEvent.VK_I) {
+          int[] selected = TableUtil.GetSelectedRows(TABLE);
+          if (selected == null || selected.length < 1)
+             return;
+          JSONObject json = GetRowData(selected[0]);
+          if (json != null) {
+             config.gui.show_details.update(currentTivo, json);
+          }
        } else if (keyCode == KeyEvent.VK_J) {
           // Print json of selected row to log window
           int[] selected = TableUtil.GetSelectedRows(TABLE);

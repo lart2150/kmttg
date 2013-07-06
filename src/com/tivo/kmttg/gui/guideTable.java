@@ -294,6 +294,9 @@ public class guideTable {
                title += " (to be recorded on " + s.json.getString("__inTodo__") + ")";
             log.warn(title);
             log.print(message);
+            
+            if (config.gui.show_details.isShowing())
+               config.gui.show_details.update(currentTivo, s.json);
          } catch (JSONException e) {
             log.error("TABLERowSelected - " + e.getMessage());
             return;
@@ -457,7 +460,15 @@ public class guideTable {
       if (e.isControlDown())
          return;
       int keyCode = e.getKeyCode();
-      if (keyCode == KeyEvent.VK_J) {
+      if (keyCode == KeyEvent.VK_I) {
+         int[] selected = TableUtil.GetSelectedRows(TABLE);
+         if (selected == null || selected.length < 1)
+            return;
+         JSONObject json = GetRowData(selected[0]);
+         if (json != null) {
+            config.gui.show_details.update(currentTivo, json);
+         }
+      } else if (keyCode == KeyEvent.VK_J) {
          // Print json of selected row to log window
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)

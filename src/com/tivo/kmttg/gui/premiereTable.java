@@ -36,6 +36,7 @@ import com.tivo.kmttg.util.log;
 
 public class premiereTable {
    private String[] TITLE_cols = {"DATE", "SHOW", "SEA", "CHANNEL", "DUR"};
+   private String currentTivo = null;
    public JXTable TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    public JScrollPane scroll = null;
@@ -196,6 +197,7 @@ public class premiereTable {
           for (int i=0; i<data.length(); ++i) {
              AddRow(data.getJSONObject(i));
           }
+          currentTivo = tivoName;
           tivo_data.put(tivoName, data);
           TableUtil.packColumns(TABLE,2);
           if (config.gui.remote_gui != null)
@@ -255,6 +257,9 @@ public class premiereTable {
                 
              log.warn(title);
              log.print(message);
+             
+             if (config.gui.show_details.isShowing())
+                config.gui.show_details.update(currentTivo, s.json);
           } catch (JSONException e) {
              log.error("TABLERowSelected - " + e.getMessage());
              return;
@@ -267,7 +272,15 @@ public class premiereTable {
        if (e.isControlDown())
           return;
        int keyCode = e.getKeyCode();
-       if (keyCode == KeyEvent.VK_J) {
+       if (keyCode == KeyEvent.VK_I) {
+          int[] selected = TableUtil.GetSelectedRows(TABLE);
+          if (selected == null || selected.length < 1)
+             return;
+          JSONObject json = GetRowData(selected[0]);
+          if (json != null) {
+             config.gui.show_details.update(currentTivo, json);
+          }
+       } else if (keyCode == KeyEvent.VK_J) {
           // Print json of selected row to log window
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)

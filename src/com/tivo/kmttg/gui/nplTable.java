@@ -410,6 +410,15 @@ public class nplTable {
             if (item.equals("Get extended metadata")) {
                createMeta.getExtendedMetadata(tivoName, s.data, true);
             }
+            if (item.equals("Show information")) {
+               // Dispatch i key event so no need to duplicate code here
+               NowPlaying.dispatchEvent(
+                  new KeyEvent(
+                     NowPlaying, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0,
+                     KeyEvent.VK_I, KeyEvent.CHAR_UNDEFINED
+                  )
+               );                
+            }
             if (item.equals("Display data")) {
                // Dispatch j key event so no need to duplicate code here
                NowPlaying.dispatchEvent(
@@ -455,12 +464,16 @@ public class nplTable {
       JMenuItem play = new JMenuItem("Play");
       play.addActionListener(meta.getActionListeners()[0]);
       
+      JMenuItem showInfo = new JMenuItem("Show information");
+      showInfo.addActionListener(meta.getActionListeners()[0]);
+      
       JMenuItem info = new JMenuItem("Display data");
       info.addActionListener(meta.getActionListeners()[0]);
       
       JMenuItem query = new JMenuItem("Web query");
       query.addActionListener(meta.getActionListeners()[0]);
       
+      popupMenu.add(showInfo);
       popupMenu.add(info);
       popupMenu.add(query);
       popupMenu.add(meta);
@@ -626,6 +639,15 @@ public class nplTable {
                }
             } // if keyCode == KeyEvent.VK_SPACE            
          } // if selected != null
+      } else if (keyCode == KeyEvent.VK_I) {
+         // Print all data of selected row to log window by sorted keys
+         int[] selected = GetSelectedRows();
+         if (selected == null || selected.length < 1)
+            return;
+         sortableDate s = (sortableDate)NowPlaying.getValueAt(selected[0],getColumnIndex("DATE"));
+         if ( ! s.folder && s.data != null && s.data.containsKey("recordingId")) {
+            config.gui.show_details.update(tivoName, s.data.get("recordingId"));
+         }
       } else if (keyCode == KeyEvent.VK_J) {
          // Print all data of selected row to log window by sorted keys
          int[] selected = GetSelectedRows();
@@ -762,6 +784,9 @@ public class nplTable {
       
             log.warn("\n" + s.data.get("title"));
             log.print(message);
+            
+            if (config.gui.show_details.isShowing() && s.data.containsKey("recordingId"))
+               config.gui.show_details.update(tivoName, s.data.get("recordingId"));
          }
       }
    }
