@@ -18,6 +18,7 @@ import javax.swing.JTextArea;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
 
@@ -158,6 +159,8 @@ public class ShowDetails {
    }
    
    public void update(String tivoName, String recordingId) {
+      if ( ! config.rpcEnabled(tivoName) )
+         return;
       JSONObject json = new JSONObject();
       try {
          json.put("levelOfDetail", "medium");
@@ -170,6 +173,8 @@ public class ShowDetails {
    
    // Update dialog components with given JSON (runs as background task)
    public void update(final String tivoName, final JSONObject initialJson) {
+      if ( ! config.rpcEnabled(tivoName) )
+         return;
       if (initialJson == null)
          return;
       class backgroundRun extends SwingWorker<Object, Object> {
@@ -178,7 +183,7 @@ public class ShowDetails {
                JSONObject json = initialJson;
                // Need high level of detail
                if (json.has("levelOfDetail") && ! json.getString("levelOfDetail").equals("high")) {
-                  Remote r = new Remote(tivoName);
+                  Remote r = config.initRemote(tivoName);
                   if (r.success) {
                      JSONObject j = new JSONObject();
                      j.put("bodyId", r.bodyId_get());
@@ -237,7 +242,10 @@ public class ShowDetails {
                String chan = "";
                if (json.has("channel")) {
                   JSONObject c = json.getJSONObject("channel");
-                  chan = c.getString("channelNumber") + " " + c.getString("name");
+                  if (c.has("channelNumber"))
+                  chan = c.getString("channelNumber");
+                  if (c.has("callSign"))
+                     chan += " " + c.getString("callSign");
                }
                channel.setText(chan);
       
