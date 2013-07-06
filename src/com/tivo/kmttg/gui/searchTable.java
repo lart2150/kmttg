@@ -137,11 +137,8 @@ public class searchTable {
       //TABLE.setFillsViewportHeight(true);
       //TABLE.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
       
-      // Add popup menu
-      TableUtil.CreatePopupMenu(TABLE, new PopupPair[] {
-         new PopupPair("Display data", KeyEvent.VK_J),
-         new PopupPair("Web query", KeyEvent.VK_Q)
-      });
+      // Add right mouse button handler
+      TableUtil.AddRightMouseListener(TABLE);
    }   
 
    // Custom table cell renderer to allow for icons

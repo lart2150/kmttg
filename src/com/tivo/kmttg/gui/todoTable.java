@@ -106,12 +106,8 @@ public class todoTable {
          }
       });
       
-      // Add popup menu
-      TableUtil.CreatePopupMenu(TABLE, new PopupPair[] {
-         new PopupPair("Show Information", KeyEvent.VK_I),
-         new PopupPair("Display data", KeyEvent.VK_J),
-         new PopupPair("Web query", KeyEvent.VK_Q)
-      });
+      // Add right mouse button handler
+      TableUtil.AddRightMouseListener(TABLE);
    }    
     
     // Override some default table model actions
