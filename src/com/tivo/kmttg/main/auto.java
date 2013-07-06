@@ -501,7 +501,7 @@ public class auto {
       h.put("metadataTivo",        false);
       h.put("decrypt",             (Boolean)(auto.decrypt   == 1));
       h.put("qsfix",               (Boolean)(auto.qsfix     == 1));
-      h.put("twpdelete",           (Boolean)(auto.twpdelete == 1 && config.TivoWebPlusDelete == 1));
+      h.put("twpdelete",           (Boolean)(auto.twpdelete == 1 && config.twpDeleteEnabled()));
       h.put("ipaddelete",          (Boolean)(auto.ipaddelete == 1 && config.rpcEnabled(tivoName)));
       h.put("comskip",             (Boolean)(auto.comskip   == 1));
       h.put("comcut",              (Boolean)(auto.comcut    == 1));
