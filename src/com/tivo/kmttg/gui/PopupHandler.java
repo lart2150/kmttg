@@ -32,7 +32,8 @@ public class PopupHandler {
       } else {
          // This is a NPL table
          tivoName = tabName;
-         items.add(new PopupPair("Get extended metadata [m]", KeyEvent.VK_M));
+         if (!config.rpcEnabled(tivoName) && !config.mindEnabled(tivoName))
+            items.add(new PopupPair("Get extended metadata [m]", KeyEvent.VK_M));
          if (config.rpcEnabled(tivoName) || config.twpDeleteEnabled())
             items.add(new PopupPair("Delete [delete]", KeyEvent.VK_DELETE));
          if (config.rpcEnabled(tivoName)) {
