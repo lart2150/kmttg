@@ -16,6 +16,7 @@ import com.tivo.kmttg.main.config;
 public class PopupHandler {   
    public static void display(final JXTable TABLE, MouseEvent e) {
       String tabName = config.gui.getCurrentTabName();
+      String tivoName;
       if (tabName.equals("FILES"))
          return;
       JPopupMenu popup = new JPopupMenu();
@@ -23,20 +24,23 @@ public class PopupHandler {
       if (tabName.equals("Remote")) {
          // This is a Remote table
          String subTabName = config.gui.remote_gui.getCurrentTabName();
-         String tivoName = config.gui.remote_gui.getTivoName(subTabName);
+         tivoName = config.gui.remote_gui.getTivoName(subTabName);
          if (config.rpcEnabled(tivoName))
-            items.add(new PopupPair("Show Information", KeyEvent.VK_I));
-         items.add(new PopupPair("Display data", KeyEvent.VK_J));
-         items.add(new PopupPair("Web query", KeyEvent.VK_Q));
+            items.add(new PopupPair("Show Information [i]", KeyEvent.VK_I));
+         items.add(new PopupPair("Display data [j]", KeyEvent.VK_J));
+         items.add(new PopupPair("Web query [q]", KeyEvent.VK_Q));
       } else {
          // This is a NPL table
-         items.add(new PopupPair("Get extended metadata", KeyEvent.VK_M));
-         items.add(new PopupPair("Delete", KeyEvent.VK_DELETE));
-         items.add(new PopupPair("Play", KeyEvent.VK_SPACE));
-         if (config.rpcEnabled(tabName))
-            items.add(new PopupPair("Show Information", KeyEvent.VK_I));
-         items.add(new PopupPair("Display data", KeyEvent.VK_J));
-         items.add(new PopupPair("Web query", KeyEvent.VK_Q));
+         tivoName = tabName;
+         items.add(new PopupPair("Get extended metadata [m]", KeyEvent.VK_M));
+         if (config.rpcEnabled(tivoName) || config.twpDeleteEnabled())
+            items.add(new PopupPair("Delete [delete]", KeyEvent.VK_DELETE));
+         if (config.rpcEnabled(tivoName)) {
+            items.add(new PopupPair("Play [space]", KeyEvent.VK_SPACE));
+            items.add(new PopupPair("Show Information [i]", KeyEvent.VK_I));
+         }
+         items.add(new PopupPair("Display data [j]", KeyEvent.VK_J));
+         items.add(new PopupPair("Web query [q]", KeyEvent.VK_Q));
       }
       
       for (int i=0; i<items.size(); ++i) {
