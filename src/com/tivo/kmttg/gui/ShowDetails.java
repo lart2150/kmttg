@@ -31,7 +31,7 @@ public class ShowDetails {
    private JLabel time = null;
    private JLabel channel = null;
    private JTextArea description = null;
-   private JLabel otherInfo = null;
+   private JTextArea otherInfo = null;
    private JTextArea actorInfo = null;
    private JLabel image = null;
    private Color backgroundColor = new Color(16,0,76); // dark blue
@@ -74,8 +74,12 @@ public class ShowDetails {
          description.setLineWrap(true);
          description.setWrapStyleWord(true);
          
-         otherInfo = new JLabel("");
+         otherInfo = new JTextArea();
+         otherInfo.setBackground(backgroundColor);
          otherInfo.setForeground(otherColor);
+         otherInfo.setColumns(textRowLimit);
+         otherInfo.setLineWrap(true);
+         otherInfo.setWrapStyleWord(true);
          
          actorInfo = new JTextArea();
          actorInfo.setBackground(backgroundColor);
@@ -258,7 +262,7 @@ public class ShowDetails {
                   if (json.has("duration")) {
                      long s = TableUtil.getStartTime(json);
                      long e = TableUtil.getEndTime(json);
-                     t += " (" + (int)(e-s)/60000 + " mins)";
+                     t += " (" + (int)Math.ceil((e-s)/60000.0) + " mins)";
                   }
                }
                time.setText(t);
@@ -302,11 +306,32 @@ public class ShowDetails {
                if (json.has("credit")) {
                   String separator = "";
                   JSONArray credit = json.getJSONArray("credit");
+                  // actors
                   for (int i=0; i<credit.length(); ++i) {
                      JSONObject a = credit.getJSONObject(i);
                      if (i>0) separator = ", ";
-                     if (a.getString("role").equals("actor"))
-                        actors += separator + a.getString("first") + " " + a.getString("last");
+                     if (a.getString("role").equals("actor")) {
+                        if (a.has("first") && a.has("last"))
+                           actors += separator + a.getString("first") + " " + a.getString("last");
+                     }
+                  }
+                  // hosts
+                  Boolean pyTivo = false;
+                  for (int i=0; i<credit.length(); ++i) {
+                     JSONObject a = credit.getJSONObject(i);
+                     if (a.getString("role").equals("host") && a.has("first")) {
+                        if (a.getString("first").equals("container"))
+                           pyTivo = true;
+                     }
+                  }
+                  if (!pyTivo) {
+                     for (int i=0; i<credit.length(); ++i) {
+                        JSONObject a = credit.getJSONObject(i);
+                        if (a.getString("role").equals("host")) {
+                           if (a.has("first") && a.has("last"))
+                              actors += separator + a.getString("first") + " " + a.getString("last");
+                        }
+                     }                     
                   }
                }
                actorInfo.setText(actors);
@@ -320,6 +345,7 @@ public class ShowDetails {
                   image.setText("");
                   image.setIcon(null);
                }
+               //log.print(json.toString(3));
             } catch (JSONException e) {
                log.error("ShowDetails update - " + e.getMessage());
             }
