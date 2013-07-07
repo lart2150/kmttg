@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
@@ -232,10 +234,10 @@ public class ShowDetails {
                   subtitle = "\"" + json.getString("subtitle") + "\"";
                if (json.has("starRating"))
                   subtitle += "Stars: " + starsToNum(json.getString("starRating"));
-               if (json.has("seasonNumber"))
-                  subtitle += " Sea " + json.get("seasonNumber");
-               if (json.has("episodeNum"))
-                  subtitle += " Ep " + json.getJSONArray("episodeNum").get(0);
+               if (json.has("seasonNumber") && json.has("episodeNum")) {
+                  subtitle += " (Sea " + json.get("seasonNumber") +
+                  " Ep " + json.getJSONArray("episodeNum").get(0) + ")";
+               }
                subTitle.setText(subtitle);
                
                // channel
@@ -262,10 +264,13 @@ public class ShowDetails {
                time.setText(t);
                   
                // description
-               if (json.has("description"))
-                  description.setText(json.getString("description"));
-               else
-                  description.setText("");
+               String desc = "";
+               if (json.has("description")) {
+                  desc = json.getString("description");
+                  if (json.has("cc") && json.getBoolean("cc"))
+                     desc += " (CC)";
+               }
+               description.setText(desc);
                
                // otherInfo
                String other = "";
@@ -273,6 +278,16 @@ public class ShowDetails {
                   other += "Rated " + json.getString("mpaaRating").toUpperCase() + "; ";
                else if (json.has("tvRating"))
                   other += "TV " + json.getString("tvRating").toUpperCase() + "; ";
+               if (json.has("category")) {
+                  JSONArray cat = json.getJSONArray("category");
+                  Set<String> c = new HashSet<String>();
+                  for (int i=0; i<cat.length(); ++i) {
+                     if (cat.getJSONObject(i).has("label"))
+                        c.add(cat.getJSONObject(i).getString("label"));
+                  }
+                  for (String s : c)
+                     other += s + "; ";
+               }
                if (json.has("hdtv") && json.getBoolean("hdtv"))
                   other += "HD; ";
                if (json.has("originalAirdate")) {
