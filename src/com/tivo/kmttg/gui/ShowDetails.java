@@ -161,6 +161,7 @@ public class ShowDetails {
          dialog.setTitle("Show information");
          dialog.setContentPane(main_panel);
          dialog.setLocationRelativeTo(frame.getJMenuBar().getComponent(0));
+         dialog.pack();
       }
    }
    
@@ -349,7 +350,7 @@ public class ShowDetails {
             } catch (JSONException e) {
                log.error("ShowDetails update - " + e.getMessage());
             }
-            dialog.invalidate();
+            dialog.validate();
             dialog.pack();
             display(true);
             return null;
