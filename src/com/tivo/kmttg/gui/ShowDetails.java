@@ -306,14 +306,17 @@ public class ShowDetails {
                String actors = "";
                if (json.has("credit")) {
                   String separator = "";
+                  int count = 0;
                   JSONArray credit = json.getJSONArray("credit");
                   // actors
                   for (int i=0; i<credit.length(); ++i) {
                      JSONObject a = credit.getJSONObject(i);
-                     if (i>0) separator = ", ";
                      if (a.getString("role").equals("actor")) {
-                        if (a.has("first") && a.has("last"))
+                        if (a.has("first") && a.has("last")) {
+                           if (count>0) separator = ", ";
                            actors += separator + a.getString("first") + " " + a.getString("last");
+                           count++;
+                        }
                      }
                   }
                   // hosts
@@ -331,8 +334,11 @@ public class ShowDetails {
                      for (int i=0; i<credit.length(); ++i) {
                         JSONObject a = credit.getJSONObject(i);
                         if (a.getString("role").equals("host")) {
-                           if (a.has("first") && a.has("last"))
+                           if (a.has("first") && a.has("last")) {
+                              if (count>0) separator = ", ";
                               actors += separator + a.getString("first") + " " + a.getString("last");
+                              count++;
+                           }
                         }
                      }                     
                   }
