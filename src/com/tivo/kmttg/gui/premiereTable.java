@@ -277,7 +277,17 @@ public class premiereTable {
           if (json != null) {
              config.gui.show_details.update(currentTivo, json);
           }
-       } else if (keyCode == KeyEvent.VK_J) {
+       }
+       else if (keyCode == KeyEvent.VK_R) {
+          config.gui.remote_gui.record_premiere.doClick();
+       }
+       else if (keyCode == KeyEvent.VK_S) {
+          config.gui.remote_gui.recordSP_premiere.doClick();
+       }
+       else if (keyCode == KeyEvent.VK_W) {
+          config.gui.remote_gui.wishlist_premiere.doClick();
+       }
+       else if (keyCode == KeyEvent.VK_J) {
           // Print json of selected row to log window
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)

@@ -211,7 +211,7 @@ public class todoTable {
        }
     }
     
-    // Handle delete keyboard presses
+    // Handle keyboard presses
     private void KeyPressed(KeyEvent e) {
        if (e.isControlDown())
           return;
@@ -219,7 +219,14 @@ public class todoTable {
        if (keyCode == KeyEvent.VK_DELETE){
           // Delete key has special action
           DeleteCB();
-       } else if (keyCode == KeyEvent.VK_I) {
+       }
+       else if (keyCode == KeyEvent.VK_C) {
+          config.gui.remote_gui.cancel_todo.doClick();
+       }
+       else if (keyCode == KeyEvent.VK_M) {
+          config.gui.remote_gui.modify_todo.doClick();
+       }
+       else if (keyCode == KeyEvent.VK_I) {
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
              return;

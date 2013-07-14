@@ -162,7 +162,14 @@ public class deletedTable {
          if (json != null) {
             config.gui.show_details.update(currentTivo, json);
          }
-      } else if (keyCode == KeyEvent.VK_J) {
+      }
+      else if (keyCode == KeyEvent.VK_R) {
+         config.gui.remote_gui.recover_deleted.doClick();
+      }
+      else if (keyCode == KeyEvent.VK_DELETE) {
+         config.gui.remote_gui.permDelete_deleted.doClick();
+      }
+      else if (keyCode == KeyEvent.VK_J) {
          // Print json of selected row to log window
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
