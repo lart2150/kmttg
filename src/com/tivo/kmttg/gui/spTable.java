@@ -103,6 +103,9 @@ public class spTable {
       sorter.setComparator(sortableComparator);
       sorter = TABLE.getColumnExt(3).getSorter();
       sorter.setComparator(sortableComparator);
+      
+      // Add right mouse button handler
+      TableUtil.AddRightMouseListener(TABLE);
    }   
 
    /**
@@ -520,6 +523,18 @@ public class spTable {
           JSONObject json = GetRowData(selected[0]);
           if (json != null)
              rnpl.printJSON(json);
+       }
+       else if (keyCode == KeyEvent.VK_C) {
+          config.gui.remote_gui.copy_sp.doClick();
+       }
+       else if (keyCode == KeyEvent.VK_M) {
+          config.gui.remote_gui.modify_sp.doClick();
+       }
+       else if (keyCode == KeyEvent.VK_U) {
+          config.gui.remote_gui.upcoming_sp.doClick();
+       }
+       else if (keyCode == KeyEvent.VK_O) {
+          config.gui.remote_gui.conflicts_sp.doClick();
        }
        else if (keyCode == KeyEvent.VK_Q) {
           // Web query currently selected entry
