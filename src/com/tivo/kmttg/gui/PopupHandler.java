@@ -25,12 +25,29 @@ public class PopupHandler {
          // This is a Remote table
          String subTabName = config.gui.remote_gui.getCurrentTabName();
          tivoName = config.gui.remote_gui.getTivoName(subTabName);
+         if (subTabName.equals("ToDo")) {            
+            items.add(new PopupPair("Cancel [c]", KeyEvent.VK_C, subTabName));
+            items.add(new PopupPair("Modify [m]", KeyEvent.VK_M, subTabName));
+         }
+         if (subTabName.equals("Won't Record")) {            
+            items.add(new PopupPair("Record [r]", KeyEvent.VK_R, subTabName));
+            items.add(new PopupPair("Explain [e]", KeyEvent.VK_E, subTabName));
+         }
+         if (subTabName.equals("Season Premieres") || subTabName.equals("Search") || subTabName.equals("Guide")) {            
+            items.add(new PopupPair("Record [r]", KeyEvent.VK_R, subTabName));
+            items.add(new PopupPair("Season Pass [s]", KeyEvent.VK_S, subTabName));
+            items.add(new PopupPair("Wishlist [w]", KeyEvent.VK_W, subTabName));
+         }
          if (subTabName.equals("Season Passes")) {
             items.add(new PopupPair("Delete [delete]", KeyEvent.VK_DELETE, subTabName));
             items.add(new PopupPair("Copy [c]", KeyEvent.VK_C, subTabName));
             items.add(new PopupPair("Modify [m]", KeyEvent.VK_M, subTabName));
             items.add(new PopupPair("Upcoming [u]", KeyEvent.VK_U, subTabName));
             items.add(new PopupPair("Conflicts [o]", KeyEvent.VK_O, subTabName));
+         }
+         if (subTabName.equals("Deleted")) {            
+            items.add(new PopupPair("Recover [r]", KeyEvent.VK_R, subTabName));
+            items.add(new PopupPair("Permanently Delete [delete]", KeyEvent.VK_DELETE, subTabName));
          }
          if (config.rpcEnabled(tivoName) && !subTabName.equals("Season Passes"))
             items.add(new PopupPair("Show Information [i]", KeyEvent.VK_I, subTabName));
