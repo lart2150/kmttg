@@ -143,6 +143,10 @@ public class remotegui {
    private JButton rc_jumpto_button = null;
    private JButton rc_jumpahead_button = null;
    private JButton rc_jumpback_button = null;
+   public JButton copy_sp = null;
+   public JButton conflicts_sp = null;
+   public JButton modify_sp = null;
+   public JButton upcoming_sp = null;
    
    private Hashtable<String,JSONArray> all_todo = new Hashtable<String,JSONArray>();
    private long all_todo_time = 0;
@@ -648,7 +652,7 @@ public class remotegui {
          }
       });         
       
-      JButton copy_sp = new JButton("Copy");
+      copy_sp = new JButton("Copy");
       copy_sp.setMargin(new Insets(1,1,1,1));
       copy_sp.setToolTipText(getToolTip("copy_sp"));
       copy_sp.addActionListener(new java.awt.event.ActionListener() {
@@ -670,7 +674,7 @@ public class remotegui {
          }
       });         
       
-      JButton modify_sp = new JButton("Modify");
+      modify_sp = new JButton("Modify");
       modify_sp.setMargin(new Insets(1,1,1,1));
       modify_sp.setToolTipText(getToolTip("modify_sp"));
       modify_sp.addActionListener(new java.awt.event.ActionListener() {
@@ -706,7 +710,7 @@ public class remotegui {
          }
       });         
 
-      JButton upcoming_sp = new JButton("Upcoming");
+      upcoming_sp = new JButton("Upcoming");
       upcoming_sp.setMargin(new Insets(1,1,1,1));
       upcoming_sp.setToolTipText(getToolTip("upcoming_sp"));
       upcoming_sp.addActionListener(new java.awt.event.ActionListener() {
@@ -742,7 +746,7 @@ public class remotegui {
          }
       });
 
-      JButton conflicts_sp = new JButton("Conflicts");
+      conflicts_sp = new JButton("Conflicts");
       conflicts_sp.setMargin(new Insets(1,1,1,1));
       conflicts_sp.setToolTipText(getToolTip("conflicts_sp"));
       conflicts_sp.addActionListener(new java.awt.event.ActionListener() {
