@@ -130,14 +130,22 @@ public class remotegui {
    private Boolean cc_state = false;
    
    // These buttons selectively disabled
-   private JButton cancel_todo = null;
-   private JButton modify_todo = null;
+   public JButton cancel_todo = null;
+   public JButton modify_todo = null;
    private JButton reorder_sp = null;
-   private JButton wishlist_premiere = null;
-   private JButton wishlist_search = null;    
-   private JButton wishlist_guide = null;
-   private JButton recover_deleted = null;
-   private JButton permDelete_deleted = null;  
+   public JButton record_cancel = null;
+   public JButton explain_cancel = null;
+   public JButton record_premiere = null;
+   public JButton recordSP_premiere = null;
+   public JButton wishlist_premiere = null;
+   public JButton record_search = null;    
+   public JButton recordSP_search = null;    
+   public JButton wishlist_search = null;    
+   public JButton record_guide = null;
+   public JButton recordSP_guide = null;
+   public JButton wishlist_guide = null;
+   public JButton recover_deleted = null;
+   public JButton permDelete_deleted = null;  
    private JButton rc_hme_button = null;
    private JButton rc_sps_button = null;
    private JButton rc_jumpto_button = null;
@@ -445,10 +453,10 @@ public class remotegui {
          }
       });
 
-      JButton guide_record = new JButton("Record");
-      guide_record.setMargin(new Insets(1,1,1,1));
-      guide_record.setToolTipText(getToolTip("guide_record"));
-      guide_record.addActionListener(new java.awt.event.ActionListener() {
+      record_guide = new JButton("Record");
+      record_guide.setMargin(new Insets(1,1,1,1));
+      record_guide.setToolTipText(getToolTip("guide_record"));
+      record_guide.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             if (tab_guide.inFolder) {
                String tivoName = (String)tivo_guide.getSelectedItem();
@@ -459,10 +467,10 @@ public class remotegui {
          }
       });
 
-      JButton guide_recordSP = new JButton("Season Pass");
-      guide_recordSP.setMargin(new Insets(1,1,1,1));
-      guide_recordSP.setToolTipText(getToolTip("guide_recordSP"));
-      guide_recordSP.addActionListener(new java.awt.event.ActionListener() {
+      recordSP_guide = new JButton("Season Pass");
+      recordSP_guide.setMargin(new Insets(1,1,1,1));
+      recordSP_guide.setToolTipText(getToolTip("guide_recordSP"));
+      recordSP_guide.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             if (tab_guide.inFolder) {
                String tivoName = (String)tivo_guide.getSelectedItem();
@@ -519,9 +527,9 @@ public class remotegui {
       row1_guide.add(Box.createRigidArea(space_5));
       row1_guide.add(refresh_guide);
       row1_guide.add(Box.createRigidArea(space_5));
-      row1_guide.add(guide_record);
+      row1_guide.add(record_guide);
       row1_guide.add(Box.createRigidArea(space_5));
-      row1_guide.add(guide_recordSP);
+      row1_guide.add(recordSP_guide);
       row1_guide.add(Box.createRigidArea(space_5));
       row1_guide.add(wishlist_guide);
       row1_guide.add(Box.createRigidArea(space_5));
@@ -891,7 +899,7 @@ public class remotegui {
          }
       });
 
-      JButton record_cancel = new JButton("Record");
+      record_cancel = new JButton("Record");
       record_cancel.setMargin(new Insets(1,1,1,1));
       record_cancel.setToolTipText(getToolTip("record_cancel"));
       record_cancel.addActionListener(new java.awt.event.ActionListener() {
@@ -904,7 +912,7 @@ public class remotegui {
          }
       });
 
-      JButton explain_cancel = new JButton("Explain");
+      explain_cancel = new JButton("Explain");
       explain_cancel.setMargin(new Insets(1,1,1,1));
       explain_cancel.setToolTipText(getToolTip("explain_cancel"));
       explain_cancel.addActionListener(new java.awt.event.ActionListener() {
@@ -1193,7 +1201,7 @@ public class remotegui {
          }
       });
       
-      JButton record_premiere = new JButton("Record");
+      record_premiere = new JButton("Record");
       record_premiere.setMargin(new Insets(1,1,1,1));
       record_premiere.setToolTipText(getToolTip("record_premiere"));
       record_premiere.addActionListener(new java.awt.event.ActionListener() {
@@ -1204,7 +1212,7 @@ public class remotegui {
          }
       });
       
-      JButton recordSP_premiere = new JButton("Season Pass");
+      recordSP_premiere = new JButton("Season Pass");
       recordSP_premiere.setMargin(new Insets(1,1,1,1));
       recordSP_premiere.setToolTipText(getToolTip("recordSP_premiere"));
       recordSP_premiere.addActionListener(new java.awt.event.ActionListener() {
@@ -1491,7 +1499,7 @@ public class remotegui {
 
       text_search.setToolTipText(getToolTip("text_search"));
 
-      JButton record_search = new JButton("Record");
+      record_search = new JButton("Record");
       record_search.setMargin(new Insets(1,1,1,1));
       record_search.setToolTipText(getToolTip("record_search"));
       record_search.addActionListener(new java.awt.event.ActionListener() {
@@ -1503,10 +1511,10 @@ public class remotegui {
          }
       });
 
-      JButton record_sp_search = new JButton("Season Pass");
-      record_sp_search.setMargin(new Insets(1,1,1,1));
-      record_sp_search.setToolTipText(getToolTip("record_sp_search"));
-      record_sp_search.addActionListener(new java.awt.event.ActionListener() {
+      recordSP_search = new JButton("Season Pass");
+      recordSP_search.setMargin(new Insets(1,1,1,1));
+      recordSP_search.setToolTipText(getToolTip("record_sp_search"));
+      recordSP_search.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             String tivoName = (String)tivo_search.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
@@ -1570,7 +1578,7 @@ public class remotegui {
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(record_search);
       row1_search.add(Box.createRigidArea(space_5));
-      row1_search.add(record_sp_search);
+      row1_search.add(recordSP_search);
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(wishlist_search);
       row1_search.add(Box.createRigidArea(space_5));
