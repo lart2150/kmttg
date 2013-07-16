@@ -68,7 +68,7 @@ if ($chan) {         # want to tune to a channel
     for $chdigit (split(//, sprintf("%04d", $chan))) {
         $ircmds .= pack("v2", $chdigit ? $chdigit + 8 : 18, 500);
     }
-    sling_cmd(0x87, $ircmds . pack("x448 v4", 3, 0, 0, 0));
+    sling_cmd(0x87, $ircmds . pack("x456 v4", 3, 0, 0, 0));
 }
 sling_cmd(0xb5, pack("V11 a16 V2 x92", 0xff, 0xff, $hd ? 0x0f : $vs, 1, 0x051e0000 + $vbw, 0x10001 + ($vsm << 8), 3, 1,
                       0x40, 0x4f, 1, $rand, 0x1012020, 1)); # set stream params
