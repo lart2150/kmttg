@@ -243,7 +243,10 @@ public class jdownload_decrypt implements Serializable {
             log.error("Download failed to file: " + job.mpegFile);
             log.error("Exit code: " + exit_code);
             process.printStderr();
-            file.delete(job.mpegFile);
+            if (config.DeleteFailedDownloads == 1) {
+               if (file.delete(job.mpegFile))
+                  log.warn("Removed failed download file: " + job.mpegFile);
+            }
             
             // Try download again with delayed launch time if specified
             if (job.launch_tries < config.download_tries) {

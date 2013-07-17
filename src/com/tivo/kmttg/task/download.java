@@ -245,7 +245,10 @@ public class download implements Serializable {
             log.error("Download failed to file: " + job.tivoFile);
             log.error("Exit code: " + exit_code);
             process.printStderr();
-            file.delete(job.tivoFile);
+            if (config.DeleteFailedDownloads == 1) {
+               if (file.delete(job.tivoFile))
+                  log.warn("Removed failed download file: " + job.tivoFile);
+            }
             
             // Try download again with delayed launch time if specified
             if (job.launch_tries < config.download_tries) {

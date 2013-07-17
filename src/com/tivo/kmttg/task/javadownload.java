@@ -218,7 +218,10 @@ public class javadownload implements Serializable {
          
          if (failed == 1) {
             log.error("Download failed to file: " + job.tivoFile);
-            file.delete(job.tivoFile);
+            if (config.DeleteFailedDownloads == 1) {
+               if (file.delete(job.tivoFile))
+                  log.warn("Removed failed download file: " + job.tivoFile);
+            }
             
             // Try download again with delayed launch time if specified
             if (job.launch_tries < config.download_tries) {
