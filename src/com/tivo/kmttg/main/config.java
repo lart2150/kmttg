@@ -74,7 +74,8 @@ public class config {
    public static int VrdCombineCutEncode = 0; // Combine VRD Ad Cut and encode
    public static int VrdQsfixMpeg2ps = 0; // If set force VRD QS Fix to output mpeg2 program stream
    public static int TSDownload = 0;
-   public static int OverwriteFiles = 0;
+   public static int OverwriteFiles = 0; // Don't overwrite existing files by default
+   public static int DeleteFailedDownloads = 1; // Delete failed download files by default
    public static int HideProtectedFiles = 0;   
    public static int java_downloads = 0;        // Use java instead of curl to download
    public static int combine_download_decrypt = 0; // Combine download and decrypt if possible
@@ -879,6 +880,9 @@ public class config {
             if (key.equals("OverwriteFiles")) {
                OverwriteFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("DeleteFailedDownloads")) {
+               DeleteFailedDownloads = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("java_downloads")) {
                java_downloads = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1174,6 +1178,8 @@ public class config {
          ofp.write("<HideProtectedFiles>\n" + HideProtectedFiles + "\n\n");
          
          ofp.write("<OverwriteFiles>\n" + OverwriteFiles + "\n\n");
+         
+         ofp.write("<DeleteFailedDownloads>\n" + DeleteFailedDownloads + "\n\n");
          
          ofp.write("<java_downloads>\n" + java_downloads + "\n\n");
          

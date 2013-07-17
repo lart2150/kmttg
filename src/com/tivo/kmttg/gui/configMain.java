@@ -72,6 +72,7 @@ public class configMain {
    private static JCheckBox iPadDelete = null;
    private static JCheckBox HideProtectedFiles = null;
    private static JCheckBox OverwriteFiles = null;
+   private static JCheckBox DeleteFailedDownloads = null;
    private static JCheckBox java_downloads = null;
    private static JCheckBox toolTips = null;
    private static JCheckBox slingBox = null;
@@ -632,6 +633,12 @@ public class configMain {
       else
          OverwriteFiles.setSelected(false);
       
+      // DeleteFailedDownloads
+      if (config.DeleteFailedDownloads == 1)
+         DeleteFailedDownloads.setSelected(true);
+      else
+         DeleteFailedDownloads.setSelected(false);
+      
       // java_downloads
       if (config.java_downloads == 1)
          java_downloads.setSelected(true);
@@ -1122,6 +1129,12 @@ public class configMain {
          config.OverwriteFiles = 1;
       else
          config.OverwriteFiles = 0;
+      
+      // DeleteFailedDownloads
+      if (DeleteFailedDownloads.isSelected())
+         config.DeleteFailedDownloads = 1;
+      else
+         config.DeleteFailedDownloads = 0;
       
       // java_downloads
       if (java_downloads.isSelected())
@@ -1796,6 +1809,7 @@ public class configMain {
       iPadDelete = new javax.swing.JCheckBox();
       HideProtectedFiles = new javax.swing.JCheckBox();
       OverwriteFiles = new javax.swing.JCheckBox();
+      DeleteFailedDownloads = new javax.swing.JCheckBox();
       java_downloads = new javax.swing.JCheckBox();
       combine_download_decrypt = new javax.swing.JCheckBox();
       single_download = new javax.swing.JCheckBox();
@@ -1918,6 +1932,7 @@ public class configMain {
       iPadDelete.setText("Enable iPad style delete task");
       HideProtectedFiles.setText("Do not show copy protected files in table");
       OverwriteFiles.setText("Overwrite existing files");
+      DeleteFailedDownloads.setText("Delete failed downloads");
       java_downloads.setText("Use Java for downloads instead of curl");
       combine_download_decrypt.setText("Combine download and tivodecode decrypt");
       single_download.setText("Allow only 1 download at a time");
@@ -2702,6 +2717,11 @@ public class configMain {
       c.gridx = 0;
       c.gridy = gy;
       files_panel.add(OverwriteFiles, c);
+      
+      // DeleteFailedDownloads
+      c.gridx = 1;
+      c.gridy = gy;
+      files_panel.add(DeleteFailedDownloads, c);
 
       // Programs Panel
       JPanel programs_panel = new JPanel(new GridBagLayout());      
@@ -3299,6 +3319,7 @@ public class configMain {
       iPadDelete.setToolTipText(getToolTip("iPadDelete"));
       HideProtectedFiles.setToolTipText(getToolTip("HideProtectedFiles"));
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
+      DeleteFailedDownloads.setToolTipText(getToolTip("DeleteFailedDownloads"));
       java_downloads.setToolTipText(getToolTip("java_downloads"));
       combine_download_decrypt.setToolTipText(getToolTip("combine_download_decrypt"));
       single_download.setToolTipText(getToolTip("single_download"));
@@ -3622,6 +3643,14 @@ public class configMain {
          text += "so as not to overwrite any existing files of same name on your computer.<br>";
          text += "With this option enabled kmttg will run tasks regardless of whether their output files<br>";
          text += "exist or not, overwriting existing files as needed.";
+      }
+      else if (component.equals("DeleteFailedDownloads")) {
+         text =  "<b>Delete failed downloads</b><br>";
+         text += "With this option disabled kmttg will not delete a failed file download attempt.<br>";
+         text += "This only useful if you want to keep a partial download and you also have<br>";
+         text += "<b>Overwrite existing files</b> option disabled or <b># download attempts</b> option<br>";
+         text += "set to 0 or 1. By disabling this option note that you can end up with partial downloads<br>";
+         text += "so most users will probably want to keep this option enabled.";
       }
       else if (component.equals("java_downloads")) {
          text =  "<b>Use Java for downloads instead of curl</b><br>";
