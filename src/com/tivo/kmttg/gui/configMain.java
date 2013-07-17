@@ -3647,7 +3647,7 @@ public class configMain {
       else if (component.equals("DeleteFailedDownloads")) {
          text =  "<b>Delete failed downloads</b><br>";
          text += "With this option disabled kmttg will not delete a failed file download attempt.<br>";
-         text += "This only useful if you want to keep a partial download and you also have<br>";
+         text += "This only useful disabled if you want to keep a partial download and you also have<br>";
          text += "<b>Overwrite existing files</b> option disabled or <b># download attempts</b> option<br>";
          text += "set to 0 or 1. By disabling this option note that you can end up with partial downloads<br>";
          text += "so most users will probably want to keep this option enabled.";
