@@ -1697,6 +1697,8 @@ public class jobMonitor {
       Long now = new Date().getTime();
       for (int i=0; i < config.getTivoNames().size(); i++) {
          String tivoName = config.getTivoNames().get(i);
+         if (!config.nplCapable(tivoName))
+            continue;
          if (launch.get(tivoName) == null) {
             launch.put(tivoName, now - 1);
          }
