@@ -416,6 +416,16 @@ public class config {
       TSN.put(tivoName, tsn);
    }
    
+   public static Boolean nplCapable(String tivoName) {
+      Boolean capable = true;
+      String tsn = getTsn(tivoName);
+      if (tsn != null && tsn.startsWith("AE2")) {
+         // TiVo Mini is not NPL capable
+         capable = false;
+      }
+      return capable;
+   }
+   
    // Get configured setting in limit_npl_fetches hash for given tivoName
    public static int getLimitNplSetting(String tivoName) {
       if (limit_npl_fetches.containsKey(tivoName)) {
