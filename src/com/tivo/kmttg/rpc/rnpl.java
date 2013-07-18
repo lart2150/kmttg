@@ -413,11 +413,11 @@ public class rnpl {
       Stack<String> allTivos = config.getTivoNames();
       Stack<String> filteredTivos = new Stack<String>();
       for (int i=0; i<allTivos.size(); ++i) {
-         if (config.rpcEnabled(allTivos.get(i)))
+         if (config.rpcEnabled(allTivos.get(i)) && config.nplCapable(allTivos.get(i)))
             filteredTivos.add(allTivos.get(i));
       }
       for (int i=0; i<allTivos.size(); ++i) {
-         if (config.mindEnabled(allTivos.get(i)))
+         if (config.mindEnabled(allTivos.get(i)) && config.nplCapable(allTivos.get(i)))
             filteredTivos.add(allTivos.get(i));
       }
       if (filteredTivos.isEmpty())
