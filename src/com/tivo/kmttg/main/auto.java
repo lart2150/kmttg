@@ -38,7 +38,8 @@ public class auto {
          // Queue up now playing list downloads from all Tivos
          for (int i=0; i < config.getTivoNames().size(); i++) {
             String tivoName = config.getTivoNames().get(i);
-            jobMonitor.getNPL(tivoName);
+            if (config.nplCapable(tivoName))
+               jobMonitor.getNPL(tivoName);
          }
          
          // Process all queued up jobs until all completed
@@ -61,7 +62,9 @@ public class auto {
          Hashtable<String,Long> launch = new Hashtable<String,Long>();
          Long now = new Date().getTime() - 1;
          for (int i=0; i < config.getTivoNames().size(); i++) {
-            launch.put(config.getTivoNames().get(i), now);
+            String tivoName = config.getTivoNames().get(i);
+            if (config.nplCapable(tivoName))
+               launch.put(tivoName, now);
          }
          Long launchTime;
          
@@ -71,6 +74,8 @@ public class auto {
             // Launch jobs for Tivos or update launch times appropriately
             for (int i=0; i < config.getTivoNames().size(); i++) {
                String tivoName = config.getTivoNames().get(i);
+               if (!config.nplCapable(tivoName))
+                  continue;
                now = new Date().getTime();
                if ( ! launch.containsKey(tivoName) ) {
                   launch.put(tivoName, new Date().getTime() - 1);
