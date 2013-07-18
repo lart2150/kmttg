@@ -1307,8 +1307,11 @@ public class gui {
          for (int i=0; i<tivoNames.size(); i++) {
             // Queue up a nowplaying list job for this tivo
             config.GUI_AUTO++;
-            getTab(tivoNames.get(i)).getTable().setFolderState(false);
-            jobMonitor.getNPL(tivoNames.get(i));
+            tivoTab t = getTab(tivoNames.get(i));
+            if (t != null) {
+               t.getTable().setFolderState(false);
+               jobMonitor.getNPL(tivoNames.get(i));
+            }
          }
       }
    }
@@ -1398,8 +1401,10 @@ public class gui {
          int i = 0;         
          for (String value : values.keySet()) {
             if (! value.equals("FILES") && ! value.equals("Remote")) {
-               names[i] = value;
-               i++;
+               if (config.nplCapable(value)) {
+                  names[i] = value;
+                  i++;
+               }
             }
          }
          
@@ -1407,7 +1412,7 @@ public class gui {
          tivoTabRemoveExtra(names);
          
          // Add tabs
-         for (int j=names.length-1; j>=0; j--) {
+         for (int j=i-1; j>=0; j--) {
             tivoTabAdd(names[j]);
          }
          
@@ -2359,8 +2364,11 @@ public class gui {
       Stack<String> tivoNames = config.getTivoNames();
       if (tivoNames.size() > 0) {
          for (int i=0; i<tivoNames.size(); i++) {
-            nplTable npl = getTab(tivoNames.get(i)).getTable();
-            npl.updateNPLjobStatus(map);
+            tivoTab t = getTab(tivoNames.get(i));
+            if (t != null) {
+               nplTable npl = t.getTable();
+               npl.updateNPLjobStatus(map);
+            }
          }
       }
    }
