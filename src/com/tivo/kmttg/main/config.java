@@ -370,7 +370,8 @@ public class config {
          setTsn(b.get("machine"), b.get("identity"));
       save(configIni);
       if (GUIMODE) {
-         config.gui.AddTivo(b.get("machine"), b.get("ip"));
+         if (nplCapable(b.get("machine")))
+            gui.AddTivo(b.get("machine"), b.get("ip"));
       }
    }
    
