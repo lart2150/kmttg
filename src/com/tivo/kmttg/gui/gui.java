@@ -1494,7 +1494,7 @@ public class gui {
             if (! tabName.equals("FILES") && ! tabName.equals("Remote")) {
                remove = true;
                for (int j=0; j<names.length; j++) {
-                  if (names[j].equals(tabName)) {
+                  if (names[j] != null && names[j].equals(tabName)) {
                      remove = false;
                   }
                }
