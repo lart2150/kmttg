@@ -627,6 +627,14 @@ public class auto {
          autoConfig.parseAuto(config.autoIni);
       }
       title = title.toLowerCase();
+      
+      // Escape some regex special characters (can't include $ and \ here)
+      char[] special = {'(', ')', '[', ']', '^', '*', '+', '?', '!'};
+      for (int i=0; i<special.length; ++i) {
+         if (title.contains("" + special[i]))
+            title = title.replaceAll("\\" + special[i], "\\\\" + special[i]);
+      }
+      
       // Check autoIni file to see if entry already exists
       Boolean exists = false;
       try {
