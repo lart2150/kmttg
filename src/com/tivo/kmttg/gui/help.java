@@ -87,7 +87,7 @@ public class help {
    public static String getVersion() {
       debug.print("");
       String version = null;
-      String version_url = "http://sourceforge.net/projects/kmttg/files/version_info/current_version/download?use_mirror=autoselect";
+      String version_url = "http://svn.code.sf.net/p/kmttg/code/trunk/version";
       try {
          URL url = new URL(version_url);
          URLConnection con = url.openConnection();
