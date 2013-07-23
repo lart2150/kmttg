@@ -27,7 +27,7 @@ import com.tivo.kmttg.util.log;
 public class ShowDetails {
    private JDialog dialog = null;
    private JLabel mainTitle = null;
-   private JLabel subTitle = null;
+   private JTextArea subTitle = null;
    private JLabel time = null;
    private JLabel channel = null;
    private JTextArea description = null;
@@ -58,8 +58,12 @@ public class ShowDetails {
             )
          );
          
-         subTitle = new JLabel("");
+         subTitle = new JTextArea();
+         subTitle.setBackground(backgroundColor);
          subTitle.setForeground(titleColor);
+         subTitle.setColumns(textRowLimit);
+         subTitle.setLineWrap(true);
+         subTitle.setWrapStyleWord(true);
          
          time = new JLabel("");
          time.setForeground(otherColor);
