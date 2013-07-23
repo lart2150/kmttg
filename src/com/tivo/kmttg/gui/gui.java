@@ -1302,7 +1302,7 @@ public class gui {
          log.error("No keywords defined in " + config.autoIni + "... aborting");
          return;
       }
-      Stack<String> tivoNames = config.getTivoNames();
+      Stack<String> tivoNames = config.getNplTivoNames();
       if (tivoNames.size() > 0) {
          for (int i=0; i<tivoNames.size(); i++) {
             // Queue up a nowplaying list job for this tivo
@@ -2361,7 +2361,7 @@ public class gui {
    
    // Identify NPL table items associated with queued/running jobs
    public void updateNPLjobStatus(Hashtable<String,String> map) {
-      Stack<String> tivoNames = config.getTivoNames();
+      Stack<String> tivoNames = config.getNplTivoNames();
       if (tivoNames.size() > 0) {
          for (int i=0; i<tivoNames.size(); i++) {
             tivoTab t = getTab(tivoNames.get(i));

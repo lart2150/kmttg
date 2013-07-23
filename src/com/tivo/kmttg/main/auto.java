@@ -36,10 +36,8 @@ public class auto {
          parseAutoIni();
          
          // Queue up now playing list downloads from all Tivos
-         for (int i=0; i < config.getTivoNames().size(); i++) {
-            String tivoName = config.getTivoNames().get(i);
-            if (config.nplCapable(tivoName))
-               jobMonitor.getNPL(tivoName);
+         for (String tivoName : config.getNplTivoNames()) {
+            jobMonitor.getNPL(tivoName);
          }
          
          // Process all queued up jobs until all completed
@@ -61,10 +59,8 @@ public class auto {
          log.print("\nSTARTING AUTO TRANSFERS");
          Hashtable<String,Long> launch = new Hashtable<String,Long>();
          Long now = new Date().getTime() - 1;
-         for (int i=0; i < config.getTivoNames().size(); i++) {
-            String tivoName = config.getTivoNames().get(i);
-            if (config.nplCapable(tivoName))
-               launch.put(tivoName, now);
+         for (String tivoName : config.getNplTivoNames()) {
+            launch.put(tivoName, now);
          }
          Long launchTime;
          
@@ -72,10 +68,7 @@ public class auto {
          Boolean GO = true;         
          while (GO) {                     
             // Launch jobs for Tivos or update launch times appropriately
-            for (int i=0; i < config.getTivoNames().size(); i++) {
-               String tivoName = config.getTivoNames().get(i);
-               if (!config.nplCapable(tivoName))
-                  continue;
+            for (String tivoName : config.getNplTivoNames()) {
                now = new Date().getTime();
                if ( ! launch.containsKey(tivoName) ) {
                   launch.put(tivoName, new Date().getTime() - 1);
@@ -122,7 +115,7 @@ public class auto {
       }
 
       // No tivos => nothing else to do
-      if ( config.getTivoNames().isEmpty() ) {
+      if ( config.getNplTivoNames().isEmpty() ) {
          log.error("No tivos defined in config");
          exitAuto(1);
       }

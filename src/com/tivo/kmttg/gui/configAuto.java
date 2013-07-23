@@ -804,7 +804,7 @@ public class configAuto {
    // Checks given tivo name against current valid names and resets to all if not valid
    private String validateTivoName(String tivoName) {
       if ( ! tivoName.equals("all") ) {
-         Stack<String> names = config.getTivoNames();
+         Stack<String> names = config.getNplTivoNames();
          for (int i=0; i<names.size(); ++i) {
             if (tivoName.equals(names.get(i)))
                return tivoName;
