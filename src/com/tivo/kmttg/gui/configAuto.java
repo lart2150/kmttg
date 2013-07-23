@@ -792,7 +792,7 @@ public class configAuto {
    
    // Defines choices for tivo name filtering
    private Object[] getTivoFilterNames() {
-      Stack<String> names = config.getTivoNames();
+      Stack<String> names = config.getNplTivoNames();
       names.add(0, "all");
       Object[] tivoNames = new Object[names.size()];
       for (int i=0; i<names.size(); ++i) {

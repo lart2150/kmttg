@@ -443,7 +443,8 @@ public class configMain {
             name = tivoNames.get(i);
             ip = config.TIVOS.get(name);
             tivos.addItem(name + "=" + ip);
-            autotune_tivoName.addItem(name);
+            if (config.nplCapable(name))
+               autotune_tivoName.addItem(name);
          }         
       }
       
@@ -820,7 +821,7 @@ public class configMain {
       pyTivo_config.setText("" + config.pyTivo_config);
       
       // pyTivo_tivo
-      Stack<String> names = config.getTivoNames();
+      Stack<String> names = config.getNplTivoNames();
       if (names.size() > 0) {
          String setting = names.get(0);
          for (int i=0; i<names.size(); ++i) {
@@ -844,7 +845,7 @@ public class configMain {
       if (autotune_tivoName != null) {
          name = (String)autotune_tivoName.getSelectedItem();
       } else {
-         name = config.getTivoNames().get(0);
+         name = config.getNplTivoNames().get(0);
       }
       if (name != null && name.length() > 0) {
          if (autotune.isConfigured(name))
@@ -2004,7 +2005,7 @@ public class configMain {
          }
       });
 
-      autotune_tivoName.setModel(new javax.swing.DefaultComboBoxModel(config.getTivoNames()));
+      autotune_tivoName.setModel(new javax.swing.DefaultComboBoxModel(config.getNplTivoNames()));
       autotune_tivoName.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -2018,7 +2019,7 @@ public class configMain {
       ));
       MinChanDigits.setName("MinChanDigits");
       
-      pyTivo_tivo.setModel(new javax.swing.DefaultComboBoxModel(config.getTivoNames()));
+      pyTivo_tivo.setModel(new javax.swing.DefaultComboBoxModel(config.getNplTivoNames()));
       pyTivo_tivo.setName("pyTivo_tivo");
       
       pyTivo_files.setModel(new javax.swing.DefaultComboBoxModel(
