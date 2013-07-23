@@ -361,6 +361,15 @@ public class config {
          config.gui.SetTivos(config.TIVOS);
       }
    }
+   
+   public static Stack<String> getNplTivoNames() {
+      Stack<String> tivos = new Stack<String>();
+      for (String name : TIVOS.keySet()) {
+         if ( ! name.matches("FILES") && nplCapable(name) )
+            tivos.add(name);
+      }
+      return tivos;     
+   }
 
    // Add a newly detected tivos to hash (and GUI if in GUI mode)
    public static void addTivo(Hashtable<String,String> b) {
