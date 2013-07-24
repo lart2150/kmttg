@@ -352,7 +352,7 @@ public class rnpl {
    // NOTE: This uses CountDownLatch to enable waiting for multiple
    // parallel background jobs to finish before returning so that
    // ToDo lists are retrieved in parallel instead of sequentially
-   public static Hashtable<String,JSONArray> getTodoLists(String[] tivoNames) {
+   public static Hashtable<String,JSONArray> getTodoLists(Stack<String> tivoNames) {
       // This used to run a background Remote job
       class Counter extends SwingWorker<Void, Void> {
          CountDownLatch latch;
@@ -389,12 +389,12 @@ public class rnpl {
       
       // Launch background Remote jobs and wait for latch
       // counter to reach 0 before returning todoLists hash
-      int N = tivoNames.length;
+      int N = tivoNames.size();
       CountDownLatch latch = new CountDownLatch(N);
       ExecutorService executor = Executors.newFixedThreadPool(N);      
       Hashtable<String,JSONArray> todoLists = new Hashtable<String,JSONArray>();
-      for (int t=0; t<tivoNames.length; ++t) {
-         executor.execute(new Counter(tivoNames[t], todoLists, latch));
+      for (String tivoName : tivoNames) {
+         executor.execute(new Counter(tivoName, todoLists, latch));
       }
       try {
          latch.await();
@@ -423,17 +423,12 @@ public class rnpl {
       if (filteredTivos.isEmpty())
          return;
       
-      String[] tivoNames = new String[filteredTivos.size()];
-      for (int i=0; i<filteredTivos.size(); ++i)
-         tivoNames[i] = filteredTivos.get(i);
-      
       // Get all todo lists to check against
       log.warn("AutomaticConflictsHandler - getting todo lists from all TiVos");
-      Hashtable<String,JSONArray> all_todo = getTodoLists(tivoNames);
+      Hashtable<String,JSONArray> all_todo = getTodoLists(filteredTivos);
       
       // Get conflicts of type programSourceConflict for each TiVo and try scheduling them
-      for (int i=0; i<tivoNames.length; ++i) {
-         String tivoName = tivoNames[i];
+      for (String tivoName : filteredTivos) {
          log.warn("AutomaticConflictsHandler - looking for conflicts on TiVo: " + tivoName);
          Remote r = config.initRemote(tivoName);
          if (r.success) {
@@ -451,11 +446,11 @@ public class rnpl {
                      // Step through each conflict
                      JSONObject json = conflicts.getJSONObject(c);
                      Boolean keepTrying = true;
-                     for (int j=0; j<tivoNames.length; ++j) {
+                     for (String tname : filteredTivos) {
                         // Try scheduling on all other available Tivos
                         if (keepTrying) {
-                           if (! tivoNames[j].equals(tivoName)) {
-                              String onTivo = tivoNames[j];
+                           if (! tname.equals(tivoName)) {
+                              String onTivo = tname;
                               r = config.initRemote(onTivo);
                               if (r.success) {
                                  // Try scheduling this conflicted recording on onTivo
