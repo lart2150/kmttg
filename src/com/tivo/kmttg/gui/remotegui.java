@@ -503,7 +503,7 @@ public class remotegui {
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Object doInBackground() {
                      log.warn("Refreshing ToDo list for Guide entries...");
-                     all_todo = getTodoLists("Guide");
+                     all_todo = getTodoLists();
                      log.warn("Refresh ToDo list for Guide entries completed.");
                      return null;
                   }
@@ -937,7 +937,7 @@ public class remotegui {
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Object doInBackground() {
                      log.warn("Refreshing ToDo list for Will Not Record matches...");
-                     all_todo = getTodoLists("Cancel");
+                     all_todo = getTodoLists();
                      log.warn("Refresh ToDo list for Will Not Record matches completed.");
                      return null;
                   }
@@ -1545,7 +1545,7 @@ public class remotegui {
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Object doInBackground() {
                      log.warn("Refreshing ToDo list for Search matches...");
-                     all_todo = getTodoLists("Search");
+                     all_todo = getTodoLists();
                      log.warn("Refresh ToDo list for Search matches completed.");
                      return null;
                   }
@@ -2419,7 +2419,6 @@ public class remotegui {
    }
    
    public void setTivoNames() { 
-      Stack<String> tivo_stack = config.getTivoNames();
       tivo_todo.removeAllItems();
       tivo_guide.removeAllItems();
       tivo_sp.removeAllItems();
@@ -2429,29 +2428,33 @@ public class remotegui {
       tivo_rc.removeAllItems();
       tivo_info.removeAllItems();
       tivo_premiere.removeAllItems();
-      for (int i=0; i<tivo_stack.size(); ++i) {
-         if (config.rpcEnabled(tivo_stack.get(i)) || config.mindEnabled(tivo_stack.get(i))) {
-            tivo_todo.addItem(tivo_stack.get(i));
-            tivo_guide.addItem(tivo_stack.get(i));
-            tivo_sp.addItem(tivo_stack.get(i));
-            tivo_cancel.addItem(tivo_stack.get(i));
-            tivo_deleted.addItem(tivo_stack.get(i));
-            tivo_search.addItem(tivo_stack.get(i));
-            tivo_info.addItem(tivo_stack.get(i));
-            tivo_premiere.addItem(tivo_stack.get(i));
+      for (String tivoName : config.getTivoNames()) {
+         if (config.rpcEnabled(tivoName) || config.mindEnabled(tivoName)) {
+            tivo_todo.addItem(tivoName);
+            tivo_guide.addItem(tivoName);
+            tivo_sp.addItem(tivoName);
+            tivo_cancel.addItem(tivoName);
+            tivo_deleted.addItem(tivoName);
+            tivo_search.addItem(tivoName);
+            tivo_info.addItem(tivoName);
+            tivo_premiere.addItem(tivoName);
          }
          // Remote tab always valid as it can use RPC or telnet
-         tivo_rc.addItem(tivo_stack.get(i));
+         tivo_rc.addItem(tivoName);
       }
       setHmeDestinations(getTivoName("rc"));
    }
    
-   private String[] getTivoNames(JComboBox component) {
-      String[] names = new String[component.getItemCount()];
-      for (int i=0; i<component.getItemCount(); ++i) {
-         names[i] = (String)component.getItemAt(i);
+   // Return list of Tivos that are rpc enabled or mind enabled and NPL capable (i.e. no Mini)
+   private Stack<String> getFilteredTivoNames() {
+      Stack<String> tivoNames = new Stack<String>();
+      for (String tivoName : config.getTivoNames()) {
+         if (config.nplCapable(tivoName)) {
+            if (config.rpcEnabled(tivoName) || config.mindEnabled(tivoName))
+               tivoNames.add(tivoName);
+         }
       }
-      return names;
+      return tivoNames;
    }
    
    private void updateButtonStates(String tivoName, String tab) {
@@ -2692,9 +2695,8 @@ public class remotegui {
    // NOTE: This called as part of a background job
    public void TagPremieresWithSeasonPasses(JSONArray data) {
       log.warn("Collecting information on existing Season Passes...");
-      String[] tivoNames = getTivoNames(tivo_premiere);
-      for (int t=0; t<tivoNames.length; ++t) {
-         Remote r = config.initRemote(tivoNames[t]);
+      for (String tivoName : getFilteredTivoNames()) {
+         Remote r = config.initRemote(tivoName);
          if (r.success) {
             JSONArray existing = r.SeasonPasses(null);
             if (existing != null) {
@@ -2710,10 +2712,10 @@ public class remotegui {
                            if (data.getJSONObject(j).has("__SPscheduled__")) {
                               data.getJSONObject(j).put("__SPscheduled__",
                                  data.getJSONObject(j).getString("__SPscheduled__") +
-                                 ", " + tivoNames[t]
+                                 ", " + tivoName
                               );
                            } else {
-                              data.getJSONObject(j).put("__SPscheduled__", tivoNames[t]);
+                              data.getJSONObject(j).put("__SPscheduled__", tivoName);
                            }
                         }
                      }
@@ -2733,16 +2735,9 @@ public class remotegui {
    // NOTE: This uses CountDownLatch to enable waiting for multiple
    // parallel background jobs to finish before returning so that
    // ToDo lists are retrieved in parallel instead of sequentially
-   public Hashtable<String,JSONArray> getTodoLists(String tab) {
-      String[] tivoNames;
-      if (tab.equals("Guide"))
-         tivoNames = getTivoNames(tivo_guide);
-      else if (tab.equals("Cancel"))
-         tivoNames = getTivoNames(tivo_cancel);
-      else
-         tivoNames = getTivoNames(tivo_search);
+   public Hashtable<String,JSONArray> getTodoLists() {
       all_todo_time = new Date().getTime();
-      return rnpl.getTodoLists(tivoNames);
+      return rnpl.getTodoLists(getFilteredTivoNames());
    }
       
    // See if given JSON entry matches any of the entries in all_todo hashtable
@@ -3003,7 +2998,7 @@ public class remotegui {
    public void updateTodoIfNeeded(String tabName) {
       if (todoNeedsRefresh()) {
          log.warn("Refreshing todo lists");
-         all_todo = getTodoLists(tabName);
+         all_todo = getTodoLists();
       }
    }
    
