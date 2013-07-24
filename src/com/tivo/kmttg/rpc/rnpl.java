@@ -326,11 +326,19 @@ public class rnpl {
                // Add inTodo flag indicating tivo name scheduled to record this show
                if (start.equals(startTime)) {
                   // Start time & channel match
-                  if (channelNumber != null && chan.equals(channelNumber))
-                     entry.put(inTodo, tivo);
+                  if (channelNumber != null && chan.equals(channelNumber)) {
+                     if (entry.has(inTodo))
+                        entry.put(inTodo, entry.getString(inTodo) + ", " + tivo);
+                     else
+                        entry.put(inTodo, tivo);
+                  }
                   // Start time & title match (same program on another channel)
-                  else if (name.equals(title))
-                     entry.put(inTodo, tivo + ": " + chan);
+                  else if (name.equals(title)) {
+                     if (entry.has(inTodo))
+                        entry.put(inTodo, entry.getString(inTodo) + ", " + tivo + ": " + chan);
+                     else
+                        entry.put(inTodo, tivo + ": " + chan);
+                  }
                }
                // Same program recorded at different time
                if (includeOtherTimes && ! entry.has(inTodo)) {
