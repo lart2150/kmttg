@@ -693,6 +693,8 @@ public class config {
             if (result != null)
                curl = result;
          }
+        if (!file.isFile(curl))
+           curl = "";
          return curl;
       }
       
@@ -703,6 +705,8 @@ public class config {
             if (result != null)
                tivodecode = result;
          }
+         if (!file.isFile(tivodecode))
+            tivodecode = "";
          return tivodecode;
       }
       
@@ -713,6 +717,8 @@ public class config {
             if (result != null)
                ffmpeg = result;
          }
+         if (!file.isFile(ffmpeg))
+            ffmpeg = "";
          return ffmpeg;
       }
       
@@ -723,6 +729,8 @@ public class config {
             if (result != null)
                mediainfo = result;
          }
+         if (!file.isFile(mediainfo))
+            mediainfo = "";
          return mediainfo;
       }
       
@@ -737,6 +745,8 @@ public class config {
             if (result != null)
                mencoder = result;
          }
+         if (!file.isFile(mencoder))
+            mencoder = "";
          return mencoder;
       }
       
@@ -747,6 +757,8 @@ public class config {
             if (result != null)
                handbrake = result;
          }
+         if (!file.isFile(handbrake))
+            handbrake = "";
          return handbrake;
       }
       
@@ -757,6 +769,8 @@ public class config {
             if (result != null)
                comskip = result;
          }
+         if (!file.isFile(comskip))
+            comskip = "";
          return comskip;
       }
             
@@ -772,6 +786,8 @@ public class config {
             if (result != null)
                AtomicParsley = result;
          }
+         if (!file.isFile(AtomicParsley))
+            AtomicParsley = "";
          return AtomicParsley;
       }
       
@@ -782,6 +798,8 @@ public class config {
             if (result != null)
                ccextractor = result;
          }
+         if (!file.isFile(ccextractor))
+            ccextractor = "";
          return ccextractor;
       }
             
