@@ -474,7 +474,7 @@ public class auto {
       
       // Need to check ProgramId_unique if enabled to see if we already have processed this previously
       if (auto.useProgramId_unique == 1 && entry.containsKey("ProgramId_unique")) {
-         if ( keywordMatchHistory(entry.get("ProgramId_unique"), config.autoHistory) ) {
+         if ( keywordMatchHistory(entry.get("ProgramId_unique")) ) {
             log.print("(ProgramId_unique=" + entry.get("ProgramId_unique") + " already processed => will not download)");
             return;
          }
@@ -482,7 +482,7 @@ public class auto {
       
       // Need to check ProgramId to see if we already have processed this previously
       if (auto.useProgramId_unique == 0 && entry.containsKey("ProgramId")) {
-         if ( keywordMatchHistory(entry.get("ProgramId"), config.autoHistory) ) {
+         if ( keywordMatchHistory(entry.get("ProgramId")) ) {
             log.print("(ProgramId=" + entry.get("ProgramId") + " already processed => will not download)");
             return;
          }
@@ -523,7 +523,9 @@ public class auto {
    }
    
    // Return true if ProgramId exists in autoHistory file
-   private static Boolean keywordMatchHistory(String ProgramId, String historyFile) {
+   public static Boolean keywordMatchHistory(String ProgramId) {
+      String historyFile = config.autoHistory;
+      if (!file.isFile(historyFile)) return false;
       try {
          BufferedReader history = new BufferedReader(new FileReader(historyFile));
          // NOTE: Strip out leading 0s when comparing because sometimes XML includes
@@ -557,7 +559,7 @@ public class auto {
       if (ProgramId == null) {
          return 0;
       } else {
-         if (keywordMatchHistory(ProgramId, config.autoHistory))
+         if (keywordMatchHistory(ProgramId))
             return 2;
       }
 
@@ -583,21 +585,21 @@ public class auto {
       if ( ! job.containsKey("ProgramId") ) {
          return 0;
       } else {
-         if (  keywordMatchHistory(job.get("ProgramId"), config.autoHistory) && 
-               keywordMatchHistory(job.get("ProgramId_unique"), config.autoHistory) )
+         if (  keywordMatchHistory(job.get("ProgramId")) && 
+               keywordMatchHistory(job.get("ProgramId_unique")) )
             return 2;
       }
 
       // Append entry to autoHistory file
       try {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(config.autoHistory, true));
-         if ( ! keywordMatchHistory(job.get("ProgramId"), config.autoHistory) ) {
+         if ( ! keywordMatchHistory(job.get("ProgramId")) ) {
             ofp.write(job.get("ProgramId"));
             if (job.containsKey("title"))
                ofp.write(" " + job.get("title"));
             ofp.write("\r\n");
          }
-         if ( ! keywordMatchHistory(job.get("ProgramId_unique"), config.autoHistory) ) {
+         if ( ! keywordMatchHistory(job.get("ProgramId_unique")) ) {
             if (job.containsKey("ProgramId_unique")) {
                ofp.write(job.get("ProgramId_unique"));
                if (job.containsKey("title"))
