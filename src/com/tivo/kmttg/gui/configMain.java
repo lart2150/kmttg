@@ -55,6 +55,7 @@ public class configMain {
    private static JCheckBox check_space = null;
    private static JCheckBox beacon = null;
    private static JCheckBox npl_when_started = null;
+   private static JCheckBox showHistoryInTable = null;
    private static JCheckBox UseOldBeacon = null;
    private static JCheckBox download_time_estimate = null;
    private static JCheckBox UseAdscan = null;
@@ -502,6 +503,12 @@ public class configMain {
          npl_when_started.setSelected(true);
       else
          npl_when_started.setSelected(false);
+      
+      // showHistoryInTable
+      if (config.showHistoryInTable == 1)
+         showHistoryInTable.setSelected(true);
+      else
+         showHistoryInTable.setSelected(false);
       
       // download_time_estimate
       if (config.download_time_estimate == 1)
@@ -971,6 +978,13 @@ public class configMain {
          config.npl_when_started = 1;
       } else {
          config.npl_when_started = 0;
+      }
+      
+      // showHistoryInTable
+      if (showHistoryInTable.isSelected()) {
+         config.showHistoryInTable = 1;
+      } else {
+         config.showHistoryInTable = 0;
       }
       
       // Beacon
@@ -1876,6 +1890,7 @@ public class configMain {
       beacon = new javax.swing.JCheckBox();
       UseOldBeacon = new javax.swing.JCheckBox();
       npl_when_started = new javax.swing.JCheckBox();
+      showHistoryInTable = new javax.swing.JCheckBox();
       download_time_estimate = new javax.swing.JCheckBox();
       toolTips = new javax.swing.JCheckBox();
       slingBox = new javax.swing.JCheckBox();
@@ -2059,6 +2074,8 @@ public class configMain {
       UseOldBeacon.setText("Detect with TiVo Beacon instead of Bonjour");
       
       npl_when_started.setText("Start NPL jobs when starting kmttg GUI");
+      
+      showHistoryInTable.setText("Highlight processed shows in history file");
       
       download_time_estimate.setText("Show estimated time remaining for downloads");
       
@@ -3089,6 +3106,12 @@ public class configMain {
       c.gridy = gy;
       visual_panel.add(tableColAutoSize, c);      
       
+      // showHistoryInTable
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      visual_panel.add(showHistoryInTable, c);      
+      
       // slingBox
       gy++;
       c.gridx = 0;
@@ -3304,6 +3327,7 @@ public class configMain {
       beacon.setToolTipText(getToolTip("beacon"));
       UseOldBeacon.setToolTipText(getToolTip("UseOldBeacon"));
       npl_when_started.setToolTipText(getToolTip("npl_when_started"));
+      showHistoryInTable.setToolTipText(getToolTip("showHistoryInTable"));
       download_time_estimate.setToolTipText(getToolTip("download_time_estimate"));
       UseAdscan.setToolTipText(getToolTip("UseAdscan"));
       VrdReview.setToolTipText(getToolTip("VrdReview"));
@@ -3499,6 +3523,14 @@ public class configMain {
          text += "right away when starting kmttg GUI. Otherwise no NPL jobs are started and you<br>";
          text += "can manually select TiVos and click on <b>Refresh</b> button to selectively start<br>";
          text += "NPL jobs.";
+      }
+      else if (component.equals("showHistoryInTable")) {
+         text =  "<b>Highlight processed shows in history file</b><br>";
+         text += "If this option is enabled then kmttg will highlight shows that have been previously<br>";
+         text += "processed by kmttg and have an entry in the <b>auto.history</b> file.<br>";
+         text += "Useful as an easier check to see if a show has been processed before or not.<br>";
+         text += "NOTE: If you clear out auto.history file regularly then obviously this option will<br>";
+         text += "not be very useful.";
       }
       else if (component.equals("download_time_estimate")) {
          text =  "<b>Show estimated time remaining for downloads</b><br>";

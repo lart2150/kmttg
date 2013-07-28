@@ -81,6 +81,7 @@ public class config {
    public static int combine_download_decrypt = 0; // Combine download and decrypt if possible
    public static int single_download = 0;  // Allow only one download at a time if enabled
    public static int npl_when_started = 0; // Start NPL jobs when kmttg GUI starts
+   public static int showHistoryInTable = 0; // If 1 then highlight table entries matching auto.history
    public static boolean persistQueue = false;	// Save job queue between sessions
 
    public static String comskipIni = "";
@@ -137,6 +138,7 @@ public class config {
    public static Color tableBkgndLight = Color.white;
    public static Color tableBkgndProtected = new Color(191,156,94); // tan
    public static Color tableBkgndRecording = new Color(149, 151, 221); // light blue
+   public static Color tableBkgndInHistory = new Color(250, 252, 164); // light yellow
    public static Color lightRed = new Color(250, 190, 190); // light red
    public static Font  tableFont = new Font("System", Font.BOLD, FontSize);
    public static int   tableColAutoSize = 1; // If 0 then don't auto size table columns
@@ -1093,6 +1095,9 @@ public class config {
             if (key.equals("npl_when_started")) {
                npl_when_started = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("showHistoryInTable")) {
+               showHistoryInTable = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("diskSpace")) {
                String[] l = line.split("=");
                if (l.length == 2) {
@@ -1319,6 +1324,8 @@ public class config {
          ofp.write("<autoLogSizeMB>\n" + autoLogSizeMB + "\n\n");
          
          ofp.write("<npl_when_started>\n" + npl_when_started + "\n\n");
+         
+         ofp.write("<showHistoryInTable>\n" + showHistoryInTable + "\n\n");
          
          if (autotune != null ) {
             Enumeration<String> tivos = autotune.keys();
