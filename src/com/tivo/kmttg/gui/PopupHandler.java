@@ -67,32 +67,45 @@ public class PopupHandler {
          }
          items.add(new PopupPair("Display data [j]", KeyEvent.VK_J, tivoName));
          items.add(new PopupPair("Web query [q]", KeyEvent.VK_Q, tivoName));
+         items.add(new PopupPair("Add to auto transfers", config.gui.addSelectedTitlesMenuItem, tivoName));
+         items.add(new PopupPair("Add to history file", config.gui.addSelectedHistoryMenuItem, tivoName));
       }
       
       for (int i=0; i<items.size(); ++i) {
          final int key = items.get(i).key;
          JMenuItem item = new JMenuItem(items.get(i).name);
          final String tableName = items.get(i).tableName;
-         item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               // Dispatch key event
-               if (tableName.equals("Season Passes")) {
-                  TABLE.dispatchEvent(
+         final JMenuItem menuitem = items.get(i).menuitem;
+         if (menuitem == null) {
+            // Action bound to key event
+            item.addActionListener(new ActionListener() {
+               public void actionPerformed(ActionEvent e) {
+                  // Dispatch key event
+                  if (tableName.equals("Season Passes")) {
+                     TABLE.dispatchEvent(
+                           new KeyEvent(
+                              TABLE, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), 0,
+                              key, KeyEvent.CHAR_UNDEFINED
+                           )
+                        );                  
+                  } else {
+                     TABLE.dispatchEvent(
                         new KeyEvent(
-                           TABLE, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), 0,
+                           TABLE, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0,
                            key, KeyEvent.CHAR_UNDEFINED
                         )
-                     );                  
-               } else {
-                  TABLE.dispatchEvent(
-                     new KeyEvent(
-                        TABLE, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0,
-                        key, KeyEvent.CHAR_UNDEFINED
-                     )
-                  );
+                     );
+                  }
                }
-            }
-         });  
+            });
+         } else {
+            // Action bound to menu item
+            item.addActionListener(new ActionListener() {
+               public void actionPerformed(ActionEvent e) {
+                  menuitem.doClick();
+               }
+            });
+         }
          popup.add(item);
       }
       int row = TABLE.rowAtPoint(e.getPoint());
