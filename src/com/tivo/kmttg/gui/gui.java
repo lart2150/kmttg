@@ -55,8 +55,8 @@ public class gui {
    private JCheckBoxMenuItem loopInGuiMenuItem = null;
    private JCheckBoxMenuItem resumeDownloadsMenuItem = null;
    private JCheckBoxMenuItem toggleLaunchingJobsMenuItem = null;
-   private JMenuItem addSelectedTitlesMenuItem = null;
-   private JMenuItem addSelectedHistoryMenuItem = null;
+   public  JMenuItem addSelectedTitlesMenuItem = null;
+   public  JMenuItem addSelectedHistoryMenuItem = null;
    private JMenuItem logFileMenuItem = null;
    private JMenuItem configureMenuItem = null;
    private JMenuItem refreshEncodingsMenuItem = null;
