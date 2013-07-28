@@ -1598,6 +1598,7 @@ public class gui {
             String tabName = tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
             BufferedWriter ofp = new BufferedWriter(new FileWriter(config.gui_settings));            
             ofp.write("# kmttg gui preferences file\n");
+            ofp.write("<GUI_LOOP>\n"            + config.GUI_LOOP            + "\n");
             ofp.write("<metadata>\n"            + metadata_setting()         + "\n");
             ofp.write("<decrypt>\n"             + decrypt_setting()          + "\n");
             ofp.write("<qsfix>\n"               + qsfix_setting()            + "\n");
@@ -1754,6 +1755,10 @@ public class gui {
                key = line.replaceFirst("<", "");
                key = key.replaceFirst(">", "");
                continue;
+            }
+            if (key.equals("GUI_LOOP")) {
+               if (line.matches("1"))
+                  loopInGuiMenuItem.setSelected(true);
             }
             if (key.equals("metadata")) {
                if (line.matches("1"))
