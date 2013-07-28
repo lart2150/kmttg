@@ -34,6 +34,7 @@ import javax.swing.table.*;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
@@ -369,13 +370,24 @@ public class nplTable {
                else
                   cell.setBackground(config.tableBkgndDarker);
                
-               if ( d != null && ! d.folder && d.data.containsKey("CopyProtected") )
-                  cell.setBackground( config.tableBkgndProtected );
-               
-               if ( d != null && ! d.folder && d.data.containsKey("ExpirationImage") &&
-                   (d.data.get("ExpirationImage").equals("in-progress-recording") ||
-                    d.data.get("ExpirationImage").equals("in-progress-transfer")))
-                  cell.setBackground( config.tableBkgndRecording );
+               if (d != null && ! d.folder) {
+                  if (d.data.containsKey("CopyProtected"))
+                     cell.setBackground( config.tableBkgndProtected );
+                  
+                  if (d.data.containsKey("ExpirationImage") &&
+                      (d.data.get("ExpirationImage").equals("in-progress-recording") ||
+                       d.data.get("ExpirationImage").equals("in-progress-transfer")))
+                     cell.setBackground( config.tableBkgndRecording );
+                  
+                  if (config.showHistoryInTable == 1) {
+                     if (d.data.containsKey("ProgramId") &&
+                           auto.keywordMatchHistory(d.data.get("ProgramId")))
+                        cell.setBackground(config.tableBkgndInHistory);
+                     if (d.data.containsKey("ProgramId_unique") &&
+                           auto.keywordMatchHistory(d.data.get("ProgramId_unique")))
+                        cell.setBackground(config.tableBkgndInHistory);
+                  }
+               }
                
             } else {
                // FILES mode
