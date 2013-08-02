@@ -19,6 +19,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.FontUIResource;
 
+import org.jdesktop.swingx.JXTable;
+
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.install.update;
@@ -903,9 +905,39 @@ public class gui {
             public void actionPerformed(ActionEvent e) {
                String tivoName = getSelectedTivoName();
                if (tivoName != null) {
+                  // This is a TiVo tab
                   tivoTabs.get(tivoName).autoSelectedTitlesCB();
                } else {
-                  log.error("This command must be run from a TiVo tab with selected tivo shows.");
+                  String tabName = getCurrentTabName();
+                  if (tabName.equals("Remote")) {
+                     // Several Remote tables have show titles that can be added
+                     String[] not_supported = {"Season Passes", "Remote", "Info"};
+                     String subTabName = config.gui.remote_gui.getCurrentTabName();
+                     Boolean proceed = true;
+                     for (String name : not_supported)
+                        if (name.equals(subTabName))
+                           proceed = false;
+                     if (proceed) {
+                        JXTable TABLE = config.gui.remote_gui.getCurrentTable();
+                        int[] selected = TableUtil.GetSelectedRows(TABLE);
+                        if (selected != null && selected.length > 0) {
+                           for (int row : selected) {
+                              JSONObject json = TableUtil.GetRowData(TABLE, row, "DATE");
+                              if (json.has("title")) {
+                                 try {
+                                    auto.autoAddTitleEntryToFile(json.getString("title"));
+                                 } catch (JSONException e1) {
+                                    log.error("Add selected titles json exception - " + e1.getMessage());
+                                 }
+                              }
+                           }
+                        } else {
+                           log.error("No show selected in Remote table");
+                           return;                        
+                        }
+                     }
+                  } else
+                     log.error("This command must be run from a TiVo tab with selected tivo shows.");
                }
             }
          });
