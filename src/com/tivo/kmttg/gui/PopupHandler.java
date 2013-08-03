@@ -28,16 +28,25 @@ public class PopupHandler {
          if (config.rpcEnabled(tivoName) && subTabName.equals("ToDo")) {            
             items.add(new PopupPair("Cancel [c]", KeyEvent.VK_C, subTabName));
             items.add(new PopupPair("Modify [m]", KeyEvent.VK_M, subTabName));
+            items.add(new PopupPair(
+               "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
+            );
          }
          if (subTabName.equals("Won't Record")) {            
             items.add(new PopupPair("Record [r]", KeyEvent.VK_R, subTabName));
             items.add(new PopupPair("Explain [e]", KeyEvent.VK_E, subTabName));
+            items.add(new PopupPair(
+               "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
+            );
          }
          if (subTabName.equals("Season Premieres") || subTabName.equals("Search") || subTabName.equals("Guide")) {            
             items.add(new PopupPair("Record [r]", KeyEvent.VK_R, subTabName));
             items.add(new PopupPair("Season Pass [s]", KeyEvent.VK_S, subTabName));
             if (config.rpcEnabled(tivoName))
                items.add(new PopupPair("Wishlist [w]", KeyEvent.VK_W, subTabName));
+            items.add(new PopupPair(
+                  "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
+            );
          }
          if (subTabName.equals("Season Passes")) {
             items.add(new PopupPair("Delete [delete]", KeyEvent.VK_DELETE, subTabName));
@@ -49,6 +58,9 @@ public class PopupHandler {
          if (config.rpcEnabled(tivoName) && subTabName.equals("Deleted")) {            
             items.add(new PopupPair("Recover [r]", KeyEvent.VK_R, subTabName));
             items.add(new PopupPair("Permanently Delete [delete]", KeyEvent.VK_DELETE, subTabName));
+            items.add(new PopupPair(
+               "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
+            );
          }
          if (config.rpcEnabled(tivoName) && !subTabName.equals("Season Passes"))
             items.add(new PopupPair("Show Information [i]", KeyEvent.VK_I, subTabName));
