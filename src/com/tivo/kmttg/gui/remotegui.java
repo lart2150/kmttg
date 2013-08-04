@@ -3070,8 +3070,7 @@ public class remotegui {
          text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
          text += "shows and will not schedule the recording.<br>";
-         text += "NOTE: For units older than series 4 this will schedule show similarly to tivo.com<br>";
-         text += "or other online guides with email confirmations.";
+         text += "NOTE: Not available for units older than series 4.";
       }
       else if (component.equals("guide_recordSP")){
          text = "<b>Season Pass</b><br>";
@@ -3082,8 +3081,7 @@ public class remotegui {
          text += "to modify existing season pass if found.<br>";
          text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
          text += "priority after creating it.<br>";
-         text += "NOTE: For units older than series 4 this will schedule season pass similarly to tivo.com<br>";
-         text += "or other online guides with email confirmations.";
+         text += "NOTE: Not available for units older than series 4.";
       }
       else if (component.equals("guide_refresh_todo")) {
          text = "<b>Refresh ToDo</b><br>";
@@ -3112,8 +3110,7 @@ public class remotegui {
          text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
          text += "shows and will not schedule the recording.<br>";
-         text += "NOTE: For units older than series 4 this will schedule show similarly to tivo.com<br>";
-         text += "or other online guides with email confirmations.";
+         text += "NOTE: Not available for units older than series 4.";
       }
       else if (component.equals("refresh_cancel_folder")){
          text = "<b>Back</b><br>";
@@ -3194,8 +3191,7 @@ public class remotegui {
          text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
          text += "shows and will not schedule the recording.<br>";
-         text += "NOTE: For units older than series 4 this will schedule show similarly to tivo.com<br>";
-         text += "or other online guides with email confirmations.";
+         text += "NOTE: Not available for units older than series 4.";
       }
       else if (component.equals("record_sp_search")) {
          text = "<b>Season Pass</b><br>";
@@ -3206,8 +3202,7 @@ public class remotegui {
          text += "to modify existing season pass if found.<br>";
          text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
          text += "priority after creating it.<br>";
-         text += "NOTE: For units older than series 4 this will schedule season pass similarly to tivo.com<br>";
-         text += "or other online guides with email confirmations.";
+         text += "NOTE: Not available for units older than series 4.";
       }
       else if (component.equals("wishlist_search")) {
          text = "<b>Create Wishlist</b><br>";
@@ -3284,8 +3279,7 @@ public class remotegui {
          text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
          text += "shows and will not schedule the recording.<br>";
-         text += "NOTE: For units older than series 4 this will schedule show similarly to tivo.com<br>";
-         text += "or other online guides with email confirmations.";
+         text += "NOTE: Not available for units older than series 4.";
       }
       else if (component.equals("recordSP_premiere")){
          text = "<b>Season Pass</b><br>";
@@ -3296,8 +3290,7 @@ public class remotegui {
          text += "to modify existing season pass if found.<br>";
          text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
          text += "priority after creating it.<br>";
-         text += "NOTE: For units older than series 4 this will schedule season pass similarly to tivo.com<br>";
-         text += "or other online guides with email confirmations.";
+         text += "NOTE: Not available for units older than series 4.";
       }
       else if (component.equals("refresh_sp")){
          text = "<b>Refresh</b><br>";
