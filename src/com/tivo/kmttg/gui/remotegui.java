@@ -853,7 +853,8 @@ public class remotegui {
       tivo_cancel = new javax.swing.JComboBox();
       tivo_cancel.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
-             if (e.getStateChange() == ItemEvent.SELECTED) {               
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+               updateButtonStates(getTivoName("cancel"), "Won't Record");
                // TiVo selection changed for Not Record tab
                // NOTE: Don't want to reset table in case we want to record a show on another TiVo
                /*
@@ -2469,15 +2470,25 @@ public class remotegui {
       }
       if (tab.equals("Season Passes")) {
          reorder_sp.setEnabled(state);
+         copy_sp.setEnabled(state);
+      }
+      if (tab.equals("Won't Record")) {
+         record_cancel.setEnabled(state);
       }
       if (tab.equals("Season Premieres")) {
          wishlist_premiere.setEnabled(state);
+         record_premiere.setEnabled(state);
+         recordSP_premiere.setEnabled(state);
       }
       if (tab.equals("Search")) {
          wishlist_search.setEnabled(state);
+         record_search.setEnabled(state);
+         recordSP_search.setEnabled(state);
       }
       if (tab.equals("Guide")) {
          wishlist_guide.setEnabled(state);
+         record_guide.setEnabled(state);
+         recordSP_guide.setEnabled(state);
       }
       if (tab.equals("Deleted")) {
          recover_deleted.setEnabled(state);
