@@ -477,7 +477,7 @@ public class nplTable {
                            if (config.rpcEnabled(tivoName)) {
                               id = rnpl.findRecordingId(tivoName, entry);
                               if (id != null) {
-                                 show_names += entry.get("title");
+                                 show_names += " " + entry.get("title");
                                  urlsToDelete.add(entry.get("url"));
                                  idsToDelete.add(id);
                               }
@@ -504,7 +504,7 @@ public class nplTable {
                               }
                            } else {
                               // Not recording so go ahead and delete it
-                              show_names += s.data.get("title");
+                              show_names += " " + s.data.get("title");
                               urlsToDelete.add(s.data.get("url"));
                               idsToDelete.add(id);
                            }
