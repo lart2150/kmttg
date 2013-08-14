@@ -75,11 +75,11 @@ public class tivoFileName {
          "EpisodeNumber", "SeriesEpNumber", "season", "episode", "description",
          "tivoName", "originalAirDate", "movieYear"
       };
-      for (int i=0; i<names.length; ++i) {
-         if (entry.containsKey(names[i])) {
-            keys.put(names[i], entry.get(names[i]));
+      for (String name : names) {
+         if (entry.containsKey(name)) {
+            keys.put(name, entry.get(name));
          } else {
-            keys.put(names[i], "");
+            keys.put(name, "");
          }
       }
       // If originalAirDate is empty then use [year]_[monthNum]_[mday] instead
@@ -165,40 +165,28 @@ public class tivoFileName {
       String[] fields = keyword.split("\\s+");
       Stack<String>newFields = new Stack<String>();
       Boolean exists = true;
-      String text;
-      for (int i=0; i<fields.length; i++) {
-         text = fields[i];
+      for (String text : fields) {
          // Put spaces back in that we previously eliminated
          text = text.replaceAll("___space___", " ");
          if (text.contains("\"")) {
             text = text.replaceAll("\"", "");
          } else {
-            text = text.replaceFirst("^title$",           removeSpecialChars(keys.get("title")));
-            text = text.replaceFirst("^mainTitle$",       removeSpecialChars(keys.get("titleOnly")));
-            text = text.replaceFirst("^episodeTitle$",    removeSpecialChars(keys.get("episodeTitle")));
-            text = text.replaceFirst("^channelNum$",      removeSpecialChars(keys.get("channelNum")));
-            text = text.replaceFirst("^channel$",         removeSpecialChars(keys.get("channel")));
-            text = text.replaceFirst("^min$",             removeSpecialChars(keys.get("min")));
-            text = text.replaceFirst("^hour$",            removeSpecialChars(keys.get("hour")));
-            text = text.replaceFirst("^wday$",            removeSpecialChars(keys.get("wday")));
-            text = text.replaceFirst("^mday$",            removeSpecialChars(keys.get("mday")));
-            text = text.replaceFirst("^month$",           removeSpecialChars(keys.get("month")));
-            text = text.replaceFirst("^monthNum$",        removeSpecialChars(keys.get("monthNum")));
-            text = text.replaceFirst("^year$",            removeSpecialChars(keys.get("year")));
-            text = text.replaceFirst("^startTime$",       removeSpecialChars(keys.get("startTime")));
-            text = text.replaceFirst("^SeriesEpNumber$",  removeSpecialChars(keys.get("SeriesEpNumber")));
-            text = text.replaceFirst("^season$",          removeSpecialChars(keys.get("season")));
-            text = text.replaceFirst("^episode$",         removeSpecialChars(keys.get("episode")));
-            text = text.replaceFirst("^EpisodeNumber$",   removeSpecialChars(keys.get("EpisodeNumber")));
-            text = text.replaceFirst("^description$",     removeSpecialChars(keys.get("description")));
-            text = text.replaceFirst("^tivoName$",        removeSpecialChars(keys.get("tivoName")));
-            text = text.replaceFirst("^originalAirDate$", removeSpecialChars(keys.get("originalAirDate")));
-            text = text.replaceFirst("^movieYear$",       removeSpecialChars(keys.get("movieYear")));
+            String[] keywords = {
+               "title", "mainTitle", "episodeTitle", "channelNum", "channel",
+               "min", "hour", "wday", "mday", "month", "monthNum", "year",
+               "startTime", "SeriesEpNumber", "season", "episode", "EpisodeNumber",
+               "description", "tivoName", "originalAirDate", "movieYear"
+            };
+            for (String k : keywords) {
+               String replacement = k;
+               if (k.equals("mainTitle")) replacement = "titleOnly";
+               text = text.replaceFirst("^" + k + "$", removeSpecialChars(keys.get(replacement)));
+            }
             if (text.length() == 0) exists = false;
          }
          newFields.add(text);
       }
-      text = "";
+      String text = "";
       if (exists) {
          for (int i=0; i<newFields.size(); ++i) {
             text += newFields.get(i);
