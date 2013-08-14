@@ -429,7 +429,7 @@ public class nplTable {
       }
    }
    
-   // Handle delete keyboard presses
+   // Handle keyboard presses
    private void KeyPressed(KeyEvent e) {
       if (e.isControlDown())
          return;
@@ -438,10 +438,12 @@ public class nplTable {
          // s key presses START JOBS button
          config.gui.start.doClick();
       }
-      else if (keyCode == KeyEvent.VK_DELETE || keyCode == KeyEvent.VK_SPACE) {
+      else if (keyCode == KeyEvent.VK_DELETE ||
+               keyCode == KeyEvent.VK_BACK_SPACE ||
+               keyCode == KeyEvent.VK_SPACE) {
          int[] selected = GetSelectedRows();         
          if (selected != null && selected.length > 0) {
-            if (keyCode == KeyEvent.VK_DELETE) {
+            if (keyCode == KeyEvent.VK_DELETE || keyCode == KeyEvent.VK_BACK_SPACE) {
                // Delete key has special action
                String show_names = "";
                Stack<String> urlsToDelete = new Stack<String>();
