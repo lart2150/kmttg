@@ -43,7 +43,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class spTable {
-   private String[] TITLE_cols = {"PRIORITY", "SHOW", "CHANNEL", "NUM"};
+   private String[] TITLE_cols = {"PRIORITY", "SHOW", "CHANNEL", "RECORD", "KEEP", "NUM", "START", "END"};
    public JXTable TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private String currentTivo = null;
@@ -83,6 +83,18 @@ public class spTable {
       tm = TABLE.getColumnModel().getColumn(3);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
+      tm = TABLE.getColumnModel().getColumn(4);
+      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+      ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
+      tm = TABLE.getColumnModel().getColumn(5);
+      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+      ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
+      tm = TABLE.getColumnModel().getColumn(6);
+      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+      ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
+      tm = TABLE.getColumnModel().getColumn(7);
+      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+      ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
       
       // Define custom column sorting routines
       Comparator<Object> sortableComparator = new Comparator<Object>() {
@@ -101,7 +113,11 @@ public class spTable {
       // Use custom sorting routines for certain columns
       Sorter sorter = TABLE.getColumnExt(0).getSorter();
       sorter.setComparator(sortableComparator);
-      sorter = TABLE.getColumnExt(3).getSorter();
+      sorter = TABLE.getColumnExt(5).getSorter();
+      sorter.setComparator(sortableComparator);
+      sorter = TABLE.getColumnExt(6).getSorter();
+      sorter.setComparator(sortableComparator);
+      sorter = TABLE.getColumnExt(7).getSorter();
       sorter.setComparator(sortableComparator);
       
       // Add right mouse button handler
@@ -370,11 +386,27 @@ public class spTable {
           int max = 0;
           if (data.has("maxRecordings"))
              max = data.getInt("maxRecordings");
+          int startPad = 0;
+          if (data.has("startTimePadding"))
+             startPad = data.getInt("startTimePadding")/60;
+          int endPad = 0;
+          if (data.has("endTimePadding"))
+             endPad = data.getInt("endTimePadding")/60;
+          String record = "";
+          if (data.has("showStatus"))
+             record = data.getString("showStatus");
+          String keep = "";
+          if (data.has("keepBehavior"))
+             keep = data.getString("keepBehavior");
           
           info[0] = new sortableInt(data, priority);
           info[1] = title;
           info[2] = channel;
-          info[3] = new sortableInt(null, max);
+          info[3] = record;
+          info[4] = keep;
+          info[5] = new sortableInt(null, max);
+          info[6] = startPad;
+          info[7] = endPad;
           return info;
        } catch (Exception e) {
           log.error("jsonToTableData - " + e.getMessage());
