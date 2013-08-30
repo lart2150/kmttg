@@ -18,6 +18,7 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class auto {
+   private static Hashtable<String,String> history_hash = new Hashtable<String,String>();
    
    // Batch mode processing (no GUI)
    public static void startBatchMode() {
@@ -540,6 +541,36 @@ public class auto {
             }
          }
          history.close();         
+      }         
+      catch (IOException ex) {
+         log.warn("No history file: " + historyFile);
+         return false;
+      }
+      return false;
+   }
+   
+   // Return true if ProgramId exists in autoHistory file
+   public static Boolean keywordMatchHistoryFast(String ProgramId, Boolean refresh) {
+      String historyFile = config.autoHistory;
+      if (!file.isFile(historyFile)) return false;
+      ProgramId = ProgramId.replaceFirst("^([^\\d]+)0+([1-9]+.+)$", "$1$2");
+      try {
+         if (refresh || history_hash.size() == 0) {
+            // Update history_hash with programId values from auto.history file
+            BufferedReader history = new BufferedReader(new FileReader(historyFile));
+            // NOTE: Strip out leading 0s when comparing because sometimes XML includes
+            // leading 0s while other times it does not
+            String line = null;
+            while (( line = history.readLine()) != null) {
+               line = line.replaceFirst("^([^\\d]+)0+([1-9]+.+)$", "$1$2");
+               String[] l = line.split("\\s+");
+               history_hash.put(l[0], "");
+            }
+            history.close();
+         }
+         
+         if (history_hash.containsKey(ProgramId))
+            return true;
       }         
       catch (IOException ex) {
          log.warn("No history file: " + historyFile);
