@@ -381,10 +381,10 @@ public class nplTable {
                   
                   if (config.showHistoryInTable == 1) {
                      if (d.data.containsKey("ProgramId") &&
-                           auto.keywordMatchHistory(d.data.get("ProgramId")))
+                           auto.keywordMatchHistoryFast(d.data.get("ProgramId"), false))
                         cell.setBackground(config.tableBkgndInHistory);
                      if (d.data.containsKey("ProgramId_unique") &&
-                           auto.keywordMatchHistory(d.data.get("ProgramId_unique")))
+                           auto.keywordMatchHistoryFast(d.data.get("ProgramId_unique"), false))
                         cell.setBackground(config.tableBkgndInHistory);
                   }
                }
@@ -780,6 +780,11 @@ public class nplTable {
             
       // Adjust column widths to data
       packColumns(NowPlaying, 2);
+      
+      if (config.showHistoryInTable == 1) {
+         // Update history hash (used for highlighting entries with IDs in auto.history)
+         auto.keywordMatchHistoryFast("bogus", true);
+      }
    }
    
    // Refresh table with given NowPlaying entries
