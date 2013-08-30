@@ -552,10 +552,10 @@ public class auto {
    // Return true if ProgramId exists in autoHistory file
    public static Boolean keywordMatchHistoryFast(String ProgramId, Boolean refresh) {
       String historyFile = config.autoHistory;
-      if (!file.isFile(historyFile)) return false;
       ProgramId = ProgramId.replaceFirst("^([^\\d]+)0+([1-9]+.+)$", "$1$2");
       try {
          if (refresh || history_hash.size() == 0) {
+            if (!file.isFile(historyFile)) return false;
             // Update history_hash with programId values from auto.history file
             BufferedReader history = new BufferedReader(new FileReader(historyFile));
             // NOTE: Strip out leading 0s when comparing because sometimes XML includes
