@@ -1715,15 +1715,22 @@ public class gui {
                }
             }
             if (remote_gui != null) {
-               String[]names = {"todo", "guide", "sp", "cancel", "deleted", "search", "rc", "info", "premiere"};
+               String[]names = {
+                  "todo", "guide", "sp", "cancel", "deleted", "search", "rc", "info", "web", "premiere"
+               };
                ofp.write("\n<rpc_tivo>\n");
-               for (int j=0; j<names.length; ++j)
-                  ofp.write(names[j] + "=" + remote_gui.getTivoName(names[j]) + "\n");
+               for (String tab : names)
+                  ofp.write(tab + "=" + remote_gui.getTivoName(tab) + "\n");
                ofp.write("\n<rpc_includePast>\n");
                if (remote_gui.includeHistory_cancel.isSelected())
                   ofp.write("1\n");
                else
                   ofp.write("0\n");
+               if (remote_gui.bookmark_web.getItemCount() > 0) {
+                  ofp.write("\n<rpc_web_bookmarks>\n");
+                  for (int j=0; j<remote_gui.bookmark_web.getItemCount(); ++j)
+                     ofp.write(remote_gui.bookmark_web.getItemAt(j) + "\n");
+               }
                
                // Record dialog
                JSONObject json = remote_gui.recordOpt.getValues();
@@ -1993,6 +2000,9 @@ public class gui {
                String[] l = line.split("=");
                if (l.length == 2 && tivoTabs.containsKey(l[1]))
                   remote_gui.setTivoName(l[0], l[1]);
+            }
+            if (key.equals("rpc_web_bookmarks") && remote_gui != null) {
+               remote_gui.bookmark_web.addItem(line);
             }
             if (key.equals("rpc_includePast") && remote_gui != null) {
                if (line.matches("1"))
