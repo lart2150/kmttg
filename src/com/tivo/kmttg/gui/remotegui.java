@@ -89,6 +89,11 @@ public class remotegui {
    public  recordOptions recordOpt = new recordOptions();
    public  wlOptions wlOpt = new wlOptions();
    
+   private JComboBox tivo_web = null;
+   private JButton send_web = null;
+   private JTextField url_web = null;
+   public  JComboBox bookmark_web = null;
+   
    private JComboBox tivo_info = null;
    JTextPane text_info = null;
    private Hashtable<String,String> tivo_info_data = new Hashtable<String,String>();
@@ -1342,10 +1347,130 @@ public class remotegui {
       c.gridwidth = 8;
       c.fill = GridBagConstraints.BOTH;
       panel_premiere.add(row2_premiere, c);
+
+      // Web tab items      
+      gy = 0;
+      c.ipady = 0;
+      c.insets = new Insets(5,0,5,0); // Increase vertical spacing
+      c.weighty = 0.0;  // default to no vertical stretch
+      c.weightx = 0.0;  // default to no horizontal stretch
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      c.gridheight = 1;
+      c.anchor = GridBagConstraints.CENTER;
+      c.fill = GridBagConstraints.HORIZONTAL;
+
+      JPanel panel_web = new JPanel();
+      panel_web.setLayout(new GridBagLayout());
+      
+      JLabel title_web = new JLabel("Web URL");
+      
+      JLabel tivo_web_label = new javax.swing.JLabel();
+      
+      tivo_web = new javax.swing.JComboBox();
+      tivo_web.setToolTipText(getToolTip("tivo_web"));
+
+      url_web = new JTextField(40);
+      url_web.setMinimumSize(url_web.getPreferredSize());
+      // Press "Send" button when enter pressed in search text field
+      url_web.addKeyListener( new KeyAdapter() {
+         public void keyReleased( KeyEvent e ) {
+            if (e.isControlDown())
+               return;
+            if( e.getKeyCode() == KeyEvent.VK_ENTER ) {
+               send_web.doClick();
+            }
+         }
+      });
+      url_web.setToolTipText(getToolTip("url_web"));
+
+      send_web = new JButton("Execute");
+      send_web.setToolTipText(getToolTip("send_web"));
+      send_web.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Execute URL
+            String tivoName = (String)tivo_web.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               String url = string.removeLeadingTrailingSpaces(url_web.getText());
+               if (url != null && url.length() > 0) {
+                  RC_webCB(tivoName, url);
+                  // Add to bookmarks if not already there
+                  Boolean add = true;
+                  if (bookmark_web.getItemCount() > 0) {
+                     for (int i=0; i<bookmark_web.getItemCount(); ++i) {
+                        String item = (String)bookmark_web.getItemAt(i);
+                        if (item.equals(url))
+                           add = false;
+                     }
+                  }
+                  if (add) {
+                     bookmark_web.addItem(url);
+                  }
+               }
+               else
+                  log.error("No URL provided");
+            }
+         }
+      });
+      
+      JLabel bookmark_label = new JLabel("Bookmark:");
+      
+      bookmark_web = new javax.swing.JComboBox();
+      bookmark_web.setToolTipText(getToolTip("bookmark_web"));
+      bookmark_web.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+                url_web.setText((String)bookmark_web.getSelectedItem());
+            }
+         }
+      });
+
+      JButton remove_bookmark = new JButton("Remove Bookmark");
+      remove_bookmark.setToolTipText(getToolTip("remove_bookmark"));
+      remove_bookmark.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            if (bookmark_web.getItemCount() > 0) {
+               bookmark_web.removeItemAt(bookmark_web.getSelectedIndex());
+            }
+         }
+      });
+      
+      JPanel row1_web = new JPanel();
+      row1_web.setLayout(new BoxLayout(row1_web, BoxLayout.LINE_AXIS));      
+      row1_web.add(title_web);
+      row1_web.add(Box.createRigidArea(space_5));
+      row1_web.add(tivo_web_label);
+      row1_web.add(Box.createRigidArea(space_5));
+      row1_web.add(tivo_web);
+      row1_web.add(Box.createRigidArea(space_5));
+      row1_web.add(url_web);
+      row1_web.add(Box.createRigidArea(space_5));
+      row1_web.add(send_web);
+      
+      JPanel row2_web = new JPanel();
+      row2_web.setLayout(new BoxLayout(row2_web, BoxLayout.LINE_AXIS));
+      row2_web.add(bookmark_label);
+      row2_web.add(Box.createRigidArea(space_5));
+      row2_web.add(bookmark_web);
+      
+      JPanel row3_web = new JPanel();
+      row3_web.setLayout(new BoxLayout(row3_web, BoxLayout.LINE_AXIS));
+      row3_web.add(remove_bookmark);
+      
+      panel_web.add(row1_web, c);
+      gy++;
+      c.gridy = gy;
+      panel_web.add(row2_web, c);
+      gy++;
+      c.gridy = gy;
+      c.anchor = GridBagConstraints.WEST;
+      panel_web.add(row3_web, c);
       
       // System Information tab items      
       gy = 0;
       c.ipady = 0;
+      c.insets = new Insets(0,0,0,0);
       c.weighty = 0.0;  // default to no vertical stretch
       c.weightx = 0.0;  // default to no horizontal stretch
       c.gridx = 0;
@@ -2200,6 +2325,7 @@ public class remotegui {
       tabbed_panel.add("Guide", panel_guide);
       tabbed_panel.add("Deleted", panel_deleted);
       tabbed_panel.add("Remote", panel_rc);
+      tabbed_panel.add("Web", panel_web);
       tabbed_panel.add("Info", panel_info);
       
       // Init the tivo comboboxes
@@ -2228,6 +2354,32 @@ public class remotegui {
       job.remote_sp   = true;
       job.sp          = tab_sp;
       jobMonitor.submitNewJob(job);
+   }
+   
+   private void RC_webCB(final String tivoName, final String url) {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Boolean doInBackground() {
+            Remote r = config.initRemote(tivoName);
+            if (r.success) {
+               JSONObject json = new JSONObject();
+               try {
+                  json.put("bodyId", r.bodyId_get());
+                  json.put("uiDestinationType", "web");
+                  json.put("uri", "x-tivo:web:" + url);
+                  log.warn("Web url request for TiVo '" + tivoName + "' - " + url);
+                  JSONObject reply = r.Command("uiNavigate", json);
+                  if (reply != null)
+                     log.print("Response - " + reply.toString());
+               } catch (JSONException e) {
+                  log.error("RC_webCB error - " + e.getMessage());
+               }
+               r.disconnect();
+            }
+            return null;
+         }
+      }
+      backgroundRun b = new backgroundRun();
+      b.execute();
    }
    
    private void RC_infoCB(final String tivoName) {
@@ -2394,6 +2546,8 @@ public class remotegui {
          return (String)tivo_search.getSelectedItem();
       if (tab.equals("rc") || tab.equals("Remote"))
          return (String)tivo_rc.getSelectedItem();
+      if (tab.equals("web") || tab.equals("Web"))
+         return (String)tivo_web.getSelectedItem();
       if (tab.equals("info") || tab.equals("Info"))
          return (String)tivo_info.getSelectedItem();
       if (tab.equals("premiere") || tab.equals("Season Premieres"))
@@ -2418,6 +2572,8 @@ public class remotegui {
             tivo_search.setSelectedItem(tivoName);
          if (tab.equals("rc"))
             tivo_rc.setSelectedItem(tivoName);
+         if (tab.equals("web"))
+            tivo_web.setSelectedItem(tivoName);
          if (tab.equals("info"))
             tivo_info.setSelectedItem(tivoName);
          if (tab.equals("premiere"))
@@ -2458,6 +2614,7 @@ public class remotegui {
       tivo_search.removeAllItems();
       tivo_rc.removeAllItems();
       tivo_info.removeAllItems();
+      tivo_web.removeAllItems();
       tivo_premiere.removeAllItems();
       for (String tivoName : config.getTivoNames()) {
          if (config.rpcEnabled(tivoName) || config.mindEnabled(tivoName)) {
@@ -2469,6 +2626,9 @@ public class remotegui {
             tivo_search.addItem(tivoName);
             tivo_info.addItem(tivoName);
             tivo_premiere.addItem(tivoName);
+         }
+         if (config.rpcEnabled(tivoName)) {
+            tivo_web.addItem(tivoName);            
          }
          // Remote tab always valid as it can use RPC or telnet
          tivo_rc.addItem(tivoName);
@@ -3422,11 +3582,36 @@ public class remotegui {
          text += "using <b>Space bar</b> to play, <b>Delete</b> button to delete.<br>";
          text += "NOTE: Only 1 item can be deleted or played at a time.";
       }
+      if (component.equals("tivo_web")) {
+         text = "Select TiVo for which to execute given URL.<br>";
+         text += "<b>NOTE: This only works for TiVos supporting HTML5 such as series 5 TiVos.</b>";
+      }
+      if (component.equals("send_web")) {
+         text = "<b>Execute</b><br>";
+         text += "Send given URL to TiVo internal web browser.<br>";
+         text += "NOTE: Use remote <b>arrow keys</b> to navigate the page and <b>Select</b> button to<br>";
+         text += "select or execute currently highlighted item on the page.<br>";
+         text += "<b>NOTE: This only works for TiVos supporting HTML5 such as series 5 TiVos.</b>";
+      }
+      if (component.equals("url_web")) {
+         text = "<b>URL</b><br>";
+         text += "URL to use. Press Return in this field to send the provided URL to selected TiVo<br>";
+         text += "and to add the entered URL to bookmarks below.<br>";
+         text += "<b>NOTE: This only works for TiVos supporting HTML5 such as series 5 TiVos.</b>";
+      }
       if (component.equals("tivo_info")) {
          text = "Select TiVo for which to retrieve system information.<br>";
          text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
          text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
          text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
+      }
+      if (component.equals("bookmark_web")) {
+         text = "<b>Bookmark</b><br>";
+         text += "Select a previously entered URL in this list to set as current URL.";
+      }
+      if (component.equals("remove_bookmark")) {
+         text = "<b>Remove Bookmark</b><br>";
+         text += "Remove currently selected bookmark from the list.";
       }
       else if (component.equals("refresh_info")){
          text = "<b>Refresh</b><br>";
