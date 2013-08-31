@@ -3105,8 +3105,9 @@ public class remotegui {
       else if (component.equals("export_channels")){
          text = "<b>Export Channels...</b><br>";
          text += "Export current channel lineup of this TiVo to CSV file.<br>";
-         text += "This can be useful for a new TiVo where it could be useful to consult a<br>";
-         text += "spreadsheet so as to know which channels to keep and which to remove.";
+         text += "Spreadsheet includes both included and excluded channels from channel list<br>.";
+         text += "This can be useful for a new TiVo to consult a spreadsheet so as to know which<br>";
+         text += "channels to keep and remove.";
       }
       else if (component.equals("guide_recordSP")){
          text = "<b>Season Pass</b><br>";
