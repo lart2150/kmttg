@@ -453,6 +453,34 @@ public class remotegui {
          }
       });
 
+      JButton export_channels = new JButton("Export Channels...");
+      export_channels.setMargin(new Insets(1,1,1,1));
+      export_channels.setToolTipText(getToolTip("export_channels"));
+      export_channels.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            final String tivoName = (String)tivo_guide.getSelectedItem();
+            Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            Browser.setSelectedFile(new File(config.programDir + File.separator + tivoName + "_channels.csv"));
+            int result = Browser.showDialog(config.gui.getJFrame(), "Export to csv file");
+            if (result == JFileChooser.APPROVE_OPTION) {               
+               class backgroundRun extends SwingWorker<Object, Object> {
+                  protected Object doInBackground() {
+                     File file = Browser.getSelectedFile();
+                     log.warn("Exporting '" + tivoName + "' channel list to csv file: " + file.getAbsolutePath());
+                     Remote r = config.initRemote(tivoName);
+                     if (r.success) {
+                        r.ChannelLineupCSV(file);
+                        r.disconnect();
+                     }
+                     return null;
+                  }
+               }
+               backgroundRun b = new backgroundRun();
+               b.execute();
+            }
+         }
+      });
+
       record_guide = new JButton("Record");
       record_guide.setMargin(new Insets(1,1,1,1));
       record_guide.setToolTipText(getToolTip("guide_record"));
@@ -526,6 +554,8 @@ public class remotegui {
       row1_guide.add(guide_start);
       row1_guide.add(Box.createRigidArea(space_5));
       row1_guide.add(refresh_guide);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(export_channels);
       row1_guide.add(Box.createRigidArea(space_5));
       row1_guide.add(record_guide);
       row1_guide.add(Box.createRigidArea(space_5));
@@ -3071,6 +3101,12 @@ public class remotegui {
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
          text += "shows and will not schedule the recording.<br>";
          text += "NOTE: Not available for units older than series 4.";
+      }
+      else if (component.equals("export_channels")){
+         text = "<b>Export Channels...</b><br>";
+         text += "Export current channel lineup of this TiVo to CSV file.<br>";
+         text += "This can be useful for a new TiVo where it could be useful to consult a<br>";
+         text += "spreadsheet so as to know which channels to keep and which to remove.";
       }
       else if (component.equals("guide_recordSP")){
          text = "<b>Season Pass</b><br>";

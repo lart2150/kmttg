@@ -1,10 +1,12 @@
 package com.tivo.kmttg.rpc;
 
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
@@ -1307,6 +1309,63 @@ public class Remote {
          return null;
       }
       return null;
+   }
+   
+   // Create CSV file from channel lineup - included and excluded channels
+   public void ChannelLineupCSV(File file) {
+      JSONObject result = null;
+      try {
+         // Top level list
+         Hashtable<String,JSONArray> h = new Hashtable<String,JSONArray>();
+         JSONObject json = new JSONObject();
+         json.put("noLimit", "true");
+         json.put("bodyId", bodyId_get());
+         result = Command("channelSearch", json);
+         if (result != null && result.has("channel")) {
+            // Only want received channels returned
+            JSONArray included = new JSONArray();
+            JSONArray excluded = new JSONArray();
+            for (int i=0; i<result.getJSONArray("channel").length(); ++i) {
+               json = result.getJSONArray("channel").getJSONObject(i);
+               if (json.getBoolean("isReceived"))
+                  included.put(json);
+               else
+                  excluded.put(json);
+            }
+            h.put("included", included);
+            h.put("excluded", excluded);
+            
+            BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
+            ofp.write("CHANNEL NUMBER,CHANNEL NAME,INCLUDED\r\n");
+            for (int i=0; i<included.length(); ++i) {
+               JSONObject j = included.getJSONObject(i);
+               String channelNumber = "";
+               if (j.has("channelNumber"))
+                  channelNumber = j.getString("channelNumber");
+               String callSign = "";
+               if (j.has("callSign"))
+                  callSign = j.getString("callSign");
+               ofp.write(channelNumber + "," + callSign + ",YES\r\n");
+            }
+            for (int i=0; i<excluded.length(); ++i) {
+               JSONObject j = excluded.getJSONObject(i);
+               String channelNumber = "";
+               if (j.has("channelNumber"))
+                  channelNumber = j.getString("channelNumber");
+               String callSign = "";
+               if (j.has("callSign"))
+                  callSign = j.getString("callSign");
+               ofp.write(channelNumber + "," + callSign + ",NO\r\n");
+            }
+            ofp.close();
+            log.warn("Channel lineup export completed successfully.");
+         } else {
+            error("rpc ChannelLineupCSV error - no channels obtained");
+         }
+      } catch (Exception e) {
+         error("rpc ChannelLineupCSV error - " + e.getMessage());
+         return;
+      }
    }
    
    public JSONArray SeasonPremieres(JSONArray channelNumbers, jobData job, int total_days) {
