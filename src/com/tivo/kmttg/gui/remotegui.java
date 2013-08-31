@@ -3105,7 +3105,7 @@ public class remotegui {
       else if (component.equals("export_channels")){
          text = "<b>Export Channels...</b><br>";
          text += "Export current channel lineup of this TiVo to CSV file.<br>";
-         text += "Spreadsheet includes both included and excluded channels from channel list<br>.";
+         text += "Spreadsheet includes both included and excluded channels from channel list.<br>";
          text += "This can be useful for a new TiVo to consult a spreadsheet so as to know which<br>";
          text += "channels to keep and remove.";
       }
