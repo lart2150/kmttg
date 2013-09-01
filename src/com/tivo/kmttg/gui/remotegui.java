@@ -3589,8 +3589,11 @@ public class remotegui {
       if (component.equals("send_web")) {
          text = "<b>Execute</b><br>";
          text += "Send given URL to TiVo internal web browser.<br>";
-         text += "NOTE: Use remote <b>arrow keys</b> to navigate the page and <b>Select</b> button to<br>";
+         text += "NAVIGATION: Use remote <b>arrow keys</b> to navigate the page and <b>Select</b> button to<br>";
          text += "select or execute currently highlighted item on the page.<br>";
+         text += "TYPING TEXT: You can use the kmttg <b>Remote</b> tab if there are fields where you<br>";
+         text += "need to enter some text since the kmttg remote understands key presses for the basic<br>";
+         text += "keyboard keys.<br>";
          text += "<b>NOTE: This only works for TiVos supporting HTML5 such as series 5 TiVos.</b>";
       }
       if (component.equals("url_web")) {
