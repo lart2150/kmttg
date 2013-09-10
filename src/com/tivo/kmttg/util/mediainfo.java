@@ -27,7 +27,7 @@ public class mediainfo {
          Stack<String> l = process.getStdout();
          if (l.size() > 0) {
             Hashtable<String,String> info = new Hashtable<String,String>();
-            String[] sections = {"General", "Video", "Audio", "Menu"};
+            String[] sections = {"General", "Video", "Audio", "Menu", "Text"};
             String section = "";
             String line;
             info.put("container", "mpeg");
