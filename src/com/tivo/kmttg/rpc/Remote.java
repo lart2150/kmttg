@@ -200,7 +200,15 @@ public class Remote {
             bodyId_get();
          }
       } catch (Exception e) {
-         error("RemoteInit - (IP=" + IP + ", port=" + port + "): " + Arrays.toString(e.getStackTrace()));
+         if (e.getMessage().contains("CertificateException")) {
+            String message = "This version of Java likely has disabled MD2 or RSA certificate support\n";
+            message += "which is needed for kmttg Remote functions to work. You will need to edit\n";
+            message += "lib/security/security.java file under your Java installation and put a hash\n";
+            message += "character (#) in front of the following line to re-enable MD2/RSA certificates:\n";
+            message += "jdk.certpath.disabledAlgorithms=MD2, RSA keySize < 1024";
+            error(message);
+         } else
+            error("RemoteInit - (IP=" + IP + ", port=" + port + "): " + Arrays.toString(e.getStackTrace()));
          success = false;
       }
    }
