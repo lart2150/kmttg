@@ -17,6 +17,7 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Random;
@@ -199,7 +200,7 @@ public class Remote {
             bodyId_get();
          }
       } catch (Exception e) {
-         error("RemoteInit - (IP=" + IP + ", port=" + port + "): " + e.getMessage());
+         error("RemoteInit - (IP=" + IP + ", port=" + port + "): " + Arrays.toString(e.getStackTrace()));
          success = false;
       }
    }

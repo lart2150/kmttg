@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -1742,7 +1743,7 @@ public class gui {
                         ofp.write(n[j] + "=" + json.get(n[j]) + "\n");
                      }
                   } catch (JSONException e) {
-                     log.error(e.getStackTrace().toString());
+                     log.error(Arrays.toString(e.getStackTrace()));
                   }
                }
                
@@ -1756,7 +1757,7 @@ public class gui {
                         ofp.write(n[j] + "=" + json.get(n[j]) + "\n");
                      }
                   } catch (JSONException e) {
-                     log.error(e.getStackTrace().toString());
+                     log.error(Arrays.toString(e.getStackTrace()));
                   }
                }
             }

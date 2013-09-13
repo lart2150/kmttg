@@ -21,6 +21,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -3008,7 +3009,7 @@ public class remotegui {
          }
          return true;
       } catch (JSONException e) {
-         log.error(e.getStackTrace().toString());
+         log.error(Arrays.toString(e.getStackTrace()));
          return false;
       }
    }

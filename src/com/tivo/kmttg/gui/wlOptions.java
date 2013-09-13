@@ -1,5 +1,6 @@
 package com.tivo.kmttg.gui;
 
+import java.util.Arrays;
 import java.util.Hashtable;
 
 import javax.swing.JCheckBox;
@@ -229,7 +230,7 @@ public class wlOptions {
          }
          return json;
       } catch (JSONException e) {
-         log.error(e.getStackTrace().toString());
+         log.error(Arrays.toString(e.getStackTrace()));
       }
       return null;
    }
