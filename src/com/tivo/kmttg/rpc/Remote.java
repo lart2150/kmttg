@@ -14,6 +14,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -175,6 +176,10 @@ public class Remote {
    }
    
    private void RemoteInit(String IP, int port, String MAK) {
+      // This is to workaround issue that started with Java 7 update 40 which sets
+      // this property to "MD2, RSA keySize < 1024" and prevents authentication
+      // from working
+      Security.setProperty("jdk.certpath.disabledAlgorithms","");
       this.IP = IP;
       this.port = port;
       createSocketFactory();
