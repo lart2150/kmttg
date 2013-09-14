@@ -94,6 +94,7 @@ public class remotegui {
    private JButton send_web = null;
    private JTextField url_web = null;
    public  JComboBox bookmark_web = null;
+   private JComboBox type_web = null;
    
    private JComboBox tivo_info = null;
    JTextPane text_info = null;
@@ -1365,12 +1366,11 @@ public class remotegui {
       JPanel panel_web = new JPanel();
       panel_web.setLayout(new GridBagLayout());
       
-      JLabel title_web = new JLabel("Web URL");
-      
-      JLabel tivo_web_label = new javax.swing.JLabel();
-      
       tivo_web = new javax.swing.JComboBox();
       tivo_web.setToolTipText(getToolTip("tivo_web"));
+      
+      type_web = new javax.swing.JComboBox(new String[] {"html", "flash"});
+      type_web.setToolTipText(getToolTip("type_web"));
 
       url_web = new JTextField(40);
       url_web.setMinimumSize(url_web.getPreferredSize());
@@ -1392,22 +1392,11 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Execute URL
             String tivoName = (String)tivo_web.getSelectedItem();
+            String type = (String)type_web.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                String url = string.removeLeadingTrailingSpaces(url_web.getText());
                if (url != null && url.length() > 0) {
-                  RC_webCB(tivoName, url);
-                  // Add to bookmarks if not already there
-                  Boolean add = true;
-                  if (bookmark_web.getItemCount() > 0) {
-                     for (int i=0; i<bookmark_web.getItemCount(); ++i) {
-                        String item = (String)bookmark_web.getItemAt(i);
-                        if (item.equals(url))
-                           add = false;
-                     }
-                  }
-                  if (add) {
-                     bookmark_web.addItem(url);
-                  }
+                  RC_webCB(tivoName, url, type);
                }
                else
                   log.error("No URL provided");
@@ -1422,7 +1411,9 @@ public class remotegui {
       bookmark_web.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
              if (e.getStateChange() == ItemEvent.SELECTED) {
-                url_web.setText((String)bookmark_web.getSelectedItem());
+                String[] l = ((String)bookmark_web.getSelectedItem()).split("::");
+                type_web.setSelectedItem(l[0]);
+                url_web.setText(l[1]);
             }
          }
       });
@@ -1439,16 +1430,14 @@ public class remotegui {
       
       JPanel row1_web = new JPanel();
       row1_web.setLayout(new BoxLayout(row1_web, BoxLayout.LINE_AXIS));      
-      row1_web.add(title_web);
-      row1_web.add(Box.createRigidArea(space_5));
-      row1_web.add(tivo_web_label);
-      row1_web.add(Box.createRigidArea(space_5));
       row1_web.add(tivo_web);
+      row1_web.add(Box.createRigidArea(space_5));
+      row1_web.add(type_web);
       row1_web.add(Box.createRigidArea(space_5));
       row1_web.add(url_web);
       row1_web.add(Box.createRigidArea(space_5));
       row1_web.add(send_web);
-      
+            
       JPanel row2_web = new JPanel();
       row2_web.setLayout(new BoxLayout(row2_web, BoxLayout.LINE_AXIS));
       row2_web.add(bookmark_label);
@@ -2357,17 +2346,20 @@ public class remotegui {
       jobMonitor.submitNewJob(job);
    }
    
-   private void RC_webCB(final String tivoName, final String url) {
+   private void RC_webCB(final String tivoName, final String url, final String type) {
       class backgroundRun extends SwingWorker<Object, Object> {
          protected Boolean doInBackground() {
             Remote r = config.initRemote(tivoName);
             if (r.success) {
                JSONObject json = new JSONObject();
                try {
+                  String destination = type;
+                  if (type.equals("html"))
+                     destination = "web";
                   json.put("bodyId", r.bodyId_get());
-                  json.put("uiDestinationType", "web");
-                  json.put("uri", "x-tivo:web:" + url);
-                  log.warn("Web url request for TiVo '" + tivoName + "' - " + url);
+                  json.put("uiDestinationType", destination);
+                  json.put("uri", "x-tivo:" + destination + ":" + url);
+                  log.warn(type + " url request for TiVo '" + tivoName + "' - " + url);
                   JSONObject reply = r.Command("uiNavigate", json);
                   if (reply != null)
                      log.print("Response - " + reply.toString());
@@ -2376,6 +2368,22 @@ public class remotegui {
                }
                r.disconnect();
             }
+            
+            // Add type + url to bookmarks if not already there
+            Boolean add = true;
+            String entry = type + "::" + url;
+            if (bookmark_web.getItemCount() > 0) {
+               for (int i=0; i<bookmark_web.getItemCount(); ++i) {
+                  String item = (String)bookmark_web.getItemAt(i);
+                  if (item.equals(entry))
+                     add = false;
+               }
+            }
+            if (add) {
+               bookmark_web.insertItemAt(entry, 0);
+               bookmark_web.setSelectedIndex(0);
+            }
+            
             return null;
          }
       }
@@ -3585,23 +3593,34 @@ public class remotegui {
       }
       if (component.equals("tivo_web")) {
          text = "Select TiVo for which to execute given URL.<br>";
-         text += "<b>NOTE: This only works for TiVos supporting HTML5 such as series 5 TiVos.</b>";
+         text += "NOTE: flash type works for series 4 and above TiVos.<br>";
+         text += "NOTE: html type only works for TiVos supporting HTML5 such as series 5 TiVos.";
+      }
+      if (component.equals("type_web")) {
+         text = "Execute provided URL as given type.<br>";
+         text += "If type specified as html, send given URL to TiVo internal web browser.<br>";
+         text += "If type specified as flash, send given URL to TiVo internal flash player.<br>";
+         text += "NOTE: flash type works for series 4 and above TiVos.<br>";
+         text += "NOTE: html type only works for TiVos supporting HTML5 such as series 5 TiVos.";
       }
       if (component.equals("send_web")) {
          text = "<b>Execute</b><br>";
-         text += "Send given URL to TiVo internal web browser.<br>";
-         text += "NAVIGATION: Use remote <b>arrow keys</b> to navigate the page and <b>Select</b> button to<br>";
+         text += "If type specified as html, send given URL to TiVo internal web browser.<br>";
+         text += "If type specified as flash, send given URL to TiVo internal flash player.<br>";
+         text += "WEB NAVIGATION: Use remote <b>arrow keys</b> to navigate the page and <b>Select</b> button to<br>";
          text += "select or execute currently highlighted item on the page.<br>";
          text += "TYPING TEXT: You can use the kmttg <b>Remote</b> tab if there are fields where you<br>";
          text += "need to enter some text since the kmttg remote understands key presses for the basic<br>";
          text += "keyboard keys.<br>";
-         text += "<b>NOTE: This only works for TiVos supporting HTML5 such as series 5 TiVos.</b>";
+         text += "NOTE: flash type works for series 4 and above TiVos.<br>";
+         text += "NOTE: html type only works for TiVos supporting HTML5 such as series 5 TiVos.";
       }
       if (component.equals("url_web")) {
          text = "<b>URL</b><br>";
          text += "URL to use. Press Return in this field to send the provided URL to selected TiVo<br>";
          text += "and to add the entered URL to bookmarks below.<br>";
-         text += "<b>NOTE: This only works for TiVos supporting HTML5 such as series 5 TiVos.</b>";
+         text += "NOTE: flash type works for series 4 and above TiVos.<br>";
+         text += "NOTE: html type only works for TiVos supporting HTML5 such as series 5 TiVos.";
       }
       if (component.equals("tivo_info")) {
          text = "Select TiVo for which to retrieve system information.<br>";
@@ -3611,7 +3630,7 @@ public class remotegui {
       }
       if (component.equals("bookmark_web")) {
          text = "<b>Bookmark</b><br>";
-         text += "Select a previously entered URL in this list to set as current URL.";
+         text += "Select a previously entered URL & type in this list to set as current URL & type.";
       }
       if (component.equals("remove_bookmark")) {
          text = "<b>Remove Bookmark</b><br>";
