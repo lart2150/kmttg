@@ -51,6 +51,7 @@ public class PopupHandler {
             );
          }
          if (subTabName.equals("Season Passes")) {
+            items.add(new PopupPair("Change Priority [p]", KeyEvent.VK_P, subTabName));
             items.add(new PopupPair("Delete [delete]", KeyEvent.VK_DELETE, subTabName));
             if (config.rpcEnabled(tivoName))
                items.add(new PopupPair("Copy [c]", KeyEvent.VK_C, subTabName));

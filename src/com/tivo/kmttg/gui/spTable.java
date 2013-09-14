@@ -19,6 +19,7 @@ import java.util.Hashtable;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -471,6 +472,30 @@ public class spTable {
        dm.removeRow(table.convertRowIndexToModel(row));
     }
     
+    private void changeRowPrompt(int from) {
+       MyTableModel dm = (MyTableModel)TABLE.getModel();
+       from = TABLE.convertRowIndexToModel(from);
+       String answer = (String)JOptionPane.showInputDialog(
+          config.gui.getJFrame(),
+          "Enter desired new priority #",
+          "Change Priority",
+          JOptionPane.PLAIN_MESSAGE
+       );
+       try {
+          int priority = Integer.parseInt(answer);
+          if (priority > 0 && priority <= TABLE.getRowCount()) {
+             int to = TABLE.convertRowIndexToModel(priority-1);
+             if (to != from) {
+                dm.moveRow(from, from, to);
+             }
+          } else {
+             log.error("Invalid priority number entered: " + answer);
+          }
+       } catch (NumberFormatException e) {
+          log.error("Invalid priority number entered: " + answer);
+       }
+    }
+    
     public Boolean isTableLoaded() {
        return loaded;
     }
@@ -561,6 +586,12 @@ public class spTable {
        }
        else if (keyCode == KeyEvent.VK_M) {
           config.gui.remote_gui.modify_sp.doClick();
+       }
+       else if (keyCode == KeyEvent.VK_P) {
+          int[] selected = TableUtil.GetSelectedRows(TABLE);
+          if (selected == null || selected.length < 1)
+             return;
+          changeRowPrompt(selected[0]);
        }
        else if (keyCode == KeyEvent.VK_U) {
           config.gui.remote_gui.upcoming_sp.doClick();
