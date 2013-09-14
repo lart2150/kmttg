@@ -43,6 +43,7 @@ import com.tivo.kmttg.util.log;
 
 public class Remote {
    public Boolean debug = false;
+   public String SchemaVersion = "9";
    public Boolean success = true;
    private String IP = null;
    private String cdata = null;
@@ -257,7 +258,7 @@ public class Remote {
          String headers =
             "Type: request" + eol +
             "RpcId: " + rpc_id + eol +
-            "SchemaVersion: 9" + eol +
+            "SchemaVersion: " + SchemaVersion + eol +
             "Content-Type: application/json" + eol +
             "RequestType: " + type + eol +
             "ResponseCount: " + ResponseCount + eol +
