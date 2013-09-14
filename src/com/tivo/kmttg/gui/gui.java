@@ -2003,7 +2003,10 @@ public class gui {
                   remote_gui.setTivoName(l[0], l[1]);
             }
             if (key.equals("rpc_web_bookmarks") && remote_gui != null) {
-               remote_gui.bookmark_web.addItem(line);
+               if (line.matches("^html::.+$") || line.matches("^flash::.+$"))
+                  remote_gui.bookmark_web.addItem(line);
+               else
+                  remote_gui.bookmark_web.addItem("html::" + line);
             }
             if (key.equals("rpc_includePast") && remote_gui != null) {
                if (line.matches("1"))
