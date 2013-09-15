@@ -74,7 +74,7 @@ public class gui {
    private JMenuItem saveMessagesMenuItem = null;
    private JMenuItem clearMessagesMenuItem = null;
    //private JMenuItem resetServerMenuItem = null;
-   private JMenuItem pushesMenuItem = null;
+   //private JMenuItem pushesMenuItem = null;
    private JMenuItem saveJobsMenuItem = null;
    private JMenuItem loadJobsMenuItem = null;
    private JMenuItem searchMenuItem = null;
@@ -587,8 +587,8 @@ public class gui {
          fileMenu.add(getSaveMessagesMenuItem());
          fileMenu.add(getClearMessagesMenuItem());
          //fileMenu.add(getResetServerMenuItem());
-         if (config.pyTivo_config != null && file.isFile(config.pyTivo_config))
-            fileMenu.add(getPushesMenuItem());
+         //if (config.pyTivo_config != null && file.isFile(config.pyTivo_config))
+         //   fileMenu.add(getPushesMenuItem());
          fileMenu.add(getResumeDownloadsMenuItem());
          fileMenu.add(getJobMenu());
          fileMenu.add(getSearchMenuItem());
@@ -785,7 +785,7 @@ public class gui {
       return resetServerMenuItem;
    }*/
 
-   private JMenuItem getPushesMenuItem() {
+   /*private JMenuItem getPushesMenuItem() {
       debug.print("");
       if (pushesMenuItem == null) {
          pushesMenuItem = new JMenuItem();
@@ -801,7 +801,7 @@ public class gui {
          });
       }
       return pushesMenuItem;
-   }
+   }*/
    
    private JMenuItem getToggleLaunchingJobsMenuItem() {
       debug.print("");
