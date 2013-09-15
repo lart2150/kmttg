@@ -2,6 +2,7 @@ package com.tivo.kmttg.main;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.Security;
 
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -20,6 +21,11 @@ public class kmttg {
       
    public static void main(String[] argv) {
       debug.enabled = false;
+      
+      // This is to workaround issue that started with Java 7 update 40 which sets
+      // this property to "MD2, RSA keySize < 1024" and prevents authentication
+      // from working
+      Security.setProperty("jdk.certpath.disabledAlgorithms","");
       
       // Parse command lines and set options accordingly
       getopt(argv);
