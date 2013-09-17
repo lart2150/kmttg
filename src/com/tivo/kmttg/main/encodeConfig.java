@@ -18,6 +18,7 @@ import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class encodeConfig {
    private static Boolean encodeName_reset = true;
@@ -280,6 +281,8 @@ public class encodeConfig {
             arg = arg.replaceAll("OUTPUT", escapeBackSlashes(outputFile));
             arg = arg.replaceAll("CPU_CORES", ("" + config.cpu_cores));
             if (srtFile != null) {
+               if (! file.isFile(srtFile))
+                  srtFile = string.replaceSuffix(inputFile, ".srt");
                arg = arg.replaceAll("SRTFILE", escapeBackSlashes(srtFile));
             }
             args.add(arg);
