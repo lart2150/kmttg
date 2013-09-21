@@ -39,6 +39,10 @@ public class mainInstall {
                            // Define default paths to installed programs
                            config.parse();
                            
+                           // Set Remote tivo names if relevant
+                           if (config.ipadEnabled())
+                              config.gui.remote_gui.setTivoNames();
+                           
                            // Save settings
                            config.save(config.configIni);
                            
