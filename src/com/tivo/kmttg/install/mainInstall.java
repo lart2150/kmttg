@@ -36,6 +36,9 @@ public class mainInstall {
                            // Remove zip file
                            file.delete(download);
                            
+                           // Define default paths to installed programs
+                           config.parse();
+                           
                            // Save settings
                            config.save(config.configIni);
                            
