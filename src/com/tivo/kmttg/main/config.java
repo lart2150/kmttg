@@ -777,8 +777,10 @@ public class config {
       }
             
       else if (programName.equals("comskipIni")) {
-         String comskipIni = string.dirname(getProgramDefault("comskip")) + s + "comskip.ini";
-         return comskipIni;
+         if (file.isFile(getProgramDefault("comskip")))
+            return string.dirname(getProgramDefault("comskip")) + s + "comskip.ini";
+         else
+            return "";
       }
       
       else if (programName.equals("AtomicParsley")) {
