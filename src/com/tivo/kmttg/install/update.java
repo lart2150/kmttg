@@ -73,6 +73,38 @@ public class update {
       b.execute();
    }
    
+   public static void update_projectx_background() {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            toolDownload t = new toolDownload();
+            String version = t.projectx_file;
+            int response = JOptionPane.showConfirmDialog(
+               config.gui.getJFrame(),
+               "Install projectX file: " + version + " ?",
+               "Confirm",
+               JOptionPane.YES_NO_OPTION,
+               JOptionPane.QUESTION_MESSAGE
+            );
+            if (response == JOptionPane.YES_OPTION) {
+               String zipFile = t.projectXdownload(config.programDir);
+               config.gui.progressBar_setValue(0);
+               config.gui.setTitle(config.kmttg);
+               if (zipFile != null) {
+                  if (Unzip.unzip(config.programDir, zipFile) ) {
+                     log.warn("projectX install complete");
+                     file.delete(zipFile);
+                     config.parse();
+                     config.gui.refreshOptions(false);
+                  }
+               }
+            }
+            return null;
+         }
+      }
+      backgroundRun b = new backgroundRun();
+      b.execute();
+   }
+   
    private static void update_kmttg() {
       String kmttg_jar = config.programDir + "/kmttg.jar";
       if (file.isFile(kmttg_jar)) {
