@@ -19,11 +19,12 @@ public class toolDownload {
    String tail = "/download?use_mirror=autoselect";
    String windows_file = "kmttg_win32_tools_v0p9s.zip";
    String mac_file = "kmttg_MacOSX_tools_v0p8l.zip";
-   String localFileName = null;
+   String projectx_file = "ProjectX_0_9_1_0.zip";
    
    public String download(String dir, String os) {
       debug.print("dir=" + dir + " os=" + os);
       String urlString = null;
+      String localFileName = null;
       if (os.equals("windows")) {
          urlString = base + windows_file + tail;
          localFileName = config.programDir + File.separator + windows_file;
@@ -32,7 +33,7 @@ public class toolDownload {
          localFileName = config.programDir + File.separator + mac_file;
       }
       if (urlString != null) {
-         if (downloadUrl(dir, urlString)) {
+         if (downloadUrl(urlString, localFileName)) {
             return localFileName;
          } else {
             return null;
@@ -41,8 +42,15 @@ public class toolDownload {
       return null;
    }
    
-   public Boolean downloadUrl(String dir, String urlString) {
-      debug.print("dir=" + dir + " urlString=" + urlString);
+   public String projectXdownload(String dir) {
+      String urlString = base + projectx_file + tail;
+      String localFileName = config.programDir + File.separator + projectx_file;
+      if (downloadUrl(urlString, localFileName))
+         return localFileName;
+      return null;
+   }
+   
+   private Boolean downloadUrl(String urlString, String localFileName) {
       BufferedInputStream in = null;
       RandomAccessFile out = null;
       Integer size = 0;
