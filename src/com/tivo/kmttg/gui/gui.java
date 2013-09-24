@@ -52,6 +52,7 @@ public class gui {
    private JMenuItem helpAboutMenuItem = null;
    private JMenuItem helpUpdateMenuItem = null;
    private JMenuItem helpToolsUpdateMenuItem = null;
+   private JMenuItem helpToolsProjectXMenuItem = null;
    private JMenuItem exitMenuItem = null;
    private JMenuItem autoConfigMenuItem = null;
    private JMenuItem runInGuiMenuItem = null;
@@ -636,6 +637,8 @@ public class gui {
          helpMenu.add(getHelpUpdateMenuItem());
          if (config.OS.equals("windows") || config.OS.equals("mac"))
             helpMenu.add(getHelpToolsUpdateMenuItem());
+         else
+            helpMenu.add(getHelpToolsProjectXMenuItem());
       }
       return helpMenu;
    }
@@ -680,6 +683,20 @@ public class gui {
          });
       }
       return helpToolsUpdateMenuItem;
+   }
+
+   private JMenuItem getHelpToolsProjectXMenuItem() {
+      debug.print("");
+      if (helpToolsProjectXMenuItem == null) {
+         helpToolsProjectXMenuItem = new JMenuItem();
+         helpToolsProjectXMenuItem.setText("Update/Install ProjectX...");
+         helpToolsProjectXMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               update.update_projectx_background();
+            }
+         });
+      }
+      return helpToolsProjectXMenuItem;
    }
 
    private JMenuItem getExitMenuItem() {
