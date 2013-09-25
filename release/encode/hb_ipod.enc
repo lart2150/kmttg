@@ -5,7 +5,7 @@ Handbrake iPod: mp4 container, res x=320 h.264 video, aac audio
 # Encode command or script (single line)
 # Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
-HANDBRAKE -i INPUT -t 1 -c 1 -f mp4 -I -X 320 -e x264 -b 700 -a 1 -E faac -B 160 -R 48 -6 dpl2 -D 0.0 -x level=30:bframes=0:cabac=0:ref=2:vbv-maxrate=768:vbv-bufsize=2000:analyse=all:me=umh:no-fast-pskip=1:subq=6:8x8dct=0:trellis=0:weightb=0:mixed-refs=0 -v 1 -o OUTPUT
+HANDBRAKE -i INPUT -t 1 -c 1 -f mp4 -I -X 320 -e x264 -b 700 -a 1 -E faac -B 160 -R 48 -6 dpl2 -D 0.0 -x threads=CPU_CORES:level=30:bframes=0:cabac=0:ref=2:vbv-maxrate=768:vbv-bufsize=2000:analyse=all:me=umh:no-fast-pskip=1:subq=6:8x8dct=0:trellis=0:weightb=0:mixed-refs=0 -v 1 -o OUTPUT
  
 # Encoded output file extension
 <extension>
