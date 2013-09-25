@@ -147,6 +147,14 @@ public class qsfix implements Serializable {
                config.gui.jobTab_UpdateJobMonitorRowOutput(job, output);
             }
             
+            // Rename already created metadata file if relevant
+            String meta = string.replaceSuffix(job.mpegFile, ".mpg") + ".txt";
+            if (file.isFile(meta)) {
+               String meta_new = job.mpegFile + ".txt";
+               log.print("Renaming metadata file to: " + meta_new);
+               file.rename(meta, meta_new);
+            }
+            
             // Subsequent jobs need to have mpegFile updated
             jobMonitor.updatePendingJobFieldValue(job, "mpegFile", job.mpegFile);
          }
