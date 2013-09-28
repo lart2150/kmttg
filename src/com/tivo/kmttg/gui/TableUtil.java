@@ -250,6 +250,7 @@ public class TableUtil {
                // scroll to and set selection to given row
                TABLE.scrollRectToVisible(TABLE.getCellRect(row, 0, true));
                TABLE.setRowSelectionInterval(row, row);
+               TABLE.requestFocus();
                return true;
             }
          }
