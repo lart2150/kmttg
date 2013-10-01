@@ -132,6 +132,7 @@ public class config {
    public static String slingBox_res = "1920x1080";
    public static String slingBox_vbw = "4000";
    public static String slingBox_type = "Slingbox 350/500";
+   public static String slingBox_container = "mpegts";
 
    // GUI table related
    public static Color tableBkgndDarker = new Color(235,235,235); // light grey
