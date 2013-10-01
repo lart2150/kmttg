@@ -1672,6 +1672,7 @@ public class gui {
             ofp.write("<slingBox_res>\n"        + config.slingBox_res        + "\n");
             ofp.write("<slingBox_vbw>\n"        + config.slingBox_vbw        + "\n");
             ofp.write("<slingBox_type>\n"       + config.slingBox_type       + "\n");
+            ofp.write("<slingBox_container>\n"  + config.slingBox_container  + "\n");
             ofp.write("<jobMonitorFullPaths>\n" + config.jobMonitorFullPaths + "\n");
             ofp.write("<width>\n"               + d.width                    + "\n");
             ofp.write("<height>\n"              + d.height                   + "\n");
@@ -1911,6 +1912,8 @@ public class gui {
                config.slingBox_vbw = line;
             if (key.equals("slingBox_type"))
                config.slingBox_type = line;
+            if (key.equals("slingBox_container"))
+               config.slingBox_container = line;
             if (key.equals("jobMonitorFullPaths")) {
                if (line.matches("1"))
                   config.jobMonitorFullPaths = 1;
