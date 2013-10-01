@@ -130,7 +130,7 @@ public class slingbox implements Serializable {
       if (job.slingbox_chan != null)
          command += " -chan " + job.slingbox_chan;
       command += " | \"" + config.ffmpeg + "\" -fflags +genpts -i - ";
-      command += "-vcodec copy -acodec ac3 -ab 224k -y -f mpegts \"" + job.slingbox_file + "\"";
+      command += "-vcodec copy -acodec ac3 -ab 224k -y -f " + config.slingBox_container + " \"" + job.slingbox_file + "\"";
       
       // Make temporary script containing command
       try {
@@ -312,6 +312,7 @@ public class slingbox implements Serializable {
    }
       
    // Obtain current length in ms of encoding file from ffmpeg stderr
+   // frame=  679 fps= 39 q=-1.0 size=    2231kB time=22.66 bitrate= 806.9kbits/s
    private String ffmpegGetTime() {
       String zero = "0:00:00";
       String last = process.getStderrLast();
@@ -320,14 +321,28 @@ public class slingbox implements Serializable {
          String[] l = last.split("time=");
          String[] ll = l[l.length-1].split("\\s+");
          try {
+            Pattern p;
+            Matcher m;
             if (ll[0].contains(":")) {
                // "HH:MM:SS.MS" format
-               Pattern p = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");
-               Matcher m = p.matcher(ll[0]);
+               p = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");
+               m = p.matcher(ll[0]);
                if (m.matches()) {
                   long HH = Long.parseLong(m.group(1));
                   long MM = Long.parseLong(m.group(2));
                   long SS = Long.parseLong(m.group(3));
+                  return String.format("%d:%02d:%02d",HH,MM,SS);
+               }
+            } else {
+               // "SS.MS" format
+               p = Pattern.compile("(\\d+).(\\d+)");
+               m = p.matcher(ll[0]);
+               if (m.matches()) {
+                  long secsIn = Long.parseLong(m.group(1));
+                  long HH = secsIn / 3600;
+                  long remainder = secsIn % 3600;
+                  long MM = remainder / 60;
+                  long SS = remainder % 60; 
                   return String.format("%d:%02d:%02d",HH,MM,SS);
                }
             }
