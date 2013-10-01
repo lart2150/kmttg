@@ -37,6 +37,7 @@ public class slingboxgui {
    private JComboBox type;
    private JComboBox vbw;
    private JComboBox res;
+   private JComboBox container;
    jobData job = null;
    JFileChooser Browser = null;
    
@@ -220,6 +221,13 @@ public class slingboxgui {
          type.addItem("Slingbox Pro");
          type.setSelectedItem(config.slingBox_type);
          
+         JLabel container_label = new JLabel("Video container to use");
+         container = new JComboBox();
+         container.setToolTipText(getToolTip("container"));
+         container.addItem("mpegts");
+         container.addItem("matroska");
+         container.setSelectedItem(config.slingBox_container);
+         
          int gy = 0;
          GridBagConstraints c = new GridBagConstraints();
          c.ipady = 0;
@@ -288,6 +296,13 @@ public class slingboxgui {
          gy++;
          c.gridy = gy;
          c.gridx = 0;
+         panel.add(container_label, c);
+         c.gridx = 1;
+         panel.add(container, c);
+         
+         gy++;
+         c.gridy = gy;
+         c.gridx = 0;
          JPanel left_video = new JPanel();
          left_video.setLayout(new BoxLayout(left_video, BoxLayout.LINE_AXIS));
          left_video.add(res_label);
@@ -329,6 +344,7 @@ public class slingboxgui {
       config.slingBox_vbw = (String)vbw.getSelectedItem();
       config.slingBox_res = (String)res.getSelectedItem();
       config.slingBox_type = (String)type.getSelectedItem();
+      config.slingBox_container = (String)container.getSelectedItem();
    }
    
    private String getTimeStamp() {
@@ -339,11 +355,16 @@ public class slingboxgui {
    
    private String getFileName() {
       String d = string.removeLeadingTrailingSpaces(dir.getText());
+      String c = string.removeLeadingTrailingSpaces((String)container.getSelectedItem());
+      config.slingBox_container = c;
       if (d.length() == 0) {
          log.error("No slingbox directory specified. Aborting...");
          return null;
       }
-      return d + File.separator + "slingbox_" + getTimeStamp() + ".ts";
+      String ext = ".ts";
+      if (c.equals("matroska"))
+         ext = ".mkv";
+      return d + File.separator + "slingbox_" + getTimeStamp() + ext;
    }
    
    private String getToolTip(String component) {
@@ -401,6 +422,15 @@ public class slingboxgui {
          text = "<b>Slingbox model</b><br>";
          text += "Choose which Slingbox model you have. kmttg uses a different Perl script and<br>";
          text += "options for older models vs newer models so it's important to choose the right one.";
+      }
+      else if (component.equals("container")) {
+         text = "<b>Video container to use</b><br>";
+         text += "Choose video container to use for the capture.<br>";
+         text += "mpegts = mpeg2 transport stream container<br>";
+         text += "matroska = mkv container<br>";
+         text += "NOTE: If capturing from Slingbox Pro models and you plan on editing the capture using<br>";
+         text += "VideoRedo TVSuite software, you should use <b>matroska</b> since otherwise VRD won't<br>";
+         text += "be able to open the file since there is no frame rate information for TS captures.";
       }
       else if (component.equals("dur")) {
          text = "<b>Capture # minutes</b><br>";
