@@ -20,6 +20,7 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -1385,13 +1386,14 @@ public class Remote {
          return null;   
       
       JSONObject json;
+      LinkedHashMap<String,JSONObject> unique = new LinkedHashMap<String,JSONObject>();
       JSONArray data = new JSONArray();
       Date now = new Date();
       long start = now.getTime();
       long day_increment = 1*24*60*60*1000;
       long stop = start + day_increment;
       try {
-         // Set shorter timeout since some requests fail for some reason (especially for Linux)
+         // Set shorter timeout in case some requests fail
          socket.setSoTimeout(20*1000);
          // Search 1 day at a time
          int item = 0;
@@ -1446,7 +1448,7 @@ public class Remote {
                         if (match) {
                            // repeat != true
                            if ( ! json.has("repeat") || (json.has("repeat") && ! json.getBoolean("repeat")) ) {
-                              data.put(json);
+                              unique.put(json.getString("offerId"), json);
                            }   
                         }
                      }
@@ -1457,9 +1459,11 @@ public class Remote {
             start += day_increment;
             stop += day_increment;
          }
-         if (data.length() == 0) {
+         if (unique.isEmpty()) {
             log.warn("No show premieres found.");
          } else {
+            for (JSONObject j : unique.values() )
+               data.put(j);
             // Tag json entries in data that already have Season Passes scheduled
             config.gui.remote_gui.TagPremieresWithSeasonPasses(data);
          }
