@@ -19,7 +19,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -38,7 +37,7 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class AdvSearch {
-   private JDialog dialog = null;
+   private JFrame dialog = null;
    private JPanel content = null;
    private JComboBox savedEntries = null;
    private JComboBox creditKeywordRole = null;
@@ -50,8 +49,8 @@ public class AdvSearch {
    private JTextField channels = null;
    private JTextField originalAirYear = null;
    private JTextField creditKeyword = null;
-   private JCheckBox episodic = null;
-   private JCheckBox hdtv = null;
+   private JComboBox episodic = null;
+   private JComboBox hdtv = null;
    private JCheckBox receivedChannelsOnly = null;
    private JCheckBox favoriteChannelsOnly = null;
    private String tivoName = null;
@@ -63,93 +62,16 @@ public class AdvSearch {
       // Create dialog if not already created
       if (dialog == null) {
          create(frame);
+         
+         // Parse saveFile to define current configuration
+         readFile(config.programDir + File.separator + saveFile);
       }
       this.tivoName = tivoName;
       this.max_search = max_search;
       
-      // Parse saveFile to define current configuration
-      readFile(config.programDir + File.separator + saveFile);
-      
       // Display the dialog
       dialog.setVisible(true);
       title.grabFocus();
-   }
-   
-   private void SearchCB() {
-      try {
-         String text;
-         JSONObject json = new JSONObject();
-         JSONArray a = new JSONArray();
-         a.put("collection"); a.put("content"); a.put("person");
-         json.put("includeUnifiedItemType", a);              
-         json.put("levelOfDetail", "medium");
-         json.put("mergeOverridingCollections", true);
-         json.put("namespace", "refserver");
-         json.put("searchable", true);
-         Date now = new Date();
-         json.put("minStartTime", rnpl.getStringFromLongDate(now.getTime()));
-         
-         text = string.removeLeadingTrailingSpaces(title.getText());
-         if (text != null && text.length() > 0) {
-            json.put("title", text);
-         }
-         text = string.removeLeadingTrailingSpaces(subtitleKeyword.getText());
-         if (text != null && text.length() > 0) {
-            json.put("subtitleKeyword", text);
-         }
-         text = string.removeLeadingTrailingSpaces(subtitle.getText());
-         if (text != null && text.length() > 0) {
-            json.put("subtitle", text);
-         }
-         text = string.removeLeadingTrailingSpaces(descriptionKeyword.getText());
-         if (text != null && text.length() > 0) {
-            json.put("descriptionKeyword", text);
-         }
-         text = string.removeLeadingTrailingSpaces(originalAirYear.getText());
-         if (text != null && text.length() > 0) {
-            json.put("originalAirYear", text);
-         }
-         text = string.removeLeadingTrailingSpaces(creditKeyword.getText());
-         if (text != null && text.length() > 0) {
-            json.put("creditKeyword", text);
-            json.put("creditKeywordRole", (String)creditKeywordRole.getSelectedItem());
-         }
-         text = string.removeLeadingTrailingSpaces(keywords.getText());
-         if (text != null && text.length() > 0) {
-            if (text.contains("(") || text.contains("-") || text.contains("+") || text.contains("*"))
-               json.put("advancedKeyword", true);
-            json.put("keyword", text);
-         }
-         String[] chans = null;
-         text = string.removeLeadingTrailingSpaces(channels.getText());
-         if (text != null && text.length() > 0) {
-            chans = text.split("\\s+");
-         }
-         if (episodic.isSelected())
-            json.put("episodic", true);
-         if (hdtv.isSelected())
-            json.put("hdtv", true);
-         if (favoriteChannelsOnly.isSelected())
-            json.put("favoriteChannelsOnly", true);
-         if (! receivedChannelsOnly.isSelected())
-            json.put("receivedChannelsOnly", false);
-
-         //log.print(json.toString(3)); // debugging
-         jobData job = new jobData();
-         job.source                 = tivoName;
-         job.tivoName               = tivoName;
-         job.type                   = "remote";
-         job.name                   = "Remote";
-         job.search                 = config.gui.remote_gui.tab_search;
-         job.remote_search_max      = max_search;
-         job.remote_adv_search      = true;
-         job.remote_adv_search_json = json;
-         if (chans != null)
-            job.remote_adv_search_chans = chans;
-         jobMonitor.submitNewJob(job);
-      } catch (JSONException e) {
-         log.error("AdvSearch SearchCB error - " + e.getMessage());
-      }
    }
   
    private void create(JFrame frame) {      
@@ -200,13 +122,14 @@ public class AdvSearch {
       creditKeyword = new JTextField(30);
       creditKeyword.setToolTipText(getToolTip("creditKeyword"));
       
-      episodic = new JCheckBox("Episodic Shows Only");
+      JLabel episodic_label = new JLabel("Show types");
+      episodic = new JComboBox(new Object[] {"both", "episodic", "non-episodic"});
       episodic.setToolTipText(getToolTip("episodic"));
-      episodic.setSelected(false);
       
-      hdtv = new JCheckBox("HD Recordings");
+      JLabel hdtv_label = new JLabel("Recording types");
+      hdtv = new JComboBox(new Object[] {"both", "HD", "SD"});
       hdtv.setToolTipText(getToolTip("hdtv"));
-      hdtv.setSelected(true);
+      hdtv.setSelectedItem("HD");
       
       receivedChannelsOnly = new JCheckBox("Received channels only");
       receivedChannelsOnly.setToolTipText(getToolTip("receivedChannelsOnly"));
@@ -228,7 +151,10 @@ public class AdvSearch {
       save.setToolTipText(getToolTip("save"));
       save.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
-            String entry = JOptionPane.showInputDialog("Enter wishlist name");
+            String text = (String)savedEntries.getSelectedItem();
+            if (text.equals("Default"))
+               text = "";
+            String entry = JOptionPane.showInputDialog(null, "Enter wishlist name", text);
             if (entry != null && entry.length() > 0)
                addEntry(entry);
          }
@@ -375,7 +301,11 @@ public class AdvSearch {
       c.gridy = gy;
       JPanel row10 = new JPanel();
       row10.setLayout(new BoxLayout(row10, BoxLayout.X_AXIS));
+      row10.add(episodic_label);
+      row10.add(Box.createRigidArea(space_5));
       row10.add(episodic);
+      row10.add(Box.createRigidArea(space_5));
+      row10.add(hdtv_label);
       row10.add(Box.createRigidArea(space_5));
       row10.add(hdtv);
       content.add(row10, c);
@@ -401,10 +331,9 @@ public class AdvSearch {
       content.add(row12, c);
    
       // create dialog window
-      dialog = new JDialog(frame, false); // non-modal dialog
+      dialog = new JFrame();
       dialog.setTitle("Advanced Search");
       dialog.setContentPane(content);
-      dialog.setSize(new Dimension(700,450));
       dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
       dialog.pack();
    }
@@ -431,6 +360,7 @@ public class AdvSearch {
             if (line.matches("^<.+>")) {
                if (key != null && json.length() > 0) {
                   entries.put(key, json);
+                  uniqueEntry(key);
                }
                key = line.replaceFirst("<", "");
                key = key.replaceFirst(">", "");
@@ -463,7 +393,7 @@ public class AdvSearch {
          return;
       }
       try {
-         BufferedWriter ofp = new BufferedWriter(new FileWriter(wFile, true));
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(wFile, false));
          String eol = "\r\n";
          for (String entry : entries.keySet()) {
             JSONObject json = entries.get(entry);
@@ -500,14 +430,8 @@ public class AdvSearch {
          json.put("creditKeywordRole", creditKeywordRole.getSelectedItem());
          json.put("keywords", string.removeLeadingTrailingSpaces(keywords.getText()));
          json.put("channels", string.removeLeadingTrailingSpaces(channels.getText()));
-         if (episodic.isSelected())
-            json.put("episodic", "on");
-         else
-            json.put("episodic", "off");
-         if (hdtv.isSelected())
-            json.put("hdtv", "on");
-         else
-            json.put("hdtv", "off");
+         json.put("episodic", episodic.getSelectedItem());
+         json.put("hdtv", hdtv.getSelectedItem());
          if (receivedChannelsOnly.isSelected())
             json.put("receivedChannelsOnly", "on");
          else
@@ -587,8 +511,16 @@ public class AdvSearch {
                text = json.getString("channels");
             channels.setText(text);
             
-            episodic.setSelected(json.getString("episodic").equals("on"));
-            hdtv.setSelected(json.getString("hdtv").equals("on"));
+            text = "both";
+            if (json.has("episodic"))
+               text = json.getString("episodic");
+            episodic.setSelectedItem(text);
+            
+            text = "HD";
+            if (json.has("hdtv"))
+               text = json.getString("hdtv");
+            hdtv.setSelectedItem(text);
+            
             receivedChannelsOnly.setSelected(json.getString("receivedChannelsOnly").equals("on"));
             favoriteChannelsOnly.setSelected(json.getString("favoriteChannelsOnly").equals("on"));
          } catch (JSONException e) {
@@ -607,10 +539,93 @@ public class AdvSearch {
       creditKeywordRole.setSelectedItem("actor");
       keywords.setText("");
       channels.setText("");
-      episodic.setSelected(false);
-      hdtv.setSelected(true);
+      episodic.setSelectedItem("both");
+      hdtv.setSelectedItem("HD");
       receivedChannelsOnly.setSelected(true);
       favoriteChannelsOnly.setSelected(false);
+   }
+   
+   private void SearchCB() {
+      try {
+         String text;
+         JSONObject json = new JSONObject();
+         JSONArray a = new JSONArray();
+         a.put("collection"); a.put("content"); a.put("person");
+         json.put("includeUnifiedItemType", a);              
+         json.put("levelOfDetail", "medium");
+         json.put("mergeOverridingCollections", true);
+         json.put("namespace", "refserver");
+         json.put("searchable", true);
+         Date now = new Date();
+         json.put("minStartTime", rnpl.getStringFromLongDate(now.getTime()));
+         
+         text = string.removeLeadingTrailingSpaces(title.getText());
+         if (text != null && text.length() > 0) {
+            json.put("title", text);
+         }
+         text = string.removeLeadingTrailingSpaces(subtitleKeyword.getText());
+         if (text != null && text.length() > 0) {
+            json.put("subtitleKeyword", text);
+         }
+         text = string.removeLeadingTrailingSpaces(subtitle.getText());
+         if (text != null && text.length() > 0) {
+            json.put("subtitle", text);
+         }
+         text = string.removeLeadingTrailingSpaces(descriptionKeyword.getText());
+         if (text != null && text.length() > 0) {
+            json.put("descriptionKeyword", text);
+         }
+         text = string.removeLeadingTrailingSpaces(originalAirYear.getText());
+         if (text != null && text.length() > 0) {
+            json.put("originalAirYear", text);
+         }
+         text = string.removeLeadingTrailingSpaces(creditKeyword.getText());
+         if (text != null && text.length() > 0) {
+            json.put("creditKeyword", text);
+            json.put("creditKeywordRole", (String)creditKeywordRole.getSelectedItem());
+         }
+         text = string.removeLeadingTrailingSpaces(keywords.getText());
+         if (text != null && text.length() > 0) {
+            if (text.contains("(") || text.contains("-") || text.contains("+") || text.contains("*"))
+               json.put("advancedKeyword", true);
+            json.put("keyword", text);
+         }
+         String[] chans = null;
+         text = string.removeLeadingTrailingSpaces(channels.getText());
+         if (text != null && text.length() > 0) {
+            chans = text.split("\\s+");
+         }
+         text = (String)episodic.getSelectedItem();
+         if (text.equals("episodic"))
+            json.put("episodic", true);
+         if (text.equals("non-episodic"))
+            json.put("episodic", false);
+         text = (String)hdtv.getSelectedItem();
+         if (text.equals("HD"))
+            json.put("hdtv", true);
+         if (text.equals("SD"))
+            json.put("hdtv", false);
+         if (favoriteChannelsOnly.isSelected())
+            json.put("favoriteChannelsOnly", true);
+         if (! receivedChannelsOnly.isSelected())
+            json.put("receivedChannelsOnly", false);
+
+         //log.print(json.toString(3)); // debugging
+         jobData job = new jobData();
+         job.source                 = tivoName;
+         job.tivoName               = tivoName;
+         job.type                   = "remote";
+         job.name                   = "Remote";
+         job.search                 = config.gui.remote_gui.tab_search;
+         job.remote_search_max      = max_search;
+         job.remote_adv_search      = true;
+         job.remote_adv_search_json = json;
+         if (chans != null)
+            job.remote_adv_search_chans = chans;
+         jobMonitor.submitNewJob(job);
+      } catch (JSONException e) {
+         log.error("AdvSearch SearchCB error - " + e.getMessage());
+      }
    }
       
    private String getToolTip(String component) {
@@ -668,12 +683,16 @@ public class AdvSearch {
          text += "NOTE: Case insensitive.";
       }
       else if (component.equals("episodic")) {
-         text =  "<b>Episodic Shows Only</b><br>";
-         text += "When enabled match only episodic shows (i.e. series only).";
+         text =  "<b>Show types</b><br>";
+         text += "both = match both episodic and non-episodic shows.<br>";
+         text += "episodic = match only episodic shows.<br>";
+         text += "non-episodic = match only non-episodic shows.";
       }
       else if (component.equals("hdtv")) {
-         text =  "<b>HD Recordings</b><br>";
-         text += "When enabled match HD recordings only (i.e. no SD recordings).";
+         text =  "<b>Recording types</b><br>";
+         text += "both = match both HD and SD recordings.<br>";
+         text += "HD = match only HD recordings.<br>";
+         text += "SD = match only SD recordings.";
       }
       else if (component.equals("receivedChannelsOnly")) {
          text =  "<b>Received channels only</b><br>";
