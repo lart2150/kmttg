@@ -122,11 +122,12 @@ public class remotegui {
    public Hashtable<String,JSONArray> premiere_channel_info = new Hashtable<String,JSONArray>();
    
    private JComboBox tivo_search = null;
-   private searchTable tab_search = null;
+   public searchTable tab_search = null;
    private JTextField text_search = null;
    public JButton button_search = null;
    private JSpinner max_search = null;
    public Hashtable<String,JSONArray> search_info = new Hashtable<String,JSONArray>();
+   private AdvSearch advSearch = new AdvSearch();
 
    private JComboBox tivo_rc = null;
    private JComboBox hme_rc = null;
@@ -1645,6 +1646,20 @@ public class remotegui {
 
       text_search.setToolTipText(getToolTip("text_search"));
 
+      JButton adv_search = new JButton("Search++");
+      adv_search.setMargin(new Insets(1,1,1,1));
+      adv_search.setToolTipText(getToolTip("adv_search"));
+      adv_search.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_search.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               advSearch.display(
+                  config.gui.getJFrame(), tivoName, (Integer)max_search.getValue()
+               );
+            }
+         }
+      });
+
       record_search = new JButton("Record");
       record_search.setMargin(new Insets(1,1,1,1));
       record_search.setToolTipText(getToolTip("record_search"));
@@ -1721,6 +1736,8 @@ public class remotegui {
       row1_search.add(max_search_label);
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(max_search);
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(adv_search);
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(record_search);
       row1_search.add(Box.createRigidArea(space_5));

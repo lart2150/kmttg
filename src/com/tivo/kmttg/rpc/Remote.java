@@ -1569,6 +1569,112 @@ public class Remote {
       
       return null;
    }
+
+   // Advanced Search (used by AdvSearch GUI and remote task)
+   public JSONArray AdvSearch(jobData job) {
+      try {
+         JSONObject collections = new JSONObject();
+         int order = 0;
+         Boolean stop = false;
+         int offset = 0;
+         int count = 50;
+         
+         // Update job monitor output column name
+         if (job != null && config.GUIMODE) {
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Advanced Search");
+         }
+         
+         JSONObject json = job.remote_adv_search_json;
+         json.put("bodyId", bodyId_get());
+         while ( ! stop ) {
+            json.put("count", count);
+            json.put("offset", offset);
+            JSONObject result = Command("offerSearch", json);
+            if (result == null) {
+               log.error("AdvSearch failed.");
+               stop = true;
+            } else {
+               if (result.has("offer")) {
+                  if (result.has("isBottom") && result.getBoolean("isBottom"))
+                     stop = true;
+                  JSONArray entries = result.getJSONArray("offer");
+                  for (int i=0; i<entries.length(); ++i) {
+                     JSONObject j = entries.getJSONObject(i);
+                     Boolean include = true;
+                     if (job.remote_adv_search_chans != null && j.has("channel")) {
+                        // Channel filter
+                        include = false;
+                        if (j.getJSONObject("channel").has("channelNumber")) {
+                           String channelNumber = j.getJSONObject("channel").getString("channelNumber");
+                           for (String chan : job.remote_adv_search_chans) {
+                              if (chan.equals(channelNumber))
+                                 include = true;
+                           }
+                        }
+                     }
+                     if (include) {
+                        if (j.has("partnerCollectionId") && j.has("title") && j.has("collectionId")) {
+                           String partner = j.getString("partnerCollectionId");
+                           if ( ! partner.startsWith("epg") )
+                              continue;
+                           String title = j.getString("title");
+                           String collectionId = j.getString("collectionId");
+                           String collectionType = "";
+                           if (j.has("collectionType"))
+                              collectionType = j.getString("collectionType");
+                           if (! collections.has(collectionId)) {
+                              JSONObject new_json = new JSONObject();
+                              new_json.put("collectionId", collectionId);
+                              new_json.put("title", title);
+                              new_json.put("type", collectionType);
+                              new_json.put("entries", new JSONArray());
+                              new_json.put("order", order);
+                              collections.put(collectionId, new_json);
+                              order++;
+                           }
+                           collections.getJSONObject(collectionId).getJSONArray("entries").put(j);
+                        }
+                     }
+                  }
+                  offset += entries.length();
+                  String message = "Matches: " + offset ;
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+                  if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                     config.gui.setTitle("Adv Search: " + offset + " " + config.kmttg);
+                  }
+                  if (offset >= job.remote_search_max-1)
+                     stop = true;
+                  if (entries.length() == 0)
+                     stop = true;
+               } else {
+                  // result did not return offer so must be done or errored out
+                  stop = true;
+               }                        
+            } // result != null
+         } // while
+         log.warn(">> Advanced search completed on TiVo: " + job.tivoName);
+         
+         // Now generate table_entries in priority order
+         if (collections.length() > 0) {
+            JSONArray table_entries = new JSONArray();
+            JSONArray keys = collections.names();
+            for (int i=0; i<order; ++i) {
+               for (int j=0; j<keys.length(); ++j) {
+                  if (collections.getJSONObject(keys.getString(j)).getInt("order") == i) {
+                     table_entries.put(collections.getJSONObject(keys.getString(j)));
+                     break;
+                  }
+               }
+            }
+            return table_entries;
+         } else {
+            log.warn("NOTE: No matches found during the search.");
+         }
+      } catch (JSONException e) {
+         log.error("AdvSearch failed - " + e.getMessage());
+      }
+      return null;
+   }
    
    // Method use by various RPC tables for SP scheduling
    // NOTE: This should be called in a separate thread

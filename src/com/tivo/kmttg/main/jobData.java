@@ -9,6 +9,7 @@ import java.util.Hashtable;
 import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.cancelledTable;
 import com.tivo.kmttg.gui.deletedTable;
 import com.tivo.kmttg.gui.guideTable;
@@ -151,6 +152,10 @@ public class jobData implements Serializable, Cloneable {
    public String remote_search_keyword = null;
    public searchTable search = null;
    public int remote_search_max = 200;
+   
+   public Boolean remote_adv_search = false;
+   public JSONObject remote_adv_search_json = null;
+   public String[] remote_adv_search_chans = null;
    
    public Boolean remote_guideChannels = false;
    public guideTable gTable = null;

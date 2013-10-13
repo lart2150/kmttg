@@ -94,6 +94,12 @@ public class remote implements Serializable {
                   if (data != null)
                      config.gui.remote_gui.updateTodoIfNeeded("Search");
                }
+               if (job.remote_adv_search && config.GUIMODE) {
+                  config.gui.remote_gui.clearTable("search");
+                  data = r.AdvSearch(job);
+                  if (data != null)
+                     config.gui.remote_gui.updateTodoIfNeeded("Search");
+               }
                if (job.remote_guideChannels && config.GUIMODE) {
                   data = r.ChannelList(job);
                   if (data != null)
@@ -123,6 +129,7 @@ public class remote implements Serializable {
       if (job.remote_channels)      jobName += " Channels List";
       if (job.remote_premiere)      jobName += " Season Premieres";
       if (job.remote_search)        jobName += " Keyword Search";
+      if (job.remote_adv_search)    jobName += " Advanced Search";
       if (job.remote_guideChannels) jobName += " Guide Channel List";
       log.print(">> RUNNING '" + jobName + "' JOB FOR TiVo: " + job.tivoName);
       thread.start();
@@ -144,7 +151,8 @@ public class remote implements Serializable {
       if (thread_running) {
          // Still running
          if (config.GUIMODE && ! job.remote_premiere &&
-             ! job.remote_cancel && ! job.remote_deleted && ! job.remote_search ) {
+             ! job.remote_cancel && ! job.remote_deleted && ! job.remote_search && 
+             ! job.remote_adv_search ) {
             // Update STATUS column
             config.gui.jobTab_UpdateJobMonitorRowStatus(job, "running");
          }
@@ -204,6 +212,9 @@ public class remote implements Serializable {
                job.premiere.AddRows(job.tivoName, data);
             }
             if (job.remote_search && job.search != null && data != null) {
+               job.search.AddRows(job.tivoName, data);
+            }
+            if (job.remote_adv_search && job.search != null && data != null) {
                job.search.AddRows(job.tivoName, data);
             }
             if (job.remote_guideChannels && job.gTable != null && data != null) {
