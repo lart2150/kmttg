@@ -733,6 +733,12 @@ public class AdvSearch {
          text += "Match this keyword or phrase in role selected to the left of this field.<br>";
          text += "NOTE: Case insensitive.";
       }
+      else if (component.equals("category")) {
+         text =  "<b>Category</b><br>";
+         text += "Limit matches to shows in this category.<br>";
+         text += "Default is <b>ALL</b> which means show can be in any category, else<br>";
+         text += "match the specific category selected in this list.";
+      }
       else if (component.equals("episodic")) {
          text =  "<b>Show types</b><br>";
          text += "both = match both episodic and non-episodic shows.<br>";
