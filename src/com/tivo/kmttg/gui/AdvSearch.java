@@ -685,6 +685,7 @@ public class AdvSearch {
          text =  "<b>Subtitle Keyword</b><br>";
          text += "Match this keyword in show subtitle text.<br>";
          text += "Can be used in conjunction with Title but <b>not with Keywords</b>.<br>";
+         text += "NOTE: Wildcard <b>*</b> is allowed with at least 1 alphanumeric character.<br>";
          text += "NOTE: Case insensitive.";
       }
       else if (component.equals("keywords")) {
@@ -695,7 +696,7 @@ public class AdvSearch {
          text += "<b>+keyword</b>: + prefix indicates required keyword (AND).<br>";
          text += "<b>-keyword</b>: - prefix indicates required missing keyword (NOT).<br>";
          text += "<b>(keyword)</b>: keyword inside parentheses indicate optional (OR).<br>";
-         text += "<b>keyword*</b>: * character is a wildcard.<br>";
+         text += "<b>keyword*</b>: * char is wildcard but requires 1 alphanumeric char with it.<br>";
          text += "You can have multiple keyword operators each separated by a space.<br>";
          text += "NOTE: Case insensitive.";
       }
@@ -707,6 +708,7 @@ public class AdvSearch {
       else if (component.equals("descriptionKeyword")) {
          text =  "<b>Description keyword</b><br>";
          text += "Match this keyword or phrase in show description text.<br>";
+         text += "NOTE: Wildcard <b>*</b> is allowed with at least 1 alphanumeric character.<br>";
          text += "NOTE: Subtitle text is also considered as part of description.<br>";
          text += "NOTE: Case insensitive.";
       }
@@ -727,6 +729,7 @@ public class AdvSearch {
       else if (component.equals("creditKeyword")) {
          text =  "<b>Other keyword</b><br>";
          text += "Match this keyword or phrase in role selected to the left of this field.<br>";
+         text += "NOTE: Wildcard <b>*</b> is allowed with at least 1 alphanumeric character.<br>";
          text += "NOTE: Case insensitive.";
       }
       else if (component.equals("category")) {
