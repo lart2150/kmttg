@@ -3663,15 +3663,18 @@ public class remotegui {
       }
       else if (component.equals("rc_jumpto_text")) {
          text = "<b>Jump to minute</b><br>";
-         text += "Set playback position to exactly this number of minutes into the show.";
+         text += "Set playback position to exactly this number of minutes into the show.<br>";
+         text += "NOTE: You can enter non-integer values for minutes such as 0.5";
       }
       else if (component.equals("rc_jumpahead_text")) {
          text = "<b>Skip minutes ahead</b><br>";
-         text += "Set playback position this number of minutes ahead of current position.";
+         text += "Set playback position this number of minutes ahead of current position.<br>";
+         text += "NOTE: You can enter non-integer values for minutes such as 0.5";
       }
       else if (component.equals("rc_jumpback_text")) {
          text = "<b>Skip minutes back</b><br>";
-         text += "Set playback position this number of minutes behind current position.";
+         text += "Set playback position this number of minutes behind current position.<br>";
+         text += "NOTE: You can enter non-integer values for minutes such as 0.5";
       }
       else if (component.equals("rc_hme_button")) {
          text = "<b>HME Jump</b><br>";
