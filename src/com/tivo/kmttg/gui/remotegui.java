@@ -2120,14 +2120,14 @@ public class remotegui {
             if (mins_string == null || mins_string.length() == 0)
                return;
             try {
-               final int mins = Integer.parseInt(mins_string);
+               final int secs = (int)(Float.parseFloat(mins_string)*60);
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Boolean doInBackground() {
                      Remote r = config.initRemote(tivoName);
                      if (r.success) {
                         JSONObject json = new JSONObject();
                         try {
-                           Long pos = (long)60000*mins;
+                           Long pos = (long)1000*secs;
                            json.put("offset", pos);
                            r.Command("Jump", json);
                         } catch (JSONException e) {
@@ -2162,7 +2162,7 @@ public class remotegui {
             if (mins_string == null || mins_string.length() == 0)
                return;
             try {
-               final int mins = Integer.parseInt(mins_string);
+               final int secs = (int)(Float.parseFloat(mins_string)*60);
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Boolean doInBackground() {
                      Remote r = config.initRemote(tivoName);
@@ -2172,7 +2172,7 @@ public class remotegui {
                         if (reply != null && reply.has("position")) {
                            try {
                               Long pos = reply.getLong("position");
-                              pos += (long)60000*mins;
+                              pos += (long)1000*secs;
                               json.put("offset", pos);
                               r.Command("Jump", json);
                            } catch (JSONException e) {
@@ -2208,7 +2208,7 @@ public class remotegui {
             if (mins_string == null || mins_string.length() == 0)
                return;
             try {
-               final int mins = Integer.parseInt(mins_string);
+               final int secs = (int)(Float.parseFloat(mins_string)*60);
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Boolean doInBackground() {
                      Remote r = config.initRemote(tivoName);
@@ -2218,7 +2218,7 @@ public class remotegui {
                         if (reply != null && reply.has("position")) {
                            try {
                               Long pos = reply.getLong("position");
-                              pos -= (long)60000*mins;
+                              pos -= (long)1000*secs;
                               if (pos < 0)
                                  pos = (long)0;
                               json.put("offset", pos);
