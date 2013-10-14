@@ -3403,6 +3403,11 @@ public class remotegui {
          text += "To shorten search times include more words in the search. Very generic/short<br>";
          text += "keywords will lead to much longer search times.";
       }
+      else if (component.equals("adv_search")) {
+         text = "Brings up the <b>Advanced Search</b> dialog window which has more advanced search criteria<br>";
+         text += "and allows you to create and save searches much like creating wishlists on a TiVo.<br>";
+         text += "The results of advanced searches are displayed in the Search table in this tab.";
+      }
       else if (component.equals("max_search")) {
          text = "<b>Max</b><br>";
          text += "Specify maximum number of hits to limit search to.<br>";
