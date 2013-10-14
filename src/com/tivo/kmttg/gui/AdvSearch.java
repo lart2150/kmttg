@@ -25,7 +25,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
@@ -595,11 +594,7 @@ public class AdvSearch {
       try {
          String text;
          JSONObject json = new JSONObject();
-         JSONArray a = new JSONArray();
-         a.put("collection"); a.put("content"); a.put("person");
-         json.put("includeUnifiedItemType", a);              
          json.put("levelOfDetail", "high");
-         json.put("mergeOverridingCollections", true);
          json.put("namespace", "refserver");
          json.put("searchable", true);
          Date now = new Date();
@@ -712,6 +707,7 @@ public class AdvSearch {
       else if (component.equals("descriptionKeyword")) {
          text =  "<b>Description keyword</b><br>";
          text += "Match this keyword or phrase in show description text.<br>";
+         text += "NOTE: Subtitle text is also considered as part of description.<br>";
          text += "NOTE: Case insensitive.";
       }
       else if (component.equals("channels")) {
