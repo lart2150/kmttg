@@ -41,6 +41,7 @@ public class AdvSearch {
    private JPanel content = null;
    private JComboBox savedEntries = null;
    private JComboBox creditKeywordRole = null;
+   private JComboBox category = null;
    private JTextField title = null;
    private JTextField subtitleKeyword = null;
    private JTextField keywords = null;
@@ -90,6 +91,33 @@ public class AdvSearch {
          "actor", "director", "producer", "executiveProducer", "writer"
       });
       creditKeywordRole.setToolTipText(getToolTip("creditKeywordRole"));
+      
+      JLabel category_label = new JLabel("Category");
+      category = new JComboBox(new Object[] {
+         "ALL",
+         "Action Adventure",
+         "Arts",
+         "Comedy",
+         "Daytime",
+         "Documentary",
+         "Drama",
+         "Educational",
+         "Interests",
+         "Kids",
+         "Lifestyle",
+         "Movies",
+         "Mystery and Suspense",
+         "News and Business",
+         "Reality",
+         "Sci-Fi and Fantasy",
+         "Science and Nature",
+         "Shorts",
+         "Sport",
+         "Sports",
+         "Talk Shows",
+         "TV Shows"
+      });
+      category.setToolTipText(getToolTip("category"));
                         
       JLabel title_label = new JLabel("Title");
       title = new JTextField(30);
@@ -301,13 +329,10 @@ public class AdvSearch {
       c.gridy = gy;
       JPanel row10 = new JPanel();
       row10.setLayout(new BoxLayout(row10, BoxLayout.X_AXIS));
-      row10.add(episodic_label);
+      category_label.setPreferredSize(label_size);
+      row10.add(category_label);
       row10.add(Box.createRigidArea(space_5));
-      row10.add(episodic);
-      row10.add(Box.createRigidArea(space_5));
-      row10.add(hdtv_label);
-      row10.add(Box.createRigidArea(space_5));
-      row10.add(hdtv);
+      row10.add(category);
       content.add(row10, c);
       
       // row11
@@ -315,9 +340,13 @@ public class AdvSearch {
       c.gridy = gy;
       JPanel row11 = new JPanel();
       row11.setLayout(new BoxLayout(row11, BoxLayout.X_AXIS));
-      row11.add(receivedChannelsOnly);
+      row11.add(episodic_label);
       row11.add(Box.createRigidArea(space_5));
-      row11.add(favoriteChannelsOnly);
+      row11.add(episodic);
+      row11.add(Box.createRigidArea(space_5));
+      row11.add(hdtv_label);
+      row11.add(Box.createRigidArea(space_5));
+      row11.add(hdtv);
       content.add(row11, c);
       
       // row12
@@ -325,10 +354,20 @@ public class AdvSearch {
       c.gridy = gy;
       JPanel row12 = new JPanel();
       row12.setLayout(new BoxLayout(row12, BoxLayout.X_AXIS));
-      row12.add(search);
+      row12.add(receivedChannelsOnly);
       row12.add(Box.createRigidArea(space_5));
-      row12.add(close);
+      row12.add(favoriteChannelsOnly);
       content.add(row12, c);
+      
+      // row13
+      gy++;
+      c.gridy = gy;
+      JPanel row13 = new JPanel();
+      row13.setLayout(new BoxLayout(row13, BoxLayout.X_AXIS));
+      row13.add(search);
+      row13.add(Box.createRigidArea(space_5));
+      row13.add(close);
+      content.add(row13, c);
    
       // create dialog window
       dialog = new JFrame();
@@ -401,7 +440,7 @@ public class AdvSearch {
             String[] items = {
                "title", "subtitleKeyword", "keywords", "subtitle",
                "descriptionKeyword", "channels", "originalAirYear",
-               "creditKeywordRole", "creditKeyword",
+               "creditKeywordRole", "creditKeyword", "category",
                "episodic", "hdtv",
                "receivedChannelsOnly", "favoriteChannelsOnly"
             };
@@ -428,6 +467,7 @@ public class AdvSearch {
          json.put("originalAirYear", string.removeLeadingTrailingSpaces(originalAirYear.getText()));
          json.put("creditKeyword", string.removeLeadingTrailingSpaces(creditKeyword.getText()));
          json.put("creditKeywordRole", creditKeywordRole.getSelectedItem());
+         json.put("category", category.getSelectedItem());
          json.put("keywords", string.removeLeadingTrailingSpaces(keywords.getText()));
          json.put("channels", string.removeLeadingTrailingSpaces(channels.getText()));
          json.put("episodic", episodic.getSelectedItem());
@@ -501,6 +541,11 @@ public class AdvSearch {
                text = json.getString("creditKeywordRole");
             creditKeywordRole.setSelectedItem(text);
             
+            text = "ALL";
+            if (json.has("category"))
+               text = json.getString("category");
+            category.setSelectedItem(text);
+            
             text = "";
             if (json.has("keywords"))
                text = json.getString("keywords");
@@ -537,6 +582,7 @@ public class AdvSearch {
       originalAirYear.setText("");
       creditKeyword.setText("");
       creditKeywordRole.setSelectedItem("actor");
+      category.setSelectedItem("ALL");
       keywords.setText("");
       channels.setText("");
       episodic.setSelectedItem("both");
@@ -552,7 +598,7 @@ public class AdvSearch {
          JSONArray a = new JSONArray();
          a.put("collection"); a.put("content"); a.put("person");
          json.put("includeUnifiedItemType", a);              
-         json.put("levelOfDetail", "medium");
+         json.put("levelOfDetail", "high");
          json.put("mergeOverridingCollections", true);
          json.put("namespace", "refserver");
          json.put("searchable", true);
@@ -584,6 +630,9 @@ public class AdvSearch {
             json.put("creditKeyword", text);
             json.put("creditKeywordRole", (String)creditKeywordRole.getSelectedItem());
          }
+         String cat = (String)category.getSelectedItem();
+         if (cat.equals("ALL"))
+            cat = null;
          text = string.removeLeadingTrailingSpaces(keywords.getText());
          if (text != null && text.length() > 0) {
             if (text.contains("(") || text.contains("-") || text.contains("+") || text.contains("*"))
@@ -622,6 +671,8 @@ public class AdvSearch {
          job.remote_adv_search_json = json;
          if (chans != null)
             job.remote_adv_search_chans = chans;
+         if (cat != null)
+            job.remote_adv_search_cat = cat;
          jobMonitor.submitNewJob(job);
       } catch (JSONException e) {
          log.error("AdvSearch SearchCB error - " + e.getMessage());

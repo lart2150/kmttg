@@ -1578,6 +1578,7 @@ public class Remote {
          Boolean stop = false;
          int offset = 0;
          int count = 50;
+         int match_count = 0;
          
          // Update job monitor output column name
          if (job != null && config.GUIMODE) {
@@ -1612,11 +1613,22 @@ public class Remote {
                            }
                         }
                      }
+                     if (job.remote_adv_search_cat != null && j.has("category")) {
+                        // Category filter
+                        String match = job.remote_adv_search_cat;
+                        include = false;
+                        JSONArray a = j.getJSONArray("category");
+                        for (int k=0; k<a.length(); ++k) {
+                           if (a.getJSONObject(k).getString("label").equals(match))
+                              include = true;
+                        }
+                     }
                      if (include) {
                         if (j.has("partnerCollectionId") && j.has("title") && j.has("collectionId")) {
                            String partner = j.getString("partnerCollectionId");
                            if ( ! partner.startsWith("epg") )
                               continue;
+                           match_count++;
                            String title = j.getString("title");
                            String collectionId = j.getString("collectionId");
                            String collectionType = "";
@@ -1637,12 +1649,12 @@ public class Remote {
                      }
                   }
                   offset += entries.length();
-                  String message = "Matches: " + offset ;
+                  String message = "Matches: " + match_count ;
                   config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
                   if ( jobMonitor.isFirstJobInMonitor(job) ) {
                      config.gui.setTitle("Adv Search: " + offset + " " + config.kmttg);
                   }
-                  if (offset >= job.remote_search_max-1)
+                  if (match_count >= job.remote_search_max-1)
                      stop = true;
                   if (entries.length() == 0)
                      stop = true;
