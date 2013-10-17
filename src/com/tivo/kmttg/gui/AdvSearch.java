@@ -681,6 +681,12 @@ public class AdvSearch {
          text += "Match this show title exactly.<br>";
          text += "NOTE: Case insensitive.";
       }
+      else if (component.equals("savedEntries")) {
+         text =  "<b>Saved Entries</b><br>";
+         text += "Contains previously saved search configurations. Select a named configuration<br>";
+         text += "to set dialog entry settings to that saved configuration.<br>";
+         text += "Select <b>Default</b> to reset all dialog entries to default/empty config.";
+      }
       else if (component.equals("subtitleKeyword")) {
          text =  "<b>Subtitle Keyword</b><br>";
          text += "Match this keyword in show subtitle text.<br>";
