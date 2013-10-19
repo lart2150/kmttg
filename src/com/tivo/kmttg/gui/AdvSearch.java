@@ -71,6 +71,10 @@ public class AdvSearch {
       this.max_search = max_search;
       
       // Display the dialog
+      if (config.getTivoUsername() == null)
+         category.setEnabled(false);
+      else
+         category.setEnabled(true);
       dialog.setVisible(true);
       title.grabFocus();
    }
@@ -94,7 +98,7 @@ public class AdvSearch {
       
       JLabel collectionType_label = new JLabel("Genre");
       collectionType = new JComboBox(new Object[] {
-         "ALL", "movie", "music", "series", "special"
+         "ALL", "movie", "series", "special"
       });
       collectionType.setToolTipText(getToolTip("collectionType"));
       
@@ -605,7 +609,7 @@ public class AdvSearch {
       try {
          String text;
          JSONObject json = new JSONObject();
-         json.put("levelOfDetail", "high");
+         json.put("format", "idSet");
          json.put("namespace", "refserver");
          json.put("searchable", true);
          Date now = new Date();
@@ -631,12 +635,18 @@ public class AdvSearch {
          if (text != null && text.length() > 0) {
             json.put("descriptionKeyword", text);
          }
+         String cat = (String)category.getSelectedItem();
+         if (cat.equals("ALL"))
+            cat = null;
+         if (config.getTivoUsername() == null) {
+            cat = null;
+            category.setSelectedItem("ALL");
+         }
          text = string.removeLeadingTrailingSpaces(originalAirYear.getText());
-         int movieYear = -1;
          if (text != null && text.length() > 0) {
             String type = (String)(collectionType.getSelectedItem());
-            if (type.equals("movie"))
-               movieYear = Integer.parseInt(text);
+            if (type.equals("movie") || (cat != null && cat.equals("Movies")))
+               json.put("movieYear", text);
             else
                json.put("originalAirYear", text);
          }
@@ -649,9 +659,6 @@ public class AdvSearch {
          if (! text.equals("ALL")) {
             json.put("collectionType", text);
          }
-         String cat = (String)category.getSelectedItem();
-         if (cat.equals("ALL"))
-            cat = null;
          text = string.removeLeadingTrailingSpaces(keywords.getText());
          if (text != null && text.length() > 0) {
             if (text.contains("(") || text.contains("-") || text.contains("+") || text.contains("*"))
@@ -687,8 +694,6 @@ public class AdvSearch {
             job.remote_adv_search_chans = chans;
          if (cat != null)
             job.remote_adv_search_cat = cat;
-         if (movieYear > -1)
-            job.remote_adv_search_movieYear = movieYear;
          jobMonitor.submitNewJob(job);
       } catch (JSONException e) {
          log.error("AdvSearch SearchCB error - " + e.getMessage());
@@ -779,7 +784,9 @@ public class AdvSearch {
          text =  "<b>Category</b><br>";
          text += "Limit matches to shows in this category.<br>";
          text += "Default is <b>ALL</b> which means show can be in any category, else<br>";
-         text += "match the specific category selected in this list.";
+         text += "match the specific category selected in this list.<br>";
+         text += "<b>NOTE: This field is only available if kmttg has access to your tivo.com<br>";
+         text += "username & password (located under config->Tivos tab)</b>.";
       }
       else if (component.equals("hdtv")) {
          text =  "<b>Recording types</b><br>";
