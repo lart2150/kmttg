@@ -1654,9 +1654,11 @@ public class Remote {
 
          // Now get details of each entry and apply any further filters
          String additional[] = {
+            "namespace", "searchable", "minStartTime",
             "movieYear", "originalAirYear",
             "hdtv", "favoriteChannelsOnly", "receivedChannelsOnly"
          };
+         JSONArray filtered_entries = new JSONArray();
          for (int i=0; i<entries.length(); ++i) {
             String id = entries.getString(i);
             Boolean include = true;
@@ -1693,31 +1695,38 @@ public class Remote {
                      match_count++;
                      if (match_count > job.remote_search_max)
                         break;
+                     filtered_entries.put(j);
                      String message = "Matches: " + match_count ;
                      config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
                      if ( jobMonitor.isFirstJobInMonitor(job) ) {
                         config.gui.setTitle("Adv Search: " + match_count + " " + config.kmttg);
                      }
-                     String title = j.getString("title");
-                     String collectionId = j.getString("collectionId");
-                     String collectionType = "";
-                     if (j.has("collectionType"))
-                        collectionType = j.getString("collectionType");
-                     if (! collections.has(collectionId)) {
-                        JSONObject new_json = new JSONObject();
-                        new_json.put("collectionId", collectionId);
-                        new_json.put("title", title);
-                        new_json.put("type", collectionType);
-                        new_json.put("entries", new JSONArray());
-                        new_json.put("order", order);
-                        collections.put(collectionId, new_json);
-                        order++;
-                     }
-                     collections.getJSONObject(collectionId).getJSONArray("entries").put(j);
                   } // if partner
                } // if include
             } // result != null
          } // for
+         filtered_entries = TableUtil.sortByOldestStartDate(filtered_entries);
+         
+         // Sort into collections
+         for (int i=0; i<filtered_entries.length(); ++i) {
+            JSONObject j = filtered_entries.getJSONObject(i);
+            String title = j.getString("title");
+            String collectionId = j.getString("collectionId");
+            String collectionType = "";
+            if (j.has("collectionType"))
+               collectionType = j.getString("collectionType");
+            if (! collections.has(collectionId)) {
+               JSONObject new_json = new JSONObject();
+               new_json.put("collectionId", collectionId);
+               new_json.put("title", title);
+               new_json.put("type", collectionType);
+               new_json.put("entries", new JSONArray());
+               new_json.put("order", order);
+               collections.put(collectionId, new_json);
+               order++;
+            }
+            collections.getJSONObject(collectionId).getJSONArray("entries").put(j);
+         }
          
          log.warn(">> Advanced search completed on TiVo: " + job.tivoName);
          
