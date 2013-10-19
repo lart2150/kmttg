@@ -94,7 +94,7 @@ public class AdvSearch {
       
       JLabel collectionType_label = new JLabel("Genre");
       collectionType = new JComboBox(new Object[] {
-         "ALL", "movie", "series", "special"
+         "ALL", "movie", "music", "series", "special"
       });
       collectionType.setToolTipText(getToolTip("collectionType"));
       
