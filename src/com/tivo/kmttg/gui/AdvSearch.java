@@ -40,8 +40,10 @@ public class AdvSearch {
    private JPanel content = null;
    private JComboBox savedEntries = null;
    private JComboBox creditKeywordRole = null;
+   private JComboBox collectionType = null;
    private JComboBox category = null;
    private JTextField title = null;
+   private JTextField titleKeyword = null;
    private JTextField subtitleKeyword = null;
    private JTextField keywords = null;
    private JTextField subtitle = null;
@@ -49,7 +51,6 @@ public class AdvSearch {
    private JTextField channels = null;
    private JTextField originalAirYear = null;
    private JTextField creditKeyword = null;
-   private JComboBox episodic = null;
    private JComboBox hdtv = null;
    private JCheckBox receivedChannelsOnly = null;
    private JCheckBox favoriteChannelsOnly = null;
@@ -91,6 +92,12 @@ public class AdvSearch {
       });
       creditKeywordRole.setToolTipText(getToolTip("creditKeywordRole"));
       
+      JLabel collectionType_label = new JLabel("Genre");
+      collectionType = new JComboBox(new Object[] {
+         "ALL", "movie", "series", "special"
+      });
+      collectionType.setToolTipText(getToolTip("collectionType"));
+      
       JLabel category_label = new JLabel("Category");
       category = new JComboBox(new Object[] {
          "ALL",
@@ -122,6 +129,10 @@ public class AdvSearch {
       title = new JTextField(30);
       title.setToolTipText(getToolTip("title"));
       
+      JLabel titleKeyword_label = new JLabel("Title keyword");
+      titleKeyword = new JTextField(30);
+      titleKeyword.setToolTipText(getToolTip("titleKeyword"));
+      
       JLabel subtitleKeyword_label = new JLabel("Subtitle keyword");
       subtitleKeyword = new JTextField(30);
       subtitleKeyword.setToolTipText(getToolTip("subtitleKeyword"));
@@ -142,16 +153,12 @@ public class AdvSearch {
       channels = new JTextField(30);
       channels.setToolTipText(getToolTip("channels"));
 
-      JLabel originalAirYear_label = new JLabel("Original Air Year");
+      JLabel originalAirYear_label = new JLabel("Year");
       originalAirYear = new JTextField(30);
       originalAirYear.setToolTipText(getToolTip("originalAirYear"));
 
       creditKeyword = new JTextField(30);
       creditKeyword.setToolTipText(getToolTip("creditKeyword"));
-      
-      JLabel episodic_label = new JLabel("Show types");
-      episodic = new JComboBox(new Object[] {"both", "episodic", "non-episodic"});
-      episodic.setToolTipText(getToolTip("episodic"));
       
       JLabel hdtv_label = new JLabel("Recording types");
       hdtv = new JComboBox(new Object[] {"both", "HD", "SD"});
@@ -223,150 +230,148 @@ public class AdvSearch {
       c.anchor = GridBagConstraints.WEST;
       c.fill = GridBagConstraints.NONE;
 
-      // row 1
-      JPanel row1 = new JPanel();
-      row1.setLayout(new BoxLayout(row1, BoxLayout.X_AXIS));
+      JPanel row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
       Dimension space_5 = new Dimension(5,0);
-      row1.add(savedEntries_label);
-      row1.add(Box.createRigidArea(space_5));
-      row1.add(savedEntries);
-      row1.add(Box.createRigidArea(space_5));
-      row1.add(save);
-      row1.add(Box.createRigidArea(space_5));
-      row1.add(delete);
-      content.add(row1, c);
+      row.add(savedEntries_label);
+      row.add(Box.createRigidArea(space_5));
+      row.add(savedEntries);
+      row.add(Box.createRigidArea(space_5));
+      row.add(save);
+      row.add(Box.createRigidArea(space_5));
+      row.add(delete);
+      content.add(row, c);
       
-      // row2
       gy++;
       c.gridy = gy;
-      JPanel row2 = new JPanel();
-      row2.setLayout(new BoxLayout(row2, BoxLayout.X_AXIS));
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
       title_label.setPreferredSize(label_size);
-      row2.add(title_label);
-      row2.add(Box.createRigidArea(space_5));
-      row2.add(title);
-      content.add(row2, c);
+      row.add(title_label);
+      row.add(Box.createRigidArea(space_5));
+      row.add(title);
+      content.add(row, c);
       
-      // row3
       gy++;
       c.gridy = gy;
-      JPanel row3 = new JPanel();
-      row3.setLayout(new BoxLayout(row3, BoxLayout.X_AXIS));
-      subtitleKeyword_label.setPreferredSize(label_size);
-      row3.add(subtitleKeyword_label);
-      row3.add(Box.createRigidArea(space_5));
-      row3.add(subtitleKeyword);
-      content.add(row3, c);
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+      titleKeyword_label.setPreferredSize(label_size);
+      row.add(titleKeyword_label);
+      row.add(Box.createRigidArea(space_5));
+      row.add(titleKeyword);
+      content.add(row, c);
       
-      // row4
       gy++;
       c.gridy = gy;
-      JPanel row4 = new JPanel();
-      row4.setLayout(new BoxLayout(row4, BoxLayout.X_AXIS));
-      keywords_label.setPreferredSize(label_size);
-      row4.add(keywords_label);
-      row4.add(Box.createRigidArea(space_5));
-      row4.add(keywords);
-      content.add(row4, c);
-      
-      // row5
-      gy++;
-      c.gridy = gy;
-      JPanel row5 = new JPanel();
-      row5.setLayout(new BoxLayout(row5, BoxLayout.X_AXIS));
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
       subtitle_label.setPreferredSize(label_size);
-      row5.add(subtitle_label);
-      row5.add(Box.createRigidArea(space_5));
-      row5.add(subtitle);
-      content.add(row5, c);
+      row.add(subtitle_label);
+      row.add(Box.createRigidArea(space_5));
+      row.add(subtitle);
+      content.add(row, c);
       
-      // row6
       gy++;
       c.gridy = gy;
-      JPanel row6 = new JPanel();
-      row6.setLayout(new BoxLayout(row6, BoxLayout.X_AXIS));
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+      subtitleKeyword_label.setPreferredSize(label_size);
+      row.add(subtitleKeyword_label);
+      row.add(Box.createRigidArea(space_5));
+      row.add(subtitleKeyword);
+      content.add(row, c);
+      
+      gy++;
+      c.gridy = gy;
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+      keywords_label.setPreferredSize(label_size);
+      row.add(keywords_label);
+      row.add(Box.createRigidArea(space_5));
+      row.add(keywords);
+      content.add(row, c);
+      
+      gy++;
+      c.gridy = gy;
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
       descriptionKeyword_label.setPreferredSize(label_size);
-      row6.add(descriptionKeyword_label);
-      row6.add(Box.createRigidArea(space_5));
-      row6.add(descriptionKeyword);
-      content.add(row6, c);
+      row.add(descriptionKeyword_label);
+      row.add(Box.createRigidArea(space_5));
+      row.add(descriptionKeyword);
+      content.add(row, c);
       
-      // row7
       gy++;
       c.gridy = gy;
-      JPanel row7 = new JPanel();
-      row7.setLayout(new BoxLayout(row7, BoxLayout.X_AXIS));
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
       channels_label.setPreferredSize(label_size);
-      row7.add(channels_label);
-      row7.add(Box.createRigidArea(space_5));
-      row7.add(channels);
-      content.add(row7, c);
+      row.add(channels_label);
+      row.add(Box.createRigidArea(space_5));
+      row.add(channels);
+      content.add(row, c);
       
-      // row8
       gy++;
       c.gridy = gy;
-      JPanel row8 = new JPanel();
-      row8.setLayout(new BoxLayout(row8, BoxLayout.X_AXIS));
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
       originalAirYear_label.setPreferredSize(label_size);
-      row8.add(originalAirYear_label);
-      row8.add(Box.createRigidArea(space_5));
-      row8.add(originalAirYear);
-      content.add(row8, c);
+      row.add(originalAirYear_label);
+      row.add(Box.createRigidArea(space_5));
+      row.add(originalAirYear);
+      content.add(row, c);
       
-      // row9
       gy++;
       c.gridy = gy;
-      JPanel row9 = new JPanel();
-      row9.setLayout(new BoxLayout(row9, BoxLayout.X_AXIS));
-      row9.add(creditKeywordRole);
-      row9.add(Box.createRigidArea(space_5));
-      row9.add(creditKeyword);
-      content.add(row9, c);
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+      row.add(creditKeywordRole);
+      row.add(Box.createRigidArea(space_5));
+      row.add(creditKeyword);
+      content.add(row, c);
       
-      // row10
       gy++;
       c.gridy = gy;
-      JPanel row10 = new JPanel();
-      row10.setLayout(new BoxLayout(row10, BoxLayout.X_AXIS));
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+      collectionType_label.setPreferredSize(label_size);
+      row.add(collectionType_label);
+      row.add(Box.createRigidArea(space_5));
+      row.add(collectionType);
+      row.add(Box.createRigidArea(space_5));
+      row.add(hdtv_label);
+      row.add(Box.createRigidArea(space_5));
+      row.add(hdtv);
+      content.add(row, c);
+      
+      gy++;
+      c.gridy = gy;
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
       category_label.setPreferredSize(label_size);
-      row10.add(category_label);
-      row10.add(Box.createRigidArea(space_5));
-      row10.add(category);
-      content.add(row10, c);
+      row.add(category_label);
+      row.add(Box.createRigidArea(space_5));
+      row.add(category);
+      content.add(row, c);
       
-      // row11
       gy++;
       c.gridy = gy;
-      JPanel row11 = new JPanel();
-      row11.setLayout(new BoxLayout(row11, BoxLayout.X_AXIS));
-      row11.add(episodic_label);
-      row11.add(Box.createRigidArea(space_5));
-      row11.add(episodic);
-      row11.add(Box.createRigidArea(space_5));
-      row11.add(hdtv_label);
-      row11.add(Box.createRigidArea(space_5));
-      row11.add(hdtv);
-      content.add(row11, c);
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+      row.add(receivedChannelsOnly);
+      row.add(Box.createRigidArea(space_5));
+      row.add(favoriteChannelsOnly);
+      content.add(row, c);
       
-      // row12
       gy++;
       c.gridy = gy;
-      JPanel row12 = new JPanel();
-      row12.setLayout(new BoxLayout(row12, BoxLayout.X_AXIS));
-      row12.add(receivedChannelsOnly);
-      row12.add(Box.createRigidArea(space_5));
-      row12.add(favoriteChannelsOnly);
-      content.add(row12, c);
-      
-      // row13
-      gy++;
-      c.gridy = gy;
-      JPanel row13 = new JPanel();
-      row13.setLayout(new BoxLayout(row13, BoxLayout.X_AXIS));
-      row13.add(search);
-      row13.add(Box.createRigidArea(space_5));
-      row13.add(close);
-      content.add(row13, c);
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+      row.add(search);
+      row.add(Box.createRigidArea(space_5));
+      row.add(close);
+      content.add(row, c);
    
       // create dialog window
       dialog = new JFrame();
@@ -437,10 +442,9 @@ public class AdvSearch {
             JSONObject json = entries.get(entry);
             ofp.write("<" + entry + ">" + eol);
             String[] items = {
-               "title", "subtitleKeyword", "keywords", "subtitle",
+               "title", "titleKeyword", "subtitleKeyword", "keywords", "subtitle",
                "descriptionKeyword", "channels", "originalAirYear",
-               "creditKeywordRole", "creditKeyword", "category",
-               "episodic", "hdtv",
+               "creditKeywordRole", "creditKeyword", "collectionType", "category", "hdtv",
                "receivedChannelsOnly", "favoriteChannelsOnly"
             };
             for (String item : items) {
@@ -460,16 +464,17 @@ public class AdvSearch {
          log.warn("Saving wishlist entry: " + entry);
          JSONObject json = new JSONObject();
          json.put("title", string.removeLeadingTrailingSpaces(title.getText()));
+         json.put("titleKeyword", string.removeLeadingTrailingSpaces(titleKeyword.getText()));
          json.put("subtitleKeyword", string.removeLeadingTrailingSpaces(subtitleKeyword.getText()));
          json.put("subtitle", string.removeLeadingTrailingSpaces(subtitle.getText()));
          json.put("descriptionKeyword", string.removeLeadingTrailingSpaces(descriptionKeyword.getText()));
          json.put("originalAirYear", string.removeLeadingTrailingSpaces(originalAirYear.getText()));
          json.put("creditKeyword", string.removeLeadingTrailingSpaces(creditKeyword.getText()));
          json.put("creditKeywordRole", creditKeywordRole.getSelectedItem());
+         json.put("collectionType", collectionType.getSelectedItem());
          json.put("category", category.getSelectedItem());
          json.put("keywords", string.removeLeadingTrailingSpaces(keywords.getText()));
          json.put("channels", string.removeLeadingTrailingSpaces(channels.getText()));
-         json.put("episodic", episodic.getSelectedItem());
          json.put("hdtv", hdtv.getSelectedItem());
          if (receivedChannelsOnly.isSelected())
             json.put("receivedChannelsOnly", "on");
@@ -511,6 +516,11 @@ public class AdvSearch {
             title.setText(text);
             
             text = "";
+            if (json.has("titleKeyword"))
+               text = json.getString("titleKeyword");
+            titleKeyword.setText(text);
+            
+            text = "";
             if (json.has("subtitleKeyword"))
                text = json.getString("subtitleKeyword");
             subtitleKeyword.setText(text);
@@ -541,6 +551,11 @@ public class AdvSearch {
             creditKeywordRole.setSelectedItem(text);
             
             text = "ALL";
+            if (json.has("collectionType"))
+               text = json.getString("collectionType");
+            collectionType.setSelectedItem(text);
+            
+            text = "ALL";
             if (json.has("category"))
                text = json.getString("category");
             category.setSelectedItem(text);
@@ -554,11 +569,6 @@ public class AdvSearch {
             if (json.has("channels"))
                text = json.getString("channels");
             channels.setText(text);
-            
-            text = "both";
-            if (json.has("episodic"))
-               text = json.getString("episodic");
-            episodic.setSelectedItem(text);
             
             text = "HD";
             if (json.has("hdtv"))
@@ -575,16 +585,17 @@ public class AdvSearch {
    
    private void resetToDefaults() {
       title.setText("");
+      titleKeyword.setText("");
       subtitleKeyword.setText("");
       subtitle.setText("");
       descriptionKeyword.setText("");
       originalAirYear.setText("");
       creditKeyword.setText("");
       creditKeywordRole.setSelectedItem("actor");
+      collectionType.setSelectedItem("ALL");
       category.setSelectedItem("ALL");
       keywords.setText("");
       channels.setText("");
-      episodic.setSelectedItem("both");
       hdtv.setSelectedItem("HD");
       receivedChannelsOnly.setSelected(true);
       favoriteChannelsOnly.setSelected(false);
@@ -604,6 +615,10 @@ public class AdvSearch {
          if (text != null && text.length() > 0) {
             json.put("title", text);
          }
+         text = string.removeLeadingTrailingSpaces(titleKeyword.getText());
+         if (text != null && text.length() > 0) {
+            json.put("titleKeyword", text);
+         }
          text = string.removeLeadingTrailingSpaces(subtitleKeyword.getText());
          if (text != null && text.length() > 0) {
             json.put("subtitleKeyword", text);
@@ -617,13 +632,22 @@ public class AdvSearch {
             json.put("descriptionKeyword", text);
          }
          text = string.removeLeadingTrailingSpaces(originalAirYear.getText());
+         int movieYear = -1;
          if (text != null && text.length() > 0) {
-            json.put("originalAirYear", text);
+            String type = (String)(collectionType.getSelectedItem());
+            if (type.equals("movie"))
+               movieYear = Integer.parseInt(text);
+            else
+               json.put("originalAirYear", text);
          }
          text = string.removeLeadingTrailingSpaces(creditKeyword.getText());
          if (text != null && text.length() > 0) {
             json.put("creditKeyword", text);
             json.put("creditKeywordRole", (String)creditKeywordRole.getSelectedItem());
+         }
+         text = (String)collectionType.getSelectedItem();
+         if (! text.equals("ALL")) {
+            json.put("collectionType", text);
          }
          String cat = (String)category.getSelectedItem();
          if (cat.equals("ALL"))
@@ -639,11 +663,6 @@ public class AdvSearch {
          if (text != null && text.length() > 0) {
             chans = text.split("\\s+");
          }
-         text = (String)episodic.getSelectedItem();
-         if (text.equals("episodic"))
-            json.put("episodic", true);
-         if (text.equals("non-episodic"))
-            json.put("episodic", false);
          text = (String)hdtv.getSelectedItem();
          if (text.equals("HD"))
             json.put("hdtv", true);
@@ -668,6 +687,8 @@ public class AdvSearch {
             job.remote_adv_search_chans = chans;
          if (cat != null)
             job.remote_adv_search_cat = cat;
+         if (movieYear > -1)
+            job.remote_adv_search_movieYear = movieYear;
          jobMonitor.submitNewJob(job);
       } catch (JSONException e) {
          log.error("AdvSearch SearchCB error - " + e.getMessage());
@@ -687,10 +708,17 @@ public class AdvSearch {
          text += "to set dialog entry settings to that saved configuration.<br>";
          text += "Select <b>Default</b> to reset all dialog entries to default/empty config.";
       }
+      else if (component.equals("titleKeyword")) {
+         text =  "<b>Title Keyword</b><br>";
+         text += "Match this keyword in show main title text.<br>";
+         text += "Cannot be used with other keyword types.<br>";
+         text += "NOTE: Wildcard <b>*</b> is allowed with at least 1 alphanumeric character.<br>";
+         text += "NOTE: Case insensitive.";
+      }
       else if (component.equals("subtitleKeyword")) {
          text =  "<b>Subtitle Keyword</b><br>";
          text += "Match this keyword in show subtitle text.<br>";
-         text += "Can be used in conjunction with Title but <b>not with Keywords</b>.<br>";
+         text += "Cannot be used with other keyword types.<br>";
          text += "NOTE: Wildcard <b>*</b> is allowed with at least 1 alphanumeric character.<br>";
          text += "NOTE: Case insensitive.";
       }
@@ -704,6 +732,7 @@ public class AdvSearch {
          text += "<b>(keyword)</b>: keyword inside parentheses indicate optional (OR).<br>";
          text += "<b>keyword*</b>: * char is wildcard but requires 1 alphanumeric char with it.<br>";
          text += "You can have multiple keyword operators each separated by a space.<br>";
+         text += "Cannot be used with other keyword types.<br>";
          text += "NOTE: Case insensitive.";
       }
       else if (component.equals("subtitle")) {
@@ -716,6 +745,7 @@ public class AdvSearch {
          text += "Match this keyword or phrase in show description text.<br>";
          text += "NOTE: Wildcard <b>*</b> is allowed with at least 1 alphanumeric character.<br>";
          text += "NOTE: Subtitle text is also considered as part of description.<br>";
+         text += "Cannot be used with other keyword types.<br>";
          text += "NOTE: Case insensitive.";
       }
       else if (component.equals("channels")) {
@@ -724,8 +754,9 @@ public class AdvSearch {
          text += "For more than 1 channel separate each channel number by a space.";
       }
       else if (component.equals("originalAirYear")) {
-         text =  "<b>Original Air Year</b><br>";
+         text =  "<b>Year</b><br>";
          text += "Match only shows whose original air date happened in given year.<br>";
+         text += "If movie genre is selected, it matches the year the movie was released.<br>";
          text += "NOTE: You can use a single year here (multiple years not supported).";
       }
       else if (component.equals("creditKeywordRole")) {
@@ -738,17 +769,17 @@ public class AdvSearch {
          text += "NOTE: Wildcard <b>*</b> is allowed with at least 1 alphanumeric character.<br>";
          text += "NOTE: Case insensitive.";
       }
+      else if (component.equals("collectionType")) {
+         text =  "<b>Genre</b><br>";
+         text += "Limit matches to shows in this genre.<br>";
+         text += "Default is <b>ALL</b> which means show can be in any genre, else<br>";
+         text += "match the specific genre selected in this list.";
+      }
       else if (component.equals("category")) {
          text =  "<b>Category</b><br>";
          text += "Limit matches to shows in this category.<br>";
          text += "Default is <b>ALL</b> which means show can be in any category, else<br>";
          text += "match the specific category selected in this list.";
-      }
-      else if (component.equals("episodic")) {
-         text =  "<b>Show types</b><br>";
-         text += "both = match both episodic and non-episodic shows.<br>";
-         text += "episodic = match only episodic shows.<br>";
-         text += "non-episodic = match only non-episodic shows.";
       }
       else if (component.equals("hdtv")) {
          text =  "<b>Recording types</b><br>";
