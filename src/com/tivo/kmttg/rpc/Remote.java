@@ -1664,6 +1664,7 @@ public class Remote {
             Boolean include = true;
             JSONObject json_id = new JSONObject();
             json_id.put("bodyId", bodyId_get());
+            json_id.put("count", 50);
             json_id.put("levelOfDetail", "high");
             for (String entry : additional) {
                if (json.has(entry))
@@ -1675,34 +1676,37 @@ public class Remote {
                json_id.put("offerId", id);
             JSONObject result = Command("offerSearch", json_id);
             if (result != null && result.has("offer")) {
-               JSONObject j = result.getJSONArray("offer").getJSONObject(0);
-               if (job.remote_adv_search_chans != null && j.has("channel")) {
-                  // Channel filter
-                  include = false;
-                  if (j.getJSONObject("channel").has("channelNumber")) {
-                     String channelNumber = j.getJSONObject("channel").getString("channelNumber");
-                     for (String chan : job.remote_adv_search_chans) {
-                        if (chan.equals(channelNumber))
-                           include = true;
+               JSONArray a = result.getJSONArray("offer");
+               for (int k=0; k<a.length(); ++k) {
+                  JSONObject j = a.getJSONObject(k);
+                  if (job.remote_adv_search_chans != null && j.has("channel")) {
+                     // Channel filter
+                     include = false;
+                     if (j.getJSONObject("channel").has("channelNumber")) {
+                        String channelNumber = j.getJSONObject("channel").getString("channelNumber");
+                        for (String chan : job.remote_adv_search_chans) {
+                           if (chan.equals(channelNumber))
+                              include = true;
+                        }
                      }
-                  }
-               } // if channel
-               if (include) {
-                  if (j.has("partnerCollectionId") && j.has("title") && j.has("collectionId")) {
-                     String partner = j.getString("partnerCollectionId");
-                     if ( ! partner.startsWith("epg") )
-                        continue;
-                     match_count++;
-                     if (match_count > job.remote_search_max)
-                        break;
-                     filtered_entries.put(j);
-                     String message = "Matches: " + match_count ;
-                     config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
-                     if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                        config.gui.setTitle("Adv Search: " + match_count + " " + config.kmttg);
-                     }
-                  } // if partner
-               } // if include
+                  } // if channel
+                  if (include) {
+                     if (j.has("partnerCollectionId") && j.has("title") && j.has("collectionId")) {
+                        String partner = j.getString("partnerCollectionId");
+                        if ( ! partner.startsWith("epg") )
+                           continue;
+                        match_count++;
+                        if (match_count > job.remote_search_max)
+                           break;
+                        filtered_entries.put(j);
+                        String message = "Matches: " + match_count ;
+                        config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+                        if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                           config.gui.setTitle("Adv Search: " + match_count + " " + config.kmttg);
+                        }
+                     } // if partner
+                  } // if include
+               } // for k
             } // result != null
          } // for
          filtered_entries = TableUtil.sortByOldestStartDate(filtered_entries);
