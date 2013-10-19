@@ -1573,104 +1573,152 @@ public class Remote {
    // Advanced Search (used by AdvSearch GUI and remote task)
    public JSONArray AdvSearch(jobData job) {
       try {
+         String commandName = "offerSearch";
          JSONObject collections = new JSONObject();
          int order = 0;
          Boolean stop = false;
          int offset = 0;
          int count = 50;
          int match_count = 0;
+         JSONObject json = job.remote_adv_search_json;
+         
+         // Change commandName to collectionSearch if appropriate
+         Boolean noKeywords = true;
+         String s[] = {
+            "title", "titleKeyword", "subtitleKeyword", "subtitle",
+            "descriptionKeyword", "creditKeyword", "keyword"
+         };
+         for (String name : s) {
+            if ( json.has(name) )
+               noKeywords = false;
+         }
+         if (noKeywords)
+            commandName = "collectionSearch";
+         if (commandName.equals("collectionSearch") && json.has("collectionType")) {
+            if (job.remote_adv_search_cat == null && json.getString("collectionType").equals("movie"))
+               if (config.getTivoUsername() != null)
+                  job.remote_adv_search_cat = "Movies";
+         }
+         
+         String categoryId = null;
+         if (job.remote_adv_search_cat != null) {
+            // Need to search for categoryId based on category name
+            categoryId = getCategoryId(job.tivoName, job.remote_adv_search_cat);
+         }
          
          // Update job monitor output column name
          if (job != null && config.GUIMODE) {
             config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Advanced Search");
          }
          
-         JSONObject json = job.remote_adv_search_json;
          json.put("bodyId", bodyId_get());
+         if (categoryId != null) {
+            JSONArray a = new JSONArray();
+            a.put(categoryId);
+            json.put("categoryId", a);
+         }
+         
+         // Get list of object IDs matching raw search criteria
+         //log.print("commandName=" + commandName); // debug
+         //log.print(json.toString(3)); // debug
+         JSONArray entries = new JSONArray();
          while ( ! stop ) {
             json.put("count", count);
             json.put("offset", offset);
-            JSONObject result = Command("offerSearch", json);
+            JSONObject result = Command(commandName, json);
             if (result == null) {
                log.error("AdvSearch failed.");
                stop = true;
             } else {
-               if (result.has("offer")) {
-                  if (result.has("isBottom") && result.getBoolean("isBottom"))
-                     stop = true;
-                  JSONArray entries = result.getJSONArray("offer");
-                  for (int i=0; i<entries.length(); ++i) {
-                     JSONObject j = entries.getJSONObject(i);
-                     Boolean include = true;
-                     if (job.remote_adv_search_chans != null && j.has("channel")) {
-                        // Channel filter
-                        include = false;
-                        if (j.getJSONObject("channel").has("channelNumber")) {
-                           String channelNumber = j.getJSONObject("channel").getString("channelNumber");
-                           for (String chan : job.remote_adv_search_chans) {
-                              if (chan.equals(channelNumber))
-                                 include = true;
-                           }
-                        }
-                     }
-                     if (job.remote_adv_search_cat != null && j.has("category")) {
-                        // Category filter
-                        String match = job.remote_adv_search_cat;
-                        include = false;
-                        JSONArray a = j.getJSONArray("category");
-                        for (int k=0; k<a.length(); ++k) {
-                           if (a.getJSONObject(k).getString("label").equals(match))
-                              include = true;
-                        }
-                     }
-                     if (job.remote_adv_search_movieYear > -1 && j.has("movieYear")) {
-                        // movieYear filter
-                        int movieYear = job.remote_adv_search_movieYear;
-                        include = false;
-                        if (j.getInt("movieYear") == movieYear)
-                           include = true;
-                     }
-                     if (include) {
-                        if (j.has("partnerCollectionId") && j.has("title") && j.has("collectionId")) {
-                           String partner = j.getString("partnerCollectionId");
-                           if ( ! partner.startsWith("epg") )
-                              continue;
-                           match_count++;
-                           String title = j.getString("title");
-                           String collectionId = j.getString("collectionId");
-                           String collectionType = "";
-                           if (j.has("collectionType"))
-                              collectionType = j.getString("collectionType");
-                           if (! collections.has(collectionId)) {
-                              JSONObject new_json = new JSONObject();
-                              new_json.put("collectionId", collectionId);
-                              new_json.put("title", title);
-                              new_json.put("type", collectionType);
-                              new_json.put("entries", new JSONArray());
-                              new_json.put("order", order);
-                              collections.put(collectionId, new_json);
-                              order++;
-                           }
-                           collections.getJSONObject(collectionId).getJSONArray("entries").put(j);
-                        }
-                     }
-                  }
-                  offset += entries.length();
-                  String message = "Matches: " + match_count ;
+               if (result.has("collectionId") || result.has("offerId")) {
+                  JSONArray a;
+                  if (result.has("collectionId"))
+                     a = result.getJSONArray("collectionId");
+                  else
+                     a = result.getJSONArray("offerId");
+                  offset += a.length();
+                  String message = "Initial Matches: " + offset ;
                   config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
                   if ( jobMonitor.isFirstJobInMonitor(job) ) {
                      config.gui.setTitle("Adv Search: " + offset + " " + config.kmttg);
                   }
-                  if (match_count >= job.remote_search_max-1)
-                     stop = true;
-                  if (entries.length() == 0)
+                  for (int i=0; i<a.length(); i++)
+                     entries.put(a.get(i));
+                  if (result.has("isBottom") && result.getBoolean("isBottom"))
                      stop = true;
                } else {
-                  // result did not return offer so must be done or errored out
                   stop = true;
-               }                        
-            } // result != null
+               }
+            }
          } // while
+
+         // Now get details of each entry and apply any further filters
+         String additional[] = {
+            "movieYear", "originalAirYear",
+            "hdtv", "favoriteChannelsOnly", "receivedChannelsOnly"
+         };
+         for (int i=0; i<entries.length(); ++i) {
+            String id = entries.getString(i);
+            Boolean include = true;
+            JSONObject json_id = new JSONObject();
+            json_id.put("bodyId", bodyId_get());
+            json_id.put("levelOfDetail", "high");
+            for (String entry : additional) {
+               if (json.has(entry))
+                  json_id.put(entry, json.get(entry));
+            }
+            if (commandName.equals("collectionSearch"))
+               json_id.put("collectionId", id);
+            else
+               json_id.put("offerId", id);
+            JSONObject result = Command("offerSearch", json_id);
+            if (result != null && result.has("offer")) {
+               JSONObject j = result.getJSONArray("offer").getJSONObject(0);
+               if (job.remote_adv_search_chans != null && j.has("channel")) {
+                  // Channel filter
+                  include = false;
+                  if (j.getJSONObject("channel").has("channelNumber")) {
+                     String channelNumber = j.getJSONObject("channel").getString("channelNumber");
+                     for (String chan : job.remote_adv_search_chans) {
+                        if (chan.equals(channelNumber))
+                           include = true;
+                     }
+                  }
+               } // if channel
+               if (include) {
+                  if (j.has("partnerCollectionId") && j.has("title") && j.has("collectionId")) {
+                     String partner = j.getString("partnerCollectionId");
+                     if ( ! partner.startsWith("epg") )
+                        continue;
+                     match_count++;
+                     if (match_count > job.remote_search_max)
+                        break;
+                     String message = "Matches: " + match_count ;
+                     config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+                     if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                        config.gui.setTitle("Adv Search: " + match_count + " " + config.kmttg);
+                     }
+                     String title = j.getString("title");
+                     String collectionId = j.getString("collectionId");
+                     String collectionType = "";
+                     if (j.has("collectionType"))
+                        collectionType = j.getString("collectionType");
+                     if (! collections.has(collectionId)) {
+                        JSONObject new_json = new JSONObject();
+                        new_json.put("collectionId", collectionId);
+                        new_json.put("title", title);
+                        new_json.put("type", collectionType);
+                        new_json.put("entries", new JSONArray());
+                        new_json.put("order", order);
+                        collections.put(collectionId, new_json);
+                        order++;
+                     }
+                     collections.getJSONObject(collectionId).getJSONArray("entries").put(j);
+                  } // if partner
+               } // if include
+            } // result != null
+         } // for
+         
          log.warn(">> Advanced search completed on TiVo: " + job.tivoName);
          
          // Now generate table_entries in priority order
@@ -1691,6 +1739,38 @@ public class Remote {
          }
       } catch (JSONException e) {
          log.error("AdvSearch failed - " + e.getMessage());
+      } // try
+      return null;
+   }
+   
+   private String getCategoryId(String tivoName, String categoryName) {
+      Remote r = new Remote(tivoName, true);
+      if (r.success) {
+         try {
+            JSONObject json = new JSONObject();
+            json.put("orderBy", "label");
+            json.put("topLevelOnly", true);
+            json.put("noLimit", true);
+            JSONObject result = r.Command("categorySearch", json);
+            if (result != null && result.has("category")) {
+               JSONArray top = result.getJSONArray("category");
+               for (int i=0; i<top.length(); ++i) {
+                  if (top.getJSONObject(i).has("partnerId"))
+                     top.remove(i);
+               }
+               for (int i=0; i<top.length(); ++i) {
+                  JSONObject j = top.getJSONObject(i);
+                  if (j.has("label") && j.has("label") && j.getString("label").equals(categoryName)) {
+                     r.disconnect();
+                     return j.getString("categoryId");
+                  }
+               }
+            }
+         } catch (JSONException e) {
+            System.out.println("Remote getCategoryId - " + e.getMessage());
+            return null;
+         }
+         r.disconnect();
       }
       return null;
    }
