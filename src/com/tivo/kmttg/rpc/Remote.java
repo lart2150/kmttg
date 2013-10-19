@@ -1623,6 +1623,13 @@ public class Remote {
                               include = true;
                         }
                      }
+                     if (job.remote_adv_search_movieYear > -1 && j.has("movieYear")) {
+                        // movieYear filter
+                        int movieYear = job.remote_adv_search_movieYear;
+                        include = false;
+                        if (j.getInt("movieYear") == movieYear)
+                           include = true;
+                     }
                      if (include) {
                         if (j.has("partnerCollectionId") && j.has("title") && j.has("collectionId")) {
                            String partner = j.getString("partnerCollectionId");
