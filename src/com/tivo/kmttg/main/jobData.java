@@ -157,6 +157,7 @@ public class jobData implements Serializable, Cloneable {
    public JSONObject remote_adv_search_json = null;
    public String[] remote_adv_search_chans = null;
    public String remote_adv_search_cat = null;
+   public int remote_adv_search_movieYear = -1;
    
    public Boolean remote_guideChannels = false;
    public guideTable gTable = null;
