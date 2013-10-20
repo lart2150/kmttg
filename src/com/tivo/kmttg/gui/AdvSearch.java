@@ -41,6 +41,7 @@ public class AdvSearch {
    private JComboBox savedEntries = null;
    private JComboBox creditKeywordRole = null;
    private JComboBox collectionType = null;
+   private JComboBox minStarRating = null;
    private JComboBox category = null;
    private JTextField title = null;
    private JTextField titleKeyword = null;
@@ -101,6 +102,16 @@ public class AdvSearch {
          "ALL", "movie", "series", "special"
       });
       collectionType.setToolTipText(getToolTip("collectionType"));
+      
+      JLabel minStarRating_label = new JLabel("Minimum rating");
+      minStarRating = new JComboBox(new Object[] {
+         "ALL",
+         "one", "onePointFive",
+         "two", "twoPointFive",
+         "three", "threePointFive",
+         "four",
+      });
+      minStarRating.setToolTipText(getToolTip("minStarRating"));
       
       JLabel category_label = new JLabel("Category");
       category = new JComboBox(new Object[] {
@@ -363,6 +374,16 @@ public class AdvSearch {
       c.gridy = gy;
       row = new JPanel();
       row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+      minStarRating_label.setPreferredSize(label_size);
+      row.add(minStarRating_label);
+      row.add(Box.createRigidArea(space_5));
+      row.add(minStarRating);
+      content.add(row, c);
+      
+      gy++;
+      c.gridy = gy;
+      row = new JPanel();
+      row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
       row.add(receivedChannelsOnly);
       row.add(Box.createRigidArea(space_5));
       row.add(favoriteChannelsOnly);
@@ -449,7 +470,7 @@ public class AdvSearch {
                "title", "titleKeyword", "subtitleKeyword", "keywords", "subtitle",
                "descriptionKeyword", "channels", "originalAirYear",
                "creditKeywordRole", "creditKeyword", "collectionType", "category", "hdtv",
-               "receivedChannelsOnly", "favoriteChannelsOnly"
+               "receivedChannelsOnly", "favoriteChannelsOnly", "minStarRating"
             };
             for (String item : items) {
                if (json.has(item))
@@ -476,6 +497,7 @@ public class AdvSearch {
          json.put("creditKeyword", string.removeLeadingTrailingSpaces(creditKeyword.getText()));
          json.put("creditKeywordRole", creditKeywordRole.getSelectedItem());
          json.put("collectionType", collectionType.getSelectedItem());
+         json.put("minStarRating", minStarRating.getSelectedItem());
          json.put("category", category.getSelectedItem());
          json.put("keywords", string.removeLeadingTrailingSpaces(keywords.getText()));
          json.put("channels", string.removeLeadingTrailingSpaces(channels.getText()));
@@ -560,6 +582,11 @@ public class AdvSearch {
             collectionType.setSelectedItem(text);
             
             text = "ALL";
+            if (json.has("minStarRating"))
+               text = json.getString("minStarRating");
+            minStarRating.setSelectedItem(text);
+            
+            text = "ALL";
             if (json.has("category"))
                text = json.getString("category");
             category.setSelectedItem(text);
@@ -597,6 +624,7 @@ public class AdvSearch {
       creditKeyword.setText("");
       creditKeywordRole.setSelectedItem("actor");
       collectionType.setSelectedItem("ALL");
+      minStarRating.setSelectedItem("ALL");
       category.setSelectedItem("ALL");
       keywords.setText("");
       channels.setText("");
@@ -614,7 +642,10 @@ public class AdvSearch {
          json.put("searchable", true);
          Date now = new Date();
          json.put("minStartTime", rnpl.getStringFromLongDate(now.getTime()));
-         
+
+         String type = (String)(collectionType.getSelectedItem());
+         String cat = (String)category.getSelectedItem();
+
          text = string.removeLeadingTrailingSpaces(title.getText());
          if (text != null && text.length() > 0) {
             json.put("title", text);
@@ -635,7 +666,6 @@ public class AdvSearch {
          if (text != null && text.length() > 0) {
             json.put("descriptionKeyword", text);
          }
-         String cat = (String)category.getSelectedItem();
          if (cat.equals("ALL"))
             cat = null;
          if (config.getTivoUsername() == null) {
@@ -644,7 +674,6 @@ public class AdvSearch {
          }
          text = string.removeLeadingTrailingSpaces(originalAirYear.getText());
          if (text != null && text.length() > 0) {
-            String type = (String)(collectionType.getSelectedItem());
             if (type.equals("movie") || (cat != null && cat.equals("Movies")))
                json.put("movieYear", text);
             else
@@ -658,6 +687,11 @@ public class AdvSearch {
          text = (String)collectionType.getSelectedItem();
          if (! text.equals("ALL")) {
             json.put("collectionType", text);
+         }
+         text = (String)minStarRating.getSelectedItem();
+         if (! text.equals("ALL")) {
+            if (type.equals("movie") || (cat != null && cat.equals("Movies")))
+               json.put("minStarRating", text);
          }
          text = string.removeLeadingTrailingSpaces(keywords.getText());
          if (text != null && text.length() > 0) {
@@ -779,6 +813,12 @@ public class AdvSearch {
          text += "Limit matches to shows in this genre.<br>";
          text += "Default is <b>ALL</b> which means show can be in any genre, else<br>";
          text += "match the specific genre selected in this list.";
+      }
+      else if (component.equals("minStarRating")) {
+         text =  "<b>Minimum rating</b><br>";
+         text += "Minimum star rating for movies.<br>";
+         text += "NOTE: This is only used if Genre=movie or Category=Movies<br>";
+         text += "Default is <b>ALL</b> which means any rating.";
       }
       else if (component.equals("category")) {
          text =  "<b>Category</b><br>";
