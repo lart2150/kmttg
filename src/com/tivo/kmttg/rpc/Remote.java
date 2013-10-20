@@ -1659,6 +1659,7 @@ public class Remote {
             "hdtv", "favoriteChannelsOnly", "receivedChannelsOnly"
          };
          JSONArray filtered_entries = new JSONArray();
+         outerloop:
          for (int i=0; i<entries.length(); ++i) {
             String id = entries.getString(i);
             Boolean include = true;
@@ -1697,7 +1698,7 @@ public class Remote {
                            continue;
                         match_count++;
                         if (match_count > job.remote_search_max)
-                           break;
+                           break outerloop;
                         filtered_entries.put(j);
                         String message = "Matches: " + match_count ;
                         config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
