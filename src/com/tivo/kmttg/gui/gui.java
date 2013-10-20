@@ -1282,10 +1282,6 @@ public class gui {
       } else {
          captions.setEnabled(true);
       }
-      if (! file.isDir(config.VRD) && qsfix.isSelected()) {
-         captions.setSelected(false);
-         captions.setEnabled(false);         
-      }
 
       if (! file.isFile(config.ffmpeg) &&
           ! file.isFile(config.mencoder) &&
