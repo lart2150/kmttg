@@ -690,7 +690,7 @@ public class AdvSearch {
          }
          text = (String)minStarRating.getSelectedItem();
          if (! text.equals("ALL")) {
-            if (type.equals("movie") || (cat != null && cat.equals("Movies")))
+            if (type.equals("movie") || cat != null)
                json.put("minStarRating", text);
          }
          text = string.removeLeadingTrailingSpaces(keywords.getText());
@@ -817,7 +817,7 @@ public class AdvSearch {
       else if (component.equals("minStarRating")) {
          text =  "<b>Minimum rating</b><br>";
          text += "Minimum star rating for movies.<br>";
-         text += "NOTE: This is only used if Genre=movie or Category=Movies<br>";
+         text += "NOTE: This is only used if Genre=movie or Category is not set to ALL.<br>";
          text += "Default is <b>ALL</b> which means any rating.";
       }
       else if (component.equals("category")) {
