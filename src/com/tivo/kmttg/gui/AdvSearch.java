@@ -812,7 +812,12 @@ public class AdvSearch {
          text =  "<b>Genre</b><br>";
          text += "Limit matches to shows in this genre.<br>";
          text += "Default is <b>ALL</b> which means show can be in any genre, else<br>";
-         text += "match the specific genre selected in this list.";
+         text += "match the specific genre selected in this list.<br>";
+         text += "Selecting Genre=movie without providing any other keywords is equivalent<br>";
+         text += "to selection Category=Movies without keywords.<br>";
+         text += "<b>NOTE: To search Genre=movie without any other keywords provided,<br>";
+         text += "kmttg has to be configured with your tivo.com username & password<br>";
+         text += "(located under config->Tivos tab)</b>.";
       }
       else if (component.equals("minStarRating")) {
          text =  "<b>Minimum rating</b><br>";
