@@ -263,9 +263,11 @@ public class parseNPL {
                      flag = false;
                   if (h.get("ExpirationImage").equals("in-progress-transfer"))
                      flag = false;                  
-               }                  
-               if (flag)
-                  h.put("ExpirationImage", "copy-protected");
+               } 
+               // This intentionally commented out so that people wanting to see
+               // expiration icons instead of copy protect can do so
+               //if (flag)
+               //   h.put("ExpirationImage", "copy-protected");
             }
          }
          // Add last entry
