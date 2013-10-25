@@ -140,6 +140,8 @@ public class adcut implements Serializable {
             String meta_new = job.mpegFile_cut + ".txt";
             log.print("Renaming metadata file to: " + meta_new);
             file.rename(meta, meta_new);
+            // Subsequent jobs need to have metaFile updated
+            jobMonitor.updatePendingJobFieldValue(job, "metaFile", meta_new);
          }
          
          // Subsequent jobs need to have mpegFile updated
