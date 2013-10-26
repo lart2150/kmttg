@@ -1526,6 +1526,7 @@ public class remotegui {
                      log.error("NOTE: If this TiVo is in 'Pending Restart' state Network Connect fails.");
                   else
                      log.warn("Network Connection initiated on: " + tivoName);
+                  r.disconnect();
                }
             }
          }
@@ -2511,12 +2512,15 @@ public class remotegui {
                      }
                   }
                }
+               r.disconnect();
                return display;
             } catch (JSONException e1) {
                log.error("getWhatsOn json error: " + e1.getMessage());
+               r.disconnect();
                return null;
             }
          }
+         r.disconnect();
       }
       return null;
    }
