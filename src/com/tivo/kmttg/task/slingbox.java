@@ -27,6 +27,7 @@ public class slingbox implements Serializable {
    String script = "";
    String pidFile = "";
    String perl_script;
+   String last_time = "0:00:00";
    private backgroundProcess process;
    public jobData job;
    
@@ -206,6 +207,10 @@ public class slingbox implements Serializable {
             Long size = file.size(job.slingbox_file);
             String s = String.format("%.2f MB", (float)size/Math.pow(2,20));
             String t = ffmpegGetTime();
+            if (t.equals("0:00:00"))
+               t = last_time;
+            else
+               last_time = t;
             
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
                // Update STATUS column 
