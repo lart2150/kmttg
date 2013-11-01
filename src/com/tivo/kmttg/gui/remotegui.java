@@ -3619,15 +3619,15 @@ public class remotegui {
       }
       if (component.equals("tivo_web")) {
          text = "Select TiVo for which to execute given URL.<br>";
-         text += "NOTE: flash type works for series 4 and above TiVos and is very limited.<br>";
-         text += "NOTE: html type only works for TiVos supporting HTML5 such as series 5 TiVos.";
+         text += "NOTE: flash type works for series 4 and later TiVos and is very limited.<br>";
+         text += "NOTE: html type also works for series 4 and later TiVos.";
       }
       if (component.equals("type_web")) {
          text = "Execute provided URL as given type.<br>";
          text += "If type specified as html, send given URL to TiVo internal web browser.<br>";
          text += "If type specified as flash, send given URL to TiVo internal flash player.<br>";
-         text += "NOTE: flash type works for series 4 and above TiVos and is very limited.<br>";
-         text += "NOTE: html type only works for TiVos supporting HTML5 such as series 5 TiVos.";
+         text += "NOTE: flash type works for series 4 and later TiVos and is very limited.<br>";
+         text += "NOTE: html type also works for series 4 and later TiVos.";
       }
       if (component.equals("send_web")) {
          text = "<b>Execute</b><br>";
@@ -3638,15 +3638,15 @@ public class remotegui {
          text += "TYPING TEXT: You can use the kmttg <b>Remote</b> tab if there are fields where you<br>";
          text += "need to enter some text since the kmttg remote understands key presses for the basic<br>";
          text += "keyboard keys.<br>";
-         text += "NOTE: flash type works for series 4 and above TiVos and is very limited.<br>";
-         text += "NOTE: html type only works for TiVos supporting HTML5 such as series 5 TiVos.";
+         text += "NOTE: flash type works for series 4 and later TiVos and is very limited.<br>";
+         text += "NOTE: html type also works for series 4 and later TiVos.";
       }
       if (component.equals("url_web")) {
          text = "<b>URL</b><br>";
          text += "URL to use. Press Return in this field to send the provided URL to selected TiVo<br>";
          text += "and to add the entered URL to bookmarks below.<br>";
-         text += "NOTE: flash type works for series 4 and above TiVos and is very limited.<br>";
-         text += "NOTE: html type only works for TiVos supporting HTML5 such as series 5 TiVos.";
+         text += "NOTE: flash type works for series 4 and later TiVos and is very limited.<br>";
+         text += "NOTE: html type also works for series 4 and later TiVos.";
       }
       if (component.equals("tivo_info")) {
          text = "Select TiVo for which to retrieve system information.<br>";
