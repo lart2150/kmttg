@@ -20,9 +20,11 @@ import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class slingbox implements Serializable {
    private static final long serialVersionUID = 1L;
+   Boolean raw = false;
    String command = "";
    String script = "";
    String pidFile = "";
@@ -34,6 +36,7 @@ public class slingbox implements Serializable {
    public slingbox(jobData job) {
       debug.print("job=" + job);
       this.job = job;
+      raw = job.slingbox_raw;
             
       // Generate unique script names
       script = file.makeTempFile("script");
@@ -116,22 +119,41 @@ public class slingbox implements Serializable {
          vs = "5";
       if (config.slingBox_type.equals("Slingbox Pro"))
          hd = "0";
-      // Make main piped command string
-      command = "\"" + job.slingbox_perl + "\" \"" + perl_script + "\" " +
-         "-stdout " +
-         "-ip "     + config.slingBox_ip + " " +
-         "-port "   + config.slingBox_port + " " +
-         "-pass "   + config.slingBox_pass + " " +
-         "-vbw "    + config.slingBox_vbw + " " +
-         "-vs "     + vs;
-      if (hd != null)
-         command += " -hd " + hd;
-      if (job.slingbox_dur != null)
-         command += " -dur " + job.slingbox_dur;
-      if (job.slingbox_chan != null)
-         command += " -chan " + job.slingbox_chan;
-      command += " | \"" + config.ffmpeg + "\" -fflags +genpts -i - ";
-      command += "-vcodec copy -acodec ac3 -ab 224k -y -f " + config.slingBox_container + " \"" + job.slingbox_file + "\"";
+      if (raw) {
+         // Raw capture to asf file
+         job.slingbox_file = string.replaceSuffix(job.slingbox_file, ".asf");
+         config.gui.jobTab_UpdateJobMonitorRowOutput(job, job.slingbox_file);
+         command = "\"" + job.slingbox_perl + "\" \"" + perl_script + "\" " +
+               "-output " + job.slingbox_file + " " +
+               "-ip "     + config.slingBox_ip + " " +
+               "-port "   + config.slingBox_port + " " +
+               "-pass "   + config.slingBox_pass + " " +
+               "-vbw "    + config.slingBox_vbw + " " +
+               "-vs "     + vs;
+            if (hd != null)
+               command += " -hd " + hd;
+            if (job.slingbox_dur != null)
+               command += " -dur " + job.slingbox_dur;
+            if (job.slingbox_chan != null)
+               command += " -chan " + job.slingbox_chan;         
+      } else {
+         // Make main piped command string
+         command = "\"" + job.slingbox_perl + "\" \"" + perl_script + "\" " +
+            "-stdout " +
+            "-ip "     + config.slingBox_ip + " " +
+            "-port "   + config.slingBox_port + " " +
+            "-pass "   + config.slingBox_pass + " " +
+            "-vbw "    + config.slingBox_vbw + " " +
+            "-vs "     + vs;
+         if (hd != null)
+            command += " -hd " + hd;
+         if (job.slingbox_dur != null)
+            command += " -dur " + job.slingbox_dur;
+         if (job.slingbox_chan != null)
+            command += " -chan " + job.slingbox_chan;
+         command += " | \"" + config.ffmpeg + "\" -fflags +genpts -i - ";
+         command += "-vcodec copy -acodec ac3 -ab 224k -y -f " + config.slingBox_container + " \"" + job.slingbox_file + "\"";
+      }
       
       // Make temporary script containing command
       try {
@@ -206,21 +228,26 @@ public class slingbox implements Serializable {
             // Update status in job table
             Long size = file.size(job.slingbox_file);
             String s = String.format("%.2f MB", (float)size/Math.pow(2,20));
-            String t = ffmpegGetTime();
-            if (t.equals("0:00:00"))
-               t = last_time;
-            else
-               last_time = t;
+            String t = "0:00:00";
+            if (raw)
+               t = jobMonitor.getElapsedTime(job.time);
+            else {
+               t = ffmpegGetTime();
+               if (t.equals("0:00:00"))
+                  t = last_time;
+               else
+                  last_time = t;
+            }
             
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
-               // Update STATUS column 
+               // Update STATUS column
                config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);
                
                // If 1st job then update title
                String title = String.format("slingbox %s %s", t, config.kmttg);
-               config.gui.setTitle(title);
+               config.gui.setTitle(title);                  
             } else {
-               // Update STATUS column            
+               // Update STATUS column
                config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);
             }
          }

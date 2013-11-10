@@ -3,6 +3,7 @@ package com.tivo.kmttg.gui;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -12,6 +13,7 @@ import java.util.Date;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -38,6 +40,7 @@ public class slingboxgui {
    private JComboBox vbw;
    private JComboBox res;
    private JComboBox container;
+   private JCheckBox raw;
    jobData job = null;
    JFileChooser Browser = null;
    
@@ -92,6 +95,7 @@ public class slingboxgui {
                   job.tivoName      = "Slingbox";
                   job.slingbox_perl = perl.getText();
                   job.slingbox_file = slingbox_file;
+                  job.slingbox_raw  = raw.isSelected();
                   String d = string.removeLeadingTrailingSpaces(dur.getText());
                   if (d.length() > 0 && ! d.equals("0")) {
                      try {
@@ -228,8 +232,13 @@ public class slingboxgui {
          container.addItem("matroska");
          container.setSelectedItem(config.slingBox_container);
          
+         raw = new JCheckBox("Capture raw file");
+         raw.setToolTipText(getToolTip("raw"));
+         raw.setSelected(false);
+         
          int gy = 0;
          GridBagConstraints c = new GridBagConstraints();
+         c.insets = new Insets(0, 2, 0, 2);
          c.ipady = 0;
          c.weighty = 0.0;  // default to no vertical stretch
          c.weightx = 0.0;  // default to no horizontal stretch
@@ -242,14 +251,19 @@ public class slingboxgui {
                   
          Dimension space = new Dimension(10,0);
          c.gridy = gy;
-         JPanel row0 = new JPanel();
-         row0.setLayout(new BoxLayout(row0, BoxLayout.LINE_AXIS));
-         row0.add(start);
-         row0.add(Box.createRigidArea(space));
-         row0.add(stop);
-         panel.add(row0, c);
+         JPanel row = new JPanel();
+         row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS));
+         row.add(start);
+         row.add(Box.createRigidArea(space));
+         row.add(stop);
+         panel.add(row, c);
          c.gridx = 1;
-         panel.add(Help, c);
+         row = new JPanel();
+         row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS));
+         row.add(Help);
+         row.add(Box.createRigidArea(space));
+         row.add(raw);
+         panel.add(row, c);
          
          gy++;
          c.gridy = gy;
@@ -289,16 +303,19 @@ public class slingboxgui {
          gy++;
          c.gridy = gy;
          c.gridx = 0;
-         panel.add(type_label, c);
+         row = new JPanel();
+         row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS));
+         row.add(type_label);
+         row.add(Box.createRigidArea(space));
+         row.add(type);
+         panel.add(row, c);
          c.gridx = 1;
-         panel.add(type, c);
-         
-         gy++;
-         c.gridy = gy;
-         c.gridx = 0;
-         panel.add(container_label, c);
-         c.gridx = 1;
-         panel.add(container, c);
+         row = new JPanel();
+         row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS));
+         row.add(container_label);
+         row.add(Box.createRigidArea(space));
+         row.add(container);
+         panel.add(row, c);
          
          gy++;
          c.gridy = gy;
@@ -441,6 +458,11 @@ public class slingboxgui {
          text = "<b>Tune to channel</b><br>";
          text += "Tune to specified channel # before starting capture. Empty means don't tune.<br>";
          text += "NOTE: This can be any number >= 0 or empty for none.";
+      }
+      else if (component.equals("raw")) {
+         text = "<b>Capture raw file</b><br>";
+         text += "If enabled then capture raw Slingbox file instead of using ffmpeg to remux<br>";
+         text += "to selected video container and convert audio to ac3.";
       }
       if (text.length() > 0) {
          text = "<html>" + text + "</html>";
