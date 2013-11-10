@@ -14,6 +14,7 @@ import java.util.Stack;
 import javax.swing.Timer;
 
 import com.tivo.kmttg.gui.gui;
+import com.tivo.kmttg.gui.tivoTab;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -1715,6 +1716,8 @@ public class jobMonitor {
             }
             // Launch jobs for this tivo
             config.GUI_AUTO++;
+            tivoTab t = config.gui.getTab(tivoName);
+            t.getTable().setFolderState(false);
             getNPL(tivoName);
             launch.put(tivoName, (long)-1);
          }
