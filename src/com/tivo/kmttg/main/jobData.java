@@ -170,6 +170,7 @@ public class jobData implements Serializable, Cloneable {
    public premiereTable premiere = null;
    
    // Slingbox related
+   public Boolean slingbox_raw = false;
    public String slingbox_perl = null;
    public String slingbox_file = null;
    public String slingbox_dur = null;
