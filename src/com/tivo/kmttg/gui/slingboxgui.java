@@ -256,14 +256,11 @@ public class slingboxgui {
          row.add(start);
          row.add(Box.createRigidArea(space));
          row.add(stop);
+         row.add(Box.createRigidArea(space));
+         row.add(Help);
          panel.add(row, c);
          c.gridx = 1;
-         row = new JPanel();
-         row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS));
-         row.add(Help);
-         row.add(Box.createRigidArea(space));
-         row.add(raw);
-         panel.add(row, c);
+         panel.add(raw, c);
          
          gy++;
          c.gridy = gy;
