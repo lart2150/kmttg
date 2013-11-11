@@ -56,6 +56,8 @@ public class slingbox implements Serializable {
       perl_script = config.programDir + File.separator + "slingbox" + File.separator;
       if (config.slingBox_type.equals("Slingbox 350/500"))
          perl_script += "rec350.pl";
+      else if (config.slingBox_type.equals("Slingbox Solo"))
+         perl_script += "rec2a.pl";
       else
          perl_script += "rec2.pl";
       
@@ -118,6 +120,8 @@ public class slingbox implements Serializable {
       if (! config.slingBox_type.equals("Slingbox 350/500"))
          vs = "5";
       if (config.slingBox_type.equals("Slingbox Pro"))
+         hd = "0";
+      if (config.slingBox_type.equals("Slingbox Solo"))
          hd = "0";
       if (raw) {
          // Raw capture to asf file

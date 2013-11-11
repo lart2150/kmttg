@@ -223,6 +223,7 @@ public class slingboxgui {
          type.addItem("Slingbox 350/500");
          type.addItem("Slingbox Pro HD");
          type.addItem("Slingbox Pro");
+         type.addItem("Slingbox Solo");
          type.setSelectedItem(config.slingBox_type);
          
          JLabel container_label = new JLabel("Video container to use");
@@ -442,7 +443,7 @@ public class slingboxgui {
          text += "Choose video container to use for the capture.<br>";
          text += "mpegts = mpeg2 transport stream container<br>";
          text += "matroska = mkv container<br>";
-         text += "NOTE: If capturing from Slingbox Pro models and you plan on editing the capture using<br>";
+         text += "NOTE: If capturing from Slingbox Pro or Solo models and you plan on editing the capture using<br>";
          text += "VideoRedo TVSuite software, you should use <b>matroska</b> since otherwise VRD won't<br>";
          text += "be able to open the file since there is no frame rate information for TS captures.";
       }
