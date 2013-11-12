@@ -31,6 +31,7 @@ public class slingboxgui {
    private JPanel panel = null;
    private JTextField dir;
    private JTextField perl;
+   private JTextField filename;
    private JTextField ip;
    private JTextField port;
    private JTextField pass;
@@ -176,6 +177,10 @@ public class slingboxgui {
             }
          );
          
+         JLabel filename_label = new JLabel("File name");
+         filename = new JTextField(30);
+         filename.setToolTipText(getToolTip("filename"));
+         
          JLabel pass_label = new JLabel("Slingbox password");
          pass = new JTextField(30);
          pass.setToolTipText(getToolTip("pass"));
@@ -301,6 +306,13 @@ public class slingboxgui {
          gy++;
          c.gridy = gy;
          c.gridx = 0;
+         panel.add(filename_label, c);
+         c.gridx = 1;
+         panel.add(filename, c);
+         
+         gy++;
+         c.gridy = gy;
+         c.gridx = 0;
          row = new JPanel();
          row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS));
          row.add(type_label);
@@ -369,8 +381,10 @@ public class slingboxgui {
    }
    
    private String getFileName() {
+      String name;
       String d = string.removeLeadingTrailingSpaces(dir.getText());
       String c = string.removeLeadingTrailingSpaces((String)container.getSelectedItem());
+      String f = string.removeLeadingTrailingSpaces(filename.getText());
       config.slingBox_container = c;
       if (d.length() == 0) {
          log.error("No slingbox directory specified. Aborting...");
@@ -379,7 +393,15 @@ public class slingboxgui {
       String ext = ".ts";
       if (c.equals("matroska"))
          ext = ".mkv";
-      return d + File.separator + "slingbox_" + getTimeStamp() + ext;
+      
+      // kmttg assigned name
+      name = d + File.separator + "slingbox_" + getTimeStamp() + ext;
+      
+      // If filename field not empty then use that file name instead
+      if (f.length() > 0)
+         name = d + File.separator + f;
+      
+      return name;
    }
    
    private String getToolTip(String component) {
@@ -422,6 +444,12 @@ public class slingboxgui {
          text += "Full path to the Perl executable.<br>";
          text += "NOTE: Make sure to add Crypt::Tea_JS module via Perl Package Manager.<br>";
          text += "NOTE: Double-click in this field to bring up file browser.";
+      }
+      else if (component.equals("filename")) {
+         text = "<b>File name</b><br>";
+         text += "Optional file name to use for this capture.<br>";
+         text += "If you leave this field empty then kmttg will create a unique file name<br>";
+         text += "for the capture.";
       }
       else if (component.equals("res")) {
          text = "<b>Video resolution</b><br>";
