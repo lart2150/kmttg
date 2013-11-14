@@ -195,7 +195,7 @@ public class atomic implements Serializable {
       }
       
       Hashtable <String,String> h = new Hashtable<String,String>();
-      h.put("MediaKind", "Movie");
+      h.put("MediaKind", "Short Film");
       
       // Parse metaFile
       try {
