@@ -459,8 +459,12 @@ public class nplTable {
                   if (selected[i] < lowest)
                      lowest = selected[i];
                }
-               if (lowest-1 < 0)
-                  lowest = 0;
+               if (lowest-1 < 0) {
+                  if (NowPlaying.getRowCount() > 1)
+                     lowest = 1;
+                  else
+                     lowest = 0;
+               }
                else
                   lowest -= 1;
                final_select = (sortableDate)NowPlaying.getValueAt(lowest,getColumnIndex("DATE"));
