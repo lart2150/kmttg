@@ -27,19 +27,16 @@ public class mediainfo {
          Stack<String> l = process.getStdout();
          if (l.size() > 0) {
             Hashtable<String,String> info = new Hashtable<String,String>();
-            String[] sections = {"General", "Video", "Audio", "Menu", "Text"};
             String section = "";
             String line;
             info.put("container", "mpeg");
             info.put("video", "mpeg2video");
             for (int i=0; i<l.size(); ++i) {
                line = l.get(i);
-               for (int j=0; j<sections.length; ++j) {
-                  if (line.matches("^" + sections[j] + "\\s*$")) {
-                     section = sections[j];
-                  }
+               if (!line.contains(":")) {
+                  section = line;
                }
-               if (section.equals("General") && line.matches("^Format\\s+:.+$")) {
+               if (section.matches("^General.*$") && line.matches("^Format\\s+:.+$")) {
                   // Format                                   : MPEG-TS
                   String fields[] = line.split(":");
                   String container = fields[1].toLowerCase();
@@ -50,7 +47,7 @@ public class mediainfo {
                   if (container.equals("mpeg4"))
                      info.put("container", "mp4");
                }
-               if (section.equals("General") && line.matches("^Duration\\s+:.+$")) {
+               if (section.matches("^General.$") && line.matches("^Duration\\s+:.+$")) {
                   // Duration                                 : 1h 43mn
                   // Duration                                 : 5mn 0s
                   String fields[] = line.split(":");
@@ -71,7 +68,7 @@ public class mediainfo {
                      info.put("duration", "" + dur);
                   }
                }
-               if (section.equals("Video") && line.matches("^Format\\s+:.+$")) {
+               if (section.matches("^Video.*$") && line.matches("^Format\\s+:.+$")) {
                   String fields[] = line.split(":");
                   String video = fields[1].toLowerCase();
                   video = video.replaceAll(" ", "");
@@ -81,26 +78,26 @@ public class mediainfo {
                   if (video.contains("avc"))
                      info.put("video", "h264");
                }
-               if (section.equals("Video") && line.matches("^Width\\s+:.+$")) {
+               if (section.matches("^Video.*$") && line.matches("^Width\\s+:.+$")) {
                   String fields[] = line.split(":");
                   String x = fields[1].toLowerCase();
                   x = x.replaceAll(" ", "");
                   x = x.replaceAll("pixels", "");
                   info.put("x", x);
                }
-               if (section.equals("Video") && line.matches("^Height\\s+:.+$")) {
+               if (section.matches("^Video.*$") && line.matches("^Height\\s+:.+$")) {
                   String fields[] = line.split(":");
                   String y = fields[1].toLowerCase();
                   y = y.replaceAll(" ", "");
                   y = y.replaceAll("pixels", "");
                   info.put("y", y);
                }
-               if (section.equals("Video") && line.matches("^Display\\s+aspect.+$")) {
+               if (section.matches("^Video.*$") && line.matches("^Display\\s+aspect.+$")) {
                   // Display aspect ratio                     : 4:3
                   String dar = line.replaceFirst(" ", "");
                   String fields[] = dar.split(":");
                   if (fields.length == 3) {
-                     info.put("DAR_x", fields[1]);
+                     info.put("DAR_x", fields[1].replaceFirst("^\\s+", ""));
                      info.put("DAR_y", fields[2]);
                   }
                }
