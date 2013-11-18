@@ -126,7 +126,7 @@ public class slingbox implements Serializable {
          job.slingbox_file = string.replaceSuffix(job.slingbox_file, ".asf");
          config.gui.jobTab_UpdateJobMonitorRowOutput(job, job.slingbox_file);
          command = "\"" + job.slingbox_perl + "\" \"" + perl_script + "\" " +
-               "-output " + job.slingbox_file + " " +
+               "-output \"" + job.slingbox_file + "\" " +
                "-ip "     + config.slingBox_ip + " " +
                "-port "   + config.slingBox_port + " " +
                "-pass "   + config.slingBox_pass + " " +
