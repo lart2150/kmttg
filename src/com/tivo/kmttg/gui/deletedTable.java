@@ -32,7 +32,7 @@ public class deletedTable {
    private String currentTivo = null;
    public JXTable TABLE = null;
    public JScrollPane scroll = null;
-   public String[] TITLE_cols = {"SHOW", "DATE", "CHANNEL", "DUR"};
+   public String[] TITLE_cols = {"SHOW", "DELETED", "RECORDED", "CHANNEL", "DUR"};
    public Boolean inFolder = false;
    public String folderName = null;
    public int folderEntryNum = -1;
@@ -79,7 +79,7 @@ public class deletedTable {
       // Use custom sorting routines for certain columns
       Sorter sorter = TABLE.getColumnExt(1).getSorter();
       sorter.setComparator(sortableComparator);
-      sorter = TABLE.getColumnExt(3).getSorter();
+      sorter = TABLE.getColumnExt(4).getSorter();
       sorter.setComparator(sortableComparator);
       
       // Define selection listener to detect table row selection changes
@@ -106,9 +106,14 @@ public class deletedTable {
       
       tm = TABLE.getColumnModel().getColumn(2);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+      // Right justify dates
+      ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
       
       tm = TABLE.getColumnModel().getColumn(3);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+      
+      tm = TABLE.getColumnModel().getColumn(4);
+      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
       // Center justify duration
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.CENTER);
                
@@ -130,10 +135,10 @@ public class deletedTable {
       @SuppressWarnings("unchecked")
       // This is used to define columns as specific classes
       public Class getColumnClass(int col) {
-         if (col == 1) {
+         if (col == 1 || col == 2) {
             return sortableDate.class;
          }
-         if (col == 3) {
+         if (col == 4) {
             return sortableDuration.class;
          }
          return Object.class;
@@ -146,7 +151,7 @@ public class deletedTable {
    }
    
    private JSONObject GetRowData(int row) {
-      return TableUtil.GetRowData(TABLE, row, "DATE");
+      return TableUtil.GetRowData(TABLE, row, "RECORDED");
    }
    
    // Handle keyboard presses
@@ -203,7 +208,7 @@ public class deletedTable {
       debug.print("row=" + row);
       if (row == -1) return;
       // Get column items for selected row 
-      sortableDate s = (sortableDate)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "DATE"));
+      sortableDate s = (sortableDate)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "RECORDED"));
       try {
          // Non folder entry so print single entry info
          sortableDuration dur = (sortableDuration)TABLE.getValueAt(row,TableUtil.getColumnIndex(TABLE, "DUR"));
@@ -275,8 +280,8 @@ public class deletedTable {
          data[i] = "";
       }
       try {
-         String startString=null, endString=null;
-         long start=0, end=0;
+         String startString=null, endString=null, delString=null;
+         long start=0, end=0, del=0;
          if (entry.has("scheduledStartTime")) {
             startString = entry.getString("scheduledStartTime");
             start = TableUtil.getLongDateFromString(startString);
@@ -286,13 +291,18 @@ public class deletedTable {
             start = TableUtil.getStartTime(entry);
             end = TableUtil.getEndTime(entry);
          }
+         if (entry.has("deletionTime")) {
+            delString = entry.getString("deletionTime");
+            del = TableUtil.getLongDateFromString(delString);            
+         }
          String title = TableUtil.makeShowTitle(entry);
          String channel = TableUtil.makeChannelName(entry);
    
          data[0] = title;
-         data[1] = new sortableDate(entry, start);
-         data[2] = channel;
-         data[3] = new sortableDuration(end-start, false);
+         data[1] = new sortableDate(entry, del);
+         data[2] = new sortableDate(entry, start);
+         data[3] = channel;
+         data[4] = new sortableDuration(end-start, false);
          
          TableUtil.AddRow(TABLE, data);
          
