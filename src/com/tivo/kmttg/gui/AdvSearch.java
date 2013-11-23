@@ -25,6 +25,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
@@ -681,8 +682,28 @@ public class AdvSearch {
          }
          text = string.removeLeadingTrailingSpaces(creditKeyword.getText());
          if (text != null && text.length() > 0) {
-            json.put("creditKeyword", text);
-            json.put("creditKeywordRole", (String)creditKeywordRole.getSelectedItem());
+            /* text expected in FirstName LastName format with commas between multiple names:
+               clint eastwood
+               clint eastwood, tommy jones
+            */
+            JSONArray creditArray = new JSONArray();
+            String[] names = text.split(",");
+            for (String nameText : names) {
+               JSONObject credit = new JSONObject();
+               credit.put("type", "credit");
+               credit.put("role", (String)creditKeywordRole.getSelectedItem());
+               nameText = nameText.replaceFirst("^\\s+", "");
+               String[] name = nameText.split("\\s+");
+               if (name.length == 2) {
+                  credit.put("first", name[0]);
+                  credit.put("last", name[1]);
+               }
+               if (name.length == 1) {
+                  credit.put("last", name[0]);
+               }
+               creditArray.put(credit);
+            }
+            json.put("credit", creditArray);
          }
          text = (String)collectionType.getSelectedItem();
          if (! text.equals("ALL")) {
@@ -804,8 +825,12 @@ public class AdvSearch {
       }
       else if (component.equals("creditKeyword")) {
          text =  "<b>Other keyword</b><br>";
-         text += "Match this keyword or phrase in role selected to the left of this field.<br>";
-         text += "NOTE: Wildcard <b>*</b> is allowed with at least 1 alphanumeric character.<br>";
+         text += "Match this exact given name in role selected to the left of this field.<br>";
+         text += "Enter in form of <b>FirstName LastName</b>. EXAMPLE: <b>clint eastwood</b><br>";
+         text += "If only 1 string is given then it is assumed to be <b>LastName</b>.<br>";
+         text += "If you want to specify more than 1 name then use a comma between names, e.g.:<br>";
+         text += "<b>clint eastwood, tommy jones</b><br>";
+         text += "NOTE: Multiple names will match using OR logic, not AND.<br>";
          text += "NOTE: Case insensitive.";
       }
       else if (component.equals("collectionType")) {
