@@ -585,7 +585,7 @@ public class cancelledTable {
                TABLE.clearSelection();
                try {
                   TABLE.setRowSelectionInterval(i,i);
-                  TABLE.scrollRectToVisible(TABLE.getCellRect(i, 0, true));
+                  TableUtil.scrollToCenter(TABLE, i);
                }
                catch (Exception e) {
                   // This is here because JXTable seems to have a problem sometimes after table cleared

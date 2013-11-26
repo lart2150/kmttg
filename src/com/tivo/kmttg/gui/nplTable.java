@@ -1210,7 +1210,7 @@ public class nplTable {
                NowPlaying.clearSelection();
                try {
                   NowPlaying.setRowSelectionInterval(i,i);
-                  NowPlaying.scrollRectToVisible(NowPlaying.getCellRect(i, 0, true));
+                  TableUtil.scrollToCenter(NowPlaying, i);
                }
                catch (Exception e) {
                   // This is here because JXTable seems to have a problem sometimes after table cleared

@@ -428,7 +428,7 @@ public class spTable {
     
     public void setSelectedRow(int row) {
        TABLE.setRowSelectionInterval(row,row);
-       TABLE.scrollRectToVisible(new Rectangle(TABLE.getCellRect(row, 0, true)));
+       TableUtil.scrollToCenter(TABLE, row);
     }
     
     public JSONObject GetRowData(int row) {
