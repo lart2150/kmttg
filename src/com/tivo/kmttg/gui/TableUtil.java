@@ -1,6 +1,7 @@
 package com.tivo.kmttg.gui;
 
 import java.awt.Component;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.UnsupportedEncodingException;
@@ -19,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
@@ -157,6 +159,28 @@ public class TableUtil {
       }
    }
    
+   public static void scrollToCenter(JXTable table, int rowIndex) {
+      if (!(table.getParent() instanceof JViewport)) {
+        return;
+      }
+      int vColIndex = 0;
+      JViewport viewport = (JViewport) table.getParent();
+      Rectangle rect = table.getCellRect(rowIndex, vColIndex, true);
+      Rectangle viewRect = viewport.getViewRect();
+      rect.setLocation(rect.x - viewRect.x, rect.y - viewRect.y);
+
+      int centerX = (viewRect.width - rect.width) / 2;
+      int centerY = (viewRect.height - rect.height) / 2;
+      if (rect.x < centerX) {
+        centerX = -centerX;
+      }
+      if (rect.y < centerY) {
+        centerY = -centerY;
+      }
+      rect.translate(centerX, centerY);
+      viewport.scrollRectToVisible(rect);
+    }
+   
    // Bring up a dialog to allow searching SHOW column of given table
    public static void SearchGUI() {
       if (searchDialog == null) {
@@ -248,7 +272,7 @@ public class TableUtil {
             v = v.toLowerCase();
             if (v.matches("^.*" + searchString.toLowerCase() + ".*$")) {
                // scroll to and set selection to given row
-               TABLE.scrollRectToVisible(TABLE.getCellRect(row, 0, true));
+               scrollToCenter(TABLE, row);
                TABLE.setRowSelectionInterval(row, row);
                TABLE.requestFocus();
                return true;
