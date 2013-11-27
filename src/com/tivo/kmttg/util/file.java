@@ -153,7 +153,8 @@ public class file {
          in.close();
          out.close(); 
       } catch (Exception e) {
-         log.error("file copy: " + Arrays.toString(e.getStackTrace()));
+         log.error("file copy: " + e.getMessage());
+         log.error(Arrays.toString(e.getStackTrace()));
          return false;
       }
       return true;

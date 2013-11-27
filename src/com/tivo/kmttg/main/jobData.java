@@ -226,7 +226,8 @@ public class jobData implements Serializable, Cloneable {
          Method method = c.getMethod("launchJob");
          success = (Boolean) method.invoke(proc);
       } catch (Exception e) {
-         log.error("jobData launch: " + Arrays.toString(e.getStackTrace()));
+         log.error("jobData launch: " + e.getMessage());
+         log.error(Arrays.toString(e.getStackTrace()));
       }
       
       if (success) {
@@ -249,7 +250,8 @@ public class jobData implements Serializable, Cloneable {
                return (Boolean) method.invoke(field.get(this));
             }
          } catch (Exception e) {
-            log.error("jobData check: " + Arrays.toString(e.getStackTrace()));
+            log.error("jobData check: " + e.getMessage());
+            log.error(Arrays.toString(e.getStackTrace()));
          }
       }
       return false;
@@ -265,7 +267,8 @@ public class jobData implements Serializable, Cloneable {
                return (backgroundProcess) method.invoke(field.get(this));
             }
          } catch (Exception e) {
-            log.error("jobData getProcess: " + Arrays.toString(e.getStackTrace()));
+            log.error("jobData getProcess: " + e.getMessage());
+            log.error(Arrays.toString(e.getStackTrace()));
          }
       }
       return null;      
@@ -282,7 +285,8 @@ public class jobData implements Serializable, Cloneable {
                field.set(this, null);
             }
          } catch (Exception e) {
-            log.error("jobData kill: " + Arrays.toString(e.getStackTrace()));
+            log.error("jobData kill: " + e.getMessage());
+            log.error(Arrays.toString(e.getStackTrace()));
          }
       }
    }

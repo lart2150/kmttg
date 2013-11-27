@@ -1757,6 +1757,7 @@ public class gui {
                         ofp.write(n[j] + "=" + json.get(n[j]) + "\n");
                      }
                   } catch (JSONException e) {
+                     log.error(e.getMessage());
                      log.error(Arrays.toString(e.getStackTrace()));
                   }
                }
@@ -1771,6 +1772,7 @@ public class gui {
                         ofp.write(n[j] + "=" + json.get(n[j]) + "\n");
                      }
                   } catch (JSONException e) {
+                     log.error(e.getMessage());
                      log.error(Arrays.toString(e.getStackTrace()));
                   }
                }

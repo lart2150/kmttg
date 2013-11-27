@@ -230,6 +230,7 @@ public class wlOptions {
          }
          return json;
       } catch (JSONException e) {
+         log.error(e.getMessage());
          log.error(Arrays.toString(e.getStackTrace()));
       }
       return null;

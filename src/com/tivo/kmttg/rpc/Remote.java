@@ -209,8 +209,10 @@ public class Remote {
             message += "character (#) in front of the following line to re-enable MD2/RSA certificates:\n";
             message += "jdk.certpath.disabledAlgorithms=MD2, RSA keySize < 1024";
             error(message);
-         } else
-            error("RemoteInit - (IP=" + IP + ", port=" + port + "): " + Arrays.toString(e.getStackTrace()));
+         } else {
+            error("RemoteInit - (IP=" + IP + ", port=" + port + "): " + e.getMessage());
+            error(Arrays.toString(e.getStackTrace()));
+         }
          success = false;
       }
    }
