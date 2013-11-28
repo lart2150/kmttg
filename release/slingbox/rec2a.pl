@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# This script is for Slingbox Solo models
 
 use IO::Socket::INET;
 use Crypt::Tea_JS;
@@ -18,7 +19,7 @@ $sleep = 0;                     # sleep time in seconds before starting capture
 $dur = 0;                       # duration in seconds you want to capture
 $chan = '';                     # tune to a channel before capture
 $output = "rec2.asf";           # output file (use -stdout option for stdout)
-$irparm = 3;			# change this to 2 if you get cmd 135 errors
+$irparm = 2;			# change this to 2 if you get cmd 135 errors
 $stdout = 0;
 
 # Parse command line arguments
