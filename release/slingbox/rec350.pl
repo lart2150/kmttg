@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# This Perl script used to capture slingbox output directly
+# This script is for Slingbox 350/500 models
 
 use IO::Select;
 use IO::Socket::INET;

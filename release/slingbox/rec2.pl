@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# This script is for Slingbox Pro models
 
 use IO::Socket::INET;
 use Crypt::Tea_JS;
