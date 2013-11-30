@@ -45,7 +45,8 @@ public class fileBrowser {
         String[] valid = new String[] {
            ".tivo", ".mpeg", ".mpg", ".mpeg2", ".asf", ".avi", ".dvr-ms", ".flv",
            ".m2p", ".m4v", ".mkv", ".mov", ".mp4", ".mpeg4", ".m2ts", ".mts",
-           ".ogm", ".tp", ".ts", ".vob", ".wmv", ".wtv", ".xvid", ".divx", ".dvx"
+           ".ogm", ".tp", ".ts", ".vob", ".wmv", ".wtv", ".xvid", ".divx", ".dvx",
+           ".vprj"
         };
         for (int i=0; i<valid.length; ++i)
         if ( s.endsWith(valid[i])) {
