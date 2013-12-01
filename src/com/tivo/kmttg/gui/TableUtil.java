@@ -579,6 +579,7 @@ public class TableUtil {
                   if (recordSingle(tivoName, json) && ! isRecordingScheduled(json)) {
                      // Add to todo list for this tivo
                      config.gui.remote_gui.addEntryToTodo(tivoName, json);
+                     json.put("__inTodo__", tivoName);
                   }
                }
             } catch (JSONException e) {
