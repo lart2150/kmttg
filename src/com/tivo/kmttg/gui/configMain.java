@@ -109,7 +109,7 @@ public class configMain {
    private static JTextField active_job_limit = null;
    private static JTextField VRD_path = null;
    private static JTextField t2extract = null;
-   private static JTextField t2extract_args = null;
+   //private static JTextField t2extract_args = null;
    private static JTextField mencoder_args = null;
    private static JTextField ccextractor = null;
    private static JTextField AtomicParsley = null;
@@ -747,7 +747,7 @@ public class configMain {
       t2extract.setText(config.t2extract);
       
       // t2extract_args
-      t2extract_args.setText(config.t2extract_args);
+      //t2extract_args.setText(config.t2extract_args);
       
       // ccextractor
       ccextractor.setText(config.ccextractor);
@@ -1408,19 +1408,19 @@ public class configMain {
          value = "";
       } else {
          if ( ! file.isFile(value) ) {
-            textFieldError(t2extract, "t2extract/ccextractor setting not a valid file: '" + value  + "'");
+            textFieldError(t2extract, "ccextractor setting not a valid file: '" + value  + "'");
             errors++;
          }
       }
       config.t2extract = value;
       
-      // t2extract_args
+      /*// t2extract_args
       value = string.removeLeadingTrailingSpaces(t2extract_args.getText());
       if (value.length() == 0) {
          // Reset to default if none given
          value = "";
       }
-      config.t2extract_args = value;
+      config.t2extract_args = value;*/
       
       // ccextractor
       value = string.removeLeadingTrailingSpaces(ccextractor.getText());
@@ -1743,7 +1743,7 @@ public class configMain {
       comskip_ini = new javax.swing.JTextField(30);
       VRD_path = new javax.swing.JTextField(30);
       t2extract = new javax.swing.JTextField(30);
-      t2extract_args = new javax.swing.JTextField(30);
+      //t2extract_args = new javax.swing.JTextField(30);
       ccextractor = new javax.swing.JTextField(30);
       AtomicParsley = new javax.swing.JTextField(30);
       projectx = new javax.swing.JTextField(30);
@@ -1853,7 +1853,7 @@ public class configMain {
       JLabel active_job_limit_label = new javax.swing.JLabel();
       JLabel VRD_path_label = new javax.swing.JLabel();
       JLabel t2extract_label = new javax.swing.JLabel();
-      JLabel t2extract_args_label = new javax.swing.JLabel();
+      //JLabel t2extract_args_label = new javax.swing.JLabel();
       JLabel ccextractor_label = new javax.swing.JLabel();
       JLabel AtomicParsley_label = new javax.swing.JLabel();
       JLabel projectx_label = new javax.swing.JLabel();
@@ -1976,8 +1976,8 @@ public class configMain {
       limit_npl_fetches_label.setText("limit # of npl fetches");
       active_job_limit_label.setText("active job limit"); 
       VRD_path_label.setText("VideoRedo path");
-      t2extract_label.setText("t2extract/ccextractor"); 
-      t2extract_args_label.setText("t2extract extra arguments");
+      t2extract_label.setText("ccextractor"); 
+      //t2extract_args_label.setText("t2extract extra arguments");
       ccextractor_label.setText("ccextractor");
       AtomicParsley_label.setText("AtomicParsley");
       projectx_label.setText("ProjectX");
@@ -2919,7 +2919,7 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(cpu_cores, c);
       
-      // t2extract_args
+      /*// t2extract_args
       gy++;
       c.gridx = 0;
       c.gridy = gy;
@@ -2927,7 +2927,7 @@ public class configMain {
       
       c.gridx = 1;
       c.gridy = gy;
-      program_options_panel.add(t2extract_args, c);
+      program_options_panel.add(t2extract_args, c);*/
       
       // mencoder_args
       gy++;
@@ -3368,7 +3368,7 @@ public class configMain {
       comskip.setToolTipText(getToolTip("comskip"));
       comskip_ini.setToolTipText(getToolTip("comskip_ini"));
       t2extract.setToolTipText(getToolTip("t2extract"));
-      t2extract_args.setToolTipText(getToolTip("t2extract_args"));
+      //t2extract_args.setToolTipText(getToolTip("t2extract_args"));
       ccextractor.setToolTipText(getToolTip("ccextractor"));
       VRD_path.setToolTipText(getToolTip("VRD_path"));
       AtomicParsley.setToolTipText(getToolTip("AtomicParsley"));
@@ -3845,10 +3845,11 @@ public class configMain {
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("t2extract")) {
-         text =  "<b>t2extract/ccextractor</b><br>";
+         text =  "<b>ccextractor</b><br>";
          text += "<b>REQUIRED</b> if you plan to use <b>captions</b> task.<br>";
-         text += "For Windows systems this program is used for generating closed captions <b>.srt</b> files.<br>";
-         text += "This is the full path to either <b>T2Sami t2extract</b> or <b>ccextractor</b> program.<br>";
+         text += "This program is used for generating closed captions <b>.srt</b> files.<br>";
+         text += "This is the full path to <b>ccextractor</b> program which is available<br>";
+         text += "from http://ccextractor.sourceforge.net.<br>";
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("t2extract_args")) {
