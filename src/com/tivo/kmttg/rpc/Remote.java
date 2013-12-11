@@ -93,7 +93,8 @@ public class Remote {
        try {
           KeyStore keyStore = KeyStore.getInstance("PKCS12");
           // This is default USA password
-          String password = "mpE7Qy8cSqdf";
+          //String password = "mpE7Qy8cSqdf";
+          String password = "617Cc0aMqEXn";
           InputStream keyInput;
           if (cdata == null) {
              // Installation dir cdata.p12 file takes priority if it exists
