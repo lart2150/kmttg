@@ -1986,8 +1986,10 @@ public class remotegui {
                         try {
                            JSONObject json = new JSONObject();
                            String uri="";
-                           if (name.equals("Netflix"))
+                           if (name.equals("Netflix (flash)"))
                               uri = "x-tivo:flash:uuid:F23D193D-D2C2-4D18-9ABE-FA6B8488302F";
+                           if (name.equals("Netflix (html)"))
+                              uri = "x-tivo:netflix:netflix";
                            if (name.equals("YouTube"))
                               uri = "x-tivo:flash:uuid:B8CEA236-0C3D-41DA-9711-ED220480778E";
                            if (name.equals("Amazon"))
@@ -2764,7 +2766,7 @@ public class remotegui {
       backgroundRun b = new backgroundRun();
       b.execute();
       */
-      String[] hmeNames = {"Netflix", "YouTube", "Amazon", "Hulu Plus", "AOL On", "Launchpad"};
+      String[] hmeNames = {"Netflix (html)", "YouTube", "Amazon", "Hulu Plus", "AOL On", "Launchpad"};
       hme_rc.removeAllItems();
       for (int i=0; i<hmeNames.length; ++i)
          hme_rc.addItem(hmeNames[i]);
