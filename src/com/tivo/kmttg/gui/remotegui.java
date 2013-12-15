@@ -1972,7 +1972,7 @@ public class remotegui {
       });
       tivo_rc.setToolTipText(getToolTip("tivo_rc"));
 
-      rc_hme_button = new JButton("HME Jump:");
+      rc_hme_button = new JButton("Launch App:");
       disableSpaceAction(rc_hme_button);
       rc_hme_button.setToolTipText(getToolTip("rc_hme_button"));
       rc_hme_button.addActionListener(new java.awt.event.ActionListener() {
@@ -1992,6 +1992,8 @@ public class remotegui {
                               uri = "x-tivo:netflix:netflix";
                            if (name.equals("YouTube"))
                               uri = "x-tivo:flash:uuid:B8CEA236-0C3D-41DA-9711-ED220480778E";
+                           if (name.equals("YouTube (html)"))
+                              uri = "x-tivo:web:https://www.youtube.com/tv";
                            if (name.equals("Amazon"))
                               uri = "x-tivo:hme:uuid:35FE011C-3850-2228-FBC5-1B9EDBBE5863";
                            if (name.equals("Hulu Plus"))
@@ -2003,7 +2005,7 @@ public class remotegui {
                            json.put("uri", uri);
                            r.Command("Navigate", json);
                         } catch (JSONException e1) {
-                           log.error("HME Jump - " + e1.getMessage());
+                           log.error("Launch App - " + e1.getMessage());
                         }
                         r.disconnect();
                      }
@@ -2766,7 +2768,7 @@ public class remotegui {
       backgroundRun b = new backgroundRun();
       b.execute();
       */
-      String[] hmeNames = {"Netflix (html)", "YouTube", "Amazon", "Hulu Plus", "AOL On", "Launchpad"};
+      String[] hmeNames = {"Netflix (html)", "YouTube (html)", "Amazon", "Hulu Plus", "AOL On", "Launchpad"};
       hme_rc.removeAllItems();
       for (int i=0; i<hmeNames.length; ++i)
          hme_rc.addItem(hmeNames[i]);
@@ -3689,11 +3691,11 @@ public class remotegui {
          text += "NOTE: You can enter non-integer values for minutes such as 0.5";
       }
       else if (component.equals("rc_hme_button")) {
-         text = "<b>HME Jump</b><br>";
-         text += "Jump to the specified HME application for the selected TiVo.";
+         text = "<b>Launch App</b><br>";
+         text += "Launch the selected application to right of this button on the selected TiVo.";
       }
       else if (component.equals("hme_rc")) {
-         text = "Select which HME application you want to jump to for selected TiVo.";
+         text = "Select which application you want to launch on the selected TiVo.";
       }
       else if (component.equals("rc_sps_button")) {
          text = "<b>SPS backdoor</b><br>";
