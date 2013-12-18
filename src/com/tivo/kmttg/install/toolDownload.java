@@ -20,6 +20,7 @@ public class toolDownload {
    String windows_file = "kmttg_win32_tools_v0p9s.zip";
    String mac_file = "kmttg_MacOSX_tools_v0p8l.zip";
    String projectx_file = "ProjectX_0_9_1_0.zip";
+   String tools_version = "tools_version";
    
    public String download(String dir, String os) {
       debug.print("dir=" + dir + " os=" + os);
