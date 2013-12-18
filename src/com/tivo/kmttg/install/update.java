@@ -2,9 +2,13 @@ package com.tivo.kmttg.install;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -48,9 +52,16 @@ public class update {
                version = t.windows_file;
             else
                version = t.mac_file;
+            String installedVersionFile = config.programDir + File.separator + t.tools_version;
+            String query = "Install tools file: " + version + " ?";
+            if (file.isFile(installedVersionFile)) {
+               String lastVersion = getToolsVersion(installedVersionFile);
+               if (lastVersion != null)
+                  query = "Last installed file: " + lastVersion + "\n" + query;
+            }
             int response = JOptionPane.showConfirmDialog(
                config.gui.getJFrame(),
-               "Install tools file: " + version + " ?",
+               query,
                "Confirm",
                JOptionPane.YES_NO_OPTION,
                JOptionPane.QUESTION_MESSAGE
@@ -63,6 +74,7 @@ public class update {
                   if (Unzip.unzip(config.programDir, zipFile) ) {
                      log.warn("Tools update complete");
                      file.delete(zipFile);
+                     writeToolsVersion(installedVersionFile, version);
                   }
                }
             }
@@ -259,5 +271,29 @@ public class update {
       
         in.close();
         out.close();
+     }
+     
+     private static String getToolsVersion(String fileName) {
+        String version = null;
+        try {
+           BufferedReader in = new BufferedReader(new FileReader(new File(fileName)));
+           version = in.readLine();
+           in.close();
+        } catch (Exception e) {
+           log.error("getToolsVersion - " + e.getMessage());
+        }
+        return version;
+     }
+     
+     private static Boolean writeToolsVersion(String fileName, String version) {
+        try {
+           BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+           writer.write(version + "\n");
+           writer.close();
+           return true;
+        } catch (Exception e) {
+           log.error("getToolsVersion - " + e.getMessage());
+        }
+        return false;
      }
 }
