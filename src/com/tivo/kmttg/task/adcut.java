@@ -253,8 +253,8 @@ public class adcut implements Serializable {
                f = string.replaceSuffix(job.mpegFile, ".edl");
                if (job.edlFile != null)
                   f = job.edlFile;
-               if (file.delete(job.edlFile))
-                  log.print("(Deleted edl file: " + job.edlFile + ")");
+               if (file.delete(f))
+                  log.print("(Deleted edl file: " + f + ")");
                f = job.mpegFile + ".Xcl";
                if (file.isFile(f) && file.delete(f))
                   log.print("(Deleted xcl file: " + f + ")");
