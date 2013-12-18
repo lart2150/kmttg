@@ -245,16 +245,22 @@ public class adcut implements Serializable {
             log.print("---DONE--- job=" + job.type + " output=" + job.mpegFile_cut);
             // Remove Ad Cut files if option enabled
             if ( config.RemoveComcutFiles == 1 ) {
-               if (file.delete(job.vprjFile))
-                  log.print("(Deleted vprj file: " + job.vprjFile + ")");
+               String f = string.replaceSuffix(job.mpegFile, ".VPrj");
+               if (job.vprjFile != null)
+                  f = job.vprjFile;
+               if (file.delete(f))
+                  log.print("(Deleted vprj file: " + f + ")");
+               f = string.replaceSuffix(job.mpegFile, ".edl");
+               if (job.edlFile != null)
+                  f = job.edlFile;
                if (file.delete(job.edlFile))
                   log.print("(Deleted edl file: " + job.edlFile + ")");
-               String xclFile = job.mpegFile + ".Xcl";
-               if (file.isFile(xclFile) && file.delete(xclFile))
-                  log.print("(Deleted xcl file: " + xclFile + ")");
-               String txtFile = string.replaceSuffix(job.mpegFile, ".txt");
-               if (file.isFile(txtFile) && file.delete(txtFile))
-                  log.print("(Deleted comskip txt file: " + txtFile + ")");
+               f = job.mpegFile + ".Xcl";
+               if (file.isFile(f) && file.delete(f))
+                  log.print("(Deleted xcl file: " + f + ")");
+               f = string.replaceSuffix(job.mpegFile, ".txt");
+               if (file.isFile(f) && file.delete(f))
+                  log.print("(Deleted comskip txt file: " + f + ")");
             }
             // Remove .mpg file if option enabled
             if ( config.RemoveComcutFiles_mpeg == 1 ) {
