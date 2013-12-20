@@ -3642,7 +3642,7 @@ public class configMain {
          text += "For TiVo software that properly supports it, this forces TiVo file downloads to use<br>";
          text += "the faster Transport Stream format instead of the default Program Stream format by adding<br>";
          text += "<b>&Format=video/x-tivo-mpeg-ts</b> tag to the download URL.<br>";
-         text += "NOTE: Currently only Premiere, Australia, and New Zealand TiVos support this format and this will<br>";
+         text += "NOTE: Currently only Series 4+, Australia, and New Zealand TiVos support this format and this will<br>";
          text += "have no effect on other TiVos.<br>";
          text += "<b>NOTE: 'tivodecode' cannot properly decrypt TS TiVo files so don't enable this option<br>";
          text += "if you are using it to decrypt TiVo files.</b>";
