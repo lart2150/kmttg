@@ -299,6 +299,8 @@ public class rnpl {
    public static void flagIfInTodo(JSONObject entry, Boolean includeOtherTimes, Hashtable<String,JSONArray> all_todo) {
       String inTodo = "__inTodo__";
       try {
+         if ( ! entry.has("title") || ! entry.has("startTime"))
+            return;
          String title = entry.getString("title");
          if (entry.has("subtitle")) {
             title = title + " - " + entry.getString("subtitle");
