@@ -3638,7 +3638,7 @@ public class remotegui {
          text = "<b>Execute</b><br>";
          text += "If type specified as html, send given URL to TiVo internal web browser.<br>";
          text += "If type specified as flash, send given URL to TiVo internal flash player.<br>";
-         text += "WEB NAVIGATION: Use remote <b>arrow keys</b> to navigate the page and <b>Select</b> button to<br>";
+         text += "WEB NAVIGATION: Use kmttg Remote keys <b>Q, A, W, S</b> to navigate the page and <b>Select</b> button to<br>";
          text += "select or execute currently highlighted item on the page.<br>";
          text += "TYPING TEXT: You can use the kmttg <b>Remote</b> tab if there are fields where you<br>";
          text += "need to enter some text since the kmttg remote understands key presses for the basic<br>";
