@@ -579,7 +579,7 @@ public class TableUtil {
                   if (recordSingle(tivoName, json) && ! isRecordingScheduled(json)) {
                      // Add to todo list for this tivo
                      config.gui.remote_gui.addEntryToTodo(tivoName, json);
-                     json.put("__inTodo__", tivoName);
+                     addTivoNameFlagtoJson(json, "__inTodo__", tivoName);
                   }
                }
             } catch (JSONException e) {
@@ -658,6 +658,17 @@ public class TableUtil {
          help.showInBrowser(url);
       } catch (UnsupportedEncodingException e) {
          log.error("webQuery - " + e.getMessage());
+      }
+   }
+   
+   static public void addTivoNameFlagtoJson(JSONObject json, String flag, String tivoName) {
+      try {
+         if (json.has(flag))
+            json.put(flag, json.getString(flag) + ", " + tivoName);
+         else
+            json.put(flag, tivoName);
+      } catch (JSONException e) {
+         log.error("addTivoNameFlagtoJson - " + e.getMessage());
       }
    }
 }
