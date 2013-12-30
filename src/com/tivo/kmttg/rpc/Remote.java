@@ -1835,6 +1835,7 @@ public class Remote {
                JSONObject result = Command("Seasonpass", o);
                if (result != null) {
                   log.print("success");
+                  TableUtil.addTivoNameFlagtoJson(json, "__SPscheduled__", tivoName);
                }
             }
          } else {
