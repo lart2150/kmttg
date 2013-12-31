@@ -48,6 +48,10 @@ public class qsfix implements Serializable {
       if (config.VrdDecrypt == 1 && ! file.isFile(sourceFile)) {
          sourceFile = job.tivoFile;
       }
+      
+      // If running qsfix as "decrypt" task then assume starting point is tivoFile
+      if (job.qsfix_mode.equals("decrypt") && file.isFile(job.tivoFile))
+         sourceFile = job.tivoFile;
                   
       if ( ! file.isFile(sourceFile) ) {
          log.error("source file not found: " + sourceFile);

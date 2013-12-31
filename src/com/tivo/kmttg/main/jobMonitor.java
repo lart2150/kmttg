@@ -1043,6 +1043,8 @@ public class jobMonitor {
                job.entry = entry;
             }
          }
+         if (! qsfix)
+            job.qsfix_mode = "decrypt";
          submitNewJob(job);
       }
       
