@@ -135,6 +135,9 @@ public class jobData implements Serializable, Cloneable {
    public Stack<String> demuxFiles = null;
    public String xclFile = null;
    
+   // qsfix related (value can be "decrypt" if using qsfix as decrypt with VRD)
+   public String qsfix_mode = "qsfix";
+   
    public Boolean remote_sp = false;
    public spTable sp = null;
    
