@@ -8,7 +8,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -189,6 +192,22 @@ public class tivoTab {
             c.gridx = gx;
             c.gridy = gy;
             panel.add(disk_usage, c);
+         }
+         
+         // Export button
+         if ( ! tivoName.equals("FILES") ) {
+            JButton export = new JButton("Export...");
+            export.setMargin(new Insets(0,5,0,5));
+            export.setToolTipText(config.gui.getToolTip("export_npl"));
+            export.addActionListener(new java.awt.event.ActionListener() {
+               public void actionPerformed(java.awt.event.ActionEvent e) {
+                  nplTab.exportNPL();
+               }
+            });
+            gx++;
+            c.gridx = gx;
+            c.gridy = gy;
+            panel.add(export, c);
          }
          
          // Status label
@@ -564,5 +583,4 @@ public class tivoTab {
       TableColumnModel tableColumnModel = nplTab.NowPlaying.getTableHeader().getColumnModel();
       tableColumnModel.moveColumn(from, to);
    }
-
 }
