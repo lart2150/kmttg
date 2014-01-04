@@ -1505,48 +1505,47 @@ public class nplTable {
    }
       
    // Export NPL entries to a csv file
+   // NOTE: The current table structure + sorting is used
    public void exportNPL() {
       String file = config.programDir + File.separator + tivoName + "_npl.csv";
+      int numCols = TIVO_cols.length;
       try {
-         if (entries != null && ! entries.isEmpty()) {
+         if (NowPlaying != null && NowPlaying.getRowCount() > 0) {
+            log.warn("Exporting NPL table for: " + tivoName + " ...");
             BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
-            ofp.write("SHOW,DATE,CHANNEL,DURATION,SIZE,BITRATE (Mbps)\r\n");
-            for (Hashtable<String,String> entry : entries) {
-               String s;
-               
-               s = "NONE";
-               if (entry.containsKey("title"))
-                  s = entry.get("title");
-               ofp.write("\"" + s + "\",");
-               
-               s = "NONE";
-               if (entry.containsKey("date_long"))
-                  s = entry.get("date_long");
-               ofp.write(s + ",");
-               
-               s = "NONE";
-               if (entry.containsKey("channelNum"))
-                  s = entry.get("channelNum");
-               if (entry.containsKey("channel"))
-                  s += "=" + entry.get("channel");
-               ofp.write(s + ",");
-               
-               s = "0";
-               if (entry.containsKey("duration"))
-                  s = sortableDuration.millisecsToHMS(Long.parseLong(entry.get("duration")), false);
-               ofp.write(s + ",");
-               
-               s = "0";
-               if (entry.containsKey("sizeGB"))
-                  s = entry.get("sizeGB");
-               ofp.write(s + ",");
-               
-               s = "0";
-               if (entry.containsKey("size") && entry.containsKey("duration")) {
-                  Double rate = bitRate(entry.get("size"), entry.get("duration"));
-                  s = String.format("%.2f", rate);
+            for (int col=0; col<numCols; ++col) {
+               int c = NowPlaying.convertColumnIndexToModel(col);
+               String name = NowPlaying.getModel().getColumnName(c);
+               if (name.equals(""))
+                  continue;
+               if (name.equals("DUR"))
+                  name = "DURATION";
+               if (name.equals("Mbps"))
+                  name = "BITRATE (Mbps)";
+               ofp.write(name);
+               if (col<numCols-1)
+                  ofp.write(",");
+            }
+            ofp.write("\r\n");
+            for (int row=0; row<NowPlaying.getRowCount(); row++) {
+               for (int col=0; col<numCols; ++col) {
+                  int r = NowPlaying.convertRowIndexToModel(row);
+                  int c = NowPlaying.convertColumnIndexToModel(col);
+                  String colName = NowPlaying.getModel().getColumnName(c);
+                  if (colName.equals(""))
+                     continue;
+                  String val = "" + NowPlaying.getModel().getValueAt(r, c);
+                  val = val.trim();
+                  if (val.equals("")) {
+                     val = "NONE";
+                     if (colName.equals("DUR") || colName.equals("SIZE") || colName.equals("Mbps"))
+                        val = "0";
+                  }
+                  ofp.write("\"" + val + "\"");
+                  if (col < numCols-1)
+                     ofp.write(",");
                }
-               ofp.write(s + "\r\n");
+               ofp.write("\r\n");
             }
             ofp.close();
             log.warn("NPL csv export completed to file: " + file);
