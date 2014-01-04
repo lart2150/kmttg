@@ -2304,8 +2304,10 @@ public class gui {
       }
       else if (component.equals("export_npl")) {
          text =  "<b>Export</b><br>";
-         text += "Export NPL entries to a csv file which can be easily<br>";
-         text += "imported into an Excel spreadsheet or equivalent.";
+         text += "Export NPL entries to a csv file which can be easily imported into an Excel<br>";
+         text += "spreadsheet or equivalent.<br>";
+         text += "NOTE: The list is exported as displayed, so if you want all individual entries<br>";
+         text += "in the spreadsheet then disable <b>Show Folders</b> before exporting.";
       }
       
       if (text.length() > 0) {
