@@ -1098,7 +1098,7 @@ public class nplTable {
             );
          }
       } else {
-         data[3] = new sortableChannel(" <various> ", "0");
+         data[3] = new sortableChannel("<various>", "0");
       }
       
       data[4] = new sortableDuration(folderEntry);
