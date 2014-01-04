@@ -7,7 +7,10 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1500,4 +1503,59 @@ public class nplTable {
       }
       UpdatingNPL = false;
    }
+      
+   // Export NPL entries to a csv file
+   public void exportNPL() {
+      String file = config.programDir + File.separator + tivoName + "_npl.csv";
+      try {
+         if (entries != null && ! entries.isEmpty()) {
+            BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
+            ofp.write("SHOW,DATE,CHANNEL,DURATION,SIZE,BITRATE (Mbps)\r\n");
+            for (Hashtable<String,String> entry : entries) {
+               String s;
+               
+               s = "NONE";
+               if (entry.containsKey("title"))
+                  s = entry.get("title");
+               ofp.write("\"" + s + "\",");
+               
+               s = "NONE";
+               if (entry.containsKey("date_long"))
+                  s = entry.get("date_long");
+               ofp.write(s + ",");
+               
+               s = "NONE";
+               if (entry.containsKey("channelNum"))
+                  s = entry.get("channelNum");
+               if (entry.containsKey("channel"))
+                  s += "=" + entry.get("channel");
+               ofp.write(s + ",");
+               
+               s = "0";
+               if (entry.containsKey("duration"))
+                  s = sortableDuration.millisecsToHMS(Long.parseLong(entry.get("duration")), false);
+               ofp.write(s + ",");
+               
+               s = "0";
+               if (entry.containsKey("sizeGB"))
+                  s = entry.get("sizeGB");
+               ofp.write(s + ",");
+               
+               s = "0";
+               if (entry.containsKey("size") && entry.containsKey("duration")) {
+                  Double rate = bitRate(entry.get("size"), entry.get("duration"));
+                  s = String.format("%.2f", rate);
+               }
+               ofp.write(s + "\r\n");
+            }
+            ofp.close();
+            log.warn("NPL csv export completed to file: " + file);
+         } else {
+            log.error("You must 1st refresh NPL");
+         }
+      } catch (IOException e) {
+         log.error("exportNPL - " + e.getMessage());
+      }
+   }
+
 }
