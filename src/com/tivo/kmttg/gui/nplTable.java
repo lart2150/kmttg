@@ -117,6 +117,13 @@ public class nplTable {
                if (s1.sortable < s2.sortable) return -1;
                return 0;
             }
+            if (o1 instanceof sortableChannel && o2 instanceof sortableChannel) {
+               sortableChannel s1 = (sortableChannel)o1;
+               sortableChannel s2 = (sortableChannel)o2;
+               if (s1.sortable > s2.sortable) return 1;
+               if (s1.sortable < s2.sortable) return -1;
+               return 0;
+            }
             if (o1 instanceof sortableShow && o2 instanceof sortableShow) {
                sortableShow s1 = (sortableShow)o1;
                sortableShow s2 = (sortableShow)o2;
@@ -173,16 +180,10 @@ public class nplTable {
          Sorter sorter = NowPlaying.getColumnExt(1).getSorter();
          sorter.setComparator(sortableComparator);
       } else {
-         Sorter sorter = NowPlaying.getColumnExt(1).getSorter();
-         sorter.setComparator(sortableComparator);
-         sorter = NowPlaying.getColumnExt(2).getSorter();
-         sorter.setComparator(sortableComparator);
-         sorter = NowPlaying.getColumnExt(4).getSorter();
-         sorter.setComparator(sortableComparator);
-         sorter = NowPlaying.getColumnExt(5).getSorter();
-         sorter.setComparator(sortableComparator);
-         sorter = NowPlaying.getColumnExt(6).getSorter();
-         sorter.setComparator(sortableComparator);
+         for (int i=1; i<7; ++i) {
+            Sorter sorter = NowPlaying.getColumnExt(i).getSorter();
+            sorter.setComparator(sortableComparator);
+         }
       }   
       
       // Define selection listener to detect table row selection changes
@@ -296,6 +297,9 @@ public class nplTable {
          }
          if (col == 2) {
             return sortableDate.class;
+         }
+         if (col == 3) {
+            return sortableChannel.class;
          }
          if (col == 4) {
             return sortableDuration.class;
@@ -1024,15 +1028,9 @@ public class nplTable {
       }
       data[1] = new sortableShow(entry);
       data[2] = new sortableDate(entry);
-      String channel = "";
-      if ( entry.containsKey("channelNum") ) {
-         channel = " " + entry.get("channelNum");
+      if ( entry.containsKey("channelNum") && entry.containsKey("channel") ) {
+         data[3] = new sortableChannel(entry.get("channel"), entry.get("channelNum"));
       }
-      if ( entry.containsKey("channel") ) {
-         channel += "=" + entry.get("channel"); 
-      }
-      if (channel.length() > 0) channel += " ";
-      data[3] = channel;
       data[4] = new sortableDuration(entry);
       data[5] = new sortableSize(entry);
       Double rate = 0.0;
@@ -1094,16 +1092,14 @@ public class nplTable {
       data[2] = new sortableDate(fName, folderEntry, gmt_index);
       
       if (sameChannel) {
-         if ( folderEntry.get(0).containsKey("channelNum") ) {
-            channel = folderEntry.get(0).get("channelNum");
-         }
-         if ( folderEntry.get(0).containsKey("channel") ) {
-            channel += "=" + folderEntry.get(0).get("channel"); 
+         if ( folderEntry.get(0).containsKey("channelNum") && folderEntry.get(0).containsKey("channel")) {
+            data[3] = new sortableChannel(
+               folderEntry.get(0).get("channel"),folderEntry.get(0).get("channelNum")
+            );
          }
       } else {
-         channel = "<various>";
+         data[3] = new sortableChannel(" <various> ", "0");
       }
-      data[3] = " " + channel + " ";
       
       data[4] = new sortableDuration(folderEntry);
       data[5] = new sortableSize(folderEntry);
