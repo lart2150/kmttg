@@ -353,6 +353,33 @@ public class remotegui {
             }
          }
       });
+
+      JButton export_todo = new JButton("Export ...");
+      export_todo.setToolTipText(getToolTip("export_todo"));
+      export_todo.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            final String tivoName = (String)tivo_todo.getSelectedItem();
+            Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            Browser.setSelectedFile(new File(config.programDir + File.separator + tivoName + "_todo.csv"));
+            int result = Browser.showDialog(config.gui.getJFrame(), "Export to csv file");
+            if (result == JFileChooser.APPROVE_OPTION) {               
+               class backgroundRun extends SwingWorker<Object, Object> {
+                  protected Object doInBackground() {
+                     File file = Browser.getSelectedFile();
+                     log.warn("Exporting '" + tivoName + "' todo list to csv file: " + file.getAbsolutePath());
+                     Remote r = config.initRemote(tivoName);
+                     if (r.success) {
+                        r.TodoExportCSV(file);
+                        r.disconnect();
+                     }
+                     return null;
+                  }
+               }
+               backgroundRun b = new backgroundRun();
+               b.execute();
+            }
+         }
+      });
       
       label_todo = new JLabel();
       
@@ -368,6 +395,8 @@ public class remotegui {
       row1_todo.add(cancel_todo);
       row1_todo.add(Box.createRigidArea(space_5));
       row1_todo.add(modify_todo);
+      row1_todo.add(Box.createRigidArea(space_5));
+      row1_todo.add(export_todo);
       row1_todo.add(Box.createRigidArea(space_5));
       row1_todo.add(label_todo);
       panel_todo.add(row1_todo, c);
@@ -3264,6 +3293,11 @@ public class remotegui {
       else if (component.equals("modify_todo")){
          text = "<b>Modify</b><br>";
          text += "Modify recording options of selected show in table below.";
+      }
+      else if (component.equals("export_todo")){
+         text = "<b>Export</b><br>";
+         text += "Export selected TiVo ToDo list to a csv file which can be easily<br>";
+         text += "imported into an Excel spreadsheet or equivalent.";
       }
       if (component.equals("tivo_guide")) {
          text = "Select TiVo for which to retrieve guide listings.<br>";
