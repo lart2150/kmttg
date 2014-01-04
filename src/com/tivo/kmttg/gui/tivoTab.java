@@ -193,7 +193,7 @@ public class tivoTab {
          
          // Export button
          if ( ! tivoName.equals("FILES") ) {
-            JButton export = new JButton("Export...");
+            JButton export = new JButton("Export");
             export.setMargin(new Insets(0,5,0,5));
             export.setToolTipText(config.gui.getToolTip("export_npl"));
             export.addActionListener(new java.awt.event.ActionListener() {
