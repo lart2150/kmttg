@@ -17,6 +17,7 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
@@ -35,6 +36,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.TableUtil;
+import com.tivo.kmttg.gui.sortableDuration;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -1040,6 +1042,49 @@ public class Remote {
       }
 
       return TableUtil.sortByOldestStartDate(allShows);
+   }
+   
+   // Create CSV file from todo list
+   public void TodoExportCSV(File file) {
+      try {
+         // Top level list
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
+         JSONArray todo = ToDo(null);
+         if (todo != null) {
+            ofp.write("DATE,SHOW,CHANNEL,DURATION\r\n");
+            for (int i=0; i<todo.length(); ++i) {
+               JSONObject json = todo.getJSONObject(i);
+               String startString=null, endString=null, duration="";
+               long start=0, end=0;
+               if (json.has("scheduledStartTime")) {
+                  startString = json.getString("scheduledStartTime");
+                  start = TableUtil.getLongDateFromString(startString);
+                  endString = json.getString("scheduledEndTime");
+                  end = TableUtil.getLongDateFromString(endString);
+               } else if (json.has("startTime")) {
+                  start = TableUtil.getStartTime(json);
+                  end = TableUtil.getEndTime(json);
+               }
+               if (end != 0 && start != 0)
+                  duration = sortableDuration.millisecsToHMS(end-start, true);
+               String date = "";
+               if (start != 0) {
+                  SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy hh:mm a");
+                  date = sdf.format(start);
+               }
+               String show = TableUtil.makeShowTitle(json);
+               String channel = TableUtil.makeChannelName(json);
+               ofp.write(date + ",\"" + show + "\"," + channel + "," + duration + "\r\n");
+            }
+         } else {
+            log.error("Error getting ToDo list for TiVo: " + tivoName);
+         }
+         ofp.close();
+         log.warn("ToDo list export completed successfully.");
+      } catch (Exception e) {
+         error("rpc TodoExportCSV error - " + e.getMessage());
+         return;
+      }
    }
    
    // Similar to ToDo but for upcoming episode IDs obtained from a Season Pass
