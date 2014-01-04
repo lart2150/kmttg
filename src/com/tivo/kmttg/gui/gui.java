@@ -2302,6 +2302,11 @@ public class gui {
          text += "Enter total disk space capacity in GB for this TiVo and then press <b>Enter</b><br>";
          text += "to update this window and save the value.";
       }
+      else if (component.equals("export_npl")) {
+         text =  "<b>Export</b><br>";
+         text += "Export NPL entries to a csv file which can be easily<br>";
+         text += "imported into an Excel spreadsheet or equivalent.";
+      }
       
       if (text.length() > 0) {
          text = "<html>" + text + "</html>";
