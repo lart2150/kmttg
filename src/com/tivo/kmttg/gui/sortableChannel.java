@@ -14,6 +14,14 @@ public class sortableChannel {
       sortable = Float.parseFloat(chan);
    }
    
+   sortableChannel(String channelName, String channelNum) {
+      display = channelNum + "=" + channelName;
+      if (display.length() > 0)
+         display += " ";
+      String chan = channelNum.replaceFirst("-", ".");
+      sortable = Float.parseFloat(chan);
+   }
+   
    public String toString() {
       return display;
    }
