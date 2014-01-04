@@ -15,7 +15,10 @@ public class sortableChannel {
    }
    
    sortableChannel(String channelName, String channelNum) {
-      display = channelNum + "=" + channelName;
+      if (channelName.contains("<various>"))
+         display = channelName;
+      else
+         display = channelNum + "=" + channelName;
       if (display.length() > 0)
          display += " ";
       String chan = channelNum.replaceFirst("-", ".");
