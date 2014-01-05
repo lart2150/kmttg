@@ -1028,9 +1028,10 @@ public class nplTable {
       }
       data[1] = new sortableShow(entry);
       data[2] = new sortableDate(entry);
-      if ( entry.containsKey("channelNum") && entry.containsKey("channel") ) {
+      if ( entry.containsKey("channelNum") && entry.containsKey("channel") )
          data[3] = new sortableChannel(entry.get("channel"), entry.get("channelNum"));
-      }
+      else
+         data[3] = new sortableChannel("", "");         
       data[4] = new sortableDuration(entry);
       data[5] = new sortableSize(entry);
       Double rate = 0.0;
