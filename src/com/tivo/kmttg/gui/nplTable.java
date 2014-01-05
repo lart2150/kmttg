@@ -1097,7 +1097,8 @@ public class nplTable {
             data[3] = new sortableChannel(
                folderEntry.get(0).get("channel"),folderEntry.get(0).get("channelNum")
             );
-         }
+         } else
+            data[3] = new sortableChannel("", "");
       } else {
          data[3] = new sortableChannel("<various>", "0");
       }
