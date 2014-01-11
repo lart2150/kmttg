@@ -1698,7 +1698,7 @@ public class jobMonitor {
       
       // Launch jobs for Tivos or update launch times appropriately
       Long now = new Date().getTime();
-      for (String tivoName : config.getNplTivoNames()) {
+      for (String tivoName : auto.getTiVos()) {
          if (launch.get(tivoName) == null) {
             launch.put(tivoName, now - 1);
          }

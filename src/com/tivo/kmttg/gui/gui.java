@@ -1348,7 +1348,7 @@ public class gui {
          log.error("No keywords defined in " + config.autoIni + "... aborting");
          return;
       }
-      Stack<String> tivoNames = config.getNplTivoNames();
+      Stack<String> tivoNames = auto.getTiVos();
       if (tivoNames.size() > 0) {
          for (int i=0; i<tivoNames.size(); i++) {
             // Queue up a nowplaying list job for this tivo
