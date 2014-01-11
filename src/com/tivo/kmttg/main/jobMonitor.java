@@ -878,7 +878,7 @@ public class jobMonitor {
          if (metadata) {
             Stack<String> meta_files = videoFilesToProcess(
                mode, decrypt, comcut, encode, config.metadata_files,
-               startFile, videoFile, tivoFile, mpegFile, mpegFile_cut, encodeFile, ".txt"
+               startFile, videoFile, tivoFile, mpegFile, mpegFile_cut, encodeFile, encodeFile2, ".txt"
             );
             if (meta_files.size() > 0) {
                for (int i=0; i<meta_files.size(); ++i) {
@@ -987,7 +987,7 @@ public class jobMonitor {
       if (metadataTivo) {
          Stack<String> meta_files = videoFilesToProcess(
             mode, decrypt, comcut, encode, config.metadata_files,
-            startFile, videoFile, tivoFile, mpegFile, mpegFile_cut, encodeFile, ".txt"
+            startFile, videoFile, tivoFile, mpegFile, mpegFile_cut, encodeFile, encodeFile2, ".txt"
          );
          if (meta_files.size() > 0) {
             for (int i=0; i<meta_files.size(); ++i) {
@@ -1242,7 +1242,6 @@ public class jobMonitor {
             job.hasMoreEncodingJobs = true;
          submitNewJob(job);
          
-         // TODO Second encoding is not pushed or sent to custom script
          if (encodeName2 != null) {
             job = new jobData();
             job.source       = source;
@@ -1269,7 +1268,7 @@ public class jobMonitor {
       if (push) {
          Stack<String> push_files = videoFilesToProcess(
             mode, decrypt, comcut, encode, config.pyTivo_files,
-            startFile, videoFile, tivoFile, mpegFile, mpegFile_cut, encodeFile, ""
+            startFile, videoFile, tivoFile, mpegFile, mpegFile_cut, encodeFile, encodeFile2, ""
          );
          if (push_files.size() > 0) {
             for (int i=0; i<push_files.size(); ++i) {
@@ -1310,8 +1309,8 @@ public class jobMonitor {
    // video files specifically should be processed
    private static Stack<String> videoFilesToProcess(
       String mode, Boolean decrypt, Boolean comcut, Boolean encode, String filter,
-      String startFile, String videoFile, String tivoFile, String mpegFile, String mpegFile_cut, String encodeFile,
-      String suffix
+      String startFile, String videoFile, String tivoFile, String mpegFile, String mpegFile_cut,
+      String encodeFile, String encodeFile2, String suffix
       ) {
       // Don't want null values for file names
       if (startFile    == null)    startFile = "startFile";
@@ -1320,6 +1319,7 @@ public class jobMonitor {
       if (mpegFile     == null)     mpegFile = "mpegFile";
       if (mpegFile_cut == null) mpegFile_cut = "mpegFile_cut";
       if (encodeFile   == null)   encodeFile = "encodeFile";
+      if (encodeFile   == null)  encodeFile2 = "encodeFile2";
       
       Stack<String> files = new Stack<String>();
       if ( ! filter.equals("all") ) {
@@ -1327,6 +1327,8 @@ public class jobMonitor {
          if (filter.equals("last")) {
             if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
                files.add(encodeFile + suffix);
+            if (encode || (mode.equals("FILES") && encodeFile2.equals(startFile)))
+               files.add(encodeFile2 + suffix);
             else if (decrypt || comcut || (mode.equals("FILES") && videoFile.equals(startFile)))
                files.add(videoFile + suffix);
             else if (mode.equals("Download") || (mode.equals("FILES") && tivoFile.equals(startFile)))
@@ -1347,6 +1349,8 @@ public class jobMonitor {
          else if (filter.equals("encodeFile")) {
             if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
                files.add(encodeFile + suffix);
+            if (encode || (mode.equals("FILES") && encodeFile2.equals(startFile)))
+               files.add(encodeFile2 + suffix);
          }
       } else {
          // files setting = "all" => potentially multiple push jobs
@@ -1358,6 +1362,8 @@ public class jobMonitor {
             files.add(mpegFile_cut + suffix);
          if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
             files.add(encodeFile + suffix);
+         if (encode || (mode.equals("FILES") && encodeFile2.equals(startFile)))
+            files.add(encodeFile2 + suffix);
       }
       return files;
    }
