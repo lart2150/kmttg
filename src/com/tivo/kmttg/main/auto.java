@@ -37,7 +37,7 @@ public class auto {
          parseAutoIni();
          
          // Queue up now playing list downloads from all Tivos
-         for (String tivoName : config.getNplTivoNames()) {
+         for (String tivoName : getTiVos()) {
             jobMonitor.getNPL(tivoName);
          }
          
@@ -60,7 +60,7 @@ public class auto {
          log.print("\nSTARTING AUTO TRANSFERS");
          Hashtable<String,Long> launch = new Hashtable<String,Long>();
          Long now = new Date().getTime() - 1;
-         for (String tivoName : config.getNplTivoNames()) {
+         for (String tivoName : getTiVos()) {
             launch.put(tivoName, now);
          }
          Long launchTime;
@@ -69,7 +69,7 @@ public class auto {
          Boolean GO = true;         
          while (GO) {                     
             // Launch jobs for Tivos or update launch times appropriately
-            for (String tivoName : config.getNplTivoNames()) {
+            for (String tivoName : getTiVos()) {
                now = new Date().getTime();
                if ( ! launch.containsKey(tivoName) ) {
                   launch.put(tivoName, new Date().getTime() - 1);
@@ -459,6 +459,29 @@ public class auto {
          }
       }
       return entries;
+   }
+   
+   // Return all TiVo names relevant for auto processing
+   // i.e. Only enabled auto entries and related TiVos they are setup for
+   public static Stack<String> getTiVos() {
+      Stack<String> all = config.getNplTivoNames();
+      parseAutoIni();
+      Stack<String> tivoNames = new Stack<String>();
+      Stack<autoEntry> entries = getTitleEntries();
+      entries.addAll(getKeywordsEntries());
+      for (autoEntry entry : entries) {
+         if (entry.enabled != 0) {
+            if (entry.tivo.equals("all")) {
+               return all;
+            } else {
+               if (! tivoNames.contains(entry.tivo)) {
+                  if (all.contains(entry.tivo))
+                     tivoNames.add(entry.tivo);
+               }
+            }
+         }
+      }
+      return tivoNames;
    }
       
    /*private static Boolean grep(String string, Stack<String> stack) {
