@@ -670,7 +670,7 @@ public class jobMonitor {
       String videoFile    = null;
       String srtFile      = null;
       String encodeFile   = null;
-      String encodeFile2   = null;
+      String encodeFile2  = null;
  
       // Init tivoName
       if (specs.containsKey("tivoName")) {
@@ -757,7 +757,7 @@ public class jobMonitor {
          
          // Add indicated extension to differentiate this file from first
          if (encodeName2 != null) {
-        	 String encodeExt2 = encodeConfig.getExtension(encodeName2);
+        	    String encodeExt2 = encodeConfig.getExtension(encodeName2);
              encodeFile2 = string.replaceSuffix(mpegFile, "_" + encodeName2_suffix + "." + encodeExt2);
              encodeFile2 = encodeDir + s + string.basename(encodeFile2);
          }
@@ -799,8 +799,8 @@ public class jobMonitor {
          
          // Add indicated extension to differentiate this file from first
          if (encodeName2 != null) {
-        	 String encodeExt2 = encodeConfig.getExtension(encodeName2);
-        	 encodeFile2 = string.replaceSuffix(startFile, "_" + encodeName2_suffix + "." + encodeExt2);
+        	    String encodeExt2 = encodeConfig.getExtension(encodeName2);
+        	    encodeFile2 = string.replaceSuffix(startFile, "_" + encodeName2_suffix + "." + encodeExt2);
              encodeFile2 = encodeDir + s + encodeFile2;
          }
          
@@ -1312,6 +1312,9 @@ public class jobMonitor {
       String startFile, String videoFile, String tivoFile, String mpegFile, String mpegFile_cut,
       String encodeFile, String encodeFile2, String suffix
       ) {
+      Boolean encode2 = false;
+      if (encodeFile2 != null)
+         encode2 = true;
       // Don't want null values for file names
       if (startFile    == null)    startFile = "startFile";
       if (videoFile    == null)    videoFile = "videoFile";
@@ -1319,16 +1322,16 @@ public class jobMonitor {
       if (mpegFile     == null)     mpegFile = "mpegFile";
       if (mpegFile_cut == null) mpegFile_cut = "mpegFile_cut";
       if (encodeFile   == null)   encodeFile = "encodeFile";
-      if (encodeFile   == null)  encodeFile2 = "encodeFile2";
       
       Stack<String> files = new Stack<String>();
       if ( ! filter.equals("all") ) {
          // files setting != "all" => single push job
          if (filter.equals("last")) {
-            if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
+            if (encode || (mode.equals("FILES") && encodeFile.equals(startFile))) {
                files.add(encodeFile + suffix);
-            if (encode || (mode.equals("FILES") && encodeFile2.equals(startFile)))
-               files.add(encodeFile2 + suffix);
+               if (encode2)
+                  files.add(encodeFile2 + suffix);
+            }
             else if (decrypt || comcut || (mode.equals("FILES") && videoFile.equals(startFile)))
                files.add(videoFile + suffix);
             else if (mode.equals("Download") || (mode.equals("FILES") && tivoFile.equals(startFile)))
@@ -1349,7 +1352,7 @@ public class jobMonitor {
          else if (filter.equals("encodeFile")) {
             if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
                files.add(encodeFile + suffix);
-            if (encode || (mode.equals("FILES") && encodeFile2.equals(startFile)))
+            if (encode2)
                files.add(encodeFile2 + suffix);
          }
       } else {
@@ -1362,7 +1365,7 @@ public class jobMonitor {
             files.add(mpegFile_cut + suffix);
          if (encode || (mode.equals("FILES") && encodeFile.equals(startFile)))
             files.add(encodeFile + suffix);
-         if (encode || (mode.equals("FILES") && encodeFile2.equals(startFile)))
+         if (encode2)
             files.add(encodeFile2 + suffix);
       }
       return files;
