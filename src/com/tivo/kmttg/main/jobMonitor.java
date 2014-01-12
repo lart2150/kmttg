@@ -1266,9 +1266,10 @@ public class jobMonitor {
       }
             
       if (push) {
+         // NOTE: encodeFile2 arg intentionally set to null to avoid push of 2nd encoding
          Stack<String> push_files = videoFilesToProcess(
             mode, decrypt, comcut, encode, config.pyTivo_files,
-            startFile, videoFile, tivoFile, mpegFile, mpegFile_cut, encodeFile, encodeFile2, ""
+            startFile, videoFile, tivoFile, mpegFile, mpegFile_cut, encodeFile, null, ""
          );
          if (push_files.size() > 0) {
             for (int i=0; i<push_files.size(); ++i) {
