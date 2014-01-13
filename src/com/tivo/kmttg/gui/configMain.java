@@ -82,6 +82,7 @@ public class configMain {
    private static JCheckBox autotune_enabled = null;
    private static JCheckBox combine_download_decrypt = null;
    private static JCheckBox single_download = null;
+   private static JCheckBox rpcnpl = null;
    private static JCheckBox enableRpc = null;
    private static JCheckBox persistQueue = null;
    private static JTextField tivo_name = null;
@@ -665,6 +666,12 @@ public class configMain {
       else
          single_download.setSelected(false);
       
+      // rpcnpl
+      if (config.rpcnpl == 1)
+         rpcnpl.setSelected(true);
+      else
+         rpcnpl.setSelected(false);
+      
       // persistQueue
       if (config.persistQueue)
     	  persistQueue.setSelected(true);
@@ -1168,6 +1175,12 @@ public class configMain {
          config.single_download = 1;
       else
          config.single_download = 0;
+      
+      // rpcnpl
+      if (rpcnpl.isSelected())
+         config.rpcnpl = 1;
+      else
+         config.rpcnpl = 0;
       
       // persistQueue
       if (persistQueue.isSelected())
@@ -1828,6 +1841,7 @@ public class configMain {
       java_downloads = new javax.swing.JCheckBox();
       combine_download_decrypt = new javax.swing.JCheckBox();
       single_download = new javax.swing.JCheckBox();
+      rpcnpl = new javax.swing.JCheckBox();
       enableRpc = new javax.swing.JCheckBox();
       persistQueue = new javax.swing.JCheckBox();
       JLabel MAK_label = new javax.swing.JLabel();
@@ -1952,6 +1966,7 @@ public class configMain {
       java_downloads.setText("Use Java for downloads instead of curl");
       combine_download_decrypt.setText("Combine download and tivodecode decrypt");
       single_download.setText("Allow only 1 download at a time");
+      rpcnpl.setText("Use RPC to get NPL when possible");
       enableRpc.setText("Enable iPad style communications with this TiVo");
       persistQueue.setText("Automatically restore job queue between sessions");
       MAK_label.setText("MAK"); 
@@ -3028,14 +3043,19 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(single_download, c);
       
-      // persistJobQueue
+      // rpcnpl
       c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(rpcnpl, c);
+      
+      // persistJobQueue
+      gy++;
+      c.gridx = 0;
       c.gridy = gy;
       program_options_panel.add(persistQueue, c);
       
       // comskip_review
-      gy++;
-      c.gridx = 0;
+      c.gridx = 1;
       c.gridy = gy;
       program_options_panel.add(comskip_review, c);
       
@@ -3348,6 +3368,7 @@ public class configMain {
       java_downloads.setToolTipText(getToolTip("java_downloads"));
       combine_download_decrypt.setToolTipText(getToolTip("combine_download_decrypt"));
       single_download.setToolTipText(getToolTip("single_download"));
+      rpcnpl.setToolTipText(getToolTip("rpcnpl"));
       enableRpc.setToolTipText(getToolTip("enableRpc"));
       persistQueue.setToolTipText(getToolTip("persistQueue"));
       files_path.setToolTipText(getToolTip("files_path"));
@@ -3706,6 +3727,11 @@ public class configMain {
          text += "at a time per TiVo, which means you can still have simultaneous downloads for different TiVos. This<br>";
          text += "option restricts that further to only 1 at a time for all TiVos.";
       }
+      else if (component.equals("rpcnpl")) {
+         text =  "<b>Use RPC to get NPL when possible</b><br>";
+         text += "If this option is enabled then kmttg will use RPC for obtaining NPL listings whenever possible<br>";
+         text += "for series 4 or later TiVos only.";
+        }
       else if (component.equals("enableRpc")) {
          text =  "<b>Enable iPad style communications with this TiVo</b><br>";
          text += "If this option is enabled then kmttg will use iPad style communications with the TiVo to enable<br>";
