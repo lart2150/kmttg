@@ -874,8 +874,11 @@ public class Remote {
          JSONObject json = new JSONObject();
          json.put("count", 50);
          while ( ! stop ) {
-            if (job != null && config.GUIMODE)
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List");
+            if (job != null && config.GUIMODE) {
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + offset);
+               if ( jobMonitor.isFirstJobInMonitor(job) )
+                  config.gui.setTitle("playlist: " + offset + " " + config.kmttg);
+            }
             result = Command("MyShows", json);
             if (result != null && result.has("recordingFolderItem")) {
                JSONArray items = (JSONArray) result.get("recordingFolderItem");
@@ -1008,8 +1011,11 @@ public class Remote {
          JSONObject json = new JSONObject();
          json.put("count", 50);
          while ( ! stop ) {
-            if (job != null && config.GUIMODE)
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List");
+            if (job != null && config.GUIMODE) {
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + offset);
+               if ( jobMonitor.isFirstJobInMonitor(job) )
+                  config.gui.setTitle("playlist: " + offset + " " + config.kmttg);
+            }
             result = Command("MyShows", json);
             if (result != null && result.has("recording")) {
                JSONArray items = (JSONArray) result.get("recording");
