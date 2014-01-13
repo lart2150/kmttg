@@ -247,7 +247,7 @@ public class jobMonitor {
    }
    
    public static void getNPL(String name) {
-      if (config.java_downloads == 0)
+      if (config.java_downloads == 0 || config.rpcnpl == 1 && config.rpcEnabled(name))
          NowPlaying.submitJob(name);
       else
          javaNowPlaying.submitJob(name);
