@@ -708,6 +708,15 @@ public class nplTable {
                }
             }
             
+            if (s.data.containsKey("TimeOffset")) {
+               if (! s.data.get("TimeOffset").startsWith("0")) {
+                  int secs = Integer.parseInt(s.data.get("TimeOffset"));
+                  int mins = secs/60;
+                  secs -= mins*60;
+                  message += ", PAUSE POINT: " + String.format("%d mins %d secs", mins, secs);
+               }
+            }
+            
             if (s.data.containsKey("originalAirDate")) {
                message += ", originalAirDate=" + s.data.get("originalAirDate");
             }
