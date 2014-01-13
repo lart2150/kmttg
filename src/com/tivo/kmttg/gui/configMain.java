@@ -3730,7 +3730,10 @@ public class configMain {
       else if (component.equals("rpcnpl")) {
          text =  "<b>Use RPC to get NPL when possible</b><br>";
          text += "If this option is enabled then kmttg will use RPC for obtaining NPL listings whenever possible<br>";
-         text += "for series 4 or later TiVos only.";
+         text += "for series 4 or later TiVos only. This avoids the traditional 2 step process of obtaining XML<br>";
+         text += "listings followed by <b>remote</b> call when refreshing NPL tables.<br>";
+         text += "NOTE: RPC data does not contain <b>SeriesId</b>, so if having that field in pyTivo metadata file<br>";
+         text += "is important to you then you should not enable this option.";
         }
       else if (component.equals("enableRpc")) {
          text =  "<b>Enable iPad style communications with this TiVo</b><br>";
