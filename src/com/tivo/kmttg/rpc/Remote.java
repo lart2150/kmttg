@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -915,6 +916,11 @@ public class Remote {
                                     new JSONObject("{\"recordingId\":\"" + s.get("childRecordingId") + "\"}")
                                  );
                                  if (result != null) {
+                                    if (job.getURLs) {
+                                       if (!getURLs(job.tivoName, result.getJSONArray("recording").getJSONObject(0))) {
+                                          return null;
+                                       }
+                                    }
                                     allShows.put(result);
                                  }
                               }
@@ -927,8 +933,14 @@ public class Remote {
                         "Search",
                         new JSONObject("{\"recordingId\":\"" + item.getString("childRecordingId") + "\"}")
                      );
-                     if (result != null)
+                     if (result != null) {
+                        if (job.getURLs) {
+                           if (!getURLs(job.tivoName, result.getJSONArray("recording").getJSONObject(0))) {
+                              return null;
+                           }
+                        }
                         allShows.put(result);
+                     }
                   }
                } // for
             } else {
@@ -942,6 +954,46 @@ public class Remote {
       }
 
       return allShows;
+   }
+   
+   // Find mfs id based on RPC recordingId and then build equivalent
+   // traditional TTG URLs based on the mfs id.
+   // This is needed when obtaining NPL listings using only RPC which
+   // doesn't have the TTG URLs in JSON data.
+   private Boolean getURLs(String tivoName, JSONObject json) {
+      try {
+         JSONObject j = new JSONObject();
+         j.put("bodyId", bodyId_get());
+         j.put("namespace", "mfs");
+         j.put("objectId", json.getString("recordingId"));
+         JSONObject result = Command("idSearch", j);
+         if (result != null) {
+            if (result.has("objectId")) {
+               String id = result.getJSONArray("objectId").getString(0);
+               id = id.replaceFirst("mfs:rc\\.", "");
+               String ip = config.TIVOS.get(tivoName);
+               String port_http = config.getWanSetting(tivoName, "http");
+               if (port_http == null)
+                  port_http = "80";
+               String port_https = config.getWanSetting(tivoName, "https");
+               if (port_https == null)
+                  port_https = "443";
+               String fname = URLEncoder.encode(json.getString("title"), "UTF-8");
+               String url = "http://" + ip + ":" + port_http + "/download/" +
+                  fname + ".TiVo?Container=%2FNowPlaying&id=" + id;
+               String url_details = "https://" + ip + ":" + port_https +
+                  "/TiVoVideoDetails?id=" + id;
+               json.put("__url__", url);
+               json.put("__url_TiVoVideoDetails__", url_details);
+               return true;
+            }
+         }         
+      }
+      catch (Exception e) {
+         log.error("Remote getURLs - " + e.getMessage());
+      }
+      log.error("Remote getURLs - failed to retrieve mfs URLs");
+      return false;
    }
    
    // Get list of all shows (drilling down into folders for individual shows)
