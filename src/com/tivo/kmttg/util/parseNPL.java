@@ -255,7 +255,9 @@ public class parseNPL {
             }
             
             // Set copy-protect icon if copy-protected
-            if (h.containsKey("CopyProtected")) {
+            // This intentionally commented out so that people wanting to see
+            // expiration icons instead of copy protect can do so
+            /*if (h.containsKey("CopyProtected")) {
                // Give preference to show transferring status over copy protected
                Boolean flag = true;
                if (h.containsKey("ExpirationImage")) {
@@ -266,9 +268,9 @@ public class parseNPL {
                } 
                // This intentionally commented out so that people wanting to see
                // expiration icons instead of copy protect can do so
-               //if (flag)
-               //   h.put("ExpirationImage", "copy-protected");
-            }
+               if (flag)
+                  h.put("ExpirationImage", "copy-protected");
+            }*/
          }
          // Add last entry
          if ( ! h.isEmpty() ) {
