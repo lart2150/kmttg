@@ -875,9 +875,9 @@ public class Remote {
          json.put("count", 50);
          while ( ! stop ) {
             if (job != null && config.GUIMODE) {
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + offset);
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + allShows.length());
                if ( jobMonitor.isFirstJobInMonitor(job) )
-                  config.gui.setTitle("playlist: " + offset + " " + config.kmttg);
+                  config.gui.setTitle("playlist: " + allShows.length() + " " + config.kmttg);
             }
             result = Command("MyShows", json);
             if (result != null && result.has("recordingFolderItem")) {
@@ -1012,9 +1012,9 @@ public class Remote {
          json.put("count", 50);
          while ( ! stop ) {
             if (job != null && config.GUIMODE) {
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + offset);
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + allShows.length());
                if ( jobMonitor.isFirstJobInMonitor(job) )
-                  config.gui.setTitle("playlist: " + offset + " " + config.kmttg);
+                  config.gui.setTitle("playlist: " + allShows.length() + " " + config.kmttg);
             }
             result = Command("MyShows", json);
             if (result != null && result.has("recording")) {
