@@ -109,7 +109,7 @@ public class NowPlaying implements Serializable {
          thread_running = true;
          AutoThread t = new AutoThread();
          thread = new Thread(t);
-         log.print(">> Getting Now Playing List from " + job.tivoName + " ...");
+         log.print(">> Getting Now Playing List via RPC from " + job.tivoName + " ...");
          thread.start();
       } else {
          // Traditional XML retrieval
