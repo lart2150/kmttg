@@ -236,6 +236,10 @@ public class jobMonitor {
             }
          }
          
+         // Update totalDownloads if a download job was just launched
+         if (isDownloadJob(job))
+            totalDownloads++;
+         
          // Update VideoRedoCOMJobs number
          if ( isVideoRedoCOMJob(job) )
             VideoRedoCOMJobs++;
