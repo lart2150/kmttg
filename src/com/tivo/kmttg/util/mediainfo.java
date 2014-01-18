@@ -109,5 +109,25 @@ public class mediainfo {
       }
       return null;
    }
+   
+   public static Boolean checkDownloadDuration(int download_duration, String videoFile) {
+      if (config.download_check_length == 1 && download_duration != 0) {
+         // Check duration vs expected using mediainfo
+         log.warn("'Check download duration' option enabled => checking expected vs. actual");
+         log.warn("(Mismatch tolerance = " + config.download_check_tolerance + " secs)");
+         log.warn("Expected duration = " + download_duration + " secs");
+         Hashtable<String,String> h = getVideoInfo(videoFile);
+         if (h != null && h.containsKey("duration")) {
+            int actual = Integer.parseInt(h.get("duration"));
+            log.warn("Actual duration = " + actual + " secs");
+            if (Math.abs(actual-download_duration) > config.download_check_tolerance) {
+               log.error("actual download duration not within expected tolerance => error");
+               return false;
+            }
+         } else
+            log.error("Unable to determine duration using mediainfo from file: " + videoFile);
+      }
+      return true;
+   }
 
 }
