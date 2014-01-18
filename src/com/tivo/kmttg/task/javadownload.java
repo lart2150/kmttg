@@ -5,7 +5,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Hashtable;
 
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
@@ -218,24 +217,12 @@ public class javadownload implements Serializable {
             }
          }
          
-         if (failed == 0 && config.download_check_length == 1 && job.download_duration != 0) {
-            // Check duration vs expected using mediainfo
-            log.warn("'Check download duration' option enabled => checking expected vs. actual");
-            log.warn("(Mismatch tolerance = " + config.download_check_tolerance + " secs)");
-            log.warn("Expected duration = " + job.download_duration + " secs");
-            Hashtable<String,String> h = mediainfo.getVideoInfo(job.tivoFile);
-            if (h != null && h.containsKey("duration")) {
-               int actual = Integer.parseInt(h.get("duration"));
-               log.warn("Actual duration = " + actual + " secs");
-               if (Math.abs(actual-job.download_duration) > config.download_check_tolerance) {
-                  log.error("actual download duration not within expected tolerance => error");
-                  failed = 1;
-               }
-            } else {
-               log.error("Unable to determine duration using mediainfo from file: " + job.tivoFile);
-            }
+         if (failed == 0) {
+            // Check download duration if configured
+            if ( ! mediainfo.checkDownloadDuration(job.download_duration, job.tivoFile) )
+               failed = 1;
          }
-         
+                  
          if (failed == 1) {
             log.error("Download failed to file: " + job.tivoFile);
             if (config.DeleteFailedDownloads == 1) {
