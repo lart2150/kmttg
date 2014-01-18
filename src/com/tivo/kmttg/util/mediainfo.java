@@ -47,7 +47,7 @@ public class mediainfo {
                   if (container.equals("mpeg4"))
                      info.put("container", "mp4");
                }
-               if (section.matches("^General.$") && line.matches("^Duration\\s+:.+$")) {
+               if (section.matches("^General.*$") && line.matches("^Duration\\s+:.+$")) {
                   // Duration                                 : 1h 43mn
                   // Duration                                 : 5mn 0s
                   String fields[] = line.split(":");
