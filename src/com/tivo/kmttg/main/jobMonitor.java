@@ -929,6 +929,8 @@ public class jobMonitor {
          jobData job = new jobData();
          job.source       = source;
          job.tivoName     = tivoName;
+         if (entry != null && entry.containsKey("duration"))
+            job.download_duration = (int) (Long.parseLong(entry.get("duration"))/1000);
          if (config.resumeDownloads && entry.containsKey("ByteOffset")) {
             job.offset = entry.get("ByteOffset");
          }
