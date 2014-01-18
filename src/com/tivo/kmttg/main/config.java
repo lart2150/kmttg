@@ -185,6 +185,8 @@ public class config {
    public static int download_tries = 5;        // Number of times to retry downloads
    public static int download_retry_delay = 10; // Delay in secs between retry attempts
    public static int download_time_estimate = 0; // Show estimated remaining time for downloads if enabled
+   public static int download_check_length = 0;  // Check download length vs expected
+   public static int download_check_tolerance = 200; // Download length mismatch tolerance (secs)
    
    // autotune related
    public static Hashtable<String,Hashtable<String,String>> autotune = null;
@@ -1096,6 +1098,9 @@ public class config {
             if (key.equals("download_time_estimate")) {
                download_time_estimate = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("download_check_length")) {
+               download_check_length = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("autoLogSizeMB")) {
                autoLogSizeMB = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1329,6 +1334,8 @@ public class config {
          ofp.write("<download_delay>\n" + download_delay + "\n\n");
          
          ofp.write("<download_time_estimate>\n" + download_time_estimate + "\n\n");
+         
+         ofp.write("<download_check_length>\n" + download_check_length + "\n\n");
          
          ofp.write("<autoLogSizeMB>\n" + autoLogSizeMB + "\n\n");
          

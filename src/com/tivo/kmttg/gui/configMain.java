@@ -52,6 +52,7 @@ public class configMain {
    private static JCheckBox remove_comcut_mpeg = null;
    private static JCheckBox remove_mpeg = null;
    private static JCheckBox QSFixBackupMpegFile = null;
+   private static JCheckBox download_check_length = null;
    private static JCheckBox check_space = null;
    private static JCheckBox beacon = null;
    private static JCheckBox npl_when_started = null;
@@ -545,6 +546,11 @@ public class configMain {
          QSFixBackupMpegFile.setSelected(true);
       else
          QSFixBackupMpegFile.setSelected(false);
+
+      if (config.download_check_length == 1)
+         download_check_length.setSelected(true);
+      else
+         download_check_length.setSelected(false);
       
       // Check disk space
       if (config.CheckDiskSpace == 1)
@@ -1055,6 +1061,11 @@ public class configMain {
          config.QSFixBackupMpegFile = 1;
       else
          config.QSFixBackupMpegFile = 0;
+      
+      if (download_check_length.isSelected())
+         config.download_check_length = 1;
+      else
+         config.download_check_length = 0;
       
       // Check disk space
       if (check_space.isSelected())
@@ -1822,6 +1833,7 @@ public class configMain {
       remove_comcut_mpeg = new javax.swing.JCheckBox();
       remove_mpeg = new javax.swing.JCheckBox();
       QSFixBackupMpegFile = new javax.swing.JCheckBox();
+      download_check_length = new javax.swing.JCheckBox();
       UseAdscan = new javax.swing.JCheckBox();
       VrdReview = new javax.swing.JCheckBox();
       comskip_review = new javax.swing.JCheckBox();
@@ -1947,6 +1959,7 @@ public class configMain {
       remove_comcut_mpeg.setText("Remove .mpg file after Ad Cut");
       remove_mpeg.setText("Remove .mpg file after encode");
       QSFixBackupMpegFile.setText("For QS Fix of .mpg file backup original .mpg");
+      download_check_length.setText("Check download duration");
       UseAdscan.setText("Use VideoRedo AdScan instead of comskip");
       VrdReview.setText("Use VideoRedo GUI to review detected commercials");
       comskip_review.setText("Use comskip GUI to review detected commercials");
@@ -2650,6 +2663,11 @@ public class configMain {
       c.gridx = 0;
       c.gridy = gy;
       files_panel.add(QSFixBackupMpegFile, c);
+      
+      // download_check_length
+      c.gridx = 1;
+      c.gridy = gy;
+      files_panel.add(download_check_length, c);
             
       // Check Available Disk Space
       gy++;
@@ -3343,6 +3361,7 @@ public class configMain {
       remove_comcut_mpeg.setToolTipText(getToolTip("remove_comcut_mpeg"));
       remove_mpeg.setToolTipText(getToolTip("remove_mpeg"));
       QSFixBackupMpegFile.setToolTipText(getToolTip("QSFixBackupMpegFile"));
+      download_check_length.setToolTipText(getToolTip("download_check_length"));
       check_space.setToolTipText(getToolTip("check_space"));
       beacon.setToolTipText(getToolTip("beacon"));
       UseOldBeacon.setToolTipText(getToolTip("UseOldBeacon"));
@@ -3521,6 +3540,15 @@ public class configMain {
          text += "If running VRD QS Fix on a .mpg file kmttg will rename the original .mpg file to .mpg.bak<br>";
          text += "if this option is enabled. Otherwise kmttg removes the original .mpg file and replaces with<br>";
          text += "the fixed version following successful VideoRedo QS Fix run";
+      }
+      else if (component.equals("download_check_length")) {
+         text =  "<b>Check download duration</b><br>";
+         text += "When enabled use mediainfo CLI to determine the duration of downloaded .TiVo files<br>";
+         text += "and compare against expected duration within a certain tolerance.<br>";
+         text += "If a download is not within tolerance then it will be considered an error.<br>";
+         text += "NOTE: This option relies on mediainfo CLI being configured and being able to<br>";
+         text += "determine duration of .TiVo files properly, and also relies on TiVo duration<br>";
+         text += "reported by TiVo to be accurate, so may not be 100% reliable.";
       }
       else if (component.equals("check_space")) {
          text =  "<b>Check Available Disk Space</b><br>";
