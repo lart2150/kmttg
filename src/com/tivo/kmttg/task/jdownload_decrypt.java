@@ -14,6 +14,7 @@ import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.mediainfo;
 import com.tivo.kmttg.util.string;
 
 public class jdownload_decrypt implements Serializable {
@@ -237,6 +238,12 @@ public class jdownload_decrypt implements Serializable {
          // If file size is very small then it's likely a failure
          if (failed == 0) {
             if ( file.size(job.mpegFile) < 1000 ) failed = 1;
+         }
+         
+         if (failed == 0) {
+            // Check download duration if configured
+            if ( ! mediainfo.checkDownloadDuration(job.download_duration, job.mpegFile) )
+               failed = 1;
          }
          
          if (failed == 1) {
