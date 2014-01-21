@@ -408,14 +408,12 @@ public class NowPlaying implements Serializable {
             }
             if (json.has("startTime") && json.has("duration")) {
                long start = TableUtil.getStartTime(json);
-               long end = TableUtil.getEndTime(json);
-               long duration = end-start;
                entry.put("gmt", "" + start);
                SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yyyy");
                entry.put("date", sdf.format(start));
                sdf = new SimpleDateFormat("E MM/dd/yyyy hh:mm aa");
                entry.put("date_long", sdf.format(start));
-               entry.put("duration", "" + duration);
+               entry.put("duration", "" + json.getInt("duration")*1000);
             }
             if (json.has("partnerCollectionId")) {
                entry.put("ProgramId", json.getString("partnerCollectionId"));
