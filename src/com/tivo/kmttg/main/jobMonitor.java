@@ -716,6 +716,11 @@ public class jobMonitor {
          mpegDir = outputDir;
       }
       
+      String qsfixDir = config.qsfixDir;
+      if ( ! file.isDir(qsfixDir) ) {
+         qsfixDir = outputDir;
+      }
+      
       String mpegCutDir = config.mpegCutDir;
       if ( ! file.isDir(mpegCutDir) ) {
          mpegCutDir = outputDir;
@@ -740,7 +745,7 @@ public class jobMonitor {
          } else {
             mpegFile = startFile;
          }
-         mpegFile_fix = mpegFile + ".qsfix";
+         mpegFile_fix = qsfixDir + s + string.basename(mpegFile) + ".qsfix";
          
          edlFile = string.replaceSuffix(mpegFile, ".edl");
          xclFile = mpegFile + ".Xcl";
@@ -782,7 +787,7 @@ public class jobMonitor {
          mpegFile = mpegDir + s + mpegFile;
          metaFile = mpegFile + ".txt";
          
-         mpegFile_fix = mpegFile + ".qsfix";
+         mpegFile_fix = qsfixDir + s + string.basename(mpegFile) + ".qsfix";
          
          edlFile = string.replaceSuffix(mpegFile, ".edl");
          xclFile = mpegFile + ".Xcl";
