@@ -919,7 +919,7 @@ public class Remote {
                                     new JSONObject("{\"recordingId\":\"" + s.get("childRecordingId") + "\"}")
                                  );
                                  if (result != null) {
-                                    if (job.getURLs) {
+                                    if (job != null && job.getURLs) {
                                        if (!getURLs(job.tivoName, result.getJSONArray("recording").getJSONObject(0))) {
                                           return null;
                                        }
@@ -937,7 +937,7 @@ public class Remote {
                         new JSONObject("{\"recordingId\":\"" + item.getString("childRecordingId") + "\"}")
                      );
                      if (result != null) {
-                        if (job.getURLs) {
+                        if (job != null && job.getURLs) {
                            if (!getURLs(job.tivoName, result.getJSONArray("recording").getJSONObject(0))) {
                               return null;
                            }
