@@ -94,6 +94,7 @@ public class configMain {
    private static JTextField file_naming = null;
    private static JTextField tivo_output_dir = null;
    private static JTextField mpeg_output_dir = null;
+   private static JTextField qsfixDir = null;
    private static JTextField mpeg_cut_dir = null;
    private static JTextField encode_output_dir = null;
    private static JTextField tivodecode = null;
@@ -729,6 +730,9 @@ public class configMain {
       // .mpg output dir
       mpeg_output_dir.setText(config.mpegDir);
       
+      // .mpg output dir
+      qsfixDir.setText(config.qsfixDir);
+      
       // .mpg cut dir
       mpeg_cut_dir.setText(config.mpegCutDir);
       
@@ -1326,6 +1330,19 @@ public class configMain {
       }
       config.mpegDir = value;
       
+      // qsfix output dir
+      value = string.removeLeadingTrailingSpaces(qsfixDir.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = config.mpegDir;
+      } else {
+         if ( ! file.isDir(value) ) {
+            textFieldError(qsfixDir, "QS Fix Output Dir setting not a valid dir: '" + value + "'");
+            errors++;
+         }
+      }
+      config.qsfixDir = value;
+      
       // .mpg cut dir
       value = string.removeLeadingTrailingSpaces(mpeg_cut_dir.getText());
       if (value.length() == 0) {
@@ -1752,6 +1769,7 @@ public class configMain {
       textbg_default = encode_output_dir.getBackground();
       mpeg_cut_dir = new javax.swing.JTextField(30);
       mpeg_output_dir = new javax.swing.JTextField(30);
+      qsfixDir = new javax.swing.JTextField(30);
       mpeg_cut_dir = new javax.swing.JTextField(30);
       tivo_output_dir = new javax.swing.JTextField(30);
       file_naming = new javax.swing.JTextField(30);
@@ -1861,6 +1879,7 @@ public class configMain {
       JLabel file_naming_label = new javax.swing.JLabel();
       JLabel tivo_output_dir_label = new javax.swing.JLabel();
       JLabel mpeg_output_dir_label = new javax.swing.JLabel();
+      JLabel qsfixDir_label = new javax.swing.JLabel();
       JLabel mpeg_cut_dir_label = new javax.swing.JLabel();
       JLabel encode_output_dir_label = new javax.swing.JLabel();
       JLabel tivodecode_label = new javax.swing.JLabel();
@@ -1986,7 +2005,8 @@ public class configMain {
       FontSize_label.setText("GUI Font Size");
       file_naming_label.setText("File Naming"); 
       tivo_output_dir_label.setText(".TiVo Output Dir"); 
-      mpeg_output_dir_label.setText(".mpg Output Dir"); 
+      mpeg_output_dir_label.setText(".mpg Output Dir");
+      qsfixDir_label.setText("QS Fix Output Dir");
       mpeg_cut_dir_label.setText(".mpg Cut Dir"); 
       encode_output_dir_label.setText("Encode Output Dir"); 
       tivodecode_label.setText("tivodecode"); 
@@ -2179,6 +2199,20 @@ public class configMain {
                   int result = Browser.showDialog(mpeg_output_dir, "Choose Directory");
                   if (result == JFileChooser.APPROVE_OPTION) {
                      mpeg_output_dir.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      qsfixDir.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                  int result = Browser.showDialog(qsfixDir, "Choose Directory");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     qsfixDir.setText(Browser.getSelectedFile().getPath());
                   }
                }
             }
@@ -2732,6 +2766,16 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       files_panel.add(mpeg_output_dir, c);
+      
+      // QS Fix Output Dir
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      files_panel.add(qsfixDir_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      files_panel.add(qsfixDir, c);
       
       // .mpg Cut Dir
       gy++;
@@ -3396,6 +3440,7 @@ public class configMain {
       file_naming.setToolTipText(getToolTip("file_naming"));
       tivo_output_dir.setToolTipText(getToolTip("tivo_output_dir"));
       mpeg_output_dir.setToolTipText(getToolTip("mpeg_output_dir"));
+      qsfixDir.setToolTipText(getToolTip("qsfixDir"));
       mpeg_cut_dir.setToolTipText(getToolTip("mpeg_cut_dir"));
       encode_output_dir.setToolTipText(getToolTip("encode_output_dir"));
       tivodecode.setToolTipText(getToolTip("tivodecode"));
@@ -3811,6 +3856,13 @@ public class configMain {
          text =  "<b>.mpg Output Dir</b><br>";
          text += "<b>REQUIRED</b> if you plan to decrypt TiVo files to mpeg files.<br>";
          text += "This defines location where decrypted mpeg files will be saved to.<br>";
+         text += "NOTE: Make sure to have plenty of disk space available at this location.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
+      }
+      else if (component.equals("qsfixDir")) {
+         text =  "<b>QS Fix Output Dir</b><br>";
+         text += "<b>REQUIRED</b> if you plan to run qsfix task.<br>";
+         text += "This defines location where qsfix output files will be saved to.<br>";
          text += "NOTE: Make sure to have plenty of disk space available at this location.<br>";
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
