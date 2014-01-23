@@ -139,6 +139,7 @@ public class metadataTivo implements Serializable {
          // No or empty output means problems
          xmlFile2 = xmlFile.replaceAll("1", "2");
          if ( file.isEmpty(xmlFile2) ) {
+            log.error("empty file: " + xmlFile2);
             failed = 1;
          }
          
@@ -148,12 +149,13 @@ public class metadataTivo implements Serializable {
                BufferedReader xml = new BufferedReader(new FileReader(xmlFile2));
                String first = xml.readLine();
                if ( ! first.toLowerCase().matches("^.+xml.+$") ) {
-                  failed = 1;
                   log.error(first);
+                  failed = 1;
                }
                xml.close();
             }
             catch (IOException ex) {
+               log.error("IOException - " + ex.getMessage());
                failed = 1;
             }
          }
