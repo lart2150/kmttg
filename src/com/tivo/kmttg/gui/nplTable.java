@@ -286,9 +286,8 @@ public class nplTable {
          super(data, columnNames);
       }
       
-      @SuppressWarnings("unchecked")
       // This is used to define columns as specific classes
-      public Class getColumnClass(int col) {
+      public Class<?> getColumnClass(int col) {
          if (col == 0) {
             return Icon.class;
          }
@@ -327,9 +326,8 @@ public class nplTable {
          super(data, columnNames);
       }
       
-      @SuppressWarnings("unchecked")
       // This is used to define columns as specific classes
-      public Class getColumnClass(int col) {
+      public Class<?> getColumnClass(int col) {
          if (col == 1) {
             return sortableSize.class;
          }
@@ -1124,11 +1122,19 @@ public class nplTable {
    // Add a selected file in FILES mode to NowPlaying table
    public void AddNowPlayingFileRow(File file) {
       debug.print("file=" + file);
+      if (!file.exists()) {
+         log.warn(file.getName() + " was not found so it isn't being added. This *may* be a bug since you suppossedly selected it from a file chooser.");
+         return;
+      }
       int cols = FILE_cols.length;
       Object[] data = new Object[cols];
       String fileName = file.getName();
       String baseDir = file.getParentFile().getPath();
       long size = file.length();
+      
+      if (size == 0) {
+         log.warn("File size is 0. It may be empty");
+      }
       
       data[0] = fileName;
       Hashtable<String,String> h = new Hashtable<String,String>();
