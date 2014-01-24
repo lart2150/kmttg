@@ -138,10 +138,10 @@ public class metadataTivo implements Serializable {
          
          // No or empty output means problems
          xmlFile2 = xmlFile.replaceAll("1", "2");
-         if ( file.isEmpty(xmlFile2) ) {
-            log.error("empty file: " + xmlFile2);
-            failed = 1;
-         }
+         //if ( file.isEmpty(xmlFile2) ) {
+         //   log.error("empty file: " + xmlFile2);
+         //   failed = 1;
+         //}
          
          // Check that first line is xml
          if (failed == 0) {
