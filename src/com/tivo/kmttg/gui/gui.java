@@ -215,9 +215,8 @@ public class gui {
       manager.addKeyEventDispatcher( new KeyDispatcher() );
    }
 
-   @SuppressWarnings("unchecked")
    public void setFontSize(int fontSize) {
-      Enumeration keys = UIManager.getDefaults().keys();
+      Enumeration<Object> keys = UIManager.getDefaults().keys();
       while (keys.hasMoreElements()) {
          Object key = keys.nextElement();
          Object value = UIManager.get(key);

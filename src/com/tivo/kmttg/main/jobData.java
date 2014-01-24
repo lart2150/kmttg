@@ -416,7 +416,6 @@ public class jobData implements Serializable, Cloneable {
 		return (jobData) clone(this);
 	}
    
-   @SuppressWarnings("unchecked")
    private static Object clone(Object o)
    {
       Object clone = null;
@@ -435,7 +434,7 @@ public class jobData implements Serializable, Cloneable {
       }
 
       // Walk up the superclass hierarchy
-      for (Class obj = o.getClass();
+      for (Class<? extends Object> obj = o.getClass();
       !obj.equals(Object.class);
       obj = obj.getSuperclass())
       {
