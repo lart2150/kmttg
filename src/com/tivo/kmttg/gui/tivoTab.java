@@ -287,8 +287,23 @@ public class tivoTab {
       int result = browser.Browser.showDialog(nplTab.NowPlaying, "Add");
       if (result == JFileChooser.APPROVE_OPTION) {
          File[] files = browser.Browser.getSelectedFiles();
-         for (int i=0; i<files.length; ++i)
-            nplTab.AddNowPlayingFileRow(files[i]);
+         for (int i=0; i<files.length; ++i) {
+            // workaround for http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6351074
+            // file browser trims the file name so it may have originally contained a space
+            // if user selected a file that doesn't exist then look for the same name with preceeding space
+            if (!files[i].exists()) {
+               // look for same file but with space
+               String new_filename = files[i].getParent() + File.separatorChar + " " + files[i].getName();
+               File f = new File(new_filename);
+               if (f.exists()) {
+                  nplTab.AddNowPlayingFileRow(f);
+               } else {
+                  log.error("You selected a file which could not be found: " + files[i].getAbsolutePath());
+               }
+            } else {
+               nplTab.AddNowPlayingFileRow(files[i]);
+            }
+         }
       }
    }
 
