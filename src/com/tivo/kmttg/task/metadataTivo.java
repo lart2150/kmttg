@@ -33,8 +33,8 @@ import com.tivo.kmttg.util.log;
 
 public class metadataTivo implements Serializable {
    private static final long serialVersionUID = 1L;
-   private String xmlFile = "chunk-01-0001.xml";
-   private String xmlFile2 = null;
+   private String xmlFile =  "chunk-01-0001.xml";
+   private String xmlFile2 = "chunk-02-0002.xml";
    private backgroundProcess process;
    public jobData job;
    
@@ -137,7 +137,6 @@ public class metadataTivo implements Serializable {
          }
          
          // No or empty output means problems
-         xmlFile2 = xmlFile.replaceAll("1", "2");
          //if ( file.isEmpty(xmlFile2) ) {
          //   log.error("empty file: " + xmlFile2);
          //   failed = 1;
@@ -359,13 +358,9 @@ public class metadataTivo implements Serializable {
       }
       catch (Exception ex) {
          log.error(ex.toString());
-         file.delete(xmlFile);
-         file.delete(xmlFile2);
          return false;
       }
       
-      file.delete(xmlFile);
-      file.delete(xmlFile2);
       return true;
    }
    
