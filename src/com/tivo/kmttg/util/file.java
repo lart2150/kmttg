@@ -94,29 +94,37 @@ public class file {
          }         
       } else {
          // Use 'df' command to get free space
+         // unix and linux put the available number in different column positions
          backgroundProcess process = new backgroundProcess();
          command.add("/bin/df");
          command.add("-k");
          command.add(f);
-         if ( process.run(command) ) {
-            if ( process.Wait() == 0 ) {
+         if (process.run(command)) {
+            if (process.Wait() == 0) {
                Stack<String> l = process.getStdout();
                if (l.size() > 0) {
-                  String free_string = l.lastElement();
-                  String[] ll = free_string.split("\\s+");
-                  if (ll.length-3 >= 0) {
-                     free_string = ll[ll.length-3];
-                     try {
-                        free = Long.parseLong(free_string);
-                        free = (long) (free * Math.pow(2, 10));
-                        return free;
-                     } catch (NumberFormatException e) {
-                        return bad;
+                  String first_line = l.firstElement();
+                  String[] columns = first_line.split("\\s+");
+
+                  // locate position of 'Available' column
+                  for (int i = 0; i < columns.length; i++) {
+                     if (columns[i].equals("Available")) {
+                        // now grab the number in this column
+                        String free_string = l.lastElement();
+                        String[] ll = free_string.split("\\s+");
+                        free_string = ll[i];
+                        try {
+                           free = Long.parseLong(free_string);
+                           free = (long) (free * 1024);
+                           return free;
+                        } catch (NumberFormatException e) {
+                           return bad;
+                        }
                      }
                   }
                }
             }
-         }         
+         }
       }
       return bad;
    }
