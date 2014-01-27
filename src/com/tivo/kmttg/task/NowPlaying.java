@@ -448,6 +448,7 @@ public class NowPlaying implements Serializable {
             if (json.has("state")) {
                if (json.getString("state").equals("inProgress")) {
                   entry.put("ExpirationImage", "in-progress-recording");
+                  entry.put("InProgress", "Yes");
                   if (json.has("collectionTitle")) {
                      String c = json.getString("collectionTitle");
                      if (c.equals("pcBodySubscription"))
