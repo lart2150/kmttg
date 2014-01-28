@@ -1,6 +1,5 @@
 package com.tivo.kmttg.task;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Stack;
@@ -24,30 +23,11 @@ public class captions implements Serializable {
    // constructor
    public captions(jobData job) {
       debug.print("job=" + job);
-      
       if (config.VrdReview_noCuts == 1) {
          // Look for VRD default edit file output
-         if (! file.isFile(job.videoFile)) {
-            String s;
-            Stack<String> tryit = new Stack<String>();
-            String base = string.basename(job.videoFile);
-            s = config.mpegCutDir + File.separator + string.replaceSuffix(base, "_cut.mpg");
-            tryit.add(s);
-            s = config.mpegCutDir + File.separator + string.replaceSuffix(base, "_cut.ts");
-            tryit.add(s);
-            s = config.mpegDir + File.separator + string.replaceSuffix(base, ".mpg");
-            tryit.add(s);
-            s = config.mpegDir + File.separator + string.replaceSuffix(base, ".ts");
-            tryit.add(s);
-            for (String f : tryit) {
-               if (file.isFile(f)) {
-                  job.videoFile = s;
-                  break;
-               }
-            }
-         }
+         if (! file.isFile(job.videoFile))
+            job.videoFile = file.vrdreviewFileSearch(job.videoFile);
       }
-
       srtFile = string.replaceSuffix(job.videoFile, ".srt");
       this.job = job;
    }
