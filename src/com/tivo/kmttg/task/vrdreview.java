@@ -145,11 +145,14 @@ public class vrdreview implements Serializable {
          
          if (config.VrdReview_noCuts == 1) {
             // Look for VRD default edit file output
-            String tryit = string.replaceSuffix(job.mpegFile, " (02).mpg");
-            String tryit2 = string.replaceSuffix(job.mpegFile, "_cut.mpg");
-            if ( ! file.isFile(tryit) && ! file.isFile(tryit2)) {
-               log.error("vrdreview expected output file not available: " + tryit + " or " + tryit2);
-               failed = 1;
+            String[] exts = {" (02).mpg", " (02).ts"};
+            for (String ext : exts) {
+               String s = string.replaceSuffix(job.mpegFile, ext);
+               if (file.isFile(s)) {
+                  String cutFile = s.replaceFirst(" \\(02\\)", "_cut");
+                  if (file.rename(s, cutFile))
+                     log.print("(Renamed " + s + " to " + cutFile + ")");
+               }
             }
          }
          
@@ -175,7 +178,16 @@ public class vrdreview implements Serializable {
                      log.print("(Deleted mpeg file: " + job.mpegFile + ")");
                }
             }
-
+            
+            // If job.mpegFile ends in .ts might have to rename metaFile
+            if (job.mpegFile.endsWith(".ts")) {
+               String metaFile = string.replaceSuffix(job.mpegFile, "_cut.mpg.txt");
+               if (file.isFile(metaFile)) {
+                  String s = string.replaceSuffix(job.mpegFile, "_cut.ts.txt");
+                  if (file.rename(metaFile, s))
+                     log.print("(Renamed " + metaFile + " to " + s);
+               }
+            }
          }
       }
       return false;
