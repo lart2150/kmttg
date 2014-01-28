@@ -20,7 +20,7 @@ public class encode implements Serializable {
 
    // constructor
    public encode(jobData job) {
-      debug.print("job=" + job);
+      debug.print("job=" + job);      
       this.job = job;
    }
    
@@ -49,14 +49,11 @@ public class encode implements Serializable {
          mpeg = job.mpegFile_cut;
       } else {
          mpeg = job.mpegFile;
-         if (config.VrdReview_noCuts == 1) {
-            // Look for VRD default edit file output
-            String tryit = string.replaceSuffix(mpeg, " (02).mpg");
-            if (file.isFile(tryit))
-               mpeg = tryit;
-         }
       }
       
+      if (! file.isFile(job.mpegFile_cut) && config.VrdReview_noCuts == 1)
+         mpeg = file.vrdreviewFileSearch(mpeg);
+
       if ( ! file.isFile(mpeg) ) {
          log.error("mpeg file not given or doesn't exist: " + mpeg);
          schedule = false;
