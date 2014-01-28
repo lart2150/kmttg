@@ -37,6 +37,11 @@ public class push implements Serializable {
    
    public push(jobData job) {
       debug.print("job=" + job);
+      if (config.VrdReview_noCuts == 1) {
+         // Look for VRD default edit file output
+         if (! file.isFile(job.videoFile))
+            job.videoFile = file.vrdreviewFileSearch(job.videoFile);
+      }
       this.job = job;
       if (config.pyTivo_config != null) {
          shares = pyTivo.parsePyTivoConf(config.pyTivo_config);
