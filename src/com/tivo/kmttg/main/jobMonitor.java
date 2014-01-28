@@ -10,6 +10,8 @@ import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.Timer;
 
@@ -751,10 +753,16 @@ public class jobMonitor {
          xclFile = mpegFile + ".Xcl";
 
          if (mpegCutDir.equals(mpegDir)) {
-            mpegFile_cut = string.replaceSuffix(mpegFile, "_cut.mpg");
+            Pattern p = Pattern.compile("^(.+)(\\..+$)");
+            Matcher m = p.matcher(mpegFile);
+            if (m.matches()) {
+               mpegFile_cut = m.group(1) + "_cut" + m.group(2);
+            } else {
+               mpegFile_cut = string.replaceSuffix(mpegFile, "_cut.mpg");
+            }
          } else {
             // If mpegCutDir different than mpegDir then no need for _cut
-            mpegFile_cut = string.replaceSuffix(mpegFile, ".mpg");;
+            mpegFile_cut = mpegFile;
          }
          mpegFile_cut = mpegCutDir + s + string.basename(mpegFile_cut);
          
