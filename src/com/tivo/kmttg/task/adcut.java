@@ -125,15 +125,7 @@ public class adcut implements Serializable {
             isFileChanged = true;
          }
       }      
-      if (isFileChanged) {            
-         // If in GUI mode, update job monitor output field
-         if (config.GUIMODE) {
-            String output = string.basename(job.mpegFile_cut);
-            if (config.jobMonitorFullPaths == 1)
-               output = job.mpegFile_cut;
-            config.gui.jobTab_UpdateJobMonitorRowOutput(job, output);
-         }
-         
+      if (isFileChanged) {                     
          // Rename already created metadata file if relevant
          String meta = string.replaceSuffix(job.mpegFile_cut, ".mpg") + ".txt";
          if (file.isFile(meta)) {
@@ -146,6 +138,14 @@ public class adcut implements Serializable {
          
          // Subsequent jobs need to have mpegFile updated
          jobMonitor.updatePendingJobFieldValue(job, "mpegFile_cut", job.mpegFile_cut);
+      }
+      
+      // If in GUI mode, update job monitor output field
+      if (config.GUIMODE) {
+         String output = string.basename(job.mpegFile_cut);
+         if (config.jobMonitorFullPaths == 1)
+            output = job.mpegFile_cut;
+         config.gui.jobTab_UpdateJobMonitorRowOutput(job, output);
       }
 
       Stack<String> command = new Stack<String>();
