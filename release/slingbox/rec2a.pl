@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# This script is for Slingbox Solo models
+# This script is for Slingbox Solo, Pro and Pro HD models
 
 use IO::Socket::INET;
 use Crypt::Tea_JS;
