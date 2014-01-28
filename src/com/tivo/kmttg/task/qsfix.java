@@ -161,8 +161,11 @@ public class qsfix implements Serializable {
                jobMonitor.updatePendingJobFieldValue(job, "metaFile", meta_new);
             }
             
-            // Subsequent jobs need to have mpegFile updated
+            // Subsequent jobs need to have mpegFile && mpegFile_cut updated
             jobMonitor.updatePendingJobFieldValue(job, "mpegFile", job.mpegFile);
+            String mpegFile_cut = job.mpegFile.replaceFirst("\\.mpg$", "_cut.mpg");
+            mpegFile_cut = job.mpegFile.replaceFirst("\\.ts$", "_cut.ts");
+            jobMonitor.updatePendingJobFieldValue(job, "mpegFile_cut", mpegFile_cut);
          }
       }
 
