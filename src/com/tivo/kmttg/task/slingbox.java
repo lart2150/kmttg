@@ -117,10 +117,12 @@ public class slingbox implements Serializable {
          vs = "5";
       if (! config.slingBox_type.equals("Slingbox 350/500"))
          vs = "5";
-      if (config.slingBox_type.equals("Slingbox Pro"))
-         hd = "1";
       if (config.slingBox_type.equals("Slingbox Solo"))
          hd = "0";
+      if (config.slingBox_type.equals("Slingbox Pro"))
+         hd = "0";
+      if (config.slingBox_type.equals("Slingbox Pro HD"))
+         hd = "1";
       if (raw) {
          // Raw capture to asf file
          job.slingbox_file = string.replaceSuffix(job.slingbox_file, ".asf");
