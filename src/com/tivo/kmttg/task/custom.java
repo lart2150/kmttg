@@ -61,10 +61,8 @@ public class custom implements Serializable {
       if (job.mpegFile_cut != null) {
          mpegFile_cut = job.mpegFile_cut;
          if (! file.isFile(mpegFile_cut)) {
-            // Look for VRD default edit file output
-            String tryit = mpegFile_cut.replaceFirst("_cut.mpg", ".mpg");
-            tryit = string.replaceSuffix(tryit, " (02).mpg");
-            if (file.isFile(tryit))
+            String tryit = file.vrdreviewFileSearch(mpegFile_cut);
+            if (tryit.contains("_cut"))
                mpegFile_cut = tryit;
          }
       }
