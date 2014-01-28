@@ -361,7 +361,7 @@ public class file {
          tryit.add(s);
          for (String f : tryit) {
             if (file.isFile(f)) {
-               inputFile = s;
+               inputFile = f;
                break;
             }
          }
