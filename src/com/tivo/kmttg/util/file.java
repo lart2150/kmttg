@@ -332,4 +332,28 @@ public class file {
       return true;
    }
 
+   // vrdreview output location can vary according to user
+   // This function will look for them in .mpg cut dir and then .mpg dir
+   public static String vrdreviewFileSearch(String inputFile) {
+      if (! file.isFile(inputFile)) {
+         String s;
+         Stack<String> tryit = new Stack<String>();
+         String base = string.basename(inputFile);
+         s = config.mpegCutDir + File.separator + string.replaceSuffix(base, "_cut.mpg");
+         tryit.add(s);
+         s = config.mpegCutDir + File.separator + string.replaceSuffix(base, "_cut.ts");
+         tryit.add(s);
+         s = config.mpegDir + File.separator + string.replaceSuffix(base, ".mpg");
+         tryit.add(s);
+         s = config.mpegDir + File.separator + string.replaceSuffix(base, ".ts");
+         tryit.add(s);
+         for (String f : tryit) {
+            if (file.isFile(f)) {
+               inputFile = s;
+               break;
+            }
+         }
+      }
+      return inputFile;
+   }
 }
