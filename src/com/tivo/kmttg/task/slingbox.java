@@ -56,10 +56,8 @@ public class slingbox implements Serializable {
       perl_script = config.programDir + File.separator + "slingbox" + File.separator;
       if (config.slingBox_type.equals("Slingbox 350/500"))
          perl_script += "rec350.pl";
-      else if (config.slingBox_type.equals("Slingbox Solo"))
-         perl_script += "rec2a.pl";
       else
-         perl_script += "rec2.pl";
+         perl_script += "rec2a.pl";
       
       if ( ! file.isFile(perl_script) ) {
          log.error("Can't find perl capture script: " + perl_script);
@@ -120,7 +118,7 @@ public class slingbox implements Serializable {
       if (! config.slingBox_type.equals("Slingbox 350/500"))
          vs = "5";
       if (config.slingBox_type.equals("Slingbox Pro"))
-         hd = "0";
+         hd = "1";
       if (config.slingBox_type.equals("Slingbox Solo"))
          hd = "0";
       if (raw) {
