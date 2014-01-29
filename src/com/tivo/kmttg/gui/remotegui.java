@@ -232,7 +232,6 @@ public class remotegui {
    remotegui(JFrame frame) {      
       Browser = new JFileChooser(config.programDir);
       Browser.setMultiSelectionEnabled(false);
-      Browser.addChoosableFileFilter(new FileFilterSP());
       
       // Define content for main tabbed pane
       int gy = 0;
@@ -360,7 +359,13 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             final String tivoName = (String)tivo_todo.getSelectedItem();
             Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            Browser.setSelectedFile(new File(config.programDir + File.separator + tivoName + "_todo.csv"));
+            Browser.setFileFilter(new FileFilterSP(".csv"));
+            Browser.setSelectedFile(
+               new File(
+                  config.programDir + File.separator + tivoName +
+                  "_todo_" + TableUtil.currentYearMonthDay() + ".csv"
+               )
+            );
             int result = Browser.showDialog(config.gui.getJFrame(), "Export to csv file");
             if (result == JFileChooser.APPROVE_OPTION) {               
                class backgroundRun extends SwingWorker<Object, Object> {
@@ -497,6 +502,7 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             final String tivoName = (String)tivo_guide.getSelectedItem();
             Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            Browser.setFileFilter(new FileFilterSP(".csv"));
             Browser.setSelectedFile(new File(config.programDir + File.separator + tivoName + "_channels.csv"));
             int result = Browser.showDialog(config.gui.getJFrame(), "Export to csv file");
             if (result == JFileChooser.APPROVE_OPTION) {               
@@ -677,6 +683,7 @@ public class remotegui {
                   return;
                }  else {
                   Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  Browser.setFileFilter(new FileFilterSP(".sp"));
                   Browser.setSelectedFile(new File(config.programDir + File.separator + tivoName + ".sp"));
                   int result = Browser.showDialog(config.gui.getJFrame(), "Save to file");
                   if (result == JFileChooser.APPROVE_OPTION) {               
@@ -695,6 +702,7 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Load SP data from a file
             Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            Browser.setFileFilter(new FileFilterSP(".sp"));
             int result = Browser.showDialog(config.gui.getJFrame(), "Load from file");
             if (result == JFileChooser.APPROVE_OPTION) {               
                File file = Browser.getSelectedFile();
@@ -716,7 +724,9 @@ public class remotegui {
                   return;
                }  else {
                   Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                  Browser.setSelectedFile(new File(config.programDir + File.separator + tivoName + ".csv"));
+                  Browser.setFileFilter(new FileFilterSP(".csv"));
+                  Browser.setSelectedFile(new File(config.programDir + File.separator + tivoName + "_sp" + ".csv")
+                  );
                   int result = Browser.showDialog(config.gui.getJFrame(), "Export to csv file");
                   if (result == JFileChooser.APPROVE_OPTION) {               
                      File file = Browser.getSelectedFile();
