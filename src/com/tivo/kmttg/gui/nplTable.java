@@ -1519,9 +1519,7 @@ public class nplTable {
       
    // Export NPL entries to a csv file
    // NOTE: The current table structure + sorting is used
-   public void exportNPL() {
-      String file = config.programDir + File.separator + tivoName +
-         "_npl_" + TableUtil.currentYearMonthDay() + ".csv";
+   public void exportNPL(String file) {
       int numCols = TIVO_cols.length;
       try {
          if (NowPlaying != null && NowPlaying.getRowCount() > 0) {
