@@ -43,6 +43,7 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class Remote {
    public Boolean debug = false;
@@ -1125,14 +1126,14 @@ public class Remote {
                   end = TableUtil.getEndTime(json);
                }
                if (end != 0 && start != 0)
-                  duration = sortableDuration.millisecsToHMS(end-start, true);
+                  duration = string.removeLeadingTrailingSpaces(sortableDuration.millisecsToHMS(end-start, false));
                String date = "";
                if (start != 0) {
                   SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy hh:mm a");
                   date = sdf.format(start);
                }
-               String show = TableUtil.makeShowTitle(json);
-               String channel = TableUtil.makeChannelName(json);
+               String show = string.removeLeadingTrailingSpaces(TableUtil.makeShowTitle(json));
+               String channel = string.removeLeadingTrailingSpaces(TableUtil.makeChannelName(json));
                ofp.write(date + ",\"" + show + "\"," + channel + "," + duration + "\r\n");
             }
          } else {
