@@ -46,6 +46,7 @@ public class tivoTab {
    private JCheckBox showFolders = null;
    private nplTable nplTab = null;
    private fileBrowser browser = null;
+   private JFileChooser csvBrowser = null;
    
    tivoTab(final String name) {
       debug.print("name=" + name);
@@ -193,12 +194,27 @@ public class tivoTab {
          
          // Export button
          if ( ! tivoName.equals("FILES") ) {
-            JButton export = new JButton("Export");
+            JButton export = new JButton("Export...");
             export.setMargin(new Insets(0,5,0,5));
             export.setToolTipText(config.gui.getToolTip("export_npl"));
             export.addActionListener(new java.awt.event.ActionListener() {
                public void actionPerformed(java.awt.event.ActionEvent e) {
-                  nplTab.exportNPL();
+                  if (csvBrowser == null) {
+                     csvBrowser = new JFileChooser(config.programDir);
+                     csvBrowser.setMultiSelectionEnabled(false);
+                  }
+                  csvBrowser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  csvBrowser.setFileFilter(new FileFilterSP(".csv"));
+                  csvBrowser.setSelectedFile(
+                     new File(
+                        config.programDir + File.separator + tivoName +
+                        "_npl_" + TableUtil.currentYearMonthDay() + ".csv"
+                     )
+                  );
+                  int result = csvBrowser.showDialog(config.gui.getJFrame(), "Export to csv file");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     nplTab.exportNPL(csvBrowser.getSelectedFile().getAbsolutePath());
+                  }
                }
             });
             gx++;
