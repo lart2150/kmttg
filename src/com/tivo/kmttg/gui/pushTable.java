@@ -140,7 +140,10 @@ public class pushTable {
           // NUM
           info[0] = new sortableInt(json, num);
           // Title
-          info[1] = json.getString("source");
+          String title = "none";
+          if (json.has("title"))
+             title = json.getString("title");
+          info[1] = title;
           // TiVo
           String tsn = json.getString("bodyId");
           tsn = tsn.replaceFirst("tsn:", "");
