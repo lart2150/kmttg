@@ -2,9 +2,6 @@ package com.tivo.kmttg.gui;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.io.StringReader;
-import java.util.Hashtable;
-import java.util.Stack;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -12,63 +9,23 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
-import com.tivo.kmttg.mind.Mind;
 import com.tivo.kmttg.rpc.Remote;
-import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
 public class Pushes {
-   private String bodyId = null;
    private JFrame frame = null;
    private JDialog dialog = null;
    private pushTable tab = null;
    private JSONArray data = null;
-   private Mind mind = null;
+   private String tivoName = null;
    
    public Pushes(String tivoName, JFrame frame) {
-      this.frame = frame;
-      
-      // Determine bodyId = tsn for this TiVo
-      bodyId = config.getTsn(tivoName);
-      if (bodyId == null) {
-         // Try using RPC to get tsn instead
-         if (config.rpcEnabled(tivoName)) {
-            Remote r = config.initRemote(tivoName);
-            if (r.success) {
-               bodyId = r.bodyId_get();
-               r.disconnect();
-            }
-         }
-         if (bodyId == null) {
-            log.error("tsn could not be determined for: " + tivoName);
-            return;
-         }
-      }
-      if ( ! bodyId.startsWith("tsn") )
-         bodyId = "tsn:" + bodyId;
-      
-      // Determine mind server username & password by parsing pyTivo.conf
-      if (! file.isFile(config.pyTivo_config)) {
-         log.error("You have not configured valid path to pyTivo.conf file (needed for username & password)");
-         return;
-      }
-      if (config.getTivoUsername() == null || config.getTivoPassword() == null) {
-         log.error("tivo.com username and/or password not set in config or " + config.pyTivo_config);
-         return;
-      }
-      
-      // Query mind server for pushes and store in data
+      this.tivoName = tivoName;
+      this.frame = frame;      
       getPushes();
    }
    
@@ -80,29 +37,39 @@ public class Pushes {
             if (tab != null)
                tab.clear();
             data = new JSONArray();
-            if (mind == null)
-               mind = new Mind(config.pyTivo_mind);
-            if (!mind.login(config.getTivoUsername(), config.getTivoPassword())) {
-               log.error("Failed to login to Mind");
-               return null;
-            }
-            Stack<String> s = mind.pcBodySearch();
-            if (s != null && s.size() > 0) {
-               String pcBodyId = mind.getElement(s.get(0), "pcBodyId");
-               String command = "bodyOfferSearch";
-               Hashtable<String,String> h = new Hashtable<String,String>();
-               h.put("bodyId", bodyId);
-               h.put("pcBodyId", pcBodyId);
-               h.put("noLimit", "true");
-               s = mind.dict_request(command + "&bodyId=" + bodyId, h);
-               if (s != null && s.size() > 0) {
-                  parseSearchXML(s.get(0));
-               } else {
-                  log.warn("No queued entries found");
+            Remote r = new Remote(tivoName, true);
+            if (r.success) {
+               try {            
+                  JSONObject json = new JSONObject();
+                  json.put("bodyId", r.bodyId_get());
+                  json.put("noLimit", true);
+                  json.put("levelOfDetail", "low");
+                  JSONObject result = r.Command("downloadSearch", json);
+                  if (result != null && result.has("download")) {
+                     JSONArray a = result.getJSONArray("download");
+                     for (int i=0; i<a.length(); ++i) {
+                        JSONObject d = a.getJSONObject(i);
+                        if (d.has("state")) {
+                           String state = d.getString("state");
+                           if (state.equals("scheduled") || state.equals("inProgress")) {
+                              JSONObject j = new JSONObject();
+                              j.put("bodyId", json.getString("bodyId"));
+                              j.put("levelOfDetail", "high");
+                              j.put("offerId", d.getString("offerId"));
+                              JSONObject detail = r.Command("offerSearch", j);
+                              if (detail != null && detail.has("offer")) {
+                                 JSONObject o = detail.getJSONArray("offer").getJSONObject(0);
+                                 o.put("bodyId", json.getString("bodyId"));
+                                 data.put(o);
+                              }
+                           }
+                        }
+                     }
+                  }
+               } catch (Exception e) {
+                  e.printStackTrace();
                }
-            } else {
-               log.error("getPushes - Unable to retrieve pcBodyId");
-               return null;
+               r.disconnect();
             }
             
             if (data != null && data.length() > 0) {
@@ -119,77 +86,7 @@ public class Pushes {
       backgroundRun b = new backgroundRun();
       b.execute();
    }
-   
-   private void removePushes(JSONArray entries) {
-      // Run in separate background thread
-      class backgroundRun extends SwingWorker<Void, Void> {
-         JSONArray entries;
-         
-         public backgroundRun(JSONArray entries) {
-            this.entries = entries;
-         }
-         
-         protected Void doInBackground() {
-            try {
-               Mind mind = new Mind(config.pyTivo_mind);
-               if (!mind.login(config.getTivoUsername(), config.getTivoPassword())) {
-                  log.error("Failed to login to Mind");
-                  return null;
-               }
-               for (int i=0; i<entries.length(); ++i) {
-                  String command = "bodyOfferRemove";
-                  Hashtable<String,String> h = new Hashtable<String,String>();
-                  h.put("bodyId", bodyId);
-                  h.put("bodyOfferId", entries.getJSONObject(i).getString("bodyOfferId"));
-                  Stack<String> s = mind.dict_request(command + "&bodyId=" + bodyId, h);
-                  if (s != null && s.size() > 0) {
-                     log.print(s.get(0));
-                  } else {
-                     log.error("push item remove failed");
-                     return null;
-                  }
-               }
-            } catch (Exception e) {
-               log.error("removePushes - " + e.getMessage());
-               return null;
-            }
-            return null;
-         }
-      }
-      backgroundRun b = new backgroundRun(entries);
-      b.execute();
-   }
-   
-   // Parse given bodyOfferList xml and populate data JSONArray with its contents
-   private void parseSearchXML(String xml) {
-      try {
-         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-         InputSource is = new InputSource();
-         is.setCharacterStream(new StringReader(xml));
-         Document doc = docBuilder.parse(is);
-         if (doc == null) {
-            log.error("Unable to parse xml");
-            return;
-         }
-         NodeList entryList = doc.getElementsByTagName("bodyOffer");
-         if (entryList != null && entryList.getLength() > 0) {
-            data = new JSONArray();
-            for (int i=0; i<entryList.getLength(); ++i) {
-               JSONObject json = new JSONObject();
-               for (Node childNode = entryList.item(i).getFirstChild(); childNode != null;) {
-                  Node nextChild = childNode.getNextSibling();
-                  json.put(childNode.getNodeName(), childNode.getTextContent());
-                  childNode = nextChild;
-               }
-               data.put(json);
-            }
-         }
-      } catch (Exception e) {
-         log.error("parseSearchXML - " + e.getMessage());
-      }
-   }
-   
+      
    private void init() {
       // Define content for dialog window
       int gy = 0;
@@ -217,41 +114,11 @@ public class Pushes {
             getPushes();
          }
       });
-
-      // Remove button
-      JButton remove = new JButton("Remove");
-      tip = "<html><b>Remove</b><br>Attempt to remove selected entry in the table from push queue.<br>";
-      tip += "NOTE: This will not cancel pushes already in progress or very close to starting.<br>";
-      tip += "NOTE: The response to this operation from mind server is always 'success' so there<br>";
-      tip += "is no guarantee that removing an entry actually works or not.";
-      tip += "</html>";
-      remove.setToolTipText(tip);
-      remove.addActionListener(new java.awt.event.ActionListener() {
-         public void actionPerformed(java.awt.event.ActionEvent e) {
-            JSONArray entries = new JSONArray();
-            Boolean cont = true;
-            while (cont) {
-               int[] selected = tab.getTable().getSelectedRows();
-               if (selected.length > 0) {
-                  int row = selected[0];
-                  JSONObject json = tab.GetRowData(row);
-                  if (json != null)
-                     entries.put(json);
-                  tab.RemoveRow(row);
-               } else {
-                  cont = false;
-               }
-            }
-            if (entries.length() > 0)
-               removePushes(entries);
-         }
-      });
       
-      // Row 1 = 2 buttons
+      // Row 1 = refresh button
       JPanel row1 = new JPanel();
       row1.setLayout(new BoxLayout(row1, BoxLayout.LINE_AXIS));
       row1.add(refresh);
-      row1.add(remove);
       content.add(row1, c);
       
       // Table
