@@ -157,10 +157,9 @@ public class slingbox implements Serializable {
             command += " -chan " + job.slingbox_chan;
          command += " | \"" + config.ffmpeg + "\" -fflags +genpts -i - ";
          command += "-vcodec copy -acodec ac3 -ab 224k ";
-         if (! config.slingBox_type.equals("Slingbox 350/500")) {
-            // This is so that framerate is properly set so VRD can edit the output file directly
-            command += "-r 29.97 ";
-         }
+         // This is so that framerate is properly set so VRD can edit the output file directly
+         // and so that framerate is constant instead of variable for the capture
+         command += "-r 29.97 ";
          command += "-y -f " + config.slingBox_container + " \"" + job.slingbox_file + "\"";
       }
       
