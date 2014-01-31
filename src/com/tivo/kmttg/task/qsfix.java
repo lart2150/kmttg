@@ -131,14 +131,14 @@ public class qsfix implements Serializable {
          if (info != null && info.get("container").equals("mpegts")) {
             if (job.mpegFile.endsWith(".mpg")) {
                job.mpegFile = string.replaceSuffix(job.mpegFile, ".ts");
-               job.mpegFile_fix = config.qsfixDir + File.separator + string.basename(job.mpegFile) + ".qsfix";
+               job.mpegFile_fix = job.mpegFile + ".qsfix";
                isFileChanged = true;
             }
          }      
          if (info != null && info.get("container").equals("mp4")) {
             if (job.mpegFile.endsWith(".mpg")) {
                job.mpegFile = string.replaceSuffix(job.mpegFile, ".mp4");
-               job.mpegFile_fix = config.qsfixDir + File.separator + string.basename(job.mpegFile) + ".qsfix";
+               job.mpegFile_fix = job.mpegFile + ".qsfix";
                isFileChanged = true;
             }
          }      

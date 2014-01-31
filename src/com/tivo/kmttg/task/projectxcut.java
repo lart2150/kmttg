@@ -1,6 +1,5 @@
 package com.tivo.kmttg.task;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Hashtable;
@@ -212,7 +211,7 @@ public class projectxcut implements Serializable {
                
                // Start remux background job               
                mpegFile = job.mpegFile_cut;
-               job.mpegFile_fix = config.qsfixDir + File.separator + string.basename(job.mpegFile_cut) + ".qsfix";               
+               job.mpegFile_fix = job.mpegFile_cut + ".qsfix";               
                totalSize = ProjectX.getDemuxFilesSize(job.demuxFiles);
 
                Stack<String> command = new Stack<String>();

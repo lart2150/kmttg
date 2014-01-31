@@ -35,7 +35,6 @@ public class config {
    public static String tivodecode = "";
    public static String outputDir = "";
    public static String mpegDir = "";
-   public static String qsfixDir = "";
    public static String mpegCutDir = "";
    public static String encodeDir = "";
    public static String ffmpeg = "";
@@ -223,10 +222,6 @@ public class config {
          log.warn("Configured mpegDir does not exist, resetting to default");
          mpegDir = outputDir;
       }
-      if (! file.isDir(qsfixDir)) {
-         log.warn("Configured qsfixDir does not exist, resetting to default");
-         qsfixDir = mpegDir;
-      }
       if (! file.isDir(mpegCutDir)) {
          log.warn("Configured mpegCutDir does not exist, resetting to default");
          mpegCutDir = outputDir;
@@ -319,9 +314,6 @@ public class config {
 
       if ( ! mpegDir.equals("") && ! file.isDir(mpegDir) )
          errors.add("Mpeg Dir does not exist: " + mpegDir);
-
-      if ( ! qsfixDir.equals("") && ! file.isDir(qsfixDir) )
-         errors.add("QS Fix Dir does not exist: " + qsfixDir);
 
       if ( ! mpegCutDir.equals("") && ! file.isDir(mpegCutDir) )
          errors.add("Mpeg Cut Dir does not exist: " + mpegCutDir);
@@ -652,7 +644,6 @@ public class config {
       outputDir          = programDir;
       TIVOS.put("FILES", outputDir);
       mpegDir            = outputDir;
-      qsfixDir           = outputDir;
       mpegCutDir         = outputDir;
       encodeDir          = outputDir;
       customCommand      = "";
@@ -836,7 +827,6 @@ public class config {
          String key = null;
          String[] autotune_keys = com.tivo.kmttg.task.autotune.getRequiredElements();
          String autotune_tivoName = null;
-         Boolean qs = false;
          while (( line = ini.readLine()) != null) {
             // Get rid of leading and trailing white space
             line = line.replaceFirst("^\\s*(.*$)", "$1");
@@ -959,10 +949,6 @@ public class config {
             }
             if (key.equals("mpegDir")) {
                mpegDir = line;
-            }
-            if (key.equals("qsfixDir")) {
-               qs = true;
-               qsfixDir = line;
             }
             if (key.equals("mpegCutDir")) {
                mpegCutDir = line;
@@ -1145,11 +1131,7 @@ public class config {
          }
          if ( ! file.isDir(TIVOS.get("FILES")) ) {
             TIVOS.put("FILES", outputDir);
-         }
-         
-         if ( ! qs )
-            qsfixDir = mpegDir;
-         
+         }         
       }         
       catch (IOException ex) {
          log.error("Problem parsing config file: " + config);
@@ -1267,8 +1249,6 @@ public class config {
          ofp.write("<outputDir>\n" + outputDir + "\n\n");
          
          ofp.write("<mpegDir>\n" + mpegDir + "\n\n");
-         
-         ofp.write("<qsfixDir>\n" + qsfixDir + "\n\n");
          
          ofp.write("<mpegCutDir>\n" + mpegCutDir + "\n\n");
          
