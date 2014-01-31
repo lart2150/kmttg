@@ -412,7 +412,7 @@ public class Remote {
             buf = new String(body, "UTF8");
             JSONObject j = new JSONObject(buf);
             if (j.has("type") && j.getString("type").equals("error")) {
-               error("RPC error response: " + j.getString("text"));
+               error("RPC error response:\n" + j.toString(3));
                return null;
             }
             j.put("IsFinal", IsFinal);
