@@ -445,17 +445,6 @@ public class NowPlaying implements Serializable {
                   entry.put("kuid", "yes");                  
                }
             }
-            if (json.has("state")) {
-               if (json.getString("state").equals("inProgress")) {
-                  entry.put("ExpirationImage", "in-progress-recording");
-                  entry.put("InProgress", "Yes");
-                  if (json.has("collectionTitle")) {
-                     String c = json.getString("collectionTitle");
-                     if (c.equals("pcBodySubscription"))
-                        entry.put("ExpirationImage", "in-progress-transfer");
-                  }
-               }
-            }
             if (json.has("bookmarkPosition")) {
                // NOTE: Don't have ByteOffset available, so use TimeOffset (secs) instead
                entry.put("TimeOffset", "" + json.getInt("bookmarkPosition")/1000);               
@@ -469,6 +458,18 @@ public class NowPlaying implements Serializable {
                         entry.put("ExpirationImage", "suggestion-recording");
                         entry.put("suggestion", "yes");                        
                      }
+                  }
+               }
+            }
+            // In progress recordings trump any other kind of icon
+            if (json.has("state")) {
+               if (json.getString("state").equals("inProgress")) {
+                  entry.put("ExpirationImage", "in-progress-recording");
+                  entry.put("InProgress", "Yes");
+                  if (json.has("collectionTitle")) {
+                     String c = json.getString("collectionTitle");
+                     if (c.equals("pcBodySubscription"))
+                        entry.put("ExpirationImage", "in-progress-transfer");
                   }
                }
             }
