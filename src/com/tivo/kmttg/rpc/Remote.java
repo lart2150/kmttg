@@ -585,6 +585,7 @@ public class Remote {
                req = RpcRequest("recordingSearch", false, json);
             } else {
                // Expects count=# in initial json, offset=# after first call
+               json.put("flatten", true);
                req = RpcRequest("recordingFolderItemSearch", false, json);
             }
          }
@@ -864,7 +865,7 @@ public class Remote {
       }
    }
    
-   // Get list of all shows (drilling down into folders for individual shows)
+   // Get flat list of all shows
    public JSONArray MyShows(jobData job) {
       JSONArray allShows = new JSONArray();
       JSONObject result = null;
@@ -882,6 +883,8 @@ public class Remote {
                   config.gui.setTitle("playlist: " + allShows.length() + " " + config.kmttg);
             }
             result = Command("MyShows", json);
+            if (result != null && result.has("IsFinal") && result.getBoolean("IsFinal"))
+               stop = true;
             if (result != null && result.has("recordingFolderItem")) {
                JSONArray items = (JSONArray) result.get("recordingFolderItem");
                offset += items.length();
@@ -889,63 +892,19 @@ public class Remote {
                if (items.length() == 0)
                   stop = true;
                JSONObject item;
-               String title;
                for (int i=0; i<items.length(); ++i) {
-                  title = null;
                   item = items.getJSONObject(i);
-                  if (item.has("folderItemCount")) {
-                     if (item.getInt("folderItemCount") > 0) {
-                        // Type folder has to be further drilled down
-                        if (item.has("title"))
-                           title = item.getString("title");
-                        if (title != null && title.equals("HD Recordings")) {
-                           // Skip drilling into "HD Recordings" folder
-                           continue;
-                        }
-                        result = Command(
-                           "FolderIds",
-                           new JSONObject("{\"parentRecordingFolderItemId\":\"" + item.get("recordingFolderItemId") + "\"}")
-                        );
-                        if (result != null) {
-                           JSONArray ids = result.getJSONArray("objectIdAndType");
-                           for (int j=0; j<ids.length(); ++j) {
-                              JSONArray id = new JSONArray();
-                              id.put(ids.get(j));
-                              JSONObject s = new JSONObject();
-                              s.put("objectIdAndType",id);
-                              result = Command("SearchIds", s);
-                              if (result != null) {
-                                 s = result.getJSONArray("recordingFolderItem").getJSONObject(0);
-                                 result = Command(
-                                    "Search",
-                                    new JSONObject("{\"recordingId\":\"" + s.get("childRecordingId") + "\"}")
-                                 );
-                                 if (result != null) {
-                                    if (job != null && job.getURLs) {
-                                       if (!getURLs(job.tivoName, result.getJSONArray("recording").getJSONObject(0))) {
-                                          return null;
-                                       }
-                                    }
-                                    allShows.put(result);
-                                 }
-                              }
-                           }
+                  result = Command(
+                     "Search",
+                     new JSONObject("{\"recordingId\":\"" + item.getString("childRecordingId") + "\"}")
+                  );
+                  if (result != null) {
+                     if (job != null && job.getURLs) {
+                        if (!getURLs(job.tivoName, result.getJSONArray("recording").getJSONObject(0))) {
+                           return null;
                         }
                      }
-                  } else {
-                     // Individual entry just add to items array
-                     result = Command(
-                        "Search",
-                        new JSONObject("{\"recordingId\":\"" + item.getString("childRecordingId") + "\"}")
-                     );
-                     if (result != null) {
-                        if (job != null && job.getURLs) {
-                           if (!getURLs(job.tivoName, result.getJSONArray("recording").getJSONObject(0))) {
-                              return null;
-                           }
-                        }
-                        allShows.put(result);
-                     }
+                     allShows.put(result);
                   }
                } // for
             } else {
