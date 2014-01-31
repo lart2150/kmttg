@@ -78,7 +78,7 @@ public class Pushes {
                else
                   tab.AddRows(data);
             } else {
-               log.warn("No pending pushes found to display");
+               log.warn(tivoName + ": No pending pushes found to display");
             }
             return null;
          }
