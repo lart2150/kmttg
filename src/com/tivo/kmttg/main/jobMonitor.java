@@ -732,13 +732,13 @@ public class jobMonitor {
       String s = File.separator;
       if ( mode.equals("FILES") ) {
          // FILES mode means different starting points than download mode
+         // NOTE: OK to use basename here since no file naming with folders to have to honor
          source = startFile;
          if ( startFile.toLowerCase().endsWith(".tivo") ) {
             tivoFile = startFile;
-            metaFile = string.replaceSuffix(tivoFile, ".mpg.txt");
-            mpegFile = string.replaceSuffix(tivoFile, ".mpg");
-            mpegFile = mpegDir + s + string.basename(mpegFile);
-            metaFile = mpegDir + s + string.basename(metaFile);
+            mpegFile = string.replaceSuffix(string.basename(startFile), ".mpg");
+            mpegFile = mpegDir + s + mpegFile;
+            metaFile = mpegFile + ".txt";            
          } else {
             mpegFile = startFile;
          }
@@ -764,13 +764,13 @@ public class jobMonitor {
          if (comcut) metaFile = mpegFile_cut + ".txt";
          
          String encodeExt = encodeConfig.getExtension(encodeName);
-         encodeFile = string.replaceSuffix(mpegFile, "." + encodeExt);
+         encodeFile = string.replaceSuffix(startFile, "." + encodeExt);
          encodeFile = encodeDir + s + string.basename(encodeFile);
          
          // Add indicated extension to differentiate this file from first
          if (encodeName2 != null) {
         	    String encodeExt2 = encodeConfig.getExtension(encodeName2);
-             encodeFile2 = string.replaceSuffix(mpegFile, "_" + encodeName2_suffix + "." + encodeExt2);
+             encodeFile2 = string.replaceSuffix(startFile, "_" + encodeName2_suffix + "." + encodeExt2);
              encodeFile2 = encodeDir + s + string.basename(encodeFile2);
          }
          
@@ -785,6 +785,7 @@ public class jobMonitor {
          
       } else {
          // Download mode
+         // NOTE: Do NOT use basename function here - need to honor file naming with folders
          tivoFile = outputDir + s + startFile;
          mpegFile = string.replaceSuffix(startFile, ".mpg");
          mpegFile = mpegDir + s + mpegFile;
@@ -796,18 +797,12 @@ public class jobMonitor {
          xclFile = mpegFile + ".Xcl";
          
          if (mpegCutDir.equals(mpegDir)) {
-            Pattern p = Pattern.compile("^(.+)(\\..+$)");
-            Matcher m = p.matcher(mpegFile);
-            if (m.matches()) {
-               mpegFile_cut = m.group(1) + "_cut" + m.group(2);
-            } else {
-               mpegFile_cut = string.replaceSuffix(mpegFile, "_cut.mpg");
-            }
+            mpegFile_cut = string.replaceSuffix(startFile, "_cut.mpg");
          } else {
-            // If mpegCutDir different than mpegDir then no need for _cut
-            mpegFile_cut = mpegFile;
+            // If mpegCutDir different than mpegDir then no need for _cut in name
+            mpegFile_cut = string.replaceSuffix(startFile, ".mpg");
          }
-         mpegFile_cut = mpegCutDir + s + string.basename(mpegFile_cut);
+         mpegFile_cut = mpegCutDir + s + mpegFile_cut;
          
          if (comcut) metaFile = mpegFile_cut + ".txt";
 
@@ -901,6 +896,7 @@ public class jobMonitor {
             if (meta_files.size() > 0) {
                for (int i=0; i<meta_files.size(); ++i) {
                   jobData job = new jobData();
+                  job.startFile          = startFile;
                   job.source             = source;
                   job.tivoName           = tivoName;
                   if (config.java_downloads == 0) {
@@ -932,15 +928,17 @@ public class jobMonitor {
          // Autotune
          if (autotune.isConfigured(tivoName)) {
             jobData job = new jobData();
-            job.source   = source;
-            job.tivoName = tivoName;
-            job.type     = "autotune";
-            job.name     = "telnet";
+            job.startFile = startFile;
+            job.source    = source;
+            job.tivoName  = tivoName;
+            job.type      = "autotune";
+            job.name      = "telnet";
             submitNewJob(job);
          }
 
          // Download
          jobData job = new jobData();
+         job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
          if (entry != null && entry.containsKey("duration"))
@@ -1012,6 +1010,7 @@ public class jobMonitor {
          if (meta_files.size() > 0) {
             for (int i=0; i<meta_files.size(); ++i) {
                jobData job = new jobData();
+               job.startFile          = startFile;
                job.source             = source;
                job.tivoName           = tivoName;
                job.type               = "metadataTivo";
@@ -1027,6 +1026,7 @@ public class jobMonitor {
       
       if (decrypt && config.VrdDecrypt == 0) {
          jobData job = new jobData();
+         job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "decrypt";
@@ -1046,11 +1046,13 @@ public class jobMonitor {
       
       if (qsfix || (decrypt && config.VrdDecrypt == 1)) {
          jobData job = new jobData();
+         job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "qsfix";
          job.name         = config.VRD;
          job.mpegFile     = mpegFile;
+         job.mpegFile_cut = mpegFile_cut;
          job.mpegFile_fix = mpegFile_fix;
          if (config.VrdDecrypt == 1) {
             job.tivoFile  = tivoFile;
@@ -1070,6 +1072,7 @@ public class jobMonitor {
       
       if (demux) {
          jobData job = new jobData();
+         job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "projectx";
@@ -1081,6 +1084,7 @@ public class jobMonitor {
       
       if (streamfix) {
          jobData job = new jobData();
+         job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "streamfix";
@@ -1093,6 +1097,7 @@ public class jobMonitor {
       if (comskip) {
          if (file.isDir(config.VRD) && config.UseAdscan == 1) {
             jobData job = new jobData();
+            job.startFile    = startFile;
             job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "adscan";
@@ -1102,6 +1107,7 @@ public class jobMonitor {
             submitNewJob(job);
          } else {
             jobData job = new jobData();
+            job.startFile    = startFile;
             job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "comskip";
@@ -1125,6 +1131,7 @@ public class jobMonitor {
       if (file.isDir(config.VRD) && config.GUIMODE) {
          if ( (comskip && config.VrdReview == 1) || (comcut && config.VrdReview_noCuts == 1) ) {
             jobData job = new jobData();
+            job.startFile    = startFile;
             job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "vrdreview";
@@ -1141,6 +1148,7 @@ public class jobMonitor {
       // Schedule comskip commercial cut point review if requested (GUI mode only)
       if (comskip && config.UseAdscan == 0 && config.VrdReview == 0 && config.comskip_review == 1 && config.GUIMODE) {
          jobData job = new jobData();
+         job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "comskip_review";
@@ -1158,6 +1166,7 @@ public class jobMonitor {
          if ( file.isFile(config.VRD + File.separator + "vp.vbs") ) {
             // Use VRD
             jobData job = new jobData();
+            job.startFile = startFile;
             if (config.VrdCombineCutEncode == 1) {
                if (config.VrdEncode == 1 && encodeConfig.getCommandName(encodeName) == null) {
                   // Combine Ad Cut & Encode option set => vrdencode task
@@ -1190,6 +1199,7 @@ public class jobMonitor {
             }
          } else {
             jobData job = new jobData();
+            job.startFile = startFile;
             if (file.isFile(config.projectx)) {
                // Use projectx
                job.source       = source;
@@ -1219,6 +1229,7 @@ public class jobMonitor {
       
       if (captions) {
          jobData job = new jobData();
+         job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "captions";
@@ -1240,6 +1251,7 @@ public class jobMonitor {
       
       if (encode) {
          jobData job = new jobData();
+         job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "encode";
@@ -1264,6 +1276,7 @@ public class jobMonitor {
          
          if (encodeName2 != null) {
             job = new jobData();
+            job.startFile    = startFile;
             job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "encode";
@@ -1294,6 +1307,7 @@ public class jobMonitor {
          if (push_files.size() > 0) {
             for (int i=0; i<push_files.size(); ++i) {
                jobData job = new jobData();
+               job.startFile    = startFile;
                job.source       = source;
                job.tivoName     = tivoName;
                job.type         = "push";
@@ -1310,6 +1324,7 @@ public class jobMonitor {
       
       if (custom) {
          jobData job = new jobData();
+         job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "custom";
