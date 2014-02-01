@@ -61,8 +61,8 @@ public class custom implements Serializable {
       if (job.mpegFile_cut != null) {
          mpegFile_cut = job.mpegFile_cut;
          if (! file.isFile(mpegFile_cut)) {
-            String tryit = file.vrdreviewFileSearch(mpegFile_cut);
-            if (tryit.contains("_cut"))
+            String tryit = file.vrdreviewFileSearch(job.startFile);
+            if (tryit != null && tryit.contains("_cut"))
                mpegFile_cut = tryit;
          }
       }

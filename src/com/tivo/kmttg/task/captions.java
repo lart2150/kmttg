@@ -25,8 +25,11 @@ public class captions implements Serializable {
       debug.print("job=" + job);
       if (config.VrdReview_noCuts == 1) {
          // Look for VRD default edit file output
-         if (! file.isFile(job.videoFile))
-            job.videoFile = file.vrdreviewFileSearch(job.videoFile);
+         if (! file.isFile(job.videoFile)) {
+            String tryit = file.vrdreviewFileSearch(job.startFile);
+            if (tryit != null)
+               job.videoFile = tryit;
+         }
       }
       srtFile = string.replaceSuffix(job.videoFile, ".srt");
       this.job = job;

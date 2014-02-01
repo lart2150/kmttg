@@ -51,8 +51,11 @@ public class encode implements Serializable {
          mpeg = job.mpegFile;
       }
       
-      if (! file.isFile(job.mpegFile_cut) && config.VrdReview_noCuts == 1)
-         mpeg = file.vrdreviewFileSearch(mpeg);
+      if (! file.isFile(job.mpegFile_cut) && config.VrdReview_noCuts == 1) {
+         String tryit = file.vrdreviewFileSearch(job.startFile);
+         if (tryit != null)
+            mpeg = tryit;
+      }
 
       if ( ! file.isFile(mpeg) ) {
          log.error("mpeg file not given or doesn't exist: " + mpeg);
