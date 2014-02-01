@@ -78,6 +78,9 @@ public class qsfix implements Serializable {
             
       if (schedule) {
          // Create sub-folders for output file if needed
+         if ( ! jobMonitor.createSubFolders(job.mpegFile, job) ) {
+            schedule = false;
+         }
          if ( ! jobMonitor.createSubFolders(job.mpegFile_fix, job) ) {
             schedule = false;
          }
@@ -131,14 +134,16 @@ public class qsfix implements Serializable {
          if (info != null && info.get("container").equals("mpegts")) {
             if (job.mpegFile.endsWith(".mpg")) {
                job.mpegFile = string.replaceSuffix(job.mpegFile, ".ts");
-               job.mpegFile_fix = job.mpegFile + ".qsfix";
+               String mpegFile_fix = string.replaceSuffix(string.basename(job.startFile), ".ts.qsfix");
+               job.mpegFile_fix = config.qsfixDir + File.separator + mpegFile_fix;
                isFileChanged = true;
             }
          }      
          if (info != null && info.get("container").equals("mp4")) {
             if (job.mpegFile.endsWith(".mpg")) {
                job.mpegFile = string.replaceSuffix(job.mpegFile, ".mp4");
-               job.mpegFile_fix = job.mpegFile + ".qsfix";
+               String mpegFile_fix = string.replaceSuffix(string.basename(job.startFile), ".mp4.qsfix");
+               job.mpegFile_fix = config.qsfixDir + File.separator + mpegFile_fix;
                isFileChanged = true;
             }
          }      
@@ -328,6 +333,9 @@ public class qsfix implements Serializable {
                   }
                }
             }
+            // Create sub-folders for mpegFile if needed
+            if ( ! jobMonitor.createSubFolders(job.mpegFile, job) )
+               log.error("Failed to create mpegFile directory");
             // Now do the file rename
             result = file.rename(job.mpegFile_fix, job.mpegFile);
             if (result)
