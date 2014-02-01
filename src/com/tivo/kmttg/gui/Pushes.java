@@ -86,7 +86,48 @@ public class Pushes {
       backgroundRun b = new backgroundRun();
       b.execute();
    }
-      
+   
+   private void removePushes(JSONArray entries) {
+      // Run in separate background thread
+      class backgroundRun extends SwingWorker<Void, Void> {
+         JSONArray entries;
+
+         public backgroundRun(JSONArray entries) {
+            this.entries = entries;
+         }
+
+         protected Void doInBackground() {
+            try {
+               Remote r = new Remote(tivoName, true);
+               if (r.success) {
+                  for (int i=0; i<entries.length(); ++i) {
+                     JSONObject json = new JSONObject();
+                     json.put("bodyId", r.bodyId_get());
+                     json.put("state", "cancelled");
+                     json.put("cancellationReason", "userStoppedTransfer");
+                     json.put("offerId", entries.getJSONObject(i).getString("offerId"));
+                     //json.put("downloadId", entries.getJSONObject(i).getString("downloadId"));
+                     JSONObject result = r.Command("downloadModify", json);
+                     if (result != null) {
+                        log.print(result.toString(3));
+                     } else {
+                        log.error("push item remove failed");
+                        return null;
+                     }
+                  }
+                  r.disconnect();
+              }
+            } catch (Exception e) {
+               log.error("removePushes - " + e.getMessage());
+               return null;
+            }
+            return null;
+         }
+      }
+      backgroundRun b = new backgroundRun(entries);
+      b.execute();
+   }
+         
    private void init() {
       // Define content for dialog window
       int gy = 0;
@@ -114,11 +155,41 @@ public class Pushes {
             getPushes();
          }
       });
+
+      // Remove button
+      JButton remove = new JButton("Remove");
+      tip = "<html><b>Remove</b><br>Attempt to remove selected entry in the table from push queue.<br>";
+      tip += "NOTE: This will not cancel pushes already in progress or very close to starting.<br>";
+      tip += "NOTE: The response to this operation from mind server is always 'success' so there<br>";
+      tip += "is no guarantee that removing an entry actually works or not.";
+      tip += "</html>";
+      remove.setToolTipText(tip);
+      remove.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            JSONArray entries = new JSONArray();
+            Boolean cont = true;
+            while (cont) {
+               int[] selected = tab.getTable().getSelectedRows();
+               if (selected.length > 0) {
+                  int row = selected[0];
+                 JSONObject json = tab.GetRowData(row);
+                  if (json != null)
+                     entries.put(json);
+                  tab.RemoveRow(row);
+               } else {
+                  cont = false;
+               }
+            }
+            if (entries.length() > 0)
+               removePushes(entries);
+         }
+      });
       
-      // Row 1 = refresh button
+      // Row 1 = 2 buttons
       JPanel row1 = new JPanel();
       row1.setLayout(new BoxLayout(row1, BoxLayout.LINE_AXIS));
       row1.add(refresh);
+      row1.add(remove);
       content.add(row1, c);
       
       // Table
