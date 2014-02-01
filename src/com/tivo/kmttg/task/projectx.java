@@ -67,8 +67,11 @@ public class projectx implements Serializable {
       }      
       
       if (schedule) {
-         // Create sub-folders for output file if needed
+         // Create sub-folders for output files if needed
          if ( ! jobMonitor.createSubFolders(job.mpegFile, job) ) {
+            schedule = false;
+         }
+         if ( ! jobMonitor.createSubFolders(job.mpegFile_fix, job) ) {
             schedule = false;
          }
       }
@@ -311,6 +314,9 @@ public class projectx implements Serializable {
                      }
                   }
                }
+               // Create sub-folders for mpegFile if needed
+               if ( ! jobMonitor.createSubFolders(mpegFile, job) )
+                  log.error("Failed to create mpegFile directory");
                // Now do the file rename
                result = file.rename(job.mpegFile_fix, mpegFile);
                if (result)
