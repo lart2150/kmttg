@@ -808,11 +808,17 @@ public class gui {
          pushesMenuItem.setText("Show pending pyTivo pushes");
          pushesMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+               log.print(config.pyTivo_mind);
                String tivoName = getSelectedTivoName();
                if (tivoName == null)
                   log.error("This command must be run with a TiVo tab selected.");
-               else
+               else {
+                  config.middlemind_host = "middlemind.tivo.com";
+                  if (config.pyTivo_mind.startsWith("staging"))
+                     config.middlemind_host = "stagingmiddlemind.tivo.com";
+                  log.warn("Querying middlemind host: " + config.middlemind_host);
                   new Pushes(tivoName, getJFrame());
+               }
             }
          });
       }
