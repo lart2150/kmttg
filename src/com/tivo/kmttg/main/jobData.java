@@ -24,6 +24,7 @@ import com.tivo.kmttg.util.log;
 public class jobData implements Serializable, Cloneable {
    private static final long serialVersionUID = 1L;
    // Common to all jobs
+   public String startFile = null;
    public String  source = null;
    public Integer monitor = null;
    public Long    time = null;
