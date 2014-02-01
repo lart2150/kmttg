@@ -718,6 +718,11 @@ public class jobMonitor {
          mpegDir = outputDir;
       }
       
+      String qsfixDir = config.qsfixDir;
+      if ( ! file.isDir(qsfixDir) ) {
+         qsfixDir = outputDir;
+      }
+      
       String mpegCutDir = config.mpegCutDir;
       if ( ! file.isDir(mpegCutDir) ) {
          mpegCutDir = outputDir;
@@ -742,7 +747,8 @@ public class jobMonitor {
          } else {
             mpegFile = startFile;
          }
-         mpegFile_fix = mpegFile + ".qsfix";
+         mpegFile_fix = string.replaceSuffix(string.basename(startFile), ".mpg.qsfix");
+         mpegFile_fix = qsfixDir + s + mpegFile_fix;
          
          edlFile = string.replaceSuffix(mpegFile, ".edl");
          xclFile = mpegFile + ".Xcl";
@@ -785,13 +791,15 @@ public class jobMonitor {
          
       } else {
          // Download mode
-         // NOTE: Do NOT use basename function here - need to honor file naming with folders
+         // NOTE: Be careful using basename function here - need to honor file naming with folders
          tivoFile = outputDir + s + startFile;
          mpegFile = string.replaceSuffix(startFile, ".mpg");
          mpegFile = mpegDir + s + mpegFile;
          metaFile = mpegFile + ".txt";
          
-         mpegFile_fix = mpegFile + ".qsfix";
+         // mpegFile_fix doesn't have to honor sub-folders
+         mpegFile_fix = string.replaceSuffix(string.basename(startFile), ".mpg.qsfix");
+         mpegFile_fix = qsfixDir + s + mpegFile_fix;
          
          edlFile = string.replaceSuffix(mpegFile, ".edl");
          xclFile = mpegFile + ".Xcl";
