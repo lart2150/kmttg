@@ -334,38 +334,67 @@ public class file {
 
    // vrdreview output location can vary according to user
    // This function will look for them in .mpg cut dir and then .mpg dir
-   public static String vrdreviewFileSearch(String inputFile) {
-      if (! file.isFile(inputFile)) {
-         String s;
-         Stack<String> tryit = new Stack<String>();
-         String base = string.basename(inputFile);
-         s = config.mpegCutDir + File.separator + string.replaceSuffix(base, ".mpg");
-         tryit.add(s);
-         s = config.mpegCutDir + File.separator + string.replaceSuffix(base, ".ts");
-         tryit.add(s);
-         s = config.mpegCutDir + File.separator + string.replaceSuffix(base, "_cut.mpg");
-         tryit.add(s);
-         s = config.mpegCutDir + File.separator + string.replaceSuffix(base, "_cut.ts");
-         tryit.add(s);
-         s = config.mpegDir + File.separator + string.replaceSuffix(base, "_cut.mpg");
-         tryit.add(s);
-         s = config.mpegDir + File.separator + string.replaceSuffix(base, "_cut.ts");
-         tryit.add(s);
-         s = config.mpegDir + File.separator + string.replaceSuffix(base, " (02).mpg");
-         tryit.add(s);
-         s = config.mpegDir + File.separator + string.replaceSuffix(base, " (02).ts");
-         tryit.add(s);
-         s = config.mpegDir + File.separator + string.replaceSuffix(base, ".mpg");
-         tryit.add(s);
-         s = config.mpegDir + File.separator + string.replaceSuffix(base, ".ts");
-         tryit.add(s);
-         for (String f : tryit) {
-            if (file.isFile(f)) {
-               inputFile = f;
-               break;
-            }
+   public static String vrdreviewFileSearch(String startFile) {
+      String baseFile = string.basename(startFile);
+      String s;
+      String sep = File.separator;
+      Stack<String> tryit = new Stack<String>();
+      
+      // This block honors sub-folders in file naming above mpegCutDir
+      // (mpegCutDir could be same as mpegDir, so look for cut files 1st)
+      s = config.mpegCutDir + sep + string.replaceSuffix(startFile, "_cut.mpg");
+      tryit.add(s);
+      s = config.mpegCutDir + sep + string.replaceSuffix(startFile, "_cut.ts");
+      tryit.add(s);
+      s = config.mpegCutDir + sep + string.replaceSuffix(startFile, ".mpg");
+      tryit.add(s);
+      s = config.mpegCutDir + sep + string.replaceSuffix(startFile, ".ts");
+      tryit.add(s);
+      
+      // This block looks at top mpegCutDir level
+      // (mpegCutDir could be same as mpegDir, so look for cut files 1st)
+      s = config.mpegCutDir + sep + string.replaceSuffix(baseFile, "_cut.mpg");
+      tryit.add(s);
+      s = config.mpegCutDir + sep + string.replaceSuffix(baseFile, "_cut.ts");
+      tryit.add(s);
+      s = config.mpegCutDir + sep + string.replaceSuffix(baseFile, ".mpg");
+      tryit.add(s);
+      s = config.mpegCutDir + sep + string.replaceSuffix(baseFile, ".ts");
+      tryit.add(s);
+      
+      // This block honors sub-folders in file naming above mpegDir
+      s = config.mpegDir + sep + string.replaceSuffix(startFile, "_cut.mpg");
+      tryit.add(s);
+      s = config.mpegDir + sep + string.replaceSuffix(startFile, "_cut.ts");
+      tryit.add(s);
+      s = config.mpegDir + sep + string.replaceSuffix(startFile, " (02).mpg");
+      tryit.add(s);
+      s = config.mpegDir + sep + string.replaceSuffix(startFile, " (02).ts");
+      tryit.add(s);
+      s = config.mpegDir + sep + string.replaceSuffix(startFile, ".mpg");
+      tryit.add(s);
+      s = config.mpegDir + sep + string.replaceSuffix(startFile, ".ts");
+      tryit.add(s);
+      
+      // This block looks at top mpegDir level
+      s = config.mpegDir + sep + string.replaceSuffix(baseFile, "_cut.mpg");
+      tryit.add(s);
+      s = config.mpegDir + sep + string.replaceSuffix(baseFile, "_cut.ts");
+      tryit.add(s);
+      s = config.mpegDir + sep + string.replaceSuffix(baseFile, " (02).mpg");
+      tryit.add(s);
+      s = config.mpegDir + sep + string.replaceSuffix(baseFile, " (02).ts");
+      tryit.add(s);
+      s = config.mpegDir + sep + string.replaceSuffix(baseFile, ".mpg");
+      tryit.add(s);
+      s = config.mpegDir + sep + string.replaceSuffix(baseFile, ".ts");
+      tryit.add(s);
+
+      for (String f : tryit) {
+         if (file.isFile(f)) {
+            return f;
          }
       }
-      return inputFile;
+      return null;
    }
 }
