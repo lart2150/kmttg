@@ -761,6 +761,8 @@ public class jobMonitor {
             } else {
                mpegFile_cut = string.replaceSuffix(mpegFile, "_cut.mpg");
             }
+            if (mpegFile.toLowerCase().endsWith(".vprj"))
+               mpegFile_cut = string.replaceSuffix(mpegFile, "_cut.mpg"); 
          } else {
             // If mpegCutDir different than mpegDir then no need for _cut
             mpegFile_cut = mpegFile;
