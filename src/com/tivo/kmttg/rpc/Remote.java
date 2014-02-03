@@ -585,7 +585,6 @@ public class Remote {
                req = RpcRequest("recordingSearch", false, json);
             } else {
                // Expects count=# in initial json, offset=# after first call
-               json.put("flatten", true);
                req = RpcRequest("recordingFolderItemSearch", false, json);
             }
          }
@@ -871,47 +870,64 @@ public class Remote {
       JSONObject result = null;
 
       try {
-         // Top level list - run in a loop to grab all items
-         Boolean stop = false;
-         int offset = 0;
+         // 1st grab all IDs in one shot
          JSONObject json = new JSONObject();
-         json.put("count", 50);
-         while ( ! stop ) {
-            if (job != null && config.GUIMODE) {
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + allShows.length());
-               if ( jobMonitor.isFirstJobInMonitor(job) )
-                  config.gui.setTitle("playlist: " + allShows.length() + " " + config.kmttg);
-            }
-            result = Command("MyShows", json);
-            if (result != null && result.has("IsFinal") && result.getBoolean("IsFinal"))
-               stop = true;
-            if (result != null && result.has("recordingFolderItem")) {
-               JSONArray items = (JSONArray) result.get("recordingFolderItem");
-               offset += items.length();
-               json.put("offset", offset);
-               if (items.length() == 0)
-                  stop = true;
-               JSONObject item;
-               for (int i=0; i<items.length(); ++i) {
-                  item = items.getJSONObject(i);
-                  result = Command(
-                     "Search",
-                     new JSONObject("{\"recordingId\":\"" + item.getString("childRecordingId") + "\"}")
-                  );
-                  if (result != null) {
-                     if (job != null && job.getURLs) {
-                        if (!getURLs(job.tivoName, result.getJSONArray("recording").getJSONObject(0))) {
-                           return null;
-                        }
-                     }
-                     allShows.put(result);
+         json.put("flatten", true);
+         json.put("noLimit", true);
+         json.put("format", "idSequence");
+         result = Command("MyShows", json);
+         if (result != null && result.has("objectIdAndType")) {
+            JSONArray objects = result.getJSONArray("objectIdAndType");
+            int total = objects.length();
+            Boolean stop = false;
+            int offset = 0;
+            int count = 50;
+            // Now go through all returned 50 at a time
+            while ( ! stop ) {
+               if (job != null && config.GUIMODE) {
+                  String c = "" + allShows.length() + "/" + total;
+                  config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + c);
+                  if ( jobMonitor.isFirstJobInMonitor(job) )
+                     config.gui.setTitle("playlist: " + c + " " + config.kmttg);
+               }
+               JSONArray a = new JSONArray();
+               for (int i=offset; i<offset+count; ++i) {
+                  if (i<total) {
+                     a.put(objects.getString(i));
+                  } else {
+                     stop = true;
                   }
-               } // for
-            } else {
-               // result == null
-               stop = true;
-            } // if
-         } // while
+               }
+               if (a.length() > 0) {
+                  offset += a.length();
+                  JSONObject j = new JSONObject();
+                  j.put("objectIdAndType", a);
+                  result = Command("SearchIds", j);
+                  if (result != null && result.has("recordingFolderItem")) {
+                     JSONArray items = (JSONArray) result.get("recordingFolderItem");
+                     for (int i=0; i<items.length(); ++i) {
+                        JSONObject item = items.getJSONObject(i);
+                        result = Command(
+                           "Search",
+                           new JSONObject("{\"recordingId\":\"" + item.getString("childRecordingId") + "\"}")
+                        );
+                        if (result != null) {
+                           if (job != null && job.getURLs) {
+                              if (!getURLs(job.tivoName, result.getJSONArray("recording").getJSONObject(0))) {
+                                 return null;
+                              }
+                           }
+                           allShows.put(result);
+                        } else {
+                           stop = true;
+                        }
+                     } // for
+                  } else {
+                     stop = true;
+                  }
+               } // if a.length
+            } // while
+         } // if MyShows
       } catch (JSONException e) {
          error("rpc MyShows error - " + e.getMessage());
          return null;
