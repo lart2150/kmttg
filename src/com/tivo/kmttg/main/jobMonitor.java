@@ -176,9 +176,10 @@ public class jobMonitor {
          job = queued.get(i);
          debug.print("job=" + job);
          
-         // If there are prior job types in the family queued don't schedule yet
+         // If there are prior job types in the family queued don't schedule yet (except atomic)
          if ( priorInFamilyExist(job.familyId, famList) ) {
-            continue;
+            if ( ! job.type.equals("atomic") )
+               continue;
          }
          
          // Only 1 download at a time per Tivo allowed
