@@ -498,9 +498,13 @@ public class jobMonitor {
          if (sourceFile != null && JOBS.get(i).source != null) {
             if(JOBS.get(i).source.equals(sourceFile)) {
                if (JOBS.get(i).type.equals(job.type)) {
-                  // Identical job => do not run this job
-                  // NOTE: Types below are allowed to have multiple at a time
-                  if (! job.type.equals("push") && ! job.type.equals("metadata") && ! job.type.equals("javametadata") && ! job.type.equals("metadataTivo"))
+                  // Identical job => do not run this job (with a few exceptions)
+                  String[] exceptions = {"push","metadata","javametadata","metadataTivo","atomic"};
+                  Boolean OK = false;
+                  for (String ex : exceptions)
+                     if (job.type.equals(ex))
+                        OK = true;
+                  if (!OK)
                      return false;
                }
                sameSource = true;
