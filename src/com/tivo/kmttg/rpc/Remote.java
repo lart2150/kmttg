@@ -958,7 +958,9 @@ public class Remote {
                String port_https = config.getWanSetting(tivoName, "https");
                if (port_https == null)
                   port_https = "443";
-               String fname = URLEncoder.encode(json.getString("title"), "UTF-8");
+               String fname = URLEncoder.encode(id, "UTF-8");
+               if (json.has("title"))
+                  fname = URLEncoder.encode(json.getString("title"), "UTF-8");
                String url = "http://" + ip + ":" + port_http + "/download/" +
                   fname + ".TiVo?Container=%2FNowPlaying&id=" + id;
                String url_details = "https://" + ip + ":" + port_https +
