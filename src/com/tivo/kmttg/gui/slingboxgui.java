@@ -459,7 +459,7 @@ public class slingboxgui {
       else if (component.equals("vbw")) {
          text = "<b>Video bit rate (Kbps)</b><br>";
          text += "Video bit rate in Kbps to use for the capture.<br>";
-         text += "NOTE: This is only relevant for Slingbox 350/500 model using 1920x1080 resolution";
+         text += "NOTE: Slingbox 350/500 models only affected by this setting for 1920x1080 resolution";
       }
       else if (component.equals("type")) {
          text = "<b>Slingbox model</b><br>";
