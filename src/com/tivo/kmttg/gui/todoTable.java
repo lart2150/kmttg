@@ -1,5 +1,6 @@
 package com.tivo.kmttg.gui;
 
+import java.awt.Component;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Comparator;
@@ -12,6 +13,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
@@ -50,19 +52,53 @@ public class todoTable {
          }
       );
       
+      class ColorColumnRenderer extends DefaultTableCellRenderer {
+         private static final long serialVersionUID = 1L;
+         
+         public ColorColumnRenderer() {
+            super(); 
+         }
+         
+         public Component getTableCellRendererComponent
+             (JTable table, Object value, boolean isSelected,
+              boolean hasFocus, int row, int column) 
+         {
+            Component cell = super.getTableCellRendererComponent
+               (table, value, isSelected, hasFocus, row, column);
+            
+            if ( ! isSelected ) {
+               if (column % 2 == 0)
+                  cell.setBackground(config.tableBkgndLight);
+               else
+                  cell.setBackground(config.tableBkgndDarker);
+               JSONObject json = GetRowData(row);
+               if (json != null && json.has("state")) {
+                  try {
+                     if (json.getString("state").equals("inProgress"))
+                        cell.setBackground(config.tableBkgndRecording);
+                  } catch (JSONException e) {
+                     log.error("todoTable ColorColumnRenderer - " + e.getMessage());
+                  }
+               }
+            }         
+            cell.setFont(config.tableFont);
+           
+            return cell;
+         }
+      }      
       // Change color & font
       TableColumn tm;
       tm = TABLE.getColumnModel().getColumn(0);
-      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+      tm.setCellRenderer(new ColorColumnRenderer());
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
       tm = TABLE.getColumnModel().getColumn(1);
-      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+      tm.setCellRenderer(new ColorColumnRenderer());
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
       tm = TABLE.getColumnModel().getColumn(2);
-      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+      tm.setCellRenderer(new ColorColumnRenderer());
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
       tm = TABLE.getColumnModel().getColumn(3);
-      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+      tm.setCellRenderer(new ColorColumnRenderer());
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
       
       // Define custom column sorting routines
@@ -199,6 +235,8 @@ public class todoTable {
                 title += s.json.getString("title");
              if (s.json.has("subtitle"))
                 title += " - " + s.json.getString("subtitle");
+             if (s.json.has("state") && s.json.getString("state").equals("inProgress"))
+                title += " (currently recording)";
              log.warn(title);
              log.print(message);
 
