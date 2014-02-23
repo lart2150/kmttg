@@ -279,7 +279,7 @@ public class todoTable {
              return;
           JSONObject json = GetRowData(selected[0]);
           if (json != null)
-             rnpl.printJSON(json);
+             rnpl.pprintJSON(json);
        } else if (keyCode == KeyEvent.VK_Q) {
           // Web query currently selected entry
           int[] selected = TableUtil.GetSelectedRows(TABLE);
