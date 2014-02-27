@@ -2063,11 +2063,12 @@ public class remotegui {
       // SPS backdoors
       String sps_name, sps_text;
       String sps_text_end = "Should be used while playing back a recorded show.</html>";
-      sps_name = "Quick clear banner: SPSPS";
+      sps_name = "Quick clear play bar: SPSPS";
       SPS.put(sps_name, "select play select pause select play");
       sps_text = "<html><b>" + sps_name + "</b><br>";
       sps_text += SPS.get(sps_name) + "<br>";
       sps_text += "Toggle 'clear trickplay banner quickly' setting.<br>";
+      sps_text += "This will also clear any 'pause ads' quickly.<br>";
       sps_text += sps_text_end;
       SPS.put(sps_name + "_tooltip", sps_text);
 
