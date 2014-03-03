@@ -64,31 +64,16 @@ public class Remote {
    private SSLSocketFactory sslSocketFactory = null;
    
    public class NaiveTrustManager implements X509TrustManager {
-     /**
-      * Doesn't throw an exception, so this is how it approves a certificate.
-      * @see javax.net.ssl.X509TrustManager#checkClientTrusted(java.security.cert.X509Certificate[], String)
-      **/
+     // Doesn't throw an exception, so this is how it approves a certificate.
      public void checkClientTrusted ( X509Certificate[] cert, String authType )
-                 throws CertificateException 
-     {
-     }
+                 throws CertificateException {}
 
-     /**
-      * Doesn't throw an exception, so this is how it approves a certificate.
-      * @see javax.net.ssl.X509TrustManager#checkServerTrusted(java.security.cert.X509Certificate[], String)
-      **/
+     // Doesn't throw an exception, so this is how it approves a certificate.
      public void checkServerTrusted ( X509Certificate[] cert, String authType ) 
-        throws CertificateException 
-     {
-     }
+        throws CertificateException {}
 
-     /**
-      * @see javax.net.ssl.X509TrustManager#getAcceptedIssuers()
-      **/
-     public X509Certificate[] getAcceptedIssuers ()
-     {
-       //return null;  // I've seen someone return new X509Certificate[ 0 ]; 
-        return new X509Certificate[ 0 ];
+     public X509Certificate[] getAcceptedIssuers () {
+        return new X509Certificate[0];
      }
    }
    
@@ -208,17 +193,8 @@ public class Remote {
             bodyId_get();
          }
       } catch (Exception e) {
-         if (e.getMessage().contains("CertificateException")) {
-            String message = "This version of Java likely has disabled MD2 or RSA certificate support\n";
-            message += "which is needed for kmttg Remote functions to work. You will need to edit\n";
-            message += "lib/security/security.java file under your Java installation and put a hash\n";
-            message += "character (#) in front of the following line to re-enable MD2/RSA certificates:\n";
-            message += "jdk.certpath.disabledAlgorithms=MD2, RSA keySize < 1024";
-            error(message);
-         } else {
-            error("RemoteInit - (IP=" + IP + ", port=" + port + "): " + e.getMessage());
-            error(Arrays.toString(e.getStackTrace()));
-         }
+         error("RemoteInit - (IP=" + IP + ", port=" + port + "): " + e.getMessage());
+         error(Arrays.toString(e.getStackTrace()));
          success = false;
       }
    }
