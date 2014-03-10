@@ -393,6 +393,18 @@ public class nplTable {
                         cell.setBackground(config.tableBkgndInHistory);
                   }
                }
+               if (d != null && d.folder) {
+                  // Check inside folder for any in progress recordings
+                  for (int i=0; i<d.folderData.size(); ++i) {
+                     Hashtable<String,String> h = d.folderData.get(i);
+                     if (h.containsKey("ExpirationImage")) {
+                        if (h.get("ExpirationImage").equals("in-progress-recording"))
+                           cell.setBackground( config.tableBkgndRecording );
+                        if (h.get("ExpirationImage").equals("in-progress-transfer"))
+                           cell.setBackground( config.tableBkgndRecording );
+                     }
+                  }
+               }
                
             } else {
                // FILES mode
