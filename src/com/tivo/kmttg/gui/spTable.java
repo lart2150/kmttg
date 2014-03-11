@@ -851,12 +851,22 @@ public class spTable {
                             }
                             Boolean schedule = true;
                             for (int j=0; j<existing.length(); ++j) {
-                               if(title.equals(existing.getJSONObject(j).getString("title"))) {
-                                  if (channel.length() > 0 && existing.getJSONObject(j).has("channel")) {
-                                     if(channel.equals(existing.getJSONObject(j).getString("channel")))
-                                        schedule = false;
-                                  } else
+                               JSONObject e = existing.getJSONObject(j);
+                               if(title.equals(e.getString("title"))) {
+                                  if (channel.length() > 0 && e.has("idSetSource")) {
+                                     JSONObject id = e.getJSONObject("idSetSource");
+                                     if (id.has("channel")) {
+                                        JSONObject c = id.getJSONObject("channel");
+                                        String callSign = "";
+                                        if (c.has("callSign"))
+                                           callSign = c.getString("callSign");
+                                        if (channel.equals(callSign)) {
+                                           schedule = false;
+                                        }
+                                     }
+                                  } else {
                                      schedule = false;
+                                  }
                                }
                             }
                             
@@ -867,7 +877,7 @@ public class spTable {
                                if (result != null)
                                   log.print("success");
                             } else {
-                               log.warn("Existing SP with same title found, not scheduling: " +
+                               log.warn("Existing SP with same title + callSign found, not scheduling: " +
                                   json.getString("title")
                                );
                             }

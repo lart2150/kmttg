@@ -1865,11 +1865,19 @@ public class Remote {
          // Check against existing
          Boolean schedule = true;
          for (int j=0; j<existing.length(); ++j) {
-            if(title.equals(existing.getJSONObject(j).getString("title"))) {
-               if (channel.length() > 0 && existing.getJSONObject(j).has("channel")) {
-                  if (channel.equals(existing.getJSONObject(j).getString("channel"))) {
-                     schedule = false;
-                     existingSP = existing.getJSONObject(j);
+            JSONObject e = existing.getJSONObject(j);
+            if(title.equals(e.getString("title"))) {
+               if (channel.length() > 0 && e.has("idSetSource")) {
+                  JSONObject id = e.getJSONObject("idSetSource");
+                  if (id.has("channel")) {
+                     JSONObject c = id.getJSONObject("channel");
+                     String callSign = "";
+                     if (c.has("callSign"))
+                        callSign = c.getString("callSign");
+                     if (channel.equals(callSign)) {
+                        schedule = false;
+                        existingSP = e;
+                     }
                   }
                } else {
                   schedule = false;
@@ -1897,7 +1905,7 @@ public class Remote {
                }
             }
          } else {
-            log.warn("Existing SP with same title found, prompting to modify instead.");
+            log.warn("Existing SP with same title + callSign found, prompting to modify instead.");
             if (existingSP != null) {
                JSONObject result = config.gui.remote_gui.spOpt.promptUser(
                   "(" + tivoName + ") " + "Modify SP - " + title, existingSP
