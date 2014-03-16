@@ -2467,6 +2467,17 @@ public class remotegui {
                      json = reply.getJSONArray("bodyConfig").getJSONObject(0);
                      if (json.has("userDiskSize") && json.has("userDiskUsed")) {
                         Float sizeGB = (float)json.getLong("userDiskSize")/(1024*1024);
+                        // Update diskSpace hash if necessary
+                        Boolean update = true;
+                        if (config.diskSpace.containsKey(tivoName)) {
+                           if (Math.round(config.diskSpace.get(tivoName)) == Math.round(sizeGB))
+                              update = false;
+                        }
+                        if (update) {
+                           log.warn("Updating " + tivoName + " disk space to " + sizeGB + " GB");
+                           config.diskSpace.put(tivoName, sizeGB);
+                           config.save(config.configIni);
+                        }
                         Float pct = (float)100*json.getLong("userDiskUsed")/json.getLong("userDiskSize");
                         String pct_string = String.format("%s (%5.2f%%)", json.get("userDiskUsed"), pct);
                         String size_string = String.format("%s (%5.2f GB)", json.get("userDiskSize"), sizeGB);
