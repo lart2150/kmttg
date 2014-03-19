@@ -130,7 +130,8 @@ public class auto {
    
    public static void processAll(String tivoName, Stack<Hashtable<String,String>> ENTRIES) {
       int count = 0;
-      for (int j=0; j<ENTRIES.size(); j++) {
+      // Reverse order so as to process oldest 1st
+      for (int j=ENTRIES.size()-1; j>=0; j--) {
          if ( auto.keywordSearch(ENTRIES.get(j)) )
             count++;
       }
