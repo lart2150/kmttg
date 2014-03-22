@@ -4219,7 +4219,8 @@ public class configMain {
       else if (component.equals("lookAndFeel")) {
          text =  "<b>look and feel</b><br>";
          text += "Select look and feel to use for GUI in general.<br>";
-         text += "NOTE: Anything other than 'default' may not look as intended.";
+         text += "NOTE: Anything other than 'default' may not look as intended.<br>";
+         text += "NOTE: The <b>Mac OS</b> choice is reported to cause issues so should not be used";
       }
       else if (component.equals("MinChanDigits")) {
          text =  "<b>Min # Channel Digits</b><br>";
