@@ -863,7 +863,8 @@ public class configMain {
       metadata_files.setSelectedItem(config.metadata_files);
       
       // lookAndFeel
-      lookAndFeel.setSelectedItem(config.lookAndFeel);
+      if (lookAndFeel != null && config.lookAndFeel != null)
+         lookAndFeel.setSelectedItem(config.lookAndFeel);
       
       // autotune settings
       if (autotune_tivoName != null) {
