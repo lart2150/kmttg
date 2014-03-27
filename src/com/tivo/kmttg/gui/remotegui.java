@@ -90,11 +90,11 @@ public class remotegui {
    public  recordOptions recordOpt = new recordOptions();
    public  wlOptions wlOpt = new wlOptions();
    
-   private JComboBox tivo_web = null;
-   private JButton send_web = null;
-   private JTextField url_web = null;
-   public  JComboBox bookmark_web = null;
-   private JComboBox type_web = null;
+   //private JComboBox tivo_web = null;
+   //private JButton send_web = null;
+   //private JTextField url_web = null;
+   //public  JComboBox bookmark_web = null;
+   //private JComboBox type_web = null;
    
    private JComboBox tivo_info = null;
    JTextPane text_info = null;
@@ -1389,7 +1389,8 @@ public class remotegui {
       c.gridwidth = 8;
       c.fill = GridBagConstraints.BOTH;
       panel_premiere.add(row2_premiere, c);
-
+      
+      /* Comment out since TiVo disabled general web access via RPC
       // Web tab items      
       gy = 0;
       c.ipady = 0;
@@ -1496,6 +1497,7 @@ public class remotegui {
       c.gridy = gy;
       c.anchor = GridBagConstraints.WEST;
       panel_web.add(row3_web, c);
+      */
       
       // System Information tab items      
       gy = 0;
@@ -2377,7 +2379,7 @@ public class remotegui {
       tabbed_panel.add("Guide", panel_guide);
       tabbed_panel.add("Deleted", panel_deleted);
       tabbed_panel.add("Remote", panel_rc);
-      tabbed_panel.add("Web", panel_web);
+      //tabbed_panel.add("Web", panel_web);
       tabbed_panel.add("Info", panel_info);
       
       // Init the tivo comboboxes
@@ -2408,6 +2410,7 @@ public class remotegui {
       jobMonitor.submitNewJob(job);
    }
    
+   /*
    private void RC_webCB(final String tivoName, final String url, final String type) {
       class backgroundRun extends SwingWorker<Object, Object> {
          protected Boolean doInBackground() {
@@ -2451,7 +2454,7 @@ public class remotegui {
       }
       backgroundRun b = new backgroundRun();
       b.execute();
-   }
+   }*/
    
    private void RC_infoCB(final String tivoName) {
       class backgroundRun extends SwingWorker<Object, Object> {
@@ -2631,8 +2634,8 @@ public class remotegui {
          return (String)tivo_search.getSelectedItem();
       if (tab.equals("rc") || tab.equals("Remote"))
          return (String)tivo_rc.getSelectedItem();
-      if (tab.equals("web") || tab.equals("Web"))
-         return (String)tivo_web.getSelectedItem();
+      //if (tab.equals("web") || tab.equals("Web"))
+      //   return (String)tivo_web.getSelectedItem();
       if (tab.equals("info") || tab.equals("Info"))
          return (String)tivo_info.getSelectedItem();
       if (tab.equals("premiere") || tab.equals("Season Premieres"))
@@ -2657,8 +2660,8 @@ public class remotegui {
             tivo_search.setSelectedItem(tivoName);
          if (tab.equals("rc"))
             tivo_rc.setSelectedItem(tivoName);
-         if (tab.equals("web"))
-            tivo_web.setSelectedItem(tivoName);
+         //if (tab.equals("web"))
+         //   tivo_web.setSelectedItem(tivoName);
          if (tab.equals("info"))
             tivo_info.setSelectedItem(tivoName);
          if (tab.equals("premiere"))
@@ -2699,7 +2702,7 @@ public class remotegui {
       tivo_search.removeAllItems();
       tivo_rc.removeAllItems();
       tivo_info.removeAllItems();
-      tivo_web.removeAllItems();
+      //tivo_web.removeAllItems();
       tivo_premiere.removeAllItems();
       for (String tivoName : config.getTivoNames()) {
          if (config.rpcEnabled(tivoName) || config.mindEnabled(tivoName)) {
@@ -2712,9 +2715,9 @@ public class remotegui {
             tivo_info.addItem(tivoName);
             tivo_premiere.addItem(tivoName);
          }
-         if (config.rpcEnabled(tivoName)) {
-            tivo_web.addItem(tivoName);            
-         }
+         //if (config.rpcEnabled(tivoName)) {
+         //   tivo_web.addItem(tivoName);            
+         //}
          // Remote tab always valid as it can use RPC or telnet
          tivo_rc.addItem(tivoName);
       }

@@ -1746,11 +1746,11 @@ public class gui {
                   ofp.write("1\n");
                else
                   ofp.write("0\n");
-               if (remote_gui.bookmark_web.getItemCount() > 0) {
+               /*if (remote_gui.bookmark_web.getItemCount() > 0) {
                   ofp.write("\n<rpc_web_bookmarks>\n");
                   for (int j=0; j<remote_gui.bookmark_web.getItemCount(); ++j)
                      ofp.write(remote_gui.bookmark_web.getItemAt(j) + "\n");
-               }
+               }*/
                
                // Record dialog
                JSONObject json = remote_gui.recordOpt.getValues();
@@ -2025,12 +2025,12 @@ public class gui {
                if (l.length == 2 && tivoTabs.containsKey(l[1]))
                   remote_gui.setTivoName(l[0], l[1]);
             }
-            if (key.equals("rpc_web_bookmarks") && remote_gui != null) {
+            /*if (key.equals("rpc_web_bookmarks") && remote_gui != null) {
                if (line.matches("^html::.+$") || line.matches("^flash::.+$"))
                   remote_gui.bookmark_web.addItem(line);
                else
                   remote_gui.bookmark_web.addItem("html::" + line);
-            }
+            }*/
             if (key.equals("rpc_includePast") && remote_gui != null) {
                if (line.matches("1"))
                   remote_gui.includeHistory_cancel.setSelected(true);
