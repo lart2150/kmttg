@@ -114,10 +114,10 @@ public class download_decrypt implements Serializable {
       command += "--insecure --cookie sid=abc --cookie-jar \"" + cookieFile + "\" --url \"" + url + "\" ";
 
       // NOTE: Series 4 Resume Downloads no longer works so turn it off with message
-      if (job.offset != null && config.rpcEnabled(job.tivoName)) {
+      /*if (job.offset != null && config.rpcEnabled(job.tivoName)) {
          job.offset = null;
          log.warn("Disabling resume: Resume downloads only works for series 3 or earlier TiVos");
-      }
+      }*/
       
       if (job.offset != null) {
          command += "-C " + job.offset + " ";
