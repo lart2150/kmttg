@@ -104,10 +104,10 @@ public class jdownload_decrypt implements Serializable {
       process = new backgroundProcess();            
       String message = "DOWNLOADING/DECRYPTING";
       // NOTE: Series 4 Resume Downloads no longer works so turn it off with message
-      if (job.offset != null && config.rpcEnabled(job.tivoName)) {
+      /*if (job.offset != null && config.rpcEnabled(job.tivoName)) {
          job.offset = null;
          log.warn("Disabling resume: Resume downloads only works for series 3 or earlier TiVos");
-      }
+      }*/
       if (job.offset != null) {
          message = "RESUMING DOWNLOAD/DECRYPT WITH OFFSET=" + job.offset;
          job.tivoFileSize -= Long.parseLong(job.offset);

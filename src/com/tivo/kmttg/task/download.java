@@ -108,10 +108,10 @@ public class download implements Serializable {
       command.add("--url");
       command.add(url);
       // NOTE: Series 4 Resume Downloads no longer works so turn it off with message
-      if (job.offset != null && config.rpcEnabled(job.tivoName)) {
+      /*if (job.offset != null && config.rpcEnabled(job.tivoName)) {
          job.offset = null;
          log.warn("Disabling resume: Resume downloads only works for series 3 or earlier TiVos");
-      }
+      }*/
       if (job.offset != null) {
          command.add("-C");
          command.add(job.offset);
