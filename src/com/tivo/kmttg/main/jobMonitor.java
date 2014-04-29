@@ -933,7 +933,9 @@ public class jobMonitor {
                      job.seriesId = entry.get("SeriesId");
                   if (entry.containsKey("ProgramId"))
                      job.ProgramId = entry.get("ProgramId");
-                  submitNewJob(job);
+                  // Only submit job if metaFile doesn't exist already
+                  if (! file.isFile(job.metaFile))
+                     submitNewJob(job);
                }
             } else {
                log.error("metadata files setting=" + config.metadata_files + " but file(s) not available for this task set");
