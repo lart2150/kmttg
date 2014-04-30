@@ -3353,7 +3353,8 @@ public class remotegui {
       }
       else if (component.equals("refresh_guide")){
          text = "<b>Channels</b><br>";
-         text += "Retrieve list of channels for this TiVo if necessary.";
+         text += "Refresh list of channels for this TiVo. Note that only channels that are enabled in<br>";
+         text += "your lineup are displayed unless you enable the <b>All</b> option to the left of this button.";
       }
       else if (component.equals("back_guide")){
          text = "<b>Back</b><br>";
