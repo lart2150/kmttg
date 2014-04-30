@@ -80,6 +80,7 @@ public class remotegui {
    public  JButton refresh_guide = null;
    private JComboBox tivo_guide = null;
    private JComboBox guide_start = null;
+   private JCheckBox guide_channels = null;
    public  int guide_range = 12; // Number of hours to show in guide at a time
    private int guide_hour_increment = 12; // Number of hours for date increment
    private int guide_total_range = 11;    // Number of days
@@ -456,6 +457,9 @@ public class remotegui {
       });
       tivo_guide.setToolTipText(getToolTip("tivo_guide"));
       
+      guide_channels = new JCheckBox("All Channels", false);
+      guide_channels.setToolTipText(getToolTip("guide_channels"));
+      
       JLabel guide_start_label = new JLabel("Start");
       guide_start = new javax.swing.JComboBox();
       guide_start.setToolTipText(getToolTip("guide_start"));
@@ -488,14 +492,14 @@ public class remotegui {
                TableUtil.clear(tab_guide.TABLE);
                String tivoName = (String)tivo_guide.getSelectedItem();
                if (tivoName != null && tivoName.length() > 0) {
-                  // Obtain and display channel list only if necessary
+                  // Obtain and display channel list
                   tab_guide.updateChannels(tivoName);
                }
             }
          }
       });
 
-      JButton export_channels = new JButton("Export Channels...");
+      JButton export_channels = new JButton("Export ...");
       export_channels.setMargin(new Insets(1,1,1,1));
       export_channels.setToolTipText(getToolTip("export_channels"));
       export_channels.addActionListener(new java.awt.event.ActionListener() {
@@ -595,6 +599,8 @@ public class remotegui {
       row1_guide.add(guide_start_label);
       row1_guide.add(Box.createRigidArea(space_5));
       row1_guide.add(guide_start);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(guide_channels);
       row1_guide.add(Box.createRigidArea(space_5));
       row1_guide.add(refresh_guide);
       row1_guide.add(Box.createRigidArea(space_5));
@@ -3285,6 +3291,10 @@ public class remotegui {
       return false;
    }
    
+   public Boolean AllChannels() {
+      return guide_channels.isSelected();
+   }
+   
    public void updateTodoIfNeeded(String tabName) {
       if (todoNeedsRefresh()) {
          log.warn("Refreshing todo lists");
@@ -3336,6 +3346,11 @@ public class remotegui {
          text += "NOTE: If you are inside a channel folder when you change this setting<br>";
          text += "the guide listings will automatically update to new date.";
       }
+      if (component.equals("guide_channels")) {
+         text = "<b>All Channels</b><br>";
+         text += "If this option is checked then all channels in your lineup are shown, else just.<br>";
+         text += "channels that are enabled in your lineup are shown.";
+      }
       else if (component.equals("refresh_guide")){
          text = "<b>Channels</b><br>";
          text += "Retrieve list of channels for this TiVo if necessary.";
@@ -3357,7 +3372,7 @@ public class remotegui {
          text += "NOTE: Not available for units older than series 4.";
       }
       else if (component.equals("export_channels")){
-         text = "<b>Export Channels...</b><br>";
+         text = "<b>Export ...</b><br>";
          text += "Export current channel lineup of this TiVo to CSV file.<br>";
          text += "Spreadsheet includes both included and excluded channels from channel list.<br>";
          text += "This can be useful for a new TiVo to consult a spreadsheet so as to know which<br>";

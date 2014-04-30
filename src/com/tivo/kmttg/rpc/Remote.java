@@ -1359,6 +1359,7 @@ public class Remote {
       try {
          // Top level list
          JSONObject json = new JSONObject();
+         Boolean all_channels = config.gui.remote_gui.AllChannels();
          json.put("noLimit", "true");
          json.put("bodyId", bodyId_get());
          if (job != null && config.GUIMODE)
@@ -1368,8 +1369,11 @@ public class Remote {
             // Only want received channels returned
             JSONArray a = new JSONArray();
             for (int i=0; i<result.getJSONArray("channel").length(); ++i) {
+               Boolean add = true;
                json = result.getJSONArray("channel").getJSONObject(i);
-               if (json.getBoolean("isReceived"))
+               if (! all_channels && ! json.getBoolean("isReceived"))
+                  add = false;
+               if (add)
                   a.put(json);
             }
             return a;

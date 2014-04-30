@@ -556,11 +556,11 @@ public class guideTable {
    
    public void updateChannels(final String tivoName) {
       // Only need to do this once to get channel list
-      if (tivo_data.containsKey(tivoName) && tivo_data.get(tivoName) != null) {
+      /*if (tivo_data.containsKey(tivoName) && tivo_data.get(tivoName) != null) {
          TableUtil.clear(TABLE);
          AddRows(tivoName, tivo_data.get(tivoName));
          return;
-      }
+      }*/
       // No data available so queue up a job to get channel list
       log.warn("Obtaining list of channels for TiVo: " + tivoName);
       jobData job = new jobData();
@@ -588,7 +588,8 @@ public class guideTable {
                   JSONObject json = new JSONObject();
                   json.put("bodyId", r.bodyId_get());
                   json.put("levelOfDetail", "medium");
-                  json.put("isReceived", "true");
+                  if (! config.gui.remote_gui.AllChannels())
+                     json.put("isReceived", "true");
                   json.put("orderBy", new JSONArray("[\"channelNumber\"]"));
                   json.put("maxStartTime", maxStartTime);
                   json.put("minEndTime", minEndTime);
