@@ -457,7 +457,7 @@ public class remotegui {
       });
       tivo_guide.setToolTipText(getToolTip("tivo_guide"));
       
-      guide_channels = new JCheckBox("All Channels", false);
+      guide_channels = new JCheckBox("All", false);
       guide_channels.setToolTipText(getToolTip("guide_channels"));
       
       JLabel guide_start_label = new JLabel("Start");
@@ -3347,8 +3347,8 @@ public class remotegui {
          text += "the guide listings will automatically update to new date.";
       }
       if (component.equals("guide_channels")) {
-         text = "<b>All Channels</b><br>";
-         text += "If this option is checked then all channels in your lineup are shown, else just.<br>";
+         text = "<b>All</b><br>";
+         text += "If this option is checked then all channels in your lineup are shown, else just<br>";
          text += "channels that are enabled in your lineup are shown.";
       }
       else if (component.equals("refresh_guide")){
