@@ -397,9 +397,9 @@ public class configAuto {
       row4.add(Box.createRigidArea(space_5));
       row4.add(encode);
       row4.add(Box.createRigidArea(space_5));
-      row4.add(push);
-      row4.add(Box.createRigidArea(space_5));
       row4.add(custom);
+      row4.add(Box.createRigidArea(space_5));
+      row4.add(push);
 
       gy++;
       c.gridy = gy;
