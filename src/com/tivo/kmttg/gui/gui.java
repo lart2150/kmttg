@@ -399,9 +399,9 @@ public class gui {
          tasks_panel.add(Box.createRigidArea(space_5));
          tasks_panel.add(encode);
          tasks_panel.add(Box.createRigidArea(space_5));
-         tasks_panel.add(push);
-         tasks_panel.add(Box.createRigidArea(space_5));
          tasks_panel.add(custom);
+         tasks_panel.add(Box.createRigidArea(space_5));
+         tasks_panel.add(push);
          
          // Encoding row
          // Encoding label

@@ -212,8 +212,8 @@ public class jobData implements Serializable, Cloneable {
          "encode",
          "vrdencode",
          "atomic",
-         "push",
          "custom",
+         "push",
          "slingbox"
       };
    }
