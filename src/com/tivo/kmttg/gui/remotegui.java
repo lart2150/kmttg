@@ -90,6 +90,7 @@ public class remotegui {
    public  spOptions spOpt = new spOptions();
    public  recordOptions recordOpt = new recordOptions();
    public  wlOptions wlOpt = new wlOptions();
+   private mRecordOptions mRecordOpt = new mRecordOptions();
    
    //private JComboBox tivo_web = null;
    //private JButton send_web = null;
@@ -567,6 +568,18 @@ public class remotegui {
             }
          }
       });
+      
+      JButton guide_manual_record = new JButton("MR");
+      guide_manual_record.setMargin(new Insets(1,1,1,1));
+      guide_manual_record.setToolTipText(getToolTip("guide_manual_record"));
+      guide_manual_record.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_guide.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               mRecordOpt.promptUser(tivoName);
+            }
+         }
+      });
 
       JButton guide_refresh_todo = new JButton("Refresh ToDo");
       guide_refresh_todo.setMargin(new Insets(1,1,1,1));
@@ -611,6 +624,8 @@ public class remotegui {
       row1_guide.add(recordSP_guide);
       row1_guide.add(Box.createRigidArea(space_5));
       row1_guide.add(wishlist_guide);
+      row1_guide.add(Box.createRigidArea(space_5));
+      row1_guide.add(guide_manual_record);
       row1_guide.add(Box.createRigidArea(space_5));
       row1_guide.add(guide_refresh_todo);
       panel_guide.add(row1_guide, c);
@@ -3389,6 +3404,11 @@ public class remotegui {
          text += "NOTE: The Season Pass created will have lowest priority, so you may want to adjust the<br>";
          text += "priority after creating it.<br>";
          text += "NOTE: Not available for units older than series 4.";
+      }
+      else if (component.equals("guide_manual_record")) {
+         text = "<b>MR</b><br>";
+         text += "Schedule a manual recording on selected TiVo. This can be a single manual recording or<br>";
+         text += "a repeating manual recording just as can be created using TiVo GUI.";
       }
       else if (component.equals("guide_refresh_todo")) {
          text = "<b>Refresh ToDo</b><br>";
