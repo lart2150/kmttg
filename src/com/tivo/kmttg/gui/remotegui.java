@@ -1758,6 +1758,18 @@ public class remotegui {
             }
          }
       });
+      
+      JButton search_manual_record = new JButton("MR");
+      search_manual_record.setMargin(new Insets(1,1,1,1));
+      search_manual_record.setToolTipText(getToolTip("guide_manual_record"));
+      search_manual_record.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tivoName = (String)tivo_search.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               mRecordOpt.promptUser(tivoName);
+            }
+         }
+      });
 
       JButton refresh_todo_search = new JButton("Refresh ToDo");
       refresh_todo_search.setMargin(new Insets(1,1,1,1));
@@ -1807,6 +1819,8 @@ public class remotegui {
       row1_search.add(recordSP_search);
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(wishlist_search);
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(search_manual_record);
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(refresh_todo_search);
       panel_search.add(row1_search, c);
