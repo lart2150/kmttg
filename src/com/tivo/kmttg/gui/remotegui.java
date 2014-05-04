@@ -84,6 +84,7 @@ public class remotegui {
    public  int guide_range = 12; // Number of hours to show in guide at a time
    private int guide_hour_increment = 12; // Number of hours for date increment
    private int guide_total_range = 11;    // Number of days
+   private JButton guide_manual_record = null;
    
    private spTable tab_sp = null;
    private JComboBox tivo_sp = null;
@@ -130,6 +131,7 @@ public class remotegui {
    private JSpinner max_search = null;
    public Hashtable<String,JSONArray> search_info = new Hashtable<String,JSONArray>();
    private AdvSearch advSearch = new AdvSearch();
+   private JButton search_manual_record = null;
 
    private JComboBox tivo_rc = null;
    private JComboBox hme_rc = null;
@@ -569,7 +571,7 @@ public class remotegui {
          }
       });
       
-      JButton guide_manual_record = new JButton("MR");
+      guide_manual_record = new JButton("MR");
       guide_manual_record.setMargin(new Insets(1,1,1,1));
       guide_manual_record.setToolTipText(getToolTip("guide_manual_record"));
       guide_manual_record.addActionListener(new java.awt.event.ActionListener() {
@@ -1759,7 +1761,7 @@ public class remotegui {
          }
       });
       
-      JButton search_manual_record = new JButton("MR");
+      search_manual_record = new JButton("MR");
       search_manual_record.setMargin(new Insets(1,1,1,1));
       search_manual_record.setToolTipText(getToolTip("guide_manual_record"));
       search_manual_record.addActionListener(new java.awt.event.ActionListener() {
@@ -2797,11 +2799,13 @@ public class remotegui {
          wishlist_search.setEnabled(state);
          record_search.setEnabled(state);
          recordSP_search.setEnabled(state);
+         search_manual_record.setEnabled(state);
       }
       if (tab.equals("Guide")) {
          wishlist_guide.setEnabled(state);
          record_guide.setEnabled(state);
          recordSP_guide.setEnabled(state);
+         guide_manual_record.setEnabled(state);
       }
       if (tab.equals("Deleted")) {
          recover_deleted.setEnabled(state);
