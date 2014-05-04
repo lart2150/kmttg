@@ -727,7 +727,12 @@ public class Remote {
             //   "duration":1800,"timeOfDayLocal":"02:00:00","type":"repeatingTimeChannelSource",
             //   "channel":{channel info},"dayOfWeek":["monday","tuesday","wednesday","thursday","friday"]
             // single - "idSetSource":
-            //   "duration":1800,"time":"2012-11-16 09:30:00","channel":{channel info}
+            //   "duration":1800,"time":"2012-11-16 09:30:00","type":"singleTimeChannelSource",
+            //   "channel":{channel info}
+            JSONObject o = new JSONObject();
+            o.put("idSetSource", json);
+            o.put("bodyId", bodyId_get());
+            req = RpcRequest("subscribe", false, o);
          }
          else if (type.equals("Wishlist")) {
             // Create an auto-record wishlist
