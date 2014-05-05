@@ -27,6 +27,9 @@ public class kmttg {
       // from working
       Security.setProperty("jdk.certpath.disabledAlgorithms","");
       
+      // Java 7 bug workaround to avoid stacktrace when switching to Remote Guide tab
+      System.getProperties().setProperty("java.util.Arrays.useLegacyMergeSort", "true");
+      
       // Parse command lines and set options accordingly
       getopt(argv);
       
