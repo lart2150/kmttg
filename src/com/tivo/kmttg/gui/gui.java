@@ -913,6 +913,17 @@ public class gui {
             public void itemStateChanged(ItemEvent e) {
                AbstractButton button = (AbstractButton) e.getItem();
                config.resumeDownloads = button.isSelected();
+               if (config.resumeDownloads) {
+                  if (config.rpcnpl == 1) {
+                     config.rpcnpl = 0;
+                     log.warn("Turned off RPC NPL option since it doesn't work with resume downloads.");
+                     log.warn("You must refresh NPL again before resume downloads will work.");
+                  }
+                  if (config.java_downloads == 0) {
+                     config.java_downloads = 1;
+                     log.warn("Turned on Java Downloads option recommended for resume downloads.");
+                  }
+               }
             }
          });
       }
