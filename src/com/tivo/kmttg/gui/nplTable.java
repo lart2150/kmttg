@@ -615,6 +615,40 @@ public class nplTable {
          if ( ! s.folder && s.data != null && s.data.containsKey("title")) {
             TableUtil.webQuery(s.data.get("title"));
          }
+      } else if (keyCode == KeyEvent.VK_R) {
+         // Collect and print RPC data of selected row
+         int[] selected = GetSelectedRows();
+         if (selected == null || selected.length < 1)
+            return;
+         sortableDate s = (sortableDate)NowPlaying.getValueAt(selected[0],getColumnIndex("DATE"));
+         if ( ! s.folder && s.data != null ) {
+            if (s.data.containsKey("recordingId")) {
+               final String recordingId = s.data.get("recordingId");
+               class backgroundRun extends SwingWorker<Object, Object> {
+                  protected Object doInBackground() {
+                     Remote r = config.initRemote(tivoName);
+                     if (r.success) {
+                        try {
+                           JSONObject json = new JSONObject();
+                           json.put("recordingId", recordingId);
+                           JSONObject result = r.Command("Search", json);
+                           if (result != null && result.has("recording")) {
+                              JSONArray a = result.getJSONArray("recording");
+                              log.print(a.getJSONObject(0).toString(3));
+                           }
+                        }
+                        catch (JSONException e) {
+                           log.error(e.getMessage());
+                        }
+                        r.disconnect();
+                     }
+                     return null;
+                  }
+               }
+               backgroundRun b = new backgroundRun();
+               b.execute();
+            }
+         }         
       } else if (keyCode == KeyEvent.VK_M) {
          int row = GetSelectedRows()[0];
          sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
