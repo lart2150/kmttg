@@ -82,6 +82,8 @@ public class PopupHandler {
             items.add(new PopupPair("Show Information [i]", KeyEvent.VK_I, tivoName));
          }
          items.add(new PopupPair("Display data [j]", KeyEvent.VK_J, tivoName));
+         if (config.rpcEnabled(tivoName) || config.mindEnabled(tivoName))
+            items.add(new PopupPair("Display RPC data [r]", KeyEvent.VK_R, tivoName));
          items.add(new PopupPair("Web query [q]", KeyEvent.VK_Q, tivoName));
          items.add(new PopupPair("Add to auto transfers", config.gui.addSelectedTitlesMenuItem, tivoName));
          items.add(new PopupPair("Add to history file", config.gui.addSelectedHistoryMenuItem, tivoName));
