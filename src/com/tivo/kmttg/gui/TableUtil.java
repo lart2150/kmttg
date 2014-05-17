@@ -361,6 +361,16 @@ public class TableUtil {
             title += " [" + entry.get("movieYear") + "]";
          if (entry.has("subtitle"))
             title += " - " + entry.getString("subtitle");
+         if (entry.has("subscriptionIdentifier")) {
+            JSONArray a = entry.getJSONArray("subscriptionIdentifier");
+            if (a.length() > 0) {
+               if (a.getJSONObject(0).has("subscriptionType")) {
+                  String type = a.getJSONObject(0).getString("subscriptionType");
+                  if (type.equals("singleTimeChannel") || type.equals("repeatingTimeChannel"))
+                     title = " Manual:" + title;
+               }
+            }
+         }
       } catch (JSONException e) {
          log.error("makeShowTitle - " + e.getMessage());
       }
