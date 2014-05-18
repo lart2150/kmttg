@@ -368,44 +368,48 @@ public class nplTable {
          
          if ( ! isSelected ) {
             if ( getColumnIndex("DATE") != -1 ) {
-               // Download mode
-               sortableDate d = (sortableDate)table.getValueAt(row, getColumnIndex("DATE"));
-               if (column % 2 == 0)
-                  cell.setBackground(config.tableBkgndLight);
-               else
-                  cell.setBackground(config.tableBkgndDarker);
-               
-               if (d != null && ! d.folder) {
-                  if (d.data.containsKey("CopyProtected"))
-                     cell.setBackground( config.tableBkgndProtected );
+               try {
+                  // Download mode
+                  sortableDate d = (sortableDate)table.getValueAt(row, getColumnIndex("DATE"));
+                  if (column % 2 == 0)
+                     cell.setBackground(config.tableBkgndLight);
+                  else
+                     cell.setBackground(config.tableBkgndDarker);
                   
-                  if (d.data.containsKey("ExpirationImage") &&
-                      (d.data.get("ExpirationImage").equals("in-progress-recording") ||
-                       d.data.get("ExpirationImage").equals("in-progress-transfer")))
-                     cell.setBackground( config.tableBkgndRecording );
-                  
-                  if (config.showHistoryInTable == 1) {
-                     if (d.data.containsKey("ProgramId") &&
-                           auto.keywordMatchHistoryFast(d.data.get("ProgramId"), false))
-                        cell.setBackground(config.tableBkgndInHistory);
-                     if (d.data.containsKey("ProgramId_unique") &&
-                           auto.keywordMatchHistoryFast(d.data.get("ProgramId_unique"), false))
-                        cell.setBackground(config.tableBkgndInHistory);
-                  }
-               }
-               if (d != null && d.folder) {
-                  // Check inside folder for any in progress recordings
-                  for (int i=0; i<d.folderData.size(); ++i) {
-                     Hashtable<String,String> h = d.folderData.get(i);
-                     if (h.containsKey("ExpirationImage")) {
-                        if (h.get("ExpirationImage").equals("in-progress-recording"))
-                           cell.setBackground( config.tableBkgndRecording );
-                        if (h.get("ExpirationImage").equals("in-progress-transfer"))
-                           cell.setBackground( config.tableBkgndRecording );
+                  if (d != null && ! d.folder) {
+                     if (d.data.containsKey("CopyProtected"))
+                        cell.setBackground( config.tableBkgndProtected );
+                     
+                     if (d.data.containsKey("ExpirationImage") &&
+                         (d.data.get("ExpirationImage").equals("in-progress-recording") ||
+                          d.data.get("ExpirationImage").equals("in-progress-transfer")))
+                        cell.setBackground( config.tableBkgndRecording );
+                     
+                     if (config.showHistoryInTable == 1) {
+                        if (d.data.containsKey("ProgramId") &&
+                              auto.keywordMatchHistoryFast(d.data.get("ProgramId"), false))
+                           cell.setBackground(config.tableBkgndInHistory);
+                        if (d.data.containsKey("ProgramId_unique") &&
+                              auto.keywordMatchHistoryFast(d.data.get("ProgramId_unique"), false))
+                           cell.setBackground(config.tableBkgndInHistory);
                      }
                   }
+                  if (d != null && d.folder) {
+                     // Check inside folder for any in progress recordings
+                     for (int i=0; i<d.folderData.size(); ++i) {
+                        Hashtable<String,String> h = d.folderData.get(i);
+                        if (h.containsKey("ExpirationImage")) {
+                           if (h.get("ExpirationImage").equals("in-progress-recording"))
+                              cell.setBackground( config.tableBkgndRecording );
+                           if (h.get("ExpirationImage").equals("in-progress-transfer"))
+                              cell.setBackground( config.tableBkgndRecording );
+                        }
+                     }
+                  }
+               } catch (Exception e) {
+                  // Do nothing here
+                  // This is for to avoid stack traces being dumped on Mac platform
                }
-               
             } else {
                // FILES mode
                if (column % 2 == 0)
