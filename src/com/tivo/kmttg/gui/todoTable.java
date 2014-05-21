@@ -23,6 +23,7 @@ import org.jdesktop.swingx.decorator.Sorter;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
@@ -72,10 +73,17 @@ public class todoTable {
                else
                   cell.setBackground(config.tableBkgndDarker);
                JSONObject json = GetRowData(row);
-               if (json != null && json.has("state")) {
+               if (json != null) {
                   try {
-                     if (json.getString("state").equals("inProgress"))
-                        cell.setBackground(config.tableBkgndRecording);
+                     if (json.has("state")) {
+                        if (json.getString("state").equals("inProgress"))
+                           cell.setBackground(config.tableBkgndRecording);
+                     }
+                     
+                     if (config.showHistoryInTable == 1 && json.has("partnerCollectionId")) {
+                        if (auto.keywordMatchHistoryFast(json.getString("partnerCollectionId"), false))
+                           cell.setBackground(config.tableBkgndInHistory);
+                     }
                   } catch (JSONException e) {
                      log.error("todoTable ColorColumnRenderer - " + e.getMessage());
                   }
