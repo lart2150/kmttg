@@ -3624,6 +3624,7 @@ public class configMain {
          text += "If this option is enabled then kmttg will highlight shows that have been previously<br>";
          text += "processed by kmttg and have an entry in the <b>auto.history</b> file.<br>";
          text += "Useful as an easier check to see if a show has been processed before or not.<br>";
+         text += "NOTE: This option affects NPL and Remote ToDo table entries only.<br>";
          text += "NOTE: If you clear out auto.history file regularly then obviously this option will<br>";
          text += "not be very useful.";
       }
