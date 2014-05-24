@@ -1508,6 +1508,9 @@ public class Remote {
                            if (json.getJSONArray("episodeNum").getInt(0) == 1)
                               match = true;
                         } else {
+                           // Mini series have partNumber instead of episodeNum
+                           if (json.has("partNumber") && json.getInt("partNumber") == 1)
+                                 match = true;                              
                            // Some series don't have episode information, so look at subtitle
                            if ( json.has("subtitle") ) {
                               String subtitle = json.getString("subtitle");
