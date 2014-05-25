@@ -148,9 +148,12 @@ public class jobMonitor {
       int VideoRedoCOMJobs = 0;
       int VideoRedoGUIJobs = 0;
       int totalDownloads = 0;
+      int atomicJobs = 0;
       Hashtable<String,Integer> tivoDownload = new Hashtable<String,Integer>();
       for (int i=0; i<running.size(); i++) {
          job = running.get(i);
+         if (job.type.equals("atomic"))
+            atomicJobs++;
          if (isDownloadJob(job))
             totalDownloads++;
          if ( oneJobAtATime(job.type) ) {
@@ -175,6 +178,10 @@ public class jobMonitor {
          
          job = queued.get(i);
          debug.print("job=" + job);
+         
+         // Atomic jobs in FILES mode should only run 1 at a time
+         if (job.type.equals("atomic") && atomicJobs > 0 && job.tivoName.equals("FILES"))
+            continue;
          
          // If there are prior job types in the family queued don't schedule yet (except atomic)
          if ( priorInFamilyExist(job.familyId, famList) ) {
@@ -250,6 +257,9 @@ public class jobMonitor {
          // Update VideoRedoGUIJobs number
          if ( isVideoRedoGUIJob(job) )
             VideoRedoGUIJobs++;
+         
+         if (job.type.equals("atomic"))
+            atomicJobs++;
       }
    }
    
