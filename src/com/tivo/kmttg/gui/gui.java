@@ -1763,6 +1763,11 @@ public class gui {
                      ofp.write(remote_gui.bookmark_web.getItemAt(j) + "\n");
                }*/
                
+               // Search max hits
+               int max = (Integer) remote_gui.max_search.getValue();
+               ofp.write("\n<rpc_search_max>\n");
+               ofp.write("" + max + "\n");
+               
                // Record dialog
                JSONObject json = remote_gui.recordOpt.getValues();
                if (json != null) {
@@ -2042,6 +2047,17 @@ public class gui {
                else
                   remote_gui.bookmark_web.addItem("html::" + line);
             }*/
+            
+            if (key.equals("rpc_search_max") && remote_gui != null) {
+               try {
+                  int max = Integer.parseInt(line);
+                  remote_gui.max_search.setValue(max);
+               }
+               catch (NumberFormatException ex) {
+                  // Don't do anything here
+               }
+            }
+            
             if (key.equals("rpc_includePast") && remote_gui != null) {
                if (line.matches("1"))
                   remote_gui.includeHistory_cancel.setSelected(true);
