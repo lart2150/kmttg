@@ -48,6 +48,7 @@ public class jobData implements Serializable, Cloneable {
    public javadownload process_javadownload = null;
    public jdownload_decrypt process_jdownload_decrypt = null;
    public decrypt      process_decrypt = null;
+   public dsd          process_dsd = null;
    public qsfix        process_qsfix = null;
    public projectx     process_projectx = null;
    public comskip      process_comskip = null;
@@ -198,6 +199,7 @@ public class jobData implements Serializable, Cloneable {
          "javadownload",
          "jdownload_decrypt",
          "decrypt",
+         "dsd",
          "qsfix",
          "projectx",
          "streamfix",
@@ -343,6 +345,9 @@ public class jobData implements Serializable, Cloneable {
          file = mpegFile;
       }
       else if (type.equals("decrypt")) {
+         file = mpegFile;
+      }
+      else if (type.equals("dsd")) {
          file = mpegFile;
       }
       else if (type.equals("qsfix")) {
