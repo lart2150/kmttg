@@ -150,7 +150,9 @@ public class dsd implements Serializable {
          
          if (failed == 1) {
             log.error("dsd failed (exit code: " + exit_code + " ) - check command: " + process.toString());
+            log.error("NOTE: You must have at least partial TiVo Desktop install for DirectShow Dump to work");
             process.printStderr();
+            log.error(process.getStdout());
          } else {
             log.warn("dsd job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " output=" + job.mpegFile);
