@@ -17,7 +17,7 @@ import com.tivo.kmttg.util.log;
 public class toolDownload {
    String base = "http://sourceforge.net/projects/kmttg/files/tools/";
    String tail = "/download?use_mirror=autoselect";
-   String windows_file = "kmttg_win32_tools_v0p9s.zip";
+   String windows_file = "kmttg_win32_tools_v1.1a.zip";
    String mac_file = "kmttg_MacOSX_tools_v0p8l.zip";
    String projectx_file = "ProjectX_0_9_1_0.zip";
    String tools_version = "tools_version";
