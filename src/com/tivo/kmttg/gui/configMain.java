@@ -65,6 +65,7 @@ public class configMain {
    private static JCheckBox VrdReview_noCuts = null;
    private static JCheckBox VrdQsFilter = null;
    private static JCheckBox VrdDecrypt = null;
+   private static JCheckBox DsdDecrypt = null;
    private static JCheckBox VrdEncode = null;
    private static JCheckBox VrdAllowMultiple = null;
    private static JCheckBox VrdCombineCutEncode = null;
@@ -98,6 +99,7 @@ public class configMain {
    private static JTextField mpeg_cut_dir = null;
    private static JTextField encode_output_dir = null;
    private static JTextField tivodecode = null;
+   private static JTextField dsd = null;
    private static JTextField curl = null;
    private static JTextField ffmpeg = null;
    private static JTextField mediainfo = null;
@@ -595,6 +597,12 @@ public class configMain {
       else
          VrdDecrypt.setSelected(false);
       
+      // DsdDecrypt
+      if (config.DsdDecrypt == 1)
+         DsdDecrypt.setSelected(true);
+      else
+         DsdDecrypt.setSelected(false);
+      
       // VrdEncode
       if (config.VrdEncode == 1)
          VrdEncode.setSelected(true);
@@ -759,6 +767,9 @@ public class configMain {
       
       // tivodecode
       tivodecode.setText(config.tivodecode);
+      
+      // dsd
+      dsd.setText(config.dsd);
       
       // t2extract
       t2extract.setText(config.t2extract);
@@ -1114,6 +1125,12 @@ public class configMain {
       else
          config.VrdDecrypt = 0;
       
+      // DsdDecrypt
+      if (DsdDecrypt.isSelected() && file.isFile(config.dsd))
+         config.DsdDecrypt = 1;
+      else
+         config.DsdDecrypt = 0;
+      
       // VrdEncode
       if (VrdEncode.isSelected() && file.isDir(config.VRD))
          config.VrdEncode = 1;
@@ -1442,6 +1459,19 @@ public class configMain {
          }
       }
       config.tivodecode = value;
+      
+      // dsd
+      value = string.removeLeadingTrailingSpaces(dsd.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = "";
+      } else {
+         if ( ! file.isFile(value) ) {
+            textFieldError(dsd, "dsd setting not a valid file: '" + value + "'");
+            errors++;
+         }
+      }
+      config.dsd = value;
       
       // t2extract
       value = string.removeLeadingTrailingSpaces(t2extract.getText());
@@ -1776,6 +1806,7 @@ public class configMain {
       file_naming = new javax.swing.JTextField(30);
       files_path = new javax.swing.JTextField(30);
       tivodecode = new javax.swing.JTextField(30);
+      dsd = new javax.swing.JTextField(30);
       curl = new javax.swing.JTextField(30);
       ffmpeg = new javax.swing.JTextField(30);
       mediainfo = new javax.swing.JTextField(30);
@@ -1859,6 +1890,7 @@ public class configMain {
       VrdReview_noCuts = new javax.swing.JCheckBox();
       VrdQsFilter = new javax.swing.JCheckBox();
       VrdDecrypt = new javax.swing.JCheckBox();
+      DsdDecrypt = new javax.swing.JCheckBox();
       VrdEncode = new javax.swing.JCheckBox();
       VrdAllowMultiple = new javax.swing.JCheckBox();
       VrdCombineCutEncode = new javax.swing.JCheckBox();
@@ -1884,6 +1916,7 @@ public class configMain {
       JLabel mpeg_cut_dir_label = new javax.swing.JLabel();
       JLabel encode_output_dir_label = new javax.swing.JLabel();
       JLabel tivodecode_label = new javax.swing.JLabel();
+      JLabel dsd_label = new javax.swing.JLabel();
       JLabel curl_label = new javax.swing.JLabel();
       JLabel ffmpeg_label = new javax.swing.JLabel();
       JLabel mediainfo_label = new javax.swing.JLabel();
@@ -1986,6 +2019,7 @@ public class configMain {
       VrdReview_noCuts.setText("Bring up VideoRedo GUI to make manual cuts");
       VrdQsFilter.setText("Enable VideoRedo QS Fix video dimension filter");
       VrdDecrypt.setText("Decrypt using VideoRedo instead of tivodecode");
+      DsdDecrypt.setText("Decrypt using DirectShow Dump instead of tivodecode");
       VrdEncode.setText("Show VideoRedo encoding profiles");
       VrdAllowMultiple.setText("Allow multiple VideoRedo jobs at once");
       VrdCombineCutEncode.setText("Combine Ad Cut & Encode");
@@ -2011,6 +2045,7 @@ public class configMain {
       mpeg_cut_dir_label.setText(".mpg Cut Dir"); 
       encode_output_dir_label.setText("Encode Output Dir"); 
       tivodecode_label.setText("tivodecode"); 
+      dsd_label.setText("dsd"); 
       curl_label.setText("curl"); 
       ffmpeg_label.setText("ffmpeg"); 
       mediainfo_label.setText("mediainfo cli"); 
@@ -2270,6 +2305,20 @@ public class configMain {
                   int result = Browser.showDialog(tivodecode, "Choose File");
                   if (result == JFileChooser.APPROVE_OPTION) {
                      tivodecode.setText(Browser.getSelectedFile().getPath());
+                  }
+               }
+            }
+         }
+      );
+      
+      dsd.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount() == 2) {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  int result = Browser.showDialog(dsd, "Choose File");
+                  if (result == JFileChooser.APPROVE_OPTION) {
+                     dsd.setText(Browser.getSelectedFile().getPath());
                   }
                }
             }
@@ -2842,6 +2891,18 @@ public class configMain {
       c.gridy = gy;
       programs_panel.add(tivodecode, c);
       
+      // dsd
+      if (config.OS.equals("windows")) {
+         gy++;
+         c.gridx = 0;
+         c.gridy = gy;
+         programs_panel.add(dsd_label, c);
+   
+         c.gridx = 1;
+         c.gridy = gy;
+         programs_panel.add(dsd, c);
+      }
+      
       // mencoder
       gy++;
       c.gridx = 0;
@@ -3121,6 +3182,14 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       program_options_panel.add(comskip_review, c);
+      
+      if (config.OS.equals("windows")) {
+         // DsdDecrypt
+         gy++;
+         c.gridx = 0;
+         c.gridy = gy;
+         program_options_panel.add(DsdDecrypt, c);
+      }
       
       // Visual Panel
       JPanel visual_panel = new JPanel(new GridBagLayout());       
@@ -3419,6 +3488,7 @@ public class configMain {
       VrdReview_noCuts.setToolTipText(getToolTip("VrdReview_noCuts"));
       VrdQsFilter.setToolTipText(getToolTip("VrdQsFilter"));
       VrdDecrypt.setToolTipText(getToolTip("VrdDecrypt"));
+      DsdDecrypt.setToolTipText(getToolTip("DsdDecrypt"));
       VrdEncode.setToolTipText(getToolTip("VrdEncode"));
       VrdAllowMultiple.setToolTipText(getToolTip("VrdAllowMultiple"));
       VrdCombineCutEncode.setToolTipText(getToolTip("VrdCombineCutEncode"));
@@ -3445,6 +3515,7 @@ public class configMain {
       mpeg_cut_dir.setToolTipText(getToolTip("mpeg_cut_dir"));
       encode_output_dir.setToolTipText(getToolTip("encode_output_dir"));
       tivodecode.setToolTipText(getToolTip("tivodecode"));
+      dsd.setToolTipText(getToolTip("dsd"));
       curl.setToolTipText(getToolTip("curl"));
       ffmpeg.setToolTipText(getToolTip("ffmpeg"));
       mediainfo.setToolTipText(getToolTip("mediainfo"));
@@ -3691,8 +3762,19 @@ public class configMain {
          text += "to VideoRedo, when this option is enabled kmttg will use VideoRedo QSFix task<br>";
          text += "to decrypt .TiVo files instead of the standard <b>tivodecode</b> program. This is<br>";
          text += "useful for cases when the .TiVo files are in a format that tivodecode cannot decrypt<br>";
-         text += "such as for Transport Stream format .TiVo files used in AU/NZ TiVos.<br>";
+         text += "such as for Transport Stream format .TiVo files.<br>";
          text += "NOTE: You must have TiVo Desktop (or at least TiVoDirectShowFilter.dll) installed for this to work.";
+      }
+      else if (component.equals("DsdDecrypt")) {
+         text =  "<b>Decrypt using DirectShow Dump instead of tivodecode</b><br>";
+         text += "If you have at least a partial TiVo Desktop installation with<br>";
+         text += "<b>TiVoDirectShowFilter.dll</b> installed then you can enable this option to decrypt<br>";
+         text += ".TiVo files instead of the standard <b>tivodecode</b> program. This is<br>";
+         text += "useful for cases when the .TiVo files are in a format that tivodecode cannot decrypt<br>";
+         text += "such as for Transport Stream (TS) format .TiVo files.<br>";
+         text += "NOTE: You must have TiVo Desktop (or at least TiVoDirectShowFilter.dll) installed for this to work.<br>";
+         text += "NOTE: DirectShow Dump cannot be combined with download task, so you should disable kmttg<br>";
+         text += "config option <b>Combine downlad and tivodecode decrypt</b> if enabled in order to use this option.";
       }
       else if (component.equals("VrdEncode")) {
          text =  "<b>Show VideoRedo encoding profiles</b><br>";
@@ -3793,7 +3875,7 @@ public class configMain {
          text += "NOTE: You still need to enable both <b>download</b> and <b>decrypt</b> tasks for a show for this<br>";
          text += "to apply - if you do not enable <b>decrypt</b> task then still only download to TiVo file is performed.<br>";
          text += "NOTE: This option only applies if using <b>tivodecode</b> to decrypt, not for<br>";
-         text += "VideoRedo qsfix decrypt which must be performed separately from download.";
+         text += "VideoRedo qsfix or DirectShow dump decrypt which must be performed separately from downloads.";
       }
       else if (component.equals("single_download")) {
          text =  "<b>Allow only 1 download at a time</b><br>";
@@ -3888,6 +3970,15 @@ public class configMain {
          text =  "<b>tivodecode</b><br>";
          text += "<b>REQUIRED</b> if you plan to decrypt TiVo files to unecrypted mpeg2 format.<br>";
          text += "This defines the full path to the <b>tivodecode</b> program.<br>";
+         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
+      }
+      else if (component.equals("dsd")) {
+         text =  "<b>dsd</b><br>";
+         text += "This defines the full path to the <b>DirectShow Dump</b> program.<br>";
+         text += "For Windows systems this can be used instead of tivodecode to decrypt<br>";
+         text += ".TiVo files in either mpeg2 program stream or transport stream containers.<br>";
+         text += "<b>NOTE: This requires you have at least a partial install of TiVo Desktop as well with<br>";
+         text += "TiVoDirectShowFilter.dll installed</b><br>";
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("curl")) {
