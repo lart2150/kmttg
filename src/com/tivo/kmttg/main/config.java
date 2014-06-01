@@ -21,7 +21,7 @@ import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 
 public class config {
-   public static String kmttg = "kmttg v1p0t";
+   public static String kmttg = "kmttg v1.1a_beta";
    
    // encoding related
    public static String encProfDir = "";
@@ -33,6 +33,7 @@ public class config {
    // 3rd party executable files
    public static String curl = "";
    public static String tivodecode = "";
+   public static String dsd = "";
    public static String outputDir = "";
    public static String mpegDir = "";
    public static String qsfixDir = "";
@@ -71,6 +72,7 @@ public class config {
    public static int VrdReview_noCuts = 0;
    public static int VrdQsFilter = 0;
    public static int VrdDecrypt = 0;
+   public static int DsdDecrypt = 0;
    public static int VrdAllowMultiple = 0; // Allow multiple VRD instances at once
    public static int VrdCombineCutEncode = 0; // Combine VRD Ad Cut and encode
    public static int VrdQsfixMpeg2ps = 0; // If set force VRD QS Fix to output mpeg2 program stream
@@ -248,6 +250,11 @@ public class config {
          if ( file.isFile(result) )
             tivodecode = result;
       }
+      if ( ! file.isFile(dsd) ) {
+         result = getProgramDefault("dsd");
+         if ( file.isFile(result) )
+            dsd = result;
+      }
       if ( ! file.isFile(ffmpeg) ) {
          result = getProgramDefault("ffmpeg");
          if ( file.isFile(result) )
@@ -288,14 +295,16 @@ public class config {
          if ( file.isFile(result) )
             AtomicParsley = result;
       }
-      // Intentionally disabled for now
-      /*
       if ( ! file.isFile(ccextractor) ) {
           result = getProgramDefault("ccextractor");
           if ( file.isFile(result) )
              ccextractor = result;
        }
-       */
+      if ( ! file.isFile(t2extract) ) {
+         result = getProgramDefault("ccextractor");
+         if ( file.isFile(result) )
+            t2extract = result;
+      }
 
       // Parse encoding profiles
       encodeConfig.parseEncodingProfiles();
@@ -666,6 +675,7 @@ public class config {
       // 3rd party executable defaults
       curl          = getProgramDefault("curl");
       tivodecode    = getProgramDefault("tivodecode");
+      dsd           = getProgramDefault("dsd");
       ffmpeg        = getProgramDefault("ffmpeg");
       //projectx      = getProgramDefault("projectx");
       mencoder      = getProgramDefault("mencoder");
@@ -673,7 +683,7 @@ public class config {
       comskip       = getProgramDefault("comskip");
       comskipIni    = getProgramDefault("comskipIni");
       AtomicParsley = getProgramDefault("AtomicParsley");      
-      //ccextractor   = getProgramDefault("ccextractor");
+      ccextractor   = getProgramDefault("ccextractor");
       
       // Slingbox settings
       slingBox_perl = "";
@@ -723,6 +733,16 @@ public class config {
          if (!file.isFile(tivodecode))
             tivodecode = "";
          return tivodecode;
+      }
+      
+      else if (programName.equals("dsd")) {
+         String dsd = programDir + s + "dsd" + s + "DSDCmd.exe";      
+         if (OS.equals("other")) {
+            dsd = "";
+         }
+         if (!file.isFile(dsd))
+            dsd = "";
+         return dsd;
       }
       
       else if (programName.equals("ffmpeg")) {
@@ -809,7 +829,9 @@ public class config {
       }
       
       else if (programName.equals("ccextractor")) {
-         String ccextractor    = programDir + s + "ccextractor"    + s + "ccextractor"    + exe;      
+         String ccextractor    = programDir + s + "ccextractor"    + s + "ccextractor"    + exe;
+         if (OS.equals("windows"))
+            ccextractor    = programDir + s + "ccextractor"    + s + "ccextractorwin"    + exe;
          if (OS.equals("other") && ! file.isFile(ccextractor)) {
             result = file.unixWhich("ccextractor");
             if (result != null)
@@ -972,6 +994,12 @@ public class config {
             }
             if (key.equals("tivodecode")) {
                tivodecode = line;
+            }
+            if (key.equals("DsdDecrypt")) {
+               DsdDecrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
+            if (key.equals("dsd")) {
+               dsd = line;
             }
             if (key.equals("curl")) {
                curl = line;
@@ -1274,6 +1302,10 @@ public class config {
          ofp.write("<encodeDir>\n" + encodeDir + "\n\n");
          
          ofp.write("<tivodecode>\n" + tivodecode + "\n\n");
+         
+         ofp.write("<DsdDecrypt>\n" + DsdDecrypt + "\n\n");
+         
+         ofp.write("<dsd>\n" + dsd + "\n\n");
          
          ofp.write("<curl>\n" + curl + "\n\n");
          
