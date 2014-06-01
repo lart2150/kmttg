@@ -1056,8 +1056,13 @@ public class jobMonitor {
          job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
-         job.type         = "decrypt";
-         job.name         = config.tivodecode;
+         if (config.DsdDecrypt == 1) {
+            job.type      = "dsd";
+            job.name      = config.dsd;            
+         } else {
+            job.type      = "decrypt";
+            job.name      = config.tivodecode;
+         }
          job.tivoFile     = tivoFile;
          job.mpegFile     = mpegFile;
          if (twpdelete && entry != null && entry.containsKey("url")) {
