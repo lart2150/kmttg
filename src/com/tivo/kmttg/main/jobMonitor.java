@@ -1065,6 +1065,7 @@ public class jobMonitor {
          }
          job.tivoFile     = tivoFile;
          job.mpegFile     = mpegFile;
+         job.mpegFile_cut = mpegFile_cut;
          if (twpdelete && entry != null && entry.containsKey("url")) {
             job.twpdelete = true;
             job.url       = entry.get("url");
