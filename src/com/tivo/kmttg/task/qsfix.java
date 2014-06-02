@@ -156,6 +156,11 @@ public class qsfix implements Serializable {
                config.gui.jobTab_UpdateJobMonitorRowOutput(job, output);
             }
             
+            // Subsequent jobs need to have mpegFile && mpegFile_cut updated
+            jobMonitor.updatePendingJobFieldValue(job, "mpegFile", job.mpegFile);
+            String mpegFile_cut = job.mpegFile_cut.replaceFirst("_cut.mpg", "_cut.ts");
+            jobMonitor.updatePendingJobFieldValue(job, "mpegFile_cut", mpegFile_cut);
+            
             // Rename already created metadata file if relevant
             String meta = string.replaceSuffix(job.mpegFile, ".mpg") + ".txt";
             if (file.isFile(meta)) {
@@ -165,11 +170,14 @@ public class qsfix implements Serializable {
                // Subsequent jobs need to have metaFile updated
                jobMonitor.updatePendingJobFieldValue(job, "metaFile", meta_new);
             }
-            
-            // Subsequent jobs need to have mpegFile && mpegFile_cut updated
-            jobMonitor.updatePendingJobFieldValue(job, "mpegFile", job.mpegFile);
-            String mpegFile_cut = job.mpegFile_cut.replaceFirst("_cut.mpg", "_cut.ts");
-            jobMonitor.updatePendingJobFieldValue(job, "mpegFile_cut", mpegFile_cut);
+            meta = string.replaceSuffix(job.mpegFile_cut, ".mpg") + ".txt";
+            if (file.isFile(meta)) {
+               String meta_new = job.mpegFile_cut + ".txt";
+               log.print("Renaming metadata file to: " + meta_new);
+               file.rename(meta, meta_new);
+               // Subsequent jobs need to have metaFile updated
+               jobMonitor.updatePendingJobFieldValue(job, "metaFile", meta_new);
+            }
          }
       }
 
