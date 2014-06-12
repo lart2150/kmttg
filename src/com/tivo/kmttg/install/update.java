@@ -18,6 +18,7 @@ import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -147,16 +148,17 @@ public class update {
                      if ( unzip(config.programDir, zipFile) ) {
                         log.print("Successfully updated kmttg installation.");
                         file.delete(zipFile);
-                        // Ask user if OK to exit kmttg
+                        // Ask user if OK to restart kmttg
                         int response2 = JOptionPane.showConfirmDialog(
                            config.gui.getJFrame(),
-                           "OK to exit kmttg?",
+                           "OK to restart kmttg?",
                            "Confirm",
                            JOptionPane.YES_NO_OPTION,
                            JOptionPane.QUESTION_MESSAGE
                         );
                         if (response2 == JOptionPane.YES_OPTION) {
-                           System.exit(0);
+                           //System.exit(0);
+                           restartApplication();
                         }
                      } else {
                         log.error("Trouble unzipping file: " + zipFile);
@@ -296,4 +298,28 @@ public class update {
         }
         return false;
      }
+          
+     private static void restartApplication() {
+        try {
+           final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+           final File currentJar = new File(update.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+     
+           /* is it a jar file? */
+           if(!currentJar.getName().endsWith(".jar"))
+              return;
+     
+           /* Build command: java -jar application.jar */
+           final ArrayList<String> command = new ArrayList<String>();
+           command.add(javaBin);
+           command.add("-jar");
+           command.add(currentJar.getPath());
+     
+           final ProcessBuilder builder = new ProcessBuilder(command);
+           builder.start();
+           System.exit(0);
+        } catch (Exception e) {
+           log.error("restartApplication - " + e.getMessage());
+        }
+     }
+
 }
