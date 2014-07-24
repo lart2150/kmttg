@@ -40,6 +40,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -1595,6 +1596,30 @@ public class remotegui {
             }
          }
       });
+
+      JButton reboot_info = new JButton("Reboot");
+      reboot_info.setToolTipText(getToolTip("reboot_info"));
+      reboot_info.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Reboot selected TiVo
+            String tivoName = (String)tivo_info.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               int response = JOptionPane.showConfirmDialog(
+                  config.gui.getJFrame(),
+                  "Reboot " + tivoName + "?",
+                  "Confirm",
+                  JOptionPane.YES_NO_OPTION,
+                  JOptionPane.QUESTION_MESSAGE
+               );
+               if (response == JOptionPane.YES_OPTION) {
+                  Remote r = config.initRemote(tivoName);
+                  if (r.success) {
+                     r.reboot(tivoName);
+                  }
+               }
+            }
+         }
+      });
       
       row1_info.add(Box.createRigidArea(space_40));
       row1_info.add(title_info);
@@ -1606,6 +1631,8 @@ public class remotegui {
       row1_info.add(refresh_info);
       row1_info.add(Box.createRigidArea(space_5));
       row1_info.add(netconnect_info);
+      row1_info.add(Box.createRigidArea(space_40));
+      row1_info.add(reboot_info);
       panel_info.add(row1_info, c);
       
       text_info = new JTextPane();
@@ -3787,6 +3814,10 @@ public class remotegui {
       else if (component.equals("netconnect_info")){
          text = "<b>Network Connect</b><br>";
          text += "Start a Network Connection (call home) for selected TiVo.";
+      }
+      else if (component.equals("reboot_info")){
+         text = "<b>Reboot</b><br>";
+         text += "Reboot selected TiVo. A confirmation prompt is used to prevent accidental use.";
       }
       else if (component.equals("rc_jumpto_text")) {
          text = "<b>Jump to minute</b><br>";
