@@ -1933,6 +1933,30 @@ public class Remote {
          log.error("SPschedule - " + e.getMessage());
       }
    }
+   
+   public Boolean reboot() {
+      try {
+         JSONObject json = new JSONObject();
+         json.put("bodyId", bodyId_get());
+         json.put("uri", "x-tivo:classicui:restartDvr");
+         JSONObject result = Command("uiNavigate", json);
+         if (result != null) {
+            Thread.sleep(3000);
+            String[] keys = {"thumbsDown", "thumbsDown", "thumbsDown", "enter"};
+            for (String key : keys) {
+               JSONObject j = new JSONObject();
+               j.put("event", key);
+               result = Command("keyEventSend", j);
+               if (result == null) break;
+            }
+            disconnect();
+            return(true);
+         }
+      } catch (Exception e) {
+         log.error("reboot - " + e.getMessage());
+      }
+      return(false);
+   }
       
    private void print(String message) {
       log.print(message);
