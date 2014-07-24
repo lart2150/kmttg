@@ -36,6 +36,7 @@ import javax.net.ssl.X509TrustManager;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.SwingWorker;
 import com.tivo.kmttg.gui.TableUtil;
 import com.tivo.kmttg.gui.sortableDuration;
 import com.tivo.kmttg.main.config;
@@ -1934,28 +1935,35 @@ public class Remote {
       }
    }
    
-   public Boolean reboot() {
-      try {
-         JSONObject json = new JSONObject();
-         json.put("bodyId", bodyId_get());
-         json.put("uri", "x-tivo:classicui:restartDvr");
-         JSONObject result = Command("uiNavigate", json);
-         if (result != null) {
-            Thread.sleep(3000);
-            String[] keys = {"thumbsDown", "thumbsDown", "thumbsDown", "enter"};
-            for (String key : keys) {
-               JSONObject j = new JSONObject();
-               j.put("event", key);
-               result = Command("keyEventSend", j);
-               if (result == null) break;
+   // Background mode reboot sequence for a TiVo
+   public void reboot(final String tivoName) {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            try {
+               JSONObject json = new JSONObject();
+               json.put("bodyId", bodyId_get());
+               json.put("uri", "x-tivo:classicui:restartDvr");
+               JSONObject result = Command("uiNavigate", json);
+               if (result != null) {
+                  Thread.sleep(3000);
+                  String[] keys = {"thumbsDown", "thumbsDown", "thumbsDown", "enter"};
+                  for (String key : keys) {
+                     JSONObject j = new JSONObject();
+                     j.put("event", key);
+                     result = Command("keyEventSend", j);
+                     if (result == null) break;
+                  }
+                  log.warn("Rebooting TiVo: " + tivoName);
+                  disconnect();
+               }
+            } catch (Exception e) {
+               log.error("reboot - " + e.getMessage());
             }
-            disconnect();
-            return(true);
+            return null;
          }
-      } catch (Exception e) {
-         log.error("reboot - " + e.getMessage());
       }
-      return(false);
+      backgroundRun b = new backgroundRun();
+      b.execute();
    }
       
    private void print(String message) {
