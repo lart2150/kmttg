@@ -1557,6 +1557,7 @@ public class remotegui {
                
                // Put cached info in text area if available
                String tivoName = getTivoName("info");
+               updateButtonStates(tivoName, "Info");
                if (tivoName != null && tivoName.length() > 0) {
                   if (tivo_info_data.containsKey(tivoName))
                      text_info.setText(tivo_info_data.get(tivoName));
