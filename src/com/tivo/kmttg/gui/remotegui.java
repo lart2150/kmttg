@@ -101,6 +101,7 @@ public class remotegui {
    //private JComboBox type_web = null;
    
    private JComboBox tivo_info = null;
+   private JButton reboot_info = null;
    JTextPane text_info = null;
    private Hashtable<String,String> tivo_info_data = new Hashtable<String,String>();
    public Hashtable<String, JButton> buttons = new Hashtable<String, JButton>();
@@ -1597,7 +1598,7 @@ public class remotegui {
          }
       });
 
-      JButton reboot_info = new JButton("Reboot");
+      reboot_info = new JButton("Reboot");
       reboot_info.setToolTipText(getToolTip("reboot_info"));
       reboot_info.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -2843,6 +2844,9 @@ public class remotegui {
          rc_jumpto_button.setEnabled(state);
          rc_jumpahead_button.setEnabled(state);
          rc_jumpback_button.setEnabled(state);
+      }
+      if (tab.equals("Info")) {
+         reboot_info.setEnabled(state);
       }
    }
    
