@@ -28,6 +28,7 @@ public class autoEntry {
    public int suggestionsFilter = 0;
    public int useProgramId_unique = 0;
    public String channelFilter = null;
+   public String tivoFileNameFormat = null;
    
    public String toString() {
       return "{type=" + type + ", tivo=" + tivo + ", keyword=" + keyword + ", keywords=" + keywords + "}";

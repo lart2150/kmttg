@@ -123,6 +123,14 @@ public class autoConfig {
                      entry.comskipIni = m.group(2);
                   }
                }
+               if (name.matches("tivoFileNameFormat")) {
+                  // tivoFileNameFormat value can have spaces
+                  Pattern p = Pattern.compile("(\\S+)\\s+(.+)");
+                  Matcher m = p.matcher(line);
+                  if (m.matches()) {
+                     entry.tivoFileNameFormat = m.group(2);
+                  }
+               }
                if (name.matches("enabled"))
                   entry.enabled = Integer.parseInt(value);
                if (name.matches("metadata"))

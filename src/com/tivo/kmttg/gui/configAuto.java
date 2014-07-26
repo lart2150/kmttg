@@ -87,6 +87,7 @@ public class configAuto {
    private static JTextField check_interval = null;
    private static JTextField comskipIni = null;
    private static JTextField channelFilter = null;
+   private static JTextField tivoFileNameFormat = null;
    private static JCheckBox dateFilter = null;
    private static JCheckBox suggestionsFilter = null;
    private static JCheckBox suggestionsFilter_single = null;
@@ -249,6 +250,9 @@ public class configAuto {
       
       JLabel channelFilter_label = new JLabel("channel filter: ");
       channelFilter = new JTextField(30);
+      
+      JLabel tivoFileNameFormat_label = new JLabel("file name override: ");
+      tivoFileNameFormat = new JTextField(30);
       
       JLabel encoding_name_label = new JLabel("Encoding Name: ");
       
@@ -459,6 +463,20 @@ public class configAuto {
       c.anchor = GridBagConstraints.CENTER;
       c.weightx = 0.0;
       content.add(row_channelFilter, c); 
+      
+      // row_tivoFileNameFormat
+      JPanel row_tivoFileNameFormat = new JPanel();
+      row_tivoFileNameFormat.setLayout(new BoxLayout(row_tivoFileNameFormat, BoxLayout.X_AXIS));
+      row_tivoFileNameFormat.add(tivoFileNameFormat_label);
+      row_tivoFileNameFormat.add(Box.createRigidArea(space_5));
+      row_tivoFileNameFormat.add(tivoFileNameFormat);
+
+      gy++;
+      c.gridy = gy;
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.anchor = GridBagConstraints.CENTER;
+      c.weightx = 0.0;
+      content.add(row_tivoFileNameFormat, c); 
             
       // row_misc
       JPanel row_misc = new JPanel();
@@ -610,6 +628,7 @@ public class configAuto {
       title.setToolTipText(getToolTip("title"));
       comskipIni.setToolTipText(getToolTip("comskipIni"));
       channelFilter.setToolTipText(getToolTip("channelFilter"));
+      tivoFileNameFormat.setToolTipText(getToolTip("tivoFileNameFormat"));
       check_interval.setToolTipText(getToolTip("check_interval"));
       add.setToolTipText(getToolTip("add"));
       update.setToolTipText(getToolTip("update"));
@@ -687,6 +706,11 @@ public class configAuto {
          text += "If you wish to filter out by channel number or name for this auto transfer<br>";
          text += "then enter either channel number or name in this field. Leave it empty if you<br>";
          text += "do not want to filter by channel number or name.";
+      }
+      else if (component.equals("tivoFileNameFormat")) {
+         text =  "<b>file name override</b><br>";
+         text += "If you wish to use a custom file name format for this auto entry that overrides<br>";
+         text += "the global <b>File Naming</b> setting then do so here. Else leave this field blank.";
       }
       else if (component.equals("check_interval")) {
          text =  "<b>Check Tivos Interval (mins)</b><br>";
@@ -1264,6 +1288,8 @@ public class configAuto {
                    ofp.write("encode_name2_suffix " + entry.encode_name2_suffix + "\n");
                if (entry.channelFilter != null && entry.channelFilter.length() > 0)
                   ofp.write("channelFilter " + entry.channelFilter + "\n");
+               if (entry.tivoFileNameFormat != null && entry.tivoFileNameFormat.length() > 0)
+                  ofp.write("tivoFileNameFormat " + entry.tivoFileNameFormat + "\n");
                if (file.isFile(entry.comskipIni))
                   ofp.write("comskipIni " + entry.comskipIni + "\n");
                else
@@ -1322,6 +1348,11 @@ public class configAuto {
          channelFilter.setText(entry.channelFilter);
       else
          channelFilter.setText("");
+      
+      if (entry.tivoFileNameFormat != null)
+         tivoFileNameFormat.setText(entry.tivoFileNameFormat);
+      else
+         tivoFileNameFormat.setText("");
       
       type.setSelectedItem(entry.type);
       
@@ -1437,6 +1468,12 @@ public class configAuto {
          entry.channelFilter = cFilter;
       else
          entry.channelFilter = null;
+      
+      cFilter = (String)string.removeLeadingTrailingSpaces(tivoFileNameFormat.getText());
+      if (cFilter.length() > 0)
+         entry.tivoFileNameFormat = cFilter;
+      else
+         entry.tivoFileNameFormat = null;
       
       entry.type = ktype;
       

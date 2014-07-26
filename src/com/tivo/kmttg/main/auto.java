@@ -513,6 +513,11 @@ public class auto {
          }
       }
       
+      // File Naming override from auto entry
+      if (auto.tivoFileNameFormat != null) {
+         entry.put("tivoFileNameFormat", auto.tivoFileNameFormat);
+      }
+      
       log.print("START PROCESSING OF ENTRY: " + entry.get("title"));
       
       Hashtable<String,Object> h = new Hashtable<String,Object>();
