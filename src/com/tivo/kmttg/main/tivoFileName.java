@@ -15,11 +15,14 @@ import com.tivo.kmttg.util.string;
 // Build tivo file name based on certain keyword/specs
 public class tivoFileName {
    
-   public static String buildTivoFileName(Hashtable<String,String> entry) {      
-      if ( config.tivoFileNameFormat == null ) {
-         config.tivoFileNameFormat = "[title] ([monthNum]_[mday]_[year])";
-      }
-      String file = config.tivoFileNameFormat + ".TiVo";
+   public static String buildTivoFileName(Hashtable<String,String> entry) {
+      String tivoFileNameFormat = config.tivoFileNameFormat;
+      // File naming override possible from auto transfers setup
+      if (entry.containsKey("tivoFileNameFormat"))
+         tivoFileNameFormat = entry.get("tivoFileNameFormat");
+      if ( tivoFileNameFormat == null )
+         tivoFileNameFormat = "[title] ([monthNum]_[mday]_[year])";
+      String file = tivoFileNameFormat + ".TiVo";
       
       // Breakdown gmt to local time components
       Hashtable<String,String> keys = new Hashtable<String,String>();
@@ -40,7 +43,7 @@ public class tivoFileName {
       keys.put("startTime", "");
       keys.put("season", "");
       keys.put("episode", "");
-      if (config.tivoFileNameFormat.contains("startTime") && entry.containsKey("tivoName")) {
+      if (tivoFileNameFormat.contains("startTime") && entry.containsKey("tivoName")) {
          createMeta.getExtendedMetadata(entry.get("tivoName"), entry, true);
          if (entry.containsKey("startTime"))
             keys.put("startTime", entry.get("startTime"));
