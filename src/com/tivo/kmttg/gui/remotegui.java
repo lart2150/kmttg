@@ -3822,7 +3822,11 @@ public class remotegui {
       }
       else if (component.equals("reboot_info")){
          text = "<b>Reboot</b><br>";
-         text += "Reboot selected TiVo. A confirmation prompt is used to prevent accidental use.";
+         text += "Reboot selected TiVo. This button is a macro that directs selected DVR to<br>";
+         text += "the soft reboot screen and sends the 3x thumbs down + enter sequence to<br>";
+         text += "reboot it - just as if you were doing so from the Help menu on DVR itself.<br>";
+         text += "A confirmation prompt is used to prevent accidental use.<br>";
+         text += "NOTE: This only works for series 4 or later TiVos";
       }
       else if (component.equals("rc_jumpto_text")) {
          text = "<b>Jump to minute</b><br>";
