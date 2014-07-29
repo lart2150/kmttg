@@ -105,7 +105,7 @@ public class Remote {
              keyInput = new FileInputStream(cdata);
           keyStore.load(keyInput, password.toCharArray());
           keyInput.close();
-          KeyManagerFactory fac = KeyManagerFactory.getInstance("SunX509");
+          KeyManagerFactory fac = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
           fac.init(keyStore, password.toCharArray());
           SSLContext context = SSLContext.getInstance("TLS");
           TrustManager[] tm = new TrustManager[] { new NaiveTrustManager() };
