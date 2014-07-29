@@ -269,6 +269,8 @@ public class atomic implements Serializable {
          }
          if (h.containsKey("title") ) {
             String title = h.get("title");
+            args.add("--title");
+            args.add(title);
             args.add("--TVShowName");
             args.add(title);
             args.add("--artist");
