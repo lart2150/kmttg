@@ -269,11 +269,14 @@ public class atomic implements Serializable {
          }
          if (h.containsKey("title") ) {
             String title = h.get("title");
-            args.add("--title");
-            args.add(title);
             if (h.get("MediaKind").equals("TV Show")) {
                args.add("--TVShowName");
                args.add(title);
+            } else {
+               // Movies: --title == title
+               // Episodic shows: --title = episodeTitle below
+               args.add("--title");
+               args.add(title);               
             }
             args.add("--artist");
             args.add(title);
