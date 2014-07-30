@@ -21,6 +21,7 @@ import java.util.Stack;
 import java.util.Vector;
 
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -657,6 +658,22 @@ public class nplTable {
          int row = GetSelectedRows()[0];
          sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
          createMeta.getExtendedMetadata(tivoName, s.data, true);
+      } else if (keyCode == KeyEvent.VK_COMMA && inFolder) {
+         // Return from folder to top level view
+         JButton button = config.gui.getTab(tivoName).getRefreshButton();
+         button.doClick();
+      } else if (keyCode == KeyEvent.VK_PERIOD) {
+         // Descend into currently selected folder
+         int[] selected = GetSelectedRows();
+         if (selected == null || selected.length < 1)
+            return;
+         sortableDate s = (sortableDate)NowPlaying.getValueAt(selected[0],getColumnIndex("DATE"));
+         if ( s.folder ) {
+            setFolderState(true);
+            folderName = s.folderName;
+            folderEntryNum = selected[0];
+            RefreshNowPlaying(s.folderData);
+         }
       } else {
          // Pass along keyboard action for unimplemented key press
          e.consume();
