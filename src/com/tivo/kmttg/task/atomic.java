@@ -271,8 +271,10 @@ public class atomic implements Serializable {
             String title = h.get("title");
             args.add("--title");
             args.add(title);
-            args.add("--TVShowName");
-            args.add(title);
+            if (h.get("MediaKind").equals("TV Show")) {
+               args.add("--TVShowName");
+               args.add(title);
+            }
             args.add("--artist");
             args.add(title);
             args.add("--albumArtist");
