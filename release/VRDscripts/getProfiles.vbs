@@ -33,7 +33,7 @@ if (ver = 4) then
 else
    numProfiles = VideoReDo.ProfilesGetCount()
    if ( numProfiles > 0 ) then
-      for i = 1 to numProfiles
+      for i = 0 to numProfiles-1
          if (VideoReDo.ProfilesGetProfileEnabled(i)) then
             wscript.echo(VideoReDo.ProfilesGetProfileXML(i))
          end if
