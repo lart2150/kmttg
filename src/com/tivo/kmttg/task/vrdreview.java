@@ -38,7 +38,10 @@ public class vrdreview implements Serializable {
       Boolean schedule = true;
       
       String s = File.separator;
-      String[] pnames = {"VRDPlus.exe", "VRDPlus3.exe", "VideoReDo.exe", "VideoReDo3.exe", "VideoReDo4.exe"};
+      String[] pnames = {
+         "VRDPlus.exe", "VRDPlus3.exe", "VideoReDo.exe", "VideoReDo3.exe", "VideoReDo4.exe",
+         "VideoReDo5.exe", "VideoReDo6.exe"
+      };
       for (int i=0; i<pnames.length; ++i) {
          vrd = config.VRD + s + pnames[i];
          if (file.isFile(vrd)) break;
