@@ -38,7 +38,7 @@ public class comskip implements Serializable {
       outputFile = job.edlFile;
       if (job.vprjFile != null) {
          outputFile = job.vprjFile;
-         options = "--videoredo";
+         //options = "--videoredo";
       }
       if (job.xclFile != null) {
          outputFile = job.xclFile;
@@ -88,6 +88,12 @@ public class comskip implements Serializable {
       if (file.isFile(config.projectx) && ! file.isDir(config.VRD)) {
          // Want output_projectx=1 in comskipIni if ProjectX configured & VRD not configured
          if ( ! enableXcl() )
+            schedule = false;
+      }
+      
+      if (job.vprjFile != null) {
+         // Want output_videoredo3=1 in comskipIni if target is VRD
+         if ( ! enableVrd3() )
             schedule = false;
       }
       
@@ -291,6 +297,40 @@ public class comskip implements Serializable {
             log.error("Failed to edit/remove " + comskipIni);
             return false;
          }
+      }         
+      catch (IOException ex) {
+         log.error("Problem parsing or writing to comskip ini file: " + comskipIni);
+         return false;
+      }
+      return true;
+   }
+   
+   // Add output_videoredo3=1 if not already there in comskip ini file
+   private Boolean enableVrd3() {
+      try {
+         // First figure out if we need to change
+         BufferedReader ini = new BufferedReader(new FileReader(comskipIni));
+         String line = null;
+         Pattern p_one = Pattern.compile("^output_videoredo3=1.*$");
+         Matcher m;
+         Boolean found = false;
+         while (( line = ini.readLine()) != null) {
+            // Get rid of leading and trailing white space
+            line = line.replaceFirst("^\\s*(.*$)", "$1");
+            line = line.replaceFirst("^(.*)\\s*$", "$1");
+            if (line.length() == 0) continue; // skip empty lines
+            m = p_one.matcher(line);
+            if (m.matches())
+               found = true;
+         }
+         ini.close();
+         if (found)
+            return true;
+         
+         log.warn("Adding output_videoredo3=1 in comskip file: " + comskipIni);         
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(comskipIni, true));
+         ofp.write("\r\noutput_videoredo3=1\r\n");
+         ofp.close();         
       }         
       catch (IOException ex) {
          log.error("Problem parsing or writing to comskip ini file: " + comskipIni);
