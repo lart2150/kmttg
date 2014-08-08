@@ -81,10 +81,10 @@ else
 end if
 
 ' Open source file
-if (ver = 5) then
-   openFlag = VideoReDo.FileOpen(sourceFile, false)
-else
+if (ver = 4) then
    openFlag = VideoReDo.FileOpenBatch( sourceFile )
+else
+   openFlag = VideoReDo.FileOpen(sourceFile, false)
 end if
 
 if openFlag = false then
@@ -93,10 +93,11 @@ if openFlag = false then
 end if
 
 if (dimensions) then
-   ' TODO for ver = 5 here
+   wscript.stdout.writeline( "Dimensions Filter Enabled: x=" + x + " y=" + y)
    if (ver = 4) then
-      wscript.stdout.writeline( "Dimensions Filter Enabled: x=" + x + " y=" + y)
       VideoReDo.SetFilterDimensions x, y
+   else
+      VideoReDo.FileSetFilterDimensions x, y
    end if
 end if
 
@@ -115,7 +116,7 @@ if (ver = 4) then
       end if
    end if
 else
-   ' V5 VRD had different MPEG2 profile names
+   ' V5 VRD has dash in MPEG2 profile names
    if (profileName = "MPEG2 Program Stream") then
       profileName = "MPEG-2 Program Stream"
    end if
@@ -153,9 +154,9 @@ else
       percent = "Progress: " & Int(VideoReDo.OutputGetPercentComplete()) & "%"
       wscript.echo(percent)
       if not fso.FileExists(lockFile) then
-         VideoReDo.AbortOutput()
+         VideoReDo.OutputAbort()
 		   endtime = DateAdd("s", 15, Now)
-		   while( VideoReDo.IsOutputInProgress() And (Now < endtime) )
+		   while( VideoReDo.OutputGetState <> 0 And (Now < endtime) )
 			   wscript.sleep 500
 		   wend
          VideoReDo.ProgramExit()
