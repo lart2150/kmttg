@@ -23,20 +23,43 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 sourceFile = args(0)
 destFile   = args(1)
 
-'Create VideoReDo object and open the source project / file.
+' Create VideoReDo object and open the source project / file.
+ver = 5
 if (VrdAllowMultiple) then
-   Set VideoReDo = wscript.CreateObject( "VideoReDo.Application" )
-   VideoReDo.SetQuietMode(true)
+   ' Try VRD 5 1st then older VRD
+   On Error Resume Next
+   Set VideoReDo = WScript.CreateObject( "VideoReDo5.Application" )
+   On Error Goto 0
+   if ( not IsObject(VideoReDo) ) then
+      Set VideoReDo = wscript.CreateObject( "VideoReDo.Application" )
+      VideoReDo.SetQuietMode(true)
+      ver = 4
+   end if
 else
-   Set VideoReDoSilent = wscript.CreateObject( "VideoReDo.VideoReDoSilent" )
+   ' Try VRD 5 1st then older VRD
+   On Error Resume Next
+   set VideoReDoSilent = wscript.CreateObject( "VideoReDo5.VideoReDoSilent" )
+   On Error Goto 0
+   if ( not IsObject(VideoReDoSilent) ) then
+      ver = 4
+      set VideoReDoSilent = wscript.CreateObject( "VideoReDo.VideoReDoSilent" )
+   end if
    set VideoReDo = VideoReDoSilent.VRDInterface
 end if
 
 'Hard code no audio alert
-VideoReDo.AudioAlert = false
+if (ver = 4) then
+   VideoReDo.AudioAlert = false
+else
+   VideoReDo.ProgramSetAudioAlert( false )
+end if
 
 ' Open source file
-openFlag = VideoReDo.FileOpen( sourceFile )
+if (ver = 4) then
+   openFlag = VideoReDo.FileOpen( sourceFile )
+else
+   openFlag = VideoReDo.FileOpen(sourceFile, false)
+end if
 
 if openFlag = false then
    wscript.stderr.writeline( "? Unable to open file/project: " + sourceFile )
@@ -44,7 +67,15 @@ if openFlag = false then
 end if
 
 ' Start Ad Scan
-scanStarted = VideoReDo.StartAdScan( 0, 0, 1 )
+if (ver = 4) then
+   scanStarted = VideoReDo.StartAdScan( 0, 0, 1 )
+else
+   VideoReDo.AdScanSetParameter 0, false
+   VideoReDo.AdScanSetParameter 1, false
+   VideoReDo.AdScanSetParameter 2, true
+   VideoReDo.AdScanToggleScan()
+   scanStarted = VideoReDo.AdScanIsScanning()
+end if
 
 if scanStarted = false then
    wscript.stderr.writeline("? Unable to start Ad Scan on file: " + sourceFile )
@@ -52,27 +83,53 @@ if scanStarted = false then
 end if
 
 ' Wait until scan done and output % complete to stdout
-fileDuration = VideoRedo.GetProgramDuration()*1000
-while( VideoRedo.IsScanInProgress() )
-   percent = "Progress: " & Int(VideoReDo.GetCursorTimeMsec()*100/fileDuration) & "%"
-   wscript.echo(percent)
-   if not fso.FileExists(lockFile) then
-      VideoReDo.AbortOutput()
-		endtime = DateAdd("s", 15, Now)
-		while( VideoReDo.IsOutputInProgress() And (Now < endtime) )
-			wscript.sleep 500
-		wend
-      VideoReDo.Close()
-      wscript.quit 5
-   end if
-   wscript.sleep 2000
-wend
+if (ver = 4) then
+   fileDuration = VideoRedo.GetProgramDuration()*1000
+   while( VideoRedo.IsScanInProgress() )
+      percent = "Progress: " & Int(VideoReDo.GetCursorTimeMsec()*100/fileDuration) & "%"
+      wscript.echo(percent)
+      if not fso.FileExists(lockFile) then
+         VideoReDo.AbortOutput()
+         endtime = DateAdd("s", 15, Now)
+         while( VideoReDo.IsScanInProgress() And (Now < endtime) )
+            wscript.sleep 500
+         wend
+         VideoReDo.Close()
+         wscript.quit 5
+      end if
+      wscript.sleep 2000
+   wend
+else
+   fileDuration = VideoRedo.FileGetOpenedFileDuration()
+   while( VideoRedo.AdScanIsScanning() )
+      percent = "Progress: " & Int(VideoReDo.NavigationGetCursorTime()*100/fileDuration) & "%"
+      wscript.echo(percent)
+      if not fso.FileExists(lockFile) then
+         VideoReDo.OutputAbort()
+         endtime = DateAdd("s", 15, Now)
+         while( VideoRedo.AdScanIsScanning() And (Now < endtime) )
+            wscript.sleep 500
+         wend
+         VideoReDo.ProgramExit()
+         wscript.quit 5
+      end if
+      wscript.sleep 2000
+   wend
+end if
 
-' Write output file
-projectFile = VideoReDo.WriteProjectFile(destFile)
+' Write output project file
+if (ver = 4) then
+   VideoReDo.WriteProjectFile(destFile)
+else
+   VideoReDo.FileSaveProjectAs(destFile)
+end if
 
 ' Close VRD
-VideoReDo.Close()
+if (ver = 4) then
+   VideoReDo.Close()
+else
+   VideoReDo.ProgramExit()
+end if
 
 ' Exit with status 0
 wscript.echo( "   Output complete to: " + destFile )

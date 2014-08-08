@@ -57,7 +57,9 @@ destFile   = args(1)
 ver = 5
 if (VrdAllowMultiple) then
    ' Try VRD 5 1st then older VRD
+   On Error Resume Next
    Set VideoReDo = WScript.CreateObject( "VideoReDo5.Application" )
+   On Error Goto 0
    if ( not IsObject(VideoReDo) ) then
       Set VideoReDo = wscript.CreateObject( "VideoReDo.Application" )
       VideoReDo.SetQuietMode(true)
@@ -65,7 +67,9 @@ if (VrdAllowMultiple) then
    end if
 else
    ' Try VRD 5 1st then older VRD
+   On Error Resume Next
    set VideoReDoSilent = wscript.CreateObject( "VideoReDo5.VideoReDoSilent" )
+   On Error Goto 0
    if ( not IsObject(VideoReDoSilent) ) then
       ver = 4
       set VideoReDoSilent = wscript.CreateObject( "VideoReDo.VideoReDoSilent" )
