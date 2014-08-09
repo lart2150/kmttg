@@ -84,6 +84,7 @@ else
    VideoReDo.EditSetMode(1)
    VideoReDo.EditSetSelectionStart(0)
    VideoReDo.EditSetSelectionEnd(2000)
+   VideoReDo.EditAddSelection()
    VideoReDo.FileAddToJoiner()
    ' Save selection to mpeg2 program stream.
    profileName = "MPEG-2 Program Stream"
