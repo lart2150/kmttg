@@ -19,7 +19,9 @@ import com.tivo.kmttg.util.string;
 
 public class vrdreview implements Serializable {
    private static final long serialVersionUID = 1L;
-   String  vrd = null;
+   String  vrdscript = null;
+   String  cscript = null;
+   String  lockFile = null;
    private backgroundProcess process;
    private jobData job;
 
@@ -38,19 +40,7 @@ public class vrdreview implements Serializable {
       Boolean schedule = true;
       
       String s = File.separator;
-      String[] pnames = {
-         "VRDPlus.exe", "VRDPlus3.exe", "VideoReDo.exe", "VideoReDo3.exe", "VideoReDo4.exe",
-         "VideoReDo5.exe", "VideoReDo6.exe"
-      };
-      for (int i=0; i<pnames.length; ++i) {
-         vrd = config.VRD + s + pnames[i];
-         if (file.isFile(vrd)) break;
-      }
-      
-      if ( ! file.isFile(vrd) ) {
-         log.error("Could not determine VideRedo GUI executable path in installation dir: " + config.VRD);
-         schedule = false;
-      }
+      cscript = System.getenv("SystemRoot") + s + "system32" + s + "cscript.exe";
                         
       if ( ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not found: " + job.mpegFile);
@@ -73,6 +63,14 @@ public class vrdreview implements Serializable {
             schedule = false;
          }
       }
+
+      if ( schedule ) {
+         lockFile = file.makeTempFile("VRDLock");      
+         if ( lockFile == null || ! file.isFile(lockFile) ) {
+            log.error("Failed to created lock file: " + lockFile);
+            schedule = false;
+         }
+      }
       
       if (schedule) {
          if ( start() ) {
@@ -82,6 +80,7 @@ public class vrdreview implements Serializable {
          }
          return true;
       } else {
+         if (lockFile != null) file.delete(lockFile);
          return false;
       }      
    }
@@ -89,9 +88,21 @@ public class vrdreview implements Serializable {
    // Return false if starting command fails, true otherwise
    private Boolean start() {
       debug.print("");
+      // Create the vbs script
+      vrdscript = config.programDir + "\\VRDscripts\\vrdreview.vbs";      
+      if ( ! file.isFile(vrdscript) ) {
+         log.error("File does not exist: " + vrdscript);
+         log.error("Aborting. Fix incomplete kmttg installation");
+         jobMonitor.removeFromJobList(job);
+         return false;
+      }
+
       Stack<String> command = new Stack<String>();
-      command.add(vrd);
+      command.add(cscript);
+      command.add("//nologo");
+      command.add(vrdscript);
       command.add(job.vprjFile);
+      command.add("/l:" + lockFile);
       process = new backgroundProcess();
       log.print(">> Running vrdreview on " + job.vprjFile + " ...");
       if ( process.run(command) ) {
@@ -101,6 +112,7 @@ public class vrdreview implements Serializable {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
+         if (lockFile != null) file.delete(lockFile);
          return false;
       }
       return true;
@@ -108,7 +120,9 @@ public class vrdreview implements Serializable {
    
    public void kill() {
       debug.print("");
-      process.kill();
+      // NOTE: Instead of process.kill VRD jobs are special case where removing lockFile
+      // causes VB script to close VRD. (Otherwise script is killed but VRD still runs).
+      file.delete(lockFile);
       log.warn("Killing '" + job.type + "' job: " + process.toString());
    }
 
@@ -193,6 +207,7 @@ public class vrdreview implements Serializable {
             }
          }
       }
+      if (lockFile != null) file.delete(lockFile);
       return false;
    }
    
@@ -200,8 +215,9 @@ public class vrdreview implements Serializable {
    private Boolean createBasicVprjFile(String vprjFile, String inputFile) {
       try {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(vprjFile));
-         ofp.write("<Version>2\n");
-         ofp.write("<Filename>" + inputFile + "\n");
+         ofp.write("<VideoReDoProject Version=\"3\">\n");
+         ofp.write("<Filename>" + inputFile + "</Filename>\n");
+         ofp.write("</VideoReDoProject>\n");
          ofp.close();
       }
       catch (IOException ex) {
