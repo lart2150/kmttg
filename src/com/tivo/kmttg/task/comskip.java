@@ -38,7 +38,6 @@ public class comskip implements Serializable {
       outputFile = job.edlFile;
       if (job.vprjFile != null) {
          outputFile = job.vprjFile;
-         //options = "--videoredo";
       }
       if (job.xclFile != null) {
          outputFile = job.xclFile;
@@ -85,7 +84,7 @@ public class comskip implements Serializable {
          schedule = false;
       }
       
-      if (file.isFile(config.projectx) && ! file.isDir(config.VRD)) {
+      if (file.isFile(config.projectx) && config.VRD == 0) {
          // Want output_projectx=1 in comskipIni if ProjectX configured & VRD not configured
          if ( ! enableXcl() )
             schedule = false;

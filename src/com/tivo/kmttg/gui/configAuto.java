@@ -229,7 +229,7 @@ public class configAuto {
       encode.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
             boolean selected = encode.isSelected();
-            if (! file.isDir(config.VRD)) {
+            if (config.VRD == 0) {
                if (selected) {
                   if (config.OS.equals("windows") && file.isFile(config.mencoder)) {
                      qsfix.setEnabled(true);
@@ -854,7 +854,7 @@ public class configAuto {
          decrypt.setEnabled(true);
       }
       /* This intentionally disabled for now
-      if (! file.isDir(config.VRD)) {
+      if (config.VRD == 0) {
          if (config.OS.equals("windows") && file.isFile(config.mencoder) && encode.isSelected()) {
             qsfix.setEnabled(true);
             qsfix.setSelected(true);
@@ -866,7 +866,7 @@ public class configAuto {
          qsfix.setEnabled(true);
       }
       */
-      if (! file.isDir(config.VRD) && ! file.isFile(config.projectx)) {
+      if (config.VRD == 0 && ! file.isFile(config.projectx)) {
          qsfix.setSelected(false);
          qsfix.setEnabled(false);
       } else {
@@ -894,7 +894,7 @@ public class configAuto {
          comskip.setEnabled(true);
       }
 
-      if (! file.isFile(config.mencoder) && ! file.isDir(config.VRD) && ! file.isFile(config.projectx)) {
+      if (! file.isFile(config.mencoder) && config.VRD == 0 && ! file.isFile(config.projectx)) {
          comcut.setSelected(false);
          comcut.setEnabled(false);
       } else {
@@ -907,7 +907,7 @@ public class configAuto {
       } else {
          captions.setEnabled(true);
       }
-      if (! file.isDir(config.VRD) && qsfix.isSelected()) {
+      if (config.VRD == 0 && qsfix.isSelected()) {
          captions.setSelected(false);
          captions.setEnabled(false);         
       }

@@ -61,9 +61,8 @@ public class comskip_review implements Serializable {
       }
       
       // Decide what the output file of interest is
-      if (job.vprjFile != null && file.isDir(config.VRD)) {
+      if (job.vprjFile != null && config.VRD == 1) {
          outputFile = job.vprjFile;
-         options = "--videoredo";
       }
       if (outputFile == null && job.xclFile != null && file.isFile(config.projectx))
          outputFile = job.xclFile;

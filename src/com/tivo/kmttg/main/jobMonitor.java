@@ -854,7 +854,7 @@ public class jobMonitor {
       
       // Decide if demux should be enabled
       // if projectx available & qsfix enabled AND ! vrd => enable
-      if (file.isFile(config.projectx) && qsfix && ! file.isDir(config.VRD)) {
+      if (file.isFile(config.projectx) && qsfix && config.VRD == 0) {
          qsfix = false;
          demux = true;
          // demux can only operate on mpeg files not TiVo files
@@ -876,7 +876,7 @@ public class jobMonitor {
       // comcut requires an edlFile or vprjFile which may require comskip
       if (comcut) {
          if ( ! comskip ) {
-            if (file.isDir(config.VRD)) {
+            if (config.VRD == 1) {
                if ( config.VrdReview_noCuts == 0 && ! file.isFile(string.replaceSuffix(mpegFile, ".VPrj")) ) {
                   comskip = true;
                }
@@ -1083,7 +1083,7 @@ public class jobMonitor {
          job.source       = source;
          job.tivoName     = tivoName;
          job.type         = "qsfix";
-         job.name         = config.VRD;
+         job.name         = "VRD";
          job.mpegFile     = mpegFile;
          job.mpegFile_cut = mpegFile_cut;
          job.mpegFile_fix = mpegFile_fix;
@@ -1128,13 +1128,13 @@ public class jobMonitor {
       }
       
       if (comskip) {
-         if (file.isDir(config.VRD) && config.UseAdscan == 1) {
+         if (config.VRD == 1 && config.UseAdscan == 1) {
             jobData job = new jobData();
             job.startFile    = startFile;
             job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "adscan";
-            job.name         = config.VRD;
+            job.name         = "VRD";
             job.mpegFile     = mpegFile;
             job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
             submitNewJob(job);
@@ -1150,9 +1150,9 @@ public class jobMonitor {
             else
                job.mpegFile  = mpegFile;
             job.edlFile      = edlFile;
-            if (file.isFile(config.projectx) && ! file.isDir(config.VRD))
+            if (file.isFile(config.projectx) && config.VRD == 0)
                job.xclFile   = xclFile;
-            if (file.isDir(config.VRD))
+            if (config.VRD == 1)
                job.vprjFile = string.replaceSuffix(mpegFile, ".VPrj");
             if (specs.containsKey("comskipIni"))
                job.comskipIni = (String) specs.get("comskipIni");
@@ -1161,14 +1161,14 @@ public class jobMonitor {
       }
       
       // Schedule VideoRedo GUI manual cuts review if requested (GUI mode only)
-      if (file.isDir(config.VRD) && config.GUIMODE) {
+      if (config.VRD == 1 && config.GUIMODE) {
          if ( (comskip && config.VrdReview == 1) || (comcut && config.VrdReview_noCuts == 1) ) {
             jobData job = new jobData();
             job.startFile    = startFile;
             job.source       = source;
             job.tivoName     = tivoName;
             job.type         = "vrdreview";
-            job.name         = config.VRD;
+            job.name         = "VRD";
             job.mpegFile     = mpegFile;
             job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
             submitNewJob(job);
@@ -1187,16 +1187,16 @@ public class jobMonitor {
          job.type         = "comskip_review";
          job.name         = "comskip_review";
          job.mpegFile     = mpegFile;
-         if (file.isDir(config.VRD))
+         if (config.VRD == 1)
             job.vprjFile  = string.replaceSuffix(mpegFile, ".VPrj");
-         if (file.isFile(config.projectx) && ! file.isDir(config.VRD))
+         if (file.isFile(config.projectx) && config.VRD == 0)
             job.xclFile   = xclFile;
          job.edlFile      = edlFile;
          submitNewJob(job);         
       }
       
       if (comcut) {
-         if ( file.isFile(config.VRD + File.separator + "vp.vbs") ) {
+         if ( config.VRD == 1 ) {
             // Use VRD
             jobData job = new jobData();
             job.startFile = startFile;
@@ -1224,7 +1224,7 @@ public class jobMonitor {
                job.source       = source;
                job.tivoName     = tivoName;
                job.type         = "adcut";
-               job.name         = config.VRD;
+               job.name         = "VRD";
                job.mpegFile     = mpegFile;
                job.mpegFile_cut = mpegFile_cut;
                job.edlFile      = edlFile;

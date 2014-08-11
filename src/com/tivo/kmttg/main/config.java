@@ -46,7 +46,6 @@ public class config {
    public static String handbrake = "";
    public static String comskip = "";
    public static String AtomicParsley = "";
-   public static String VRD = "";
    public static String t2extract = "";
    public static String ccextractor = "";
 
@@ -68,6 +67,7 @@ public class config {
    public static int UseAdscan = 0;
    public static int VrdReview = 0;
    public static int comskip_review = 0;
+   public static int VRD = 0;
    public static int VrdEncode = 0;
    public static int VrdReview_noCuts = 0;
    public static int VrdQsFilter = 0;
@@ -1050,7 +1050,8 @@ public class config {
                MinChanDigits = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("VRD")) {
-               VRD = line;
+               if (! string.removeLeadingTrailingSpaces(line).equals("0"))
+               VRD = 1;
             }
             if (key.equals("t2extract")) {
                t2extract = line;

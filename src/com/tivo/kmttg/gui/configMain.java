@@ -60,6 +60,7 @@ public class configMain {
    private static JCheckBox UseOldBeacon = null;
    private static JCheckBox download_time_estimate = null;
    private static JCheckBox UseAdscan = null;
+   private static JCheckBox VRD = null;
    private static JCheckBox VrdReview = null;
    private static JCheckBox comskip_review = null;
    private static JCheckBox VrdReview_noCuts = null;
@@ -112,7 +113,6 @@ public class configMain {
    private static JTextField wan_ipad_port = null;
    private static JTextField limit_npl_fetches = null;
    private static JTextField active_job_limit = null;
-   private static JTextField VRD_path = null;
    private static JTextField t2extract = null;
    //private static JTextField t2extract_args = null;
    private static JTextField mencoder_args = null;
@@ -603,6 +603,12 @@ public class configMain {
       else
          DsdDecrypt.setSelected(false);
       
+      // VRD flag
+      if (config.VRD == 1)
+         VRD.setSelected(true);
+      else
+         VRD.setSelected(false);
+      
       // VrdEncode
       if (config.VrdEncode == 1)
          VrdEncode.setSelected(true);
@@ -761,9 +767,6 @@ public class configMain {
       
       // comskip_ini
       comskip_ini.setText(config.comskipIni);
-      
-      // VRD path
-      VRD_path.setText(config.VRD);
       
       // tivodecode
       tivodecode.setText(config.tivodecode);
@@ -1035,19 +1038,6 @@ public class configMain {
             config.tivo_beacon = null;
          }
       }
-                  
-      // VRD path
-      value = string.removeLeadingTrailingSpaces(VRD_path.getText());
-      if (value.length() == 0) {
-         // Reset to default if none given
-         value = "";
-      } else {
-         if ( ! file.isDir(value) ) {
-            textFieldError(VRD_path, "VideoRedo path setting not a valid dir: '" + value + "'");
-            errors++;
-         }
-      }
-      config.VRD = value;
             
       // Remove .TiVo
       if (remove_tivo.isSelected())
@@ -1089,14 +1079,20 @@ public class configMain {
       else
          config.CheckDiskSpace = 0;
       
+      // VRD flag
+      if (VRD.isSelected())
+         config.VRD = 1;
+      else
+         config.VRD = 0;
+      
       // UseAdscan
-      if (UseAdscan.isSelected() && file.isDir(config.VRD))
+      if (UseAdscan.isSelected() && config.VRD == 1)
          config.UseAdscan = 1;
       else
          config.UseAdscan = 0;
       
       // VrdReview
-      if (VrdReview.isSelected() && file.isDir(config.VRD))
+      if (VrdReview.isSelected() && config.VRD == 1)
          config.VrdReview = 1;
       else
          config.VrdReview = 0;
@@ -1108,19 +1104,19 @@ public class configMain {
          config.comskip_review = 0;
       
       // VrdReview_noCuts
-      if (VrdReview_noCuts.isSelected() && file.isDir(config.VRD))
+      if (VrdReview_noCuts.isSelected() && config.VRD == 1)
          config.VrdReview_noCuts = 1;
       else
          config.VrdReview_noCuts = 0;
       
       // VrdQsFilter
-      if (VrdQsFilter.isSelected() && file.isDir(config.VRD))
+      if (VrdQsFilter.isSelected() && config.VRD == 1)
          config.VrdQsFilter = 1;
       else
          config.VrdQsFilter = 0;
       
       // VrdDecrypt
-      if (VrdDecrypt.isSelected() && file.isDir(config.VRD))
+      if (VrdDecrypt.isSelected() && config.VRD == 1)
          config.VrdDecrypt = 1;
       else
          config.VrdDecrypt = 0;
@@ -1132,25 +1128,25 @@ public class configMain {
          config.DsdDecrypt = 0;
       
       // VrdEncode
-      if (VrdEncode.isSelected() && file.isDir(config.VRD))
+      if (VrdEncode.isSelected() && config.VRD == 1)
          config.VrdEncode = 1;
       else
          config.VrdEncode = 0;
       
       // VrdAllowMultiple
-      if (VrdAllowMultiple.isSelected() && file.isDir(config.VRD))
+      if (VrdAllowMultiple.isSelected() && config.VRD == 1)
          config.VrdAllowMultiple = 1;
       else
          config.VrdAllowMultiple = 0;
       
       // VrdCombineCutEncode
-      if (VrdCombineCutEncode.isSelected() && file.isDir(config.VRD))
+      if (VrdCombineCutEncode.isSelected() && config.VRD == 1)
          config.VrdCombineCutEncode = 1;
       else
          config.VrdCombineCutEncode = 0;
       
       // VrdQsfixMpeg2ps
-      if (VrdQsfixMpeg2ps.isSelected() && file.isDir(config.VRD))
+      if (VrdQsfixMpeg2ps.isSelected() && config.VRD == 1)
          config.VrdQsfixMpeg2ps = 1;
       else
          config.VrdQsfixMpeg2ps = 0;
@@ -1815,7 +1811,6 @@ public class configMain {
       handbrake = new javax.swing.JTextField(30);
       comskip = new javax.swing.JTextField(30);
       comskip_ini = new javax.swing.JTextField(30);
-      VRD_path = new javax.swing.JTextField(30);
       t2extract = new javax.swing.JTextField(30);
       //t2extract_args = new javax.swing.JTextField(30);
       ccextractor = new javax.swing.JTextField(30);
@@ -1885,6 +1880,7 @@ public class configMain {
       QSFixBackupMpegFile = new javax.swing.JCheckBox();
       download_check_length = new javax.swing.JCheckBox();
       UseAdscan = new javax.swing.JCheckBox();
+      VRD = new javax.swing.JCheckBox();
       VrdReview = new javax.swing.JCheckBox();
       comskip_review = new javax.swing.JCheckBox();
       VrdReview_noCuts = new javax.swing.JCheckBox();
@@ -1930,7 +1926,6 @@ public class configMain {
       JLabel wan_ipad_port_label = new javax.swing.JLabel();
       JLabel limit_npl_fetches_label = new javax.swing.JLabel();
       JLabel active_job_limit_label = new javax.swing.JLabel();
-      JLabel VRD_path_label = new javax.swing.JLabel();
       JLabel t2extract_label = new javax.swing.JLabel();
       //JLabel t2extract_args_label = new javax.swing.JLabel();
       JLabel ccextractor_label = new javax.swing.JLabel();
@@ -2014,6 +2009,7 @@ public class configMain {
       QSFixBackupMpegFile.setText("For QS Fix of .mpg file backup original .mpg");
       download_check_length.setText("Check download duration");
       UseAdscan.setText("Use VideoRedo AdScan instead of comskip");
+      VRD.setText("Enable VideoRedo");
       VrdReview.setText("Use VideoRedo GUI to review detected commercials");
       comskip_review.setText("Use comskip GUI to review detected commercials");
       VrdReview_noCuts.setText("Bring up VideoRedo GUI to make manual cuts");
@@ -2059,7 +2055,6 @@ public class configMain {
       wan_ipad_port_label.setText("wan ipad port"); 
       limit_npl_fetches_label.setText("limit # of npl fetches");
       active_job_limit_label.setText("active job limit"); 
-      VRD_path_label.setText("VideoRedo path");
       t2extract_label.setText("ccextractor"); 
       //t2extract_args_label.setText("t2extract extra arguments");
       ccextractor_label.setText("ccextractor");
@@ -2277,20 +2272,6 @@ public class configMain {
                   int result = Browser.showDialog(encode_output_dir, "Choose Directory");
                   if (result == JFileChooser.APPROVE_OPTION) {
                      encode_output_dir.setText(Browser.getSelectedFile().getPath());
-                  }
-               }
-            }
-         }
-      );
-      
-      VRD_path.addMouseListener(
-         new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-               if(e.getClickCount() == 2) {
-                  Browser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                  int result = Browser.showDialog(VRD_path, "Choose Directory");
-                  if (result == JFileChooser.APPROVE_OPTION) {
-                     VRD_path.setText(Browser.getSelectedFile().getPath());
                   }
                }
             }
@@ -3295,15 +3276,11 @@ public class configMain {
       // VRD Panel
       JPanel vrd_panel = new JPanel(new GridBagLayout());       
       
-      // VRD path
+      // VRD flag
       gy=0;
-      c.gridx = 0;
-      c.gridy = gy;
-      vrd_panel.add(VRD_path_label, c);
-
       c.gridx = 1;
       c.gridy = gy;
-      vrd_panel.add(VRD_path, c);
+      vrd_panel.add(VRD, c);
 
       // UseAdscan
       gy++;
@@ -3483,6 +3460,7 @@ public class configMain {
       showHistoryInTable.setToolTipText(getToolTip("showHistoryInTable"));
       download_time_estimate.setToolTipText(getToolTip("download_time_estimate"));
       UseAdscan.setToolTipText(getToolTip("UseAdscan"));
+      VRD.setToolTipText(getToolTip("VRD"));
       VrdReview.setToolTipText(getToolTip("VrdReview"));
       comskip_review.setToolTipText(getToolTip("comskip_review"));
       VrdReview_noCuts.setToolTipText(getToolTip("VrdReview_noCuts"));
@@ -3527,7 +3505,6 @@ public class configMain {
       t2extract.setToolTipText(getToolTip("t2extract"));
       //t2extract_args.setToolTipText(getToolTip("t2extract_args"));
       ccextractor.setToolTipText(getToolTip("ccextractor"));
-      VRD_path.setToolTipText(getToolTip("VRD_path"));
       AtomicParsley.setToolTipText(getToolTip("AtomicParsley"));
       projectx.setToolTipText(getToolTip("projectx"));
       wan_http_port.setToolTipText(getToolTip("wan_http_port"));
@@ -4074,16 +4051,14 @@ public class configMain {
           text += "NOTE: kmttg will use t2extract over ccextractor if possible.<br>";
           text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
        }
-      else if (component.equals("VRD_path")) {
-         text =  "<b>VideoRedo path</b><br>";
+      else if (component.equals("VRD")) {
+         text =  "<b>Enable VideoRedo</b><br>";
          text += "For Windows systems only if you have VideoRedo program installed on this computer<br>";
-         text += "then supply the full path to the VideoRedo installation directory on your computer.<br>";
+         text += "then you can turn on this option to enable VideoRedo functionality in kmttg.<br>";
          text += "This setting is <b>REQUIRED</b> to enable <b>VRD QS fix</b> task which runs VideoRedo<br>";
          text += "to automatically repair glitches/problems in mpeg2 program files.<br>";
-         text += "This setting also REQUIRED if you want to use VideoRedo for commercial cutting (<b>comcut</b>) step.<br>";
-         text += "Example path setting for Windows Vista:<br>";
-         text += "<b>C:\\Program Files (x86)\\VideoRedoPlus</b><br>";
-         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
+         text += "This setting also REQUIRED if you want to use VideoRedo for commercial cutting (<b>comcut</b>) step,<br>";
+         text += "and for a bunch of other tasks that can make use of VideoRedo.";
       }
       else if (component.equals("AtomicParsley")) {
          text =  "<b>AtomicParsley</b><br>";
