@@ -88,7 +88,8 @@ end if
 if (ver = 4) then
    openFlag = VideoReDo.FileOpenBatch( sourceFile )
 else
-   openFlag = VideoReDo.FileOpen(sourceFile, false)
+   ' 2nd arg has to be true for qsfix mode to apply
+   openFlag = VideoReDo.FileOpen(sourceFile, true)
 end if
 
 if openFlag = false then
