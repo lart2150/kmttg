@@ -1250,6 +1250,8 @@ public class config {
          
          ofp.write("<RemoveMpegFile>\n" + RemoveMpegFile + "\n\n");
          
+         ofp.write("<VRD>\n" + VRD + "\n\n");
+         
          ofp.write("<QSFixBackupMpegFile>\n" + QSFixBackupMpegFile + "\n\n");
          
          ofp.write("<UseAdscan>\n" + UseAdscan + "\n\n");
@@ -1329,8 +1331,6 @@ public class config {
          ofp.write("<MaxJobs>\n" + MaxJobs + "\n\n");
          
          ofp.write("<MinChanDigits>\n" + MinChanDigits + "\n\n");
-         
-         ofp.write("<VRD>\n" + VRD + "\n\n");
          
          ofp.write("<AtomicParsley>\n" + AtomicParsley + "\n\n");
          
