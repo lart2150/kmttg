@@ -211,6 +211,7 @@ public class comskip implements Serializable {
             log.error("comskip failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
          } else {
+            fixVprj(); // comskip generated scene marker entries may need to be fixed
             log.warn("comskip job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " output=" + outputFile);
             // Cleanup
@@ -302,6 +303,70 @@ public class comskip implements Serializable {
          return false;
       }
       return true;
+   }
+   
+   // Fix comskip generated V3 VPrj file if there are scene markers in wrong format
+   /* Sample wrong format
+   </cutlist></VideoReDoProject>
+   <SceneMarker 0>114114000
+   <SceneMarker 1>419585833
+   <SceneMarker 2>6276770500
+   
+   Fixed scene marker example:
+   <SceneMarker Sequence="1">2650781667</SceneMarker>
+   */
+   private Boolean fixVprj() {
+      Boolean changed = false;
+      String tmpFile = file.makeTempFile("vprjfix");
+      try {
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(tmpFile, true));
+         BufferedReader ini = new BufferedReader(new FileReader(outputFile));
+         String line = null;
+         Pattern marker = Pattern.compile("<SceneMarker (\\d+)>(\\d+)$");
+         String endStr = "</VideoReDoProject>";
+         Matcher m;
+         Stack<String> s = new Stack<String>();
+         while (( line = ini.readLine()) != null) {
+            // Get rid of leading and trailing white space
+            line = line.replaceFirst("^\\s*(.*$)", "$1");
+            line = line.replaceFirst("^(.*)\\s*$", "$1");
+            if (line.length() == 0) continue; // skip empty lines
+            line = line.replace(endStr, "");
+            m = marker.matcher(line);
+            if (m.matches()) {
+               changed = true;
+               int num = Integer.parseInt(m.group(1)) + 1;
+               String time = m.group(2);
+               line = "SceneMarker Sequence=\"" + num + "\">" + time + "</SceneMarker>";
+               s.add(line);
+               continue;
+            }
+            ofp.write(line + "\n");
+         }
+         if (changed) {
+            ofp.write("<SceneList>\n");
+            for (String l : s)
+               ofp.write(l + "\n");
+            ofp.write("</SceneList>\n");
+         }
+         ofp.write(endStr + "\n");
+         ini.close();
+         ofp.close();         
+
+         if (changed) {
+            // Remove outputFile and replace with tmpFile
+            log.warn("Fixing scene markers in file: " + outputFile);         
+            file.delete(outputFile);
+            return(file.rename(tmpFile, outputFile));
+         } else {
+            file.delete(tmpFile);
+         }
+      }         
+      catch (IOException ex) {
+         log.error("fixVprj: Problem parsing or chaging file: " + outputFile);
+         return false;
+      }
+      return changed;
    }
    
    // Add output_videoredo3=1 if not already there in comskip ini file
