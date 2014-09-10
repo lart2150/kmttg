@@ -522,6 +522,8 @@ public class rnpl {
             JSONObject c = json.getJSONObject("channel");
             if (c.has("callSign") && c.has("channelNumber"))
                message += " on " + c.getString("channelNumber") + "=" + c.getString("callSign");
+            if (c.has("callSign") && ! c.has("channelNumber"))
+               message += " on " + c.getString("callSign");
          }
       } catch (JSONException e) {
          log.error("formatEntry error - " + e.getMessage());

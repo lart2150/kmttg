@@ -384,8 +384,13 @@ public class TableUtil {
             JSONObject o = entry.getJSONObject("channel");
             if (o.has("channelNumber"))
                channel += o.getString("channelNumber");
-            if (o.has("callSign"))
-               channel += "=" + o.getString("callSign");
+            if (o.has("callSign")) {
+               String callSign = o.getString("callSign");
+               if (callSign.toLowerCase().equals("all channels"))
+                  channel += callSign;
+               else
+                  channel += "=" + callSign;
+            }
          }
       } catch (JSONException e) {
          log.error("makeChannelName - " + e.getMessage());

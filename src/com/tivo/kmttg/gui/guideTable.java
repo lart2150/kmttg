@@ -385,6 +385,13 @@ public class guideTable {
                channel = entry.getString("channelNumber");
             if (entry.has("callSign"))
                channel += "=" + entry.getString("callSign");
+            if (entry.has("callSign")) {
+               String callSign = entry.getString("callSign");
+               if (callSign.toLowerCase().equals("all channels"))
+                  channel += callSign;
+               else
+                  channel += "=" + callSign;
+            }
             data[0] = gui.Images.get("folder");
             data[1] = new sortableDate(channel, entry, 0);
             data[3] = channel;

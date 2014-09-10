@@ -379,8 +379,13 @@ public class spTable {
                 o2 = o.getJSONObject("channel");
                 if (o2.has("channelNumber"))
                    channel += o2.getString("channelNumber");
-                if (o2.has("callSign"))
-                   channel += "=" + o2.getString("callSign");
+                if (o2.has("callSign")) {
+                   String callSign = o2.getString("callSign");
+                   if (callSign.toLowerCase().equals("all channels"))
+                      channel += callSign;
+                   else
+                      channel += "=" + callSign;
+                }
              }
           }
           int max = 0;
