@@ -66,6 +66,7 @@ public class Mind {
          OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
          out.write(urlData);
          out.flush();
+         out.close();
 
          cm.storeCookies(con);
 
@@ -84,6 +85,7 @@ public class Mind {
          if ( ! success ) {
             log.error("urlString=" + urlString + " urlData=" + urlData);
          }
+         in.close();
          return success;
       }
       catch (MalformedURLException e) {
@@ -112,6 +114,7 @@ public class Mind {
          out.write(urlData);
          out.flush();
          cm.storeCookies(con);
+         out.close();
 
          // Return response
          Stack<String> s = new Stack<String>();
@@ -121,6 +124,7 @@ public class Mind {
             s.add(inputLine);
             if (debug) log.print(inputLine);
          }
+         in.close();
          return s;
       }
       catch (MalformedURLException e) {

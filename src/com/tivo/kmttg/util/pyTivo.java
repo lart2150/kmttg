@@ -317,6 +317,7 @@ public class pyTivo {
          while ((line = in.readLine()) != null) {
             xml += line + "\n";
          }
+         in.close();
          if (xml.length() > 0) {
             JSONObject result = XML.toJSONObject(xml);
             if (result != null && result.has("TvBusMarshalledStruct:TvBusEnvelope")) {
