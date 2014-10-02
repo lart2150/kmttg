@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -588,7 +589,7 @@ public class tivoTab {
    
    // Change table column order according to given string array order
    public void setColumnOrder(String[] order) {
-      debug.print("order=" + order);
+      debug.print("order=" + Arrays.toString(order));
       
       // Don't do anything if column counts don't match up
       if (nplTab.NowPlaying.getColumnCount() != order.length) return;

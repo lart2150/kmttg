@@ -1544,7 +1544,7 @@ public class gui {
    }
    
    private void tivoTabRemoveExtra(String[] names) {
-      debug.print("names=" + names);
+      debug.print("names=" + Arrays.toString(names));
       int numTabs = tabbed_panel.getComponentCount();
       if (numTabs > 0 && names.length > 0) {
          // Determine tabs we no longer want

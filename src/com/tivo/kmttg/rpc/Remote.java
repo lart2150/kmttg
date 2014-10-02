@@ -1217,7 +1217,7 @@ public class Remote {
             }
             return conflicts;
          } catch (JSONException e) {
-            log.error(e.getStackTrace().toString());
+            log.error(Arrays.toString(e.getStackTrace()));
          }
       }
       return null;

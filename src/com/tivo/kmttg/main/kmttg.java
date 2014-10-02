@@ -3,6 +3,7 @@ package com.tivo.kmttg.main;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.security.Security;
+import java.util.Arrays;
 
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -128,7 +129,7 @@ public class kmttg {
    }
    
    private static void getopt(String[] argv) {
-      debug.print("argv=" + argv);
+      debug.print("argv=" + Arrays.toString(argv));
       int i=0;
       String arg;
       while ( i<argv.length ) {

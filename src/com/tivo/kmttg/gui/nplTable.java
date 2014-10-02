@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -1254,7 +1255,7 @@ public class nplTable {
    }
       
    public void SetNowPlayingHeaders(String[] headers) {
-      debug.print("headers=" + headers);
+      debug.print("headers=" + Arrays.toString(headers));
       for (int i=0; i<headers.length; ++i) {
          SetHeaderText(NowPlaying, headers[i], i);
       }
@@ -1268,7 +1269,7 @@ public class nplTable {
    }
    
    public void AddRow(JXTable table, Object[] data) {
-      debug.print("data=" + data);
+      debug.print("data=" + Arrays.toString(data));
       DefaultTableModel dm = (DefaultTableModel)table.getModel();
       dm.addRow(data);
    }

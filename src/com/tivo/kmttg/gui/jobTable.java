@@ -5,6 +5,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableColumnModel;
@@ -211,13 +212,13 @@ public class jobTable {
     }
     
     public void AddRow(JTable table, Object[] data) {
-       debug.print("table=" + table + " data=" + data);
+       debug.print("table=" + table + " data=" + Arrays.toString(data));
        DefaultTableModel dm = (DefaultTableModel)table.getModel();
        dm.addRow(data);
     }
     
     public void InsertRow(JTable table, Object[] data, int row) {
-       debug.print("table=" + table + " data=" + data);
+       debug.print("table=" + table + " data=" + Arrays.toString(data));
        DefaultTableModel dm = (DefaultTableModel)table.getModel();
        dm.insertRow(row, data);
     }
@@ -295,7 +296,7 @@ public class jobTable {
     
     // Change table column order according to given string array order
     public void setColumnOrder(String[] order) {
-       debug.print("order=" + order);
+       debug.print("order=" + Arrays.toString(order));
        
        // Don't do anything if column counts don't match up
        if (JobMonitor.getColumnCount() != order.length) return;
