@@ -145,8 +145,8 @@ public class jobMonitor {
       // Also count number of GUI VideoRedo jobs currently running
       // Also count total number of download jobs currently running
       int cpuActiveJobs = 0;
-      int VideoRedoCOMJobs = 0;
-      int VideoRedoGUIJobs = 0;
+      //int VideoRedoCOMJobs = 0;
+      //int VideoRedoGUIJobs = 0;
       int totalDownloads = 0;
       int atomicJobs = 0;
       Hashtable<String,Integer> tivoDownload = new Hashtable<String,Integer>();
@@ -161,14 +161,14 @@ public class jobMonitor {
                tivoDownload.put(job.tivoName, 0);
             }
             tivoDownload.put(job.tivoName, tivoDownload.get(job.tivoName)+1);
-         } else if ( isVideoRedoGUIJob(job) ) {
-            // NOTE: VRD GUI job not considered CPU active
-            VideoRedoGUIJobs++;
+         //} else if ( isVideoRedoGUIJob(job) ) {
+         //   // NOTE: VRD GUI job not considered CPU active
+         //   VideoRedoGUIJobs++;
          } else {
             cpuActiveJobs++;
-            if ( isVideoRedoCOMJob(job) ) {
-               VideoRedoCOMJobs++;
-            }
+            //if ( isVideoRedoCOMJob(job) ) {
+            //   VideoRedoCOMJobs++;
+            //}
          }
       }
       
@@ -210,14 +210,14 @@ public class jobMonitor {
          if ( isActiveJob(job) && cpuActiveJobs >= config.MaxJobs) continue;
          
          // Don't launch more than one VideoRedo COM job at a time
-         if ( isVideoRedoCOMJob(job) ) {
-            if (VideoRedoCOMJobs > 0) continue;
-         }
+         //if ( isVideoRedoCOMJob(job) ) {
+         //   if (VideoRedoCOMJobs > 0) continue;
+         //}
          
          // Don't launch more than one VideoRedo GUI job at a time
-         if ( isVideoRedoGUIJob(job) ) {
-            if (VideoRedoGUIJobs > 0) continue;
-         }
+         //if ( isVideoRedoGUIJob(job) ) {
+         //   if (VideoRedoGUIJobs > 0) continue;
+         //}
          
          // Apply a start delay to download jobs (to avoid TiVo server overload)
          if (config.download_delay > 0 && isDownloadJob(job) && job.launch_time == null) {
@@ -251,12 +251,12 @@ public class jobMonitor {
             totalDownloads++;
          
          // Update VideoRedoCOMJobs number
-         if ( isVideoRedoCOMJob(job) )
-            VideoRedoCOMJobs++;
+         //if ( isVideoRedoCOMJob(job) )
+         //   VideoRedoCOMJobs++;
          
          // Update VideoRedoGUIJobs number
-         if ( isVideoRedoGUIJob(job) )
-            VideoRedoGUIJobs++;
+         //if ( isVideoRedoGUIJob(job) )
+         //   VideoRedoGUIJobs++;
          
          if (job.type.equals("atomic"))
             atomicJobs++;
@@ -1497,7 +1497,7 @@ public class jobMonitor {
       Boolean active = true;
       if (isDownloadJob(job))
          active = false;
-      if (isVideoRedoGUIJob(job))
+      if (job.type.equals("vrdreview"))
          active = false;
       String[] a = {"atomic", "autotune", "javametadata", "metadata", "push", "remote", "slingbox"};
       for (int i=0; i<a.length; ++i) {
@@ -1516,7 +1516,7 @@ public class jobMonitor {
    }
 
    // Return true if this job is a VideoRedo COM job that needs to be restricted to 1 at a time
-   private static Boolean isVideoRedoCOMJob(jobData job) {
+   /*private static Boolean isVideoRedoCOMJob(jobData job) {
       Boolean restricted = false;
       if ( job.type.equals("qsfix") || job.type.equals("adscan") ||
            job.type.equals("adcut") || job.type.equals("vrdencode") ) {
@@ -1528,10 +1528,10 @@ public class jobMonitor {
          restricted = false;
       
       return restricted;
-   }
+   }*/
 
    // Return true if this job is a VideoRedo GUI job that needs to be restricted to 1 at a time
-   private static Boolean isVideoRedoGUIJob(jobData job) {
+   /*private static Boolean isVideoRedoGUIJob(jobData job) {
       Boolean restricted = false;
       if ( job.type.equals("vrdreview") ) {
          restricted = true;
@@ -1542,7 +1542,7 @@ public class jobMonitor {
          restricted = false;
       
       return restricted;
-   }
+   }*/
    
    // Shut down OS (Windows only)
    public void shutdown() {
