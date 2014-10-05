@@ -2017,7 +2017,7 @@ public class configMain {
       VrdDecrypt.setText("Decrypt using VideoRedo instead of tivodecode");
       DsdDecrypt.setText("Decrypt using DirectShow Dump instead of tivodecode");
       VrdEncode.setText("Show VideoRedo encoding profiles");
-      VrdAllowMultiple.setText("Allow multiple VideoRedo jobs at once");
+      VrdAllowMultiple.setText("Run all VideoRedo jobs in GUI mode");
       VrdCombineCutEncode.setText("Combine Ad Cut & Encode");
       VrdQsfixMpeg2ps.setText("Force QS Fix output to always be mpeg2 Program Stream");
       TSDownload.setText("Download TiVo files in Transport Stream format");
@@ -3763,17 +3763,12 @@ public class configMain {
          text += "to display as encoding and/or remuxing choices.";
       }
       else if (component.equals("VrdAllowMultiple")) {
-         text =  "<b>Allow multiple VideoRedo jobs at once</b><br>";
-         text += "If this option is enabled then this allows kmttg to launch more than 1 VideoRedo<br>";
-         text += "job at a time. The side effect of doing this is that if you are running from kmttg<br>";
-         text += "GUI then each VideoRedo job that is started will temporarily popup the initial<br>";
-         text += "VideoRedo screen. Once a job starts it will be hidden and only tray status will show.<br>";
-         text += "If this option is disabled then you will not be bothered by VideoRedo screens but<br>";
-         text += "kmttg will be limited to only 1 VideoRedo job at a time.<br>";
-         text += "NOTE: VideoRedo has limitation where you cannot run more than 1 <b>silent</b> job at<br>";
-         text += "time, which is why restricting to 1 at a time in that mode is necessary.<br>";
-         text += "<b>NOTE: 'active job limit' setting is still in effect for VideoRedo jobs, so if you want<br>";
-         text += "to allow multiple VideoRedo jobs at once you also need to consider that setting.</b>";
+         text =  "<b>Run all VideoRedo jobs in GUI mode</b><br>";
+         text += "If this option is enabled then kmttg will launch all VideoRedo tasks in GUI mode<br>";
+         text += "instead of silent/background mode. Depending on your flow this may be necessary<br>";
+         text += "because silent mode runs interfere with any GUI versions of VideoRedo you may be<br>";
+         text += "running. If you're going to be actively using VideoRedo GUI while kmttg is running<br>";
+         text += "then you will need to turn this option on.";
       }
       else if (component.equals("VrdCombineCutEncode")) {
          text =  "<b>Combine Ad Cut & Encode</b><br>";
