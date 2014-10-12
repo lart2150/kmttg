@@ -38,6 +38,7 @@ public class comskip implements Serializable {
       outputFile = job.edlFile;
       if (job.vprjFile != null) {
          outputFile = job.vprjFile;
+         options = "--videoredo";
       }
       if (job.xclFile != null) {
          outputFile = job.xclFile;
@@ -337,7 +338,7 @@ public class comskip implements Serializable {
                changed = true;
                int num = Integer.parseInt(m.group(1)) + 1;
                String time = m.group(2);
-               line = "SceneMarker Sequence=\"" + num + "\">" + time + "</SceneMarker>";
+               line = "<SceneMarker Sequence=\"" + num + "\">" + time + "</SceneMarker>";
                s.add(line);
                continue;
             }
