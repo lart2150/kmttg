@@ -3706,7 +3706,8 @@ public class remotegui {
       else if (component.equals("export_sp")){
          text = "<b>Export</b><br>";
          text += "Export the currently displayed Season Pass list to a csv file which can be easily<br>";
-         text += "imported into an Excel spreadsheet or equivalent.";
+         text += "imported into an Excel spreadsheet or equivalent.<br>";
+         text += "<b>NOTE: This is NOT for saving/backing up season passes, use the Save button for that.";
       }
       else if (component.equals("delete_sp")){
          text = "<b>Delete</b><br>";
@@ -3717,12 +3718,12 @@ public class remotegui {
       }
       else if (component.equals("copy_sp")){
          text = "<b>Copy</b><br>";
-         text += "This is used to copy <b>loaded</b>season passes in the table to one of your TiVos.<br>";
+         text += "This is used to copy <b>loaded</b> season passes in the table to one of your TiVos.<br>";
          text += "Select the TiVo you want to copy to and then select rows in the table that you want copied,<br>";
          text += "then press this button to perform the copy.<br>";
-         text += "If you want to copy from another Premiere, first switch to that Premiere and save its<br>";
-         text += "season passes to a file. Then switch to destination Premiere and load the file you just saved.<br>";
-         text += "Now you can select entries in the table and use this button to copy to destination Premiere.<br>";
+         text += "If you want to copy from another TiVo, first switch to that TiVo and save its<br>";
+         text += "season passes to a file. Then switch to destination TiVo and load the file you just saved.<br>";
+         text += "Now you can select entries in the table and use this button to copy to destination TiVo.<br>";
          text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
          text += "checking against the current set of season passes already on the TiVo.";
       }
