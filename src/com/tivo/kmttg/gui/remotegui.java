@@ -2222,6 +2222,7 @@ public class remotegui {
       }
       
       rc_jumpto_button = new JButton("Jump to minute:");
+      AddButtonShortcut(rc_jumpto_button, "Altm", KeyEvent.VK_M);
       disableSpaceAction(rc_jumpto_button);
       rc_jumpto_button.setToolTipText(getToolTip("rc_jumpto_text"));
       rc_jumpto_button.addActionListener(new java.awt.event.ActionListener() {
@@ -2264,6 +2265,7 @@ public class remotegui {
       rc_jumpto_text.setText("0");
 
       rc_jumpahead_button = new JButton("Skip minutes ahead:");
+      AddButtonShortcut(rc_jumpahead_button, "Alt.", KeyEvent.VK_PERIOD);
       disableSpaceAction(rc_jumpahead_button);
       rc_jumpahead_button.setToolTipText(getToolTip("rc_jumpahead_text"));
       rc_jumpahead_button.addActionListener(new java.awt.event.ActionListener() {
@@ -2310,6 +2312,7 @@ public class remotegui {
       rc_jumpahead_text.setText("5");
 
       rc_jumpback_button = new JButton("Skip minutes back:");
+      AddButtonShortcut(rc_jumpback_button, "Alt,", KeyEvent.VK_COMMA);
       disableSpaceAction(rc_jumpback_button);
       rc_jumpback_button.setToolTipText(getToolTip("rc_jumpback_text"));
       rc_jumpback_button.addActionListener(new java.awt.event.ActionListener() {
@@ -3829,17 +3832,17 @@ public class remotegui {
          text += "NOTE: This only works for series 4 or later TiVos";
       }
       else if (component.equals("rc_jumpto_text")) {
-         text = "<b>Jump to minute</b><br>";
+         text = "<b>Jump to minute (Alt m)</b><br>";
          text += "Set playback position to exactly this number of minutes into the show.<br>";
          text += "NOTE: You can enter non-integer values for minutes such as 0.5";
       }
       else if (component.equals("rc_jumpahead_text")) {
-         text = "<b>Skip minutes ahead</b><br>";
+         text = "<b>Skip minutes ahead (Alt .)</b><br>";
          text += "Set playback position this number of minutes ahead of current position.<br>";
          text += "NOTE: You can enter non-integer values for minutes such as 0.5";
       }
       else if (component.equals("rc_jumpback_text")) {
-         text = "<b>Skip minutes back</b><br>";
+         text = "<b>Skip minutes back (Alt ,)</b><br>";
          text += "Set playback position this number of minutes behind current position.<br>";
          text += "NOTE: You can enter non-integer values for minutes such as 0.5";
       }
