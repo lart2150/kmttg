@@ -81,7 +81,7 @@ public class config {
    public static int OverwriteFiles = 0; // Don't overwrite existing files by default
    public static int DeleteFailedDownloads = 1; // Delete failed download files by default
    public static int HideProtectedFiles = 0;   
-   public static int java_downloads = 0;        // Use java instead of curl to download
+   public static int java_downloads = 1;        // Use java instead of curl to download
    public static int combine_download_decrypt = 0; // Combine download and decrypt if possible
    public static int single_download = 0;  // Allow only one download at a time if enabled
    public static int npl_when_started = 0; // Start NPL jobs when kmttg GUI starts
