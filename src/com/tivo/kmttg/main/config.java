@@ -19,6 +19,7 @@ import java.util.Stack;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
+import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
    public static String kmttg = "kmttg v1.1f_beta";
@@ -200,6 +201,11 @@ public class config {
    public static int middlemind_port = 443;
    private static String tivo_username = "";
    private static String tivo_password = "";
+   
+   // httpserver related
+   public static int httpserver_enable = 1;
+   public static int httpserver_port = 8181;
+   public static kmttgServer httpserver = null;
    
    public static Stack<String> parse() {
       debug.print("");
