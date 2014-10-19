@@ -49,6 +49,21 @@ public class kmttgServer extends HTTPServer {
             try {
                String operation = params.get("operation");
                String tivo = string.urlDecode(params.get("tivo"));
+               if (operation.equals("keyEventMacro")) {
+                  // Special case
+                  String sequence = string.urlDecode(params.get("sequence"));
+                  String[] s = sequence.split(" ");
+                  Remote r = new Remote(tivo);
+                  if (r.success) {
+                     r.keyEventMacro(s);
+                     resp.send(200, "");
+                  } else {
+                     resp.send(500, "RPC call failed to TiVo: " + tivo);
+                  }
+                  return;
+               }
+               
+               // General purpose remote operation
                JSONObject json;
                if (params.containsKey("json"))
                   json = new JSONObject(string.urlDecode(params.get("json")));
