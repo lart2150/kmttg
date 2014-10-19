@@ -1384,7 +1384,8 @@ public class HTTPServer {
          *         written, or null if isDiscardBody() returns true, in which
          *         case the body should not be written
          */
-        public ChunkedOutputStream getChunkedBody() {
+      @SuppressWarnings("resource")
+      public ChunkedOutputStream getChunkedBody() {
             headers.replace("Transfer-Encoding", "chunked");
             return discardBody ? null : new ChunkedOutputStream(out);
         }
@@ -1496,6 +1497,7 @@ public class HTTPServer {
          * @throws IOException if an error occurs
          */
         public void sendError(int status, String text) throws IOException {
+            @SuppressWarnings("resource")
             Formatter f = new Formatter();
             f.format("<!DOCTYPE html>%n" +
                 "<html>%n<head><title>%d %s</title></head>%n" +
@@ -2550,7 +2552,8 @@ public class HTTPServer {
                 w = name.length();
         w += 2; // with room for added slash and space
         // note: we use apache's format, for consistent user experience
-        Formatter f = new Formatter(Locale.US);
+      @SuppressWarnings("resource")
+      Formatter f = new Formatter(Locale.US);
         f.format("<!DOCTYPE html>%n" +
             "<html><head><title>Index of %s</title></head>%n" +
             "<body><h1>Index of %s</h1>%n" +
