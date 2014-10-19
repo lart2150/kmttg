@@ -1935,6 +1935,26 @@ public class Remote {
       }
    }
    
+   public void keyEventMacro(String[] sequence) {
+      try {
+         JSONObject result;
+         for (int i=0; i<sequence.length; ++i) {
+            JSONObject json = new JSONObject();
+            if (sequence[i].matches("^[0-9]")) {
+               json.put("event", "ascii");
+               json.put("value", sequence[i].toCharArray()[0]);
+            } else {
+               json.put("event", sequence[i]);
+            }
+            result = Command("keyEventSend", json);
+            if (result == null) break;
+         }
+      } catch (JSONException e1) {
+         log.error("Macro CB - " + e1.getMessage());
+      }
+      disconnect();
+   }
+   
    // Background mode reboot sequence for a TiVo
    public void reboot(final String tivoName) {
       class backgroundRun extends SwingWorker<Object, Object> {
