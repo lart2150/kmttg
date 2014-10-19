@@ -3249,25 +3249,7 @@ public class remotegui {
          protected Object doInBackground() {
             if (config.rpcEnabled(tivoName)) {
                Remote r = config.initRemote(tivoName);
-               if (r.success) {
-                  try {
-                     JSONObject result;
-                     for (int i=0; i<sequence.length; ++i) {
-                        JSONObject json = new JSONObject();
-                        if (sequence[i].matches("^[0-9]")) {
-                           json.put("event", "ascii");
-                           json.put("value", sequence[i].toCharArray()[0]);
-                        } else {
-                           json.put("event", sequence[i]);
-                        }
-                        result = r.Command("keyEventSend", json);
-                        if (result == null) break;
-                     }
-                  } catch (JSONException e1) {
-                     log.error("Macro CB - " + e1.getMessage());
-                  }
-                  r.disconnect();
-               }
+               r.keyEventMacro(sequence);
             } else {
                // Use telnet protocol
                new telnet(config.TIVOS.get(tivoName), mapToTelnet(sequence));
