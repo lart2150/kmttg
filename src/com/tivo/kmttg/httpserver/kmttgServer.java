@@ -3,19 +3,22 @@ package com.tivo.kmttg.httpserver;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Stack;
 
+import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class kmttgServer extends HTTPServer {
    public kmttgServer server;
    
    public kmttgServer() {
       try {
-         String baseDir = config.programDir + File.separator + "httpserver";
+         String baseDir = config.programDir;
          if ( ! file.isDir(baseDir)) {
             log.error("httpserver base directory not found: " + baseDir);
             return;
@@ -37,18 +40,23 @@ public class kmttgServer extends HTTPServer {
    // Override parent method to handle special requests
    // Sample rpc request: /rpc?tivo=Roamio&operation=SysInfo
    protected void serve(Request req, Response resp) throws IOException {
-      // Intercept certain special paths, pass along the rest
       String path = req.getPath();
-      log.print("serve path=" + path);
+      
+      // Intercept certain special paths, pass along the rest
       if (path.equals("/rpc")) {
          Map<String,String> params = req.getParams();
          if (params.containsKey("operation") && params.containsKey("tivo")) {
             try {
                String operation = params.get("operation");
-               String tivo = params.get("tivo");
+               String tivo = string.urlDecode(params.get("tivo"));
+               JSONObject json;
+               if (params.containsKey("json"))
+                  json = new JSONObject(string.urlDecode(params.get("json")));
+               else
+                  json = new JSONObject();
                Remote r = new Remote(tivo);
                if (r.success) {
-                  JSONObject result = r.Command(operation, new JSONObject());
+                  JSONObject result = r.Command(operation, json);
                   if (result != null) {
                      resp.send(200, result.toString());
                   }
@@ -61,6 +69,17 @@ public class kmttgServer extends HTTPServer {
             resp.sendError(400, "RPC request missing 'operation' and/or 'tivo'");
             return;
          }
+         return;
+      }
+      
+      if (path.equals("/getRpcTivos")) {
+         Stack<String> tivos = config.getTivoNames();
+         JSONArray a = new JSONArray();
+         for (String tivoName : tivos) {
+            if (config.rpcEnabled(tivoName))
+               a.put(tivoName);
+         }
+         resp.send(200, a.toString());
          return;
       }
       
