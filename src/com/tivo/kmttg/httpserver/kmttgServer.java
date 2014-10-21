@@ -1,11 +1,13 @@
 package com.tivo.kmttg.httpserver;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONFile;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
@@ -49,6 +51,7 @@ public class kmttgServer extends HTTPServer {
             try {
                String operation = params.get("operation");
                String tivo = string.urlDecode(params.get("tivo"));
+               
                if (operation.equals("keyEventMacro")) {
                   // Special case
                   String sequence = string.urlDecode(params.get("sequence"));
@@ -59,6 +62,57 @@ public class kmttgServer extends HTTPServer {
                      resp.send(200, "");
                   } else {
                      resp.send(500, "RPC call failed to TiVo: " + tivo);
+                  }
+                  return;
+               }
+               
+               if (operation.equals("SPSave")) {
+                  // Special case
+                  String fileName = config.programDir + File.separator + tivo + ".sp";
+                  Remote r = new Remote(tivo);
+                  if (r.success) {
+                     JSONArray a = r.SeasonPasses(null);
+                     if ( a != null ) {
+                        if ( ! JSONFile.write(a, fileName) ) {
+                           resp.send(500, "Failed to write to file: " + fileName);
+                        }
+                     } else {
+                        resp.send(500, "Failed to retriev SP list for tivo: " + tivo);
+                        r.disconnect();
+                        return;
+                     }
+                     r.disconnect();
+                     resp.send(200, "Saved SP to file: " + fileName);
+                  } else {
+                     resp.send(500, "RPC call failed to TiVo: " + tivo);
+                  }
+                  return;
+               }
+               
+               if (operation.equals("SPFiles")) {
+                  // Special case - return all .sp files available for loading
+                  File dir = new File(config.programDir);
+                  File [] files = dir.listFiles(new FilenameFilter() {
+                      public boolean accept(File dir, String name) {
+                          return name.endsWith(".sp");
+                      }
+                  });
+                  JSONArray a = new JSONArray();
+                  for (File f : files) {
+                     a.put(f.getAbsolutePath());
+                  }
+                  resp.send(200, a.toString());
+                  return;
+               }
+               
+               if (operation.equals("SPLoad")) {
+                  // Special case
+                  String fileName = string.urlDecode(params.get("file"));
+                  JSONArray a = JSONFile.readJSONArray(fileName);
+                  if ( a != null ) {
+                     resp.send(200, a.toString());
+                  } else {
+                     resp.send(500, "Failed to load SP file: " + fileName);
                   }
                   return;
                }
