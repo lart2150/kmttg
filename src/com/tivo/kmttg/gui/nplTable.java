@@ -1381,6 +1381,10 @@ public class nplTable {
       // TWP delete calls
       for (int i=0; i<urls.size(); ++i) {
          file.TivoWebPlusDelete(urls.get(i));
+         // Intentionally put a delay here
+         try {
+            Thread.sleep(2000);
+         } catch (InterruptedException e) {}
       }
    }
    
