@@ -40,115 +40,25 @@ public class kmttgServer extends HTTPServer {
    }
    
    // Override parent method to handle special requests
-   // Sample rpc request: /rpc?tivo=Roamio&operation=SysInfo
+   // Intercept certain special paths, pass along the rest
    protected void serve(Request req, Response resp) throws IOException {
       String path = req.getPath();
       
-      // Intercept certain special paths, pass along the rest
+      // Handle rpc requests
       if (path.equals("/rpc")) {
-         Map<String,String> params = req.getParams();
-         if (params.containsKey("operation") && params.containsKey("tivo")) {
-            try {
-               String operation = params.get("operation");
-               String tivo = string.urlDecode(params.get("tivo"));
-               
-               if (operation.equals("keyEventMacro")) {
-                  // Special case
-                  String sequence = string.urlDecode(params.get("sequence"));
-                  String[] s = sequence.split(" ");
-                  Remote r = new Remote(tivo);
-                  if (r.success) {
-                     r.keyEventMacro(s);
-                     resp.send(200, "");
-                  } else {
-                     resp.send(500, "RPC call failed to TiVo: " + tivo);
-                  }
-                  return;
-               }
-               
-               if (operation.equals("SPSave")) {
-                  // Special case
-                  String fileName = config.programDir + File.separator + tivo + ".sp";
-                  Remote r = new Remote(tivo);
-                  if (r.success) {
-                     JSONArray a = r.SeasonPasses(null);
-                     if ( a != null ) {
-                        if ( ! JSONFile.write(a, fileName) ) {
-                           resp.send(500, "Failed to write to file: " + fileName);
-                        }
-                     } else {
-                        resp.send(500, "Failed to retriev SP list for tivo: " + tivo);
-                        r.disconnect();
-                        return;
-                     }
-                     r.disconnect();
-                     resp.send(200, "Saved SP to file: " + fileName);
-                  } else {
-                     resp.send(500, "RPC call failed to TiVo: " + tivo);
-                  }
-                  return;
-               }
-               
-               if (operation.equals("SPFiles")) {
-                  // Special case - return all .sp files available for loading
-                  File dir = new File(config.programDir);
-                  File [] files = dir.listFiles(new FilenameFilter() {
-                      public boolean accept(File dir, String name) {
-                          return name.endsWith(".sp");
-                      }
-                  });
-                  JSONArray a = new JSONArray();
-                  for (File f : files) {
-                     a.put(f.getAbsolutePath());
-                  }
-                  resp.send(200, a.toString());
-                  return;
-               }
-               
-               if (operation.equals("SPLoad")) {
-                  // Special case
-                  String fileName = string.urlDecode(params.get("file"));
-                  JSONArray a = JSONFile.readJSONArray(fileName);
-                  if ( a != null ) {
-                     resp.send(200, a.toString());
-                  } else {
-                     resp.send(500, "Failed to load SP file: " + fileName);
-                  }
-                  return;
-               }
-               
-               // General purpose remote operation
-               JSONObject json;
-               if (params.containsKey("json"))
-                  json = new JSONObject(string.urlDecode(params.get("json")));
-               else
-                  json = new JSONObject();
-               Remote r = new Remote(tivo);
-               if (r.success) {
-                  JSONObject result = r.Command(operation, json);
-                  if (result != null) {
-                     resp.send(200, result.toString());
-                  }
-                  r.disconnect();
-               }
-            } catch (Exception e) {
-               resp.sendError(500, e.getMessage());
-            }
-         } else {
-            resp.sendError(400, "RPC request missing 'operation' and/or 'tivo'");
-            return;
-         }
+         handleRpc(req, resp);
          return;
       }
       
+      // Return list of rpc enabled TiVos known by kmttg
       if (path.equals("/getRpcTivos")) {
-         Stack<String> tivos = config.getTivoNames();
-         JSONArray a = new JSONArray();
-         for (String tivoName : tivos) {
-            if (config.rpcEnabled(tivoName))
-               a.put(tivoName);
-         }
-         resp.send(200, a.toString());
+         handleRpcTivos(resp);
+         return;
+      }
+      
+      // Initiate and return transcoding video stream
+      if (path.equals("/transcode")) {
+         handleTranscode(req, resp);
          return;
       }
       
@@ -173,6 +83,150 @@ public class kmttgServer extends HTTPServer {
           status = handler.serve(req, resp);
       if (status > 0)
           resp.sendError(status);
-  }
+   }
+   
+   // Handle rpc requests
+   // Sample rpc request: /rpc?tivo=Roamio&operation=SysInfo
+   public void handleRpc(Request req, Response resp) throws IOException {
+      Map<String,String> params = req.getParams();
+      if (params.containsKey("operation") && params.containsKey("tivo")) {
+         try {
+            String operation = params.get("operation");
+            String tivo = string.urlDecode(params.get("tivo"));
+            
+            if (operation.equals("keyEventMacro")) {
+               // Special case
+               String sequence = string.urlDecode(params.get("sequence"));
+               String[] s = sequence.split(" ");
+               Remote r = new Remote(tivo);
+               if (r.success) {
+                  r.keyEventMacro(s);
+                  resp.send(200, "");
+               } else {
+                  resp.send(500, "RPC call failed to TiVo: " + tivo);
+               }
+               return;
+            }
+            
+            if (operation.equals("SPSave")) {
+               // Special case
+               String fileName = config.programDir + File.separator + tivo + ".sp";
+               Remote r = new Remote(tivo);
+               if (r.success) {
+                  JSONArray a = r.SeasonPasses(null);
+                  if ( a != null ) {
+                     if ( ! JSONFile.write(a, fileName) ) {
+                        resp.send(500, "Failed to write to file: " + fileName);
+                     }
+                  } else {
+                     resp.send(500, "Failed to retriev SP list for tivo: " + tivo);
+                     r.disconnect();
+                     return;
+                  }
+                  r.disconnect();
+                  resp.send(200, "Saved SP to file: " + fileName);
+               } else {
+                  resp.send(500, "RPC call failed to TiVo: " + tivo);
+               }
+               return;
+            }
+            
+            if (operation.equals("SPFiles")) {
+               // Special case - return all .sp files available for loading
+               File dir = new File(config.programDir);
+               File [] files = dir.listFiles(new FilenameFilter() {
+                   public boolean accept(File dir, String name) {
+                       return name.endsWith(".sp");
+                   }
+               });
+               JSONArray a = new JSONArray();
+               for (File f : files) {
+                  a.put(f.getAbsolutePath());
+               }
+               resp.send(200, a.toString());
+               return;
+            }
+            
+            if (operation.equals("SPLoad")) {
+               // Special case
+               String fileName = string.urlDecode(params.get("file"));
+               JSONArray a = JSONFile.readJSONArray(fileName);
+               if ( a != null ) {
+                  resp.send(200, a.toString());
+               } else {
+                  resp.send(500, "Failed to load SP file: " + fileName);
+               }
+               return;
+            }
+            
+            // General purpose remote operation
+            JSONObject json;
+            if (params.containsKey("json"))
+               json = new JSONObject(string.urlDecode(params.get("json")));
+            else
+               json = new JSONObject();
+            Remote r = new Remote(tivo);
+            if (r.success) {
+               JSONObject result = r.Command(operation, json);
+               if (result != null) {
+                  resp.send(200, result.toString());
+               }
+               r.disconnect();
+            }
+         } catch (Exception e) {
+            resp.sendError(500, e.getMessage());
+         }
+      } else {
+         resp.sendError(400, "RPC request missing 'operation' and/or 'tivo'");
+      }
+   }
+   
+   // Return list of rpc enabled TiVos known by kmttg
+   public void handleRpcTivos(Response resp) throws IOException {
+      Stack<String> tivos = config.getTivoNames();
+      JSONArray a = new JSONArray();
+      for (String tivoName : tivos) {
+         if (config.rpcEnabled(tivoName))
+            a.put(tivoName);
+      }
+      resp.send(200, a.toString());
+   }
 
+   // Transcoding video handler
+   public void handleTranscode(Request req, Response resp) throws IOException {
+      Transcode tc = null;
+      SocketProcessInputStream ss = null;
+      long length = 0;
+      Map<String,String> params = req.getParams();
+      if (params.containsKey("file") && params.containsKey("format")) {
+         String fileName = string.urlDecode(params.get("file"));
+         if ( ! file.isFile(fileName) ) {
+            resp.send(404, "Cannot find video file: " + fileName);
+            return;
+         }
+         String format = string.urlDecode(params.get("format"));
+         length = new File(fileName).length();
+         tc = new Transcode(fileName);
+         if (format.equals("webm"))
+            ss = tc.webm();
+         else {
+            resp.send(500, "Unsupported transcode format: " + format);
+            return;
+         }
+      }
+      
+      if (ss != null) {
+         // Transcode stream has been started, so send it out
+         try {
+            resp.sendBody(ss, length, null);
+         } catch (Exception e) {
+            // This catches interruptions from client side so we can kill the transcode
+            log.error("transcode - " + e.getMessage());
+            ss.close();
+            tc.kill();
+         }
+      } else {
+         resp.send(500, "Error starting transcode");
+      }      
+   }
 }
