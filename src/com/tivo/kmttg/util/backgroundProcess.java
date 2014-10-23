@@ -186,5 +186,9 @@ public class backgroundProcess {
    public OutputStream getOutputStream() {
       return proc.getOutputStream();
    }
+   
+   public Process getProcess() {
+      return proc;
+   }
 
 }
