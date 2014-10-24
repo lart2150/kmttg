@@ -119,14 +119,14 @@ public class Transcode {
       String segments = base + File.separator + prefix + "-%05d.ts";
       String[] ffArgs = {
          "-threads", "0", "-y", "-segment_format", "mpegts", "-f", "segment",
-         "-map_metadata", "-1", "-vcodec", "libx264", "-map", "0:1", "-crf", "20",
-         "-maxrate", "6991k", "-bufsize", "13982k", "-preset", "veryfast",
-         "-x264opts", "cabac=0:8x8dct=1:bframes=0:subme=2:me_range=4:rc_lookahead=10:me=dia:no_chroma_me:8x8dct=0:partitions=none:cabac=0",
-         "-flags", "-global_header", "-segment_time", "7", "-segment_start_number", "0",
-         "-force_key_frames", "expr:gte(t,n_forced*7)", "-sn",
+         "-map_metadata", "-1", "-vcodec", "libx264", "-map", "0:1", "-crf", "19",
+         "-maxrate", "3000k", "-bufsize", "6000k", "-preset", "veryfast",
+         "-x264opts", "cabac=0:8x8dct=1:bframes=0:subme=0:me_range=4:rc_lookahead=10:me=dia:no_chroma_me:8x8dct=0:partitions=none:bframes=3:cabac=1",
+         "-flags", "-global_header", "-segment_time", "3", "-segment_start_number", "0",
+         "-force_key_frames", "expr:gte(t,n_forced*3)", "-sn",
          "-acodec", "aac", "-map", "0:2", "-strict", "-2", "-cutoff", "15000", "-ac", "2",
-         "-ab", "193k", "-segment_list", segmentFile, segments            
-      };
+         "-ab", "217k", "-segment_list", segmentFile, segments            
+      }; 
       Stack<String> command = new Stack<String>();
       command.add(config.ffmpeg);
       command.add("-i");
