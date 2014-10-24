@@ -1,5 +1,7 @@
 package com.tivo.kmttg.httpserver;
 
+import com.tivo.kmttg.util.log;
+
 public class Piper implements java.lang.Runnable {
    private java.io.InputStream input;
    private java.io.OutputStream output;
@@ -20,8 +22,7 @@ public class Piper implements java.lang.Runnable {
             }
          }
       } catch (Exception e) {
-         // Something happened while reading or writing streams; pipe is broken
-         throw new RuntimeException("Broken pipe", e);
+         log.error("Piper broken pipe - " + e.getMessage());
       } finally {
          try {
             input.close();
