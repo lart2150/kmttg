@@ -1965,7 +1965,7 @@ public class Remote {
                json.put("uri", "x-tivo:classicui:restartDvr");
                JSONObject result = Command("uiNavigate", json);
                if (result != null) {
-                  Thread.sleep(3000);
+                  Thread.sleep(5000);
                   String[] keys = {"thumbsDown", "thumbsDown", "thumbsDown", "enter"};
                   for (String key : keys) {
                      JSONObject j = new JSONObject();
