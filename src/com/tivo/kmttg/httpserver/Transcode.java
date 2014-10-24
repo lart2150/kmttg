@@ -1,9 +1,11 @@
 package com.tivo.kmttg.httpserver;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Stack;
 
 import com.tivo.kmttg.main.config;
@@ -21,18 +23,14 @@ public class Transcode {
       this.inputFile = inputFile;
    }
    private static class RunnableInputDrainer implements Runnable {
-      private BufferedReader reader;
-      public RunnableInputDrainer(InputStream is, boolean dump) {
-         this.reader = new BufferedReader(new InputStreamReader(is));
-      }
-      @SuppressWarnings("unused")
+      InputStream is;
       public RunnableInputDrainer(InputStream is) {
-         this(is, false);
+         this.is = is;
       }
       public void run() {
          try {
-            String line;
-            while((line = reader.readLine()) != null) {log.print(line);}
+            byte[] b = new byte[2048];
+            while(is.read(b) != -1) {}
          } catch (IOException e) {log.error("Drainer - " + e.getMessage());}         
       }
    }
@@ -73,18 +71,25 @@ public class Transcode {
          ff.add("-");
          for (String c : ffArgs)
             ff.add(c);
+         String[] ffmpeg = new String[ff.size()];
+         int i=0;
+         for (String s : ff)
+            ffmpeg[i++] = s;
          try {
             p1 = rt.exec(tivodecode);
-            p2 = rt.exec((String[])ff.toArray());
-            RunnableInputDrainer des = new RunnableInputDrainer(p2.getErrorStream(), false);
+            p2 = rt.exec(ffmpeg);
+            RunnableInputDrainer des = new RunnableInputDrainer(p2.getErrorStream());
             new Thread(des).start();
          } catch (IOException e) {
             log.error("webm - " + e.getMessage());
             return null;
          }
-         Piper pipe = new Piper(p1.getInputStream(), p2.getOutputStream());
+         Piper pipe = new Piper(
+            new BufferedInputStream(p1.getInputStream()),
+            new BufferedOutputStream(p2.getOutputStream())
+         );
          new Thread(pipe).start();
-         ss.attachProcess(p2);
+         ss.attachProcess(p1);
       } else {
          command.add(config.ffmpeg);
          command.add("-i");
@@ -105,6 +110,47 @@ public class Transcode {
          }
       }
       return ss;
+   }
+   
+   public FileInputStream hls() {
+      String base = config.programDir + File.separator + "web";
+      String prefix = "test";
+      String segmentFile = base + File.separator + prefix + ".m3u8";
+      String segments = base + File.separator + prefix + "-%05d.ts";
+      String[] ffArgs = {
+         "-threads", "0", "-y", "-segment_format", "mpegts", "-f", "segment",
+         "-map_metadata", "-1", "-vcodec", "libx264", "-map", "0:1", "-crf", "20",
+         "-maxrate", "6991k", "-bufsize", "13982k", "-preset", "veryfast",
+         "-x264opts", "cabac=0:8x8dct=1:bframes=0:subme=2:me_range=4:rc_lookahead=10:me=dia:no_chroma_me:8x8dct=0:partitions=none:cabac=0",
+         "-flags", "-global_header", "-segment_time", "7", "-segment_start_number", "0",
+         "-force_key_frames", "expr:gte(t,n_forced*7)", "-sn",
+         "-acodec", "aac", "-map", "0:2", "-strict", "-2", "-cutoff", "15000", "-ac", "2",
+         "-ab", "193k", "-segment_list", segmentFile, segments            
+      };
+      Stack<String> command = new Stack<String>();
+      command.add(config.ffmpeg);
+      command.add("-i");
+      command.add(inputFile);
+      for (String c : ffArgs)
+         command.add(c);
+      
+      process = new backgroundProcess();
+      log.print(">> Transcoding to hls " + inputFile + " ...");
+      if ( process.run(command) ) {
+         log.print(process.toString());
+      } else {
+         log.error("Failed to start command: " + process.toString());
+         process.printStderr();
+         process = null;
+         return null;
+      }
+      try {
+         Thread.sleep(2000);
+         return new FileInputStream(segmentFile);
+      } catch (Exception e) {
+         log.error("hls - " + e.getMessage());
+      }
+      return null;
    }
    
    public void kill() {
