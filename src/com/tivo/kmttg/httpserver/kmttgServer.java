@@ -3,6 +3,7 @@ package com.tivo.kmttg.httpserver;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Stack;
 
@@ -57,6 +58,12 @@ public class kmttgServer extends HTTPServer {
       }
       
       // Initiate and return transcoding video stream
+      if (path.equals("/getVideoFiles")) {
+         handleVideoFiles(resp);
+         return;
+      }
+      
+      // Initiate and return transcoding video stream
       if (path.equals("/transcode")) {
          handleTranscode(req, resp);
          return;
@@ -103,7 +110,7 @@ public class kmttgServer extends HTTPServer {
                   r.keyEventMacro(s);
                   resp.send(200, "");
                } else {
-                  resp.send(500, "RPC call failed to TiVo: " + tivo);
+                  resp.sendError(500, "RPC call failed to TiVo: " + tivo);
                }
                return;
             }
@@ -116,17 +123,17 @@ public class kmttgServer extends HTTPServer {
                   JSONArray a = r.SeasonPasses(null);
                   if ( a != null ) {
                      if ( ! JSONFile.write(a, fileName) ) {
-                        resp.send(500, "Failed to write to file: " + fileName);
+                        resp.sendError(500, "Failed to write to file: " + fileName);
                      }
                   } else {
-                     resp.send(500, "Failed to retriev SP list for tivo: " + tivo);
+                     resp.sendError(500, "Failed to retriev SP list for tivo: " + tivo);
                      r.disconnect();
                      return;
                   }
                   r.disconnect();
                   resp.send(200, "Saved SP to file: " + fileName);
                } else {
-                  resp.send(500, "RPC call failed to TiVo: " + tivo);
+                  resp.sendError(500, "RPC call failed to TiVo: " + tivo);
                }
                return;
             }
@@ -154,7 +161,7 @@ public class kmttgServer extends HTTPServer {
                if ( a != null ) {
                   resp.send(200, a.toString());
                } else {
-                  resp.send(500, "Failed to load SP file: " + fileName);
+                  resp.sendError(500, "Failed to load SP file: " + fileName);
                }
                return;
             }
@@ -191,6 +198,54 @@ public class kmttgServer extends HTTPServer {
       }
       resp.send(200, a.toString());
    }
+   
+   // Return list of rpc enabled TiVos known by kmttg
+   public void handleVideoFiles(Response resp) throws IOException {
+      // LinkedHashMap is used to get unique list of files
+      LinkedHashMap<String,Integer> h = new LinkedHashMap<String,Integer>();
+      getVideoFiles(config.mpegDir, h);
+      getVideoFiles(config.outputDir, h);
+      getVideoFiles(config.encodeDir, h);
+      JSONArray a = new JSONArray();
+      for (String key : h.keySet()) {
+         a.put(key);
+      }
+      resp.send(200, a.toString());
+   }
+   
+   private void getVideoFiles(String pathname, LinkedHashMap<String,Integer> h) {
+      File f = new File(pathname);
+      File[] listfiles = f.listFiles();
+      for (int i = 0; i < listfiles.length; i++) {
+         if (listfiles[i].isDirectory()) {
+            File[] internalFile = listfiles[i].listFiles();
+            for (int j = 0; j < internalFile.length; j++) {
+               if (isVideoFile(internalFile[j].getAbsolutePath()))
+                  h.put(internalFile[j].getAbsolutePath(), 1);
+               if (internalFile[j].isDirectory()) {
+                  String name = internalFile[j].getAbsolutePath();
+                  getVideoFiles(name, h);
+               }
+            }
+         } else {
+            if (isVideoFile(listfiles[i].getAbsolutePath()))
+               h.put(listfiles[i].getAbsolutePath(), 1);
+         }
+      }
+   }
+   
+   private boolean isVideoFile(String fileName) {
+      boolean videoFile = false;
+      String[] extensions = {
+         "mp4","mpeg","vob","mpg","mpeg2","mp2","avi","wmv",
+         "asf","mkv","tivo","m4v","3gp","mov","flv","ts"
+      };
+      for (String extension : extensions) {
+         if (fileName.toLowerCase().endsWith("." + extension))
+            videoFile = true;
+      }
+      return videoFile;
+   }
 
    // Transcoding video handler
    public void handleTranscode(Request req, Response resp) throws IOException {
@@ -201,7 +256,7 @@ public class kmttgServer extends HTTPServer {
       if (params.containsKey("file") && params.containsKey("format")) {
          String fileName = string.urlDecode(params.get("file"));
          if ( ! file.isFile(fileName) ) {
-            resp.send(404, "Cannot find video file: " + fileName);
+            resp.sendError(404, "Cannot find video file: '" + fileName + "'");
             return;
          }
          String format = string.urlDecode(params.get("format"));
@@ -210,7 +265,7 @@ public class kmttgServer extends HTTPServer {
          if (format.equals("webm"))
             ss = tc.webm();
          else {
-            resp.send(500, "Unsupported transcode format: " + format);
+            resp.sendError(500, "Unsupported transcode format: " + format);
             return;
          }
       }
@@ -226,7 +281,7 @@ public class kmttgServer extends HTTPServer {
             tc.kill();
          }
       } else {
-         resp.send(500, "Error starting transcode");
+         resp.sendError(500, "Error starting transcode");
       }      
    }
 }
