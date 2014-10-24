@@ -1,6 +1,7 @@
 package com.tivo.kmttg.httpserver;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -250,6 +251,7 @@ public class kmttgServer extends HTTPServer {
    // Transcoding video handler
    public void handleTranscode(Request req, Response resp) throws IOException {
       Transcode tc = null;
+      FileInputStream fis = null;
       SocketProcessInputStream ss = null;
       long length = 0;
       Map<String,String> params = req.getParams();
@@ -264,20 +266,31 @@ public class kmttgServer extends HTTPServer {
          tc = new Transcode(fileName);
          if (format.equals("webm"))
             ss = tc.webm();
+         if (format.equals("hls"))
+            fis = tc.hls();
          else {
             resp.sendError(500, "Unsupported transcode format: " + format);
             return;
          }
       }
       
-      if (ss != null) {
+      if (ss != null || fis != null) {
          // Transcode stream has been started, so send it out
          try {
-            resp.sendBody(ss, length, null);
+            if (ss != null)
+               resp.sendBody(ss, length, null);
+            if (fis != null) {
+               length = fis.getChannel().size();
+               resp.sendHeaders(200, length, -1, null, "application/x-mpegurl", null);
+               resp.sendBody(fis, length, null);
+            }
          } catch (Exception e) {
             // This catches interruptions from client side so we can kill the transcode
             log.error("transcode - " + e.getMessage());
-            ss.close();
+            if (ss != null)
+               ss.close();
+            if (fis != null)
+               fis.close();
             tc.kill();
          }
       } else {
