@@ -1,7 +1,6 @@
 package com.tivo.kmttg.httpserver;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
@@ -14,12 +13,14 @@ import com.tivo.kmttg.JSON.JSONFile;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class kmttgServer extends HTTPServer {
-   public kmttgServer server;
+   private Stack<Transcode> transcodes = new Stack<Transcode>();
+   public int transcode_counter = 0;
    
    public kmttgServer() {
       try {
@@ -28,11 +29,11 @@ public class kmttgServer extends HTTPServer {
             log.error("httpserver base directory not found: " + baseDir);
             return;
          }
-         server = new kmttgServer(config.httpserver_port);
-         VirtualHost host = server.getVirtualHost(null);
+         config.httpserver = new kmttgServer(config.httpserver_port);
+         VirtualHost host = config.httpserver.getVirtualHost(null);
          host.setAllowGeneratedIndex(true);
          host.addContext("/", new FileContextHandler(new File(baseDir), "/"));
-         server.start();
+         config.httpserver.start();
       } catch (IOException e) {
          log.error("HTTPServer Init - " + e.getMessage());
       }
@@ -46,6 +47,10 @@ public class kmttgServer extends HTTPServer {
    // Intercept certain special paths, pass along the rest
    protected void serve(Request req, Response resp) throws IOException {
       String path = req.getPath();
+      debug.print("req path: " + path);
+      
+      // Clear up finished transcodes
+      cleanup();
       
       // Handle rpc requests
       if (path.equals("/rpc")) {
@@ -252,7 +257,7 @@ public class kmttgServer extends HTTPServer {
    // Transcoding video handler
    public void handleTranscode(Request req, Response resp) throws IOException {
       Transcode tc = null;
-      FileInputStream fis = null;
+      String returnFile = null;
       SocketProcessInputStream ss = null;
       long length = 0;
       Map<String,String> params = req.getParams();
@@ -262,40 +267,94 @@ public class kmttgServer extends HTTPServer {
             resp.sendError(404, "Cannot find video file: '" + fileName + "'");
             return;
          }
-         String format = string.urlDecode(params.get("format"));
-         length = new File(fileName).length();
-         tc = new Transcode(fileName);
-         if (format.equals("webm"))
-            ss = tc.webm();
-         else if (format.equals("hls"))
-            fis = tc.hls();
-         else {
-            resp.sendError(500, "Unsupported transcode format: " + format);
-            return;
+         tc = alreadyRunning(fileName);
+         if (tc != null) {
+            if (tc.ss != null)
+               ss = tc.ss;
+            if (tc.returnFile != null)
+               returnFile = tc.returnFile;
+         } else {
+            String format = string.urlDecode(params.get("format"));
+            length = new File(fileName).length();
+            tc = new Transcode(fileName);
+            addTranscode(tc);
+            if (format.equals("webm"))
+               ss = tc.webm();
+            else if (format.equals("hls"))
+               returnFile = tc.hls();
+            else {
+               resp.sendError(500, "Unsupported transcode format: " + format);
+               return;
+            }
          }
       }
       
-      if (ss != null || fis != null) {
+      if (ss != null || returnFile != null) {
          // Transcode stream has been started, so send it out
          try {
-            if (ss != null)
+            if (ss != null) {
                resp.sendBody(ss, length, null);
-            if (fis != null) {
-               length = fis.getChannel().size();
-               resp.sendHeaders(200, length, -1, null, "application/x-mpegurl", null);
-               resp.sendBody(fis, length, null);
+            }
+            if (returnFile != null) {
+               req.setPath(returnFile);
+               //resp.sendHeaders(200, -1, -1, null, "application/x-mpegurl", null);
+               serve(req, resp);
             }
          } catch (Exception e) {
             // This catches interruptions from client side so we can kill the transcode
             log.error("transcode - " + e.getMessage());
             if (ss != null)
                ss.close();
-            if (fis != null)
-               fis.close();
             tc.kill();
          }
       } else {
          resp.sendError(500, "Error starting transcode");
       }      
+   }
+   
+   private void addTranscode(Transcode tc) {
+      transcodes.add(tc);
+      transcode_counter++;
+   }
+   
+   // Restrict to only 1 transcode at a time per input file
+   Transcode alreadyRunning(String fileName) {
+      for (Transcode tc : transcodes) {
+         if (tc.inputFile.equals(fileName)) {
+            if (tc.isRunning())
+               return tc;
+         }
+      }
+      return null;
+   }
+   
+   // Remove finished processes from transcodes stack
+  void cleanup() {
+      for (int i=0; i<transcodes.size(); ++i) {
+         Transcode tc = transcodes.get(i);
+         if (! tc.isRunning()) {
+            tc.cleanup();
+            transcodes.remove(i);
+         }
+      }
+   }
+  
+  void killTranscode(String name) {
+     name = name.replaceFirst("/web/", "");
+     for (int i=0; i<transcodes.size(); ++i) {
+        Transcode tc = transcodes.get(i);
+        String prefix = tc.prefix;
+        if (name.startsWith(prefix)) {
+           tc.kill();
+           tc.cleanup();
+        }
+     }
+  }
+   
+   void killTranscodes() {
+      for(Transcode tc : transcodes) {
+         tc.kill();
+      }
+      cleanup();
    }
 }
