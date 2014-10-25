@@ -43,17 +43,8 @@ public class Transcode {
          return null;
       }
       String sockStr = "tcp://127.0.0.1:" + ss.getPort();
-      String[] ffArgs = {
-         "-vcodec",
-         "libvpx",
-         "-cpu-used",
-         "-5",
-         "-deadline",
-         "realtime",
-         "-f",
-         "webm",
-         sockStr            
-      };
+      String args = "-threads 0 -y -vcodec libvpx -crf 19 -sn -acodec libvorbis -ac 2 -ab 217k -f webm " + sockStr;
+      String[] ffArgs = args.split(" ");
       Stack<String> command = new Stack<String>();
       if (inputFile.toLowerCase().endsWith(".tivo")) {
          log.print(">> Transcoding TiVo file to webm " + inputFile + " ...");
@@ -113,26 +104,26 @@ public class Transcode {
    }
    
    public FileInputStream hls() {
+      String args = "-threads 0 -y -map_metadata -1 -vcodec libx264 -crf 19";
+      args += "-maxrate 3000k -bufsize 6000k -preset veryfast";
+      args += "-x264opts cabac=0:8x8dct=1:bframes=0:subme=0:me_range=4:rc_lookahead=10:me=dia:no_chroma_me:8x8dct=0:partitions=none:bframes=3:cabac=1";
+      args += "-flags -global_header -force_key_frames expr:gte(t,n_forced*3) -sn";
+      args += "-acodec aac -strict -2 -cutoff 15000 -ac 2 -ab 217k";
+      args += "-segment_format mpegts -f segment -segment_time 3 -segment_start_number 0";
+      args += "-segment_list_entry_prefix /web/ -segment_list";
       String base = config.programDir + File.separator + "web";
       String prefix = "test";
       String segmentFile = base + File.separator + prefix + ".m3u8";
       String segments = base + File.separator + prefix + "-%05d.ts";
-      String[] ffArgs = {
-         "-threads", "0", "-y", "-segment_format", "mpegts", "-f", "segment",
-         "-map_metadata", "-1", "-vcodec", "libx264", "-map", "0:1", "-crf", "19",
-         "-maxrate", "3000k", "-bufsize", "6000k", "-preset", "veryfast",
-         "-x264opts", "cabac=0:8x8dct=1:bframes=0:subme=0:me_range=4:rc_lookahead=10:me=dia:no_chroma_me:8x8dct=0:partitions=none:bframes=3:cabac=1",
-         "-flags", "-global_header", "-segment_time", "3", "-segment_start_number", "0",
-         "-force_key_frames", "expr:gte(t,n_forced*3)", "-sn",
-         "-acodec", "aac", "-map", "0:2", "-strict", "-2", "-cutoff", "15000", "-ac", "2",
-         "-ab", "217k", "-segment_list", segmentFile, segments            
-      }; 
+      String[] ffArgs = args.split(" ");
       Stack<String> command = new Stack<String>();
       command.add(config.ffmpeg);
       command.add("-i");
       command.add(inputFile);
       for (String c : ffArgs)
          command.add(c);
+      command.add(segmentFile);
+      command.add(segments);
       
       process = new backgroundProcess();
       log.print(">> Transcoding to hls " + inputFile + " ...");
