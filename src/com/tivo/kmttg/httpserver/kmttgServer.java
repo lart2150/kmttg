@@ -267,7 +267,7 @@ public class kmttgServer extends HTTPServer {
          tc = new Transcode(fileName);
          if (format.equals("webm"))
             ss = tc.webm();
-         if (format.equals("hls"))
+         else if (format.equals("hls"))
             fis = tc.hls();
          else {
             resp.sendError(500, "Unsupported transcode format: " + format);
