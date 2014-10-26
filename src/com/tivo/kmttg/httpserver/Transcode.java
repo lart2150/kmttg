@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Stack;
 
 import com.tivo.kmttg.main.config;
@@ -42,6 +43,9 @@ public class Transcode {
    }
    
    public SocketProcessInputStream webm() {
+      boolean isTivoFile = false;
+      if (inputFile.toLowerCase().endsWith(".tivo"))
+         isTivoFile = true;
       try {
          ss = new SocketProcessInputStream();
       } catch (Exception e) {
@@ -52,7 +56,17 @@ public class Transcode {
       String args = "-threads 0 -y -vcodec libvpx -crf 19 -b 1M -sn -acodec libvorbis -ac 2 -ab 217k -f webm " + sockStr;
       String[] ffArgs = args.split(" ");
       Stack<String> command = new Stack<String>();
-      if (inputFile.toLowerCase().endsWith(".tivo")) {
+      command.add(config.ffmpeg);
+      command.add("-i");
+      if (isTivoFile)
+         command.add("-");
+      else
+         command.add(inputFile);
+      for (String c : ffArgs)
+         command.add(c);
+
+      if (isTivoFile) {
+         // Need 2 piped processes
          log.print(">> Transcoding TiVo file to webm " + inputFile + " ...");
          java.lang.Runtime rt = java.lang.Runtime.getRuntime();
          String[] tivodecode = {
@@ -62,19 +76,14 @@ public class Transcode {
             "--no-verify",
             inputFile
          };
-         Stack<String> ff = new Stack<String>();
-         ff.add(config.ffmpeg);
-         ff.add("-i");
-         ff.add("-");
-         for (String c : ffArgs)
-            ff.add(c);
-         String[] ffmpeg = new String[ff.size()];
+         String[] ffmpeg = new String[command.size()];
          int i=0;
-         for (String s : ff)
+         for (String s : command)
             ffmpeg[i++] = s;
          try {
             p1 = rt.exec(tivodecode);
             p2 = rt.exec(ffmpeg);
+            log.print(printArray(tivodecode) + " | " + printArray(ffmpeg));
             RunnableInputDrainer des = new RunnableInputDrainer(p2.getErrorStream());
             new Thread(des).start();
          } catch (IOException e) {
@@ -88,12 +97,6 @@ public class Transcode {
          new Thread(pipe).start();
          ss.attachProcess(p1);
       } else {
-         command.add(config.ffmpeg);
-         command.add("-i");
-         command.add(inputFile);
-         for (String c : ffArgs)
-            command.add(c);
-         
          process = new backgroundProcess();
          log.print(">> Transcoding to webm " + inputFile + " ...");
          if ( process.run(command) ) {
@@ -110,6 +113,9 @@ public class Transcode {
    }
    
    public String hls() {
+      boolean isTivoFile = false;
+      if (inputFile.toLowerCase().endsWith(".tivo"))
+         isTivoFile = true;
       format = "hls";
       String urlBase = "/web/cache/";
       String args = "-ss 0 -threads 0 -y -map_metadata -1 -vcodec libx264 -crf 19";
@@ -131,32 +137,68 @@ public class Transcode {
       Stack<String> command = new Stack<String>();
       command.add(config.ffmpeg);
       command.add("-i");
-      command.add(inputFile);
+      if (isTivoFile)
+         command.add("-");
+      else
+         command.add(inputFile);
       for (String c : ffArgs)
          command.add(c);
       command.add(segmentFile);
       command.add(segments);
-      
-      process = new backgroundProcess();
-      log.print(">> Transcoding to hls " + inputFile + " ...");
-      if ( process.run(command) ) {
-         log.print(process.toString());
-         returnFile = urlBase + prefix + ".m3u8";
+
+      if (isTivoFile) {
+         // Need 2 piped processes
+         log.print(">> Transcoding TiVo file to HLS " + inputFile + " ...");
+         java.lang.Runtime rt = java.lang.Runtime.getRuntime();
+         String[] tivodecode = {
+            config.tivodecode,
+            "--mak",
+            config.MAK,
+            "--no-verify",
+            inputFile
+         };
+         String[] ffmpeg = new String[command.size()];
+         int i=0;
+         for (String s : command)
+            ffmpeg[i++] = s;
          try {
-            // Wait for segmentFile to get created
-            int counter = 0;
-            while( file.size(segmentFile) == 0 && counter < 10 ) {
-               Thread.sleep(1000);
-               counter++;
-            }
-         } catch (InterruptedException e) {
-            log.error("Transcode sleep - " + e.getMessage());
+            p1 = rt.exec(tivodecode);
+            p2 = rt.exec(ffmpeg);
+            log.print(printArray(tivodecode) + " | " + printArray(ffmpeg));
+            RunnableInputDrainer des = new RunnableInputDrainer(p2.getErrorStream());
+            new Thread(des).start();
+         } catch (IOException e) {
+            log.error("hls - " + e.getMessage());
+            return null;
          }
+         Piper pipe = new Piper(
+            new BufferedInputStream(p1.getInputStream()),
+            new BufferedOutputStream(p2.getOutputStream())
+         );
+         new Thread(pipe).start();
       } else {
-         log.error("Failed to start command: " + process.toString());
-         process.printStderr();
-         process = null;
-         return null;
+         process = new backgroundProcess();
+         log.print(">> Transcoding to hls " + inputFile + " ...");
+         if ( process.run(command) ) {
+            log.print(process.toString());
+         } else {
+            log.error("Failed to start command: " + process.toString());
+            process.printStderr();
+            process = null;
+            return null;
+         }
+      }
+      
+      returnFile = urlBase + prefix + ".m3u8";
+      try {
+         // Wait for segmentFile to get created
+         int counter = 0;
+         while( file.size(segmentFile) == 0 && counter < 10 ) {
+            Thread.sleep(1000);
+            counter++;
+         }
+      } catch (InterruptedException e) {
+         log.error("Transcode sleep - " + e.getMessage());
       }
       return returnFile;
    }
@@ -208,6 +250,10 @@ public class Transcode {
             }
          }
       }
+   }
+   
+   private String printArray(String[] arr) {
+      return Arrays.asList(arr).toString().substring(1).replaceFirst("]", "").replace(", ", " ");
    }
 
 }
