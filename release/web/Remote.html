@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>TiVo Remote</title>
+ <link rel="stylesheet" href="css/Remote.css">
+</head>
+<body>
+<div id="RIGHT">
+ <label>TiVo:&nbsp;&nbsp;</label><select id="TIVO" class="TIVO"></select>
+ <br><br>
+ <button onclick="launch()">Launch App:</button><label>&nbsp;&nbsp;</label><select id="LAUNCH" class="LAUNCH"></select> 
+ <br><br>
+ <button onclick="sps()">SPS Backdoor:</button><label>&nbsp;&nbsp;</label><select id="SPS" class="SPS"></select> 
+ <br><br>
+ <button onclick="skipb()">Skip minutes back:</button><label>&nbsp;&nbsp;</label><input id="SKIPB" class="SKIPB" value="5"></input> 
+ <br><br>
+ <button onclick="skipf()">Skip minutes ahead:</button><label>&nbsp;&nbsp;</label><input id="SKIPF" class="SKIPF" value="5"></input> 
+ <br><br>
+ <button onclick="skipm()">Jump to minute:</button><label>&nbsp;&nbsp;</label><input id="SKIPM" class="SKIPM" value="0"></input> 
+ <div id="REMOTE">
+ 	<ul>
+		<li id="tivo" class="tivo"><button></button></li>
+		<li id="livetv" class="liveTv"><button></button></li>
+		<li id="up" class="up"><button></button></li>
+		<li id="down" class="down"><button></button></li>
+		<li id="left" class="left"><button></button></li>
+		<li id="right" class="right"><button></button></li>
+		<li id="select" class="select"><button></button></li>
+		<li id="info" class="info"><button></button></li>
+		<li id="zoom" class="zoom"><button></button></li>
+		<li id="channelUp" class="channelUp"><button></button></li>
+      <p id="channelLabel"></p>
+		<li id="channelDown" class="channelDown"><button></button></li>
+		<li id="thumbsUp" class="thumbsUp"><button></button></li>
+		<li id="thumbsDown" class="thumbsDown"><button></button></li>
+		<li id="guide" class="guide"><button></button></li>
+		<li id="record" class="record"><button></button></li>
+		<li id="play" class="play"><button></button></li>
+		<li id="forward" class="forward"><button></button></li>
+		<li id="reverse" class="reverse"><button></button></li>
+		<li id="slow" class="slow"><button></button></li>
+		<li id="pause" class="pause"><button></button></li>
+		<li id="replay" class="replay"><button></button></li>
+		<li id="advance" class="advance"><button></button></li>
+		<li id="actionA" class="actionA"><button></button></li>
+		<li id="actionB" class="actionB"><button></button></li>
+		<li id="actionC" class="actionC"><button></button></li>
+		<li id="actionD" class="actionD"><button></button></li>
+		<li id="num1" class="num1"><button></button></li>
+		<li id="num2" class="num2"><button></button></li>
+		<li id="num3" class="num3"><button></button></li>
+		<li id="num4" class="num4"><button></button></li>
+		<li id="num5" class="num5"><button></button></li>
+		<li id="num6" class="num6"><button></button></li>
+		<li id="num7" class="num7"><button></button></li>
+		<li id="num8" class="num8"><button></button></li>
+		<li id="num9" class="num9"><button></button></li>
+		<li id="num0" class="num0"><button></button></li>
+		<li id="clear" class="clear"><button></button></li>
+		<li id="enter" class="enter"><button></button></li>
+		<li id="standby" class="standby"><button>Standby</button></li>
+		<li id="ccOn" class="ccOn"><button>CC On</button></li>
+		<li id="ccOff" class="ccOff"><button>CC Off</button></li>
+		<li id="nowShowing" class="nowShowing"><button>My Shows</button></li>
+	</ul>
+ </div>
+</div>
+ <script type="text/javascript" src="js/jquery-1.11.1.js"></script>
+ <script type="text/javascript" src="js/rpc/Remote.js"></script>
+</body>
+</html>

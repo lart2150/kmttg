@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="DataTables-1.10.3/media/css/jquery.dataTables.css">
+<link rel="stylesheet" type="text/css" href="DataTables-1.10.3/extensions/TableTools/css/dataTables.tableTools.css">
+<style>
+table, th, td {
+    border: 1px solid grey;
+}
+td.details-control {
+   background: url('images/details_open.png') no-repeat center center;
+   cursor: pointer;
+}
+tr.shown td.details-control {
+   background: url('images/details_close.png') no-repeat center center;
+}
+</style>
+ <title>Season Passes</title>
+</head>
+<body>
+ <label>TiVo:&nbsp;&nbsp;</label><select id="TIVO" class="TIVO"></select>
+ <button type="button" onclick="Refresh()">Refresh</button>
+ <button type="button" onclick="Save()">Save</button>
+ <button type="button" onclick="Load()">Load...</button>
+ <button type="button" onclick="Delete()">Delete</button>
+ <button type="button" onclick="Copy()">Copy</button>
+ <button type="button" onclick="Reorder()">Re-order</button>
+ <button type="button" onclick="Upcoming()">Upcoming</button>
+ <button type="button" onclick="Up()">Up</button>
+ <button type="button" onclick="Down()">Down</button>
+ <div id="LOAD" class="LOAD" style="display: none">
+   <button type="button" onclick="CancelSelected()">CANCEL</button>
+   <button type="button" onclick="LoadSelected()">Load file:</button>
+   <select id="SELECT" class="SELECT">
+   </select>
+ </div>
+ <table id="TABLE" class="display">
+ <thead>
+  <tr><th></th><th>PRIORITY</th><th>SHOW</th><th>CHANNEL</th><th>RECORD</th><th>KEEP</th><th>NUM</th><th>START</th><th>END</th></tr>
+ </thead>
+ <tbody>
+ </tbody>
+ </table>
+ <script type="text/javascript" src="js/jquery-1.11.1.js"></script>
+ <script type="text/javascript" src="DataTables-1.10.3/media/js/jquery.dataTables.js"></script>
+ <script type="text/javascript" src="DataTables-1.10.3/extensions/TableTools/js/dataTables.tableTools.js"></script>
+ <script type="text/javascript" src="js/rpc/SeasonPasses.js"></script>
+</body>
+</html>
