@@ -67,6 +67,7 @@ public class configMain {
    private static JCheckBox VrdQsFilter = null;
    private static JCheckBox VrdDecrypt = null;
    private static JCheckBox DsdDecrypt = null;
+   private static JCheckBox httpserver_enable = null;
    private static JCheckBox VrdEncode = null;
    private static JCheckBox VrdAllowMultiple = null;
    private static JCheckBox VrdCombineCutEncode = null;
@@ -127,6 +128,7 @@ public class configMain {
    private static JTextField download_retry_delay = null;
    private static JTextField download_delay = null;
    private static JTextField metadata_entries = null;
+   private static JTextField httpserver_port = null;
    private static JTextField autoLogSizeMB = null;
    private static JTextField pyTivo_host = null;
    private static JTextField web_query = null;
@@ -603,6 +605,12 @@ public class configMain {
       else
          DsdDecrypt.setSelected(false);
       
+      // httpserver_enable
+      if (config.httpserver_enable == 1)
+         httpserver_enable.setSelected(true);
+      else
+         httpserver_enable.setSelected(false);
+      
       // VRD flag
       if (config.VRD == 1)
          VRD.setSelected(true);
@@ -824,6 +832,9 @@ public class configMain {
       
       // metadata_entries
       metadata_entries.setText("" + config.metadata_entries);
+      
+      // httpserver_port
+      httpserver_port.setText("" + config.httpserver_port);
       
       // autoLogSizeMB
       autoLogSizeMB.setText("" + config.autoLogSizeMB);
@@ -1126,6 +1137,12 @@ public class configMain {
          config.DsdDecrypt = 1;
       else
          config.DsdDecrypt = 0;
+      
+      // httpserver_enable
+      if (httpserver_enable.isSelected())
+         config.httpserver_enable = 1;
+      else
+         config.httpserver_enable = 0;
       
       // VrdEncode
       if (VrdEncode.isSelected() && config.VRD == 1)
@@ -1656,6 +1673,22 @@ public class configMain {
          config.metadata_entries = "";
       }
       
+      // httpserver_port
+      value = string.removeLeadingTrailingSpaces(httpserver_port.getText());
+      if (value.length() > 0) {
+         try {
+            config.httpserver_port = Integer.parseInt(value);
+         } catch(NumberFormatException e) {
+            textFieldError(httpserver_port, "Illegal setting for kmttg web server port: '" + value + "'");
+            log.error("Setting to 8181");
+            config.httpserver_port = 8181;
+            httpserver_port.setText("" + config.httpserver_port);
+            errors++;
+         }
+      } else {
+         config.httpserver_port = 8181;
+      }
+            
       // download_delay
       value = string.removeLeadingTrailingSpaces(download_delay.getText());
       if (value.length() > 0) {
@@ -1843,6 +1876,7 @@ public class configMain {
       download_retry_delay = new javax.swing.JTextField(15);
       download_delay = new javax.swing.JTextField(15);
       metadata_entries = new javax.swing.JTextField(15);
+      httpserver_port = new javax.swing.JTextField(15);
       autoLogSizeMB = new javax.swing.JTextField(15);
       
       disk_space = new javax.swing.JTextField(5);
@@ -1887,6 +1921,7 @@ public class configMain {
       VrdQsFilter = new javax.swing.JCheckBox();
       VrdDecrypt = new javax.swing.JCheckBox();
       DsdDecrypt = new javax.swing.JCheckBox();
+      httpserver_enable = new javax.swing.JCheckBox();
       VrdEncode = new javax.swing.JCheckBox();
       VrdAllowMultiple = new javax.swing.JCheckBox();
       VrdCombineCutEncode = new javax.swing.JCheckBox();
@@ -1938,6 +1973,7 @@ public class configMain {
       JLabel download_retry_delay_label = new javax.swing.JLabel();
       JLabel download_delay_label = new javax.swing.JLabel();
       JLabel metadata_entries_label = new javax.swing.JLabel();
+      JLabel httpserver_port_label = new javax.swing.JLabel();
       JLabel autoLogSizeMB_label = new javax.swing.JLabel();
       JLabel available_keywords_label = new javax.swing.JLabel();
       JLabel pyTivo_host_label = new javax.swing.JLabel();
@@ -2016,6 +2052,7 @@ public class configMain {
       VrdQsFilter.setText("Enable VideoRedo QS Fix video dimension filter");
       VrdDecrypt.setText("Decrypt using VideoRedo instead of tivodecode");
       DsdDecrypt.setText("Decrypt using DirectShow Dump instead of tivodecode");
+      httpserver_enable.setText("Enable kmttg web server");
       VrdEncode.setText("Show VideoRedo encoding profiles");
       VrdAllowMultiple.setText("Run all VideoRedo jobs in GUI mode");
       VrdCombineCutEncode.setText("Combine Ad Cut & Encode");
@@ -2068,6 +2105,7 @@ public class configMain {
       download_retry_delay_label.setText("seconds between download retry attempts");
       download_delay_label.setText("start delay in seconds for download tasks");
       metadata_entries_label.setText("extra metadata entries (comma separated)");
+      httpserver_port_label.setText("kmttg web server port");
       autoLogSizeMB_label.setText("auto log file size limit (MB)");
       web_query_label.setText("web query base url (bindkey q)");
       web_browser_label.setText("web browser binary");
@@ -3109,6 +3147,16 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(metadata_entries, c);
       
+      // httpserver_port
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(httpserver_port_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      program_options_panel.add(httpserver_port, c);
+      
       // TivoWebPlusDelete
       gy++;
       c.gridx = 0;
@@ -3171,6 +3219,12 @@ public class configMain {
          c.gridy = gy;
          program_options_panel.add(DsdDecrypt, c);
       }
+      
+      // httpserver_enable
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      program_options_panel.add(httpserver_enable, c);
       
       // Visual Panel
       JPanel visual_panel = new JPanel(new GridBagLayout());       
@@ -3467,6 +3521,7 @@ public class configMain {
       VrdQsFilter.setToolTipText(getToolTip("VrdQsFilter"));
       VrdDecrypt.setToolTipText(getToolTip("VrdDecrypt"));
       DsdDecrypt.setToolTipText(getToolTip("DsdDecrypt"));
+      httpserver_enable.setToolTipText(getToolTip("httpserver_enable"));
       VrdEncode.setToolTipText(getToolTip("VrdEncode"));
       VrdAllowMultiple.setToolTipText(getToolTip("VrdAllowMultiple"));
       VrdCombineCutEncode.setToolTipText(getToolTip("VrdCombineCutEncode"));
@@ -3529,6 +3584,7 @@ public class configMain {
       download_retry_delay.setToolTipText(getToolTip("download_retry_delay"));
       download_delay.setToolTipText(getToolTip("download_delay"));
       metadata_entries.setToolTipText(getToolTip("metadata_entries"));
+      httpserver_port.setToolTipText(getToolTip("httpserver_port"));
       autoLogSizeMB.setToolTipText(getToolTip("autoLogSizeMB"));
       web_query.setToolTipText(getToolTip("web_query"));
       web_browser.setToolTipText(getToolTip("web_browser"));
@@ -3752,6 +3808,19 @@ public class configMain {
          text += "NOTE: You must have TiVo Desktop (or at least TiVoDirectShowFilter.dll) installed for this to work.<br>";
          text += "NOTE: DirectShow Dump cannot be combined with download task, so you should disable kmttg<br>";
          text += "config option <b>Combine downlad and tivodecode decrypt</b> if enabled in order to use this option.";
+      }
+      else if (component.equals("httpserver_enable")) {
+         text =  "<b>Enable kmttg web server</b><br>";
+         text += "<b>EXPERIMENTAL</b><br>";
+         text += "Enabling web browser allows you to interact with kmttg via any web browser with<br>";
+         text += "a subset of kmttg capabilities and capability to stream videos from computer<br>";
+         text += "running kmttg to any browser. This is experimental because some functions are<br>";
+         text += "still a work in progress and not robust, especially video streaming.<br>";
+         text += "NOTE: TiVos listed in web browser are intentionally restricted to series 4 or later only.";
+      }
+      else if (component.equals("httpserver_port")) {
+         text =  "<b>kmttg web server port</b><br>";
+         text += "Port to use for kmttg web server. See web server setting and associated tooltip below.";
       }
       else if (component.equals("VrdEncode")) {
          text =  "<b>Show VideoRedo encoding profiles</b><br>";

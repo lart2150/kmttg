@@ -203,7 +203,7 @@ public class config {
    private static String tivo_password = "";
    
    // httpserver related
-   public static int httpserver_enable = 1;
+   public static int httpserver_enable = 0;
    public static int httpserver_port = 8181;
    public static kmttgServer httpserver = null;
    
@@ -910,6 +910,12 @@ public class config {
             if (key.equals("tableColAutoSize")) {
                tableColAutoSize = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("httpserver_enable")) {
+               httpserver_enable = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
+            if (key.equals("httpserver_port")) {
+               httpserver_port = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("RemoveTivoFile")) {
                RemoveTivoFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1247,6 +1253,10 @@ public class config {
          ofp.write("<lookAndFeel>\n" + lookAndFeel + "\n\n");
          
          ofp.write("<tableColAutoSize>\n" + tableColAutoSize + "\n\n");
+         
+         ofp.write("<httpserver_enable>\n" + httpserver_enable + "\n\n");
+         
+         ofp.write("<httpserver_port>\n" + httpserver_port + "\n\n");
          
          ofp.write("<RemoveTivoFile>\n" + RemoveTivoFile + "\n\n");
          
