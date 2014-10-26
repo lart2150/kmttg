@@ -253,31 +253,59 @@ function Load() {
    });
 }
 
+// NOTE: NOT WORKING
 function Copy() {
-   var table = $('#TABLE').DataTable();
-   $.each(table.rows('.selected'), function(i, rowNum) {
-      var row = table.row(rowNum);
-      var json = row.data()[NUMCOLS];
-      // TODO: Obtain destination TiVo to copy to
-      // TODO: Obtain Season passes of destination TiVo to check against
-      /*
-      if (json.subscriptionId) {
-         var url = "/rpc?operation=Seasonpass&tivo=";
-         url += encodeURIComponent(TIVO.value);
-         var js = '{"subscriptionId":"' + json.subscriptionId + '"}';
-         url += "&json=" + encodeURIComponent(js);
-         $.getJSON(url, function(data) {
-            console.log(JSON.stringify(data, null, 3));
-            if (data.type && data.type == "success")
-               row.remove().draw(false);
-            else {
-               alert("Seasonpass failed: " + JSON.stringify(data, null, 3));
+   // TODO: Obtain destination TiVo to copy to
+   var tivo = "Elite";
+   
+   var url = "/rpc?operation=SeasonPasses&tivo=" + encodeURIComponent(tivo);
+   $.getJSON(url, function(data) {
+      if (data.hasOwnProperty("subscription")) {
+         var spdata = data.subscription;
+         var table = $('#TABLE').DataTable();
+         $.each(table.rows('.selected'), function(i, rowNum) {
+            var row = table.row(rowNum);
+            if (! row.data()) {
+               alert("No rows selected!");
+               return;
             }
-         })
-         .error(function(xhr, status) {
-            handleError("Seasonpass", xhr, status);
+            var json = row.data()[NUMCOLS];
+
+            if (json.subscriptionId) {
+               // Check against existing spdata
+               var exists = 0;
+               $.each(spdata, function(i, sp) {
+                  if (sp.hasOwnProperty("subscriptionId")) {
+                     if (sp.subscriptionId === json.subscriptionId) {
+                        exists = 1;
+                     }
+                  }
+               });
+               if (exists == 0) {
+                  var url = "/rpc?operation=Seasonpass&tivo=";
+                  url += encodeURIComponent(TIVO.value);
+                  var js = '{"subscriptionId":"' + json.subscriptionId + '"}';
+                  url += "&json=" + encodeURIComponent(js);
+                  $.getJSON(url, function(data) {
+                     //console.log(JSON.stringify(data, null, 3));
+                     if (data.type && data.type == "success")
+                        console.log("SUCCESS");
+                     else {
+                        console.log("FAILED: " + JSON.stringify(data, null, 3));
+                     }
+                  })
+                  .error(function(xhr, status) {
+                     handleError("Seasonpass", xhr, status);
+                  });
+               } else {
+                  console.log("NOT COPYING: already exists");
+               }
+            }
          });
-      }*/
+      }
+   })
+   .error(function(xhr, status) {
+      handleError("SeasonPasses", xhr, status);
    });
 }
 
