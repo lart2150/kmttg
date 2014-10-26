@@ -256,11 +256,33 @@ public class kmttgServer extends HTTPServer {
 
    // Transcoding video handler
    public void handleTranscode(Request req, Response resp) throws IOException {
+      Map<String,String> params = req.getParams();
+      
+      if (params.containsKey("killall")) {
+         int num = killTranscodes();
+         resp.send(200, "Killed " + num + " jobs");
+         return;
+      }
+      
+      if (params.containsKey("kill")) {
+         String fileName = string.urlDecode(params.get("kill"));
+         killTranscode(fileName);
+         resp.send(200, "Killed job: " + fileName);
+         return;
+      }
+      
+      if (params.containsKey("running")) {
+         JSONArray a = getRunning();
+         if (a.length() == 0)
+            a.put("NONE");
+         resp.send(200, a.toString());
+         return;
+      }
+      
       Transcode tc = null;
       String returnFile = null;
       SocketProcessInputStream ss = null;
       long length = 0;
-      Map<String,String> params = req.getParams();
       if (params.containsKey("file") && params.containsKey("format")) {
          String fileName = string.urlDecode(params.get("file"));
          if ( ! file.isFile(fileName) ) {
@@ -328,8 +350,17 @@ public class kmttgServer extends HTTPServer {
       return null;
    }
    
+   JSONArray getRunning() {
+      JSONArray a = new JSONArray();
+      for (Transcode tc : transcodes) {
+         if (tc.isRunning())
+            a.put(tc.inputFile);
+      }
+      return a;
+   }
+   
    // Remove finished processes from transcodes stack
-  void cleanup() {
+   void cleanup() {
       for (int i=0; i<transcodes.size(); ++i) {
          Transcode tc = transcodes.get(i);
          if (! tc.isRunning()) {
@@ -339,22 +370,42 @@ public class kmttgServer extends HTTPServer {
       }
    }
   
-  void killTranscode(String name) {
-     name = name.replaceFirst("/web/", "");
-     for (int i=0; i<transcodes.size(); ++i) {
-        Transcode tc = transcodes.get(i);
-        String prefix = tc.prefix;
-        if (name.startsWith(prefix)) {
-           tc.kill();
-           tc.cleanup();
-        }
+   void killTranscode(String name) {
+      boolean removed = false;
+      log.warn("killTranscode - " + name);
+      name = name.replaceFirst("/web/cache/", "");
+      for (int i=0; i<transcodes.size(); ++i) {
+         Transcode tc = transcodes.get(i);
+         String prefix = tc.prefix;
+         if (name.startsWith(prefix)) {
+            tc.kill();
+            tc.cleanup();
+            transcodes.remove(i);
+            removed = true;
+         }
+      }
+      if (! removed) {
+         // name might be the original full path inputFile
+         for (int i=0; i<transcodes.size(); ++i) {
+            Transcode tc = transcodes.get(i);
+            if (name.equals(tc.inputFile)) {
+               tc.kill();
+               tc.cleanup();
+               transcodes.remove(i);
+            }
+         }
      }
-  }
+   }
    
-   void killTranscodes() {
+   public int killTranscodes() {
+      int killed = 0;
       for(Transcode tc : transcodes) {
          tc.kill();
+         tc.cleanup();
+         killed++;
       }
       cleanup();
+      transcodes.clear();
+      return killed;
    }
 }

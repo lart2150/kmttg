@@ -9,6 +9,7 @@ import java.util.Stack;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.backgroundProcess;
+import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
@@ -110,16 +111,20 @@ public class Transcode {
    
    public String hls() {
       format = "hls";
+      String urlBase = "/web/cache/";
       String args = "-ss 0 -threads 0 -y -map_metadata -1 -vcodec libx264 -crf 19";
       args += " -maxrate 3000k -bufsize 6000k -preset veryfast";
       args += " -x264opts cabac=0:8x8dct=1:bframes=0:subme=0:me_range=4:rc_lookahead=10:me=dia:no_chroma_me:8x8dct=0:partitions=none:bframes=3:cabac=1";
       args += " -flags -global_header -force_key_frames expr:gte(t,n_forced*3) -sn";
       args += " -acodec aac -strict -2 -cutoff 15000 -ac 2 -ab 217k";
-      args += " -segment_format mpegts -f segment -segment_time 30 -segment_start_number 0";
+      args += " -segment_format mpegts -f segment -segment_time 10 -segment_start_number 0";
       //args += " -segment_list_entry_prefix /web/ -segment_wrap 10 -segment_list_flags +live -segment_list";
-      args += " -segment_list_entry_prefix /web/ -segment_list_flags +live -segment_list";
-      base = config.programDir + File.separator + "web";
-      prefix = string.basename(inputFile) + config.httpserver.transcode_counter;
+      args += " -segment_list_entry_prefix " + urlBase + " -segment_list_flags +live -segment_list";
+      base = config.programDir + File.separator + "web" + File.separator + "cache";
+      if (! file.isDir(base))
+         new File(base).mkdirs();
+      //prefix = string.basename(inputFile) + config.httpserver.transcode_counter;
+      prefix = "t" + config.httpserver.transcode_counter;
       String segmentFile = base + File.separator + prefix + ".m3u8";
       String segments = base + File.separator + prefix + "-%05d.ts";
       String[] ffArgs = args.split(" ");
@@ -136,9 +141,14 @@ public class Transcode {
       log.print(">> Transcoding to hls " + inputFile + " ...");
       if ( process.run(command) ) {
          log.print(process.toString());
-         returnFile = "/web/" + prefix + ".m3u8";
+         returnFile = urlBase + prefix + ".m3u8";
          try {
-            Thread.sleep(2000);
+            // Wait for segmentFile to get created
+            int counter = 0;
+            while( file.size(segmentFile) == 0 && counter < 10 ) {
+               Thread.sleep(1000);
+               counter++;
+            }
          } catch (InterruptedException e) {
             log.error("Transcode sleep - " + e.getMessage());
          }
