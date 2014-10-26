@@ -1,10 +1,12 @@
 $(document).ready(function() {
    // Stream.html document elements
    BROWSE = document.getElementById("BROWSE");
+   TYPE = document.getElementById("TYPE");
+   $("#TYPE").change(function () {FileBrowser();});
 });
 
 function FileBrowser() {
-   var format = "hls";
+   var format = $('input[name="type"]:checked').val();
    var baseUrl = "/transcode?format=" + format + "&file=";
    $.getJSON("/getVideoFiles", function(data) {
       var html = "";

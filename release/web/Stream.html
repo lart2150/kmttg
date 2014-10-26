@@ -6,7 +6,11 @@
 <body>
  <button type="button" onclick="FileBrowser()">Browse Files...</button>
  <button type="button" onclick="Running()">Show Running</button>
- <button type="button" onclick="KillAll()">Kill All</button>
+ <button type="button" onclick="KillAll()">Kill All</button><br>
+ <form id="TYPE">
+  <input type="radio" name="type" value="hls" checked>HLS (Safari, IOS)
+  <input type="radio" name="type" value="webm">webm (Firefox)
+ </form>
  <div id="BROWSE"></div>
  <script type="text/javascript" src="js/jquery-1.11.1.js"></script>
  <script type="text/javascript" src="js/rpc/Stream.js"></script>
