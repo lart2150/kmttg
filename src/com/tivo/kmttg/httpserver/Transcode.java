@@ -49,7 +49,7 @@ public class Transcode {
          return null;
       }
       String sockStr = "tcp://127.0.0.1:" + ss.getPort();
-      String args = "-threads 0 -y -vcodec libvpx -crf 19 -sn -acodec libvorbis -ac 2 -ab 217k -f webm " + sockStr;
+      String args = "-threads 0 -y -vcodec libvpx -crf 19 -b 1M -sn -acodec libvorbis -ac 2 -ab 217k -f webm " + sockStr;
       String[] ffArgs = args.split(" ");
       Stack<String> command = new Stack<String>();
       if (inputFile.toLowerCase().endsWith(".tivo")) {
