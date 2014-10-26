@@ -11,6 +11,7 @@ import javax.swing.Timer;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
+import com.tivo.kmttg.httpserver.kmttgServer;
 import com.tivo.kmttg.install.mainInstall;
 
 public class kmttg {
@@ -61,6 +62,8 @@ public class kmttg {
              
              // Kill any running background jobs
              jobMonitor.killRunning();
+             if (config.httpserver != null)
+                config.httpserver.killTranscodes();
              if (debug.enabled) debug.close();
              
              // Kill any non-deamon, non-AWT threads
@@ -80,6 +83,8 @@ public class kmttg {
          // GUI mode
          config.gui = new gui();
          config.parse();
+         if (config.httpserver_enable == 1)
+            new kmttgServer();
          SwingUtilities.invokeLater(
             new Runnable() {
                public void run() {
