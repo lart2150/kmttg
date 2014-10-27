@@ -3147,16 +3147,6 @@ public class configMain {
       c.gridy = gy;
       program_options_panel.add(metadata_entries, c);
       
-      // httpserver_port
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      program_options_panel.add(httpserver_port_label, c);
-
-      c.gridx = 1;
-      c.gridy = gy;
-      program_options_panel.add(httpserver_port, c);
-      
       // TivoWebPlusDelete
       gy++;
       c.gridx = 0;
@@ -3219,12 +3209,6 @@ public class configMain {
          c.gridy = gy;
          program_options_panel.add(DsdDecrypt, c);
       }
-      
-      // httpserver_enable
-      gy++;
-      c.gridx = 0;
-      c.gridy = gy;
-      program_options_panel.add(httpserver_enable, c);
       
       // Visual Panel
       JPanel visual_panel = new JPanel(new GridBagLayout());       
@@ -3326,6 +3310,25 @@ public class configMain {
          c.gridy = gy;
          visual_panel.add(web_browser, c);
       }
+      
+      // Web Panel
+      JPanel web_panel = new JPanel(new GridBagLayout());       
+            
+      // httpserver_enable
+      gy=0;
+      c.gridx = 0;
+      c.gridy = gy;
+      web_panel.add(httpserver_enable, c);
+      
+      // httpserver_port
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      web_panel.add(httpserver_port_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      web_panel.add(httpserver_port, c);
       
       // VRD Panel
       JPanel vrd_panel = new JPanel(new GridBagLayout());       
@@ -3463,6 +3466,7 @@ public class configMain {
       tabbed_panel.add("Program Options", program_options_panel);
       tabbed_panel.add("Tivos", tivo_panel);
       tabbed_panel.add("Visual", visual_panel);
+      tabbed_panel.add("Web", web_panel);
       if (config.OS.equals("windows"))
          tabbed_panel.add("VideoRedo", vrd_panel);
       tabbed_panel.add("pyTivo", pyTivo_panel);
@@ -3820,7 +3824,10 @@ public class configMain {
       }
       else if (component.equals("httpserver_port")) {
          text =  "<b>kmttg web server port</b><br>";
-         text += "Port to use for kmttg web server. See web server setting and associated tooltip below.";
+         text += "Port to use for kmttg web server. See web server setting and associated tooltip above.<br>";
+         text += "NOTE: In your router configuration you can setup WAN port forwarding such as to enable<br>";
+         text += "access to kmttg web server from outside your home, so if you leave kmttg running then<br>";
+         text += "you can access the web server capabilities from anywhere.";
       }
       else if (component.equals("VrdEncode")) {
          text =  "<b>Show VideoRedo encoding profiles</b><br>";
