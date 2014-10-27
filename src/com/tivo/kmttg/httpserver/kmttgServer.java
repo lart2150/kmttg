@@ -12,6 +12,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONFile;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -64,9 +65,15 @@ public class kmttgServer extends HTTPServer {
          return;
       }
       
-      // Initiate and return transcoding video stream
+      // Get list of video files in kmttg video places
       if (path.equals("/getVideoFiles")) {
          handleVideoFiles(resp);
+         return;
+      }
+      
+      // Get list of video files from a tivo
+      if (path.equals("/getMyShows")) {
+         handleMyShows(req, resp);
          return;
       }
       
@@ -220,6 +227,27 @@ public class kmttgServer extends HTTPServer {
       resp.send(200, a.toString());
    }
    
+   public void handleMyShows(Request req, Response resp) throws IOException {
+      Map<String,String> params = req.getParams();
+      if (params.containsKey("tivo")) {
+         String tivo = string.urlDecode(params.get("tivo"));
+         Remote r = new Remote(tivo);
+         if (r.success) {
+            jobData job = new jobData();
+            job.tivoName = tivo;
+            job.getURLs = true; // This needed to get __url__ property
+            JSONArray a = r.MyShows(job);
+            r.disconnect();
+            resp.send(200, a.toString());         
+         } else {
+            resp.sendError(500, "Failed to get shows from tivo: " + tivo);
+            return;
+         }
+      } else {
+         resp.sendError(400, "Request missing tivo parameter");
+      }
+   }
+   
    private void getVideoFiles(String pathname, LinkedHashMap<String,Integer> h) {
       File f = new File(pathname);
       File[] listfiles = f.listFiles();
@@ -279,6 +307,7 @@ public class kmttgServer extends HTTPServer {
          return;
       }
       
+      // File transcode
       Transcode tc = null;
       String returnFile = null;
       SocketProcessInputStream ss = null;
@@ -303,6 +332,26 @@ public class kmttgServer extends HTTPServer {
             if (format.equals("webm"))
                ss = tc.webm();
             else if (format.equals("hls"))
+               returnFile = tc.hls();
+            else {
+               resp.sendError(500, "Unsupported transcode format: " + format);
+               return;
+            }
+         }
+      }
+      
+      // TiVo download + transcode
+      if (params.containsKey("url") && params.containsKey("format")) {
+         String url = params.get("url");
+         tc = alreadyRunning(url);
+         if (tc != null) {
+            if (tc.returnFile != null)
+               returnFile = tc.returnFile;
+         } else {
+            String format = string.urlDecode(params.get("format"));
+            tc = new TiVoTranscode(url);
+            addTranscode(tc);
+            if (format.equals("hls"))
                returnFile = tc.hls();
             else {
                resp.sendError(500, "Unsupported transcode format: " + format);
