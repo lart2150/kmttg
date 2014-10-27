@@ -5,7 +5,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Stack;
 
 import com.tivo.kmttg.main.config;
@@ -29,7 +28,7 @@ public class Transcode {
    public Transcode(String inputFile) {
       this.inputFile = inputFile;
    }
-   private static class RunnableInputDrainer implements Runnable {
+   public static class RunnableInputDrainer implements Runnable {
       InputStream is;
       public RunnableInputDrainer(InputStream is) {
          this.is = is;
@@ -53,7 +52,7 @@ public class Transcode {
          return null;
       }
       String sockStr = "tcp://127.0.0.1:" + ss.getPort();
-      String args = "-threads 0 -y -vcodec libvpx -crf 19 -b 1M -sn -acodec libvorbis -ac 2 -ab 217k -f webm " + sockStr;
+      String args = TranscodeTemplates.webm() + " " + sockStr;
       String[] ffArgs = args.split(" ");
       Stack<String> command = new Stack<String>();
       command.add(config.ffmpeg);
@@ -83,7 +82,10 @@ public class Transcode {
          try {
             p1 = rt.exec(tivodecode);
             p2 = rt.exec(ffmpeg);
-            log.print(printArray(tivodecode) + " | " + printArray(ffmpeg));
+            log.print(
+               TranscodeTemplates.printArray(tivodecode) + " | " +
+               TranscodeTemplates.printArray(ffmpeg)
+            );
             RunnableInputDrainer des = new RunnableInputDrainer(p2.getErrorStream());
             new Thread(des).start();
          } catch (IOException e) {
@@ -118,18 +120,10 @@ public class Transcode {
          isTivoFile = true;
       format = "hls";
       String urlBase = "/web/cache/";
-      String args = "-ss 0 -threads 0 -y -map_metadata -1 -vcodec libx264 -crf 19";
-      args += " -maxrate 3000k -bufsize 6000k -preset veryfast";
-      args += " -x264opts cabac=0:8x8dct=1:bframes=0:subme=0:me_range=4:rc_lookahead=10:me=dia:no_chroma_me:8x8dct=0:partitions=none:bframes=3:cabac=1";
-      args += " -flags -global_header -force_key_frames expr:gte(t,n_forced*3) -sn";
-      args += " -acodec aac -strict -2 -cutoff 15000 -ac 2 -ab 217k";
-      args += " -segment_format mpegts -f segment -segment_time 10 -segment_start_number 0";
-      //args += " -segment_list_entry_prefix /web/ -segment_wrap 10 -segment_list_flags +live -segment_list";
-      args += " -segment_list_entry_prefix " + urlBase + " -segment_list_flags +live -segment_list";
+      String args = TranscodeTemplates.hls(urlBase);
       base = config.programDir + File.separator + "web" + File.separator + "cache";
       if (! file.isDir(base))
          new File(base).mkdirs();
-      //prefix = string.basename(inputFile) + config.httpserver.transcode_counter;
       prefix = "t" + config.httpserver.transcode_counter;
       String segmentFile = base + File.separator + prefix + ".m3u8";
       String segments = base + File.separator + prefix + "-%05d.ts";
@@ -164,7 +158,10 @@ public class Transcode {
          try {
             p1 = rt.exec(tivodecode);
             p2 = rt.exec(ffmpeg);
-            log.print(printArray(tivodecode) + " | " + printArray(ffmpeg));
+            log.print(
+               TranscodeTemplates.printArray(tivodecode) + " | " +
+               TranscodeTemplates.printArray(ffmpeg)
+            );
             RunnableInputDrainer des = new RunnableInputDrainer(p2.getErrorStream());
             new Thread(des).start();
          } catch (IOException e) {
@@ -251,9 +248,4 @@ public class Transcode {
          }
       }
    }
-   
-   private String printArray(String[] arr) {
-      return Arrays.asList(arr).toString().substring(1).replaceFirst("]", "").replace(", ", " ");
-   }
-
 }
