@@ -24,6 +24,7 @@ public class Transcode {
    String prefix = "";
    int count = 0;
    String format = "";
+   Boolean keepCache = true;
    
    public Transcode(String inputFile) {
       this.inputFile = inputFile;
@@ -237,6 +238,8 @@ public class Transcode {
    }
    
    public void cleanup() {
+      if (keepCache)
+         return;
       if (prefix.length() > 0 && base.length() > 0) {
          log.warn("Removing '" + prefix + "' transcode files in: " + base);
          File[] files = new File(base).listFiles();

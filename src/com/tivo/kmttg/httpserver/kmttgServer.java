@@ -307,6 +307,14 @@ public class kmttgServer extends HTTPServer {
          return;
       }
       
+      if (params.containsKey("getCached")) {
+         JSONArray a = getCached();
+         if (a.length() == 0)
+            a.put("NONE");
+         resp.send(200, a.toString());
+         return;
+      }
+      
       // File transcode
       Transcode tc = null;
       String returnFile = null;
@@ -404,6 +412,17 @@ public class kmttgServer extends HTTPServer {
       for (Transcode tc : transcodes) {
          if (tc.isRunning())
             a.put(tc.inputFile);
+      }
+      return a;
+   }
+   
+   JSONArray getCached() {
+      JSONArray a = new JSONArray();
+      String base = config.programDir + File.separator + "web" + File.separator + "cache";
+      File[] files = new File(base).listFiles();
+      for (File f : files) {
+         if (f.getAbsolutePath().endsWith(".m3u8"))
+            a.put("/web/cache/" + string.basename(f.getAbsolutePath()));
       }
       return a;
    }

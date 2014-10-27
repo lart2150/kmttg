@@ -68,6 +68,19 @@ function FileBrowser() {
    });
 }
 
+function GetCached() {
+   $.getJSON("/transcode?getCached=1", function(data) {
+      var html = "";
+      $.each(data, function (i, file) {
+         html += '<a target="_blank" href="' + file + '">' + file + '</a><br>';
+      });
+      BROWSE.innerHTML = html;
+   })
+   .error(function(xhr, status) {
+      handleError("/transcode?getCached", xhr, status);
+   });
+}
+
 function KillAll() {
    $.get("/transcode?killall=1", function(data) {
       alert(data);
