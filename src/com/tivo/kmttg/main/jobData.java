@@ -176,6 +176,10 @@ public class jobData implements Serializable, Cloneable {
    public Boolean remote_channels = false;
    public premiereTable premiere = null;
    
+   // MyShows retrieval related
+   public int myshows_offset = -1;
+   public int myshows_limit = -1;
+   
    // Slingbox related
    public Boolean slingbox_raw = false;
    public String slingbox_perl = null;
