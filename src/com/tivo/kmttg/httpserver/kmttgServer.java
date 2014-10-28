@@ -539,6 +539,10 @@ public class kmttgServer extends HTTPServer {
             //tc.cleanup();
             transcodes.remove(i);
          }
+         if ( ! isPartial(tc.segmentFile) ) {
+            // Segment file is terminated, so job must have finished
+            transcodes.remove(i);
+         }
       }
    }
   
