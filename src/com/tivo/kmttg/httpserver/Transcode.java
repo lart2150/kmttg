@@ -7,12 +7,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Hashtable;
 import java.util.Stack;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.backgroundProcess;
+import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.mediainfo;
 import com.tivo.kmttg.util.string;
 
 public class Transcode {
@@ -144,6 +147,20 @@ public class Transcode {
       command.add(segments);
 
       if (isTivoFile) {
+         // Only PS container works with tivodecode, so check container
+         if (file.isFile(config.mediainfo)) {
+            Hashtable<String,String> info = mediainfo.getVideoInfo(inputFile);
+            if (info != null && ! info.get("container").equals("mpeg")) {
+               log.warn("Attempt to transcode non PS .TiVo file aborted: " + inputFile);
+               return null;
+            }
+         } else if (file.isFile(config.ffmpeg)) {
+            Hashtable<String,String> info = ffmpeg.getVideoInfo(inputFile);
+            if (info != null && ! info.get("container").equals("mpeg")) {
+               log.warn("Attempt to transcode non PS .TiVo file aborted: " + inputFile);
+               return null;
+            }            
+         }
          // Need 2 piped processes
          log.print(">> Transcoding TiVo file to HLS " + inputFile + " ...");
          java.lang.Runtime rt = java.lang.Runtime.getRuntime();
