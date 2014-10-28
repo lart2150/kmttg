@@ -245,9 +245,13 @@ public class kmttgServer extends HTTPServer {
             jobData job = new jobData();
             job.tivoName = tivo;
             job.getURLs = true; // This needed to get __url__ property
+            if (params.containsKey("offset"))
+               job.myshows_offset = Integer.parseInt(params.get("offset"));
+            if (params.containsKey("limit"))
+               job.myshows_limit = Integer.parseInt(params.get("limit"));
             JSONArray a = r.MyShows(job);
             r.disconnect();
-            resp.send(200, a.toString());         
+            resp.send(200, a.toString());
          } else {
             resp.sendError(500, "Failed to get shows from tivo: " + tivo);
             return;
