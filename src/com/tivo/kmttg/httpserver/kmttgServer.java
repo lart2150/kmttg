@@ -1,7 +1,9 @@
 package com.tivo.kmttg.httpserver;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
@@ -25,6 +27,7 @@ import com.tivo.kmttg.util.string;
 public class kmttgServer extends HTTPServer {
    private Stack<Transcode> transcodes = new Stack<Transcode>();
    public int transcode_counter = 0;
+   private String m3u8_terminator = "#EXT-X-ENDLIST";
    
    public kmttgServer() {
       try {
@@ -321,6 +324,13 @@ public class kmttgServer extends HTTPServer {
          return;
       }
       
+      if (params.containsKey("removeCached")) {
+         int removed = removeCached(params.get("removeCached"));
+         String message = "Removed " + removed + " cached items";
+         resp.send(200, message);
+         return;
+      }
+      
       // File transcode
       Transcode tc = null;
       String returnFile = null;
@@ -404,7 +414,7 @@ public class kmttgServer extends HTTPServer {
    }
    
    // Restrict to only 1 transcode at a time per input file
-   Transcode alreadyRunning(String fileName) {
+   private Transcode alreadyRunning(String fileName) {
       for (Transcode tc : transcodes) {
          if (tc.inputFile.equals(fileName)) {
             if (tc.isRunning())
@@ -414,7 +424,7 @@ public class kmttgServer extends HTTPServer {
       return null;
    }
    
-   JSONArray getRunning() {
+   private JSONArray getRunning() {
       JSONArray a = new JSONArray();
       for (Transcode tc : transcodes) {
          if (tc.isRunning())
@@ -423,7 +433,7 @@ public class kmttgServer extends HTTPServer {
       return a;
    }
    
-   JSONArray getCached() {
+   private JSONArray getCached() {
       JSONArray a = new JSONArray();
       String base = config.httpserver_cache;
       if (! file.isDir(base))
@@ -437,6 +447,21 @@ public class kmttgServer extends HTTPServer {
             String textFile = f.getAbsolutePath() + ".txt";
             if (file.isFile(textFile))
                json.put("name", getTextFileContents(textFile));
+            if (isPartial(f.getAbsolutePath())) {
+               Boolean running = false;
+               for (Transcode tc : transcodes) {
+                  if (tc.segmentFile != null && tc.segmentFile.equals(f.getAbsolutePath())) {
+                     json.put("running", 1);
+                     running = true;
+                  }
+               }
+               if ( ! running ) {
+                  // Add m3u8 termination to incomplete m3u8 file
+                  fixPartial(f.getAbsolutePath());
+                  if (isPartial(f.getAbsolutePath()))
+                     json.put("partial", 1);
+               }
+            }
             a.put(json);
             } catch (JSONException e) {
                log.error("getCached - " + e.getMessage());
@@ -446,14 +471,60 @@ public class kmttgServer extends HTTPServer {
       return a;
    }
    
-   String getTextFileContents(String textFile) {
+   private int removeCached(String target) {
+      int count = 0;
+      String base = config.httpserver_cache;
+      if (! file.isDir(base))
+         return count;
+      
+      File[] files = new File(base).listFiles();
+      if (target.equals("all")) {
+         for (File f : files) {
+            if (f.delete() && f.getAbsolutePath().endsWith(".m3u8"))
+               count++;
+         }
+      } else {
+         String prefix = target.replaceFirst(config.httpserver_cache_relative, "");
+         prefix = prefix.replaceFirst("\\.m3u8", "");
+         for (File f : files) {
+            String fileName = string.basename(f.getAbsolutePath());
+            if (fileName.startsWith(prefix)) {
+               if (f.delete() && f.getAbsolutePath().endsWith(".m3u8"))
+                  count++;               
+            }
+         }
+      }
+      return count;
+   }
+   
+   private String getTextFileContents(String textFile) {
       String text = "";
       try {
-         text = new Scanner(new File(textFile)).useDelimiter("\\A").next();
+         Scanner s = new Scanner(new File(textFile));
+         text = s.useDelimiter("\\A").next();
+         s.close();
       } catch (FileNotFoundException e) {
          log.error("getTextFileContents - " + e.getMessage());
       }
       return text;
+   }
+   
+   private Boolean isPartial(String m3u8) {
+      Boolean partial = true;
+      String contents = getTextFileContents(m3u8);
+      if ( contents.contains(m3u8_terminator) )
+         partial = false;
+      return partial;
+   }
+   
+   private void fixPartial(String m3u8) {
+      try {
+      BufferedWriter ofp = new BufferedWriter(new FileWriter(m3u8, true));
+      ofp.write(m3u8_terminator + "\r\n");
+      ofp.close();
+      } catch (Exception e) {
+         log.error("fixPartial - " + e.getMessage());
+      }
    }
    
    // Remove finished processes from transcodes stack
