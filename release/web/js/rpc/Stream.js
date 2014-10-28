@@ -91,19 +91,24 @@ function MyShows() {
 }
 
 function loadNplData(data) {
+   var format = $('input[name="type"]:checked').val();
+   var baseUrl = "/transcode?format=" + format + "&url=";
    $.each(data, function (i, entry) {
       if (entry.hasOwnProperty("recording")) {
          var json = entry.recording[0];
          //console.log(JSON.stringify(json, null, 3));
          if (json.hasOwnProperty("__url__")) {
-
-            var show = "";
+         
+            var show_name = "";
             if (json.hasOwnProperty("title")) {
-               show = json.title;
+               show_name = json.title;
             }
             if (json.hasOwnProperty("subtitle")) {
-               show += " - " + json.subtitle;
+               show_name += " - " + json.subtitle;
             }
+            var show_url = baseUrl + encodeURIComponent(json.__url__);
+            show_url += "&name=" + encodeURIComponent(show_name);
+            var show = '<a href="' + show_url + '" target="__blank">' + show_name + '</a>';
 
             var date = "";
             if (json.hasOwnProperty("startTime")) {
@@ -210,17 +215,19 @@ function FileBrowser() {
    var format = $('input[name="type"]:checked').val();
    var baseUrl = "/transcode?format=" + format + "&file=";
    $.getJSON("/getVideoFiles", function(data) {
-      loadFileData(data);
+      loadFileData(data, baseUrl);
    })
    .error(function(xhr, status) {
       handleError("/getVideoFiles", xhr, status);
    });
 }
 
-function loadFileData(data) {
+function loadFileData(data, baseUrl) {
    $.each(data, function (i, file) {
       if (file != "NONE") {
-         var row = $('#FILETABLE').DataTable().row.add([file]);
+         var url = baseUrl + encodeURIComponent(file);
+         var link = '<a href="' + url + '" target="__blank">' + file + '</a>';
+         var row = $('#FILETABLE').DataTable().row.add([link]);
          row.draw();
       }
    });
@@ -231,10 +238,22 @@ function GetCached() {
    hideTables();
    showFileTable();
    $.getJSON("/transcode?getCached=1", function(data) {
-      loadFileData(data);
+      loadCacheData(data);
    })
    .error(function(xhr, status) {
       handleError("/transcode?getCached", xhr, status);
+   });
+}
+
+function loadCacheData(data) {
+   $.each(data, function (i, json) {
+      if (json != "NONE") {
+         var url = json.url;
+         var name = json.name;
+         var link = '<a href="' + url + '" target="__blank">' + name + '</a>';
+         var row = $('#FILETABLE').DataTable().row.add([link]);
+         row.draw();
+      }
    });
 }
 
@@ -253,9 +272,9 @@ function Running() {
       var html = "";
       $.each(data, function (i, job) {
          if ( job === "NONE" ) {
-            html = "<div>NONE</div>";
+            html = '<div style="color: blue">NO JOBS RUNNING</div>';
          } else {
-            html += '<a target="bottom" href="' + baseUrl;
+            html += '<a target="_blank" href="' + baseUrl;
             html += encodeURIComponent(job) + '">kill ' + job + '</a><br>';
          }
       });

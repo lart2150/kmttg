@@ -1,14 +1,17 @@
 package com.tivo.kmttg.httpserver;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONFile;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
@@ -352,7 +355,7 @@ public class kmttgServer extends HTTPServer {
       }
       
       // TiVo download + transcode
-      if (params.containsKey("url") && params.containsKey("format")) {
+      if (params.containsKey("url") && params.containsKey("format") && params.containsKey("name")) {
          String url = params.get("url");
          tc = alreadyRunning(url);
          if (tc != null) {
@@ -360,7 +363,8 @@ public class kmttgServer extends HTTPServer {
                returnFile = tc.returnFile;
          } else {
             String format = string.urlDecode(params.get("format"));
-            tc = new TiVoTranscode(url);
+            String name = string.urlDecode(params.get("name"));
+            tc = new TiVoTranscode(url, name);
             addTranscode(tc);
             if (format.equals("hls"))
                returnFile = tc.hls();
@@ -426,10 +430,30 @@ public class kmttgServer extends HTTPServer {
          return a;
       File[] files = new File(base).listFiles();
       for (File f : files) {
-         if (f.getAbsolutePath().endsWith(".m3u8"))
-            a.put(config.httpserver_cache_relative + string.basename(f.getAbsolutePath()));
+         if (f.getAbsolutePath().endsWith(".m3u8")) {
+            try {
+            JSONObject json = new JSONObject();
+            json.put("url", config.httpserver_cache_relative + string.basename(f.getAbsolutePath()));
+            String textFile = f.getAbsolutePath() + ".txt";
+            if (file.isFile(textFile))
+               json.put("name", getTextFileContents(textFile));
+            a.put(json);
+            } catch (JSONException e) {
+               log.error("getCached - " + e.getMessage());
+            }
+         }
       }
       return a;
+   }
+   
+   String getTextFileContents(String textFile) {
+      String text = "";
+      try {
+         text = new Scanner(new File(textFile)).useDelimiter("\\A").next();
+      } catch (FileNotFoundException e) {
+         log.error("getTextFileContents - " + e.getMessage());
+      }
+      return text;
    }
    
    // Remove finished processes from transcodes stack

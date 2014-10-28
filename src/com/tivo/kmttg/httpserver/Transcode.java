@@ -2,7 +2,9 @@ package com.tivo.kmttg.httpserver;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Stack;
@@ -27,6 +29,8 @@ public class Transcode {
    
    public Transcode(String inputFile) {
       this.inputFile = inputFile;
+      if (! file.isDir(base))
+         new File(base).mkdirs();
       setCachePrefix(); // sets prefix variable
    }
    public static class RunnableInputDrainer implements Runnable {
@@ -122,9 +126,8 @@ public class Transcode {
       format = "hls";
       String urlBase = config.httpserver_cache_relative;
       String args = TranscodeTemplates.hls(urlBase);
-      if (! file.isDir(base))
-         new File(base).mkdirs();
       String segmentFile = base + File.separator + prefix + ".m3u8";
+      String textFile = segmentFile + ".txt";
       String segments = base + File.separator + prefix + "-%05d.ts";
       String[] ffArgs = args.split(" ");
       Stack<String> command = new Stack<String>();
@@ -185,6 +188,7 @@ public class Transcode {
          }
       }
       
+      createTextFile(textFile, inputFile);
       returnFile = urlBase + prefix + ".m3u8";
       try {
          // Wait for segmentFile to get created
@@ -207,6 +211,17 @@ public class Transcode {
       catch (IllegalThreadStateException i) {
          return -1;
       }
+   }
+   
+   public void createTextFile(String textFile, String contents) {
+      try {
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(textFile, false));
+         ofp.write(contents + "\r\n");
+         ofp.close();
+      } catch (IOException e) {
+         log.error("createTextFile - " + e.getMessage());
+      }
+
    }
    
    // Determine unused video cache file prefix to use

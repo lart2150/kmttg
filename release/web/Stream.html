@@ -22,10 +22,12 @@
  <button type="button" onclick="MyShows()">My Shows...</button>
  <button type="button" onclick="FileBrowser()">Browse Files...</button>
  <button type="button" onclick="GetCached()">Get Cached...</button>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ <label>JOBS:</label>
  <button type="button" onclick="Running()">Show Running</button>
  <button type="button" onclick="KillAll()">Kill All</button><br>
  <form id="TYPE">
-  <input type="radio" name="type" value="hls" checked>HLS (Safari, iOS Safari, Android 4.x Chrome)
+  <label>Transcode type:&nbsp;</label><input type="radio" name="type" value="hls" checked>HLS (Safari, iOS Safari, Android 4.x Chrome)
   <!--<input type="radio" name="type" value="webm">webm (Firefox)-->
  </form>
 
@@ -44,7 +46,7 @@
  <div id="FILETABLE_DIV" style="display: none">
  <table id="FILETABLE" class="display">
  <thead>
-  <tr><th>FILE NAME</th></tr>
+  <tr><th>NAME</th></tr>
  </thead>
  <tbody>
  </tbody>

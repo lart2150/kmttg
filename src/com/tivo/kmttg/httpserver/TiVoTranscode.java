@@ -14,10 +14,12 @@ import com.tivo.kmttg.util.log;
 public class TiVoTranscode extends Transcode {
    private Thread thread = null;
    String inputUrl = null;
+   String name = "";
    
-   public TiVoTranscode(String inputUrl) {
+   public TiVoTranscode(String inputUrl, String name) {
       super(inputUrl);
       this.inputUrl = inputUrl;
+      this.name = name;
    }
    
    @Override
@@ -30,6 +32,7 @@ public class TiVoTranscode extends Transcode {
          new File(base).mkdirs();
       prefix = "t" + config.httpserver.transcode_counter;
       String segmentFile = base + File.separator + prefix + ".m3u8";
+      String textFile = segmentFile + ".txt";
       String segments = base + File.separator + prefix + "-%05d.ts";
       String[] ffArgs = args.split(" ");
       Stack<String> command = new Stack<String>();
@@ -106,6 +109,7 @@ public class TiVoTranscode extends Transcode {
       } catch (InterruptedException e) {
          log.error("TiVoTranscode sleep - " + e.getMessage());
       }
+      createTextFile(textFile, name);
       return returnFile;
    }
    
