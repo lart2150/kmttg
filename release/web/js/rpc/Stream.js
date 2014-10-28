@@ -40,10 +40,10 @@ $(document).ready(function() {
        "width":          "10px"
       },
       null,
-      { "width": "130px" },
-      { "width": "60px" },
-      { "width": "30px" },
-      { "width": "60px" },
+      null,
+      null,
+      null,
+      null,
      ],
    });
 
