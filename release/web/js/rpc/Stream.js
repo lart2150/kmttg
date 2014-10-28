@@ -98,6 +98,11 @@ function loadNplData(data) {
          var json = entry.recording[0];
          //console.log(JSON.stringify(json, null, 3));
          if (json.hasOwnProperty("__url__")) {
+
+            var date = "";
+            if (json.hasOwnProperty("startTime")) {
+               date = getTime(json.startTime);
+            }
          
             var show_name = "";
             if (json.hasOwnProperty("title")) {
@@ -107,13 +112,8 @@ function loadNplData(data) {
                show_name += " - " + json.subtitle;
             }
             var show_url = baseUrl + encodeURIComponent(json.__url__);
-            show_url += "&name=" + encodeURIComponent(show_name);
+            show_url += "&name=" + encodeURIComponent(show_name + " (" + date + ")");
             var show = '<a href="' + show_url + '" target="__blank">' + show_name + '</a>';
-
-            var date = "";
-            if (json.hasOwnProperty("startTime")) {
-               date = getTime(json.startTime);
-            }
 
             var channel = "";
             if (json.hasOwnProperty("channel")) {
