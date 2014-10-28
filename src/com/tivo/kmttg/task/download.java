@@ -46,12 +46,19 @@ public class download implements Serializable {
       }
       
       if ( schedule && file.isFile(job.tivoFile) ) {
-         if (config.OverwriteFiles == 0) {
-            log.warn("SKIPPING DOWNLOAD, FILE ALREADY EXISTS: " + job.tivoFile);
-            schedule = false;
+         // If this is a resume then rename tivoFile
+         if (job.offset != null) {
+            job.tivoFile = job.tivoFile.replaceFirst(".TiVo", "(2).TiVo");
+            log.warn("NOTE: Renaming TiVo file to avoid overwrite: " + job.tivoFile);
+            jobMonitor.updatePendingJobFieldValue(job, "tivoFile", job.tivoFile);
          } else {
-            log.warn("OVERWRITING EXISTING FILE: " + job.tivoFile);
-            file.delete(job.tivoFile);
+            if (config.OverwriteFiles == 0) {
+               log.warn("SKIPPING DOWNLOAD, FILE ALREADY EXISTS: " + job.tivoFile);
+               schedule = false;
+            } else {
+               log.warn("OVERWRITING EXISTING FILE: " + job.tivoFile);
+               file.delete(job.tivoFile);
+            }
          }
       }
 

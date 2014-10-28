@@ -44,11 +44,17 @@ public class jdownload_decrypt implements Serializable {
       
       // Don't decrypt if mpegFile already exists
       if ( file.isFile(job.mpegFile) ) {
-         if (config.OverwriteFiles == 0) {
-            log.warn("SKIPPING DOWNLOAD/DECRYPT, FILE ALREADY EXISTS: " + job.mpegFile);
-            schedule = false;
+         if (job.offset != null) {
+            job.mpegFile = job.mpegFile.replaceFirst(".mpg", "(2).mpg");
+            log.warn("NOTE: Renaming mpeg file to avoid overwrite: " + job.mpegFile);
+            jobMonitor.updatePendingJobFieldValue(job, "mpegFile", job.mpegFile);
          } else {
-            log.warn("OVERWRITING EXISTING FILE: " + job.mpegFile);
+            if (config.OverwriteFiles == 0) {
+               log.warn("SKIPPING DOWNLOAD/DECRYPT, FILE ALREADY EXISTS: " + job.mpegFile);
+               schedule = false;
+            } else {
+               log.warn("OVERWRITING EXISTING FILE: " + job.mpegFile);
+            }
          }
       }
       
