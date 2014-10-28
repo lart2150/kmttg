@@ -18,6 +18,7 @@ import com.tivo.kmttg.util.string;
 public class Transcode {
    SocketProcessInputStream ss = null;
    String returnFile = null;
+   String segmentFile = null;
    backgroundProcess process = null;
    Process p1 = null;
    Process p2 = null;
@@ -126,7 +127,7 @@ public class Transcode {
       format = "hls";
       String urlBase = config.httpserver_cache_relative;
       String args = TranscodeTemplates.hls(urlBase);
-      String segmentFile = base + File.separator + prefix + ".m3u8";
+      segmentFile = base + File.separator + prefix + ".m3u8";
       String textFile = segmentFile + ".txt";
       String segments = base + File.separator + prefix + "-%05d.ts";
       String[] ffArgs = args.split(" ");
