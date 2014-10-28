@@ -502,6 +502,8 @@ public class kmttgServer extends HTTPServer {
    }
    
    private String getTextFileContents(String textFile) {
+      if ( ! file.isFile(textFile) )
+         return "";
       String text = "";
       try {
          Scanner s = new Scanner(new File(textFile));
