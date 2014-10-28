@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
+ <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/media/css/jquery.dataTables.css">
+ <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/extensions/TableTools/css/dataTables.tableTools.css">
+ <style>
+ table, th, td {
+     border: 1px solid grey;
+ }
+ td.details-control {
+    background: url('images/details_open.png') no-repeat center center;
+    cursor: pointer;
+ }
+ tr.shown td.details-control {
+    background: url('images/details_close.png') no-repeat center center;
+ }
+ </style>
  <title>Video Streaming</title>
 </head>
 <body>
@@ -14,8 +28,33 @@
   <input type="radio" name="type" value="hls" checked>HLS (Safari, iOS Safari, Android 4.x Chrome)
   <!--<input type="radio" name="type" value="webm">webm (Firefox)-->
  </form>
+
  <div id="BROWSE"></div>
+
+ <div id="NPLTABLE_DIV" style="display: none">
+ <table id="NPLTABLE" class="display">
+ <thead>
+  <tr><th></th><th>SHOW</th><th>DATE</th><th>CHANNEL</th><th>DUR</th><th>SIZE</th></tr>
+ </thead>
+ <tbody>
+ </tbody>
+ </table>
+ </div>
+
+ <div id="FILETABLE_DIV" style="display: none">
+ <table id="FILETABLE" class="display">
+ <thead>
+  <tr><th>FILE NAME</th></tr>
+ </thead>
+ <tbody>
+ </tbody>
+ </table>
+ </div>
+
  <script type="text/javascript" src="js/jquery-1.11.1.js"></script>
+ <script type="text/javascript" src="DataTables-1.10.3/media/js/jquery.dataTables.js"></script>
+ <script type="text/javascript" src="DataTables-1.10.3/extensions/TableTools/js/dataTables.tableTools.js"></script>
+ <script type="text/javascript" src="js/String.js"></script>
  <script type="text/javascript" src="js/rpc/Stream.js"></script>
 </body>
 </html>
