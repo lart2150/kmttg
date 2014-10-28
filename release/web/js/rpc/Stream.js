@@ -68,23 +68,37 @@ $(document).ready(function() {
 });
 
 
-function MyShows() {
+function MyShows(offset) {
+   if (! offset)
+      offset = 0;
+   var limit = 50;
    var html = '<div style="color: blue">';
-   html += 'PLEASE WAIT: GETTING SHOWS FROM ' + TIVO.value + ' ...</div>';
+   message = 'PLEASE WAIT: GETTING SHOWS ' + offset + '-' + (offset+limit) + ' FROM ' + TIVO.value + ' ...';
+   html += message + '</div>';
    BROWSE.innerHTML = html;
-   window.setInterval(function() {
-      $('#blinkText').toggle(); }, 300
-   );
-   clearNplTable();
-   hideTables();
+   if (offset == 0) {
+      clearNplTable();
+      hideTables();
+   }
    showNplTable();
    var format = $('input[name="type"]:checked').val();
    var baseUrl = "/transcode?format=" + format + "&url=";
-   $.getJSON("/getMyShows?tivo=" + encodeURIComponent(TIVO.value), function(data) {
-      BROWSE.innerHTML = "";
-      loadNplData(data, baseUrl);
+   var tivo = encodeURIComponent(TIVO.value);
+   var url = "/getMyShows?limit=" + limit + "&tivo=" + tivo + "&offset=" + offset;
+   $.getJSON(url, function(data) {
+      if (data && data.length > 0) {
+         loadNplData(data);
+         offset += limit;
+         if (data.length == limit)
+            MyShows(offset);
+         else
+            BROWSE.innerHTML = "";
+      } else {
+         BROWSE.innerHTML = "";
+      }
    })
    .error(function(xhr, status) {
+      go = 0;
       BROWSE.innerHTML = "";
       handleError("/getMyShows", xhr, status);
    });
