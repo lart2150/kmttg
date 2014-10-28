@@ -20,14 +20,14 @@ public class Transcode {
    Process p1 = null;
    Process p2 = null;
    String inputFile = null;
-   String base = "";
+   String base = config.httpserver_cache;
    String prefix = "";
    int count = 0;
    String format = "";
-   Boolean keepCache = true;
    
    public Transcode(String inputFile) {
       this.inputFile = inputFile;
+      setCachePrefix(); // sets prefix variable
    }
    public static class RunnableInputDrainer implements Runnable {
       InputStream is;
@@ -120,12 +120,10 @@ public class Transcode {
       if (inputFile.toLowerCase().endsWith(".tivo"))
          isTivoFile = true;
       format = "hls";
-      String urlBase = "/web/cache/";
+      String urlBase = config.httpserver_cache_relative;
       String args = TranscodeTemplates.hls(urlBase);
-      base = config.programDir + File.separator + "web" + File.separator + "cache";
       if (! file.isDir(base))
          new File(base).mkdirs();
-      prefix = "t" + config.httpserver.transcode_counter;
       String segmentFile = base + File.separator + prefix + ".m3u8";
       String segments = base + File.separator + prefix + "-%05d.ts";
       String[] ffArgs = args.split(" ");
@@ -211,6 +209,33 @@ public class Transcode {
       }
    }
    
+   // Determine unused video cache file prefix to use
+   public void setCachePrefix() {
+      String prefix_string = "t";
+      Boolean go = true;
+      int index = config.httpserver.transcode_counter;
+      File[] files = new File(base).listFiles();
+      String filePrefix;
+      while (go) {
+         filePrefix = prefix_string + index;
+         boolean useThis = true;
+         for (File f : files) {
+            String basename = string.basename(f.getAbsolutePath());
+            if (basename.startsWith(filePrefix)) {
+               useThis = false;
+            }
+         }
+         if (useThis) {
+            prefix = prefix_string + index;
+            return;
+         }
+         index++;
+         if (index > 100) // prevent large number of cached files + inf loop
+            go = false;
+      }
+      prefix = prefix_string + index;
+   }
+   
    public boolean isRunning() {
       // hls is special case since once files are created don't re-create
       if (count > 0 && format.equals("hls"))
@@ -238,8 +263,6 @@ public class Transcode {
    }
    
    public void cleanup() {
-      if (keepCache)
-         return;
       if (prefix.length() > 0 && base.length() > 0) {
          log.warn("Removing '" + prefix + "' transcode files in: " + base);
          File[] files = new File(base).listFiles();

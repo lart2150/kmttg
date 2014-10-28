@@ -206,6 +206,9 @@ public class config {
    public static int httpserver_enable = 0;
    public static int httpserver_port = 8181;
    public static kmttgServer httpserver = null;
+   public static String httpserver_home = null;
+   public static String httpserver_cache = null;
+   public static String httpserver_cache_relative = null;
    
    public static Stack<String> parse() {
       debug.print("");

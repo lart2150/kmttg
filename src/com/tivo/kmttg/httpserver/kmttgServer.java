@@ -31,6 +31,9 @@ public class kmttgServer extends HTTPServer {
             return;
          }
          config.httpserver = new kmttgServer(config.httpserver_port);
+         config.httpserver_home = baseDir + File.separator + "web";
+         config.httpserver_cache = config.httpserver_home + File.separator + "cache";
+         config.httpserver_cache_relative = "/web/cache/";
          VirtualHost host = config.httpserver.getVirtualHost(null);
          host.setAllowGeneratedIndex(true);
          host.addContext("/", new FileContextHandler(new File(baseDir), "/"));
@@ -418,11 +421,13 @@ public class kmttgServer extends HTTPServer {
    
    JSONArray getCached() {
       JSONArray a = new JSONArray();
-      String base = config.programDir + File.separator + "web" + File.separator + "cache";
+      String base = config.httpserver_cache;
+      if (! file.isDir(base))
+         return a;
       File[] files = new File(base).listFiles();
       for (File f : files) {
          if (f.getAbsolutePath().endsWith(".m3u8"))
-            a.put("/web/cache/" + string.basename(f.getAbsolutePath()));
+            a.put(config.httpserver_cache_relative + string.basename(f.getAbsolutePath()));
       }
       return a;
    }
@@ -432,7 +437,7 @@ public class kmttgServer extends HTTPServer {
       for (int i=0; i<transcodes.size(); ++i) {
          Transcode tc = transcodes.get(i);
          if (! tc.isRunning()) {
-            tc.cleanup();
+            //tc.cleanup();
             transcodes.remove(i);
          }
       }
@@ -441,13 +446,13 @@ public class kmttgServer extends HTTPServer {
    void killTranscode(String name) {
       boolean removed = false;
       log.warn("killTranscode - " + name);
-      name = name.replaceFirst("/web/cache/", "");
+      name = name.replaceFirst(config.httpserver_cache_relative, "");
       for (int i=0; i<transcodes.size(); ++i) {
          Transcode tc = transcodes.get(i);
          String prefix = tc.prefix;
          if (name.startsWith(prefix)) {
             tc.kill();
-            tc.cleanup();
+            //tc.cleanup();
             transcodes.remove(i);
             removed = true;
          }
@@ -458,7 +463,7 @@ public class kmttgServer extends HTTPServer {
             Transcode tc = transcodes.get(i);
             if (name.equals(tc.inputFile)) {
                tc.kill();
-               tc.cleanup();
+               //tc.cleanup();
                transcodes.remove(i);
             }
          }
@@ -469,7 +474,7 @@ public class kmttgServer extends HTTPServer {
       int killed = 0;
       for(Transcode tc : transcodes) {
          tc.kill();
-         tc.cleanup();
+         //tc.cleanup();
          killed++;
       }
       cleanup();
