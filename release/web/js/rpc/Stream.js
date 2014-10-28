@@ -246,15 +246,33 @@ function GetCached() {
 }
 
 function loadCacheData(data) {
+   var count = 0;
    $.each(data, function (i, json) {
       if (json != "NONE") {
+         count += 1;
          var url = json.url;
          var name = json.name;
+         if ( json.hasOwnProperty("running") )
+            name = "(still running) " + name;
+         if ( json.hasOwnProperty("partial") ) {
+            if ( ! json.hasOwnProperty("running") )
+               name = "(partial) " + name;
+         }
          var link = '<a href="' + url + '" target="__blank">' + name + '</a>';
+         if ( ! json.hasOwnProperty("running") ) {
+            var url2 = "/transcode?removeCached=" + json.url;
+            link += '<br><a href="' + url2 + '" target="__blank">' + '[remove]' + '</a>';
+         }
          var row = $('#FILETABLE').DataTable().row.add([link]);
          row.draw();
       }
    });
+   if (count > 0) {
+      var url = "/transcode?removeCached=all";
+      var link = '<a href="' + url + '" target="__blank">' + '[remove all]' + '</a>';
+      var row = $('#FILETABLE').DataTable().row.add([link]);
+      row.draw();
+   }
 }
 
 function KillAll() {
