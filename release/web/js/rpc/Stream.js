@@ -29,8 +29,7 @@ $(document).ready(function() {
      ordering: false, // turn off column sorting
      autoWidth: true,
      tableTools: {
-       "sRowSelect": "os",
-       "aButtons": [ "select_all", "select_none" ]
+       "aButtons": []
      },
      columns: [
       {
@@ -55,8 +54,7 @@ $(document).ready(function() {
      ordering: false, // turn off column sorting
      autoWidth: true,
      tableTools: {
-       "sRowSelect": "os",
-       "aButtons": [ "select_all", "select_none" ]
+       "aButtons": []
      },
      columns: [
       null,
