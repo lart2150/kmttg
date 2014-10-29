@@ -22,6 +22,7 @@ public class Transcode {
    SocketProcessInputStream ss = null;
    String returnFile = null;
    String segmentFile = null;
+   String name = null;
    backgroundProcess process = null;
    Process p1 = null;
    Process p2 = null;
@@ -33,6 +34,7 @@ public class Transcode {
    
    public Transcode(String inputFile) {
       this.inputFile = inputFile;
+      this.name = inputFile;
       if (! file.isDir(base))
          new File(base).mkdirs();
       setCachePrefix(); // sets prefix variable
