@@ -14,7 +14,6 @@ import com.tivo.kmttg.util.log;
 public class TiVoTranscode extends Transcode {
    private Thread thread = null;
    String inputUrl = null;
-   String name = "";
    String tivo = "";
    
    public TiVoTranscode(String inputUrl, String name, String tivo) {
