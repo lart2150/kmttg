@@ -15,11 +15,13 @@ public class TiVoTranscode extends Transcode {
    private Thread thread = null;
    String inputUrl = null;
    String name = "";
+   String tivo = "";
    
-   public TiVoTranscode(String inputUrl, String name) {
+   public TiVoTranscode(String inputUrl, String name, String tivo) {
       super(inputUrl);
       this.inputUrl = inputUrl;
       this.name = name;
+      this.tivo = tivo;
    }
    
    @Override
@@ -119,5 +121,10 @@ public class TiVoTranscode extends Transcode {
       if (thread != null) {
          thread.interrupt();
       }
+   }
+   
+   @Override
+   public String getTivoName() {
+      return tivo;
    }
 }

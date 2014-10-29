@@ -307,4 +307,9 @@ public class Transcode {
          }
       }
    }
+   
+   // Extending methods should override appropriately
+   public String getTivoName() {
+      return null;
+   }
 }
