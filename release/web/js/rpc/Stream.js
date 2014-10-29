@@ -110,6 +110,17 @@ function loadNplData(data) {
          var json = entry.recording[0];
          //console.log(JSON.stringify(json, null, 3));
          if (json.hasOwnProperty("__url__")) {
+         
+            // Copy protected or recording => not downloadable
+            var candownload = true;
+            if (json.hasOwnProperty("state") && json.state === "inProgress")
+               candownload = false;
+            if (json.hasOwnProperty("drm")) {
+               if (json.drm.hasOwnProperty("tivoToGo")) {
+                  if (json.drm.tivoToGo === false)
+                     candownload = false;
+               }
+            }
 
             var date = "";
             if (json.hasOwnProperty("startTime")) {
@@ -125,7 +136,12 @@ function loadNplData(data) {
             }
             var show_url = baseUrl + encodeURIComponent(json.__url__);
             show_url += "&name=" + encodeURIComponent(show_name + " (" + date + ")");
-            var show = '<a href="' + show_url + '" target="__blank">' + show_name + '</a>';
+            var show = show_name;
+            if (candownload) {
+               show += '<br><a href="' + show_url + '" target="__blank">[stream]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+               show += '<a href="javascript:;" onclick="TiVoDownload(\'' + encodeURIComponent(json.__url__) + '\'';
+               show += ', \'' + encodeURIComponent(show_name + " (" + date + ")") +'\')">[download]</a>';
+            }
 
             var channel = "";
             if (json.hasOwnProperty("channel")) {
@@ -161,6 +177,43 @@ function loadNplData(data) {
             row.draw();
          }
       }
+   });
+}
+
+function loadFileData(data, baseUrl) {
+   $.each(data, function (i, file) {
+      if (file != "NONE") {
+         var url = baseUrl + encodeURIComponent(file);
+         var link = file;
+         link += '<br><a href="' + url + '" target="__blank">[stream]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+         link += '<a href="javascript:;" onclick="FileDownload(\'' + encodeURIComponent(file) + '\')">[download]</a>';         
+         var row = $('#FILETABLE').DataTable().row.add([link]);
+         row.draw();
+      }
+   });
+}
+
+function TiVoDownload(show_url, name) {
+   var format = $('input[name="type"]:checked').val();
+   url = "/transcode?format=" + format + "&download=1";
+   url += "&url=" + show_url + "&name=" + name;
+   $.get(url, function(response) {
+      alert(response);
+   })
+   .error(function(xhr, status) {
+      handleError("download", xhr, status);
+   });
+}
+
+function FileDownload(file) {
+   var format = $('input[name="type"]:checked').val();
+   url = "/transcode?format=" + format + "&download=1";
+   url += "&file=" + file;
+   $.get(url, function(response) {
+      alert(response);
+   })
+   .error(function(xhr, status) {
+      handleError("download", xhr, status);
    });
 }
 
@@ -234,17 +287,6 @@ function FileBrowser() {
    });
 }
 
-function loadFileData(data, baseUrl) {
-   $.each(data, function (i, file) {
-      if (file != "NONE") {
-         var url = baseUrl + encodeURIComponent(file);
-         var link = '<a href="' + url + '" target="__blank">' + file + '</a>';
-         var row = $('#FILETABLE').DataTable().row.add([link]);
-         row.draw();
-      }
-   });
-}
-
 function GetCached() {
    clearFileTable();
    hideTables();
@@ -270,25 +312,36 @@ function loadCacheData(data) {
             if ( ! json.hasOwnProperty("running") )
                name = "(partial) " + name;
          }
-         var link = '<a href="' + url + '" target="__blank">' + name + '</a>';
+         var link = name;
+         link += '<br><a href="' + url + '" target="__blank">[play]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
          if ( ! json.hasOwnProperty("running") ) {
-            var url2 = "/transcode?removeCached=" + json.url;
-            link += '<br><a href="' + url2 + '" target="__blank">' + '[remove]' + '</a>';
+            link += '<a href="javascript:;" onclick="RemoveCached(\'' + encodeURIComponent(json.url) + '\')">[remove]</a>';
          }
          var row = $('#FILETABLE').DataTable().row.add([link]);
          row.draw();
       }
    });
    if (count > 0) {
-      var url = "/transcode?removeCached=all";
-      var link = '<a href="' + url + '" target="__blank">' + '[remove all]' + '</a>';
+      var link = '<a href="javascript:;" onclick="RemoveCached(\'all\')">[remove all]</a>';
       var row = $('#FILETABLE').DataTable().row.add([link]);
       row.draw();
    }
 }
 
+function RemoveCached(link_url) {
+   var url = "/transcode?removeCached=" + link_url;
+   $.get(url, function(data) {
+      $("#GetCached").click()
+      alert(data);
+   })
+   .error(function(xhr, status) {
+      handleError("removeCached", xhr, status);
+   });
+}
+
 function KillAll() {
    $.get("/transcode?killall=1", function(data) {
+      $("#ShowRunning").click()
       alert(data);
    })
    .error(function(xhr, status) {
@@ -296,16 +349,25 @@ function KillAll() {
    });
 }
 
+function Kill(job) {
+   var url = "/transcode?kill=" + job;
+   $.get(url, function(data) {
+      $("#ShowRunning").click()
+      alert(data);
+   })
+   .error(function(xhr, status) {
+      handleError("kill", xhr, status);
+   });
+}
+
 function Running() {
-   var baseUrl = "/transcode?kill=";
    $.getJSON("/transcode?running=1", function(data) {
       var html = "";
       $.each(data, function (i, job) {
          if ( job === "NONE" ) {
             html = '<div style="color: blue">NO JOBS RUNNING</div>';
          } else {
-            html += '<a target="_blank" href="' + baseUrl;
-            html += encodeURIComponent(job) + '">kill ' + job + '</a><br>';
+            html += '<a href="javascript:;" onclick="Kill(\'' + encodeURIComponent(job) + '\')">[kill]</a> ' + job;
          }
       });
       BROWSE.innerHTML = html;
