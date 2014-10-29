@@ -379,7 +379,7 @@ public class kmttgServer extends HTTPServer {
             && params.containsKey("name") && params.containsKey("tivo")) {
          String url = params.get("url");
          String tivo = string.urlDecode(params.get("tivo"));;
-         if ( ! isOnlyTivo(url) ) {
+         if ( ! isOnlyTivo(tivo) ) {
             resp.sendError(500, "Only 1 download at a time allowed: " + tivo);
             return;
          }
