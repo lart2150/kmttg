@@ -85,7 +85,7 @@ function MyShows(offset) {
    var url = "/getMyShows?limit=" + limit + "&tivo=" + tivo + "&offset=" + offset;
    $.getJSON(url, function(data) {
       if (data && data.length > 0) {
-         loadNplData(data);
+         loadNplData(data, tivo);
          offset += limit;
          if (data.length == limit)
             MyShows(offset);
@@ -102,7 +102,7 @@ function MyShows(offset) {
    });
 }
 
-function loadNplData(data) {
+function loadNplData(data, tivo) {
    var format = $('input[name="type"]:checked').val();
    var baseUrl = "/transcode?format=" + format + "&url=";
    $.each(data, function (i, entry) {
@@ -140,7 +140,8 @@ function loadNplData(data) {
             if (candownload) {
                show += '<br><a href="' + show_url + '" target="__blank">[stream]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
                show += '<a href="javascript:;" onclick="TiVoDownload(\'' + encodeURIComponent(json.__url__) + '\'';
-               show += ', \'' + encodeURIComponent(show_name + " (" + date + ")") +'\')">[download]</a>';
+               show += ', \'' + encodeURIComponent(show_name + " (" + date + ")") + '\', \'';
+               show += encodeURIComponent(tivo) + '\')">[download]</a>';
             }
 
             var channel = "";
@@ -193,10 +194,10 @@ function loadFileData(data, baseUrl) {
    });
 }
 
-function TiVoDownload(show_url, name) {
+function TiVoDownload(show_url, name, tivo) {
    var format = $('input[name="type"]:checked').val();
    url = "/transcode?format=" + format + "&download=1";
-   url += "&url=" + show_url + "&name=" + name;
+   url += "&url=" + show_url + "&name=" + name + "&tivo=" + tivo;
    $.get(url, function(response) {
       alert(response);
    })
@@ -367,7 +368,8 @@ function Running() {
          if ( job === "NONE" ) {
             html = '<div style="color: blue">NO JOBS RUNNING</div>';
          } else {
-            html += '<a href="javascript:;" onclick="Kill(\'' + encodeURIComponent(job) + '\')">[kill]</a> ' + job;
+            html += '<a href="javascript:;" onclick="Kill(\'' + encodeURIComponent(job.inputFile);
+            html += '\')">[kill]</a> ' + job.name;
          }
       });
       BROWSE.innerHTML = html;
