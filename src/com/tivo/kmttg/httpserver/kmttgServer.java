@@ -2,7 +2,6 @@ package com.tivo.kmttg.httpserver;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -222,13 +221,17 @@ public class kmttgServer extends HTTPServer {
       resp.send(200, a.toString());
    }
    
-   // Return list of rpc enabled TiVos known by kmttg
+   // Return list of video files known to kmttg
    public void handleVideoFiles(Response resp) throws IOException {
-      // LinkedHashMap is used to get unique list of files
+      // LinkedHashMap is used to keep hash keys unique
+      LinkedHashMap<String,Integer> dirs = new LinkedHashMap<String,Integer>();
+      dirs.put(config.outputDir,1);
+      dirs.put(config.mpegDir,1);
+      dirs.put(config.mpegCutDir,1);
+      dirs.put(config.encodeDir,1);
       LinkedHashMap<String,Integer> h = new LinkedHashMap<String,Integer>();
-      getVideoFiles(config.mpegDir, h);
-      getVideoFiles(config.outputDir, h);
-      getVideoFiles(config.encodeDir, h);
+      for (String dir : dirs.keySet())
+         getVideoFiles(dir, h);
       JSONArray a = new JSONArray();
       for (String key : h.keySet()) {
          a.put(key);
@@ -392,13 +395,34 @@ public class kmttgServer extends HTTPServer {
       if (ss != null || returnFile != null) {
          // Transcode stream has been started, so send it out
          try {
+            Boolean download = false;
+            if (params.containsKey("download"))
+               download = true;
+            
             if (ss != null) {
-               resp.sendBody(ss, length, null);
+               if (download) {
+                  // download mode => simple response to client
+                  resp.send(200, "download started for: " + string.urlDecode(params.get("name")));
+               } else {
+                  // Streaming mode => send back stream
+                  resp.sendBody(ss, length, null);
+               }
             }
             if (returnFile != null) {
-               req.setPath(returnFile);
-               //resp.sendHeaders(200, -1, -1, null, "application/x-mpegurl", null);
-               serve(req, resp);
+               if (download) {
+                  // download mode => simple response to client
+                  String message = "download started for: ";
+                  if (params.containsKey("name"))
+                     message += params.get("name");
+                  if (params.containsKey("file"))
+                     message += params.get("file");
+                  resp.send(200, message);
+               } else {
+                  // Streaming mode => initiate file download request
+                  req.setPath(returnFile);
+                  //resp.sendHeaders(200, -1, -1, null, "application/x-mpegurl", null);
+                  serve(req, resp);
+               }
             }
          } catch (Exception e) {
             // This catches interruptions from client side so we can kill the transcode
@@ -509,9 +533,7 @@ public class kmttgServer extends HTTPServer {
          Scanner s = new Scanner(new File(textFile));
          text = s.useDelimiter("\\A").next();
          s.close();
-      } catch (FileNotFoundException e) {
-         log.error("getTextFileContents - " + e.getMessage());
-      }
+      } catch (Exception e) {}
       return text;
    }
    
@@ -536,12 +558,13 @@ public class kmttgServer extends HTTPServer {
    // Remove finished processes from transcodes stack
    void cleanup() {
       for (int i=0; i<transcodes.size(); ++i) {
+         Boolean removed = false;
          Transcode tc = transcodes.get(i);
          if (! tc.isRunning()) {
-            //tc.cleanup();
             transcodes.remove(i);
+            removed = true;
          }
-         if ( ! isPartial(tc.segmentFile) ) {
+         if ( ! removed && ! isPartial(tc.segmentFile) ) {
             // Segment file is terminated, so job must have finished
             transcodes.remove(i);
          }
@@ -557,7 +580,6 @@ public class kmttgServer extends HTTPServer {
          String prefix = tc.prefix;
          if (name.startsWith(prefix)) {
             tc.kill();
-            //tc.cleanup();
             transcodes.remove(i);
             removed = true;
          }
@@ -568,7 +590,6 @@ public class kmttgServer extends HTTPServer {
             Transcode tc = transcodes.get(i);
             if (name.equals(tc.inputFile)) {
                tc.kill();
-               //tc.cleanup();
                transcodes.remove(i);
             }
          }
@@ -579,7 +600,6 @@ public class kmttgServer extends HTTPServer {
       int killed = 0;
       for(Transcode tc : transcodes) {
          tc.kill();
-         //tc.cleanup();
          killed++;
       }
       cleanup();
