@@ -369,7 +369,7 @@ function Running() {
             html = '<div style="color: blue">NO JOBS RUNNING</div>';
          } else {
             html += '<a href="javascript:;" onclick="Kill(\'' + encodeURIComponent(job.inputFile);
-            html += '\')">[kill]</a> ' + job.name;
+            html += '\')">[kill]</a> ' + job.name + '<br>';
          }
       });
       BROWSE.innerHTML = html;
@@ -408,7 +408,10 @@ function detailsFormat(d) {
 function handleError(prefix, xhr, status) {
    if ( status != "success" ) {
       var error = "ERROR (" + prefix + "):\n";
-      error += JSON.stringify(xhr, null, 3);
+      var message = xhr;
+      if ( xhr.hasOwnProperty("responseText") )
+         message = xhr.responseText;
+      error += JSON.stringify(message, null, 3);
       alert(error);
    }
 }
