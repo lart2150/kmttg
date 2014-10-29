@@ -372,8 +372,14 @@ public class kmttgServer extends HTTPServer {
       }
       
       // TiVo download + transcode
-      if (params.containsKey("url") && params.containsKey("format") && params.containsKey("name")) {
+      if (params.containsKey("url") && params.containsKey("format")
+            && params.containsKey("name") && params.containsKey("tivo")) {
          String url = params.get("url");
+         String tivo = string.urlDecode(params.get("tivo"));;
+         if ( ! isOnlyTivo(url) ) {
+            resp.sendError(500, "Only 1 download at a time allowed: " + tivo);
+            return;
+         }
          tc = alreadyRunning(url);
          if (tc != null) {
             if (tc.returnFile != null)
@@ -381,7 +387,7 @@ public class kmttgServer extends HTTPServer {
          } else {
             String format = string.urlDecode(params.get("format"));
             String name = string.urlDecode(params.get("name"));
-            tc = new TiVoTranscode(url, name);
+            tc = new TiVoTranscode(url, name, tivo);
             addTranscode(tc);
             if (format.equals("hls"))
                returnFile = tc.hls();
@@ -394,6 +400,12 @@ public class kmttgServer extends HTTPServer {
       
       if (ss != null || returnFile != null) {
          // Transcode stream has been started, so send it out
+         String fileName = null;
+         if (params.containsKey("file"))
+            fileName = string.urlDecode(params.get("file"));
+         String name = null;
+         if (params.containsKey("name"))
+            name = string.urlDecode(params.get("name"));
          try {
             Boolean download = false;
             if (params.containsKey("download"))
@@ -402,7 +414,10 @@ public class kmttgServer extends HTTPServer {
             if (ss != null) {
                if (download) {
                   // download mode => simple response to client
-                  resp.send(200, "download started for: " + string.urlDecode(params.get("name")));
+                  if (alreadyRunning(fileName) != null)
+                     resp.send(200, "already running: " + name);
+                  else
+                     resp.send(200, "download started for: " + name);
                } else {
                   // Streaming mode => send back stream
                   resp.sendBody(ss, length, null);
@@ -411,11 +426,11 @@ public class kmttgServer extends HTTPServer {
             if (returnFile != null) {
                if (download) {
                   // download mode => simple response to client
-                  String message = "download started for: ";
-                  if (params.containsKey("name"))
-                     message += params.get("name");
-                  if (params.containsKey("file"))
-                     message += params.get("file");
+                  String message = "downloading: ";
+                  if (name != null)
+                     message += name;
+                  if (fileName != null)
+                     message += fileName;
                   resp.send(200, message);
                } else {
                   // Streaming mode => initiate file download request
@@ -434,6 +449,18 @@ public class kmttgServer extends HTTPServer {
       } else {
          resp.sendError(500, "Error starting transcode");
       }      
+   }
+   
+   // Can only download 1 file from a tivo at a time
+   private Boolean isOnlyTivo(String tivo) {
+      Boolean isonly = true;
+      for (Transcode tc : transcodes) {
+         if (tc.getTivoName() != null) {
+            if (tc.getTivoName().equals(tivo))
+               isonly = false;
+         }
+      }
+      return isonly;
    }
    
    private void addTranscode(Transcode tc) {
