@@ -310,8 +310,11 @@ public class kmttgServer extends HTTPServer {
       
       if (params.containsKey("kill")) {
          String fileName = string.urlDecode(params.get("kill"));
-         killTranscode(fileName);
-         resp.send(200, "Killed job: " + fileName);
+         String jobName = killTranscode(fileName);
+         if (jobName == null)
+            resp.sendError(500, "Failed to kill job: " + fileName);
+         else
+            resp.send(200, "Killed job: " + jobName);
          return;
       }
       
@@ -481,9 +484,17 @@ public class kmttgServer extends HTTPServer {
    
    private JSONArray getRunning() {
       JSONArray a = new JSONArray();
-      for (Transcode tc : transcodes) {
-         if (tc.isRunning())
-            a.put(tc.inputFile);
+      try {
+         for (Transcode tc : transcodes) {
+            if (tc.isRunning()) {
+               JSONObject json = new JSONObject();
+               json.put("name", tc.name);
+               json.put("inputFile", tc.inputFile);
+               a.put(json);
+            }
+         }
+      } catch (JSONException e) {
+         log.error("getRunning - " + e.getMessage());
       }
       return a;
    }
@@ -598,8 +609,8 @@ public class kmttgServer extends HTTPServer {
       }
    }
   
-   void killTranscode(String name) {
-      boolean removed = false;
+   public String killTranscode(String name) {
+      String jobName = null;
       log.warn("killTranscode - " + name);
       name = name.replaceFirst(config.httpserver_cache_relative, "");
       for (int i=0; i<transcodes.size(); ++i) {
@@ -608,19 +619,21 @@ public class kmttgServer extends HTTPServer {
          if (name.startsWith(prefix)) {
             tc.kill();
             transcodes.remove(i);
-            removed = true;
+            jobName = tc.name;
          }
       }
-      if (! removed) {
+      if (jobName == null) {
          // name might be the original full path inputFile
          for (int i=0; i<transcodes.size(); ++i) {
             Transcode tc = transcodes.get(i);
-            if (name.equals(tc.inputFile)) {
+            if (name.equals(string.urlDecode(tc.inputFile))) {
                tc.kill();
                transcodes.remove(i);
+               jobName = tc.name;
             }
          }
-     }
+      }
+      return jobName;
    }
    
    public int killTranscodes() {
