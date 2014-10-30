@@ -147,10 +147,16 @@ function loadNplData(data, tivo) {
             show_url += "&tivo=" + encodeURIComponent(tivo);
             var show = show_name;
             if (candownload) {
-               show += '<br><a href="' + show_url + '" target="__blank">[stream]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
-               show += '<a href="javascript:;" onclick="TiVoDownload(\'' + encodeURIComponent(json.__url__) + '\'';
+               var duration = 0;
+               if (json.hasOwnProperty("duration"))
+                  duration = json.duration;
+               show += '<br><a href="' + show_url;
+               show += '" target="__blank">[stream]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+               show += '<a href="javascript:;" onclick="TiVoDownload(\'';
+               show += encodeURIComponent(json.__url__) + '\'';
                show += ', \'' + encodeURIComponent(show_name + " (" + date + ")") + '\', \'';
-               show += encodeURIComponent(tivo) + '\')">[download]</a>';
+               show += encodeURIComponent(tivo) + '\', \'' + duration;
+               show += '\')">[download]</a>';
             }
 
             var channel = "";
@@ -203,10 +209,11 @@ function loadFileData(data, baseUrl) {
    });
 }
 
-function TiVoDownload(show_url, name, tivo) {
+function TiVoDownload(show_url, name, tivo, duration) {
    var format = $('input[name="type"]:checked').val();
    url = "/transcode?format=" + format + "&download=1";
    url += "&url=" + show_url + "&name=" + name + "&tivo=" + tivo;
+   url += "&duration=" + duration;
    $.get(url, function(response) {
       showDialog("TiVo download",response,'warning',2);
    })
@@ -316,16 +323,48 @@ function loadCacheData(data) {
          count += 1;
          var url = json.url;
          var name = json.name;
-         if ( json.hasOwnProperty("running") )
-            name = "(still running) " + name;
-         if ( json.hasOwnProperty("partial") ) {
-            if ( ! json.hasOwnProperty("running") )
-               name = "(partial) " + name;
+
+         var time = 0;
+         if ( json.hasOwnProperty("time") )
+            time = json.time;
+
+         var duration = 0;
+         if ( json.hasOwnProperty("duration") )
+            duration = json.duration;
+
+         var prefix = "";
+         if ( time > 0 )
+            prefix = "[" + secsToHM(time) + "]";
+         if ( json.hasOwnProperty("running") ) {
+            if (time > 0 && duration > 0) {
+               var pct = "%5.1f %%".sprintf(100*time/duration);
+               prefix = "(running: " + pct + ")";
+            } else if (time > 0) {
+               prefix = "(running: " + secsToHM(time) + ")";
+            } else {
+               prefix = "(running)";
+            }
          }
+         if ( json.hasOwnProperty("partial") ) {
+            if ( ! json.hasOwnProperty("running") ) {
+               if (time > 0 && duration > 0) {
+                  prefix = "(partial: " + secsToHM(time) + " / " + secsToHM(duration) + ")";
+               } else if (time > 0) {
+                  prefix = "(partial: " + secsToHM(time) + ")";
+               } else {
+                  prefix = "(partial)";
+               }
+            }
+         }
+         if (prefix.length > 0)
+            name = prefix + " " + name;
+
          var link = name;
-         link += '<br><a href="' + url + '" target="__blank">[play]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+         link += '<br><a href="' + url + '" target="__blank">[play]</a>';
+         link += '&nbsp;&nbsp;&nbsp;&nbsp;';
          if ( ! json.hasOwnProperty("running") ) {
-            link += '<a href="javascript:;" onclick="RemoveCached(\'' + encodeURIComponent(json.url) + '\')">[remove]</a>';
+            link += '<a href="javascript:;" onclick="RemoveCached(\'';
+            link += encodeURIComponent(json.url) + '\')">[remove]</a>';
          }
          var row = $('#FILETABLE').DataTable().row.add([link]);
          row.draw();
@@ -389,8 +428,28 @@ function loadRunningData(data) {
       row.draw();
    } else {
       $.each(data, function (i, job) {
+         var time = 0;
+         if ( job.hasOwnProperty("time") )
+            time = job.time;
+
+         var duration = 0;
+         if ( job.hasOwnProperty("duration") )
+            duration = job.duration;
+            
+         var name = job.name;
+            
+         var prefix = "";
+         if (time > 0 && duration > 0) {
+            var pct = "%5.1f %%".sprintf(100*time/duration);
+            prefix = "(" + pct + ")";
+         } else if (time > 0) {
+            prefix = "(" + secsToHM(time) + ")";
+         }
+         if (prefix.length > 0)
+            name = prefix + " " + name;
+            
          var link = '<a href="javascript:;" onclick="Kill(\'' + encodeURIComponent(job.inputFile);
-         link += '\')">[kill]</a> ' + job.name;
+         link += '\')">[kill]</a> ' + name;
          var row = $('#FILETABLE').DataTable().row.add([link]);
          row.draw();
       });
