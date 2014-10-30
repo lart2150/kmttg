@@ -32,7 +32,7 @@ public class TiVoTranscode extends Transcode {
       if (! file.isDir(base))
          new File(base).mkdirs();
       prefix = "t" + config.httpserver.transcode_counter;
-      String segmentFile = base + File.separator + prefix + ".m3u8";
+      segmentFile = base + File.separator + prefix + ".m3u8";
       String textFile = segmentFile + ".txt";
       String segments = base + File.separator + prefix + "-%05d.ts";
       String[] ffArgs = args.split(" ");
