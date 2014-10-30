@@ -65,8 +65,16 @@ $(document).ready(function() {
    $('#NPLTABLE tbody').on('click', 'td.details-control', nplDetailsClicked);
 });
 
-
 function MyShows(offset) {
+   // If table is hidden but has data, then simply unhide it and return
+   if (NPLTABLE_DIV.style.display === "none") {
+      var len = $('#NPLTABLE').DataTable().column(0).data().length;
+      if (len > 0) {
+         showNplTable();
+         return;
+      }
+   }
+   
    if (! offset)
       offset = 0;
    var limit = 50;
@@ -136,6 +144,7 @@ function loadNplData(data, tivo) {
             }
             var show_url = baseUrl + encodeURIComponent(json.__url__);
             show_url += "&name=" + encodeURIComponent(show_name + " (" + date + ")");
+            show_url += "&tivo=" + encodeURIComponent(tivo);
             var show = show_name;
             if (candownload) {
                show += '<br><a href="' + show_url + '" target="__blank">[stream]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -199,7 +208,7 @@ function TiVoDownload(show_url, name, tivo) {
    url = "/transcode?format=" + format + "&download=1";
    url += "&url=" + show_url + "&name=" + name + "&tivo=" + tivo;
    $.get(url, function(response) {
-      alert(response);
+      showDialog("TiVo download",response,'warning',2);
    })
    .error(function(xhr, status) {
       handleError("download", xhr, status);
@@ -211,7 +220,7 @@ function FileDownload(file) {
    url = "/transcode?format=" + format + "&download=1";
    url += "&file=" + file;
    $.get(url, function(response) {
-      alert(response);
+      showDialog("File Download",response,'warning', 2);
    })
    .error(function(xhr, status) {
       handleError("download", xhr, status);
@@ -333,7 +342,7 @@ function RemoveCached(link_url) {
    var url = "/transcode?removeCached=" + link_url;
    $.get(url, function(data) {
       $("#GetCached").click()
-      alert(data);
+      showDialog("Remove cached",data,'warning',2);
    })
    .error(function(xhr, status) {
       handleError("removeCached", xhr, status);
@@ -343,7 +352,7 @@ function RemoveCached(link_url) {
 function KillAll() {
    $.get("/transcode?killall=1", function(data) {
       $("#ShowRunning").click()
-      alert(data);
+      showDialog("Kill all",data,'warning',2);
    })
    .error(function(xhr, status) {
       handleError("killall", xhr, status);
@@ -354,7 +363,7 @@ function Kill(job) {
    var url = "/transcode?kill=" + job;
    $.get(url, function(data) {
       $("#ShowRunning").click()
-      alert(data);
+      showDialog("Kill",data,'warning',2);
    })
    .error(function(xhr, status) {
       handleError("kill", xhr, status);
@@ -362,21 +371,30 @@ function Kill(job) {
 }
 
 function Running() {
+   clearFileTable();
+   hideTables();
+   showFileTable();
    $.getJSON("/transcode?running=1", function(data) {
-      var html = "";
-      $.each(data, function (i, job) {
-         if ( job === "NONE" ) {
-            html = '<div style="color: blue">NO JOBS RUNNING</div>';
-         } else {
-            html += '<a href="javascript:;" onclick="Kill(\'' + encodeURIComponent(job.inputFile);
-            html += '\')">[kill]</a> ' + job.name + '<br>';
-         }
-      });
-      BROWSE.innerHTML = html;
+      loadRunningData(data);
    })
    .error(function(xhr, status) {
       handleError("running", xhr, status);
    });
+}
+
+function loadRunningData(data) {
+   if (data[0] === "NONE") {
+      var link = "NO JOBS RUNNING";
+      var row = $('#FILETABLE').DataTable().row.add([link]);
+      row.draw();
+   } else {
+      $.each(data, function (i, job) {
+         var link = '<a href="javascript:;" onclick="Kill(\'' + encodeURIComponent(job.inputFile);
+         link += '\')">[kill]</a> ' + job.name;
+         var row = $('#FILETABLE').DataTable().row.add([link]);
+         row.draw();
+      });
+   }
 }
 
 // Callback when details column is clicked on in a row
@@ -407,11 +425,10 @@ function detailsFormat(d) {
 
 function handleError(prefix, xhr, status) {
    if ( status != "success" ) {
-      var error = "ERROR (" + prefix + "):\n";
+      var error = "<h1>ERROR (" + prefix + "):</h1>";
       var message = xhr;
       if ( xhr.hasOwnProperty("responseText") )
          message = xhr.responseText;
-      error += JSON.stringify(message, null, 3);
-      alert(error);
+      showDialog(prefix,message,'error');
    }
 }

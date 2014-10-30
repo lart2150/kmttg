@@ -161,11 +161,9 @@ function tivoChanged() {
 
 function handleError(prefix, xhr, status) {
    if ( status != "success" ) {
-      var error = "ERROR (" + prefix + "):\n";
       var message = xhr;
       if ( xhr.hasOwnProperty("responseText") )
          message = xhr.responseText;
-      error += JSON.stringify(message, null, 3);
-      alert(error);
+      showDialog(prefix,message,'error');
    }
 }

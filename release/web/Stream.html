@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+ <link rel="stylesheet" type="text/css" href="dialog/dialog_box.css">
  <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/media/css/jquery.dataTables.css">
  <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/extensions/TableTools/css/dataTables.tableTools.css">
  <style>
@@ -18,6 +19,7 @@
  <title>Video Streaming</title>
 </head>
 <body>
+ <div id="content">
  <label>TiVo:&nbsp;&nbsp;</label><select id="TIVO" class="TIVO"></select>
  <button type="button" onclick="MyShows()">My Shows...</button>
  <button type="button" onclick="FileBrowser()">Browse Files...</button>
@@ -30,7 +32,7 @@
   <label>Transcode type:&nbsp;</label><input type="radio" name="type" value="hls" checked>HLS (Safari, iOS Safari, Android 4.x Chrome)
   <!--<input type="radio" name="type" value="webm">webm (Firefox)-->
  </form>
-
+ </div>
  <div id="BROWSE"></div>
 
  <div id="NPLTABLE_DIV" style="display: none">
@@ -52,11 +54,11 @@
  </tbody>
  </table>
  </div>
-
  <script type="text/javascript" src="js/jquery-1.11.1.js"></script>
  <script type="text/javascript" src="DataTables-1.10.3/media/js/jquery.dataTables.js"></script>
  <script type="text/javascript" src="DataTables-1.10.3/extensions/TableTools/js/dataTables.tableTools.js"></script>
  <script type="text/javascript" src="js/String.js"></script>
  <script type="text/javascript" src="js/rpc/Stream.js"></script>
+ <script type="text/javascript" src="dialog/dialog_box.js"></script>
 </body>
 </html>

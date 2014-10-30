@@ -2,13 +2,17 @@
 <html>
 <head>
  <title>System Information</title>
+ <link rel="stylesheet" type="text/css" href="dialog/dialog_box.css">
 </head>
 <body>
+<div id="content">
  <label>TiVo:&nbsp;&nbsp;</label><select id="TIVO" class="TIVO"></select>
  <button type="button" onclick="Info()">Refresh</button>
  <div id="INFO"></div>
+</div>
  <script type="text/javascript" src="js/jquery-1.11.1.js"></script>
  <script type="text/javascript" src="js/String.js"></script>
  <script type="text/javascript" src="js/rpc/Info.js"></script>
+ <script type="text/javascript" src="dialog/dialog_box.js"></script>
 </body>
 </html>

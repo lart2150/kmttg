@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="DataTables-1.10.3/media/css/jquery.dataTables.css">
-<link rel="stylesheet" type="text/css" href="DataTables-1.10.3/extensions/TableTools/css/dataTables.tableTools.css">
+ <link rel="stylesheet" type="text/css" href="dialog/dialog_box.css">
+ <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/media/css/jquery.dataTables.css">
+ <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/extensions/TableTools/css/dataTables.tableTools.css">
 <style>
 table, th, td {
     border: 1px solid grey;
@@ -18,6 +19,7 @@ tr.shown td.details-control {
  <title>Season Passes</title>
 </head>
 <body>
+<div id="content">
  <label>TiVo:&nbsp;&nbsp;</label><select id="TIVO" class="TIVO"></select>
  <button type="button" onclick="Refresh()">Refresh</button>
  <button type="button" onclick="Save()">Save</button>
@@ -29,6 +31,7 @@ tr.shown td.details-control {
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
  <button type="button" onclick="Up()">Move Up</button>
  <button type="button" onclick="Down()">Move Down</button>
+</div>
  <div id="LOAD" class="LOAD" style="display: none">
    <button type="button" onclick="CancelSelected()">CANCEL</button>
    <button type="button" onclick="LoadSelected()">Load file:</button>
@@ -46,5 +49,6 @@ tr.shown td.details-control {
  <script type="text/javascript" src="DataTables-1.10.3/media/js/jquery.dataTables.js"></script>
  <script type="text/javascript" src="DataTables-1.10.3/extensions/TableTools/js/dataTables.tableTools.js"></script>
  <script type="text/javascript" src="js/rpc/SeasonPasses.js"></script>
+ <script type="text/javascript" src="dialog/dialog_box.js"></script>
 </body>
 </html>

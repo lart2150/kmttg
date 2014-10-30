@@ -193,7 +193,7 @@ function Delete() {
             if (data.type && data.type == "success")
                row.remove().draw(false);
             else {
-               alert("Unsubscribe failed: " + JSON.stringify(data, null, 3));
+               showDialog("Unsubscribe failed",JSON.stringify(data, null, 3),'error');
             }
          })
          .error(function(xhr, status) {
@@ -208,7 +208,7 @@ function Delete() {
 function Save() {
    var url = "/rpc?operation=SPSave&tivo=" + encodeURIComponent(TIVO.value);
    $.get(url, function(data) {
-      alert(data);
+      showDialog("SP Save",data,'warning');
    })
    .error(function(xhr, status) {
       handleError("SPSave", xhr, status);
@@ -266,7 +266,7 @@ function Copy() {
          $.each(table.rows('.selected'), function(i, rowNum) {
             var row = table.row(rowNum);
             if (! row.data()) {
-               alert("No rows selected!");
+               showDialog("SP Copy","No rows selected!",'warning',2);
                return;
             }
             var json = row.data()[NUMCOLS];
@@ -414,11 +414,9 @@ function clickRow(index) {
 
 function handleError(prefix, xhr, status) {
    if ( status != "success" ) {
-      var error = "ERROR (" + prefix + "):\n";
       var message = xhr;
       if ( xhr.hasOwnProperty("responseText") )
          message = xhr.responseText;
-      error += JSON.stringify(message, null, 3);
-      alert(error);
+      showDialog(prefix,message,'error');
    }
 }
