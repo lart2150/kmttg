@@ -1,12 +1,45 @@
-$(document).ready(function() {
-   // Remote.html document elements
-   TIVO = document.getElementById("TIVO");
-   LAUNCH = document.getElementById("LAUNCH");
-   SPS = document.getElementById("SPS");
-   SKIPB = document.getElementById("SKIPB");
-   SKIPF = document.getElementById("SKIPF");
-   SKIPM = document.getElementById("SKIPM");
+// Remote.html document elements
+TIVO = document.getElementById("TIVO");
+LAUNCH = document.getElementById("LAUNCH");
+SPS = document.getElementById("SPS");
+SKIPB = document.getElementById("SKIPB");
+SKIPF = document.getElementById("SKIPF");
+SKIPM = document.getElementById("SKIPM");
 
+// Add sps selections
+var codes = {};
+codes["Quick clear play bar: SPSPS"] = "select play select pause select play";
+codes["Clock: SPS9S"] = "select play select 9 select clear";
+codes["30 sec skip: SPS30S"] = "select play select 3 0 select clear";
+codes["Information: SPSRS"] = "select play select replay select";
+codes["4x FF: SPS88S"] = "select play select 8 8 select clear";
+for (var code in codes) {
+   if (codes.hasOwnProperty(code)) {
+      var option = document.createElement("option");
+      option.text = code;
+      option.value = code;
+      SPS.appendChild(option);
+   }
+}
+
+// Add launch selections
+var apps = {};
+apps["Netflix (html)"] = "x-tivo:netflix:netflix";
+apps["YouTube (html)"] = "x-tivo:web:https://www.youtube.com/tv";
+apps["Amazon"] = "x-tivo:hme:uuid:35FE011C-3850-2228-FBC5-1B9EDBBE5863";
+apps["Hulu Plus"] = "x-tivo:flash:uuid:802897EB-D16B-40C8-AEEF-0CCADB480559";
+apps["AOL On"] = "x-tivo:flash:uuid:EA1DEF9D-D346-4284-91A0-FEA8EAF4CD39";
+apps["Launchpad"] = "x-tivo:flash:uuid:545E064D-C899-407E-9814-69A021D68DAD";
+for (var app in apps) {
+   if (apps.hasOwnProperty(app)) {
+      var option = document.createElement("option");
+      option.text = app;
+      option.value = app;
+      LAUNCH.appendChild(option);
+   }
+}
+
+$(document).ready(function() {
    // Add callback for TiVo selection change
    $('.TIVO').change(function() { tivoChanged(); });
 
@@ -28,40 +61,6 @@ $(document).ready(function() {
    .error(function(xhr, status) {
       handleError("/getRpcTivos", xhr, status);
    });
-
-   // Add launch selections
-   var apps = {};
-   apps["Netflix (html)"] = "x-tivo:netflix:netflix";
-   apps["YouTube (html)"] = "x-tivo:web:https://www.youtube.com/tv";
-   apps["Amazon"] = "x-tivo:hme:uuid:35FE011C-3850-2228-FBC5-1B9EDBBE5863";
-   apps["Hulu Plus"] = "x-tivo:flash:uuid:802897EB-D16B-40C8-AEEF-0CCADB480559";
-   apps["AOL On"] = "x-tivo:flash:uuid:EA1DEF9D-D346-4284-91A0-FEA8EAF4CD39";
-   apps["Launchpad"] = "x-tivo:flash:uuid:545E064D-C899-407E-9814-69A021D68DAD";
-   for (var app in apps) {
-      if (apps.hasOwnProperty(app)) {
-         var option = document.createElement("option");
-         option.text = app;
-         option.value = app;
-         LAUNCH.appendChild(option);
-      }
-   }
-
-   // Add sps selections
-   var codes = {};
-   codes["Quick clear play bar: SPSPS"] = "select play select pause select play";
-   codes["Clock: SPS9S"] = "select play select 9 select clear";
-   codes["30 sec skip: SPS30S"] = "select play select 3 0 select clear";
-   codes["Information: SPSRS"] = "select play select replay select";
-   codes["4x FF: SPS88S"] = "select play select 8 8 select clear";
-   for (var code in codes) {
-      if (codes.hasOwnProperty(code)) {
-         var option = document.createElement("option");
-         option.text = code;
-         option.value = code;
-         SPS.appendChild(option);
-      }
-   }
-
 });
 
 //button callback - RPC keyEventSend call
