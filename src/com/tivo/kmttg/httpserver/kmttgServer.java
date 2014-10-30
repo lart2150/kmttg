@@ -1,14 +1,12 @@
 package com.tivo.kmttg.httpserver;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONArray;
@@ -20,14 +18,15 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
+import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.mediainfo;
 import com.tivo.kmttg.util.string;
 
 public class kmttgServer extends HTTPServer {
    private Stack<Transcode> transcodes = new Stack<Transcode>();
    public int transcode_counter = 0;
-   private String m3u8_terminator = "#EXT-X-ENDLIST";
    
    public kmttgServer() {
       try {
@@ -366,6 +365,7 @@ public class kmttgServer extends HTTPServer {
             String format = string.urlDecode(params.get("format"));
             length = new File(fileName).length();
             tc = new Transcode(fileName);
+            tc.duration = -1; // Setting to -1 to deal with it a little later
             addTranscode(tc);
             if (format.equals("webm"))
                ss = tc.webm();
@@ -395,6 +395,9 @@ public class kmttgServer extends HTTPServer {
             String format = string.urlDecode(params.get("format"));
             String name = string.urlDecode(params.get("name"));
             tc = new TiVoTranscode(url, name, tivo);
+            if (params.containsKey("duration")) {
+               tc.duration = Integer.parseInt(params.get("duration"));
+            }
             addTranscode(tc);
             if (format.equals("hls"))
                returnFile = tc.hls();
@@ -453,6 +456,11 @@ public class kmttgServer extends HTTPServer {
                ss.close();
             tc.kill();
          }
+         
+         // Calculate duration for file-based transcodes
+         if ( tc != null && tc.duration == -1) {
+            setDuration(tc);
+         }
       } else {
          resp.sendError(500, "Error starting transcode");
       }      
@@ -494,6 +502,11 @@ public class kmttgServer extends HTTPServer {
                JSONObject json = new JSONObject();
                json.put("name", tc.name);
                json.put("inputFile", tc.inputFile);
+               float time = Hlsutils.totalTime_m3u8(tc.segmentFile);
+               if (time > 0) {
+                  json.put("time", time);
+               }
+               json.put("duration", tc.duration);
                a.put(json);
             }
          }
@@ -512,27 +525,32 @@ public class kmttgServer extends HTTPServer {
       for (File f : files) {
          if (f.getAbsolutePath().endsWith(".m3u8")) {
             try {
-            JSONObject json = new JSONObject();
-            json.put("url", config.httpserver_cache_relative + string.basename(f.getAbsolutePath()));
-            String textFile = f.getAbsolutePath() + ".txt";
-            if (file.isFile(textFile))
-               json.put("name", getTextFileContents(textFile));
-            if (isPartial(f.getAbsolutePath())) {
-               Boolean running = false;
-               for (Transcode tc : transcodes) {
-                  if (tc.segmentFile != null && tc.segmentFile.equals(f.getAbsolutePath())) {
-                     json.put("running", 1);
-                     running = true;
+               JSONObject json = new JSONObject();
+               json.put("url", config.httpserver_cache_relative + string.basename(f.getAbsolutePath()));
+               float time = Hlsutils.totalTime_m3u8(f.getAbsolutePath());
+               if (time > 0) {
+                  json.put("time", time);
+               }
+               String textFile = f.getAbsolutePath() + ".txt";
+               if (file.isFile(textFile))
+                  json.put("name", Hlsutils.getTextFileContents(textFile));
+               if (Hlsutils.isPartial(f.getAbsolutePath())) {
+                  Boolean running = false;
+                  for (Transcode tc : transcodes) {
+                     if (tc.segmentFile != null && tc.segmentFile.equals(f.getAbsolutePath())) {
+                        json.put("running", 1);
+                        json.put("duration", tc.duration);
+                        running = true;
+                     }
+                  }
+                  if ( ! running ) {
+                     // Add m3u8 termination to incomplete m3u8 file
+                     Hlsutils.fixPartial(f.getAbsolutePath());
+                     if (Hlsutils.isPartial(f.getAbsolutePath()))
+                        json.put("partial", 1);
                   }
                }
-               if ( ! running ) {
-                  // Add m3u8 termination to incomplete m3u8 file
-                  fixPartial(f.getAbsolutePath());
-                  if (isPartial(f.getAbsolutePath()))
-                     json.put("partial", 1);
-               }
-            }
-            a.put(json);
+               a.put(json);
             } catch (JSONException e) {
                log.error("getCached - " + e.getMessage());
             }
@@ -567,36 +585,6 @@ public class kmttgServer extends HTTPServer {
       return count;
    }
    
-   private String getTextFileContents(String textFile) {
-      if ( ! file.isFile(textFile) )
-         return "";
-      String text = "";
-      try {
-         Scanner s = new Scanner(new File(textFile));
-         text = s.useDelimiter("\\A").next();
-         s.close();
-      } catch (Exception e) {}
-      return text;
-   }
-   
-   private Boolean isPartial(String m3u8) {
-      Boolean partial = true;
-      String contents = getTextFileContents(m3u8);
-      if ( contents.contains(m3u8_terminator) )
-         partial = false;
-      return partial;
-   }
-   
-   private void fixPartial(String m3u8) {
-      try {
-      BufferedWriter ofp = new BufferedWriter(new FileWriter(m3u8, true));
-      ofp.write(m3u8_terminator + "\r\n");
-      ofp.close();
-      } catch (Exception e) {
-         log.error("fixPartial - " + e.getMessage());
-      }
-   }
-   
    // Remove finished processes from transcodes stack
    void cleanup() {
       for (int i=0; i<transcodes.size(); ++i) {
@@ -606,7 +594,7 @@ public class kmttgServer extends HTTPServer {
             transcodes.remove(i);
             removed = true;
          }
-         if ( ! removed && ! isPartial(tc.segmentFile) ) {
+         if ( ! removed && ! Hlsutils.isPartial(tc.segmentFile) ) {
             // Segment file is terminated, so job must have finished
             transcodes.remove(i);
          }
@@ -649,5 +637,18 @@ public class kmttgServer extends HTTPServer {
       cleanup();
       transcodes.clear();
       return killed;
+   }
+   
+   // For transcodes with input file as source, try and get duration usinf mediainfo or ffmpeg
+   public void setDuration(Transcode tc) {
+      Hashtable<String,String> info = null;
+      if (file.isFile(config.mediainfo)) {
+         info = mediainfo.getVideoInfo(tc.inputFile);
+      } else if (file.isFile(config.ffmpeg)) {
+         info = ffmpeg.getVideoInfo(tc.inputFile);
+      }
+      if (info != null && info.containsKey("duration")) {
+         tc.duration = Integer.parseInt(info.get("duration"));
+      }
    }
 }
