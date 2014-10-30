@@ -15,6 +15,7 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONFile;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.rpc.Remote;
@@ -45,6 +46,9 @@ public class kmttgServer extends HTTPServer {
          config.httpserver.start();
       } catch (IOException e) {
          log.error("HTTPServer Init - " + e.getMessage());
+         config.httpserver = null;
+         if (!config.GUIMODE)
+            auto.process_web = false;
       }
    }
    
