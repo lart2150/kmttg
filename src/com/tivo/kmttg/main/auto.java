@@ -11,6 +11,7 @@ import java.util.Hashtable;
 import java.util.Stack;
 
 import com.tivo.kmttg.gui.SwingWorker;
+import com.tivo.kmttg.httpserver.kmttgServer;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -19,6 +20,8 @@ import com.tivo.kmttg.util.string;
 
 public class auto {
    private static Hashtable<String,String> history_hash = new Hashtable<String,String>();
+   private static boolean process_auto = true;
+   public static boolean process_web = true;
    
    // Batch mode processing (no GUI)
    public static void startBatchMode() {
@@ -67,28 +70,34 @@ public class auto {
          
          // Endless loop
          Boolean GO = true;         
-         while (GO) {                     
-            // Launch jobs for Tivos or update launch times appropriately
-            for (String tivoName : getTiVos()) {
-               now = new Date().getTime();
-               if ( ! launch.containsKey(tivoName) ) {
-                  launch.put(tivoName, new Date().getTime() - 1);
-               }
-               launchTime = launch.get(tivoName);
-               
-               // Launch new jobs for this Tivo if ready
-               if (launchTime != -1 && now > launchTime) {
-                  // Parse auto.ini each time before launch in case it gets updated
-                  parseAutoIni();
-                  // Launch jobs for this tivo
-                  jobMonitor.getNPL(tivoName);
-                  launch.put(tivoName, (long)-1);
-               }
-               
-               if ( ! jobMonitor.waitForJobs(tivoName) && launchTime == -1 ) {
-                  // Setup to launch new jobs after user configured sleep time
-                  launch.put(tivoName, now + autoConfig.CHECK_TIVOS_INTERVAL*60*1000);
-                  log.print("\n'" + tivoName + "' PROCESSING SLEEPING " + autoConfig.CHECK_TIVOS_INTERVAL + " mins ...");
+         while (GO) {
+            if (config.httpserver_enable == 1 && process_web && config.httpserver == null) {
+               // Try starting web server if configured and not already running
+               new kmttgServer();
+            }
+            if ( process_auto ) {
+               // Launch jobs for Tivos or update launch times appropriately
+               for (String tivoName : getTiVos()) {
+                  now = new Date().getTime();
+                  if ( ! launch.containsKey(tivoName) ) {
+                     launch.put(tivoName, new Date().getTime() - 1);
+                  }
+                  launchTime = launch.get(tivoName);
+                  
+                  // Launch new jobs for this Tivo if ready
+                  if (launchTime != -1 && now > launchTime) {
+                     // Parse auto.ini each time before launch in case it gets updated
+                     parseAutoIni();
+                     // Launch jobs for this tivo
+                     jobMonitor.getNPL(tivoName);
+                     launch.put(tivoName, (long)-1);
+                  }
+                  
+                  if ( ! jobMonitor.waitForJobs(tivoName) && launchTime == -1 ) {
+                     // Setup to launch new jobs after user configured sleep time
+                     launch.put(tivoName, now + autoConfig.CHECK_TIVOS_INTERVAL*60*1000);
+                     log.print("\n'" + tivoName + "' PROCESSING SLEEPING " + autoConfig.CHECK_TIVOS_INTERVAL + " mins ...");
+                  }
                }
             }
             
@@ -123,6 +132,11 @@ public class auto {
    }
    
    private static void exitAuto(int num) {
+      if (config.httpserver_enable == 1) {
+         // Don't exit when web server enabled, but turn off auto processing
+         process_auto = false;
+         return;
+      }
       debug.print("num=" + num);
       log.print("\nEXITING BATCH MODE");
       System.exit(num);
