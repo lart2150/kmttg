@@ -22,6 +22,7 @@ public class Transcode {
    SocketProcessInputStream ss = null;
    String returnFile = null;
    String segmentFile = null;
+   int duration = 0;
    String name = null;
    backgroundProcess process = null;
    Process p1 = null;
