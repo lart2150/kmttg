@@ -70,7 +70,7 @@ public class mdns {
             // Ignore certain devices like TiVo Stream which starts with TSN "A94"
             if (tsn != null && tsn.startsWith("A94"))
                tsn = null;
-            if (platform != null && platform.contains("Silverstreak"))
+            if (platform != null && platform.contains("Silver"))
                tsn = null;
             if (tsn != null) {
                Boolean add = true;
