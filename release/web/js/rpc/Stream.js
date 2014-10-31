@@ -1,3 +1,7 @@
+// This used for periodic update function for running jobs
+RUNNING = 0;
+MONITOR_INTERVAL = 3; // Seconds between monitor updates
+
 $(document).ready(function() {
    // Stream.html document elements
    TIVO = document.getElementById("TIVO");
@@ -65,10 +69,14 @@ $(document).ready(function() {
    $('#NPLTABLE tbody').on('click', 'td.details-control', nplDetailsClicked);
 });
 
+function getNumRows(table) {
+   return table.DataTable().column(0).data().length;
+}
+
 function MyShows(offset) {
    // If table is hidden but has data, then simply unhide it and return
    if (NPLTABLE_DIV.style.display === "none") {
-      var len = $('#NPLTABLE').DataTable().column(0).data().length;
+      var len = getNumRows($('#NPLTABLE'));
       if (len > 0) {
          showNplTable();
          return;
@@ -291,6 +299,8 @@ function getUrl(json) {
 }
 
 function FileBrowser() {
+   FILETABLE_DIV.mode = "Files";
+      
    clearFileTable();
    hideTables();
    showFileTable();
@@ -304,7 +314,10 @@ function FileBrowser() {
    });
 }
 
-function GetCached() {
+function GetCached(from_monitor) {
+   if ( ! from_monitor )
+      FILETABLE_DIV.mode = "Cached";
+
    clearFileTable();
    hideTables();
    showFileTable();
@@ -318,6 +331,7 @@ function GetCached() {
 
 function loadCacheData(data) {
    var count = 0;
+   var running = 0;
    $.each(data, function (i, json) {
       if (json != "NONE") {
          count += 1;
@@ -336,6 +350,7 @@ function loadCacheData(data) {
          if ( time > 0 )
             prefix = "[" + secsToHM(time) + "]";
          if ( json.hasOwnProperty("running") ) {
+            running++;
             if (time > 0 && duration > 0) {
                var pct = "%5.1f %%".sprintf(100*time/duration);
                prefix = "(running: " + pct + ")";
@@ -375,6 +390,18 @@ function loadCacheData(data) {
       var row = $('#FILETABLE').DataTable().row.add([link]);
       row.draw();
    }
+      
+   if (RUNNING) {
+      // If monitor is running, turn it off when if there are no jobs currently running
+      if (running == 0)
+         RUNNING_monitor_off();
+   } else {
+      // Start monitoring function to update cached/running table every few seconds
+      if (running > 0) {
+         console.log("RUNNING monitor started");
+         RUNNING = setInterval(function(){RUNNING_monitor();}, 1000*MONITOR_INTERVAL);
+      }
+   }
 }
 
 function RemoveCached(link_url) {
@@ -409,7 +436,9 @@ function Kill(job) {
    });
 }
 
-function Running() {
+function Running(from_monitor) {
+   if ( ! from_monitor )
+      FILETABLE_DIV.mode = "Running";
    clearFileTable();
    hideTables();
    showFileTable();
@@ -453,7 +482,48 @@ function loadRunningData(data) {
          var row = $('#FILETABLE').DataTable().row.add([link]);
          row.draw();
       });
+      
+      // Start monitoring function to update cached/running table every few seconds
+      if (! RUNNING) {
+         console.log("RUNNING monitor started");
+         RUNNING = setInterval(function(){RUNNING_monitor();}, 3000);
+      }
    }
+}
+
+// Monitor function to periodically update Running or Cached table if currently displayed
+function RUNNING_monitor() {
+   var stop = false;
+   if (FILETABLE_DIV.style.display === "none") {
+      stop = true;
+   }
+   if (FILETABLE_DIV.mode != "Running" && FILETABLE_DIV.mode != "Cached")
+      stop = true;
+   if ( ! stop ) {
+      var len = getNumRows($('#FILETABLE'));
+      if (len == 0)
+         stop = true;
+      else {
+         var row1 = $('#FILETABLE').DataTable().column(0).data()[0];
+         if (row1 === "NO JOBS RUNNING")
+            stop = true;
+      }
+   }
+   
+   if (RUNNING && stop) {
+      RUNNING_monitor_off();
+      return;
+   }
+   if (FILETABLE_DIV.mode === "Running")
+      Running(1);
+   if (FILETABLE_DIV.mode === "Cached")
+      GetCached(1);
+};
+
+function RUNNING_monitor_off() {
+   console.log("RUNNING monitor stopped");
+   clearInterval(RUNNING);
+   RUNNING = 0;
 }
 
 // Callback when details column is clicked on in a row
