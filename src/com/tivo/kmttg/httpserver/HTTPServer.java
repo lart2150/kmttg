@@ -31,8 +31,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
-import com.tivo.kmttg.main.config;
-
 /**
  * The {@code HTTPServer} class implements a light-weight HTTP server.
  *
@@ -1752,8 +1750,6 @@ public class HTTPServer {
             } catch (InterruptedIOException ignore) { // timeout
                 break;
             } catch (IOException ioe) {
-                // moyekj add
-                config.httpserver.killTranscode(req.getPath());
                 resp.sendError(500,
                     "error processing request: " + ioe.getMessage());
                 break;
