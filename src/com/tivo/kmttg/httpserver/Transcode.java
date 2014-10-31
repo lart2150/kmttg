@@ -213,12 +213,12 @@ public class Transcode {
       returnFile = urlBase + prefix + ".m3u8";
       try {
          // Wait for segmentFile to get created
-         int counter = 0;
-         while( file.size(segmentFile) == 0 && counter < 10 ) {
+         int counter = 0; int max = config.httpserver_ffmpeg_wait;
+         while( file.size(segmentFile) == 0 && counter < max ) {
             Thread.sleep(1000);
             counter++;
          }
-         if (counter >= 10) {
+         if (counter >= max) {
             log.error("Segment file not being created, assuming ffmpeg error");
             return null;
          }
