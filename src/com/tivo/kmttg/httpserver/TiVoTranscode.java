@@ -86,7 +86,7 @@ public class TiVoTranscode extends Transcode {
                   http.downloadPiped(urlString, "tivo", config.MAK, p1.getOutputStream(), true, null);
                }
                catch (Exception e) {
-                  log.error("downloadPiped - " + e.getMessage());
+                  error("downloadPiped - " + e.getMessage());
                   Thread.currentThread().interrupt();
                   return;
                }
@@ -95,7 +95,7 @@ public class TiVoTranscode extends Transcode {
          thread = new Thread(r);
          thread.start();
       } catch (IOException e) {
-         log.error("hls - " + e.getMessage());
+         error("hls - " + e.getMessage());
          return null;
       }
       
@@ -104,15 +104,19 @@ public class TiVoTranscode extends Transcode {
          // Wait for segmentFile to get created
          int counter = 0; int max = config.httpserver_ffmpeg_wait;
          while( file.size(segmentFile) == 0 && counter < max ) {
+            if (! thread.isAlive()) {
+               error("ffmpeg transcode stopped");
+               return null;
+            }
             Thread.sleep(1000);
             counter++;
          }
          if (counter >= max) {
-            log.error("Segment file not being created, assuming ffmpeg error");
+            error("Segment file not being created, assuming ffmpeg error");
             return null;
          }
       } catch (InterruptedException e) {
-         log.error("TiVoTranscode sleep - " + e.getMessage());
+         error("TiVoTranscode sleep - " + e.getMessage());
       }
       createTextFile(textFile, name);
       return returnFile;

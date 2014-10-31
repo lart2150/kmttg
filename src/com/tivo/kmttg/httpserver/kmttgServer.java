@@ -365,6 +365,10 @@ public class kmttgServer extends HTTPServer {
             String format = string.urlDecode(params.get("format"));
             length = new File(fileName).length();
             tc = new Transcode(fileName);
+            if (tc.getErrors().length() > 0) {
+               resp.sendError(500, tc.getErrors());
+               return;
+            }
             tc.duration = -1; // Setting to -1 to deal with it a little later
             addTranscode(tc);
             if (format.equals("webm"))
@@ -395,6 +399,10 @@ public class kmttgServer extends HTTPServer {
             String format = string.urlDecode(params.get("format"));
             String name = string.urlDecode(params.get("name"));
             tc = new TiVoTranscode(url, name, tivo);
+            if (tc.getErrors().length() > 0) {
+               resp.sendError(500, tc.getErrors());
+               return;
+            }
             if (params.containsKey("duration")) {
                tc.duration = Integer.parseInt(params.get("duration"));
             }

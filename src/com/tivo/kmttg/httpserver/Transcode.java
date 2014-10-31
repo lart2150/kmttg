@@ -32,6 +32,7 @@ public class Transcode {
    String prefix = "";
    int count = 0;
    String format = "";
+   Stack<String> errors = new Stack<String>();
    
    public Transcode(String inputFile) {
       this.inputFile = inputFile;
@@ -60,7 +61,7 @@ public class Transcode {
       try {
          ss = new SocketProcessInputStream();
       } catch (Exception e) {
-         log.error("webm - " + e.getMessage());
+         error("webm - " + e.getMessage());
          return null;
       }
       String sockStr = "tcp://127.0.0.1:" + ss.getPort();
@@ -101,7 +102,7 @@ public class Transcode {
             RunnableInputDrainer des = new RunnableInputDrainer(p2.getErrorStream());
             new Thread(des).start();
          } catch (IOException e) {
-            log.error("webm - " + e.getMessage());
+            error("webm - " + e.getMessage());
             return null;
          }
          Piper pipe = new Piper(
@@ -117,7 +118,7 @@ public class Transcode {
             log.print(process.toString());
             ss.attachProcess(process.getProcess());
          } else {
-            log.error("Failed to start command: " + process.toString());
+            error("Failed to start command: " + process.toString());
             process.printStderr();
             process = null;
             return null;
@@ -188,7 +189,7 @@ public class Transcode {
             RunnableInputDrainer des = new RunnableInputDrainer(p2.getErrorStream());
             new Thread(des).start();
          } catch (IOException e) {
-            log.error("hls - " + e.getMessage());
+            error("hls - " + e.getMessage());
             return null;
          }
          Piper pipe = new Piper(
@@ -202,7 +203,7 @@ public class Transcode {
          if ( process.run(command) ) {
             log.print(process.toString());
          } else {
-            log.error("Failed to start command: " + process.toString());
+            error("Failed to start command: " + process.toString());
             process.printStderr();
             process = null;
             return null;
@@ -215,15 +216,19 @@ public class Transcode {
          // Wait for segmentFile to get created
          int counter = 0; int max = config.httpserver_ffmpeg_wait;
          while( file.size(segmentFile) == 0 && counter < max ) {
+            if (process.exitStatus() != -1) {
+               error("ffmpeg transcode stopped");
+               return null;
+            }
             Thread.sleep(1000);
             counter++;
          }
          if (counter >= max) {
-            log.error("Segment file not being created, assuming ffmpeg error");
+            error("Segment file not being created, assuming ffmpeg error");
             return null;
          }
       } catch (InterruptedException e) {
-         log.error("Transcode sleep - " + e.getMessage());
+         error("Transcode sleep - " + e.getMessage());
       }
       return returnFile;
    }
@@ -244,7 +249,7 @@ public class Transcode {
          ofp.write(contents + "\r\n");
          ofp.close();
       } catch (IOException e) {
-         log.error("createTextFile - " + e.getMessage());
+         error("createTextFile - " + e.getMessage());
       }
 
    }
@@ -318,5 +323,18 @@ public class Transcode {
    // Extending methods should override appropriately
    public String getTivoName() {
       return null;
+   }
+   
+   public void error(String message) {
+      log.error(message);
+      errors.add(message);
+   }
+   
+   public String getErrors() {
+      String message = "";
+      for (String s : errors) {
+         message += s + "\n";
+      }
+      return message;
    }
 }
