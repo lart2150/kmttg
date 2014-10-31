@@ -443,10 +443,13 @@ public class kmttgServer extends HTTPServer {
                      message += fileName;
                   resp.send(200, message);
                } else {
-                  // Streaming mode => initiate file download request
-                  req.setPath(returnFile);
-                  //resp.sendHeaders(200, -1, -1, null, "application/x-mpegurl", null);
-                  serve(req, resp);
+                  // Streaming mode => response is a link tag for Play start
+                  String message = "Play ";
+                  if (name != null)
+                     message += name;
+                  if (fileName != null)
+                     message += fileName;
+                  resp.send(200, "<a href=\"" + returnFile + "\">" + message + "</a>");
                }
             }
          } catch (Exception e) {
