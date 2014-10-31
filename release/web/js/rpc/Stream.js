@@ -4,12 +4,25 @@ MONITOR_INTERVAL = 3; // Seconds between monitor updates
 
 $(document).ready(function() {
    // Stream.html document elements
+   MAXRATE = document.getElementById("MAXRATE");
    TIVO = document.getElementById("TIVO");
    BROWSE = document.getElementById("BROWSE");
    TYPE = document.getElementById("TYPE");
    NPLTABLE = document.getElementById("NPLTABLE");
    $("#TYPE").change(function () {FileBrowser();});
    NUMCOLS = 6;
+   
+   var rates = [
+      "500", "1000k", "1500k", "2000k", "2500k", "3000k",
+      "3500k", "4000k"
+   ];
+   $.each(rates, function (i,rate) {
+      var option = document.createElement("option");
+      option.text = rate;
+      option.value = rate;
+      MAXRATE.appendChild(option);
+   });
+   $('#MAXRATE').val("2000k");
 
    // Retrieve rpc enabled TiVos
    $.getJSON("/getRpcTivos", function(data) {
@@ -218,12 +231,13 @@ function loadFileData(data, baseUrl) {
 }
 
 function TiVoDownload(show_url, name, tivo, duration) {
+   var maxrate = MAXRATE.value;
    var format = $('input[name="type"]:checked').val();
    url = "/transcode?format=" + format + "&download=1";
    url += "&url=" + show_url + "&name=" + name + "&tivo=" + tivo;
-   url += "&duration=" + duration;
+   url += "&duration=" + duration + "&maxrate=" + maxrate;
    $.get(url, function(response) {
-      if (! response.search(".m3u8")) {
+      if (response.indexOf("href=") == -1) {
          showDialog("TiVo download",response,'warning',2);
       }
    })
@@ -233,11 +247,12 @@ function TiVoDownload(show_url, name, tivo, duration) {
 }
 
 function FileDownload(file) {
+   var maxrate = MAXRATE.value;
    var format = $('input[name="type"]:checked').val();
    url = "/transcode?format=" + format + "&download=1";
-   url += "&file=" + file;
+   url += "&file=" + file + "&maxrate=" + maxrate;
    $.get(url, function(response) {
-      if (! response.search(".m3u8")) {
+      if (response.indexOf("href=") == -1) {
          showDialog("File Download",response,'warning', 2);
       }
    })
