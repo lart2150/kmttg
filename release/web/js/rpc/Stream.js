@@ -223,7 +223,9 @@ function TiVoDownload(show_url, name, tivo, duration) {
    url += "&url=" + show_url + "&name=" + name + "&tivo=" + tivo;
    url += "&duration=" + duration;
    $.get(url, function(response) {
-      showDialog("TiVo download",response,'warning',2);
+      if (! response.search(".m3u8")) {
+         showDialog("TiVo download",response,'warning',2);
+      }
    })
    .error(function(xhr, status) {
       handleError("download", xhr, status);
@@ -235,7 +237,9 @@ function FileDownload(file) {
    url = "/transcode?format=" + format + "&download=1";
    url += "&file=" + file;
    $.get(url, function(response) {
-      showDialog("File Download",response,'warning', 2);
+      if (! response.search(".m3u8")) {
+         showDialog("File Download",response,'warning', 2);
+      }
    })
    .error(function(xhr, status) {
       handleError("download", xhr, status);
