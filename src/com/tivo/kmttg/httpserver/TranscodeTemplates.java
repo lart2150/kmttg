@@ -11,7 +11,7 @@ public class TranscodeTemplates {
       args += " -flags -global_header -force_key_frames expr:gte(t,n_forced*3) -sn";
       args += " -acodec aac -strict -2 -cutoff 15000 -ac 2 -ab 217k";
       args += " -segment_format mpegts -f segment -segment_time 10 -segment_start_number 0";
-      args += " -segment_list_entry_prefix " + urlBase + " -segment_list_flags +live -segment_list";
+      args += " -segment_list_entry_prefix " + urlBase + " -segment_list_flags +cache -segment_list";
       return args;
    }
    
