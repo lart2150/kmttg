@@ -159,7 +159,7 @@ function loadNplData(data, tivo) {
                if (json.hasOwnProperty("duration"))
                   duration = json.duration;
                show += '<br><a href="' + show_url;
-               show += '" target="__blank">[stream]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+               show += '" target="__blank">[download & play]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
                show += '<a href="javascript:;" onclick="TiVoDownload(\'';
                show += encodeURIComponent(json.__url__) + '\'';
                show += ', \'' + encodeURIComponent(show_name + " (" + date + ")") + '\', \'';
@@ -209,7 +209,7 @@ function loadFileData(data, baseUrl) {
       if (file != "NONE") {
          var url = baseUrl + encodeURIComponent(file);
          var link = file;
-         link += '<br><a href="' + url + '" target="__blank">[stream]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+         link += '<br><a href="' + url + '" target="__blank">[download & play]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
          link += '<a href="javascript:;" onclick="FileDownload(\'' + encodeURIComponent(file) + '\')">[download]</a>';         
          var row = $('#FILETABLE').DataTable().row.add([link]);
          row.draw();
