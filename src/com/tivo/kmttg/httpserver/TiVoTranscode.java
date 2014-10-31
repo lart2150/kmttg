@@ -27,7 +27,7 @@ public class TiVoTranscode extends Transcode {
    public String hls() {
       format = "hls";
       String urlBase = config.httpserver_cache_relative;
-      String args = TranscodeTemplates.hls(urlBase);
+      String args = TranscodeTemplates.hls(urlBase, maxrate);
       base = config.httpserver_cache;
       if (! file.isDir(base))
          new File(base).mkdirs();

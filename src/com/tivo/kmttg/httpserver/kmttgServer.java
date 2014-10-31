@@ -305,6 +305,10 @@ public class kmttgServer extends HTTPServer {
    public void handleTranscode(Request req, Response resp) throws IOException {
       Map<String,String> params = req.getParams();
       
+      String maxrate = null;
+      if (params.containsKey("maxrate"))
+         maxrate = params.get("maxrate");
+      
       if (params.containsKey("killall")) {
          int num = killTranscodes();
          resp.send(200, "Killed " + num + " jobs");
@@ -365,6 +369,8 @@ public class kmttgServer extends HTTPServer {
             String format = string.urlDecode(params.get("format"));
             length = new File(fileName).length();
             tc = new Transcode(fileName);
+            if (maxrate != null)
+               tc.maxrate = maxrate;
             if (tc.getErrors().length() > 0) {
                resp.sendError(500, tc.getErrors());
                return;
@@ -399,6 +405,8 @@ public class kmttgServer extends HTTPServer {
             String format = string.urlDecode(params.get("format"));
             String name = string.urlDecode(params.get("name"));
             tc = new TiVoTranscode(url, name, tivo);
+            if (maxrate != null)
+               tc.maxrate = maxrate;
             if (tc.getErrors().length() > 0) {
                resp.sendError(500, tc.getErrors());
                return;

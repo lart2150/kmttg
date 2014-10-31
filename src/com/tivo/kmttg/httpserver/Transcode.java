@@ -32,6 +32,7 @@ public class Transcode {
    String prefix = "";
    int count = 0;
    String format = "";
+   String maxrate = "3000k";
    Stack<String> errors = new Stack<String>();
    
    public Transcode(String inputFile) {
@@ -133,7 +134,7 @@ public class Transcode {
          isTivoFile = true;
       format = "hls";
       String urlBase = config.httpserver_cache_relative;
-      String args = TranscodeTemplates.hls(urlBase);
+      String args = TranscodeTemplates.hls(urlBase, maxrate);
       segmentFile = base + File.separator + prefix + ".m3u8";
       String textFile = segmentFile + ".txt";
       String segments = base + File.separator + prefix + "-%05d.ts";
