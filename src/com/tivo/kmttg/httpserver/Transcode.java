@@ -218,6 +218,10 @@ public class Transcode {
             Thread.sleep(1000);
             counter++;
          }
+         if (counter >= 10) {
+            log.error("Segment file not being created, assuming ffmpeg error");
+            return null;
+         }
       } catch (InterruptedException e) {
          log.error("Transcode sleep - " + e.getMessage());
       }
