@@ -109,7 +109,6 @@ function MyShows(offset) {
    }
    showNplTable();
    var format = $('input[name="type"]:checked').val();
-   var baseUrl = "/transcode?format=" + format + "&url=";
    var tivo = encodeURIComponent(TIVO.value);
    var url = "/getMyShows?limit=" + limit + "&tivo=" + tivo + "&offset=" + offset;
    $.getJSON(url, function(data) {
@@ -132,6 +131,7 @@ function MyShows(offset) {
 }
 
 function loadNplData(data, tivo) {
+   var maxrate = MAXRATE.value;
    var format = $('input[name="type"]:checked').val();
    var baseUrl = "/transcode?format=" + format + "&url=";
    $.each(data, function (i, entry) {
@@ -166,6 +166,7 @@ function loadNplData(data, tivo) {
             var show_url = baseUrl + encodeURIComponent(json.__url__);
             show_url += "&name=" + encodeURIComponent(show_name + " (" + date + ")");
             show_url += "&tivo=" + encodeURIComponent(tivo);
+            show_url += "&maxrate=" + maxrate;
             var show = show_name;
             if (candownload) {
                var duration = 0;
