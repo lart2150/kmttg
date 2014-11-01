@@ -156,13 +156,13 @@ public class Transcode {
          if (file.isFile(config.mediainfo)) {
             Hashtable<String,String> info = mediainfo.getVideoInfo(inputFile);
             if (info != null && ! info.get("container").equals("mpeg")) {
-               log.warn("Attempt to transcode non PS .TiVo file aborted: " + inputFile);
+               error("Attempt to transcode non PS .TiVo file aborted: " + inputFile);
                return null;
             }
          } else if (file.isFile(config.ffmpeg)) {
             Hashtable<String,String> info = ffmpeg.getVideoInfo(inputFile);
             if (info != null && ! info.get("container").equals("mpeg")) {
-               log.warn("Attempt to transcode non PS .TiVo file aborted: " + inputFile);
+               error("Attempt to transcode non PS .TiVo file aborted: " + inputFile);
                return null;
             }            
          }
