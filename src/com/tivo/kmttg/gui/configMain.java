@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
+import com.tivo.kmttg.httpserver.kmttgServer;
 import com.tivo.kmttg.main.beacon;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -1139,10 +1140,18 @@ public class configMain {
          config.DsdDecrypt = 0;
       
       // httpserver_enable
-      if (httpserver_enable.isSelected())
+      if (httpserver_enable.isSelected()) {
          config.httpserver_enable = 1;
-      else
+         if (config.httpserver == null)
+            new kmttgServer();
+      }
+      else {
          config.httpserver_enable = 0;
+         if (config.httpserver != null) {
+            config.httpserver.stop();
+            config.httpserver = null;
+         }
+      }
       
       // VrdEncode
       if (VrdEncode.isSelected() && config.VRD == 1)
