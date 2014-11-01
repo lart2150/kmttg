@@ -2101,7 +2101,11 @@ public class remotegui {
                               uri = "x-tivo:flash:uuid:B8CEA236-0C3D-41DA-9711-ED220480778E";
                            if (name.equals("YouTube (html)"))
                               uri = "x-tivo:web:https://www.youtube.com/tv";
-                           if (name.equals("Amazon"))
+                           if (name.equals("Amazon (html)"))
+                              uri = "x-tivo:web:https://atv-ext.amazon.com/cdp/resources/app_host/index.html?deviceTypeID=A3UXGKN0EORVOF";
+                           if (name.equals("Vudu (html)"))
+                              uri = "x-tivo:vudu:vudu";
+                           if (name.equals("Amazon (hme)"))
                               uri = "x-tivo:hme:uuid:35FE011C-3850-2228-FBC5-1B9EDBBE5863";
                            if (name.equals("Hulu Plus"))
                               uri = "x-tivo:flash:uuid:802897EB-D16B-40C8-AEEF-0CCADB480559";
@@ -2896,7 +2900,10 @@ public class remotegui {
       backgroundRun b = new backgroundRun();
       b.execute();
       */
-      String[] hmeNames = {"Netflix (html)", "YouTube (html)", "Amazon", "Hulu Plus", "AOL On", "Launchpad"};
+      String[] hmeNames = {
+         "Netflix (html)", "YouTube (html)", "Vudu (html)",
+         "Amazon (hme)", "Hulu Plus", "AOL On", "Launchpad"
+      };
       hme_rc.removeAllItems();
       for (int i=0; i<hmeNames.length; ++i)
          hme_rc.addItem(hmeNames[i]);
