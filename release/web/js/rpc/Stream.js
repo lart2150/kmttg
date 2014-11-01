@@ -165,6 +165,10 @@ function loadNplData(data, tivo) {
             if (json.hasOwnProperty("startTime")) {
                date = getTime(json.startTime);
             }
+            
+            var duration = 0;
+            if (json.hasOwnProperty("duration"))
+               duration = json.duration;
          
             var show_name = "";
             if (json.hasOwnProperty("title")) {
@@ -176,12 +180,10 @@ function loadNplData(data, tivo) {
             var show_url = baseUrl + encodeURIComponent(json.__url__);
             show_url += "&name=" + encodeURIComponent(show_name + " (" + date + ")");
             show_url += "&tivo=" + encodeURIComponent(tivo);
+            show_url += "&duration=" + duration;
             show_url += "&maxrate=" + maxrate;
             var show = show_name;
             if (candownload) {
-               var duration = 0;
-               if (json.hasOwnProperty("duration"))
-                  duration = json.duration;
                show += '<br><a href="' + show_url;
                show += '" target="__blank">[download & play]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
                show += '<a href="javascript:;" onclick="TiVoDownload(\'';
