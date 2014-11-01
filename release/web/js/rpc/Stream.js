@@ -324,8 +324,9 @@ function FileBrowser() {
    clearFileTable();
    hideTables();
    showFileTable();
+   var maxrate = MAXRATE.value;
    var format = $('input[name="type"]:checked').val();
-   var baseUrl = "/transcode?format=" + format + "&file=";
+   var baseUrl = "/transcode?format=" + format + "&maxrate=" + maxrate + "&file=";
    $.getJSON("/getVideoFiles", function(data) {
       loadFileData(data, baseUrl);
    })
