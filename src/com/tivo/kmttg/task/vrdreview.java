@@ -1,12 +1,19 @@
 package com.tivo.kmttg.task;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Stack;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -212,15 +219,25 @@ public class vrdreview implements Serializable {
    }
    
    // Create a VRD vprj file with no file cuts - just source video file
+   // NOTE: vprj file is xml, so use official xml writer to get proper character escapes
    private Boolean createBasicVprjFile(String vprjFile, String inputFile) {
       try {
-         BufferedWriter ofp = new BufferedWriter(new FileWriter(vprjFile));
-         ofp.write("<VideoReDoProject Version=\"3\">\n");
-         ofp.write("<Filename>" + inputFile + "</Filename>\n");
-         ofp.write("</VideoReDoProject>\n");
-         ofp.close();
+         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+         Document doc = docBuilder.newDocument();
+         Element rootElement = doc.createElement("VideoReDoProject");
+         rootElement.setAttribute("Version", "3");
+         doc.appendChild(rootElement);
+         Element fileElement = doc.createElement("Filename");
+         fileElement.insertBefore(doc.createTextNode(inputFile), fileElement.getLastChild());
+         rootElement.appendChild(fileElement);
+         TransformerFactory tFactory = TransformerFactory.newInstance();
+         Transformer transformer = tFactory.newTransformer();
+         DOMSource source = new DOMSource(doc);
+         StreamResult result = new StreamResult(new File(vprjFile));
+         transformer.transform(source, result);
       }
-      catch (IOException ex) {
+      catch (Exception ex) {
          log.error("Failed to write to file: " + vprjFile);
          log.error(ex.toString());
          return false;
