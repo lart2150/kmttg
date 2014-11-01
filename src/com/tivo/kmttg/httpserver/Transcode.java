@@ -11,6 +11,7 @@ import java.util.Hashtable;
 import java.util.Stack;
 
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.kmttg;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
@@ -301,7 +302,8 @@ public class Transcode {
    
    public void kill() {
       if (process != null) {
-         log.warn("Killing transcode: " + process.toString());
+         if (! kmttg._shuttingDown)
+            log.warn("Killing transcode: " + process.toString());
          process.kill();
       }
       if (p1 != null)
