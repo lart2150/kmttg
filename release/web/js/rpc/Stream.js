@@ -1,6 +1,6 @@
 // This used for periodic update function for running jobs
 RUNNING = 0;
-MONITOR_INTERVAL = 3; // Seconds between monitor updates
+MONITOR_INTERVAL = 5; // Seconds between monitor updates
 
 $(document).ready(function() {
    // Stream.html document elements
@@ -13,8 +13,8 @@ $(document).ready(function() {
    NUMCOLS = 6;
    
    var rates = [
-      "500", "1000k", "1500k", "2000k", "2500k", "3000k",
-      "3500k", "4000k"
+      "500k", "1000k", "1500k", "2000k", "2500k", "3000k",
+      "3500k", "4000k", "4500k", "5000k"
    ];
    $.each(rates, function (i,rate) {
       var option = document.createElement("option");
