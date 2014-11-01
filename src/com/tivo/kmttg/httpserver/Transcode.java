@@ -218,7 +218,7 @@ public class Transcode {
          // Wait for segmentFile to get created
          int counter = 0; int max = config.httpserver_ffmpeg_wait;
          while( file.size(segmentFile) == 0 && counter < max ) {
-            if (process.exitStatus() != -1) {
+            if (process != null && process.exitStatus() != -1) {
                error("ffmpeg transcode stopped");
                log.error(process.getStderr());
                errors.add(process.getStderrLast());
