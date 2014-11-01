@@ -219,6 +219,8 @@ public class Transcode {
          while( file.size(segmentFile) == 0 && counter < max ) {
             if (process.exitStatus() != -1) {
                error("ffmpeg transcode stopped");
+               log.error(process.getStderr());
+               errors.add(process.getStderrLast());
                return null;
             }
             Thread.sleep(1000);

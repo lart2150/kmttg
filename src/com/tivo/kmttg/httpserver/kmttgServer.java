@@ -371,10 +371,6 @@ public class kmttgServer extends HTTPServer {
             tc = new Transcode(fileName);
             if (maxrate != null)
                tc.maxrate = maxrate;
-            if (tc.getErrors().length() > 0) {
-               resp.sendError(500, tc.getErrors());
-               return;
-            }
             tc.duration = -1; // Setting to -1 to deal with it a little later
             addTranscode(tc);
             if (format.equals("webm"))
@@ -383,6 +379,10 @@ public class kmttgServer extends HTTPServer {
                returnFile = tc.hls();
             else {
                resp.sendError(500, "Unsupported transcode format: " + format);
+               return;
+            }
+            if (tc.getErrors().length() > 0) {
+               resp.sendError(500, tc.getErrors());
                return;
             }
          }
@@ -407,10 +407,6 @@ public class kmttgServer extends HTTPServer {
             tc = new TiVoTranscode(url, name, tivo);
             if (maxrate != null)
                tc.maxrate = maxrate;
-            if (tc.getErrors().length() > 0) {
-               resp.sendError(500, tc.getErrors());
-               return;
-            }
             if (params.containsKey("duration")) {
                tc.duration = Integer.parseInt(params.get("duration"));
             }
@@ -419,6 +415,10 @@ public class kmttgServer extends HTTPServer {
                returnFile = tc.hls();
             else {
                resp.sendError(500, "Unsupported transcode format: " + format);
+               return;
+            }
+            if (tc.getErrors().length() > 0) {
+               resp.sendError(500, tc.getErrors());
                return;
             }
          }
