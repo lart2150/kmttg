@@ -23,6 +23,7 @@ $(document).ready(function() {
       MAXRATE.appendChild(option);
    });
    $('#MAXRATE').val("2000k");
+   $('#MAXRATE').change(function() { rateChanged(); });
 
    // Retrieve rpc enabled TiVos
    $.getJSON("/getRpcTivos", function(data) {
@@ -81,6 +82,15 @@ $(document).ready(function() {
    // Add event listener for opening and closing row details
    $('#NPLTABLE tbody').on('click', 'td.details-control', nplDetailsClicked);
 });
+
+// Replace all maxrate references in links with currently selected rate
+function rateChanged() {
+   var maxrate = MAXRATE.value;
+   var re = /maxrate=[0-9]+k/;
+   $('a').each( function(i, link) {
+      link.href = link.href.replace(re, "maxrate=" + maxrate);
+   });
+}
 
 function getNumRows(table) {
    return table.DataTable().column(0).data().length;
