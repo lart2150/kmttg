@@ -15,6 +15,8 @@ td.details-control {
 tr.shown td.details-control {
    background: url('images/details_close.png') no-repeat center center;
 }
+ #content { background:#eee; border:1px solid #666; height:20px; left:0; position:fixed; width:100%; top:0; z-index:10;}
+ #TABLE_DIV { margin:0 auto; overflow:auto; padding:65px 0; }
 </style>
  <title>Season Passes</title>
 </head>
@@ -31,13 +33,14 @@ tr.shown td.details-control {
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
  <button type="button" onclick="Up()">Move Up</button>
  <button type="button" onclick="Down()">Move Down</button>
-</div>
  <div id="LOAD" class="LOAD" style="display: none">
    <button type="button" onclick="CancelSelected()">CANCEL</button>
    <button type="button" onclick="LoadSelected()">Load file:</button>
    <select id="SELECT" class="SELECT">
    </select>
  </div>
+</div>
+ <div id="TABLE_DIV">
  <table id="TABLE" class="display">
  <thead>
   <tr><th></th><th>PRIORITY</th><th>SHOW</th><th>CHANNEL</th><th>RECORD</th><th>KEEP</th><th>NUM</th><th>START</th><th>END</th></tr>
@@ -45,6 +48,7 @@ tr.shown td.details-control {
  <tbody>
  </tbody>
  </table>
+ </div>
  <script type="text/javascript" src="js/jquery-1.11.1.js"></script>
  <script type="text/javascript" src="DataTables-1.10.3/media/js/jquery.dataTables.js"></script>
  <script type="text/javascript" src="DataTables-1.10.3/extensions/TableTools/js/dataTables.tableTools.js"></script>
