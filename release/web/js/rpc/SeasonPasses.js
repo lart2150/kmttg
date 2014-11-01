@@ -208,7 +208,7 @@ function Delete() {
 function Save() {
    var url = "/rpc?operation=SPSave&tivo=" + encodeURIComponent(TIVO.value);
    $.get(url, function(data) {
-      showDialog("SP Save",data,'warning');
+      showDialog("SP Save",data,'warning',2);
    })
    .error(function(xhr, status) {
       handleError("SPSave", xhr, status);
