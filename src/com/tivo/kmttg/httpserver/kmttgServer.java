@@ -88,9 +88,15 @@ public class kmttgServer extends HTTPServer {
          return;
       }
       
-      // Get list of video files from a tivo
+      // Get todo list from a tivo
       if (path.equals("/getToDo")) {
          handleToDo(req, resp);
+         return;
+      }
+      
+      // reboot a tivo
+      if (path.equals("/reboot")) {
+         handleReboot(req, resp);
          return;
       }
       
@@ -288,6 +294,23 @@ public class kmttgServer extends HTTPServer {
             resp.send(200, a.toString());
          } else {
             resp.sendError(500, "Failed to get todo from tivo: " + tivo);
+            return;
+         }
+      } else {
+         resp.sendError(400, "Request missing tivo parameter");
+      }
+   }
+   
+   public void handleReboot(Request req, Response resp) throws IOException {
+      Map<String,String> params = req.getParams();
+      if (params.containsKey("tivo")) {
+         String tivo = string.urlDecode(params.get("tivo"));
+         Remote r = new Remote(tivo);
+         if (r.success) {
+            r.reboot(tivo);
+            resp.send(200, "Reboot sequence sent to TiVo: " + tivo);
+         } else {
+            resp.sendError(500, "Failed to send reboot sequence to TiVo: " + tivo);
             return;
          }
       } else {
