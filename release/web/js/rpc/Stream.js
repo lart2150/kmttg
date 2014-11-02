@@ -232,11 +232,11 @@ function TiVoDownload(show_url, name, tivo, duration) {
    url += "&duration=" + duration + "&maxrate=" + maxrate;
    $.get(url, function(response) {
       if (response.indexOf("href=") == -1) {
-         showDialog("TiVo download",response,'warning',2);
+         showDialog("TiVo transcode",response,'warning',2);
       }
    })
    .error(function(xhr, status) {
-      util_handleError("download", xhr, status);
+      util_handleError("transcode", xhr, status);
    });
 }
 
@@ -247,11 +247,11 @@ function FileDownload(file) {
    url += "&file=" + file + "&maxrate=" + maxrate;
    $.get(url, function(response) {
       if (response.indexOf("href=") == -1) {
-         showDialog("File Download",response,'warning', 2);
+         showDialog("File transcode",response,'warning', 2);
       }
    })
    .error(function(xhr, status) {
-      util_handleError("download", xhr, status);
+      util_handleError("transcode", xhr, status);
    });
 }
 
