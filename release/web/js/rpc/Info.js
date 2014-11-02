@@ -107,3 +107,27 @@ function TunerInfo(data) {
    // Cache the information
    INFO[TIVO.value] = INFO.innerHTML;
 }
+
+// Network Connect button callback
+function NetworkConnect() {
+   var url = "/rpc?operation=PhoneHome&tivo=" + encodeURIComponent(TIVO.value);
+   $.get(url, function(response) {
+      showDialog("Network Connect",response,'warning',2);
+   })
+   .error(function(xhr, status) {
+      util_handleError("NetworkConnect", xhr, status);
+   });
+}
+
+// Reboot button callback
+function Reboot() {
+   if (confirm('Reboot ' + TIVO.value + '?')) {
+      var url = "/reboot?tivo=" + encodeURIComponent(TIVO.value);
+      $.get(url, function(response) {
+         showDialog("Reboot",response,'warning',2);
+      })
+      .error(function(xhr, status) {
+         util_handleError("Reboot", xhr, status);
+      });
+   }
+}
