@@ -26,7 +26,7 @@ $(document).ready(function() {
      ordering: false, // turn off column sorting
      autoWidth: true,
      tableTools: {
-       "sRowSelect": "os",
+       "sRowSelect": "single",
        "aButtons": []
      },
      columns: [
