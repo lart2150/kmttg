@@ -163,20 +163,14 @@ function loadNplData(data, tivo) {
 
             var date = "";
             if (json.hasOwnProperty("startTime")) {
-               date = getTime(json.startTime);
+               date = util_getTime(json.startTime);
             }
             
             var duration = 0;
             if (json.hasOwnProperty("duration"))
                duration = json.duration;
          
-            var show_name = "";
-            if (json.hasOwnProperty("title")) {
-               show_name = json.title;
-            }
-            if (json.hasOwnProperty("subtitle")) {
-               show_name += " - " + json.subtitle;
-            }
+            var show_name = util_getShowName(json);
             var show_url = baseUrl + encodeURIComponent(json.__url__);
             show_url += "&name=" + encodeURIComponent(show_name + " (" + date + ")");
             show_url += "&tivo=" + encodeURIComponent(tivo);
@@ -185,32 +179,19 @@ function loadNplData(data, tivo) {
             var show = show_name;
             if (candownload) {
                show += '<br><a href="' + show_url;
-               show += '" target="__blank">[download & play]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+               show += '" target="__blank">[transcode & play]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
                show += '<a href="javascript:;" onclick="TiVoDownload(\'';
                show += encodeURIComponent(json.__url__) + '\'';
                show += ', \'' + encodeURIComponent(show_name + " (" + date + ")") + '\', \'';
                show += encodeURIComponent(tivo) + '\', \'' + duration;
-               show += '\')">[download]</a>';
+               show += '\')">[transcode]</a>';
             }
 
-            var channel = "";
-            if (json.hasOwnProperty("channel")) {
-               var chan = json.channel;
-               if (chan.hasOwnProperty("callSign")) {
-                  channel = chan.callSign;
-               } else {
-                  if (chan.has("name")) {
-                     channel = chan.name;
-                  }
-               }
-               if(chan.hasOwnProperty("channelNumber")) {
-                  channel += "=" + chan.channelNumber;
-               }
-            }
+            var channel = util_getChannel(json);
 
             var dur = "";
             if (json.hasOwnProperty("duration")) {
-               dur = secsToHM(json.duration);
+               dur = util_secsToHM(json.duration);
             }
 
             var size = "";
@@ -235,8 +216,8 @@ function loadFileData(data, baseUrl) {
       if (file != "NONE") {
          var url = baseUrl + encodeURIComponent(file);
          var link = file;
-         link += '<br><a href="' + url + '" target="__blank">[download & play]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
-         link += '<a href="javascript:;" onclick="FileDownload(\'' + encodeURIComponent(file) + '\')">[download]</a>';         
+         link += '<br><a href="' + url + '" target="__blank">[transcode & play]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+         link += '<a href="javascript:;" onclick="FileDownload(\'' + encodeURIComponent(file) + '\')">[transcode]</a>';         
          var row = $('#FILETABLE').DataTable().row.add([link]);
          row.draw();
       }
@@ -272,26 +253,6 @@ function FileDownload(file) {
    .error(function(xhr, status) {
       handleError("download", xhr, status);
    });
-}
-
-function secsToHM(secs) {
-   var hours = Math.floor(secs/3600);
-   var mins = Math.floor((secs - (hours * 3600))/60);
-   return "%d:%02d".sprintf(hours,mins);
-}
-
-function getTime(startTime) {
-   var week = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
-   var dt = new Date(Date.parse(startTime.replace(/-/g, "/") + " GMT"));
-   var date = "%s %02d/%02d/%02d %02d:%02d".sprintf(
-      week[dt.getUTCDay()],
-      dt.getMonth()+1,
-      dt.getDate(),
-      dt.getFullYear()-2000,
-      dt.getHours(),
-      dt.getMinutes()
-   );
-   return date;
 }
 
 function hideTables() {
@@ -381,14 +342,14 @@ function loadCacheData(data) {
 
          var prefix = "";
          if ( time > 0 )
-            prefix = "[" + secsToHM(time) + "]";
+            prefix = "[" + util_secsToHM(time) + "]";
          if ( json.hasOwnProperty("running") ) {
             running++;
             if (time > 0 && duration > 0) {
                var pct = "%5.1f %%".sprintf(100*time/duration);
                prefix = "(running: " + pct + ")";
             } else if (time > 0) {
-               prefix = "(running: " + secsToHM(time) + ")";
+               prefix = "(running: " + util_secsToHM(time) + ")";
             } else {
                prefix = "(running)";
             }
@@ -396,9 +357,9 @@ function loadCacheData(data) {
          if ( json.hasOwnProperty("partial") ) {
             if ( ! json.hasOwnProperty("running") ) {
                if (time > 0 && duration > 0) {
-                  prefix = "(partial: " + secsToHM(time) + " / " + secsToHM(duration) + ")";
+                  prefix = "(partial: " + util_secsToHM(time) + " / " + util_secsToHM(duration) + ")";
                } else if (time > 0) {
-                  prefix = "(partial: " + secsToHM(time) + ")";
+                  prefix = "(partial: " + util_secsToHM(time) + ")";
                } else {
                   prefix = "(partial)";
                }
@@ -505,7 +466,7 @@ function loadRunningData(data) {
             var pct = "%5.1f %%".sprintf(100*time/duration);
             prefix = "(" + pct + ")";
          } else if (time > 0) {
-            prefix = "(" + secsToHM(time) + ")";
+            prefix = "(" + util_secsToHM(time) + ")";
          }
          if (prefix.length > 0)
             name = prefix + " " + name;
