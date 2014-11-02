@@ -200,7 +200,9 @@ public class kmttgServer extends HTTPServer {
             Remote r = new Remote(tivo);
             if (r.success) {
                JSONObject result = r.Command(operation, json);
-               if (result != null) {
+               if (result == null) {
+                  resp.sendError(500, "operation failed: " + operation);
+               } else {
                   resp.send(200, result.toString());
                }
                r.disconnect();
