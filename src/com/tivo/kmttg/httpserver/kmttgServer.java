@@ -283,10 +283,6 @@ public class kmttgServer extends HTTPServer {
          if (r.success) {
             jobData job = new jobData();
             job.tivoName = tivo;
-            if (params.containsKey("offset"))
-               job.myshows_offset = Integer.parseInt(params.get("offset"));
-            if (params.containsKey("limit"))
-               job.myshows_limit = Integer.parseInt(params.get("limit"));
             JSONArray a = r.ToDo(job);
             r.disconnect();
             resp.send(200, a.toString());
