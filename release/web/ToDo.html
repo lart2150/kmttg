@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <link rel="stylesheet" type="text/css" href="dialog/dialog_box.css">
+ <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/media/css/jquery.dataTables.css">
+ <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/extensions/TableTools/css/dataTables.tableTools.css">
+<style>
+table, th, td {
+    border: 1px solid grey;
+}
+td.details-control {
+   background: url('images/details_open.png') no-repeat center center;
+   cursor: pointer;
+}
+tr.shown td.details-control {
+   background: url('images/details_close.png') no-repeat center center;
+}
+ #content { background:#eee; border:1px solid #666; left:0; position:fixed; width:100%; margin-top:0; z-index:10;}
+ #TABLE_DIV { margin:0 auto; overflow:auto; padding:65px 0; }
+</style>
+ <title>ToDo</title>
+</head>
+<body>
+<div id="content">
+ <label>TiVo:&nbsp;&nbsp;</label><select id="TIVO" class="TIVO"></select>
+ <button type="button" onclick="Refresh()">Refresh</button>
+ <button type="button" onclick="Cancel()">Cancel</button>
+ <div id="MESSAGE"></div>
+</div>
+ <div id="TABLE_DIV">
+ <table id="TABLE" class="display">
+ <thead>
+  <tr><th></th><th>DATE</th><th>SHOW</th><th>CHANNEL</th><th>DUR</th></tr>
+ </thead>
+ <tbody>
+ </tbody>
+ </table>
+ </div>
+ <script type="text/javascript" src="js/jquery-1.11.1.js"></script>
+ <script type="text/javascript" src="DataTables-1.10.3/media/js/jquery.dataTables.js"></script>
+ <script type="text/javascript" src="DataTables-1.10.3/extensions/TableTools/js/dataTables.tableTools.js"></script>
+ <script type="text/javascript" src="js/String.js"></script>
+ <script type="text/javascript" src="js/rpc/util.js"></script>
+ <script type="text/javascript" src="js/rpc/ToDo.js"></script>
+ <script type="text/javascript" src="dialog/dialog_box.js"></script>
+</body>
+</html>
