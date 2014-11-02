@@ -14,7 +14,7 @@ $(document).ready(function() {
       $('.TIVO').change(function() { tivoChanged(); });
    })
    .error(function(xhr, status) {
-      handleError("/getRpcTivos", xhr, status);
+      util_handleError("/getRpcTivos", xhr, status);
    });
 });
 
@@ -24,7 +24,7 @@ function Info() {
    var url = "/rpc?operation=SysInfo&tivo=" + encodeURIComponent(TIVO.value);
    $.getJSON(url, SysInfo)
    .error(function(xhr, status) {
-      handleError("SysInfo", xhr, status);
+      util_handleError("SysInfo", xhr, status);
    });
 }
 
@@ -62,7 +62,7 @@ function SysInfo(data) {
    var url = "/rpc?operation=WhatsOn&tivo=" + encodeURIComponent(TIVO.value);
    $.getJSON(url, WhatsOn)
    .error(function(xhr, status) {
-      handleError("WhatsOn", xhr, status);
+      util_handleError("WhatsOn", xhr, status);
    });
 }
 
@@ -85,7 +85,7 @@ function WhatsOn(data) {
    var url = "/rpc?operation=TunerInfo&tivo=" + encodeURIComponent(TIVO.value);
    $.getJSON(url, TunerInfo)
    .error(function(xhr, status) {
-      handleError("TunerInfo", xhr, status);
+      util_handleError("TunerInfo", xhr, status);
    });
 }
 
@@ -106,13 +106,4 @@ function TunerInfo(data) {
    INFO.innerHTML += "<pre>" + html + "</pre>";
    // Cache the information
    INFO[TIVO.value] = INFO.innerHTML;
-}
-
-function handleError(prefix, xhr, status) {
-   if ( status != "success" ) {
-      var message = xhr;
-      if ( xhr.hasOwnProperty("responseText") )
-         message = xhr.responseText;
-      showDialog(prefix,message,'error');
-   }
 }

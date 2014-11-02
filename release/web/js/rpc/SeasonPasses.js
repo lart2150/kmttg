@@ -89,7 +89,7 @@ $.getJSON("/getRpcTivos", function(data) {
    $('.TIVO').change(function() { tivoChanged(); });
 })
 .error(function(xhr, status) {
-   handleError("/getRpcTivos", xhr, status);
+   util_handleError("/getRpcTivos", xhr, status);
 });
 
 //button callback - RPC call to retrieve SP info for selected TiVo
@@ -98,7 +98,7 @@ function Refresh() {
    var url = "/rpc?operation=SeasonPasses&tivo=" + encodeURIComponent(TIVO.value);
    $.getJSON(url, SeasonPasses)
    .error(function(xhr, status) {
-      handleError("SeasonPasses", xhr, status);
+      util_handleError("SeasonPasses", xhr, status);
    });
 }
 
@@ -197,7 +197,7 @@ function Delete() {
             }
          })
          .error(function(xhr, status) {
-            handleError("Unsubscribe", xhr, status);
+            util_handleError("Unsubscribe", xhr, status);
          });
       }
    });
@@ -211,7 +211,7 @@ function Save() {
       showDialog("SP Save",data,'warning',2);
    })
    .error(function(xhr, status) {
-      handleError("SPSave", xhr, status);
+      util_handleError("SPSave", xhr, status);
    });
 }
 
@@ -230,7 +230,7 @@ function LoadSelected() {
       loadData("Loaded: ", data);
    })
    .error(function(xhr, status) {
-      handleError("SPLoad", xhr, status);
+      util_handleError("SPLoad", xhr, status);
    });
 }
 
@@ -249,7 +249,7 @@ function Load() {
       TABLE.style.display = 'none';
    })
    .error(function(xhr, status) {
-      handleError("SPFiles", xhr, status);
+      util_handleError("SPFiles", xhr, status);
    });
 }
 
@@ -295,7 +295,7 @@ function Copy() {
                      }
                   })
                   .error(function(xhr, status) {
-                     handleError("Seasonpass", xhr, status);
+                     util_handleError("Seasonpass", xhr, status);
                   });
                } else {
                   console.log("NOT COPYING: already exists");
@@ -305,7 +305,7 @@ function Copy() {
       }
    })
    .error(function(xhr, status) {
-      handleError("SeasonPasses", xhr, status);
+      util_handleError("SeasonPasses", xhr, status);
    });
 }
 
@@ -334,7 +334,7 @@ function Reorder() {
             Refresh();
       })
       .error(function(xhr, status) {
-         handleError("Prioritize", xhr, status);
+         util_handleError("Prioritize", xhr, status);
       });
    }
 }
@@ -410,13 +410,4 @@ function Down() {
 
 function clickRow(index) {
    $("#TABLE tbody tr:eq(" + index + ")").click();
-}
-
-function handleError(prefix, xhr, status) {
-   if ( status != "success" ) {
-      var message = xhr;
-      if ( xhr.hasOwnProperty("responseText") )
-         message = xhr.responseText;
-      showDialog(prefix,message,'error');
-   }
 }

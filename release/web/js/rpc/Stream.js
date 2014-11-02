@@ -35,7 +35,7 @@ $(document).ready(function() {
       });
    })
    .error(function(xhr, status) {
-      handleError("/getRpcTivos", xhr, status);
+      util_handleError("/getRpcTivos", xhr, status);
    });
 
    // NPL table
@@ -136,7 +136,7 @@ function MyShows(offset) {
    .error(function(xhr, status) {
       go = 0;
       BROWSE.innerHTML = "";
-      handleError("/getMyShows", xhr, status);
+      util_handleError("/getMyShows", xhr, status);
    });
 }
 
@@ -236,7 +236,7 @@ function TiVoDownload(show_url, name, tivo, duration) {
       }
    })
    .error(function(xhr, status) {
-      handleError("download", xhr, status);
+      util_handleError("download", xhr, status);
    });
 }
 
@@ -251,7 +251,7 @@ function FileDownload(file) {
       }
    })
    .error(function(xhr, status) {
-      handleError("download", xhr, status);
+      util_handleError("download", xhr, status);
    });
 }
 
@@ -304,7 +304,7 @@ function FileBrowser() {
       loadFileData(data, baseUrl);
    })
    .error(function(xhr, status) {
-      handleError("/getVideoFiles", xhr, status);
+      util_handleError("/getVideoFiles", xhr, status);
    });
 }
 
@@ -319,7 +319,7 @@ function GetCached(from_monitor) {
       loadCacheData(data);
    })
    .error(function(xhr, status) {
-      handleError("/transcode?getCached", xhr, status);
+      util_handleError("/transcode?getCached", xhr, status);
    });
 }
 
@@ -405,7 +405,7 @@ function RemoveCached(link_url) {
       showDialog("Remove cached",data,'warning',2);
    })
    .error(function(xhr, status) {
-      handleError("removeCached", xhr, status);
+      util_handleError("removeCached", xhr, status);
    });
 }
 
@@ -415,7 +415,7 @@ function KillAll() {
       showDialog("Kill all",data,'warning',2);
    })
    .error(function(xhr, status) {
-      handleError("killall", xhr, status);
+      util_handleError("killall", xhr, status);
    });
 }
 
@@ -426,7 +426,7 @@ function Kill(job) {
       showDialog("Kill",data,'warning',2);
    })
    .error(function(xhr, status) {
-      handleError("kill", xhr, status);
+      util_handleError("kill", xhr, status);
    });
 }
 
@@ -440,7 +440,7 @@ function Running(from_monitor) {
       loadRunningData(data);
    })
    .error(function(xhr, status) {
-      handleError("running", xhr, status);
+      util_handleError("running", xhr, status);
    });
 }
 
@@ -544,14 +544,4 @@ function nplDetailsClicked() {
 // Currently this displays whole json contents
 function detailsFormat(d) {
    return '<pre>' + JSON.stringify(d[NUMCOLS], null, 3) + '</pre>';
-}
-
-function handleError(prefix, xhr, status) {
-   if ( status != "success" ) {
-      var error = "<h1>ERROR (" + prefix + "):</h1>";
-      var message = xhr;
-      if ( xhr.hasOwnProperty("responseText") )
-         message = xhr.responseText;
-      showDialog(prefix,message,'error');
-   }
 }

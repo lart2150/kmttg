@@ -15,7 +15,7 @@ $(document).ready(function() {
       $('.TIVO').change(function() { tivoChanged(); });
    })
    .error(function(xhr, status) {
-      handleError("/getRpcTivos", xhr, status);
+      util_handleError("/getRpcTivos", xhr, status);
    });
 
    // NOTE: column 0 is a special column reserved for display
@@ -98,7 +98,7 @@ function Refresh() {
    .error(function(xhr, status) {
       go = 0;
       MESSAGE.innerHTML = "";
-      handleError("ToDo", xhr, status);
+      util_handleError("ToDo", xhr, status);
    });
 }
 
@@ -157,7 +157,7 @@ function Cancel() {
             }
          })
          .error(function(xhr, status) {
-            handleError("Cancel", xhr, status);
+            util_handleError("Cancel", xhr, status);
          });
       }
    });
@@ -179,13 +179,4 @@ function loadTable() {
    $.each(rows, function(i, row) {
       table.row.add(row).draw();
    });
-}
-
-function handleError(prefix, xhr, status) {
-   if ( status != "success" ) {
-      var message = xhr;
-      if ( xhr.hasOwnProperty("responseText") )
-         message = xhr.responseText;
-      showDialog(prefix,message,'error');
-   }
 }

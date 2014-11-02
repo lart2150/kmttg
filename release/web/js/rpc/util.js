@@ -68,3 +68,12 @@ function util_secsToHM(secs) {
    var mins = Math.floor((secs - (hours * 3600))/60);
    return "%d:%02d".sprintf(hours,mins);
 }
+
+function util_handleError(prefix, xhr, status) {
+   if ( status != "success" ) {
+      var message = xhr;
+      if ( xhr.hasOwnProperty("responseText") )
+         message = xhr.responseText;
+      showDialog(prefix,message,'error');
+   }
+}

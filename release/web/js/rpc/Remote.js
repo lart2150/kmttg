@@ -61,7 +61,7 @@ $(document).ready(function() {
       });
    })
    .error(function(xhr, status) {
-      handleError("/getRpcTivos", xhr, status);
+      util_handleError("/getRpcTivos", xhr, status);
    });
 });
 
@@ -74,7 +74,7 @@ function buttonPress(button) {
    url += "&json=" + encodeURIComponent(json);
    $.get(url)
    .error(function(xhr, status) {
-      handleError("keyEventSend", xhr, status);
+      util_handleError("keyEventSend", xhr, status);
    });
 }
 
@@ -86,7 +86,7 @@ function launch() {
    url += "&json=" + encodeURIComponent(json);
    $.get(url)
    .error(function(xhr, status) {
-      handleError("Navigate", xhr, status);
+      util_handleError("Navigate", xhr, status);
    });
 }
 
@@ -97,7 +97,7 @@ function sps() {
    url += "&sequence=" + encodeURIComponent(sequence);
    $.get(url)
    .error(function(xhr, status) {
-      handleError("keyEventMacro", xhr, status);
+      util_handleError("keyEventMacro", xhr, status);
    });
 }
 
@@ -113,12 +113,12 @@ function skipf() {
          url += "&json=" + encodeURIComponent(json);
          $.get(url)
          .error(function(xhr, status) {
-            handleError("Jump", xhr, status);
+            util_handleError("Jump", xhr, status);
          });
       }
    })
    .error(function(xhr, status) {
-      handleError("Position", xhr, status);
+      util_handleError("Position", xhr, status);
    });
 }
 
@@ -136,12 +136,12 @@ function skipb() {
          url += "&json=" + encodeURIComponent(json);
          $.get(url)
          .error(function(xhr, status) {
-            handleError("Jump", xhr, status);
+            util_handleError("Jump", xhr, status);
          });
       }
    })
    .error(function(xhr, status) {
-      handleError("Position", xhr, status);
+      util_handleError("Position", xhr, status);
    });
 }
 
@@ -152,19 +152,10 @@ function skipm() {
    url += "&json=" + encodeURIComponent(json);
    $.get(url)
    .error(function(xhr, status) {
-      handleError("Jump", xhr, status);
+      util_handleError("Jump", xhr, status);
    });
 }
 
 function tivoChanged() {
    console.log("tivoChanged");
-}
-
-function handleError(prefix, xhr, status) {
-   if ( status != "success" ) {
-      var message = xhr;
-      if ( xhr.hasOwnProperty("responseText") )
-         message = xhr.responseText;
-      showDialog(prefix,message,'error');
-   }
 }
