@@ -88,6 +88,12 @@ public class kmttgServer extends HTTPServer {
          return;
       }
       
+      // Get list of video files from a tivo
+      if (path.equals("/getToDo")) {
+         handleToDo(req, resp);
+         return;
+      }
+      
       // Initiate and return transcoding video stream
       if (path.equals("/transcode")) {
          handleTranscode(req, resp);
@@ -262,6 +268,30 @@ public class kmttgServer extends HTTPServer {
             resp.send(200, a.toString());
          } else {
             resp.sendError(500, "Failed to get shows from tivo: " + tivo);
+            return;
+         }
+      } else {
+         resp.sendError(400, "Request missing tivo parameter");
+      }
+   }
+   
+   public void handleToDo(Request req, Response resp) throws IOException {
+      Map<String,String> params = req.getParams();
+      if (params.containsKey("tivo")) {
+         String tivo = string.urlDecode(params.get("tivo"));
+         Remote r = new Remote(tivo);
+         if (r.success) {
+            jobData job = new jobData();
+            job.tivoName = tivo;
+            if (params.containsKey("offset"))
+               job.myshows_offset = Integer.parseInt(params.get("offset"));
+            if (params.containsKey("limit"))
+               job.myshows_limit = Integer.parseInt(params.get("limit"));
+            JSONArray a = r.ToDo(job);
+            r.disconnect();
+            resp.send(200, a.toString());
+         } else {
+            resp.sendError(500, "Failed to get todo from tivo: " + tivo);
             return;
          }
       } else {
