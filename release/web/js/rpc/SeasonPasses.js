@@ -1,8 +1,10 @@
 $(document).ready(function() {
    TIVO = document.getElementById("TIVO");
    TABLE = document.getElementById("TABLE");
+   COPY = document.getElementById("COPY");
    LOAD = document.getElementById("LOAD");
    SELECT = document.getElementById("SELECT");
+   DEST_TIVO = document.getElementById("DEST_TIVO");
    NUMCOLS = 9;
 
    // NOTE: column 0 is a special column reserved for display
@@ -253,44 +255,83 @@ function Load() {
    });
 }
 
-// NOTE: NOT WORKING
-function Copy() {
-   // TODO: Obtain destination TiVo to copy to
-   var tivo = "Elite";
+function CopyCB() {
+   // Clear out DEST_TIVO list
+   DEST_TIVO.options.length = 0;
+   COPY.style.display = 'block';
+   LOAD.style.display = 'none';
    
+   // Set valid DEST_TIVO values
+   var tivos = Array.prototype.slice.call(TIVO.options);
+   $.each(tivos, function(i,option) {
+      if (option.value != TIVO.value) {
+         var opt = document.createElement("option");
+         opt.text = option.value;
+         opt.value = option.value;
+         DEST_TIVO.appendChild(opt);
+      }
+   });
+}
+
+function CancelCopy() {
+   COPY.style.display = 'none';
+}
+
+function Copy() {
+   COPY.style.display = 'none';
+   var tivo = DEST_TIVO.value;
+   var table = $('#TABLE').DataTable();
+   var selected = TableTools.fnGetInstance('TABLE').fnGetSelected();
+   if (selected.length == 0) {
+      showDialog("SP Copy","No rows selected!",'warning',2);
+      return;
+   }   
+   
+   // Obtain SP data of destination TiVo to compare against
    var url = "/rpc?operation=SeasonPasses&tivo=" + encodeURIComponent(tivo);
    $.getJSON(url, function(data) {
       if (data.hasOwnProperty("subscription")) {
          var spdata = data.subscription;
-         var table = $('#TABLE').DataTable();
-         $.each(table.rows('.selected'), function(i, rowNum) {
+         $.each(selected, function(i,r) {
+            var rowNum = r._DT_RowIndex;
             var row = table.row(rowNum);
-            if (! row.data()) {
-               showDialog("SP Copy","No rows selected!",'warning',2);
-               return;
-            }
             var json = row.data()[NUMCOLS];
-
             if (json.subscriptionId) {
-               // Check against existing spdata
-               var exists = 0;
-               $.each(spdata, function(i, sp) {
-                  if (sp.hasOwnProperty("subscriptionId")) {
-                     if (sp.subscriptionId === json.subscriptionId) {
-                        exists = 1;
+               // Check against existing
+               var title = json.title;
+               var channel = "";
+               if (json.hasOwnProperty("channel")) {
+                  var o = json.channel;
+                  if (o.hasOwnProperty("callSign"))
+                     channel = o.callSign;
+               }
+               var schedule = true;
+               $.each(spdata, function(i, e) {
+                  if (title === e.title) {
+                     if (channel.length > 0 && e.hasOwnProperty("idSetSource")) {
+                        var id = e.idSetSource;
+                        if (id.hasOwnProperty("channel")) {
+                           var c = id.channel;
+                           var callSign = "";
+                           if (c.hasOwnProperty("callSign"))
+                              callSign = c.callSign;
+                           if (channel === callSign) {
+                              schedule = false;
+                           }
+                        }
+                     } else {
+                        schedule = false;
                      }
                   }
                });
-               if (exists == 0) {
-                  var url = "/rpc?operation=Seasonpass&tivo=";
-                  url += encodeURIComponent(TIVO.value);
-                  var js = '{"subscriptionId":"' + json.subscriptionId + '"}';
-                  url += "&json=" + encodeURIComponent(js);
+               if (schedule) {
+                  var url = "/rpc?operation=Seasonpass&tivo=" + encodeURIComponent(tivo);
+                  url += "&json=" + encodeURIComponent(JSON.stringify(json));
+                  console.log("Copying " + json.title);
                   $.getJSON(url, function(data) {
-                     //console.log(JSON.stringify(data, null, 3));
-                     if (data.type && data.type == "success")
-                        console.log("SUCCESS");
-                     else {
+                     if (data.subscription) {
+                        showDialog("SP Copy",'Copied SP: "' + json.title + '" to TiVo ' + tivo,'warning',2);
+                     } else {
                         console.log("FAILED: " + JSON.stringify(data, null, 3));
                      }
                   })
@@ -298,7 +339,7 @@ function Copy() {
                      util_handleError("Seasonpass", xhr, status);
                   });
                } else {
-                  console.log("NOT COPYING: already exists");
+                  showDialog("SP Copy",'Not copying existing SP: "' + json.title + '"','warning',2);
                }
             }
          });
@@ -306,7 +347,7 @@ function Copy() {
    })
    .error(function(xhr, status) {
       util_handleError("SeasonPasses", xhr, status);
-   });
+   });   
 }
 
 function Reorder() {

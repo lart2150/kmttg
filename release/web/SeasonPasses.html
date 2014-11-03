@@ -27,17 +27,21 @@ tr.shown td.details-control {
  <button type="button" onclick="Save()">Save</button>
  <!--<button type="button" onclick="Load()">Load...</button>-->
  <button type="button" onclick="Delete()">Delete</button>
- <!--<button type="button" onclick="Copy()">Copy</button>-->
+ <button type="button" onclick="CopyCB()">Copy</button>
  <button type="button" onclick="Reorder()">Re-order</button>
  <!--<button type="button" onclick="Upcoming()">Upcoming</button>-->
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
  <button type="button" onclick="Up()">Move Up</button>
  <button type="button" onclick="Down()">Move Down</button>
+ <div id="COPY" class="COPY" style="display: none">
+   <button type="button" onclick="CancelCopy()">CANCEL</button>
+   <button type="button" onclick="Copy()">Copy to TiVo:</button>
+   <select id="DEST_TIVO" class="DEST_TIVO"></select>
+ </div>
  <div id="LOAD" class="LOAD" style="display: none">
    <button type="button" onclick="CancelSelected()">CANCEL</button>
    <button type="button" onclick="LoadSelected()">Load file:</button>
-   <select id="SELECT" class="SELECT">
-   </select>
+   <select id="SELECT" class="SELECT"></select>
  </div>
 </div>
  <div id="TABLE_DIV">
