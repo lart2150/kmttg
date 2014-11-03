@@ -278,6 +278,7 @@ function CancelCopy() {
 }
 
 function Copy() {
+   var count = 0;
    COPY.style.display = 'none';
    var tivo = DEST_TIVO.value;
    var table = $('#TABLE').DataTable();
@@ -292,6 +293,7 @@ function Copy() {
    $.getJSON(url, function(data) {
       if (data.hasOwnProperty("subscription")) {
          var spdata = data.subscription;
+         var promises = [];
          $.each(selected, function(i,r) {
             var rowNum = r._DT_RowIndex;
             var row = table.row(rowNum);
@@ -328,11 +330,16 @@ function Copy() {
                   var url = "/rpc?operation=Seasonpass&tivo=" + encodeURIComponent(tivo);
                   url += "&json=" + encodeURIComponent(JSON.stringify(json));
                   console.log("Copying " + json.title);
+                  // Create a deferred event
+                  var p = $.Deferred();
+                  promises.push(p);
                   $.getJSON(url, function(data) {
                      if (data.subscription) {
-                        showDialog("SP Copy",'Copied SP: "' + json.title + '" to TiVo ' + tivo,'warning',2);
+                        count++;
+                        p.resolve();
                      } else {
                         console.log("FAILED: " + JSON.stringify(data, null, 3));
+                        p.resolve();
                      }
                   })
                   .error(function(xhr, status) {
@@ -343,11 +350,16 @@ function Copy() {
                }
             }
          });
+         
+         // This only triggered once all deferred events complete
+         $.when.apply($, promises).then( function() {
+            showDialog("SP Copy",'Copied ' + count + ' SP to TiVo ' + tivo,'warning',3);
+         });
       }
    })
    .error(function(xhr, status) {
       util_handleError("SeasonPasses", xhr, status);
-   });   
+   });
 }
 
 function Reorder() {
