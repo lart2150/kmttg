@@ -10,6 +10,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.kmttg;
 
 public class log {
    private static Logger logger = null;
@@ -57,16 +58,22 @@ public class log {
    // Log entries to config.autoLog file
    // Uses logger for 2 file limited size rotation
    private static void logToFile(String type, String s) {
-      if (logger == null) {
-         if ( ! initLogger() )
-            return;
+      if (kmttg._shuttingDown || kmttg._startingUp) {
+         // Don't log if in GUI mode and shutting down or starting up
+         // so as to avoid creating auto.log* files
+         System.out.println(type + ": "+ s);
+      } else {
+         if (logger == null) {
+            if ( ! initLogger() )
+               return;
+         }
+         if (type.equals("print"))
+            logger.info(s);
+         if (type.equals("warn"))
+            logger.warning(s);
+         if (type.equals("error"))
+            logger.severe(s);
       }
-      if (type.equals("print"))
-         logger.info(s);
-      if (type.equals("warn"))
-         logger.warning(s);
-      if (type.equals("error"))
-         logger.severe(s);
    }
    
    public static void print(String s) {
