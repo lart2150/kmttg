@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <link rel="stylesheet" type="text/css" href="dialog/dialog_box.css">
+ <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/media/css/jquery.dataTables.css">
+ <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/extensions/TableTools/css/dataTables.tableTools.css">
+<style>
+table, th, td {
+    border: 1px solid grey;
+}
+ #content { background:#eee; border:1px solid #666; left:0; position:fixed; width:100%; margin-top:0; z-index:10;}
+ #TABLE_DIV { margin:0 auto; overflow:auto; padding:65px 0; }
+</style>
+ <title>Job Monitor</title>
+</head>
+<body>
+<div id="content">
+ <button type="button" onclick="Refresh()">Refresh</button>
+ <button type="button" onclick="Kill()">Kill selected</button>
+</div>
+ <div id="TABLE_DIV">
+ <table id="TABLE" class="display">
+ <thead>
+  <tr><th>STATUS</th><th>JOB</th><th>SOURCE</th><th>OUTPUT</th></tr>
+ </thead>
+ <tbody>
+ </tbody>
+ </table>
+ </div>
+ <script type="text/javascript" src="js/jquery-1.11.1.js"></script>
+ <script type="text/javascript" src="DataTables-1.10.3/media/js/jquery.dataTables.js"></script>
+ <script type="text/javascript" src="DataTables-1.10.3/extensions/TableTools/js/dataTables.tableTools.js"></script>
+ <script type="text/javascript" src="js/String.js"></script>
+ <script type="text/javascript" src="js/rpc/util.js"></script>
+ <script type="text/javascript" src="js/rpc/Jobs.js"></script>
+ <script type="text/javascript" src="dialog/dialog_box.js"></script>
+</body>
+</html>

@@ -16,6 +16,7 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
+import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.ffmpeg;
@@ -103,6 +104,12 @@ public class kmttgServer extends HTTPServer {
       // Initiate and return transcoding video stream
       if (path.equals("/transcode")) {
          handleTranscode(req, resp);
+         return;
+      }
+      
+      // get job data from job monitor
+      if (path.equals("/jobs")) {
+         handleJobs(req, resp);
          return;
       }
       
@@ -350,6 +357,51 @@ public class kmttgServer extends HTTPServer {
             videoFile = true;
       }
       return videoFile;
+   }
+   
+   private void handleJobs(Request req, Response resp) throws IOException {
+      Map<String,String> params = req.getParams();
+      
+      if (params.containsKey("get")) {
+         JSONArray jobs = new JSONArray();
+         if (jobMonitor.JOBS != null) {
+            try {
+               for (int i=0; i<jobMonitor.JOBS.size(); ++i) {
+                  jobData j = jobMonitor.JOBS.get(i);
+                  JSONObject job = new JSONObject();
+                  job.put("status", j.status);
+                  job.put("type", j.type);
+                  job.put("source", j.tivoName);
+                  job.put("output", j.getOutputFile());
+                  job.put("familyId", j.familyId);
+                  jobs.put(job);
+               }
+            } catch (Exception e) {
+               resp.sendError(500, "getJobs - " + e.getMessage());
+               return;
+            }
+         }
+         resp.send(200, jobs.toString());
+         return;
+      }
+      
+      if (params.containsKey("kill")) {
+         String id = string.urlDecode(params.get("kill"));
+         if (jobMonitor.JOBS != null) {
+            for (int i=0; i<jobMonitor.JOBS.size(); ++i) {
+               jobData j = jobMonitor.JOBS.get(i);
+               String jid = "" + j.familyId;
+               if (jid.equals(id)) {
+                  jobMonitor.kill(j);
+                  resp.send(200, "Killed job: " + j.toString());
+                  return;
+               }
+            }
+         }
+         resp.sendError(400, "could not find job id: " + id);
+         return;
+      }
+      resp.sendError(400, "jobs request missing relevant parameters");
    }
 
    // Transcoding video handler
