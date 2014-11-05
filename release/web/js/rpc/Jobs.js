@@ -6,6 +6,7 @@ $(document).ready(function() {
      dom: 'T<"clear">lfrtip',
      paging: false,
      ordering: true, // turn on column sorting
+     aaSorting: [], // sorting off initially
      autoWidth: true,
      tableTools: {
        "sRowSelect": "single",
