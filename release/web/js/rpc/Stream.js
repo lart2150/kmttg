@@ -1,6 +1,7 @@
 // This used for periodic update function for running jobs
 RUNNING = 0;
 MONITOR_INTERVAL = 5; // Seconds between monitor updates
+RPC = {}; // Used to decide between RPC or XML for each TiVo
 
 $(document).ready(function() {
    // Stream.html document elements
@@ -25,17 +26,18 @@ $(document).ready(function() {
    $('#MAXRATE').val("2000k");
    $('#MAXRATE').change(function() { rateChanged(); });
 
-   // Retrieve rpc enabled TiVos
-   $.getJSON("/getRpcTivos", function(data) {
-      $.each(data, function( i, value ) {
+   // Retrieve TiVos (both rpc and non-rpc)
+   $.getJSON("/getTivos", function(data) {
+      $.each(data, function( i, json ) {
+         RPC[json.tivo] = 0;
          var option = document.createElement("option");
-         option.text = value;
-         option.value = value;
+         option.text = json.tivo;
+         option.value = json.tivo;
          TIVO.appendChild(option);
       });
    })
    .error(function(xhr, status) {
-      util_handleError("/getRpcTivos", xhr, status);
+      util_handleError("/getTivos", xhr, status);
    });
 
    // NPL table
@@ -96,7 +98,7 @@ function getNumRows(table) {
    return table.DataTable().column(0).data().length;
 }
 
-function MyShows(offset) {
+function MyShows() {
    // If table is hidden but has data, then simply unhide it and return
    if (NPLTABLE_DIV.style.display === "none") {
       var len = getNumRows($('#NPLTABLE'));
@@ -106,6 +108,14 @@ function MyShows(offset) {
       }
    }
    
+   if (RPC[TIVO.value] == 1) {
+      MyShowsRPC();
+   } else {
+      MyShowsXML();
+   }
+}
+
+function MyShowsRPC(offset) {   
    if (! offset)
       offset = 0;
    var limit = 50;
@@ -118,15 +128,14 @@ function MyShows(offset) {
       hideTables();
    }
    showNplTable();
-   var format = $('input[name="type"]:checked').val();
    var tivo = encodeURIComponent(TIVO.value);
    var url = "/getMyShows?limit=" + limit + "&tivo=" + tivo + "&offset=" + offset;
    $.getJSON(url, function(data) {
       if (data && data.length > 0) {
-         loadNplData(data, tivo);
+         loadNplDataRPC(data, tivo);
          offset += limit;
          if (data.length == limit)
-            MyShows(offset);
+            MyShowsRPC(offset);
          else
             BROWSE.innerHTML = "";
       } else {
@@ -134,13 +143,12 @@ function MyShows(offset) {
       }
    })
    .error(function(xhr, status) {
-      go = 0;
       BROWSE.innerHTML = "";
       util_handleError("/getMyShows", xhr, status);
    });
 }
 
-function loadNplData(data, tivo) {
+function loadNplDataRPC(data, tivo) {
    var maxrate = MAXRATE.value;
    var format = $('input[name="type"]:checked').val();
    var baseUrl = "/transcode?format=" + format + "&url=";
@@ -167,8 +175,11 @@ function loadNplData(data, tivo) {
             }
             
             var duration = 0;
-            if (json.hasOwnProperty("duration"))
+            var dur = "";
+            if (json.hasOwnProperty("duration")) {
                duration = json.duration;
+               dur = util_secsToHM(json.duration);
+            }
          
             var show_name = util_getShowName(json);
             var show_url = baseUrl + encodeURIComponent(json.__url__);
@@ -189,11 +200,6 @@ function loadNplData(data, tivo) {
 
             var channel = util_getChannel(json);
 
-            var dur = "";
-            if (json.hasOwnProperty("duration")) {
-               dur = util_secsToHM(json.duration);
-            }
-
             var size = "";
             if (json.hasOwnProperty("size")) {
                var size_GB = json.size/Math.pow(2,20);
@@ -207,6 +213,164 @@ function loadNplData(data, tivo) {
             );
             row.draw();
          }
+      }
+   });
+}
+
+function xmlGetFirst(xml, key) {
+   var nodes = xml.getElementsByTagName(key);
+   if (nodes.length > 0) {
+      if (nodes[0].childNodes.length > 0) {
+         return nodes[0].childNodes[0];
+      } else
+         return;
+   } else
+      return;
+}
+
+function xmlGetFirstVal(xml, key) {
+   var node = xmlGetFirst(xml, key);
+   if (node)
+      return node.nodeValue;
+   else
+      return;
+}
+
+function MyShowsXML(offset) {
+   if (! offset)
+      offset = 0;
+   var html = '<div style="color: blue">';
+   message = 'PLEASE WAIT: GETTING SHOWS ' + offset + '- FROM ' + TIVO.value + ' ...';
+   html += message + '</div>';
+   BROWSE.innerHTML = html;
+   if (offset == 0) {
+      clearNplTable();
+      hideTables();
+   }
+   showNplTable();
+   var tivo = encodeURIComponent(TIVO.value);
+   var url = "/getMyShows?xml=1&tivo=" + tivo + "&offset=" + offset;
+   $.get(url, function(data) {
+      if (data && data.length > 0) {
+         var parser = new DOMParser();
+         var xml = parser.parseFromString(data,"text/xml");
+         var TotalItems = parseInt(xmlGetFirstVal(xml, "TotalItems"));
+         var ItemCount = parseInt(xmlGetFirstVal(xml, "ItemCount"));
+         offset += ItemCount;
+         loadNplDataXML(xml, tivo);
+         if (offset < TotalItems)
+            MyShowsXML(offset);
+         else
+            BROWSE.innerHTML = "";
+      } else {
+         BROWSE.innerHTML = "";
+      }
+   })
+   .error(function(xhr, status) {
+      BROWSE.innerHTML = "";
+      util_handleError("/getMyShows", xhr, status);
+   });
+}
+
+function loadNplDataXML(xml, tivo) {
+   var maxrate = MAXRATE.value;
+   var format = $('input[name="type"]:checked').val();
+   var baseUrl = "/transcode?format=" + format + "&url=";
+
+   var shows = xml.getElementsByTagName("Item");
+   $.each(shows, function (i, node) {
+         
+      // URL
+      var url = "";
+      var show_url = "";
+      var Link = xmlGetFirst(node, "Links");
+      if (Link) {
+         var Content = xmlGetFirst(Link.parentNode, "Content");
+         if (Content) {
+            var Url = xmlGetFirstVal(Content.parentNode, "Url");
+            if (Url) {
+               url = Url;
+            }
+         }
+      }
+
+      if (url.length > 0) {
+         // Copy protected or recording => not downloadable
+         var candownload = true;
+         var CopyProtected = xmlGetFirstVal(node, "CopyProtected");
+         if (CopyProtected)
+            candownload = false;
+         var InProgress = xmlGetFirstVal(node, "InProgress");
+         if (InProgress)
+            candownload = false;
+            
+         var date = "";
+         var CaptureDate = xmlGetFirstVal(node, "CaptureDate");
+         if (CaptureDate) {
+            var gmt = parseInt(CaptureDate,16)*1000;
+            date = util_getTimeFromGmt(gmt);
+         }
+         var ShowingStartTime = xmlGetFirstVal(node, "ShowingStartTime");
+         if (ShowingStartTime) {
+            var gmt = parseInt(ShowingStartTime,16)*1000;
+            date = util_getTimeFromGmt(gmt);
+         }
+         
+         var duration = 0;
+         var dur = "";
+         var Duration = xmlGetFirstVal(node, "Duration");
+         if (Duration) {
+            duration = Duration/1000 + 10;
+            dur = util_secsToHM(duration);
+         }
+               
+         var title = xmlGetFirstVal(node, "Title");
+         var EpisodeNumber = xmlGetFirstVal(node, "EpisodeNumber");
+         if (EpisodeNumber)
+            title += " [Ep " + "%03d".sprintf(parseInt(EpisodeNumber)) + "]";
+         var subtitle = xmlGetFirstVal(node, "EpisodeTitle");
+         if (subtitle)
+            title += " - " + subtitle;
+         var show = title;
+         if (candownload) {
+            var show_url = baseUrl + encodeURIComponent(url);
+            show_url += "&name=" + encodeURIComponent(title + " (" + date + ")");
+            show_url += "&tivo=" + encodeURIComponent(tivo);
+            show_url += "&duration=" + duration;
+            show_url += "&maxrate=" + maxrate;
+            
+            show += '<br><a href="' + show_url;
+            show += '" target="__blank">[transcode & play]</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+            show += '<a href="javascript:;" onclick="TiVoDownload(\'';
+            show += encodeURIComponent(url) + '\'';
+            show += ', \'' + encodeURIComponent(title + " (" + date + ")") + '\', \'';
+            show += encodeURIComponent(tivo) + '\', \'' + duration;
+            show += '\')">[transcode]</a>';
+         }
+         
+         var channel = "";
+         var SourceStation = xmlGetFirstVal(node, "SourceStation");
+         if (SourceStation) {
+            channel = SourceStation;
+         }
+         var SourceChannel = xmlGetFirstVal(node, "SourceChannel");
+         if (SourceChannel) {
+            channel += "=" + SourceChannel;
+         }
+         
+         var size = "";
+         var SourceSize = xmlGetFirstVal(node, "SourceSize");
+         if (SourceSize) {
+            var size_GB = SourceSize/Math.pow(2,30);
+            size = "%.2f GB".sprintf(size_GB);         
+         }
+
+         // NOTE: 1st column is dummy used for hiding/unhiding row child info
+         // NOTE: Adding node xml data to end not associated with a table column
+         var row = $('#NPLTABLE').DataTable().row.add(
+            ["", show, date, channel, dur, size, node]
+         );
+         row.draw();
       }
    });
 }
@@ -282,13 +446,6 @@ function hideFileTable() {
 
 function showFileTable() {
    FILETABLE_DIV.style.display = 'block';
-}
-
-function getUrl(json) {
-   var url = "";
-   if (json.hasOwnProperty("__url__"))
-      url = json.__url__;
-   return url;
 }
 
 function FileBrowser() {
@@ -540,8 +697,47 @@ function nplDetailsClicked() {
    }
 }
 
+function formatXml(xml) {
+    var formatted = '';
+    var reg = /(>)(<)(\/*)/g;
+    xml = xml.replace(reg, '$1\r\n$2$3');
+    var pad = 0;
+    jQuery.each(xml.split('\r\n'), function(index, node) {
+        var indent = 0;
+        if (node.match( /.+<\/\w[^>]*>$/ )) {
+            indent = 0;
+        } else if (node.match( /^<\/\w/ )) {
+            if (pad != 0) {
+                pad -= 1;
+            }
+        } else if (node.match( /^<\w[^>]*[^\/]>.*$/ )) {
+            indent = 1;
+        } else {
+            indent = 0;
+        }
+
+        var padding = '';
+        for (var i = 0; i < pad; i++) {
+            padding += '  ';
+        }
+
+        formatted += padding + node + '\r\n';
+        pad += indent;
+    });
+
+    return formatted;
+}
+
 // This is formatting to use for the displaying row child data
-// Currently this displays whole json contents
+// Currently this displays whole json or xml contents
 function detailsFormat(d) {
-   return '<pre>' + JSON.stringify(d[NUMCOLS], null, 3) + '</pre>';
+   if (d[NUMCOLS].title)
+      return '<pre>' + JSON.stringify(d[NUMCOLS], null, 3) + '</pre>';
+   else {
+      var s = formatXml(new XMLSerializer().serializeToString(d[NUMCOLS]));
+      // Need to replace <> with [] so that it's not interpreted as html
+      s = s.replace(/</g, "[");
+      s = s.replace(/>/g, "]");
+      return '<pre>' + s + '</pre>';
+   }
 }
