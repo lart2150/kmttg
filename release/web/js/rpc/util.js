@@ -63,6 +63,20 @@ function util_getTime(startTime) {
    return date;
 }
 
+function util_getTimeFromGmt(gmt) {
+   var week = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
+   var dt = new Date(gmt);
+   var date = "%s %02d/%02d/%02d %02d:%02d".sprintf(
+      week[dt.getUTCDay()],
+      dt.getMonth()+1,
+      dt.getDate(),
+      dt.getFullYear()-2000,
+      dt.getHours(),
+      dt.getMinutes()
+   );
+   return date;
+}
+
 function util_secsToHM(secs) {
    var hours = Math.floor(secs/3600);
    var mins = Math.floor((secs - (hours * 3600))/60);
