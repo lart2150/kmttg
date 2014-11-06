@@ -15,6 +15,7 @@ import com.tivo.kmttg.JSON.JSONFile;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
@@ -74,6 +75,12 @@ public class kmttgServer extends HTTPServer {
       // Return list of rpc enabled TiVos known by kmttg
       if (path.equals("/getRpcTivos")) {
          handleRpcTivos(resp);
+         return;
+      }
+      
+      // Return json array of TiVos and if rpc enabled or not
+      if (path.equals("/getTivos")) {
+         handleTivos(resp);
          return;
       }
       
@@ -245,6 +252,27 @@ public class kmttgServer extends HTTPServer {
       resp.send(200, a.toString());
    }
    
+   // Return list TiVos known by kmttg and rpc flag for each
+   public void handleTivos(Response resp) throws IOException {
+      Stack<String> tivos = config.getTivoNames();
+      JSONArray a = new JSONArray();
+      try {
+         for (String tivoName : tivos) {
+            JSONObject json = new JSONObject();
+            json.put("tivo", tivoName);
+            if (config.rpcEnabled(tivoName))
+               json.put("rpc", 1);
+            else
+               json.put("rpc", 0);
+            a.put(json);
+         }
+         resp.send(200, a.toString());
+      } catch (JSONException e) {
+         resp.sendError(500, "handleTivos - Error obtaining tivo list");
+         log.error("handleTivos - " + e.getMessage());
+      }
+   }
+   
    // Return list of video files known to kmttg
    public void handleVideoFiles(Response resp) throws IOException {
       // LinkedHashMap is used to keep hash keys unique
@@ -267,21 +295,48 @@ public class kmttgServer extends HTTPServer {
       Map<String,String> params = req.getParams();
       if (params.containsKey("tivo")) {
          String tivo = string.urlDecode(params.get("tivo"));
-         Remote r = new Remote(tivo);
-         if (r.success) {
-            jobData job = new jobData();
-            job.tivoName = tivo;
-            job.getURLs = true; // This needed to get __url__ property
+         if (params.containsKey("xml")) {
+            // Non RPC method requested returns XML
+            int offset = 0;
             if (params.containsKey("offset"))
-               job.myshows_offset = Integer.parseInt(params.get("offset"));
-            if (params.containsKey("limit"))
-               job.myshows_limit = Integer.parseInt(params.get("limit"));
-            JSONArray a = r.MyShows(job);
-            r.disconnect();
-            resp.send(200, a.toString());
+               offset = Integer.parseInt(params.get("offset"));
+            String outputFile = file.makeTempFile("NPL");
+            String ip = config.TIVOS.get(tivo);
+            String url = "https://" + ip;
+            String wan_port = config.getWanSetting(tivo, "https");
+            if (wan_port != null)
+               url += ":" + wan_port;
+            url += "/TiVoConnect?Command=QueryContainer&Container=/NowPlaying&Recurse=Yes&AnchorOffset=" + offset;
+            try {
+               if (http.download(url, "tivo", config.MAK, outputFile, false, null) ) {
+                  resp.send(200, Hlsutils.getTextFileContents(outputFile));
+                  file.delete(outputFile);
+               } else {
+                  resp.sendError(400, "Failed to retrive NPL listings for TiVo: " + tivo);
+               }
+            } catch (Exception e) {
+               resp.sendError(400, "Failed to retrive NPL listings for TiVo: " + tivo);
+               log.error("handleMyShows - " + e.getMessage());
+            }
+
          } else {
-            resp.sendError(500, "Failed to get shows from tivo: " + tivo);
-            return;
+            // RPC method returns JSONArray
+            Remote r = new Remote(tivo);
+            if (r.success) {
+               jobData job = new jobData();
+               job.tivoName = tivo;
+               job.getURLs = true; // This needed to get __url__ property
+               if (params.containsKey("offset"))
+                  job.myshows_offset = Integer.parseInt(params.get("offset"));
+               if (params.containsKey("limit"))
+                  job.myshows_limit = Integer.parseInt(params.get("limit"));
+               JSONArray a = r.MyShows(job);
+               r.disconnect();
+               resp.send(200, a.toString());
+            } else {
+               resp.sendError(500, "Failed to get shows from tivo: " + tivo);
+               return;
+            }
          }
       } else {
          resp.sendError(400, "Request missing tivo parameter");
