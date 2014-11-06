@@ -29,7 +29,7 @@ $(document).ready(function() {
    // Retrieve TiVos (both rpc and non-rpc)
    $.getJSON("/getTivos", function(data) {
       $.each(data, function( i, json ) {
-         RPC[json.tivo] = 0;
+         RPC[json.tivo] = json.rpc;
          var option = document.createElement("option");
          option.text = json.tivo;
          option.value = json.tivo;
