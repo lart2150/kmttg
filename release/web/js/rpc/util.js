@@ -50,10 +50,10 @@ function util_getTimeLong(startTime) {
 }
 
 function util_getTime(startTime) {
-   var week = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
+   var week = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
    var dt = new Date(Date.parse(startTime.replace(/-/g, "/") + " GMT"));
    var date = "%s %02d/%02d/%02d %02d:%02d".sprintf(
-      week[dt.getUTCDay()],
+      week[dt.getDay()],
       dt.getMonth()+1,
       dt.getDate(),
       dt.getFullYear()-2000,
@@ -64,10 +64,10 @@ function util_getTime(startTime) {
 }
 
 function util_getTimeFromGmt(gmt) {
-   var week = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
+   var week = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
    var dt = new Date(gmt);
    var date = "%s %02d/%02d/%02d %02d:%02d".sprintf(
-      week[dt.getUTCDay()],
+      week[dt.getDay()],
       dt.getMonth()+1,
       dt.getDate(),
       dt.getFullYear()-2000,
