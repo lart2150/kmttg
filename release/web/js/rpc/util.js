@@ -80,6 +80,13 @@ function util_getTimeFromGmt(gmt) {
 function util_secsToHM(secs) {
    var hours = Math.floor(secs/3600);
    var mins = Math.floor((secs - (hours * 3600))/60);
+   var seconds = secs - (hours * 3600) - (mins * 60);
+   if (seconds > 30)
+      mins += 1;
+   if (mins == 60) {
+      hours += 1;
+      mins = 0;
+   }
    return "%d:%02d".sprintf(hours,mins);
 }
 
