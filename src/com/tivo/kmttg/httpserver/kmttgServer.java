@@ -552,7 +552,7 @@ public class kmttgServer extends HTTPServer {
          String url = params.get("url");
          String tivo = string.urlDecode(params.get("tivo"));;
          if ( ! isOnlyTivo(tivo) ) {
-            resp.sendError(500, "Only 1 download at a time allowed: " + tivo);
+            resp.sendError(500, "Only 1 tivo download at a time allowed: " + tivo);
             return;
          }
          tc = alreadyRunning(url);
@@ -601,7 +601,7 @@ public class kmttgServer extends HTTPServer {
                   if (alreadyRunning(fileName) != null)
                      resp.send(200, "already running: " + name);
                   else
-                     resp.send(200, "download started for: " + name);
+                     resp.send(200, "transcode started for: " + name);
                } else {
                   // Streaming mode => send back stream
                   resp.sendBody(ss, length, null);
@@ -610,7 +610,7 @@ public class kmttgServer extends HTTPServer {
             if (returnFile != null) {
                if (download) {
                   // download mode => simple response to client
-                  String message = "downloading: ";
+                  String message = "transcoding: ";
                   if (name != null)
                      message += name;
                   if (fileName != null)
