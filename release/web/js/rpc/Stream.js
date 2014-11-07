@@ -320,7 +320,7 @@ function loadNplDataXML(xml, tivo) {
          var dur = "";
          var Duration = xmlGetFirstVal(node, "Duration");
          if (Duration) {
-            duration = Duration/1000 + 10;
+            duration = Duration/1000;
             dur = util_secsToHM(duration);
          }
                
@@ -683,7 +683,6 @@ function nplDetailsClicked() {
    var table = $('#NPLTABLE').DataTable();
    var tr = $(this).closest('tr');
    var row = table.row(tr);
-   console.log(row);
 
    if ( row.child.isShown() ) {
       // This row is already open - close it
