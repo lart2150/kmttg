@@ -43,11 +43,14 @@ public class configMain {
    
    private static JButton add = null;
    private static JButton del = null;
+   private static JButton share_add = null;
+   private static JButton share_del = null;
    private static JButton OK = null;
    private static JButton CANCEL = null;
    private static JButton autotune_test = null;
    private static JDialog dialog = null;
    private static JComboBox tivos = null;
+   private static JComboBox shares = null;
    private static JCheckBox remove_tivo = null;
    private static JCheckBox remove_comcut = null;
    private static JCheckBox remove_comcut_mpeg = null;
@@ -92,6 +95,8 @@ public class configMain {
    private static JCheckBox persistQueue = null;
    private static JTextField tivo_name = null;
    private static JTextField tivo_ip = null;
+   private static JTextField share_name = null;
+   private static JTextField share_dir = null;
    private static JTextField files_path = null;
    private static JTextField MAK = null;
    private static JTextField FontSize = null;
@@ -266,6 +271,43 @@ public class configMain {
       }
    }
    
+   // Callback for share add button
+   private static void share_addCB() {
+      debug.print("");
+      // Add name=dir to shares combobox
+      String name = string.removeLeadingTrailingSpaces(share_name.getText());
+      String dir = string.removeLeadingTrailingSpaces(share_dir.getText());
+      if ( name.length() == 0) {
+         log.error("Enter a name in the 'Share Name' field");
+         return;
+      }
+      if ( dir.length() == 0) {
+         log.error("Enter a valid directory in 'Share Directory' field");
+         return;
+      }
+      addShare(name, dir);      
+   }
+   
+   public static void addShare(String name, String dir) {  
+      debug.print("name=" + name + " dir=" + dir);
+      if (dialog == null || shares == null) return;
+      String value = name + "=" + dir;
+      // Don't add duplicate value
+      Boolean doit = true;
+      int count = shares.getItemCount();
+      if (count > 0) {
+         for (int i=0; i<count; i++) {
+            String s = shares.getItemAt(i).toString();
+            if (s.equals(value))
+               doit = false;
+         }
+      }
+      if (doit) {
+         shares.addItem(value);
+         shares.setSelectedItem(value);
+      }
+   }
+   
    private static void updateWanSettings(String setting) {
       if (setting != null) {
          String tivoName = setting.replaceFirst("=.+$", "");
@@ -320,6 +362,18 @@ public class configMain {
          tivos.removeItemAt(selected);
       } else {
          log.error("No tivo entries left to remove");
+      }
+   }
+   
+   // Callback for share del button
+   private static void share_delCB() {
+      debug.print("");
+      // Remove current selection in shares combobox
+      int selected = shares.getSelectedIndex();
+      if (selected > -1) {
+         shares.removeItemAt(selected);
+      } else {
+         log.error("No share entries left to remove");
       }
    }
    
@@ -454,6 +508,15 @@ public class configMain {
             tivos.addItem(name + "=" + ip);
             if (config.nplCapable(name))
                autotune_tivoName.addItem(name);
+         }         
+      }
+      
+      // Shares
+      if (config.httpserver_shares.size()>0) {
+         // Update share name lists
+         shares.removeAllItems();
+         for (String dir : config.httpserver_shares.keySet()) {
+            shares.addItem(dir + "=" + config.httpserver_shares.get(dir));
          }         
       }
       
@@ -940,6 +1003,19 @@ public class configMain {
          }
       }
       config.setTivoNames(h);
+      
+      // Shares
+      count = shares.getItemCount();
+      if (count > 0) {
+         config.httpserver_shares.clear();
+         for (int i=0; i<count; i++) {
+            String s = shares.getItemAt(i).toString();
+            String[] l = s.split("=");
+            if (l.length == 2) {
+               config.httpserver_shares.put(l[0], l[1]);
+            }
+         }
+      }
       
       // limit_npl_fetches
       name = (String)tivos.getSelectedItem();
@@ -1867,6 +1943,8 @@ public class configMain {
       
       tivo_name = new javax.swing.JTextField(20);
       tivo_ip = new javax.swing.JTextField(20);
+      share_name = new javax.swing.JTextField(20);
+      share_dir = new javax.swing.JTextField(20);
       autotune_channel_interval = new javax.swing.JTextField(20);
       autotune_button_interval = new javax.swing.JTextField(20);
       autotune_chan1 = new javax.swing.JTextField(20);
@@ -1905,11 +1983,18 @@ public class configMain {
             }
          }
       });
+      
+      JLabel shares_label = new javax.swing.JLabel();
+      shares = new javax.swing.JComboBox();
 
       add = new javax.swing.JButton();
       del = new javax.swing.JButton();
+      share_add = new javax.swing.JButton();
+      share_del = new javax.swing.JButton();
       JLabel tivo_name_label = new javax.swing.JLabel();
       JLabel tivo_ip_label = new javax.swing.JLabel();
+      JLabel share_name_label = new javax.swing.JLabel();
+      JLabel share_dir_label = new javax.swing.JLabel();
       JLabel autotune_channel_interval_label = new javax.swing.JLabel();
       JLabel autotune_button_interval_label = new javax.swing.JLabel();
       JLabel autotune_chan1_label = new javax.swing.JLabel();
@@ -2039,8 +2124,24 @@ public class configMain {
          }
       });
       
+      share_add.setText("ADD"); 
+      share_add.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            share_addCB();
+         }
+      });
+      
+      share_del.setText("DEL"); 
+      share_del.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            share_delCB();
+         }
+      });
+      
       tivo_name_label.setText("Tivo Name"); 
       tivo_ip_label.setText("Tivo IP#");
+      share_name_label.setText("Share Name");
+      share_dir_label.setText("Share Directory");
       autotune_channel_interval_label.setText("Channel change interval (secs)");
       autotune_button_interval_label.setText("Button press interval (msecs)");
       autotune_chan1_label.setText("Channel number for tuner 1");
@@ -2078,7 +2179,8 @@ public class configMain {
       rpcnpl.setText("Use RPC to get NPL when possible");
       enableRpc.setText("Enable iPad style communications with this TiVo");
       persistQueue.setText("Automatically restore job queue between sessions");
-      MAK_label.setText("MAK"); 
+      MAK_label.setText("MAK");
+      shares_label.setText("Shares");
       FontSize_label.setText("GUI Font Size");
       file_naming_label.setText("File Naming"); 
       tivo_output_dir_label.setText(".TiVo Output Dir"); 
@@ -3339,6 +3441,46 @@ public class configMain {
       c.gridy = gy;
       web_panel.add(httpserver_port, c);
       
+      // shares combobox
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      web_panel.add(shares_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      web_panel.add(shares, c);
+
+      // DEL button
+      c.gridx = 4;
+      c.gridy = gy;
+      web_panel.add(share_del, c);
+      
+      // Share name
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      web_panel.add(share_name_label,c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      web_panel.add(share_name, c);
+      
+      // ADD button
+      c.gridx = 4;
+      c.gridy = gy;
+      web_panel.add(share_add, c);
+      
+      // Share dir
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      web_panel.add(share_dir_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      web_panel.add(share_dir, c);
+      
       // VRD Panel
       JPanel vrd_panel = new JPanel(new GridBagLayout());       
       
@@ -3506,6 +3648,8 @@ public class configMain {
       debug.print("");
       tivo_name.setToolTipText(getToolTip("tivo_name"));
       tivo_ip.setToolTipText(getToolTip("tivo_ip"));
+      share_name.setToolTipText(getToolTip("share_name"));
+      share_dir.setToolTipText(getToolTip("share_dir"));
       autotune_enabled.setToolTipText(getToolTip("autotune_enabled"));
       autotune_channel_interval.setToolTipText(getToolTip("autotune_channel_interval"));
       autotune_button_interval.setToolTipText(getToolTip("autotune_button_interval"));
@@ -3514,6 +3658,8 @@ public class configMain {
       autotune_tivoName.setToolTipText(getToolTip("autotune_tivoName"));
       add.setToolTipText(getToolTip("add")); 
       del.setToolTipText(getToolTip("del")); 
+      share_add.setToolTipText(getToolTip("share_add")); 
+      share_del.setToolTipText(getToolTip("share_del")); 
       remove_tivo.setToolTipText(getToolTip("remove_tivo"));
       remove_comcut.setToolTipText(getToolTip("remove_comcut"));
       remove_comcut_mpeg.setToolTipText(getToolTip("remove_comcut_mpeg"));
@@ -3628,6 +3774,19 @@ public class configMain {
          text += "<b>Tivo Central-Messages&Settings-Settings-Phone&Network: IP addr</b><br>";
          text += "Enter corresponding <b>Tivo Name</b> above and then click on <b>ADD</b> button.";
       }
+      else if (component.equals("share_name")) {
+         text =  "<b>Share Name</b><br>";
+         text += "Enter the name you want to use for a video share.<br>";
+         text += "These video shares are used by <b>Share Browser</b> and <b>Video Streaming-Browse Files</b><br>";
+         text += "web server pages. If you don't define any custom shares then kmttg will use some default ones instead.<br>";
+         text += "Enter corresponding <b>Share Directory</b> below and then click on <b>ADD</b> button.<br>";
+         text += "NOTE: When changing these shares you will need to restart kmttg so the web server<br>";
+         text += "will pick up the changes.";
+      }
+      else if (component.equals("share_dir")) {
+         text =  "<b>Share Directory</b><br>";
+         text += "Enter corresponding <b>Share Name</b> above and then click on <b>ADD</b> button.";
+      }
       else if (component.equals("autotune_enabled")) {
          text =  "<b>Tune to specified channels before a download</b><br>";
          text += "For Series 3 & 4 TiVos that have <b>Network Remote Control</b> option enabled<br>";
@@ -3677,6 +3836,14 @@ public class configMain {
       else if (component.equals("del")) {
          text =  "<b>DEL</b><br>";
          text += "Remove currently selected entry in <b>Tivos</b> list.";
+      }
+      else if (component.equals("share_add")) {
+         text =  "<b>ADD</b><br>";
+         text += "Add specified <b>Share Name</b> and associated <b>Share Directory</b> to <b>Shares</b> list.";
+      }
+      else if (component.equals("share_del")) {
+         text =  "<b>DEL</b><br>";
+         text += "Remove currently selected entry in <b>Shares</b> list.";
       }
       else if (component.equals("remove_tivo")) {
          text =  "<b>Remove .TiVo after file decrypt</b><br>";
