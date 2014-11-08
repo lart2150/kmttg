@@ -210,6 +210,7 @@ public class config {
    public static String httpserver_home = null;
    public static String httpserver_cache = null;
    public static String httpserver_cache_relative = null;
+   public static LinkedHashMap<String,String> httpserver_shares = new LinkedHashMap<String,String>();
    
    public static Stack<String> parse() {
       debug.print("");
@@ -902,6 +903,10 @@ public class config {
                }
                TIVOS.put(name, value);
             }
+            if (key.equals("SHARES")) {
+               String l[] = line.split("=");
+               httpserver_shares.put(l[0], string.removeLeadingTrailingSpaces(l[1]));
+            }
             if (key.equals("tivoFileNameFormat")) {
                tivoFileNameFormat = line;
             }
@@ -1217,7 +1222,12 @@ public class config {
          
          ofp.write("<TIVOS>\n");
          for (String name : TIVOS.keySet())
-               ofp.write(String.format("%-20s %-20s\n", name, TIVOS.get(name)));
+            ofp.write(String.format("%-20s %-20s\n", name, TIVOS.get(name)));
+         ofp.write("\n");
+         
+         ofp.write("<SHARES>\n");
+         for (String name : httpserver_shares.keySet())
+            ofp.write(name + "=" + httpserver_shares.get(name) + "\n");
          ofp.write("\n");
          
          if (WAN.size() > 0) {
