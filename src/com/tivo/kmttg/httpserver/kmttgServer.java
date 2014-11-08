@@ -43,7 +43,25 @@ public class kmttgServer extends HTTPServer {
          config.httpserver_cache_relative = "/web/cache/";
          VirtualHost host = config.httpserver.getVirtualHost(null);
          host.setAllowGeneratedIndex(true);
+         // Root dir is always kmttg install dir
          host.addContext("/", new FileContextHandler(new File(baseDir), "/"));
+         
+         // Make some video shares browsable
+         if (config.httpserver_shares.isEmpty()) {
+            // No custom shares defined - so use default list
+            host.addContext("/mpegDir", new FileContextHandler(new File(config.mpegDir), "/mpegDir"));
+            host.addContext("/mpegCutDir", new FileContextHandler(new File(config.mpegCutDir), "/mpegCutDir"));
+            host.addContext("/encodeDir", new FileContextHandler(new File(config.encodeDir), "/encodeDir"));
+         } else {
+            // Custom shares defined - so use them
+            for (String share : config.httpserver_shares.keySet()) {
+               host.addContext(
+                  "/" + share,
+                  new FileContextHandler(new File(config.httpserver_shares.get(share)), "/" + share)
+               );
+            }
+         }
+         
          config.httpserver.start();
       } catch (IOException e) {
          log.error("HTTPServer Init - " + e.getMessage());
@@ -87,6 +105,12 @@ public class kmttgServer extends HTTPServer {
       // Get list of video files in kmttg video places
       if (path.equals("/getVideoFiles")) {
          handleVideoFiles(resp);
+         return;
+      }
+      
+      // Get list of browser shares
+      if (path.equals("/getBrowserShares")) {
+         handleBrowserShares(resp);
          return;
       }
       
@@ -273,14 +297,38 @@ public class kmttgServer extends HTTPServer {
       }
    }
    
+   private void handleBrowserShares(Response resp) throws IOException {
+      JSONArray a = new JSONArray();
+      if (config.httpserver_shares.isEmpty()) {
+         // No custom shares defined - so use default list
+         a.put("mpegDir");
+         a.put("mpegCutDir");
+         a.put("encodeDir");
+      } else {
+         // Custom shares defined - so use them
+         for (String dir : config.httpserver_shares.keySet()) {
+            a.put(dir);
+         }
+      }
+      resp.send(200, a.toString());
+   }
+   
    // Return list of video files known to kmttg
    public void handleVideoFiles(Response resp) throws IOException {
       // LinkedHashMap is used to keep hash keys unique
       LinkedHashMap<String,Integer> dirs = new LinkedHashMap<String,Integer>();
-      dirs.put(config.outputDir,1);
-      dirs.put(config.mpegDir,1);
-      dirs.put(config.mpegCutDir,1);
-      dirs.put(config.encodeDir,1);
+      if (config.httpserver_shares.isEmpty()) {
+         // No custom shares defined - so use default list
+         dirs.put(config.outputDir,1);
+         dirs.put(config.mpegDir,1);
+         dirs.put(config.mpegCutDir,1);
+         dirs.put(config.encodeDir,1);
+      } else {
+         // Custom shares defined - so use them
+         for (String dir : config.httpserver_shares.keySet()) {
+            dirs.put(config.httpserver_shares.get(dir), 1);
+         }
+      }
       LinkedHashMap<String,Integer> h = new LinkedHashMap<String,Integer>();
       for (String dir : dirs.keySet())
          getVideoFiles(dir, h);
