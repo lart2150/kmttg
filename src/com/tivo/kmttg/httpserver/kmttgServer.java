@@ -38,13 +38,17 @@ public class kmttgServer extends HTTPServer {
             return;
          }
          config.httpserver = new kmttgServer(config.httpserver_port);
-         config.httpserver_home = baseDir + File.separator + "web";
-         config.httpserver_cache = config.httpserver_home + File.separator + "cache";
          config.httpserver_cache_relative = "/web/cache/";
          VirtualHost host = config.httpserver.getVirtualHost(null);
          host.setAllowGeneratedIndex(true);
          // Root dir is always kmttg install dir
          host.addContext("/", new FileContextHandler(new File(baseDir), "/"));
+         
+         // Cache dir is configurable
+         host.addContext(config.httpserver_cache_relative,
+            new FileContextHandler(new File(config.httpserver_cache),
+            config.httpserver_cache_relative)
+         );
          
          // Make some video shares browsable
          if (config.httpserver_shares.isEmpty()) {

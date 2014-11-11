@@ -22,7 +22,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v1.1g";
+   public static String kmttg = "kmttg v1.1h_beta";
    
    // encoding related
    public static String encProfDir = "";
@@ -638,6 +638,11 @@ public class config {
       programDir = string.urlDecode(programDir);
       debug.print("programDir=" + programDir);
       
+      httpserver_home = programDir + File.separator + "web";
+      // This is configurable but define default
+      httpserver_cache = httpserver_home + File.separator + "cache";
+
+      
       // tmpDir
       if (OS.equals("windows")) {
          tmpDir = System.getenv("TEMP");
@@ -924,6 +929,13 @@ public class config {
             }
             if (key.equals("httpserver_port")) {
                httpserver_port = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
+            if (key.equals("httpserver_cache")) {
+               httpserver_cache = string.removeLeadingTrailingSpaces(line);
+               // Create cache dir if it doesn't exist and web server is on
+               if (! file.isDir(httpserver_cache))
+                  new File(httpserver_cache).mkdirs();
+
             }
             if (key.equals("RemoveTivoFile")) {
                RemoveTivoFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
@@ -1271,6 +1283,8 @@ public class config {
          ofp.write("<httpserver_enable>\n" + httpserver_enable + "\n\n");
          
          ofp.write("<httpserver_port>\n" + httpserver_port + "\n\n");
+         
+         ofp.write("<httpserver_cache>\n" + httpserver_cache + "\n\n");
          
          ofp.write("<RemoveTivoFile>\n" + RemoveTivoFile + "\n\n");
          

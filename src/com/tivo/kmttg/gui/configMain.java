@@ -9,6 +9,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Stack;
 
@@ -135,6 +136,7 @@ public class configMain {
    private static JTextField download_delay = null;
    private static JTextField metadata_entries = null;
    private static JTextField httpserver_port = null;
+   private static JTextField httpserver_cache = null;
    private static JTextField autoLogSizeMB = null;
    private static JTextField pyTivo_host = null;
    private static JTextField web_query = null;
@@ -899,6 +901,9 @@ public class configMain {
       
       // httpserver_port
       httpserver_port.setText("" + config.httpserver_port);
+      
+      // httpserver_cache
+      httpserver_cache.setText(config.httpserver_cache);
       
       // autoLogSizeMB
       autoLogSizeMB.setText("" + config.autoLogSizeMB);
@@ -1773,6 +1778,19 @@ public class configMain {
       } else {
          config.httpserver_port = 8181;
       }
+      
+      // httpserver_cache
+      value = string.removeLeadingTrailingSpaces(httpserver_cache.getText());
+      if (value.length() == 0) {
+         // Reset to default if none given
+         value = config.httpserver_home + File.separator + "cache";
+      } else {
+         if ( ! file.isDir(value) ) {
+            textFieldError(httpserver_cache, "web server cache setting not a valid dir: '" + value  + "'");
+            errors++;
+         }
+      }
+      config.httpserver_cache = value;
             
       // download_delay
       value = string.removeLeadingTrailingSpaces(download_delay.getText());
@@ -1964,6 +1982,7 @@ public class configMain {
       download_delay = new javax.swing.JTextField(15);
       metadata_entries = new javax.swing.JTextField(15);
       httpserver_port = new javax.swing.JTextField(15);
+      httpserver_cache = new javax.swing.JTextField(15);
       autoLogSizeMB = new javax.swing.JTextField(15);
       
       disk_space = new javax.swing.JTextField(5);
@@ -2068,6 +2087,7 @@ public class configMain {
       JLabel download_delay_label = new javax.swing.JLabel();
       JLabel metadata_entries_label = new javax.swing.JLabel();
       JLabel httpserver_port_label = new javax.swing.JLabel();
+      JLabel httpserver_cache_label = new javax.swing.JLabel();
       JLabel autoLogSizeMB_label = new javax.swing.JLabel();
       JLabel available_keywords_label = new javax.swing.JLabel();
       JLabel pyTivo_host_label = new javax.swing.JLabel();
@@ -2217,6 +2237,7 @@ public class configMain {
       download_delay_label.setText("start delay in seconds for download tasks");
       metadata_entries_label.setText("extra metadata entries (comma separated)");
       httpserver_port_label.setText("kmttg web server port");
+      httpserver_cache_label.setText("kmttg web server cache dir");
       autoLogSizeMB_label.setText("auto log file size limit (MB)");
       web_query_label.setText("web query base url (bindkey q)");
       web_browser_label.setText("web browser binary");
@@ -3441,6 +3462,16 @@ public class configMain {
       c.gridy = gy;
       web_panel.add(httpserver_port, c);
       
+      // httpserver_cache
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      web_panel.add(httpserver_cache_label, c);
+
+      c.gridx = 1;
+      c.gridy = gy;
+      web_panel.add(httpserver_cache, c);
+      
       // shares combobox
       gy++;
       c.gridx = 0;
@@ -3744,6 +3775,7 @@ public class configMain {
       download_delay.setToolTipText(getToolTip("download_delay"));
       metadata_entries.setToolTipText(getToolTip("metadata_entries"));
       httpserver_port.setToolTipText(getToolTip("httpserver_port"));
+      httpserver_cache.setToolTipText(getToolTip("httpserver_cache"));
       autoLogSizeMB.setToolTipText(getToolTip("autoLogSizeMB"));
       web_query.setToolTipText(getToolTip("web_query"));
       web_browser.setToolTipText(getToolTip("web_browser"));
@@ -4004,6 +4036,13 @@ public class configMain {
          text += "NOTE: In your router configuration you can setup WAN port forwarding such as to enable<br>";
          text += "access to kmttg web server from outside your home, so if you leave kmttg running then<br>";
          text += "you can access the web server capabilities from anywhere.";
+      }
+      else if (component.equals("httpserver_cache")) {
+         text =  "<b>kmttg web server cache dir</b><br>";
+         text += "Directory to use for kmttg web server cache files. These files are created when using<br>";
+         text += "web server <b>Video Streaming</b> page to transcode files to HLS. Note that since these<br>";
+         text += "are video files it's possible a lot of space may be needed, so make sure there is plenty<br>";
+         text += "of space where you define this directory.";
       }
       else if (component.equals("VrdEncode")) {
          text =  "<b>Show VideoRedo encoding profiles</b><br>";
