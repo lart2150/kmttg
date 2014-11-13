@@ -2573,8 +2573,8 @@ public class HTTPServer {
             try {
                 String name = file.getName() + (file.isDirectory() ? "/" : "");
                 String size = file.isDirectory() ? "- " : toSizeApproxString(file.length());
-                if (! file.isDirectory() && ! Hlsutils.isVideoFile(file.getName()))
-                   if (config.httpserver_share_filter == 1)
+                if (config.httpserver_share_filter == 1 && ! file.isDirectory() &&
+                      ! Hlsutils.isVideoFile(file.getName()))
                       continue;
                 // properly url-encode the link
                 String link = new URI(null, path + name, null).toASCIIString();
