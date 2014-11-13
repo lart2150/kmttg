@@ -31,6 +31,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
+import com.tivo.kmttg.main.config;
+
 /**
  * The {@code HTTPServer} class implements a light-weight HTTP server.
  *
@@ -2570,8 +2572,10 @@ public class HTTPServer {
         for (File file : dir.listFiles()) {
             try {
                 String name = file.getName() + (file.isDirectory() ? "/" : "");
-                String size = file.isDirectory() ? "- "
-                                                 : toSizeApproxString(file.length());
+                String size = file.isDirectory() ? "- " : toSizeApproxString(file.length());
+                if (! file.isDirectory() && ! Hlsutils.isVideoFile(file.getName()))
+                   if (config.httpserver_share_filter == 1)
+                      continue;
                 // properly url-encode the link
                 String link = new URI(null, path + name, null).toASCIIString();
                 f.format(" <a href=\"%s\">%s</a>%-" + (w - name.length()) +
