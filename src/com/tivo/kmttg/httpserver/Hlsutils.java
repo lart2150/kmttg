@@ -56,5 +56,18 @@ public class Hlsutils {
       }
       return total;
    }
+   
+   public static boolean isVideoFile(String fileName) {
+      String[] extensions = {
+         "mp4","mpeg","vob","mpg","mpeg2","mp2","avi","wmv",
+         "asf","mkv","tivo","m4v","3gp","mov","flv","ts"
+      };
+      boolean videoFile = false;
+      for (String extension : extensions) {
+         if (fileName.toLowerCase().endsWith("." + extension))
+            videoFile = true;
+      }
+      return videoFile;
+   }
 
 }
