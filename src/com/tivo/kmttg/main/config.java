@@ -210,6 +210,7 @@ public class config {
    public static String httpserver_home = null;
    public static String httpserver_cache = null;
    public static String httpserver_cache_relative = null;
+   public static int httpserver_share_filter = 0;
    public static LinkedHashMap<String,String> httpserver_shares = new LinkedHashMap<String,String>();
    
    public static Stack<String> parse() {
@@ -935,7 +936,9 @@ public class config {
                // Create cache dir if it doesn't exist and web server is on
                if (! file.isDir(httpserver_cache))
                   new File(httpserver_cache).mkdirs();
-
+            }
+            if (key.equals("httpserver_share_filter")) {
+               httpserver_share_filter = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("RemoveTivoFile")) {
                RemoveTivoFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
@@ -1285,6 +1288,8 @@ public class config {
          ofp.write("<httpserver_port>\n" + httpserver_port + "\n\n");
          
          ofp.write("<httpserver_cache>\n" + httpserver_cache + "\n\n");
+         
+         ofp.write("<httpserver_share_filter>\n" + httpserver_share_filter + "\n\n");
          
          ofp.write("<RemoveTivoFile>\n" + RemoveTivoFile + "\n\n");
          

@@ -73,6 +73,7 @@ public class configMain {
    private static JCheckBox VrdDecrypt = null;
    private static JCheckBox DsdDecrypt = null;
    private static JCheckBox httpserver_enable = null;
+   private static JCheckBox httpserver_share_filter = null;
    private static JCheckBox VrdEncode = null;
    private static JCheckBox VrdAllowMultiple = null;
    private static JCheckBox VrdCombineCutEncode = null;
@@ -677,6 +678,12 @@ public class configMain {
       else
          httpserver_enable.setSelected(false);
       
+      // httpserver_share_filter
+      if (config.httpserver_share_filter == 1)
+         httpserver_share_filter.setSelected(true);
+      else
+         httpserver_share_filter.setSelected(false);
+      
       // VRD flag
       if (config.VRD == 1)
          VRD.setSelected(true);
@@ -1234,6 +1241,14 @@ public class configMain {
          }
       }
       
+      // httpserver_share_filter
+      if (httpserver_share_filter.isSelected()) {
+         config.httpserver_share_filter = 1;
+      }
+      else {
+         config.httpserver_share_filter = 0;
+      }
+      
       // VrdEncode
       if (VrdEncode.isSelected() && config.VRD == 1)
          config.VrdEncode = 1;
@@ -1769,7 +1784,7 @@ public class configMain {
          try {
             config.httpserver_port = Integer.parseInt(value);
          } catch(NumberFormatException e) {
-            textFieldError(httpserver_port, "Illegal setting for kmttg web server port: '" + value + "'");
+            textFieldError(httpserver_port, "Illegal setting for web server port: '" + value + "'");
             log.error("Setting to 8181");
             config.httpserver_port = 8181;
             httpserver_port.setText("" + config.httpserver_port);
@@ -2035,6 +2050,7 @@ public class configMain {
       VrdDecrypt = new javax.swing.JCheckBox();
       DsdDecrypt = new javax.swing.JCheckBox();
       httpserver_enable = new javax.swing.JCheckBox();
+      httpserver_share_filter = new javax.swing.JCheckBox();
       VrdEncode = new javax.swing.JCheckBox();
       VrdAllowMultiple = new javax.swing.JCheckBox();
       VrdCombineCutEncode = new javax.swing.JCheckBox();
@@ -2182,7 +2198,8 @@ public class configMain {
       VrdQsFilter.setText("Enable VideoRedo QS Fix video dimension filter");
       VrdDecrypt.setText("Decrypt using VideoRedo instead of tivodecode");
       DsdDecrypt.setText("Decrypt using DirectShow Dump instead of tivodecode");
-      httpserver_enable.setText("Enable kmttg web server");
+      httpserver_enable.setText("Enable web server");
+      httpserver_share_filter.setText("Share browser show video files only");
       VrdEncode.setText("Show VideoRedo encoding profiles");
       VrdAllowMultiple.setText("Run all VideoRedo jobs in GUI mode");
       VrdCombineCutEncode.setText("Combine Ad Cut & Encode");
@@ -2236,8 +2253,8 @@ public class configMain {
       download_retry_delay_label.setText("seconds between download retry attempts");
       download_delay_label.setText("start delay in seconds for download tasks");
       metadata_entries_label.setText("extra metadata entries (comma separated)");
-      httpserver_port_label.setText("kmttg web server port");
-      httpserver_cache_label.setText("kmttg web server cache dir");
+      httpserver_port_label.setText("web server port");
+      httpserver_cache_label.setText("web server cache dir");
       autoLogSizeMB_label.setText("auto log file size limit (MB)");
       web_query_label.setText("web query base url (bindkey q)");
       web_browser_label.setText("web browser binary");
@@ -3472,6 +3489,12 @@ public class configMain {
       c.gridy = gy;
       web_panel.add(httpserver_cache, c);
       
+      // httpserver_enable
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      web_panel.add(httpserver_share_filter, c);
+      
       // shares combobox
       gy++;
       c.gridx = 0;
@@ -3712,6 +3735,7 @@ public class configMain {
       VrdDecrypt.setToolTipText(getToolTip("VrdDecrypt"));
       DsdDecrypt.setToolTipText(getToolTip("DsdDecrypt"));
       httpserver_enable.setToolTipText(getToolTip("httpserver_enable"));
+      httpserver_share_filter.setToolTipText(getToolTip("httpserver_share_filter"));
       VrdEncode.setToolTipText(getToolTip("VrdEncode"));
       VrdAllowMultiple.setToolTipText(getToolTip("VrdAllowMultiple"));
       VrdCombineCutEncode.setToolTipText(getToolTip("VrdCombineCutEncode"));
@@ -4022,7 +4046,7 @@ public class configMain {
          text += "config option <b>Combine downlad and tivodecode decrypt</b> if enabled in order to use this option.";
       }
       else if (component.equals("httpserver_enable")) {
-         text =  "<b>Enable kmttg web server</b><br>";
+         text =  "<b>Enable web server</b><br>";
          text += "<b>EXPERIMENTAL</b><br>";
          text += "Enabling web browser allows you to interact with kmttg via any web browser with<br>";
          text += "a subset of kmttg capabilities and capability to stream videos from computer<br>";
@@ -4031,18 +4055,22 @@ public class configMain {
          text += "NOTE: TiVos listed in web browser are intentionally restricted to series 4 or later only.";
       }
       else if (component.equals("httpserver_port")) {
-         text =  "<b>kmttg web server port</b><br>";
-         text += "Port to use for kmttg web server. See web server setting and associated tooltip above.<br>";
+         text =  "<b>web server port</b><br>";
+         text += "Port to use for web server. See web server setting and associated tooltip above.<br>";
          text += "NOTE: In your router configuration you can setup WAN port forwarding such as to enable<br>";
-         text += "access to kmttg web server from outside your home, so if you leave kmttg running then<br>";
+         text += "access to web server from outside your home, so if you leave kmttg running then<br>";
          text += "you can access the web server capabilities from anywhere.";
       }
       else if (component.equals("httpserver_cache")) {
-         text =  "<b>kmttg web server cache dir</b><br>";
-         text += "Directory to use for kmttg web server cache files. These files are created when using<br>";
+         text =  "<b>web server cache dir</b><br>";
+         text += "Directory to use for web server cache files. These files are created when using<br>";
          text += "web server <b>Video Streaming</b> page to transcode files to HLS. Note that since these<br>";
          text += "are video files it's possible a lot of space may be needed, so make sure there is plenty<br>";
          text += "of space where you define this directory.";
+      }
+      else if (component.equals("httpserver_share_filter")) {
+         text =  "<b>Share browser show video files only</b><br>";
+         text += "For <b>Share Browser</b> page only show video files if this option is enabled.";
       }
       else if (component.equals("VrdEncode")) {
          text =  "<b>Show VideoRedo encoding profiles</b><br>";
