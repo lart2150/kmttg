@@ -439,7 +439,7 @@ public class kmttgServer extends HTTPServer {
          if (listfiles[i].isDirectory()) {
             File[] internalFile = listfiles[i].listFiles();
             for (int j = 0; j < internalFile.length; j++) {
-               if (isVideoFile(internalFile[j].getAbsolutePath()))
+               if (Hlsutils.isVideoFile(internalFile[j].getAbsolutePath()))
                   h.put(internalFile[j].getAbsolutePath(), 1);
                if (internalFile[j].isDirectory()) {
                   String name = internalFile[j].getAbsolutePath();
@@ -447,23 +447,10 @@ public class kmttgServer extends HTTPServer {
                }
             }
          } else {
-            if (isVideoFile(listfiles[i].getAbsolutePath()))
+            if (Hlsutils.isVideoFile(listfiles[i].getAbsolutePath()))
                h.put(listfiles[i].getAbsolutePath(), 1);
          }
       }
-   }
-   
-   private boolean isVideoFile(String fileName) {
-      boolean videoFile = false;
-      String[] extensions = {
-         "mp4","mpeg","vob","mpg","mpeg2","mp2","avi","wmv",
-         "asf","mkv","tivo","m4v","3gp","mov","flv","ts"
-      };
-      for (String extension : extensions) {
-         if (fileName.toLowerCase().endsWith("." + extension))
-            videoFile = true;
-      }
-      return videoFile;
    }
    
    private void handleJobs(Request req, Response resp) throws IOException {
