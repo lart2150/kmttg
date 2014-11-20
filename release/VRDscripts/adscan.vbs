@@ -70,8 +70,8 @@ end if
 if (ver = 4) then
    scanStarted = VideoReDo.StartAdScan( 0, 0, 1 )
 else
-   VideoReDo.AdScanSetParameter 0, false
-   VideoReDo.AdScanSetParameter 1, false
+   'VideoReDo.AdScanSetParameter 0, false
+   'VideoReDo.AdScanSetParameter 1, false
    VideoReDo.AdScanSetParameter 2, true
    VideoReDo.AdScanToggleScan()
    scanStarted = VideoReDo.AdScanIsScanning()
