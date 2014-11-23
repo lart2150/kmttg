@@ -2570,18 +2570,16 @@ public class HTTPServer {
             f.format(" <a href=\"%s/\">Parent Directory</a>%"
                 + (w + 5) + "s-%n", getParentPath(path), "");
         for (File file : dir.listFiles()) {
-            try {
-                String name = file.getName() + (file.isDirectory() ? "/" : "");
-                String size = file.isDirectory() ? "- " : toSizeApproxString(file.length());
-                if (config.httpserver_share_filter == 1 && ! file.isDirectory() &&
-                      ! Hlsutils.isVideoFile(file.getName()))
-                      continue;
-                // properly url-encode the link
-                String link = new URI(null, path + name, null).toASCIIString();
-                f.format(" <a href=\"%s\">%s</a>%-" + (w - name.length()) +
-                    "s&#8206;%td-%<tb-%<tY %<tR%6s%n",
-                    link, name, "", file.lastModified(), size);
-            } catch (URISyntaxException ignore) {}
+             String name = file.getName() + (file.isDirectory() ? "/" : "");
+             String size = file.isDirectory() ? "- " : toSizeApproxString(file.length());
+             if (config.httpserver_share_filter == 1 && ! file.isDirectory() &&
+                   ! Hlsutils.isVideoFile(file.getName()))
+                   continue;
+             // properly url-encode the link
+             String link = escapeHTML(path + name);
+             f.format(" <a href=\"%s\">%s</a>%-" + (w - name.length()) +
+                 "s&#8206;%td-%<tb-%<tY %<tR%6s%n",
+                 link, name, "", file.lastModified(), size);
         }
         f.format("</pre></body></html>");
         return f.toString();
