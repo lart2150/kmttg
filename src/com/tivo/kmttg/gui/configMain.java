@@ -95,6 +95,7 @@ public class configMain {
    private static JCheckBox rpcnpl = null;
    private static JCheckBox enableRpc = null;
    private static JCheckBox persistQueue = null;
+   private static JTextField VRDexe = null;
    private static JTextField tivo_name = null;
    private static JTextField tivo_ip = null;
    private static JTextField share_name = null;
@@ -690,6 +691,9 @@ public class configMain {
       else
          VRD.setSelected(false);
       
+      // VRDexe
+      VRDexe.setText(config.VRDexe);
+      
       // VrdEncode
       if (config.VrdEncode == 1)
          VrdEncode.setSelected(true);
@@ -1184,6 +1188,17 @@ public class configMain {
          config.VRD = 1;
       else
          config.VRD = 0;
+      
+      // VRDexe
+      value = string.removeLeadingTrailingSpaces(VRDexe.getText());
+      if (value.length() > 0) {
+    	   if (file.isFile(value)) {
+    	      config.VRDexe = value;
+    	   } else {
+            textFieldError(VRDexe, "Configured path to VRD executable doesn't exist: '" + value + "'");
+            errors++;
+    	   }
+      }
       
       // UseAdscan
       if (UseAdscan.isSelected() && config.VRD == 1)
@@ -1974,6 +1989,7 @@ public class configMain {
       tivo_password = new javax.swing.JTextField(30);
       pyTivo_config = new javax.swing.JTextField(30);
       
+      VRDexe = new javax.swing.JTextField(20);
       tivo_name = new javax.swing.JTextField(20);
       tivo_ip = new javax.swing.JTextField(20);
       share_name = new javax.swing.JTextField(20);
@@ -2025,6 +2041,7 @@ public class configMain {
       del = new javax.swing.JButton();
       share_add = new javax.swing.JButton();
       share_del = new javax.swing.JButton();
+      JLabel VRDexe_label = new javax.swing.JLabel();
       JLabel tivo_name_label = new javax.swing.JLabel();
       JLabel tivo_ip_label = new javax.swing.JLabel();
       JLabel share_name_label = new javax.swing.JLabel();
@@ -2174,6 +2191,7 @@ public class configMain {
          }
       });
       
+      VRDexe_label.setText("VideoRedo executable"); 
       tivo_name_label.setText("Tivo Name"); 
       tivo_ip_label.setText("Tivo IP#");
       share_name_label.setText("Share Name");
@@ -3543,6 +3561,16 @@ public class configMain {
       c.gridx = 1;
       c.gridy = gy;
       vrd_panel.add(VRD, c);
+      
+      // VRDexe
+      gy++;
+      c.gridx = 0;
+      c.gridy = gy;
+      vrd_panel.add(VRDexe_label, c);
+      
+      c.gridx = 1;
+      c.gridy = gy;
+      vrd_panel.add(VRDexe, c);
 
       // UseAdscan
       gy++;
@@ -3700,6 +3728,7 @@ public class configMain {
    
    public static void setToolTips() {
       debug.print("");
+      VRDexe.setToolTipText(getToolTip("VRDexe"));
       tivo_name.setToolTipText(getToolTip("tivo_name"));
       tivo_ip.setToolTipText(getToolTip("tivo_ip"));
       share_name.setToolTipText(getToolTip("share_name"));
@@ -4373,6 +4402,13 @@ public class configMain {
          text += "to automatically repair glitches/problems in mpeg2 program files.<br>";
          text += "This setting also REQUIRED if you want to use VideoRedo for commercial cutting (<b>comcut</b>) step,<br>";
          text += "and for a bunch of other tasks that can make use of VideoRedo.";
+      }
+      else if (component.equals("VRDexe")) {
+          text =  "<b>VideoRedo executable</b><br>";
+          text += "Specify here the full path to VideoRedo executable.<br>";
+          text += "This is used for <b>vrdreview</b> task for manually checking/editing commercials.<br>";
+          text += "This path needs to be full path to the VideoRedo .exe file.<br>";
+          text += "If not configured here, kmttg will attempt to find it automatically.<br>";
       }
       else if (component.equals("AtomicParsley")) {
          text =  "<b>AtomicParsley</b><br>";
