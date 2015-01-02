@@ -22,7 +22,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v1.1i_beta";
+   public static String kmttg = "kmttg v1.1i";
    
    // encoding related
    public static String encProfDir = "";
@@ -69,6 +69,7 @@ public class config {
    public static int VrdReview = 0;
    public static int comskip_review = 0;
    public static int VRD = 0;
+   public static String VRDexe = "";
    public static int VrdEncode = 0;
    public static int VrdReview_noCuts = 0;
    public static int VrdQsFilter = 0;
@@ -1089,6 +1090,9 @@ public class config {
                if (! string.removeLeadingTrailingSpaces(line).equals("0"))
                VRD = 1;
             }
+            if (key.equals("VRDexe")) {
+               VRDexe = string.removeLeadingTrailingSpaces(line);
+            }
             if (key.equals("t2extract")) {
                t2extract = line;
             }
@@ -1300,6 +1304,8 @@ public class config {
          ofp.write("<RemoveMpegFile>\n" + RemoveMpegFile + "\n\n");
          
          ofp.write("<VRD>\n" + VRD + "\n\n");
+         
+         ofp.write("<VRDexe>\n" + VRDexe + "\n\n");
          
          ofp.write("<QSFixBackupMpegFile>\n" + QSFixBackupMpegFile + "\n\n");
          
