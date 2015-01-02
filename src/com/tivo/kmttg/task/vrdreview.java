@@ -26,9 +26,7 @@ import com.tivo.kmttg.util.string;
 
 public class vrdreview implements Serializable {
    private static final long serialVersionUID = 1L;
-   String  vrdscript = null;
-   String  cscript = null;
-   String  lockFile = null;
+   String  vrd = null;
    private backgroundProcess process;
    private jobData job;
 
@@ -46,8 +44,25 @@ public class vrdreview implements Serializable {
       debug.print("");
       Boolean schedule = true;
       
-      String s = File.separator;
-      cscript = System.getenv("SystemRoot") + s + "system32" + s + "cscript.exe";
+      vrd = config.VRDexe;
+      if (! file.isFile(vrd)) {
+         // Try and find vrd automatically
+         vrd = findVRD();
+         if (vrd != null) {
+            config.VRDexe = vrd;
+            config.save(config.configIni);
+         }
+      }
+      if (vrd == null) {
+         log.error("Cannot find VRD executable - please specify path in config");
+         schedule = false;
+      } else {
+         if ( ! file.isFile(vrd)) {
+            log.error("Invalid path to VRD executable: " + vrd);
+            log.error("Please provide valid path in config");
+            schedule = false;
+         }
+      }
                         
       if ( ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not found: " + job.mpegFile);
@@ -70,14 +85,6 @@ public class vrdreview implements Serializable {
             schedule = false;
          }
       }
-
-      if ( schedule ) {
-         lockFile = file.makeTempFile("VRDLock");      
-         if ( lockFile == null || ! file.isFile(lockFile) ) {
-            log.error("Failed to created lock file: " + lockFile);
-            schedule = false;
-         }
-      }
       
       if (schedule) {
          if ( start() ) {
@@ -87,7 +94,6 @@ public class vrdreview implements Serializable {
          }
          return true;
       } else {
-         if (lockFile != null) file.delete(lockFile);
          return false;
       }      
    }
@@ -95,21 +101,10 @@ public class vrdreview implements Serializable {
    // Return false if starting command fails, true otherwise
    private Boolean start() {
       debug.print("");
-      // Create the vbs script
-      vrdscript = config.programDir + "\\VRDscripts\\vrdreview.vbs";      
-      if ( ! file.isFile(vrdscript) ) {
-         log.error("File does not exist: " + vrdscript);
-         log.error("Aborting. Fix incomplete kmttg installation");
-         jobMonitor.removeFromJobList(job);
-         return false;
-      }
 
       Stack<String> command = new Stack<String>();
-      command.add(cscript);
-      command.add("//nologo");
-      command.add(vrdscript);
+      command.add(vrd);
       command.add(job.vprjFile);
-      command.add("/l:" + lockFile);
       process = new backgroundProcess();
       log.print(">> Running vrdreview on " + job.vprjFile + " ...");
       if ( process.run(command) ) {
@@ -119,7 +114,6 @@ public class vrdreview implements Serializable {
          process.printStderr();
          process = null;
          jobMonitor.removeFromJobList(job);
-         if (lockFile != null) file.delete(lockFile);
          return false;
       }
       return true;
@@ -127,9 +121,7 @@ public class vrdreview implements Serializable {
    
    public void kill() {
       debug.print("");
-      // NOTE: Instead of process.kill VRD jobs are special case where removing lockFile
-      // causes VB script to close VRD. (Otherwise script is killed but VRD still runs).
-      file.delete(lockFile);
+      process.kill();
       log.warn("Killing '" + job.type + "' job: " + process.toString());
    }
 
@@ -214,7 +206,6 @@ public class vrdreview implements Serializable {
             }
          }
       }
-      if (lockFile != null) file.delete(lockFile);
       return false;
    }
    
@@ -243,6 +234,28 @@ public class vrdreview implements Serializable {
          return false;
       }
       return true;
+   }
+   
+   private String findVRD() {
+	   String[] pfiles = {System.getenv("ProgramFiles(x86)"), System.getenv("ProgramFiles")};
+	   String[] paths = {
+		  "VideoReDoTVSuite6", "VideoReDoTVSuite5", "VideoReDoTVSuite4", "VideoReDoPlus"
+	   };
+	   String[] pnames = {
+	      "VideoReDo6.exe", "VideoReDo5.exe", "VideoReDo4.exe", "VideoReDo3.exe",
+		  "VideoReDo.exe", "VRDPlus3.exe", "VRDPlus.exe",    		   
+	   };
+	   String vrd;
+	   for (String pfile : pfiles) {
+		   for (String path : paths) {
+			   for (String pname : pnames) {
+				   vrd = pfile + File.separator + path + File.separator + pname;
+				   if (file.isFile(vrd))
+					   return vrd;
+			   }
+		   }
+	   }
+	   return null;
    }
 
 }
