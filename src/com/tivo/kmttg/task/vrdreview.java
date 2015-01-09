@@ -224,6 +224,7 @@ public class vrdreview implements Serializable {
          rootElement.appendChild(fileElement);
          TransformerFactory tFactory = TransformerFactory.newInstance();
          Transformer transformer = tFactory.newTransformer();
+         transformer.setOutputProperty("omit-xml-declaration", "yes");
          DOMSource source = new DOMSource(doc);
          StreamResult result = new StreamResult(new File(vprjFile));
          transformer.transform(source, result);
