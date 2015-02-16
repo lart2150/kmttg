@@ -456,6 +456,8 @@ public class nplTable {
    private void KeyPressed(KeyEvent e) {
       if (e.isControlDown())
          return;
+      if (tivoName.equals("FILES"))
+         return;
       int keyCode = e.getKeyCode();
       if (keyCode == KeyEvent.VK_S) {
          // s key presses START JOBS button
