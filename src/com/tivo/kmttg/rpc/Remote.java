@@ -1074,7 +1074,7 @@ public class Remote {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
          JSONArray todo = ToDo(null);
          if (todo != null) {
-            ofp.write("DATE,SHOW,CHANNEL,DURATION\r\n");
+            ofp.write("DATE,SORTABLE DATE,SHOW,CHANNEL,DURATION\r\n");
             for (int i=0; i<todo.length(); ++i) {
                JSONObject json = todo.getJSONObject(i);
                String startString=null, endString=null, duration="";
@@ -1091,13 +1091,16 @@ public class Remote {
                if (end != 0 && start != 0)
                   duration = string.removeLeadingTrailingSpaces(sortableDuration.millisecsToHMS(end-start, false));
                String date = "";
+               String date_sortable = "";
                if (start != 0) {
                   SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy hh:mm a");
                   date = sdf.format(start);
+                  sdf = new SimpleDateFormat("yyyyMMddHHmm");
+                  date_sortable = sdf.format(start);
                }
                String show = string.removeLeadingTrailingSpaces(TableUtil.makeShowTitle(json));
                String channel = string.removeLeadingTrailingSpaces(TableUtil.makeChannelName(json));
-               ofp.write(date + ",\"" + show + "\"," + channel + "," + duration + "\r\n");
+               ofp.write(date + "," + date_sortable + ",\"" + show + "\"," + channel + "," + duration + "\r\n");
             }
          } else {
             log.error("Error getting ToDo list for TiVo: " + tivoName);

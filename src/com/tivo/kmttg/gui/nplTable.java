@@ -1608,12 +1608,20 @@ public class nplTable {
                   name = "DURATION";
                if (name.equals("Mbps"))
                   name = "BITRATE (Mbps)";
+               if (name.equals("SIZE"))
+                  name = "SIZE (GB)";
                ofp.write(name);
                if (col<numCols-1)
                   ofp.write(",");
+               if (name.equals("DATE")) {
+                  ofp.write("SORTABLE DATE");
+                  if (col<numCols-1)
+                     ofp.write(",");
+               }
             }
             ofp.write("\r\n");
             for (int row=0; row<NowPlaying.getRowCount(); row++) {
+               sortableDate s = (sortableDate)NowPlaying.getValueAt(row,getColumnIndex("DATE"));
                for (int col=0; col<numCols; ++col) {
                   int r = NowPlaying.convertRowIndexToModel(row);
                   int c = NowPlaying.convertColumnIndexToModel(col);
@@ -1627,9 +1635,16 @@ public class nplTable {
                      if (colName.equals("DUR") || colName.equals("SIZE") || colName.equals("Mbps"))
                         val = "0";
                   }
+                  if (colName.equals("SIZE"))
+                     val = val.replaceFirst(" GB", "");
                   ofp.write("\"" + val + "\"");
                   if (col < numCols-1)
                      ofp.write(",");
+                  if (colName.equals("DATE")) {
+                     ofp.write("\"" + TableUtil.getSortableDate(s) + "\"");
+                     if (col < numCols-1)
+                        ofp.write(",");
+                  }
                }
                ofp.write("\r\n");
             }
