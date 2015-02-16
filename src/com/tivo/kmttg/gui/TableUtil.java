@@ -341,12 +341,17 @@ public class TableUtil {
          return 0;
       }
    }
+   
+   public static String getSortableDate(sortableDate s) {
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+      long gmt = Long.parseLong(s.sortable);
+      return sdf.format(gmt);
+   }
       
    public static String currentYearMonthDay() {
       SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd");
       return sdf.format(new Date().getTime());
    }
-
    
    public static String makeShowTitle(JSONObject entry) {
       String title = " ";
