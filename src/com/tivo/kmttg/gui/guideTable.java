@@ -383,8 +383,6 @@ public class guideTable {
             String channel = "";
             if (entry.has("channelNumber"))
                channel = entry.getString("channelNumber");
-            if (entry.has("callSign"))
-               channel += "=" + entry.getString("callSign");
             if (entry.has("callSign")) {
                String callSign = entry.getString("callSign");
                if (callSign.toLowerCase().equals("all channels"))
