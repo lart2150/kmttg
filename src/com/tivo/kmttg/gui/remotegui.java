@@ -488,8 +488,8 @@ public class remotegui {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             if (tab_guide.inFolder) {
                // Return from inside a folder to top level table display
-               tab_guide.setFolderState(false);
                tab_guide.Refresh((JSONArray)null);
+               tab_guide.setFolderState(false);
                if (tab_guide.folderEntryNum >= 0)
                   tab_guide.SelectFolder(tab_guide.folderName);
             } else {
