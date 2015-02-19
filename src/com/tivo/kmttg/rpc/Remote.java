@@ -531,7 +531,7 @@ public class Remote {
          }
          else if (type.equals("Prioritize")) {
             // Re-prioritize season passes
-            // Expects JSONArray of all SP's "subscriptionId" in the order you want them
+            // Expects JSONArray of all SP's "subscriptionIdV2" in the order you want them
             json.put("bodyId", bodyId_get());
             req = RpcRequest("subscriptionsReprioritize", false, json);
          }
@@ -1349,7 +1349,7 @@ public class Remote {
    public JSONArray SPReorder(jobData job) {
       JSONObject json = new JSONObject();
       try {
-         json.put("subscriptionId", job.remote_orderIds);
+         json.put("subscriptionIdV2", job.remote_orderIds);
       } catch (JSONException e1) {
          log.error("ReorderCB - " + e1.getMessage());
          return null;
