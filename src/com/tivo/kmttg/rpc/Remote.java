@@ -48,7 +48,7 @@ import com.tivo.kmttg.util.string;
 
 public class Remote {
    public Boolean debug = false;
-   public String SchemaVersion = "9";
+   public String SchemaVersion = "14";
    public Boolean success = true;
    private String IP = null;
    private String cdata = null;
