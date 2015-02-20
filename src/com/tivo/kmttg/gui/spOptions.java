@@ -19,6 +19,10 @@ public class spOptions {
    TwoWayHashmap<String,String> untilHash = new TwoWayHashmap<String,String>();
    TwoWayHashmap<String,Integer> startHash = new TwoWayHashmap<String,Integer>();
    TwoWayHashmap<String,Integer> stopHash = new TwoWayHashmap<String,Integer>();
+   TwoWayHashmap<String,String> includeHash = new TwoWayHashmap<String,String>();
+   TwoWayHashmap<String,Integer> startFromHash = new TwoWayHashmap<String,Integer>();
+   TwoWayHashmap<String,String> rentOrBuyHash = new TwoWayHashmap<String,String>();
+   TwoWayHashmap<String,String> hdHash = new TwoWayHashmap<String,String>();
    
    public spOptions() {      
       recordHash.add("Repeats & first-run",   "rerunsAllowed");
@@ -57,6 +61,32 @@ public class spOptions {
       stopHash.add("60 minutes late", 3600);
       stopHash.add("90 minutes late", 5400);
       stopHash.add("180 minutes late", 10800);
+      
+      // Include
+      // idSetSource->consumptionSource
+      includeHash.add("Recordings Only",               "linear");
+      includeHash.add("Recordings & Streaming Videos", "all");
+      includeHash.add("Streaming Only",                "onDemand");
+      
+      // Start From
+      // Variable entries depending on 1st season available
+      // Season 1, Season 2, ..., New episodes only
+      // idSetSource->startSeasonOrYear
+      startFromHash.add("New episodes only", 1);
+      
+      // Rent or Buy
+      // Only used if if includeHash != linear (Default to "free")
+      // idSetSource->costFilter
+      rentOrBuyHash.add("Include", "freeOrRent");
+      rentOrBuyHash.add("Don't Include", "free");
+      rentOrBuyHash.add("??", "any");
+
+      // Get in HD
+      // Only used if Channel="All Channels" (default to "prefer" otherwise)
+      // hdPreference
+      hdHash.add("Always", "always");
+      hdHash.add("If Possible", "prefer");
+      hdHash.add("Never", "never");
       
       createComponents();      
    }
