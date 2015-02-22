@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -191,7 +192,8 @@ public class spOptions {
       updateStates();
    }
    
-   public JSONObject promptUser(String title, JSONObject json) {
+   public JSONObject promptUser(String title, JSONObject json, Boolean WL) {
+      setRecordChoices(WL);
       try {
          if (json != null)
             setValues(json);
@@ -212,18 +214,38 @@ public class spOptions {
             j.put("startTimePadding", startHash.getV((String)start.getSelectedItem()));
             j.put("endTimePadding",   stopHash.getV((String)stop.getSelectedItem()));
             String consumptionSource = includeHash.getV((String)include.getSelectedItem());
-            if ( j.has("idSetSource") && ! consumptionSource.equals("linear") ) {
-               JSONObject idSetSource = j.getJSONObject("idSetSource");
-               idSetSource.put("consumptionSource", consumptionSource);
-               int startSeasonOrYear = startFromHash.getV((String)startFrom.getSelectedItem());
-               if (startSeasonOrYear == -1) {
-                  idSetSource.put("episodeGuideType", "none");
-                  idSetSource.put("newOnlyDate", getGMT());
-               } else {
-                  idSetSource.put("episodeGuideType", "season");
-                  idSetSource.put("startSeasonOrYear", startSeasonOrYear);
+            int startSeasonOrYear = startFromHash.getV((String)startFrom.getSelectedItem());
+            // NOTE: All types have startSeasonOrYear
+            if ( consumptionSource.equals("linear") ) {
+               // Recordings only
+               JSONObject idSetSource;
+               Boolean newid = false;
+               if (j.has("idSetSource"))
+                  idSetSource = j.getJSONObject("idSetSource");
+               else {
+                  idSetSource = new JSONObject();
+                  newid = true;
                }
+               setSeason(idSetSource, startSeasonOrYear);
+               if (newid)
+                  j.put("idSetSource", idSetSource);
+            } else {
+               // Streaming elements desired
+               JSONObject idSetSource;
+               Boolean newid = false;
+               if ( j.has("idSetSource") )
+                  idSetSource = j.getJSONObject("idSetSource");
+               else {
+                  idSetSource = new JSONObject();
+                  newid = true;
+               }
+               if (consumptionSource.equals("onDemand") && idSetSource.has("channel"))
+                  idSetSource.remove("channel"); // Streaming only should not have channel in idSetSource
+               idSetSource.put("consumptionSource", consumptionSource);
                idSetSource.put("costFilter", rentOrBuyHash.getV((String)rentOrBuy.getSelectedItem()));
+               setSeason(idSetSource, startSeasonOrYear);
+               if (newid)
+                  j.put("idSetSource", idSetSource);
             }
             return j;
          } else {
@@ -314,11 +336,36 @@ public class spOptions {
       hd.setEnabled(hdenable);
    }
    
+   private void setRecordChoices(Boolean WL) {
+      String All = "All (with duplicates)";
+      if (WL) {
+         if( ((DefaultComboBoxModel)record.getModel()).getIndexOf(All) == -1)
+            record.addItem(All);
+      } else {
+         if( ((DefaultComboBoxModel)record.getModel()).getIndexOf(All) != -1)
+            record.removeItem(All);         
+      }
+   }
+   
    // Return current GMT time in format example: "2015-02-21 02:35:07"
    private String getGMT() {
       Date currentTime = new Date();
       SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd, HH:mm:ss");
       sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
       return(sdf.format(currentTime));
+   }
+   
+   private void setSeason(JSONObject idSetSource, int startSeasonOrYear) {
+      try {
+         if (startSeasonOrYear == -1) {
+            idSetSource.put("episodeGuideType", "none");
+            idSetSource.put("newOnlyDate", getGMT());
+         } else {
+            idSetSource.put("episodeGuideType", "season");
+            idSetSource.put("startSeasonOrYear", startSeasonOrYear);
+         }
+      } catch (JSONException e) {
+         log.error("spOptions.setSeason - " + e.getMessage());
+      }
    }
 }

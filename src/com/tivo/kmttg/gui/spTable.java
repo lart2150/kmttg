@@ -43,7 +43,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class spTable {
-   private String[] TITLE_cols = {"PRIORITY", "SHOW", "CHANNEL", "RECORD", "KEEP", "NUM", "START", "END"};
+   private String[] TITLE_cols = {"PRIORITY", "SHOW", "INCLUDE", "SEASON", "CHANNEL", "RECORD", "KEEP", "NUM", "START", "END"};
    public JXTable TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private String currentTivo = null;
@@ -70,29 +70,36 @@ public class spTable {
       );
       
       // Change color & font
+      int col = 0;
       TableColumn tm;
-      tm = TABLE.getColumnModel().getColumn(0);
+      tm = TABLE.getColumnModel().getColumn(col++);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.RIGHT);
-      tm = TABLE.getColumnModel().getColumn(1);
+      tm = TABLE.getColumnModel().getColumn(col++);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
-      tm = TABLE.getColumnModel().getColumn(2);
-      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
-      ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
-      tm = TABLE.getColumnModel().getColumn(3);
+      tm = TABLE.getColumnModel().getColumn(col++);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
-      tm = TABLE.getColumnModel().getColumn(4);
-      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
-      ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
-      tm = TABLE.getColumnModel().getColumn(5);
+      tm = TABLE.getColumnModel().getColumn(col++);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
-      tm = TABLE.getColumnModel().getColumn(6);
+      tm = TABLE.getColumnModel().getColumn(col++);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
-      tm = TABLE.getColumnModel().getColumn(7);
+      tm = TABLE.getColumnModel().getColumn(col++);
+      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+      ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
+      tm = TABLE.getColumnModel().getColumn(col++);
+      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+      ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
+      tm = TABLE.getColumnModel().getColumn(col++);
+      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
+      ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
+      tm = TABLE.getColumnModel().getColumn(col++);
+      tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+      ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
+      tm = TABLE.getColumnModel().getColumn(col++);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
       ((JLabel) tm.getCellRenderer()).setHorizontalAlignment(JLabel.LEFT);
       
@@ -113,11 +120,13 @@ public class spTable {
       // Use custom sorting routines for certain columns
       Sorter sorter = TABLE.getColumnExt(0).getSorter();
       sorter.setComparator(sortableComparator);
-      sorter = TABLE.getColumnExt(5).getSorter();
+      sorter = TABLE.getColumnExt(3).getSorter(); // SEASON = sortableInt
       sorter.setComparator(sortableComparator);
-      sorter = TABLE.getColumnExt(6).getSorter();
+      sorter = TABLE.getColumnExt(7).getSorter(); // NUM = sortableInt
       sorter.setComparator(sortableComparator);
-      sorter = TABLE.getColumnExt(7).getSorter();
+      sorter = TABLE.getColumnExt(8).getSorter(); // START = sortableInt
+      sorter.setComparator(sortableComparator);
+      sorter = TABLE.getColumnExt(9).getSorter(); // END = sortableInt
       sorter.setComparator(sortableComparator);
       
       // Add right mouse button handler
@@ -372,6 +381,25 @@ public class spTable {
              int count = data.getJSONArray("__upcoming").length();
              title += " (" + count + ")";
           }
+          
+          String include = "linear";
+          if (data.has("idSetSource")) {
+             o = data.getJSONObject("idSetSource");
+             if (o.has("consumptionSource"))
+                include = o.getString("consumptionSource");
+          }
+          
+          int season = 1;
+          if (data.has("idSetSource")) {
+             o = data.getJSONObject("idSetSource");
+             if (o.has("startSeasonOrYear"))
+                season = o.getInt("startSeasonOrYear");
+             if (o.has("type")) {
+                if (o.getString("type").equals("wishListSource"))
+                   season = 0;
+             }
+          }
+          
           String channel = " ";
           if (data.has("idSetSource")) {
              o = data.getJSONObject("idSetSource");
@@ -404,14 +432,17 @@ public class spTable {
           if (data.has("keepBehavior"))
              keep = data.getString("keepBehavior");
           
-          info[0] = new sortableInt(data, priority);
-          info[1] = title;
-          info[2] = channel;
-          info[3] = record;
-          info[4] = keep;
-          info[5] = new sortableInt(null, max);
-          info[6] = startPad;
-          info[7] = endPad;
+          int col = 0;
+          info[col++] = new sortableInt(data, priority);
+          info[col++] = title;
+          info[col++] = include;
+          info[col++] = new sortableInt(null, season);
+          info[col++] = channel;
+          info[col++] = record;
+          info[col++] = keep;
+          info[col++] = new sortableInt(null, max);
+          info[col++] = startPad;
+          info[col++] = endPad;
           return info;
        } catch (Exception e) {
           log.error("jsonToTableData - " + e.getMessage());
@@ -917,7 +948,7 @@ public class spTable {
                          return null;
                       }
                       JSONObject result = config.gui.remote_gui.spOpt.promptUser(
-                         "(" + tivoName + ")" + "Modify SP - " + title, json
+                         "(" + tivoName + ")" + "Modify SP - " + title, json, TableUtil.isWL(json)
                       );
                       if (result != null) {
                          Remote r = config.initRemote(tivoName);

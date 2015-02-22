@@ -1909,15 +1909,34 @@ public class Remote {
          // OK to subscribe
          if (schedule) {
             JSONObject o = config.gui.remote_gui.spOpt.promptUser(
-               "(" + tivoName + ") " + "Create SP - " + title, null
+               "(" + tivoName + ") " + "Create SP - " + title, null, false
             );
             if (o != null) {
                log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
-               JSONObject idSetSource = new JSONObject();
-               idSetSource.put("collectionId", json.getString("collectionId"));
-               idSetSource.put("type", "seasonPassSource");
-               idSetSource.put("channel", json.getJSONObject("channel"));
-               o.put("idSetSource", idSetSource);   
+               if (o.has("idSetSource")) {
+                  JSONObject idSetSource = o.getJSONObject("idSetSource");
+                  if (idSetSource.has("consumptionSource")) {
+                     // Has streaming elements
+                     String consumptionSource = idSetSource.getString("consumptionSource");
+                     idSetSource.put("collectionId", json.getString("collectionId"));
+                     idSetSource.put("type", "seasonPassSource");
+                     if (json.has("channel") && consumptionSource.equals("all"))
+                        idSetSource.put("channel", json.getJSONObject("channel"));
+                  } else {
+                     // Recordings only
+                     idSetSource.put("collectionId", json.getString("collectionId"));
+                     idSetSource.put("type", "seasonPassSource");
+                     idSetSource.put("channel", json.getJSONObject("channel"));
+                     o.put("idSetSource", idSetSource);
+                  }
+               } else {
+                  // Recordings only
+                  JSONObject idSetSource = new JSONObject();
+                  idSetSource.put("collectionId", json.getString("collectionId"));
+                  idSetSource.put("type", "seasonPassSource");
+                  idSetSource.put("channel", json.getJSONObject("channel"));
+                  o.put("idSetSource", idSetSource);
+               }
                JSONObject result = Command("Seasonpass", o);
                if (result != null) {
                   log.print("success");
@@ -1928,7 +1947,7 @@ public class Remote {
             log.warn("Existing SP with same title + callSign found, prompting to modify instead.");
             if (existingSP != null) {
                JSONObject result = config.gui.remote_gui.spOpt.promptUser(
-                  "(" + tivoName + ") " + "Modify SP - " + title, existingSP
+                  "(" + tivoName + ") " + "Modify SP - " + title, existingSP, TableUtil.isWL(existingSP)
                );
                if (result != null) {
                   if (Command("ModifySP", result) != null) {

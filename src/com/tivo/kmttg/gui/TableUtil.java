@@ -342,6 +342,20 @@ public class TableUtil {
       }
    }
    
+   public static Boolean isWL(JSONObject json) {
+      Boolean WL = false;
+      try {
+         if (json.has("idSetSource")) {
+            JSONObject idSetSource = json.getJSONObject("idSetSource");
+            if (idSetSource.has("type") && idSetSource.getString("type").equals("wishListSource"))
+               WL = true;
+         }
+      } catch (JSONException e) {
+         log.error("isWL - " + e.getMessage());
+      }
+      return WL;
+   }
+   
    public static String getSortableDate(sortableDate s) {
       SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
       long gmt = Long.parseLong(s.sortable);
