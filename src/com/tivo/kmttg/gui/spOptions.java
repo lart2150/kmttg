@@ -1,5 +1,11 @@
 package com.tivo.kmttg.gui;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -11,10 +17,12 @@ import com.tivo.kmttg.util.TwoWayHashmap;
 import com.tivo.kmttg.util.log;
 
 public class spOptions {
+   int maxSeason = 40;
    JComponent[] components;
    JLabel label;
-   JComboBox record, number, until, start, stop;
+   JComboBox record, channel, number, until, start, stop, include, startFrom, rentOrBuy, hd;
    TwoWayHashmap<String,String> recordHash = new TwoWayHashmap<String,String>();
+   TwoWayHashmap<String,String> channelHash = new TwoWayHashmap<String,String>();
    TwoWayHashmap<String,Integer> numberHash = new TwoWayHashmap<String,Integer>();
    TwoWayHashmap<String,String> untilHash = new TwoWayHashmap<String,String>();
    TwoWayHashmap<String,Integer> startHash = new TwoWayHashmap<String,Integer>();
@@ -28,6 +36,8 @@ public class spOptions {
       recordHash.add("Repeats & first-run",   "rerunsAllowed");
       recordHash.add("First-run only",        "firstRunOnly");
       recordHash.add("All (with duplicates)", "everyEpisode");
+      
+      channelHash.add("All", "");
       
       numberHash.add("1 recorded show", 1);
       numberHash.add("2 recorded shows", 2);
@@ -70,22 +80,27 @@ public class spOptions {
       
       // Start From
       // Variable entries depending on 1st season available
-      // Season 1, Season 2, ..., New episodes only
-      // idSetSource->startSeasonOrYear
-      startFromHash.add("New episodes only", 1);
+      // idSetSource->"episodeGuideType": "season", "startSeasonOrYear": 1
+      startFromHash.add("Season 1", 1);
+      // idSetSource->"episodeGuideType": "none", "newOnlyDate": "2015-02-21 02:35:07" (GMT time)
+      startFromHash.add("New episodes only", -1);
+      // idSetSource->"episodeGuideType": "season", "startSeasonOrYear": 2      
+      // startFromHash.add("Season 2", 2);
+      for (int i=2; i<=maxSeason; i++) {
+         startFromHash.add("Season " + i, i);
+      }
       
       // Rent or Buy
       // Only used if if includeHash != linear (Default to "free")
       // idSetSource->costFilter
-      rentOrBuyHash.add("Include", "freeOrRent");
+      rentOrBuyHash.add("Include", "any");
       rentOrBuyHash.add("Don't Include", "free");
-      rentOrBuyHash.add("??", "any");
 
       // Get in HD
       // Only used if Channel="All Channels" (default to "prefer" otherwise)
       // hdPreference
-      hdHash.add("Always", "always");
       hdHash.add("If Possible", "prefer");
+      hdHash.add("Always", "always");
       hdHash.add("Never", "never");
       
       createComponents();      
@@ -97,6 +112,17 @@ public class spOptions {
          "Repeats & first-run", "First-run only", "All (with duplicates)"}
       );
       record.setSelectedItem("First-run only");
+      
+      channel = new JComboBox(new String[] {
+         "This", "All"
+      });
+      channel.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+               updateStates();
+            }
+         }
+      });
       
       number = new JComboBox(new String[] {
          "1 recorded show", "2 recorded shows", "3 recorded shows",
@@ -122,14 +148,47 @@ public class spOptions {
       );
       stop.setSelectedItem("On time");
       
+      include = new JComboBox(new String[] {
+         "Recordings Only", "Recordings & Streaming Videos", "Streaming Only"
+      });
+      include.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+               updateStates();
+            }
+         }
+      });
+      
+      startFrom = new JComboBox(new String[] {
+         "Season 1", "New episodes only"
+      });
+      for (int i=2; i<=maxSeason; i++) {
+         startFrom.addItem("Season " + i);
+      }
+      
+      rentOrBuy = new JComboBox(new String[] {
+         "Don't Include", "Include"
+      });
+      
+      hd = new JComboBox(new String[] {
+         "If Possible", "Always", "Never"
+      });
+      
       components = new JComponent[] {
          label,
+         new JLabel("Include"),         include,
+         new JLabel("Start From"),      startFrom,
+         new JLabel("Rent Or Buy"),     rentOrBuy,
          new JLabel("Record"),          record,
+         //new JLabel("Channel"),         channel,
+         //new JLabel("Get in HD"),       hd,
          new JLabel("Keep at most"),    number,
          new JLabel("Keep until"),      until,
          new JLabel("Start recording"), start,
-         new JLabel("Stop recording"),  stop
+         new JLabel("Stop recording"),  stop,
       };
+      
+      updateStates();
    }
    
    public JSONObject promptUser(String title, JSONObject json) {
@@ -152,6 +211,20 @@ public class spOptions {
             j.put("keepBehavior",     untilHash.getV((String)until.getSelectedItem()));
             j.put("startTimePadding", startHash.getV((String)start.getSelectedItem()));
             j.put("endTimePadding",   stopHash.getV((String)stop.getSelectedItem()));
+            String consumptionSource = includeHash.getV((String)include.getSelectedItem());
+            if ( j.has("idSetSource") && ! consumptionSource.equals("linear") ) {
+               JSONObject idSetSource = j.getJSONObject("idSetSource");
+               idSetSource.put("consumptionSource", consumptionSource);
+               int startSeasonOrYear = startFromHash.getV((String)startFrom.getSelectedItem());
+               if (startSeasonOrYear == -1) {
+                  idSetSource.put("episodeGuideType", "none");
+                  idSetSource.put("newOnlyDate", getGMT());
+               } else {
+                  idSetSource.put("episodeGuideType", "season");
+                  idSetSource.put("startSeasonOrYear", startSeasonOrYear);
+               }
+               idSetSource.put("costFilter", rentOrBuyHash.getV((String)rentOrBuy.getSelectedItem()));
+            }
             return j;
          } else {
             return null;
@@ -174,6 +247,26 @@ public class spOptions {
             start.setSelectedItem(startHash.getK(json.getInt("startTimePadding")));
          if(json.has("endTimePadding"))
             stop.setSelectedItem(stopHash.getK(json.getInt("endTimePadding")));
+         String consumptionSource = "linear";
+         String costFilter = "free";
+         int startSeasonOrYear = -1;
+         if(json.has("idSetSource")) {
+            JSONObject id = json.getJSONObject("idSetSource");
+            if(id.has("consumptionSource")) {
+               consumptionSource = id.getString("consumptionSource");
+               if( ! consumptionSource.equals("linear") ) {
+                  if (id.has("costFilter"))
+                     costFilter = id.getString("costFilter");
+               }
+            }
+            if(id.has("startSeasonOrYear"))
+               startSeasonOrYear = id.getInt("startSeasonOrYear");
+         }
+         if (consumptionSource.equals("linear") && startSeasonOrYear == -1)
+            startSeasonOrYear = 1;
+         include.setSelectedItem(includeHash.getK(consumptionSource));
+         rentOrBuy.setSelectedItem(rentOrBuyHash.getK(costFilter));
+         startFrom.setSelectedItem(startFromHash.getK(startSeasonOrYear));
       } catch (JSONException e) {
          log.error("spOptions.setValues - " + e.getMessage());
       }
@@ -192,5 +285,40 @@ public class spOptions {
          return null;
       }
       return json;
+   }
+   
+   // include cyclic change callback
+   private void updateStates() {
+      String choice = (String)include.getSelectedItem();
+      String channelChoice = (String)channel.getSelectedItem();
+      Boolean recording = true;
+      Boolean streaming = true;
+      if (choice.equals("Streaming Only"))
+         recording = false;
+      if (choice.equals("Recordings Only"))
+         streaming = false;
+      
+      rentOrBuy.setEnabled(streaming);
+      record.setEnabled(recording);
+      channel.setEnabled(recording);
+      number.setEnabled(recording);
+      until.setEnabled(recording);
+      start.setEnabled(recording);
+      stop.setEnabled(recording);
+      
+      Boolean hdenable = false;
+      if (channelChoice.equals("All"))
+         hdenable = true;
+      if (choice.equals("Streaming Only"))
+         hdenable = false;
+      hd.setEnabled(hdenable);
+   }
+   
+   // Return current GMT time in format example: "2015-02-21 02:35:07"
+   private String getGMT() {
+      Date currentTime = new Date();
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd, HH:mm:ss");
+      sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+      return(sdf.format(currentTime));
    }
 }
