@@ -1838,6 +1838,75 @@ public class Remote {
       return null;
    }
    
+   // Search that includes non-linear content
+   public JSONArray extendedSearch(String keyword, Boolean includePaid, jobData job, int max) {
+      JSONArray titles = new JSONArray();
+      try {
+         int count = 50;
+         
+         // Update job monitor output column name
+         if (job != null && config.GUIMODE) {
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "onDemand Keyword Search: " + keyword);
+         }
+         
+         JSONObject json = new JSONObject();
+         json.put("count", count);
+         json.put("keyword", keyword);
+         json.put("includeBroadcast", true);
+         json.put("includeFree", true);
+         json.put("includePaid", includePaid);
+         json.put("includeVod", false);
+         json.put("orderBy", "strippedTitle");
+         json.put("mergeOverridingCollections", true);
+         json.put("levelOfDetail", "medium");
+         JSONObject result = Command("collectionSearch", json);
+         if (result == null) {
+            log.error("onDemand Keyword search failed for: '" + keyword + "'");
+         } else {                        
+            if (result.has("collection")) {
+               JSONArray entries = result.getJSONArray("collection");
+               JSONObject j = new JSONObject();
+               j.put("bodyId", bodyId_get());
+               j.put("count", count);
+               j.put("namespace", "trioserver");
+               j.put("mergeOverridingCollections", true);
+               j.put("levelOfDetail", "medium");
+               for (int i=0; i<entries.length(); ++i) {
+                  JSONObject c = entries.getJSONObject(i);
+                  if (c.has("collectionId")) {
+                     Boolean stop = false;
+                     int offset = 0;
+                     while ( ! stop ) {
+                        j.put("collectionId", c.getString("collectionId"));
+                        j.put("offset", offset);
+                        result = Command("offerSearch", j);
+                        if (result.has("offer")) {
+                           JSONArray a = result.getJSONArray("offer");
+                           offset += a.length();
+                           if (a.length() == 0)
+                              stop = true;
+                           for (int k=0; k<a.length(); ++k) {
+                              JSONObject title = a.getJSONObject(k);
+                              titles.put(title);
+                              if (titles.length() >= max) {
+                                 return titles;
+                              }
+                           }
+                        } else {
+                           stop = true;
+                        }
+                     } // while
+                  }
+               } // for
+            }
+         }
+      } catch (JSONException e) {
+         log.error("searchOnDemandKeywords failed - " + e.getMessage());
+      }
+      
+      return titles;
+   }
+   
    private String getCategoryId(String tivoName, String categoryName) {
       Remote r = new Remote(tivoName, true);
       if (r.success) {
