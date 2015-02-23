@@ -43,6 +43,7 @@ public class searchTable {
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
+   private Hashtable<String,String> partners = new Hashtable<String,String>();
          
    searchTable(JFrame dialog) {
       Object[][] data = {}; 
@@ -381,9 +382,20 @@ public class searchTable {
                data[0] = gui.Images.get("folder");
                data[1] = entry.getString("type");
                data[2] = " " + entry.getString("title") + " (" + num + ")";
-               String startString = entry.getJSONArray("entries").getJSONObject(0).getString("startTime");
-               long start = TableUtil.getLongDateFromString(startString);
+               String startString = "";
+               long start = 0;
+               if (entry.getJSONArray("entries").getJSONObject(0).has("startTime")) {
+                  startString = entry.getJSONArray("entries").getJSONObject(0).getString("startTime");
+                  start = TableUtil.getLongDateFromString(startString);
+               }
+               else if (entry.getJSONArray("entries").getJSONObject(0).has("releaseDate")) {
+                  startString = entry.getJSONArray("entries").getJSONObject(0).getString("releaseDate");
+                  start = TableUtil.getLongDateFromString(startString);
+               }
                data[3] = new sortableDate(entry.getString("title"), entry, start);
+               if (entry.getJSONArray("entries").getJSONObject(0).has("partnerId")) {
+                  data[4] = " STREAMING";
+               }
             } else {
                // Single item => don't display as folder
                data = makeTableEntry(entry.getJSONArray("entries").getJSONObject(0));
@@ -411,15 +423,24 @@ public class searchTable {
          }
          // If entry is in 1 of todo lists then add special __inTodo__ JSON entry
          config.gui.remote_gui.flagIfInTodo(entry, false);
-         String startString = entry.getString("startTime");
-         long start = TableUtil.getLongDateFromString(startString);
+         long start = 0;
+         if (entry.has("startTime")) {
+            start = TableUtil.getLongDateFromString(entry.getString("startTime"));
+         }
+         else if (entry.has("releaseDate")) {
+            start = TableUtil.getLongDateFromString(entry.getString("releaseDate"));
+         }
          long duration = entry.getLong("duration")*1000;
          String type = " ";
          if (entry.has("collectionType")) {
             type = entry.getString("collectionType");
          }
          String title = TableUtil.makeShowTitle(entry);
-         String channel = TableUtil.makeChannelName(entry);
+         String channel = "";
+         if (entry.has("channel"))
+            channel = TableUtil.makeChannelName(entry);
+         else if (entry.has("partnerId"))
+            channel = getPartnerName(entry.getString("partnerId"));
          
          data[1] = type;
          data[2] = title;
@@ -592,5 +613,39 @@ public class searchTable {
       }
       backgroundRun b = new backgroundRun();
       b.execute();
+   }
+   
+   // Return friendly name of a partner based on id, such as Netflix, Hulu, etc.
+   private String getPartnerName(String partnerId) {
+	  String name = partnerId;
+      if (partners.size() == 0) {
+          log.warn("Refreshing partner names");
+          Remote r = config.initRemote(currentTivo);
+          if (r.success) {
+             try {
+                JSONObject json = new JSONObject();
+                json.put("bodyId", r.bodyId_get());
+                json.put("noLimit", true);
+                json.put("levelOfDetail", "high");
+                JSONObject result = r.Command("partnerInfoSearch", json);
+                if (result != null && result.has("partnerInfo")) {
+             	   JSONArray info = result.getJSONArray("partnerInfo");
+             	   for (int i=0; i<info.length(); ++i) {
+             		   JSONObject j = info.getJSONObject(i);
+             		   if (j.has("partnerId") && j.has("displayName")) {
+             			   partners.put(j.getString("partnerId"), j.getString("displayName"));
+             		   }
+             	   }
+                }            	   
+             } catch (JSONException e1) {
+                log.error("getPartnerName - " + e1.getMessage());
+             }
+             r.disconnect();
+          }
+       }
+      
+	   if (partners.containsKey(partnerId))
+		   name = partners.get(partnerId);
+	   return name;
    }
 }

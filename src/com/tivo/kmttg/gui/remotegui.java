@@ -131,6 +131,7 @@ public class remotegui {
    private JTextField text_search = null;
    public JButton button_search = null;
    public JSpinner max_search = null;
+   private JCheckBox extendedSearch = null;
    public Hashtable<String,JSONArray> search_info = new Hashtable<String,JSONArray>();
    private AdvSearch advSearch = new AdvSearch();
    private JButton search_manual_record = null;
@@ -1719,6 +1720,7 @@ public class remotegui {
                   job.remote_search_max     = max;
                   job.remote_search         = true;
                   job.remote_search_keyword = keyword;
+                  job.remote_search_extended = extendedSearch.isSelected();
                   jobMonitor.submitNewJob(job);
                }
             }
@@ -1766,7 +1768,7 @@ public class remotegui {
          }
       });
 
-      recordSP_search = new JButton("Season Pass");
+      recordSP_search = new JButton("SP");
       recordSP_search.setMargin(new Insets(1,1,1,1));
       recordSP_search.setToolTipText(getToolTip("record_sp_search"));
       recordSP_search.addActionListener(new java.awt.event.ActionListener() {
@@ -1828,6 +1830,9 @@ public class remotegui {
       max_search = new JSpinner(spinner_model);
       max_search.setToolTipText(getToolTip("max_search"));
       
+      extendedSearch = new JCheckBox("streaming", false);
+      extendedSearch.setToolTipText(getToolTip("extendedSearch"));
+      
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(title_search);
       row1_search.add(Box.createRigidArea(space_5));
@@ -1842,6 +1847,8 @@ public class remotegui {
       row1_search.add(max_search_label);
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(max_search);
+      row1_search.add(Box.createRigidArea(space_5));
+      row1_search.add(extendedSearch);
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(adv_search);
       row1_search.add(Box.createRigidArea(space_5));
@@ -3488,6 +3495,10 @@ public class remotegui {
       else if (component.equals("includeHistory_cancel")){
          text = "<b>Include History</b><br>";
          text += "Include past history prior to current time if enabled.";
+      }
+      else if (component.equals("extendedSearch")){
+         text = "<b>streaming</b><br>";
+         text += "If enabled, include streaming titles in search in addition to TV channels.";
       }
       else if (component.equals("explain_cancel")) {
          text = "<b>Explain</b><br>";

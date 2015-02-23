@@ -1561,6 +1561,7 @@ public class Remote {
    // String    collectionId
    // JSONArray entries
    public JSONArray searchKeywords(String keyword, jobData job, int max) {
+      JSONArray table_entries = new JSONArray();
       JSONObject collections = new JSONObject();
       int order = 0;
       try {
@@ -1632,7 +1633,6 @@ public class Remote {
          
          // Now generate table_entries in priority order
          if (collections.length() > 0) {
-            JSONArray table_entries = new JSONArray();
             JSONArray keys = collections.names();
             for (int i=0; i<order; ++i) {
                for (int j=0; j<keys.length(); ++j) {
@@ -1642,13 +1642,31 @@ public class Remote {
                   }
                }
             }
-            return table_entries;
+         }
+         
+         // Add extended search results if requested
+         if (job != null && job.remote_search_extended) {
+            collections = extendedSearch(keyword, false, job, max);
+            if (collections != null && collections.length() > 0) {
+               order = collections.getInt("order");
+               JSONArray keys = collections.names();
+               for (int i=0; i<order; ++i) {
+                  for (int j=0; j<keys.length(); ++j) {
+                     if (! keys.getString(j).equals("order")) {
+                        if (collections.getJSONObject(keys.getString(j)).getInt("order") == i) {
+                           table_entries.put(collections.getJSONObject(keys.getString(j)));
+                           break;
+                        }
+                     }
+                  }
+               }
+            }
          }
       } catch (JSONException e) {
-         log.error("searchButtonCB failed - " + e.getMessage());
+         log.error("searchKeywords failed - " + e.getMessage());
       }
       
-      return null;
+      return table_entries;
    }
 
    // Advanced Search (used by AdvSearch GUI and remote task)
@@ -1839,14 +1857,16 @@ public class Remote {
    }
    
    // Search that includes non-linear content
-   public JSONArray extendedSearch(String keyword, Boolean includePaid, jobData job, int max) {
+   public JSONObject extendedSearch(String keyword, Boolean includePaid, jobData job, int max) {
       JSONArray titles = new JSONArray();
+      JSONObject collections = new JSONObject();
+      int order = 0;
       try {
          int count = 50;
          
          // Update job monitor output column name
          if (job != null && config.GUIMODE) {
-            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "onDemand Keyword Search: " + keyword);
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Extended keyword Search: " + keyword);
          }
          
          JSONObject json = new JSONObject();
@@ -1861,7 +1881,7 @@ public class Remote {
          json.put("levelOfDetail", "medium");
          JSONObject result = Command("collectionSearch", json);
          if (result == null) {
-            log.error("onDemand Keyword search failed for: '" + keyword + "'");
+            log.error("Extended keyword search failed for: '" + keyword + "'");
          } else {                        
             if (result.has("collection")) {
                JSONArray entries = result.getJSONArray("collection");
@@ -1883,13 +1903,19 @@ public class Remote {
                         if (result.has("offer")) {
                            JSONArray a = result.getJSONArray("offer");
                            offset += a.length();
+                           String message = "Ext Matches: " + offset;
+                           config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+                           if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                              config.gui.setTitle("Ext Search: " + offset + " " + config.kmttg);
+                           }
                            if (a.length() == 0)
                               stop = true;
                            for (int k=0; k<a.length(); ++k) {
                               JSONObject title = a.getJSONObject(k);
-                              titles.put(title);
+                              if ( ! stop )
+                                 titles.put(title);
                               if (titles.length() >= max) {
-                                 return titles;
+                                 stop = true;
                               }
                            }
                         } else {
@@ -1900,11 +1926,36 @@ public class Remote {
                } // for
             }
          }
+         
+         // Sort into collections
+         for (int i=0; i<titles.length(); ++i) {
+            JSONObject j = titles.getJSONObject(i);
+            String partnerId = j.getString("partnerId");
+            String title = j.getString("title");
+            String collectionId = j.getString("collectionId");
+            String collectionType = "";
+            if (j.has("collectionType"))
+               collectionType = j.getString("collectionType");
+            if (! collections.has(collectionId)) {
+               JSONObject new_json = new JSONObject();
+               new_json.put("partnerId", partnerId);
+               new_json.put("collectionId", collectionId);
+               new_json.put("title", title);
+               new_json.put("type", collectionType);
+               new_json.put("entries", new JSONArray());
+               new_json.put("order", order);
+               collections.put(collectionId, new_json);
+               order++;
+            }
+            collections.getJSONObject(collectionId).getJSONArray("entries").put(j);
+         }
+         collections.put("order", order);         
+         log.warn(">> Extended search completed on TiVo: " + job.tivoName);
       } catch (JSONException e) {
-         log.error("searchOnDemandKeywords failed - " + e.getMessage());
+         log.error("extendedSearch failed - " + e.getMessage());
       }
       
-      return titles;
+      return collections;
    }
    
    private String getCategoryId(String tivoName, String categoryName) {
