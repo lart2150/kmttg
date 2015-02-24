@@ -691,6 +691,51 @@ public class TableUtil {
       return sorted;
    }
    
+   // For a given array of JSON objects sort by episode numbers - earliest 1st
+   static public JSONArray sortByEpisode(JSONArray array) {
+      class EpComparator implements Comparator<JSONObject> {      
+         public int compare(JSONObject j1, JSONObject j2) {
+            int ep1 = getEpisodeNum(j1);
+            int ep2 = getEpisodeNum(j2);
+            if (ep1 > ep2){
+               return 1;
+            } else if (ep1 < ep2){
+               return -1;
+            } else {
+               return 0;
+            }
+         }
+      }
+      List<JSONObject> arrayList = new ArrayList<JSONObject>();
+      for (int i=0; i<array.length(); ++i) {
+         try {
+            arrayList.add(array.getJSONObject(i));
+         } catch (JSONException e) {
+            log.error("sortByEpisode - " + e.getMessage());
+         }
+      }
+      JSONArray sorted = new JSONArray();
+      EpComparator comparator = new EpComparator();
+      Collections.sort(arrayList, comparator);
+      for (JSONObject ajson : arrayList) {
+         sorted.put(ajson);
+      }
+      return sorted;
+   }
+   
+   public static int getEpisodeNum(JSONObject json) {
+      try {
+         if (json.has("seasonNumber") && json.has("episodeNum")) {
+            int seasonNumber = json.getInt("seasonNumber");
+            int episodeNum = json.getJSONArray("episodeNum").getInt(0);
+            return 100*seasonNumber + episodeNum;
+         }
+      } catch (Exception e) {
+         log.error("getEpisodeNum - " + e.getMessage());
+      }
+      return 0;
+   }
+   
    // Send url to web browser
    static public void webQuery(String title) {
       try {
