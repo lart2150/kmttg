@@ -127,6 +127,7 @@ public class config {
    public static int FontSize = 12;
    public static String lookAndFeel = "default";
    public static Boolean resumeDownloads = false;
+   public static Hashtable<String,String> partners = new Hashtable<String,String>();
    
    // Slingbox related
    public static int slingBox = 0;         // If 1 then display Slingbox tab
