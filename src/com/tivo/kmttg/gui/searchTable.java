@@ -436,13 +436,24 @@ public class searchTable {
             type = entry.getString("collectionType");
          }
          String title = TableUtil.makeShowTitle(entry);
-         if (entry.has("hdtv") && entry.getBoolean("hdtv"))
+         if (entry.has("partnerId")) {
+            if (entry.has("hdtv") && entry.getBoolean("hdtv"))
             title += " [HD]";
+            if (entry.has("price")) {
+               String price = entry.getString("price");
+               if (price.equals("USD.0"))
+                  price = "free";
+               price = price.replaceFirst("USD\\.", "");
+               if (price.matches("^[0-9]+"))
+                  price = String.format("$%.2f", Float.parseFloat(price)/100.0);
+               title = "(" + price + ") " + title;
+            }
+         }
          String channel = "";
          if (entry.has("channel"))
             channel = TableUtil.makeChannelName(entry);
          else if (entry.has("partnerId"))
-            channel = getPartnerName(entry.getString("partnerId"));
+            channel = getPartnerName(entry);
          
          data[1] = type;
          data[2] = title;
@@ -618,36 +629,42 @@ public class searchTable {
    }
    
    // Return friendly name of a partner based on id, such as Netflix, Hulu, etc.
-   private String getPartnerName(String partnerId) {
-	  String name = partnerId;
-      if (partners.size() == 0) {
-          log.warn("Refreshing partner names");
-          Remote r = config.initRemote(currentTivo);
-          if (r.success) {
-             try {
-                JSONObject json = new JSONObject();
-                json.put("bodyId", r.bodyId_get());
-                json.put("noLimit", true);
-                json.put("levelOfDetail", "high");
-                JSONObject result = r.Command("partnerInfoSearch", json);
-                if (result != null && result.has("partnerInfo")) {
-             	   JSONArray info = result.getJSONArray("partnerInfo");
-             	   for (int i=0; i<info.length(); ++i) {
-             		   JSONObject j = info.getJSONObject(i);
-             		   if (j.has("partnerId") && j.has("displayName")) {
-             			   partners.put(j.getString("partnerId"), j.getString("displayName"));
-             		   }
-             	   }
-                }            	   
-             } catch (JSONException e1) {
-                log.error("getPartnerName - " + e1.getMessage());
-             }
-             r.disconnect();
-          }
-       }
-      
-	   if (partners.containsKey(partnerId))
-		   name = partners.get(partnerId);
-	   return name;
+   private String getPartnerName(JSONObject entry) {
+      try {
+         if (partners.size() == 0) {
+            log.warn("Refreshing partner names");
+            Remote r = config.initRemote(currentTivo);
+            if (r.success) {
+               JSONObject json = new JSONObject();
+               json.put("bodyId", r.bodyId_get());
+               json.put("noLimit", true);
+               json.put("levelOfDetail", "high");
+               JSONObject result = r.Command("partnerInfoSearch", json);
+               if (result != null && result.has("partnerInfo")) {
+                  JSONArray info = result.getJSONArray("partnerInfo");
+                  for (int i=0; i<info.length(); ++i) {
+                     JSONObject j = info.getJSONObject(i);
+                     if (j.has("partnerId") && j.has("displayName")) {
+                        partners.put(j.getString("partnerId"), j.getString("displayName"));
+                     }
+                  }
+               }            	   
+               r.disconnect();
+            }
+         }
+   
+         String partnerId = "";
+         if (entry.has("partnerId"))
+            partnerId = entry.getString("partnerId");
+         if (entry.has("brandingPartnerId"))
+            partnerId = entry.getString("brandingPartnerId");
+         String name = partnerId;
+         if (partners.containsKey(partnerId))
+            name = partners.get(partnerId);
+         return name;
+      } catch (JSONException e1) {
+         log.error("getPartnerName - " + e1.getMessage());
+         return "STREAMING";
+      }
    }
 }
