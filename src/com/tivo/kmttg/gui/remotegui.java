@@ -131,7 +131,7 @@ public class remotegui {
    private JTextField text_search = null;
    public JButton button_search = null;
    public JSpinner max_search = null;
-   private JCheckBox extendedSearch = null;
+   public JCheckBox extendedSearch = null;
    public Hashtable<String,JSONArray> search_info = new Hashtable<String,JSONArray>();
    private AdvSearch advSearch = new AdvSearch();
    private JButton search_manual_record = null;
