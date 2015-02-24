@@ -1768,6 +1768,13 @@ public class gui {
                ofp.write("\n<rpc_search_max>\n");
                ofp.write("" + max + "\n");
                
+               // Search streaming setting
+               int extendedSearch = 0;
+               if (remote_gui.extendedSearch.isSelected())
+                  extendedSearch = 1;
+               ofp.write("\n<rpc_search_extendedSearch>\n");
+               ofp.write("" + extendedSearch + "\n");
+               
                // Record dialog
                JSONObject json = remote_gui.recordOpt.getValues();
                if (json != null) {
@@ -2052,6 +2059,16 @@ public class gui {
                try {
                   int max = Integer.parseInt(line);
                   remote_gui.max_search.setValue(max);
+               }
+               catch (NumberFormatException ex) {
+                  // Don't do anything here
+               }
+            }
+            
+            if (key.equals("rpc_search_extendedSearch") && remote_gui != null) {
+               try {
+                  int extendedSearch = Integer.parseInt(line);
+                  remote_gui.extendedSearch.setSelected(extendedSearch == 1);
                }
                catch (NumberFormatException ex) {
                   // Don't do anything here
