@@ -385,4 +385,12 @@ public class spOptions {
          log.error("spOptions.setSeason - " + e.getMessage());
       }
    }
+   
+   public String getIncludeValue() {
+      return (String)include.getSelectedItem();
+   }
+   
+   public void setIncludeValue(String val) {
+      include.setSelectedItem(val);
+   }
 }
