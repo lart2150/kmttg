@@ -2046,6 +2046,16 @@ public class Remote {
          
          // OK to subscribe
          if (schedule) {
+            
+            // Streaming source should default to "Streaming Only" setting for Include
+            String include_value = (String)config.gui.remote_gui.spOpt.getIncludeValue();
+            if (include_value.equals("Recordings Only") && json.has("partnerId"))
+               config.gui.remote_gui.spOpt.setIncludeValue("Streaming Only");
+            
+            // Non streaming source should default to "Recordings Only"
+            if (! include_value.equals("Recordings Only") && ! json.has("partnerId"))
+               config.gui.remote_gui.spOpt.setIncludeValue("Recordings Only");
+
             JSONObject o = config.gui.remote_gui.spOpt.promptUser(
                "(" + tivoName + ") " + "Create SP - " + title, null, false
             );
