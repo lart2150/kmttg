@@ -1861,6 +1861,7 @@ public class Remote {
       JSONArray titles = new JSONArray();
       JSONObject collections = new JSONObject();
       int order = 0;
+      int matched = 0;
       try {
          int count = 50;
          
@@ -1903,10 +1904,13 @@ public class Remote {
                         if (result.has("offer")) {
                            JSONArray a = result.getJSONArray("offer");
                            offset += a.length();
-                           String message = "Ext Matches: " + offset;
-                           config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
-                           if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                              config.gui.setTitle("Ext Search: " + offset + " " + config.kmttg);
+                           matched += a.length();
+                           if (job != null) {
+                              String message = "Ext Matches: " + matched;
+                              config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+                              if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                                 config.gui.setTitle("Ext Search: " + offset + " " + config.kmttg);
+                              }
                            }
                            if (a.length() == 0)
                               stop = true;
@@ -1963,7 +1967,8 @@ public class Remote {
             }
          }
          
-         log.warn(">> Extended search completed on TiVo: " + job.tivoName);
+         if (job != null)
+            log.warn(">> Extended search completed on TiVo: " + job.tivoName);
       } catch (JSONException e) {
          log.error("extendedSearch failed - " + e.getMessage());
       }
