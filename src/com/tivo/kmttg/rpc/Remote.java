@@ -1909,7 +1909,7 @@ public class Remote {
                               String message = "Ext Matches: " + matched;
                               config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
                               if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                                 config.gui.setTitle("Ext Search: " + offset + " " + config.kmttg);
+                                 config.gui.setTitle("Ext Search: " + matched + " " + config.kmttg);
                               }
                            }
                            if (a.length() == 0)
