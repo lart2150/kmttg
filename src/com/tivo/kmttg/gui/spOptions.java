@@ -193,7 +193,7 @@ public class spOptions {
    }
    
    public JSONObject promptUser(String title, JSONObject json, Boolean WL) {
-      setRecordChoices(WL);
+      setChoices(WL);
       try {
          if (json != null)
             setValues(json);
@@ -336,21 +336,34 @@ public class spOptions {
       hd.setEnabled(hdenable);
    }
    
-   private void setRecordChoices(Boolean WL) {
+   private void setChoices(Boolean WL) {
       String All = "All (with duplicates)";
+      String c1 = "Recordings Only";
+      String c2 = "Recordings & Streaming Videos";
+      String c3 = "Streaming Only";
       if (WL) {
          if( ((DefaultComboBoxModel)record.getModel()).getIndexOf(All) == -1)
             record.addItem(All);
+         if( ((DefaultComboBoxModel)include.getModel()).getIndexOf(c2) != -1)
+            include.removeItem(c2);         
+         if( ((DefaultComboBoxModel)include.getModel()).getIndexOf(c3) != -1)
+            include.removeItem(c3);         
+         include.setSelectedItem(c1);
+         updateStates();
       } else {
          if( ((DefaultComboBoxModel)record.getModel()).getIndexOf(All) != -1)
             record.removeItem(All);         
+         if( ((DefaultComboBoxModel)include.getModel()).getIndexOf(c2) == -1)
+            include.addItem(c2);
+         if( ((DefaultComboBoxModel)include.getModel()).getIndexOf(c3) == -1)
+            include.addItem(c3);
       }
    }
    
    // Return current GMT time in format example: "2015-02-21 02:35:07"
    private String getGMT() {
       Date currentTime = new Date();
-      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd, HH:mm:ss");
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
       sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
       return(sdf.format(currentTime));
    }
@@ -360,9 +373,13 @@ public class spOptions {
          if (startSeasonOrYear == -1) {
             idSetSource.put("episodeGuideType", "none");
             idSetSource.put("newOnlyDate", getGMT());
+            if (idSetSource.has("startSeasonOrYear"))
+               idSetSource.remove("startSeasonOrYear");
          } else {
             idSetSource.put("episodeGuideType", "season");
             idSetSource.put("startSeasonOrYear", startSeasonOrYear);
+            if (idSetSource.has("newOnlyDate"))
+               idSetSource.remove("newOnlyDate");
          }
       } catch (JSONException e) {
          log.error("spOptions.setSeason - " + e.getMessage());
