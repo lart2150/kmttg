@@ -1949,7 +1949,20 @@ public class Remote {
             }
             collections.getJSONObject(collectionId).getJSONArray("entries").put(j);
          }
-         collections.put("order", order);         
+         collections.put("order", order);
+         
+         // Sort collections by episode #
+         if (collections.length() > 0) {
+            JSONArray keys = collections.names();
+            for (int i=0; i<keys.length(); ++i) {
+               String key = keys.getString(i);
+               if ( ! key.equals("order") ) {
+                  JSONArray a = collections.getJSONObject(key).getJSONArray("entries");
+                  collections.getJSONObject(key).put("entries", TableUtil.sortByEpisode(a));
+               }
+            }
+         }
+         
          log.warn(">> Extended search completed on TiVo: " + job.tivoName);
       } catch (JSONException e) {
          log.error("extendedSearch failed - " + e.getMessage());
