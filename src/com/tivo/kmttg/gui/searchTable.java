@@ -43,7 +43,6 @@ public class searchTable {
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
-   private Hashtable<String,String> partners = new Hashtable<String,String>();
          
    searchTable(JFrame dialog) {
       Object[][] data = {}; 
@@ -631,9 +630,9 @@ public class searchTable {
    // Return friendly name of a partner based on id, such as Netflix, Hulu, etc.
    private String getPartnerName(JSONObject entry) {
       try {
-         if (partners.size() == 0) {
+         if (config.partners.size() == 0) {
             log.warn("Refreshing partner names");
-            Remote r = config.initRemote(currentTivo);
+            Remote r = config.initRemote(config.gui.remote_gui.getTivoName("search"));
             if (r.success) {
                JSONObject json = new JSONObject();
                json.put("bodyId", r.bodyId_get());
@@ -645,7 +644,7 @@ public class searchTable {
                   for (int i=0; i<info.length(); ++i) {
                      JSONObject j = info.getJSONObject(i);
                      if (j.has("partnerId") && j.has("displayName")) {
-                        partners.put(j.getString("partnerId"), j.getString("displayName"));
+                        config.partners.put(j.getString("partnerId"), j.getString("displayName"));
                      }
                   }
                }            	   
@@ -659,8 +658,8 @@ public class searchTable {
          if (entry.has("brandingPartnerId"))
             partnerId = entry.getString("brandingPartnerId");
          String name = partnerId;
-         if (partners.containsKey(partnerId))
-            name = partners.get(partnerId);
+         if (config.partners.containsKey(partnerId))
+            name = config.partners.get(partnerId);
          return name;
       } catch (JSONException e1) {
          log.error("getPartnerName - " + e1.getMessage());
