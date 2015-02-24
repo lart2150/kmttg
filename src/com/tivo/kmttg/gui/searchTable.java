@@ -436,6 +436,8 @@ public class searchTable {
             type = entry.getString("collectionType");
          }
          String title = TableUtil.makeShowTitle(entry);
+         if (entry.has("hdtv") && entry.getBoolean("hdtv"))
+            title += " [HD]";
          String channel = "";
          if (entry.has("channel"))
             channel = TableUtil.makeChannelName(entry);
