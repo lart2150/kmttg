@@ -1769,12 +1769,6 @@ public class gui {
                ofp.write("" + max + "\n");
                
                // Search streaming settings
-               int extendedSearch = 0;
-               if (remote_gui.extendedSearch.isSelected())
-                  extendedSearch = 1;
-               ofp.write("\n<rpc_search_extendedSearch>\n");
-               ofp.write("" + extendedSearch + "\n");
-               
                int includeFree = 0;
                if (remote_gui.includeFree.isSelected())
                   includeFree = 1;
@@ -2077,26 +2071,6 @@ public class gui {
                try {
                   int max = Integer.parseInt(line);
                   remote_gui.max_search.setValue(max);
-               }
-               catch (NumberFormatException ex) {
-                  // Don't do anything here
-               }
-            }
-            
-            if (key.equals("rpc_search_extendedSearch") && remote_gui != null) {
-               try {
-                  int extendedSearch = Integer.parseInt(line);
-                  if (extendedSearch == 1) {
-                     remote_gui.extendedSearch.setSelected(true);
-                     remote_gui.includeFree.setEnabled(true);
-                     remote_gui.includePaid.setEnabled(true);
-                     remote_gui.includeVod.setEnabled(true);
-                  } else {
-                     remote_gui.extendedSearch.setSelected(false);
-                     remote_gui.includeFree.setEnabled(false);
-                     remote_gui.includePaid.setEnabled(false);
-                     remote_gui.includeVod.setEnabled(false);
-                  }
                }
                catch (NumberFormatException ex) {
                   // Don't do anything here
