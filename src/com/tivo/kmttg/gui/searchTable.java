@@ -382,7 +382,7 @@ public class searchTable {
                data[1] = entry.getString("type");
                data[2] = " " + entry.getString("title") + " (" + num + ")";
                String startString = "";
-               long start = 0;
+               long start = -1;
                if (entry.getJSONArray("entries").getJSONObject(0).has("startTime")) {
                   startString = entry.getJSONArray("entries").getJSONObject(0).getString("startTime");
                   start = TableUtil.getLongDateFromString(startString);
@@ -422,7 +422,7 @@ public class searchTable {
          }
          // If entry is in 1 of todo lists then add special __inTodo__ JSON entry
          config.gui.remote_gui.flagIfInTodo(entry, false);
-         long start = 0;
+         long start = -1;
          if (entry.has("startTime")) {
             start = TableUtil.getLongDateFromString(entry.getString("startTime"));
          }
