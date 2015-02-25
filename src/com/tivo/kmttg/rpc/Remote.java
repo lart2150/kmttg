@@ -1645,10 +1645,10 @@ public class Remote {
          }
          
          // Add extended search results if requested
-         if (job != null && job.remote_search_extended) {
-            Boolean includeFree = config.gui.remote_gui.includeFree.isSelected();
-            Boolean includePaid = config.gui.remote_gui.includePaid.isSelected();
-            Boolean includeVod = config.gui.remote_gui.includeVod.isSelected();
+         Boolean includeFree = config.gui.remote_gui.includeFree.isSelected();
+         Boolean includePaid = config.gui.remote_gui.includePaid.isSelected();
+         Boolean includeVod = config.gui.remote_gui.includeVod.isSelected();
+         if (includeFree || includePaid || includeVod) {
             collections = extendedSearch(keyword, includeFree, includePaid, includeVod, job, max);
             if (collections != null && collections.length() > 0) {
                order = collections.getInt("order");
