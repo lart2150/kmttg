@@ -159,7 +159,6 @@ public class jobData implements Serializable, Cloneable {
    public String remote_search_keyword = null;
    public searchTable search = null;
    public int remote_search_max = 200;
-   public Boolean remote_search_extended = false;
    
    public Boolean remote_adv_search = false;
    public JSONObject remote_adv_search_json = null;
