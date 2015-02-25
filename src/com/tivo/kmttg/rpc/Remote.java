@@ -1646,7 +1646,10 @@ public class Remote {
          
          // Add extended search results if requested
          if (job != null && job.remote_search_extended) {
-            collections = extendedSearch(keyword, false, job, max);
+            Boolean includeFree = config.gui.remote_gui.includeFree.isSelected();
+            Boolean includePaid = config.gui.remote_gui.includePaid.isSelected();
+            Boolean includeVod = config.gui.remote_gui.includeVod.isSelected();
+            collections = extendedSearch(keyword, includeFree, includePaid, includeVod, job, max);
             if (collections != null && collections.length() > 0) {
                order = collections.getInt("order");
                JSONArray keys = collections.names();
@@ -1857,7 +1860,7 @@ public class Remote {
    }
    
    // Search that includes non-linear content
-   public JSONObject extendedSearch(String keyword, Boolean includePaid, jobData job, int max) {
+   public JSONObject extendedSearch(String keyword, Boolean includeFree, Boolean includePaid, Boolean includeVod, jobData job, int max) {
       JSONArray titles = new JSONArray();
       JSONObject collections = new JSONObject();
       int order = 0;
@@ -1871,12 +1874,13 @@ public class Remote {
          }
          
          JSONObject json = new JSONObject();
+         json.put("bodyId", bodyId_get());
          json.put("count", count);
          json.put("keyword", keyword);
          json.put("includeBroadcast", true);
-         json.put("includeFree", true);
+         json.put("includeFree", includeFree);
          json.put("includePaid", includePaid);
-         json.put("includeVod", false);
+         json.put("includeVod", includeVod);
          json.put("orderBy", "strippedTitle");
          json.put("mergeOverridingCollections", true);
          json.put("levelOfDetail", "medium");
@@ -1904,22 +1908,31 @@ public class Remote {
                         if (result.has("offer")) {
                            JSONArray a = result.getJSONArray("offer");
                            offset += a.length();
-                           matched += a.length();
+                           if (a.length() == 0)
+                              stop = true;
+                           for (int k=0; k<a.length(); ++k) {
+                              JSONObject title = a.getJSONObject(k);
+                              if ( ! stop ) {
+                                 // NOTE: Filter out paid items if includePaid == false
+                                 Boolean add = true;
+                                 if ( title.has("price") && ! includePaid) {
+                                    if ( ! title.getString("price").equals("USD.0") )
+                                       add = false;
+                                 }
+                                 if (add) {
+                                    matched++;
+                                    titles.put(title);
+                                 }
+                              }
+                              if (titles.length() >= max) {
+                                 stop = true;
+                              }
+                           }
                            if (job != null) {
                               String message = "Ext Matches: " + matched;
                               config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
                               if ( jobMonitor.isFirstJobInMonitor(job) ) {
                                  config.gui.setTitle("Ext Search: " + matched + " " + config.kmttg);
-                              }
-                           }
-                           if (a.length() == 0)
-                              stop = true;
-                           for (int k=0; k<a.length(); ++k) {
-                              JSONObject title = a.getJSONObject(k);
-                              if ( ! stop )
-                                 titles.put(title);
-                              if (titles.length() >= max) {
-                                 stop = true;
                               }
                            }
                         } else {

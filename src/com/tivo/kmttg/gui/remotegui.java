@@ -11,6 +11,7 @@ import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
@@ -132,6 +133,9 @@ public class remotegui {
    public JButton button_search = null;
    public JSpinner max_search = null;
    public JCheckBox extendedSearch = null;
+   public JCheckBox includeFree = null;
+   public JCheckBox includePaid = null;
+   public JCheckBox includeVod = null;
    public Hashtable<String,JSONArray> search_info = new Hashtable<String,JSONArray>();
    private AdvSearch advSearch = new AdvSearch();
    private JButton search_manual_record = null;
@@ -1667,6 +1671,9 @@ public class remotegui {
       JPanel row1_search = new JPanel();
       row1_search.setLayout(new BoxLayout(row1_search, BoxLayout.LINE_AXIS));
       
+      JPanel row2_search = new JPanel();
+      row2_search.setLayout(new BoxLayout(row2_search, BoxLayout.LINE_AXIS));
+      
       JLabel title_search = new JLabel("Search");
       
       JLabel tivo_search_label = new javax.swing.JLabel();
@@ -1830,9 +1837,6 @@ public class remotegui {
       max_search = new JSpinner(spinner_model);
       max_search.setToolTipText(getToolTip("max_search"));
       
-      extendedSearch = new JCheckBox("streaming", false);
-      extendedSearch.setToolTipText(getToolTip("extendedSearch"));
-      
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(title_search);
       row1_search.add(Box.createRigidArea(space_5));
@@ -1848,8 +1852,6 @@ public class remotegui {
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(max_search);
       row1_search.add(Box.createRigidArea(space_5));
-      row1_search.add(extendedSearch);
-      row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(adv_search);
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(record_search);
@@ -1862,6 +1864,40 @@ public class remotegui {
       row1_search.add(Box.createRigidArea(space_5));
       row1_search.add(refresh_todo_search);
       panel_search.add(row1_search, c);
+      
+      extendedSearch = new JCheckBox("Include streaming", false);
+      extendedSearch.setToolTipText(getToolTip("extendedSearch"));
+      extendedSearch.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            Boolean enabled = extendedSearch.isSelected();
+            includeFree.setEnabled(enabled);
+            includePaid.setEnabled(enabled);
+            includeVod.setEnabled(enabled);
+         }
+      });      
+      includeFree = new JCheckBox("Include free content", false);
+      includeFree.setToolTipText(getToolTip("includeFree"));
+      includeFree.setEnabled(false);
+      
+      includePaid = new JCheckBox("Include paid content", false);
+      includePaid.setToolTipText(getToolTip("includePaid"));
+      includePaid.setEnabled(false);
+      
+      includeVod = new JCheckBox("Include VOD", false);
+      includeVod.setToolTipText(getToolTip("includeVod"));
+      includeVod.setEnabled(false);
+      
+      gy++;
+      c.gridy = gy;
+      row2_search.add(Box.createRigidArea(space_5));
+      row2_search.add(extendedSearch);
+      row2_search.add(Box.createRigidArea(space_5));
+      row2_search.add(includeFree);
+      row2_search.add(Box.createRigidArea(space_5));
+      row2_search.add(includePaid);
+      row2_search.add(Box.createRigidArea(space_5));
+      row2_search.add(includeVod);
+      panel_search.add(row2_search,c);
       
       tab_search = new searchTable(config.gui.getJFrame());
       tab_search.TABLE.setPreferredScrollableViewportSize(tab_search.TABLE.getPreferredSize());
@@ -3497,8 +3533,20 @@ public class remotegui {
          text += "Include past history prior to current time if enabled.";
       }
       else if (component.equals("extendedSearch")){
-         text = "<b>streaming</b><br>";
+         text = "<b>Include streaming</b><br>";
          text += "If enabled, include streaming titles in search in addition to TV channels.";
+      }
+      else if (component.equals("includeFree")){
+         text = "<b>Include free content</b><br>";
+         text += "If enabled, include free streaming content.";
+      }
+      else if (component.equals("includePaid")){
+         text = "<b>Include paid content</b><br>";
+         text += "If enabled, include paid streaming content.";
+      }
+      else if (component.equals("includeVod")){
+         text = "<b>Include VOD</b><br>";
+         text += "If enabled, include VOD content.";
       }
       else if (component.equals("explain_cancel")) {
          text = "<b>Explain</b><br>";
