@@ -132,7 +132,6 @@ public class remotegui {
    private JTextField text_search = null;
    public JButton button_search = null;
    public JSpinner max_search = null;
-   public JCheckBox extendedSearch = null;
    public JCheckBox includeFree = null;
    public JCheckBox includePaid = null;
    public JCheckBox includeVod = null;
@@ -1727,7 +1726,6 @@ public class remotegui {
                   job.remote_search_max     = max;
                   job.remote_search         = true;
                   job.remote_search_keyword = keyword;
-                  job.remote_search_extended = extendedSearch.isSelected();
                   jobMonitor.submitNewJob(job);
                }
             }
@@ -1865,32 +1863,17 @@ public class remotegui {
       row1_search.add(refresh_todo_search);
       panel_search.add(row1_search, c);
       
-      extendedSearch = new JCheckBox("Include streaming", false);
-      extendedSearch.setToolTipText(getToolTip("extendedSearch"));
-      extendedSearch.addActionListener(new ActionListener() {
-         public void actionPerformed(ActionEvent e) {
-            Boolean enabled = extendedSearch.isSelected();
-            includeFree.setEnabled(enabled);
-            includePaid.setEnabled(enabled);
-            includeVod.setEnabled(enabled);
-         }
-      });      
-      includeFree = new JCheckBox("Include free content", false);
+      includeFree = new JCheckBox("Include free streaming content", false);
       includeFree.setToolTipText(getToolTip("includeFree"));
-      includeFree.setEnabled(false);
       
-      includePaid = new JCheckBox("Include paid content", false);
+      includePaid = new JCheckBox("Include paid streaming content", false);
       includePaid.setToolTipText(getToolTip("includePaid"));
-      includePaid.setEnabled(false);
       
-      includeVod = new JCheckBox("Include VOD", false);
+      includeVod = new JCheckBox("Include VOD content", false);
       includeVod.setToolTipText(getToolTip("includeVod"));
-      includeVod.setEnabled(false);
       
       gy++;
       c.gridy = gy;
-      row2_search.add(Box.createRigidArea(space_5));
-      row2_search.add(extendedSearch);
       row2_search.add(Box.createRigidArea(space_5));
       row2_search.add(includeFree);
       row2_search.add(Box.createRigidArea(space_5));
@@ -3532,21 +3515,17 @@ public class remotegui {
          text = "<b>Include History</b><br>";
          text += "Include past history prior to current time if enabled.";
       }
-      else if (component.equals("extendedSearch")){
-         text = "<b>Include streaming</b><br>";
-         text += "If enabled, include streaming titles in search in addition to TV channels.";
-      }
       else if (component.equals("includeFree")){
-         text = "<b>Include free content</b><br>";
-         text += "If enabled, include free streaming content.";
+         text = "<b>Include free streaming content</b><br>";
+         text += "If enabled, include free streaming content in search.";
       }
       else if (component.equals("includePaid")){
-         text = "<b>Include paid content</b><br>";
-         text += "If enabled, include paid streaming content.";
+         text = "<b>Include paid streaming content</b><br>";
+         text += "If enabled, include paid streaming content in search.";
       }
       else if (component.equals("includeVod")){
-         text = "<b>Include VOD</b><br>";
-         text += "If enabled, include VOD content.";
+         text = "<b>Include VOD content</b><br>";
+         text += "If enabled, include VOD content in search.";
       }
       else if (component.equals("explain_cancel")) {
          text = "<b>Explain</b><br>";
