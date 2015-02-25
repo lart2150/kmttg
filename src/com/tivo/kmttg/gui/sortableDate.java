@@ -37,7 +37,10 @@ public class sortableDate {
    sortableDate(JSONObject json, long gmt) {
       this.json = json;
       display = getTime(gmt);
-      sortable = "" + gmt;
+      if (gmt == 0 || gmt == -1)
+         sortable = "0";
+      else
+         sortable = "" + gmt;
    }
    
    // Folder entry json & gmt constructor
@@ -54,7 +57,7 @@ public class sortableDate {
       this.folderName = folderName;
       this.json = json;
       folder = true;
-      if (gmt == 0) {
+      if (gmt == 0 || gmt == -1) {
          display = "";
          sortable = "0";
       } else {
@@ -65,6 +68,8 @@ public class sortableDate {
    
    private String getTime(long gmt) {
       debug.print("gmt=" + gmt);
+      if (gmt == -1)
+         return "";
       SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy hh:mm a");
       return sdf.format(gmt);
    }
