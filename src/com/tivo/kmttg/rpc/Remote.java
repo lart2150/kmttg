@@ -1897,6 +1897,8 @@ public class Remote {
                j.put("mergeOverridingCollections", true);
                j.put("levelOfDetail", "medium");
                for (int i=0; i<entries.length(); ++i) {
+                  if (titles.length() >= max)
+                     break;
                   JSONObject c = entries.getJSONObject(i);
                   if (c.has("collectionId")) {
                      Boolean stop = false;
