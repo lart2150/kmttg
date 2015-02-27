@@ -863,7 +863,7 @@ public class Remote {
             int total = objects.length();
             Boolean stop = false;
             int offset = 0;
-            if (job.myshows_offset >= 0)
+            if (job != null && job.myshows_offset >= 0)
                offset = job.myshows_offset;
             int count = 50;
             // Now go through all returned 50 at a time
@@ -910,7 +910,7 @@ public class Remote {
                      stop = true;
                   }
                } // if a.length
-               if (job.myshows_limit > 0 && allShows.length() >= job.myshows_limit)
+               if (job != null && job.myshows_limit > 0 && allShows.length() >= job.myshows_limit)
                   stop = true;
             } // while
          } // if MyShows
