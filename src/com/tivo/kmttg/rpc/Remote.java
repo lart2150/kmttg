@@ -1866,7 +1866,7 @@ public class Remote {
       int order = 0;
       int matched = 0;
       try {
-         int count = 50;
+         int count = 25;
          
          // Update job monitor output column name
          if (job != null && config.GUIMODE) {
@@ -1905,7 +1905,7 @@ public class Remote {
                         j.put("collectionId", c.getString("collectionId"));
                         j.put("offset", offset);
                         result = Command("offerSearch", j);
-                        if (result.has("offer")) {
+                        if (result != null && result.has("offer")) {
                            JSONArray a = result.getJSONArray("offer");
                            offset += a.length();
                            if (a.length() == 0)
