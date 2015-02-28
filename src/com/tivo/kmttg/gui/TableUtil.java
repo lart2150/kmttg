@@ -484,6 +484,19 @@ public class TableUtil {
    // or an existing show for which to modify recording options.
    private static Boolean recordSingle(final String tivoName, JSONObject json) {
       try {
+         if (json.has("partnerId") && ! json.has("channel")) {
+            Boolean streaming = true;
+            if (json.has("collectionType") && json.getString("collectionType").equals("webVideo"))
+               streaming = false;
+            if (streaming) {
+               // Streaming only entry - don't know how to deal with it
+               String title = "";
+               if (json.has("title"))
+                  title = json.getString("title");
+               log.error("Streaming only entry cannot be recorded: " + title);
+               return false;
+            }
+         }
          String title = "UNTITLED";
          if (json.has("title"))
             title = json.getString("title");
