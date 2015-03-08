@@ -414,6 +414,11 @@ public class spTable {
                    else
                       channel += "=" + callSign;
                 }
+             } else {
+                if (o.has("consumptionSource")) {
+                   if (! o.getString("consumptionSource").equals("onDemand"))
+                      channel += "All Channels";
+                }
              }
           }
           int max = 0;
@@ -948,7 +953,7 @@ public class spTable {
                          return null;
                       }
                       JSONObject result = config.gui.remote_gui.spOpt.promptUser(
-                         "(" + tivoName + ")" + "Modify SP - " + title, json, TableUtil.isWL(json)
+                         tivoName, "(" + tivoName + ")" + "Modify SP - " + title, json, TableUtil.isWL(json)
                       );
                       if (result != null) {
                          Remote r = config.initRemote(tivoName);

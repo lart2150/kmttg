@@ -410,6 +410,18 @@ public class TableUtil {
                else
                   channel += "=" + callSign;
             }
+         } else {
+            if (entry.has("idSetSource")) {
+               JSONObject idSetSource = entry.getJSONObject("idSetSource");
+               if (idSetSource.has("channel"))
+                  channel = makeChannelName(idSetSource);
+               else {
+                  if (idSetSource.has("consumptionSource")) {
+                     if (idSetSource.getString("consumptionSource").equals("linear"))
+                        channel += "All Channels";
+                  }
+               }
+            }
          }
       } catch (JSONException e) {
          log.error("makeChannelName - " + e.getMessage());

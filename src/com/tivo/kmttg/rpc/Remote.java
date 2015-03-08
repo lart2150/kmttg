@@ -688,6 +688,8 @@ public class Remote {
             o.put("startTimePadding", json.getInt("startTimePadding"));
             o.put("idSetSource", json.getJSONObject("idSetSource"));
             o.put("subscriptionId", json.getString("subscriptionId"));
+            if (json.has("hdPreference"))
+               o.put("hdPreference", json.getString("hdPreference"));
             if (json.has("title"))
                o.put("title", json.getString("title"));
             if (json.has("folderingRules"))
@@ -1991,6 +1993,38 @@ public class Remote {
       return collections;
    }
    
+   // Given a collectionId return channels in guide associated with it
+   public JSONArray channelSearch(String collectionId) {
+      LinkedHashMap<String,JSONObject> unique = new LinkedHashMap<String,JSONObject>();
+      JSONArray channels = new JSONArray();
+      try {
+         JSONObject json = new JSONObject();
+         json.put("bodyId", bodyId_get());
+         json.put("collectionId", collectionId);
+         json.put("levelOfDetail", "low");
+         json.put("count", 50);
+         JSONObject result = Command("offerSearch", json);
+         if (result != null && result.has("offer")) {
+            JSONArray offers = result.getJSONArray("offer");
+            for (int i=0; i<offers.length(); ++i) {
+               JSONObject offer = offers.getJSONObject(i);
+               if (offer.has("channel")) {
+                  JSONObject channel = offer.getJSONObject("channel");
+                  unique.put(channel.getString("callSign"), channel);
+               }
+            }
+         }
+         if (! unique.isEmpty()) {
+            for (JSONObject j : unique.values()) {
+               channels.put(j);
+            }
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      return channels;
+   }
+   
    private String getCategoryId(String tivoName, String categoryName) {
       Remote r = new Remote(tivoName, true);
       if (r.success) {
@@ -2072,7 +2106,7 @@ public class Remote {
                config.gui.remote_gui.spOpt.setIncludeValue("Recordings Only");
 
             JSONObject o = config.gui.remote_gui.spOpt.promptUser(
-               "(" + tivoName + ") " + "Create SP - " + title, null, false
+               tivoName, "(" + tivoName + ") " + "Create SP - " + title, json, false
             );
             if (o != null) {
                log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
@@ -2110,7 +2144,7 @@ public class Remote {
             log.warn("Existing SP with same title + callSign found, prompting to modify instead.");
             if (existingSP != null) {
                JSONObject result = config.gui.remote_gui.spOpt.promptUser(
-                  "(" + tivoName + ") " + "Modify SP - " + title, existingSP, TableUtil.isWL(existingSP)
+                  tivoName, "(" + tivoName + ") " + "Modify SP - " + title, existingSP, TableUtil.isWL(existingSP)
                );
                if (result != null) {
                   if (Command("ModifySP", result) != null) {

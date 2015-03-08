@@ -4,6 +4,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Hashtable;
+import java.util.Stack;
 import java.util.TimeZone;
 
 import javax.swing.DefaultComboBoxModel;
@@ -12,8 +14,11 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
+import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.TwoWayHashmap;
 import com.tivo.kmttg.util.log;
 
@@ -23,7 +28,6 @@ public class spOptions {
    JLabel label;
    JComboBox record, channel, number, until, start, stop, include, startFrom, rentOrBuy, hd;
    TwoWayHashmap<String,String> recordHash = new TwoWayHashmap<String,String>();
-   TwoWayHashmap<String,String> channelHash = new TwoWayHashmap<String,String>();
    TwoWayHashmap<String,Integer> numberHash = new TwoWayHashmap<String,Integer>();
    TwoWayHashmap<String,String> untilHash = new TwoWayHashmap<String,String>();
    TwoWayHashmap<String,Integer> startHash = new TwoWayHashmap<String,Integer>();
@@ -32,14 +36,13 @@ public class spOptions {
    TwoWayHashmap<String,Integer> startFromHash = new TwoWayHashmap<String,Integer>();
    TwoWayHashmap<String,String> rentOrBuyHash = new TwoWayHashmap<String,String>();
    TwoWayHashmap<String,String> hdHash = new TwoWayHashmap<String,String>();
+   Hashtable<String,JSONObject> channelHash = new Hashtable<String,JSONObject>();
    
    public spOptions() {      
       recordHash.add("Repeats & first-run",   "rerunsAllowed");
       recordHash.add("First-run only",        "firstRunOnly");
       recordHash.add("All (with duplicates)", "everyEpisode");
-      
-      channelHash.add("All", "");
-      
+            
       numberHash.add("1 recorded show", 1);
       numberHash.add("2 recorded shows", 2);
       numberHash.add("3 recorded shows", 3);
@@ -115,7 +118,7 @@ public class spOptions {
       record.setSelectedItem("First-run only");
       
       channel = new JComboBox(new String[] {
-         "This", "All"
+         "All"
       });
       channel.addItemListener(new ItemListener() {
          public void itemStateChanged(ItemEvent e) {
@@ -181,8 +184,8 @@ public class spOptions {
          new JLabel("Start From"),      startFrom,
          new JLabel("Rent Or Buy"),     rentOrBuy,
          new JLabel("Record"),          record,
-         //new JLabel("Channel"),         channel,
-         //new JLabel("Get in HD"),       hd,
+         new JLabel("Channel"),         channel,
+         new JLabel("Get in HD"),       hd,
          new JLabel("Keep at most"),    number,
          new JLabel("Keep until"),      until,
          new JLabel("Start recording"), start,
@@ -192,11 +195,13 @@ public class spOptions {
       updateStates();
    }
    
-   public JSONObject promptUser(String title, JSONObject json, Boolean WL) {
+   public JSONObject promptUser(String tivoName, String title, JSONObject json, Boolean WL) {
       setChoices(WL);
       try {
-         if (json != null)
+         if (json != null) {
             setValues(json);
+            setChannels(tivoName, json);
+         }
          label.setText(title);
          int response = JOptionPane.showConfirmDialog(
             null, components, "Season Pass Options", JOptionPane.OK_CANCEL_OPTION
@@ -213,6 +218,8 @@ public class spOptions {
             j.put("keepBehavior",     untilHash.getV((String)until.getSelectedItem()));
             j.put("startTimePadding", startHash.getV((String)start.getSelectedItem()));
             j.put("endTimePadding",   stopHash.getV((String)stop.getSelectedItem()));
+            String hdPreference = hdHash.getV((String)hd.getSelectedItem());
+            String channelName = (String)channel.getSelectedItem();
             String consumptionSource = includeHash.getV((String)include.getSelectedItem());
             int startSeasonOrYear = startFromHash.getV((String)startFrom.getSelectedItem());
             // NOTE: All types have startSeasonOrYear
@@ -227,6 +234,7 @@ public class spOptions {
                   newid = true;
                }
                setSeason(idSetSource, startSeasonOrYear);
+                              
                if (newid)
                   j.put("idSetSource", idSetSource);
             } else {
@@ -247,6 +255,27 @@ public class spOptions {
                if (newid)
                   j.put("idSetSource", idSetSource);
             }
+            
+            // Channel & HD preference only applies for non onDemand content
+            if (! consumptionSource.equals("onDemand") && j.has("idSetSource")) {
+               JSONObject idSetSource = j.getJSONObject("idSetSource");
+               if (channelName.equals(" All")) {
+                  j.put("hdPreference", hdPreference);
+                  if (idSetSource.has("channel"))
+                     idSetSource.remove("channel");
+                  idSetSource.put("type", "seasonPassSource");
+                  idSetSource.put("consumptionSource", consumptionSource);
+                  if (json != null && json.has("collectionId")) {
+                     idSetSource.put("collectionId", json.getString("collectionId"));
+                  }
+                  idSetSource.put("costFilter", "free");
+               } else {
+                  if (j.has("hdPreference"))
+                     j.remove("hdPreference");
+                  idSetSource.put("channel", channelHash.get(channelName));
+               }
+            }
+            
             return j;
          } else {
             return null;
@@ -329,7 +358,7 @@ public class spOptions {
       stop.setEnabled(recording);
       
       Boolean hdenable = false;
-      if (channelChoice.equals("All"))
+      if (channelChoice.equals(" All"))
          hdenable = true;
       if (choice.equals("Streaming Only"))
          hdenable = false;
@@ -357,6 +386,61 @@ public class spOptions {
             include.addItem(c2);
          if( ((DefaultComboBoxModel)include.getModel()).getIndexOf(c3) == -1)
             include.addItem(c3);
+      }
+   }
+   
+   private void setChannels(String tivoName, JSONObject json) {
+      Stack<String> c = new Stack<String>();
+      c.push(" All");
+      channelHash.clear();
+      try {
+         String collectionId = null;
+         if (json.has("collectionId"))
+            collectionId = json.getString("collectionId");
+         else {
+            if (json.has("idSetSource")) {
+               JSONObject idSetSource = json.getJSONObject("idSetSource");
+               if (idSetSource.has("collectionId"))
+                  collectionId = idSetSource.getString("collectionId");
+            }
+         }
+         if (collectionId != null) {
+            Remote r = config.initRemote(tivoName);
+            if (r.success) {
+                  JSONArray channels = r.channelSearch(collectionId);
+                  if (channels.length() > 0) {
+                     for (int i=0; i<channels.length(); ++i) {
+                        JSONObject chan = channels.getJSONObject(i);
+                        JSONObject j = new JSONObject();
+                        j.put("channel", chan);
+                        String channelName = TableUtil.makeChannelName(j);
+                        channelHash.put(channelName, chan);
+                        c.push(channelName);
+                     }
+                  }
+            }
+         }
+      } catch (JSONException e) {
+         log.error("spOptions setChannels - " + e.getMessage());
+      }
+      channel.removeAllItems();
+      for (Object chan : c.toArray()) {
+         channel.addItem((String)chan);
+      }
+      if (json.has("idSetSource")) {
+         String chan = TableUtil.makeChannelName(json);
+         if (chan.contains("="))
+            channel.setSelectedItem(chan);
+         else {
+            // hdPreference relevant for All Channels
+            if (json.has("hdPreference")) {
+               try {
+                  hd.setSelectedItem(hdHash.getK(json.getString("hdPreference")));
+               } catch (JSONException e) {
+                  log.error("spOptions setChannels - " + e.getMessage());
+               }
+            }
+         }
       }
    }
    

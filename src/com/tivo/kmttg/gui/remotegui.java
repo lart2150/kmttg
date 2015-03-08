@@ -3172,7 +3172,9 @@ public class remotegui {
          JSONObject json = new JSONObject();
          if (wl.has("autoRecord")) {
             // Need to prompt for season pass options
-            json = spOpt.promptUser("(" + tivoName + ") " + "Create ARWL - " + wl.getString("title"), null, true);
+            json = spOpt.promptUser(
+               tivoName, "(" + tivoName + ") " + "Create ARWL - " + wl.getString("title"), null, true
+            );
          }
          
          if (json != null) {
