@@ -654,6 +654,8 @@ public class Remote {
                o.put("endTimePadding", json.getInt("endTimePadding"));
             if (json.has("startTimePadding"))
                o.put("startTimePadding", json.getInt("startTimePadding"));
+            if (json.has("hdPreference"))
+               o.put("hdPreference", json.getString("hdPreference"));
             // These are required for wishlist types
             // NOTE: Advanced wishlist SPs don't contain idSetSource so don't work
             // NOTE: title is not needed for type=seasonPassSource and titles with special
