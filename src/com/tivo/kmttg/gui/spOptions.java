@@ -275,7 +275,17 @@ public class spOptions {
                   idSetSource.put("channel", channelHash.get(channelName));
                }
             }
-            
+            if (consumptionSource.equals("onDemand")) {
+               String [] remove = {"hdPreference"};
+               for (String r : remove)
+                  if (j.has(r))
+                     j.remove(r);
+            }
+            String [] remove = {"__priority__", "__upcoming", "priority"};
+            for (String r : remove) {
+               if (j.has(r))
+                  j.remove(r);
+            }
             return j;
          } else {
             return null;
@@ -427,18 +437,16 @@ public class spOptions {
       for (Object chan : c.toArray()) {
          channel.addItem((String)chan);
       }
-      if (json.has("idSetSource")) {
-         String chan = TableUtil.makeChannelName(json);
-         if (chan.contains("="))
-            channel.setSelectedItem(chan);
-         else {
-            // hdPreference relevant for All Channels
-            if (json.has("hdPreference")) {
-               try {
-                  hd.setSelectedItem(hdHash.getK(json.getString("hdPreference")));
-               } catch (JSONException e) {
-                  log.error("spOptions setChannels - " + e.getMessage());
-               }
+      String chan = TableUtil.makeChannelName(json);
+      if (chan.contains("="))
+         channel.setSelectedItem(chan);
+      else {
+         // hdPreference relevant for All Channels
+         if (json.has("hdPreference")) {
+            try {
+               hd.setSelectedItem(hdHash.getK(json.getString("hdPreference")));
+            } catch (JSONException e) {
+               log.error("spOptions setChannels - " + e.getMessage());
             }
          }
       }
