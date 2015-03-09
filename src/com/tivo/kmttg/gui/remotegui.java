@@ -135,6 +135,7 @@ public class remotegui {
    public JCheckBox includeFree = null;
    public JCheckBox includePaid = null;
    public JCheckBox includeVod = null;
+   public JCheckBox unavailable = null;
    public Hashtable<String,JSONArray> search_info = new Hashtable<String,JSONArray>();
    private AdvSearch advSearch = new AdvSearch();
    private JButton search_manual_record = null;
@@ -1872,6 +1873,9 @@ public class remotegui {
       includeVod = new JCheckBox("Include VOD content", false);
       includeVod.setToolTipText(getToolTip("includeVod"));
       
+      unavailable = new JCheckBox("Include unavailable", false);
+      unavailable.setToolTipText(getToolTip("unavailable"));
+      
       gy++;
       c.gridy = gy;
       row2_search.add(Box.createRigidArea(space_5));
@@ -1880,6 +1884,8 @@ public class remotegui {
       row2_search.add(includePaid);
       row2_search.add(Box.createRigidArea(space_5));
       row2_search.add(includeVod);
+      row2_search.add(Box.createRigidArea(space_5));
+      row2_search.add(unavailable);
       panel_search.add(row2_search,c);
       
       tab_search = new searchTable(config.gui.getJFrame());
@@ -3528,6 +3534,10 @@ public class remotegui {
       else if (component.equals("includeVod")){
          text = "<b>Include VOD content</b><br>";
          text += "If enabled, include VOD content in search.";
+      }
+      else if (component.equals("unavailable")){
+         text = "<b>Include unavailable</b><br>";
+         text += "If enabled, include content currently unavailable in guide data in search.";
       }
       else if (component.equals("explain_cancel")) {
          text = "<b>Explain</b><br>";

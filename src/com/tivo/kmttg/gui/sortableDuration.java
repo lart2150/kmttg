@@ -51,7 +51,10 @@ public class sortableDuration {
    
    sortableDuration(long value, Boolean showSecs) {
       sortable = value;
-      display = millisecsToHMS(sortable, showSecs);
+      if (value == 0)
+         display = "";
+      else
+         display = millisecsToHMS(sortable, showSecs);
    }
    
    public static String millisecsToHMS(long duration, Boolean showSecs) {

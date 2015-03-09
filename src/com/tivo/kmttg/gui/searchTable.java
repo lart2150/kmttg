@@ -429,7 +429,9 @@ public class searchTable {
          else if (entry.has("releaseDate")) {
             start = TableUtil.getLongDateFromString(entry.getString("releaseDate"));
          }
-         long duration = entry.getLong("duration")*1000;
+         long duration = 0;
+         if (entry.has("duration"))
+            duration = entry.getLong("duration")*1000;
          String type = " ";
          if (entry.has("collectionType")) {
             type = entry.getString("collectionType");
@@ -461,7 +463,7 @@ public class searchTable {
          data[5] = new sortableDuration(duration, false);
          return data;
       } catch (JSONException e1) {
-         log.error("AddTABLERow - " + e1.getMessage());
+         log.error("searchTable makeTableEntry - " + e1.getMessage());
       }
       return null;
    }

@@ -1652,8 +1652,9 @@ public class Remote {
          Boolean includeFree = config.gui.remote_gui.includeFree.isSelected();
          Boolean includePaid = config.gui.remote_gui.includePaid.isSelected();
          Boolean includeVod = config.gui.remote_gui.includeVod.isSelected();
-         if (includeFree || includePaid || includeVod) {
-            collections = extendedSearch(keyword, includeFree, includePaid, includeVod, job, max);
+         Boolean unavailable = config.gui.remote_gui.unavailable.isSelected();
+         if (includeFree || includePaid || includeVod || unavailable) {
+            collections = extendedSearch(keyword, includeFree, includePaid, includeVod, ! unavailable, job, max);
             if (collections != null && collections.length() > 0) {
                order = collections.getInt("order");
                JSONArray keys = collections.names();
@@ -1864,7 +1865,9 @@ public class Remote {
    }
    
    // Search that includes non-linear content
-   public JSONObject extendedSearch(String keyword, Boolean includeFree, Boolean includePaid, Boolean includeVod, jobData job, int max) {
+   public JSONObject extendedSearch(
+         String keyword, Boolean includeFree, Boolean includePaid,
+         Boolean includeVod, Boolean filterUnavailable, jobData job, int max) {
       JSONArray titles = new JSONArray();
       JSONObject collections = new JSONObject();
       int order = 0;
@@ -1882,10 +1885,13 @@ public class Remote {
          json.put("count", count);
          json.put("keyword", keyword);
          json.put("includeBroadcast", true);
-         json.put("includeFree", includeFree);
-         json.put("includePaid", includePaid);
-         json.put("includeVod", includeVod);
+         if (includeFree || includePaid || includeVod) {
+            json.put("includeFree", includeFree);
+            json.put("includePaid", includePaid);
+            json.put("includeVod", includeVod);
+         }
          json.put("orderBy", "strippedTitle");
+         json.put("filterUnavailable", filterUnavailable);
          json.put("mergeOverridingCollections", true);
          json.put("levelOfDetail", "medium");
          JSONObject result = Command("collectionSearch", json);
@@ -1943,6 +1949,20 @@ public class Remote {
                            }
                         } else {
                            stop = true;
+                           if (! filterUnavailable) {
+                              // No guide data available for this collection
+                              if (titles.length() < max && c.has("description")) {
+                                 matched++;
+                                 titles.put(c);
+                                 if (job != null) {
+                                    String message = "Ext Matches: " + matched;
+                                    config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+                                    if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                                       config.gui.setTitle("Ext Search: " + matched + " " + config.kmttg);
+                                    }
+                                 }
+                              }
+                           }
                         }
                      } // while
                   }
@@ -1953,7 +1973,9 @@ public class Remote {
          // Sort into collections
          for (int i=0; i<titles.length(); ++i) {
             JSONObject j = titles.getJSONObject(i);
-            String partnerId = j.getString("partnerId");
+            String partnerId = "";
+            if (j.has("partnerId"))
+               partnerId = j.getString("partnerId");
             String title = j.getString("title");
             String collectionId = j.getString("collectionId");
             String collectionType = "";
@@ -1961,7 +1983,8 @@ public class Remote {
                collectionType = j.getString("collectionType");
             if (! collections.has(collectionId)) {
                JSONObject new_json = new JSONObject();
-               new_json.put("partnerId", partnerId);
+               if (partnerId.length() > 0)
+                  new_json.put("partnerId", partnerId);
                new_json.put("collectionId", collectionId);
                new_json.put("title", title);
                new_json.put("type", collectionType);

@@ -1787,6 +1787,12 @@ public class gui {
                ofp.write("\n<rpc_search_includeVod>\n");
                ofp.write("" + includeVod + "\n");
                
+               int unavailable = 0;
+               if (remote_gui.unavailable.isSelected())
+                  unavailable = 1;
+               ofp.write("\n<rpc_search_unavailable>\n");
+               ofp.write("" + unavailable + "\n");
+               
                // Record dialog
                JSONObject json = remote_gui.recordOpt.getValues();
                if (json != null) {
@@ -2101,6 +2107,16 @@ public class gui {
                try {
                   int includeVod = Integer.parseInt(line);
                   remote_gui.includeVod.setSelected(includeVod == 1);
+               }
+               catch (NumberFormatException ex) {
+                  // Don't do anything here
+               }
+            }
+            
+            if (key.equals("rpc_search_unavailable") && remote_gui != null) {
+               try {
+                  int unavailable = Integer.parseInt(line);
+                  remote_gui.unavailable.setSelected(unavailable == 1);
                }
                catch (NumberFormatException ex) {
                   // Don't do anything here

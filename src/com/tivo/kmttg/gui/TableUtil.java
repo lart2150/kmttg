@@ -449,7 +449,7 @@ public class TableUtil {
             description = s.json.getString("description");
          }
          String d = "";
-         if (dur.sortable != null) {
+         if (dur.sortable != null && dur.sortable > 0) {
             d = rnpl.msecsToMins(dur.sortable);
          }
          String message = "";
@@ -458,7 +458,8 @@ public class TableUtil {
          if (channelNum != null && channel != null) {
             message += " on " + channelNum + "=" + channel;
          }
-         message += ", Duration = " + d;
+         if (d.length() > 0)
+            message += ", Duration = " + d;
          
          if (s.json.has("seasonNumber"))
             message += ", season " + s.json.get("seasonNumber");
