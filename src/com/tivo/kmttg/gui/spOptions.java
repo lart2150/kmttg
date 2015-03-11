@@ -425,6 +425,7 @@ public class spOptions {
                   if (r.success) {
                      JSONArray channels = r.channelSearch(collectionId);
                      if (channels.length() > 0) {
+                        resetChannels();
                         for (int i=0; i<channels.length(); ++i) {
                            JSONObject chan = channels.getJSONObject(i);
                            JSONObject j = new JSONObject();
@@ -545,9 +546,9 @@ public class spOptions {
    
    private void resetChannels() {
       channel.removeAllItems();
-      startFromHash = new TwoWayHashmap<String,Integer>();
+      channelHash = new Hashtable<String,JSONObject>();
       channel.addItem(" All");
-      startFrom.setSelectedItem(" All");
+      channel.setSelectedItem(" All");
    }
    
    private void setStartChoice(int season) {
