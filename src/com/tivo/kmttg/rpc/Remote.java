@@ -25,6 +25,8 @@ import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -2023,20 +2025,33 @@ public class Remote {
       LinkedHashMap<String,JSONObject> unique = new LinkedHashMap<String,JSONObject>();
       JSONArray channels = new JSONArray();
       try {
+         int count = 30;
+         int offset = 0;
          JSONObject json = new JSONObject();
          json.put("bodyId", bodyId_get());
          json.put("collectionId", collectionId);
          json.put("levelOfDetail", "low");
-         json.put("count", 50);
-         JSONObject result = Command("offerSearch", json);
-         if (result != null && result.has("offer")) {
-            JSONArray offers = result.getJSONArray("offer");
-            for (int i=0; i<offers.length(); ++i) {
-               JSONObject offer = offers.getJSONObject(i);
-               if (offer.has("channel")) {
-                  JSONObject channel = offer.getJSONObject("channel");
-                  unique.put(channel.getString("callSign"), channel);
+         json.put("count", count);
+         Boolean stop = false;
+         while (! stop) {
+            json.put("offset", offset);
+            JSONObject result = Command("offerSearch", json);
+            offset += count;
+            if (result != null && result.has("offer")) {
+               if (result.has("isBottom") && result.getBoolean("isBottom"))
+                  stop = true;
+               JSONArray offers = result.getJSONArray("offer");
+               if (offers.length() == 0)
+                  stop = true;
+               for (int i=0; i<offers.length(); ++i) {
+                  JSONObject offer = offers.getJSONObject(i);
+                  if (offer.has("channel")) {
+                     JSONObject channel = offer.getJSONObject("channel");
+                     unique.put(channel.getString("callSign"), channel);
+                  }
                }
+            } else {
+               stop = true;
             }
          }
          if (! unique.isEmpty()) {
@@ -2045,9 +2060,65 @@ public class Remote {
             }
          }
       } catch (Exception e) {
-         e.printStackTrace();
+         log.error("channelSearch - " + e.getMessage());
       }
       return channels;
+   }
+   
+   // Given a collectionId return season or year info associated with it
+   // Returns JSONObject with "seasons" and/or "years" JSONArray elements
+   public JSONObject seasonYearSearch(String collectionId) {
+      JSONObject info = new JSONObject();
+      // Using SortedSet so as to get unique array
+      SortedSet<Integer> seasons = new TreeSet<Integer>();
+      SortedSet<Integer> years = new TreeSet<Integer>();
+      try {
+         int count = 30;
+         int offset = 0;
+         JSONObject json = new JSONObject();
+         json.put("collectionId", collectionId);
+         json.put("filterUnavailable", false);
+         json.put("orderBy", "seasonNumber");
+         json.put("levelOfDetail", "low");
+         json.put("count", count);
+         Boolean stop = false;
+         while (! stop) {
+            json.put("offset", offset);
+            JSONObject result = Command("contentSearch", json);
+            offset += count;
+            if (result != null && result.has("content")) {
+               if (result.has("isBottom") && result.getBoolean("isBottom"))
+                  stop = true;
+               JSONArray matches = result.getJSONArray("content");
+               if (matches.length() == 0)
+                  stop = true;
+               for (int i=0; i<matches.length(); ++i) {
+                  JSONObject j = matches.getJSONObject(i);
+                  if (j.has("seasonNumber"))
+                     seasons.add(j.getInt("seasonNumber"));
+                  else if (j.has("originalAirYear"))
+                     years.add(j.getInt("originalAirYear"));
+               }
+            } else {
+               stop = true;
+            }
+         }
+         if (seasons.size() > 0) {
+            JSONArray a = new JSONArray();
+            for (int season : seasons)
+               a.put(season);
+            info.put("seasons", a);
+         }
+         if (years.size() > 0) {
+            JSONArray a = new JSONArray();
+            for (int year : years)
+               a.put(year);
+            info.put("years", a);
+         }
+      } catch (Exception e) {
+         log.error("seasonYearSearch - " + e.getMessage());
+      }
+      return info;
    }
    
    private String getCategoryId(String tivoName, String categoryName) {
@@ -2074,7 +2145,7 @@ public class Remote {
                }
             }
          } catch (JSONException e) {
-            System.out.println("Remote getCategoryId - " + e.getMessage());
+            log.error("Remote getCategoryId - " + e.getMessage());
             return null;
          }
          r.disconnect();
