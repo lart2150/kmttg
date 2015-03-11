@@ -531,8 +531,8 @@ public class spOptions {
    
    private void setChannelChoice(String item) {
       Boolean needToAdd = true;
-      for (int i=0; i<startFrom.getItemCount(); ++i) {
-         String s = (String)startFrom.getItemAt(i);
+      for (int i=0; i<channel.getItemCount(); ++i) {
+         String s = (String)channel.getItemAt(i);
          if (s.equals(item)) {
             needToAdd = false;
             channel.setSelectedItem(item);
