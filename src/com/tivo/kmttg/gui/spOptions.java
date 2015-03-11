@@ -90,9 +90,6 @@ public class spOptions {
       startFromHash.add("New episodes only", -1);
       // idSetSource->"episodeGuideType": "season", "startSeasonOrYear": 2      
       // startFromHash.add("Season 2", 2);
-      for (int i=2; i<=maxSeason; i++) {
-         startFromHash.add("Season " + i, i);
-      }
       
       // Rent or Buy
       // Only used if if includeHash != linear (Default to "free")
@@ -166,9 +163,6 @@ public class spOptions {
       startFrom = new JComboBox(new String[] {
          "Season 1", "New episodes only"
       });
-      for (int i=2; i<=maxSeason; i++) {
-         startFrom.addItem("Season " + i);
-      }
       
       rentOrBuy = new JComboBox(new String[] {
          "Don't Include", "Include"
@@ -201,6 +195,7 @@ public class spOptions {
          if (json != null) {
             setValues(json);
             setChannels(tivoName, json);
+            setStartFrom(tivoName, json);
          }
          label.setText(title);
          int response = JOptionPane.showConfirmDialog(
@@ -399,57 +394,189 @@ public class spOptions {
       }
    }
    
-   private void setChannels(String tivoName, JSONObject json) {
-      Stack<String> c = new Stack<String>();
-      c.push(" All");
-      channelHash.clear();
-      try {
-         String collectionId = null;
-         if (json.has("collectionId"))
-            collectionId = json.getString("collectionId");
-         else {
-            if (json.has("idSetSource")) {
-               JSONObject idSetSource = json.getJSONObject("idSetSource");
-               if (idSetSource.has("collectionId"))
-                  collectionId = idSetSource.getString("collectionId");
-            }
-         }
-         if (collectionId != null) {
-            Remote r = config.initRemote(tivoName);
-            if (r.success) {
-                  JSONArray channels = r.channelSearch(collectionId);
-                  if (channels.length() > 0) {
-                     for (int i=0; i<channels.length(); ++i) {
-                        JSONObject chan = channels.getJSONObject(i);
-                        JSONObject j = new JSONObject();
-                        j.put("channel", chan);
-                        String channelName = TableUtil.makeChannelName(j);
-                        channelHash.put(channelName, chan);
-                        c.push(channelName);
+   // This runs in background mode so as not to hang up GUI
+   private void setChannels(final String tivoName, final JSONObject json) {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            Stack<String> c = new Stack<String>();
+            c.push(" All");
+            channelHash.clear();
+            String defaultChoice = " All";
+            try {
+               resetChannels();
+               // Set default choice
+               String name = TableUtil.makeChannelName(json);
+               if (name.contains("="))
+                  defaultChoice = name;
+               setChannelChoice(defaultChoice);
+               
+               String collectionId = null;
+               if (json.has("collectionId"))
+                  collectionId = json.getString("collectionId");
+               else {
+                  if (json.has("idSetSource")) {
+                     JSONObject idSetSource = json.getJSONObject("idSetSource");
+                     if (idSetSource.has("collectionId"))
+                        collectionId = idSetSource.getString("collectionId");
+                  }
+               }
+               if (collectionId != null) {
+                  Remote r = config.initRemote(tivoName);
+                  if (r.success) {
+                     JSONArray channels = r.channelSearch(collectionId);
+                     if (channels.length() > 0) {
+                        for (int i=0; i<channels.length(); ++i) {
+                           JSONObject chan = channels.getJSONObject(i);
+                           JSONObject j = new JSONObject();
+                           j.put("channel", chan);
+                           String channelName = TableUtil.makeChannelName(j);
+                           channelHash.put(channelName, chan);
+                           c.push(channelName);
+                        }
                      }
                   }
-            }
-         }
-      } catch (JSONException e) {
-         log.error("spOptions setChannels - " + e.getMessage());
-      }
-      channel.removeAllItems();
-      for (Object chan : c.toArray()) {
-         channel.addItem((String)chan);
-      }
-      String chan = TableUtil.makeChannelName(json);
-      if (chan.contains("="))
-         channel.setSelectedItem(chan);
-      else {
-         // hdPreference relevant for All Channels
-         if (json.has("hdPreference")) {
-            try {
-               hd.setSelectedItem(hdHash.getK(json.getString("hdPreference")));
+               }
             } catch (JSONException e) {
                log.error("spOptions setChannels - " + e.getMessage());
             }
+            channel.removeAllItems();
+            for (Object chan : c.toArray()) {
+               channel.addItem((String)chan);
+            }
+            setChannelChoice(defaultChoice);
+            if ( ! defaultChoice.contains("=") ) {
+               // hdPreference relevant for All Channels
+               if (json.has("hdPreference")) {
+                  try {
+                     hd.setSelectedItem(hdHash.getK(json.getString("hdPreference")));
+                  } catch (JSONException e) {
+                     log.error("spOptions setChannels - " + e.getMessage());
+                  }
+               }
+            }
+            //log.warn(">> Channel choices completed");
+            return null;
+         } // doInBackground
+      } // backgroundRun
+      backgroundRun b = new backgroundRun();
+      b.execute();
+   }
+   
+   // This runs in background mode so as not to hang up GUI
+   private void setStartFrom(final String tivoName, final JSONObject json) {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            try {
+               resetStartFrom();
+               // Set default choice
+               int defaultChoice = 1;
+               if (json.has("idSetSource")) {
+                  JSONObject idSetSource = json.getJSONObject("idSetSource");
+                  if (idSetSource.has("episodeGuideType") && idSetSource.getString("episodeGuideType").equals("none"))
+                     defaultChoice = -1;
+                  if (idSetSource.has("startSeasonOrYear"))
+                     defaultChoice = idSetSource.getInt("startSeasonOrYear");
+               }
+               setStartChoice(defaultChoice);
+               
+               String collectionId = null;
+               if (json.has("collectionId"))
+                  collectionId = json.getString("collectionId");
+               else {
+                  if (json.has("idSetSource")) {
+                     JSONObject idSetSource = json.getJSONObject("idSetSource");
+                     if (idSetSource.has("collectionId"))
+                        collectionId = idSetSource.getString("collectionId");
+                  }
+               }
+               if (collectionId != null) {
+                  Remote r = config.initRemote(tivoName);
+                  if (r.success) {
+                     JSONObject j = r.seasonYearSearch(collectionId);
+                     if (j != null ) {
+                        JSONArray a = new JSONArray();
+                        if (j.has("seasons"))
+                           a = j.getJSONArray("seasons");
+                        else if (j.has("years"))
+                           a = j.getJSONArray("years");
+                        if (a.length() > 0) {
+                           startFrom.removeAllItems();
+                           startFromHash = new TwoWayHashmap<String,Integer>();
+                           for (int i=0; i<a.length(); ++i) {
+                              int season = a.getInt(i);
+                              startFrom.addItem("Season " + season);
+                              startFromHash.add("Season " + season, season);
+                              if (i == 0) {
+                                 startFrom.addItem("New episodes only");
+                                 startFromHash.add("New episodes only", -1);
+                              }
+                           }
+                        }
+                     }
+                     // Set default choice
+                     setStartChoice(defaultChoice);
+                  } // if r.success
+               }
+            } catch (JSONException e) {
+               log.error("spOptions setStartFrom - " + e.getMessage());
+            }
+            //log.warn(">> Start From choices completed");
+            return null;
+         } // doInBackground
+      } // backgroundRun
+      backgroundRun b = new backgroundRun();
+      b.execute();
+   }
+   
+   private void setChannelChoice(String item) {
+      Boolean needToAdd = true;
+      for (int i=0; i<startFrom.getItemCount(); ++i) {
+         String s = (String)startFrom.getItemAt(i);
+         if (s.equals(item)) {
+            needToAdd = false;
+            channel.setSelectedItem(item);
          }
       }
+      if (needToAdd) {
+         channel.addItem(item);
+         channel.setSelectedItem(item);
+      }
+   }
+   
+   private void resetChannels() {
+      channel.removeAllItems();
+      startFromHash = new TwoWayHashmap<String,Integer>();
+      channel.addItem(" All");
+      startFrom.setSelectedItem(" All");
+   }
+   
+   private void setStartChoice(int season) {
+      String item = "Season " + season;
+      if (season == -1) {
+         item = "New episodes only";
+      }
+      Boolean needToAdd = true;
+      for (int i=0; i<startFrom.getItemCount(); ++i) {
+         String s = (String)startFrom.getItemAt(i);
+         if (s.equals(item)) {
+            needToAdd = false;
+            startFrom.setSelectedItem(item);
+         }
+      }
+      if (needToAdd) {
+         startFrom.addItem(item);
+         startFrom.setSelectedItem(item);
+      }
+   }
+   
+   private void resetStartFrom() {
+      startFrom.removeAllItems();
+      startFromHash = new TwoWayHashmap<String,Integer>();
+      startFrom.addItem("Season 1");
+      startFromHash.add("Season 1", 1);
+      startFrom.addItem("New episodes only");
+      startFromHash.add("New episodes only", -1);
+      startFrom.setSelectedItem("Season 1");
    }
    
    // Return current GMT time in format example: "2015-02-21 02:35:07"
