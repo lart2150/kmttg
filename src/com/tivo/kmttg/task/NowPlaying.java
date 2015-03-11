@@ -447,7 +447,17 @@ public class NowPlaying implements Serializable {
             }
             if (json.has("bookmarkPosition")) {
                // NOTE: Don't have ByteOffset available, so use TimeOffset (secs) instead
-               entry.put("TimeOffset", "" + json.getInt("bookmarkPosition")/1000);               
+               entry.put("TimeOffset", "" + json.getInt("bookmarkPosition")/1000);
+               
+               if (json.has("size") && json.has("duration")) {
+                  // Estimate ByteOffset based on TimeOffset
+                  // size (KB) * 1024 * bookmarkPosition/(duration(s)*1000)
+                  long size = (long)json.getLong("size")*1024;
+                  long duration = (long)json.getLong("duration")*1000;
+                  long bookmarkPosition = (long)json.getLong("bookmarkPosition");
+                  long ByteOffset = bookmarkPosition*size/duration;
+                  entry.put("ByteOffset", "" + ByteOffset);
+               }
             }
             if (json.has("subscriptionIdentifier")) {
                JSONArray a = json.getJSONArray("subscriptionIdentifier");
