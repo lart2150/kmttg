@@ -2065,13 +2065,11 @@ public class Remote {
       return channels;
    }
    
-   // Given a collectionId return season or year info associated with it
-   // Returns JSONObject with "seasons" and/or "years" JSONArray elements
-   public JSONObject seasonYearSearch(String collectionId) {
-      JSONObject info = new JSONObject();
+   // Given a collectionId return greatest season number found
+   public int seasonSearch(String collectionId) {
+      int maxSeason = 1;
       // Using SortedSet so as to get unique array
       SortedSet<Integer> seasons = new TreeSet<Integer>();
-      SortedSet<Integer> years = new TreeSet<Integer>();
       try {
          int count = 30;
          int offset = 0;
@@ -2096,29 +2094,21 @@ public class Remote {
                   JSONObject j = matches.getJSONObject(i);
                   if (j.has("seasonNumber"))
                      seasons.add(j.getInt("seasonNumber"));
-                  else if (j.has("originalAirYear"))
-                     years.add(j.getInt("originalAirYear"));
                }
             } else {
                stop = true;
             }
          }
          if (seasons.size() > 0) {
-            JSONArray a = new JSONArray();
-            for (int season : seasons)
-               a.put(season);
-            info.put("seasons", a);
-         }
-         if (years.size() > 0) {
-            JSONArray a = new JSONArray();
-            for (int year : years)
-               a.put(year);
-            info.put("years", a);
+            for (int season : seasons) {
+               if (season > maxSeason)
+                  maxSeason = season;
+            }
          }
       } catch (Exception e) {
-         log.error("seasonYearSearch - " + e.getMessage());
+         log.error("seasonSearch - " + e.getMessage());
       }
-      return info;
+      return maxSeason;
    }
    
    private String getCategoryId(String tivoName, String categoryName) {
