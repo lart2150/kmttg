@@ -23,7 +23,6 @@ import com.tivo.kmttg.util.TwoWayHashmap;
 import com.tivo.kmttg.util.log;
 
 public class spOptions {
-   int maxSeason = 40;
    JComponent[] components;
    JLabel label;
    JComboBox record, channel, number, until, start, stop, include, startFrom, rentOrBuy, hd;
@@ -473,7 +472,7 @@ public class spOptions {
                int defaultChoice = 1;
                if (json.has("idSetSource")) {
                   JSONObject idSetSource = json.getJSONObject("idSetSource");
-                  if (idSetSource.has("episodeGuideType") && idSetSource.getString("episodeGuideType").equals("none"))
+                  if (idSetSource.has("newOnlyDate"))
                      defaultChoice = -1;
                   if (idSetSource.has("startSeasonOrYear"))
                      defaultChoice = idSetSource.getInt("startSeasonOrYear");
@@ -493,25 +492,13 @@ public class spOptions {
                if (collectionId != null) {
                   Remote r = config.initRemote(tivoName);
                   if (r.success) {
-                     JSONObject j = r.seasonYearSearch(collectionId);
-                     if (j != null ) {
-                        JSONArray a = new JSONArray();
-                        if (j.has("seasons"))
-                           a = j.getJSONArray("seasons");
-                        else if (j.has("years"))
-                           a = j.getJSONArray("years");
-                        if (a.length() > 0) {
-                           startFrom.removeAllItems();
-                           startFromHash = new TwoWayHashmap<String,Integer>();
-                           for (int i=0; i<a.length(); ++i) {
-                              int season = a.getInt(i);
-                              startFrom.addItem("Season " + season);
-                              startFromHash.add("Season " + season, season);
-                              if (i == 0) {
-                                 startFrom.addItem("New episodes only");
-                                 startFromHash.add("New episodes only", -1);
-                              }
-                           }
+                     int maxSeason = r.seasonSearch(collectionId);
+                     for (int i=1; i<=maxSeason; ++i) {
+                        startFrom.addItem("Season " + i);
+                        startFromHash.add("Season " + i, i);
+                        if (i == 0) {
+                           startFrom.addItem("New episodes only");
+                           startFromHash.add("New episodes only", -1);
                         }
                      }
                      // Set default choice
