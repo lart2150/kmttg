@@ -400,14 +400,10 @@ public class spOptions {
             Stack<String> c = new Stack<String>();
             c.push(" All");
             channelHash.clear();
-            String defaultChoice = " All";
             try {
                resetChannels();
                // Set default choice
-               String name = TableUtil.makeChannelName(json);
-               if (name.contains("="))
-                  defaultChoice = name;
-               setChannelChoice(defaultChoice);
+               setChannelChoice(json);
                
                String collectionId = null;
                if (json.has("collectionId"))
@@ -443,7 +439,8 @@ public class spOptions {
             for (Object chan : c.toArray()) {
                channel.addItem((String)chan);
             }
-            setChannelChoice(defaultChoice);
+            setChannelChoice(json);
+            String defaultChoice = (String)channel.getSelectedItem();
             if ( ! defaultChoice.contains("=") ) {
                // hdPreference relevant for All Channels
                if (json.has("hdPreference")) {
@@ -517,18 +514,32 @@ public class spOptions {
       b.execute();
    }
    
-   private void setChannelChoice(String item) {
+   private void setChannelChoice(JSONObject json) {
+      String name = " All";
+      String chan = TableUtil.makeChannelName(json);
+      if (chan.contains("="))
+         name = chan;
       Boolean needToAdd = true;
       for (int i=0; i<channel.getItemCount(); ++i) {
          String s = (String)channel.getItemAt(i);
-         if (s.equals(item)) {
+         if (s.equals(name)) {
             needToAdd = false;
-            channel.setSelectedItem(item);
+            channel.setSelectedItem(name);
          }
       }
       if (needToAdd) {
-         channel.addItem(item);
-         channel.setSelectedItem(item);
+         channel.addItem(name);
+         channel.setSelectedItem(name);
+      }
+      // Make sure channelHash has above entry
+      if (json.has("idSetSource")) {
+         try {
+         JSONObject id = json.getJSONObject("idSetSource");
+         if (id.has("channel"))
+            channelHash.put(name, id.getJSONObject("channel"));
+         } catch (JSONException e) {
+            log.error("setChannelChoice - " + e.getMessage());
+         }
       }
    }
    
