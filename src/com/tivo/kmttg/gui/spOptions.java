@@ -493,10 +493,11 @@ public class spOptions {
                   Remote r = config.initRemote(tivoName);
                   if (r.success) {
                      int maxSeason = r.seasonSearch(collectionId);
+                     startFrom.removeAllItems();
                      for (int i=1; i<=maxSeason; ++i) {
                         startFrom.addItem("Season " + i);
                         startFromHash.add("Season " + i, i);
-                        if (i == 0) {
+                        if (i == 1) {
                            startFrom.addItem("New episodes only");
                            startFromHash.add("New episodes only", -1);
                         }
