@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.SortedSet;
+import java.util.Stack;
 import java.util.TreeSet;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -2066,10 +2067,13 @@ public class Remote {
    }
    
    // Given a collectionId return greatest season number found
-   public int seasonSearch(String collectionId) {
+   // Return JSONObject with "maxSeason" integer or "years" JSONArray
+   public JSONObject seasonYearSearch(String collectionId) {
+      JSONObject info = new JSONObject();
       int maxSeason = 1;
       // Using SortedSet so as to get unique array
-      SortedSet<Integer> seasons = new TreeSet<Integer>();
+      Hashtable<Integer,Stack<Integer>> seasons = new Hashtable<Integer,Stack<Integer>>();
+      Hashtable<Integer,Stack<Integer>> years = new Hashtable<Integer,Stack<Integer>>();
       try {
          int count = 30;
          int offset = 0;
@@ -2077,8 +2081,9 @@ public class Remote {
          json.put("collectionId", collectionId);
          json.put("filterUnavailable", false);
          json.put("orderBy", "seasonNumber");
-         json.put("levelOfDetail", "low");
+         json.put("levelOfDetail", "medium");
          json.put("count", count);
+         json.put("omitPgdImages", true);
          Boolean stop = false;
          while (! stop) {
             json.put("offset", offset);
@@ -2092,23 +2097,73 @@ public class Remote {
                   stop = true;
                for (int i=0; i<matches.length(); ++i) {
                   JSONObject j = matches.getJSONObject(i);
+                  // Skip non episode matches
+                  if (j.has("isEpisode") && ! j.getBoolean("isEpisode"))
+                     continue;
+                  int year = 0, season = 0;
                   if (j.has("seasonNumber"))
-                     seasons.add(j.getInt("seasonNumber"));
+                     season = j.getInt("seasonNumber");
+                  if (j.has("originalAirYear"))
+                     year = j.getInt("originalAirYear");
+                  if (season > 0) {
+                     if (! seasons.containsKey(season))
+                        seasons.put(season, new Stack<Integer>());
+                     if (year > 0) {
+                        Stack<Integer> years_stack = seasons.get(season);
+                        years_stack.push(year);
+                        seasons.put(season, years_stack);
+                     }
+                  }
+                  if (year > 0) {
+                     if (! years.containsKey(year))
+                        years.put(year, new Stack<Integer>());
+                     if (season > 0) {
+                        Stack<Integer> seasons_stack = years.get(year);
+                        seasons_stack.push(season);
+                        years.put(year, seasons_stack);
+                     }
+                  }
                }
             } else {
                stop = true;
             }
          }
          if (seasons.size() > 0) {
-            for (int season : seasons) {
+            for (int season : seasons.keySet()) {
                if (season > maxSeason)
                   maxSeason = season;
             }
          }
+         info.put("maxSeason", maxSeason);
+         Boolean useYears = false;
+         if (seasons.size() == 0 && years.size() > 0)
+            useYears = true;
+         if (seasons.size() > 0 && years.size() > 0) {
+            // If there is a year without any season, then use years range instead
+            for (int year : years.keySet()) {
+               Stack<Integer> seasons_stack = years.get(year);
+               if (seasons_stack.isEmpty())
+                  useYears = true;
+            }
+         }
+         if (useYears) {
+            info.remove("maxSeason");
+            // 1st make unique array of years
+            SortedSet<Integer> unique = new TreeSet<Integer>();
+            for (int year : years.keySet())
+               unique.add(year);
+            Object y[] = unique.toArray();
+            Arrays.sort(y);
+            JSONArray a = new JSONArray();
+            for (Object year : y)
+               a.put(year);
+            info.put("years", a);
+         }
       } catch (Exception e) {
          log.error("seasonSearch - " + e.getMessage());
       }
-      return maxSeason;
+      //log.print(">>seasonSearch completes");
+      return info;
    }
    
    private String getCategoryId(String tivoName, String categoryName) {

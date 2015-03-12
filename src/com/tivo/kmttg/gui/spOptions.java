@@ -489,15 +489,35 @@ public class spOptions {
                if (collectionId != null) {
                   Remote r = config.initRemote(tivoName);
                   if (r.success) {
-                     int maxSeason = r.seasonSearch(collectionId);
+                     JSONObject info = r.seasonYearSearch(collectionId);
                      startFrom.removeAllItems();
-                     for (int i=1; i<=maxSeason; ++i) {
-                        startFrom.addItem("Season " + i);
-                        startFromHash.add("Season " + i, i);
-                        if (i == 1) {
-                           startFrom.addItem("New episodes only");
-                           startFromHash.add("New episodes only", -1);
+                     if (info.has("maxSeason")) {
+                        int maxSeason = info.getInt("maxSeason");
+                        for (int i=1; i<=maxSeason; ++i) {
+                           startFrom.addItem("Season " + i);
+                           startFromHash.add("Season " + i, i);
+                           if (i == 1) {
+                              startFrom.addItem("New episodes only");
+                              startFromHash.add("New episodes only", -1);
+                           }
                         }
+                     }
+                     if (info.has("years")) {
+                        Boolean hasDefault = false;
+                        JSONArray years = info.getJSONArray("years");
+                        for (int i=0; i<years.length(); ++i) {
+                           int year = years.getInt(i);
+                           if (defaultChoice == year)
+                              hasDefault = true;
+                           startFrom.addItem("" + year);
+                           startFromHash.add("" + year, year);
+                           if (i == 0) {
+                              startFrom.addItem("New episodes only");
+                              startFromHash.add("New episodes only", -1);
+                           }
+                        }
+                        if (! hasDefault)
+                           defaultChoice = years.getInt(0);
                      }
                      // Set default choice
                      setStartChoice(defaultChoice);
@@ -552,6 +572,8 @@ public class spOptions {
    
    private void setStartChoice(int season) {
       String item = "Season " + season;
+      if (season > 1900)
+         item = "" + season;
       if (season == -1) {
          item = "New episodes only";
       }
