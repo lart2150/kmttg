@@ -803,6 +803,12 @@ public class Remote {
             json.put("bodyId", bodyId_get());
             req = RpcRequest("unsubscribe", false, json);
          }
+         else if (type.equals("ContentLocatorStore")) {
+            // Add a streaming partner content locator (bookmark) to My Shows
+            // Expects both contentId & collectionId in json:
+            json.put("bodyId", bodyId_get());
+            req = RpcRequest("contentLocatorStore", false, json);
+         }
          else if (type.equals("Position")) {
             json.put("throttleDelay", 1000);
             req = RpcRequest("videoPlaybackInfoEventRegister", false, json);

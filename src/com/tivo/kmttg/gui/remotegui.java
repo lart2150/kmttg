@@ -3615,6 +3615,8 @@ public class remotegui {
          text += "NOTE: You should select TiVo you want to record on before pressing this button.<br>";
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
          text += "shows and will not schedule the recording.<br>";
+         text += "<b>NOTE: For streaming only titles this will add a bookmark of the title to the TiVo's My Shows.<br>";
+         text += "Streaming titles can be movies, episodes or even currently unavailable content.</b><br>";
          text += "NOTE: Not available for units older than series 4.";
       }
       else if (component.equals("record_sp_search")) {

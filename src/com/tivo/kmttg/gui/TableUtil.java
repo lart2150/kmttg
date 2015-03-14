@@ -502,12 +502,30 @@ public class TableUtil {
             if (json.has("collectionType") && json.getString("collectionType").equals("webVideo"))
                streaming = false;
             if (streaming) {
-               // Streaming only entry - don't know how to deal with it
-               String title = "";
-               if (json.has("title"))
-                  title = json.getString("title");
-               log.error("Streaming only entry cannot be recorded: " + title);
-               return false;
+               // Streaming only entry requires ContentLocatorStore
+               if (json.has("contentId") && json.has("collectionId")) {
+                  String title = "UNTITLED";
+                  if (json.has("title"))
+                     title = json.getString("title");
+                  JSONObject j = new JSONObject();
+                  j.put("contentId", json.getString("contentId"));
+                  j.put("collectionId", json.getString("collectionId"));
+                  Remote r = config.initRemote(tivoName);
+                  if (r.success) {
+                     JSONObject result = r.Command("ContentLocatorStore", j);
+                     r.disconnect();
+                     if (result != null) {
+                        log.warn("Added streaming title to My Shows: '" + title + "' on Tivo: " + tivoName);
+                        return true;
+                     } else {
+                        log.error("Failed to create content locator for: " + title);
+                        return false;
+                     }
+                  }
+               } else {
+                  log.warn("Missing contentId and/or collectionId for streaming title");
+                  return false;
+               }
             }
          }
          String title = "UNTITLED";
