@@ -3594,13 +3594,18 @@ public class remotegui {
       }
       else if (component.equals("refresh_stream")) {
          text = "<b>Refresh</b><br>";
-         text += "Refresh list of streaming items for selected TiVo.";
+         text += "Refresh list of streaming items for selected TiVo.<br>";
+         text += "The table will show individual My Shows streaming items such as Streaming Movie items<br>";
+         text += "as well as any One Passes with streaming options enabled.<br>";
+         text += "NOTE: When clicking on a folder it can take several seconds for episodes related to the<br>";
+         text += "streaming One Pass to be obtained, so please be patient.";
       }
       else if (component.equals("remove_stream")) {
          text = "<b>Remove</b><br>";
          text += "Remove selected list of streaming items in table from this TiVo.<br>";
-         text += "NOTE: Only non-folder entries can be removed. Folder entries come from<br>";
-         text += "Streaming One Passes so should be removed from <b>Season Passes</b> tab.";
+         text += "NOTE: Folder entries can also be selected and removed and is accomplished by unsubscribing<br>";
+         text += "the related One Pass (Season Pass) entries.<br>";
+         text += "Following any successful removal the table of streaming items is automatically refreshed.";
       }
       else if (component.equals("back_stream")){
          text = "<b>Back</b><br>";
