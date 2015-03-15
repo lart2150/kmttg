@@ -2230,6 +2230,12 @@ public class Remote {
    public JSONArray getEpisodes(String collectionId) {
       JSONArray episodes = new JSONArray();
       try {
+         // If there's a SP with matching collectionId then may restrict seasons
+         int startFrom = 1;
+         int possible = getOnePassStartFrom(collectionId);
+         if (possible > 0)
+            startFrom = possible;
+         
          int count = 25;
          int offset = 0;
          JSONObject json = new JSONObject();
@@ -2259,6 +2265,12 @@ public class Remote {
                   // Skip non episode matches
                   if (j.has("isEpisode") && ! j.getBoolean("isEpisode"))
                      continue;
+                  if (startFrom > 1) {
+                     // Filter according to startSeasonOrYear
+                     int start = getStartSeasonOrYear(j);
+                     if (start != -1 && start < startFrom)
+                        continue;
+                  }
                   episodes.put(j);
                }
             } else {
@@ -2266,9 +2278,56 @@ public class Remote {
             }
          }
       } catch (Exception e) {
-         log.error("seasonSearch - " + e.getMessage());
+         log.error("getEpisodes - " + e.getMessage());
       }
       return episodes;
+   }
+   
+   // Return a One Pass with given collectionId if it exists
+   public JSONObject findSP(String collectionId) {
+      try {
+         JSONObject json = new JSONObject();
+         json.put("bodyId", bodyId_get());
+         json.put("levelOfDetail", "medium");
+         json.put("collectionId", collectionId);
+         JSONObject result = Command("subscriptionSearch", json);
+         if (result != null && result.has("subscription")) {
+            return result.getJSONArray("subscription").getJSONObject(0);
+         }
+      } catch (JSONException e) {
+         log.error("findSP - " + e.getMessage());
+      }
+      return null;
+   }
+   
+   private int getOnePassStartFrom(String collectionId) {
+      JSONObject sp = findSP(collectionId);
+      if (sp != null) {
+         return getStartSeasonOrYear(sp);
+      }
+      return -1;
+   }
+   
+   private int getStartSeasonOrYear(JSONObject json) {
+      if (json != null) {
+         try {
+            if (json.has("idSetSource")) {
+               JSONObject id = json.getJSONObject("idSetSource");
+               if (id.has("startSeasonOrYear")) {
+                  return id.getInt("startSeasonOrYear");
+               }
+            }
+            if (json.has("seasonNumber")) {
+               return json.getInt("seasonNumber");
+            }
+            if (json.has("originalAirYear")) {
+               return json.getInt("originalAirYear");
+            }
+         } catch (JSONException e) {
+            log.error("getStartSeasonOrYear - " + e.getMessage());
+         }
+      }
+      return -1;
    }
    
    private String getCategoryId(String tivoName, String categoryName) {
