@@ -449,11 +449,11 @@ public class TableUtil {
             description = s.json.getString("description");
          }
          String d = "";
-         if (dur.sortable != null && dur.sortable > 0) {
+         if (dur != null && dur.sortable != null && dur.sortable > 0) {
             d = rnpl.msecsToMins(dur.sortable);
          }
          String message = "";
-         if (s.display != null)
+         if (s.display != null && ! s.sortable.equals("0"))
             message = s.display;
          if (channelNum != null && channel != null) {
             message += " on " + channelNum + "=" + channel;
@@ -798,6 +798,46 @@ public class TableUtil {
             json.put(flag, tivoName);
       } catch (JSONException e) {
          log.error("addTivoNameFlagtoJson - " + e.getMessage());
+      }
+   }
+   
+   // Return friendly name of a partner based on id, such as Netflix, Hulu, etc.
+   static public String getPartnerName(JSONObject entry) {
+      try {
+         if (config.partners.size() == 0) {
+            log.warn("Refreshing partner names");
+            Remote r = config.initRemote(config.gui.remote_gui.getTivoName("search"));
+            if (r.success) {
+               JSONObject json = new JSONObject();
+               json.put("bodyId", r.bodyId_get());
+               json.put("noLimit", true);
+               json.put("levelOfDetail", "high");
+               JSONObject result = r.Command("partnerInfoSearch", json);
+               if (result != null && result.has("partnerInfo")) {
+                  JSONArray info = result.getJSONArray("partnerInfo");
+                  for (int i=0; i<info.length(); ++i) {
+                     JSONObject j = info.getJSONObject(i);
+                     if (j.has("partnerId") && j.has("displayName")) {
+                        config.partners.put(j.getString("partnerId"), j.getString("displayName"));
+                     }
+                  }
+               }                 
+               r.disconnect();
+            }
+         }
+   
+         String partnerId = "";
+         if (entry.has("partnerId"))
+            partnerId = entry.getString("partnerId");
+         if (entry.has("brandingPartnerId"))
+            partnerId = entry.getString("brandingPartnerId");
+         String name = partnerId;
+         if (config.partners.containsKey(partnerId))
+            name = config.partners.get(partnerId);
+         return name;
+      } catch (JSONException e1) {
+         log.error("getPartnerName - " + e1.getMessage());
+         return "STREAMING";
       }
    }
 }
