@@ -105,6 +105,9 @@ public class remote implements Serializable {
                   if (data != null)
                      config.gui.remote_gui.updateTodoIfNeeded("Guide");
                }
+               if (job.remote_stream) {
+                  data = r.streamingEntries(null);
+               }
                if (data != null) {
                   success = true;
                } else {
@@ -131,6 +134,7 @@ public class remote implements Serializable {
       if (job.remote_search)        jobName += " Keyword Search";
       if (job.remote_adv_search)    jobName += " Advanced Search";
       if (job.remote_guideChannels) jobName += " Guide Channel List";
+      if (job.remote_stream)        jobName += " Streaming Entries";
       log.print(">> RUNNING '" + jobName + "' JOB FOR TiVo: " + job.tivoName);
       thread.start();
 
@@ -220,6 +224,9 @@ public class remote implements Serializable {
             if (job.remote_guideChannels && job.gTable != null && data != null) {
                TableUtil.clear(job.gTable.TABLE);
                job.gTable.AddRows(job.tivoName, data);
+            }
+            if (job.remote_stream && job.stream != null) {
+               job.stream.AddRows(job.tivoName, data);
             }
 
             log.warn("REMOTE job completed: " + jobMonitor.getElapsedTime(job.time));
