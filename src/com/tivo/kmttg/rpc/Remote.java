@@ -2027,6 +2027,52 @@ public class Remote {
       return collections;
    }
    
+   // Return list of My Shows streaming entries (streaming folders or individual streaming items)
+   // (For initial call parentId=null)
+   public JSONArray streamingEntries(String parentId) {
+      JSONArray entries = new JSONArray();
+      try {
+         JSONObject json = new JSONObject();
+         json.put("bodyId", bodyId_get());
+         json.put("levelOfDetail", "medium");
+         json.put("noLimit", true);
+         if (parentId != null)
+            json.put("parentMyShowsItemId", parentId);
+         JSONObject result = Command("myShowsItemSearch", json);
+         if (result != null && result.has("myShowsItem")) {
+            JSONArray a = result.getJSONArray("myShowsItem");
+            for (int i=0; i<a.length(); ++i) {
+               JSONObject entry = a.getJSONObject(i);
+               if (entry.has("onDemandAvailability") && entry.has("collectionId")) {
+                  JSONObject j = new JSONObject();
+                  j.put("collectionId", entry.get("collectionId"));
+                  j.put("levelOfDetail", "high");
+                  JSONObject r = Command("collectionSearch", j);
+                  if (r != null && r.has("collection")) {
+                     JSONObject o = r.getJSONArray("collection").getJSONObject(0);
+                     o.put("myShowsItemId", entry.get("myShowsItemId"));
+                     if (entry.has("startTime"))
+                        o.put("startTime", entry.getString("startTime"));
+                     if (entry.has("isFolder"))
+                        o.put("isFolder", entry.getBoolean("isFolder"));
+                     JSONObject avail = entry.getJSONArray("onDemandAvailability").getJSONObject(0);
+                     if (avail.has("brandingPartnerId"))
+                        o.put("partnerId", avail.getJSONArray("brandingPartnerId").getString(0));
+                     entries.put(o);
+                  }
+               } else if (entry.has("isFolder") && entry.getBoolean("isFolder")) {
+                  JSONArray children = streamingEntries(entry.getString("myShowsItemId"));
+                  for (int k=0; k<children.length(); ++k)
+                     entries.put(children.getJSONObject(k));
+               }
+            }
+         }
+      } catch (Exception e) {
+         log.error("streamingEntries - " + e.getMessage());
+      }
+      return(entries);
+   }
+   
    // Given a collectionId return channels in guide associated with it
    public JSONArray channelSearch(String collectionId) {
       LinkedHashMap<String,JSONObject> unique = new LinkedHashMap<String,JSONObject>();
@@ -2170,6 +2216,51 @@ public class Remote {
       }
       //log.print(">>seasonSearch completes");
       return info;
+   }
+   
+   // Given a collectionId return all episodes
+   public JSONArray getEpisodes(String collectionId) {
+      JSONArray episodes = new JSONArray();
+      try {
+         int count = 25;
+         int offset = 0;
+         JSONObject json = new JSONObject();
+         json.put("bodyId", bodyId_get());
+         json.put("collectionId", collectionId);
+         json.put("filterUnavailable", false);
+         JSONArray orderBy = new JSONArray();
+         orderBy.put("seasonNumber");
+         orderBy.put("episodeNum");
+         json.put("orderBy", orderBy);
+         json.put("levelOfDetail", "medium");
+         json.put("count", count);
+         //json.put("omitPgdImages", true);
+         Boolean stop = false;
+         while (! stop) {
+            json.put("offset", offset);
+            JSONObject result = Command("contentSearch", json);
+            offset += count;
+            if (result != null && result.has("content")) {
+               if (result.has("isBottom") && result.getBoolean("isBottom"))
+                  stop = true;
+               JSONArray matches = result.getJSONArray("content");
+               if (matches.length() == 0)
+                  stop = true;
+               for (int i=0; i<matches.length(); ++i) {
+                  JSONObject j = matches.getJSONObject(i);
+                  // Skip non episode matches
+                  if (j.has("isEpisode") && ! j.getBoolean("isEpisode"))
+                     continue;
+                  episodes.put(j);
+               }
+            } else {
+               stop = true;
+            }
+         }
+      } catch (Exception e) {
+         log.error("seasonSearch - " + e.getMessage());
+      }
+      return episodes;
    }
    
    private String getCategoryId(String tivoName, String categoryName) {
