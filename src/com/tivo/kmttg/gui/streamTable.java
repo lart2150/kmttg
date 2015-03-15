@@ -372,6 +372,19 @@ public class streamTable {
       return null;
    }
    
+   private void BePatient(String title) {
+      TableUtil.clear(TABLE);
+      int cols = TITLE_cols.length;
+      Object[] data = new Object[cols];
+      // Initialize to empty strings
+      for (int i=0; i<cols; ++i) {
+         data[i] = "";
+      }
+      data[2] = "PLEASE BE PATIENT - getting '" + title + "' episodes";
+      TableUtil.AddRow(TABLE, data);
+      TableUtil.packColumns(TABLE, 2);
+   }
+   
    // Look for entry with given folder name and select it
    // (This used when returning back from folder mode to top level mode)
    public void SelectFolder(String folderName) {
@@ -453,6 +466,7 @@ public class streamTable {
             Refresh(episode_data.get(collectionId));
             return;
          }
+         BePatient(title);
          class backgroundRun extends SwingWorker<Object, Object> {
             protected Object doInBackground() {
                Remote r = config.initRemote(tivoName);
@@ -497,8 +511,21 @@ public class streamTable {
                         row = selected[i];
                         JSONObject json = GetRowData(row);
                         if (json.has("isFolder") && json.getBoolean("isFolder")) {
-                           // A One Pass streaming entry should be removed from Season Passes tab
-                           log.warn("NOTE: Must remove using 'Season Passes' tab': " + json.getString("title"));
+                           // A One Pass streaming entry is removed by unsubscribing Season Pass
+                           if (json.has("collectionId")) {
+                              JSONObject sp = r.findSP(json.getString("collectionId"));
+                              if (sp != null) {
+                                 if (sp.has("subscriptionId")) {
+                                    JSONObject o = new JSONObject();
+                                    o.put("subscriptionId", sp.getString("subscriptionId"));
+                                    JSONObject result = r.Command("Unsubscribe", o);
+                                    if (result != null) {
+                                       removed = true;
+                                       log.warn("Removed streaming One Pass: " + json.getString("title"));
+                                    }
+                                 }
+                              }
+                           }
                         } else {
                            // A non-One Pass entry can be removed
                            if (json.has("contentId")) {
