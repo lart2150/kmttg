@@ -88,6 +88,10 @@ public class remotegui {
    private int guide_total_range = 11;    // Number of days
    private JButton guide_manual_record = null;
    
+   public JButton refresh_stream = null;
+   private streamTable tab_stream = null;
+   private JComboBox tivo_stream = null;
+   
    private spTable tab_sp = null;
    private JComboBox tivo_sp = null;
    public  spOptions spOpt = new spOptions();
@@ -649,6 +653,103 @@ public class remotegui {
       c.gridwidth = 8;
       c.fill = GridBagConstraints.BOTH;
       panel_guide.add(tabScroll_guide, c);
+      
+      // Streaming Tab items
+      gy = 0;
+      c.ipady = 0;
+      c.weighty = 0.0;  // default to no vertical stretch
+      c.weightx = 0.0;  // default to no horizontal stretch
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      c.gridheight = 1;
+      c.anchor = GridBagConstraints.CENTER;
+      c.fill = GridBagConstraints.HORIZONTAL;
+      JPanel panel_stream = new JPanel();
+      
+      panel_stream.setLayout(new GridBagLayout());
+      
+      JPanel row1_stream = new JPanel();
+      row1_stream.setLayout(new BoxLayout(row1_stream, BoxLayout.LINE_AXIS));
+      
+      JLabel title_stream = new JLabel("Streaming");
+      
+      JLabel tivo_stream_label = new javax.swing.JLabel();
+      
+      tivo_stream = new javax.swing.JComboBox();
+      tivo_stream.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {
+                if ( ! tab_stream.inFolder ) {
+                   // Refresh channel list only if not inside a folder
+                   TableUtil.clear(tab_stream.TABLE);
+                   String tivoName = getTivoName("stream");
+                   updateButtonStates(tivoName, "Stream");
+                   if (tab_stream.tivo_data.containsKey(tivoName))
+                      tab_stream.AddRows(tivoName, tab_stream.tivo_data.get(tivoName));
+                }
+            }
+         }
+      });
+      tivo_stream.setToolTipText(getToolTip("tivo_stream"));
+      
+      refresh_stream = new JButton("Refresh");
+      refresh_stream.setMargin(new Insets(1,1,1,1));
+      refresh_stream.setToolTipText(getToolTip("refresh_stream"));
+      refresh_stream.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            if (tab_stream.inFolder) {
+               // Return from inside a folder to top level table display
+               tab_stream.Refresh((JSONArray)null);
+               tab_stream.setFolderState(false);
+               if (tab_stream.folderEntryNum >= 0)
+                  tab_stream.SelectFolder(tab_stream.folderName);
+            } else {
+               // At top level => Update current folder contents
+               final String tivoName = (String)tivo_stream.getSelectedItem();
+               if (tivoName != null && tivoName.length() > 0) {
+                  TableUtil.clear(tab_stream.TABLE);
+                  class backgroundRun extends SwingWorker<Object, Object> {
+                     protected Object doInBackground() {
+                        log.warn("Refreshing Streaming entries...");
+                        jobData job = new jobData();
+                        job.source        = tivoName;
+                        job.tivoName      = tivoName;
+                        job.type          = "remote";
+                        job.name          = "Remote";
+                        job.remote_stream = true;
+                        job.stream        = tab_stream;
+                        jobMonitor.submitNewJob(job);
+                        return null;
+                     }
+                  }
+                  backgroundRun b = new backgroundRun();
+                  b.execute();
+               }
+            }
+         }
+      });
+      
+      row1_stream.add(Box.createRigidArea(space_5));
+      row1_stream.add(title_stream);
+      row1_stream.add(Box.createRigidArea(space_5));
+      row1_stream.add(tivo_stream_label);
+      row1_stream.add(Box.createRigidArea(space_5));
+      row1_stream.add(tivo_stream);
+      row1_stream.add(Box.createRigidArea(space_5));
+      row1_stream.add(refresh_stream);
+      panel_stream.add(row1_stream, c);
+      
+      tab_stream = new streamTable(config.gui.getJFrame());
+      tab_stream.TABLE.setPreferredScrollableViewportSize(tab_stream.TABLE.getPreferredSize());
+      JScrollPane tabScroll_stream = new JScrollPane(tab_stream.scroll);
+      gy++;
+      c.gridy = gy;
+      c.weightx = 1.0;
+      c.weighty = 1.0;
+      c.gridwidth = 8;
+      c.fill = GridBagConstraints.BOTH;
+      panel_stream.add(tabScroll_stream, c);
             
       // Season Passes Tab items      
       gy = 0;
@@ -2482,6 +2583,7 @@ public class remotegui {
       tabbed_panel.add("Season Premieres", panel_premiere);
       tabbed_panel.add("Search", panel_search);
       tabbed_panel.add("Guide", panel_guide);
+      tabbed_panel.add("Streaming", panel_stream);
       tabbed_panel.add("Deleted", panel_deleted);
       tabbed_panel.add("Remote", panel_rc);
       //tabbed_panel.add("Web", panel_web);
@@ -2493,6 +2595,7 @@ public class remotegui {
       // Pack table columns
       TableUtil.packColumns(tab_todo.TABLE, 2);
       TableUtil.packColumns(tab_guide.TABLE, 2);
+      TableUtil.packColumns(tab_stream.TABLE, 2);
       TableUtil.packColumns(tab_sp.TABLE, 2);
       TableUtil.packColumns(tab_cancel.TABLE, 2);
       TableUtil.packColumns(tab_deleted.TABLE, 2);
@@ -2706,6 +2809,8 @@ public class remotegui {
          return tab_search.TABLE;
       if (tabName.equals("Guide"))
          return tab_guide.TABLE;
+      if (tabName.equals("Streaming"))
+         return tab_stream.TABLE;
       if (tabName.equals("Deleted"))
          return tab_deleted.TABLE;
       return null;
@@ -2729,6 +2834,8 @@ public class remotegui {
          return (String)tivo_todo.getSelectedItem();
       if (tab.equals("guide") || tab.equals("Guide"))
          return (String)tivo_guide.getSelectedItem();
+      if (tab.equals("stream") || tab.equals("Streaming"))
+         return (String)tivo_stream.getSelectedItem();
       if (tab.equals("sp") || tab.equals("Season Passes"))
          return (String)tivo_sp.getSelectedItem();
       if (tab.equals("cancel") || tab.equals("Won't Record"))
@@ -2755,6 +2862,8 @@ public class remotegui {
             tivo_todo.setSelectedItem(tivoName);
          if (tab.equals("guide"))
             tivo_guide.setSelectedItem(tivoName);
+         if (tab.equals("stream"))
+            tivo_stream.setSelectedItem(tivoName);
          if (tab.equals("sp"))
             tivo_sp.setSelectedItem(tivoName);
          if (tab.equals("cancel"))
@@ -2784,6 +2893,9 @@ public class remotegui {
       if (tableName.equals("guide")) {
          TableUtil.clear(tab_guide.TABLE);
       }
+      if (tableName.equals("stream")) {
+         TableUtil.clear(tab_stream.TABLE);
+      }
       if (tableName.equals("cancel")) {
          TableUtil.clear(tab_cancel.TABLE);
       }
@@ -2801,6 +2913,7 @@ public class remotegui {
    public void setTivoNames() { 
       tivo_todo.removeAllItems();
       tivo_guide.removeAllItems();
+      tivo_stream.removeAllItems();
       tivo_sp.removeAllItems();
       tivo_cancel.removeAllItems();
       tivo_deleted.removeAllItems();
@@ -2820,9 +2933,9 @@ public class remotegui {
             tivo_info.addItem(tivoName);
             tivo_premiere.addItem(tivoName);
          }
-         //if (config.rpcEnabled(tivoName)) {
-         //   tivo_web.addItem(tivoName);            
-         //}
+         if (config.rpcEnabled(tivoName)) {
+            tivo_stream.addItem(tivoName);            
+         }
          // Remote tab always valid as it can use RPC or telnet
          tivo_rc.addItem(tivoName);
       }
@@ -3425,19 +3538,19 @@ public class remotegui {
          text += "Export selected TiVo ToDo list to a csv file which can be easily<br>";
          text += "imported into an Excel spreadsheet or equivalent.";
       }
-      if (component.equals("tivo_guide")) {
+      else if (component.equals("tivo_guide")) {
          text = "Select TiVo for which to retrieve guide listings.<br>";
          text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
          text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
          text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
-      if (component.equals("guide_start")) {
+      else if (component.equals("guide_start")) {
          text = "<b>Start</b><br>";
          text += "Select guide start time to use when obtaining listings.<br>";
          text += "NOTE: If you are inside a channel folder when you change this setting<br>";
          text += "the guide listings will automatically update to new date.";
       }
-      if (component.equals("guide_channels")) {
+      else if (component.equals("guide_channels")) {
          text = "<b>All</b><br>";
          text += "If this option is checked then all channels in your lineup are shown, else just<br>";
          text += "channels that are enabled in your lineup are shown.";
@@ -3462,6 +3575,18 @@ public class remotegui {
          text += "Note that if there are conflicts in this time slot kmttg will print out the conflicting<br>";
          text += "shows and will not schedule the recording.<br>";
          text += "NOTE: Not available for units older than series 4.";
+      }
+      else if (component.equals("tivo_stream")) {
+         text = "Select TiVo for which to retrieve streaming entries.<br>";
+         text += "NOTE: Only series 4 or later TiVos are supported.";
+      }
+      else if (component.equals("refresh_stream")) {
+         text = "<b>Refresh</b><br>";
+         text += "Refresh list of streaming items for selected TiVo.";
+      }
+      else if (component.equals("back_stream")){
+         text = "<b>Back</b><br>";
+         text += "Return to top level folder view..";
       }
       else if (component.equals("export_channels")){
          text = "<b>Export ...</b><br>";
