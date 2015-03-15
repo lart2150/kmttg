@@ -319,6 +319,7 @@ public class streamTable {
       if (state) {
          inFolder = true;
          if (config.gui.remote_gui != null) {
+            config.gui.remote_gui.remove_stream.setEnabled(false);
             config.gui.remote_gui.refresh_stream.setText("Back");
             config.gui.remote_gui.refresh_stream.setToolTipText(
                config.gui.remote_gui.getToolTip("back_stream")
@@ -327,6 +328,7 @@ public class streamTable {
       } else {
          inFolder = false;
          if (config.gui.remote_gui != null) {
+            config.gui.remote_gui.remove_stream.setEnabled(true);
             config.gui.remote_gui.refresh_stream.setText("Refresh");
             config.gui.remote_gui.refresh_stream.setToolTipText(
                config.gui.remote_gui.getToolTip("refresh_stream")
@@ -476,6 +478,54 @@ public class streamTable {
          b.execute();
       } catch (JSONException e) {
          log.error("streamTable updateFolder - " + e.getMessage());
+      }
+   }
+   
+   // Attempt to remove currently selected top view table item(s)
+   public void removeButtonCB() {
+      final String tivoName = currentTivo;
+      final int[] selected = TableUtil.GetSelectedRows(TABLE);
+      if (selected.length > 0) {
+         class backgroundRun extends SwingWorker<Object, Object> {
+            protected Object doInBackground() {
+               try {
+                  Boolean removed = false;
+                  Remote r = config.initRemote(tivoName);
+                  if (r.success) {
+                     int row;
+                     for (int i=0; i<selected.length; ++i) {
+                        row = selected[i];
+                        JSONObject json = GetRowData(row);
+                        if (json.has("isFolder") && json.getBoolean("isFolder")) {
+                           // A One Pass streaming entry should be removed from Season Passes tab
+                           log.warn("NOTE: Must remove using 'Season Passes' tab': " + json.getString("title"));
+                        } else {
+                           // A non-One Pass entry can be removed
+                           if (json.has("contentId")) {
+                              JSONObject o = new JSONObject();
+                              o.put("contentId", json.getString("contentId"));
+                              JSONObject result = r.Command("ContentLocatorRemove", o);
+                              if (result != null) {
+                                 removed = true;
+                                 log.warn("Removed streaming item: " + json.getString("title"));
+                              }
+                           }
+                        }
+                     } // for
+                     r.disconnect();
+                     if (removed) {
+                        // Force a table refresh if any items were removed
+                        config.gui.remote_gui.refresh_stream.doClick();
+                     }
+                  } // if r.success
+               } catch (JSONException e) {
+                  log.error("removeButtonCB - " + e.getMessage());
+               }
+               return null;
+            }
+         }
+         backgroundRun b = new backgroundRun();
+         b.execute();
       }
    }
             

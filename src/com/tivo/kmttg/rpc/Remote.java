@@ -809,6 +809,12 @@ public class Remote {
             json.put("bodyId", bodyId_get());
             req = RpcRequest("contentLocatorStore", false, json);
          }
+         else if (type.equals("ContentLocatorRemove")) {
+            // Remove a streaming partner content locator (bookmark) to My Shows
+            // Expects contentId in json:
+            json.put("bodyId", bodyId_get());
+            req = RpcRequest("contentLocatorRemove", false, json);
+         }
          else if (type.equals("Position")) {
             json.put("throttleDelay", 1000);
             req = RpcRequest("videoPlaybackInfoEventRegister", false, json);
@@ -2050,7 +2056,9 @@ public class Remote {
                   JSONObject r = Command("collectionSearch", j);
                   if (r != null && r.has("collection")) {
                      JSONObject o = r.getJSONArray("collection").getJSONObject(0);
-                     o.put("myShowsItemId", entry.get("myShowsItemId"));
+                     o.put("myShowsItemId", entry.getString("myShowsItemId"));
+                     if (entry.has("contentId"))
+                        o.put("contentId", entry.getString("contentId"));
                      if (entry.has("startTime"))
                         o.put("startTime", entry.getString("startTime"));
                      if (entry.has("isFolder"))

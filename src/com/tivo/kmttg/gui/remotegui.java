@@ -89,6 +89,7 @@ public class remotegui {
    private JButton guide_manual_record = null;
    
    public JButton refresh_stream = null;
+   public JButton remove_stream = null;
    private streamTable tab_stream = null;
    private JComboBox tivo_stream = null;
    
@@ -730,6 +731,15 @@ public class remotegui {
          }
       });
       
+      remove_stream = new JButton("Remove");
+      remove_stream.setMargin(new Insets(1,1,1,1));
+      remove_stream.setToolTipText(getToolTip("remove_stream"));
+      remove_stream.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            tab_stream.removeButtonCB();
+         }
+      });
+      
       row1_stream.add(Box.createRigidArea(space_5));
       row1_stream.add(title_stream);
       row1_stream.add(Box.createRigidArea(space_5));
@@ -738,6 +748,8 @@ public class remotegui {
       row1_stream.add(tivo_stream);
       row1_stream.add(Box.createRigidArea(space_5));
       row1_stream.add(refresh_stream);
+      row1_stream.add(Box.createRigidArea(space_5));
+      row1_stream.add(remove_stream);
       panel_stream.add(row1_stream, c);
       
       tab_stream = new streamTable(config.gui.getJFrame());
@@ -3583,6 +3595,12 @@ public class remotegui {
       else if (component.equals("refresh_stream")) {
          text = "<b>Refresh</b><br>";
          text += "Refresh list of streaming items for selected TiVo.";
+      }
+      else if (component.equals("remove_stream")) {
+         text = "<b>Remove</b><br>";
+         text += "Remove selected list of streaming items in table from this TiVo.<br>";
+         text += "NOTE: Only non-folder entries can be removed. Folder entries come from<br>";
+         text += "Streaming One Passes so should be removed from <b>Season Passes</b> tab.";
       }
       else if (component.equals("back_stream")){
          text = "<b>Back</b><br>";
