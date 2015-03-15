@@ -16,6 +16,7 @@ import com.tivo.kmttg.gui.guideTable;
 import com.tivo.kmttg.gui.premiereTable;
 import com.tivo.kmttg.gui.searchTable;
 import com.tivo.kmttg.gui.spTable;
+import com.tivo.kmttg.gui.streamTable;
 import com.tivo.kmttg.gui.todoTable;
 import com.tivo.kmttg.task.*;
 import com.tivo.kmttg.util.backgroundProcess;
@@ -144,6 +145,9 @@ public class jobData implements Serializable, Cloneable {
    
    public Boolean remote_sp = false;
    public spTable sp = null;
+   
+   public Boolean remote_stream = false;
+   public streamTable stream = null;
    
    public Boolean remote_spreorder = false;
    public JSONArray remote_orderIds = null;
