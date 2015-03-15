@@ -454,7 +454,7 @@ public class searchTable {
          if (entry.has("channel"))
             channel = TableUtil.makeChannelName(entry);
          else if (entry.has("partnerId"))
-            channel = getPartnerName(entry);
+            channel = TableUtil.getPartnerName(entry);
          
          data[1] = type;
          data[2] = title;
@@ -627,45 +627,5 @@ public class searchTable {
       }
       backgroundRun b = new backgroundRun();
       b.execute();
-   }
-   
-   // Return friendly name of a partner based on id, such as Netflix, Hulu, etc.
-   private String getPartnerName(JSONObject entry) {
-      try {
-         if (config.partners.size() == 0) {
-            log.warn("Refreshing partner names");
-            Remote r = config.initRemote(config.gui.remote_gui.getTivoName("search"));
-            if (r.success) {
-               JSONObject json = new JSONObject();
-               json.put("bodyId", r.bodyId_get());
-               json.put("noLimit", true);
-               json.put("levelOfDetail", "high");
-               JSONObject result = r.Command("partnerInfoSearch", json);
-               if (result != null && result.has("partnerInfo")) {
-                  JSONArray info = result.getJSONArray("partnerInfo");
-                  for (int i=0; i<info.length(); ++i) {
-                     JSONObject j = info.getJSONObject(i);
-                     if (j.has("partnerId") && j.has("displayName")) {
-                        config.partners.put(j.getString("partnerId"), j.getString("displayName"));
-                     }
-                  }
-               }            	   
-               r.disconnect();
-            }
-         }
-   
-         String partnerId = "";
-         if (entry.has("partnerId"))
-            partnerId = entry.getString("partnerId");
-         if (entry.has("brandingPartnerId"))
-            partnerId = entry.getString("brandingPartnerId");
-         String name = partnerId;
-         if (config.partners.containsKey(partnerId))
-            name = config.partners.get(partnerId);
-         return name;
-      } catch (JSONException e1) {
-         log.error("getPartnerName - " + e1.getMessage());
-         return "STREAMING";
-      }
    }
 }
