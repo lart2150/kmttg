@@ -642,6 +642,19 @@ public class TableUtil {
                }
             }
          } else {
+            // This is likely unavailable content, so for type series bring up SP form instead
+            if (json.has("collectionType") && json.getString("collectionType").equals("series")) {
+               Remote r = config.initRemote(tivoName);
+               if (r.success) {
+                  JSONArray existing = r.SeasonPasses(null);
+                  if (existing != null) {
+                     r.SPschedule(tivoName, json, existing);
+                  }
+                  r.disconnect();
+                  return(true);
+               }
+               return(false);
+            }
             log.error("Missing contentId and/or offerId for: '" + title + "'");
             return(false);
          }
