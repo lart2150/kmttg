@@ -55,7 +55,7 @@ public class thumbsTable {
       tm = TABLE.getColumnModel().getColumn(1);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndDarker, config.tableFont));
       
-      tm = TABLE.getColumnModel().getColumn(1);
+      tm = TABLE.getColumnModel().getColumn(2);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
                
       // Add right mouse button handler
@@ -77,7 +77,9 @@ public class thumbsTable {
       } 
       
       // Set all cells uneditable
-      public boolean isCellEditable(int row, int column) {        
+      public boolean isCellEditable(int row, int column) {
+         if (column == 2)
+            return true;
          return false;
       }
    }
