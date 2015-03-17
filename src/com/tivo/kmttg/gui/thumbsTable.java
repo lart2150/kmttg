@@ -1,13 +1,17 @@
 package com.tivo.kmttg.gui;
 
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import javax.swing.DefaultCellEditor;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
@@ -37,7 +41,19 @@ public class thumbsTable {
       TABLE = new JXTable(data, TITLE_cols);
       TABLE.setModel(new ThumbsTableModel(data, TITLE_cols));
       TABLE.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+      TABLE.setRowSelectionAllowed(false);
+
       scroll = new JScrollPane(TABLE);
+      
+      // Add listener for click handling (for folder entries)
+      /*TABLE.addMouseListener(
+         new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+               MouseClicked(e);
+            }
+         }
+      );*/
+      
       // Add keyboard listener
       TABLE.addKeyListener(
          new KeyAdapter() {
@@ -57,10 +73,28 @@ public class thumbsTable {
       
       tm = TABLE.getColumnModel().getColumn(2);
       tm.setCellRenderer(new ColorColumnRenderer(config.tableBkgndLight, config.tableFont));
+      // Special cell editor needed to select all text on focus
+      MyCellEditor m = new MyCellEditor(new JTextField());
+      m.setClickCountToStart(1); // Change cell to edit mode with single click instead of double click
+      tm.setCellEditor(m);
                
       // Add right mouse button handler
       TableUtil.AddRightMouseListener(TABLE);
    }   
+   
+   // Extend editor to select all text when cell receives focus
+   class MyCellEditor extends DefaultCellEditor {
+      private static final long serialVersionUID = 1L;
+
+      public MyCellEditor(final JTextField textField) {
+         super(textField);
+         textField.addFocusListener( new FocusAdapter() {
+            public void focusGained( final FocusEvent e ) {
+               textField.selectAll();
+            }
+         });
+      }      
+   }
    
    // Override some default table model actions
    class ThumbsTableModel extends DefaultTableModel {
@@ -70,9 +104,8 @@ public class thumbsTable {
          super(data, columnNames);
       }
       
-      @SuppressWarnings("unchecked")
       // This is used to define columns as specific classes
-      public Class getColumnClass(int col) {
+      public Class<?> getColumnClass(int col) {
          return Object.class;
       } 
       
@@ -83,11 +116,19 @@ public class thumbsTable {
          return false;
       }
    }
-   
+
    private JSONObject GetRowData(int row) {
       String title = (String)TABLE.getModel().getValueAt(row, 0);
       return table_data.get(title);
    }
+   
+   // Mouse event handler
+   /*private void MouseClicked(MouseEvent e) {
+      if( e.getClickCount() == 1 ) {
+         int row = TABLE.rowAtPoint(e.getPoint());
+         TABLE.editCellAt(row, 2);
+      }
+   }*/
    
    // Handle keyboard presses
    private void KeyPressed(KeyEvent e) {
