@@ -93,6 +93,9 @@ public class remotegui {
    private streamTable tab_stream = null;
    private JComboBox tivo_stream = null;
    
+   private thumbsTable tab_thumbs = null;
+   private JComboBox tivo_thumbs = null;
+   
    private spTable tab_sp = null;
    private JComboBox tivo_sp = null;
    public  spOptions spOpt = new spOptions();
@@ -1335,6 +1338,85 @@ public class remotegui {
       c.gridwidth = 8;
       c.fill = GridBagConstraints.BOTH;
       panel_deleted.add(tabScroll_deleted, c);
+      
+      // Thumbs tab items      
+      gy = 0;
+      c.ipady = 0;
+      c.weighty = 0.0;  // default to no vertical stretch
+      c.weightx = 0.0;  // default to no horizontal stretch
+      c.gridx = 0;
+      c.gridy = gy;
+      c.gridwidth = 1;
+      c.gridheight = 1;
+      c.anchor = GridBagConstraints.CENTER;
+      c.fill = GridBagConstraints.HORIZONTAL;
+      
+      JPanel panel_thumbs = new JPanel();
+      panel_thumbs.setLayout(new GridBagLayout());
+      
+      JPanel row1_thumbs = new JPanel();
+      row1_thumbs.setLayout(new BoxLayout(row1_thumbs, BoxLayout.LINE_AXIS));
+      
+      JLabel title_thumbs = new JLabel("Thumb Ratings");
+      
+      JLabel tivo_thumbs_label = new javax.swing.JLabel();
+      
+      tivo_thumbs = new javax.swing.JComboBox();
+      tivo_thumbs.addItemListener(new ItemListener() {
+         public void itemStateChanged(ItemEvent e) {
+             if (e.getStateChange() == ItemEvent.SELECTED) {               
+               // TiVo selection changed for Thumbs tab
+               TableUtil.clear(tab_thumbs.TABLE);
+               String tivoName = getTivoName("thumbs");
+               updateButtonStates(tivoName, "Thumbs");
+               if (tab_thumbs.tivo_data.containsKey(tivoName))
+                  tab_thumbs.AddRows(tivoName, tab_thumbs.tivo_data.get(tivoName));
+            }
+         }
+      });
+      tivo_thumbs.setToolTipText(getToolTip("tivo_thumbs"));
+
+      JButton refresh_thumbs = new JButton("Refresh");
+      refresh_thumbs.setMargin(new Insets(1,1,1,1));
+      refresh_thumbs.setToolTipText(getToolTip("refresh_thumbs"));
+      refresh_thumbs.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Refresh thumbs list
+            TableUtil.clear(tab_thumbs.TABLE);
+            String tivoName = (String)tivo_thumbs.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               jobData job = new jobData();
+               job.source         = tivoName;
+               job.tivoName       = tivoName;
+               job.type           = "remote";
+               job.name           = "Remote";
+               job.remote_thumbs  = true;
+               job.thumbs         = tab_thumbs;
+               jobMonitor.submitNewJob(job);
+            }
+         }
+      });
+            
+      row1_thumbs.add(Box.createRigidArea(space_5));
+      row1_thumbs.add(title_thumbs);
+      row1_thumbs.add(Box.createRigidArea(space_5));
+      row1_thumbs.add(tivo_thumbs_label);
+      row1_thumbs.add(Box.createRigidArea(space_5));
+      row1_thumbs.add(tivo_thumbs);
+      row1_thumbs.add(Box.createRigidArea(space_5));
+      row1_thumbs.add(refresh_thumbs);
+      panel_thumbs.add(row1_thumbs, c);
+      
+      tab_thumbs = new thumbsTable(config.gui.getJFrame());
+      tab_thumbs.TABLE.setPreferredScrollableViewportSize(tab_thumbs.TABLE.getPreferredSize());
+      JScrollPane tabScroll_thumbs = new JScrollPane(tab_thumbs.scroll);
+      gy++;
+      c.gridy = gy;
+      c.weightx = 1.0;
+      c.weighty = 1.0;
+      c.gridwidth = 8;
+      c.fill = GridBagConstraints.BOTH;
+      panel_thumbs.add(tabScroll_thumbs, c);
       
       // Premiere tab items      
       gy = 0;
@@ -2597,6 +2679,7 @@ public class remotegui {
       tabbed_panel.add("Guide", panel_guide);
       tabbed_panel.add("Streaming", panel_stream);
       tabbed_panel.add("Deleted", panel_deleted);
+      tabbed_panel.add("Thumbs", panel_thumbs);
       tabbed_panel.add("Remote", panel_rc);
       //tabbed_panel.add("Web", panel_web);
       tabbed_panel.add("Info", panel_info);
@@ -2611,6 +2694,7 @@ public class remotegui {
       TableUtil.packColumns(tab_sp.TABLE, 2);
       TableUtil.packColumns(tab_cancel.TABLE, 2);
       TableUtil.packColumns(tab_deleted.TABLE, 2);
+      TableUtil.packColumns(tab_thumbs.TABLE, 2);
       TableUtil.packColumns(tab_search.TABLE, 2);
    }
       
@@ -2825,6 +2909,8 @@ public class remotegui {
          return tab_stream.TABLE;
       if (tabName.equals("Deleted"))
          return tab_deleted.TABLE;
+      if (tabName.equals("Thumbs"))
+         return tab_thumbs.TABLE;
       return null;
    }
 
@@ -2854,6 +2940,8 @@ public class remotegui {
          return (String)tivo_cancel.getSelectedItem();
       if (tab.equals("deleted") || tab.equals("Deleted"))
          return (String)tivo_deleted.getSelectedItem();
+      if (tab.equals("thumbs") || tab.equals("Thumbs"))
+         return (String)tivo_thumbs.getSelectedItem();
       if (tab.equals("search") || tab.equals("Search"))
          return (String)tivo_search.getSelectedItem();
       if (tab.equals("rc") || tab.equals("Remote"))
@@ -2882,6 +2970,8 @@ public class remotegui {
             tivo_cancel.setSelectedItem(tivoName);
          if (tab.equals("deleted"))
             tivo_deleted.setSelectedItem(tivoName);
+         if (tab.equals("thumbs"))
+            tivo_thumbs.setSelectedItem(tivoName);
          if (tab.equals("search"))
             tivo_search.setSelectedItem(tivoName);
          if (tab.equals("rc"))
@@ -2914,6 +3004,9 @@ public class remotegui {
       if (tableName.equals("deleted")) {
          TableUtil.clear(tab_deleted.TABLE);
       }
+      if (tableName.equals("thumbs")) {
+         TableUtil.clear(tab_thumbs.TABLE);
+      }
       if (tableName.equals("search")) {
          TableUtil.clear(tab_search.TABLE);
       }
@@ -2929,6 +3022,7 @@ public class remotegui {
       tivo_sp.removeAllItems();
       tivo_cancel.removeAllItems();
       tivo_deleted.removeAllItems();
+      tivo_thumbs.removeAllItems();
       tivo_search.removeAllItems();
       tivo_rc.removeAllItems();
       tivo_info.removeAllItems();
@@ -2941,6 +3035,7 @@ public class remotegui {
             tivo_sp.addItem(tivoName);
             tivo_cancel.addItem(tivoName);
             tivo_deleted.addItem(tivoName);
+            tivo_thumbs.addItem(tivoName);            
             tivo_search.addItem(tivoName);
             tivo_info.addItem(tivoName);
             tivo_premiere.addItem(tivoName);
@@ -3729,6 +3824,16 @@ public class remotegui {
          text = "<b>Permanently Delete</b><br>";
          text += "Permanently delete selected individual show(s) in table on specified TiVo.<br>";
          text += "NOTE: Once deleted these shows are removed from Recently Deleted and can't be recovered.";
+      }
+      else if (component.equals("tivo_thumbs")) {
+         text = "Select TiVo for which to display list of thumbed shows.<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
+         text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
+      }
+      else if (component.equals("refresh_thumbs")){
+         text = "<b>Refresh</b><br>";
+         text += "Refresh list for selected TiVo.";
       }
       else if (component.equals("tivo_search")) {
          text = "Select TiVo for which to perform search with.<br>";

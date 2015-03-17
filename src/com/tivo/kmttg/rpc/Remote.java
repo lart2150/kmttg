@@ -2283,6 +2283,57 @@ public class Remote {
       return episodes;
    }
    
+   // Given a collectionId return all episodes
+   public JSONArray getThumbs(jobData job) {
+      JSONArray thumbs = new JSONArray();
+      try {
+         int count = 50;
+         int offset = 0;
+         JSONObject json = new JSONObject();
+         json.put("bodyId", bodyId_get());
+         json.put("levelOfDetail", "medium");
+         json.put("count", count);
+         Boolean stop = false;
+         while (! stop) {
+            json.put("offset", offset);
+            JSONObject result = Command("userContentSearch", json);
+            offset += count;
+            if (result != null && result.has("userContent")) {                              
+               JSONArray matches = result.getJSONArray("userContent");
+               if (matches.length() == 0)
+                  stop = true;
+               for (int i=0; i<matches.length(); ++i) {
+                  JSONObject t = matches.getJSONObject(i);
+                  JSONObject j = new JSONObject();
+                  j.put("bodyId", bodyId_get());
+                  j.put("collectionId", t.getString("collectionId"));
+                  result = Command("contentSearch", j);
+                  if (result != null && result.has("content")) {
+                     JSONObject r = result.getJSONArray("content").getJSONObject(0);
+                     if (r.has("title"))
+                        t.put("title", r.getString("title"));
+                     if (r.has("collectionType"))
+                        t.put("collectionType", r.getString("collectionType"));
+                  }
+                  thumbs.put(t);
+                  // Update status in job monitor
+                  if (job != null && config.GUIMODE) {
+                     config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Thumbs List");
+                     config.gui.jobTab_UpdateJobMonitorRowStatus(job, "count=" + thumbs.length());
+                     if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                        config.gui.setTitle("Thumbs: " + thumbs.length() + " " + config.kmttg);
+                     }
+                  }
+               }
+            } else
+               stop = true;
+         }
+      } catch (Exception e) {
+         log.error("getThumbs - " + e.getMessage());
+      }
+      return thumbs;
+   }
+   
    // Return a One Pass with given collectionId if it exists
    public JSONObject findSP(String collectionId) {
       try {

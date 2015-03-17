@@ -76,6 +76,8 @@ public class remote implements Serializable {
                }
                if (job.remote_deleted)
                   data = r.DeletedShows(job);
+               if (job.remote_thumbs)
+                  data = r.getThumbs(job);
                if (job.remote_rnpl) {
                   if (config.rpcEnabled(job.tivoName))
                      data = r.MyShows(job);
@@ -128,6 +130,7 @@ public class remote implements Serializable {
       if (job.remote_spreorder)     jobName += " Season Pass Re-order";
       if (job.remote_cancel)        jobName += " Will Not Record List";
       if (job.remote_deleted)       jobName += " Deleted List";
+      if (job.remote_thumbs)        jobName += " Thumbs List";
       if (job.remote_rnpl)          jobName += " NP List";
       if (job.remote_channels)      jobName += " Channels List";
       if (job.remote_premiere)      jobName += " Season Premieres";
@@ -156,7 +159,7 @@ public class remote implements Serializable {
          // Still running
          if (config.GUIMODE && ! job.remote_premiere &&
              ! job.remote_cancel && ! job.remote_deleted && ! job.remote_search && 
-             ! job.remote_adv_search ) {
+             ! job.remote_adv_search && ! job.remote_thumbs) {
             // Update STATUS column
             config.gui.jobTab_UpdateJobMonitorRowStatus(job, "running");
          }
@@ -204,6 +207,9 @@ public class remote implements Serializable {
             }
             if (job.remote_deleted && job.deleted != null) {
                job.deleted.AddRows(job.tivoName, data);
+            }
+            if (job.remote_thumbs && job.thumbs != null) {
+               job.thumbs.AddRows(job.tivoName, data);
             }
             if (job.remote_rnpl) {
                rnpl.setNPLData(job.tivoName, data, job.auto_entries);
