@@ -1391,8 +1391,7 @@ public class HTTPServer {
          *         written, or null if isDiscardBody() returns true, in which
          *         case the body should not be written
          */
-      @SuppressWarnings("resource")
-      public ChunkedOutputStream getChunkedBody() {
+        public ChunkedOutputStream getChunkedBody() {
             headers.replace("Transfer-Encoding", "chunked");
             return discardBody ? null : new ChunkedOutputStream(out);
         }

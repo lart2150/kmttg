@@ -313,9 +313,8 @@ public class spTable {
           super(data, columnNames);
        }
        
-       @SuppressWarnings("unchecked")
        // This is used to define columns as specific classes
-       public Class getColumnClass(int col) {
+       public Class<?> getColumnClass(int col) {
           if (col == 1) {
              return sortableInt.class;
           }

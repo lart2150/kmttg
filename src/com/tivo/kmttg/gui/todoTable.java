@@ -162,9 +162,8 @@ public class todoTable {
           super(data, columnNames);
        }
        
-       @SuppressWarnings("unchecked")
        // This is used to define columns as specific classes
-       public Class getColumnClass(int col) {
+       public Class<?> getColumnClass(int col) {
           // NOTE: col index starts at 0
           if (col == 0) {
              return sortableDate.class;

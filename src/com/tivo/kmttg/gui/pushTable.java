@@ -98,9 +98,8 @@ public class pushTable {
           super(data, columnNames);
        }
        
-       @SuppressWarnings("unchecked")
        // This is used to define columns as specific classes
-       public Class getColumnClass(int col) {
+       public Class<?> getColumnClass(int col) {
           if (col == 0) {
              return sortableInt.class;
           }
