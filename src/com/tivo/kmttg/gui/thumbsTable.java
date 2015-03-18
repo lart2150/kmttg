@@ -21,6 +21,9 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.jobData;
+import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
@@ -39,11 +42,15 @@ public class thumbsTable {
    thumbsTable(JFrame dialog) {
       Object[][] data = {}; 
       TABLE = new JXTable(data, TITLE_cols);
+      scroll = new JScrollPane(TABLE);
+      reset();
+   }
+   
+   public void reset() {
+      Object[][] data = {}; 
       TABLE.setModel(new ThumbsTableModel(data, TITLE_cols));
       TABLE.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
       TABLE.setRowSelectionAllowed(false);
-
-      scroll = new JScrollPane(TABLE);
       
       // Add listener for click handling (for folder entries)
       /*TABLE.addMouseListener(
@@ -139,7 +146,7 @@ public class thumbsTable {
    }
 
    private JSONObject GetRowData(int row) {
-      String title = (String)TABLE.getModel().getValueAt(row, 0);
+      String title = (String)TABLE.getModel().getValueAt(row, 1);
       return table_data.get(title);
    }
    
@@ -182,11 +189,12 @@ public class thumbsTable {
    // Update table to display given entries
    public void AddRows(String tivoName, JSONArray data) {
       try {
+         table_data = new Hashtable<String, JSONObject>();
          Stack<JSONObject> o = new Stack<JSONObject>();
          for (int i=0; i<data.length(); ++i)
             o.add(data.getJSONObject(i));
          
-         // Reset local entries to new entries
+         // Update table
          Refresh(o);
          TableUtil.packColumns(TABLE, 2);
          tivo_data.put(tivoName, data);
@@ -195,13 +203,13 @@ public class thumbsTable {
             config.gui.remote_gui.setTivoName("thumbs", tivoName);
          }
       } catch (JSONException e) {
-         log.print("Thumbs AddRows - " + e.getMessage());
+         log.error("Thumbs AddRows - " + e.getMessage());
       }      
    }
    
    // Refresh table with given given entries
    public void Refresh(Stack<JSONObject> o) {
-      table_data = new Hashtable<String, JSONObject>();
+      clear();
       if (o == null) {
          if (currentTivo != null)
             AddRows(currentTivo, tivo_data.get(currentTivo));
@@ -212,9 +220,12 @@ public class thumbsTable {
       }
    }
    
+   public void clear() {
+      TableUtil.clear(TABLE);
+   }
+   
    // Update table display to show top level flat structure
    private void displayFlatStructure(Stack<JSONObject> o) {
-      TableUtil.clear(TABLE);
       for (int i=0; i<o.size(); ++i) {
          AddTABLERow(o.get(i));
       }
@@ -252,6 +263,79 @@ public class thumbsTable {
       } catch (JSONException e1) {
          log.error("AddTABLERow - " + e1.getMessage());
       }      
-   }   
+   }
+   
+   public void refreshThumbs(String tivoName) {
+      clear();
+      jobData job = new jobData();
+      job.source         = tivoName;
+      job.tivoName       = tivoName;
+      job.type           = "remote";
+      job.name           = "Remote";
+      job.remote_thumbs  = true;
+      job.thumbs         = this;
+      jobMonitor.submitNewJob(job);
+   }
+   
+   // For each row value different that current database, update thumbs value
+   public void updateThumbs(String tivoName) {
+      try {
+         JSONArray changed = new JSONArray();
+         for (int row=0; row<TABLE.getModel().getRowCount(); ++row) {
+            String table_value = (String)TABLE.getModel().getValueAt(row, 2);
+            JSONObject json = GetRowData(row);
+            if (json != null) {
+               String data_value = "" + json.getInt("thumbsRating");
+               if (! table_value.equals(data_value)) {
+                  // Make a copy of json so we don't change it
+                  JSONObject j = new JSONObject(json.toString());
+                  j.put("thumbsRating", Integer.parseInt(table_value));
+                  changed.put(j);
+               }
+            }
+         }
+         if (changed.length() > 0) {
+            // There are table changes, so update in the background
+            class backgroundRun extends SwingWorker<Object, Object> {
+               private JSONArray changed;
+               private String tivoName;
+               public backgroundRun(String tivoName, JSONArray changed) {
+                  this.tivoName = tivoName;
+                  this.changed = changed;
+               }
+               protected Object doInBackground() {
+                  try {
+                     Remote r = config.initRemote(tivoName);
+                     if (r.success) {
+                        for (int i=0; i<changed.length(); ++i) {
+                           JSONObject j = changed.getJSONObject(i);
+                           log.print("Updating '" + j.getString("title") + "' to thumbs rating: " + j.getInt("thumbsRating"));
+                           JSONObject o = new JSONObject();
+                           o.put("bodyId", r.bodyId_get());
+                           o.put("collectionId", j.getString("collectionId"));
+                           o.put("thumbsRating", j.getInt("thumbsRating"));
+                           JSONObject result = r.Command("userContentStore", o);
+                           if (result != null) {
+                              log.print("Thumbs rating updated");
+                           }
+                        }
+                        r.disconnect();
+                     }
+                  } catch (JSONException e) {
+                     log.error("updateThumbs - " + e.getMessage());
+                  }
+                  // Now refresh the thumbs table
+                  reset();
+                  refreshThumbs(tivoName);
+                  return null;
+          }
+            }
+            backgroundRun b = new backgroundRun(tivoName, changed);
+            b.execute();
+         }
+      } catch (Exception e) {
+         log.error("updateThumbs - " + e.getMessage());
+      }
+   }
             
 }

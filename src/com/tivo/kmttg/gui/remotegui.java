@@ -92,6 +92,7 @@ public class remotegui {
    private streamTable tab_stream = null;
    private JComboBox tivo_stream = null;
    
+   public JButton refresh_thumbs = null;
    private thumbsTable tab_thumbs = null;
    private JComboBox tivo_thumbs = null;
    
@@ -1375,24 +1376,28 @@ public class remotegui {
       });
       tivo_thumbs.setToolTipText(getToolTip("tivo_thumbs"));
 
-      JButton refresh_thumbs = new JButton("Refresh");
+      refresh_thumbs = new JButton("Refresh");
       refresh_thumbs.setMargin(new Insets(1,1,1,1));
       refresh_thumbs.setToolTipText(getToolTip("refresh_thumbs"));
       refresh_thumbs.addActionListener(new java.awt.event.ActionListener() {
          public void actionPerformed(java.awt.event.ActionEvent e) {
             // Refresh thumbs list
-            TableUtil.clear(tab_thumbs.TABLE);
             String tivoName = (String)tivo_thumbs.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               jobData job = new jobData();
-               job.source         = tivoName;
-               job.tivoName       = tivoName;
-               job.type           = "remote";
-               job.name           = "Remote";
-               job.remote_thumbs  = true;
-               job.thumbs         = tab_thumbs;
-               jobMonitor.submitNewJob(job);
+               tab_thumbs.refreshThumbs(tivoName);
             }
+         }
+      });
+
+      JButton update_thumbs = new JButton("Update");
+      update_thumbs.setMargin(new Insets(1,1,1,1));
+      update_thumbs.setToolTipText(getToolTip("update_thumbs"));
+      update_thumbs.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Update thumbs list
+            String tivoName = (String)tivo_thumbs.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0)
+               tab_thumbs.updateThumbs(tivoName);
          }
       });
             
@@ -1404,6 +1409,8 @@ public class remotegui {
       row1_thumbs.add(tivo_thumbs);
       row1_thumbs.add(Box.createRigidArea(space_5));
       row1_thumbs.add(refresh_thumbs);
+      row1_thumbs.add(Box.createRigidArea(space_5));
+      row1_thumbs.add(update_thumbs);
       panel_thumbs.add(row1_thumbs, c);
       
       tab_thumbs = new thumbsTable(config.gui.getJFrame());
@@ -3833,6 +3840,13 @@ public class remotegui {
       else if (component.equals("refresh_thumbs")){
          text = "<b>Refresh</b><br>";
          text += "Refresh list for selected TiVo.";
+      }
+      else if (component.equals("update_thumbs")){
+         text = "<b>Update</b><br>";
+         text += "Updates thumbs values on TiVo according to changed values in table.<br>";
+         text += "NOTE: You can directly edit values in the RATING column of the table.<br>";
+         text += "Valid settings for RATING are: -3,-2,-1,0,1,2,3. A value of 0 means no thumbs<br>";
+         text += "and an update with 0 value will remove the thumbs for the respective show.";
       }
       else if (component.equals("tivo_search")) {
          text = "Select TiVo for which to perform search with.<br>";
