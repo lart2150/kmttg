@@ -1,6 +1,5 @@
 package com.tivo.kmttg.gui;
 
-import java.awt.Component;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
