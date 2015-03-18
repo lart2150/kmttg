@@ -1,5 +1,6 @@
 package com.tivo.kmttg.gui;
 
+import java.awt.Component;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
@@ -83,6 +84,7 @@ public class thumbsTable {
    }   
    
    // Extend editor to select all text when cell receives focus
+   // and to check thumbs value
    class MyCellEditor extends DefaultCellEditor {
       private static final long serialVersionUID = 1L;
 
@@ -93,6 +95,26 @@ public class thumbsTable {
                textField.selectAll();
             }
          });
+      }
+      
+      public Object getCellEditorValue() {
+         Object value = super.getCellEditorValue();
+         int val = 1;
+         try {
+            val = Integer.parseInt((String)value);
+         } catch (NumberFormatException e) {
+            log.warn("Illegal value - setting to 1");
+            val = 1;
+         }
+         if (val < -3) {
+            log.warn("Illegal value - setting to -3");
+            val = -3;
+         }
+         if (val > 3) {
+            val = 3;
+            log.warn("Illegal value - setting to 3");
+         }
+         return "" + val;
       }      
    }
    
