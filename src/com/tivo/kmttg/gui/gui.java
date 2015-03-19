@@ -1747,7 +1747,7 @@ public class gui {
             }
             if (remote_gui != null) {
                String[]names = {
-                  "todo", "guide", "sp", "cancel", "deleted", "search", "rc", "info", "web", "premiere"
+                  "todo", "sp", "cancel", "premiere", "search", "guide", "stream", "deleted", "thumbs", "rc", "info" 
                };
                ofp.write("\n<rpc_tivo>\n");
                for (String tab : names)
