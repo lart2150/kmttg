@@ -59,6 +59,10 @@ public class PopupHandler {
             items.add(new PopupPair("Upcoming [u]", KeyEvent.VK_U, subTabName));
             items.add(new PopupPair("Conflicts [o]", KeyEvent.VK_O, subTabName));
          }
+         if (subTabName.equals("Thumbs")) {
+            if (config.rpcEnabled(tivoName))
+               items.add(new PopupPair("Copy [c]", KeyEvent.VK_C, subTabName));
+         }
          if (config.rpcEnabled(tivoName) && subTabName.equals("Deleted")) {            
             items.add(new PopupPair("Recover [r]", KeyEvent.VK_R, subTabName));
             items.add(new PopupPair("Permanently Delete [delete]", KeyEvent.VK_DELETE, subTabName));
@@ -66,7 +70,7 @@ public class PopupHandler {
                "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
             );
          }
-         if (config.rpcEnabled(tivoName) && !subTabName.equals("Season Passes"))
+         if (config.rpcEnabled(tivoName) && !subTabName.equals("Season Passes") && !subTabName.equals("Thumbs"))
             items.add(new PopupPair("Show Information [i]", KeyEvent.VK_I, subTabName));
          items.add(new PopupPair("Display data [j]", KeyEvent.VK_J, subTabName));
          items.add(new PopupPair("Web query [q]", KeyEvent.VK_Q, subTabName));
