@@ -1421,6 +1421,18 @@ public class remotegui {
          }
       });
 
+      JButton copy_thumbs = new JButton("Copy");
+      copy_thumbs.setMargin(new Insets(1,1,1,1));
+      copy_thumbs.setToolTipText(getToolTip("copy_thumbs"));
+      copy_thumbs.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Copy selected thumbs
+            String tivoName = (String)tivo_thumbs.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0)
+               tab_thumbs.copyThumbs(tivoName);
+         }
+      });
+
       refresh_thumbs = new JButton("Refresh");
       refresh_thumbs.setMargin(new Insets(1,1,1,1));
       refresh_thumbs.setToolTipText(getToolTip("refresh_thumbs"));
@@ -1434,7 +1446,7 @@ public class remotegui {
          }
       });
 
-      JButton update_thumbs = new JButton("Update");
+      JButton update_thumbs = new JButton("Modify");
       update_thumbs.setMargin(new Insets(1,1,1,1));
       update_thumbs.setToolTipText(getToolTip("update_thumbs"));
       update_thumbs.addActionListener(new java.awt.event.ActionListener() {
@@ -1458,6 +1470,8 @@ public class remotegui {
       row1_thumbs.add(save_thumbs);
       row1_thumbs.add(Box.createRigidArea(space_5));
       row1_thumbs.add(load_thumbs);
+      row1_thumbs.add(Box.createRigidArea(space_5));
+      row1_thumbs.add(copy_thumbs);
       row1_thumbs.add(Box.createRigidArea(space_5));
       row1_thumbs.add(update_thumbs);
       panel_thumbs.add(row1_thumbs, c);
@@ -3897,6 +3911,16 @@ public class remotegui {
          text += "Valid settings for RATING are: -3,-2,-1,0,1,2,3. A value of 0 means no thumbs<br>";
          text += "and an update with 0 value will remove the thumbs for the respective show.";
       }
+      else if (component.equals("copy_thumbs")){
+         text = "<b>Copy</b><br>";
+         text += "This is used to copy <b>loaded</b> thumbs in the table to one of your TiVos.<br>";
+         text += "Select the TiVo you want to copy to, load saved thumbs from a file, and then select<br>";
+         text += "rows in the table that you want copied, then press this button to perform the copy.<br>";
+         text += "If you want to copy from another TiVo, first switch to that TiVo and save its<br>";
+         text += "thumbs to a file. Then switch to destination TiVo and load the file you just saved.<br>";
+         text += "Now you can select entries in the table and use this button to copy to destination TiVo.<br>";
+         text += "Note that any existing shows with ratings on the destination TiVo will be overriden.";
+      }
       else if (component.equals("tivo_search")) {
          text = "Select TiVo for which to perform search with.<br>";
          text += "When changing TiVo selection the table below is NOT automatically updated so that you are<br>";
@@ -4075,8 +4099,8 @@ public class remotegui {
       else if (component.equals("copy_sp")){
          text = "<b>Copy</b><br>";
          text += "This is used to copy <b>loaded</b> season passes in the table to one of your TiVos.<br>";
-         text += "Select the TiVo you want to copy to and then select rows in the table that you want copied,<br>";
-         text += "then press this button to perform the copy.<br>";
+         text += "Select the TiVo you want to copy to, load saved season passes from a saved file, and then<br>";
+         text += "select rows in the table that you want copied, then press this button to perform the copy.<br>";
          text += "If you want to copy from another TiVo, first switch to that TiVo and save its<br>";
          text += "season passes to a file. Then switch to destination TiVo and load the file you just saved.<br>";
          text += "Now you can select entries in the table and use this button to copy to destination TiVo.<br>";

@@ -40,6 +40,7 @@ public class thumbsTable {
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private Hashtable<String, JSONObject> table_data = null;
    private Boolean loaded = false;
+   private String loadedPrefix = "Loaded: ";
          
    thumbsTable(JFrame dialog) {
       Object[][] data = {}; 
@@ -149,6 +150,8 @@ public class thumbsTable {
 
    private JSONObject GetRowData(int row) {
       String title = (String)TABLE.getModel().getValueAt(row, 1);
+      if (title.startsWith(loadedPrefix))
+         title = title.replaceFirst(loadedPrefix, "");
       return table_data.get(title);
    }
    
@@ -375,10 +378,48 @@ public class thumbsTable {
          // Clear table and display loaded data
          clear();
          AddRows(null, data);
-         updateTitleCols("Loaded:");
+         updateTitleCols(loadedPrefix);
          TableUtil.packColumns(TABLE, 2);
          setLoaded(true);
       }
+   }
+   
+   public void copyThumbs(final String tivoName) {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         protected Object doInBackground() {
+            int[] selected = TableUtil.GetSelectedRows(TABLE);
+            if (selected.length > 0) {
+               int row;
+               JSONObject json, result;
+               Remote r = config.initRemote(tivoName);
+               if (r.success) {
+                  log.print("Copying thumbs ratings to TiVo: " + tivoName);
+                  for (int i=0; i<selected.length; ++i) {
+                     row = selected[i];
+                     json = GetRowData(row);
+                     if (json != null) {
+                        try {
+                           log.print("Copying: " + json.getString("title"));
+                           JSONObject o = new JSONObject();
+                           o.put("bodyId", r.bodyId_get());
+                           o.put("collectionId", json.getString("collectionId"));
+                           o.put("thumbsRating", json.getInt("thumbsRating"));
+                           result = r.Command("userContentStore", o);
+                           if (result != null)
+                              log.print("success");
+                        } catch (JSONException e) {
+                           log.error("thumbsCopy - " + e.getMessage());
+                        }
+                     }
+                  }
+                  r.disconnect();
+               }
+            }
+            return null;
+         }
+      }
+      backgroundRun b = new backgroundRun();
+      b.execute();
    }
    
    public Boolean isTableLoaded() {
@@ -397,7 +438,7 @@ public class thumbsTable {
       if (TABLE.getRowCount() > 0) {
          int col = TableUtil.getColumnIndex(TABLE, "SHOW");
          String title = (String)TABLE.getValueAt(0,col);
-         if (title != null && title.startsWith("Loaded"))
+         if (title != null && title.startsWith(loadedPrefix))
             setLoaded(true);
          else
             setLoaded(false);
