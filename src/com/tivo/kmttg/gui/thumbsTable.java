@@ -19,6 +19,7 @@ import org.jdesktop.swingx.JXTable;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
+import com.tivo.kmttg.JSON.JSONFile;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -38,6 +39,7 @@ public class thumbsTable {
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private Hashtable<String, JSONObject> table_data = null;
+   private Boolean loaded = false;
          
    thumbsTable(JFrame dialog) {
       Object[][] data = {}; 
@@ -50,7 +52,7 @@ public class thumbsTable {
       Object[][] data = {}; 
       TABLE.setModel(new ThumbsTableModel(data, TITLE_cols));
       TABLE.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-      TABLE.setRowSelectionAllowed(false);
+      //TABLE.setRowSelectionAllowed(false);
       
       // Add listener for click handling (for folder entries)
       /*TABLE.addMouseListener(
@@ -137,9 +139,9 @@ public class thumbsTable {
          return Object.class;
       } 
       
-      // Set all cells uneditable
+      // Set selected cells editable or non-editable
       public boolean isCellEditable(int row, int column) {
-         if (column == 2)
+         if (column == 2 && ! isTableLoaded() )
             return true;
          return false;
       }
@@ -185,7 +187,7 @@ public class thumbsTable {
          e.consume();
       }
    }
-
+   
    // Update table to display given entries
    public void AddRows(String tivoName, JSONArray data) {
       try {
@@ -197,9 +199,11 @@ public class thumbsTable {
          // Update table
          Refresh(o);
          TableUtil.packColumns(TABLE, 2);
-         tivo_data.put(tivoName, data);
-         currentTivo = tivoName;
-         if (config.gui.remote_gui != null) {
+         if (tivoName != null) {
+            tivo_data.put(tivoName, data);
+            currentTivo = tivoName;
+         }
+         if (config.gui.remote_gui != null && tivoName != null) {
             config.gui.remote_gui.setTivoName("thumbs", tivoName);
          }
       } catch (JSONException e) {
@@ -222,12 +226,24 @@ public class thumbsTable {
    
    public void clear() {
       TableUtil.clear(TABLE);
+      setLoaded(false);
    }
    
    // Update table display to show top level flat structure
    private void displayFlatStructure(Stack<JSONObject> o) {
       for (int i=0; i<o.size(); ++i) {
          AddTABLERow(o.get(i));
+      }
+   }
+   
+   private void updateTitleCols(String name) {
+      String title;
+      int col = TableUtil.getColumnIndex(TABLE, "SHOW");
+      ThumbsTableModel dm = (ThumbsTableModel)TABLE.getModel();
+      for (int row=0; row<TABLE.getRowCount(); ++row) {
+         title = (String)TABLE.getValueAt(row,col);
+         title = name + title;
+         dm.setValueAt(title, row, col);
       }
    }
    
@@ -267,6 +283,7 @@ public class thumbsTable {
    
    public void refreshThumbs(String tivoName) {
       clear();
+      setLoaded(false);
       jobData job = new jobData();
       job.source         = tivoName;
       job.tivoName       = tivoName;
@@ -279,6 +296,10 @@ public class thumbsTable {
    
    // For each row value different that current database, update thumbs value
    public void updateThumbs(String tivoName) {
+      if (isTableLoaded()) {
+         log.error("Cannot update a loaded table");
+         return;
+      }
       try {
          JSONArray changed = new JSONArray();
          for (int row=0; row<TABLE.getModel().getRowCount(); ++row) {
@@ -335,6 +356,51 @@ public class thumbsTable {
          }
       } catch (Exception e) {
          log.error("updateThumbs - " + e.getMessage());
+      }
+   }
+   
+   public void saveThumbs(String tivoName, String file) {
+      if (tivo_data.containsKey(tivoName) && tivo_data.get(tivoName).length() > 0) {
+         log.warn("Saving '" + tivoName + "' Thumbs list to file: " + file);
+         JSONFile.write(tivo_data.get(tivoName), file);
+      } else {
+         log.error("No data available to save.");
+      }      
+   }
+   
+   public void loadThumbs(String file) {
+      log.print("Loading Thumbs data from file: " + file);
+      JSONArray data = JSONFile.readJSONArray(file);
+      if (data != null && data.length() > 0) {
+         // Clear table and display loaded data
+         clear();
+         AddRows(null, data);
+         updateTitleCols("Loaded:");
+         TableUtil.packColumns(TABLE, 2);
+         setLoaded(true);
+      }
+   }
+   
+   public Boolean isTableLoaded() {
+      return loaded;
+   }
+   
+   private void setLoaded(Boolean flag) {
+      if (flag) {
+         loaded = true;
+      } else {
+         loaded = false;
+      }
+   }
+   
+   public void updateLoadedStatus() {
+      if (TABLE.getRowCount() > 0) {
+         int col = TableUtil.getColumnIndex(TABLE, "SHOW");
+         String title = (String)TABLE.getValueAt(0,col);
+         if (title != null && title.startsWith("Loaded"))
+            setLoaded(true);
+         else
+            setLoaded(false);
       }
    }
             

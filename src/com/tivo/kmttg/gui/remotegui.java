@@ -1371,10 +1371,55 @@ public class remotegui {
                updateButtonStates(tivoName, "Thumbs");
                if (tab_thumbs.tivo_data.containsKey(tivoName))
                   tab_thumbs.AddRows(tivoName, tab_thumbs.tivo_data.get(tivoName));
+               tab_thumbs.updateLoadedStatus();
             }
          }
       });
       tivo_thumbs.setToolTipText(getToolTip("tivo_thumbs"));
+
+      JButton save_thumbs = new JButton("Save...");
+      save_thumbs.setMargin(new Insets(1,1,1,1));
+      save_thumbs.setToolTipText(getToolTip("save_thumbs"));
+      save_thumbs.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Save thumbs list
+            String tivoName = (String)tivo_thumbs.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               if (tab_thumbs.isTableLoaded()) {
+                  log.error("Cannot save loaded Thumbs");
+                  return;
+               }  else {
+                  Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                  Browser.setFileFilter(new FileFilterSP(".thumbs"));
+                  Browser.setSelectedFile(new File(config.programDir + File.separator + tivoName + ".thumbs"));
+                  int result = Browser.showDialog(config.gui.getJFrame(), "Save to file");
+                  if (result == JFileChooser.APPROVE_OPTION) {               
+                     File file = Browser.getSelectedFile();
+                     tab_thumbs.saveThumbs(tivoName, file.getAbsolutePath());
+                  }
+               }
+            }
+         }
+      });
+
+      JButton load_thumbs = new JButton("Load...");
+      load_thumbs.setMargin(new Insets(1,1,1,1));
+      load_thumbs.setToolTipText(getToolTip("load_thumbs"));
+      load_thumbs.addActionListener(new java.awt.event.ActionListener() {
+         public void actionPerformed(java.awt.event.ActionEvent e) {
+            // Load thumbs list
+            String tivoName = (String)tivo_thumbs.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
+               Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+               Browser.setFileFilter(new FileFilterSP(".thumbs"));
+               int result = Browser.showDialog(config.gui.getJFrame(), "Load thumbs file");
+               if (result == JFileChooser.APPROVE_OPTION) {               
+                  File file = Browser.getSelectedFile();
+                  tab_thumbs.loadThumbs(file.getAbsolutePath());
+               }
+            }
+         }
+      });
 
       refresh_thumbs = new JButton("Refresh");
       refresh_thumbs.setMargin(new Insets(1,1,1,1));
@@ -1409,6 +1454,10 @@ public class remotegui {
       row1_thumbs.add(tivo_thumbs);
       row1_thumbs.add(Box.createRigidArea(space_5));
       row1_thumbs.add(refresh_thumbs);
+      row1_thumbs.add(Box.createRigidArea(space_5));
+      row1_thumbs.add(save_thumbs);
+      row1_thumbs.add(Box.createRigidArea(space_5));
+      row1_thumbs.add(load_thumbs);
       row1_thumbs.add(Box.createRigidArea(space_5));
       row1_thumbs.add(update_thumbs);
       panel_thumbs.add(row1_thumbs, c);
