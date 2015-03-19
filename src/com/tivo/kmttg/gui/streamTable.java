@@ -431,7 +431,8 @@ public class streamTable {
          JSONObject json = GetRowData(selected[0]);
          if (json != null)
             rnpl.pprintJSON(json);
-      } else if (keyCode == KeyEvent.VK_Q) {
+      }
+      else if (keyCode == KeyEvent.VK_Q) {
          // Web query currently selected entry
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
@@ -447,7 +448,11 @@ public class streamTable {
                log.error("KeyPressed Q - " + e1.getMessage());
             }
          }
-      } else {
+      }
+      else if (keyCode == KeyEvent.VK_R) {
+         config.gui.remote_gui.remove_stream.doClick();
+      }
+      else {
          // Pass along keyboard action
          e.consume();
       }

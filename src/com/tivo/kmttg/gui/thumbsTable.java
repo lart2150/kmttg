@@ -185,7 +185,26 @@ public class thumbsTable {
          JSONObject json = GetRowData(selected[0]);
          if (json != null)
             rnpl.pprintJSON(json);
-      } else {
+      }
+      else if (keyCode == KeyEvent.VK_C) {
+         config.gui.remote_gui.copy_thumbs.doClick();
+      }
+      else if (keyCode == KeyEvent.VK_Q) {
+         // Web query currently selected entry
+         int[] selected = TableUtil.GetSelectedRows(TABLE);
+         if (selected == null || selected.length < 1)
+            return;
+         JSONObject json = GetRowData(selected[0]);
+         if (json != null && json.has("title")) {
+            try {
+               String title = json.getString("title");
+               TableUtil.webQuery(title);
+            } catch (JSONException e1) {
+               log.error("KeyPressed Q - " + e1.getMessage());
+            }
+         }
+      }
+      else {
          // Pass along keyboard action
          e.consume();
       }
