@@ -93,6 +93,8 @@ public class remotegui {
    private JComboBox tivo_stream = null;
    
    public JButton refresh_thumbs = null;
+   public JButton copy_thumbs = null;
+   public JButton update_thumbs = null;
    private thumbsTable tab_thumbs = null;
    private JComboBox tivo_thumbs = null;
    
@@ -1421,7 +1423,7 @@ public class remotegui {
          }
       });
 
-      JButton copy_thumbs = new JButton("Copy");
+      copy_thumbs = new JButton("Copy");
       copy_thumbs.setMargin(new Insets(1,1,1,1));
       copy_thumbs.setToolTipText(getToolTip("copy_thumbs"));
       copy_thumbs.addActionListener(new java.awt.event.ActionListener() {
@@ -1446,7 +1448,7 @@ public class remotegui {
          }
       });
 
-      JButton update_thumbs = new JButton("Modify");
+      update_thumbs = new JButton("Modify");
       update_thumbs.setMargin(new Insets(1,1,1,1));
       update_thumbs.setToolTipText(getToolTip("update_thumbs"));
       update_thumbs.addActionListener(new java.awt.event.ActionListener() {
@@ -3173,6 +3175,10 @@ public class remotegui {
          rc_jumpto_button.setEnabled(state);
          rc_jumpahead_button.setEnabled(state);
          rc_jumpback_button.setEnabled(state);
+      }
+      if (tab.equals("Thumbs")) {
+         copy_thumbs.setEnabled(state);
+         update_thumbs.setEnabled(state);
       }
       if (tab.equals("Info")) {
          reboot_info.setEnabled(state);
