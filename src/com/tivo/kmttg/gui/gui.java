@@ -78,7 +78,7 @@ public class gui {
    private JMenuItem pushesMenuItem = null;
    private JMenuItem saveJobsMenuItem = null;
    private JMenuItem loadJobsMenuItem = null;
-   private JMenuItem searchMenuItem = null;
+   public JMenuItem searchMenuItem = null;
    
    private JComboBox encoding = null;
    private JLabel encoding_label = null;

@@ -43,7 +43,7 @@ public class PopupHandler {
          if (subTabName.equals("Season Premieres") || subTabName.equals("Search") || subTabName.equals("Guide")) {            
             if (config.rpcEnabled(tivoName)) {
                items.add(new PopupPair("Record [r]", KeyEvent.VK_R, subTabName));
-               items.add(new PopupPair("Season Pass [s]", KeyEvent.VK_S, subTabName));
+               items.add(new PopupPair("Season Pass [p]", KeyEvent.VK_P, subTabName));
                items.add(new PopupPair("Wishlist [w]", KeyEvent.VK_W, subTabName));
             }
             items.add(new PopupPair(
@@ -72,8 +72,11 @@ public class PopupHandler {
          }
          if (config.rpcEnabled(tivoName) && !subTabName.equals("Season Passes") && !subTabName.equals("Thumbs"))
             items.add(new PopupPair("Show Information [i]", KeyEvent.VK_I, subTabName));
+         
+         // General items for all tables
          items.add(new PopupPair("Display data [j]", KeyEvent.VK_J, subTabName));
          items.add(new PopupPair("Web query [q]", KeyEvent.VK_Q, subTabName));
+         items.add(new PopupPair("Search table [ctrl-s]", config.gui.searchMenuItem, subTabName));
       } else {
          // This is a NPL table
          tivoName = tabName;
@@ -91,6 +94,7 @@ public class PopupHandler {
          items.add(new PopupPair("Web query [q]", KeyEvent.VK_Q, tivoName));
          items.add(new PopupPair("Add to auto transfers", config.gui.addSelectedTitlesMenuItem, tivoName));
          items.add(new PopupPair("Add to history file", config.gui.addSelectedHistoryMenuItem, tivoName));
+         items.add(new PopupPair("Search table [ctrl-s]", config.gui.searchMenuItem, tivoName));
       }
       
       for (int i=0; i<items.size(); ++i) {
