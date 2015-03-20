@@ -2302,19 +2302,27 @@ public class Remote {
                JSONArray matches = result.getJSONArray("userContent");
                if (matches.length() == 0)
                   stop = true;
+               // NOTE: Performing collectionSearch with 50 at a time is a huge speedup
                JSONObject j = new JSONObject();
+               JSONArray ids = new JSONArray();
                for (int i=0; i<matches.length(); ++i) {
                   JSONObject t = matches.getJSONObject(i);
-                  j.put("collectionId", t.getString("collectionId"));
-                  result = Command("collectionSearch", j);
-                  if (result != null && result.has("collection")) {
-                     JSONObject r = result.getJSONArray("collection").getJSONObject(0);
+                  ids.put(t.getString("collectionId"));
+               }
+               j.put("collectionId", ids);
+               j.put("count", ids.length());
+               result = Command("collectionSearch", j);
+               if (result != null && result.has("collection")) {
+                  JSONArray a = result.getJSONArray("collection");
+                  for (int i=0; i<a.length(); ++i) {                  
+                     JSONObject r = a.getJSONObject(i);
+                     JSONObject t = matches.getJSONObject(i);
                      if (r.has("title"))
                         t.put("title", r.getString("title"));
                      if (r.has("collectionType"))
                         t.put("collectionType", r.getString("collectionType"));
+                     thumbs.put(t);
                   }
-                  thumbs.put(t);
                   // Update status in job monitor
                   if (job != null && config.GUIMODE) {
                      config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Thumbs List");
