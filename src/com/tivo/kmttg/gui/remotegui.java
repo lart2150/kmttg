@@ -95,6 +95,7 @@ public class remotegui {
    public JButton refresh_thumbs = null;
    public JButton copy_thumbs = null;
    public JButton update_thumbs = null;
+   public JLabel thumbs_label = null;
    private thumbsTable tab_thumbs = null;
    private JComboBox tivo_thumbs = null;
    
@@ -1369,6 +1370,7 @@ public class remotegui {
              if (e.getStateChange() == ItemEvent.SELECTED) {               
                // TiVo selection changed for Thumbs tab
                TableUtil.clear(tab_thumbs.TABLE);
+               thumbs_label.setText("");
                String tivoName = getTivoName("thumbs");
                updateButtonStates(tivoName, "Thumbs");
                if (tab_thumbs.tivo_data.containsKey(tivoName))
@@ -1416,6 +1418,7 @@ public class remotegui {
                Browser.setFileFilter(new FileFilterSP(".thumbs"));
                int result = Browser.showDialog(config.gui.getJFrame(), "Load thumbs file");
                if (result == JFileChooser.APPROVE_OPTION) {               
+                  thumbs_label.setText("");
                   File file = Browser.getSelectedFile();
                   tab_thumbs.loadThumbs(file.getAbsolutePath());
                }
@@ -1443,6 +1446,7 @@ public class remotegui {
             // Refresh thumbs list
             String tivoName = (String)tivo_thumbs.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
+               thumbs_label.setText("");
                tab_thumbs.refreshThumbs(tivoName);
             }
          }
@@ -1456,9 +1460,12 @@ public class remotegui {
             // Update thumbs list
             String tivoName = (String)tivo_thumbs.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0)
+               thumbs_label.setText("");
                tab_thumbs.updateThumbs(tivoName);
          }
       });
+      
+      thumbs_label = new JLabel();
             
       row1_thumbs.add(Box.createRigidArea(space_5));
       row1_thumbs.add(title_thumbs);
@@ -1476,6 +1483,8 @@ public class remotegui {
       row1_thumbs.add(copy_thumbs);
       row1_thumbs.add(Box.createRigidArea(space_5));
       row1_thumbs.add(update_thumbs);
+      row1_thumbs.add(Box.createRigidArea(space_5));
+      row1_thumbs.add(thumbs_label);
       panel_thumbs.add(row1_thumbs, c);
       
       tab_thumbs = new thumbsTable(config.gui.getJFrame());

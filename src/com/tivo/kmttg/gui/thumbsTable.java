@@ -227,6 +227,7 @@ public class thumbsTable {
          }
          if (config.gui.remote_gui != null && tivoName != null) {
             config.gui.remote_gui.setTivoName("thumbs", tivoName);
+            refreshNumber();
          }
       } catch (JSONException e) {
          log.error("Thumbs AddRows - " + e.getMessage());
@@ -301,6 +302,12 @@ public class thumbsTable {
       } catch (JSONException e1) {
          log.error("AddTABLERow - " + e1.getMessage());
       }      
+   }
+   
+   
+   // Refresh the # SHOWS label in the ToDo tab
+   private void refreshNumber() {
+      config.gui.remote_gui.thumbs_label.setText("" + tivo_data.get(currentTivo).length() + " THUMBS");
    }
    
    public void refreshThumbs(String tivoName) {
