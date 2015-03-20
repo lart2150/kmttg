@@ -355,7 +355,7 @@ public class todoTable {
     }
     
     // Refresh the # SHOWS label in the ToDo tab
-    public void refreshNumber() {
+    private void refreshNumber() {
        config.gui.remote_gui.label_todo.setText("" + tivo_data.get(currentTivo).length() + " SHOWS");
     }
     
