@@ -2302,14 +2302,13 @@ public class Remote {
                JSONArray matches = result.getJSONArray("userContent");
                if (matches.length() == 0)
                   stop = true;
+               JSONObject j = new JSONObject();
                for (int i=0; i<matches.length(); ++i) {
                   JSONObject t = matches.getJSONObject(i);
-                  JSONObject j = new JSONObject();
-                  j.put("bodyId", bodyId_get());
                   j.put("collectionId", t.getString("collectionId"));
-                  result = Command("contentSearch", j);
-                  if (result != null && result.has("content")) {
-                     JSONObject r = result.getJSONArray("content").getJSONObject(0);
+                  result = Command("collectionSearch", j);
+                  if (result != null && result.has("collection")) {
+                     JSONObject r = result.getJSONArray("collection").getJSONObject(0);
                      if (r.has("title"))
                         t.put("title", r.getString("title"));
                      if (r.has("collectionType"))
