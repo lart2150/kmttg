@@ -148,7 +148,7 @@ public class thumbsTable {
       }
    }
 
-   private JSONObject GetRowData(int row) {
+   public JSONObject GetRowData(int row) {
       String title = (String)TABLE.getModel().getValueAt(row, 1);
       if (title.startsWith(loadedPrefix))
          title = title.replaceFirst(loadedPrefix, "");

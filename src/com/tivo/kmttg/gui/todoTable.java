@@ -309,7 +309,7 @@ public class todoTable {
        }
     }
     
-    private JSONObject GetRowData(int row) {
+    public JSONObject GetRowData(int row) {
        return TableUtil.GetRowData(TABLE, row, "DATE");
     }
     
