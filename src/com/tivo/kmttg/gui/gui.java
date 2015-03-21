@@ -171,7 +171,7 @@ public class gui {
    public void addGlobalKeyListener() {
       class KeyDispatcher implements KeyEventDispatcher {
          public boolean dispatchKeyEvent(KeyEvent e) {
-            String tabName = config.gui.getCurrentTabName();
+            String tabName = getCurrentTabName();
             if (tabName.equals("Remote")) {
                String subTabName = config.gui.remote_gui.getCurrentTabName();
                if (subTabName.equals("Remote")) {
@@ -1527,9 +1527,21 @@ public class gui {
    
    public String getSelectedTivoName() {
       String tabName = getCurrentTabName();
-      if (! tabName.equals("FILES") && ! tabName.equals("Remote")) {
+      if (! tabName.equals("FILES") && ! tabName.equals("Remote") && ! tabName.equals("Slingbox")) {
          return tabName;
       }
+      return null;
+   }
+   
+   public String getCurrentRemoteTivoName() {
+      if (getCurrentTabName().equals("Remote"))
+         return config.gui.remote_gui.getTivoName(config.gui.remote_gui.getCurrentTabName());
+      return null;
+   }
+   
+   public JSONObject getCurrentRemoteJson() {
+      if (getCurrentTabName().equals("Remote"))
+         return config.gui.remote_gui.getSelectedJSON(config.gui.remote_gui.getCurrentTabName());         
       return null;
    }
    
