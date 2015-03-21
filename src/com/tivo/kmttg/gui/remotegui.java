@@ -2993,6 +2993,40 @@ public class remotegui {
          return tab_thumbs.TABLE;
       return null;
    }
+   
+   // Return json of currently selected row in currently showing table if any
+   public JSONObject getSelectedJSON(String tabName) {
+      JXTable TABLE = getCurrentTable();
+      if (TABLE == null)
+         return null;
+      int[] selected = TableUtil.GetSelectedRows(TABLE);
+      if (selected == null)
+         return null;
+      int row = 0;
+      if (selected.length > 0)
+         row = selected[0];
+      if (row == 0)
+         return null;
+      if (tabName.equals("ToDo"))
+         return tab_todo.GetRowData(row);
+      if (tabName.equals("Season Passes"))
+         return tab_sp.GetRowData(row);
+      if (tabName.equals("Won't Record"))
+         return tab_cancel.GetRowData(row);
+      if (tabName.equals("Season Premieres"))
+         return tab_premiere.GetRowData(row);
+      if (tabName.equals("Search"))
+         return tab_search.GetRowData(row);
+      if (tabName.equals("Guide"))
+         return tab_guide.GetRowData(row);
+      if (tabName.equals("Streaming"))
+         return tab_stream.GetRowData(row);
+      if (tabName.equals("Deleted"))
+         return tab_deleted.GetRowData(row);
+      if (tabName.equals("Thumbs"))
+         return tab_thumbs.GetRowData(row);
+      return null;
+   }
 
    public String getGuideStartTime() {
 	  String start = (String)guide_start.getSelectedItem();
