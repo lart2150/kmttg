@@ -2346,7 +2346,15 @@ public class Remote {
    public int getThumbsRating(JSONObject json) {
       int thumbsRating = 0;
       try {
-         if (json.has("collectionId")) {
+         String collectionId = null;
+         if (json.has("collectionId"))
+            collectionId = json.getString("collectionId");
+         if (collectionId == null && json.has("idSetSource")) {
+            JSONObject id = json.getJSONObject("idSetSource");
+            if (id.has("collectionId"))
+               collectionId = id.getString("collectionId");
+         }
+         if (collectionId != null) {
             JSONObject o = new JSONObject();
             o.put("bodyId", bodyId_get());
             o.put("collectionId", json.getString("collectionId"));
@@ -2368,14 +2376,21 @@ public class Remote {
    public Boolean setThumbsRating(JSONObject json, int thumbsRating, Boolean override) {
       Boolean success = false;
       try {
-         if (json.has("collectionId")) {
+         String collectionId = null;
+         if (json.has("collectionId"))
+            collectionId = json.getString("collectionId");
+         if (collectionId == null && json.has("idSetSource")) {
+            JSONObject id = json.getJSONObject("idSetSource");
+            if (id.has("collectionId"))
+               collectionId = id.getString("collectionId");
+         }
+         if (collectionId != null) {
             if (! override) {
                // Don't override if thumbs rating already exists
                thumbsRating = getThumbsRating(json);
                if (thumbsRating != 0)
                   return true;
             }
-            String collectionId = json.getString("collectionId");
             JSONObject o = new JSONObject();
             o.put("bodyId", bodyId_get());
             o.put("collectionId", collectionId);
