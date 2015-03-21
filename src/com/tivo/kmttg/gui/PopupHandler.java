@@ -76,6 +76,7 @@ public class PopupHandler {
          // General items for all tables
          items.add(new PopupPair("Display data [j]", KeyEvent.VK_J, subTabName));
          items.add(new PopupPair("Web query [q]", KeyEvent.VK_Q, subTabName));
+         items.add(new PopupPair("Change thumbs rating [ctrl-t]", config.gui.thumbsMenuItem, subTabName));
          items.add(new PopupPair("Search table [ctrl-s]", config.gui.searchMenuItem, subTabName));
       } else {
          // This is a NPL table
