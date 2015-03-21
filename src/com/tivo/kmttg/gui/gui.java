@@ -597,7 +597,9 @@ public class gui {
          fileMenu.add(getResumeDownloadsMenuItem());
          fileMenu.add(getJobMenu());
          fileMenu.add(getSearchMenuItem());
-         fileMenu.add(getThumbsMenuItem());
+         //fileMenu.add(getThumbsMenuItem());
+         // Create thumbs menu item but don't add to File menu
+         getThumbsMenuItem();
          fileMenu.add(getExitMenuItem());
       }
       return fileMenu;
