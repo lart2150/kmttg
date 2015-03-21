@@ -2357,7 +2357,7 @@ public class Remote {
          if (collectionId != null) {
             JSONObject o = new JSONObject();
             o.put("bodyId", bodyId_get());
-            o.put("collectionId", json.getString("collectionId"));
+            o.put("collectionId", collectionId);
             JSONObject result = Command("userContentSearch", o);
             if (result != null && result.has("userContent")) {
                JSONObject j = result.getJSONArray("userContent").getJSONObject(0);
