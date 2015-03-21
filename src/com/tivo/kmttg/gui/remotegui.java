@@ -3002,10 +3002,10 @@ public class remotegui {
       int[] selected = TableUtil.GetSelectedRows(TABLE);
       if (selected == null)
          return null;
-      int row = 0;
+      int row = -1;
       if (selected.length > 0)
          row = selected[0];
-      if (row == 0)
+      if (row == -1)
          return null;
       if (tabName.equals("ToDo"))
          return tab_todo.GetRowData(row);
