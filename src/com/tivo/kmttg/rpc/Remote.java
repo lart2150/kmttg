@@ -2283,7 +2283,7 @@ public class Remote {
       return episodes;
    }
    
-   // Given a collectionId return all episodes
+   // Return all thumbs ratings for a TiVo
    public JSONArray getThumbs(jobData job) {
       JSONArray thumbs = new JSONArray();
       try {
@@ -2339,6 +2339,55 @@ public class Remote {
          log.error("getThumbs - " + e.getMessage());
       }
       return thumbs;
+   }
+   
+   // Get thumbs rating for given json collectionId if it exists
+   // Returns 0 if none
+   public int getThumbsRating(JSONObject json) {
+      int thumbsRating = 0;
+      try {
+         if (json.has("collectionId")) {
+            JSONObject o = new JSONObject();
+            o.put("bodyId", bodyId_get());
+            o.put("collectionId", json.getString("collectionId"));
+            JSONObject result = Command("userContentSearch", o);
+            if (result != null && result.has("userContent")) {
+               JSONObject j = result.getJSONArray("userContent").getJSONObject(0);
+               if (j.has("thumbsRating"))
+                  thumbsRating = j.getInt("thumbsRating");
+            }
+         }
+      } catch (JSONException e) {
+         log.error("getThumbsRating - " + e.getMessage());
+      }
+      return thumbsRating;
+   }
+   
+   // Set thumb rating for given json collectionId if it exists
+   // If override is true, then override existing thumb value
+   public Boolean setThumbsRating(JSONObject json, int thumbsRating, Boolean override) {
+      Boolean success = false;
+      try {
+         if (json.has("collectionId")) {
+            if (! override) {
+               // Don't override if thumbs rating already exists
+               thumbsRating = getThumbsRating(json);
+               if (thumbsRating != 0)
+                  return true;
+            }
+            String collectionId = json.getString("collectionId");
+            JSONObject o = new JSONObject();
+            o.put("bodyId", bodyId_get());
+            o.put("collectionId", collectionId);
+            o.put("thumbsRating", thumbsRating);
+            JSONObject result = Command("userContentStore", o);
+            if (result != null)
+               success = true;
+         }
+      } catch (JSONException e) {
+         log.error("setThumbsRating - " + e.getMessage());
+      }
+      return success;
    }
    
    // Return a One Pass with given collectionId if it exists
@@ -2501,6 +2550,8 @@ public class Remote {
                if (result != null) {
                   log.print("success");
                   TableUtil.addTivoNameFlagtoJson(json, "__SPscheduled__", tivoName);
+                  // Set thumbs rating if not already set
+                  setThumbsRating(json, 1, false);
                }
             }
          } else {

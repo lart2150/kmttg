@@ -17,7 +17,9 @@ import java.util.Stack;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
@@ -42,6 +44,8 @@ public class TableUtil {
    private static JDialog searchDialog = null;
    private static JTextField searchField = null;
    private static JButton find = null;
+   private static JDialog thumbsDialog = null;
+   private static JComboBox thumbsChoice = null;
    
    public static String getColumnName(JXTable TABLE, int c) {
       return (String)TABLE.getColumnModel().getColumn(c).getHeaderValue();
@@ -281,6 +285,116 @@ public class TableUtil {
       }
       return false;      
    }
+   
+   // Bring up set thumbs dialog
+   public static void ThumbsGUI() {      
+      // Determine tivoName and json of currently selected table
+      String tabName = config.gui.remote_gui.getCurrentTabName();
+      final String tivoName = config.gui.remote_gui.getTivoName(tabName);
+      if (tivoName == null)
+         return;
+      final JSONObject json = config.gui.remote_gui.getSelectedJSON(tabName);
+      if (json == null)
+         return;
+      if (thumbsDialog == null) {
+         // Dialog not created yet, so do so
+         JPanel row1 = new JPanel();
+         row1.setLayout(new BoxLayout(row1, BoxLayout.LINE_AXIS));
+         JLabel rating = new JLabel("Thumbs Rating: ");
+         thumbsChoice = new JComboBox();
+         for (int i=-3; i<=3; ++i)
+            thumbsChoice.addItem(i);
+         JButton setButton = new JButton("SET");
+         setButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+               class backgroundRun extends SwingWorker<Object, Object> {
+                  protected Object doInBackground() {
+                     // Determine tivoName and json of currently selected table
+                     String tabName = config.gui.remote_gui.getCurrentTabName();
+                     String tivoName = config.gui.remote_gui.getTivoName(tabName);
+                     if (tivoName == null)
+                        return null;
+                     JSONObject json = config.gui.remote_gui.getSelectedJSON(tabName);
+                     if (json == null)
+                        return null;
+                     String setting = "" + thumbsChoice.getSelectedItem();
+                     int thumbsRating = Integer.parseInt(setting);
+                     Remote r = config.initRemote(tivoName);
+                     if (r.success) {
+                        Boolean result = r.setThumbsRating(json, thumbsRating, true);
+                        r.disconnect();
+                        String title = "";
+                        try {
+                           if (json.has("title"))
+                              title = json.getString("title");
+                           if (json.has("subtitle"))
+                              title = title + " - " + json.getString("subtitle");
+                        } catch (JSONException e) {
+                           log.error("ThumbsGUI SET - " + e.getMessage());
+                        }
+                        if (result) {
+                           log.warn("Successfully set thumbs rating for '" + title + "' to: " + thumbsRating);
+                        }
+                        else
+                           log.error("Failed to set thumbs rating for '" + title + "'");
+                     }
+                     return null;
+                  }
+               }
+               if (thumbsDialog != null) {
+                  thumbsDialog.setVisible(false);
+               }
+               backgroundRun b = new backgroundRun();
+               b.execute();
+            }
+         });
+         row1.add(setButton);
+         row1.add(rating);
+         row1.add(thumbsChoice);
+         thumbsDialog = new JDialog(config.gui.getJFrame(), false); // non-modal dialog
+         thumbsDialog.setTitle("Thumbs Rating");
+         thumbsDialog.setContentPane(row1);
+         thumbsDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+         thumbsDialog.setLocationRelativeTo(config.gui.captions);
+         //thumbsDialog.setMinimumSize(new Dimension(300,100));
+         thumbsDialog.pack();
+      }
+      
+      // Set default rating
+      thumbsChoice.setSelectedItem(0);
+      if (json != null && json.has("collectionId")) {
+         class backgroundRun extends SwingWorker<Object, Object> {
+            protected Object doInBackground() {
+               int rating = 0;
+               Remote r = config.initRemote(tivoName);
+               if (r.success) {
+                  rating = r.getThumbsRating(json);
+                  r.disconnect();
+               }
+               thumbsChoice.setSelectedItem(rating);
+               return null;
+            }
+         }
+         backgroundRun b = new backgroundRun();
+         b.execute();
+      }
+      
+      // Set title
+      String title = "Set thumbs: ";
+      try {
+         if (json != null && json.has("title"))
+            title += json.getString("title");
+         if (json != null && json.has("subtitle"))
+            title += " - " + json.getString("subtitle");
+      } catch (JSONException e) {
+         log.error("ThumbsGUI - " + e.getMessage());
+      }
+      thumbsDialog.setTitle(title);
+      
+      // Display dialog and set default thumbs rating
+      thumbsDialog.requestFocus();
+      thumbsDialog.setVisible(true);
+   }
 
    // Add right mouse button listener
    public static void AddRightMouseListener(final JXTable TABLE) {            
@@ -495,7 +609,7 @@ public class TableUtil {
    
    // Main engine for single show scheduling. This can be a new show
    // or an existing show for which to modify recording options.
-   private static Boolean recordSingle(final String tivoName, JSONObject json) {
+   private static Boolean recordSingle(final String tivoName, final JSONObject json) {
       try {
          if (json.has("partnerId") && ! json.has("channel")) {
             Boolean streaming = true;
@@ -513,12 +627,15 @@ public class TableUtil {
                   Remote r = config.initRemote(tivoName);
                   if (r.success) {
                      JSONObject result = r.Command("ContentLocatorStore", j);
-                     r.disconnect();
                      if (result != null) {
                         log.warn("Added streaming title to My Shows: '" + title + "' on Tivo: " + tivoName);
+                        // Set thumbs rating if it doesn't exist for this collection
+                        r.setThumbsRating(json, 1, false);
+                        r.disconnect();
                         return true;
                      } else {
                         log.error("Failed to create content locator for: " + title);
+                        r.disconnect();
                         return false;
                      }
                   }
@@ -575,6 +692,8 @@ public class TableUtil {
                               String conflicts = rnpl.recordingConflicts(result, json);
                               if (conflicts == null) {
                                  log.warn(_message);
+                                 // Set thumbs rating if it doesn't exist for this collection
+                                 r.setThumbsRating(json, 1, false);
                               } else {
                                  log.error(conflicts);
                                  return(false);
@@ -625,6 +744,8 @@ public class TableUtil {
                                     String conflicts = rnpl.recordingConflicts(result, json);
                                     if (conflicts == null) {
                                        log.warn(message);
+                                       // Set thumbs rating if it doesn't exist for this collection
+                                       r.setThumbsRating(json, 1, false);
                                        return(true);
                                     } else {
                                        log.warn("Cannot schedule '" + _title + "' on '" + name + "' due to conflicts");
