@@ -358,8 +358,7 @@ public class TableUtil {
       }
       
       // Set default rating
-      thumbsChoice.setSelectedItem(0);
-      if (json != null && json.has("collectionId")) {
+      if (json != null) {
          class backgroundRun extends SwingWorker<Object, Object> {
             protected Object doInBackground() {
                int rating = 0;
