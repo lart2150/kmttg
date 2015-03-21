@@ -79,6 +79,7 @@ public class gui {
    private JMenuItem saveJobsMenuItem = null;
    private JMenuItem loadJobsMenuItem = null;
    public JMenuItem searchMenuItem = null;
+   public JMenuItem thumbsMenuItem = null;
    
    private JComboBox encoding = null;
    private JLabel encoding_label = null;
@@ -203,6 +204,10 @@ public class gui {
                }*/
                if (e.getKeyCode() == KeyEvent.VK_S) {
                   searchMenuItem.doClick();
+                  return true;
+               }
+               if (e.getKeyCode() == KeyEvent.VK_T) {
+                  thumbsMenuItem.doClick();
                   return true;
                }
             }
@@ -592,6 +597,7 @@ public class gui {
          fileMenu.add(getResumeDownloadsMenuItem());
          fileMenu.add(getJobMenu());
          fileMenu.add(getSearchMenuItem());
+         fileMenu.add(getThumbsMenuItem());
          fileMenu.add(getExitMenuItem());
       }
       return fileMenu;
@@ -1227,6 +1233,22 @@ public class gui {
          });
       }
       return searchMenuItem;
+   }
+
+   private JMenuItem getThumbsMenuItem() {
+      debug.print("");
+      if (thumbsMenuItem == null) {
+         thumbsMenuItem = new JMenuItem();
+         thumbsMenuItem.setText("Set Thumbs rating...");
+         thumbsMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
+               Event.CTRL_MASK, true));
+         thumbsMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               TableUtil.ThumbsGUI();
+            }
+         });
+      }
+      return thumbsMenuItem;
    }
 
    // This will decide which options are enabled based on current config settings
