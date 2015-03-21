@@ -287,13 +287,13 @@ public class TableUtil {
    }
    
    // Bring up set thumbs dialog
-   public static void ThumbsGUI() {      
-      // Determine tivoName and json of currently selected table
-      String tabName = config.gui.remote_gui.getCurrentTabName();
-      final String tivoName = config.gui.remote_gui.getTivoName(tabName);
-      if (tivoName == null)
+   public static void ThumbsGUI() {
+      final String tivoName = config.gui.getCurrentRemoteTivoName();
+      if (tivoName == null) {
+         log.error("Setting thumbs is only valid from Remote tables");
          return;
-      final JSONObject json = config.gui.remote_gui.getSelectedJSON(tabName);
+      }
+      final JSONObject json = config.gui.getCurrentRemoteJson();
       if (json == null)
          return;
       if (thumbsDialog == null) {
@@ -310,11 +310,10 @@ public class TableUtil {
                class backgroundRun extends SwingWorker<Object, Object> {
                   protected Object doInBackground() {
                      // Determine tivoName and json of currently selected table
-                     String tabName = config.gui.remote_gui.getCurrentTabName();
-                     String tivoName = config.gui.remote_gui.getTivoName(tabName);
+                     String tivoName = config.gui.getCurrentRemoteTivoName();
                      if (tivoName == null)
                         return null;
-                     JSONObject json = config.gui.remote_gui.getSelectedJSON(tabName);
+                     JSONObject json = config.gui.getCurrentRemoteJson();
                      if (json == null)
                         return null;
                      String setting = "" + thumbsChoice.getSelectedItem();
@@ -327,8 +326,6 @@ public class TableUtil {
                         try {
                            if (json.has("title"))
                               title = json.getString("title");
-                           if (json.has("subtitle"))
-                              title = title + " - " + json.getString("subtitle");
                         } catch (JSONException e) {
                            log.error("ThumbsGUI SET - " + e.getMessage());
                         }
@@ -384,8 +381,6 @@ public class TableUtil {
       try {
          if (json != null && json.has("title"))
             title += json.getString("title");
-         if (json != null && json.has("subtitle"))
-            title += " - " + json.getString("subtitle");
       } catch (JSONException e) {
          log.error("ThumbsGUI - " + e.getMessage());
       }
