@@ -470,11 +470,11 @@ public class guideTable {
             config.gui.show_details.update(currentTivo, json);
          }
       }
+      else if (keyCode == KeyEvent.VK_P) {
+         config.gui.remote_gui.recordSP_guide.doClick();
+      }
       else if (keyCode == KeyEvent.VK_R) {
          config.gui.remote_gui.record_guide.doClick();
-      }
-      else if (keyCode == KeyEvent.VK_S) {
-         config.gui.remote_gui.recordSP_guide.doClick();
       }
       else if (keyCode == KeyEvent.VK_W) {
          config.gui.remote_gui.wishlist_guide.doClick();
