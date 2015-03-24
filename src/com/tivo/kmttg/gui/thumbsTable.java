@@ -4,6 +4,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -16,6 +17,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.Sorter;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -87,6 +89,24 @@ public class thumbsTable {
       MyCellEditor m = new MyCellEditor(new JTextField());
       m.setClickCountToStart(1); // Change cell to edit mode with single click instead of double click
       tm.setCellEditor(m);
+      
+      // Define custom column sorting routine for RATING column
+      Comparator<Object> sortableComparator = new Comparator<Object>() {
+         public int compare(Object o1, Object o2) {
+            if (o1 instanceof String && o2 instanceof String) {
+               int s1 = Integer.parseInt("" + o1);
+               int s2 = Integer.parseInt("" + o2);
+               if (s1 > s2) return 1;
+               if (s1 < s2) return -1;
+               return 0;
+            }
+            return 0;
+         }
+      };
+      
+      // Use custom sorting routines for certain columns
+      Sorter sorter = TABLE.getColumnExt(2).getSorter();
+      sorter.setComparator(sortableComparator);
                
       // Add right mouse button handler
       TableUtil.AddRightMouseListener(TABLE);
@@ -149,7 +169,7 @@ public class thumbsTable {
    }
 
    public JSONObject GetRowData(int row) {
-      String title = (String)TABLE.getModel().getValueAt(row, 1);
+      String title = (String)TABLE.getValueAt(row, TableUtil.getColumnIndex(TABLE, "SHOW"));
       if (title.startsWith(loadedPrefix))
          title = title.replaceFirst(loadedPrefix, "");
       return table_data.get(title);
@@ -331,8 +351,8 @@ public class thumbsTable {
       }
       try {
          JSONArray changed = new JSONArray();
-         for (int row=0; row<TABLE.getModel().getRowCount(); ++row) {
-            String table_value = (String)TABLE.getModel().getValueAt(row, 2);
+         for (int row=0; row<TABLE.getRowCount(); ++row) {
+            String table_value = "" + TABLE.getValueAt(row, TableUtil.getColumnIndex(TABLE, "RATING"));
             JSONObject json = GetRowData(row);
             if (json != null) {
                String data_value = "" + json.getInt("thumbsRating");
@@ -372,7 +392,7 @@ public class thumbsTable {
                         r.disconnect();
                      }
                   } catch (JSONException e) {
-                     log.error("updateThumbs - " + e.getMessage());
+                     log.error("updateThumbs (1) - " + e.getMessage());
                   }
                   // Now refresh the thumbs table
                   reset();
@@ -384,7 +404,7 @@ public class thumbsTable {
             b.execute();
          }
       } catch (Exception e) {
-         log.error("updateThumbs - " + e.getMessage());
+         log.error("updateThumbs (2) - " + e.getMessage());
       }
    }
    
