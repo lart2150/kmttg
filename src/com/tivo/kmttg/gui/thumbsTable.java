@@ -292,13 +292,13 @@ public class thumbsTable {
    }
    
    private void updateTitleCols(String name) {
-      String title;
+      jsonString entry;
       int col = TableUtil.getColumnIndex(TABLE, "SHOW");
       ThumbsTableModel dm = (ThumbsTableModel)TABLE.getModel();
       for (int row=0; row<TABLE.getRowCount(); ++row) {
-         title = (String)TABLE.getValueAt(row,col);
-         title = name + title;
-         dm.setValueAt(title, row, col);
+         entry = (jsonString)TABLE.getValueAt(row,col);
+         entry.display = name + entry.display;
+         dm.setValueAt(entry, row, col);
       }
    }
    
