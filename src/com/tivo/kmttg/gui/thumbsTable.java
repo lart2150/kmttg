@@ -40,7 +40,6 @@ public class thumbsTable {
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
-   private Hashtable<String, JSONObject> table_data = null;
    private Boolean loaded = false;
    private String loadedPrefix = "Loaded: ";
          
@@ -49,6 +48,18 @@ public class thumbsTable {
       TABLE = new JXTable(data, TITLE_cols);
       scroll = new JScrollPane(TABLE);
       reset();
+   }
+   
+   public class jsonString {
+      String display;
+      JSONObject json;
+      public jsonString(JSONObject json, String title) {
+         this.display = title;
+         this.json = json;
+      }
+      public String toString() {
+         return display;
+      }
    }
    
    public void reset() {
@@ -157,6 +168,10 @@ public class thumbsTable {
       
       // This is used to define columns as specific classes
       public Class<?> getColumnClass(int col) {
+         // NOTE: col index starts at 0
+         if (col == 1) {
+            return jsonString.class;
+         }
          return Object.class;
       } 
       
@@ -169,10 +184,8 @@ public class thumbsTable {
    }
 
    public JSONObject GetRowData(int row) {
-      String title = (String)TABLE.getValueAt(row, TableUtil.getColumnIndex(TABLE, "SHOW"));
-      if (title.startsWith(loadedPrefix))
-         title = title.replaceFirst(loadedPrefix, "");
-      return table_data.get(title);
+      jsonString j = (jsonString)TABLE.getValueAt(row, TableUtil.getColumnIndex(TABLE, "SHOW"));
+      return j.json;
    }
    
    // Mouse event handler
@@ -233,7 +246,6 @@ public class thumbsTable {
    // Update table to display given entries
    public void AddRows(String tivoName, JSONArray data) {
       try {
-         table_data = new Hashtable<String, JSONObject>();
          Stack<JSONObject> o = new Stack<JSONObject>();
          for (int i=0; i<data.length(); ++i)
             o.add(data.getJSONObject(i));
@@ -311,11 +323,10 @@ public class thumbsTable {
             thumbs = "" + entry.getInt("thumbsRating");
    
          data[0] = type;
-         data[1] = title;
+         data[1] = new jsonString(entry, title);
          data[2] = thumbs;
          
          TableUtil.AddRow(TABLE, data);
-         table_data.put(title, entry);
          
          // Adjust column widths to data
          TableUtil.packColumns(TABLE, 2);
