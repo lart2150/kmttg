@@ -220,9 +220,8 @@ public class update {
       return null;
    }
       
-   @SuppressWarnings("unchecked")
    private static Boolean unzip(String dir, String file) {
-       Enumeration entries;
+       Enumeration<?> entries;
        ZipFile zipFile;
 
        try {

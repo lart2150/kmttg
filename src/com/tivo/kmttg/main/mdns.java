@@ -120,7 +120,6 @@ public class mdns {
    }
    
    // This method useful for discovering RPC servers on the LAN
-   @SuppressWarnings("unchecked")
    // Sample names:
    // "_tivo-mindrpc._tcp.local."
    // "_tivo-videostream._tcp.local."
@@ -131,7 +130,7 @@ public class mdns {
             if ( ! SERVICE.containsKey(info[i].getName()) ) {
                SERVICE.put(info[i].getName(), info[i]);
                log.warn("MDNS: " + info[i].getName() + " (" + info[i].getHostAddress() + ":" + info[i].getPort() + ")");
-               Enumeration e = info[i].getPropertyNames();
+               Enumeration<?> e = info[i].getPropertyNames();
                while (e.hasMoreElements()) {
                   String key = (String) e.nextElement();
                   log.print(key + "=" + info[i].getPropertyString(key));
