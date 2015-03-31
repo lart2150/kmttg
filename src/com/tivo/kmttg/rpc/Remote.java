@@ -559,14 +559,9 @@ public class Remote {
             req = RpcRequest("recordingFolderItemSearch", false, json);
          }
          else if (type.equals("MyShows")) {
+            // Expects count=# in initial json, offset=# after first call
             json.put("bodyId", bodyId_get());
-            if (away) {
-               json.put("levelOfDetail", "medium");
-               req = RpcRequest("recordingSearch", false, json);
-            } else {
-               // Expects count=# in initial json, offset=# after first call
-               req = RpcRequest("recordingFolderItemSearch", false, json);
-            }
+            req = RpcRequest("recordingFolderItemSearch", false, json);
          }
          else if (type.equals("ToDo")) {
             // Get list of recordings that are expected to record
@@ -877,13 +872,13 @@ public class Remote {
       try {
          JSONObject json = new JSONObject();
          json.put("count", count);
+         JSONArray items = new JSONArray();
          while (! stop) {
             json.put("offset", offset);
             result = Command("MyShows", json);
             if (result != null && result.has("recordingFolderItem")) {
                JSONArray a = result.getJSONArray("recordingFolderItem");
                for (int i=0; i<a.length(); ++i) {
-                  JSONArray items = new JSONArray();
                   JSONObject j = a.getJSONObject(i);
                   if (j.has("folderItemCount")) {
                      // This is a folder with sub-items
@@ -898,8 +893,12 @@ public class Remote {
                         JSONObject folder_result = Command("MyShows", folder_json);
                         if (folder_result != null && folder_result.has("recordingFolderItem")) {
                            JSONArray folder_a = folder_result.getJSONArray("recordingFolderItem");
-                           for (int l=0; l<folder_a.length(); ++l)
-                              items.put(folder_a.getJSONObject(l));
+                           for (int l=0; l<folder_a.length(); ++l) {
+                              JSONObject o = folder_a.getJSONObject(l);
+                              String id = o.getString("childRecordingId");
+                              if (! unique.containsKey(id))
+                                 items.put(o);
+                           }
                            if (folder_a.length() < folder_count)
                               folder_stop = true;
                         } else {
@@ -909,37 +908,10 @@ public class Remote {
                      }
                   } else {
                      // Single item
-                     items.put(j);
+                     String id = j.getString("childRecordingId");
+                     if (! unique.containsKey(id))
+                        items.put(j);
                   } // if
-                  
-                  // items now contains flat list of ids to search for
-                  for (int k=0; k<items.length(); ++k) {
-                     JSONObject item = items.getJSONObject(k);
-                     String id = item.getString("childRecordingId");
-                     if (! unique.containsKey(id)) {
-                        unique.put(id, 1);
-                        result = Command(
-                           "Search",
-                           new JSONObject("{\"recordingId\":\"" + id + "\"}")
-                        );
-                        if (result != null) {
-                           if (job != null && job.getURLs) {
-                              if (!getURLs(job.tivoName, result.getJSONArray("recording").getJSONObject(0))) {
-                                 return null;
-                              }
-                           }
-                           allShows.put(result);
-                        } else {
-                           stop = true;
-                        }
-                     }
-                  } // for k
-                  if (job != null && config.GUIMODE) {
-                     String c = "" + allShows.length();
-                     config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + c);
-                     if ( jobMonitor.isFirstJobInMonitor(job) )
-                        config.gui.setTitle("playlist: " + c + " " + config.kmttg);
-                  }
                } // for i
                if (a.length() < count)
                   stop = true;
@@ -948,6 +920,32 @@ public class Remote {
             }
             offset += count;
          } // while
+         
+         // items contains unique flat list of ids to search for
+         for (int k=0; k<items.length(); ++k) {
+            if (job != null && config.GUIMODE) {
+               String c = "" + allShows.length();
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + c);
+               if ( jobMonitor.isFirstJobInMonitor(job) )
+                  config.gui.setTitle("playlist: " + c + " " + config.kmttg);
+            }
+            JSONObject item = items.getJSONObject(k);
+            String id = item.getString("childRecordingId");
+            result = Command(
+               "Search",
+               new JSONObject("{\"recordingId\":\"" + id + "\"}")
+            );
+            if (result != null) {
+               if (job != null && job.getURLs) {
+                  if (!getURLs(job.tivoName, result.getJSONArray("recording").getJSONObject(0))) {
+                     return null;
+                  }
+               }
+               allShows.put(result);
+            } else {
+               stop = true;
+            }
+         } // for k
       } catch (JSONException e) {
          error("rpc MyShows error - " + e.getMessage());
          return null;
