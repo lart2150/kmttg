@@ -867,52 +867,60 @@ public class Remote {
    
    // Get flat list of all shows
    public JSONArray MyShows(jobData job) {
+      Hashtable<String,Integer> unique = new Hashtable<String,Integer>();
       JSONArray allShows = new JSONArray();
       JSONObject result = null;
+      Boolean stop = false;
+      int count = 50;
+      int offset = 0;
 
       try {
-         // 1st grab all IDs in one shot
          JSONObject json = new JSONObject();
-         json.put("flatten", true);
-         json.put("noLimit", true);
-         json.put("format", "idSequence");
-         result = Command("MyShows", json);
-         if (result != null && result.has("objectIdAndType")) {
-            JSONArray objects = result.getJSONArray("objectIdAndType");
-            int total = objects.length();
-            Boolean stop = false;
-            int offset = 0;
-            if (job != null && job.myshows_offset >= 0)
-               offset = job.myshows_offset;
-            int count = 50;
-            // Now go through all returned 50 at a time
-            while ( ! stop ) {
-               if (job != null && config.GUIMODE) {
-                  String c = "" + allShows.length() + "/" + total;
-                  config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + c);
-                  if ( jobMonitor.isFirstJobInMonitor(job) )
-                     config.gui.setTitle("playlist: " + c + " " + config.kmttg);
-               }
-               JSONArray a = new JSONArray();
-               for (int i=offset; i<offset+count; ++i) {
-                  if (i<total) {
-                     a.put(objects.getString(i));
+         json.put("count", count);
+         while (! stop) {
+            json.put("offset", offset);
+            result = Command("MyShows", json);
+            if (result != null && result.has("recordingFolderItem")) {
+               JSONArray a = result.getJSONArray("recordingFolderItem");
+               for (int i=0; i<a.length(); ++i) {
+                  JSONArray items = new JSONArray();
+                  JSONObject j = a.getJSONObject(i);
+                  if (j.has("folderItemCount")) {
+                     // This is a folder with sub-items
+                     int folder_count = count;
+                     int folder_offset = 0;
+                     JSONObject folder_json = new JSONObject();
+                     folder_json.put("count", folder_count);
+                     folder_json.put("parentRecordingFolderItemId", j.getString("recordingFolderItemId"));
+                     Boolean folder_stop = false;
+                     while(! folder_stop) {
+                        folder_json.put("offset", folder_offset);
+                        JSONObject folder_result = Command("MyShows", folder_json);
+                        if (folder_result != null && folder_result.has("recordingFolderItem")) {
+                           JSONArray folder_a = folder_result.getJSONArray("recordingFolderItem");
+                           for (int l=0; l<folder_a.length(); ++l)
+                              items.put(folder_a.getJSONObject(l));
+                           if (folder_a.length() < folder_count)
+                              folder_stop = true;
+                        } else {
+                           folder_stop = true;
+                        }
+                        folder_offset += folder_count;
+                     }
                   } else {
-                     stop = true;
-                  }
-               }
-               if (a.length() > 0) {
-                  offset += a.length();
-                  JSONObject j = new JSONObject();
-                  j.put("objectIdAndType", a);
-                  result = Command("SearchIds", j);
-                  if (result != null && result.has("recordingFolderItem")) {
-                     JSONArray items = (JSONArray) result.get("recordingFolderItem");
-                     for (int i=0; i<items.length(); ++i) {
-                        JSONObject item = items.getJSONObject(i);
+                     // Single item
+                     items.put(j);
+                  } // if
+                  
+                  // items now contains flat list of ids to search for
+                  for (int k=0; k<items.length(); ++k) {
+                     JSONObject item = items.getJSONObject(k);
+                     String id = item.getString("childRecordingId");
+                     if (! unique.containsKey(id)) {
+                        unique.put(id, 1);
                         result = Command(
                            "Search",
-                           new JSONObject("{\"recordingId\":\"" + item.getString("childRecordingId") + "\"}")
+                           new JSONObject("{\"recordingId\":\"" + id + "\"}")
                         );
                         if (result != null) {
                            if (job != null && job.getURLs) {
@@ -924,15 +932,22 @@ public class Remote {
                         } else {
                            stop = true;
                         }
-                     } // for
-                  } else {
-                     stop = true;
+                     }
+                  } // for k
+                  if (job != null && config.GUIMODE) {
+                     String c = "" + allShows.length();
+                     config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + c);
+                     if ( jobMonitor.isFirstJobInMonitor(job) )
+                        config.gui.setTitle("playlist: " + c + " " + config.kmttg);
                   }
-               } // if a.length
-               if (job != null && job.myshows_limit > 0 && allShows.length() >= job.myshows_limit)
+               } // for i
+               if (a.length() < count)
                   stop = true;
-            } // while
-         } // if MyShows
+            } else {
+               stop = true;
+            }
+            offset += count;
+         } // while
       } catch (JSONException e) {
          error("rpc MyShows error - " + e.getMessage());
          return null;
