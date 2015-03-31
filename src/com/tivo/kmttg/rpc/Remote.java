@@ -922,13 +922,9 @@ public class Remote {
          } // while
          
          // items contains unique flat list of ids to search for
+         count = 0;
+         int total = items.length();
          for (int k=0; k<items.length(); ++k) {
-            if (job != null && config.GUIMODE) {
-               String c = "" + allShows.length();
-               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + c);
-               if ( jobMonitor.isFirstJobInMonitor(job) )
-                  config.gui.setTitle("playlist: " + c + " " + config.kmttg);
-            }
             JSONObject item = items.getJSONObject(k);
             String id = item.getString("childRecordingId");
             result = Command(
@@ -944,6 +940,13 @@ public class Remote {
                allShows.put(result);
             } else {
                stop = true;
+            }
+            count++;
+            if (job != null && config.GUIMODE && count % 50 == 0) {
+               String c = "" + allShows.length() + "/" + total;
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + c);
+               if ( jobMonitor.isFirstJobInMonitor(job) )
+                  config.gui.setTitle("playlist: " + c + " " + config.kmttg);
             }
          } // for k
       } catch (JSONException e) {
