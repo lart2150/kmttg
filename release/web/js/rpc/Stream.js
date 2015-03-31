@@ -120,7 +120,7 @@ function MyShowsRPC(offset) {
       offset = 0;
    var limit = 50;
    var html = '<div style="color: blue">';
-   message = 'PLEASE WAIT: GETTING SHOWS ' + offset + '-' + (offset+limit) + ' FROM ' + TIVO.value + ' ...';
+   message = 'PLEASE WAIT: GETTING SHOWS FROM ' + TIVO.value + ' ...';
    html += message + '</div>';
    BROWSE.innerHTML = html;
    if (offset == 0) {
