@@ -1962,6 +1962,9 @@ public class Remote {
                                     if ( ! title.getString("price").equals("USD.0") )
                                        add = false;
                                  }
+                                 // Filter out no longer supported collectionType=webVideo
+                                 if (title.has("collectionType") && title.getString("collectionType").equals("webVideo"))
+                                    add = false;
                                  if (add) {
                                     matched++;
                                     titles.put(title);
