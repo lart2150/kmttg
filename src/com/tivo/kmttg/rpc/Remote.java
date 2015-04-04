@@ -942,7 +942,7 @@ public class Remote {
                   }
                }
                // For series types saved collectionId in collections so as to get seriesId later
-               if (entry.has("collectionType") && entry.getString("collectionType").equals("series")) {
+               if (entry.has("isEpisode") && entry.getBoolean("isEpisode")) {
                   if (entry.has("collectionId")) {
                      String s = entry.getString("collectionId");
                      if ( ! collections.containsKey(s) )
@@ -1024,13 +1024,11 @@ public class Remote {
             ids.put(collectionId);
          int max = 50; // Limit searches to 50 at a time
          int index = 0;
-         int count = 0;
          JSONArray a = new JSONArray();
          while (index < ids.length()) {
-            if (count >= max) {
-               // Time to search
-               if (a.length() > 0)
-                  addToCollectionMap(a, map);
+            if (a.length() >= max) {
+               // Limit reached, so search and then empty a
+               addToCollectionMap(a, map);
                a = new JSONArray();
             }
             a.put(ids.getString(index));
