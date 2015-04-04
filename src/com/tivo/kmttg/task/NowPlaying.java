@@ -420,6 +420,10 @@ public class NowPlaying implements Serializable {
                if (entry.containsKey("gmt"))
                   entry.put("ProgramId_unique", entry.get("ProgramId") + "_" + entry.get("gmt"));
             }
+            if (json.has("__SeriesId__")) {
+               // This data not in TiVo database - added by Remote MyShows method
+               entry.put("SeriesId", json.getString("__SeriesId__"));
+            }
             if (json.has("drm")) {
                JSONObject drm = json.getJSONObject("drm");
                if (drm.has("tivoToGo")) {
