@@ -98,6 +98,8 @@ public class Remote {
                 cdata = config.programDir + "/cdata.password";
                 if (file.isFile(cdata)) {
                    password = new Scanner(new File(cdata)).useDelimiter("\\A").next();
+                } else {
+                   error("cdata.p12 file present, but cdata.password is not");
                 }
              } else {
                 // Read default USA cdata.p12 from kmttg.jar
@@ -863,6 +865,7 @@ public class Remote {
    // Get flat list of all shows
    public JSONArray MyShows(jobData job) {
       Hashtable<String,Integer> unique = new Hashtable<String,Integer>();
+      Hashtable<String,Integer> collections = new Hashtable<String,Integer>();
       JSONArray allShows = new JSONArray();
       JSONObject result = null;
       Boolean stop = false;
@@ -931,10 +934,19 @@ public class Remote {
                "Search",
                new JSONObject("{\"recordingId\":\"" + id + "\"}")
             );
-            if (result != null) {
+            if (result != null && result.has("recording")) {
+               JSONObject entry = result.getJSONArray("recording").getJSONObject(0);
                if (job != null && job.getURLs) {
-                  if (!getURLs(job.tivoName, result.getJSONArray("recording").getJSONObject(0))) {
+                  if (!getURLs(job.tivoName, entry)) {
                      return null;
+                  }
+               }
+               // For series types saved collectionId in collections so as to get seriesId later
+               if (entry.has("collectionType") && entry.getString("collectionType").equals("series")) {
+                  if (entry.has("collectionId")) {
+                     String s = entry.getString("collectionId");
+                     if ( ! collections.containsKey(s) )
+                        collections.put(s, 1);
                   }
                }
                allShows.put(result);
@@ -953,6 +965,10 @@ public class Remote {
          error("rpc MyShows error - " + e.getMessage());
          return null;
       }
+      
+      // Process collections to efficiently get seriesId information
+      if (collections.size() > 0)
+         addSeriesID(allShows, collections);
 
       return allShows;
    }
@@ -997,6 +1013,70 @@ public class Remote {
       }
       log.error("Remote getURLs - failed to retrieve mfs URLs");
       return false;
+   }
+   
+   // Add seriesID information to MyShows data based on collectionSearch data
+   private void addSeriesID(JSONArray allShows, Hashtable<String,Integer> collections) {
+      try {
+         JSONArray ids = new JSONArray();
+         Hashtable<String,String> map = new Hashtable<String,String>();
+         for (String collectionId : collections.keySet())
+            ids.put(collectionId);
+         int max = 50; // Limit searches to 50 at a time
+         int index = 0;
+         int count = 0;
+         JSONArray a = new JSONArray();
+         while (index < ids.length()) {
+            if (count >= max) {
+               // Time to search
+               if (a.length() > 0)
+                  addToCollectionMap(a, map);
+               a = new JSONArray();
+            }
+            a.put(ids.getString(index));
+            index++;
+         }
+         // Search for any remaining entries
+         if (a.length() > 0)
+            addToCollectionMap(a, map);
+         
+         if (map.size() > 0) {
+            for (String collectionId : map.keySet()) {
+               for (int i=0; i<allShows.length(); ++i) {
+                  JSONObject json = allShows.getJSONObject(i);
+                  JSONObject entry = json.getJSONArray("recording").getJSONObject(0);
+                  if (entry.has("collectionId") && entry.getString("collectionId").equals(collectionId)) {
+                     entry.put("__SeriesId__", map.get(collectionId));
+                  }
+               }
+            }
+         }
+      } catch (JSONException e) {
+         log.error("Remote addSeriesID - " + e.getMessage());
+      }
+   }
+   
+   private void addToCollectionMap(JSONArray a, Hashtable<String,String> map) {
+      try {
+         JSONObject json = new JSONObject();
+         json.put("count", a.length());
+         json.put("collectionId", a);
+         JSONObject result = Command("collectionSearch", json);
+         if (result != null && result.has("collection")) {
+            JSONArray items = result.getJSONArray("collection");
+            for (int i=0; i<items.length(); ++i) {
+               JSONObject j = items.getJSONObject(i);
+               if (j.has("partnerCollectionId")) {
+                  String sid = j.getString("partnerCollectionId");
+                  sid = sid.replaceFirst("epgProvider:cl\\.", "");
+                  map.put(j.getString("collectionId"), sid);
+               }
+            }
+         }
+      } catch (JSONException e) {
+         log.error("Remote addToCollectionMap - " + e.getMessage());
+      }
+      
    }
    
    // Get list of all shows (drilling down into folders for individual shows)
