@@ -875,6 +875,7 @@ public class Remote {
       try {
          JSONObject json = new JSONObject();
          json.put("count", count);
+         json.put("flatten", true);
          JSONArray items = new JSONArray();
          while (! stop) {
             json.put("offset", offset);
@@ -883,38 +884,10 @@ public class Remote {
                JSONArray a = result.getJSONArray("recordingFolderItem");
                for (int i=0; i<a.length(); ++i) {
                   JSONObject j = a.getJSONObject(i);
-                  if (j.has("folderItemCount")) {
-                     // This is a folder with sub-items
-                     int folder_count = count;
-                     int folder_offset = 0;
-                     JSONObject folder_json = new JSONObject();
-                     folder_json.put("count", folder_count);
-                     folder_json.put("parentRecordingFolderItemId", j.getString("recordingFolderItemId"));
-                     Boolean folder_stop = false;
-                     while(! folder_stop) {
-                        folder_json.put("offset", folder_offset);
-                        JSONObject folder_result = Command("MyShows", folder_json);
-                        if (folder_result != null && folder_result.has("recordingFolderItem")) {
-                           JSONArray folder_a = folder_result.getJSONArray("recordingFolderItem");
-                           for (int l=0; l<folder_a.length(); ++l) {
-                              JSONObject o = folder_a.getJSONObject(l);
-                              String id = o.getString("childRecordingId");
-                              if (! unique.containsKey(id))
-                                 items.put(o);
-                           }
-                           if (folder_a.length() < folder_count)
-                              folder_stop = true;
-                        } else {
-                           folder_stop = true;
-                        }
-                        folder_offset += folder_count;
-                     }
-                  } else {
-                     // Single item
-                     String id = j.getString("childRecordingId");
-                     if (! unique.containsKey(id))
-                        items.put(j);
-                  } // if
+                  // Single item
+                  String id = j.getString("childRecordingId");
+                  if (! unique.containsKey(id))
+                     items.put(j);
                } // for i
                if (a.length() < count)
                   stop = true;
@@ -923,6 +896,12 @@ public class Remote {
             }
             offset += count;
          } // while
+         if (job != null && config.GUIMODE) {
+            String c = "0/" + items.length();
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + c);
+            if ( jobMonitor.isFirstJobInMonitor(job) )
+               config.gui.setTitle("playlist: " + c + " " + config.kmttg);
+         }
          
          // items contains unique flat list of ids to search for
          count = 0;
