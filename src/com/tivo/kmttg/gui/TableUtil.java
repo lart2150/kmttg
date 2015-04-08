@@ -611,30 +611,10 @@ public class TableUtil {
                streaming = false;
             if (streaming) {
                // Streaming only entry requires ContentLocatorStore
-               if (json.has("contentId") && json.has("collectionId")) {
-                  String title = "UNTITLED";
-                  if (json.has("title"))
-                     title = json.getString("title");
-                  JSONObject j = new JSONObject();
-                  j.put("contentId", json.getString("contentId"));
-                  j.put("collectionId", json.getString("collectionId"));
-                  Remote r = config.initRemote(tivoName);
-                  if (r.success) {
-                     JSONObject result = r.Command("ContentLocatorStore", j);
-                     if (result != null) {
-                        log.warn("Added streaming title to My Shows: '" + title + "' on Tivo: " + tivoName);
-                        // Set thumbs rating if it doesn't exist for this collection
-                        r.setThumbsRating(json, 1, false);
-                        r.disconnect();
-                        return true;
-                     } else {
-                        log.error("Failed to create content locator for: " + title);
-                        r.disconnect();
-                        return false;
-                     }
-                  }
+               if (json.has("collectionId")) {
+                  return bookmarkIfPossible(tivoName, json);
                } else {
-                  log.warn("Missing contentId and/or collectionId for streaming title");
+                  log.warn("Missing collectionId for streaming title");
                   return false;
                }
             }
@@ -757,8 +737,9 @@ public class TableUtil {
                }
             }
          } else {
-            // This is likely unavailable content, so for type series bring up SP form instead
+            // This is likely unavailable content
             if (json.has("collectionType") && json.getString("collectionType").equals("series")) {
+               // for type series bring up SP form
                Remote r = config.initRemote(tivoName);
                if (r.success) {
                   JSONArray existing = r.SeasonPasses(null);
@@ -770,6 +751,13 @@ public class TableUtil {
                }
                return(false);
             }
+            
+            if (json.has("collectionId")) {
+               // Non-series type with collectionId may be possible to bookmark
+               return bookmarkIfPossible(tivoName, json);
+            }
+            
+            // Exhausted all possibilities so error out
             log.error("Missing contentId and/or offerId for: '" + title + "'");
             return(false);
          }
@@ -778,6 +766,69 @@ public class TableUtil {
          return(false);
       }
       return(true);
+   }
+   
+   private static Boolean bookmarkIfPossible(String tivoName, JSONObject json) {
+      class backgroundRun extends SwingWorker<Object, Object> {
+         String tivoName;
+         JSONObject json;
+         public backgroundRun(String tivoName, JSONObject json) {
+            this.tivoName = tivoName;
+            this.json = json;
+         }
+         protected Boolean doInBackground() {
+            JSONObject result;
+            Remote r = config.initRemote(tivoName);
+            if (r.success) {
+               try {
+                  if (! json.has("contentId")) {
+                     // If contentId is missing then look for one
+                     JSONObject j = new JSONObject();
+                     j.put("bodyId", r.bodyId_get());
+                     j.put("collectionId", json.getString("collectionId"));
+                     result = r.Command("contentSearch", j);
+                     if (result != null && result.has("content")) {
+                        JSONObject o = result.getJSONArray("content").getJSONObject(0);
+                        if (o.has("contentId"))
+                           json.put("contentId", o.getString("contentId"));
+                     }
+                  }
+                  // Without contentId we can't proceed
+                  if (! json.has("contentId")) {
+                     log.error("Unable to determine/find contentId");
+                     r.disconnect();
+                     return false;
+                  }
+                  // Have contentId and collectionId, so proceed with adding content locator
+                  String title = "UNTITLED";
+                  if (json.has("title"))
+                     title = json.getString("title");
+                  JSONObject j = new JSONObject();
+                  j.put("contentId", json.getString("contentId"));
+                  j.put("collectionId", json.getString("collectionId"));
+                  result = r.Command("ContentLocatorStore", j);
+                  if (result != null) {
+                     log.warn("Added bookmark to My Shows: '" + title + "' on Tivo: " + tivoName);
+                     // Set thumbs rating if it doesn't exist for this collection
+                     r.setThumbsRating(json, 1, false);
+                     r.disconnect();
+                     return true;
+                  } else {
+                     log.error("Failed to create content locator for: " + title);
+                     r.disconnect();
+                     return false;
+                  }
+               } catch (JSONException e) {
+                  log.error("bookmarkIfPossible - " + e.getMessage());
+               }
+            } // if r.success
+            return false;
+         } // doInBackground
+      } // class backgroundRun
+      
+      backgroundRun b = new backgroundRun(tivoName, json);
+      b.execute();                     
+      return true;
    }
    
    // Method used by various RPC tables for single item recording
