@@ -1013,6 +1013,23 @@ public class TableUtil {
          String name = partnerId;
          if (config.partners.containsKey(partnerId))
             name = config.partners.get(partnerId);
+         if (name.equals(partnerId)) {
+            // Not cached, so find it without bodyId from middlemind
+            Remote r = new Remote(config.gui.remote_gui.getTivoName("search"), true);
+            if (r.success) {
+               JSONObject json = new JSONObject();
+               json.put("partnerId", partnerId);
+               JSONObject result = r.Command("partnerInfoSearch", json);
+               r.disconnect();
+               if (result != null && result.has("partnerInfo")) {
+                  JSONObject partner = result.getJSONArray("partnerInfo").getJSONObject(0);
+                  if (partner.has("displayName")) {
+                     name = partner.getString("displayName");
+                     config.partners.put(partnerId, name);
+                  }
+               }
+            }
+         }
          return name;
       } catch (JSONException e1) {
          log.error("getPartnerName - " + e1.getMessage());
