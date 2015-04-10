@@ -330,7 +330,7 @@ public class ShowDetails {
                      if (a.getString("role").equals("host") && a.has("first")) {
                         if (a.getString("first").equals("container"))
                            pyTivo = true;
-                        if (a.getString("last").contains("TRANSCODE"))
+                        if (a.has("last") && a.getString("last").contains("TRANSCODE"))
                            pyTivo = true;
                      }
                   }
