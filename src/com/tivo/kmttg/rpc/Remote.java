@@ -563,7 +563,12 @@ public class Remote {
          else if (type.equals("MyShows")) {
             // Expects count=# in initial json, offset=# after first call
             json.put("bodyId", bodyId_get());
-            req = RpcRequest("recordingFolderItemSearch", false, json);
+            if (away) {
+               json.put("levelOfDetail", "medium");
+               req = RpcRequest("recordingSearch", false, json);
+            } else {
+               req = RpcRequest("recordingFolderItemSearch", false, json);
+            }
          }
          else if (type.equals("ToDo")) {
             // Get list of recordings that are expected to record
