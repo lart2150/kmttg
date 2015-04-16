@@ -562,6 +562,35 @@ public class rnpl {
          log.error("pprintJSON - " + e.getMessage());
       }
    }
+
+   public static JSONArray parseCreditString(String text, String role) {
+      /* text expected in FirstName LastName format with commas between multiple names:
+      clint eastwood
+      clint eastwood, tommy jones
+       */
+      JSONArray creditArray = new JSONArray();
+      try {
+      String[] names = text.split(",");
+      for (String nameText : names) {
+         JSONObject credit = new JSONObject();
+         credit.put("type", "credit");
+         credit.put("role", role);
+         nameText = nameText.replaceFirst("^\\s+", "");
+         String[] name = nameText.split("\\s+");
+         if (name.length == 2) {
+            credit.put("first", name[0]);
+            credit.put("last", name[1]);
+         }
+         if (name.length == 1) {
+            credit.put("last", name[0]);
+         }
+         creditArray.put(credit);
+      }
+      } catch (JSONException e) {
+         log.error("parseCreditString - " + e.getMessage());
+      }
+      return creditArray;
+   }
    
    // Print out schema operation details
    public static void help(String operationName) {
