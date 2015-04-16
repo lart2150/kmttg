@@ -138,11 +138,12 @@ public class remotegui {
    private DefaultListModel premiere_model = new DefaultListModel();
    public Hashtable<String,JSONArray> premiere_channel_info = new Hashtable<String,JSONArray>();
    
-   private JComboBox tivo_search = null;
+   public JComboBox tivo_search = null;
    public searchTable tab_search = null;
    private JTextField text_search = null;
    public JButton button_search = null;
    public JSpinner max_search = null;
+   public JComboBox search_type = null;
    public JCheckBox includeFree = null;
    public JCheckBox includePaid = null;
    public JCheckBox includeVod = null;
@@ -2139,6 +2140,12 @@ public class remotegui {
       row1_search.add(refresh_todo_search);
       panel_search.add(row1_search, c);
       
+      JLabel search_type_label = new javax.swing.JLabel("Type");
+      
+      String [] types = {"keywords", "actor", "director", "producer", "executiveProducer", "writer"};
+      search_type = new javax.swing.JComboBox(types);
+      search_type.setToolTipText(getToolTip("search_typef"));
+      
       includeFree = new JCheckBox("Include free streaming content", false);
       includeFree.setToolTipText(getToolTip("includeFree"));
       
@@ -2153,6 +2160,9 @@ public class remotegui {
       
       gy++;
       c.gridy = gy;
+      row2_search.add(search_type_label);
+      row2_search.add(Box.createRigidArea(space_5));
+      row2_search.add(search_type);
       row2_search.add(Box.createRigidArea(space_5));
       row2_search.add(includeFree);
       row2_search.add(Box.createRigidArea(space_5));
@@ -3978,14 +3988,25 @@ public class remotegui {
          text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
          text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
+      else if (component.equals("search_type")) {
+         text = "Select type of search to perform:<br>";
+         text += "<b>keywords</b> => traditional keyword search in show titles, subtitles, and descriptions<br>";
+         text += "For other role choices you should provide person name in the search field. See the tooltip for<br>";
+         text += "the search field for details on the expected syntax of person names.";
+      }
       else if (component.equals("button_search")) {
          text = "<b>Search</b><br>";
          text += "Start a search of specified keywords.";
       }
       else if (component.equals("text_search")) {
-         text = "Specify keywords to search for. NOTE: Multiple words mean logical AND operation.<br>";
+         text = "Specify keywords to search for. NOTE: For <b>Type=keywords</b>, multiple words mean logical AND operation.<br>";
          text += "To shorten search times include more words in the search. Very generic/short<br>";
-         text += "keywords will lead to much longer search times.";
+         text += "keywords will lead to much longer search times.<br>";
+         text += "For <b>Type=role type</b> searches use the following syntax:<br>";
+         text += "<b>FirstName LastName</b>. EXAMPLE: clint eastwood<br>";
+         text += "<b>LastName</b>. EXAMPLE: eastwood. (When only 1 string provided it's assumed to be last name)<br>";
+         text += "To search for more than 1 person at a time (OR operation), separate each by a comma. For example:<br>";
+         text += "<b>clint eastwood, tommy jones</b>";
       }
       else if (component.equals("adv_search")) {
          text = "Brings up the <b>Advanced Search</b> dialog window which has more advanced search criteria<br>";

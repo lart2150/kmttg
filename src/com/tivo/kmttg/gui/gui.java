@@ -34,6 +34,7 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class gui {
 
@@ -1805,6 +1806,9 @@ public class gui {
                ofp.write("" + max + "\n");
                
                // Search streaming settings
+               ofp.write("\n<rpc_search_type>\n");
+               ofp.write("" + remote_gui.search_type.getSelectedItem());
+               
                int includeFree = 0;
                if (remote_gui.includeFree.isSelected())
                   includeFree = 1;
@@ -2117,6 +2121,11 @@ public class gui {
                catch (NumberFormatException ex) {
                   // Don't do anything here
                }
+            }
+            
+            if (key.equals("rpc_search_type") && remote_gui != null) {
+               String search_type = string.removeLeadingTrailingSpaces(line);
+               remote_gui.search_type.setSelectedItem(search_type);
             }
             
             if (key.equals("rpc_search_includeFree") && remote_gui != null) {

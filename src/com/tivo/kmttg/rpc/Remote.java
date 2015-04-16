@@ -626,7 +626,7 @@ public class Remote {
             if ( ! away )
                json.put("mergeOverridingCollections", true);
             json.put("namespace", "refserver");
-            if ( ! json.has("orderBy") )
+            if ( ! json.has("orderBy") && ! json.has("credit") )
                json.put("orderBy", new JSONArray("[\"relevance\"]"));
             json.put("searchable", true);
             Date now = new Date();
@@ -1666,9 +1666,17 @@ public class Remote {
          int offset = 0;
          int count = 50;
          
+         String search_type = (String)config.gui.remote_gui.search_type.getSelectedItem();
+         
+         // Role type search
+         JSONArray credit = null;
+         if (! search_type.equals("keywords")) {
+            credit = rnpl.parseCreditString(keyword, search_type);
+         }
+         
          // Update job monitor output column name
-         if (job != null && config.GUIMODE) {
-            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Keyword Search: " + keyword);
+         if (job != null) {
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Guide Search: " + keyword);
          }
          
          while ( ! stop ) {
@@ -1676,7 +1684,10 @@ public class Remote {
             JSONObject json = new JSONObject();
             json.put("count", count);
             json.put("offset", offset);
-            json.put("keyword", keyword);
+            if (credit == null)
+               json.put("keyword", keyword);
+            else
+               json.put("credit", credit);
             JSONObject result = Command("OfferSearch", json);
             if (result == null) {
                log.error("Keyword search failed for: '" + keyword + "'");
@@ -1747,7 +1758,7 @@ public class Remote {
          Boolean includeVod = config.gui.remote_gui.includeVod.isSelected();
          Boolean unavailable = config.gui.remote_gui.unavailable.isSelected();
          if (includeFree || includePaid || includeVod || unavailable) {
-            collections = extendedSearch(keyword, includeFree, includePaid, includeVod, ! unavailable, job, max);
+            collections = extendedSearch(keyword, credit, includeFree, includePaid, includeVod, ! unavailable, job, max);
             if (collections != null && collections.length() > 0) {
                order = collections.getInt("order");
                JSONArray keys = collections.names();
@@ -1959,7 +1970,7 @@ public class Remote {
    
    // Search that includes non-linear content
    public JSONObject extendedSearch(
-         String keyword, Boolean includeFree, Boolean includePaid,
+         String keyword, JSONArray credit, Boolean includeFree, Boolean includePaid,
          Boolean includeVod, Boolean filterUnavailable, jobData job, int max) {
       JSONArray titles = new JSONArray();
       JSONObject collections = new JSONObject();
@@ -1970,13 +1981,16 @@ public class Remote {
          
          // Update job monitor output column name
          if (job != null && config.GUIMODE) {
-            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Extended keyword Search: " + keyword);
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Extended Search: " + keyword);
          }
          
          JSONObject json = new JSONObject();
          json.put("bodyId", bodyId_get());
          json.put("count", count);
-         json.put("keyword", keyword);
+         if (credit == null)
+            json.put("keyword", keyword);
+         else
+            json.put("credit", credit);
          json.put("includeBroadcast", true);
          if (includeFree || includePaid || includeVod) {
             json.put("includeFree", includeFree);
