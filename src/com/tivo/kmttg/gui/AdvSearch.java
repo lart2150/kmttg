@@ -682,27 +682,7 @@ public class AdvSearch {
          }
          text = string.removeLeadingTrailingSpaces(creditKeyword.getText());
          if (text != null && text.length() > 0) {
-            /* text expected in FirstName LastName format with commas between multiple names:
-               clint eastwood
-               clint eastwood, tommy jones
-            */
-            JSONArray creditArray = new JSONArray();
-            String[] names = text.split(",");
-            for (String nameText : names) {
-               JSONObject credit = new JSONObject();
-               credit.put("type", "credit");
-               credit.put("role", (String)creditKeywordRole.getSelectedItem());
-               nameText = nameText.replaceFirst("^\\s+", "");
-               String[] name = nameText.split("\\s+");
-               if (name.length == 2) {
-                  credit.put("first", name[0]);
-                  credit.put("last", name[1]);
-               }
-               if (name.length == 1) {
-                  credit.put("last", name[0]);
-               }
-               creditArray.put(credit);
-            }
+            JSONArray creditArray = rnpl.parseCreditString(text, (String)creditKeywordRole.getSelectedItem());
             json.put("credit", creditArray);
          }
          text = (String)collectionType.getSelectedItem();
