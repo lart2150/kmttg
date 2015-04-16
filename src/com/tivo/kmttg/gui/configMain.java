@@ -78,6 +78,7 @@ public class configMain {
    private static JCheckBox VrdAllowMultiple = null;
    private static JCheckBox VrdCombineCutEncode = null;
    private static JCheckBox VrdQsfixMpeg2ps = null;
+   private static JCheckBox VrdOneAtATime = null;
    private static JCheckBox TSDownload = null;
    private static JCheckBox TivoWebPlusDelete = null;
    private static JCheckBox iPadDelete = null;
@@ -718,6 +719,12 @@ public class configMain {
       else
          VrdQsfixMpeg2ps.setSelected(false);
       
+      // VrdOneAtATime
+      if (config.VrdOneAtATime == 1)
+    	  VrdOneAtATime.setSelected(true);
+      else
+    	  VrdOneAtATime.setSelected(false);
+      
       // TSDownload
       if (config.TSDownload == 1)
          TSDownload.setSelected(true);
@@ -1287,6 +1294,12 @@ public class configMain {
          config.VrdQsfixMpeg2ps = 1;
       else
          config.VrdQsfixMpeg2ps = 0;
+      
+      // VrdOneAtATime
+      if (VrdOneAtATime.isSelected() && config.VRD == 1)
+         config.VrdOneAtATime = 1;
+      else
+         config.VrdOneAtATime = 0;
       
       // TSDownload
       if (TSDownload.isSelected())
@@ -2072,6 +2085,7 @@ public class configMain {
       VrdAllowMultiple = new javax.swing.JCheckBox();
       VrdCombineCutEncode = new javax.swing.JCheckBox();
       VrdQsfixMpeg2ps = new javax.swing.JCheckBox();
+      VrdOneAtATime = new javax.swing.JCheckBox();
       TSDownload = new javax.swing.JCheckBox();
       TivoWebPlusDelete = new javax.swing.JCheckBox();
       iPadDelete = new javax.swing.JCheckBox();
@@ -2222,6 +2236,7 @@ public class configMain {
       VrdAllowMultiple.setText("Run all VideoRedo jobs in GUI mode");
       VrdCombineCutEncode.setText("Combine Ad Cut & Encode");
       VrdQsfixMpeg2ps.setText("Force QS Fix output to always be mpeg2 Program Stream");
+      VrdOneAtATime.setText("Only allow 1 VRD job at a time");
       TSDownload.setText("Download TiVo files in Transport Stream format");
       TivoWebPlusDelete.setText("Enable TivoWebPlus Delete task");
       iPadDelete.setText("Enable iPad style delete task");
@@ -3626,6 +3641,12 @@ public class configMain {
       c.gridy = gy;
       vrd_panel.add(VrdAllowMultiple, c);
       
+      // VrdOneAtATime
+      gy++;
+      c.gridx = 1;
+      c.gridy = gy;
+      vrd_panel.add(VrdOneAtATime, c);
+      
       // pyTivo Panel
       JPanel pyTivo_panel = new JPanel(new GridBagLayout());      
       
@@ -3769,6 +3790,7 @@ public class configMain {
       VrdAllowMultiple.setToolTipText(getToolTip("VrdAllowMultiple"));
       VrdCombineCutEncode.setToolTipText(getToolTip("VrdCombineCutEncode"));
       VrdQsfixMpeg2ps.setToolTipText(getToolTip("VrdQsfixMpeg2ps"));
+      VrdOneAtATime.setToolTipText(getToolTip("VrdOneAtATime"));
       TSDownload.setToolTipText(getToolTip("TSDownload"));
       TivoWebPlusDelete.setToolTipText(getToolTip("TivoWebPlusDelete"));
       iPadDelete.setToolTipText(getToolTip("iPadDelete"));
@@ -4135,6 +4157,10 @@ public class configMain {
          text += "Thus for example if the input file is Mpeg2 Transport Stream format then the output<br>";
          text += "will be Mpeg2 Program Stream.";
       }
+      else if (component.equals("VrdOneAtATime")) {
+          text =  "<b>Only allow 1 VRD job at a time</b><br>";
+          text += "If this option is enabled then only 1 VideoRedo job will be allowed to run at a time.";
+       }
       else if (component.equals("TSDownload")) {
          text =  "<b>Download TiVo files in Transport Stream format</b><br>";
          text += "For TiVo software that properly supports it, this forces TiVo file downloads to use<br>";

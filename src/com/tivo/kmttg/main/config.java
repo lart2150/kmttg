@@ -22,7 +22,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v1.1m";
+   public static String kmttg = "kmttg v1.1n_beta";
    
    // encoding related
    public static String encProfDir = "";
@@ -78,6 +78,7 @@ public class config {
    public static int VrdAllowMultiple = 0; // Allow multiple VRD instances at once
    public static int VrdCombineCutEncode = 0; // Combine VRD Ad Cut and encode
    public static int VrdQsfixMpeg2ps = 0; // If set force VRD QS Fix to output mpeg2 program stream
+   public static int VrdOneAtATime = 0; // If set only allow 1 VRD job at a time
    public static int TSDownload = 0;
    public static int OverwriteFiles = 0; // Don't overwrite existing files by default
    public static int DeleteFailedDownloads = 1; // Delete failed download files by default
@@ -987,6 +988,9 @@ public class config {
             if (key.equals("VrdQsfixMpeg2ps")) {
                VrdQsfixMpeg2ps = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("VrdOneAtATime")) {
+            	VrdOneAtATime = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+             }
             if (key.equals("TSDownload")) {
                TSDownload = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1329,6 +1333,8 @@ public class config {
          ofp.write("<VrdCombineCutEncode>\n" + VrdCombineCutEncode + "\n\n");
          
          ofp.write("<VrdQsfixMpeg2ps>\n" + VrdQsfixMpeg2ps + "\n\n");
+         
+         ofp.write("<VrdOneAtATime>\n" + VrdOneAtATime + "\n\n");
          
          ofp.write("<TSDownload>\n" + TSDownload + "\n\n");
          

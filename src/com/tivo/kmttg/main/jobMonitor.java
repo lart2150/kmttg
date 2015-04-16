@@ -147,6 +147,7 @@ public class jobMonitor {
       int cpuActiveJobs = 0;
       //int VideoRedoCOMJobs = 0;
       //int VideoRedoGUIJobs = 0;
+      int VideoRedoJobs = 0;
       int totalDownloads = 0;
       int atomicJobs = 0;
       Hashtable<String,Integer> tivoDownload = new Hashtable<String,Integer>();
@@ -156,6 +157,8 @@ public class jobMonitor {
             atomicJobs++;
          if (isDownloadJob(job))
             totalDownloads++;
+         if (isVideoRedoJob(job))
+        	 VideoRedoJobs++;
          if ( oneJobAtATime(job.type) ) {
             if ( ! tivoDownload.containsKey(job.tivoName) ) {
                tivoDownload.put(job.tivoName, 0);
@@ -218,7 +221,10 @@ public class jobMonitor {
          //if ( isVideoRedoGUIJob(job) ) {
          //   if (VideoRedoGUIJobs > 0) continue;
          //}
-         
+
+         if ( config.VrdOneAtATime == 1 && isVideoRedoJob(job) ) {
+        	 if (VideoRedoJobs > 0) continue;
+         }
          // Apply a start delay to download jobs (to avoid TiVo server overload)
          if (config.download_delay > 0 && isDownloadJob(job) && job.launch_time == null) {
             long now = new Date().getTime();
@@ -257,6 +263,9 @@ public class jobMonitor {
          // Update VideoRedoGUIJobs number
          //if ( isVideoRedoGUIJob(job) )
          //   VideoRedoGUIJobs++;
+         
+         if ( isVideoRedoJob(job) )
+        	 VideoRedoJobs++;
          
          if (job.type.equals("atomic"))
             atomicJobs++;
@@ -1543,6 +1552,16 @@ public class jobMonitor {
       
       return restricted;
    }*/
+   
+   private static Boolean isVideoRedoJob(jobData job) {
+	   Boolean vrd = false;
+	   String[] names = {"qsfix", "adscan", "adcut", "vrdencode", "vrdreview"};
+	   for (String name : names) {
+		   if (job.type.equals(name))
+			   vrd = true;
+	   }
+	   return vrd;
+   }
    
    // Shut down OS (Windows only)
    public void shutdown() {
