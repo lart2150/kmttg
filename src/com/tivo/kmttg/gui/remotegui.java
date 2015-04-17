@@ -2144,7 +2144,7 @@ public class remotegui {
       
       String [] types = {"keywords", "actor", "director", "producer", "executiveProducer", "writer"};
       search_type = new javax.swing.JComboBox(types);
-      search_type.setToolTipText(getToolTip("search_typef"));
+      search_type.setToolTipText(getToolTip("search_type"));
       
       includeFree = new JCheckBox("Include free streaming content", false);
       includeFree.setToolTipText(getToolTip("includeFree"));
