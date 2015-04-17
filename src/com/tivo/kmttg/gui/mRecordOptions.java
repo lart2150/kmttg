@@ -234,7 +234,8 @@ public class mRecordOptions {
       try {
          JSONObject json = new JSONObject();
          int hour = Integer.parseInt((String)start_hour.getSelectedItem());
-         if (start_ampm.getSelectedItem().equals("pm"))
+         String ampm = (String)start_ampm.getSelectedItem();
+         if (ampm.equals("pm") && hour < 12)
             hour += 12;
          String min = (String)start_min.getSelectedItem();
          
