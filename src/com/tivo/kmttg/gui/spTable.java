@@ -962,6 +962,7 @@ public class spTable {
                             }
                             
                             // Update SP table
+                            log.warn(">> Updating table, please be patient...");
                             JSONArray a = r.SeasonPasses(new jobData());
                             if( a != null) {
                                clear();
