@@ -193,8 +193,10 @@ public class spOptions {
       try {
          if (json != null) {
             setValues(json);
-            setChannels(tivoName, json);
-            setStartFrom(tivoName, json);
+            if ( ! WL ) {
+               setChannels(tivoName, json);
+               setStartFrom(tivoName, json);
+            }
          }
          label.setText(title);
          int response = JOptionPane.showConfirmDialog(
@@ -212,68 +214,75 @@ public class spOptions {
             j.put("keepBehavior",     untilHash.getV((String)until.getSelectedItem()));
             j.put("startTimePadding", startHash.getV((String)start.getSelectedItem()));
             j.put("endTimePadding",   stopHash.getV((String)stop.getSelectedItem()));
+            // NOTE: For WL types set consumptionSource to null
+            String consumptionSource = null;
+            if (include.isEnabled())
+               consumptionSource = includeHash.getV((String)include.getSelectedItem());
             String hdPreference = hdHash.getV((String)hd.getSelectedItem());
             String channelName = (String)channel.getSelectedItem();
-            String consumptionSource = includeHash.getV((String)include.getSelectedItem());
             int startSeasonOrYear = startFromHash.getV((String)startFrom.getSelectedItem());
-            // NOTE: All types have startSeasonOrYear
-            if ( consumptionSource.equals("linear") ) {
-               // Recordings only
-               JSONObject idSetSource;
-               Boolean newid = false;
-               if (j.has("idSetSource"))
-                  idSetSource = j.getJSONObject("idSetSource");
-               else {
-                  idSetSource = new JSONObject();
-                  newid = true;
-               }
-               setSeason(idSetSource, startSeasonOrYear);
-                              
-               if (newid)
-                  j.put("idSetSource", idSetSource);
-            } else {
-               // Streaming elements desired
-               JSONObject idSetSource;
-               Boolean newid = false;
-               if ( j.has("idSetSource") )
-                  idSetSource = j.getJSONObject("idSetSource");
-               else {
-                  idSetSource = new JSONObject();
-                  newid = true;
-               }
-               if (consumptionSource.equals("onDemand") && idSetSource.has("channel"))
-                  idSetSource.remove("channel"); // Streaming only should not have channel in idSetSource
-               idSetSource.put("consumptionSource", consumptionSource);
-               idSetSource.put("costFilter", rentOrBuyHash.getV((String)rentOrBuy.getSelectedItem()));
-               setSeason(idSetSource, startSeasonOrYear);
-               if (newid)
-                  j.put("idSetSource", idSetSource);
-            }
-            
-            // Channel & HD preference only applies for non onDemand content
-            if (! consumptionSource.equals("onDemand") && j.has("idSetSource")) {
-               JSONObject idSetSource = j.getJSONObject("idSetSource");
-               if (channelName.equals(" All")) {
-                  j.put("hdPreference", hdPreference);
-                  if (idSetSource.has("channel"))
-                     idSetSource.remove("channel");
-                  idSetSource.put("type", "seasonPassSource");
-                  idSetSource.put("consumptionSource", consumptionSource);
-                  if (json != null && json.has("collectionId")) {
-                     idSetSource.put("collectionId", json.getString("collectionId"));
+            if (consumptionSource != null) {
+               // NOTE: All types have startSeasonOrYear
+               if ( consumptionSource.equals("linear") ) {
+                  // Recordings only
+                  JSONObject idSetSource;
+                  Boolean newid = false;
+                  if (j.has("idSetSource"))
+                     idSetSource = j.getJSONObject("idSetSource");
+                  else {
+                     idSetSource = new JSONObject();
+                     newid = true;
                   }
-                  idSetSource.put("costFilter", "free");
+                  setSeason(idSetSource, startSeasonOrYear);
+                                 
+                  if (newid)
+                     j.put("idSetSource", idSetSource);
                } else {
-                  if (j.has("hdPreference"))
-                     j.remove("hdPreference");
-                  idSetSource.put("channel", channelHash.get(channelName));
+                  // Streaming elements desired
+                  JSONObject idSetSource;
+                  Boolean newid = false;
+                  if ( j.has("idSetSource") )
+                     idSetSource = j.getJSONObject("idSetSource");
+                  else {
+                     idSetSource = new JSONObject();
+                     newid = true;
+                  }
+                  if (consumptionSource.equals("onDemand") && idSetSource.has("channel"))
+                     idSetSource.remove("channel"); // Streaming only should not have channel in idSetSource
+                  idSetSource.put("consumptionSource", consumptionSource);
+                  idSetSource.put("costFilter", rentOrBuyHash.getV((String)rentOrBuy.getSelectedItem()));
+                  setSeason(idSetSource, startSeasonOrYear);
+                  if (newid)
+                     j.put("idSetSource", idSetSource);
                }
-            }
-            if (consumptionSource.equals("onDemand")) {
-               String [] remove = {"hdPreference"};
-               for (String r : remove)
-                  if (j.has(r))
-                     j.remove(r);
+            
+               // Channel & HD preference only applies for non onDemand content
+               if (! consumptionSource.equals("onDemand") && j.has("idSetSource")) {
+                  JSONObject idSetSource = j.getJSONObject("idSetSource");
+                  if (channelName != null && channelName.equals(" All")) {
+                     if (hdPreference != null)
+                        j.put("hdPreference", hdPreference);
+                     if (idSetSource.has("channel"))
+                        idSetSource.remove("channel");
+                     idSetSource.put("type", "seasonPassSource");
+                     idSetSource.put("consumptionSource", consumptionSource);
+                     if (json != null && json.has("collectionId")) {
+                        idSetSource.put("collectionId", json.getString("collectionId"));
+                     }
+                     idSetSource.put("costFilter", "free");
+                  } else {
+                     if (j.has("hdPreference"))
+                        j.remove("hdPreference");
+                     if (channelName != null)
+                        idSetSource.put("channel", channelHash.get(channelName));
+                  }
+               }
+               if (consumptionSource.equals("onDemand")) {
+                  String [] remove = {"hdPreference"};
+                  for (String r : remove)
+                     if (j.has(r))
+                        j.remove(r);
+               }
             }
             String [] remove = {"__priority__", "__upcoming", "priority"};
             for (String r : remove) {
@@ -391,6 +400,10 @@ public class spOptions {
          if( ((DefaultComboBoxModel)include.getModel()).getIndexOf(c3) == -1)
             include.addItem(c3);
       }
+      include.setEnabled(! WL);
+      startFrom.setEnabled(! WL);
+      record.setEnabled(! WL);
+      channel.setEnabled(! WL);
    }
    
    // This runs in background mode so as not to hang up GUI
