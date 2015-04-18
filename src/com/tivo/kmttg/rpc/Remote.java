@@ -661,6 +661,8 @@ public class Remote {
                o.put("startTimePadding", json.getInt("startTimePadding"));
             if (json.has("hdPreference"))
                o.put("hdPreference", json.getString("hdPreference"));
+            if (json.has("hdOnly"))
+               o.put("hdOnly", json.getBoolean("hdOnly"));
             // These are required for wishlist types
             // NOTE: Advanced wishlist SPs don't contain idSetSource so don't work
             // NOTE: title is not needed for type=seasonPassSource and titles with special
@@ -697,6 +699,8 @@ public class Remote {
             o.put("subscriptionId", json.getString("subscriptionId"));
             if (json.has("hdPreference"))
                o.put("hdPreference", json.getString("hdPreference"));
+            if (json.has("hdOnly"))
+               o.put("hdOnly", json.getBoolean("hdOnly"));
             if (json.has("title"))
                o.put("title", json.getString("title"));
             if (json.has("folderingRules"))
