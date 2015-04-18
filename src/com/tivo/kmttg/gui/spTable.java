@@ -965,6 +965,7 @@ public class spTable {
                             log.warn(">> Updating table, please be patient...");
                             JSONArray a = r.SeasonPasses(new jobData());
                             if( a != null) {
+                               log.warn(">> Finished updating table");
                                clear();
                                AddRows(tivoName, a);
                                setSelectedRow(row);
