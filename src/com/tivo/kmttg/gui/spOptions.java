@@ -196,6 +196,14 @@ public class spOptions {
             if ( ! WL ) {
                setChannels(tivoName, json);
                setStartFrom(tivoName, json);
+            } else {
+               // This is a WL type
+               String hdp = "prefer";
+               if (json.has("hdPreference"))
+                  hdp = json.getString("hdPreference");
+               if (json.has("hdOnly") && json.getBoolean("hdOnly"))
+                  hdp = "always";
+               hd.setSelectedItem(hdHash.getK(hdp));
             }
          }
          label.setText(title);
@@ -260,8 +268,7 @@ public class spOptions {
                if (! consumptionSource.equals("onDemand") && j.has("idSetSource")) {
                   JSONObject idSetSource = j.getJSONObject("idSetSource");
                   if (channelName != null && channelName.equals(" All")) {
-                     if (hdPreference != null)
-                        j.put("hdPreference", hdPreference);
+                     j.put("hdPreference", hdPreference);
                      if (idSetSource.has("channel"))
                         idSetSource.remove("channel");
                      idSetSource.put("type", "seasonPassSource");
@@ -273,6 +280,8 @@ public class spOptions {
                   } else {
                      if (j.has("hdPreference"))
                         j.remove("hdPreference");
+                     if (j.has("hdOnly"))
+                        j.remove("hdOnly");
                      if (channelName != null)
                         idSetSource.put("channel", channelHash.get(channelName));
                   }
@@ -283,7 +292,19 @@ public class spOptions {
                      if (j.has(r))
                         j.remove(r);
                }
+            } // consumptionSource != null
+            else {
+               // WL type
+               j.put("hdPreference", hdPreference);
             }
+            
+            if (j.has("hdPreference")) {
+               if (j.getString("hdPreference").equals("always"))
+                  j.put("hdOnly", true);
+               else
+                  j.put("hdOnly", false);
+            }
+            
             String [] remove = {"__priority__", "__upcoming", "priority"};
             for (String r : remove) {
                if (j.has(r))
@@ -400,9 +421,10 @@ public class spOptions {
          if( ((DefaultComboBoxModel)include.getModel()).getIndexOf(c3) == -1)
             include.addItem(c3);
       }
+      if (WL)
+         hd.setEnabled(true);
       include.setEnabled(! WL);
       startFrom.setEnabled(! WL);
-      record.setEnabled(! WL);
       channel.setEnabled(! WL);
    }
    
