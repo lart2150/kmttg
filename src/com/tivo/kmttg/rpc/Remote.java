@@ -2640,11 +2640,8 @@ public class Remote {
                   JSONObject idSetSource = o.getJSONObject("idSetSource");
                   if (idSetSource.has("consumptionSource")) {
                      // Has streaming elements
-                     String consumptionSource = idSetSource.getString("consumptionSource");
                      idSetSource.put("collectionId", json.getString("collectionId"));
                      idSetSource.put("type", "seasonPassSource");
-                     if (json.has("channel") && consumptionSource.equals("all"))
-                        idSetSource.put("channel", json.getJSONObject("channel"));
                   } else {
                      // Recordings only
                      idSetSource.put("collectionId", json.getString("collectionId"));
