@@ -208,7 +208,7 @@ public class javaNowPlaying implements Serializable {
       
       Boolean done = true;
       
-      if ( (AnchorOffset + result.get("ItemCount")) < result.get("TotalItems") ) {
+      if ( result.get("ItemCount") > 0 && (AnchorOffset + result.get("ItemCount")) < result.get("TotalItems") ) {
          done = false;
       }
       

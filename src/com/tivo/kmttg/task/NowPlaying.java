@@ -308,7 +308,7 @@ public class NowPlaying implements Serializable {
       
       Boolean done = true;
       
-      if ( (AnchorOffset + result.get("ItemCount")) < result.get("TotalItems") )
+      if ( result.get("ItemCount") > 0 && (AnchorOffset + result.get("ItemCount")) < result.get("TotalItems") )
          done = false;
       
       if (limit_npl_fetches > 0 && fetchCount >= limit_npl_fetches) {
