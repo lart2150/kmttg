@@ -25,6 +25,7 @@ import com.tivo.kmttg.util.*;
 public class NowPlaying implements Serializable {
    private static final long serialVersionUID = 1L;
    private Stack<Hashtable<String,String>> ENTRIES = new Stack<Hashtable<String,String>>();
+   private Hashtable<String,Integer> unique = new Hashtable<String,Integer>();
    private String cookieFile = "";
    private String outputFile = "";
    private int AnchorOffset = 0;
@@ -325,6 +326,7 @@ public class NowPlaying implements Serializable {
       } else {
          // Done
          jobMonitor.removeFromJobList(job);
+         ENTRIES = parseNPL.uniquify(ENTRIES, unique);
          if (config.GUI_AUTO > 0) {
             // Update NPL
             config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);

@@ -25,6 +25,7 @@ public class javaNowPlaying implements Serializable {
    private Boolean thread_running = false;
    private Boolean success = false;
    private Stack<Hashtable<String,String>> ENTRIES = new Stack<Hashtable<String,String>>();
+   private Hashtable<String,Integer> unique = new Hashtable<String,Integer>();
    private String outputFile = "";
    private int AnchorOffset = 0;
    private int TotalItems = 0;
@@ -226,6 +227,7 @@ public class javaNowPlaying implements Serializable {
       } else {
          // Done
          jobMonitor.removeFromJobList(job);
+         ENTRIES = parseNPL.uniquify(ENTRIES, unique);
          if (config.GUI_AUTO > 0) {
             // Update NPL
             config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
