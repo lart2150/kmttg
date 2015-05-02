@@ -323,5 +323,18 @@ public class parseNPL {
       SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yyyy hh:mm aa");
       return sdf.format(gmt);
    }
+   
+   public static Stack<Hashtable<String,String>> uniquify(Stack<Hashtable<String,String>> ENTRIES, Hashtable<String,Integer> unique) {
+      Stack<Hashtable<String,String>> UNIQUE = new Stack<Hashtable<String,String>>();
+      for (int i=0; i<ENTRIES.size(); ++i) {
+         String ProgramId_unique = ENTRIES.get(i).get("ProgramId_unique");
+         if (! unique.containsKey(ProgramId_unique)) {
+            unique.put(ProgramId_unique, 1);
+            UNIQUE.add(ENTRIES.get(i));
+         }
+      }
+      ENTRIES = null;
+      return UNIQUE;
+   }
 
 }
