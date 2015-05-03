@@ -456,14 +456,15 @@ public class nplTable {
    private void KeyPressed(KeyEvent e) {
       if (e.isControlDown())
          return;
-      if (tivoName.equals("FILES"))
-         return;
       int keyCode = e.getKeyCode();
       if (keyCode == KeyEvent.VK_S) {
          // s key presses START JOBS button
          config.gui.start.doClick();
+         return;
       }
-      else if (keyCode == KeyEvent.VK_DELETE ||
+      if (tivoName.equals("FILES"))
+         return;
+      if (keyCode == KeyEvent.VK_DELETE ||
                keyCode == KeyEvent.VK_BACK_SPACE ||
                keyCode == KeyEvent.VK_SPACE) {
          int[] selected = GetSelectedRows();         
