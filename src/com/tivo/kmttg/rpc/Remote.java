@@ -879,6 +879,8 @@ public class Remote {
       Boolean stop = false;
       int count = 50;
       int offset = 0;
+      int limit_npl_fetches = config.getLimitNplSetting(job.tivoName);
+      int fetchCount = 0;
 
       try {
          JSONObject json = new JSONObject();
@@ -903,6 +905,11 @@ public class Remote {
                stop = true;
             }
             offset += count;
+            fetchCount++;
+            if (limit_npl_fetches > 0 && fetchCount >= limit_npl_fetches) {
+               log.warn(job.tivoName + ": Further NPL listings not obtained due to fetch limit=" + limit_npl_fetches + " exceeded.");
+               stop = true;
+            }
          } // while
          if (job != null && config.GUIMODE) {
             String c = "0/" + items.length();
