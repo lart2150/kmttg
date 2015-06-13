@@ -35,6 +35,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
@@ -570,7 +571,8 @@ public class gui extends Application {
          HBox cancel_pane = new HBox();
          cancel_pane.setPadding(new Insets(0,0,0,5));
          cancel_pane.setSpacing(5);
-         cancel_pane.getChildren().addAll(cancel, cancel_pane_stretch);         
+         cancel_pane.getChildren().addAll(cancel, cancel_pane_stretch);
+         cancel.setMinWidth(Button.USE_PREF_SIZE); // Don't truncate button text
          HBox.setHgrow(cancel_pane_stretch, Priority.ALWAYS);  // stretch horizontally
          // Bind progressBar width to cancel_pane_stretch width so it will grow horizontally
          progressBar.prefWidthProperty().bind(
