@@ -184,14 +184,15 @@ public class configAuto {
       Label type_label = new Label("Type");
       type = new ComboBox<String>();
       type.getItems().addAll("title", "keywords");
-      type.getSelectionModel().select(type.getItems().get(0));
+      type.setValue(type.getItems().get(0));
       
       Label tivo_label = new Label("TiVo");
       tivo = new ComboBox<String>();
       for (String s : getTivoFilterNames()) {
          tivo.getItems().add(s);
       }
-      tivo.getSelectionModel().select(tivo.getItems().get(0));
+      if (tivo.getItems().size() > 0)
+         tivo.setValue(tivo.getItems().get(0));
       
       title = new TextField();
             
@@ -266,7 +267,7 @@ public class configAuto {
       dateOperator = new ComboBox<String>();
       dateOperator.getItems().add("more than");
       dateOperator.getItems().add("less than");
-      dateOperator.getSelectionModel().select(dateOperator.getItems().get(0));
+      dateOperator.setValue(dateOperator.getItems().get(0));
       dateHours = new TextField("48");
       dateHours.setPrefWidth(50);
       Label dateHours_label = new Label("hours old");
@@ -623,7 +624,8 @@ public class configAuto {
       for (int i=0; i<names.length; ++i) {
          tivo.getItems().add(names[i]);
       }
-      tivo.getSelectionModel().select(tivo.getItems().get(0));
+      if (tivo.getItems().size() > 0)
+         tivo.setValue(tivo.getItems().get(0));
    }
    
    // Defines choices for tivo name filtering
@@ -785,7 +787,7 @@ public class configAuto {
       dry_run.setSelected((Boolean)(autoConfig.dryrun == 1));
       noJobWait.setSelected((Boolean)(autoConfig.noJobWait == 1));
       dateFilter.setSelected((Boolean)(autoConfig.dateFilter == 1));
-      dateOperator.getSelectionModel().select(autoConfig.dateOperator);
+      dateOperator.setValue(autoConfig.dateOperator);
       dateHours.setText("" + autoConfig.dateHours);
       suggestionsFilter.setSelected((Boolean)(autoConfig.suggestionsFilter == 1));
       kuidFilter.setSelected((Boolean)(autoConfig.kuidFilter == 1));
@@ -806,8 +808,10 @@ public class configAuto {
          encoding_name.getItems().add(values.get(i));
          encoding_name2.getItems().add(values.get(i));
       }
-      encoding_name.getSelectionModel().select(encoding_name.getItems().get(0));
-      encoding_name2.getSelectionModel().select(encoding_name2.getItems().get(0));      
+      if (encoding_name.getItems().size() > 0)
+         encoding_name.setValue(encoding_name.getItems().get(0));
+      if (encoding_name2.getItems().size() > 0)
+         encoding_name2.setValue(encoding_name2.getItems().get(0));      
    }
    
    // Set table entries according to auto config setup
@@ -1044,13 +1048,13 @@ public class configAuto {
       suggestionsFilter_single.setSelected((Boolean)(entry.suggestionsFilter == 1));
       useProgramId_unique.setSelected((Boolean)(entry.useProgramId_unique == 1));
       
-      encoding_name.getSelectionModel().select(entry.encode_name);
+      encoding_name.setValue(entry.encode_name);
       
       if (entry.encode_name2 != null) {
-    	  encoding_name2.getSelectionModel().select(entry.encode_name2);
+    	  encoding_name2.setValue(entry.encode_name2);
     	  encoding_name2_suffix.setText(entry.encode_name2_suffix);
       } else
-    	  encoding_name2.getSelectionModel().select(_noSecondEncodingTxt);
+    	  encoding_name2.setValue(_noSecondEncodingTxt);
       
       comskipIni.setText(entry.comskipIni);
       
@@ -1064,10 +1068,10 @@ public class configAuto {
       else
          tivoFileNameFormat.setText("");
       
-      type.getSelectionModel().select(entry.type);
+      type.setValue(entry.type);
       
       entry.tivo = validateTivoName(entry.tivo);
-      tivo.getSelectionModel().select(entry.tivo);
+      tivo.setValue(entry.tivo);
       
       if (entry.type.equals("title")) {
          title.setText(entry.keyword);

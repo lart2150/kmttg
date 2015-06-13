@@ -240,7 +240,7 @@ public class search {
       search_type.getItems().addAll(
          "keywords", "actor", "director", "producer", "executiveProducer", "writer"
       );
-      search_type.getSelectionModel().select("keywords");
+      search_type.setValue("keywords");
       search_type.setTooltip(tooltip.getToolTip("search_type"));
       
       includeFree = new CheckBox("Include free streaming content");

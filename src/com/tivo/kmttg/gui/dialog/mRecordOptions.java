@@ -201,8 +201,9 @@ public class mRecordOptions {
                               }
                               channelHash.put(item, json);
                               channel.getItems().add(item);
-                              channel.setValue(channel.getItems().get(0));
                            }
+                           if (channel.getItems().size() > 0)
+                              channel.setValue(channel.getItems().get(0));
                         } catch (JSONException e) {
                            log.error("mRecordOptions.getChannels error - " + e.getMessage());
                         }

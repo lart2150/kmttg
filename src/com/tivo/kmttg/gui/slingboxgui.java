@@ -217,13 +217,13 @@ public class slingboxgui {
          res = new ComboBox<String>();
          res.setTooltip(getToolTip("res"));
          res.getItems().addAll("1920x1080", "640x480");
-         res.getSelectionModel().select(config.slingBox_res);
+         res.setValue(config.slingBox_res);
          
          Label vbw_label = new Label("Video bit rate (Kbps)");
          vbw = new ComboBox<String>();
          vbw.setTooltip(getToolTip("vbw"));
          vbw.getItems().addAll("4000", "5000", "6000", "7000");
-         vbw.getSelectionModel().select(config.slingBox_vbw);
+         vbw.setValue(config.slingBox_vbw);
          
          Label type_label = new Label("Slingbox model");
          type = new ComboBox<String>();
@@ -232,14 +232,14 @@ public class slingboxgui {
          type.getItems().add("Slingbox Pro HD");
          type.getItems().add("Slingbox Pro");
          type.getItems().add("Slingbox Solo");
-         type.getSelectionModel().select(config.slingBox_type);
+         type.setValue(config.slingBox_type);
          
          Label container_label = new Label("Video container to use");
          container = new ComboBox<String>();
          container.setTooltip(getToolTip("container"));
          container.getItems().add("mpegts");
          container.getItems().add("matroska");
-         container.getSelectionModel().select(config.slingBox_container);
+         container.setValue(config.slingBox_container);
          
          raw = new CheckBox("Capture raw file");
          raw.setTooltip(getToolTip("raw"));

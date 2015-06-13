@@ -86,7 +86,7 @@ public class premiere {
       for (int i=1; i<=12; ++i) {
          days.getItems().add("" + i);
       }
-      days.getSelectionModel().select("12");
+      days.setValue("12");
 
       MyButton refresh = new MyButton("Search");
       refresh.setPadding(util.smallButtonInsets());

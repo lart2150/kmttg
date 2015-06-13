@@ -358,7 +358,8 @@ public class guideTable extends TableMap {
          if (dates.get(i).equals(current))
             widget.getSelectionModel().select(i);
       }
-      widget.getSelectionModel().select(dates.get(0));
+      if (dates.size() > 0)
+         widget.getSelectionModel().select(dates.get(0));
    }
    
    public void updateChannels(final String tivoName, Boolean force) {

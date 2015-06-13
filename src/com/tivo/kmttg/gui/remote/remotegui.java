@@ -231,27 +231,27 @@ public class remotegui {
       String current = getTivoName(tab);
       if ( ! tivoName.equals(current)) {
          if (tab.equals("todo"))
-            todo_tab.tivo.getSelectionModel().select(tivoName);
+            todo_tab.tivo.setValue(tivoName);
          if (tab.equals("guide"))
-            guide_tab.tivo.getSelectionModel().select(tivoName);
+            guide_tab.tivo.setValue(tivoName);
          if (tab.equals("stream"))
-            stream_tab.tivo.getSelectionModel().select(tivoName);
+            stream_tab.tivo.setValue(tivoName);
          if (tab.equals("sp"))
-            sp_tab.tivo.getSelectionModel().select(tivoName);
+            sp_tab.tivo.setValue(tivoName);
          if (tab.equals("cancel"))
-            cancel_tab.tivo.getSelectionModel().select(tivoName);
+            cancel_tab.tivo.setValue(tivoName);
          if (tab.equals("deleted"))
-            deleted_tab.tivo.getSelectionModel().select(tivoName);
+            deleted_tab.tivo.setValue(tivoName);
          if (tab.equals("thumbs"))
-            thumbs_tab.tivo.getSelectionModel().select(tivoName);
+            thumbs_tab.tivo.setValue(tivoName);
          if (tab.equals("search"))
-            search_tab.tivo.getSelectionModel().select(tivoName);
+            search_tab.tivo.setValue(tivoName);
          if (tab.equals("rc"))
-            rc_tab.tivo.getSelectionModel().select(tivoName);
+            rc_tab.tivo.setValue(tivoName);
         if (tab.equals("info"))
-            info_tab.tivo.getSelectionModel().select(tivoName);
+            info_tab.tivo.setValue(tivoName);
          if (tab.equals("premiere"))
-            premiere_tab.tivo.getSelectionModel().select(tivoName);
+            premiere_tab.tivo.setValue(tivoName);
       }
    }
    

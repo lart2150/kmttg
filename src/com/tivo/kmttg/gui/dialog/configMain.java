@@ -296,7 +296,7 @@ public class configMain {
       }
       if (doit) {
          tivos.getItems().add(value);
-         tivos.getSelectionModel().select(value);
+         tivos.setValue(value);
       }
    }
    
@@ -333,7 +333,7 @@ public class configMain {
       }
       if (doit) {
          shares.getItems().add(value);
-         shares.getSelectionModel().select(value);
+         shares.setValue(value);
       }
    }
    
@@ -485,7 +485,7 @@ public class configMain {
          file_naming.positionCaret(len);
          file_naming.replaceSelection(keyword);
       }
-      keywords.getSelectionModel().select(null);
+      keywords.setValue(null);
    }
    
    // Callback for customFiles combobox
@@ -532,8 +532,10 @@ public class configMain {
             if (config.nplCapable(name))
                autotune_tivoName.getItems().add(name);
          }
-         tivos.getSelectionModel().select(0);
-         autotune_tivoName.getSelectionModel().select(0);
+         if (tivos.getItems().size() > 0)
+            tivos.setValue(tivos.getItems().get(0));
+         if (autotune_tivoName.getItems().size() > 0)
+            autotune_tivoName.setValue(autotune_tivoName.getItems().get(0));
       }
       
       // Shares
@@ -542,7 +544,9 @@ public class configMain {
          shares.getItems().clear();
          for (String dir : config.httpserver_shares.keySet()) {
             shares.getItems().add(dir + "=" + config.httpserver_shares.get(dir));
-         }         
+         }
+         if (shares.getItems().size() > 0)
+            shares.setValue(shares.getItems().get(0));
       }
       
       // enableRpc
@@ -917,7 +921,7 @@ public class configMain {
       active_job_limit.setText("" + config.MaxJobs);
       
       // MinChanDigits
-      MinChanDigits.getSelectionModel().select(config.MinChanDigits);
+      MinChanDigits.setValue("" + config.MinChanDigits);
       
       // toolTipsTimeout
       toolTipsTimeout.setText("" + config.toolTipsTimeout);
@@ -985,14 +989,14 @@ public class configMain {
                setting = config.pyTivo_tivo;
             }
          }
-         pyTivo_tivo.getSelectionModel().select(setting);
+         pyTivo_tivo.setValue(setting);
       }
       
       // pyTivo_files
-      pyTivo_files.getSelectionModel().select(config.pyTivo_files);
+      pyTivo_files.setValue(config.pyTivo_files);
       
       // metadata_files
-      metadata_files.getSelectionModel().select(config.metadata_files);
+      metadata_files.setValue(config.metadata_files);
       
       // lookAndFeel
       if (lookAndFeel != null && config.lookAndFeel != null) {
@@ -1003,7 +1007,7 @@ public class configMain {
                legal = true;
          }
          if (legal)
-            lookAndFeel.getSelectionModel().select(config.lookAndFeel);
+            lookAndFeel.setValue(config.lookAndFeel);
       }
       
       // autotune settings
