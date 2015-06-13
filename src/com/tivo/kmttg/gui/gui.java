@@ -1501,10 +1501,18 @@ public class gui extends Application {
    // Add a new tab pane
    private void addTabPane(String name, TabPane pane, Node content) {
       debug.print("name=" + name + " pane=" + pane + " content=" + content);
-      Tab tab = new Tab();
-      tab.setContent(content);
-      tab.setText(name);
-      pane.getTabs().add(tab);
+      // Prevent duplicates
+      Boolean add = true;
+      for (Tab t : pane.getTabs()) {
+         if (t.getText().equals(name))
+            add = false;
+      }
+      if (add) {
+         Tab tab = new Tab();
+         tab.setContent(content);
+         tab.setText(name);
+         pane.getTabs().add(tab);
+      }
    }
 
    // Create tivo tabs as needed
