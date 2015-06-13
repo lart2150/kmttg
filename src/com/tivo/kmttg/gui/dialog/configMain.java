@@ -2,6 +2,7 @@ package com.tivo.kmttg.gui.dialog;
 
 import java.io.File;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 
@@ -994,8 +995,16 @@ public class configMain {
       metadata_files.getSelectionModel().select(config.metadata_files);
       
       // lookAndFeel
-      if (lookAndFeel != null && config.lookAndFeel != null)
-         lookAndFeel.getSelectionModel().select(config.lookAndFeel);
+      if (lookAndFeel != null && config.lookAndFeel != null) {
+         List<String> available = config.gui.getAvailableLooks();
+         Boolean legal = false;
+         for (String entry : available) {
+            if (config.lookAndFeel.equals(entry))
+               legal = true;
+         }
+         if (legal)
+            lookAndFeel.getSelectionModel().select(config.lookAndFeel);
+      }
       
       // autotune settings
       if (autotune_tivoName != null) {
@@ -2361,7 +2370,7 @@ public class configMain {
       
       for (String name : config.gui.getAvailableLooks())
          lookAndFeel.getItems().add(name);
-      lookAndFeel.getSelectionModel().select(0);
+      lookAndFeel.getSelectionModel().select("default.css");
       lookAndFeel.valueProperty().addListener(new ChangeListener<String>() {
          @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
             if (newVal != null) {
