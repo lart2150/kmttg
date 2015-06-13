@@ -882,7 +882,9 @@ public class Remote {
       Boolean stop = false;
       int count = 50;
       int offset = 0;
-      int limit_npl_fetches = config.getLimitNplSetting(job.tivoName);
+      int limit_npl_fetches = 0;
+      if (job != null)
+         limit_npl_fetches = config.getLimitNplSetting(job.tivoName);
       int fetchCount = 0;
 
       try {
