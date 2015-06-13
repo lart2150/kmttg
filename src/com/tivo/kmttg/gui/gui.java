@@ -367,6 +367,12 @@ public class gui extends Application {
          name += ".css";
       config.cssFile = name;
       File f = new File(config.cssDir + File.separator + config.cssFile);
+      if ( ! f.exists() ) {
+         log.warn("Unable to load css file: " + f.getAbsolutePath());
+         config.cssFile = "default.css";
+         f = new File(config.cssDir + File.separator + config.cssFile);         
+         log.warn("Trying alternate default file: " + config.cssFile);
+      }
       if (f.exists()) {
          // NOTE: This css will apply to any/all Stages
          Application.setUserAgentStylesheet(null);
