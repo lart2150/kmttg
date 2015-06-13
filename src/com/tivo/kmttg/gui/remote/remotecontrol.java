@@ -19,6 +19,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -459,7 +460,7 @@ public class remotecontrol {
             }            
          }
       });
-      jumpto_text = new TextField(); jumpto_text.setMinWidth(15);
+      jumpto_text = new TextField(); jumpto_text.setMinWidth(50); jumpto_text.setPrefWidth(50);
       jumpto_text.setTooltip(tooltip.getToolTip("jumpto_text"));
       jumpto_text.setText("0");
 
@@ -505,7 +506,7 @@ public class remotecontrol {
             }            
          }
       });
-      jumpahead_text = new TextField(); jumpahead_text.setMinWidth(15);
+      jumpahead_text = new TextField(); jumpahead_text.setMinWidth(50); jumpahead_text.setPrefWidth(50);
       jumpahead_text.setTooltip(tooltip.getToolTip("jumpahead_text"));
       jumpahead_text.setText("5");
 
@@ -553,13 +554,14 @@ public class remotecontrol {
             }            
          }
       });
-      jumpback_text = new TextField(); jumpback_text.setMinWidth(15);
+      jumpback_text = new TextField(); jumpback_text.setMinWidth(50); jumpback_text.setPrefWidth(50);
       jumpback_text.setTooltip(tooltip.getToolTip("jumpback_text"));
       jumpback_text.setText("5");
       
       // Top panel
       HBox rctop = new HBox();
       rctop.setSpacing(5);
+      rctop.setPadding(new Insets(0,0,0,5));
       rctop.setAlignment(Pos.CENTER_LEFT);
       rctop.getChildren().add(label);
       rctop.getChildren().add(tivo);
@@ -571,7 +573,8 @@ public class remotecontrol {
       // Bottom panel
       HBox rcbot = new HBox();
       rcbot.setSpacing(5);
-      rctop.setAlignment(Pos.CENTER_LEFT);
+      rcbot.setPadding(new Insets(0,0,0,5));
+      rcbot.setAlignment(Pos.CENTER_LEFT);
       rcbot.getChildren().add(jumpto_button);
       rcbot.getChildren().add(jumpto_text);
       rcbot.getChildren().add(jumpback_button);
@@ -580,6 +583,7 @@ public class remotecontrol {
       rcbot.getChildren().add(jumpahead_text);
 
       // Combine all RC panels together
+      panel.setAlignment(Pos.CENTER);
       panel.getChildren().addAll(rctop, panel_controls, rcbot);
       
       // RC tab keyboard shortcuts without buttons
