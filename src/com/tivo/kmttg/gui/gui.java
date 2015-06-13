@@ -576,7 +576,7 @@ public class gui extends Application {
          HBox.setHgrow(cancel_pane_stretch, Priority.ALWAYS);  // stretch horizontally
          // Bind progressBar width to cancel_pane_stretch width so it will grow horizontally
          progressBar.prefWidthProperty().bind(
-            cancel_pane.widthProperty().subtract(cancel.widthProperty().subtract(-15))
+            cancel_pane.widthProperty().subtract(cancel.widthProperty())
          );
          
          // Create a split pane between job & messages pane
