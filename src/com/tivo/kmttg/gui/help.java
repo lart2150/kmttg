@@ -34,7 +34,7 @@ public class help {
          content = new VBox();
          content.setAlignment(Pos.CENTER);
          
-         Label title = new Label("kmttg v1.10_beta");
+         Label title = new Label(config.kmttg);
          title.setStyle("-fx-font-weight: bold");
          content.getChildren().add(title);
          
