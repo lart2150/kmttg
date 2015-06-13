@@ -20,12 +20,16 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import javax.swing.JOptionPane;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 
-import com.tivo.kmttg.gui.SwingWorker;
 import com.tivo.kmttg.gui.help;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.file;
@@ -34,91 +38,6 @@ import com.tivo.kmttg.util.log;
 public class update {
    
    public static void update_kmttg_background() {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Object doInBackground() {
-            update_kmttg();
-            return null;
-         }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
-   }
-   
-   public static void update_tools_background() {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Object doInBackground() {
-            toolDownload t = new toolDownload();
-            String version;
-            if (config.OS.equals("windows"))
-               version = t.windows_file;
-            else
-               version = t.mac_file;
-            String installedVersionFile = config.programDir + File.separator + t.tools_version;
-            String query = "Install tools file: " + version + " ?";
-            if (file.isFile(installedVersionFile)) {
-               String lastVersion = getToolsVersion(installedVersionFile);
-               if (lastVersion != null)
-                  query = "Last installed file: " + lastVersion + "\n" + query;
-            }
-            int response = JOptionPane.showConfirmDialog(
-               config.gui.getJFrame(),
-               query,
-               "Confirm",
-               JOptionPane.YES_NO_OPTION,
-               JOptionPane.QUESTION_MESSAGE
-            );
-            if (response == JOptionPane.YES_OPTION) {
-               String zipFile = t.download(config.programDir, config.OS);
-               config.gui.progressBar_setValue(0);
-               config.gui.setTitle(config.kmttg);
-               if (zipFile != null) {
-                  if (Unzip.unzip(config.programDir, zipFile) ) {
-                     log.warn("Tools update complete");
-                     file.delete(zipFile);
-                     writeToolsVersion(installedVersionFile, version);
-                  }
-               }
-            }
-            return null;
-         }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
-   }
-   
-   public static void update_projectx_background() {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Object doInBackground() {
-            toolDownload t = new toolDownload();
-            String version = t.projectx_file;
-            int response = JOptionPane.showConfirmDialog(
-               config.gui.getJFrame(),
-               "Install projectX file: " + version + " ?",
-               "Confirm",
-               JOptionPane.YES_NO_OPTION,
-               JOptionPane.QUESTION_MESSAGE
-            );
-            if (response == JOptionPane.YES_OPTION) {
-               String zipFile = t.projectXdownload(config.programDir);
-               config.gui.progressBar_setValue(0);
-               config.gui.setTitle(config.kmttg);
-               if (zipFile != null) {
-                  if (Unzip.unzip(config.programDir, zipFile) ) {
-                     log.warn("projectX install complete");
-                     file.delete(zipFile);
-                     config.parse();
-                     config.gui.refreshOptions(false);
-                  }
-               }
-            }
-            return null;
-         }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
-   }
-   
-   private static void update_kmttg() {
       String kmttg_jar = config.programDir + "/kmttg.jar";
       if (file.isFile(kmttg_jar)) {
          String[] s = config.kmttg.split("\\s+");
@@ -132,38 +51,44 @@ public class update {
                log.print("Available version: " + current_version);
                
                // Ask user to install new version
-               int response = JOptionPane.showConfirmDialog(
-                  config.gui.getJFrame(),
-                  "Install new version: " + current_version + " ?",
-                  "Confirm",
-                  JOptionPane.YES_NO_OPTION,
-                  JOptionPane.QUESTION_MESSAGE
-               );
-               if (response == JOptionPane.YES_OPTION) {
-                  String fname = "kmttg_" + current_version + ".zip";
-                  String url = "http://sourceforge.net/projects/kmttg/files/" +
+               Alert alert = new Alert(AlertType.CONFIRMATION);
+               alert.setTitle("Confirm");
+               config.gui.setFontSize(alert, config.FontSize);
+               alert.setContentText("Install new version: " + current_version + " ?");
+               Optional<ButtonType> result = alert.showAndWait();
+               if (result.get() == ButtonType.OK) {
+                  final String fname = "kmttg_" + current_version + ".zip";
+                  final String url = "http://sourceforge.net/projects/kmttg/files/" +
                      fname + "/download?use_mirror=autoselect";
-                  String zipFile = downloadUrl(config.programDir + File.separator + fname, url);
-                  if (zipFile != null) {
-                     if ( unzip(config.programDir, zipFile) ) {
-                        log.print("Successfully updated kmttg installation.");
-                        file.delete(zipFile);
-                        // Ask user if OK to restart kmttg
-                        int response2 = JOptionPane.showConfirmDialog(
-                           config.gui.getJFrame(),
-                           "OK to restart kmttg?",
-                           "Confirm",
-                           JOptionPane.YES_NO_OPTION,
-                           JOptionPane.QUESTION_MESSAGE
-                        );
-                        if (response2 == JOptionPane.YES_OPTION) {
-                           //System.exit(0);
-                           restartApplication();
+                  Task<Void> task = new Task<Void>() {
+                     @Override public Void call() {
+                        String zipFile = downloadUrl(config.programDir + File.separator + fname, url);
+                        if (zipFile != null) {
+                           if ( unzip(config.programDir, zipFile) ) {
+                              log.print("Successfully updated kmttg installation.");
+                              file.delete(zipFile);
+                              // Ask user if OK to restart kmttg
+                              Platform.runLater(new Runnable() {
+                                 @Override public void run() {
+                                    Alert alert = new Alert(AlertType.CONFIRMATION);
+                                    alert.setTitle("Confirm");
+                                    config.gui.setFontSize(alert, config.FontSize);
+                                    alert.setContentText("OK to restart kmttg?");
+                                    Optional<ButtonType> result = alert.showAndWait();
+                                    if (result.get() == ButtonType.OK) {
+                                       //System.exit(0);
+                                       restartApplication();
+                                    }
+                                 }
+                              });
+                           } else {
+                              log.error("Trouble unzipping file: " + zipFile);
+                           }
                         }
-                     } else {
-                        log.error("Trouble unzipping file: " + zipFile);
+                        return null;
                      }
-                  }
+                  };
+                  new Thread(task).start();
                }
             }
          } else {
@@ -171,6 +96,92 @@ public class update {
          }
       } else {
          log.error("Cannot find kmttg.jar to determine installed version");
+      }
+   }
+   
+   public static void update_tools_background() {
+      final toolDownload t = new toolDownload();
+      String version;
+      if (config.OS.equals("windows"))
+         version = t.windows_file;
+      else
+         version = t.mac_file;
+      final String installedVersionFile = config.programDir + File.separator + t.tools_version;
+      String query = "Install tools file: " + version + " ?";
+      if (file.isFile(installedVersionFile)) {
+         String lastVersion = getToolsVersion(installedVersionFile);
+         if (lastVersion != null)
+            query = "Last installed file: " + lastVersion + "\n" + query;
+      }
+      // Ask user to install new version
+      Alert alert = new Alert(AlertType.CONFIRMATION);
+      alert.setTitle("Confirm");
+      config.gui.setFontSize(alert, config.FontSize);
+      alert.setContentText(query);
+      Optional<ButtonType> result = alert.showAndWait();
+      if (result.get() == ButtonType.OK) {
+         class backgroundRun extends Task<Void> {
+            String version;
+            public backgroundRun(String version) {
+               this.version = version;
+            }
+            @Override protected Void call() {
+               String zipFile = t.download(config.programDir, config.OS);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     config.gui.progressBar_setValue(0);
+                     config.gui.setTitle(config.kmttg);
+                  }
+               });
+               if (zipFile != null) {
+                  if (Unzip.unzip(config.programDir, zipFile) ) {
+                     log.warn("Tools update complete");
+                     file.delete(zipFile);
+                     writeToolsVersion(installedVersionFile, version);
+                  }
+               }
+               return null;
+            }
+         };
+         backgroundRun b = new backgroundRun(version);
+         new Thread(b).start();
+      }
+   }
+   
+   public static void update_projectx_background() {
+      final toolDownload t = new toolDownload();
+      String version = t.projectx_file;
+      Alert alert = new Alert(AlertType.CONFIRMATION);
+      alert.setTitle("Confirm");
+      config.gui.setFontSize(alert, config.FontSize);
+      alert.setContentText("Install projectX file: " + version + " ?");
+      Optional<ButtonType> result = alert.showAndWait();
+      if (result.get() == ButtonType.OK) {
+         Task<Void> task = new Task<Void>() {
+            @Override public Void call() {
+               String zipFile = t.projectXdownload(config.programDir);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     config.gui.progressBar_setValue(0);
+                     config.gui.setTitle(config.kmttg);
+                  }
+               });
+               if (zipFile != null) {
+                  if (Unzip.unzip(config.programDir, zipFile) ) {
+                     log.warn("projectX install complete");
+                     file.delete(zipFile);
+                     config.parse();
+                     Platform.runLater(new Runnable() {
+                        @Override public void run() {
+                           config.gui.refreshOptions(false);
+                        }
+                     });
+                  }
+               }
+               return null;
+            }
+         };
+         new Thread(task).start();
       }
    }
       

@@ -85,7 +85,7 @@ public class beacon {
             if (! ip.equals(config.TIVOS.get(name))) {
                log.warn("Updating IP for TiVo: " + name);
                config.TIVOS.put(name, ip);
-               config.save(config.configIni);
+               config.save();
             }
             // Update TSN if necessary
             if (b.containsKey("identity")) {
@@ -94,11 +94,11 @@ public class beacon {
                if (config_tsn == null) {
                   config.setTsn(name, tsn);
                   config_tsn = tsn;
-                  config.save(config.configIni);
+                  config.save();
                }
                if ( ! config_tsn.equals(tsn) ) {
                   config.setTsn(name, tsn);
-                  config.save(config.configIni);
+                  config.save();
                }
             }
          }

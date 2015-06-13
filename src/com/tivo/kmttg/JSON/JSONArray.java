@@ -86,14 +86,14 @@ public class JSONArray {
     /**
      * The arrayList where the JSONArray's properties are kept.
      */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    private ArrayList myArrayList;
 
 
     /**
      * Construct an empty JSONArray.
      */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public JSONArray() {
         this.myArrayList = new ArrayList();
     }
@@ -153,7 +153,7 @@ public class JSONArray {
      * Construct a JSONArray from a Collection.
      * @param collection     A Collection.
      */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "unchecked", "rawtypes" })
    public JSONArray(Collection collection) {
       this.myArrayList = new ArrayList();
       if (collection != null) {
@@ -581,7 +581,7 @@ public class JSONArray {
      * @param value A Collection value.
      * @return      this.
      */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public JSONArray put(Collection value) {
         put(new JSONArray(value));
         return this;
@@ -633,7 +633,7 @@ public class JSONArray {
      * @param value A Map value.
      * @return      this.
      */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public JSONArray put(Map value) {
         put(new JSONObject(value));
         return this;
@@ -678,7 +678,7 @@ public class JSONArray {
      * @throws JSONException If the index is negative or if the value is
      * not finite.
      */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public JSONArray put(int index, Collection value) throws JSONException {
         put(index, new JSONArray(value));
         return this;
@@ -740,7 +740,7 @@ public class JSONArray {
      * @throws JSONException If the index is negative or if the the value is
      *  an invalid number.
      */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public JSONArray put(int index, Map value) throws JSONException {
         put(index, new JSONObject(value));
         return this;

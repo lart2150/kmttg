@@ -7,6 +7,8 @@ import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import javafx.application.Platform;
+
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.http;
@@ -133,19 +135,27 @@ public class javaNowPlaying implements Serializable {
          // Still running
          if (config.GUIMODE) {
             // Update STATUS column
-            String t = jobMonitor.getElapsedTime(job.time);
-            config.gui.jobTab_UpdateJobMonitorRowStatus(job, t);
-            if ( jobMonitor.isFirstJobInMonitor(job) ) {
-               String title = String.format("playlist: %s %s", t, config.kmttg);
-               config.gui.setTitle(title);
-            }
+            final String t = jobMonitor.getElapsedTime(job.time);
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, t);
+                  if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                     String title = String.format("playlist: %s %s", t, config.kmttg);
+                     config.gui.setTitle(title);
+                  }
+               }
+            });
          }
          return true;
       } else {
          // Job finished
          if (config.GUIMODE) {
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
-               config.gui.setTitle(config.kmttg);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     config.gui.setTitle(config.kmttg);
+                  }
+               });
             }
          }
          
@@ -213,6 +223,7 @@ public class javaNowPlaying implements Serializable {
          done = false;
       }
       
+      System.out.println("fetchCount=" + fetchCount + " limit_npl_fetches=" + limit_npl_fetches); // TODO
       if (limit_npl_fetches > 0 && fetchCount >= limit_npl_fetches) {
          if ( ! done )
             log.warn(job.tivoName + ": Further NPL listings not obtained due to fetch limit=" + limit_npl_fetches + " exceeded.");
@@ -230,13 +241,21 @@ public class javaNowPlaying implements Serializable {
          ENTRIES = parseNPL.uniquify(ENTRIES, unique);
          if (config.GUI_AUTO > 0) {
             // Update NPL
-            config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
+               }
+            });
             if (! config.rpcEnabled(job.tivoName) && ! config.mindEnabled(job.tivoName))
                auto.processAll(job.tivoName, ENTRIES);
          }
          else if (config.GUIMODE) {
             // GUI mode: populate NPL table
-            config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
+               }
+            });
          } else {
             // Batch mode
             if (! config.rpcEnabled(job.tivoName) && ! config.mindEnabled(job.tivoName))

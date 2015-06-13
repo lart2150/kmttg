@@ -10,7 +10,8 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
 
-import com.tivo.kmttg.gui.SwingWorker;
+import javafx.concurrent.Task;
+
 import com.tivo.kmttg.httpserver.kmttgServer;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
@@ -52,7 +53,7 @@ public class auto {
                log.error(e.toString());
                exitAuto(1);
             }
-            jobMonitor.monitor(null, null);
+            jobMonitor.monitor(null);
          }
          
          // Done
@@ -108,7 +109,7 @@ public class auto {
                log.error(e.toString());
                exitAuto(1);
             }
-            jobMonitor.monitor(null, null);
+            jobMonitor.monitor(null);
          } // while GO
       } // auto mode    
    }
@@ -897,8 +898,8 @@ public class auto {
    
    // Windows only: Starts kmttg service using "sc create kmttg ..."
    public static void serviceCreate() {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Object doInBackground() {
+      Task<Void> task = new Task<Void>() {
+         @Override public Void call() {
             String binPath = "\\\"" + config.programDir + "\\service\\win32\\bin\\wrapper.exe\\\" -s ";
             binPath += "\\\"" + config.programDir + "\\service\\conf\\wrapper.conf\\\"";
             Stack<String> command = new Stack<String>();
@@ -934,15 +935,14 @@ public class auto {
             }
             return null;
          }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
+      };
+      new Thread(task).start();
    }
    
    // Windows only: Starts kmttg service using "sc start kmttg"
    public static void serviceStart() {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Object doInBackground() {
+      Task<Void> task = new Task<Void>() {
+         @Override public Void call() {
             Stack<String> command = new Stack<String>();
             command.add("cmd");
             command.add("/c");
@@ -977,15 +977,14 @@ public class auto {
             }
             return null;
          }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
+      };
+      new Thread(task).start();
    }
    
    // Windows only: Stops kmttg service using "sc stop kmttg"
    public static void serviceStop() {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Object doInBackground() {
+      Task<Void> task = new Task<Void>() {
+         @Override public Void call() {
             Stack<String> command = new Stack<String>();
             command.add("cmd");
             command.add("/c");
@@ -1020,15 +1019,14 @@ public class auto {
             }
             return null;
          }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
+      };
+      new Thread(task).start();
    }
    
    // Windows only: Deletes kmttg service using "sc delete kmttg"
    public static void serviceDelete() {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Object doInBackground() {
+      Task<Boolean> task = new Task<Boolean>() {
+         @Override public Boolean call() {
             Stack<String> command = new Stack<String>();
             command.add("cmd");
             command.add("/c");
@@ -1057,9 +1055,8 @@ public class auto {
             }
             return false;
          }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
+      };
+      new Thread(task).start();
    }
 
 }

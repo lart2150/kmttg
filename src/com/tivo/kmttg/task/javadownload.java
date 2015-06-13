@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 
+import javafx.application.Platform;
+
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.http;
@@ -136,9 +138,9 @@ public class javadownload implements Serializable {
          if (config.GUIMODE && file.isFile(job.tivoFile)) {
             // Update status in job table
             Long size = file.size(job.tivoFile);
-            String s = String.format("%.2f MB", (float)size/Math.pow(2,20));
-            String t = jobMonitor.getElapsedTime(job.time);
-            int pct = Integer.parseInt(String.format("%d", size*100/job.tivoFileSize));
+            final String s = String.format("%.2f MB", (float)size/Math.pow(2,20));
+            final String t = jobMonitor.getElapsedTime(job.time);
+            final int pct = Integer.parseInt(String.format("%d", size*100/job.tivoFileSize));
             
             // Calculate current transfer rate over last dt msecs
             Long dt = (long)5000;
@@ -159,26 +161,34 @@ public class javadownload implements Serializable {
                job.rate = string.getTimeRemaining(job.time2, job.time, job.tivoFileSize, size);
             }
             
-            if ( jobMonitor.isFirstJobInMonitor(job) ) {
-               // Update STATUS column 
-               config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s + "---" + job.rate);
-               
-               // If 1st job then update title & progress bar
-               String title = String.format("download: %d%% %s", pct, config.kmttg);
-               config.gui.setTitle(title);
-               config.gui.progressBar_setValue(pct);
-            } else {
-               // Update STATUS column            
-               config.gui.jobTab_UpdateJobMonitorRowStatus(job, String.format("%d%%",pct) + "---" + s + "---" + job.rate);
-            }
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                     // Update STATUS column 
+                     config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s + "---" + job.rate);
+                     
+                     // If 1st job then update title & progress bar
+                     String title = String.format("download: %d%% %s", pct, config.kmttg);
+                     config.gui.setTitle(title);
+                     config.gui.progressBar_setValue(pct);
+                  } else {
+                     // Update STATUS column            
+                     config.gui.jobTab_UpdateJobMonitorRowStatus(job, String.format("%d%%",pct) + "---" + s + "---" + job.rate);
+                  }
+               }
+            });
          }
          return true;
       } else {
          // Job finished
          if (config.GUIMODE) {
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
-               config.gui.setTitle(config.kmttg);
-               config.gui.progressBar_setValue(0);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     config.gui.setTitle(config.kmttg);
+                     config.gui.progressBar_setValue(0);
+                  }
+               });
             }
          }
          

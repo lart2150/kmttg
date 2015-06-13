@@ -50,7 +50,7 @@ public class vrdreview implements Serializable {
          vrd = findVRD();
          if (vrd != null) {
             config.VRDexe = vrd;
-            config.save(config.configIni);
+            config.save();
          }
       }
       if (vrd == null) {

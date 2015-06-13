@@ -26,7 +26,7 @@ import java.util.Stack;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.JSON.XML;
-import com.tivo.kmttg.gui.TableUtil;
+import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.mind.EasySSLHelper;
 import com.tivo.kmttg.mind.SimpleCookieManager;
@@ -98,7 +98,7 @@ public class Mind {
       }
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Stack<String> dict_request(String type, Hashtable data) {
       String urlString = "https://" + server + "/mind/" + mindVer + "?type=" + type;
       try {
@@ -143,7 +143,7 @@ public class Mind {
       return dateFormat.format(date);
    }   
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "unchecked", "rawtypes" })
    public Boolean pushVideo(Hashtable info) throws MalformedURLException {
       // At minimum tsn & url required
       if (info.get("tsn") == null || info.get("url") == null) {
@@ -255,7 +255,7 @@ public class Mind {
       }
    }
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "unchecked", "rawtypes" })
    public Stack<String> subscribe(String offerId, String contentId, String tsn) {      
       Hashtable source = new Hashtable();
       source.put("contentId", contentId);
@@ -271,7 +271,7 @@ public class Mind {
       return s;
    }
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"rawtypes" })
    public Stack<String> pcBodySearch() {
       Hashtable h = new Hashtable();
       Stack<String> s = dict_request("pcBodySearch", h);
@@ -287,7 +287,7 @@ public class Mind {
       return s;
    }
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "unchecked", "rawtypes" })
    public Stack<String> pcBodyStore(String name, String replace) {
       Hashtable h = new Hashtable();
       h.put("name", name);
@@ -296,7 +296,7 @@ public class Mind {
       return s;
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"rawtypes" })
    public Stack<String> bodyOfferModify(Hashtable h) {
       Stack<String> s = dict_request(
          "bodyOfferModify&bodyId=" + h.get("bodyId"), h
@@ -312,14 +312,14 @@ public class Mind {
       os.write(i|0x80);
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public byte[] dictcode(Hashtable d) {
         ByteArrayOutputStream bo = new ByteArrayOutputStream();
         _dictcode(bo, d);
         return bo.toByteArray();
    }
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "rawtypes", "unchecked" })
    private void _dictcode(OutputStream bo, Hashtable d) {
       try {
          String[] keys = (String[]) d.keySet().toArray(new String[0]);  

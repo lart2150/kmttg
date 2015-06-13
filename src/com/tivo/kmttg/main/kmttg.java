@@ -1,21 +1,16 @@
 package com.tivo.kmttg.main;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.security.Security;
 import java.util.Arrays;
-
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
+import java.util.Timer;
 
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
-import com.tivo.kmttg.install.mainInstall;
 
 public class kmttg {
-   static Timer timer;
+   public static Timer timer;
    static Boolean gui_mode = true;
    public static boolean _shuttingDown = false;
    public static boolean _startingUp = true;
@@ -41,41 +36,17 @@ public class kmttg {
       // Register a shutdown thread
       Runtime.getRuntime().addShutdownHook(new Thread() {
           // This method is called during shutdown
-          public void run() {             
-             if (config.GUIMODE) {
-                // Save GUI settings if in GUI mode
-                config.gui.saveSettings();
-             } else {
-                // Shut down message in in batch mode
-                log.warn("SHUTTING DOWN");
-             }
-             
-             config.GUIMODE = false;
-             
-             // Before shutdown, try and save the job queue
-             // 2/16/2012 - Don't need to save on exit, saved on queue change.
-             // Because we clear up the jobs before exiting, we *don't* want
-             // to save those changes so set flag to tell it not to save.
-             _shuttingDown = true;
-             /*if (config.persistQueue)
-            	 jobMonitor.saveAllJobs();*/
+          public void run() {
+             System.out.println("Shutdown hook executing");
+             log.warn("SHUTTING DOWN");             
+             config.GUIMODE = false;             
+             _shuttingDown = true; // Global flag used by various methods
              
              // Kill any running background jobs
              jobMonitor.killRunning();
              if (config.httpserver != null)
                 config.httpserver.killTranscodes();
-             if (debug.enabled) debug.close();
-             
-             // Kill any non-deamon, non-AWT threads
-             /*for (Thread thread : Thread.getAllStackTraces().keySet()) {
-                // daemon threads will not prevent shutdown
-                if (!thread.isDaemon()) {
-                   if (! thread.getName().startsWith("AWT") && ! thread.getName().startsWith("Destroy")) {
-                      System.err.println("Killing thread: " + thread.getName());
-                      thread.interrupt();
-                   }
-                }
-             }*/
+             if (debug.enabled) debug.close();             
           }
       });
       
@@ -83,38 +54,14 @@ public class kmttg {
          // GUI mode
          config.gui = new gui();
          config.parse();
+         
+         // Start web server if configured
          if (config.httpserver_enable == 1)
             new kmttgServer();
-         SwingUtilities.invokeLater(
-            new Runnable() {
-               public void run() {
-                  // All uncaught exceptions go to message window in GUI
-                  Thread.setDefaultUncaughtExceptionHandler(new myExceptionHandler());
-                  
-                  // Create and display main frame
-                  config.gui.getJFrame().setVisible(true);
-                  if (! config.lookAndFeel.equals("default"))
-                     config.gui.setLookAndFeel(config.lookAndFeel);
-                  
-                  // Download tools if necessary
-                  mainInstall.install();
-               }
-            }
-         );
-
-         // Invoke a 300ms period timer for job monitor
-         timer = new Timer(300, new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-               jobMonitor.monitor(config.gui, timer);
-            }    
-         });
-         timer.start();
          
-			// Upon startup, try and load saved queue
-			if (config.persistQueue)
-				jobMonitor.loadAllJobs(10);	// delay load to give gui time to setup
-       	_startingUp = false;
-       	
+         // All uncaught exceptions go to message window in GUI
+         Thread.setDefaultUncaughtExceptionHandler(new myExceptionHandler());
+         config.gui.Launch();
       } else {         
          // Batch/auto mode
     	   config.parse();	// persist queue held in main config file

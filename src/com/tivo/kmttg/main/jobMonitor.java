@@ -13,10 +13,9 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.Timer;
+import javafx.application.Platform;
 
 import com.tivo.kmttg.gui.gui;
-import com.tivo.kmttg.gui.tivoTab;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -43,12 +42,12 @@ public class jobMonitor {
    //     - Restrict to 1 VideoRedo job at a time
    //     - Restrict CPU intensive jobs to defined 'MaxJobs' (default of 1)
    //     - Order dependancy of jobs operating on same program   
-   static void monitor(gui gui, Timer timer) {
+   public static void monitor(gui gui) {
       Stack<jobData> running = new Stack<jobData>();
       Stack<jobData> queued  = new Stack<jobData>();
       jobData job;
-      if (config.GUIMODE && gui == null && timer != null) {
-         timer.stop();
+      if (config.GUIMODE && gui == null && kmttg.timer != null) {
+         kmttg.timer.cancel();
          return;
       }
       
@@ -392,7 +391,7 @@ public class jobMonitor {
       return total;
    }
    
-   static void addToJobList(jobData job) {
+   static void addToJobList(final jobData job) {
       debug.print("job=" + job);
       // Prevent duplicate jobs from being queued to the job list
       // NOTE: There can be identical shows on different Tivos, so must check output file
@@ -430,7 +429,17 @@ public class jobMonitor {
             output = "(" + job.pyTivo_tivo + ") " + output;
          }
          
-         config.gui.jobTab_AddJobMonitorRow(job, job.tivoName, output);
+         class backgroundRun implements Runnable {
+            String output;
+            public backgroundRun(String output) {
+               this.output = output;
+            }
+            @Override public void run() {
+               config.gui.jobTab_AddJobMonitorRow(job, job.tivoName, output);
+            }
+         }
+         backgroundRun b = new backgroundRun(output);
+         new Thread(b).start();
       }
       
       // Add job to master job list
@@ -444,7 +453,7 @@ public class jobMonitor {
     		jobMonitor.saveAllJobs();
    }
    
-   public static void removeFromJobList(jobData job) {
+   public static void removeFromJobList(final jobData job) {
       debug.print("job=" + job);
       Stack<jobData> new_jobs = new Stack<jobData>();
       for (int i=0; i<JOBS.size(); ++i) {
@@ -459,7 +468,11 @@ public class jobMonitor {
       
       // Remove entry from job monitor
       if (config.GUIMODE) {
-         config.gui.jobTab_RemoveJobMonitorRow(job); 
+         Platform.runLater(new Runnable() {
+            @Override public void run() {
+               config.gui.jobTab_RemoveJobMonitorRow(job);
+            }
+         });
          updateNPLjobStatus();
       }
       
@@ -471,10 +484,14 @@ public class jobMonitor {
    }
    
    // Change job status
-   public static void updateJobStatus(jobData job, String status) {
+   public static void updateJobStatus(final jobData job, final String status) {
       job.status = status;
       if (config.GUIMODE) {
-         config.gui.jobTab_UpdateJobMonitorRowStatus(job,status);
+         Platform.runLater(new Runnable() {
+            @Override public void run() {
+               config.gui.jobTab_UpdateJobMonitorRowStatus(job,status);
+            }
+         });
          updateNPLjobStatus();
       }
    }
@@ -1459,8 +1476,12 @@ public class jobMonitor {
          }
          // Clear title & progress bar
          if ( config.GUIMODE && isFirstJobInMonitor(job) ) {
-            config.gui.setTitle(config.kmttg);
-            config.gui.progressBar_setValue(0);
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  config.gui.setTitle(config.kmttg);
+                  config.gui.progressBar_setValue(0);
+               }
+            });
          }         
          removeFromJobList(job);
       } else {
@@ -1782,7 +1803,16 @@ public class jobMonitor {
          }
          
          // Update NPL lists according to above hash
-         config.gui.updateNPLjobStatus(map);
+         class backgroundRun implements Runnable {
+            Hashtable<String,String> map;
+            public backgroundRun(Hashtable<String,String> map) {
+               this.map = map;
+            }
+            @Override public void run() {
+               config.gui.updateNPLjobStatus(map);
+            }
+         }
+         Platform.runLater(new backgroundRun(map));
       }
    }
    
@@ -1815,8 +1845,6 @@ public class jobMonitor {
             }
             // Launch jobs for this tivo
             config.GUI_AUTO++;
-            tivoTab t = config.gui.getTab(tivoName);
-            t.getTable().setFolderState(false);
             getNPL(tivoName);
             launch.put(tivoName, (long)-1);
          }

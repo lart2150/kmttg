@@ -1,20 +1,20 @@
 package com.tivo.kmttg.gui;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Stack;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.Timer;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
+import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 
@@ -25,99 +25,57 @@ public class taskInfo {
    private Stack<String> owatch = new Stack<String>();
    private Stack<String> ewatch = new Stack<String>();
    
-   private JDialog dialog;
-   private JTextArea stdout = null;
-   private JTextArea stderr = null;     
+   private Stage dialog;
+   private TextArea stdout = null;
+   private TextArea stderr = null;     
    
-   public taskInfo(JFrame frame, String description, backgroundProcess process) {
+   public taskInfo(Stage frame, String description, backgroundProcess process) {
       debug.print("frame=" + frame + " description=" + description + " process=" + process);
-      JPanel content;      
-      JLabel job_label;
-      JLabel stdout_label;
-      JLabel stderr_label;
+      Label job_label;
+      Label stdout_label;
+      Label stderr_label;
       this.process = process;
       
       // Define content for dialog window
-      content = new JPanel(new GridBagLayout());
-      content.setLayout(new GridBagLayout());
-      
-      GridBagConstraints c = new GridBagConstraints();
-      c.fill = GridBagConstraints.HORIZONTAL;
-      int gx=0, gy=0;
+      VBox content = new VBox();
+      content.setSpacing(2);
+      HBox.setHgrow(content, Priority.ALWAYS);  // stretch horizontally
       
       // job description label
-      job_label = new JLabel(description);
-      c.insets = new Insets(5, 0, 0, 0);
-      c.ipady = 0;
-      c.weighty = 0;    // default to no vertical stretch
-      c.weightx = 1.0;  // default to horizontal stretch
-      c.gridx = gx;
-      c.gridy = gy++;
-      c.gridwidth = 1;
-      c.gridheight = 1;
-      c.anchor = GridBagConstraints.NORTH;
-      c.fill = GridBagConstraints.NONE;
-      content.add(job_label, c);
+      job_label = new Label(description);
+      HBox.setHgrow(job_label, Priority.ALWAYS);  // stretch horizontally
             
       // stdout label
-      stdout_label = new JLabel("stdout");
-      c.anchor = GridBagConstraints.WEST;
-      c.weighty = 0.0;  // do not stretch vertically
-      c.gridx = gx;
-      c.gridy = gy++;
-      c.fill = GridBagConstraints.NONE;
-      content.add(stdout_label, c);
+      stdout_label = new Label("stdout");
       
       // stdout text area
-      c.anchor = GridBagConstraints.NORTH;
-      c.weighty = 1.0;  // stretch vertically
-      c.gridx = gx;
-      c.gridy = gy++;
-      c.ipady = 100;    // Make this taller
-      c.fill = GridBagConstraints.BOTH;
-      c.gridwidth = 1;
-      c.gridheight = 5;
-      stdout = new JTextArea();
+      stdout = new TextArea();
+      VBox.setVgrow(stdout, Priority.ALWAYS);  // stretch vertically
       stdout.setEditable(false);
-      stdout.setLineWrap(true);
-      JScrollPane s1 = new JScrollPane(stdout);
-      content.add(s1, c);
-     
+      stdout.setWrapText(true);
       
       // stderr label
-      gy += 5;
-      stderr_label = new JLabel("stderr");
-      c.anchor = GridBagConstraints.WEST;
-      c.weighty = 0.0;  // do not stretch vertically
-      c.gridx = gx;
-      c.gridy = gy++;
-      c.ipady = 0;      // nominal height
-      c.gridwidth = 1;
-      c.gridheight = 1;
-      c.fill = GridBagConstraints.NONE;
-      content.add(stderr_label, c);
+      stderr_label = new Label("stderr");
       
       // stderr text area
-      c.anchor = GridBagConstraints.NORTH;
-      c.weighty = 1.0;  // stretch vertically
-      c.gridx = gx;
-      c.gridy = gy++;
-      c.ipady = 100;    // make this taller
-      c.fill = GridBagConstraints.BOTH;
-      stderr = new JTextArea();
+      stderr = new TextArea();
+      VBox.setVgrow(stderr, Priority.ALWAYS);  // stretch vertically
       stderr.setEditable(false);
-      stderr.setLineWrap(true);
-      JScrollPane s2 = new JScrollPane(stderr);
-      content.add(s2, c);
+      stderr.setWrapText(true);
+      
+      content.getChildren().addAll(job_label, stdout_label, stdout, stderr_label, stderr);
      
       // create and display dialog window
-      dialog = new JDialog(frame, false); // non-modal dialog
-      dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE); // Destroy when closed
+      dialog = new Stage();
+      dialog.initModality(Modality.NONE); // Non modal
+      dialog.initOwner(frame);
       dialog.setTitle("Task stdout/stderr viewer");
-      dialog.setContentPane(content);
-      dialog.pack();
-      dialog.setSize(600,400);
-      dialog.setVisible(true);
+      Scene scene = new Scene(new VBox());
+      config.gui.setFontSize(scene, config.FontSize);
+      ((VBox) scene.getRoot()).getChildren().add(content);
+      dialog.setScene(scene);
+      dialog.setWidth(600); dialog.setHeight(400);
+      dialog.show();
       
       // print available stdout/stderr
       appendStdout(process.getStdout());
@@ -128,19 +86,28 @@ public class taskInfo {
       process.setStderrWatch(ewatch);
       
       // Start a timer that updates stdout/stderr text areas dynamically
-      timer = new Timer(1000, new ActionListener() {
-         public void actionPerformed(ActionEvent evt) {
-            update();
-         }    
-      });
-      timer.start();
+      timer = new Timer();
+      timer.schedule(
+         new TimerTask() {
+            @Override
+            public void run() {
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     update();
+                  }
+               });
+            }
+        }
+        ,0,
+        1000
+      );
    }
      
    // Update text area stdout/stderr fields with process stdout/stderr
    public void update() {
       // Stop timer if dialog no longer displayed
       if (! dialog.isShowing()) {
-         timer.stop();
+         timer.cancel();
          dialog = null;
          process.setStdoutWatch(null);
          process.setStderrWatch(null);
@@ -149,7 +116,7 @@ public class taskInfo {
       if ( process.exitStatus() != -1 ) {
          // Process finished so stop timer
          // Don't return so that last flush of stdout/stderr can happen
-         timer.stop();
+         timer.cancel();
          process.setStdoutWatch(null);
          process.setStderrWatch(null);
       }
@@ -167,7 +134,7 @@ public class taskInfo {
       if (s != null && s.size() > 0) {
          stdout.setEditable(true);
          for (int i=0; i<s.size(); ++i)
-            stdout.append(s.get(i) + "\n");
+            stdout.appendText(s.get(i) + "\n");
          stdout.setEditable(false);
       }
    }
@@ -176,7 +143,7 @@ public class taskInfo {
       if (s != null && s.size() > 0) {
          stderr.setEditable(true);
          for (int i=0; i<s.size(); ++i)
-            stderr.append(s.get(i) + "\n");
+            stderr.appendText(s.get(i) + "\n");
          stderr.setEditable(false);
       }
    }

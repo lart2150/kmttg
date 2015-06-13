@@ -37,6 +37,7 @@ import java.util.StringTokenizer;
 @SuppressWarnings("unchecked")
 public class SimpleCookieManager {
 
+   @SuppressWarnings("rawtypes")
    private Map store;
 
    private static final String SET_COOKIE = "Set-Cookie";
@@ -52,6 +53,7 @@ public class SimpleCookieManager {
 
    private DateFormat dateFormat;
 
+   @SuppressWarnings("rawtypes")
    public SimpleCookieManager() {
 
       store = new HashMap();
@@ -69,6 +71,7 @@ public class SimpleCookieManager {
     * @param conn a java.net.URLConnection - must be open, or IOException will be thrown
     * @throws java.io.IOException Thrown if <i>conn</i> is not open.
     */
+   @SuppressWarnings("rawtypes")
    public void storeCookies(URLConnection conn) throws IOException {
 
       // let's determine the domain from where these cookies are being sent
@@ -125,6 +128,7 @@ public class SimpleCookieManager {
     * @param conn a java.net.URLConnection - must NOT be open, or IOException will be thrown
     * @throws java.io.IOException Thrown if <i>conn</i> has already been opened.
     */
+   @SuppressWarnings("rawtypes")
    public void setCookies(URLConnection conn) throws IOException {
 
       // let's determine the domain and path to retrieve the appropriate cookies

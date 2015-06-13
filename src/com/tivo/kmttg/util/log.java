@@ -9,6 +9,8 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import javafx.application.Platform;
+
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.kmttg;
 
@@ -81,7 +83,12 @@ public class log {
       if (s != null && s.length() > 0) {
          s = filterMAK(s);
          if (config.GUIMODE) {
-            config.gui.text_print(s);
+            final String s_final = s;
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  config.gui.text_print(s_final);
+               }
+            });
             if (config.GUI_LOOP == 0) {
                log = false;
             }
@@ -102,7 +109,12 @@ public class log {
       if (s != null && s.length() > 0) {
          s = filterMAK(s);
          if (config.GUIMODE) {
-            config.gui.text_warn(s);
+            final String s_final = s;
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  config.gui.text_warn(s_final);
+               }
+            });
             if (config.GUI_LOOP == 0) {
                log = false;
             }
@@ -123,7 +135,12 @@ public class log {
       if (s != null && s.length() > 0) {
          s = filterMAK(s);
          if (config.GUIMODE) {
-            config.gui.text_error(s);
+            final String s_final = s;
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  config.gui.text_error(s_final);
+               }
+            });
             if (config.GUI_LOOP == 0) {
                log = false;
             }
@@ -139,10 +156,14 @@ public class log {
       }
    }
    
-   public static void print(Stack<String> s) {
+   public static void print(final Stack<String> s) {
       if (s != null && s.size() > 0) {
          if (config.GUIMODE) {
-            config.gui.text_print(s);
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  config.gui.text_print(s);
+               }
+            });
             if (config.GUI_LOOP == 1) {
                // Log to file for loop in GUI
                for (int i=0; i<s.size(); ++i) {
@@ -157,10 +178,14 @@ public class log {
       }
    }
    
-   public static void warn(Stack<String> s) {
+   public static void warn(final Stack<String> s) {
       if (s != null && s.size() > 0) {
          if (config.GUIMODE) {
-            config.gui.text_warn(s);
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  config.gui.text_warn(s);
+               }
+            });
             if (config.GUI_LOOP == 1) {
                // Log to file for loop in GUI
                for (int i=0; i<s.size(); ++i) {
@@ -175,10 +200,14 @@ public class log {
       }
    }
    
-   public static void error(Stack<String> s) {
+   public static void error(final Stack<String> s) {
       if (s != null && s.size() > 0) {
          if (config.GUIMODE) {
-            config.gui.text_error(s);
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  config.gui.text_error(s);
+               }
+            });
             if (config.GUI_LOOP == 1) {
                // Log to file for loop in GUI
                for (int i=0; i<s.size(); ++i) {

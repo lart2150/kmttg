@@ -10,6 +10,8 @@ import java.net.NoRouteToHostException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import javafx.application.Platform;
+
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
@@ -68,15 +70,23 @@ public class toolDownload {
           Integer howManyBytes;
           Integer readSoFar = 0;
           byte[] bytesIn = new byte[BLOCK_SIZE];
+          int last_pct = 0;
           
           while ((howManyBytes = in.read(bytesIn)) >= 0) {
              out.write(bytesIn, 0, howManyBytes);
              readSoFar += howManyBytes;
              Float f = 100*readSoFar.floatValue()/size.floatValue();
-             Integer pct = f.intValue();
-             String title = String.format("download: %d%% %s", pct, config.kmttg);
-             config.gui.progressBar_setValue(pct);
-             config.gui.setTitle(title);
+             final Integer pct = f.intValue();
+             final String title = String.format("download: %d%% %s", pct, config.kmttg);
+             if (pct % 5 == 0 && pct > last_pct) {
+                last_pct += 5;
+                Platform.runLater(new Runnable() {
+                   @Override public void run() {
+                      config.gui.progressBar_setValue(pct);
+                      config.gui.setTitle(title);
+                   }
+                });
+             }
           }
           
           // Done
@@ -105,5 +115,5 @@ public class toolDownload {
          try  {  in.close(); out.close();  }  catch(Exception ee)  {}
       }
       return false;
-   }
+   }   
 }

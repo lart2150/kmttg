@@ -1,88 +1,120 @@
 package com.tivo.kmttg.gui;
 
-import java.awt.Color;
 import java.util.Stack;
 
-import javax.swing.JTextPane;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.Document;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import com.tivo.kmttg.main.config;
+
+import javafx.application.Platform;
+import javafx.scene.paint.Color;
+import javafx.scene.web.WebView;
 
 public class textpane {
-   private JTextPane p;
-   private int BUFFER_SIZE = 250000; // Limit text pane buffer size to ~10MB RAM
-   
-   textpane(JTextPane p) {
+   private WebView p;
+   private int BUFFER_SIZE = 250000; // Limit to this many characters
+  
+   textpane(WebView p) {
       this.p = p;
+      this.p.getEngine().loadContent("<body><div id=\"content\"></div></body>");
    }
    
+   public WebView getPane() {
+      return p;
+   }
+  
    public void print(String s) {
-      appendText(Color.black, s + "\n");
+      appendText(Color.BLACK, s);
+      scroll();
    }
-   
+  
    public void warn(String s) {
-      appendText(Color.blue, s + "\n");
+      appendText(Color.BLUE, s);
+      scroll();
    }
-   
+  
    public void error(String s) {
-      appendText(Color.red, s + "\n");
+      appendText(Color.RED, s);
       java.awt.Toolkit.getDefaultToolkit().beep();
+      scroll();
    }
-   
+  
    public void print(Stack<String> s) {
       for (int i=0; i<s.size(); ++i)
-         appendText(Color.black, s.get(i) + "\n");
+         appendText(Color.BLACK, s.get(i));
+      scroll();
    }
-   
+  
    public void warn(Stack<String> s) {
       for (int i=0; i<s.size(); ++i)
-         appendText(Color.blue, s.get(i) + "\n");
+         appendText(Color.BLUE, s.get(i));
+      scroll();
    }
-   
+  
    public void error(Stack<String> s) {
       for (int i=0; i<s.size(); ++i)
-         appendText(Color.red, s.get(i) + "\n");
+         appendText(Color.RED, s.get(i));
       java.awt.Toolkit.getDefaultToolkit().beep();
+      scroll();
    }
-   
-   public void appendText(Color c, String s) {
+  
+   private void scroll() {
       if (p != null) {
-         StyleContext sc = StyleContext.getDefaultStyleContext();
-         AttributeSet aset = sc.addAttribute(
-            SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c
-         );
-         
-         // Limit total text pane buffer size
-         limitBuffer(s.length());
-   
-         try {
-            int len = p.getDocument().getLength();
-            p.getDocument().insertString(len, s, aset);
-            p.setCaretPosition(len + s.length());
-            
-         } catch (Exception e) {
-            e.printStackTrace();
-         }
+         Platform.runLater(new Runnable() {
+            @Override public void run() {
+               try {
+                  p.getEngine().executeScript("window.scrollTo(0,document.body.scrollHeight);");
+               } catch (Exception e) {}
+            }
+         });
       }
    }
-   
+  
+   public void appendText(Color c, String s) {
+      if (p != null) {
+         Document doc = p.getEngine().getDocument();
+         Element content = doc.getElementById("content");
+         limitBuffer(content, s.length());
+         // Use <pre> tag so as to preserve whitespace
+         Element pre = doc.createElement("pre");
+         pre.setTextContent(s);
+         // NOTE: display: inline prevents newline from being added for <pre> tag
+         // NOTE: white-space: pre-wrap allows horizontal work wrapping to avoid horizontal scrollbar
+         pre.setAttribute("style", "white-space: pre-wrap; display: inline; color:" + config.gui.getWebColor(c));
+         if (content.getChildNodes().getLength() > 0)
+            content.appendChild(doc.createElement("br"));
+         content.appendChild(pre);
+      }
+   }
+  
    // Limit text pane buffer size by truncating total data size to
    // BUFFER_SIZE or less if needed
-   private void limitBuffer(int incomingDataSize) {
+   private void limitBuffer(Element content, int incomingDataSize) {
       if (p != null) {
-         Document doc = p.getDocument();
-         int overLength = doc.getLength() + incomingDataSize - BUFFER_SIZE;
-         if (overLength > 0 && doc.getLength() >= overLength) {
-            try {
-               doc.remove(0, overLength);
-            } catch (Exception e) {
-               e.printStackTrace();
+         int doc_length = content.getTextContent().getBytes().length;
+         int overLength = doc_length + incomingDataSize - BUFFER_SIZE;
+         if (overLength > 0 && doc_length >= overLength) {
+            NodeList list = content.getChildNodes();
+            int removed=0;
+            while( list.getLength() > 0 && removed < overLength ) {
+               removed += list.item(0).getTextContent().length();
+               content.removeChild(list.item(0));
             }
          }
       }
    }
    
+   public void clear() {
+      if (p != null) {
+         Element content = p.getEngine().getDocument().getElementById("content");
+         NodeList list = content.getChildNodes();
+         while (list.getLength() > 0) {
+            content.removeChild(list.item(0));
+         }
+      }
+
+   }
 }
 

@@ -3,10 +3,10 @@ package com.tivo.kmttg.gui;
 import com.tivo.kmttg.main.jobData;
 
 public class jobEntry {
-   String display;
-   jobData job;
+   public String display;
+   public jobData job;
    
-   jobEntry(jobData entry) {
+   public jobEntry(jobData entry) {
       display = entry.type;
       job = entry;
    }

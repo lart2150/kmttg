@@ -29,6 +29,9 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -39,9 +42,9 @@ import javax.net.ssl.X509TrustManager;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.SwingWorker;
-import com.tivo.kmttg.gui.TableUtil;
-import com.tivo.kmttg.gui.sortableDuration;
+import com.tivo.kmttg.gui.table.TableUtil;
+import com.tivo.kmttg.gui.remote.util;
+import com.tivo.kmttg.gui.sortable.sortableDuration;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -86,8 +89,8 @@ public class Remote {
        try {
           KeyStore keyStore = KeyStore.getInstance("PKCS12");
           // This is default USA password
-          // String password = "617Cc0aMqEXn"; // expires 7/12/2015
           String password = "LwrbLEFYvG"; // expires 4/29/2018
+          //String password = "617Cc0aMqEXn"; // expires 7/12/2015
           InputStream keyInput;
           if (cdata == null) {
              // Installation dir cdata.p12 file takes priority if it exists
@@ -1653,7 +1656,7 @@ public class Remote {
             for (JSONObject j : unique.values() )
                data.put(j);
             // Tag json entries in data that already have Season Passes scheduled
-            config.gui.remote_gui.TagPremieresWithSeasonPasses(data);
+            config.gui.remote_gui.premiere_tab.TagPremieresWithSeasonPasses(data);
          }
       } catch (Exception e) {
          error("SeasonPremieres - " + e.getMessage());
@@ -1676,7 +1679,7 @@ public class Remote {
          int offset = 0;
          int count = 50;
          
-         String search_type = (String)config.gui.remote_gui.search_type.getSelectedItem();
+         String search_type = (String)config.gui.remote_gui.search_tab.search_type.getValue();
          
          // Role type search
          JSONArray credit = null;
@@ -1763,10 +1766,10 @@ public class Remote {
          }
          
          // Add extended search results if requested
-         Boolean includeFree = config.gui.remote_gui.includeFree.isSelected();
-         Boolean includePaid = config.gui.remote_gui.includePaid.isSelected();
-         Boolean includeVod = config.gui.remote_gui.includeVod.isSelected();
-         Boolean unavailable = config.gui.remote_gui.unavailable.isSelected();
+         Boolean includeFree = config.gui.remote_gui.search_tab.includeFree.isSelected();
+         Boolean includePaid = config.gui.remote_gui.search_tab.includePaid.isSelected();
+         Boolean includeVod = config.gui.remote_gui.search_tab.includeVod.isSelected();
+         Boolean unavailable = config.gui.remote_gui.search_tab.unavailable.isSelected();
          if (includeFree || includePaid || includeVod || unavailable) {
             collections = extendedSearch(keyword, credit, includeFree, includePaid, includeVod, ! unavailable, job, max);
             if (collections != null && collections.length() > 0) {
@@ -2626,64 +2629,89 @@ public class Remote {
          }
          
          // OK to subscribe
-         if (schedule) {
-            
-            // Streaming source should default to "Streaming Only" setting for Include
-            String include_value = (String)config.gui.remote_gui.spOpt.getIncludeValue();
-            if (include_value.equals("Recordings Only") && json.has("partnerId"))
-               config.gui.remote_gui.spOpt.setIncludeValue("Streaming Only");
-            
-            // Non streaming source should default to "Recordings Only"
-            if (! include_value.equals("Recordings Only") && ! json.has("partnerId"))
-               config.gui.remote_gui.spOpt.setIncludeValue("Recordings Only");
-
-            JSONObject o = config.gui.remote_gui.spOpt.promptUser(
-               tivoName, "(" + tivoName + ") " + "Create SP - " + title, json, false
-            );
-            if (o != null) {
-               log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
-               if (o.has("idSetSource")) {
-                  JSONObject idSetSource = o.getJSONObject("idSetSource");
-                  if (idSetSource.has("consumptionSource")) {
-                     // Has streaming elements
-                     idSetSource.put("collectionId", json.getString("collectionId"));
-                     idSetSource.put("type", "seasonPassSource");
-                  } else {
-                     // Recordings only
-                     idSetSource.put("collectionId", json.getString("collectionId"));
-                     idSetSource.put("type", "seasonPassSource");
-                     idSetSource.put("channel", json.getJSONObject("channel"));
-                     o.put("idSetSource", idSetSource);
+         class backgroundRun implements Runnable {
+            Boolean schedule;
+            String tivoName;
+            JSONObject json;
+            String title;
+            JSONObject existingSP;
+            public backgroundRun(Boolean schedule, String tivoName, JSONObject json, String title, JSONObject existingSP) {
+               this.schedule = schedule;
+               this.tivoName = tivoName;
+               this.json = json;
+               this.title = title;
+               this.existingSP = existingSP;
+            }
+            @Override public void run() {
+               if (schedule) {            
+                  // Streaming source should default to "Streaming Only" setting for Include
+                  JSONObject o = null;
+                  String include_value = (String)util.spOpt.getIncludeValue();
+                  if (include_value.equals("Recordings Only") && json.has("partnerId"))
+                     util.spOpt.setIncludeValue("Streaming Only");
+                  
+                  // Non streaming source should default to "Recordings Only"
+                  if (! include_value.equals("Recordings Only") && ! json.has("partnerId"))
+                     util.spOpt.setIncludeValue("Recordings Only");
+      
+                  o = util.spOpt.promptUser(
+                     tivoName, "(" + tivoName + ") " + "Create SP - " + title, json, false
+                  );
+                  if (o != null) {
+                     log.print("Scheduling SP: '" + title + "' on TiVo: " + tivoName);
+                     if (o.has("idSetSource")) {
+                        try {
+                           JSONObject idSetSource = o.getJSONObject("idSetSource");
+                           if (idSetSource.has("consumptionSource")) {
+                              // Has streaming elements
+                              idSetSource.put("collectionId", json.getString("collectionId"));
+                              idSetSource.put("type", "seasonPassSource");
+                           } else {
+                              // Recordings only
+                              idSetSource.put("collectionId", json.getString("collectionId"));
+                              idSetSource.put("type", "seasonPassSource");
+                              idSetSource.put("channel", json.getJSONObject("channel"));
+                              o.put("idSetSource", idSetSource);
+                           }
+                        } catch (JSONException e) {
+                           log.error("SPSchedule - " + e.getMessage());
+                        }
+                     } else {
+                        try {
+                        // Recordings only
+                        JSONObject idSetSource = new JSONObject();
+                        idSetSource.put("collectionId", json.getString("collectionId"));
+                        idSetSource.put("type", "seasonPassSource");
+                        idSetSource.put("channel", json.getJSONObject("channel"));
+                        o.put("idSetSource", idSetSource);
+                        } catch (JSONException e) {
+                           log.error("SPSchedule - " + e.getMessage());
+                        }
+                     }
+                     JSONObject result = Command("Seasonpass", o);
+                     if (result != null) {
+                        log.print("success");
+                        TableUtil.addTivoNameFlagtoJson(json, "__SPscheduled__", tivoName);
+                        // Set thumbs rating if not already set
+                        setThumbsRating(json, 1, false);
+                     }
                   }
                } else {
-                  // Recordings only
-                  JSONObject idSetSource = new JSONObject();
-                  idSetSource.put("collectionId", json.getString("collectionId"));
-                  idSetSource.put("type", "seasonPassSource");
-                  idSetSource.put("channel", json.getJSONObject("channel"));
-                  o.put("idSetSource", idSetSource);
-               }
-               JSONObject result = Command("Seasonpass", o);
-               if (result != null) {
-                  log.print("success");
-                  TableUtil.addTivoNameFlagtoJson(json, "__SPscheduled__", tivoName);
-                  // Set thumbs rating if not already set
-                  setThumbsRating(json, 1, false);
-               }
-            }
-         } else {
-            log.warn("Existing SP with same title + callSign found, prompting to modify instead.");
-            if (existingSP != null) {
-               JSONObject result = config.gui.remote_gui.spOpt.promptUser(
-                  tivoName, "(" + tivoName + ") " + "Modify SP - " + title, existingSP, TableUtil.isWL(existingSP)
-               );
-               if (result != null) {
-                  if (Command("ModifySP", result) != null) {
-                     log.warn("Modified SP '" + title + "' for TiVo: " + tivoName);
+                  log.warn("Existing SP with same title + callSign found, prompting to modify instead.");
+                  if (existingSP != null) {
+                     JSONObject result = util.spOpt.promptUser(
+                        tivoName, "(" + tivoName + ") " + "Modify SP - " + title, existingSP, TableUtil.isWL(existingSP)
+                     );
+                     if (result != null) {
+                        if (Command("ModifySP", result) != null) {
+                           log.warn("Modified SP '" + title + "' for TiVo: " + tivoName);
+                        }
+                     }
                   }
                }
             }
          }
+         Platform.runLater(new backgroundRun(schedule, tivoName, json, title, existingSP));
       } catch (JSONException e) {
          log.error("SPschedule - " + e.getMessage());
       }
@@ -2711,8 +2739,8 @@ public class Remote {
    
    // Background mode reboot sequence for a TiVo
    public void reboot(final String tivoName) {
-      class backgroundRun extends SwingWorker<Object, Object> {
-         protected Object doInBackground() {
+      Task<Void> task = new Task<Void>() {
+         @Override public Void call() {
             try {
                JSONObject json = new JSONObject();
                json.put("bodyId", bodyId_get());
@@ -2735,9 +2763,8 @@ public class Remote {
             }
             return null;
          }
-      }
-      backgroundRun b = new backgroundRun();
-      b.execute();
+      };
+      new Thread(task).start();
    }
       
    private void print(String message) {

@@ -1,28 +1,34 @@
 package com.tivo.kmttg.gui;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.HierarchyBoundsListener;
-import java.awt.event.HierarchyEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Optional;
 import java.util.Stack;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.table.TableColumnModel;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 
+import com.tivo.kmttg.gui.dialog.freeSpace;
+import com.tivo.kmttg.gui.remote.util;
+import com.tivo.kmttg.gui.table.TableUtil;
+import com.tivo.kmttg.gui.table.nplTable.Tabentry;
+import com.tivo.kmttg.gui.table.nplTable;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.http;
@@ -36,47 +42,33 @@ import com.tivo.kmttg.util.string;
 
 public class tivoTab {
    String tivoName = null;
-   private JPanel panel = null;
-   private JButton add = null;
-   private JButton remove = null;
-   private JButton atomic = null;
-   private JButton pyTivo_stream = null;
-   private JButton refresh = null;
-   private JButton disk_usage = null;
-   private JLabel status = null;
-   private JCheckBox showFolders = null;
+   private VBox panel = null;
+   private MyButton add = null;
+   private MyButton remove = null;
+   private MyButton atomic = null;
+   private MyButton pyTivo_stream = null;
+   private MyButton refresh = null;
+   private MyButton disk_usage = null;
+   private Label status = null;
+   private CheckBox showFolders = null;
    private nplTable nplTab = null;
    private fileBrowser browser = null;
-   private JFileChooser csvBrowser = null;
+   private FileChooser csvBrowser = null;
    
    tivoTab(final String name) {
       debug.print("name=" + name);
       this.tivoName = name;
-      panel = new JPanel(new GridBagLayout());
+      panel = new VBox();
+      panel.setSpacing(5);
+      panel.setPadding(new Insets(5,0,0,0));
+      // Setup Col1 to fill horizontally
+      ColumnConstraints fillColumn = new ColumnConstraints();
+      fillColumn.setFillWidth(true);
+      fillColumn.setHgrow(Priority.ALWAYS);
+      RowConstraints fillVertical = new RowConstraints();
+      fillVertical.setFillHeight(true);
+      fillVertical.setVgrow(Priority.ALWAYS);
       nplTab = new nplTable(name);
-
-      // Pack table columns when panel resized
-      panel.addHierarchyBoundsListener(new HierarchyBoundsListener() {
-         public void ancestorMoved(HierarchyEvent arg0) {
-            // Don't care about movement
-         }
-         public void ancestorResized(HierarchyEvent arg0) {
-            nplTab.packColumns(nplTab.NowPlaying, 2);
-         }
-      });
-      
-      GridBagConstraints c = new GridBagConstraints();
-      c.insets = new Insets(0, 2, 0, 2);
-      c.ipadx = 0;
-      c.ipady = 0;
-      c.weighty = 0.0;  // default to no vertical stretch
-      c.weightx = 0.0;  // default to no horizontal stretch
-      c.gridwidth = 1;
-      c.gridheight = 1;
-      c.anchor = GridBagConstraints.CENTER;
-      c.fill = GridBagConstraints.HORIZONTAL;
-
-      int gx=0, gy=0;
       
       if (name.equals("FILES")) {
          // This is a FILES tab
@@ -86,79 +78,70 @@ public class tivoTab {
          browser = new fileBrowser();
          
          // Add button
-         add = new JButton("Add...");
-         add.setMargin(new Insets(0,5,0,5));
-         add.setToolTipText(config.gui.getToolTip("add"));
-         add.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
+         add = new MyButton("Add...");
+         add.setTooltip(config.gui.getToolTip("add"));
+         add.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                addCB(add);
             }
          });         
    
          // Remove button
-         remove = new JButton("Remove");
-         remove.setMargin(new Insets(0,5,0,5));
-         remove.setToolTipText(config.gui.getToolTip("remove"));
-         remove.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
+         remove = new MyButton("Remove");
+         remove.setTooltip(config.gui.getToolTip("remove"));
+         remove.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                removeCB(remove);
             }
          });
 
          // Create row with Add, Remove, atomic
-         JPanel row = new JPanel();
-         row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
-         Dimension space1 = new Dimension(5,0);
-         Dimension space2 = new Dimension(20,0);
-         row.add(add);
-         row.add(Box.createRigidArea(space1));
-         row.add(remove);
+         HBox row = new HBox();
+         row.setAlignment(Pos.CENTER_LEFT);
+         row.setPadding(new Insets(0,0,0,5));
+         row.setSpacing(5);
+         row.getChildren().addAll(add, remove);
          
          // atomic button
          if ( file.isFile(config.AtomicParsley) ) {
-            atomic = new JButton("Run AtomicParsley");
-            atomic.setMargin(new Insets(0,5,0,5));
-            atomic.setToolTipText(config.gui.getToolTip("atomic"));
-            atomic.addActionListener(new java.awt.event.ActionListener() {
-               public void actionPerformed(java.awt.event.ActionEvent e) {
+            atomic = new MyButton("Run AtomicParsley");
+            atomic.setTooltip(config.gui.getToolTip("atomic"));
+            atomic.setOnAction(new EventHandler<ActionEvent>() {
+               public void handle(ActionEvent e) {
                   atomicCB(atomic);
                }
             });
-            row.add(Box.createRigidArea(space2));
-            row.add(atomic);
+            row.getChildren().addAll(util.space(20), atomic);
          }
          
          // pyTivo stream button
          if ( config.ipadEnabled() && file.isFile(config.pyTivo_config) ) {
-            pyTivo_stream = new JButton("pyTivo stream");
-            pyTivo_stream.setMargin(new Insets(0,5,0,5));
-            pyTivo_stream.setToolTipText(config.gui.getToolTip("pyTivo_stream"));
-            pyTivo_stream.addActionListener(new java.awt.event.ActionListener() {
-               public void actionPerformed(java.awt.event.ActionEvent e) {
+            pyTivo_stream = new MyButton("pyTivo stream");
+            pyTivo_stream.setTooltip(config.gui.getToolTip("pyTivo_stream"));
+            pyTivo_stream.setOnAction(new EventHandler<ActionEvent>() {
+               public void handle(ActionEvent e) {
                   pyTivo_streamCB();
                }
             });
-            row.add(Box.createRigidArea(space2));
-            row.add(pyTivo_stream);
+            row.getChildren().addAll(util.space(20), pyTivo_stream);
          }
          
-         c.gridx = gx;
-         c.gridy = gy;
-         c.gridwidth = 1;
-         panel.add(row, c);
-      } else {
+         panel.getChildren().add(row);
+      } else {         
          // This is a TiVo tab
+         HBox row = new HBox();
+         row.setAlignment(Pos.CENTER_LEFT);
+         row.setPadding(new Insets(0,0,0,5));
+         row.setSpacing(5);
          nplTab.SetNowPlayingHeaders(nplTab.TIVO_cols);
          
          // Refresh button
-         refresh = new JButton("Refresh");
-         refresh.setMargin(new Insets(0,5,0,5));
-         refresh.setToolTipText(config.gui.getToolTip("refresh"));
-         refresh.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
+         refresh = new MyButton("Refresh");
+         refresh.setTooltip(config.gui.getToolTip("refresh"));
+         refresh.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                if (nplTab.inFolder) {
                   // Return from folder display mode to top level mode
-                  nplTab.setFolderState(false);
                   nplTab.RefreshNowPlaying(null);
                   if (nplTab.folderEntryNum >= 0) {
                      nplTab.SelectFolder(nplTab.folderName);
@@ -171,154 +154,133 @@ public class tivoTab {
                }
             }
          });
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         c.gridwidth = 1;
-         panel.add(refresh, c);
+         row.getChildren().add(refresh);
          
          // Disk Usage button
          if ( ! tivoName.equals("FILES") ) {
-            disk_usage = new JButton("Disk Usage");
-            disk_usage.setMargin(new Insets(0,5,0,5));
-            disk_usage.setToolTipText(config.gui.getToolTip("disk_usage"));
-            disk_usage.addActionListener(new java.awt.event.ActionListener() {
-               public void actionPerformed(java.awt.event.ActionEvent e) {
-                  new freeSpace(tivoName, config.gui.getJFrame());
+            disk_usage = new MyButton("Disk Usage");
+            disk_usage.setTooltip(config.gui.getToolTip("disk_usage"));
+            disk_usage.setOnAction(new EventHandler<ActionEvent>() {
+               public void handle(ActionEvent e) {
+                  new freeSpace(tivoName, config.gui.getFrame());
                }
             });
-            gx++;
-            c.gridx = gx;
-            c.gridy = gy;
-            panel.add(disk_usage, c);
+            row.getChildren().add(disk_usage);
          }
          
          // Export button
          if ( ! tivoName.equals("FILES") ) {
-            JButton export = new JButton("Export...");
-            export.setMargin(new Insets(0,5,0,5));
-            export.setToolTipText(config.gui.getToolTip("export_npl"));
-            export.addActionListener(new java.awt.event.ActionListener() {
-               public void actionPerformed(java.awt.event.ActionEvent e) {
+            MyButton export = new MyButton("Export...");
+            export.setTooltip(config.gui.getToolTip("export_npl"));
+            export.setOnAction(new EventHandler<ActionEvent>() {
+               public void handle(ActionEvent e) {
                   if (csvBrowser == null) {
-                     csvBrowser = new JFileChooser(config.programDir);
-                     csvBrowser.setMultiSelectionEnabled(false);
+                     csvBrowser = new FileChooser();
+                     csvBrowser.setTitle("Export to csv file");
+                     csvBrowser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
+                     csvBrowser.setInitialDirectory(new File(config.programDir));
                   }
-                  csvBrowser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                  csvBrowser.setFileFilter(new FileFilterSP(".csv"));
-                  csvBrowser.setSelectedFile(
-                     new File(
-                        config.programDir + File.separator + tivoName +
-                        "_npl_" + TableUtil.currentYearMonthDay() + ".csv"
-                     )
+                  csvBrowser.setInitialFileName(
+                     config.programDir + File.separator + tivoName +
+                     "_npl_" + TableUtil.currentYearMonthDay() + ".csv"
                   );
-                  int result = csvBrowser.showDialog(config.gui.getJFrame(), "Export to csv file");
-                  if (result == JFileChooser.APPROVE_OPTION) {
-                     nplTab.exportNPL(csvBrowser.getSelectedFile().getAbsolutePath());
+                  File selectedFile = csvBrowser.showSaveDialog(config.gui.getFrame());
+                  if (selectedFile != null) {
+                     nplTab.exportNPL(selectedFile.getAbsolutePath());
                   }
                }
             });
-            gx++;
-            c.gridx = gx;
-            c.gridy = gy;
-            panel.add(export, c);
+            row.getChildren().add(export);
          }
          
          // Status label
-         status = new JLabel();
-         gx++;
-         c.gridx = gx;
-         c.gridy = gy;
-         c.gridwidth = 1;
-         panel.add(status, c);
+         status = new Label();
+         row.getChildren().add(status);
          
          // showFolders
          if ( ! tivoName.equals("FILES") ) {
-            showFolders = new JCheckBox("Show Folders");
-            showFolders.addActionListener(new ActionListener() {
+            showFolders = new CheckBox("Show Folders");
+            showFolders.setOnAction(new EventHandler<ActionEvent>() {
                // Toggle between folder mode and non folder mode display
-               public void actionPerformed(ActionEvent e) {
+               public void handle(ActionEvent e) {
                   // Reset to top level display
-                  nplTab.setFolderState(false);
                   nplTab.folderEntryNum = -1;
                   
                   // Refresh to show top level entries
                   nplTab.RefreshNowPlaying(null);
                }
             });
-            gx++;
-            c.gridx = gx;
-            c.gridy = gy;
-            c.gridwidth = 1;
-            panel.add(showFolders, c);
+            row.getChildren().add(showFolders);
          }
+         
+         panel.getChildren().add(row);
       }
       
       // nplTable
-      gx = 0; gy++;
-      c.weightx = 1.0;    // stretch vertically
-      c.weighty = 1.0;    // stretch horizontally
-      c.gridheight = 1;
-      c.gridwidth = 8;
-      c.gridx = gx;
-      c.gridy = gy;
-      //c.ipady = 100;
-      c.fill = GridBagConstraints.BOTH;         
-      panel.add(nplTab.nplScroll, c);
+      panel.getChildren().add(nplTab.nplScroll);
    }
    
    public Boolean showFolders() {
+      debug.print("");
       if (showFolders == null) return false;
       return showFolders.isSelected();
    }
    
    public void showFoldersVisible(Boolean visible) {
+      debug.print("visible=" + visible);
       showFolders.setVisible(visible);
    }
    
    public void showDiskUsageVisible(Boolean visible) {
+      debug.print("visible=" + visible);
       disk_usage.setVisible(visible);
    }
    
    public void showFoldersSet(Boolean value) {
+      debug.print("value=" + value);
       showFolders.setSelected(value);
    }
    
-   public JPanel getPanel() {
+   public VBox getPanel() {
+      debug.print("");
       return panel;
    }
    
-   public JButton getRefreshButton() {
+   public MyButton getRefreshButton() {
+      debug.print("");
       return refresh;
    }
    
    public nplTable getTable() {
+      debug.print("");
       return nplTab;
    }
    
    // FILES mode add button callback
    // Bring up file browser and add selected entries to Now Playing
-   private void addCB(JButton button) {
+   private void addCB(MyButton button) {
       debug.print("button=" + button);
       // Bring up File Browser
-      int result = browser.Browser.showDialog(nplTab.NowPlaying, "Add");
-      if (result == JFileChooser.APPROVE_OPTION) {
-         File[] files = browser.Browser.getSelectedFiles();
-         for (int i=0; i<files.length; ++i) {
+      browser.Browser.setTitle("Add");
+      log.print(config.TIVOS.get("FILES"));
+      browser.Browser.setInitialDirectory(new File(config.TIVOS.get("FILES")));
+      List<File> files = browser.Browser.showOpenMultipleDialog(null);
+      if (files != null) {
+         for (int i=0; i<files.size(); ++i) {
             // workaround for http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6351074
             // file browser trims the file name so it may have originally contained a space
             // if user selected a file that doesn't exist then look for the same name with preceeding space
-            if (!files[i].exists()) {
+            if (!files.get(i).exists()) {
                // look for same file but with space
-               String new_filename = files[i].getParent() + File.separatorChar + " " + files[i].getName();
+               String new_filename = files.get(i).getParent() + File.separatorChar + " " + files.get(i).getName();
                File f = new File(new_filename);
                if (f.exists()) {
                   nplTab.AddNowPlayingFileRow(f);
                } else {
-                  log.error("You selected a file which could not be found: " + files[i].getAbsolutePath());
+                  log.error("You selected a file which could not be found: " + files.get(i).getAbsolutePath());
                }
             } else {
-               nplTab.AddNowPlayingFileRow(files[i]);
+               nplTab.AddNowPlayingFileRow(files.get(i));
             }
          }
       }
@@ -326,7 +288,7 @@ public class tivoTab {
 
    // FILES mode remove button callback
    // Remove selected NowPlaying entries from list
-   private void removeCB(JButton button) {
+   private void removeCB(MyButton button) {
       debug.print("button=" + button);
       if ( tivoName.equals("FILES") ) {
          int[] rows = nplTab.GetSelectedRows();
@@ -343,7 +305,7 @@ public class tivoTab {
 
    // FILES mode atomic button callback
    // Run AtomicParsley for selected FILES entries
-   private void atomicCB(JButton button) {
+   private void atomicCB(MyButton button) {
       debug.print("button=" + button);
       if ( tivoName.equals("FILES") ) {
          if (! file.isFile(config.AtomicParsley)) {
@@ -393,6 +355,7 @@ public class tivoTab {
 
    // FILES mode pyTivo stream button callback
    private void pyTivo_streamCB() {
+      debug.print("");
       if ( tivoName.equals("FILES") ) {
          if (! file.isFile(config.pyTivo_config)) {
             log.error("pyTivo config file does not exist: " + config.pyTivo_config);
@@ -417,26 +380,23 @@ public class tivoTab {
          
          // NOTE: This is only valid for RPC enabled TiVos
          Stack<String> o = config.getTivoNames();
-         Stack<String> n = new Stack<String>();
+         List<String> tivos = new ArrayList<String>();
          for (int j=0; j<o.size(); ++j) {
             if ( config.rpcEnabled(o.get(j)) )
-               n.add(o.get(j));
+               tivos.add(o.get(j));
          }
-         if (n.size() > 0) {
-            Object[] tivos = n.toArray();   
+         if (tivos.size() > 0) {
             int row;
             for (int i=rows.length-1; i>=0; i--) {
                row = rows[i];
                String videoFile = nplTab.NowPlayingGetSelectionFile(row);
-               String tivoName = (String)JOptionPane.showInputDialog(
-                 config.gui.getJFrame(),
-                 videoFile,
-                 "Choose destination TiVo",
-                 JOptionPane.PLAIN_MESSAGE,
-                 null,
-                 tivos,
-                 tivos[0]
-               );
+               ChoiceDialog<String> dialog = new ChoiceDialog<String>((String) tivos.get(0), tivos);
+               dialog.setTitle("Choose destination TiVo");
+               dialog.setContentText("TiVo:");
+               String tivoName = null;
+               Optional<String> result = dialog.showAndWait();
+               if (result.isPresent())
+                  tivoName = result.get();
                if (tivoName != null && tivoName.length() > 0)
                   pyTivo.streamFile(tivoName, videoFile);
             }
@@ -505,7 +465,7 @@ public class tivoTab {
    
    public void nplTab_packColumns(int pad) {
       debug.print("pad=" + pad);
-      nplTab.packColumns(nplTab.NowPlaying, pad);
+      TableUtil.autoSizeTableViewColumns(nplTab.NowPlaying, false);
    }
    
    public void nplTab_SetNowPlaying(Stack<Hashtable<String,String>> h) {
@@ -544,7 +504,7 @@ public class tivoTab {
          }
       } else {
          log.error("No shows currently selected for processing");
-      }     
+      }
    }
    
    // Callback for "Add selected to history file" Auto Transfers menu entry
@@ -574,12 +534,13 @@ public class tivoTab {
          }
       } else {
          log.error("No shows currently selected for processing");
-      }     
+      }  
    }
    
    // Return current column name order as a string array
    public String[] getColumnOrder() {
-      int size = nplTab.NowPlaying.getColumnCount();
+      debug.print("");
+      int size = nplTab.NowPlaying.getColumns().size();
       String[] order = new String[size];
       for (int i=0; i<size; ++i) {
          order[i] = nplTab.getColumnName(i);
@@ -592,7 +553,7 @@ public class tivoTab {
       debug.print("order=" + Arrays.toString(order));
       
       // Don't do anything if column counts don't match up
-      if (nplTab.NowPlaying.getColumnCount() != order.length) return;
+      if (nplTab.NowPlaying.getColumns().size() != order.length) return;
       
       // Re-order to desired positions
       String colName;
@@ -600,16 +561,29 @@ public class tivoTab {
       for (int i=0; i<order.length; ++i) {
          colName = order[i];
          if (colName.equals("ICON")) colName = "";
-         index = nplTab.getColumnIndex(colName);
+         index = TableUtil.getColumnIndex(nplTab.NowPlaying, colName);
          if ( index != -1)
             moveColumn(index, i);
       }
    }
    
    // Move a table column from -> to
-   public void moveColumn(int from, int to) {
+   private void moveColumn(int from, int to) {
       debug.print("from=" + from + " to=" + to);
-      TableColumnModel tableColumnModel = nplTab.NowPlaying.getTableHeader().getColumnModel();
-      tableColumnModel.moveColumn(from, to);
-   }
+      int num = nplTab.NowPlaying.getColumns().size();
+      Stack<TreeTableColumn<Tabentry,?>> order = new Stack<TreeTableColumn<Tabentry,?>>();
+      for (int i=0; i<num; ++i) {
+         int index = i;
+         if (index == from)
+            index = to;
+         else if (index == to)
+            index = from;
+         TreeTableColumn<Tabentry,?> col = nplTab.NowPlaying.getColumns().get(index);
+         order.push(col);
+      }
+      nplTab.NowPlaying.getColumns().clear();
+      for (TreeTableColumn<Tabentry,?> col : order) {
+         nplTab.NowPlaying.getColumns().add(col);
+      }
+   }   
 }

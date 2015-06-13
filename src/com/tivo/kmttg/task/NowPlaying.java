@@ -13,7 +13,7 @@ import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.TableUtil;
+import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;

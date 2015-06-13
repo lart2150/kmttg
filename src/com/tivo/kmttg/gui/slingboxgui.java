@@ -1,25 +1,24 @@
 package com.tivo.kmttg.gui;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Pos;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -28,37 +27,45 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class slingboxgui {
-   private JPanel panel = null;
-   private JTextField dir;
-   private JTextField perl;
-   private JTextField filename;
-   private JTextField ip;
-   private JTextField port;
-   private JTextField pass;
-   private JTextField dur;
-   private JTextField chan;
-   private JComboBox type;
-   private JComboBox vbw;
-   private JComboBox res;
-   private JComboBox container;
-   private JCheckBox raw;
+   private GridPane panel = null;
+   private TextField dir;
+   private TextField perl;
+   private TextField filename;
+   private TextField ip;
+   private TextField port;
+   private TextField pass;
+   private TextField dur;
+   private TextField chan;
+   private ComboBox<String> type;
+   private ComboBox<String> vbw;
+   private ComboBox<String> res;
+   private ComboBox<String> container;
+   private CheckBox raw;
    jobData job = null;
-   JFileChooser Browser = null;
+   FileChooser fileBrowser = null;
+   DirectoryChooser dirBrowser = null;
    
-   slingboxgui(JFrame frame) {
+   slingboxgui(Stage frame) {
       getPanel();
-      Browser = new JFileChooser(config.programDir);
-      Browser.setMultiSelectionEnabled(false);
+      fileBrowser = new FileChooser();
+      fileBrowser.setTitle("Choose file");
+      fileBrowser.setInitialDirectory(new File(config.programDir));
+      dirBrowser = new DirectoryChooser();
+      dirBrowser.setTitle("Choose directory");
+      dirBrowser.setInitialDirectory(new File(config.programDir));
    }
    
-   public JPanel getPanel() {
+   public GridPane getPanel() {
       if (panel == null) {
-         panel = new JPanel(new GridBagLayout());
+         panel = new GridPane();
+         panel.setAlignment(Pos.CENTER);
+         panel.setHgap(5);
+         panel.setVgap(1);
          
-         JButton start = new JButton("Start");
-         start.setToolTipText(getToolTip("start"));
-         start.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
+         MyButton start = new MyButton("Start");
+         start.setTooltip(getToolTip("start"));
+         start.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                String slingbox_file = getFileName();
                if (slingbox_file == null)
                   return;
@@ -122,10 +129,10 @@ public class slingboxgui {
             }
          });
          
-         JButton stop = new JButton("Stop");
-         stop.setToolTipText(getToolTip("stop"));
-         stop.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
+         MyButton stop = new MyButton("Stop");
+         stop.setTooltip(getToolTip("stop"));
+         stop.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                if (job != null) {
                   jobMonitor.kill(job);
                   job = null;
@@ -133,231 +140,170 @@ public class slingboxgui {
             }
          });
          
-         JButton Help = new JButton("Help");
-         Help.setToolTipText(getToolTip("help"));
-         Help.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
+         MyButton Help = new MyButton("Help");
+         Help.setTooltip(getToolTip("help"));
+         Help.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                help.showInBrowser("http://sourceforge.net/p/kmttg/wiki/slingbox_capture/");
             }
          });
          
-         JLabel dir_label = new JLabel("Slingbox capture file directory");
-         dir = new JTextField(30);
-         dir.setToolTipText(getToolTip("dir"));
+         Label dir_label = new Label("Slingbox capture file directory");
+         dir = new TextField(); dir.setMinWidth(30);
+         dir.setTooltip(getToolTip("dir"));
          dir.setText(config.slingBox_dir);
-         dir.addMouseListener(
-            new MouseAdapter() {
-               public void mouseClicked(MouseEvent e) {
-                  if(e.getClickCount() == 2) {
-                     Browser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                     int result = Browser.showDialog(dir, "Choose Directory");
-                     if (result == JFileChooser.APPROVE_OPTION) {
-                        dir.setText(Browser.getSelectedFile().getPath());
+         dir.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+               if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+                  if (mouseEvent.getClickCount() == 2) {
+                     File result = dirBrowser.showDialog(config.gui.getFrame());
+                     if (result != null) {
+                        dir.setText(result.getAbsolutePath());
                      }
                   }
                }
             }
-         );
+         });
          
-         JLabel perl_label = new JLabel("Perl executable");
-         perl = new JTextField(30);
-         perl.setToolTipText(getToolTip("perl"));
+         Label perl_label = new Label("Perl executable");
+         perl = new TextField(); perl.setMinWidth(30);
+         perl.setTooltip(getToolTip("perl"));
          perl.setText(config.slingBox_perl);
-         perl.addMouseListener(
-            new MouseAdapter() {
-               public void mouseClicked(MouseEvent e) {
-                  if(e.getClickCount() == 2) {
-                     Browser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                     int result = Browser.showDialog(perl, "Choose File");
-                     if (result == JFileChooser.APPROVE_OPTION) {
-                        perl.setText(Browser.getSelectedFile().getPath());
+         perl.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+               if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+                  if (mouseEvent.getClickCount() == 2) {
+                     File result = fileBrowser.showOpenDialog(config.gui.getFrame());
+                     if (result != null) {
+                        perl.setText(result.getPath());
                      }
                   }
                }
             }
-         );
+         });
          
-         JLabel filename_label = new JLabel("File name");
-         filename = new JTextField(30);
-         filename.setToolTipText(getToolTip("filename"));
+         Label filename_label = new Label("File name");
+         filename = new TextField(); filename.setMinWidth(30);
+         filename.setTooltip(getToolTip("filename"));
          
-         JLabel pass_label = new JLabel("Slingbox password");
-         pass = new JTextField(30);
-         pass.setToolTipText(getToolTip("pass"));
+         Label pass_label = new Label("Slingbox password");
+         pass = new TextField(); pass.setMinWidth(30);
+         pass.setTooltip(getToolTip("pass"));
          pass.setText(config.slingBox_pass);
          
-         JLabel ip_label = new JLabel("Slingbox IP");
-         ip = new JTextField(30);
-         ip.setToolTipText(getToolTip("ip"));
+         Label ip_label = new Label("Slingbox IP");
+         ip = new TextField(); ip.setMinWidth(30);
+         ip.setTooltip(getToolTip("ip"));
          ip.setText(config.slingBox_ip);
          
-         JLabel port_label = new JLabel("Slingbox port");
-         port = new JTextField(30);
-         port.setToolTipText(getToolTip("ip"));
+         Label port_label = new Label("Slingbox port");
+         port = new TextField(); port.setMinWidth(30);
+         port.setTooltip(getToolTip("ip"));
          port.setText(config.slingBox_port);
          
-         JLabel dur_label = new JLabel("Capture # minutes");
-         dur = new JTextField(30);
-         dur.setToolTipText(getToolTip("dur"));
+         Label dur_label = new Label("Capture # minutes");
+         dur = new TextField(); dur.setMinWidth(30);
+         dur.setTooltip(getToolTip("dur"));
          dur.setText("0");
          
-         JLabel chan_label = new JLabel("Tune to channel");
-         chan = new JTextField(30);
-         chan.setToolTipText(getToolTip("chan"));
+         Label chan_label = new Label("Tune to channel");
+         chan = new TextField(); chan.setMinWidth(30);
+         chan.setTooltip(getToolTip("chan"));
          chan.setText("");
          
-         JLabel res_label = new JLabel("Video resolution");
-         res = new JComboBox();
-         res.setToolTipText(getToolTip("res"));
-         String[] r = {"1920x1080", "640x480"};
-         for (int i=0; i<r.length; ++i)
-            res.addItem(r[i]);
-         res.setSelectedItem(config.slingBox_res);
+         Label res_label = new Label("Video resolution");
+         res = new ComboBox<String>();
+         res.setTooltip(getToolTip("res"));
+         res.getItems().addAll("1920x1080", "640x480");
+         res.getSelectionModel().select(config.slingBox_res);
          
-         JLabel vbw_label = new JLabel("Video bit rate (Kbps)");
-         vbw = new JComboBox();
-         vbw.setToolTipText(getToolTip("vbw"));
-         String[] vb = {"4000", "5000", "6000", "7000"};
-         for (int i=0; i<vb.length; ++i)
-            vbw.addItem(vb[i]);
-         vbw.setSelectedItem(config.slingBox_vbw);
+         Label vbw_label = new Label("Video bit rate (Kbps)");
+         vbw = new ComboBox<String>();
+         vbw.setTooltip(getToolTip("vbw"));
+         vbw.getItems().addAll("4000", "5000", "6000", "7000");
+         vbw.getSelectionModel().select(config.slingBox_vbw);
          
-         JLabel type_label = new JLabel("Slingbox model");
-         type = new JComboBox();
-         type.setToolTipText(getToolTip("type"));
-         type.addItem("Slingbox 350/500");
-         type.addItem("Slingbox Pro HD");
-         type.addItem("Slingbox Pro");
-         type.addItem("Slingbox Solo");
-         type.setSelectedItem(config.slingBox_type);
+         Label type_label = new Label("Slingbox model");
+         type = new ComboBox<String>();
+         type.setTooltip(getToolTip("type"));
+         type.getItems().add("Slingbox 350/500");
+         type.getItems().add("Slingbox Pro HD");
+         type.getItems().add("Slingbox Pro");
+         type.getItems().add("Slingbox Solo");
+         type.getSelectionModel().select(config.slingBox_type);
          
-         JLabel container_label = new JLabel("Video container to use");
-         container = new JComboBox();
-         container.setToolTipText(getToolTip("container"));
-         container.addItem("mpegts");
-         container.addItem("matroska");
-         container.setSelectedItem(config.slingBox_container);
+         Label container_label = new Label("Video container to use");
+         container = new ComboBox<String>();
+         container.setTooltip(getToolTip("container"));
+         container.getItems().add("mpegts");
+         container.getItems().add("matroska");
+         container.getSelectionModel().select(config.slingBox_container);
          
-         raw = new JCheckBox("Capture raw file");
-         raw.setToolTipText(getToolTip("raw"));
+         raw = new CheckBox("Capture raw file");
+         raw.setTooltip(getToolTip("raw"));
          raw.setSelected(false);
          
          int gy = 0;
-         GridBagConstraints c = new GridBagConstraints();
-         c.insets = new Insets(0, 2, 0, 2);
-         c.ipady = 0;
-         c.weighty = 0.0;  // default to no vertical stretch
-         c.weightx = 0.0;  // default to no horizontal stretch
-         c.gridx = 0;
-         c.gridy = gy;
-         c.gridwidth = 1;
-         c.gridheight = 1;
-         c.anchor = GridBagConstraints.CENTER;
-         c.fill = GridBagConstraints.HORIZONTAL;
                   
-         Dimension space = new Dimension(10,0);
-         c.gridy = gy;
-         JPanel row = new JPanel();
-         row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS));
-         row.add(start);
-         row.add(Box.createRigidArea(space));
-         row.add(stop);
-         row.add(Box.createRigidArea(space));
-         row.add(Help);
-         panel.add(row, c);
-         c.gridx = 1;
-         panel.add(raw, c);
+         HBox row = new HBox();
+         row.setSpacing(10);
+         row.getChildren().addAll(start, stop, Help);
+         panel.add(row, 0, gy);
+         panel.add(raw, 1, gy);
          
          gy++;
-         c.gridy = gy;
-         c.gridx = 0;
-         panel.add(ip_label, c);
-         c.gridx = 1;
-         panel.add(ip, c);
+         panel.add(ip_label, 0, gy);
+         panel.add(ip, 1, gy);
          
          gy++;
-         c.gridy = gy;
-         c.gridx = 0;
-         panel.add(port_label, c);
-         c.gridx = 1;
-         panel.add(port, c);
+         panel.add(port_label, 0, gy);
+         panel.add(port, 1, gy);
          
          gy++;
-         c.gridy = gy;
-         c.gridx = 0;
-         panel.add(pass_label, c);
-         c.gridx = 1;
-         panel.add(pass, c);
+         panel.add(pass_label, 0, gy);
+         panel.add(pass, 1, gy);
          
          gy++;
-         c.gridy = gy;
-         c.gridx = 0;
-         panel.add(dir_label, c);
-         c.gridx = 1;
-         panel.add(dir, c);
+         panel.add(dir_label, 0, gy);
+         panel.add(dir, 1, gy);
          
          gy++;
-         c.gridy = gy;
-         c.gridx = 0;
-         panel.add(perl_label, c);
-         c.gridx = 1;
-         panel.add(perl, c);
+         panel.add(perl_label, 0, gy);
+         panel.add(perl, 1, gy);
          
          gy++;
-         c.gridy = gy;
-         c.gridx = 0;
-         panel.add(filename_label, c);
-         c.gridx = 1;
-         panel.add(filename, c);
+         panel.add(filename_label, 0, gy);
+         panel.add(filename, 1, gy);
          
          gy++;
-         c.gridy = gy;
-         c.gridx = 0;
-         row = new JPanel();
-         row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS));
-         row.add(type_label);
-         row.add(Box.createRigidArea(space));
-         row.add(type);
-         panel.add(row, c);
-         c.gridx = 1;
-         row = new JPanel();
-         row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS));
-         row.add(container_label);
-         row.add(Box.createRigidArea(space));
-         row.add(container);
-         panel.add(row, c);
+         row = new HBox();
+         row.setSpacing(10);
+         row.getChildren().addAll(type_label, type);
+         panel.add(row, 0, gy);
+         row = new HBox();
+         row.setSpacing(10);
+         row.getChildren().addAll(container_label, container);
+         panel.add(row, 1, gy);
          
          gy++;
-         c.gridy = gy;
-         c.gridx = 0;
-         JPanel left_video = new JPanel();
-         left_video.setLayout(new BoxLayout(left_video, BoxLayout.LINE_AXIS));
-         left_video.add(res_label);
-         left_video.add(Box.createRigidArea(space));
-         left_video.add(res);
-         panel.add(left_video, c);
-         c.gridx = 1;
-         JPanel right_video = new JPanel();
-         right_video.setLayout(new BoxLayout(right_video, BoxLayout.LINE_AXIS));
-         right_video.add(Box.createRigidArea(space));
-         right_video.add(vbw_label);
-         right_video.add(Box.createRigidArea(space));
-         right_video.add(vbw);
-         panel.add(right_video, c);
+         HBox left_video = new HBox();
+         left_video.setSpacing(10);
+         left_video.getChildren().addAll(res_label, res);
+         panel.add(left_video, 0, gy);
+         HBox right_video = new HBox();
+         right_video.setSpacing(10);
+         right_video.getChildren().addAll(vbw_label, vbw);
+         panel.add(right_video, 1, gy);
          
          gy++;
-         c.gridy = gy;
-         c.gridx = 0;
-         panel.add(dur_label, c);
-         c.gridx = 1;
-         panel.add(dur, c);
+         panel.add(dur_label, 0, gy);
+         panel.add(dur, 1, gy);
          
          gy++;
-         c.gridy = gy;
-         c.gridx = 0;
-         panel.add(chan_label, c);
-         c.gridx = 1;
-         panel.add(chan, c);
+         panel.add(chan_label, 0, gy);
+         panel.add(chan, 1, gy);
       }
       return panel;
    }
@@ -368,10 +314,10 @@ public class slingboxgui {
       config.slingBox_pass = string.removeLeadingTrailingSpaces(pass.getText());
       config.slingBox_ip = string.removeLeadingTrailingSpaces(ip.getText());
       config.slingBox_port = string.removeLeadingTrailingSpaces(port.getText());
-      config.slingBox_vbw = (String)vbw.getSelectedItem();
-      config.slingBox_res = (String)res.getSelectedItem();
-      config.slingBox_type = (String)type.getSelectedItem();
-      config.slingBox_container = (String)container.getSelectedItem();
+      config.slingBox_vbw = vbw.getValue();
+      config.slingBox_res = res.getValue();
+      config.slingBox_type = type.getValue();
+      config.slingBox_container = container.getValue();
    }
    
    private String getTimeStamp() {
@@ -383,7 +329,7 @@ public class slingboxgui {
    private String getFileName() {
       String name;
       String d = string.removeLeadingTrailingSpaces(dir.getText());
-      String c = string.removeLeadingTrailingSpaces((String)container.getSelectedItem());
+      String c = string.removeLeadingTrailingSpaces(container.getValue());
       String f = string.removeLeadingTrailingSpaces(filename.getText());
       config.slingBox_container = c;
       if (d.length() == 0) {
@@ -404,7 +350,7 @@ public class slingboxgui {
       return name;
    }
    
-   private String getToolTip(String component) {
+   private Tooltip getToolTip(String component) {
       String text = "";
       if (component.equals("start")){
          text = "<b>Start</b><br>";
@@ -490,9 +436,6 @@ public class slingboxgui {
          text += "If enabled then capture raw Slingbox file instead of using ffmpeg to remux<br>";
          text += "to selected video container and convert audio to ac3.";
       }
-      if (text.length() > 0) {
-         text = "<html>" + text + "</html>";
-      }
-      return text;
+      return MyTooltip.make(text);
    }
 }

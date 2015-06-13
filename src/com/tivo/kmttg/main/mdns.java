@@ -87,7 +87,7 @@ public class mdns {
                      if (! info[i].getHostAddress().equals(config.TIVOS.get(name))) {
                         log.warn("Updating IP for TiVo: " + name);
                         config.TIVOS.put(name, info[i].getHostAddress());
-                        config.save(config.configIni);
+                        config.save();
                      }
                   }
                   // Update TSN if necessary
@@ -96,11 +96,11 @@ public class mdns {
                      if (config_tsn == null) {
                         config.setTsn(name, tsn);
                         config_tsn = tsn;
-                        config.save(config.configIni);
+                        config.save();
                      }
                      if ( ! config_tsn.equals(tsn) ) {
                         config.setTsn(name, tsn);
-                        config.save(config.configIni);
+                        config.save();
                      }
                   }
                } else {

@@ -3,8 +3,10 @@ package com.tivo.kmttg.task;
 import java.io.Serializable;
 import java.util.Date;
 
+import javafx.application.Platform;
+
 import com.tivo.kmttg.JSON.JSONArray;
-import com.tivo.kmttg.gui.TableUtil;
+import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -63,7 +65,7 @@ public class remote implements Serializable {
                if (job.remote_conflicts) {
                   data = r.Upcoming(job);
                   if (data != null && config.GUIMODE)
-                     config.gui.remote_gui.updateTodoIfNeeded("Cancel");
+                     util.updateTodoIfNeeded("Cancel");
                }
                if (job.remote_sp)
                   data = r.SeasonPasses(job);
@@ -72,7 +74,7 @@ public class remote implements Serializable {
                if (job.remote_cancel) {
                   data = r.CancelledShows(job);
                   if (data != null && config.GUIMODE)
-                     config.gui.remote_gui.updateTodoIfNeeded("Cancel");
+                     util.updateTodoIfNeeded("Cancel");
                }
                if (job.remote_deleted)
                   data = r.DeletedShows(job);
@@ -84,28 +86,29 @@ public class remote implements Serializable {
                   else
                      data = r.MyShowsS3(job);
                }
-               if (job.remote_channels)
+               if (job.remote_channels) {
                   data = r.ChannelList(job);
+               }
                if (job.remote_premiere && config.GUIMODE)
                   data = r.SeasonPremieres(
-                     config.gui.remote_gui.getSelectedChannelData(job.tivoName),
+                     config.gui.remote_gui.premiere_tab.getSelectedChannelData(job.tivoName),
                      job, config.gui.remote_gui.getPremiereDays()
                   );
                if (job.remote_search && config.GUIMODE) {
                   data = r.searchKeywords(job.remote_search_keyword, job, job.remote_search_max);
                   if (data != null)
-                     config.gui.remote_gui.updateTodoIfNeeded("Search");
+                     util.updateTodoIfNeeded("Search");
                }
                if (job.remote_adv_search && config.GUIMODE) {
                   config.gui.remote_gui.clearTable("search");
                   data = r.AdvSearch(job);
                   if (data != null)
-                     config.gui.remote_gui.updateTodoIfNeeded("Search");
+                     util.updateTodoIfNeeded("Search");
                }
                if (job.remote_guideChannels && config.GUIMODE) {
                   data = r.ChannelList(job);
                   if (data != null)
-                     config.gui.remote_gui.updateTodoIfNeeded("Guide");
+                     util.updateTodoIfNeeded("Guide");
                }
                if (job.remote_stream) {
                   data = r.streamingEntries(null);
@@ -161,78 +164,141 @@ public class remote implements Serializable {
              ! job.remote_cancel && ! job.remote_deleted && ! job.remote_search && 
              ! job.remote_adv_search && ! job.remote_thumbs) {
             // Update STATUS column
-            config.gui.jobTab_UpdateJobMonitorRowStatus(job, "running");
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, "running");
+               }
+            });
          }
          return true;
       } else {
          // Job finished
          if (config.GUIMODE) {
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
-               config.gui.setTitle(config.kmttg);
-               config.gui.progressBar_setValue(0);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     config.gui.setTitle(config.kmttg);
+                     config.gui.progressBar_setValue(0);
+                  }
+               });
             }
          }
          jobMonitor.removeFromJobList(job);
          if (success) {
             if (job.remote_todo && job.todo != null) {
                // ToDo list job => populate ToDo table
-               job.todo.AddRows(job.tivoName, data);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     job.todo.AddRows(job.tivoName, data);
+                  }
+               });
             }
             if (job.remote_upcoming && job.todo != null && config.GUIMODE) {
-               // Upcoming list job => populate ToDo table
-               job.todo.AddRows(job.tivoName, data);
-               // Make the ToDo tab the currently selected tab
-               config.gui.remote_gui.getPanel().setSelectedIndex(0);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     // Upcoming list job => populate ToDo table
+                     job.todo.AddRows(job.tivoName, data);
+                     // Make the ToDo tab the currently selected tab
+                     config.gui.remote_gui.getPanel().getSelectionModel().select(0);
+                  }
+               });
             }
             if (job.remote_conflicts && job.cancelled != null && config.GUIMODE) {
-               // Conflicts list job => populate Won't Record table
-               job.cancelled.AddRows(job.tivoName, data);
-               // Make the Won't Record tab the currently selected tab
-               config.gui.remote_gui.getPanel().setSelectedIndex(2);
-               // Enter the 1st folder in Won't Record table
-               job.cancelled.enterFirstFolder();
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     // Conflicts list job => populate Won't Record table
+                     job.cancelled.AddRows(job.tivoName, data);
+                     // Make the Won't Record tab the currently selected tab
+                     config.gui.remote_gui.getPanel().getSelectionModel().select(2);
+                     // Enter the 1st folder in Won't Record table
+                     job.cancelled.expandFirstFolder();
+                  }
+               });
             }
             if (job.remote_sp && job.sp != null) {
-               // SP job => populate SP table
-               job.sp.AddRows(job.tivoName, data);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     // SP job => populate SP table
+                     job.sp.AddRows(job.tivoName, data);
+                  }
+               });
             }
             if (job.remote_spreorder && data != null && config.GUIMODE) {
-               // Refresh SP list for TiVo SPs that were just re-ordered
-               config.gui.remote_gui.clearTable("sp");
-               config.gui.remote_gui.setTivoName("sp", job.tivoName);
-               config.gui.remote_gui.SPListCB(job.tivoName);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     // Refresh SP list for TiVo SPs that were just re-ordered
+                     config.gui.remote_gui.clearTable("sp");
+                     config.gui.remote_gui.setTivoName("sp", job.tivoName);
+                     config.gui.remote_gui.sp_tab.SPListCB(job.tivoName);
+                  }
+               });
             }
             if (job.remote_cancel && job.cancelled != null) {
-               job.cancelled.AddRows(job.tivoName, data);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     job.cancelled.AddRows(job.tivoName, data);
+                  }
+               });
             }
             if (job.remote_deleted && job.deleted != null) {
-               job.deleted.AddRows(job.tivoName, data);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     job.deleted.AddRows(job.tivoName, data);
+                  }
+               });
             }
             if (job.remote_thumbs && job.thumbs != null) {
-               job.thumbs.AddRows(job.tivoName, data);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     job.thumbs.AddRows(job.tivoName, data);
+                  }
+               });
             }
             if (job.remote_rnpl) {
                rnpl.setNPLData(job.tivoName, data, job.auto_entries);
             }
             if (job.remote_channels && data != null && config.GUIMODE) {
-               config.gui.remote_gui.putChannelData(job.tivoName, data);
-               config.gui.remote_gui.saveChannelInfo(job.tivoName);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     config.gui.remote_gui.premiere_tab.putChannelData(job.tivoName, data);
+                     config.gui.remote_gui.premiere_tab.saveChannelInfo(job.tivoName);
+                  }
+               });
             }
             if (job.remote_premiere && job.premiere != null) {
-               job.premiere.AddRows(job.tivoName, data);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     job.premiere.AddRows(job.tivoName, data);
+                  }
+               });
             }
             if (job.remote_search && job.search != null && data != null) {
-               job.search.AddRows(job.tivoName, data);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     job.search.AddRows(job.tivoName, data);
+                  }
+               });
             }
             if (job.remote_adv_search && job.search != null && data != null) {
-               job.search.AddRows(job.tivoName, data);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     job.search.AddRows(job.tivoName, data);
+                  }
+               });
             }
             if (job.remote_guideChannels && job.gTable != null && data != null) {
-               TableUtil.clear(job.gTable.TABLE);
-               job.gTable.AddRows(job.tivoName, data);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     job.gTable.updateChannels_gui(job.tivoName, data);
+                  }
+               });
             }
             if (job.remote_stream && job.stream != null) {
-               job.stream.AddRows(job.tivoName, data);
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     job.stream.AddRows(job.tivoName, data);
+                  }
+               });
             }
 
             log.warn("REMOTE job completed: " + jobMonitor.getElapsedTime(job.time));

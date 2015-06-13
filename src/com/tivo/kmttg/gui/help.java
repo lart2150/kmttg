@@ -1,87 +1,107 @@
 package com.tivo.kmttg.gui;
 
-import java.awt.Component;
-import java.awt.Insets;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.LinkedHashMap;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JEditorPane;
-import javax.swing.JPanel;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class help {
-   private static JDialog dialog = null;
-   private static JPanel content = null;
-   private static JEditorPane pane = null;
+   private static Stage dialog = null;
+   private static VBox content = null;
    
    static void showHelp() {
       debug.print("");
       if (dialog == null) {
-         dialog = new JDialog(config.gui.getJFrame(), "About kmttg");
-         content = new JPanel();
-         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+         dialog = new Stage();
+         dialog.setTitle("About kmttg");
+         content = new VBox();
+         content.setAlignment(Pos.CENTER);
          
-         pane = new JEditorPane();
-         pane.setContentType("text/html");
-         String version = getVersion();
-         String text = "<html>";
-         text += "<h2 style=\"text-align: center;\">" + config.kmttg + "</h2>";
-         if (version != null) {
-            text += "<h3 style=\"text-align: center;\">Latest version: <a href=\"http://sourceforge.net/projects/kmttg/files/kmttg_";
-            text += version + ".zip\">" + version + "</a></h3>";
-         }
-         text += "<p>LINKS:</p>";
-         text += "<table>";
-         text += "<tr><td><a href=\"http://sourceforge.net/p/kmttg/wiki/Home/\">kmttg Home Page</a></td>";
-         text += "<td><a href=\"http://sourceforge.net/projects/kmttg/files/\">kmttg downloads</a></td></tr>";
-         text += "<tr><td><a href=\"http://sourceforge.net/p/kmttg/wiki/release_notes/\">Release Notes</a></td>";
-         text += "<td><a href=\"http://sourceforge.net/p/kmttg/wiki/configuring_kmttg\">kmttg configuration</a></td></tr>";
-         text += "<tr><td><a href=\"http://sourceforge.net/p/kmttg/wiki/using_kmttg\">kmttg operation</a></td>";
-         text += "<td><a href=\"http://sourceforge.net/p/kmttg/wiki/auto_transfers\">Setting up Auto Transfers</a></td></tr>";
-         text += "<tr><td><a href=\"http://sourceforge.net/p/kmttg/wiki/windows_installation\">Windows Installation</a></td>";
-         text += "<td><a href=\"http://sourceforge.net/p/kmttg/wiki/mac_osx_installation\">Mac OSX Installation</a></td></tr>";
-         text += "<tr><a href=\"http://sourceforge.net/p/kmttg/wiki/linux_installation\">Linux Installation</a></tr>";
-         text += "</table></html>";
-         pane.setText(text);
-         pane.setEditable(false);
+         Label title = new Label("kmttg v1.10_beta");
+         title.setStyle("-fx-font-weight: bold");
+         content.getChildren().add(title);
          
-         class Hyper implements HyperlinkListener {
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-               debug.print("e=" + e);
-               if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                  showInBrowser(e.getURL().toString());
-               }
-            }
-         }
+         final String version = getVersion();
          
-         pane.addHyperlinkListener(new Hyper());
-         pane.setAlignmentX(Component.CENTER_ALIGNMENT);
-         content.add(pane);
-         JButton ok = new JButton("OK");
-         ok.setMargin(new Insets(1,100,1,100));
-         ok.setAlignmentX(Component.CENTER_ALIGNMENT);
-         ok.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
-               dialog.setVisible(false);
+         HBox row = new HBox();
+         row.setSpacing(5);
+         row.setAlignment(Pos.CENTER);
+         Label lab1 = new Label("Latest version: ");
+         Hyperlink link1 = new Hyperlink();
+         link1.setText(version);
+         link1.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+               showInBrowser("http://sourceforge.net/projects/kmttg/files/kmttg_" + version + ".zip");
             }
          });
-         content.add(ok);
-         dialog.getContentPane().add(content);
-         dialog.setLocationRelativeTo(config.gui.getJFrame().getJMenuBar().getComponent(0));
-         dialog.pack();
+         row.getChildren().addAll(lab1, link1);
+         content.getChildren().add(row);
+                  
+         final LinkedHashMap<String,String> links = new LinkedHashMap<String,String>();
+         links.put("kmttg Home Page", "http://sourceforge.net/p/kmttg/wiki/Home");
+         links.put("kmttg downloads", "http://sourceforge.net/projects/kmttg/files");
+         links.put("Release Notes", "http://sourceforge.net/p/kmttg/wiki/release_notes");
+         links.put("kmttg configuration", "http://sourceforge.net/p/kmttg/wiki/configuring_kmttg");
+         links.put("kmttg operation", "http://sourceforge.net/p/kmttg/wiki/using_kmttg");
+         links.put("Setting up Auto Transfers", "http://sourceforge.net/p/kmttg/wiki/auto_transfers");
+         links.put("Windows Installation", "http://sourceforge.net/p/kmttg/wiki/windows_installation");
+         links.put("Mac OSX Installation", "http://sourceforge.net/p/kmttg/wiki/mac_osx_installation");
+         links.put("Linux Installation", "http://sourceforge.net/p/kmttg/wiki/linux_installation");
+         GridPane grid = new GridPane();
+         grid.setHgap(5);
+         grid.setAlignment(Pos.CENTER);
+         int col = 0;
+         int gy = 0;
+         for (String s : links.keySet()) {
+            Hyperlink link = new Hyperlink();
+            link.setText(s);
+            link.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent e) {
+                   Hyperlink h = (Hyperlink)e.getSource();
+                   showInBrowser(links.get(h.getText()));
+                }
+            });
+            grid.add(link, col, gy);
+            if (col == 0)
+               col = 1;
+            else {
+               col = 0;
+               gy++;
+            }
+         }
+         content.getChildren().add(grid);
+                  
+         MyButton ok = new MyButton("OK");
+         ok.setPrefWidth(100);
+         ok.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
+               dialog.hide();
+            }
+         });
+         content.getChildren().add(ok);
+         dialog.setScene(new Scene(content));
+         config.gui.setFontSize(dialog.getScene(), config.FontSize);
       }
-      dialog.setVisible(true);
+      dialog.show();         
    }
    
    public static String getVersion() {

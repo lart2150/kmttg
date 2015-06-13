@@ -1,29 +1,86 @@
 package com.tivo.kmttg.gui;
 
-import java.awt.*;
-import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
 import java.util.Stack;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.plaf.FontUIResource;
+import org.w3c.dom.NodeList;
 
-import org.jdesktop.swingx.JXTable;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.web.WebView;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
+import com.sun.javafx.css.StyleManager;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.dialog.Pushes;
+import com.tivo.kmttg.gui.dialog.ShowDetails;
+import com.tivo.kmttg.gui.dialog.autoLogView;
+import com.tivo.kmttg.gui.dialog.configAuto;
+import com.tivo.kmttg.gui.dialog.configMain;
+import com.tivo.kmttg.gui.remote.remotegui;
+import com.tivo.kmttg.gui.remote.util;
+import com.tivo.kmttg.gui.table.TableUtil;
+import com.tivo.kmttg.gui.table.jobTable;
+import com.tivo.kmttg.gui.table.nplTable;
+import com.tivo.kmttg.gui.table.nplTable.Tabentry;
+import com.tivo.kmttg.install.mainInstall;
 import com.tivo.kmttg.install.update;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.autoConfig;
@@ -31,307 +88,362 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.encodeConfig;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.main.kmttg;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class gui {
+public class gui extends Application {
 
+   private Stage jFrame = null;
    private configAuto config_auto = null;
    private String title = config.kmttg;
-   private JFrame jFrame = null;
-   private JSplitPane jContentPane = null;
-   private JSplitPane splitBottom = null;
-   private JTabbedPane tabbed_panel = null;
-   private JMenuBar jJMenuBar = null;
-   private JMenu fileMenu = null;
-   private JMenu jobMenu = null;
-   private JMenu autoMenu = null;
-   private JMenu serviceMenu = null;
-   private JMenu helpMenu = null;
-   private JMenuItem helpAboutMenuItem = null;
-   private JMenuItem helpUpdateMenuItem = null;
-   private JMenuItem helpToolsUpdateMenuItem = null;
-   private JMenuItem helpToolsProjectXMenuItem = null;
-   private JMenuItem exitMenuItem = null;
-   private JMenuItem autoConfigMenuItem = null;
-   private JMenuItem runInGuiMenuItem = null;
-   private JCheckBoxMenuItem loopInGuiMenuItem = null;
-   private JCheckBoxMenuItem resumeDownloadsMenuItem = null;
-   private JCheckBoxMenuItem toggleLaunchingJobsMenuItem = null;
-   public  JMenuItem addSelectedTitlesMenuItem = null;
-   public  JMenuItem addSelectedHistoryMenuItem = null;
-   private JMenuItem logFileMenuItem = null;
-   private JMenuItem configureMenuItem = null;
-   private JMenuItem refreshEncodingsMenuItem = null;
-   private JMenuItem serviceStatusMenuItem = null;
-   private JMenuItem serviceInstallMenuItem = null;
-   private JMenuItem serviceStartMenuItem = null;
-   private JMenuItem serviceStopMenuItem = null;
-   private JMenuItem serviceRemoveMenuItem = null;
-   private JMenuItem backgroundJobStatusMenuItem = null;
-   private JMenuItem backgroundJobEnableMenuItem = null;
-   private JMenuItem backgroundJobDisableMenuItem = null;
-   private JMenuItem saveMessagesMenuItem = null;
-   private JMenuItem clearMessagesMenuItem = null;
-   //private JMenuItem resetServerMenuItem = null;
-   private JMenuItem pushesMenuItem = null;
-   private JMenuItem saveJobsMenuItem = null;
-   private JMenuItem loadJobsMenuItem = null;
-   public JMenuItem searchMenuItem = null;
-   public JMenuItem thumbsMenuItem = null;
+   private SplitPane jContentPane = null;
+   private SplitPane splitBottom = null;
+   private TabPane tabbed_panel = null;
+   private MenuBar menuBar = null;
+   private Menu fileMenu = null;
+   private Menu jobMenu = null;
+   private Menu autoMenu = null;
+   private Menu serviceMenu = null;
+   private Menu helpMenu = null;
+   private MenuItem helpAboutMenuItem = null;
+   private MenuItem helpUpdateMenuItem = null;
+   private MenuItem helpToolsUpdateMenuItem = null;
+   private MenuItem helpToolsProjectXMenuItem = null;
+   private MenuItem exitMenuItem = null;
+   private MenuItem autoConfigMenuItem = null;
+   private MenuItem runInGuiMenuItem = null;
+   private CheckMenuItem loopInGuiMenuItem = null;
+   private CheckMenuItem resumeDownloadsMenuItem = null;
+   private CheckMenuItem toggleLaunchingJobsMenuItem = null;
+   public  MenuItem addSelectedTitlesMenuItem = null;
+   public  MenuItem addSelectedHistoryMenuItem = null;
+   private MenuItem logFileMenuItem = null;
+   private MenuItem configureMenuItem = null;
+   private MenuItem refreshEncodingsMenuItem = null;
+   private MenuItem serviceStatusMenuItem = null;
+   private MenuItem serviceInstallMenuItem = null;
+   private MenuItem serviceStartMenuItem = null;
+   private MenuItem serviceStopMenuItem = null;
+   private MenuItem serviceRemoveMenuItem = null;
+   private MenuItem backgroundJobStatusMenuItem = null;
+   private MenuItem backgroundJobEnableMenuItem = null;
+   private MenuItem backgroundJobDisableMenuItem = null;
+   private MenuItem saveMessagesMenuItem = null;
+   private MenuItem clearMessagesMenuItem = null;
+   //private MenuItem resetServerMenuItem = null;
+   private MenuItem pushesMenuItem = null;
+   private MenuItem saveJobsMenuItem = null;
+   private MenuItem loadJobsMenuItem = null;
+   public MenuItem searchMenuItem = null;
+   public MenuItem thumbsMenuItem = null;
    
-   private JComboBox encoding = null;
-   private JLabel encoding_label = null;
-   private JLabel encoding_description_label = null;
-   public JButton start = null;
-   public JButton cancel = null;
-   public JCheckBox metadata = null;
-   public JCheckBox decrypt = null;
-   public JCheckBox qsfix = null;
-   public JCheckBox twpdelete = null;
-   public JCheckBox ipaddelete = null;
-   public JCheckBox comskip = null;
-   public JCheckBox comcut = null;
-   public JCheckBox captions = null;
-   public JCheckBox encode = null;
-   public JCheckBox push = null;
-   public JCheckBox custom = null;
-   private JTextPane text = null;
-   private jobTable jobTab = null;
+   private ComboBox<String> encoding = null;
+   private Label encoding_label = null;
+   private Label encoding_description_label = null;
+   public MyButton start = null;
+   public MyButton cancel = null;
+   public CheckBox metadata = null;
+   public CheckBox decrypt = null;
+   public CheckBox qsfix = null;
+   public CheckBox twpdelete = null;
+   public CheckBox ipaddelete = null;
+   public CheckBox comskip = null;
+   public CheckBox comcut = null;
+   public CheckBox captions = null;
+   public CheckBox encode = null;
+   public CheckBox push = null;
+   public CheckBox custom = null;
+   private WebView text = null;
    private textpane textp = null;
-   private JProgressBar progressBar = null;
-   public  JScrollPane jobPane = null;
-   private ToolTipManager toolTips = null;
+   private jobTable jobTab = null;
+   private ProgressBar progressBar = null;
+   public  ScrollPane jobPane = null;
    
    private Hashtable<String,tivoTab> tivoTabs = new Hashtable<String,tivoTab>();
-   private Hashtable<String,String> looksMap = new Hashtable<String,String>();
-   public static Hashtable<String,Icon> Images;
+   public static Hashtable<String,Image> Images;
    
    public remotegui remote_gui = null;
    public slingboxgui  slingbox_gui = null;
    
    public ShowDetails show_details = null;
    
-   public tivoTab getTab(String tabName) {
-      return tivoTabs.get(tabName);
-   }
-   
-   public JFrame getJFrame() {
+   public Stage getFrame() {
       debug.print("");
-      if (jFrame == null) {
-         jFrame = new JFrame();
-         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-         jFrame.setJMenuBar(getJJMenuBar());
-         jFrame.setContentPane(getJContentPane());
-         
-         // Add additional ipad remote tab
-         remote_gui = new remotegui(jFrame);
-         tabbed_panel.add("Remote", remote_gui.getPanel());
-         
-         //jFrame.setMinimumSize(new Dimension(700,600));
-         //jFrame.setPreferredSize(jFrame.getMinimumSize());
-         setFontSize(config.FontSize);
-         jFrame.pack();
-         jFrame.setTitle(title);
-         jobTab_packColumns(5);
-         
-         addGlobalKeyListener();
-         
-         // Restore last GUI run settings from file
-         readSettings();
-         
-         // Enable/disable options according to configuration
-         refreshOptions(true);
-         
-         // Create and enable/disable component tooltips
-         toolTips = ToolTipManager.sharedInstance();
-         toolTips.setDismissDelay(config.toolTipsTimeout*1000);
-         toolTips.setInitialDelay(500);
-         setToolTips();
-         enableToolTips(config.toolTips);
-         
-         // Set master flag indicating that kmttg is running in GUI mode
-         config.GUIMODE = true;
-         
-         // Create NowPlaying icons
-         CreateImages();
-         
-         // Init show_details dialog
-         show_details = new ShowDetails(jFrame, null);
-         
-         // Start NPL jobs
-         if (config.npl_when_started == 1)
-            initialNPL(config.TIVOS);
-      }
       return jFrame;
    }
    
+   public tivoTab getTab(String tabName) {
+      debug.print("tabName=" + tabName);
+      return tivoTabs.get(tabName);
+   }
+   
+   public void Launch() {
+      debug.print("");
+      launch();
+   }
+   
+   @Override
+   public void start(Stage stage) {
+      debug.print("stage=" + stage);
+      jFrame = stage;
+      Scene scene = new Scene(new VBox());
+      MenuBar menubar = getMenuBar();
+      
+      // Build main canvas components
+      getContentPane();
+      config.gui = this;
+            
+      VBox main_canvas = new VBox();
+      main_canvas.setSpacing(5);
+      main_canvas.getChildren().add(jContentPane);
+      ((VBox) scene.getRoot()).getChildren().addAll(menubar, main_canvas);
+      
+      // Add additional ipad remote tab
+      remote_gui = new remotegui(jFrame);
+      addTabPane("Remote", tabbed_panel, remote_gui.getPanel());
+      
+      // Init TableMap utility class
+      TableMap.init();
+      
+      setFontSize(scene, config.FontSize);
+      jobTab_packColumns(5);
+      addGlobalKeyListener(scene);
+      jFrame.setScene(scene);      
+      jFrame.setTitle(title);
+      jFrame.setOnCloseRequest(new EventHandler<WindowEvent>() {
+         @Override
+         public void handle(WindowEvent event) {
+            saveSettings();
+            System.exit(0);
+         }
+      });
+      jFrame.setWidth(1000);
+      jFrame.setHeight(800);
+
+      // Pack table columns when content pane resized
+      scene.widthProperty().addListener(new ChangeListener<Number>() {
+         @Override
+         public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+            TableUtil.autoSizeTableViewColumns(jobTab.JobMonitor, false);
+         }
+      });
+      
+      // Restore last GUI run settings from file
+      readSettings();
+      
+      // Enable/disable options according to configuration
+      refreshOptions(true);
+      
+      // Create and enable/disable component tooltips
+      MyTooltip.enableToolTips(config.toolTips);
+      setToolTips();
+      
+      // Set master flag indicating that kmttg is running in GUI mode
+      config.GUIMODE = true;
+      
+      jFrame.show();
+      
+      // Create NowPlaying icons
+      CreateImages();
+      
+      // Init show_details dialog
+      show_details = new ShowDetails(jFrame, null);
+      
+      // Start NPL jobs
+      if (config.npl_when_started == 1)
+         initialNPL(config.TIVOS);
+      
+      config.gui = this;
+      
+      setLookAndFeel(config.lookAndFeel);
+      
+      // Download tools if necessary
+      mainInstall.install();
+
+      // Invoke a 1000ms period timer for job monitor
+      kmttg.timer = new Timer();
+      kmttg.timer.schedule(
+         new TimerTask() {
+             @Override
+             public void run() {
+                Platform.runLater(new Runnable() {
+                   @Override public void run() {
+                      jobMonitor.monitor(config.gui);
+                   }
+                });
+             }
+         }
+         ,0,
+         1000
+      );
+      
+      // Upon startup, try and load saved queue
+      if (config.persistQueue)
+         jobMonitor.loadAllJobs(10);   // delay load to give gui time to setup
+      kmttg._startingUp = false;
+   }
+   
    // Adds a universal key listener so that menu shortcuts work as expected
-   public void addGlobalKeyListener() {
-      class KeyDispatcher implements KeyEventDispatcher {
-         public boolean dispatchKeyEvent(KeyEvent e) {
+   public void addGlobalKeyListener(Scene scene) {
+      debug.print("scene=" + scene);
+      scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+         public void handle(KeyEvent e) {
             String tabName = getCurrentTabName();
             if (tabName.equals("Remote")) {
                String subTabName = config.gui.remote_gui.getCurrentTabName();
                if (subTabName.equals("Remote")) {
                   // For Remote-Remote tab don't want to interfere with anything
-                  return false;
+                  return;
                }
             }
             
             // Proceed with handling menu keyboard accelerators
-            if (e.getID() == KeyEvent.KEY_PRESSED && e.isControlDown()) {
-               if (e.getKeyCode() == KeyEvent.VK_L) {
-                  clearMessagesMenuItem.doClick();
-                  return true;
+            if (e.getEventType() == KeyEvent.KEY_PRESSED && e.isControlDown()) {
+               if (e.getCode() == KeyCode.L) {
+                  clearMessagesMenuItem.fire();
+                  e.consume();
                }
-               if (e.getKeyCode() == KeyEvent.VK_E) {
-                  refreshEncodingsMenuItem.doClick();
-                  return true;
+               if (e.getCode() == KeyCode.E) {
+                  refreshEncodingsMenuItem.fire();
+                  e.consume();
                }
-               if (e.getKeyCode() == KeyEvent.VK_M) {
-                  saveMessagesMenuItem.doClick();
-                  return true;
+               if (e.getCode() == KeyCode.M) {
+                  saveMessagesMenuItem.fire();
+                  e.consume();
                }
-               if (e.getKeyCode() == KeyEvent.VK_O) {
-                  configureMenuItem.doClick();
-                  return true;
+               if (e.getCode() == KeyCode.O) {
+                  configureMenuItem.fire();
+                  e.consume();
                }
-               /*if (e.getKeyCode() == KeyEvent.VK_R) {
-                  resetServerMenuItem.doClick();
+               /*if (e.getCode() == KeyCode.R) {
+                  resetServerMenuItem.fire();
                   return true;
                }*/
-               if (e.getKeyCode() == KeyEvent.VK_S) {
-                  searchMenuItem.doClick();
-                  return true;
+               if (e.getCode() == KeyCode.S) {
+                  searchMenuItem.fire();
+                  e.consume();
                }
-               if (e.getKeyCode() == KeyEvent.VK_T) {
-                  thumbsMenuItem.doClick();
-                  return true;
+               if (e.getCode() == KeyCode.T) {
+                  thumbsMenuItem.fire();
+                  e.consume();
                }
             }
-            // Allow event to be passed along
-            return false;
          }
-      }
-           
-      KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-      manager.addKeyEventDispatcher( new KeyDispatcher() );
+      });           
    }
 
-   public void setFontSize(int fontSize) {
-      Enumeration<Object> keys = UIManager.getDefaults().keys();
-      while (keys.hasMoreElements()) {
-         Object key = keys.nextElement();
-         Object value = UIManager.get(key);
-         if (value != null && value instanceof FontUIResource) {
-            UIManager.put(key, null);
-            Font font = UIManager.getFont(key);
-            if (font != null) {
-               UIManager.put(key, new FontUIResource(font.getFamily(), font.getStyle(), fontSize));
-            }
-         }
-      }
-      config.tableFont = new Font("System", Font.BOLD, fontSize);
-      SwingUtilities.updateComponentTreeUI(jFrame);
-      
-      // Update config dialog fonts if created
-      JDialog d = configMain.getDialog();
-      if (d != null) {
-         SwingUtilities.updateComponentTreeUI(d);
-         d.pack();
-      }
-      
-      // Update auto config dialog fonts if created
-      d = configAuto.getDialog();
-      if (d != null) {
-         SwingUtilities.updateComponentTreeUI(d);
-         d.pack();
+   public void setFontSize(Scene scene, int fontSize) {
+      debug.print("scene=" + scene + " fontSize=" + fontSize);
+      scene.getRoot().setStyle("-fx-font-size: " + fontSize + "pt; -fx-font-family: \"SansSerif\"");
+      //listFontFamilies();
+   }
+
+   public void setFontSize(Dialog<?> dialog, int fontSize) {
+      debug.print("dialog=" + dialog + " fontSize=" + fontSize);
+      dialog.getDialogPane().setStyle("-fx-font-size: " + fontSize + "pt; -fx-font-family: \"SansSerif\"");
+   }
+
+   public void setFontSize(Alert alert, int fontSize) {
+      debug.print("alert=" + alert + " fontSize=" + fontSize);
+      alert.getDialogPane().setStyle("-fx-font-size: " + fontSize + "pt; -fx-font-family: \"SansSerif\"");
+   }
+   
+   public void listFontFamilies() {
+      debug.print("");
+      List<String> familiesList = Font.getFamilies();
+      for (String family : familiesList) {
+         System.out.println(family);
       }
    }
    
    public void setLookAndFeel(String name) {
+      debug.print("name=" + name);
       if (name == null)
-         name = "default";
-      config.lookAndFeel = name;
-      if (looksMap.size() == 0)
-         getAvailableLooks();
-      if (name.equals("default"))
-         name = UIManager.getCrossPlatformLookAndFeelClassName();
-      else
-         name = looksMap.get(name);
-      try {
-         JDialog d = configMain.getDialog();
-         JDialog a = configAuto.getDialog();
-         UIManager.setLookAndFeel(name);
-         SwingUtilities.updateComponentTreeUI(jFrame);
-         if (d != null) {
-            SwingUtilities.updateComponentTreeUI(d);
-            d.pack();
-         }
-         if (a != null) {
-            SwingUtilities.updateComponentTreeUI(a);
-            a.pack();
-         }
-      } catch (Exception e) {
-         log.error("setLookAndFeel - " + e.getMessage());
+         name = "default.css";
+      if (!name.endsWith(".css"))
+         name += ".css";
+      config.cssFile = name;
+      File f = new File(config.cssDir + File.separator + config.cssFile);
+      if (f.exists()) {
+         // NOTE: This css will apply to any/all Stages
+         Application.setUserAgentStylesheet(null);
+         StyleManager.getInstance().addUserAgentStylesheet(f.toURI().toString());
+      } else {
+         log.error("Unable to load css file: " + f.getAbsolutePath());
       }
    }
    
-   public String[] getAvailableLooks() {
-      UIManager.LookAndFeelInfo[] info = UIManager.getInstalledLookAndFeels();
-      String[] looks = new String [info.length+1];
-      looks[0] = "default";
-      int k = 1;
-      for (int i=0; i<info.length; i++) {
-          looks[k++] = info[i].getName();
-          looksMap.put(info[i].getName(), info[i].getClassName());
+   public List<String> getAvailableLooks() {
+      debug.print("");
+      // Parse available css files in css dir
+      String dir = config.cssDir;
+      
+      File d = new File(dir);
+      if ( ! d.isDirectory() ) {
+         log.error("css dir not valid: " + dir);
+         return null;
       }
-      return looks;
+      FilenameFilter filter = new FilenameFilter() {
+         public boolean accept(File dir, String name) {
+            debug.print("dir=" + dir + " name=" + name);
+            File d = new File(dir.getPath() + File.separator + name);
+            if (d.isDirectory()) {
+               return false;
+            }
+            // .css files
+            if ( name.toLowerCase().endsWith(".css") ) {
+               if (name.toLowerCase().equals("kmttg.css"))
+                  return false;
+               return true;
+            }
+            return false;
+         }
+      };
+     
+      // Define list of filter entries
+      List<String> css_list = new ArrayList<String>();
+      File[] files = d.listFiles(filter);
+      for (int i=0; i<files.length; i++) {
+         css_list.add(files[i].getName());
+      }
+      
+      // Sort encode list alphabetically
+      Collections.sort(css_list);
+      return css_list;
    }
    
    public void grabFocus() {
+      debug.print("");
       if (jFrame != null)
-         if(! jFrame.hasFocus()) { jFrame.requestFocus(); }
+         if(! jFrame.isFocused()) { jFrame.requestFocus(); }
    }
    
-   private Container getJContentPane() {
+   private SplitPane getContentPane() {
       debug.print("");
       if (jContentPane == null) {
-         
-         GridBagConstraints c = new GridBagConstraints();
-         c.insets = new Insets(0, 2, 0, 2);
-         c.ipadx = 0;
-         c.ipady = 0;
-         c.weighty = 0.0;  // default to no vertical stretch
-         c.weightx = 0.0;  // default to no horizontal stretch
-         c.gridwidth = 1;
-         c.gridheight = 1;
-         c.anchor = GridBagConstraints.CENTER;
-         c.fill = GridBagConstraints.HORIZONTAL;
-
-         int gy=0;
-         
+                  
          // CANCEL JOBS button
-         cancel = new JButton("CANCEL JOBS");
-         cancel.setMargin(new Insets(0,1,0,1));
-         cancel.setToolTipText(getToolTip("cancel"));
-         cancel.setBackground(config.lightRed);
-         cancel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
+         cancel = new MyButton("CANCEL JOBS");
+         cancel.setPadding(new Insets(1,2,1,2));
+         cancel.setTooltip(getToolTip("cancel"));
+         cancel.setMinWidth(100);
+         cancel.setId("button_job_cancel");
+         cancel.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                cancelCB();
             }
          });
 
          // START JOBS button
-         start = new JButton("START JOBS");
-         start.setMargin(new Insets(0,1,0,1));
-         start.setToolTipText(getToolTip("start"));
-         start.setBackground(Color.green);
-         start.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
+         start = new MyButton("START JOBS");
+         start.setPadding(new Insets(1,2,1,2));
+         start.setTooltip(getToolTip("start"));
+         start.setId("button_job_start");
+         start.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                String tivoName = getCurrentTabName();
                if (tivoName.equals("Remote"))
                   log.error("START JOBS invalid with Remote tab selected.");
@@ -339,86 +451,58 @@ public class gui {
                   tivoTabs.get(tivoName).startCB();
             }
          });
-
+         
          // Tasks
-         metadata = new JCheckBox("metadata", false);         
-         decrypt = new JCheckBox("decrypt", true);         
-         qsfix = new JCheckBox("QS Fix", false);         
-         qsfix.addActionListener(new ActionListener() {
-            // Call refreshOptions whenever this is toggled
-            public void actionPerformed(ActionEvent e) {
+         metadata = new CheckBox("metadata"); metadata.setSelected(false);
+         decrypt = new CheckBox("decrypt"); decrypt.setSelected(true);        
+         qsfix = new CheckBox("QS Fix"); qsfix.setSelected(false);        
+         qsfix.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                refreshOptions(false);
             }
          });
-         twpdelete = new JCheckBox("TWP Delete", false);         
-         ipaddelete = new JCheckBox("iPad Delete", false);         
-         comskip = new JCheckBox("Ad Detect", false);         
-         comcut = new JCheckBox("Ad Cut", false);         
-         captions = new JCheckBox("captions", false);         
-         encode = new JCheckBox("encode", false);
-         push = new JCheckBox("push", false);
-         /* This intentionally disabled for now
-         encode.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               boolean selected = encode.isSelected();
-               if (config.VRD == 0) {
-                  if (selected) {
-                     if (config.OS.equals("windows") && file.isFile(config.mencoder)) {
-                        qsfix.setEnabled(true);
-                        qsfix.setSelected(true);
-                     }
-                  } else {
-                     qsfix.setEnabled(false);
-                     qsfix.setSelected(false);
-                  }
-               }
-            }
-         });
-         */
-         custom = new JCheckBox("custom", false);
+         twpdelete = new CheckBox("TWP Delete"); twpdelete.setSelected(false);        
+         ipaddelete = new CheckBox("iPad Delete");  ipaddelete.setSelected(false);       
+         comskip = new CheckBox("Ad Detect"); comskip.setSelected(false);        
+         comcut = new CheckBox("Ad Cut"); comcut.setSelected(false);        
+         captions = new CheckBox("captions"); captions.setSelected(false);        
+         encode = new CheckBox("encode"); encode.setSelected(false);
+         push = new CheckBox("push"); push.setSelected(false);
+         custom = new CheckBox("custom"); custom.setSelected(false);
          
          // Tasks row
-         JPanel tasks_panel = new JPanel();
-         tasks_panel.setLayout(new BoxLayout(tasks_panel, BoxLayout.X_AXIS));
-         Dimension space_5 = new Dimension(5,0);
-         tasks_panel.add(start);
-         tasks_panel.add(Box.createRigidArea(space_5));
-         tasks_panel.add(metadata);
-         tasks_panel.add(Box.createRigidArea(space_5));
-         tasks_panel.add(decrypt);
-         tasks_panel.add(Box.createRigidArea(space_5));
-         tasks_panel.add(qsfix);
+         HBox tasks_panel = new HBox();
+         tasks_panel.setAlignment(Pos.CENTER_LEFT);
+         tasks_panel.setPadding(new Insets(0,0,0,5));
+         tasks_panel.setSpacing(5);
+         tasks_panel.getChildren().add(start);
+         tasks_panel.getChildren().add(metadata);
+         tasks_panel.getChildren().add(decrypt);
+         tasks_panel.getChildren().add(qsfix);
          if (config.twpDeleteEnabled()) {
-            tasks_panel.add(Box.createRigidArea(space_5));
-            tasks_panel.add(twpdelete);            
+            tasks_panel.getChildren().add(twpdelete);            
          }
          if (config.ipadDeleteEnabled()) {
-            tasks_panel.add(Box.createRigidArea(space_5));
-            tasks_panel.add(ipaddelete);            
+            tasks_panel.getChildren().add(ipaddelete);            
          }
-         tasks_panel.add(Box.createRigidArea(space_5));
-         tasks_panel.add(comskip);
-         tasks_panel.add(Box.createRigidArea(space_5));
-         tasks_panel.add(comcut);
-         tasks_panel.add(Box.createRigidArea(space_5));
-         tasks_panel.add(captions);
-         tasks_panel.add(Box.createRigidArea(space_5));
-         tasks_panel.add(encode);
-         tasks_panel.add(Box.createRigidArea(space_5));
-         tasks_panel.add(custom);
-         tasks_panel.add(Box.createRigidArea(space_5));
-         tasks_panel.add(push);
+         tasks_panel.getChildren().add(comskip);
+         tasks_panel.getChildren().add(comcut);
+         tasks_panel.getChildren().add(captions);
+         tasks_panel.getChildren().add(encode);
+         tasks_panel.getChildren().add(custom);
+         tasks_panel.getChildren().add(push);
          
          // Encoding row
          // Encoding label
-         encoding_label = new JLabel("Encoding Profile:", JLabel.CENTER);
+         encoding_label = new Label("Encoding Profile:");
+         encoding_label.setTextAlignment(TextAlignment.CENTER);
  
          // Encoding names combo box
-         encoding = new JComboBox();
+         encoding = new ComboBox<String>();
          SetEncodings(encodeConfig.getValidEncodeNames());
-         encoding.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
+         encoding.valueProperty().addListener(new ChangeListener<String>() {
+            @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
+               if (newVal != null) {
                   encodingCB(encoding);
                }
             }
@@ -429,235 +513,181 @@ public class gui {
          if (encodeConfig.getValidEncodeNames().size() > 0) {
             description = "  " + encodeConfig.getDescription(encodeConfig.getEncodeName());
          }
-         encoding_description_label = new JLabel(description);
+         encoding_description_label = new Label(description);
 
-         JPanel encoding_panel = new JPanel();
-         encoding_panel.setLayout(new BoxLayout(encoding_panel, BoxLayout.X_AXIS));
-         encoding_panel.add(encoding_label);
-         encoding_panel.add(Box.createRigidArea(space_5));
-         encoding_panel.add(encoding);
-         encoding_panel.add(Box.createRigidArea(space_5));
-         encoding_panel.add(encoding_description_label);
+         HBox encoding_panel = new HBox();
+         encoding_panel.setAlignment(Pos.CENTER_LEFT);
+         encoding_panel.setPadding(new Insets(0,0,0,5));
+         encoding_panel.setSpacing(5);
+         encoding_panel.getChildren().add(encoding_label);
+         encoding_panel.getChildren().add(encoding);
+         encoding_panel.getChildren().add(encoding_description_label);
          
          // Job Monitor table
          jobTab = new jobTable();
-         jobPane = new JScrollPane(jobTab.JobMonitor);
+         jobPane = new ScrollPane(jobTab.JobMonitor);
+         jobPane.setFitToHeight(true);
+         jobPane.setFitToWidth(true);
          
          // Progress Bar
-         progressBar = new JProgressBar();
-         progressBar.setBackground(Color.gray);
-         progressBar.setForeground(Color.green);
+         progressBar = new ProgressBar();
+         progressBar.setId("progressbar_job");
+         progressBar.setProgress(0);
 
          // Message area
-         text = new JTextPane();
+         text = new WebView();
          textp = new textpane(text);
-         text.setEditable(false);
-         JScrollPane messagePane = new JScrollPane(text);
                   
          // Tabbed panel
-         tabbed_panel = new JTabbedPane();
-         tabbed_panel.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-               if (getCurrentTabName().equals("Remote")) {
+         tabbed_panel = new TabPane();
+         tabbed_panel.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+         tabbed_panel.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
+            @Override public void changed(ObservableValue<? extends Tab> ov, Tab oldVal, Tab newVal) {
+               if (getCurrentTabName() != null && getCurrentTabName().equals("Remote")) {
                   // Set focus on remote pane
-                  remote_gui.tabbed_panel.requestFocusInWindow();
+                  remote_gui.tabbed_panel.requestFocus();
                }
             }
-        });
-
+         });
 
          // Add permanent tabs
          tivoTabs.put("FILES", new tivoTab("FILES"));
-         tabbed_panel.add("FILES", tivoTabs.get("FILES").getPanel());
+         addTabPane("FILES", tabbed_panel, tivoTabs.get("FILES").getPanel());
          
          // Add Tivo tabs
          SetTivos(config.TIVOS);
          
          // Cancel pane
-         JPanel cancel_pane = new JPanel(new GridBagLayout());
-         gy=0;
-         c.gridx = 0;
-         c.gridy = gy;
-         c.weightx = 0;
-         c.gridwidth = 1;
-         c.anchor = GridBagConstraints.WEST;
-         c.fill = GridBagConstraints.NONE;
-         cancel_pane.add(cancel, c);
-         
-         c.gridx = 1;
-         c.gridy = gy;
-         c.gridwidth = 7;
-         c.weightx = 1;
-         c.weighty = 0;
-         c.anchor = GridBagConstraints.CENTER;
-         c.fill = GridBagConstraints.HORIZONTAL;
-         cancel_pane.add(progressBar, c);
+         HBox cancel_pane_stretch = new HBox();
+         cancel_pane_stretch.getChildren().add(progressBar);
+         //cancel_pane_stretch.setAlignment(Pos.CENTER_LEFT);
+         HBox cancel_pane = new HBox();
+         cancel_pane.setPadding(new Insets(0,0,0,5));
+         cancel_pane.setSpacing(5);
+         cancel_pane.getChildren().addAll(cancel, cancel_pane_stretch);         
+         HBox.setHgrow(cancel_pane_stretch, Priority.ALWAYS);  // stretch horizontally
+         // Bind progressBar width to cancel_pane_stretch width so it will grow horizontally
+         progressBar.prefWidthProperty().bind(
+            cancel_pane.widthProperty().subtract(cancel.widthProperty().subtract(-15))
+         );
          
          // Create a split pane between job & messages pane
-         splitBottom = new JSplitPane(
-            JSplitPane.VERTICAL_SPLIT, jobPane, messagePane
-         );
-         splitBottom.setDividerLocation(130);
+         splitBottom = new SplitPane();
+         splitBottom.setOrientation(Orientation.VERTICAL);
+         splitBottom.getItems().add(jobPane);
+         splitBottom.getItems().add(text);
+         splitBottom.setDividerPosition(0, 0.55);
          
          // bottomPane will consist of cancel_pane & splitBottom
-         JPanel bottomPane = new JPanel(new GridBagLayout());
-         
-         gy=0;
-         c.gridx = 0;
-         c.gridy = gy;
-         c.gridwidth = 8;
-         c.weighty = 0;
-         c.fill = GridBagConstraints.HORIZONTAL;
-         c.anchor = GridBagConstraints.NORTH;
-         bottomPane.add(cancel_pane, c);
-         
-         gy++;
-         c.weightx = 1.0;    // stretch horizontally
-         c.weighty = 1.0;      // stretch vertically
-         c.gridwidth = 8;
-         c.gridx = 0;
-         c.gridy = gy;
-         c.fill = GridBagConstraints.BOTH;
-         c.anchor = GridBagConstraints.SOUTH;
-         bottomPane.add(splitBottom, c);
+         VBox bottomPane = new VBox();         
+         bottomPane.getChildren().add(cancel_pane);
+         bottomPane.getChildren().add(splitBottom);
+         HBox.setHgrow(splitBottom, Priority.ALWAYS); // stretch horizontally
+         VBox.setVgrow(splitBottom, Priority.ALWAYS); // stretch vertically
          
          // topPane will consist of tasks & tabbed_panel
-         JPanel topPane = new JPanel(new GridBagLayout());
-         
-         // Common settings for topPane
-         c.gridwidth = 8;
-         c.weightx = 1;
-         c.weighty = 0;
-         
-         gy=0;
-         c.gridx = 0;
-         c.gridy = gy;
-         c.fill = GridBagConstraints.HORIZONTAL;
-         c.weighty = 0;
-         topPane.add(tasks_panel, c);
-         gy++;
-         c.gridy = gy;
-         c.fill = GridBagConstraints.NONE;
-         c.anchor = GridBagConstraints.WEST;
-         topPane.add(encoding_panel, c);
-         
-         gy++;
-         c.gridx = 0;
-         c.gridy = gy;
-         c.weighty = 1.0;
-         c.gridwidth = 1;
-         c.fill = GridBagConstraints.BOTH;
-         c.anchor = GridBagConstraints.NORTH;
-         topPane.add(tabbed_panel, c);
+         VBox topPane = new VBox();
+         topPane.setSpacing(5);
+         topPane.getChildren().add(tasks_panel);
+         HBox.setHgrow(tasks_panel, Priority.ALWAYS);  // stretch horizontally
+         topPane.getChildren().add(encoding_panel);         
+         topPane.getChildren().add(tabbed_panel);
+         HBox.setHgrow(tabbed_panel, Priority.ALWAYS); // stretch horizontally
+         VBox.setVgrow(tabbed_panel, Priority.ALWAYS); // stretch vertically
          
          // Put all panels together
-         jContentPane = new JSplitPane(
-            JSplitPane.VERTICAL_SPLIT, topPane, bottomPane
-         );
-         jContentPane.setDividerLocation(330);
-
-         // Pack table columns when content pane resized
-         jContentPane.addHierarchyBoundsListener(new HierarchyBoundsListener() {
-            public void ancestorMoved(HierarchyEvent arg0) {
-               // Don't care about movement
-            }
-            public void ancestorResized(HierarchyEvent arg0) {
-               jobTab.packColumns(jobTab.JobMonitor, 2);
-            }
-         });
+         jContentPane = new SplitPane();
+         jContentPane.setOrientation(Orientation.VERTICAL);
+         jContentPane.getItems().add(topPane);
+         jContentPane.getItems().add(bottomPane);
+         jContentPane.setDividerPosition(0, 0.57);
       }
       
       return jContentPane;
    }
    
-   private JMenuBar getJJMenuBar() {
+   private MenuBar getMenuBar() {
       debug.print("");
-      if (jJMenuBar == null) {
-         jJMenuBar = new JMenuBar();
-         jJMenuBar.add(getFileMenu());
-         jJMenuBar.add(getAutoTransfersMenu());
-         // This causes remaining menus to be right justified
-         jJMenuBar.add(Box.createGlue());
-         jJMenuBar.add(getHelpMenu());
+      if (menuBar == null) {
+         menuBar = new MenuBar();
+         menuBar.getMenus().addAll(getFileMenu(), getAutoTransfersMenu());
+         menuBar.getMenus().add(getHelpMenu());
       }
-      return jJMenuBar;
+      return menuBar;
    }
 
-   private JMenu getFileMenu() {
+   private Menu getFileMenu() {
       debug.print("");
       if (fileMenu == null) {
-         fileMenu = new JMenu();
-         fileMenu.setText("File");
-         fileMenu.add(getConfigureMenuItem());
-         fileMenu.add(getRefreshEncodingsMenuItem());
-         fileMenu.add(getSaveMessagesMenuItem());
-         fileMenu.add(getClearMessagesMenuItem());
-         //fileMenu.add(getResetServerMenuItem());
+         fileMenu = new Menu("File");
+         fileMenu.getItems().add(getConfigureMenuItem());
+         fileMenu.getItems().add(getRefreshEncodingsMenuItem());
+         fileMenu.getItems().add(getSaveMessagesMenuItem());
+         fileMenu.getItems().add(getClearMessagesMenuItem());
+         //fileMenu.getItems().add(getResetServerMenuItem());
          if (config.getTivoUsername() != null)
-            fileMenu.add(getPushesMenuItem());
-         fileMenu.add(getResumeDownloadsMenuItem());
-         fileMenu.add(getJobMenu());
-         fileMenu.add(getSearchMenuItem());
+            fileMenu.getItems().add(getPushesMenuItem());
+         fileMenu.getItems().add(getResumeDownloadsMenuItem());
+         fileMenu.getItems().add(getJobMenu());
+         fileMenu.getItems().add(getSearchMenuItem());
          //fileMenu.add(getThumbsMenuItem());
          // Create thumbs menu item but don't add to File menu
          getThumbsMenuItem();
-         fileMenu.add(getExitMenuItem());
+         fileMenu.getItems().add(getExitMenuItem());
       }
       return fileMenu;
    }
    
-   private JMenu getJobMenu() {
+   private Menu getJobMenu() {
+      debug.print("");
       if (jobMenu == null) {
-         jobMenu = new JMenu();
-         jobMenu.setText("Jobs");
-         jobMenu.add(getToggleLaunchingJobsMenuItem());
-         jobMenu.add(getSaveJobsMenuItem());
-         jobMenu.add(getLoadJobsMenuItem());
+         jobMenu = new Menu("Jobs");
+         jobMenu.getItems().add(getToggleLaunchingJobsMenuItem());
+         jobMenu.getItems().add(getSaveJobsMenuItem());
+         jobMenu.getItems().add(getLoadJobsMenuItem());
       }
       return jobMenu;
    }
 
-   private JMenu getAutoTransfersMenu() {
+   private Menu getAutoTransfersMenu() {
       debug.print("");
       if (autoMenu == null) {
-         autoMenu = new JMenu();
-         autoMenu.setText("Auto Transfers");
-         autoMenu.add(getAutoConfigMenuItem());
+         autoMenu = new Menu("Auto Transfers");
+         autoMenu.getItems().add(getAutoConfigMenuItem());
          if (config.OS.equals("windows"))
-            autoMenu.add(getServiceMenu());
+            autoMenu.getItems().add(getServiceMenu());
          else
-            autoMenu.add(getBackgroundJobMenu());
-         autoMenu.add(getAddSelectedTitlesMenuItem());
-         autoMenu.add(getAddSelectedHistoryMenuItem());
-         autoMenu.add(getLogFileMenuItem());
-         autoMenu.add(getRunInGuiMenuItem());
-         autoMenu.add(getLoopInGuiMenuItem());
+            autoMenu.getItems().add(getBackgroundJobMenu());
+         autoMenu.getItems().add(getAddSelectedTitlesMenuItem());
+         autoMenu.getItems().add(getAddSelectedHistoryMenuItem());
+         autoMenu.getItems().add(getLogFileMenuItem());
+         autoMenu.getItems().add(getRunInGuiMenuItem());
+         autoMenu.getItems().add(getLoopInGuiMenuItem());
       }
       return autoMenu;
    }
 
-   private JMenu getHelpMenu() {
+   private Menu getHelpMenu() {
       debug.print("");
       if (helpMenu == null) {
-         helpMenu = new JMenu();
-         helpMenu.setText("Help");
-         helpMenu.add(getHelpAboutMenuItem());
-         helpMenu.add(getHelpUpdateMenuItem());
+         helpMenu = new Menu("Help");
+         helpMenu.getItems().add(getHelpAboutMenuItem());
+         helpMenu.getItems().add(getHelpUpdateMenuItem());
          if (config.OS.equals("windows") || config.OS.equals("mac"))
-            helpMenu.add(getHelpToolsUpdateMenuItem());
+            helpMenu.getItems().add(getHelpToolsUpdateMenuItem());
          else
-            helpMenu.add(getHelpToolsProjectXMenuItem());
+            helpMenu.getItems().add(getHelpToolsProjectXMenuItem());
       }
       return helpMenu;
    }
 
-   private JMenuItem getHelpAboutMenuItem() {
+   private MenuItem getHelpAboutMenuItem() {
       debug.print("");
       if (helpAboutMenuItem == null) {
-         helpAboutMenuItem = new JMenuItem();
+         helpAboutMenuItem = new MenuItem();
          helpAboutMenuItem.setText("About...");
-         helpAboutMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         helpAboutMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                help.showHelp();
             }
          });
@@ -665,13 +695,13 @@ public class gui {
       return helpAboutMenuItem;
    }
 
-   private JMenuItem getHelpUpdateMenuItem() {
+   private MenuItem getHelpUpdateMenuItem() {
       debug.print("");
       if (helpUpdateMenuItem == null) {
-         helpUpdateMenuItem = new JMenuItem();
+         helpUpdateMenuItem = new MenuItem();
          helpUpdateMenuItem.setText("Update kmttg...");
-         helpUpdateMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         helpUpdateMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                update.update_kmttg_background();
             }
          });
@@ -679,13 +709,13 @@ public class gui {
       return helpUpdateMenuItem;
    }
 
-   private JMenuItem getHelpToolsUpdateMenuItem() {
+   private MenuItem getHelpToolsUpdateMenuItem() {
       debug.print("");
       if (helpToolsUpdateMenuItem == null) {
-         helpToolsUpdateMenuItem = new JMenuItem();
+         helpToolsUpdateMenuItem = new MenuItem();
          helpToolsUpdateMenuItem.setText("Update tools...");
-         helpToolsUpdateMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         helpToolsUpdateMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                update.update_tools_background();
             }
          });
@@ -693,13 +723,13 @@ public class gui {
       return helpToolsUpdateMenuItem;
    }
 
-   private JMenuItem getHelpToolsProjectXMenuItem() {
+   private MenuItem getHelpToolsProjectXMenuItem() {
       debug.print("");
       if (helpToolsProjectXMenuItem == null) {
-         helpToolsProjectXMenuItem = new JMenuItem();
+         helpToolsProjectXMenuItem = new MenuItem();
          helpToolsProjectXMenuItem.setText("Update/Install ProjectX...");
-         helpToolsProjectXMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         helpToolsProjectXMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                update.update_projectx_background();
             }
          });
@@ -707,13 +737,13 @@ public class gui {
       return helpToolsProjectXMenuItem;
    }
 
-   private JMenuItem getExitMenuItem() {
+   private MenuItem getExitMenuItem() {
       debug.print("");
       if (exitMenuItem == null) {
-         exitMenuItem = new JMenuItem();
+         exitMenuItem = new MenuItem();
          exitMenuItem.setText("Exit");
-         exitMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         exitMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                System.exit(0);
             }
          });
@@ -721,13 +751,13 @@ public class gui {
       return exitMenuItem;
    }
 
-   private JMenuItem getAutoConfigMenuItem() {
+   private MenuItem getAutoConfigMenuItem() {
       debug.print("");
       if (autoConfigMenuItem == null) {
-         autoConfigMenuItem = new JMenuItem();
+         autoConfigMenuItem = new MenuItem();
          autoConfigMenuItem.setText("Configure...");
-         autoConfigMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         autoConfigMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                if (config_auto == null)
                   config_auto = new configAuto();
                config_auto.display(jFrame);
@@ -737,19 +767,23 @@ public class gui {
       return autoConfigMenuItem;
    }
 
-   private JMenuItem getSaveMessagesMenuItem() {
+   private MenuItem getSaveMessagesMenuItem() {
       debug.print("");
       if (saveMessagesMenuItem == null) {
-         saveMessagesMenuItem = new JMenuItem();
+         saveMessagesMenuItem = new MenuItem();
          saveMessagesMenuItem.setText("Save messages to file");
-         saveMessagesMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M,
-               Event.CTRL_MASK, true));
-         saveMessagesMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         saveMessagesMenuItem.setAccelerator(KeyCombination.keyCombination("Ctrl+M"));
+         saveMessagesMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                String file = config.programDir + File.separator + "kmttg.log";
                try {
+                  NodeList list = text.getEngine().getDocument().getElementById("content").getChildNodes();
+                  StringBuilder sb = new StringBuilder();
+                  for (int i=0; i<list.getLength(); ++i) {
+                     sb.append(list.item(i).getTextContent() + "\r\n");
+                  }
                   BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
-                  ofp.write(text.getText());
+                  ofp.write(sb.toString());
                   ofp.close();
                   log.warn("Saved output messages to file: " + file);
                } catch (IOException ex) {
@@ -761,31 +795,28 @@ public class gui {
       return saveMessagesMenuItem;
    }
 
-   private JMenuItem getClearMessagesMenuItem() {
+   private MenuItem getClearMessagesMenuItem() {
       debug.print("");
       if (clearMessagesMenuItem == null) {
-         clearMessagesMenuItem = new JMenuItem();
+         clearMessagesMenuItem = new MenuItem();
          clearMessagesMenuItem.setText("Clear all messages");
-         clearMessagesMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,
-               Event.CTRL_MASK, true));
-         clearMessagesMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               text.setEditable(true);
-               text.setText("");
-               text.setEditable(false);
+         clearMessagesMenuItem.setAccelerator(KeyCombination.keyCombination("Ctrl+L"));
+         clearMessagesMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
+               textp.clear();
             }
          });
       }
       return clearMessagesMenuItem;
    }
 
-   /*private JMenuItem getResetServerMenuItem() {
+   /*private MenuItem getResetServerMenuItem() {
       debug.print("");
       if (resetServerMenuItem == null) {
-         resetServerMenuItem = new JMenuItem();
+         resetServerMenuItem = new MenuItem();
          resetServerMenuItem.setText("Reset TiVo web server");
-         resetServerMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         resetServerMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                String tivoName = getSelectedTivoName();
                if (tivoName != null) {
                   String urlString = "http://" + config.TIVOS.get(tivoName) + "/TiVoConnect?Command=ResetServer";
@@ -810,13 +841,13 @@ public class gui {
       return resetServerMenuItem;
    }*/
 
-   private JMenuItem getPushesMenuItem() {
+   private MenuItem getPushesMenuItem() {
       debug.print("");
       if (pushesMenuItem == null) {
-         pushesMenuItem = new JMenuItem();
+         pushesMenuItem = new MenuItem();
          pushesMenuItem.setText("Show pending pyTivo pushes");
-         pushesMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         pushesMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                log.print(config.pyTivo_mind);
                String tivoName = getSelectedTivoName();
                if (tivoName == null)
@@ -826,7 +857,7 @@ public class gui {
                   if (config.pyTivo_mind.startsWith("staging"))
                      config.middlemind_host = "stagingmiddlemind.tivo.com";
                   log.warn("Querying middlemind host: " + config.middlemind_host);
-                  new Pushes(tivoName, getJFrame());
+                  new Pushes(tivoName, getFrame());
                }
             }
          });
@@ -834,16 +865,14 @@ public class gui {
       return pushesMenuItem;
    }
    
-   private JMenuItem getToggleLaunchingJobsMenuItem() {
+   private MenuItem getToggleLaunchingJobsMenuItem() {
       debug.print("");
       if (toggleLaunchingJobsMenuItem == null) {
-         toggleLaunchingJobsMenuItem = new JCheckBoxMenuItem();
+         toggleLaunchingJobsMenuItem = new CheckMenuItem();
          toggleLaunchingJobsMenuItem.setText("Do not launch queued jobs");
-         toggleLaunchingJobsMenuItem.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-               AbstractButton button = (AbstractButton) e.getItem();
-               Boolean enabled = button.isSelected();
-               if (enabled) {
+         toggleLaunchingJobsMenuItem.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            public void changed(ObservableValue<? extends Boolean> e, Boolean oldVal, Boolean newVal) {
+               if (newVal) {
                   jobMonitor.NoNewJobs = true;
                   log.warn("Launching queued jobs disabled. Queued jobs will not be launched.");
                } else {
@@ -856,13 +885,13 @@ public class gui {
       return toggleLaunchingJobsMenuItem;
    }
 
-   private JMenuItem getSaveJobsMenuItem() {
+   private MenuItem getSaveJobsMenuItem() {
       debug.print("");
       if (saveJobsMenuItem == null) {
-         saveJobsMenuItem = new JMenuItem();
+         saveJobsMenuItem = new MenuItem();
          saveJobsMenuItem.setText("Save queued jobs");
-         saveJobsMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         saveJobsMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                jobMonitor.saveQueuedJobs();
             }   
          });
@@ -870,13 +899,13 @@ public class gui {
       return saveJobsMenuItem;
    }
 
-   private JMenuItem getLoadJobsMenuItem() {
+   private MenuItem getLoadJobsMenuItem() {
       debug.print("");
       if (loadJobsMenuItem == null) {
-         loadJobsMenuItem = new JMenuItem();
+         loadJobsMenuItem = new MenuItem();
          loadJobsMenuItem.setText("Load queued jobs");
-         loadJobsMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         loadJobsMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                jobMonitor.loadQueuedJobs();
             }
          });
@@ -884,13 +913,13 @@ public class gui {
       return loadJobsMenuItem;
    }
    
-   private JMenuItem getRunInGuiMenuItem() {
+   private MenuItem getRunInGuiMenuItem() {
       debug.print("");
       if (runInGuiMenuItem == null) {
-         runInGuiMenuItem = new JMenuItem();
+         runInGuiMenuItem = new MenuItem();
          runInGuiMenuItem.setText("Run Once in GUI");
-         runInGuiMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         runInGuiMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                autoRunInGUICB();
             }
          });
@@ -898,30 +927,28 @@ public class gui {
       return runInGuiMenuItem;
    }
    
-   private JMenuItem getLoopInGuiMenuItem() {
+   private MenuItem getLoopInGuiMenuItem() {
       debug.print("");
       if (loopInGuiMenuItem == null) {
-         loopInGuiMenuItem = new JCheckBoxMenuItem();
+         loopInGuiMenuItem = new CheckMenuItem();
          loopInGuiMenuItem.setText("Loop in GUI");
-         loopInGuiMenuItem.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-               AbstractButton button = (AbstractButton) e.getItem();
-               autoLoopInGUICB(button.isSelected());
+         loopInGuiMenuItem.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            public void changed(ObservableValue<? extends Boolean> e, Boolean oldVal, Boolean newVal) {
+               autoLoopInGUICB(newVal);
             }
          });
       }
       return loopInGuiMenuItem;
    }
    
-   private JMenuItem getResumeDownloadsMenuItem() {
+   private MenuItem getResumeDownloadsMenuItem() {
       debug.print("");
       if (resumeDownloadsMenuItem == null) {
-         resumeDownloadsMenuItem = new JCheckBoxMenuItem();
+         resumeDownloadsMenuItem = new CheckMenuItem();
          resumeDownloadsMenuItem.setText("Resume Downloads");
-         resumeDownloadsMenuItem.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-               AbstractButton button = (AbstractButton) e.getItem();
-               config.resumeDownloads = button.isSelected();
+         resumeDownloadsMenuItem.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            public void changed(ObservableValue<? extends Boolean> e, Boolean oldVal, Boolean newVal) {
+               config.resumeDownloads = newVal;
                if (config.resumeDownloads) {
                   if (config.rpcnpl == 1) {
                      config.rpcnpl = 0;
@@ -939,48 +966,37 @@ public class gui {
       return resumeDownloadsMenuItem;
    }
    
-   private JMenuItem getAddSelectedTitlesMenuItem() {
+   private MenuItem getAddSelectedTitlesMenuItem() {
       debug.print("");
       if (addSelectedTitlesMenuItem == null) {
-         addSelectedTitlesMenuItem = new JMenuItem();
+         addSelectedTitlesMenuItem = new MenuItem();
          addSelectedTitlesMenuItem.setText("Add selected titles");
-         addSelectedTitlesMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               String tivoName = getSelectedTivoName();
-               if (tivoName != null) {
-                  // This is a TiVo tab
-                  tivoTabs.get(tivoName).autoSelectedTitlesCB();
-               } else {
-                  String tabName = getCurrentTabName();
-                  if (tabName.equals("Remote")) {
-                     // Several Remote tables have show titles that can be added
-                     String[] not_supported = {"Season Passes", "Remote", "Info"};
-                     String subTabName = config.gui.remote_gui.getCurrentTabName();
-                     Boolean proceed = true;
-                     for (String name : not_supported)
-                        if (name.equals(subTabName))
-                           proceed = false;
-                     if (proceed) {
-                        JXTable TABLE = config.gui.remote_gui.getCurrentTable();
-                        int[] selected = TableUtil.GetSelectedRows(TABLE);
-                        if (selected != null && selected.length > 0) {
-                           for (int row : selected) {
-                              JSONObject json = TableUtil.GetRowData(TABLE, row, "DATE");
-                              if (json.has("title")) {
-                                 try {
-                                    auto.autoAddTitleEntryToFile(json.getString("title"));
-                                 } catch (JSONException e1) {
-                                    log.error("Add selected titles json exception - " + e1.getMessage());
-                                 }
-                              }
+         addSelectedTitlesMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
+               TableMap tmap = TableMap.getCurrent();
+               if (! tmap.isRemote()) {
+                  // Non remote table
+                  tivoTabs.get(getSelectedTivoName()).autoSelectedTitlesCB();
+                  return;
+               }
+               // Processing for remote tables
+               if (tmap != null) {
+                  int[] selected = tmap.getSelected();
+                  if (selected != null && selected.length > 0) {
+                     for (int row : selected) {
+                        JSONObject json = tmap.getJson(row);
+                        if (json != null && json.has("title")) {
+                           try {
+                              auto.autoAddTitleEntryToFile(json.getString("title"));
+                           } catch (JSONException e1) {
+                              log.error("Add selected titles json exception - " + e1.getMessage());
                            }
-                        } else {
-                           log.error("No show selected in Remote table");
-                           return;                        
                         }
                      }
-                  } else
-                     log.error("This command must be run from a TiVo tab with selected tivo shows.");
+                  } else {
+                     log.error("No show selected in table");
+                     return;                        
+                  }
                }
             }
          });
@@ -988,13 +1004,13 @@ public class gui {
       return addSelectedTitlesMenuItem;
    }
 
-   private JMenuItem getAddSelectedHistoryMenuItem() {
+   private MenuItem getAddSelectedHistoryMenuItem() {
       debug.print("");
       if (addSelectedHistoryMenuItem == null) {
-         addSelectedHistoryMenuItem = new JMenuItem();
+         addSelectedHistoryMenuItem = new MenuItem();
          addSelectedHistoryMenuItem.setText("Add selected to history file");
-         addSelectedHistoryMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         addSelectedHistoryMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                String tivoName = getSelectedTivoName();
                if (tivoName != null) {
                   tivoTabs.get(tivoName).autoSelectedHistoryCB();
@@ -1007,13 +1023,13 @@ public class gui {
       return addSelectedHistoryMenuItem;
    }
 
-   private JMenuItem getLogFileMenuItem() {
+   private MenuItem getLogFileMenuItem() {
       debug.print("");
       if (logFileMenuItem == null) {
-         logFileMenuItem = new JMenuItem();
+         logFileMenuItem = new MenuItem();
          logFileMenuItem.setText("Examine log file...");
-         logFileMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         logFileMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                new autoLogView(jFrame);
             }
          });
@@ -1021,59 +1037,57 @@ public class gui {
       return logFileMenuItem;
    }
 
-   private JMenuItem getConfigureMenuItem() {
+   private MenuItem getConfigureMenuItem() {
       debug.print("");
       if (configureMenuItem == null) {
-         configureMenuItem = new JMenuItem();
+         configureMenuItem = new MenuItem();
          configureMenuItem.setText("Configure...");
-         configureMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         configureMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                configMain.display(jFrame);
             }
          });
-         configureMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
-               Event.CTRL_MASK, true));
+         configureMenuItem.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
       }
       return configureMenuItem;
    }
 
-   private JMenuItem getRefreshEncodingsMenuItem() {
+   private MenuItem getRefreshEncodingsMenuItem() {
       debug.print("");
       if (refreshEncodingsMenuItem == null) {
-         refreshEncodingsMenuItem = new JMenuItem();
+         refreshEncodingsMenuItem = new MenuItem();
          refreshEncodingsMenuItem.setText("Refresh Encoding Profiles");
-         refreshEncodingsMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         refreshEncodingsMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                refreshEncodingProfilesCB();
             }
          });
-         refreshEncodingsMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E,
-               Event.CTRL_MASK, true));
+         refreshEncodingsMenuItem.setAccelerator(KeyCombination.keyCombination("Ctrl+E"));
       }
       return refreshEncodingsMenuItem;
    }
 
-   private JMenu getServiceMenu() {
+   private Menu getServiceMenu() {
       debug.print("");
       if (serviceMenu == null) {
-         serviceMenu = new JMenu();
+         serviceMenu = new Menu();
          serviceMenu.setText("Service");
-         serviceMenu.add(getServiceStatusMenuItem());
-         serviceMenu.add(getServiceInstallMenuItem());
-         serviceMenu.add(getServiceStartMenuItem());
-         serviceMenu.add(getServiceStopMenuItem());
-         serviceMenu.add(getServiceRemoveMenuItem());
+         serviceMenu.getItems().add(getServiceStatusMenuItem());
+         serviceMenu.getItems().add(getServiceInstallMenuItem());
+         serviceMenu.getItems().add(getServiceStartMenuItem());
+         serviceMenu.getItems().add(getServiceStopMenuItem());
+         serviceMenu.getItems().add(getServiceRemoveMenuItem());
       }
       return serviceMenu;
    }
 
-   private JMenuItem getServiceStatusMenuItem() {
+   private MenuItem getServiceStatusMenuItem() {
       debug.print("");
       if (serviceStatusMenuItem == null) {
-         serviceStatusMenuItem = new JMenuItem();
+         serviceStatusMenuItem = new MenuItem();
          serviceStatusMenuItem.setText("Status");
-         serviceStatusMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         serviceStatusMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                String query = auto.serviceStatus();
                if (query != null) {
                   log.warn(query);
@@ -1084,13 +1098,13 @@ public class gui {
       return serviceStatusMenuItem;
    }
 
-   private JMenuItem getServiceInstallMenuItem() {
+   private MenuItem getServiceInstallMenuItem() {
       debug.print("");
       if (serviceInstallMenuItem == null) {
-         serviceInstallMenuItem = new JMenuItem();
+         serviceInstallMenuItem = new MenuItem();
          serviceInstallMenuItem.setText("Install");
-         serviceInstallMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         serviceInstallMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                String query = auto.serviceStatus();
                if (query != null) {                  
                   if (query.matches("^.+STATUS.+$")) {
@@ -1105,13 +1119,13 @@ public class gui {
       return serviceInstallMenuItem;
    }
 
-   private JMenuItem getServiceStartMenuItem() {
+   private MenuItem getServiceStartMenuItem() {
       debug.print("");
       if (serviceStartMenuItem == null) {
-         serviceStartMenuItem = new JMenuItem();
+         serviceStartMenuItem = new MenuItem();
          serviceStartMenuItem.setText("Start");
-         serviceStartMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         serviceStartMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                String query = auto.serviceStatus();
                if (query != null) {                  
                   if (query.matches("^.+RUNNING$")) {
@@ -1126,13 +1140,13 @@ public class gui {
       return serviceStartMenuItem;
    }
 
-   private JMenuItem getServiceStopMenuItem() {
+   private MenuItem getServiceStopMenuItem() {
       debug.print("");
       if (serviceStopMenuItem == null) {
-         serviceStopMenuItem = new JMenuItem();
+         serviceStopMenuItem = new MenuItem();
          serviceStopMenuItem.setText("Stop");
-         serviceStopMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         serviceStopMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                String query = auto.serviceStatus();
                if (query != null) {                  
                   if (query.matches("^.+STOPPED$")) {
@@ -1147,13 +1161,13 @@ public class gui {
       return serviceStopMenuItem;
    }
 
-   private JMenuItem getServiceRemoveMenuItem() {
+   private MenuItem getServiceRemoveMenuItem() {
       debug.print("");
       if (serviceRemoveMenuItem == null) {
-         serviceRemoveMenuItem = new JMenuItem();
+         serviceRemoveMenuItem = new MenuItem();
          serviceRemoveMenuItem.setText("Remove");
-         serviceRemoveMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         serviceRemoveMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                String query = auto.serviceStatus();
                if (query != null) {
                   if (query.matches("^.+not been created.+$")) {
@@ -1168,25 +1182,25 @@ public class gui {
       return serviceRemoveMenuItem;
    }
 
-   private JMenu getBackgroundJobMenu() {
+   private Menu getBackgroundJobMenu() {
       debug.print("");
       if (serviceMenu == null) {
-         serviceMenu = new JMenu();
+         serviceMenu = new Menu();
          serviceMenu.setText("Background Job");
-         serviceMenu.add(getBackgroundJobStatusMenuItem());
-         serviceMenu.add(getBackgroundJobEnableMenuItem());
-         serviceMenu.add(getBackgroundJobDisableMenuItem());
+         serviceMenu.getItems().add(getBackgroundJobStatusMenuItem());
+         serviceMenu.getItems().add(getBackgroundJobEnableMenuItem());
+         serviceMenu.getItems().add(getBackgroundJobDisableMenuItem());
       }
       return serviceMenu;
    }
 
-   private JMenuItem getBackgroundJobStatusMenuItem() {
+   private MenuItem getBackgroundJobStatusMenuItem() {
       debug.print("");
       if (backgroundJobStatusMenuItem == null) {
-         backgroundJobStatusMenuItem = new JMenuItem();
+         backgroundJobStatusMenuItem = new MenuItem();
          backgroundJobStatusMenuItem.setText("Status");
-         backgroundJobStatusMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         backgroundJobStatusMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                auto.unixAutoIsRunning(true);
             }
          });
@@ -1194,13 +1208,13 @@ public class gui {
       return backgroundJobStatusMenuItem;
    }
 
-   private JMenuItem getBackgroundJobEnableMenuItem() {
+   private MenuItem getBackgroundJobEnableMenuItem() {
       debug.print("");
       if (backgroundJobEnableMenuItem == null) {
-         backgroundJobEnableMenuItem = new JMenuItem();
+         backgroundJobEnableMenuItem = new MenuItem();
          backgroundJobEnableMenuItem.setText("Enable");
-         backgroundJobEnableMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         backgroundJobEnableMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                auto.unixAutoStart();
             }
          });
@@ -1208,13 +1222,13 @@ public class gui {
       return backgroundJobEnableMenuItem;
    }
 
-   private JMenuItem getBackgroundJobDisableMenuItem() {
+   private MenuItem getBackgroundJobDisableMenuItem() {
       debug.print("");
       if (backgroundJobDisableMenuItem == null) {
-         backgroundJobDisableMenuItem = new JMenuItem();
+         backgroundJobDisableMenuItem = new MenuItem();
          backgroundJobDisableMenuItem.setText("Disable");
-         backgroundJobDisableMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         backgroundJobDisableMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                auto.unixAutoKill();
             }
          });
@@ -1222,15 +1236,14 @@ public class gui {
       return backgroundJobDisableMenuItem;
    }
 
-   private JMenuItem getSearchMenuItem() {
+   private MenuItem getSearchMenuItem() {
       debug.print("");
       if (searchMenuItem == null) {
-         searchMenuItem = new JMenuItem();
+         searchMenuItem = new MenuItem();
          searchMenuItem.setText("Search Table...");
-         searchMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
-               Event.CTRL_MASK, true));
-         searchMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         searchMenuItem.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
+         searchMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                TableUtil.SearchGUI();
             }
          });
@@ -1238,15 +1251,14 @@ public class gui {
       return searchMenuItem;
    }
 
-   private JMenuItem getThumbsMenuItem() {
+   private MenuItem getThumbsMenuItem() {
       debug.print("");
       if (thumbsMenuItem == null) {
-         thumbsMenuItem = new JMenuItem();
+         thumbsMenuItem = new MenuItem();
          thumbsMenuItem.setText("Set Thumbs rating...");
-         thumbsMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
-               Event.CTRL_MASK, true));
-         thumbsMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+         thumbsMenuItem.setAccelerator(KeyCombination.keyCombination("Ctrl+T"));
+         thumbsMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
                TableUtil.ThumbsGUI();
             }
          });
@@ -1257,17 +1269,18 @@ public class gui {
    // This will decide which options are enabled based on current config settings
    // Options are disabled when associated config entry is not setup
    public void refreshOptions(Boolean refreshProfiles) {
+      debug.print("refreshProfiles=" + refreshProfiles);
       if (! file.isFile(config.curl) && config.java_downloads == 0) {
          metadata.setSelected(false);
-         metadata.setEnabled(false);
+         metadata.setDisable(true);
       } else {
-         metadata.setEnabled(true);
+         metadata.setDisable(false);
       }
       if (! file.isFile(config.tivodecode)) {
          decrypt.setSelected(false);
-         decrypt.setEnabled(false);
+         decrypt.setDisable(true);
       } else {
-         decrypt.setEnabled(true);
+         decrypt.setDisable(false);
       }
       /* This intentionally disabled for now
       if (config.VRD == 0) {
@@ -1284,67 +1297,67 @@ public class gui {
       */
       if (config.VRD == 0 && ! file.isFile(config.projectx)) {
          qsfix.setSelected(false);
-         qsfix.setEnabled(false);
+         qsfix.setDisable(true);
       } else {
-         qsfix.setEnabled(true);
+         qsfix.setDisable(false);
       }
       
       if (!config.twpDeleteEnabled()) {
          twpdelete.setSelected(false);
-         twpdelete.setEnabled(false);
+         twpdelete.setDisable(true);
       } else {
-         twpdelete.setEnabled(true);
+         twpdelete.setDisable(false);
       }
       
       if ( ! config.ipadDeleteEnabled() ) {
          ipaddelete.setSelected(false);
-         ipaddelete.setEnabled(false);
+         ipaddelete.setDisable(true);
       } else {
-         ipaddelete.setEnabled(true);
+         ipaddelete.setDisable(false);
       }
 
       if (! file.isFile(config.comskip)) {
          comskip.setSelected(false);
-         comskip.setEnabled(false);
+         comskip.setDisable(true);
       } else {
-         comskip.setEnabled(true);
+         comskip.setDisable(false);
       }
 
       if (! file.isFile(config.mencoder) && config.VRD == 0 && ! file.isFile(config.projectx)) {
          comcut.setSelected(false);
-         comcut.setEnabled(false);
+         comcut.setDisable(true);
       } else {
-         comcut.setEnabled(true);
+         comcut.setDisable(false);
       }
 
       if (! file.isFile(config.t2extract) && ! file.isFile(config.ccextractor)) {
          captions.setSelected(false);
-         captions.setEnabled(false);
+         captions.setDisable(true);
       } else {
-         captions.setEnabled(true);
+         captions.setDisable(false);
       }
 
       if (! file.isFile(config.ffmpeg) &&
           ! file.isFile(config.mencoder) &&
           ! file.isFile(config.handbrake) ) {
          encode.setSelected(false);
-         encode.setEnabled(false);
+         encode.setDisable(true);
       } else {
-         encode.setEnabled(true);
+         encode.setDisable(false);
       }
       
       if ( ! file.isFile(config.pyTivo_config) ) {
          push.setSelected(false);
-         push.setEnabled(false);
+         push.setDisable(true);
       } else {
-         push.setEnabled(true);
+         push.setDisable(false);
       }
       
       if ( ! com.tivo.kmttg.task.custom.customCommandExists() ) {
          custom.setSelected(false);
-         custom.setEnabled(false);
+         custom.setDisable(true);
       } else {
-         custom.setEnabled(true);
+         custom.setDisable(false);
       }
       
       // Refresh encoding profiles in case toggled between VRD & regular
@@ -1353,17 +1366,17 @@ public class gui {
       // Add remote tab if appropriate
       if (config.GUIMODE && remote_gui == null) {
          remote_gui = new remotegui(jFrame);
-         tabbed_panel.add("Remote", remote_gui.getPanel());
+         addTabPane("Remote", tabbed_panel, remote_gui.getPanel());
       }
       
       // Add slingbox tab if appropriate
       if (config.slingBox == 1) {
          if (slingbox_gui == null)
             slingbox_gui = new slingboxgui(jFrame);
-         tabbed_panel.add("Slingbox", slingbox_gui.getPanel());
+         addTabPane("Slingbox", tabbed_panel, slingbox_gui.getPanel());
       }
       if (config.slingBox == 0 && slingbox_gui != null) {
-         tabbed_panel.remove(slingbox_gui.getPanel());
+         tabbed_panel.getTabs().remove(slingbox_gui.getPanel());
       }
    }
    
@@ -1373,7 +1386,6 @@ public class gui {
       debug.print("");
       log.warn("Refreshing encoding profiles");
       encodeConfig.parseEncodingProfiles();
-      //SetEncodings(encodeConfig.getValidEncodeNames());
    }
    
    // Callback for "Run Once in GUI" Auto Transfers menu entry
@@ -1396,7 +1408,6 @@ public class gui {
             config.GUI_AUTO++;
             tivoTab t = getTab(tivoNames.get(i));
             if (t != null) {
-               t.getTable().setFolderState(false);
                jobMonitor.getNPL(tivoNames.get(i));
             }
          }
@@ -1406,6 +1417,7 @@ public class gui {
    // Callback for "Loop in GUI" Auto Transfers menu entry
    // This is equivalent to auto mode run but is performed in GUI
    public void autoLoopInGUICB(Boolean enabled) {
+      debug.print("enabled=" + enabled);
       // This triggers jobMonitor to clear launch hash
       config.GUI_AUTO = -1;
       
@@ -1426,19 +1438,17 @@ public class gui {
             question = "kmttg background job is currently running. Stop the job?";
          }
          if (auto_running) {
-            int response = JOptionPane.showConfirmDialog(
-               config.gui.getJFrame(),
-               question,
-               "Confirm",
-               JOptionPane.YES_NO_OPTION,
-               JOptionPane.QUESTION_MESSAGE
-            );
-            if (response == JOptionPane.YES_OPTION) {
+            Alert alert = new Alert(AlertType.CONFIRMATION);
+            alert.setTitle("Confirm");
+            setFontSize(alert, config.FontSize);
+            alert.setContentText(question);
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == ButtonType.OK) {
                if (config.OS.equals("windows")) {
                   auto.serviceStop();
                } else {
                   auto.unixAutoKill();
-               }
+               }               
             }
          }
 
@@ -1455,9 +1465,9 @@ public class gui {
    
    // Encoding cyclic change callback
    // Set the description according to selected item
-   private void encodingCB(JComboBox combo) {
+   private void encodingCB(ComboBox<String> combo) {
       debug.print("combo=" + combo);
-      String encodeName = (String)combo.getSelectedItem();
+      String encodeName = combo.getValue();
       config.encodeName = encodeName;
       String description = encodeConfig.getDescription(encodeName);
       // Set encoding_description_label accordingly
@@ -1478,6 +1488,15 @@ public class gui {
             if (job != null) jobMonitor.kill(job);
          }
       }
+   }
+   
+   // Add a new tab pane
+   private void addTabPane(String name, TabPane pane, Node content) {
+      debug.print("name=" + name + " pane=" + pane + " content=" + content);
+      Tab tab = new Tab();
+      tab.setContent(content);
+      tab.setText(name);
+      pane.getTabs().add(tab);
    }
 
    // Create tivo tabs as needed
@@ -1509,14 +1528,16 @@ public class gui {
 
       } else {
          // Remove all tivo tabs
-         while(! tabbed_panel.getTitleAt(0).equals("FILES") && ! tabbed_panel.getTitleAt(0).equals("Remote")) {
-            tivoTabRemove(tabbed_panel.getTitleAt(0));
+         String itemName = tabbed_panel.getTabs().get(0).getText();
+         while(! itemName.equals("FILES") && ! itemName.equals("Remote")) {
+            tivoTabRemove(itemName);
          }
       }
    }
 
    // Start NPL jobs for 1st time
    public void initialNPL(LinkedHashMap<String,String> values) {
+      debug.print("values=" + values);
       for (String value : values.keySet()) {
          if (! value.equals("FILES") && ! value.equals("Remote")) {
             jobMonitor.getNPL(value);
@@ -1525,10 +1546,12 @@ public class gui {
    }
    
    public String getCurrentTabName() {
-      return tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
+      debug.print("");
+      return tabbed_panel.getSelectionModel().getSelectedItem().getText();
    }
    
    public String getSelectedTivoName() {
+      debug.print("");
       String tabName = getCurrentTabName();
       if (! tabName.equals("FILES") && ! tabName.equals("Remote") && ! tabName.equals("Slingbox")) {
          return tabName;
@@ -1537,12 +1560,14 @@ public class gui {
    }
    
    public String getCurrentRemoteTivoName() {
+      debug.print("");
       if (getCurrentTabName().equals("Remote"))
          return config.gui.remote_gui.getTivoName(config.gui.remote_gui.getCurrentTabName());
       return null;
    }
    
    public JSONObject getCurrentRemoteJson() {
+      debug.print("");
       if (getCurrentTabName().equals("Remote"))
          return config.gui.remote_gui.getSelectedJSON(config.gui.remote_gui.getCurrentTabName());         
       return null;
@@ -1551,11 +1576,11 @@ public class gui {
    // Check name against existing tabbed panel names
    private Boolean tivoTabExists(String name) {
       debug.print("name=" + name);
-      int numTabs = tabbed_panel.getComponentCount();
+      int numTabs = tabbed_panel.getTabs().size();
       String tabName;
       for (int i=0; i<numTabs; i++) {
-         tabName = tabbed_panel.getTitleAt(i);
-         if (tabName.equals(name)) {
+         tabName = tabbed_panel.getTabs().get(i).getText();
+         if (tabName != null && tabName.equals(name)) {
             return true;
          }
       }
@@ -1566,8 +1591,10 @@ public class gui {
       debug.print("name=" + name);
       if ( ! tivoTabExists(name) ) {
          tivoTab tab = new tivoTab(name);
-         tabbed_panel.add(tab.getPanel(), 0);
-         tabbed_panel.setTitleAt(0, name);
+         Tab tabpane = new Tab();
+         tabpane.setContent(tab.getPanel());
+         tabpane.setText(name);
+         tabbed_panel.getTabs().add(0, tabpane);
          tivoTabs.put(name,tab);
       }
    }
@@ -1575,22 +1602,22 @@ public class gui {
    private void tivoTabRemove(String name) {
       debug.print("name=" + name);
       if (tivoTabs.containsKey(name)) {
-         tabbed_panel.remove(tivoTabs.get(name).getPanel());
+         tabbed_panel.getTabs().remove(tivoTabs.get(name));
          tivoTabs.remove(name);
       }
    }
    
    private void tivoTabRemoveExtra(String[] names) {
       debug.print("names=" + Arrays.toString(names));
-      int numTabs = tabbed_panel.getComponentCount();
+      int numTabs = tabbed_panel.getTabs().size();
       if (numTabs > 0 && names.length > 0) {
          // Determine tabs we no longer want
          Stack<String> unwanted = new Stack<String>();
          String tabName;
          Boolean remove;
          for (int i=0; i<numTabs; i++) {
-            tabName = tabbed_panel.getTitleAt(i);
-            if (! tabName.equals("FILES") && ! tabName.equals("Remote")) {
+            tabName = tabbed_panel.getTabs().get(i).getText();
+            if (tabName != null && ! tabName.equals("FILES") && ! tabName.equals("Remote")) {
                remove = true;
                for (int j=0; j<names.length; j++) {
                   if (names[j] != null && names[j].equals(tabName)) {
@@ -1614,15 +1641,16 @@ public class gui {
    // Set current tab to this tivo (if valid)
    public void SetTivo(String tivoName) {
       debug.print("tivoName=" + tivoName);
-      for (int i=0; i<tabbed_panel.getComponentCount(); ++i) {
-         if (tabbed_panel.getTitleAt(i).equals(tivoName)) {
-            tabbed_panel.setSelectedIndex(i);
+      for (int i=0; i<tabbed_panel.getTabs().size(); ++i) {
+         if (tabbed_panel.getTabs().get(i).getText().equals(tivoName)) {
+            tabbed_panel.getSelectionModel().select(i);
          }
       }
    }
    
    // Add a tivo
    public void AddTivo(String name, String ip) {
+      debug.print("name=" + name + " ip=" + ip);
       tivoTabAdd(name);
       configMain.addTivo(name, ip);
    }
@@ -1634,8 +1662,8 @@ public class gui {
       if (encoding != null) {      
          // Get existing setting in combobox
          String current = null;
-         if (encoding.getComponentCount() > 0) {
-            current = (String)encoding.getSelectedItem();
+         if (encoding.getItems().size() > 0) {
+            current = encoding.getValue();
          }
          String[] names = new String[values.size()];
          for (int i=0; i<values.size(); ++i) {
@@ -1643,27 +1671,33 @@ public class gui {
          }
          combobox.SetValues(encoding, names);
          if (current != null)
-            encoding.setSelectedItem(current);
+            encoding.setValue(current);
+         else {
+            if (encoding.getItems().size() > 0)
+               encoding.setValue(encoding.getItems().get(0));
+         }
       }
    }
    
    public String GetSelectedEncoding() {
+      debug.print("");
       String selected = null;
-      if (encoding.getComponentCount() > 0) {
-         selected = (String)encoding.getSelectedItem();
+      if (encoding.getItems().size() > 0) {
+         selected = encoding.getValue();
       }
       return selected;
    }
    
    public void SetSelectedEncoding(String name) {
-      if (encoding.getComponentCount() > 0) {
-         encoding.setSelectedItem(name);
+      debug.print("name=" + name);
+      if (encoding.getItems().size() > 0) {
+         encoding.setValue(name);
       }
    }
    
    private void CreateImages() {
       debug.print("");
-      Images = new Hashtable<String,Icon>();
+      Images = new Hashtable<String,Image>();
       String[] names = {
          "expires-soon-recording", "save-until-i-delete-recording",
          "in-progress-recording", "in-progress-transfer",
@@ -1672,29 +1706,27 @@ public class gui {
       };
       URL url;
       for (int i=0; i<names.length; i++) {
-         url = getClass().getResource("/" + names[i] + ".png");
-         if (url != null) {
+         try {
             // From jar file
-            Images.put(names[i], new ImageIcon(url));
-         } else {
+            url = getClass().getResource("/" + names[i] + ".png");
+            Images.put(names[i], new Image(url.toURI().toString()));
+         } catch (Exception e) {
             // From eclipse
-            Images.put(names[i], new ImageIcon("images/" + names[i] + ".png"));
+            Images.put(names[i], new Image(new File("images/" + names[i] + ".png").toURI().toString()));            
          }
       }
-   }
-   
+   }   
    
    // Save current GUI settings to a file
    public void saveSettings() {
+      debug.print("");
       if (config.gui_settings != null) {
          if (slingbox_gui != null)
             slingbox_gui.updateConfig();
          try {
-            Dimension d = getJFrame().getSize();
-            Point p = getJFrame().getLocation();
-            int centerDivider = jContentPane.getDividerLocation();
-            int bottomDivider = splitBottom.getDividerLocation();
-            String tabName = tabbed_panel.getTitleAt(tabbed_panel.getSelectedIndex());
+            double centerDivider = jContentPane.getDividerPositions()[0];
+            double bottomDivider = splitBottom.getDividerPositions()[0];
+            String tabName = tabbed_panel.getSelectionModel().getSelectedItem().getText();
             BufferedWriter ofp = new BufferedWriter(new FileWriter(config.gui_settings));            
             ofp.write("# kmttg gui preferences file\n");
             ofp.write("<GUI_LOOP>\n"            + config.GUI_LOOP            + "\n");
@@ -1723,14 +1755,14 @@ public class gui {
             ofp.write("<slingBox_type>\n"       + config.slingBox_type       + "\n");
             ofp.write("<slingBox_container>\n"  + config.slingBox_container  + "\n");
             ofp.write("<jobMonitorFullPaths>\n" + config.jobMonitorFullPaths + "\n");
-            ofp.write("<width>\n"               + d.width                    + "\n");
-            ofp.write("<height>\n"              + d.height                   + "\n");
-            ofp.write("<x>\n"                   + p.x                        + "\n");
-            ofp.write("<y>\n"                   + p.y                        + "\n");
+            ofp.write("<width>\n"               + (int)jFrame.getWidth()     + "\n");
+            ofp.write("<height>\n"              + (int)jFrame.getHeight()    + "\n");
+            ofp.write("<x>\n"                   + (int)jFrame.getX()         + "\n");
+            ofp.write("<y>\n"                   + (int)jFrame.getY()         + "\n");
             ofp.write("<centerDivider>\n"       + centerDivider              + "\n");
             ofp.write("<bottomDivider>\n"       + bottomDivider              + "\n");
             if (remote_gui != null) {
-               int tabIndex_r = remote_gui.tabbed_panel.getSelectedIndex();
+               int tabIndex_r = remote_gui.tabbed_panel.getSelectionModel().getSelectedIndex();
                ofp.write("<tab_remote>\n"       + tabIndex_r                 + "\n");
             }
             ofp.write("<tab>\n"                 + tabName                    + "\n");
@@ -1762,7 +1794,12 @@ public class gui {
             ofp.write("<columnWidths>\n");
             for (Enumeration<String> e=tivoTabs.keys(); e.hasMoreElements();) {
                name = e.nextElement();
-               int[] widths = tivoTabs.get(name).getTable().getColWidths();
+               ObservableList<TreeTableColumn<Tabentry, ?>> cols = tivoTabs.get(name).getTable().NowPlaying.getColumns();
+               int[] widths = new int[cols.size()];
+               int i=0;
+               for (TreeTableColumn<Tabentry, ?> col : cols) {
+                  widths[i++] = (int)col.getWidth();
+               }
                ofp.write(name + "=" + widths[0]);
                for (int j=1; j<widths.length; ++j) {
                   ofp.write("," + widths[j]);
@@ -1790,51 +1827,46 @@ public class gui {
                for (String tab : names)
                   ofp.write(tab + "=" + remote_gui.getTivoName(tab) + "\n");
                ofp.write("\n<rpc_includePast>\n");
-               if (remote_gui.includeHistory_cancel.isSelected())
+               if (remote_gui.cancel_tab.includeHistory.isSelected())
                   ofp.write("1\n");
                else
                   ofp.write("0\n");
-               /*if (remote_gui.bookmark_web.getItemCount() > 0) {
-                  ofp.write("\n<rpc_web_bookmarks>\n");
-                  for (int j=0; j<remote_gui.bookmark_web.getItemCount(); ++j)
-                     ofp.write(remote_gui.bookmark_web.getItemAt(j) + "\n");
-               }*/
                
                // Search max hits
-               int max = (Integer) remote_gui.max_search.getValue();
+               int max = (Integer) remote_gui.search_tab.max.getValue();
                ofp.write("\n<rpc_search_max>\n");
                ofp.write("" + max + "\n");
                
                // Search streaming settings
                ofp.write("\n<rpc_search_type>\n");
-               ofp.write("" + remote_gui.search_type.getSelectedItem());
+               ofp.write("" + remote_gui.search_tab.search_type.getValue());
                
                int includeFree = 0;
-               if (remote_gui.includeFree.isSelected())
+               if (remote_gui.search_tab.includeFree.isSelected())
                   includeFree = 1;
                ofp.write("\n<rpc_search_includeFree>\n");
                ofp.write("" + includeFree + "\n");
                
                int includePaid = 0;
-               if (remote_gui.includePaid.isSelected())
+               if (remote_gui.search_tab.includePaid.isSelected())
                   includePaid = 1;
                ofp.write("\n<rpc_search_includePaid>\n");
                ofp.write("" + includePaid + "\n");
                
                int includeVod = 0;
-               if (remote_gui.includeVod.isSelected())
+               if (remote_gui.search_tab.includeVod.isSelected())
                   includeVod = 1;
                ofp.write("\n<rpc_search_includeVod>\n");
                ofp.write("" + includeVod + "\n");
                
                int unavailable = 0;
-               if (remote_gui.unavailable.isSelected())
+               if (remote_gui.search_tab.unavailable.isSelected())
                   unavailable = 1;
                ofp.write("\n<rpc_search_unavailable>\n");
                ofp.write("" + unavailable + "\n");
                
                // Record dialog
-               JSONObject json = remote_gui.recordOpt.getValues();
+               JSONObject json = util.recordOpt.getValues();
                if (json != null) {
                   try {
                      ofp.write("\n<rpc_recordOpt>\n");
@@ -1849,7 +1881,7 @@ public class gui {
                }
                
                // SP dialog
-               json = remote_gui.spOpt.getValues();
+               json = util.spOpt.getValues();
                if (json != null) {
                   try {
                      ofp.write("\n<rpc_spOpt>\n");
@@ -1863,6 +1895,7 @@ public class gui {
                   }
                }
             }
+            
             ofp.write("\n");
             ofp.close();
          }         
@@ -1874,14 +1907,21 @@ public class gui {
    
    // Read initial settings from file
    public void readSettings() {
-      if (! file.isFile(config.gui_settings)) return;
+      debug.print("");
+      if (! file.isFile(config.gui_settings)) {
+         // Perhaps transitioning from older kmttg, so sent decent font size
+         config.FontSize = 11;
+         setFontSize(getFrame().getScene(), config.FontSize);
+         config.save();
+         return;
+      }
       try {
          int width = -1;
          int height = -1;
          int x = -1;
          int y = -1;
          int value;
-         int centerDivider = -1, bottomDivider = -1;
+         double centerDivider = -1, bottomDivider = -1;
          BufferedReader ifp = new BufferedReader(new FileReader(config.gui_settings));
          String line = null;
          String key = null;
@@ -2007,7 +2047,7 @@ public class gui {
             if (key.equals("encode_name")) {
                config.encodeName_orig = line;
                if (encodeConfig.isValidEncodeName(line)) {
-                  encoding.setSelectedItem(line);
+                  encoding.setValue(line);
                   config.encodeName = line;
                }
             }
@@ -2053,18 +2093,18 @@ public class gui {
                   value = 0;
                }
                if (remote_gui != null)
-                  remote_gui.getPanel().setSelectedIndex(value);
+                  remote_gui.getPanel().getSelectionModel().select(value);
             }
             if (key.equals("centerDivider")) {
                try {
-                  centerDivider = Integer.parseInt(line);
+                  centerDivider = Double.parseDouble(line);
                } catch (NumberFormatException e) {
                   centerDivider = -1;
                }
             }
             if (key.equals("bottomDivider")) {
                try {
-                  bottomDivider = Integer.parseInt(line);
+                  bottomDivider = Double.parseDouble(line);
                } catch (NumberFormatException e) {
                   bottomDivider = -1;
                }
@@ -2091,7 +2131,11 @@ public class gui {
                   widths[i] = Integer.parseInt(order[i]);
                }
                if (tivoTabs.containsKey(l[0])) {
-                  tivoTabs.get(name).getTable().setColWidths(widths);
+                  ObservableList<TreeTableColumn<Tabentry, ?>> cols = tivoTabs.get(name).getTable().NowPlaying.getColumns();
+                  int j=0;
+                  for (TreeTableColumn<Tabentry, ?> col : cols) {
+                     col.setPrefWidth(widths[j++]);
+                  }
                }
             }
             if (key.equals("showFolders")) {
@@ -2116,7 +2160,7 @@ public class gui {
             if (key.equals("rpc_search_max") && remote_gui != null) {
                try {
                   int max = Integer.parseInt(line);
-                  remote_gui.max_search.setValue(max);
+                  remote_gui.search_tab.max.getEditor().selectRange(max, max);
                }
                catch (NumberFormatException ex) {
                   // Don't do anything here
@@ -2125,13 +2169,13 @@ public class gui {
             
             if (key.equals("rpc_search_type") && remote_gui != null) {
                String search_type = string.removeLeadingTrailingSpaces(line);
-               remote_gui.search_type.setSelectedItem(search_type);
+               remote_gui.search_tab.search_type.getSelectionModel().select(search_type);
             }
             
             if (key.equals("rpc_search_includeFree") && remote_gui != null) {
                try {
                   int includeFree = Integer.parseInt(line);
-                  remote_gui.includeFree.setSelected(includeFree == 1);
+                  remote_gui.search_tab.includeFree.setSelected(includeFree == 1);
                }
                catch (NumberFormatException ex) {
                   // Don't do anything here
@@ -2141,7 +2185,7 @@ public class gui {
             if (key.equals("rpc_search_includePaid") && remote_gui != null) {
                try {
                   int includePaid = Integer.parseInt(line);
-                  remote_gui.includePaid.setSelected(includePaid == 1);
+                  remote_gui.search_tab.includePaid.setSelected(includePaid == 1);
                }
                catch (NumberFormatException ex) {
                   // Don't do anything here
@@ -2151,7 +2195,7 @@ public class gui {
             if (key.equals("rpc_search_includeVod") && remote_gui != null) {
                try {
                   int includeVod = Integer.parseInt(line);
-                  remote_gui.includeVod.setSelected(includeVod == 1);
+                  remote_gui.search_tab.includeVod.setSelected(includeVod == 1);
                }
                catch (NumberFormatException ex) {
                   // Don't do anything here
@@ -2161,7 +2205,7 @@ public class gui {
             if (key.equals("rpc_search_unavailable") && remote_gui != null) {
                try {
                   int unavailable = Integer.parseInt(line);
-                  remote_gui.unavailable.setSelected(unavailable == 1);
+                  remote_gui.search_tab.unavailable.setSelected(unavailable == 1);
                }
                catch (NumberFormatException ex) {
                   // Don't do anything here
@@ -2170,8 +2214,9 @@ public class gui {
             
             if (key.equals("rpc_includePast") && remote_gui != null) {
                if (line.matches("1"))
-                  remote_gui.includeHistory_cancel.setSelected(true);
+                  remote_gui.cancel_tab.includeHistory.setSelected(true);
             }
+            
             if (key.equals("rpc_recordOpt") && remote_gui != null) {
                String[] l = line.split("=");
                if (l.length == 2) {
@@ -2189,26 +2234,38 @@ public class gui {
          
          if (remote_gui != null) {
             if (rpc_recordOpt.length() > 0) {
-               remote_gui.recordOpt.setValues(rpc_recordOpt);
+               util.recordOpt.setValues(rpc_recordOpt);
             }
             if (rpc_spOpt.length() > 0) {
-               remote_gui.spOpt.setValues(rpc_spOpt);
+               util.spOpt.setValues(rpc_spOpt);
             }
          }
          
          if (width != -1 && height != -1) {
-            getJFrame().setSize(new Dimension(width,height));
+            jFrame.setWidth(width);
+            jFrame.setHeight(height);
          }
          
          if (x != -1 && y != -1) {
-            getJFrame().setLocation(new Point(x,y));
+            jFrame.setX(x);
+            jFrame.setY(y);
          }
          
-         if (centerDivider != -1)
-            jContentPane.setDividerLocation(centerDivider);
-         
-         if (bottomDivider != -1)
-            splitBottom.setDividerLocation(bottomDivider);
+         class backgroundRun implements Runnable {
+            double centerDivider, bottomDivider;
+            public backgroundRun(double centerDivider, double bottomDivider) {
+               this.centerDivider = centerDivider;
+               this.bottomDivider = bottomDivider;
+            }
+            @Override public void run() {
+               if (centerDivider > 0 && centerDivider < 1)
+                  jContentPane.setDividerPosition(0, centerDivider);
+               
+               if (bottomDivider > 0 && bottomDivider < 1)
+                  splitBottom.setDividerPosition(0, bottomDivider);
+            }
+         }
+         Platform.runLater(new backgroundRun(centerDivider, bottomDivider));
       }         
       catch (Exception ex) {
          log.warn("Problem parsing config file: " + config.gui_settings);
@@ -2217,34 +2274,24 @@ public class gui {
    
    // Component tooltip setup
    public void setToolTips() {
-      metadata.setToolTipText(getToolTip("metadata"));
-      decrypt.setToolTipText(getToolTip("decrypt"));
-      qsfix.setToolTipText(getToolTip("qsfix"));
-      twpdelete.setToolTipText(getToolTip("twpdelete"));
-      ipaddelete.setToolTipText(getToolTip("ipaddelete"));
-      comskip.setToolTipText(getToolTip("comskip"));
-      comcut.setToolTipText(getToolTip("comcut"));
-      captions.setToolTipText(getToolTip("captions"));
-      encode.setToolTipText(getToolTip("encode"));
-      push.setToolTipText(getToolTip("push"));
-      custom.setToolTipText(getToolTip("custom"));
-      encoding.setToolTipText(getToolTip("encoding"));
-      jobTab.JobMonitor.setToolTipText(getToolTip("JobMonitor"));
-   }
-   
-   // Enable/disable all tooltips
-   public void enableToolTips(int flag) {
-      if (flag == 1)
-         toolTips.setEnabled(true);
-      else
-         toolTips.setEnabled(false);
-   }
-   
-   public void setToolTipsTimeout(int timeout) {
-      toolTips.setDismissDelay(timeout*1000);
+      debug.print("");
+      metadata.setTooltip(getToolTip("metadata"));
+      decrypt.setTooltip(getToolTip("decrypt"));
+      qsfix.setTooltip(getToolTip("qsfix"));
+      twpdelete.setTooltip(getToolTip("twpdelete"));
+      ipaddelete.setTooltip(getToolTip("ipaddelete"));
+      comskip.setTooltip(getToolTip("comskip"));
+      comcut.setTooltip(getToolTip("comcut"));
+      captions.setTooltip(getToolTip("captions"));
+      encode.setTooltip(getToolTip("encode"));
+      push.setTooltip(getToolTip("push"));
+      custom.setTooltip(getToolTip("custom"));
+      encoding.setTooltip(getToolTip("encoding"));
+      jobTab.JobMonitor.setTooltip(getToolTip("JobMonitor"));
    }
      
-   public String getToolTip(String component) {
+   public Tooltip getToolTip(String component) {
+      debug.print("component=" + component);
       String text = "";
       if (component.equals("tivos")) {
          text =  "<b>TIVOS</b><br>";
@@ -2320,8 +2367,8 @@ public class gui {
          text += "Highly recommended step if you have VideoRedo and/or ProjectX installed.<br>";
          text += "Very highly recommended step if you will be further processing mpeg2 files<br>";
          text += "for cutting out commercials and/or encoding to new formats.<br>";
-         text += "<b>NOTE: ProjectX does not process closed captions, so if captions are important<br>";
-         text += "to you then you should only use QS Fix with VideoRedo.</b>";
+         text += "<b>NOTE: ProjectX does not process closed captions, so if captions are important</b><br>";
+         text += "<b>to you then you should only use QS Fix with VideoRedo.</b>";
       }
       else if (component.equals("twpdelete")) {
          text =  "<b>TWP Delete</b><br>";
@@ -2352,8 +2399,8 @@ public class gui {
          text += "Automatically cut out commercials detected in <b>Ad Detect</b> step.<br>";
          text += "NOTE: By default uses <b>ProjectX</b> program to make the cuts if available/configured<br>";
          text += "in kmttg and VideoRedo not available/configured.<br>";
-         text += "<b>NOTE: ProjectX does not process closed captions, so if captions are important<br>";
-         text += "to you then you should use VideoRedo or mencoder instead.</b><br>";
+         text += "<b>NOTE: ProjectX does not process closed captions, so if captions are important</b><br>";
+         text += "<b>to you then you should use VideoRedo or mencoder instead.</b><br>";
          text += "NOTE: If ProjectX not available then uses <b>mencoder</b> program to make the cuts which can<br>";
          text += "cause audio/video sync problems in the resulting files - so ProjectX recommended instead.<br>";
          text += "If you have <b>VideoRedo</b> enabled then this step uses VideoRedo for making<br>";
@@ -2365,8 +2412,8 @@ public class gui {
          text += "closed captioning text. This file can be used with several<br>";
          text += "video playback tools to display closed captions during playback.<br>";
          text += "Also for example <b>streambaby</b> can use this file.<br>";
-         text += "<b>NOTE: ProjectX does not process closed captions, so if ProjectX was part of your flow<br>";
-         text += "there will be no captions to extract from the mpeg2 file so this task won't work.</b>";
+         text += "<b>NOTE: ProjectX does not process closed captions, so if ProjectX was part of your flow</b><br>";
+         text += "<b>there will be no captions to extract from the mpeg2 file so this task won't work.</b>";
       }
       else if (component.equals("encode")) {
          text =  "<b>encode</b><br>";
@@ -2417,7 +2464,7 @@ public class gui {
           text += "differentiate it from the first encoding. It will only be used<br>";
           text += "if you select an encoding profile for a second encoding.<br>";
           text += "If you enter 'iPhone' here then your second encoding will turn<br>";
-          text += "out being named <i>filename_iPhone.ext</i>";
+          text += "out being named 'filename_iPhone.ext'";
        }
       else if (component.equals("start")) {
          text =  "<b>START JOBS</b><br>";
@@ -2452,69 +2499,109 @@ public class gui {
          text += "in the spreadsheet then disable <b>Show Folders</b> before exporting.";
       }
       
-      if (text.length() > 0) {
-         text = "<html>" + text + "</html>";
-      }
-      return text;
+      return MyTooltip.make(text);
    }
    
    // Abstraction methods
-   public void setTitle(String s) {
-      jFrame.setTitle(s);
+   public void setTitle(final String s) {
+      debug.print("s=" + s);
+      Platform.runLater(new Runnable() {
+         @Override public void run() {
+            jFrame.setTitle(s);
+         }
+      });
    }
    public void text_print(String s) {
+      debug.print("s=" + s);
       textp.print(s);
    }
    public void text_warn(String s) {
+      debug.print("s=" + s);
       textp.warn(s);
    }
    public void text_error(String s) {
+      debug.print("s=" + s);
       textp.error(s);
    }
    public void text_print(Stack<String> s) {
+      debug.print("s=" + s);
       textp.print(s);
    }
    public void text_warn(Stack<String> s) {
+      debug.print("s=" + s);
       textp.warn(s);
    }
    public void text_error(Stack<String> s) {
+      debug.print("s=" + s);
       textp.error(s);
    }
    public void jobTab_packColumns(int pad) {
-      jobTab.packColumns(jobTab.JobMonitor, pad);
+      debug.print("pad=" + pad);
+      if (jobTab != null && jobTab.JobMonitor != null)
+         TableUtil.autoSizeTableViewColumns(jobTab.JobMonitor, true);
    }
    public jobData jobTab_GetRowData(int row) {
+      debug.print("row=" + row);
       return jobTab.GetRowData(row);
    }
-   public void jobTab_UpdateJobMonitorRowStatus(jobData job, String status) {
-      jobTab.UpdateJobMonitorRowStatus(job, status);
+   public void jobTab_UpdateJobMonitorRowStatus(final jobData job, final String status) {
+      debug.print("job=" + job + " status=" + status);
+      Platform.runLater(new Runnable() {
+         @Override public void run() {
+            jobTab.UpdateJobMonitorRowStatus(job, status);
+         }
+      });
    }
-   public void jobTab_UpdateJobMonitorRowOutput(jobData job, String status) {
-      jobTab.UpdateJobMonitorRowOutput(job, status);
+   public void jobTab_UpdateJobMonitorRowOutput(final jobData job, final String status) {
+      debug.print("job=" + job + " status=" + status);
+      Platform.runLater(new Runnable() {
+         @Override public void run() {
+            jobTab.UpdateJobMonitorRowOutput(job, status);
+         }
+      });
    }
-   public void jobTab_AddJobMonitorRow(jobData job, String source, String output) {
-      jobTab.AddJobMonitorRow(job, source, output);
+   public void jobTab_AddJobMonitorRow(final jobData job, final String source, final String output) {
+      debug.print("job=" + job + " source=" + source + " output=" + output);
+      Platform.runLater(new Runnable() {
+         @Override public void run() {
+            jobTab.AddJobMonitorRow(job, source, output);
+         }
+      });
    }
-   public void jobTab_RemoveJobMonitorRow(jobData job) {
-      jobTab.RemoveJobMonitorRow(job);
+   public void jobTab_RemoveJobMonitorRow(final jobData job) {
+      debug.print("job=" + job);
+      Platform.runLater(new Runnable() {
+         @Override public void run() {
+            jobTab.RemoveJobMonitorRow(job);
+         }
+      });
    }
-   public void progressBar_setValue(int value) {
-      progressBar.setValue(value);
+   public void progressBar_setValue(final int value) {
+      debug.print("value=" + value);
+      Platform.runLater(new Runnable() {
+         @Override public void run() {
+            progressBar.setProgress((double)value/100.0);
+         }
+      });
    }
    public void refresh() {
-      jContentPane.paintImmediately(jContentPane.getBounds());
+      debug.print("");
+      jContentPane.requestLayout();
    }
    public void nplTab_SetNowPlaying(String tivoName, Stack<Hashtable<String,String>> entries) {
+      debug.print("tivoName=" + tivoName + " entries=" + entries);
       if (tivoTabs.containsKey(tivoName)) {
          tivoTabs.get(tivoName).nplTab_SetNowPlaying(entries);
       }
    }
    public void nplTab_clear(String tivoName) {
+      debug.print("tivoName=" + tivoName);
       if (tivoTabs.containsKey(tivoName)) {
          tivoTabs.get(tivoName).nplTab_clear();
       }
    }
    public void nplTab_UpdateStatus(String tivoName, String status) {
+      debug.print("tivoName=" + tivoName + " status=" + status);
       if (tivoTabs.containsKey(tivoName)) {
          tivoTabs.get(tivoName).nplTab_UpdateStatus(status);
       }
@@ -2522,56 +2609,67 @@ public class gui {
    
    // Returns state of checkbox options (as int for writing to auto.ini purposes)
    public int metadata_setting() {
+      debug.print("");
       int selected = 0;
       if (metadata.isSelected()) selected = 1;
       return selected;
    }
    public int decrypt_setting() {
+      debug.print("");
       int selected = 0;
       if (decrypt.isSelected()) selected = 1;
       return selected;
    }
    public int qsfix_setting() {
+      debug.print("");
       int selected = 0;
       if (qsfix.isSelected()) selected = 1;
       return selected;
    }
    public int twpdelete_setting() {
+      debug.print("");
       int selected = 0;
       if (twpdelete.isSelected()) selected = 1;
       return selected;
    }
    public int ipaddelete_setting() {
+      debug.print("");
       int selected = 0;
       if (ipaddelete.isSelected()) selected = 1;
       return selected;
    }
    public int comskip_setting() {
+      debug.print("");
       int selected = 0;
       if (comskip.isSelected()) selected = 1;
       return selected;
    }
    public int comcut_setting() {
+      debug.print("");
       int selected = 0;
       if (comcut.isSelected()) selected = 1;
       return selected;
    }
    public int captions_setting() {
+      debug.print("");
       int selected = 0;
       if (captions.isSelected()) selected = 1;
       return selected;
    }
    public int encode_setting() {
+      debug.print("");
       int selected = 0;
       if (encode.isSelected()) selected = 1;
       return selected;
    }
    public int push_setting() {
+      debug.print("");
       int selected = 0;
       if (push.isSelected()) selected = 1;
       return selected;
    }
    public int custom_setting() {
+      debug.print("");
       int selected = 0;
       if (custom.isSelected()) selected = 1;
       return selected;
@@ -2579,6 +2677,7 @@ public class gui {
    
    // Identify NPL table items associated with queued/running jobs
    public void updateNPLjobStatus(Hashtable<String,String> map) {
+      debug.print("map=" + map);
       Stack<String> tivoNames = config.getNplTivoNames();
       if (tivoNames.size() > 0) {
          for (int i=0; i<tivoNames.size(); i++) {
@@ -2590,5 +2689,15 @@ public class gui {
          }
       }
    }
+   
+   public String getWebColor(Color color) {
+      debug.print("color=" + color);
+      String c = String.format( "#%02X%02X%02X",
+            (int)( color.getRed() * 255 ),
+            (int)( color.getGreen() * 255 ),
+            (int)( color.getBlue() * 255 ) );
+      return(c);
+   }
+
 
 }

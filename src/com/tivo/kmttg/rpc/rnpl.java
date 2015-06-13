@@ -18,12 +18,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javafx.concurrent.Task;
+
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.JSON.JSONTokener;
-import com.tivo.kmttg.gui.SwingWorker;
-import com.tivo.kmttg.gui.TableUtil;
+import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -365,7 +366,7 @@ public class rnpl {
    // ToDo lists are retrieved in parallel instead of sequentially
    public static Hashtable<String,JSONArray> getTodoLists(Stack<String> tivoNames) {
       // This used to run a background Remote job
-      class Counter extends SwingWorker<Void, Void> {
+      class Counter extends Task<Void> {
          CountDownLatch latch;
          String tivoName;
          Hashtable<String,JSONArray> h;
@@ -376,7 +377,8 @@ public class rnpl {
             this.h = h;
          }
 
-         protected Void doInBackground() throws Exception {
+         @Override
+         protected Void call() throws Exception {
             Remote r = config.initRemote(tivoName);
             if (r.success) {
                JSONArray todo = r.ToDo(null);

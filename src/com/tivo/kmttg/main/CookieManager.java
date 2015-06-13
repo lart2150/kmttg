@@ -31,7 +31,8 @@ import java.text.*;
 @SuppressWarnings("unchecked")
 public class CookieManager {
         
-    private Map store;
+   @SuppressWarnings("rawtypes")
+   private Map store;
 
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String COOKIE_VALUE_DELIMITER = ";";
@@ -46,7 +47,8 @@ public class CookieManager {
     
     private DateFormat dateFormat;
 
-    public CookieManager() {
+    @SuppressWarnings("rawtypes")
+   public CookieManager() {
 
    store = new HashMap();
    dateFormat = new SimpleDateFormat(DATE_FORMAT);
@@ -63,7 +65,8 @@ public class CookieManager {
      * @param conn a java.net.URLConnection - must be open, or IOException will be thrown
      * @throws java.io.IOException Thrown if <i>conn</i> is not open.
      */
-    public void storeCookies(URLConnection conn) throws IOException {
+    @SuppressWarnings("rawtypes")
+   public void storeCookies(URLConnection conn) throws IOException {
    
    // let's determine the domain from where these cookies are being sent
    String domain = getDomainFromHost(conn.getURL().getHost());
@@ -123,7 +126,8 @@ public class CookieManager {
      * @param conn a java.net.URLConnection - must NOT be open, or IOException will be thrown
      * @throws java.io.IOException Thrown if <i>conn</i> has already been opened.
      */
-    public void setCookies(URLConnection conn) throws IOException {
+    @SuppressWarnings("rawtypes")
+   public void setCookies(URLConnection conn) throws IOException {
    
    // let's determine the domain and path to retrieve the appropriate cookies
    URL url = conn.getURL();

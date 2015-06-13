@@ -1964,7 +1964,8 @@ public class HTTPServer {
      * @return the parameter name-value pairs parsed from the given string,
      *         or an empty map if it does not contain any
      */
-    public static Map<String, String> parseParams(String s) {
+    @SuppressWarnings("resource")
+   public static Map<String, String> parseParams(String s) {
         if (s == null || s.length() == 0)
             return Collections.emptyMap();
         Map<String, String> params = new LinkedHashMap<String, String>(8);

@@ -1,8 +1,6 @@
 
 package com.tivo.kmttg.main;
 
-import java.awt.Color;
-import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,13 +14,16 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Stack;
 
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v1.1p";
+   public static String kmttg = "kmttg v2.0a";
    
    // encoding related
    public static String encProfDir = "";
@@ -125,7 +126,7 @@ public class config {
    public static int toolTips = 1;          // If 1 then display component toolTips
    public static int jobMonitorFullPaths = 1; // If 1 then show full paths in job monitor
    public static int toolTipsTimeout = 20;  // Set # seconds for tooltip display to timeout
-   public static int FontSize = 12;
+   public static int FontSize = 10;
    public static String lookAndFeel = "default";
    public static Boolean resumeDownloads = false;
    public static Hashtable<String,String> partners = new Hashtable<String,String>();
@@ -143,20 +144,23 @@ public class config {
    public static String slingBox_container = "mpegts";
 
    // GUI table related
-   public static Color tableBkgndDarker = new Color(235,235,235); // light grey
-   public static Color tableBkgndLight = Color.white;
-   public static Color tableBkgndProtected = new Color(191,156,94); // tan
-   public static Color tableBkgndRecording = new Color(149, 151, 221); // light blue
-   public static Color tableBkgndInHistory = new Color(250, 252, 164); // light yellow
-   public static Color lightRed = new Color(250, 190, 190); // light red
-   public static Font  tableFont = new Font("System", Font.BOLD, FontSize);
+   public static Color tableBkgndDarker = Color.rgb(235,235,235); // light grey
+   public static Color tableBkgndLight = Color.WHITE;
+   public static Color tableBkgndProtected = Color.rgb(191,156,94); // tan
+   public static Color tableBkgndRecording = Color.rgb(149, 151, 221); // light blue
+   public static Color tableBkgndInHistory = Color.rgb(250, 252, 164); // light yellow
+   public static Color lightRed = Color.rgb(250, 190, 190); // light red
+   public static Font  tableFont = new Font("System Bold", FontSize);
    public static int   tableColAutoSize = 1; // If 0 then don't auto size table columns
+   public static String tooltipBG = "#fff7c8";
    
    // GUI free space related
    public static Hashtable<String,Float> diskSpace = new Hashtable<String,Float>();
 
    // misc
    public static String programDir = "";
+   public static String cssDir = "";
+   public static String cssFile = "default.css";
    public static String OS = "other";
    public static String tmpDir = "/tmp";
    public static String perl = "perl";
@@ -415,7 +419,7 @@ public class config {
       TIVOS.put(b.get("machine"), b.get("ip"));
       if (b.containsKey("identity"))
          setTsn(b.get("machine"), b.get("identity"));
-      save(configIni);
+      save();
       if (GUIMODE) {
          if (nplCapable(b.get("machine")))
             gui.AddTivo(b.get("machine"), b.get("ip"));
@@ -668,12 +672,13 @@ public class config {
       autoLog      = programDir + s + "auto.log";
       autoHistory  = programDir + s + "auto.history";
       encProfDir   = programDir + s + "encode";
+      cssDir       = programDir + s + "css";
       
       // File to store/restore GUI settings
-      gui_settings = programDir + s + ".kmttg_settings";
+      gui_settings = programDir + s + ".kmttg_settings_v2";
       if (file.isDir(System.getProperty("user.home"))) {
          // Centralize this non-critical file instead of localizing it
-         gui_settings = System.getProperty("user.home") + s + ".kmttg_settings";
+         gui_settings = System.getProperty("user.home") + s + ".kmttg_settings_v2";
       }
       
       // Non-executable defaults
@@ -1234,9 +1239,9 @@ public class config {
    }
    
    // Save current settings in memory to config.ini
-   public static Boolean save(String config) {
-      debug.print("config=" + config);
-            
+   public static Boolean save() {
+      debug.print("");
+      String config = configIni;
       try {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(config));
          

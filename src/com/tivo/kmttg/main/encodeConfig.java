@@ -13,7 +13,8 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.tivo.kmttg.gui.SwingWorker;
+import javafx.concurrent.Task;
+
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -81,8 +82,9 @@ public class encodeConfig {
             if (config.gui != null) {
                // In GUI mode add VRD encoding profiles in background/threaded mode
                // since this can take several seconds and would hang up GUI
-               SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {         
-                  public Boolean doInBackground() {
+               Task<Boolean> worker = new Task<Boolean>() {
+                  @Override
+                  public Boolean call() {
                     return getVrdProfiles();
                   }
                   public void done() {
@@ -103,7 +105,7 @@ public class encodeConfig {
                     }
                   }
                };
-               worker.execute();
+               new Thread(worker).start();
             } else {
                // In non GUI mode we want don't want threaded run
                getVrdProfiles();

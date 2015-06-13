@@ -3,17 +3,17 @@ package com.tivo.kmttg.main;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import javax.swing.SwingUtilities;
+import javafx.application.Platform;
 
 import com.tivo.kmttg.util.log;
 
 public class myExceptionHandler implements Thread.UncaughtExceptionHandler {
 
    public void uncaughtException(final Thread t, final Throwable e) {
-       if (SwingUtilities.isEventDispatchThread()) {
+       if (Platform.isFxApplicationThread()) {
            showException(t, e);
        } else {
-           SwingUtilities.invokeLater(new Runnable() {
+          Platform.runLater(new Runnable() {
                public void run() {
                    showException(t, e);
                }

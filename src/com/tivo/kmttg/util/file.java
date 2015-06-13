@@ -59,74 +59,11 @@ public class file {
       }
    }
    
-   // Java 1.5 compatible free space calculator
+   // Java 1.6 or later compatible free space
    public static long freeSpace(String f) {
       long bad = 0;
       if ( ! file.isDir(f) ) return bad;
-      long free;
-      Stack<String> command = new Stack<String>();
-      if (config.OS.matches("windows")) {
-         // Use 'dir' command to get free space
-         command.add("cmd");
-         command.add("/c");
-         command.add("dir");
-         command.add(f);
-         backgroundProcess process = new backgroundProcess();
-         if ( process.run(command) ) {
-            if ( process.Wait() == 0 ) {
-               Stack<String> l = process.getStdout();
-               if (l.size() > 0) {
-                  String free_string = l.lastElement();
-                  if (free_string.matches(".*bytes\\s+free")) {
-                     String[] ll = free_string.split("\\s+");
-                     free_string = ll[ll.length-3].replaceAll(",", "");
-                     try {
-                        free = Long.parseLong(free_string);
-                        return free;
-                     } catch (NumberFormatException e) {
-                        return bad;
-                     }
-                  } else {
-                     return bad;
-                  }
-               }
-            }
-         }         
-      } else {
-         // Use 'df' command to get free space
-         // unix and linux put the available number in different column positions
-         backgroundProcess process = new backgroundProcess();
-         command.add("/bin/df");
-         command.add("-k");
-         command.add(f);
-         if (process.run(command)) {
-            if (process.Wait() == 0) {
-               Stack<String> l = process.getStdout();
-               if (l.size() > 0) {
-                  String first_line = l.firstElement();
-                  String[] columns = first_line.split("\\s+");
-
-                  // locate position of 'Available' column
-                  for (int i = 0; i < columns.length; i++) {
-                     if (columns[i].equals("Available")) {
-                        // now grab the number in this column
-                        String free_string = l.lastElement();
-                        String[] ll = free_string.split("\\s+");
-                        free_string = ll[i];
-                        try {
-                           free = Long.parseLong(free_string);
-                           free = (long) (free * 1024);
-                           return free;
-                        } catch (NumberFormatException e) {
-                           return bad;
-                        }
-                     }
-                  }
-               }
-            }
-         }
-      }
-      return bad;
+      return new File(f).getFreeSpace();
    }
 
    public static Boolean isEmpty(String f) {
