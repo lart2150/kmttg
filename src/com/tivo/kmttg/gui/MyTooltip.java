@@ -19,7 +19,6 @@ import javafx.util.Duration;
 
 public class MyTooltip {
    private static Boolean initialized = false;
-   private static int open_delay = 2000;
    private static int close_delay = 100;
    
    public static void init() {
@@ -46,6 +45,20 @@ public class MyTooltip {
                      else
                         config.toolTips = 0;
                   }
+                  if (key.equals("toolTipsDelay")) {
+                     try {
+                        config.toolTipsDelay = Integer.parseInt(line);
+                     } catch (NumberFormatException e) {
+                        config.toolTipsDelay = 2;
+                     }
+                  }
+                  if (key.equals("toolTipsTimeout")) {
+                     try {
+                        config.toolTipsTimeout = Integer.parseInt(line);
+                     } catch (NumberFormatException e) {
+                        config.toolTipsTimeout = 20;
+                     }
+                  }
                }
                ifp.close();
             } catch (Exception e) {
@@ -53,7 +66,7 @@ public class MyTooltip {
          }
 
       }
-      setTooltipDelay(config.toolTipsTimeout*1000);
+      setTooltipDelay(config.toolTipsDelay, config.toolTipsTimeout);
       initialized = true;
    }
    
@@ -99,8 +112,8 @@ public class MyTooltip {
       return tip;      
    }
    
-   public static void setTooltipDelay(int timeout_secs) {
-      setupCustomTooltipBehavior(open_delay, timeout_secs*1000, close_delay);
+   public static void setTooltipDelay(int open_secs, int timeout_secs) {
+      setupCustomTooltipBehavior(open_secs*1000, timeout_secs*1000, close_delay);
    }
    
    public static void disable() {

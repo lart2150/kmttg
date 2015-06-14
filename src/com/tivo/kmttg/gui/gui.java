@@ -1759,6 +1759,7 @@ public class gui extends Application {
             ofp.write("<custom>\n"              + custom_setting()           + "\n");
             ofp.write("<encode_name>\n"         + config.encodeName          + "\n");
             ofp.write("<toolTips>\n"            + config.toolTips            + "\n");
+            ofp.write("<toolTipsDelay>\n"       + config.toolTipsDelay       + "\n");
             ofp.write("<toolTipsTimeout>\n"     + config.toolTipsTimeout     + "\n");
             ofp.write("<slingBox>\n"            + config.slingBox            + "\n");
             ofp.write("<slingBox_perl>\n"       + config.slingBox_perl       + "\n");
@@ -2065,6 +2066,13 @@ public class gui extends Application {
                if (encodeConfig.isValidEncodeName(line)) {
                   encoding.setValue(line);
                   config.encodeName = line;
+               }
+            }
+            if (key.equals("toolTipsDelay")) {
+               try {
+                  config.toolTipsDelay = Integer.parseInt(line);
+               } catch (NumberFormatException e) {
+                  config.toolTipsDelay = 2;
                }
             }
             if (key.equals("toolTipsTimeout")) {

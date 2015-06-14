@@ -125,6 +125,7 @@ public class config {
    public static String gui_settings = null; // File in which to save GUI settings on exit
    public static int toolTips = 1;          // If 1 then display component toolTips
    public static int jobMonitorFullPaths = 1; // If 1 then show full paths in job monitor
+   public static int toolTipsDelay = 2; // Set # seconds for tooltip to display
    public static int toolTipsTimeout = 20;  // Set # seconds for tooltip display to timeout
    public static int FontSize = 10;
    public static String lookAndFeel = "default";
@@ -675,10 +676,13 @@ public class config {
       cssDir       = programDir + s + "css";
       
       // File to store/restore GUI settings
-      gui_settings = programDir + s + ".kmttg_settings_v2";
+      String settings_name = ".kmttg_settings_v2";
+      if (OS.equals("windows"))
+         settings_name = "kmttg_settings_v2";
+      gui_settings = programDir + s + settings_name;
       if (file.isDir(System.getProperty("user.home"))) {
          // Centralize this non-critical file instead of localizing it
-         gui_settings = System.getProperty("user.home") + s + ".kmttg_settings_v2";
+         gui_settings = System.getProperty("user.home") + s + settings_name;
       }
       
       // Non-executable defaults

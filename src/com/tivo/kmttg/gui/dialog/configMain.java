@@ -147,6 +147,7 @@ public class configMain {
    private static TextField projectx = null;
    private static TextField disk_space = null;
    private static TextField customCommand = null;
+   private static TextField toolTipsDelay = null;
    private static TextField toolTipsTimeout = null;
    private static TextField cpu_cores = null;
    private static TextField download_tries = null;
@@ -922,6 +923,9 @@ public class configMain {
       
       // MinChanDigits
       MinChanDigits.setValue("" + config.MinChanDigits);
+      
+      // toolTipsDelay
+      toolTipsDelay.setText("" + config.toolTipsDelay);
       
       // toolTipsTimeout
       toolTipsTimeout.setText("" + config.toolTipsTimeout);
@@ -1906,12 +1910,29 @@ public class configMain {
          config.autoLogSizeMB = 10;
       }
       
+      // toolTipsDelay
+      value = string.removeLeadingTrailingSpaces(toolTipsDelay.getText());
+      if (value.length() > 0) {
+         try {
+            config.toolTipsDelay = Integer.parseInt(value);
+            MyTooltip.setTooltipDelay(config.toolTipsDelay, config.toolTipsTimeout);
+         } catch(NumberFormatException e) {
+            textFieldError(toolTipsDelay, "Illegal setting for toolTips delay: '" + value + "'");
+            log.error("Setting to 2");
+            config.toolTipsDelay = 2;
+            toolTipsDelay.setText("" + config.toolTipsDelay);
+            errors++;
+         }
+      } else {
+         config.toolTipsDelay = 2;
+      }
+      
       // toolTipsTimeout
       value = string.removeLeadingTrailingSpaces(toolTipsTimeout.getText());
       if (value.length() > 0) {
          try {
             config.toolTipsTimeout = Integer.parseInt(value);
-            MyTooltip.setTooltipDelay(config.toolTipsTimeout);
+            MyTooltip.setTooltipDelay(config.toolTipsDelay, config.toolTipsTimeout);
          } catch(NumberFormatException e) {
             textFieldError(toolTipsTimeout, "Illegal setting for toolTips timeout: '" + value + "'");
             log.error("Setting to 20");
@@ -2050,6 +2071,7 @@ public class configMain {
       wan_ipad_port = new TextField(); wan_ipad_port.setPrefWidth(15);
       limit_npl_fetches = new TextField(); limit_npl_fetches.setPrefWidth(15);
       active_job_limit = new TextField(); active_job_limit.setPrefWidth(15);
+      toolTipsDelay = new TextField(); toolTipsDelay.setPrefWidth(15);
       toolTipsTimeout = new TextField(); toolTipsTimeout.setPrefWidth(15);
       cpu_cores = new TextField(); cpu_cores.setPrefWidth(15);
       download_tries = new TextField(); download_tries.setPrefWidth(15);
@@ -2196,6 +2218,7 @@ public class configMain {
       tableColAutoSize = new CheckBox();
       jobMonitorFullPaths = new CheckBox();
       autotune_enabled = new CheckBox();
+      Label toolTipsDelay_label = new Label();
       Label toolTipsTimeout_label = new Label();
       OK = new MyButton();
       CANCEL = new MyButton();
@@ -2407,6 +2430,7 @@ public class configMain {
       download_time_estimate.setText("Show estimated time remaining for downloads");
       
       toolTips.setText("Display toolTips");
+      toolTipsDelay_label.setText("toolTip open delay (secs)");
       toolTipsTimeout_label.setText("toolTip timeout (secs)");
 
       slingBox.setText("Show Slingbox capture tab");
@@ -3144,6 +3168,11 @@ public class configMain {
       visual_panel.add(FontSize_label, 0, gy);
       visual_panel.add(FontSize, 1, gy);
 
+      // toolTipsDelay
+      gy++;
+      visual_panel.add(toolTipsDelay_label, 0, gy);
+      visual_panel.add(toolTipsDelay, 1, gy);
+
       // toolTipsTimeout
       gy++;
       visual_panel.add(toolTipsTimeout_label, 0, gy);
@@ -3462,6 +3491,7 @@ public class configMain {
       slingBox.setTooltip(getToolTip("slingBox"));
       tableColAutoSize.setTooltip(getToolTip("tableColAutoSize"));
       jobMonitorFullPaths.setTooltip(getToolTip("jobMonitorFullPaths"));
+      toolTipsDelay.setTooltip(getToolTip("toolTipsDelay")); 
       toolTipsTimeout.setTooltip(getToolTip("toolTipsTimeout")); 
       cpu_cores.setTooltip(getToolTip("cpu_cores"));
       download_tries.setTooltip(getToolTip("download_tries"));
@@ -4169,9 +4199,16 @@ public class configMain {
          text =  "<b>Show full paths in Job Monitor</b><br>";
          text += "Enable or disable display of full paths in Job Monitor OUTPUT column.";
       }
+      else if (component.equals("toolTipsDelay")) {
+         text =  "<b>toolTip open delay (secs)</b><br>";
+         text += "Time in seconds to display a toolTip message. You need to hover over a widget for this<br>";
+         text += "many seconds before the tooltip bubble will appear.<br>";
+         text += "NOTE: Changing this setting will only take effect after restarting kmttg.";
+      }
       else if (component.equals("toolTipsTimeout")) {
          text =  "<b>toolTip timeout (secs)</b><br>";
-         text += "Time in seconds to timeout display of a toolTip message.";
+         text += "Time in seconds to timeout display of a toolTip message.<br>";
+         text += "NOTE: Changing this setting will only take effect after restarting kmttg.";
       }
       else if (component.equals("cpu_cores")) {
          text =  "<b>encoding cpu cores</b><br>";
