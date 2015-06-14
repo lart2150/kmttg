@@ -680,6 +680,9 @@ public class tooltip {
       else if (component.equals("reverse")) {
          text = "<";
       }
+      else if (component.equals("back")) {
+         text = "{";
+      }
       else if (component.equals("replay")) {
          text = "(";
       }
