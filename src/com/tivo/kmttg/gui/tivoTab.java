@@ -252,7 +252,6 @@ public class tivoTab {
       debug.print("button=" + button);
       // Bring up File Browser
       browser.Browser.setTitle("Add");
-      log.print(config.TIVOS.get("FILES"));
       browser.Browser.setInitialDirectory(new File(config.TIVOS.get("FILES")));
       List<File> files = browser.Browser.showOpenMultipleDialog(null);
       if (files != null) {
