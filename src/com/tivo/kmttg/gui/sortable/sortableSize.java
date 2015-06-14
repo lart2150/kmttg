@@ -24,7 +24,7 @@ public class sortableSize {
    
    public sortableSize(long size) {
       sortable = size;
-      display = String.format("%.2f GB ", sortable/Math.pow(2,20));
+      display = String.format("%.2f GB ", sortable/Math.pow(2,30));
    }
    
    public String toString() {
