@@ -198,7 +198,7 @@ public class thumbsTable extends TableMap {
          return rating;
       }
 
-      public String getString() {
+      public String toString() {
          return show.toString();
       }      
    }
@@ -298,11 +298,9 @@ public class thumbsTable extends TableMap {
    }
    
    private void updateShowRows(String prefix) {
-      int colNum = TableUtil.getColumnIndex(TABLE, "SHOW");
-      TableColumn<Tabentry, ?> col = TABLE.getColumns().get(colNum);
       for (int row=0; row<TABLE.getItems().size(); ++row) {
-         String entry = col.getCellData(row).toString();
-         col.setText(prefix + entry);
+         Tabentry e = TABLE.getItems().get(row);
+         e.show.display = prefix + e.show.display;
       }
    }
    
@@ -398,6 +396,10 @@ public class thumbsTable extends TableMap {
    }
    
    public void saveThumbs(String tivoName, String file) {
+      if (isTableLoaded()) {
+         log.error("Cannot save a loaded table");
+         return;
+      }
       if (tivo_data.containsKey(tivoName) && tivo_data.get(tivoName).length() > 0) {
          log.warn("Saving '" + tivoName + "' Thumbs list to file: " + file);
          JSONFile.write(tivo_data.get(tivoName), file);
