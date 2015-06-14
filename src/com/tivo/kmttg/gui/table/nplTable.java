@@ -355,34 +355,24 @@ public class nplTable extends TableMap {
                } else {
                   if (entry != null) {
                      setStyle("");
-                     sortableDate d = entry.getDATE();
-                     if (d != null && ! d.folder) {
-                        if (d.data.containsKey("CopyProtected"))
-                           TableUtil.setRowColor(this, config.tableBkgndProtected);
-                        
-                        if (d.data.containsKey("ExpirationImage") &&
-                            (d.data.get("ExpirationImage").equals("in-progress-recording") ||
-                             d.data.get("ExpirationImage").equals("in-progress-transfer")))
-                           TableUtil.setRowColor(this, config.tableBkgndRecording);
-                        
-                        if (config.showHistoryInTable == 1) {
-                           if (d.data.containsKey("ProgramId") &&
-                                 auto.keywordMatchHistoryFast(d.data.get("ProgramId"), false))
-                              TableUtil.setRowColor(this, config.tableBkgndInHistory);
-                           if (d.data.containsKey("ProgramId_unique") &&
-                                 auto.keywordMatchHistoryFast(d.data.get("ProgramId_unique"), false))
-                              TableUtil.setRowColor(this, config.tableBkgndInHistory);
-                        }
-                     }
-                     if (d != null && d.folder) {
-                        // Check inside folder for any in progress recordings
-                        for (int i=0; i<d.folderData.size(); ++i) {
-                           Hashtable<String,String> h = d.folderData.get(i);
-                           if (h.containsKey("ExpirationImage")) {
-                              if (h.get("ExpirationImage").equals("in-progress-recording"))
-                                 TableUtil.setRowColor(this, config.tableBkgndRecording);
-                              if (h.get("ExpirationImage").equals("in-progress-transfer"))
-                                 TableUtil.setRowColor(this, config.tableBkgndRecording);
+                     if (! isSelected()) {
+                        sortableDate d = entry.getDATE();
+                        if (d != null && d.data != null) {
+                           if (d.data.containsKey("CopyProtected"))
+                              TableUtil.setRowColor(this, config.tableBkgndProtected);
+                           
+                           if (d.data.containsKey("ExpirationImage") &&
+                               (d.data.get("ExpirationImage").equals("in-progress-recording") ||
+                                d.data.get("ExpirationImage").equals("in-progress-transfer")))
+                              TableUtil.setRowColor(this, config.tableBkgndRecording);
+                           
+                           if (config.showHistoryInTable == 1) {
+                              if (d.data.containsKey("ProgramId") &&
+                                    auto.keywordMatchHistoryFast(d.data.get("ProgramId"), false))
+                                 TableUtil.setRowColor(this, config.tableBkgndInHistory);
+                              if (d.data.containsKey("ProgramId_unique") &&
+                                    auto.keywordMatchHistoryFast(d.data.get("ProgramId_unique"), false))
+                                 TableUtil.setRowColor(this, config.tableBkgndInHistory);
                            }
                         }
                      }
@@ -1053,7 +1043,8 @@ public class nplTable extends TableMap {
    
    public void RemoveRow(int row) {
       TreeItem<Tabentry> item = NowPlaying.getTreeItem(row);
-      item.getParent().getChildren().remove(item);
+      if (item != null)
+         item.getParent().getChildren().remove(item);
    }
    
    public void RemoveRows(Stack<Integer> rows) {
