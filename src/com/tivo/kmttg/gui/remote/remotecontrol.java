@@ -65,9 +65,10 @@ public class remotecontrol {
       
       // TiVo Remote control panel
       final Object[][] Buttons = {
-         {"channelUp",   "channel_up.png",   0.5,  20,  10,  0, 0, "PAGE_UP",   KeyCode.PAGE_UP},
-         {"lab_channel", "channel_label.png",0.7,  20,  40,  0, 0, null,        null},
-         {"channelDown", "channel_down.png", 0.5,  20,  55,  0, 0, "PAGE_DOWN", KeyCode.PAGE_DOWN},
+         {"back",        "back.png",         0.6,  20,   0,  0, 0, "ShiftOPENB",KeyCode.OPEN_BRACKET},
+         {"channelUp",   "channel_up.png",   0.5,  20,  25,  0, 0, "PAGE_UP",   KeyCode.PAGE_UP},
+         {"lab_channel", "channel_label.png",0.7,  20,  55,  0, 0, null,        null},
+         {"channelDown", "channel_down.png", 0.5,  20,  70,  0, 0, "PAGE_DOWN", KeyCode.PAGE_DOWN},
          {"left",        "left.png",         0.5,  15,  85, 20, 0, "LEFT",      KeyCode.LEFT},
          {"zoom",        "zoom.png",         0.7,  20, 130,  0, 0, "AltZ",      KeyCode.Z},
          {"tivo",        "tivo.png",         0.7,  60,   0,  0, 0, "AltT",      KeyCode.T},
@@ -742,6 +743,8 @@ public class remotecontrol {
          if (! u.startsWith("ACTION")) {
             if (u.equals("ZOOM"))
                u = "WINDOW";
+            if (u.equals("BACK"))
+               u = "REPLAY";
             n.add(u);
          }
       }
