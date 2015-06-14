@@ -298,13 +298,15 @@ public class remotecontrol {
                            String uri="";
                            if (name.equals("Netflix (flash)"))
                               uri = "x-tivo:flash:uuid:F23D193D-D2C2-4D18-9ABE-FA6B8488302F";
+                           if (name.equals("Plex"))
+                              uri = "x-tivo:web:https://plex.tv/web/tv/tivo";
                            if (name.equals("Netflix (html)"))
                               uri = "x-tivo:netflix:netflix";
                            if (name.equals("YouTube"))
                               uri = "x-tivo:flash:uuid:B8CEA236-0C3D-41DA-9711-ED220480778E";
                            if (name.equals("YouTube (html)"))
                               uri = "x-tivo:web:https://www.youtube.com/tv";
-                           if (name.equals("Amazon (html)"))
+                           if (name.equals("Amazon Prime"))
                               uri = "x-tivo:web:https://atv-ext.amazon.com/cdp/resources/app_host/index.html?deviceTypeID=A3UXGKN0EORVOF";
                            if (name.equals("Vudu (html)"))
                               uri = "x-tivo:vudu:vudu";
@@ -837,8 +839,8 @@ public class remotecontrol {
       
    public void setHmeDestinations(final String tivoName) {
       String[] hmeNames = {
-         "Netflix (html)", "YouTube (html)", "Vudu (html)",
-         "Amazon (hme)", "Hulu Plus", "AOL On", "Launchpad"
+         "Netflix (html)", "YouTube (html)", "Vudu (html)", "Plex",
+         "Amazon Prime", "Hulu Plus"
       };
       hme.getItems().clear();
       for (int i=0; i<hmeNames.length; ++i)
