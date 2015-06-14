@@ -540,8 +540,7 @@ public class searchTable extends TableMap {
                      json = GetRowData(row);
                      if (json != null)
                         r.SPschedule(tivoName, json, existing);
-                }
-                  r.disconnect();
+                  }
                }
             }
             return null;

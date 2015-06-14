@@ -563,7 +563,6 @@ public class guideTable extends TableMap {
                      if (json != null)
                         r.SPschedule(tivoName, json, existing);
                   }
-                  r.disconnect();
                }
             }
             return null;
