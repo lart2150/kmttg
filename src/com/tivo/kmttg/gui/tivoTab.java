@@ -140,18 +140,8 @@ public class tivoTab {
          refresh.setTooltip(config.gui.getToolTip("refresh"));
          refresh.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-               if (nplTab.inFolder) {
-                  // Return from folder display mode to top level mode
-                  nplTab.RefreshNowPlaying(null);
-                  if (nplTab.folderEntryNum >= 0) {
-                     nplTab.SelectFolder(nplTab.folderName);
-                  }
-               } else {
-                  // Refresh now playing list mode
-                  //getTable().NowPlaying.clearSelection();
-                  //getTable().clear();
-                  jobMonitor.getNPL(name);
-               }
+               // Refresh now playing list mode
+               jobMonitor.getNPL(name);
             }
          });
          row.getChildren().add(refresh);

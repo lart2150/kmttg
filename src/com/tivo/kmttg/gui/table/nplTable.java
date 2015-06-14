@@ -37,7 +37,6 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.table.TableUtil;
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.comparator.ChannelComparator;
@@ -69,7 +68,6 @@ public class nplTable extends TableMap {
    public ScrollPane nplScroll = null;
    public String[] FILE_cols = {"FILE", "SIZE", "DIR"};
    public String[] TIVO_cols = {"", "SHOW", "DATE", "CHANNEL", "DUR", "SIZE", "Mbps"};
-   public Boolean inFolder = false;
    public String folderName = null;
    public int folderEntryNum = -1;
    private Stack<Hashtable<String,String>> entries = null;
@@ -623,10 +621,6 @@ public class nplTable extends TableMap {
          int row = GetSelectedRows()[0];
          sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
          createMeta.getExtendedMetadata(tivoName, s.data, true);
-      } else if (keyCode == KeyCode.COMMA && inFolder) {
-         // Return from folder to top level view
-         MyButton button = config.gui.getTab(tivoName).getRefreshButton();
-         button.fire();
       } else if (keyCode == KeyCode.PERIOD) {
          // Descend into currently selected folder
          int[] selected = GetSelectedRows();
@@ -841,9 +835,6 @@ public class nplTable extends TableMap {
       
       // Return message indicating size totals of displayed items
       message = getTotalsString(h);
-      if (inFolder) {
-         message = "'" + folderName + "' " + message;
-      }
       return message;
    }
       
@@ -908,7 +899,7 @@ public class nplTable extends TableMap {
          "%d SHOWS, %.0f GB USED",
          h.size(), totalSize/Math.pow(2,30)
       );
-      if (! inFolder && config.diskSpace.containsKey(tivoName)) {
+      if (config.diskSpace.containsKey(tivoName)) {
          float disk = config.diskSpace.get(tivoName);
          Double free = disk - totalSize/Math.pow(2,30);
          if (free < 0.0) free = 0.0;

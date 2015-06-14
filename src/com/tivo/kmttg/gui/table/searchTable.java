@@ -43,7 +43,6 @@ public class searchTable extends TableMap {
    private TreeItem<Tabentry> root = new TreeItem<>(new Tabentry(""));
    public ScrollPane scroll = null;
    public String[] TITLE_cols = {"", "TYPE", "SHOW", "DATE", "CHANNEL", "DUR"};
-   public Boolean inFolder = false;
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();

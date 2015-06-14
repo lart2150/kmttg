@@ -39,7 +39,6 @@ public class thumbsTable extends TableMap {
    public TableView<Tabentry> TABLE = null;
    public ScrollPane scroll = null;
    public String[] TITLE_cols = {"TYPE", "SHOW", "RATING"};
-   public Boolean inFolder = false;
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();

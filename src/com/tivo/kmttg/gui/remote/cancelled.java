@@ -83,11 +83,9 @@ public class cancelled {
       record.setTooltip(tooltip.getToolTip("record_cancel"));
       record.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
-            if (tab.inFolder) {
-               String tivoName = tivo.getValue();
-               if (tivoName != null && tivoName.length() > 0)
-                  tab.recordSingle(tivoName);
-            }
+            String tivoName = tivo.getValue();
+            if (tivoName != null && tivoName.length() > 0)
+               tab.recordSingle(tivoName);
          }
       });
 
@@ -97,7 +95,7 @@ public class cancelled {
       explain.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
             String tivoName = tivo.getValue();
-            if (tivoName != null && tivoName.length() > 0 && tab.inFolder) {
+            if (tivoName != null && tivoName.length() > 0) {
                int selected[] = TableUtil.GetSelectedRows(tab.TABLE);
                if (selected.length > 0) {
                   tab.getConflictDetails(tivoName, selected[0]);

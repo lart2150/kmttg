@@ -39,7 +39,6 @@ public class deletedTable extends TableMap {
    public TableView<Tabentry> TABLE = null;
    public ScrollPane scroll = null;
    public String[] TITLE_cols = {"SHOW", "DELETED", "RECORDED", "CHANNEL", "DUR"};
-   public Boolean inFolder = false;
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();

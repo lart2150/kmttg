@@ -46,7 +46,6 @@ public class cancelledTable extends TableMap {
    private TreeItem<Tabentry> root = new TreeItem<>(new Tabentry(""));
    public ScrollPane scroll = null;
    public String[] TITLE_cols = {"", "SHOW", "DATE", "CHANNEL", "DUR"};
-   public Boolean inFolder = false;
    public String folderName = null;
    public int folderEntryNum = -1;
    private Hashtable<String,Stack<JSONObject>> folders = null;

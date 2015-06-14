@@ -84,32 +84,25 @@ public class search {
       button.setTooltip(tooltip.getToolTip("button_search"));
       button.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
-            if (tab.inFolder) {
-               // Return to top level table display
-               tab.Refresh((JSONArray)null);
-               if (tab.folderEntryNum >= 0)
-                  tab.SelectFolder(tab.folderName);
-            } else {
-               // New search
-               tab.clear();
-               String tivoName = tivo.getValue();
-               if (tivoName != null && tivoName.length() > 0) {
-                  String keyword = string.removeLeadingTrailingSpaces(text.getText());
-                  if (keyword == null || keyword.length() == 0)
-                     return;
-                  int max_val = (Integer)max.getValue();
-                  
-                  jobData job = new jobData();
-                  job.source                = tivoName;
-                  job.tivoName              = tivoName;
-                  job.type                  = "remote";
-                  job.name                  = "Remote";
-                  job.search                = tab;
-                  job.remote_search_max     = max_val;
-                  job.remote_search         = true;
-                  job.remote_search_keyword = keyword;
-                  jobMonitor.submitNewJob(job);
-               }
+            // New search
+            tab.clear();
+            String tivoName = tivo.getValue();
+            if (tivoName != null && tivoName.length() > 0) {
+               String keyword = string.removeLeadingTrailingSpaces(text.getText());
+               if (keyword == null || keyword.length() == 0)
+                  return;
+               int max_val = (Integer)max.getValue();
+               
+               jobData job = new jobData();
+               job.source                = tivoName;
+               job.tivoName              = tivoName;
+               job.type                  = "remote";
+               job.name                  = "Remote";
+               job.search                = tab;
+               job.remote_search_max     = max_val;
+               job.remote_search         = true;
+               job.remote_search_keyword = keyword;
+               jobMonitor.submitNewJob(job);
             }
          }
       });
