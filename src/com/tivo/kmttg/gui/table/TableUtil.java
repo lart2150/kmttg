@@ -26,7 +26,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTablePosition;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -96,21 +95,26 @@ public class TableUtil {
    
    public static int[] GetSelectedRows(TableView<?> TABLE) {
       debug.print("");
-      ObservableList<Integer> obs = TABLE.getSelectionModel().getSelectedIndices();
-      int[] rows = new int[obs.size()];
-      for (int i=0; i<obs.size(); ++i)
-         rows[i] = obs.get(i);
+      ObservableList<Integer> tableRows = TABLE.getSelectionModel().getSelectedIndices();
+      LinkedHashMap<Integer,Integer> selected = new LinkedHashMap<Integer,Integer>();
+      for (Integer row : tableRows) {
+         if (row != -1)
+         selected.put(row, 1);
+      }
+      int[] rows = new int[selected.size()];
+      int count = 0;
+      for (int i : selected.keySet())
+         rows[count++] = i;
       return rows;
    }
    
    public static int[] GetSelectedRows(TreeTableView<?> TABLE) {
       debug.print("");
-      // NOTE: getSelectionModel().getSelectedIndices() is buggy so using alternate hack
+      ObservableList<Integer> tableRows = TABLE.getSelectionModel().getSelectedIndices();
       LinkedHashMap<Integer,Integer> selected = new LinkedHashMap<Integer,Integer>();
-      ObservableList<?> obs = TABLE.getSelectionModel().getSelectedCells();
-      for (Object t : obs) {
-         TreeTablePosition<?, ?> t1 = (TreeTablePosition<?, ?>)t;
-         selected.put(t1.getRow(), 1);
+      for (Integer row : tableRows) {
+         if (row != -1)
+         selected.put(row, 1);
       }
       int[] rows = new int[selected.size()];
       int count = 0;
