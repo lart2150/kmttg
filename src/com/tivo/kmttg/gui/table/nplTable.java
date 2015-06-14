@@ -1025,6 +1025,7 @@ public class nplTable extends TableMap {
       // Select entry just added
       int last = root.getChildren().size()-1;
       if (last >= 0) {
+         NowPlaying.getSelectionModel().clearSelection();
          NowPlaying.getSelectionModel().select(last);
          NowPlaying.requestFocus();
          NowPlaying.getFocusModel().focus(last);
