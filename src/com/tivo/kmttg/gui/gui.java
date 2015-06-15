@@ -1926,8 +1926,8 @@ public class gui extends Application {
    public void readSettings() {
       debug.print("");
       if (! file.isFile(config.gui_settings)) {
-         // Perhaps transitioning from older kmttg, so sent decent font size
-         config.FontSize = 11;
+         // Perhaps transitioning from older kmttg, so set decent font size
+         config.FontSize = 10;
          setFontSize(getFrame().getScene(), config.FontSize);
          config.save();
          return;
