@@ -5,7 +5,6 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -36,14 +35,12 @@ public class autoLogView {
       
       // text area
       text = new TextArea();
-      text.setDisable(true);
       text.setWrapText(true);
-      ScrollPane s1 = new ScrollPane(text);
-      HBox.setHgrow(s1, Priority.ALWAYS);  // stretch horizontally
-      VBox.setVgrow(s1, Priority.ALWAYS);  // stretch vertically
+      HBox.setHgrow(text, Priority.ALWAYS);  // stretch horizontally
+      VBox.setVgrow(text, Priority.ALWAYS);  // stretch vertically
 
       if (view()) {
-         content.getChildren().add(s1);
+         content.getChildren().add(text);
         
          // create and display dialog window
          dialog = new Stage();
@@ -57,7 +54,6 @@ public class autoLogView {
 
       } else {
          // Deallocate resources and return
-         s1 = null;
          text = null;
          content = null;
          return;
