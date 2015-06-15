@@ -300,6 +300,14 @@ public class remotecontrol {
                               uri = "x-tivo:flash:uuid:F23D193D-D2C2-4D18-9ABE-FA6B8488302F";
                            if (name.equals("Plex"))
                               uri = "x-tivo:web:https://plex.tv/web/tv/tivo";
+                           if (name.equals("Spotify"))
+                              uri = "x-tivo:web:https://d27nv3bwly96dm.cloudfront.net/indexOperav2.html";
+                           if (name.equals("Opera TV Store"))
+                              uri = "x-tivo:web:tvstore";
+                           if (name.equals("My Opera TV Store Apps"))
+                              uri = "x-tivo:web:tvstore:https://tivo.tvstore.opera.com/?startwith=myapps";
+                           if (name.equals("iHeartRadio"))
+                              uri = "x-tivo:web:https://tv.iheart.com/tivo/";
                            if (name.equals("Netflix (html)"))
                               uri = "x-tivo:netflix:netflix";
                            if (name.equals("YouTube"))
@@ -840,7 +848,8 @@ public class remotecontrol {
    public void setHmeDestinations(final String tivoName) {
       String[] hmeNames = {
          "Netflix (html)", "YouTube (html)", "Vudu (html)", "Plex",
-         "Amazon Prime", "Hulu Plus"
+         "Amazon Prime", "Hulu Plus", "Spotify", "iHeartRadio",
+         "Opera TV Store"
       };
       hme.getItems().clear();
       for (int i=0; i<hmeNames.length; ++i)
