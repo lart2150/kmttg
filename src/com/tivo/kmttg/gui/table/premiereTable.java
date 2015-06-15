@@ -70,7 +70,7 @@ public class premiereTable extends TableMap {
       TABLE = new TableView<Tabentry>();
       TABLE.getSelectionModel().setSelectionMode(SelectionMode.SINGLE); // Allow single row selection
       TABLE.setRowFactory(new ColorRowFactory()); // For row background color handling
-      // Special sort listener to set sort order to descending date when no sort is selected
+      // Special sort listener to set sort order to ascending date when no sort is selected
       TABLE.getSortOrder().addListener(new ListChangeListener<TableColumn<Tabentry, ?>>() {
          @Override
          public void onChanged(Change<? extends TableColumn<Tabentry, ?>> change) {
@@ -80,7 +80,7 @@ public class premiereTable extends TableMap {
                   return;
                int date_col = TableUtil.getColumnIndex(TABLE, "DATE");
                TABLE.getSortOrder().setAll(Collections.singletonList(TABLE.getColumns().get(date_col)));
-               TABLE.getColumns().get(date_col).setSortType(TableColumn.SortType.DESCENDING);
+               TABLE.getColumns().get(date_col).setSortType(TableColumn.SortType.ASCENDING);
             }
          }
       });
