@@ -168,10 +168,10 @@ public class search {
             String tivoName = tivo.getValue();
             if (tivoName != null && tivoName.length() > 0) {
                int[] selected = TableUtil.GetSelectedRows(tab.TABLE);
-               if (selected.length > 0) {
-                  JSONObject json = tab.GetRowData(selected[0]);
-                  config.gui.remote_gui.createWishlist(tivoName, json);
-               }
+               JSONObject json = null;
+               if (selected.length > 0)
+                  json = tab.GetRowData(selected[0]);
+               config.gui.remote_gui.createWishlist(tivoName, json);
             }
          }
       });
