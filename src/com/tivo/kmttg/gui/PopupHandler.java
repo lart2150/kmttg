@@ -54,6 +54,7 @@ public class PopupHandler {
             if (config.rpcEnabled(tivoName))
                items.add(new PopupPair("Record [r]", KeyCode.R, subTabName));
             items.add(new PopupPair("Explain [e]", KeyCode.E, subTabName));
+            items.add(new PopupPair("Tree state toggle [t]", KeyCode.T, subTabName));
             items.add(new PopupPair(
                "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
             );
@@ -63,6 +64,8 @@ public class PopupHandler {
                items.add(new PopupPair("Record [r]", KeyCode.R, subTabName));
                items.add(new PopupPair("Season Pass [p]", KeyCode.P, subTabName));
                items.add(new PopupPair("Wishlist [w]", KeyCode.W, subTabName));
+               if (subTabName.equals("Search"))
+                  items.add(new PopupPair("Tree state toggle [t]", KeyCode.T, subTabName));
             }
             items.add(new PopupPair(
                   "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
@@ -111,6 +114,7 @@ public class PopupHandler {
          if (config.rpcEnabled(tivoName) || config.mindEnabled(tivoName))
             items.add(new PopupPair("Display RPC data [r]", KeyCode.R, tivoName));
          items.add(new PopupPair("Web query [q]", KeyCode.Q, tivoName));
+         items.add(new PopupPair("Tree state toggle [t]", KeyCode.T, tivoName));
          items.add(new PopupPair("Add to auto transfers", config.gui.addSelectedTitlesMenuItem, tivoName));
          items.add(new PopupPair("Add to history file", config.gui.addSelectedHistoryMenuItem, tivoName));
          items.add(new PopupPair("Search table [ctrl-s]", config.gui.searchMenuItem, tivoName));
