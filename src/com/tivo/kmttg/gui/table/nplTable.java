@@ -17,6 +17,7 @@ import java.util.Vector;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.control.ScrollPane;
@@ -611,17 +612,8 @@ public class nplTable extends TableMap {
          int row = GetSelectedRows()[0];
          sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
          createMeta.getExtendedMetadata(tivoName, s.data, true);
-      } else if (keyCode == KeyCode.PERIOD) {
-         // Descend into currently selected folder
-         int[] selected = GetSelectedRows();
-         if (selected == null || selected.length < 1)
-            return;
-         sortableDate s = NowPlaying.getTreeItem(selected[0]).getValue().getDATE();
-         if ( s.folder ) {
-            folderName = s.folderName;
-            folderEntryNum = selected[0];
-            RefreshNowPlaying(s.folderData);
-         }
+      } else if (keyCode == KeyCode.T) {
+         toggleTreeState();
       }
    }
    
@@ -1064,6 +1056,19 @@ public class nplTable extends TableMap {
             RemoveRow(index);
             rows.remove(index);
          }
+      }
+   }
+   
+   // Toggle between fully expanded and fully collapsed tree states
+   public void toggleTreeState() {
+      Boolean fullyExpanded = true;
+      ObservableList<TreeItem<Tabentry>> obs = root.getChildren();
+      for (TreeItem<Tabentry> item : obs) {
+         if (item.getChildren().size() > 0 && ! item.isExpanded())
+            fullyExpanded = false;
+      }
+      for (TreeItem<Tabentry> item : obs) {
+         item.setExpanded(! fullyExpanded);
       }
    }
       
