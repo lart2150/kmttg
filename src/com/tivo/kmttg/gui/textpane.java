@@ -15,8 +15,12 @@ import javafx.scene.web.WebView;
 public class textpane {
    private WebView p;
    private int BUFFER_SIZE = 250000; // Limit to this many characters
+   private String BLACK, BLUE, RED;
   
    textpane(WebView p) {
+      BLACK = config.gui.getWebColor(Color.BLACK);
+      BLUE = config.gui.getWebColor(Color.BLUE);
+      RED = config.gui.getWebColor(Color.RED);
       this.p = p;
       this.p.getEngine().loadContent("<body><div id=\"content\"></div></body>");
    }
@@ -26,36 +30,36 @@ public class textpane {
    }
   
    public void print(String s) {
-      appendText(Color.BLACK, s);
+      appendText(BLACK, s);
       scroll();
    }
   
    public void warn(String s) {
-      appendText(Color.BLUE, s);
+      appendText(BLUE, s);
       scroll();
    }
   
    public void error(String s) {
-      appendText(Color.RED, s);
+      appendText(RED, s);
       java.awt.Toolkit.getDefaultToolkit().beep();
       scroll();
    }
   
    public void print(Stack<String> s) {
       for (int i=0; i<s.size(); ++i)
-         appendText(Color.BLACK, s.get(i));
+         appendText(BLACK, s.get(i));
       scroll();
    }
   
    public void warn(Stack<String> s) {
       for (int i=0; i<s.size(); ++i)
-         appendText(Color.BLUE, s.get(i));
+         appendText(BLUE, s.get(i));
       scroll();
    }
   
    public void error(Stack<String> s) {
       for (int i=0; i<s.size(); ++i)
-         appendText(Color.RED, s.get(i));
+         appendText(RED, s.get(i));
       java.awt.Toolkit.getDefaultToolkit().beep();
       scroll();
    }
@@ -72,7 +76,7 @@ public class textpane {
       }
    }
   
-   public void appendText(Color c, String s) {
+   public void appendText(String color, String s) {
       if (p != null) {
          Document doc = p.getEngine().getDocument();
          Element content = doc.getElementById("content");
@@ -82,7 +86,7 @@ public class textpane {
          pre.setTextContent(s);
          // NOTE: display: inline prevents newline from being added for <pre> tag
          // NOTE: white-space: pre-wrap allows horizontal work wrapping to avoid horizontal scrollbar
-         pre.setAttribute("style", "white-space: pre-wrap; display: inline; color:" + config.gui.getWebColor(c));
+         pre.setAttribute("style", "white-space: pre-wrap; display: inline; color:" + color);
          if (content.getChildNodes().getLength() > 0)
             content.appendChild(doc.createElement("br"));
          content.appendChild(pre);
