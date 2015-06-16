@@ -20,6 +20,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
@@ -141,6 +142,7 @@ public class nplTable extends TableMap {
                TreeTableColumn<Tabentry,sortableDate> col = new TreeTableColumn<Tabentry,sortableDate>(colName);
                col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableDate>(colName));
                col.setComparator(new DateComparator());
+               col.setCellFactory(new RightJustifyColFactory()); // Right justify column text
                NowPlaying.getColumns().add(col);
             } else if (colName.equals("CHANNEL")) {
                TreeTableColumn<Tabentry,sortableChannel> col = new TreeTableColumn<Tabentry,sortableChannel>(colName);
@@ -402,6 +404,27 @@ public class nplTable extends TableMap {
          return cell;
       }
    }   
+   
+   // Right justify column text (for DATE column)
+   private class RightJustifyColFactory implements Callback<TreeTableColumn<Tabentry, sortableDate>, TreeTableCell<Tabentry, sortableDate>> {
+      public TreeTableCell<Tabentry, sortableDate> call(TreeTableColumn<Tabentry, sortableDate> tableView) {
+         TreeTableCell<Tabentry, sortableDate> cell = new TreeTableCell<Tabentry, sortableDate>() {
+            @Override
+            public void updateItem(sortableDate entry, boolean empty) {
+               super.updateItem(entry, empty);
+               if (empty)
+                  setText("");
+               else {
+                  if (entry != null) {
+                     setText(entry.toString());
+                     setAlignment(Pos.TOP_RIGHT);
+                  }
+               }
+            }
+         };
+         return cell;
+      }
+   }
    
    // Handle keyboard presses
    private void KeyPressed(KeyEvent e) {
