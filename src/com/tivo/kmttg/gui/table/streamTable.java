@@ -7,6 +7,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
@@ -83,6 +84,7 @@ public class streamTable extends TableMap {
             TreeTableColumn<Tabentry,sortableDate> col = new TreeTableColumn<Tabentry,sortableDate>(colName);
             col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableDate>(colName));
             col.setComparator(new DateComparator());
+            col.setCellFactory(new RightJustifyColFactory()); // Right justify column text
             TABLE.getColumns().add(col);
          } else {
             // Regular String sort
@@ -134,6 +136,27 @@ public class streamTable extends TableMap {
       }
    }   
    
+   // Right justify column text (for DATE column)
+   private class RightJustifyColFactory implements Callback<TreeTableColumn<Tabentry, sortableDate>, TreeTableCell<Tabentry, sortableDate>> {
+      public TreeTableCell<Tabentry, sortableDate> call(TreeTableColumn<Tabentry, sortableDate> tableView) {
+         TreeTableCell<Tabentry, sortableDate> cell = new TreeTableCell<Tabentry, sortableDate>() {
+            @Override
+            public void updateItem(sortableDate entry, boolean empty) {
+               super.updateItem(entry, empty);
+               if (empty)
+                  setText("");
+               else {
+                  if (entry != null) {
+                     setText(entry.toString());
+                     setAlignment(Pos.TOP_RIGHT);
+                  }
+               }
+            }
+         };
+         return cell;
+      }
+   }
+   
    public static class Tabentry {
       public ImageView image = new ImageView();
       public String title = "";
@@ -142,7 +165,7 @@ public class streamTable extends TableMap {
       
       public Tabentry(JSONObject entry) {
          try {
-            long start = 0;
+            long start = -1;
             if (entry.has("startTime"))
                start = TableUtil.getLongDateFromString(entry.getString("startTime"));
             title = TableUtil.makeShowTitle(entry);
