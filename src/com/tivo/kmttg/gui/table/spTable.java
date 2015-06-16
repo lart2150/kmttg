@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.util.Hashtable;
 import java.util.Optional;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.control.ScrollPane;
@@ -782,24 +783,23 @@ public class spTable extends TableMap {
     }
     
     public void SPListModify(final String tivoName) {
-       Task<Void> task = new Task<Void>() {
-          @Override public Void call() {
-             int[] selected = TableUtil.GetSelectedRows(TABLE);
-             if (selected.length > 0) {
-                int row = selected[0];
-                JSONObject json = GetRowData(row);
-                if (json != null) {
-                   String title;
-                   try {
-                      title = json.getString("title");
-                      if (isTableLoaded()) {
-                         log.error("Cannot modify SPs from loaded file.");
-                         return null;
-                      }
-                      JSONObject result = util.spOpt.promptUser(
-                         tivoName, "(" + tivoName + ")" + "Modify SP - " + title, json, TableUtil.isWL(json)
-                      );
-                      if (result != null) {
+       if (isTableLoaded()) {
+          log.error("Cannot modify SPs from loaded file.");
+          return;
+       }
+       int[] selected = TableUtil.GetSelectedRows(TABLE);
+       if (selected.length > 0) {
+          final int row = selected[0];
+          final JSONObject json = GetRowData(row);
+          if (json != null) {
+             try {
+                final String title = json.getString("title");
+                final JSONObject result = util.spOpt.promptUser(
+                   tivoName, "(" + tivoName + ")" + "Modify SP - " + title, json, TableUtil.isWL(json)
+                );
+                if (result != null) {
+                   Task<Void> task = new Task<Void>() {
+                      @Override public Void call() {
                          Remote r = config.initRemote(tivoName);
                          if (r.success) {
                             if (r.Command("ModifySP", result) != null) {
@@ -808,27 +808,29 @@ public class spTable extends TableMap {
                             
                             // Update SP table
                             log.warn(">> Updating table, please be patient...");
-                            JSONArray a = r.SeasonPasses(new jobData());
+                            final JSONArray a = r.SeasonPasses(new jobData());
                             if( a != null) {
                                log.warn(">> Finished updating table");
-                               clear();
-                               AddRows(tivoName, a);
-                               setSelectedRow(row);
-                            }
-                            
+                               Platform.runLater(new Runnable() {
+                                  @Override public void run() {
+                                     clear();
+                                     AddRows(tivoName, a);
+                                     setSelectedRow(row);
+                                  }
+                               });
+                            }                            
                             r.disconnect();
                          }
+                         return null;
                       }
-                   } catch (JSONException e) {
-                      log.error("SPListModify error: " + e.getMessage());
-                      return null;
-                   }
-                }
+                   };
+                   new Thread(task).start();
+                } // result != null
+             } catch (JSONException e) {
+                log.error("SPListModify error: " + e.getMessage());
              }
-             return null;
-          }
-       };
-       new Thread(task).start();
+          } // json != null
+       } // selected.length > 0
     }
     
     // Update SP priority order to match current SP table
