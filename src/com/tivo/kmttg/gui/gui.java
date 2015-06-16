@@ -1667,43 +1667,42 @@ public class gui extends Application {
    }
    
    // Set encoding combobox choices
-   public void SetEncodings(Stack<String> values) {
+   public void SetEncodings(final Stack<String> values) {
       debug.print("values=" + values);
       
       if (encoding != null) {      
-         // Get existing setting in combobox
-         String current = null;
-         if (encoding.getItems().size() > 0) {
-            current = encoding.getValue();
-         }
-         String[] names = new String[values.size()];
-         for (int i=0; i<values.size(); ++i) {
-            names[i] = values.get(i);
-         }
-         combobox.SetValues(encoding, names);
-         if (current != null)
-            encoding.setValue(current);
-         else {
-            if (encoding.getItems().size() > 0)
-               encoding.setValue(encoding.getItems().get(0));
-         }
+          Platform.runLater(new Runnable() {
+              @Override public void run() {
+		         // Get existing setting in combobox
+		         String current = null;
+		         if (encoding.getItems().size() > 0) {
+		            current = encoding.getValue();
+		         }
+		         String[] names = new String[values.size()];
+		         for (int i=0; i<values.size(); ++i) {
+		            names[i] = values.get(i);
+		         }
+		         combobox.SetValues(encoding, names);
+		         if (current != null)
+		            encoding.setValue(current);
+		         else {
+		            if (encoding.getItems().size() > 0)
+		               encoding.setValue(encoding.getItems().get(0));
+		         }
+              }
+          });
       }
    }
    
-   public String GetSelectedEncoding() {
-      debug.print("");
-      String selected = null;
-      if (encoding.getItems().size() > 0) {
-         selected = encoding.getValue();
-      }
-      return selected;
-   }
-   
-   public void SetSelectedEncoding(String name) {
+   public void SetSelectedEncoding(final String name) {
       debug.print("name=" + name);
-      if (encoding.getItems().size() > 0) {
-         encoding.setValue(name);
-      }
+      Platform.runLater(new Runnable() {
+          @Override public void run() {
+		      if (encoding.getItems().size() > 0) {
+		         encoding.setValue(name);
+		      }
+          }
+      });
    }
    
    private void CreateImages() {
