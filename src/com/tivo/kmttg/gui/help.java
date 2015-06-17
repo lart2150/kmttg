@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Hyperlink;
@@ -16,6 +17,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import com.tivo.kmttg.main.config;
@@ -30,8 +32,11 @@ public class help {
       debug.print("");
       if (dialog == null) {
          dialog = new Stage();
+         dialog.initOwner(config.gui.getFrame());
+         dialog.initModality(Modality.NONE); // Non modal
          dialog.setTitle("About kmttg");
          content = new VBox();
+         content.setPadding(new Insets(0,0,5,0));
          content.setAlignment(Pos.CENTER);
          
          Label title = new Label(config.kmttg);
