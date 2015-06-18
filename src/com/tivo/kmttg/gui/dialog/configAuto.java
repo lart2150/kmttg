@@ -336,25 +336,22 @@ public class configAuto {
       GridPane row5 = new GridPane();
       row5.setHgap(5);
       row5.getColumnConstraints().addAll(
-         util.cc_none(), util.cc_none(), util.cc_none(), util.cc_stretch()
+         util.cc_none(), util.cc_none(), util.cc_stretch()
       );
       row5.setAlignment(Pos.CENTER_LEFT);
       row5.setHgap(5);
-      row5.add(encoding_name_label, 0, 0);
-      row5.add(encoding_name, 1, 0);
-      row5.add(encoding_name2, 2, 0);
-      row5.add(encoding_name2_suffix, 3, 0);
+      row5.add(encoding_name, 0, 0);
+      row5.add(encoding_name2, 1, 0);
+      row5.add(encoding_name2_suffix, 2, 0);
       content.getChildren().add(row5);
       
       // Put these items in a grid for better alignment
       GridPane gp = new GridPane();
       gp.getColumnConstraints().addAll(util.cc_none(), util.cc_stretch());
-      gp.add(comskipIni_label, 0, 0);
-      gp.add(comskipIni, 1, 0);
-      gp.add(channelFilter_label, 0, 1);
-      gp.add(channelFilter, 1, 1);
-      gp.add(tivoFileNameFormat_label, 0, 2);
-      gp.add(tivoFileNameFormat, 1, 2);
+      gp.add(encoding_name_label, 0, 0); gp.add(row5, 1, 0);
+      gp.add(comskipIni_label, 0, 1); gp.add(comskipIni, 1, 1);
+      gp.add(channelFilter_label, 0, 2); gp.add(channelFilter, 1, 2);
+      gp.add(tivoFileNameFormat_label, 0, 3); gp.add(tivoFileNameFormat, 1, 3);
       content.getChildren().add(gp); 
             
       // row_misc
@@ -382,6 +379,7 @@ public class configAuto {
       HBox row_dry_run = new HBox();
       row_dry_run.setSpacing(10);
       row_dry_run.getChildren().addAll(dry_run, check_interval_label, check_interval);
+      row_dry_run.setAlignment(Pos.CENTER_LEFT);
       content.getChildren().add(row_dry_run);
       
       // date filter row
@@ -394,11 +392,10 @@ public class configAuto {
       HBox filter_panel = new HBox();
       filter_panel.setSpacing(5);
       filter_panel.getChildren().addAll(suggestionsFilter, kuidFilter, programIdFilter);
+      filter_panel.setAlignment(Pos.CENTER_LEFT);
       content.getChildren().add(filter_panel);
       
-      // Other panel
-      HBox other_panel = new HBox();
-      other_panel.getChildren().add(noJobWait);
+      // noJobWait
       content.getChildren().add(noJobWait);
             
       // OK & CANCEL
