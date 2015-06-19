@@ -8,8 +8,8 @@
 	<property name="main" value="."/>
 	<property name="main.class" value="com.tivo.kmttg.main.kmttg"/>
         <property name="debuglevel" value="source,lines,vars"/>
-        <property name="target" value="1.7"/>
-        <property name="source" value="1.7"/>
+        <property name="target" value="1.8"/>
+        <property name="source" value="1.8"/>
     <path id="main.classpath">
     	<pathelement location="${lib}/jmdns.jar"/>
     </path>
