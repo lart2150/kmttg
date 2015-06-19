@@ -14,6 +14,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -27,12 +29,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.MyTooltip;
+import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -65,6 +69,8 @@ public class AdvSearch {
    private int max_search = 100;
    private String saveFile = "wishlists.ini";
    private LinkedHashMap<String,JSONObject> entries = new LinkedHashMap<String,JSONObject>();
+   private static double pos_x = -1;
+   private static double pos_y = -1;
 
    public void display(Stage frame, String tivoName, int max_search) {
       // Create dialog if not already created
@@ -82,6 +88,10 @@ public class AdvSearch {
          category.setDisable(true);
       else
          category.setDisable(false);
+      if (pos_x != -1)
+         dialog.setX(pos_x);
+      if (pos_y != -1)
+         dialog.setY(pos_y);
       dialog.show();
       Platform.runLater(new Runnable() {
          @Override
@@ -254,12 +264,14 @@ public class AdvSearch {
       close.setTooltip(getToolTip("close"));
       close.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
+            pos_x = dialog.getX(); pos_y = dialog.getY();
             dialog.hide();
          }
       });
       
       // layout manager start
       content = new VBox();
+      content.setPadding(new Insets(5,5,5,5));
       content.setSpacing(5);
             
       HBox row = new HBox();
@@ -343,12 +355,20 @@ public class AdvSearch {
       content.getChildren().add(row);
       
       row = new HBox();
+      row.setAlignment(Pos.CENTER);
       row.setSpacing(5);
-      row.getChildren().addAll(search, close);
+      row.getChildren().addAll(search, util.space(50), close);
       content.getChildren().add(row);
    
       // create dialog window
       dialog = new Stage();
+      dialog.setOnCloseRequest(new EventHandler<WindowEvent>() {
+         @Override
+         public void handle(WindowEvent arg0) {
+            pos_x = dialog.getX(); pos_y = dialog.getY();
+         }
+      });
+
       dialog.setTitle("Advanced Search");
       dialog.setScene(new Scene(content));
       config.gui.setFontSize(dialog.getScene(), config.FontSize);

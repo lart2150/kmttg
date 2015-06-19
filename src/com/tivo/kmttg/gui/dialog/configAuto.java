@@ -25,6 +25,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.MyTooltip;
@@ -43,6 +44,8 @@ import com.tivo.kmttg.util.string;
 public class configAuto {
    private static Stack<TextField> errors = new Stack<TextField>();
    private static String textbg_default = "";
+   private static double pos_x = -1;
+   private static double pos_y = -1;
    
    private static Stage dialog = null;
    private static VBox content = null;
@@ -111,6 +114,10 @@ public class configAuto {
       refreshOptions();
       
       // Display the dialog
+      if (pos_x != -1)
+         dialog.setX(pos_x);
+      if (pos_y != -1)
+         dialog.setY(pos_y);
       dialog.show();
    }
    
@@ -292,6 +299,7 @@ public class configAuto {
       CANCEL.setId("button_autoconfig_cancel");
       CANCEL.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
+            pos_x = dialog.getX(); pos_y = dialog.getY();
             dialog.hide();
          }
       });
@@ -407,6 +415,12 @@ public class configAuto {
                  
       // create dialog window
       dialog = new Stage();
+      dialog.setOnCloseRequest(new EventHandler<WindowEvent>() {
+         @Override
+         public void handle(WindowEvent arg0) {
+            pos_x = dialog.getX(); pos_y = dialog.getY();
+         }
+      });
       dialog.initOwner(frame);
       dialog.initModality(Modality.NONE);
       dialog.setTitle("kmttg auto transfers configuration");
@@ -1021,6 +1035,7 @@ public class configAuto {
       log.warn("Auto config settings saved");
       
       // Close dialog
+      pos_x = dialog.getX(); pos_y = dialog.getY();
       dialog.hide();
       
       // Update autoConfig settings      

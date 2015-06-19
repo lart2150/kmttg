@@ -36,6 +36,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.MyTooltip;
@@ -56,6 +57,8 @@ import com.tivo.kmttg.util.string;
 public class configMain {
    private static Stack<TextField> errors = new Stack<TextField>();
    private static String textbg_default = null;
+   private static double pos_x = -1;
+   private static double pos_y = -1;
    
    private static MyButton add = null;
    private static MyButton del = null;
@@ -195,6 +198,10 @@ public class configMain {
       clearTextFieldErrors();
       
       // Display the dialog
+      if (pos_x != -1)
+         dialog.setX(pos_x);
+      if (pos_y != -1)
+         dialog.setY(pos_y);
       dialog.show();
    }
    
@@ -255,10 +262,12 @@ public class configMain {
          Optional<ButtonType> result = alert.showAndWait();
          if (result.get() == ButtonType.OK) {
             config.save();
+            pos_x = dialog.getX(); pos_y = dialog.getY();
             dialog.hide();
          }
       } else {
          config.save();
+         pos_x = dialog.getX(); pos_y = dialog.getY();
          dialog.hide();
       }
       config.gui.refreshOptions(true);
@@ -2455,6 +2464,7 @@ public class configMain {
       CANCEL.setPrefWidth(200);
       CANCEL.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
+            pos_x = dialog.getX(); pos_y = dialog.getY();
             dialog.hide();
          }
       });
@@ -3054,7 +3064,8 @@ public class configMain {
       programs_panel.add(customFiles, 1, gy);
       
       // Program_options Panel
-      GridPane program_options_panel = new GridPane();      
+      GridPane program_options_panel = new GridPane();
+      program_options_panel.setPadding(new Insets(0,5,0,5));
       program_options_panel.setAlignment(Pos.CENTER);
       program_options_panel.setVgap(5);
       program_options_panel.setHgap(5);
@@ -3377,6 +3388,12 @@ public class configMain {
       
       // create dialog window
       dialog = new Stage();
+      dialog.setOnCloseRequest(new EventHandler<WindowEvent>() {
+         @Override
+         public void handle(WindowEvent arg0) {
+            pos_x = dialog.getX(); pos_y = dialog.getY();
+         }
+      });
       dialog.initOwner(frame);
       dialog.initModality(Modality.NONE); // Non modal
       dialog.setTitle("kmttg configuration");
