@@ -236,19 +236,19 @@ public class search {
       search_type.setValue("keywords");
       search_type.setTooltip(tooltip.getToolTip("search_type"));
       
-      includeFree = new CheckBox("Include free streaming content");
+      includeFree = new CheckBox("Free streaming content");
       includeFree.setSelected(false);
       includeFree.setTooltip(tooltip.getToolTip("includeFree"));
       
-      includePaid = new CheckBox("Include paid streaming content");
+      includePaid = new CheckBox("Paid streaming content");
       includePaid.setSelected(false);
       includePaid.setTooltip(tooltip.getToolTip("includePaid"));
       
-      includeVod = new CheckBox("Include VOD content");
+      includeVod = new CheckBox("VOD content");
       includeVod.setSelected(false);
       includeVod.setTooltip(tooltip.getToolTip("includeVod"));
       
-      unavailable = new CheckBox("Include unavailable");
+      unavailable = new CheckBox("Unavailable");
       unavailable.setSelected(false);
       unavailable.setTooltip(tooltip.getToolTip("unavailable"));
       
