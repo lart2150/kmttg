@@ -1,7 +1,7 @@
 @import "kmttg.css";
 /* This style bare minimum with only kmttg css stylings imported */
 .root {
-    -fx-base: #FAF9EB;
-    -fx-background: #FAF9EB;
-    -fx-control-inner-background: #FAF9EB;
+    -fx-base: #FAF9EF;
+    -fx-background: #FAF9EF;
+    -fx-control-inner-background: #FAF9EF;
 }
