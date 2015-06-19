@@ -161,19 +161,19 @@ public class tooltip {
          text += "Include past history prior to current time if enabled.";
       }
       else if (component.equals("includeFree")){
-         text = "<b>Include free streaming content</b><br>";
+         text = "<b>Free streaming content</b><br>";
          text += "If enabled, include free streaming content in search.";
       }
       else if (component.equals("includePaid")){
-         text = "<b>Include paid streaming content</b><br>";
+         text = "<b>Paid streaming content</b><br>";
          text += "If enabled, include paid streaming content in search.";
       }
       else if (component.equals("includeVod")){
-         text = "<b>Include VOD content</b><br>";
+         text = "<b>VOD content</b><br>";
          text += "If enabled, include VOD content in search.";
       }
       else if (component.equals("unavailable")){
-         text = "<b>Include unavailable</b><br>";
+         text = "<b>Unavailable</b><br>";
          text += "If enabled, include content currently unavailable in guide data in search.";
       }
       else if (component.equals("explain_cancel")) {
