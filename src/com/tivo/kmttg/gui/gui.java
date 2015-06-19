@@ -338,18 +338,18 @@ public class gui extends Application {
 
    public void setFontSize(Scene scene, int fontSize) {
       debug.print("scene=" + scene + " fontSize=" + fontSize);
-      scene.getRoot().setStyle("-fx-font-size: " + fontSize + "pt; -fx-font-family: \"SansSerif\"");
+      scene.getRoot().setStyle("-fx-font-size: " + fontSize + "pt;");
       //listFontFamilies();
    }
 
    public void setFontSize(Dialog<?> dialog, int fontSize) {
       debug.print("dialog=" + dialog + " fontSize=" + fontSize);
-      dialog.getDialogPane().setStyle("-fx-font-size: " + fontSize + "pt; -fx-font-family: \"SansSerif\"");
+      dialog.getDialogPane().setStyle("-fx-font-size: " + fontSize + "pt;");
    }
 
    public void setFontSize(Alert alert, int fontSize) {
       debug.print("alert=" + alert + " fontSize=" + fontSize);
-      alert.getDialogPane().setStyle("-fx-font-size: " + fontSize + "pt; -fx-font-family: \"SansSerif\"");
+      alert.getDialogPane().setStyle("-fx-font-size: " + fontSize + "pt;");
    }
    
    public void listFontFamilies() {
