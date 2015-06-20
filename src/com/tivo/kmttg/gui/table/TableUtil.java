@@ -586,7 +586,7 @@ public class TableUtil {
    }
    
    public static String makeChannelName(JSONObject entry) {
-      String channel = " ";
+      String channel = "";
       try {
          if (entry.has("channel")) {
             JSONObject o = entry.getJSONObject("channel");
