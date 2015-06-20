@@ -1336,7 +1336,7 @@ public class nplTable extends TableMap {
       String pct = "";
       if (data.containsKey("ByteOffset") && data.containsKey("size")) {
          if (! data.get("ByteOffset").startsWith("0")) {
-            int percent = (int)(Double.valueOf(data.get("ByteOffset"))/Double.valueOf(data.get("size")));
+            int percent = (int)(100*Double.valueOf(data.get("ByteOffset"))/Double.valueOf(data.get("size")));
             pct = "" + percent + "%";
          }
       }
