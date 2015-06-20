@@ -1669,28 +1669,33 @@ public class gui extends Application {
    // Set encoding combobox choices
    public void SetEncodings(final Stack<String> values) {
       debug.print("values=" + values);
-      
-      if (encoding != null) {      
-          Platform.runLater(new Runnable() {
-              @Override public void run() {
-		         // Get existing setting in combobox
-		         String current = null;
-		         if (encoding.getItems().size() > 0) {
-		            current = encoding.getValue();
-		         }
-		         String[] names = new String[values.size()];
-		         for (int i=0; i<values.size(); ++i) {
-		            names[i] = values.get(i);
-		         }
-		         combobox.SetValues(encoding, names);
-		         if (current != null)
-		            encoding.setValue(current);
-		         else {
-		            if (encoding.getItems().size() > 0)
-		               encoding.setValue(encoding.getItems().get(0));
-		         }
-              }
-          });
+
+      if (encoding != null) {
+         Platform.runLater(new Runnable() {
+            @Override public void run() {
+               // Get existing setting in combobox
+               String current = null;
+               if (encoding.getItems().size() > 0) {
+                  current = encoding.getValue();
+               }
+               Boolean valid = false;
+               String[] names = new String[values.size()];
+               for (int i=0; i<values.size(); ++i) {
+                  names[i] = values.get(i);
+                  if (current != null && current.equals(names[i]))
+                     valid = true;
+               }
+               combobox.SetValues(encoding, names);
+               if (! valid)
+                  current = null;
+               if (current != null)
+                  encoding.setValue(current);
+               else {
+                  if (encoding.getItems().size() > 0)
+                     encoding.setValue(encoding.getItems().get(0));
+               }
+            }
+         });
       }
    }
    
