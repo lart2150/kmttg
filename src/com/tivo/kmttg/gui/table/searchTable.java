@@ -221,8 +221,29 @@ public class searchTable extends TableMap {
       public Tabentry(JSONObject entry, Boolean isFolder) {
          try {
             if (isFolder && entry.getJSONArray("entries").length() > 1) {
-               int num = entry.getJSONArray("entries").length();
                // Multiple items => display as folder
+               int num = entry.getJSONArray("entries").length();
+               JSONArray entries = entry.getJSONArray("entries");
+               String chan = "";
+               if (entries.getJSONObject(0).has("channel"))
+                  chan = TableUtil.makeChannelName(entries.getJSONObject(0));
+               else if (entry.has("partnerId"))
+                  chan = TableUtil.getPartnerName(entries.getJSONObject(0));
+               Boolean sameChannel = true;
+               for (int i=1; i<num; ++i) {
+                  String fchan = "";
+                  JSONObject j = entries.getJSONObject(i);
+                  if (j.has("channel"))
+                     fchan = TableUtil.makeChannelName(j);
+                  else if (j.has("partnerId"))
+                     fchan = TableUtil.getPartnerName(j);
+                  if (! fchan.equals(chan))
+                     sameChannel = false;
+               }
+               if (sameChannel)
+                  channel = chan;
+               else
+                  channel = "<various>";
                image = new ImageView(gui.Images.get("folder"));
                type = entry.getString("type");
                title = " " + entry.getString("title") + " (" + num + ")";
@@ -242,7 +263,7 @@ public class searchTable extends TableMap {
                }
             } else {
                // Single item => don't display as folder
-               if (isFolder)
+               if (entry.has("entries"))
                   entry = entry.getJSONArray("entries").getJSONObject(0);
                
                // If entry is in 1 of todo lists then add special __inTodo__ JSON entry
@@ -397,7 +418,7 @@ public class searchTable extends TableMap {
       try {
          Boolean folder = false;
          JSONArray entries = entry.getJSONArray("entries");
-         if (entries.length() > 0)
+         if (entries.length() > 1)
             folder = true;
          if (folder) {
             TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(entry, true) );
@@ -417,7 +438,7 @@ public class searchTable extends TableMap {
             TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(entry, false) );
             root.getChildren().add(item);
          }
-         TableUtil.autoSizeTableViewColumns(TABLE, true);
+         //TableUtil.autoSizeTableViewColumns(TABLE, true);
       } catch (JSONException e) {
          log.error("searchTable AddTABLERow - " + e.getMessage());
       }
