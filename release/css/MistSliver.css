@@ -767,6 +767,145 @@
 }
 /*******************************************************************************
  *                                                                             *
+ * TreeTableView                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+.tree-table-cell {  
+    -fx-border-color: transparent rgb(143,148,153) transparent transparent;  
+}
+.tree-table-view {    
+    -fx-background-color: transparent,rgb(76,81,86),rgb(228,233,238);
+    -fx-background-insets: 0,0,1;        
+}
+.tree-table-view:focused {
+    -fx-background-color: rgb(76,81,86),rgb(76,81,86),rgb(228,233,238);
+    -fx-background-insets: -1.4,0,1;
+}
+.tree-table-row-cell {    
+    -fx-background-color: rgb(143,148,153),rgb(228,233,238);
+    -fx-background-insets: 0, 0 0 1 0; 
+}
+.tree-table-row-cell:odd {
+    -fx-background-color: rgb(143,148,153),rgb(218,223,228);   
+    -fx-background-insets: 0, 0 0 1 0; 
+}
+.tree-table-view:focused .tree-table-row-cell:focused,.tree-table-view:focused .tree-table-row-cell:focused:odd {
+    -fx-background-color: rgb(143,148,153),linear-gradient(to bottom,rgb(217,221,225) 0%,rgb(215,219,223) 30%,rgb(215,219,223) 50%,rgb(223,227,231) 80%);
+    -fx-background-insets: 0,0 1 1 1;
+}
+.tree-table-view:focused .tree-table-row-cell:filled:focused:selected {
+    -fx-background-color: rgb(143,148,153), rgb(201,211,220), linear-gradient(to bottom,rgb(209,221,229) 0%,rgb(207,219,228) 30%,rgb(207,219,228) 50%,rgb(213,224,233) 80%);
+    -fx-background-insets: 0,0 1 1 1,2; 
+}
+.tree-table-view:focused .tree-table-row-cell:filled:selected, .tree-table-view:row-selection .tree-table-row-cell:filled:hover:selected {    
+    -fx-background-color: rgb(143,148,153), linear-gradient(to bottom,rgb(209,221,229) 0%,rgb(207,219,228) 30%,rgb(207,219,228) 50%,rgb(213,224,233) 80%);
+    -fx-background-insets: 0,0 1 1 1;    
+}
+.tree-table-view:focused .tree-table-row-cell:filled:focused:selected:hover {    
+    -fx-background-color: rgb(143,148,153), rgb(201,211,220), linear-gradient(to bottom,rgb(209,221,229) 0%,rgb(207,219,228) 30%,rgb(207,219,228) 50%,rgb(213,224,233) 80%);
+    -fx-background-insets: 0,0 1 1 1,2;     
+}
+.tree-table-row-cell:filled:selected:focused, .tree-table-row-cell:filled:selected {
+    -fx-background-color: rgb(143,148,153), linear-gradient(to bottom,rgb(209,221,229) 0%,rgb(207,219,228) 30%,rgb(207,219,228) 50%,rgb(213,224,233) 80%);
+    -fx-background-insets: 0,0 1 1 1;
+}
+.tree-table-view:row-selection .tree-table-row-cell:filled:hover { 
+    -fx-background-color:  rgb(143,148,153),linear-gradient(to bottom,rgb(217,221,225) 0%,rgb(215,219,223) 30%,rgb(215,219,223) 50%,rgb(223,227,231) 80%);
+    -fx-background-insets: 0,0 1 1 1;
+}
+.tree-table-view:row-selection .tree-table-row-cell:filled:focused:hover { 
+    -fx-background-color: rgb(143,148,153), linear-gradient(to bottom,rgb(209,221,229) 0%,rgb(207,219,228) 30%,rgb(207,219,228) 50%,rgb(213,224,233) 80%);
+    -fx-background-insets: 0,0 1 1 1;
+}
+.tree-table-view:focused .tree-table-row-cell:filled:focused:hover {
+    -fx-background-color: rgb(143,148,153),linear-gradient(to bottom,rgb(217,221,225) 0%,rgb(215,219,223) 30%,rgb(215,219,223) 50%,rgb(223,227,231) 80%);
+    -fx-background-insets: 0,0 1 1 1;
+}
+.tree-table-view .column-header-background {
+    -fx-background-color: transparent;   
+}
+.tree-table-view .column-header .label {
+    -fx-font-size:12;
+}
+.tree-table-view .column-header {		
+    -fx-background-color: linear-gradient(to bottom,rgb(202,205,209) 10%,rgb(191,195,199) 50%,rgb(191,195,199) 50%, rgb(212,214,218) 80%);    
+    -fx-border-color: rgb(143,148,153);
+    -fx-border-insets: -1 0 0 -1;    
+}
+.tree-table-view .filler {		
+    -fx-background-color: linear-gradient(to bottom,rgb(202,205,209) 10%,rgb(191,195,199) 50%,rgb(191,195,199) 50%, rgb(212,214,218) 80%);    
+    -fx-background-insets: 0 4 0 0;
+    -fx-border-color: rgb(143,148,153);
+    -fx-border-insets: -1 -2 0 -1;        
+}
+.tree-table-view .show-hide-columns-button {
+    -fx-background-color: linear-gradient(to bottom,rgb(202,205,209) 10%,rgb(191,195,199) 50%,rgb(191,195,199) 50%, rgb(212,214,218) 80%);    
+    -fx-background-insets: 0;
+    -fx-border-color: rgb(143,148,153);
+    -fx-border-insets: -1 -2 0 0;    
+}
+.tree-table-view .show-hide-column-image {
+    -fx-background-color: -fx-mark-color;
+    -fx-background-insets: 0;  
+}
+.tree-table-view .column-drag-header {    
+    -fx-background-color: rgb(193,208,218) ;
+    -fx-opacity: 1;
+}
+.tree-table-view .column-drag-header .label {    
+    -fx-text-fill: white;  
+}
+.tree-table-view .column-resize-line {  
+    -fx-background-color: rgb(76,81,86);
+}
+.tree-table-view .column-overlay {
+    -fx-background-color: darkgray;
+    -fx-opacity: 0.2;
+}
+.tree-table-view .arrow {
+    -fx-padding: 0.2em;
+    -fx-shape: "m 4,17 0,-2.889 4.124,-3.86 4.125,3.86 0,2.889 L 8.124,13.625 4,17 z";
+}
+.tree-table-view .corner {
+    -fx-background-color: rgb(76,81,86),rgb(195,199,203);
+    -fx-background-insets: 0 -1 -1 0 ,1 0 0 1;  
+}
+.tree-table-view .scroll-bar:vertical .track-background {
+    -fx-background-insets: -1 -1 -1 0;
+}
+.tree-table-view .scroll-bar:vertical .track {
+    -fx-background-insets: -1 -1 -1 0, 0 0 0 1;
+}
+.tree-table-view .scroll-bar:vertical .thumb {
+    -fx-background-insets: -1 -1 -1 0, 0 0 0 1;
+}
+.tree-table-view .scroll-bar:vertical .decrement-button {
+    -fx-background-insets: 0 0 -8 1;
+    -fx-padding: 6 3 6 4;
+}
+.tree-table-view .scroll-bar:vertical .increment-button {
+    -fx-background-insets: -8 0 0 1;
+    -fx-padding: 6 3 6 4;
+}
+.tree-table-view .scroll-bar:horizontal .track-background {
+    -fx-background-insets: 0 -1 -1 -1;
+}
+.tree-table-view .scroll-bar:horizontal .track {
+    -fx-background-insets: 0 -1 -1 -1, 1 0 0 0;
+}
+.tree-table-view .scroll-bar:horizontal .thumb {
+    -fx-background-insets: 0 -1 -1 -1, 1 0 0 0;
+}
+.tree-table-view .scroll-bar:horizontal .decrement-button {	
+    -fx-background-insets: 1 -8 0 0;
+    -fx-padding: 3 6 4 6;
+}
+.tree-table-view .scroll-bar:horizontal .increment-button {
+    -fx-background-insets: 1 0 0 -8;
+    -fx-padding: 3 6 4 6;
+}
+/*******************************************************************************
+ *                                                                             *
  * SplitPane                                                                   *
  *                                                                             *
  ******************************************************************************/
