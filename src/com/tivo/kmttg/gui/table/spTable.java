@@ -80,11 +80,14 @@ public class spTable extends TableMap {
             TableColumn<Tabentry,sortableInt> col = new TableColumn<Tabentry,sortableInt>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableInt>(colName));
             col.setComparator(null); // Disable column sorting
+            col.setStyle("-fx-alignment: CENTER;");
             TABLE.getColumns().add(col);
          } else {
             TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(colName));
             col.setComparator(null); // Disable column sorting
+            if (! colName.equals("SHOW") && ! colName.equals("CHANNEL"))
+               col.setStyle("-fx-alignment: CENTER;");
             TABLE.getColumns().add(col);
          }
       }

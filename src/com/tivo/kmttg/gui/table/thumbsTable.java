@@ -86,6 +86,7 @@ public class thumbsTable extends TableMap {
             TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(colName));
             col.setComparator(new RatingComparator()); // Custom column sort
+            col.setStyle("-fx-alignment: CENTER;");
             col.setCellFactory(TextFieldTableCell.<Tabentry>forTableColumn());
             // This column is editable
             col.setOnEditCommit( new EventHandler<CellEditEvent<Tabentry, String>>() {

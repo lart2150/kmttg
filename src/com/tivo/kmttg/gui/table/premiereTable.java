@@ -11,10 +11,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -90,17 +88,20 @@ public class premiereTable extends TableMap {
             TableColumn<Tabentry,sortableDate> col = new TableColumn<Tabentry,sortableDate>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableDate>(colName));
             col.setComparator(new DateComparator()); // Custom column sort
-            col.setCellFactory(new RightJustifyColFactory()); // Right justify column text
+            col.setStyle("-fx-alignment: CENTER-RIGHT;");
             TABLE.getColumns().add(col);
          } else if (colName.equals("DUR")) {
             TableColumn<Tabentry,sortableDuration> col = new TableColumn<Tabentry,sortableDuration>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableDuration>(colName));
             col.setComparator(new DurationComparator()); // Custom column sort
+            col.setStyle("-fx-alignment: CENTER;");
             TABLE.getColumns().add(col);
          } else {
             // Regular String sort
             TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(colName));
+            if (colName.equals("SEA"))
+               col.setStyle("-fx-alignment: CENTER;");
             TABLE.getColumns().add(col);
          }
       }
@@ -129,27 +130,6 @@ public class premiereTable extends TableMap {
       // Add right mouse button handler
       TableUtil.AddRightMouseListener(TABLE);
    }   
-   
-   // Right justify column text (for DATE column)
-   private class RightJustifyColFactory implements Callback<TableColumn<Tabentry, sortableDate>, TableCell<Tabentry, sortableDate>> {
-      public TableCell<Tabentry, sortableDate> call(TableColumn<Tabentry, sortableDate> tableView) {
-         TableCell<Tabentry, sortableDate> cell = new TableCell<Tabentry, sortableDate>() {
-            @Override
-            public void updateItem(sortableDate entry, boolean empty) {
-               super.updateItem(entry, empty);
-               if (empty)
-                  setText("");
-               else {
-                  if (entry != null) {
-                     setText(entry.toString());
-                     setAlignment(Pos.TOP_RIGHT);
-                  }
-               }
-            }
-         };
-         return cell;
-      }
-   }
 
    // ColorRowFactory for setting row background color
    private class ColorRowFactory implements Callback<TableView<Tabentry>, TableRow<Tabentry>> {

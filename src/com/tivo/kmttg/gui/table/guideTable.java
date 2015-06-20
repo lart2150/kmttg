@@ -13,11 +13,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -100,7 +98,7 @@ public class guideTable extends TableMap {
             TableColumn<Tabentry,sortableDate> col = new TableColumn<Tabentry,sortableDate>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableDate>(colName));
             col.setComparator(new DateComparator());
-            col.setCellFactory(new RightJustifyColFactory()); // Right justify column text
+            col.setStyle("-fx-alignment: CENTER-RIGHT;");
             TABLE.getColumns().add(col);
          } else if (colName.equals("CHANNEL")) {
             TableColumn<Tabentry,sortableChannel> col = new TableColumn<Tabentry,sortableChannel>(colName);
@@ -111,6 +109,7 @@ public class guideTable extends TableMap {
             TableColumn<Tabentry,sortableDuration> col = new TableColumn<Tabentry,sortableDuration>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableDuration>(colName));
             col.setComparator(new DurationComparator());
+            col.setStyle("-fx-alignment: CENTER;");
             TABLE.getColumns().add(col);
          } else {
             // Regular String sort
@@ -167,26 +166,6 @@ public class guideTable extends TableMap {
          return row;
       }
    }   
-   // Right justify column text (for DATE column)
-   private class RightJustifyColFactory implements Callback<TableColumn<Tabentry, sortableDate>, TableCell<Tabentry, sortableDate>> {
-      public TableCell<Tabentry, sortableDate> call(TableColumn<Tabentry, sortableDate> tableView) {
-         TableCell<Tabentry, sortableDate> cell = new TableCell<Tabentry, sortableDate>() {
-            @Override
-            public void updateItem(sortableDate entry, boolean empty) {
-               super.updateItem(entry, empty);
-               if (empty)
-                  setText("");
-               else {
-                  if (entry != null) {
-                     setText(entry.toString());
-                     setAlignment(Pos.TOP_RIGHT);
-                  }
-               }
-            }
-         };
-         return cell;
-      }
-   }
    
    public static class Tabentry {
       public String title = "";

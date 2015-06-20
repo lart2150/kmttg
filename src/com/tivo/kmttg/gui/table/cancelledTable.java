@@ -13,7 +13,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
@@ -91,12 +90,13 @@ public class cancelledTable extends TableMap {
             TreeTableColumn<Tabentry,sortableDate> col = new TreeTableColumn<Tabentry,sortableDate>(colName);
             col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableDate>(colName));
             col.setComparator(new DateComparator()); // Custom column sort
-            col.setCellFactory(new RightJustifyColFactory()); // Right justify column text
+            col.setStyle("-fx-alignment: CENTER-RIGHT;");
             TABLE.getColumns().add(col);
          } else if (colName.equals("DUR")) {
             TreeTableColumn<Tabentry,sortableDuration> col = new TreeTableColumn<Tabentry,sortableDuration>(colName);
             col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableDuration>(colName));
             col.setComparator(new DurationComparator());
+            col.setStyle("-fx-alignment: CENTER;");
             TABLE.getColumns().add(col);
          } else {
             // Regular String sort
@@ -149,27 +149,6 @@ public class cancelledTable extends TableMap {
          return cell;
       }
    }   
-   
-   // Right justify column text (for DATE column)
-   private class RightJustifyColFactory implements Callback<TreeTableColumn<Tabentry, sortableDate>, TreeTableCell<Tabentry, sortableDate>> {
-      public TreeTableCell<Tabentry, sortableDate> call(TreeTableColumn<Tabentry, sortableDate> tableView) {
-         TreeTableCell<Tabentry, sortableDate> cell = new TreeTableCell<Tabentry, sortableDate>() {
-            @Override
-            public void updateItem(sortableDate entry, boolean empty) {
-               super.updateItem(entry, empty);
-               if (empty)
-                  setText("");
-               else {
-                  if (entry != null) {
-                     setText(entry.toString());
-                     setAlignment(Pos.TOP_RIGHT);
-                  }
-               }
-            }
-         };
-         return cell;
-      }
-   }
    
    public static class Tabentry {
       ImageView image = new ImageView();
