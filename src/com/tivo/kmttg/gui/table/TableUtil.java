@@ -90,7 +90,7 @@ public class TableUtil {
    }
    
    public static void setRowColor(Node node, Color color) {
-      node.setStyle("-fx-background-color: " + config.gui.getWebColor(color));
+      node.setStyle("-fx-opacity: 0.7; -fx-background-color: " + config.gui.getWebColor(color));
    }
    
    public static int[] GetSelectedRows(TableView<?> TABLE) {
