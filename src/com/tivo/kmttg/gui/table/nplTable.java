@@ -30,7 +30,6 @@ import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
@@ -62,6 +61,7 @@ import com.tivo.kmttg.util.createMeta;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+
 
 public class nplTable extends TableMap {
    public String tivoName = null;
@@ -129,8 +129,8 @@ public class nplTable extends TableMap {
             if (colName.length() == 0)
                colName = "IMAGE";
             if (colName.equals("IMAGE")) {
-               TreeTableColumn<Tabentry,ImageView> col = new TreeTableColumn<Tabentry,ImageView>("");
-               col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,ImageView>(colName));
+               TreeTableColumn<Tabentry,imageCell> col = new TreeTableColumn<Tabentry,imageCell>("");
+               col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,imageCell>(colName));
                col.setCellFactory(new ImageCellFactory());
                NowPlaying.getColumns().add(col);               
             } else if (colName.equals("SHOW")) {
@@ -197,7 +197,7 @@ public class nplTable extends TableMap {
       private String dirName = "";
       
       // TIVO mode entries
-      private ImageView image = new ImageView();
+      private imageCell image = new imageCell();
       private sortableShow show = null;
       private sortableDate date = null;
       private sortableChannel channel = null;
@@ -284,6 +284,7 @@ public class nplTable extends TableMap {
          if ( entry.containsKey("ExpirationImage") ) {
             image.setImage(gui.Images.get(entry.get("ExpirationImage")));
          }
+         image.setLabel(getPctWatched(entry));
          show = new sortableShow(entry);
          date = new sortableDate(entry);
          if ( entry.containsKey("channelNum") && entry.containsKey("channel") )
@@ -299,7 +300,7 @@ public class nplTable extends TableMap {
          mbps = new sortableDouble(rate);         
       }
       
-      public ImageView getIMAGE() {
+      public imageCell getIMAGE() {
          return image;
       }
       
@@ -387,11 +388,11 @@ public class nplTable extends TableMap {
       }
    }   
 
-   private class ImageCellFactory implements Callback<TreeTableColumn<Tabentry, ImageView>, TreeTableCell<Tabentry, ImageView>> {
-      public TreeTableCell<Tabentry, ImageView> call(TreeTableColumn<Tabentry, ImageView> param) {
-         TreeTableCell<Tabentry, ImageView> cell = new TreeTableCell<Tabentry, ImageView>() {
+   private class ImageCellFactory implements Callback<TreeTableColumn<Tabentry, imageCell>, TreeTableCell<Tabentry, imageCell>> {
+      public TreeTableCell<Tabentry, imageCell> call(TreeTableColumn<Tabentry, imageCell> param) {
+         TreeTableCell<Tabentry, imageCell> cell = new TreeTableCell<Tabentry, imageCell>() {
             @Override
-            public void updateItem(final ImageView item, boolean empty) {
+            public void updateItem(final imageCell item, boolean empty) {
                super.updateItem(item, empty);
                if (empty) {
                   setGraphic(null);
@@ -1329,6 +1330,26 @@ public class nplTable extends TableMap {
    
    private String getValueAt(int row, int col) {
       return NowPlaying.getColumns().get(col).getCellData(row).toString();
+   }
+   
+   private String getPctWatched(Hashtable<String,String> data) {
+      String pct = "";
+      if (data.containsKey("ByteOffset") && data.containsKey("size")) {
+         if (! data.get("ByteOffset").startsWith("0")) {
+            int percent = (int)(Double.valueOf(data.get("ByteOffset"))/Double.valueOf(data.get("size")));
+            pct = "" + percent + "%";
+         }
+      }
+      
+      if (data.containsKey("TimeOffset") && data.containsKey("duration")) {
+         if (! data.get("TimeOffset").startsWith("0")) {
+            Double secs = Double.valueOf(data.get("TimeOffset"));
+            Double duration = Double.valueOf(data.get("duration"))/1000;
+            int percent = (int)(100*secs/duration);
+            pct = "" + percent + "%";
+         }
+      }
+      return pct;
    }
       
    // Export NPL entries to a csv file
