@@ -29,11 +29,9 @@ import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.table.TableUtil;
-import com.tivo.kmttg.gui.comparator.ChannelComparator;
 import com.tivo.kmttg.gui.comparator.DateComparator;
 import com.tivo.kmttg.gui.comparator.DurationComparator;
 import com.tivo.kmttg.gui.remote.util;
-import com.tivo.kmttg.gui.sortable.sortableChannel;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
 import com.tivo.kmttg.main.config;
@@ -47,7 +45,7 @@ public class guideTable extends TableMap {
    private String currentTivo = null;
    public TableView<Tabentry> TABLE = null;
    public ScrollPane scroll = null;
-   public String[] TITLE_cols = {"DATE", "SHOW", "CHANNEL", "DUR"};
+   public String[] TITLE_cols = {"DATE", "SHOW", "DUR"};
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();   
@@ -99,11 +97,6 @@ public class guideTable extends TableMap {
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableDate>(colName));
             col.setComparator(new DateComparator());
             col.setStyle("-fx-alignment: CENTER-RIGHT;");
-            TABLE.getColumns().add(col);
-         } else if (colName.equals("CHANNEL")) {
-            TableColumn<Tabentry,sortableChannel> col = new TableColumn<Tabentry,sortableChannel>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableChannel>(colName));
-            col.setComparator(new ChannelComparator());
             TABLE.getColumns().add(col);
          } else if (colName.equals("DUR")) {
             TableColumn<Tabentry,sortableDuration> col = new TableColumn<Tabentry,sortableDuration>(colName);
@@ -166,7 +159,6 @@ public class guideTable extends TableMap {
    public static class Tabentry {
       public String title = "";
       public sortableDate date = null;
-      public sortableChannel channel = null;
       public sortableDuration duration = null;
       
       // Root node constructor
@@ -182,11 +174,6 @@ public class guideTable extends TableMap {
             long start = TableUtil.getLongDateFromString(startString);
             long dur = entry.getLong("duration")*1000;
             title = TableUtil.makeShowTitle(entry);
-            if (entry.has("channel")) {
-               JSONObject chan = entry.getJSONObject("channel");
-               if (chan.has("callSign") && chan.has("channelNumber"))
-                  channel = new sortableChannel(chan.getString("callSign"), chan.getString("channelNumber"));
-            }
             date = new sortableDate(entry, start);
             duration = new sortableDuration(dur, false);
          } catch (JSONException e1) {
@@ -200,10 +187,6 @@ public class guideTable extends TableMap {
       
       public String getSHOW() {
          return title;
-      }
-
-      public sortableChannel getCHANNEL() {
-         return channel;
       }
 
       public sortableDuration getDUR() {
