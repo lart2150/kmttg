@@ -13,19 +13,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Stack;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -89,8 +91,20 @@ public class TableUtil {
       return -1;
    }
    
-   public static void setRowColor(Node node, Color color) {
-      node.setStyle("-fx-opacity: 0.7; -fx-background-color: " + config.gui.getWebColor(color));
+   public static void setRowColor(TableRow<?> row, Color color) {
+      row.styleProperty().bind(
+         Bindings.when(row.selectedProperty())
+            .then("")
+            .otherwise("-fx-opacity: 0.7; -fx-background-color: " + config.gui.getWebColor(color))
+       );
+   }
+   
+   public static void setRowColor(TreeTableRow<?> row, Color color) {
+      row.styleProperty().bind(
+         Bindings.when(row.selectedProperty())
+            .then("")
+            .otherwise("-fx-opacity: 0.7; -fx-background-color: " + config.gui.getWebColor(color))
+       );
    }
    
    public static int[] GetSelectedRows(TableView<?> TABLE) {

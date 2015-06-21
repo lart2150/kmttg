@@ -134,26 +134,22 @@ public class todoTable extends TableMap {
             @Override
             public void updateItem(Tabentry entry, boolean empty) {
                super.updateItem(entry,  empty);
-               if (empty) {
-                  setStyle("");
-               } else {
-                  setStyle("");
-                  if (entry != null) {
-                     JSONObject json = entry.getDATE().json;
-                     if (json != null) {
-                        try {
-                           if (json.has("state")) {
-                              if (json.getString("state").equals("inProgress"))
-                                 TableUtil.setRowColor(this, config.tableBkgndRecording);
-                           }
-                           
-                           if (config.showHistoryInTable == 1 && json.has("partnerCollectionId")) {
-                              if (auto.keywordMatchHistoryFast(json.getString("partnerCollectionId"), false))
-                                 TableUtil.setRowColor(this, config.tableBkgndInHistory);
-                           }
-                        } catch (JSONException e) {
-                           log.error("todoTable ColorRowFactory - " + e.getMessage());
+               styleProperty().unbind(); setStyle("");
+               if (entry != null) {
+                  JSONObject json = entry.getDATE().json;
+                  if (json != null) {
+                     try {
+                        if (json.has("state")) {
+                           if (json.getString("state").equals("inProgress"))
+                              TableUtil.setRowColor(this, config.tableBkgndRecording);
                         }
+                        
+                        if (config.showHistoryInTable == 1 && json.has("partnerCollectionId")) {
+                           if (auto.keywordMatchHistoryFast(json.getString("partnerCollectionId"), false))
+                              TableUtil.setRowColor(this, config.tableBkgndInHistory);
+                        }
+                     } catch (JSONException e) {
+                        log.error("todoTable ColorRowFactory - " + e.getMessage());
                      }
                   }
                }

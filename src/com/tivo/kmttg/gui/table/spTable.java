@@ -113,15 +113,11 @@ public class spTable extends TableMap {
             @Override
             public void updateItem(Tabentry entry, boolean empty) {
                super.updateItem(entry,  empty);
-               if (empty) {
-                  setStyle("");
-               } else {
-                  setStyle("");
-                  if (entry != null) {
-                     JSONObject json = entry.getPRIORITY().json;
-                     if (json != null && json.has("__conflicts"))
-                        TableUtil.setRowColor(this, config.lightRed);
-                  }
+               styleProperty().unbind(); setStyle("");
+               if (entry != null) {
+                  JSONObject json = entry.getPRIORITY().json;
+                  if (json != null && json.has("__conflicts"))
+                     TableUtil.setRowColor(this, config.lightRed);
                }
                
                // Row drag and drop support

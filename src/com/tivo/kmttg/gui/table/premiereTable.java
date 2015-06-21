@@ -138,16 +138,12 @@ public class premiereTable extends TableMap {
             @Override
             public void updateItem(Tabentry entry, boolean empty) {
                super.updateItem(entry,  empty);
-               if (empty) {
-                  setStyle("");
-               } else {
-                  setStyle("");
-                  if (entry != null) {
-                     JSONObject json = entry.getDATE().json;
-                     // Mark rows that already have SPs scheduled
-                     if (json != null && json.has("__SPscheduled__")) {
-                        TableUtil.setRowColor(this, config.tableBkgndProtected);
-                     }
+               styleProperty().unbind(); setStyle("");
+               if (entry != null) {
+                  JSONObject json = entry.getDATE().json;
+                  // Mark rows that already have SPs scheduled
+                  if (json != null && json.has("__SPscheduled__")) {
+                     TableUtil.setRowColor(this, config.tableBkgndProtected);
                   }
                }
             }

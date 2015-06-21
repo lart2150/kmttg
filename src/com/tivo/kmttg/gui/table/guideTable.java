@@ -150,16 +150,12 @@ public class guideTable extends TableMap {
             @Override
             public void updateItem(Tabentry entry, boolean empty) {
                super.updateItem(entry,  empty);
-               if (empty) {
-                  setStyle("");
-               } else {
-                  setStyle("");
-                  if (entry != null) {
-                     // Mark rows that are already in To Do
-                     JSONObject json = entry.getDATE().json;
-                     if (json != null && json.has("__inTodo__"))
-                        TableUtil.setRowColor(this, config.tableBkgndProtected);
-                  }
+               styleProperty().unbind(); setStyle("");
+               if (entry != null) {
+                  // Mark rows that are already in To Do
+                  JSONObject json = entry.getDATE().json;
+                  if (json != null && json.has("__inTodo__"))
+                     TableUtil.setRowColor(this, config.tableBkgndProtected);
                }
             }
          };

@@ -356,31 +356,25 @@ public class nplTable extends TableMap {
             @Override
             public void updateItem(Tabentry entry, boolean empty) {
                super.updateItem(entry,  empty);
-               if (empty) {
-                  setStyle("");
-               } else {
-                  if (entry != null) {
-                     setStyle("");
-                     if (! isSelected()) {
-                        sortableDate d = entry.getDATE();
-                        if (d != null && d.data != null) {
-                           if (d.data.containsKey("CopyProtected"))
-                              TableUtil.setRowColor(this, config.tableBkgndProtected);
-                           
-                           if (d.data.containsKey("ExpirationImage") &&
-                               (d.data.get("ExpirationImage").equals("in-progress-recording") ||
-                                d.data.get("ExpirationImage").equals("in-progress-transfer")))
-                              TableUtil.setRowColor(this, config.tableBkgndRecording);
-                           
-                           if (config.showHistoryInTable == 1) {
-                              if (d.data.containsKey("ProgramId") &&
-                                    auto.keywordMatchHistoryFast(d.data.get("ProgramId"), false))
-                                 TableUtil.setRowColor(this, config.tableBkgndInHistory);
-                              if (d.data.containsKey("ProgramId_unique") &&
-                                    auto.keywordMatchHistoryFast(d.data.get("ProgramId_unique"), false))
-                                 TableUtil.setRowColor(this, config.tableBkgndInHistory);
-                           }
-                        }
+               styleProperty().unbind(); setStyle("");
+               if (entry != null) {
+                  sortableDate d = entry.getDATE();
+                  if (d != null && d.data != null) {
+                     if (d.data.containsKey("CopyProtected"))
+                        TableUtil.setRowColor(this, config.tableBkgndProtected);
+                     
+                     if (d.data.containsKey("ExpirationImage") &&
+                         (d.data.get("ExpirationImage").equals("in-progress-recording") ||
+                          d.data.get("ExpirationImage").equals("in-progress-transfer")))
+                        TableUtil.setRowColor(this, config.tableBkgndRecording);
+                     
+                     if (config.showHistoryInTable == 1) {
+                        if (d.data.containsKey("ProgramId") &&
+                              auto.keywordMatchHistoryFast(d.data.get("ProgramId"), false))
+                           TableUtil.setRowColor(this, config.tableBkgndInHistory);
+                        if (d.data.containsKey("ProgramId_unique") &&
+                              auto.keywordMatchHistoryFast(d.data.get("ProgramId_unique"), false))
+                           TableUtil.setRowColor(this, config.tableBkgndInHistory);
                      }
                   }
                }
