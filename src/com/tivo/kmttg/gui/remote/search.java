@@ -210,6 +210,7 @@ public class search {
 
       Label max_label = new Label("Max");
       max = new Spinner<Integer>(50, 800, 100, 50);
+      max.setEditable(true);
       max.setMaxWidth(90);
       max.setTooltip(tooltip.getToolTip("max_search"));
       
