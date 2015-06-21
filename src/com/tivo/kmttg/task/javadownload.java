@@ -234,8 +234,8 @@ public class javadownload implements Serializable {
          }
          
          if (failed == 0) {
-            // Check download duration if configured
-            if ( ! mediainfo.checkDownloadDuration(job.download_duration, job.tivoFile) )
+            // Check download duration if configured (and not resume download)
+            if ( job.offset == null && ! mediainfo.checkDownloadDuration(job.download_duration, job.tivoFile) )
                failed = 1;
          }
                   

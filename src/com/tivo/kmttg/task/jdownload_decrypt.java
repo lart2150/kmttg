@@ -247,8 +247,8 @@ public class jdownload_decrypt implements Serializable {
          }
          
          if (failed == 0) {
-            // Check download duration if configured
-            if ( ! mediainfo.checkDownloadDuration(job.download_duration, job.mpegFile) )
+            // Check download duration if configured (and not resume download)
+            if ( job.offset == null && ! mediainfo.checkDownloadDuration(job.download_duration, job.mpegFile) )
                failed = 1;
          }
          
