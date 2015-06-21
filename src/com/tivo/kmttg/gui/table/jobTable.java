@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Stack;
 
 import javafx.event.EventHandler;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -26,6 +27,7 @@ public class jobTable {
    
    public jobTable() {
       JobMonitor = new TableView<Tabentry>();
+      JobMonitor.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE); // Allow multiple row selection
       for (String colName : TITLE_cols) {
          // Regular String sort
          TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
