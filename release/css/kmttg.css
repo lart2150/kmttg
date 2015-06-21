@@ -38,6 +38,9 @@
     -fx-background-insets: 0, 1, 2;
 }
 
+/* Eliminate table cell padding so more rows can fit vertically */
+.tree-table-cell, .table-cell { -fx-padding: 0 0 0 0; }
+
 /* TabPane - don't want dark grey background */
 .tab-pane > .tab-header-area > .tab-header-background {
     -fx-background-color: -fx-outer-border, -fx-inner-border, -fx-control-inner-background;
