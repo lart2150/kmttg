@@ -2183,7 +2183,7 @@ public class gui extends Application {
             if (key.equals("rpc_search_max") && remote_gui != null) {
                try {
                   int max = Integer.parseInt(line);
-                  remote_gui.search_tab.max.getEditor().selectRange(max, max);
+                  remote_gui.search_tab.max.getValueFactory().setValue(max);
                }
                catch (NumberFormatException ex) {
                   // Don't do anything here
