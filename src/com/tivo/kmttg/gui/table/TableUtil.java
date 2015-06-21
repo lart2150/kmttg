@@ -95,7 +95,7 @@ public class TableUtil {
       row.styleProperty().bind(
          Bindings.when(row.selectedProperty())
             .then("")
-            .otherwise("-fx-opacity: 0.7; -fx-background-color: " + config.gui.getWebColor(color))
+            .otherwise("-fx-opacity: 0.65; -fx-background-color: " + config.gui.getWebColor(color))
        );
    }
    
@@ -103,7 +103,7 @@ public class TableUtil {
       row.styleProperty().bind(
          Bindings.when(row.selectedProperty())
             .then("")
-            .otherwise("-fx-opacity: 0.7; -fx-background-color: " + config.gui.getWebColor(color))
+            .otherwise("-fx-opacity: 0.65; -fx-background-color: " + config.gui.getWebColor(color))
        );
    }
    
