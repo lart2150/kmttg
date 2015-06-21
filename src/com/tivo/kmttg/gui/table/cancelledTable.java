@@ -32,6 +32,7 @@ import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.comparator.DateComparator;
 import com.tivo.kmttg.gui.comparator.DurationComparator;
+import com.tivo.kmttg.gui.comparator.StringChannelComparator;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
 import com.tivo.kmttg.main.config;
@@ -102,6 +103,8 @@ public class cancelledTable extends TableMap {
             // Regular String sort
             TreeTableColumn<Tabentry,String> col = new TreeTableColumn<Tabentry,String>(colName);
             col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,String>(colName));
+            if (colName.equals("CHANNEL"))
+               col.setComparator(new StringChannelComparator()); // Custom column sort
             TABLE.getColumns().add(col);
          }
       }

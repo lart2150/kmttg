@@ -28,6 +28,7 @@ import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.comparator.DateComparator;
 import com.tivo.kmttg.gui.comparator.DurationComparator;
+import com.tivo.kmttg.gui.comparator.StringChannelComparator;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
 import com.tivo.kmttg.main.config;
@@ -102,6 +103,8 @@ public class premiereTable extends TableMap {
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(colName));
             if (colName.equals("SEA"))
                col.setStyle("-fx-alignment: CENTER;");
+            if (colName.equals("CHANNEL"))
+               col.setComparator(new StringChannelComparator()); // Custom column sort
             TABLE.getColumns().add(col);
          }
       }
