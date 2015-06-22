@@ -202,7 +202,7 @@ public class Remote {
             bodyId_get();
          }
       } catch (Exception e) {
-         if (attempt == 0 && e.getMessage().contains("UNKNOWN ALERT: 238")) {
+         if (attempt == 0 && e.getMessage().contains("UNKNOWN ALERT")) {
             // Try it again as this could be temporary glitch
             attempt = 1;
             log.warn("RemoteInit 2nd attempt...");
