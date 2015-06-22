@@ -2068,6 +2068,7 @@ public class gui extends Application {
                   final String line_final = line;
                   Platform.runLater(new Runnable() {
                      @Override public void run() {
+                        config.encodeName = line_final;
                         encoding.setValue(line_final);
                      }
                   });
