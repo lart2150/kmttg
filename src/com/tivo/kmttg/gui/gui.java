@@ -2063,8 +2063,14 @@ public class gui extends Application {
             if (key.equals("encode_name")) {
                config.encodeName_orig = line;
                if (encodeConfig.isValidEncodeName(line)) {
-                  encoding.setValue(line);
                   config.encodeName = line;
+                  // runlater needed else doesn't get set right at kmttg startup
+                  final String line_final = line;
+                  Platform.runLater(new Runnable() {
+                     @Override public void run() {
+                        encoding.setValue(line_final);
+                     }
+                  });
                }
             }
             if (key.equals("toolTipsDelay")) {
