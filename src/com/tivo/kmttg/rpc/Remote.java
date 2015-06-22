@@ -69,6 +69,7 @@ public class Remote {
    private DataInputStream in = null;
    private DataOutputStream out = null;
    private SSLSocketFactory sslSocketFactory = null;
+   private int attempt = 0;
    
    public class NaiveTrustManager implements X509TrustManager {
      // Doesn't throw an exception, so this is how it approves a certificate.
@@ -201,6 +202,13 @@ public class Remote {
             bodyId_get();
          }
       } catch (Exception e) {
+         if (attempt == 0 && e.getMessage().contains("UNKNOWN ALERT: 238")) {
+            // Try it again as this could be temporary glitch
+            attempt = 1;
+            log.warn("RemoteInit 2nd attempt...");
+            RemoteInit(IP, port, MAK);
+            return;
+         }
          error("RemoteInit - (IP=" + IP + ", port=" + port + "): " + e.getMessage());
          error(Arrays.toString(e.getStackTrace()));
          success = false;
