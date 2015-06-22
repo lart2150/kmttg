@@ -977,7 +977,7 @@ public class gui extends Application {
          addSelectedTitlesMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
                TableMap tmap = TableMap.getCurrent();
-               if (! tmap.isRemote()) {
+               if (tmap == null || (tmap != null && ! tmap.isRemote())) {
                   // Non remote table
                   tivoTabs.get(getSelectedTivoName()).autoSelectedTitlesCB();
                   return;
