@@ -13,7 +13,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class autotune implements Serializable {
+public class autotune extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    private Thread thread = null;
    private Boolean thread_running = false;
@@ -56,14 +56,14 @@ public class autotune implements Serializable {
       }
                
       if ( start() ) {
-         job.process_autotune = this;
+         job.process = this;
          jobMonitor.updateJobStatus(job, "running");
          job.time = new Date().getTime();
       }
       return true;
    }
 
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       // Run telnet in a separate thread
       // Send sequence of channel changes for both tuners

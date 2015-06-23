@@ -13,7 +13,7 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.*;
 
 // Encoding class for running background ffmpeg, handbrake, etc. encoding jobs
-public class encode implements Serializable {
+public class encode extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    private backgroundProcess process;
    private jobData job;
@@ -79,7 +79,7 @@ public class encode implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_encode = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time           = new Date().getTime();
          }
@@ -90,7 +90,7 @@ public class encode implements Serializable {
    }
 
    // Return false if starting command fails, true otherwise
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       if ( ! encodeConfig.isValidEncodeName(job.encodeName) ) {
          jobMonitor.removeFromJobList(job);

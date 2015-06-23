@@ -17,7 +17,7 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class javametadata implements Serializable {
+public class javametadata extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    private Thread thread = null;
    private Boolean thread_running = false;
@@ -57,7 +57,7 @@ public class javametadata implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_javametadata = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time = new Date().getTime();
          }
@@ -67,7 +67,7 @@ public class javametadata implements Serializable {
       }      
    }
    
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       if (job.url == null || job.url.length() == 0) {
          log.error("URL not given");

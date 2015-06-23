@@ -15,7 +15,7 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class custom implements Serializable {
+public class custom extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    private backgroundProcess process;
    private jobData job;
@@ -41,7 +41,7 @@ public class custom implements Serializable {
                   
       if (schedule) {
          if ( start() ) {
-            job.process_custom   = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
@@ -52,7 +52,7 @@ public class custom implements Serializable {
    }
 
    // Return false if starting command fails, true otherwise
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       String mpegFile_cut = "";
       if (job.tivoFile == null) job.tivoFile = "";

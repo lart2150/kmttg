@@ -21,7 +21,7 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.parseNPL;
 
-public class javaNowPlaying implements Serializable {
+public class javaNowPlaying extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    private Thread thread = null;
    private Boolean thread_running = false;
@@ -47,21 +47,15 @@ public class javaNowPlaying implements Serializable {
    public backgroundProcess getProcess() {
       return process;
    }
-   
-   public static Boolean submitJob(String tivoName) {
+      
+   public Boolean launchJob() {
       debug.print("");
-      String ip = config.TIVOS.get(tivoName);
-      if (ip == null || ip.length() == 0) {
-         log.error("IP not defined for tivo: " + tivoName);
+      job.ip = config.TIVOS.get(job.tivoName);
+      if (job.ip == null || job.ip.length() == 0) {
+         log.error("IP not defined for tivo: " + job.tivoName);
          return false;
       }
-      jobData job = new jobData();
-      job.tivoName           = tivoName;
-      job.type               = "javaplaylist";
-      job.name               = "java";
-      job.ip                 = ip;
-      jobMonitor.submitNewJob(job);
-      limit_npl_fetches = config.getLimitNplSetting(tivoName);
+      limit_npl_fetches = config.getLimitNplSetting(job.tivoName);
       return true;      
    }
    
@@ -223,7 +217,6 @@ public class javaNowPlaying implements Serializable {
          done = false;
       }
       
-      System.out.println("fetchCount=" + fetchCount + " limit_npl_fetches=" + limit_npl_fetches); // TODO
       if (limit_npl_fetches > 0 && fetchCount >= limit_npl_fetches) {
          if ( ! done )
             log.warn(job.tivoName + ": Further NPL listings not obtained due to fetch limit=" + limit_npl_fetches + " exceeded.");

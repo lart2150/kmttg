@@ -24,7 +24,7 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class vrdreview implements Serializable {
+public class vrdreview extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    String  vrd = null;
    private backgroundProcess process;
@@ -88,7 +88,7 @@ public class vrdreview implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_vrdreview = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time              = new Date().getTime();
          }
@@ -99,7 +99,7 @@ public class vrdreview implements Serializable {
    }
 
    // Return false if starting command fails, true otherwise
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
 
       Stack<String> command = new Stack<String>();

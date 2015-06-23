@@ -18,7 +18,7 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.mediainfo;
 import com.tivo.kmttg.util.string;
 
-public class download implements Serializable {
+public class download extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    String cookieFile = "";
    private backgroundProcess process;
@@ -69,7 +69,7 @@ public class download implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_download = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
@@ -79,7 +79,7 @@ public class download implements Serializable {
       }      
    }
    
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       if (job.url == null || job.url.length() == 0) {
          log.error("URL not given");

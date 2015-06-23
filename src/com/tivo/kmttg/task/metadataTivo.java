@@ -31,7 +31,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
-public class metadataTivo implements Serializable {
+public class metadataTivo extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    private String xmlFile =  "chunk-01-0001.xml";
    private String xmlFile2 = "chunk-02-0002.xml";
@@ -70,7 +70,7 @@ public class metadataTivo implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_metadataTivo = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time                 = new Date().getTime();
          }
@@ -80,7 +80,7 @@ public class metadataTivo implements Serializable {
       }      
    }
    
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       Stack<String> command = new Stack<String>();
       command.add(config.tivodecode);

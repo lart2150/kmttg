@@ -1,10 +1,6 @@
 package com.tivo.kmttg.main;
 
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -19,12 +15,44 @@ import com.tivo.kmttg.gui.table.spTable;
 import com.tivo.kmttg.gui.table.streamTable;
 import com.tivo.kmttg.gui.table.thumbsTable;
 import com.tivo.kmttg.gui.table.todoTable;
-import com.tivo.kmttg.task.*;
+import com.tivo.kmttg.task.NowPlaying;
+import com.tivo.kmttg.task.adcut;
+import com.tivo.kmttg.task.adscan;
+import com.tivo.kmttg.task.atomic;
+import com.tivo.kmttg.task.autotune;
+import com.tivo.kmttg.task.baseTask;
+import com.tivo.kmttg.task.captions;
+import com.tivo.kmttg.task.comcut;
+import com.tivo.kmttg.task.comskip;
+import com.tivo.kmttg.task.comskip_review;
+import com.tivo.kmttg.task.custom;
+import com.tivo.kmttg.task.decrypt;
+import com.tivo.kmttg.task.download;
+import com.tivo.kmttg.task.download_decrypt;
+import com.tivo.kmttg.task.dsd;
+import com.tivo.kmttg.task.encode;
+import com.tivo.kmttg.task.javaNowPlaying;
+import com.tivo.kmttg.task.javadownload;
+import com.tivo.kmttg.task.javametadata;
+import com.tivo.kmttg.task.jdownload_decrypt;
+import com.tivo.kmttg.task.metadata;
+import com.tivo.kmttg.task.metadataTivo;
+import com.tivo.kmttg.task.projectx;
+import com.tivo.kmttg.task.projectxcut;
+import com.tivo.kmttg.task.push;
+import com.tivo.kmttg.task.qsfix;
+import com.tivo.kmttg.task.remote;
+import com.tivo.kmttg.task.slingbox;
+import com.tivo.kmttg.task.streamfix;
+import com.tivo.kmttg.task.vrdencode;
+import com.tivo.kmttg.task.vrdreview;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.log;
 
 public class jobData implements Serializable, Cloneable {
-   private static final long serialVersionUID = 1L;
+   private static final long serialVersionUID = 1L;   
+   public baseTask process = null;
+   
    // Common to all jobs
    public String startFile = null;
    public String  source = null;
@@ -36,38 +64,6 @@ public class jobData implements Serializable, Cloneable {
    public String  name = null;
    public Float   familyId = null;
    public String  job_name = null;
-   
-   // process (Variable name is required to be process_name)
-   public NowPlaying   process_npl = null;
-   public javaNowPlaying process_javanpl = null;
-   public metadata     process_metadata = null;
-   public javametadata process_javametadata = null;
-   public metadataTivo process_metadataTivo = null;
-   public autotune     process_autotune = null;
-   public remote       process_remote = null;
-   public download     process_download = null;
-   public download_decrypt process_download_decrypt = null;
-   public javadownload process_javadownload = null;
-   public jdownload_decrypt process_jdownload_decrypt = null;
-   public decrypt      process_decrypt = null;
-   public dsd          process_dsd = null;
-   public qsfix        process_qsfix = null;
-   public projectx     process_projectx = null;
-   public comskip      process_comskip = null;
-   public comskip_review process_comskip_review = null;
-   public adscan       process_adscan = null;
-   public vrdreview    process_vrdreview = null;
-   public comcut       process_comcut = null;
-   public projectxcut  process_projectxcut = null;
-   public adcut        process_adcut = null;
-   public captions     process_captions = null;
-   public encode       process_encode = null;
-   public vrdencode    process_vrdencode = null;
-   public atomic       process_atomic = null;
-   public push         process_push = null;
-   public custom       process_custom = null;
-   public streamfix    process_streamfix = null;
-   public slingbox     process_slingbox = null;
    
    public String  ip = null;
    public String  inputFile = null;
@@ -232,20 +228,73 @@ public class jobData implements Serializable, Cloneable {
       return "{source=" + source + " tivoName=" + tivoName + " type=" + type + " status=" + status + " familyId=" + familyId + "}";
    }
    
-   // NOTE: Relies on job.type to be a task name under com.tivo.kmttg.task
+   // NOTE: With a couple of exceptions relies on job.type to be a task name under com.tivo.kmttg.task
    public static int launch(jobData job, int cpuActiveJobs) {
-      Boolean success = false;
-      try {
-         Class<?> c = Class.forName(job.typeToTaskClassName());
-         Constructor<?> constructor = c.getConstructor(jobData.class);
-         Object proc = constructor.newInstance(new Object[] {job});
-         Method method = c.getMethod("launchJob");
-         success = (Boolean) method.invoke(proc);
-      } catch (Exception e) {
-         log.error("jobData launch: " + e.getMessage());
-         log.error(Arrays.toString(e.getStackTrace()));
+      if (job.type.equals("playlist"))
+         job.process = new NowPlaying(job);
+      if (job.type.equals("javaplaylist"))
+         job.process = new javaNowPlaying(job);
+      if (job.type.equals("adcut"))
+         job.process = new adcut(job);
+      if (job.type.equals("adscan"))
+         job.process = new adscan(job);
+      if (job.type.equals("atomic"))
+         job.process = new atomic(job);
+      if (job.type.equals("autotune"))
+         job.process = new autotune(job);
+      if (job.type.equals("captions"))
+         job.process = new captions(job);
+      if (job.type.equals("comcut"))
+         job.process = new comcut(job);
+      if (job.type.equals("comskip_review"))
+         job.process = new comskip_review(job);
+      if (job.type.equals("comskip"))
+         job.process = new comskip(job);
+      if (job.type.equals("custom"))
+         job.process = new custom(job);
+      if (job.type.equals("decrypt"))
+         job.process = new decrypt(job);
+      if (job.type.equals("download_decrypt"))
+         job.process = new download_decrypt(job);
+      if (job.type.equals("download"))
+         job.process = new download(job);
+      if (job.type.equals("dsd"))
+         job.process = new dsd(job);
+      if (job.type.equals("encode"))
+         job.process = new encode(job);
+      if (job.type.equals("javadownload"))
+         job.process = new javadownload(job);
+      if (job.type.equals("javametadata"))
+         job.process = new javametadata(job);
+      if (job.type.equals("jdownload_decrypt"))
+         job.process = new jdownload_decrypt(job);
+      if (job.type.equals("metadata"))
+         job.process = new metadata(job);
+      if (job.type.equals("metadataTivo"))
+         job.process = new metadataTivo(job);
+      if (job.type.equals("projectx"))
+         job.process = new projectx(job);
+      if (job.type.equals("projectxcut"))
+         job.process = new projectxcut(job);
+      if (job.type.equals("push"))
+         job.process = new push(job);
+      if (job.type.equals("qsfix"))
+         job.process = new qsfix(job);
+      if (job.type.equals("remote"))
+         job.process = new remote(job);
+      if (job.type.equals("slingbox"))
+         job.process = new slingbox(job);
+      if (job.type.equals("streamfix"))
+         job.process = new streamfix(job);
+      if (job.type.equals("vrdencode"))
+         job.process = new vrdencode(job);
+      if (job.type.equals("vrdreview"))
+         job.process = new vrdreview(job);
+      if (job.process == null) {
+         log.error("job.type=" + job.type + " not mapped");
+         return cpuActiveJobs;
       }
-      
+      Boolean success = job.process.launchJob();      
       if (success) {
          if (jobMonitor.isActiveJob(job))
             cpuActiveJobs += 1;
@@ -257,65 +306,26 @@ public class jobData implements Serializable, Cloneable {
    }
    
    public Boolean check() {
-      // Go through all the class variables and for ones called process_* if they
-      // are non-null then invoke their check method
-      for (Field field : this.getClass().getDeclaredFields()) {
-         try {
-            if (field.getName().startsWith("process_") && field.get(this) != null) {
-               Method method = field.get(this).getClass().getMethod("check");
-               return (Boolean) method.invoke(field.get(this));
-            }
-         } catch (Exception e) {
-            log.error("jobData check: " + e.getMessage());
-            log.error(Arrays.toString(e.getStackTrace()));
-         }
-      }
-      return false;
+      return this.process.check();
    }
    
    public backgroundProcess getProcess() {
-      // Go through all the class variables and for ones called process_* if they
-      // are non-null then invoke their getProcess method
-      for (Field field : this.getClass().getDeclaredFields()) {
-         try {
-            if (field.getName().startsWith("process_") && field.get(this) != null) {
-               Method method = field.get(this).getClass().getMethod("getProcess");
-               return (backgroundProcess) method.invoke(field.get(this));
-            }
-         } catch (Exception e) {
-            log.error("jobData getProcess: " + e.getMessage());
-            log.error(Arrays.toString(e.getStackTrace()));
-         }
-      }
-      return null;      
+      return this.process.getProcess();
    }
 
    public void kill() {
-      // Go through all the class variables and for ones called process_* if they
-      // are non-null then invoke their kill method
-      for (Field field : this.getClass().getDeclaredFields()) {
-         try {
-            if (field.getName().startsWith("process_") && field.get(this) != null) {
-               Method method = field.get(this).getClass().getMethod("kill");
-               method.invoke(field.get(this));
-               field.set(this, null);
-            }
-         } catch (Exception e) {
-            log.error("jobData kill: " + e.getMessage());
-            log.error(Arrays.toString(e.getStackTrace()));
-         }
-      }
+      this.process.kill();
    }
    
    // Return the kmttg task class name corresponding to current job type string
-   private String typeToTaskClassName() {
+   /*private String typeToTaskClassName() {
       String className = type;
       if (className.equals("playlist"))
          className = "NowPlaying";
       if (className.equals("javaplaylist"))
          className = "javaNowPlaying";
       return "com.tivo.kmttg.task." + className;
-   }
+   }*/
             
    public String getOutputFile() {
       String file = "";

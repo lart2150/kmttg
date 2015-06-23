@@ -79,10 +79,9 @@ public class jobMonitor {
             // queued playlist jobs launch right away, other jobs go to queue
             if ( (job.type.equals("playlist") || job.type.equals("javaplaylist")) && job.status.matches("queued") ) {
                if (job.type.equals("playlist")) {
-                  job.process_npl = new NowPlaying(job);
-                  if (job.process_npl != null) {
-                     job.process_npl.job = job; // This is used by npl check
-                     if (job.process_npl.start()) {
+                  job.process = new NowPlaying(job);
+                  if (job.process != null) {
+                     if (job.process.start()) {
                         updateJobStatus(job, "running");
                         job.time = new Date().getTime();
                         job.job_name = "playlist" + job.tivoName;
@@ -97,10 +96,9 @@ public class jobMonitor {
                   }
                }
                if (job.type.equals("javaplaylist")) {
-                  job.process_javanpl = new javaNowPlaying(job);
-                  if (job.process_javanpl != null) {
-                     job.process_javanpl.job = job; // This is used by npl check
-                     if (job.process_javanpl.start()) {
+                  job.process = new javaNowPlaying(job);
+                  if (job.process != null) {
+                     if (job.process.start()) {
                         updateJobStatus(job, "running");
                         job.time = new Date().getTime();
                         job.job_name = "javaplaylist" + job.tivoName;
@@ -272,11 +270,20 @@ public class jobMonitor {
    }
    
    public static void getNPL(String name) {
-      if (config.java_downloads == 0 || config.rpcnpl == 1 && config.rpcEnabled(name))
-         NowPlaying.submitJob(name);
-      else
-         javaNowPlaying.submitJob(name);
-   }
+      jobData job = new jobData();
+      job.tivoName           = name;
+      job.type               = "playlist";
+      job.name               = "curl";
+      jobMonitor.submitNewJob(job);
+      if (config.java_downloads == 0 || config.rpcnpl == 1 && config.rpcEnabled(name)) {
+         job.type = "playlist";
+         new NowPlaying(job).launchJob();
+      }
+      else {
+         job.type = "javaplaylist";
+         new javaNowPlaying(job).launchJob();
+      }
+   }   
    
    // If true this job can only be run one at a time per TiVo
    private static Boolean oneJobAtATime(String type) {

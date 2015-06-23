@@ -13,7 +13,7 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class comcut implements Serializable {
+public class comcut extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    private backgroundProcess process;
    private jobData job;
@@ -65,7 +65,7 @@ public class comcut implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_comcut   = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
@@ -76,7 +76,7 @@ public class comcut implements Serializable {
    }
 
    // Return false if starting command fails, true otherwise
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       Stack<String> command = new Stack<String>();
       command.add(config.mencoder);

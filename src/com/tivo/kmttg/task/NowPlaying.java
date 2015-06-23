@@ -22,7 +22,7 @@ import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.*;
 
-public class NowPlaying implements Serializable {
+public class NowPlaying extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    private Stack<Hashtable<String,String>> ENTRIES = new Stack<Hashtable<String,String>>();
    private Hashtable<String,Integer> unique = new Hashtable<String,Integer>();
@@ -61,20 +61,14 @@ public class NowPlaying implements Serializable {
       return process;
    }
    
-   public static Boolean submitJob(String tivoName) {
+   public Boolean launchJob() {
       debug.print("");
-      String ip = config.TIVOS.get(tivoName);
-      if (ip == null || ip.length() == 0) {
-         log.error("IP not defined for tivo: " + tivoName);
+      job.ip = config.TIVOS.get(job.tivoName);
+      if (job.ip == null || job.ip.length() == 0) {
+         log.error("IP not defined for tivo: " + job.tivoName);
          return false;
       }
-      jobData job = new jobData();
-      job.tivoName           = tivoName;
-      job.type               = "playlist";
-      job.name               = "curl";
-      job.ip                 = ip;
-      jobMonitor.submitNewJob(job);
-      limit_npl_fetches = config.getLimitNplSetting(tivoName);
+      limit_npl_fetches = config.getLimitNplSetting(job.tivoName);
       return true;      
    }
    

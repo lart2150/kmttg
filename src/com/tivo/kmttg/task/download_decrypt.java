@@ -21,7 +21,7 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.mediainfo;
 import com.tivo.kmttg.util.string;
 
-public class download_decrypt implements Serializable {
+public class download_decrypt extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    String command = "";
    String cookieFile = "";
@@ -83,7 +83,7 @@ public class download_decrypt implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_download_decrypt = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
@@ -93,7 +93,7 @@ public class download_decrypt implements Serializable {
       }      
    }
    
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       if (job.url == null || job.url.length() == 0) {
          log.error("URL not given");

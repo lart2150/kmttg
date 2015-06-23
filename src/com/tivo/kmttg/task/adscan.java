@@ -13,7 +13,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
-public class adscan implements Serializable {
+public class adscan extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    String  vrdscript = null;
    String  cscript = null;
@@ -79,7 +79,7 @@ public class adscan implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_adscan   = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
@@ -91,7 +91,7 @@ public class adscan implements Serializable {
    }
 
    // Return false if starting command fails, true otherwise
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       Stack<String> command = new Stack<String>();
       command.add(cscript);

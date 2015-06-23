@@ -17,7 +17,7 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.mediainfo;
 import com.tivo.kmttg.util.string;
 
-public class dsd implements Serializable {
+public class dsd extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    private backgroundProcess process;
    private jobData job;
@@ -59,7 +59,7 @@ public class dsd implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_dsd = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time            = new Date().getTime();
          }
@@ -70,7 +70,7 @@ public class dsd implements Serializable {
    }
 
    // Return false if starting command fails, true otherwise
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       
       // Obtain some info on input video

@@ -18,7 +18,7 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.pyTivo;
 import com.tivo.kmttg.util.string;
 
-public class push implements Serializable {
+public class push extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    private Thread thread = null;
    private Boolean thread_running = false;
@@ -92,7 +92,7 @@ public class push implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_push = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
@@ -102,7 +102,7 @@ public class push implements Serializable {
       }      
    }
    
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       // Run push method in a separate thread
       class AutoThread implements Runnable {

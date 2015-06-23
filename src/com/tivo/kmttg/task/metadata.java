@@ -12,7 +12,7 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.*;
 
-public class metadata implements Serializable {
+public class metadata extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    String cookieFile = "";
    String outputFile = "";
@@ -55,7 +55,7 @@ public class metadata implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_metadata = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
@@ -65,7 +65,7 @@ public class metadata implements Serializable {
       }      
    }
    
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       if (job.url == null || job.url.length() == 0) {
          log.error("URL not given");

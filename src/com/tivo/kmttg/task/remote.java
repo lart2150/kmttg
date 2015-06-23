@@ -16,7 +16,7 @@ import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
-public class remote implements Serializable {
+public class remote extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    private Thread thread = null;
    private Boolean thread_running = false;
@@ -43,14 +43,14 @@ public class remote implements Serializable {
       }
                
       if ( start() ) {
-         job.process_remote = this;
+         job.process = this;
          jobMonitor.updateJobStatus(job, "running");
          job.time = new Date().getTime();
       }
       return true;
    }
 
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       // Run Remote in a separate thread
       class AutoThread implements Runnable {

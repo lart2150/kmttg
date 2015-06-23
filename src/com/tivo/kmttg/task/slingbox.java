@@ -22,7 +22,7 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class slingbox implements Serializable {
+public class slingbox extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    Boolean raw = false;
    String command = "";
@@ -98,7 +98,7 @@ public class slingbox implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_slingbox = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
@@ -108,7 +108,7 @@ public class slingbox implements Serializable {
       }      
    }
    
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       String vs = "16", hd = null;
       if (config.slingBox_res.equals("1920x1080"))

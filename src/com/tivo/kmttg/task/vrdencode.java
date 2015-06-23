@@ -14,7 +14,7 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class vrdencode implements Serializable {
+public class vrdencode extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    String  vrdscript = null;
    String  cscript = null;
@@ -129,7 +129,7 @@ public class vrdencode implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_vrdencode = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time              = new Date().getTime();
          }
@@ -141,7 +141,7 @@ public class vrdencode implements Serializable {
    }
 
    // Return false if starting command fails, true otherwise
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       Stack<String> command = new Stack<String>();
       command.add(cscript);

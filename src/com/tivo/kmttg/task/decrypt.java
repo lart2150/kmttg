@@ -13,7 +13,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
-public class decrypt implements Serializable {
+public class decrypt extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    private backgroundProcess process;
    private jobData job;
@@ -55,7 +55,7 @@ public class decrypt implements Serializable {
       
       if (schedule) {
          if ( start() ) {
-            job.process_decrypt = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time            = new Date().getTime();
          }
@@ -66,7 +66,7 @@ public class decrypt implements Serializable {
    }
 
    // Return false if starting command fails, true otherwise
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       Stack<String> command = new Stack<String>();
       command.add(config.tivodecode);

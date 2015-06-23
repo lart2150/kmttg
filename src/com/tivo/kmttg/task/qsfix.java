@@ -18,7 +18,7 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.mediainfo;
 import com.tivo.kmttg.util.string;
 
-public class qsfix implements Serializable {
+public class qsfix extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    String  vrdscript = null;
    String  cscript = null;
@@ -88,7 +88,7 @@ public class qsfix implements Serializable {
 
       if (schedule) {
          if ( start() ) {
-            job.process_qsfix    = this;
+            job.process = this;
             jobMonitor.updateJobStatus(job, "running");
             job.time             = new Date().getTime();
          }
@@ -100,7 +100,7 @@ public class qsfix implements Serializable {
    }
 
    // Return false if starting command fails, true otherwise
-   private Boolean start() {
+   public Boolean start() {
       debug.print("");
       // Obtain some info on input video
       Hashtable<String,String> info = null;
