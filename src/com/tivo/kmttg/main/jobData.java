@@ -292,6 +292,7 @@ public class jobData implements Serializable, Cloneable {
          job.process = new vrdreview(job);
       if (job.process == null) {
          log.error("job.type=" + job.type + " not mapped");
+         jobMonitor.removeFromJobList(job);
          return cpuActiveJobs;
       }
       Boolean success = job.process.launchJob();      
