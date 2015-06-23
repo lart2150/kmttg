@@ -924,6 +924,7 @@ public class auto {
                   } else {
                      log.error("There was a problem installing kmttg service");
                      log.error(process.getStdout());
+                     serviceDenied(result);
                   }
                } else {
                   log.error("Problem running command: " + process.toString());
@@ -937,6 +938,15 @@ public class auto {
          }
       };
       new Thread(task).start();
+   }
+   
+   private static void serviceDenied(Stack<String> messages) {
+      for (String line : messages) {
+         if (line.contains("Access is denied")) {
+            log.error("You will need to run as administrator scripts under: " + config.programDir + "\\service\\win32");
+            return;
+         }
+      }
    }
    
    // Windows only: Starts kmttg service using "sc start kmttg"
@@ -958,6 +968,7 @@ public class auto {
                   for (int i=0; i<result.size(); ++i) {
                      if (result.get(i).matches("^.+FAILED.+$")) {
                         log.error(result);
+                        serviceDenied(result);
                         return null;
                      }
                   }
@@ -1000,6 +1011,7 @@ public class auto {
                   for (int i=0; i<result.size(); ++i) {
                      if (result.get(i).matches("^.+FAILED.+$")) {
                         log.error(result);
+                        serviceDenied(result);
                         return null;
                      }
                   }
@@ -1047,6 +1059,7 @@ public class auto {
                   }
                   // Did not seem to work
                   log.error(result);
+                  serviceDenied(result);
                   return false;
                }
             } else {
