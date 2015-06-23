@@ -99,6 +99,8 @@ public class nplTable extends TableMap {
       NowPlaying.getSortOrder().addListener(new ListChangeListener<TreeTableColumn<Tabentry, ?>>() {
          @Override
          public void onChanged(Change<? extends TreeTableColumn<Tabentry, ?>> change) {
+            if (tivoName.equals("FILES"))
+               return;
             change.next();
             if (change != null && change.toString().contains("removed")) {
                if (change.getRemoved().get(0).getText().equals("DATE"))
