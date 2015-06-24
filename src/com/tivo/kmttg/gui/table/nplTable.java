@@ -89,7 +89,7 @@ public class nplTable extends TableMap {
       return NowPlaying;
    }
          
-   public nplTable(String tivoName) {
+   public nplTable(final String tivoName) {
       this.tivoName = tivoName;
       NowPlaying = new TreeTableView<Tabentry>();
       NowPlaying.setShowRoot(false); // Don't show the empty root node
@@ -504,7 +504,7 @@ public class nplTable extends TableMap {
                      RefreshTable();
                   }
                   if (config.rpcEnabled(tivoName)) {
-                     // Use iPad remote protocol to remove items
+                     // Use rpc remote protocol to remove items
                      log.warn("Deleting selected shows on TiVo '" + tivoName + "':\n" + show_names);
                      RemoveIds(urlsToDelete, idsToDelete);
                      RefreshTable();
@@ -533,7 +533,7 @@ public class nplTable extends TableMap {
                   if (config.rpcEnabled(tivoName)) {
                      id = rnpl.findRecordingId(tivoName, s.data);
                      if (id != null) {
-                        // Use iPad remote protocol to play given item
+                        // Use rpc remote protocol to play given item
                         String title = "";
                         if (s.data.containsKey("title"))
                            title += s.data.get("title");

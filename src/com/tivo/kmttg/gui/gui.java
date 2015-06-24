@@ -150,7 +150,7 @@ public class gui extends Application {
    public CheckBox decrypt = null;
    public CheckBox qsfix = null;
    public CheckBox twpdelete = null;
-   public CheckBox ipaddelete = null;
+   public CheckBox rpcdelete = null;
    public CheckBox comskip = null;
    public CheckBox comcut = null;
    public CheckBox captions = null;
@@ -202,7 +202,7 @@ public class gui extends Application {
       main_canvas.getChildren().add(jContentPane);
       ((VBox) scene.getRoot()).getChildren().addAll(menubar, main_canvas);
       
-      // Add additional ipad remote tab
+      // Add additional rpc remote tab
       remote_gui = new remotegui(jFrame);
       addTabPane("Remote", tabbed_panel, remote_gui.getPanel());
       
@@ -469,7 +469,7 @@ public class gui extends Application {
             }
          });
          twpdelete = new CheckBox("TWP Delete"); twpdelete.setSelected(false);        
-         ipaddelete = new CheckBox("iPad Delete");  ipaddelete.setSelected(false);       
+         rpcdelete = new CheckBox("rpc Delete");  rpcdelete.setSelected(false);       
          comskip = new CheckBox("Ad Detect"); comskip.setSelected(false);        
          comcut = new CheckBox("Ad Cut"); comcut.setSelected(false);        
          captions = new CheckBox("captions"); captions.setSelected(false);        
@@ -489,8 +489,8 @@ public class gui extends Application {
          if (config.twpDeleteEnabled()) {
             tasks_panel.getChildren().add(twpdelete);            
          }
-         if (config.ipadDeleteEnabled()) {
-            tasks_panel.getChildren().add(ipaddelete);            
+         if (config.rpcDeleteEnabled()) {
+            tasks_panel.getChildren().add(rpcdelete);            
          }
          tasks_panel.getChildren().add(comskip);
          tasks_panel.getChildren().add(comcut);
@@ -1312,11 +1312,11 @@ public class gui extends Application {
          twpdelete.setDisable(false);
       }
       
-      if ( ! config.ipadDeleteEnabled() ) {
-         ipaddelete.setSelected(false);
-         ipaddelete.setDisable(true);
+      if ( ! config.rpcDeleteEnabled() ) {
+         rpcdelete.setSelected(false);
+         rpcdelete.setDisable(true);
       } else {
-         ipaddelete.setDisable(false);
+         rpcdelete.setDisable(false);
       }
 
       if (! file.isFile(config.comskip)) {
@@ -1749,7 +1749,7 @@ public class gui extends Application {
             ofp.write("<decrypt>\n"             + decrypt_setting()          + "\n");
             ofp.write("<qsfix>\n"               + qsfix_setting()            + "\n");
             ofp.write("<twpdelete>\n"           + twpdelete_setting()        + "\n");
-            ofp.write("<ipaddelete>\n"          + ipaddelete_setting()       + "\n");
+            ofp.write("<rpcdelete>\n"          + rpcdelete_setting()       + "\n");
             ofp.write("<comskip>\n"             + comskip_setting()          + "\n");
             ofp.write("<comcut>\n"              + comcut_setting()           + "\n");
             ofp.write("<captions>\n"            + captions_setting()         + "\n");
@@ -1982,11 +1982,11 @@ public class gui extends Application {
                else
                   twpdelete.setSelected(false);
             }            
-            if (key.equals("ipaddelete")) {
+            if (key.equals("rpcdelete")) {
                if (line.matches("1"))
-                  ipaddelete.setSelected(true);
+                  rpcdelete.setSelected(true);
                else
-                  ipaddelete.setSelected(false);
+                  rpcdelete.setSelected(false);
             }            
             if (key.equals("comskip")) {
                if (line.matches("1"))
@@ -2309,7 +2309,7 @@ public class gui extends Application {
       decrypt.setTooltip(getToolTip("decrypt"));
       qsfix.setTooltip(getToolTip("qsfix"));
       twpdelete.setTooltip(getToolTip("twpdelete"));
-      ipaddelete.setTooltip(getToolTip("ipaddelete"));
+      rpcdelete.setTooltip(getToolTip("rpcdelete"));
       comskip.setTooltip(getToolTip("comskip"));
       comcut.setTooltip(getToolTip("comcut"));
       captions.setTooltip(getToolTip("captions"));
@@ -2352,7 +2352,7 @@ public class gui extends Application {
          text += "Use TiVoCast HME app with pyTivo as a video server to stream a video file to<br>";
          text += "a series 4 or later TiVo. pyTivo.conf must be configured in kmttg and the video<br>";
          text += "file must be within a pyTivo video share folder structure.<br>";
-         text += "NOTE: You must have at least 1 series 4 or later TiVo with iPad style communications<br>";
+         text += "NOTE: You must have at least 1 series 4 or later TiVo with rpc style communications<br>";
          text += "enabled to use as a destination TiVo.<br>";
          text += "VIDEO RESTRICTIONS: Source video must be either:<br>";
          text += "<b>Unencrypted mpeg2 program stream</b> (.TiVo files won't work).<br>";
@@ -2406,12 +2406,12 @@ public class gui extends Application {
          text += "a TivoWebPlus http call to delete show on TiVo will be issued following<br>";
          text += "successful decrypt of a downloaded .TiVo file.";
       }
-      else if (component.equals("ipaddelete")) {
-         text =  "<b>iPad Delete</b><br>";
+      else if (component.equals("rpcdelete")) {
+         text =  "<b>rpc Delete</b><br>";
          text += "If you have Series 4 (Premiere) TiVo or later with Network Remote setting enabled<br>";
-         text += "then if you enable this task, iPad style communications will be used to<br>";
+         text += "then if you enable this task, rpc style communications will be used to<br>";
          text += "delete show on TiVo following successful decrypt of a downloaded .TiVo file.<br>";
-         text += "NOTE: You must also have <b>Enable iPad style communications with this TiVo</b> option<br>";
+         text += "NOTE: You must also have <b>Enable rpc style communications with this TiVo</b> option<br>";
          text += "enabled under <b>Configuration-TiVos</b> for each Premiere that you want this to work with.";
       }
       else if (component.equals("comskip")) {
@@ -2662,10 +2662,10 @@ public class gui extends Application {
       if (twpdelete.isSelected()) selected = 1;
       return selected;
    }
-   public int ipaddelete_setting() {
+   public int rpcdelete_setting() {
       debug.print("");
       int selected = 0;
-      if (ipaddelete.isSelected()) selected = 1;
+      if (rpcdelete.isSelected()) selected = 1;
       return selected;
    }
    public int comskip_setting() {

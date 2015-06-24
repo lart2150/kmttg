@@ -317,7 +317,7 @@ public class guideTable extends TableMap {
    public long displayTimeToLong(String date) {
       try {
          SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yyyy h a");
-         // First convert to long and then to iPad time format (which is in GMT)
+         // First convert to long and then to rpc time format (which is in GMT)
          return sdf.parse(date).getTime();
       } catch (ParseException e) {
          log.error("displayTimeToLong error: " + e.getMessage());

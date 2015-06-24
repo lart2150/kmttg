@@ -545,7 +545,7 @@ public class auto {
       h.put("decrypt",             (Boolean)(auto.decrypt   == 1));
       h.put("qsfix",               (Boolean)(auto.qsfix     == 1));
       h.put("twpdelete",           (Boolean)(auto.twpdelete == 1 && config.twpDeleteEnabled()));
-      h.put("ipaddelete",          (Boolean)(auto.ipaddelete == 1 && config.rpcEnabled(tivoName)));
+      h.put("rpcdelete",          (Boolean)(auto.rpcdelete == 1 && config.rpcEnabled(tivoName)));
       h.put("comskip",             (Boolean)(auto.comskip   == 1));
       h.put("comcut",              (Boolean)(auto.comcut    == 1));
       h.put("captions",            (Boolean)(auto.captions  == 1));
@@ -741,7 +741,7 @@ public class auto {
             ofp.write("decrypt "     + config.gui.decrypt_setting()   + "\n");
             ofp.write("qsfix "       + config.gui.qsfix_setting()     + "\n");
             ofp.write("twpdelete "   + config.gui.twpdelete_setting() + "\n");
-            ofp.write("ipaddelete "  + config.gui.ipaddelete_setting() + "\n");
+            ofp.write("rpcdelete "   + config.gui.rpcdelete_setting() + "\n");
             ofp.write("comskip "     + config.gui.comskip_setting()   + "\n");
             ofp.write("comcut "      + config.gui.comcut_setting()    + "\n");
             ofp.write("captions "    + config.gui.captions_setting()  + "\n");

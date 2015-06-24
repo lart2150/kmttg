@@ -244,10 +244,10 @@ public class file {
       }
    }
    
-   // Use iPad protocol to delete a show
-   public static Boolean iPadDelete(String tivoName, String recordingId) {
+   // Use rpc protocol to delete a show
+   public static Boolean rpcDelete(String tivoName, String recordingId) {
       if (recordingId == null) {
-         log.error("iPad Delete got null recordingId");
+         log.error("rpc Delete got null recordingId");
          return false;
       }
       JSONArray a = new JSONArray();
@@ -255,15 +255,15 @@ public class file {
       a.put(recordingId);
       try {
          json.put("recordingId", a);
-         log.warn(">> Attempting iPad delete for id: " + recordingId);
+         log.warn(">> Attempting rpc delete for id: " + recordingId);
          Remote r = config.initRemote(tivoName);
          if (r.success) {
             if (r.Command("Delete", json) != null)
-               log.warn(">> iPad delete succeeded.");
+               log.warn(">> rpc delete succeeded.");
             r.disconnect();
          }
       } catch (JSONException e) {
-         log.error("iPad delete failed - " + e.getMessage());
+         log.error("rpc delete failed - " + e.getMessage());
          return false;
       }
       return true;

@@ -115,8 +115,8 @@ public class jobData implements Serializable, Cloneable {
    // TWP delete related
    public Boolean twpdelete = false;
    
-   // iPad delete related
-   public Boolean ipaddelete = false;
+   // rpc delete related
+   public Boolean rpcdelete = false;
    public Hashtable<String,String> entry = null;
    
    // comskip related

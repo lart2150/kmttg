@@ -99,7 +99,7 @@ public class configMain {
    private static CheckBox VrdOneAtATime = null;
    private static CheckBox TSDownload = null;
    private static CheckBox TivoWebPlusDelete = null;
-   private static CheckBox iPadDelete = null;
+   private static CheckBox rpcDelete = null;
    private static CheckBox HideProtectedFiles = null;
    private static CheckBox OverwriteFiles = null;
    private static CheckBox DeleteFailedDownloads = null;
@@ -139,7 +139,7 @@ public class configMain {
    private static TextField comskip_ini = null;
    private static TextField wan_http_port = null;
    private static TextField wan_https_port = null;
-   private static TextField wan_ipad_port = null;
+   private static TextField wan_rpc_port = null;
    private static TextField limit_npl_fetches = null;
    private static TextField active_job_limit = null;
    private static TextField t2extract = null;
@@ -363,11 +363,11 @@ public class configMain {
          } else {
             wan_https_port.setText("");
          }
-         String ipad = config.getWanSetting(tivoName, "ipad");
-         if (ipad != null) {
-            wan_ipad_port.setText(ipad);
+         String rpc = config.getWanSetting(tivoName, "rpc");
+         if (rpc != null) {
+            wan_rpc_port.setText(rpc);
          } else {
-            wan_ipad_port.setText("");
+            wan_rpc_port.setText("");
          }
       }
    }
@@ -591,9 +591,9 @@ public class configMain {
          String https = config.getWanSetting(tivoName, "https");
          if (https != null)
             wan_https_port.setText(https);
-         String ipad = config.getWanSetting(tivoName, "ipad");
-         if (ipad != null)
-            wan_ipad_port.setText(ipad);
+         String rpc = config.getWanSetting(tivoName, "rpc");
+         if (rpc != null)
+            wan_rpc_port.setText(rpc);
       }
             
       // Beacon
@@ -771,11 +771,11 @@ public class configMain {
       else
          TivoWebPlusDelete.setSelected(false);
       
-      // iPadDelete
-      if (config.iPadDelete == 1)
-         iPadDelete.setSelected(true);
+      // rpcDelete
+      if (config.rpcDelete == 1)
+         rpcDelete.setSelected(true);
       else
-         iPadDelete.setSelected(false);
+         rpcDelete.setSelected(false);
       
       // HideProtectedFiles
       if (config.HideProtectedFiles == 1)
@@ -1133,17 +1133,17 @@ public class configMain {
             config.setWanSetting(tivoName, "https", "");
          }
          
-         value = string.removeLeadingTrailingSpaces(wan_ipad_port.getText());
+         value = string.removeLeadingTrailingSpaces(wan_rpc_port.getText());
          if (value.length() > 0) {
             try {
                Integer.parseInt(value);
-               config.setWanSetting(tivoName, "ipad", value);
+               config.setWanSetting(tivoName, "rpc", value);
             } catch(NumberFormatException e) {
-               textFieldError(wan_ipad_port, "wan ipad port should be a number: '" + value + "'");
+               textFieldError(wan_rpc_port, "wan rpc port should be a number: '" + value + "'");
                errors++;
             }
          } else {
-            config.setWanSetting(tivoName, "ipad", "");
+            config.setWanSetting(tivoName, "rpc", "");
          }
       }
       
@@ -1358,11 +1358,11 @@ public class configMain {
       else
          config.twpDeleteEnabledSet(false);
       
-      // iPadDelete
-      if (iPadDelete.isSelected())
-         config.iPadDelete = 1;
+      // rpcDelete
+      if (rpcDelete.isSelected())
+         config.rpcDelete = 1;
       else
-         config.iPadDelete = 0;
+         config.rpcDelete = 0;
       
       // HideProtectedFiles
       if (HideProtectedFiles.isSelected())
@@ -2077,7 +2077,7 @@ public class configMain {
       MAK = new TextField(); MAK.setPrefWidth(15);
       wan_http_port = new TextField(); wan_http_port.setPrefWidth(15);
       wan_https_port = new TextField(); wan_https_port.setPrefWidth(15);
-      wan_ipad_port = new TextField(); wan_ipad_port.setPrefWidth(15);
+      wan_rpc_port = new TextField(); wan_rpc_port.setPrefWidth(15);
       limit_npl_fetches = new TextField(); limit_npl_fetches.setPrefWidth(15);
       active_job_limit = new TextField(); active_job_limit.setPrefWidth(15);
       toolTipsDelay = new TextField(); toolTipsDelay.setPrefWidth(15);
@@ -2147,7 +2147,7 @@ public class configMain {
       VrdOneAtATime = new CheckBox();
       TSDownload = new CheckBox();
       TivoWebPlusDelete = new CheckBox();
-      iPadDelete = new CheckBox();
+      rpcDelete = new CheckBox();
       HideProtectedFiles = new CheckBox();
       OverwriteFiles = new CheckBox();
       DeleteFailedDownloads = new CheckBox();
@@ -2177,7 +2177,7 @@ public class configMain {
       Label comskip_ini_label = new Label();
       Label wan_http_port_label = new Label();
       Label wan_https_port_label = new Label();
-      Label wan_ipad_port_label = new Label();
+      Label wan_rpc_port_label = new Label();
       Label limit_npl_fetches_label = new Label();
       Label active_job_limit_label = new Label();
       Label t2extract_label = new Label();
@@ -2301,7 +2301,7 @@ public class configMain {
       VrdOneAtATime.setText("Only allow 1 VRD job at a time");
       TSDownload.setText("Download TiVo files in Transport Stream format");
       TivoWebPlusDelete.setText("Enable TivoWebPlus Delete task");
-      iPadDelete.setText("Enable iPad style delete task");
+      rpcDelete.setText("Enable rpc style delete task");
       HideProtectedFiles.setText("Do not show copy protected files in table");
       OverwriteFiles.setText("Overwrite existing files");
       DeleteFailedDownloads.setText("Delete failed downloads");
@@ -2309,7 +2309,7 @@ public class configMain {
       combine_download_decrypt.setText("Combine download and tivodecode decrypt");
       single_download.setText("Allow only 1 download at a time");
       rpcnpl.setText("Use RPC to get NPL when possible");
-      enableRpc.setText("Enable iPad style communications with this TiVo");
+      enableRpc.setText("Enable rpc style communications with this TiVo");
       persistQueue.setText("Automatically restore job queue between sessions");
       MAK_label.setText("MAK");
       shares_label.setText("Shares");
@@ -2332,7 +2332,7 @@ public class configMain {
       comskip_ini_label.setText("comskip.ini"); 
       wan_http_port_label.setText("wan http port"); 
       wan_https_port_label.setText("wan https port");
-      wan_ipad_port_label.setText("wan ipad port"); 
+      wan_rpc_port_label.setText("wan rpc port"); 
       limit_npl_fetches_label.setText("limit # of npl fetches");
       active_job_limit_label.setText("active job limit"); 
       t2extract_label.setText("ccextractor"); 
@@ -2842,10 +2842,10 @@ public class configMain {
       tivo_panel.add(wan_https_port_label, 0, gy);
       tivo_panel.add(wan_https_port, 1, gy);
       
-      // wan ipad port
+      // wan rpc port
       gy++;
-      tivo_panel.add(wan_ipad_port_label, 0, gy);
-      tivo_panel.add(wan_ipad_port, 1, gy);
+      tivo_panel.add(wan_rpc_port_label, 0, gy);
+      tivo_panel.add(wan_rpc_port, 1, gy);
       
       // tivo.com username & password
       gy++;
@@ -3124,8 +3124,8 @@ public class configMain {
       gy++;
       program_options_panel.add(TivoWebPlusDelete, 0, gy);
       
-      // iPadDelete
-      program_options_panel.add(iPadDelete, 1, gy);
+      // rpcDelete
+      program_options_panel.add(rpcDelete, 1, gy);
       
       // TSDownload
       gy++;
@@ -3458,7 +3458,7 @@ public class configMain {
       VrdOneAtATime.setTooltip(getToolTip("VrdOneAtATime"));
       TSDownload.setTooltip(getToolTip("TSDownload"));
       TivoWebPlusDelete.setTooltip(getToolTip("TivoWebPlusDelete"));
-      iPadDelete.setTooltip(getToolTip("iPadDelete"));
+      rpcDelete.setTooltip(getToolTip("rpcDelete"));
       HideProtectedFiles.setTooltip(getToolTip("HideProtectedFiles"));
       OverwriteFiles.setTooltip(getToolTip("OverwriteFiles"));
       DeleteFailedDownloads.setTooltip(getToolTip("DeleteFailedDownloads"));
@@ -3494,7 +3494,7 @@ public class configMain {
       projectx.setTooltip(getToolTip("projectx"));
       wan_http_port.setTooltip(getToolTip("wan_http_port"));
       wan_https_port.setTooltip(getToolTip("wan_https_port"));
-      wan_ipad_port.setTooltip(getToolTip("wan_ipad_port"));
+      wan_rpc_port.setTooltip(getToolTip("wan_rpc_port"));
       limit_npl_fetches.setTooltip(getToolTip("limit_npl_fetches"));
       active_job_limit.setTooltip(getToolTip("active_job_limit"));
       disk_space.setTooltip(getToolTip("disk_space"));
@@ -3846,11 +3846,11 @@ public class configMain {
          text += "NOTE: Once you set and save this option you must restart kmttg to see the change.";
 
       }
-      else if (component.equals("iPadDelete")) {
-         text =  "<b>Enable iPad style delete task</b><br>";
+      else if (component.equals("rpcDelete")) {
+         text =  "<b>Enable rpc style delete task</b><br>";
          text += "For Series 4 TiVos if you have <b>Network Remote</b> option enabled and this option<br>";
-         text += "enabled an optional <b>iPad Delete</b> task is made available in the kmttg GUI or auto transfers<br>";
-         text += "task set. When task is enabled, iPad communications protocol is used to delete show on TiVo<br>";
+         text += "enabled an optional <b>rpc Delete</b> task is made available in the kmttg GUI or auto transfers<br>";
+         text += "task set. When task is enabled, rpc communications protocol is used to delete show on TiVo<br>";
          text += "following a successful decrypt of a downloaded .TiVo file.<br>";
          text += "<b>NOTE: Once you set and save this option you must restart kmttg to see the change.</b>";
 
@@ -3903,8 +3903,8 @@ public class configMain {
          text += "listings followed by <b>remote</b> call when refreshing NPL tables.";
         }
       else if (component.equals("enableRpc")) {
-         text =  "<b>Enable iPad style communications with this TiVo</b><br>";
-         text += "If this option is enabled then kmttg will use iPad style communications with the TiVo to enable<br>";
+         text =  "<b>Enable rpc style communications with this TiVo</b><br>";
+         text += "If this option is enabled then kmttg will use rpc style communications with the TiVo to enable<br>";
          text += "extra functionality such as capability to play & delete shows from Now Playing list and also to<br>";
          text += "allow viewing of To Do list, Season Pass list and direct remote control capabilities.<br>";
          text += "If enabled then you can play/delete shows from Now Playing List table as follows:<br>";
@@ -4137,11 +4137,11 @@ public class configMain {
          text += "port number you are using in your router port forwarding settings.<br>";
          text += "NOTE: In order to save this setting you must OK the configuration window once for each TiVo";
       }
-      else if (component.equals("wan_ipad_port")) {
-         text =  "<b>wan ipad port</b><br>";
+      else if (component.equals("wan_rpc_port")) {
+         text =  "<b>wan rpc port</b><br>";
          text += "<b>Advanced Setting - for normal use leave this setting empty</b>.<br>";
          text += "Set this option only if you plan to use kmttg over a WAN instead of your local LAN.<br>";
-         text += "By default http port 1413 for iPad interface to Tivos on the LAN, but from WAN side<br>";
+         text += "By default http port 1413 for rpc interface to Tivos on the LAN, but from WAN side<br>";
          text += "you will have to setup port forwarding in your router, then you should specify here the WAN (public) side<br>";
          text += "port number you are using in your router port forwarding settings.<br>";
          text += "NOTE: In order to save this setting you must OK the configuration window once for each TiVo";
@@ -4277,14 +4277,14 @@ public class configMain {
          text =  "<b>tivo.com username</b><br>";
          text += "For TiVo models older than series 4 the kmttg Remote can use your tivo.com login to<br>";
          text += "obtain some of the information needed for kmttg Remote functions.<br>";
-         text += "This setting is optional. For series 4 or later enabling iPad style communications<br>";
+         text += "This setting is optional. For series 4 or later enabling rpc style communications<br>";
          text += "is a lot more useful.";
       }
       else if (component.equals("tivo_password")) {
          text =  "<b>tivo.com password</b><br>";
          text += "For TiVo models older than series 4 the kmttg Remote can use your tivo.com login to<br>";
          text += "obtain some of the information needed for kmttg Remote functions.<br>";
-         text += "This setting is optional. For series 4 or later enabling iPad style communications<br>";
+         text += "This setting is optional. For series 4 or later enabling rpc style communications<br>";
          text += "is a lot more useful.";
       }
       else if (component.equals("pyTivo_host")) {

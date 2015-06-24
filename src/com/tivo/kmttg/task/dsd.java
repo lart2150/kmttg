@@ -224,10 +224,10 @@ public class dsd extends baseTask implements Serializable {
                file.TivoWebPlusDelete(job.url);
             }
             
-            // iPad style delete show on TiVo if configured
-            if (job.ipaddelete && config.rpcEnabled(job.tivoName)) {
+            // rpc style delete show on TiVo if configured
+            if (job.rpcdelete && config.rpcEnabled(job.tivoName)) {
                String recordingId = rnpl.findRecordingId(job.tivoName, job.entry);
-               if ( ! file.iPadDelete(job.tivoName, recordingId) )
+               if ( ! file.rpcDelete(job.tivoName, recordingId) )
                   log.error("Failed to delete show on TiVo");
             }
          }

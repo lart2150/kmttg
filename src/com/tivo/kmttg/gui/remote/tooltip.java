@@ -12,7 +12,7 @@ public class tooltip {
       String text = "";
       if (component.equals("tivo_todo")) {
          text = "Select TiVo for which to retrieve To Do list.<br>";
-         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable rpc' setting for<br>";
          text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
          text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
@@ -36,7 +36,7 @@ public class tooltip {
       }
       else if (component.equals("tivo_guide")) {
          text = "Select TiVo for which to retrieve guide listings.<br>";
-         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable rpc' setting for<br>";
          text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
          text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
@@ -135,7 +135,7 @@ public class tooltip {
          text = "Select TiVo for which to display list of shows that will not record.<br>";
          text += "When changing TiVo selection the table below is NOT automatically updated so that you are<br>";
          text += "able to schedule to record a show on another TiVo.<br>";
-         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable rpc' setting for<br>";
          text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
          text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
@@ -202,7 +202,7 @@ public class tooltip {
       }
       else if (component.equals("tivo_deleted")) {
          text = "Select TiVo for which to display list of deleted shows (in Recently Deleted state)<br>";
-         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable rpc' setting for<br>";
          text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
          text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
@@ -221,7 +221,7 @@ public class tooltip {
       }
       else if (component.equals("tivo_thumbs")) {
          text = "Select TiVo for which to display list of thumbed shows.<br>";
-         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable rpc' setting for<br>";
          text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
          text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
@@ -266,7 +266,7 @@ public class tooltip {
          text = "Select TiVo for which to perform search with.<br>";
          text += "When changing TiVo selection the table below is NOT automatically updated so that you are<br>";
          text += "able to schedule to record a show on another TiVo.<br>";
-         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable rpc' setting for<br>";
          text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
          text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
@@ -351,7 +351,7 @@ public class tooltip {
       }
       else if (component.equals("tivo_sp")) {
          text = "Select TiVo for which to retrieve Season Passes list.<br>";
-         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable rpc' setting for<br>";
          text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
          text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
@@ -364,7 +364,7 @@ public class tooltip {
          text = "Select TiVo to use for finding shows that are Season or Series premieres.<br>";
          text += "When changing TiVo selection the table below is NOT automatically updated so that you are<br>";
          text += "able to schedule to record a show on another TiVo.<br>";
-         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable rpc' setting for<br>";
          text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
          text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }
@@ -536,7 +536,7 @@ public class tooltip {
       }
       if (component.equals("tivo_info")) {
          text = "Select TiVo for which to retrieve system information.<br>";
-         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable iPad' setting for<br>";
+         text += "NOTE: If a TiVo is missing go to Config-Tivos and turn on 'Enable rpc' setting for<br>";
          text += ">= series 4 units or provide tivo.com username & password for older units for more<br>";
          text += "limited Remote functionality. Then re-start kmttg after updating those settings.";
       }

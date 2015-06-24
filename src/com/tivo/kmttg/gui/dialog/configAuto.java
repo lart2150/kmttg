@@ -65,7 +65,7 @@ public class configAuto {
    private static CheckBox decrypt = null;
    private static CheckBox qsfix = null;
    private static CheckBox twpdelete = null;
-   private static CheckBox ipaddelete = null;
+   private static CheckBox rpcdelete = null;
    private static CheckBox comskip = null;
    private static CheckBox comcut = null;
    private static CheckBox captions = null;
@@ -208,7 +208,7 @@ public class configAuto {
       decrypt   = new CheckBox("decrypt");
       qsfix     = new CheckBox("QS Fix");
       twpdelete = new CheckBox("TWP Delete");
-      ipaddelete = new CheckBox("iPad Delete");
+      rpcdelete = new CheckBox("rpc Delete");
       comskip   = new CheckBox("Ad Detect");
       comcut    = new CheckBox("Ad Cut");
       captions  = new CheckBox("captions");
@@ -334,8 +334,8 @@ public class configAuto {
       if (config.twpDeleteEnabled()) {
          row4.getChildren().add(twpdelete);         
       }
-      if (config.ipadDeleteEnabled()) {
-         row4.getChildren().add(ipaddelete);         
+      if (config.rpcDeleteEnabled()) {
+         row4.getChildren().add(rpcdelete);         
       }
       row4.getChildren().addAll(comskip, comcut, captions, encode, custom, push);
       content.getChildren().add(row4);
@@ -437,7 +437,7 @@ public class configAuto {
       decrypt.setTooltip(config.gui.getToolTip("decrypt"));
       qsfix.setTooltip(config.gui.getToolTip("qsfix"));
       twpdelete.setTooltip(config.gui.getToolTip("twpdelete"));
-      ipaddelete.setTooltip(config.gui.getToolTip("ipaddelete"));
+      rpcdelete.setTooltip(config.gui.getToolTip("rpcdelete"));
       comskip.setTooltip(config.gui.getToolTip("comskip"));
       comcut.setTooltip(config.gui.getToolTip("comcut"));
       captions.setTooltip(config.gui.getToolTip("captions"));
@@ -704,11 +704,11 @@ public class configAuto {
          twpdelete.setDisable(false);
       }
       
-      if ( ! config.ipadDeleteEnabled() ) {
-         ipaddelete.setSelected(false);
-         ipaddelete.setDisable(true);
+      if ( ! config.rpcDeleteEnabled() ) {
+         rpcdelete.setSelected(false);
+         rpcdelete.setDisable(true);
       } else {
-         ipaddelete.setDisable(false);
+         rpcdelete.setDisable(false);
       }
 
       if (! file.isFile(config.comskip)) {
@@ -982,8 +982,8 @@ public class configAuto {
                // Some options may have to be turned off for disabled features
                if ( ! config.twpDeleteEnabled() )
                   entry.twpdelete = 0;
-               if ( ! config.ipadDeleteEnabled() )
-                  entry.ipaddelete = 0;
+               if ( ! config.rpcDeleteEnabled() )
+                  entry.rpcdelete = 0;
                ofp.write("\n");
                if (entry.type.equals("title")) {
                   ofp.write("<title>\n");
@@ -999,7 +999,7 @@ public class configAuto {
                ofp.write("decrypt "             + entry.decrypt             + "\n");               
                ofp.write("qsfix "               + entry.qsfix               + "\n");               
                ofp.write("twpdelete "           + entry.twpdelete           + "\n");               
-               ofp.write("ipaddelete "          + entry.ipaddelete          + "\n");               
+               ofp.write("rpcdelete "          + entry.rpcdelete          + "\n");               
                ofp.write("comskip "             + entry.comskip             + "\n");               
                ofp.write("comcut "              + entry.comcut              + "\n");               
                ofp.write("captions "            + entry.captions            + "\n");               
@@ -1050,7 +1050,7 @@ public class configAuto {
       decrypt.setSelected((Boolean)(entry.decrypt == 1));
       qsfix.setSelected((Boolean)(entry.qsfix == 1));
       twpdelete.setSelected((Boolean)(entry.twpdelete == 1));
-      ipaddelete.setSelected((Boolean)(entry.ipaddelete == 1));
+      rpcdelete.setSelected((Boolean)(entry.rpcdelete == 1));
       comskip.setSelected((Boolean)(entry.comskip == 1));
       comcut.setSelected((Boolean)(entry.comcut == 1));
       captions.setSelected((Boolean)(entry.captions == 1));
@@ -1126,10 +1126,10 @@ public class configAuto {
       else
          entry.twpdelete = 0;
       
-      if (ipaddelete.isSelected())
-         entry.ipaddelete = 1;
+      if (rpcdelete.isSelected())
+         entry.rpcdelete = 1;
       else
-         entry.ipaddelete = 0;
+         entry.rpcdelete = 0;
       
       if (comskip.isSelected())
          entry.comskip = 1;

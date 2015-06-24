@@ -45,7 +45,7 @@ public class mainInstall {
                                  config.parse();
                                  
                                  // Set Remote tivo names if relevant
-                                 if (config.ipadEnabled())
+                                 if (config.rpcEnabled())
                                     config.gui.remote_gui.setTivoNames();
                                  
                                  // Save settings

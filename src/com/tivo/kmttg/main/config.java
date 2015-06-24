@@ -65,7 +65,7 @@ public class config {
    public static int CheckBeacon = 1;
    public static int UseOldBeacon = 0;
    public static int TivoWebPlusDelete = 0;
-   public static int iPadDelete = 0;
+   public static int rpcDelete = 0;
    public static int UseAdscan = 0;
    public static int VrdReview = 0;
    public static int comskip_review = 0;
@@ -203,7 +203,7 @@ public class config {
    // autotune related
    public static Hashtable<String,Hashtable<String,String>> autotune = null;
    
-   // iPad remote related
+   // rpc remote related
    private static Hashtable<String,String> bodyId = null;
    public static String middlemind_host = "middlemind.tivo.com";
    public static int middlemind_port = 443;
@@ -548,9 +548,9 @@ public class config {
       return getRpcSetting(tivoName).equals("1");
    }
    
-   // iPad enabled =>
+   // rpc enabled =>
    // 1. At least 1 TiVo has RpcSetting of "1"
-   public static Boolean ipadEnabled() {
+   public static Boolean rpcEnabled() {
       Boolean rpcSetting = false;
       Stack<String> current_tivoNames = getTivoNames();
       for (int i=0; i<current_tivoNames.size(); ++i) {
@@ -585,9 +585,9 @@ public class config {
    
    // Return true if:
    // 1. At least 1 TiVo has RpcSetting of "1"
-   // 2. iPadDelete == 1
-   public static Boolean ipadDeleteEnabled() {
-      return ipadEnabled() && iPadDelete == 1;
+   // 2. rpcDelete == 1
+   public static Boolean rpcDeleteEnabled() {
+      return rpcEnabled() && rpcDelete == 1;
    }
    
    public static Boolean twpDeleteEnabled() {
@@ -1083,6 +1083,7 @@ public class config {
                comskipIni = line;
             }
             if (key.matches("^wan_.+$")) {
+               line = line.replaceFirst("ipad", "rpc");
                WAN.put(key, line);
             }
             if (key.matches("^tsn_.+$")) {
@@ -1177,8 +1178,8 @@ public class config {
             if (key.equals("TivoWebPlusDelete")) {
                TivoWebPlusDelete = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
-            if (key.equals("iPadDelete")) {
-               iPadDelete = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            if (key.equals("rpcDelete") || key.equals("iPadDelete")) {
+               rpcDelete = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("cpu_cores")) {
                cpu_cores = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
@@ -1444,7 +1445,7 @@ public class config {
          
          ofp.write("<TivoWebPlusDelete>\n" + TivoWebPlusDelete + "\n\n");
          
-         ofp.write("<iPadDelete>\n" + iPadDelete + "\n\n");
+         ofp.write("<rpcDelete>\n" + rpcDelete + "\n\n");
          
          ofp.write("<cpu_cores>\n" + cpu_cores + "\n\n");
          
@@ -1530,7 +1531,7 @@ public class config {
       return null;
    }
    
-   // bodyId used by iPad remote
+   // bodyId used by rpc remote
    public static String bodyId_get(String IP, int port) {
       if (bodyId == null)
          bodyId = new Hashtable<String,String>();
@@ -1541,7 +1542,7 @@ public class config {
          return "";
    }
    
-   // bodyId used by iPad remote
+   // bodyId used by rpc remote
    public static void bodyId_set(String IP, int port, String bid) {
       if (bodyId == null)
          bodyId = new Hashtable<String,String>();

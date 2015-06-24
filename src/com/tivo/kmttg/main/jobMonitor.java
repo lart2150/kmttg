@@ -683,7 +683,7 @@ public class jobMonitor {
       Boolean decrypt      = (Boolean)specs.get("decrypt");
       Boolean qsfix        = (Boolean)specs.get("qsfix");
       Boolean twpdelete    = (Boolean)specs.get("twpdelete");
-      Boolean ipaddelete   = (Boolean)specs.get("ipaddelete");
+      Boolean rpcdelete    = (Boolean)specs.get("rpcdelete");
       Boolean comskip      = (Boolean)specs.get("comskip");
       Boolean comcut       = (Boolean)specs.get("comcut");
       Boolean captions     = (Boolean)specs.get("captions");
@@ -1017,8 +1017,8 @@ public class jobMonitor {
                   job.twpdelete = true;
                   job.url       = entry.get("url");
                }
-               if (ipaddelete && entry != null) {
-                  job.ipaddelete  = true;
+               if (rpcdelete && entry != null) {
+                  job.rpcdelete  = true;
                   job.entry = entry;
                }
             } else {
@@ -1037,8 +1037,8 @@ public class jobMonitor {
                   job.twpdelete = true;
                   job.url       = entry.get("url");
                }
-               if (ipaddelete && entry != null) {
-                  job.ipaddelete  = true;
+               if (rpcdelete && entry != null) {
+                  job.rpcdelete  = true;
                   job.entry = entry;
                }
             } else {
@@ -1103,8 +1103,8 @@ public class jobMonitor {
             job.twpdelete = true;
             job.url       = entry.get("url");
          }
-         if (ipaddelete && entry != null) {
-            job.ipaddelete  = true;
+         if (rpcdelete && entry != null) {
+            job.rpcdelete  = true;
             job.entry = (entry);
          }
          submitNewJob(job);
@@ -1126,8 +1126,8 @@ public class jobMonitor {
                job.twpdelete = true;
                job.url       = entry.get("url");
             }
-            if (ipaddelete && entry != null) {
-               job.ipaddelete  = true;
+            if (rpcdelete && entry != null) {
+               job.rpcdelete  = true;
                job.entry = entry;
             }
          }

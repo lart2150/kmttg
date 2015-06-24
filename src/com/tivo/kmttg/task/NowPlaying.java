@@ -339,7 +339,7 @@ public class NowPlaying extends baseTask implements Serializable {
          com.tivo.kmttg.util.file.delete(outputFile);
          
          if (config.rpcEnabled(job.tivoName) || config.mindEnabled(job.tivoName)) {
-            // Extra iPad communication to retrieve NPL information
+            // Extra rpc communication to retrieve NPL information
             // used to be able to play/delete shows.
             rnpl.rnplListCB(job.tivoName, ENTRIES);
          }

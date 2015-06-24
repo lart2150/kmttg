@@ -144,7 +144,7 @@ public class Remote {
       if (IP == null)
          IP = tivoName;
       int use_port = port;
-      String wan_port = config.getWanSetting(tivoName, "ipad");
+      String wan_port = config.getWanSetting(tivoName, "rpc");
       if (wan_port != null)
          use_port = Integer.parseInt(wan_port);
 

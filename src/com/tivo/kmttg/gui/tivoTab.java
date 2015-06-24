@@ -115,7 +115,7 @@ public class tivoTab {
          }
          
          // pyTivo stream button
-         if ( config.ipadEnabled() && file.isFile(config.pyTivo_config) ) {
+         if ( config.rpcEnabled() && file.isFile(config.pyTivo_config) ) {
             pyTivo_stream = new MyButton("pyTivo stream");
             pyTivo_stream.setTooltip(config.gui.getToolTip("pyTivo_stream"));
             pyTivo_stream.setOnAction(new EventHandler<ActionEvent>() {
@@ -439,7 +439,7 @@ public class tivoTab {
                h.put("decrypt",    config.gui.decrypt.isSelected());
                h.put("qsfix",      config.gui.qsfix.isSelected());
                h.put("twpdelete",  config.gui.twpdelete.isSelected());
-               h.put("ipaddelete", config.gui.ipaddelete.isSelected() && config.rpcEnabled(tivoName));
+               h.put("rpcdelete", config.gui.rpcdelete.isSelected() && config.rpcEnabled(tivoName));
                h.put("comskip",    config.gui.comskip.isSelected());
                h.put("comcut",     config.gui.comcut.isSelected());
                h.put("captions",   config.gui.captions.isSelected());
