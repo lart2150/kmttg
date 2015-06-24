@@ -6,6 +6,7 @@ import java.util.Date;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -248,8 +249,9 @@ public class slingboxgui {
          int gy = 0;         
          HBox row = new HBox();
          row.setSpacing(10);
+         row.setPadding(new Insets(0,0,5,0));
          row.getChildren().addAll(start, stop, Help);
-         panel.add(row, 0, gy);
+         panel.add(row, 1, gy);
          panel.add(raw, 2, gy);
 
          gy++;
