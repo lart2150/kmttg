@@ -1083,7 +1083,7 @@ public class config {
                comskipIni = line;
             }
             if (key.matches("^wan_.+$")) {
-               line = line.replaceFirst("ipad", "rpc");
+               key = key.replaceFirst("_ipad", "_rpc");
                WAN.put(key, line);
             }
             if (key.matches("^tsn_.+$")) {
