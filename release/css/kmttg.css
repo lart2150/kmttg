@@ -43,5 +43,5 @@
 
 /* TabPane - don't want dark grey background */
 .tab-pane > .tab-header-area > .tab-header-background {
-    -fx-background-color: -fx-outer-border, -fx-inner-border, -fx-control-inner-background;
+    -fx-background-color: -fx-background;
 }
