@@ -244,66 +244,49 @@ public class slingboxgui {
          raw = new CheckBox("Capture raw file");
          raw.setTooltip(getToolTip("raw"));
          raw.setSelected(false);
-         
-         int gy = 0;
-                  
+                                    
+         int gy = 0;         
          HBox row = new HBox();
          row.setSpacing(10);
          row.getChildren().addAll(start, stop, Help);
          panel.add(row, 0, gy);
-         panel.add(raw, 1, gy);
-         
+         panel.add(raw, 2, gy);
+
          gy++;
          panel.add(ip_label, 0, gy);
          panel.add(ip, 1, gy);
-         
-         gy++;
-         panel.add(port_label, 0, gy);
-         panel.add(port, 1, gy);
+         panel.add(port_label, 2, gy);
+         panel.add(port, 3, gy);
          
          gy++;
          panel.add(pass_label, 0, gy);
          panel.add(pass, 1, gy);
-         
-         gy++;
-         panel.add(dir_label, 0, gy);
-         panel.add(dir, 1, gy);
+         panel.add(dir_label, 2, gy);
+         panel.add(dir, 3, gy);
          
          gy++;
          panel.add(perl_label, 0, gy);
          panel.add(perl, 1, gy);
+         panel.add(filename_label, 2, gy);
+         panel.add(filename, 3, gy);
          
          gy++;
-         panel.add(filename_label, 0, gy);
-         panel.add(filename, 1, gy);
+         panel.add(type_label, 0, gy);
+         panel.add(type, 1, gy);
+         panel.add(container_label, 2, gy);
+         panel.add(container, 3, gy);
          
          gy++;
-         row = new HBox();
-         row.setSpacing(10);
-         row.getChildren().addAll(type_label, type);
-         panel.add(row, 0, gy);
-         row = new HBox();
-         row.setSpacing(10);
-         row.getChildren().addAll(container_label, container);
-         panel.add(row, 1, gy);
-         
-         gy++;
-         HBox left_video = new HBox();
-         left_video.setSpacing(10);
-         left_video.getChildren().addAll(res_label, res);
-         panel.add(left_video, 0, gy);
-         HBox right_video = new HBox();
-         right_video.setSpacing(10);
-         right_video.getChildren().addAll(vbw_label, vbw);
-         panel.add(right_video, 1, gy);
+         panel.add(res_label, 0, gy);
+         panel.add(res, 1, gy);
+         panel.add(vbw_label, 2, gy);
+         panel.add(vbw, 3, gy);
          
          gy++;
          panel.add(dur_label, 0, gy);
          panel.add(dur, 1, gy);
-         
-         gy++;
-         panel.add(chan_label, 0, gy);
-         panel.add(chan, 1, gy);
+         panel.add(chan_label, 2, gy);
+         panel.add(chan, 3, gy);         
       }
       return panel;
    }
