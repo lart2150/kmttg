@@ -307,6 +307,7 @@ public class TableUtil {
       startRow += 1;
       if (startRow > lastRow)
          startRow = 0;
+      TABLE.getSelectionModel().clearSelection(); // Clear selection
       Boolean result = searchMatch(TABLE, colName, searchString, startRow, lastRow);
       if (!result && startRow > 0) {
          searchMatch(TABLE, colName, searchString, 0, startRow);
@@ -347,6 +348,7 @@ public class TableUtil {
       startRow += 1;
       if (startRow > lastRow)
          startRow = 0;
+      TABLE.getSelectionModel().clearSelection(); // Clear selection
       Boolean result = searchMatch(TABLE, colName, searchString, startRow, lastRow);
       if (!result && startRow > 0) {
          searchMatch(TABLE, colName, searchString, 0, startRow);
