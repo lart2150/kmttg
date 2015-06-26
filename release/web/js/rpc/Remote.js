@@ -26,12 +26,14 @@ for (var code in codes) {
 var apps = {};
 apps["Netflix (html)"] = "x-tivo:netflix:netflix";
 apps["YouTube (html)"] = "x-tivo:web:https://www.youtube.com/tv";
-//apps["Amazon (html)"] = "x-tivo:web:https://atv-ext.amazon.com/cdp/resources/app_host/index.html?deviceTypeID=A3UXGKN0EORVOF";
 apps["Vudu (html)"] = "x-tivo:vudu:vudu";
-apps["Amazon (hme)"] = "x-tivo:hme:uuid:35FE011C-3850-2228-FBC5-1B9EDBBE5863";
+apps["Amazon Prime"] = "x-tivo:web:https://atv-ext.amazon.com/cdp/resources/app_host/index.html?deviceTypeID=A3UXGKN0EORVOF";
 apps["Hulu Plus"] = "x-tivo:flash:uuid:802897EB-D16B-40C8-AEEF-0CCADB480559";
-apps["AOL On"] = "x-tivo:flash:uuid:EA1DEF9D-D346-4284-91A0-FEA8EAF4CD39";
+apps["Spotify"] = "x-tivo:web:https://d27nv3bwly96dm.cloudfront.net/indexOperav2.html";
 apps["Launchpad"] = "x-tivo:flash:uuid:545E064D-C899-407E-9814-69A021D68DAD";
+apps["iHeartRadio"] = "x-tivo:web:https://tv.iheart.com/tivo/";
+apps["Opera TV Store"] = "x-tivo:web:tvstore";
+
 for (var app in apps) {
    if (apps.hasOwnProperty(app)) {
       var option = document.createElement("option");
