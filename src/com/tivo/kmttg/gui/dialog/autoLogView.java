@@ -1,9 +1,13 @@
 package com.tivo.kmttg.gui.dialog;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
@@ -20,11 +24,20 @@ public class autoLogView {
    private Stage dialog = null;
    private TextArea text = null;
    private static String logfile = config.autoLog + ".0";
+   Timer timer;
+   BufferedReader br = null;
    
    public autoLogView(Stage frame) {
       debug.print("frame=" + frame);
       
       if ( ! file.isFile(logfile)) {
+         log.error("Auto log file not found: " + logfile);
+         return;
+      }
+      
+      try {
+         br = new BufferedReader(new FileReader(logfile));
+      } catch (FileNotFoundException e) {
          log.error("Auto log file not found: " + logfile);
          return;
       }
@@ -38,45 +51,54 @@ public class autoLogView {
       text.setWrapText(true);
       HBox.setHgrow(text, Priority.ALWAYS);  // stretch horizontally
       VBox.setVgrow(text, Priority.ALWAYS);  // stretch vertically
+      content.getChildren().add(text);
 
-      if (view()) {
-         content.getChildren().add(text);
-        
-         // create and display dialog window
-         dialog = new Stage();
-         dialog.setTitle(logfile);
-         dialog.setScene(new Scene(content));
-         config.gui.setFontSize(dialog.getScene(), config.FontSize);
-         dialog.setWidth(600);
-         dialog.setHeight(400);
-         dialog.initOwner(frame);
-         dialog.show();
+      // create and display dialog window
+      dialog = new Stage();
+      dialog.setTitle(logfile);
+      dialog.setScene(new Scene(content));
+      config.gui.setFontSize(dialog.getScene(), config.FontSize);
+      dialog.setWidth(600);
+      dialog.setHeight(400);
+      dialog.initOwner(frame);
+      dialog.show();
 
-      } else {
-         // Deallocate resources and return
+      // Start a timer that updates stdout/stderr text areas dynamically
+      timer = new Timer();
+      timer.schedule(
+         new TimerTask() {
+            @Override
+            public void run() {
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     update();
+                  }
+               });
+            }
+        }
+        ,0,
+        1000
+      );
+   }
+   
+   private void update() {
+      if (! dialog.isShowing()) {
+         timer.cancel();
+         try {
+            br.close();
+         } catch (IOException e) {}
          text = null;
-         content = null;
          return;
       }
-   }
-     
-   // Update text with auto log file contents
-   private Boolean view() {
+      String line = null;
+      text.setEditable(true);
       try {
-         BufferedReader log = new BufferedReader(new FileReader(logfile));
-         String line = null;
-         text.setEditable(true);
-         while (( line = log.readLine()) != null) {
+         while (( line = br.readLine()) != null) {
             text.appendText(line + "\n");
          }
-         log.close();
-         text.setEditable(false);
-      }         
-      catch (IOException ex) {
-         log.error("Auto log file cannot be read: " + logfile);
-         return false;
+      } catch (IOException e) {
+         log.error("autoLogView update - " + e.getMessage());
       }
-      return true;
+      text.setEditable(false);
    }
-
 }
