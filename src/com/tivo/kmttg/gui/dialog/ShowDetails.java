@@ -332,7 +332,7 @@ public class ShowDetails {
                      return;
                   }
                   dialog.sizeToScene();
-                  if (x != -1) {
+                  if (x != -1 && ! dialog.isShowing()) {
                      dialog.setX(x); dialog.setY(y);
                   }
                   dialog.show();
