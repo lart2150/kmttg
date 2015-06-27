@@ -124,7 +124,6 @@ public class info {
                         Remote r = config.initRemote(tivoName);
                         if (r.success) {
                            r.reboot(tivoName);
-                           r.disconnect();
                         }
                      }
                   }
