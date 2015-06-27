@@ -290,7 +290,7 @@ public class seasonpasses {
       tab = new spTable();
 
       panel = new VBox();
-      panel.setSpacing(5);
+      panel.setSpacing(1);
       panel.getChildren().addAll(row1, tab.scroll);      
    }
    

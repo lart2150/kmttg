@@ -148,7 +148,7 @@ public class info {
       VBox.setVgrow(text, Priority.ALWAYS); // stretch vertically
 
       panel = new VBox();
-      panel.setSpacing(5);
+      panel.setSpacing(1);
       panel.getChildren().addAll(row1, text);
 
    }

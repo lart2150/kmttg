@@ -204,7 +204,7 @@ public class premiere {
       row2.add(channels, 1, 0);
 
       panel = new VBox();
-      panel.setSpacing(5);
+      panel.setSpacing(1);
       panel.getChildren().addAll(row1, row2);
       
    }

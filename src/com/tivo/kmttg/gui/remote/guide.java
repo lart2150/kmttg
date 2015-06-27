@@ -248,7 +248,7 @@ public class guide {
       ChanList.setTooltip(tooltip.getToolTip("guideChanList"));
       
       GridPane tab_row = new GridPane();
-      tab_row.setHgap(5);
+      tab_row.setHgap(1);
       tab_row.setPadding(new Insets(0,0,0,5));
       tab_row.getColumnConstraints().add(0, util.cc_none());
       tab_row.getColumnConstraints().add(1, util.cc_stretch());
@@ -257,7 +257,7 @@ public class guide {
       tab_row.add(tab.scroll, 1, 0);
             
       panel = new VBox();
-      panel.setSpacing(5);
+      panel.setSpacing(1);
       panel.getChildren().addAll(row1, tab_row);      
    }
 

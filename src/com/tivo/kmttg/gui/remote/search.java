@@ -263,7 +263,7 @@ public class search {
       tab = new searchTable();
       
       panel = new VBox();
-      panel.setSpacing(5);
+      panel.setSpacing(1);
       panel.getChildren().addAll(row1, row2, tab.scroll);
       
    }

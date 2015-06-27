@@ -483,6 +483,7 @@ public class gui extends Application {
          tasks_panel.setPadding(new Insets(0,0,0,5));
          tasks_panel.setSpacing(5);
          tasks_panel.getChildren().add(start);
+         tasks_panel.getChildren().add(util.space(5));
          tasks_panel.getChildren().add(metadata);
          tasks_panel.getChildren().add(decrypt);
          tasks_panel.getChildren().add(qsfix);
@@ -595,7 +596,6 @@ public class gui extends Application {
          
          // topPane will consist of tasks & tabbed_panel
          VBox topPane = new VBox();
-         topPane.setSpacing(5);
          topPane.getChildren().add(tasks_panel);
          HBox.setHgrow(tasks_panel, Priority.ALWAYS);  // stretch horizontally
          topPane.getChildren().add(encoding_panel);         

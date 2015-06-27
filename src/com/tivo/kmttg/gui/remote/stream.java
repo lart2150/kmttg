@@ -100,7 +100,7 @@ public class stream {
       tab = new streamTable();
         
       panel = new VBox();
-      panel.setSpacing(5);
+      panel.setSpacing(1);
       panel.setPadding(new Insets(0,0,0,5));
       panel.getChildren().addAll(row1, tab.scroll);
       
