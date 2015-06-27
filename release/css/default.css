@@ -4,3 +4,19 @@
     -fx-background: #FFFADE;
     -fx-control-inner-background: #FAF9FF;
 }
+
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-padding: 0 5 0 5;
+}
+
+.combo-box > .list-cell {
+    -fx-padding: 1 1 1 1;
+}
+
+.button {
+    -fx-padding: 0 1 0 1;
+}
+
+.text-field {
+    -fx-padding: 0 1 0 1;
+}
