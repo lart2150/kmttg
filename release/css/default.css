@@ -3,5 +3,7 @@
     -fx-base: #FFFADE;
     -fx-background: #FFFADE;
     -fx-control-inner-background: #FAF9FF;
+    -fx-accent: #B2DAEB;
+    -fx-focus-color: #B2DAEB;
 }
 
