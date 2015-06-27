@@ -7,6 +7,22 @@
 #button_autoconfig_cancel {-fx-background-color: #FABEBE;} /* COLOR.LIGHTRED */
 #progressbar_job {-fx-accent: #90EE90; -fx-background-color: gray;}
 
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-padding: 0 5 0 5;
+}
+
+.combo-box > .list-cell {
+    -fx-padding: 1 1 1 1;
+}
+
+.button {
+    -fx-padding: 0 1 0 1;
+}
+
+.text-field {
+    -fx-padding: 0 1 0 1;
+}
+
 .piechart_shows {-fx-font-size: 13pt;}
 .show_details_bg {-fx-background-color: #10004C;} /* dark blue */
 .show_details_actor {-fx-background-color: #10004C; -fx-text-fill: #00E9FF; -fx-font-weight: bold;} /* light blue */
