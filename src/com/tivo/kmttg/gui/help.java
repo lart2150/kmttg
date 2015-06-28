@@ -50,6 +50,7 @@ public class help {
          row.setAlignment(Pos.CENTER);
          Label lab1 = new Label("Latest version: ");
          Hyperlink link1 = new Hyperlink();
+         link1.setStyle("-fx-text-fill: black;");
          link1.setText(version);
          link1.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -78,6 +79,7 @@ public class help {
          for (String s : links.keySet()) {
             Hyperlink link = new Hyperlink();
             link.setText(s);
+            link.setStyle("-fx-text-fill: black;");
             link.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent e) {
