@@ -11,7 +11,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -41,7 +40,6 @@ public class premiereTable extends TableMap {
    private String currentTivo = null;
    public TableView<Tabentry> TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
-   public ScrollPane scroll = null;
    
    // TableMap overrides
    @Override
@@ -108,9 +106,6 @@ public class premiereTable extends TableMap {
             TABLE.getColumns().add(col);
          }
       }
-      scroll = new ScrollPane(TABLE);  
-      scroll.setFitToHeight(true);
-      scroll.setFitToWidth(true);
       
       // Add keyboard listener
       TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {

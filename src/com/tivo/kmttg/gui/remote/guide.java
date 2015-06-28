@@ -26,6 +26,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -229,6 +230,7 @@ public class guide {
       row1.getChildren().add(guide_refresh_todo);
       
       tab = new guideTable();
+      VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
       
       ChanList = new ListView<String>();
       ChanList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -246,15 +248,18 @@ public class guide {
          }
       });
       ChanList.setTooltip(tooltip.getToolTip("guideChanList"));
+      VBox.setVgrow(ChanList, Priority.ALWAYS); // stretch vertically
       
       GridPane tab_row = new GridPane();
       tab_row.setHgap(1);
       tab_row.setPadding(new Insets(0,0,0,5));
       tab_row.getColumnConstraints().add(0, util.cc_none());
       tab_row.getColumnConstraints().add(1, util.cc_stretch());
+      tab_row.getRowConstraints().add(0, util.rc_stretch());
       ChanList.setMinWidth(150); ChanList.setMaxWidth(150);
       tab_row.add(ChanList, 0, 0);
-      tab_row.add(tab.scroll, 1, 0);
+      tab_row.add(tab.TABLE, 1, 0);
+      VBox.setVgrow(tab_row, Priority.ALWAYS); // stretch vertically
             
       panel = new VBox();
       panel.setSpacing(1);

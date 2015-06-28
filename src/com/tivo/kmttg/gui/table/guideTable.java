@@ -14,7 +14,6 @@ import javafx.collections.ListChangeListener;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -44,7 +43,6 @@ import com.tivo.kmttg.util.log;
 public class guideTable extends TableMap {
    private String currentTivo = null;
    public TableView<Tabentry> TABLE = null;
-   public ScrollPane scroll = null;
    public String[] TITLE_cols = {"DATE", "SHOW", "DUR"};
    public String folderName = null;
    public int folderEntryNum = -1;
@@ -111,9 +109,6 @@ public class guideTable extends TableMap {
             TABLE.getColumns().add(col);
          }
       }
-      scroll = new ScrollPane(TABLE);
-      scroll.setFitToHeight(true);
-      scroll.setFitToWidth(true);
       
       // Add keyboard listener
       TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {

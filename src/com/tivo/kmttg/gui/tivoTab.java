@@ -207,7 +207,8 @@ public class tivoTab {
       }
       
       // nplTable
-      panel.getChildren().add(nplTab.nplScroll);
+      VBox.setVgrow(nplTab.NowPlaying, Priority.ALWAYS); // stretch vertically
+      panel.getChildren().add(nplTab.NowPlaying);
    }
    
    public Boolean showFolders() {

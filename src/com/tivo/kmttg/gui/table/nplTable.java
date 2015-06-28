@@ -20,7 +20,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
@@ -66,7 +65,6 @@ public class nplTable extends TableMap {
    public String tivoName = null;
    public TreeTableView<Tabentry> NowPlaying = null;
    private TreeItem<Tabentry> root = new TreeItem<>(new Tabentry(""));
-   public ScrollPane nplScroll = null;
    public String[] FILE_cols = {"FILE", "SIZE", "DIR"};
    public String[] TIVO_cols = {"", "SHOW", "DATE", "CHANNEL", "DUR", "SIZE", "Mbps"};
    public String folderName = null;
@@ -171,9 +169,6 @@ public class nplTable extends TableMap {
             }
          }
       }
-      nplScroll = new ScrollPane(NowPlaying);
-      nplScroll.setFitToHeight(true);
-      nplScroll.setFitToWidth(true);
       
       // Add right mouse button handler
       TableUtil.AddRightMouseListener(NowPlaying);

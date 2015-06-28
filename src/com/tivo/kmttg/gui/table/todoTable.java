@@ -7,7 +7,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -39,7 +38,6 @@ public class todoTable extends TableMap {
    public TableView<Tabentry> TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private String currentTivo = null;
-   public ScrollPane scroll = null;
    
    // TableMap overrides
    @Override
@@ -104,9 +102,6 @@ public class todoTable extends TableMap {
             TABLE.getColumns().add(col);
          }
       }
-      scroll = new ScrollPane(TABLE);
-      scroll.setFitToHeight(true);
-      scroll.setFitToWidth(true);
       
       // Add keyboard listener
       TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {

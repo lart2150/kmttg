@@ -591,8 +591,6 @@ public class gui extends Application {
          VBox bottomPane = new VBox();         
          bottomPane.getChildren().add(cancel_pane);
          bottomPane.getChildren().add(splitBottom);
-         HBox.setHgrow(splitBottom, Priority.ALWAYS); // stretch horizontally
-         VBox.setVgrow(splitBottom, Priority.ALWAYS); // stretch vertically
          
          // topPane will consist of tasks & tabbed_panel
          VBox topPane = new VBox();
@@ -600,7 +598,6 @@ public class gui extends Application {
          HBox.setHgrow(tasks_panel, Priority.ALWAYS);  // stretch horizontally
          topPane.getChildren().add(encoding_panel);         
          topPane.getChildren().add(tabbed_panel);
-         HBox.setHgrow(tabbed_panel, Priority.ALWAYS); // stretch horizontally
          VBox.setVgrow(tabbed_panel, Priority.ALWAYS); // stretch vertically
          
          // Put all panels together

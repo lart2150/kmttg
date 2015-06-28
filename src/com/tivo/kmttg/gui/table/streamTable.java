@@ -7,7 +7,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
@@ -37,7 +36,6 @@ public class streamTable extends TableMap {
    private String currentTivo = null;
    public TreeTableView<Tabentry> TABLE = null;
    private TreeItem<Tabentry> root = new TreeItem<>(new Tabentry(""));
-   public ScrollPane scroll = null;
    public String[] TITLE_cols = {"", "CREATED", "ITEM", "SOURCE"};
    public String folderName = null;
    public int folderEntryNum = -1;
@@ -92,9 +90,6 @@ public class streamTable extends TableMap {
             TABLE.getColumns().add(col);
          }
       }
-      scroll = new ScrollPane(TABLE);
-      scroll.setFitToHeight(true);
-      scroll.setFitToWidth(true);
       
       // Add keyboard listener
       TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {

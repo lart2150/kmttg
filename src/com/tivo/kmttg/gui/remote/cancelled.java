@@ -20,6 +20,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -157,11 +158,12 @@ public class cancelled {
       row1.getChildren().add(label);
       
       tab = new cancelledTable();
+      VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
       
       panel = new VBox();
       panel.setSpacing(1);
       panel.setPadding(new Insets(0,0,0,5));      
-      panel.getChildren().addAll(row1, tab.scroll);
+      panel.getChildren().addAll(row1, tab.TABLE);
       
    }
 }

@@ -29,6 +29,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -261,11 +262,11 @@ public class search {
       row2.getChildren().add(unavailable);
       
       tab = new searchTable();
+      VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
       
       panel = new VBox();
       panel.setSpacing(1);
-      panel.getChildren().addAll(row1, row2, tab.scroll);
-      
+      panel.getChildren().addAll(row1, row2, tab.TABLE);      
    }
 
 }

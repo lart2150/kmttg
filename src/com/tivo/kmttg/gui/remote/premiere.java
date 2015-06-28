@@ -24,6 +24,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -176,9 +177,9 @@ public class premiere {
       
       channels = new ListView<String>();
       channels.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-      channels.setOrientation(Orientation.VERTICAL);
-      
+      channels.setOrientation(Orientation.VERTICAL);      
       channels.setTooltip(tooltip.getToolTip("premiere_channels"));
+      VBox.setVgrow(channels, Priority.ALWAYS); // stretch vertically
       
       row1.getChildren().add(title);
       row1.getChildren().add(tivo_label);
@@ -193,20 +194,22 @@ public class premiere {
       row1.getChildren().add(channels_update);
       
       tab = new premiereTable();
+      VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
       
       GridPane row2 = new GridPane();
       row2.setHgap(5);
       row2.setPadding(new Insets(0,0,0,5));      
       row2.getColumnConstraints().add(0, util.cc_stretch());
       row2.getColumnConstraints().add(1, util.cc_none());
+      row2.getRowConstraints().add(0, util.rc_stretch());
       channels.setMinWidth(150); channels.setMaxWidth(150);
-      row2.add(tab.scroll, 0, 0);
+      row2.add(tab.TABLE, 0, 0);
       row2.add(channels, 1, 0);
+      VBox.setVgrow(row2, Priority.ALWAYS); // stretch vertically
 
       panel = new VBox();
       panel.setSpacing(1);
-      panel.getChildren().addAll(row1, row2);
-      
+      panel.getChildren().addAll(row1, row2);      
    }
    
    // Read channel info from a file

@@ -19,6 +19,7 @@ import javafx.geometry.Insets;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
 
 public class util {
    public static LinkedHashMap<String,String> SPS = new LinkedHashMap<String,String>();
@@ -93,6 +94,12 @@ public class util {
       ColumnConstraints cc_stretch = new ColumnConstraints();
       cc_stretch.setHgrow(Priority.ALWAYS);
       return cc_stretch;
+   }
+   
+   public static RowConstraints rc_stretch() {
+      RowConstraints rc_stretch = new RowConstraints();
+      rc_stretch.setVgrow(Priority.ALWAYS);
+      return rc_stretch;
    }
    
    public static ColumnConstraints cc_none() {

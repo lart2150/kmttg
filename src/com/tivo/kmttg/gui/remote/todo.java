@@ -12,6 +12,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -144,9 +145,10 @@ public class todo {
       row1.getChildren().add(label);
       
       tab = new todoTable();
+      VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
             
       panel = new VBox();
       panel.setSpacing(1);
-      panel.getChildren().addAll(row1, tab.scroll);
+      panel.getChildren().addAll(row1, tab.TABLE);
    }
 }
