@@ -1,4 +1,8 @@
 @import "kmttg.css";
+.root {
+    -fx-accent: #B2DAEB;
+    -fx-focus-color: #B2DAEB;
+}
 /* 
     Document   : JMetroLightTheme
     Created on : Oct 16, 2012, 6:28:59 PM
@@ -32,7 +36,7 @@
  ******************************************************************************/
  
 .button {
-    -fx-padding: 5 22 5 22;   
+    -fx-padding: 0 1 0 1;   
     -fx-border-style: null; 
     -fx-background-radius: 0;
  
