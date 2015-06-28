@@ -1110,6 +1110,8 @@ public class TableUtil {
             partnerId = entry.getString("partnerId");
          if (entry.has("brandingPartnerId"))
             partnerId = entry.getString("brandingPartnerId");
+         if (partnerId.length() == 0)
+            return "STREAMING";
          String name = partnerId;
          if (config.partners.containsKey(partnerId))
             name = config.partners.get(partnerId);
