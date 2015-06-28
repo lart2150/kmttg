@@ -530,7 +530,7 @@ public class searchTable extends TableMap {
       for (int i=0; i<selected.length; ++i) {
          int row = selected[i];
          if ( isFolder(row) )
-            continue;
+            return;
          JSONObject json = GetRowData(row);
          if (json != null) {
             try {
