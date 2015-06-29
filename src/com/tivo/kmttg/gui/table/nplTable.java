@@ -440,7 +440,8 @@ public class nplTable extends TableMap {
                }
                else
                   lowest -= 1;
-               final_select = NowPlaying.getTreeItem(lowest).getValue().getDATE();
+               if (lowest >= 0)
+                  final_select = NowPlaying.getTreeItem(lowest).getValue().getDATE();
                
                for (int i=0; i<selected.length; ++i) {
                   int row = selected[i];
@@ -456,7 +457,7 @@ public class nplTable extends TableMap {
                            if (config.rpcEnabled(tivoName)) {
                               id = rnpl.findRecordingId(tivoName, entry);
                               if (id != null) {
-                                 show_names += " " + entry.get("title");
+                                 show_names += "\n" + entry.get("title");
                                  urlsToDelete.add(entry.get("url"));
                                  idsToDelete.add(id);
                               }
@@ -483,7 +484,7 @@ public class nplTable extends TableMap {
                               }
                            } else {
                               // Not recording so go ahead and delete it
-                              show_names += " " + s.data.get("title");
+                              show_names += "\n" + s.data.get("title");
                               urlsToDelete.add(s.data.get("url"));
                               idsToDelete.add(id);
                            }
@@ -500,7 +501,7 @@ public class nplTable extends TableMap {
                   }
                   if (config.rpcEnabled(tivoName)) {
                      // Use rpc remote protocol to remove items
-                     log.warn("Deleting selected shows on TiVo '" + tivoName + "':\n" + show_names);
+                     log.warn("Deleting selected shows on TiVo '" + tivoName + "':" + show_names);
                      RemoveIds(urlsToDelete, idsToDelete);
                      RefreshTable();
                   }
@@ -1094,6 +1095,7 @@ public class nplTable extends TableMap {
             if (s.folderName.equals(folderName)) {
                NowPlaying.getSelectionModel().clearSelection();
                NowPlaying.getSelectionModel().select(i);
+               NowPlaying.getSelectionModel().getSelectedItem().setExpanded(true);
                TableUtil.scrollToCenter(NowPlaying, i);
                return;
             }
@@ -1107,25 +1109,27 @@ public class nplTable extends TableMap {
       else {
          // Step through all table rows looking for entry with matching ProgramId to select
          if (data.containsKey("ProgramId")) {
-            for (int i=0; i<root.getChildren().size(); ++i) {
-               sortableDate r = root.getChildren().get(i).getValue().getDATE();
-               if (r.folder) {
-                  // Inside a folder so search all folder entries
-                  for (int j=0; j<r.folderData.size(); j++) {
-                     Hashtable<String,String> entry = r.folderData.get(j);
-                     if (entry.containsKey("ProgramId")) {
-                        if (entry.get("ProgramId").equals(data.get("ProgramId"))) {
-                           folderName = r.folderName;
-                           folderEntryNum = i;
-                           RefreshNowPlaying(r.folderData);
-                           NowPlaying.getSelectionModel().select(j);
+            for (int i=0; i<NowPlaying.getExpandedItemCount(); ++i) {
+               TreeItem<Tabentry> item = NowPlaying.getTreeItem(i);
+               if (! item.isLeaf()) {
+                  // Folder entry
+                  for (int j=0; j<item.getChildren().size(); ++j) {
+                     TreeItem<Tabentry> subitem = item.getChildren().get(j);
+                     sortableDate r = subitem.getValue().getDATE();
+                     if (r!= null && r.data != null && r.data.containsKey("ProgramId")) {
+                        if (r.data.get("ProgramId").equals(data.get("ProgramId"))) {
+                           item.setExpanded(true);
+                           NowPlaying.getSelectionModel().select(subitem);
                         }
                      }
                   }
                } else {
-                  if (r.data.containsKey("ProgramId")) {
-                     if (r.data.get("ProgramId").equals(data.get("ProgramId")))
-                        NowPlaying.getSelectionModel().select(i);
+                  // Non-folder entry
+                  sortableDate r = item.getValue().getDATE();
+                  if (r!= null && r.data != null && r.data.containsKey("ProgramId")) {
+                     if (r.data.get("ProgramId").equals(data.get("ProgramId"))) {
+                        NowPlaying.getSelectionModel().select(item);
+                     }
                   }
                }
             }
