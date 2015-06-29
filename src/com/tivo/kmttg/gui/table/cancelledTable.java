@@ -8,6 +8,7 @@ import java.util.Hashtable;
 import java.util.Stack;
 import java.util.Vector;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -269,15 +270,14 @@ public class cancelledTable extends TableMap {
    
    // Procedure to mimic expanding folder in row 0
    public void expandFirstFolder() {
-      if (root.getChildren().size() > 0) {
-         int row = 0;
-         sortableDate s = TABLE.getTreeItem(row).getValue().getDATE();
-         if (s.folder) {
-            folderName = s.folderName;
-            folderEntryNum = row;
-            Refresh(s.folderData_json);
+      Platform.runLater(new Runnable() {
+         @Override public void run() {
+            if (TABLE.getExpandedItemCount() > 0) {
+               TABLE.getTreeItem(0).setExpanded(true);
+               TableUtil.autoSizeTableViewColumns(TABLE, true);
+            }
          }
-      }
+      });
    }
          
    private void TABLERowSelected(Tabentry entry) {

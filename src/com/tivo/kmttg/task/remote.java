@@ -210,10 +210,10 @@ public class remote extends baseTask implements Serializable {
                      job.cancelled.AddRows(job.tivoName, data);
                      // Make the Won't Record tab the currently selected tab
                      config.gui.remote_gui.getPanel().getSelectionModel().select(2);
-                     // Enter the 1st folder in Won't Record table
-                     job.cancelled.expandFirstFolder();
                   }
                });
+               // Enter the 1st folder in Won't Record table
+               job.cancelled.expandFirstFolder();
             }
             if (job.remote_sp && job.sp != null) {
                Platform.runLater(new Runnable() {
