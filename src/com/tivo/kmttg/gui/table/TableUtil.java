@@ -9,12 +9,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Stack;
 
 import javafx.beans.binding.Bindings;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -109,33 +107,31 @@ public class TableUtil {
    
    public static int[] GetSelectedRows(TableView<?> TABLE) {
       debug.print("");
-      int max = TABLE.getItems().size() - 1;
-      ObservableList<Integer> tableRows = TABLE.getSelectionModel().getSelectedIndices();
-      LinkedHashMap<Integer,Integer> selected = new LinkedHashMap<Integer,Integer>();
-      for (Integer row : tableRows) {
-         if (row != -1 && row <= max)
-         selected.put(row, 1);
+      // NOTE: getSelectionModel.getSelectedIndices() is buggy, so avoid using it
+      Stack<Integer> stack = new Stack<Integer>();
+      for (int i=0; i<TABLE.getItems().size(); ++i) {
+         if (TABLE.getSelectionModel().isSelected(i))
+            stack.push(i);
       }
-      int[] rows = new int[selected.size()];
+      int[] rows = new int[stack.size()];
       int count = 0;
-      for (int i : selected.keySet())
-         rows[count++] = i;
+      for (int row : stack)
+         rows[count++] = row;
       return rows;
    }
    
    public static int[] GetSelectedRows(TreeTableView<?> TABLE) {
       debug.print("");
-      int max = TABLE.getExpandedItemCount() - 1;
-      ObservableList<Integer> tableRows = TABLE.getSelectionModel().getSelectedIndices();
-      LinkedHashMap<Integer,Integer> selected = new LinkedHashMap<Integer,Integer>();
-      for (Integer row : tableRows) {
-         if (row != -1 && row <= max)
-         selected.put(row, 1);
+      // NOTE: getSelectionModel.getSelectedIndices() is buggy, so avoid using it
+      Stack<Integer> stack = new Stack<Integer>();
+      for (int i=0; i<TABLE.getExpandedItemCount(); ++i) {
+         if (TABLE.getSelectionModel().isSelected(i))
+            stack.push(i);
       }
-      int[] rows = new int[selected.size()];
+      int[] rows = new int[stack.size()];
       int count = 0;
-      for (int i : selected.keySet())
-         rows[count++] = i;
+      for (int row : stack)
+         rows[count++] = row;
       return rows;
    }
    
