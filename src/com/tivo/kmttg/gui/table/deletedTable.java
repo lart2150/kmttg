@@ -1,9 +1,11 @@
 package com.tivo.kmttg.gui.table;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -308,112 +310,114 @@ public class deletedTable extends TableMap {
    
    // Refresh the # SHOWS label in the ToDo tab
    private void refreshNumber() {
-      config.gui.remote_gui.deleted_tab.label.setText("" + tivo_data.get(currentTivo).length() + " SHOWS");
+      Platform.runLater(new Runnable() {
+         @Override public void run() {
+            config.gui.remote_gui.deleted_tab.label.setText("" + tivo_data.get(currentTivo).length() + " SHOWS");
+         }
+      });
    }
       
    // Undelete selected recordings
    public void recoverSingle(final String tivoName) {
-      int[] test = TableUtil.GetSelectedRows(TABLE);
-      if (test.length > 0) {
-         log.print("Recovering individual recordings on TiVo: " + tivoName);
-         Task<Void> task = new Task<Void>() {
-            @Override public Void call() {
-               int row;
-               JSONObject json;
-               String title;
-               Remote r = config.initRemote(tivoName);
-               if (r.success) {
-                  Boolean cont = true;
-                  while (cont) {
-                     int[] selected = TableUtil.GetSelectedRows(TABLE);
-                     if (selected.length > 0) {
-                        row = selected[0];
-                        try {
-                           json = GetRowData(row);
-                           title = json.getString("title");
-                           if (json != null) {
-                              JSONObject o = new JSONObject();
-                              JSONArray a = new JSONArray();
-                              a.put(json.getString("recordingId"));
-                              o.put("recordingId", a);
-                              json = r.Command("Undelete", o);
-                              if (json == null) {
-                                 TABLE.getSelectionModel().clearSelection(row);
-                                 log.error("Failed to recover recording: '" + title + "'");
-                              } else {
-                                 log.warn("Recovered recording: '" + title + "' on TiVo: " + tivoName);
-                                 TABLE.getItems().remove(row);
-                                 tivo_data.get(currentTivo).remove(row);
-                                 refreshNumber();
-                              }
-                           }
-                        } catch (JSONException e) {
-                           log.error("recoverSingle failed - " + e.getMessage());
+      // Get selection set ordered highest to lowest
+      int[] unsorted = TableUtil.GetSelectedRows(TABLE);
+      if (unsorted.length == 0)
+         return;
+      Integer[] sorted = new Integer[unsorted.length];
+      int i=0;
+      for (int selected : unsorted)
+         sorted[i++] = selected;
+      Arrays.sort(sorted, Collections.reverseOrder());
+      final Integer[] sorted_final = sorted;
+      log.print("Recovering individual recordings on TiVo: " + tivoName);
+      Task<Void> task = new Task<Void>() {
+         @Override public Void call() {
+            JSONObject json;
+            String title;
+            Remote r = config.initRemote(tivoName);
+            if (r.success) {
+               for (int row : sorted_final) {
+                  try {
+                     json = GetRowData(row);
+                     title = json.getString("title");
+                     if (json != null) {
+                        JSONObject o = new JSONObject();
+                        JSONArray a = new JSONArray();
+                        a.put(json.getString("recordingId"));
+                        o.put("recordingId", a);
+                        json = r.Command("Undelete", o);
+                        if (json == null) {
+                           TABLE.getSelectionModel().clearSelection(row);
+                           log.error("Failed to recover recording: '" + title + "'");
+                        } else {
+                           log.warn("Recovered recording: '" + title + "' on TiVo: " + tivoName);
+                           TABLE.getItems().remove(row);
+                           tivo_data.get(currentTivo).remove(row);
+                           refreshNumber();
                         }
-                     } else {
-                        cont = false;
                      }
+                  } catch (JSONException e) {
+                     log.error("recoverSingle failed - " + e.getMessage());
                   }
-                  r.disconnect();
                }
-               return null;
+               r.disconnect();
             }
-         };
-         new Thread(task).start();
-      }
+            return null;
+         }
+      };
+      new Thread(task).start();
    }
    
    // Permanently delete selected recordings
    public void permanentlyDelete(final String tivoName) {
-      int[] test = TableUtil.GetSelectedRows(TABLE);
-      if (test.length > 0) {
-         log.print("Permanently deleting individual recordings on TiVo: " + tivoName);
-         Task<Void> task = new Task<Void>() {
-            @Override public Void call() {
-               int row;
-               JSONObject json;
-               String title;
-               Remote r = config.initRemote(tivoName);
-               if (r.success) {
-                  Boolean cont = true;
-                  while (cont) {
-                     int[] selected = TableUtil.GetSelectedRows(TABLE);
-                     if (selected.length > 0) {
-                        row = selected[0];
-                        try {
-                           json = GetRowData(row);
-                           if (json != null) {
-                              title = json.getString("title");
-                              if (json.has("subtitle"))
-                                 title += " - " + json.getString("subtitle");
-                              JSONObject o = new JSONObject();
-                              JSONArray a = new JSONArray();
-                              a.put(json.getString("recordingId"));
-                              o.put("recordingId", a);
-                              json = r.Command("PermanentlyDelete", o);
-                              if (json == null) {
-                                 TABLE.getSelectionModel().clearSelection(row);
-                                 log.error("Failed to permanently delete recording: '" + title + "'");
-                              } else {
-                                 log.warn("Permanently deleted recording: '" + title + "' on TiVo: " + tivoName);
-                                 TABLE.getItems().remove(row);
-                                 tivo_data.get(currentTivo).remove(row);
-                                 refreshNumber();
-                              }
-                           }
-                        } catch (JSONException e) {
-                           log.error("permanentlyDelete failed - " + e.getMessage());
+      // Get selection set ordered highest to lowest
+      int[] unsorted = TableUtil.GetSelectedRows(TABLE);
+      if (unsorted.length == 0)
+         return;
+      Integer[] sorted = new Integer[unsorted.length];
+      int i=0;
+      for (int selected : unsorted)
+         sorted[i++] = selected;
+      Arrays.sort(sorted, Collections.reverseOrder());
+      final Integer[] sorted_final = sorted;
+      log.print("Permanently deleting individual recordings on TiVo: " + tivoName);
+      Task<Void> task = new Task<Void>() {
+         @Override public Void call() {
+            JSONObject json;
+            String title;
+            Remote r = config.initRemote(tivoName);
+            if (r.success) {
+               for (int row : sorted_final) {
+                  try {
+                     json = GetRowData(row);
+                     if (json != null) {
+                        title = json.getString("title");
+                        if (json.has("subtitle"))
+                           title += " - " + json.getString("subtitle");
+                        JSONObject o = new JSONObject();
+                        JSONArray a = new JSONArray();
+                        a.put(json.getString("recordingId"));
+                        o.put("recordingId", a);
+                        json = r.Command("PermanentlyDelete", o);
+                        if (json == null) {
+                           TABLE.getSelectionModel().clearSelection(row);
+                           log.error("Failed to permanently delete recording: '" + title + "'");
+                        } else {
+                           log.warn("Permanently deleted recording: '" + title + "' on TiVo: " + tivoName);
+                           TABLE.getItems().remove(row);
+                           tivo_data.get(currentTivo).remove(row);
+                           refreshNumber();
                         }
-                     } else {
-                        cont = false;
                      }
+                  } catch (JSONException e) {
+                     log.error("permanentlyDelete failed - " + e.getMessage());
                   }
-                  r.disconnect();
                }
-               return null;
+               r.disconnect();
             }
-         };
-         new Thread(task).start();
-      }
+            return null;
+         }
+      };
+      new Thread(task).start();
    }
 }
