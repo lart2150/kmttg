@@ -270,6 +270,10 @@ public class cancelledTable extends TableMap {
    
    // Procedure to mimic expanding folder in row 0
    public void expandFirstFolder() {
+      // NOTE: Sleep seems to be necessary to get properly sized columns
+      try {
+         Thread.sleep(1000);
+      } catch (InterruptedException e) {}
       Platform.runLater(new Runnable() {
          @Override public void run() {
             if (TABLE.getExpandedItemCount() > 0) {
