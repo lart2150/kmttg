@@ -109,10 +109,11 @@ public class TableUtil {
    
    public static int[] GetSelectedRows(TableView<?> TABLE) {
       debug.print("");
+      int max = TABLE.getItems().size() - 1;
       ObservableList<Integer> tableRows = TABLE.getSelectionModel().getSelectedIndices();
       LinkedHashMap<Integer,Integer> selected = new LinkedHashMap<Integer,Integer>();
       for (Integer row : tableRows) {
-         if (row != -1)
+         if (row != -1 && row <= max)
          selected.put(row, 1);
       }
       int[] rows = new int[selected.size()];
@@ -124,10 +125,11 @@ public class TableUtil {
    
    public static int[] GetSelectedRows(TreeTableView<?> TABLE) {
       debug.print("");
+      int max = TABLE.getExpandedItemCount() - 1;
       ObservableList<Integer> tableRows = TABLE.getSelectionModel().getSelectedIndices();
       LinkedHashMap<Integer,Integer> selected = new LinkedHashMap<Integer,Integer>();
       for (Integer row : tableRows) {
-         if (row != -1)
+         if (row != -1 && row <= max)
          selected.put(row, 1);
       }
       int[] rows = new int[selected.size()];
