@@ -415,7 +415,7 @@ public class nplTable extends TableMap {
       if (keyCode == KeyCode.DELETE ||
                keyCode == KeyCode.BACK_SPACE ||
                keyCode == KeyCode.SPACE) {
-         int[] selected = GetSelectedRows();         
+         Integer[] selected = TableUtil.highToLow(GetSelectedRows());     
          if (selected != null && selected.length > 0) {
             if (keyCode == KeyCode.DELETE || keyCode == KeyCode.BACK_SPACE) {
                // Delete key has special action
@@ -459,12 +459,21 @@ public class nplTable extends TableMap {
                               id = rnpl.findRecordingId(tivoName, entry);
                               if (id != null) {
                                  show_names += "\n" + entry.get("title");
-                                 urlsToDelete.put(entry.get("url"), row);
-                                 idsToDelete.put(id, row);
+                                 urlsToDelete.put(entry.get("url"), -1);
+                                 idsToDelete.put(id, -1);
                               }
                            }
                         }
                      } // for
+                     // 1st entry gets folder row #
+                     if (urlsToDelete.size() > 0) {
+                        String first = (String) urlsToDelete.keySet().toArray()[0];
+                        urlsToDelete.put(first, row);
+                     }
+                     if (idsToDelete.size() > 0) {
+                        String first = (String) idsToDelete.keySet().toArray()[0];
+                        idsToDelete.put(first, row);
+                     }
                   } else {
                      // Delete individual show
                      if (config.twpDeleteEnabled() && ! config.rpcEnabled(tivoName)) {
@@ -1172,7 +1181,9 @@ public class nplTable extends TableMap {
       // TWP delete calls
       for (String url : urls.keySet()) {
          file.TivoWebPlusDelete(url);
-         RemoveRow(urls.get(url));
+         int row = urls.get(url);
+         if (row != -1)
+            RemoveRow(row);
          // Intentionally put a delay here
          try {
             Thread.sleep(2000);
@@ -1211,8 +1222,11 @@ public class nplTable extends TableMap {
          Remote r = config.initRemote(tivoName);
          if (r.success) {
             if (r.Command("Delete", json) != null) {
-               for (String id : ids.keySet())
-                  RemoveRow(ids.get(id));
+               for (String id : ids.keySet()) {
+                  int row = ids.get(id);
+                  if (row != -1)
+                     RemoveRow(row);
+               }
             }
             r.disconnect();
          }
