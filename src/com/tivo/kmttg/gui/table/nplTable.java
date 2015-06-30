@@ -64,7 +64,6 @@ import com.tivo.kmttg.util.log;
 public class nplTable extends TableMap {
    public String tivoName = null;
    public TreeTableView<Tabentry> NowPlaying = null;
-   private TreeItem<Tabentry> root = new TreeItem<>(new Tabentry(""));
    public String[] FILE_cols = {"FILE", "SIZE", "DIR"};
    public String[] TIVO_cols = {"", "SHOW", "DATE", "CHANNEL", "DUR", "SIZE", "Mbps"};
    public String folderName = null;
@@ -80,7 +79,7 @@ public class nplTable extends TableMap {
    // Override TableMap methods
    @Override
    public void clear() {
-      root.getChildren().clear();
+      NowPlaying.getRoot().getChildren().clear();
    }
    @Override
    public TreeTableView<?> getTreeTable() {
@@ -90,6 +89,7 @@ public class nplTable extends TableMap {
    public nplTable(final String tivoName) {
       this.tivoName = tivoName;
       NowPlaying = new TreeTableView<Tabentry>();
+      NowPlaying.setRoot(new TreeItem<>(new Tabentry("")));
       NowPlaying.setShowRoot(false); // Don't show the empty root node
       NowPlaying.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE); // Allow multiple row selection
       NowPlaying.setRowFactory(new ColorRowFactory()); // For row background color handling
@@ -100,7 +100,7 @@ public class nplTable extends TableMap {
             if (tivoName.equals("FILES"))
                return;
             change.next();
-            if (change != null && change.toString().contains("removed")) {
+            if (NowPlaying.getRoot().getChildren().size() > 0 && change != null && change.toString().contains("removed")) {
                if (change.getRemoved().get(0).getText().equals("DATE"))
                   return;
                int date_col = TableUtil.getColumnIndex(NowPlaying, "DATE");
@@ -433,7 +433,7 @@ public class nplTable extends TableMap {
                      lowest = selected[i];
                }
                if (lowest-1 < 0) {
-                  if (root.getChildren().size() > 1)
+                  if (NowPlaying.getRoot().getChildren().size() > 1)
                      lowest = 1;
                   else
                      lowest = 0;
@@ -790,8 +790,7 @@ public class nplTable extends TableMap {
          displayFlatStructure(h);
       String message = getTotalsString(h);
       
-      root.setExpanded(true);
-      NowPlaying.setRoot(root);
+      NowPlaying.getRoot().setExpanded(true);
       
       // Display totals message
       displayTotals(message);
@@ -985,7 +984,7 @@ public class nplTable extends TableMap {
    // Add a now playing non folder entry to NowPlaying table
    public void AddNowPlayingRow(Hashtable<String,String> entry) {
       TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(entry) );
-      root.getChildren().add(item);
+      NowPlaying.getRoot().getChildren().add(item);
       // Adjust column widths to data
       TableUtil.autoSizeTableViewColumns(NowPlaying, false);
 
@@ -998,7 +997,7 @@ public class nplTable extends TableMap {
          TreeItem<Tabentry> subitem = new TreeItem<>( new Tabentry(folderEntry.get(i)) );
          item.getChildren().add(subitem);
       }
-      root.getChildren().add(item);
+      NowPlaying.getRoot().getChildren().add(item);
       // Adjust column widths to data
       TableUtil.autoSizeTableViewColumns(NowPlaying, false);
    }
@@ -1006,13 +1005,12 @@ public class nplTable extends TableMap {
    // Add a selected file in FILES mode to NowPlaying table
    public void AddNowPlayingFileRow(File file) {
       TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(file) );
-      root.getChildren().add(item);
-      root.setExpanded(true);
-      NowPlaying.setRoot(root);
+      NowPlaying.getRoot().getChildren().add(item);
+      NowPlaying.getRoot().setExpanded(true);
       // Adjust column widths to data
       TableUtil.autoSizeTableViewColumns(NowPlaying, false);
       // Select entry just added
-      int last = root.getChildren().size()-1;
+      int last = NowPlaying.getRoot().getChildren().size()-1;
       if (last >= 0) {
          NowPlaying.getSelectionModel().clearSelection();
          NowPlaying.getSelectionModel().select(last);
@@ -1034,7 +1032,7 @@ public class nplTable extends TableMap {
    public void RemoveRow(int row) {
       TreeItem<Tabentry> item = NowPlaying.getTreeItem(row);
       if (item != null)
-         item.getParent().getChildren().remove(item);
+         NowPlaying.getRoot().getChildren().remove(item);
    }
    
    public void RemoveRows(Stack<Integer> rows) {
@@ -1059,7 +1057,7 @@ public class nplTable extends TableMap {
    // Toggle between fully expanded and fully collapsed tree states
    public void toggleTreeState() {
       Boolean fullyExpanded = true;
-      ObservableList<TreeItem<Tabentry>> obs = root.getChildren();
+      ObservableList<TreeItem<Tabentry>> obs = NowPlaying.getRoot().getChildren();
       for (TreeItem<Tabentry> item : obs) {
          if (item.getChildren().size() > 0 && ! item.isExpanded())
             fullyExpanded = false;
@@ -1078,10 +1076,10 @@ public class nplTable extends TableMap {
    
    // Refresh all titles currently displayed in table for non-folder entries
    public void refreshTitles() {
-      for (int row=0; row<root.getChildren().size(); ++row) {
-         sortableDate s = root.getChildren().get(row).getValue().getDATE();
+      for (int row=0; row<NowPlaying.getRoot().getChildren().size(); ++row) {
+         sortableDate s = NowPlaying.getRoot().getChildren().get(row).getValue().getDATE();
          if (! s.folder && s.data != null)
-            root.getChildren().get(row).getValue().show = new sortableShow(s.data);
+            NowPlaying.getRoot().getChildren().get(row).getValue().show = new sortableShow(s.data);
       }
    }
 
@@ -1089,8 +1087,8 @@ public class nplTable extends TableMap {
    // (This used when returning back from folder mode to top level mode)
    public void SelectFolder(String folderName) {
       debug.print("folderName=" + folderName);
-      for (int i=0; i<root.getChildren().size(); ++i) {
-         sortableDate s = root.getChildren().get(i).getValue().getDATE();
+      for (int i=0; i<NowPlaying.getRoot().getChildren().size(); ++i) {
+         sortableDate s = NowPlaying.getRoot().getChildren().get(i).getValue().getDATE();
          if (s.folder) {
             if (s.folderName.equals(folderName)) {
                NowPlaying.getSelectionModel().clearSelection();
@@ -1333,7 +1331,7 @@ public class nplTable extends TableMap {
    public void exportNPL(String file) {
       int numCols = TIVO_cols.length;
       try {
-         if (NowPlaying != null && root.getChildren().size() > 0) {
+         if (NowPlaying != null && NowPlaying.getRoot().getChildren().size() > 0) {
             log.warn("Exporting NPL table for: " + tivoName + " ...");
             BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
             int col = 0;
