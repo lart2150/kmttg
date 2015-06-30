@@ -411,7 +411,6 @@ public class searchTable extends TableMap {
             TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(entry, false) );
             TABLE.getRoot().getChildren().add(item);
          }
-         //TableUtil.autoSizeTableViewColumns(TABLE, true);
       } catch (JSONException e) {
          log.error("searchTable AddTABLERow - " + e.getMessage());
       }

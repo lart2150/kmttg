@@ -303,9 +303,6 @@ public class deletedTable extends TableMap {
    // Add a non folder entry to TABLE table
    public void AddTABLERow(JSONObject entry) {
       TABLE.getItems().add(new Tabentry(entry));
-         
-      // Adjust column widths to data
-      TableUtil.autoSizeTableViewColumns(TABLE, true);
    }   
    
    // Refresh the # SHOWS label in the ToDo tab
