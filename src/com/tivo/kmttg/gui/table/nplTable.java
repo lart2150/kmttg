@@ -786,6 +786,7 @@ public class nplTable extends TableMap {
       String message = getTotalsString(h);
       
       NowPlaying.getRoot().setExpanded(true);
+      NowPlaying.sort();
       
       // Display totals message
       displayTotals(message);

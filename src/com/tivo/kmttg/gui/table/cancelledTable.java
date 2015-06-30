@@ -336,6 +336,7 @@ public class cancelledTable extends TableMap {
          // Reset local entries/folders hashes to new entries
          folderize(o); // create folder structure
          Refresh(o);
+         TABLE.sort();
          TableUtil.autoSizeTableViewColumns(TABLE, true);
          tivo_data.put(tivoName, data);
          currentTivo = tivoName;

@@ -216,6 +216,7 @@ public class streamTable extends TableMap {
    // data is a JSONArray of channel JSON objects
    public void AddRows(String tivoName, JSONArray data) {
       Refresh(data);
+      TABLE.sort();
       TableUtil.autoSizeTableViewColumns(TABLE, true);
       
       // Save the data

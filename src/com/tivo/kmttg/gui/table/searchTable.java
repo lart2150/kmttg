@@ -353,6 +353,7 @@ public class searchTable extends TableMap {
    // JSONArray entries
    public void AddRows(String tivoName, JSONArray data) {
       Refresh(data);
+      TABLE.sort();
       TableUtil.autoSizeTableViewColumns(TABLE, true);
       
       // Save the data

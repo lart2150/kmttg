@@ -453,6 +453,7 @@ public class guideTable extends TableMap {
                                  for (int i=0; i<matches.length(); ++i) {
                                     TABLE.getItems().add(new Tabentry(matches.getJSONObject(i)));
                                  }
+                                 TABLE.sort();
                                  TableUtil.autoSizeTableViewColumns(TABLE, true);
                               } catch (Exception e) {
                                  log.error("guideTable updateFolder - " + e.getMessage());

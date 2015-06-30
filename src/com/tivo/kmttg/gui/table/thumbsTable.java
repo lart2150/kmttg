@@ -259,6 +259,7 @@ public class thumbsTable extends TableMap {
          
          // Update table
          Refresh(o);
+         TABLE.sort();
          TableUtil.autoSizeTableViewColumns(TABLE, true);
          if (tivoName != null) {
             tivo_data.put(tivoName, data);

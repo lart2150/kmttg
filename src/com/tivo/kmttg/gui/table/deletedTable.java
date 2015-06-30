@@ -268,6 +268,7 @@ public class deletedTable extends TableMap {
          
          // Reset local entries to new entries
          Refresh(o);
+         TABLE.sort();
          TableUtil.autoSizeTableViewColumns(TABLE, true);
          tivo_data.put(tivoName, data);
          currentTivo = tivoName;

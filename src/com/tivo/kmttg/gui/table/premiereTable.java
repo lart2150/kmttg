@@ -214,6 +214,7 @@ public class premiereTable extends TableMap {
           }
           currentTivo = tivoName;
           tivo_data.put(tivoName, data);
+          TABLE.sort();
           TableUtil.autoSizeTableViewColumns(TABLE, true);
           if (config.gui.remote_gui != null)
              config.gui.remote_gui.setTivoName("premiere", tivoName);

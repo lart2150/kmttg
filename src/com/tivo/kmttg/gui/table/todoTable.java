@@ -218,6 +218,7 @@ public class todoTable extends TableMap {
           }
           tivo_data.put(tivoName, data);
           currentTivo = tivoName;
+          TABLE.sort();
           TableUtil.autoSizeTableViewColumns(TABLE, true);
           if (config.gui.remote_gui != null) {
              config.gui.remote_gui.setTivoName("todo", tivoName);
