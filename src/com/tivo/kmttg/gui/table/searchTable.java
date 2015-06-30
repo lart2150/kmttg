@@ -41,7 +41,6 @@ import com.tivo.kmttg.util.log;
 public class searchTable extends TableMap {
    private String currentTivo = null;
    public TreeTableView<Tabentry> TABLE = null;
-   private TreeItem<Tabentry> root = new TreeItem<>(new Tabentry(""));
    public String[] TITLE_cols = {"", "TYPE", "SHOW", "DATE", "CHANNEL", "DUR"};
    public String folderName = null;
    public int folderEntryNum = -1;
@@ -62,7 +61,7 @@ public class searchTable extends TableMap {
    }
    @Override
    public void clear() {
-      root.getChildren().clear();
+      TABLE.getRoot().getChildren().clear();
    }
    @Override
    public TreeTableView<?> getTreeTable() {
@@ -71,6 +70,7 @@ public class searchTable extends TableMap {
          
    public searchTable() {      
       TABLE = new TreeTableView<Tabentry>();
+      TABLE.setRoot(new TreeItem<>(new Tabentry("")));
       TABLE.setShowRoot(false); // Don't show the empty root node
       TABLE.getSelectionModel().setSelectionMode(SelectionMode.SINGLE); // Allow multiple row selection
       TABLE.setRowFactory(new ColorRowFactory()); // For row background color handling
@@ -381,8 +381,7 @@ public class searchTable extends TableMap {
             }
          }
          
-         root.setExpanded(true);
-         TABLE.setRoot(root);
+         TABLE.getRoot().setExpanded(true);
       }
    }
       
@@ -406,10 +405,10 @@ public class searchTable extends TableMap {
                TreeItem<Tabentry> subitem = new TreeItem<>(new Tabentry(entries.getJSONObject(i), false));
                item.getChildren().add(subitem);
             }
-            root.getChildren().add(item); 
+            TABLE.getRoot().getChildren().add(item); 
          } else {
             TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(entry, false) );
-            root.getChildren().add(item);
+            TABLE.getRoot().getChildren().add(item);
          }
          //TableUtil.autoSizeTableViewColumns(TABLE, true);
       } catch (JSONException e) {
@@ -420,7 +419,7 @@ public class searchTable extends TableMap {
    // Toggle between fully expanded and fully collapsed tree states
    public void toggleTreeState() {
       Boolean fullyExpanded = true;
-      ObservableList<TreeItem<Tabentry>> obs = root.getChildren();
+      ObservableList<TreeItem<Tabentry>> obs = TABLE.getRoot().getChildren();
       for (TreeItem<Tabentry> item : obs) {
          if (item.getChildren().size() > 0 && ! item.isExpanded())
             fullyExpanded = false;
@@ -440,8 +439,8 @@ public class searchTable extends TableMap {
    // (This used when returning back from folder mode to top level mode)
    public void SelectFolder(String folderName) {
       debug.print("folderName=" + folderName);
-      for (int i=0; i<root.getChildren().size(); ++i) {
-         sortableDate s = root.getChildren().get(i).getValue().getDATE();
+      for (int i=0; i<TABLE.getRoot().getChildren().size(); ++i) {
+         sortableDate s = TABLE.getRoot().getChildren().get(i).getValue().getDATE();
          if (s.folder) {
             if (s.folderName.equals(folderName)) {
                TABLE.getSelectionModel().clearSelection();

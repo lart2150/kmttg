@@ -35,7 +35,6 @@ import com.tivo.kmttg.util.log;
 public class streamTable extends TableMap {
    private String currentTivo = null;
    public TreeTableView<Tabentry> TABLE = null;
-   private TreeItem<Tabentry> root = new TreeItem<>(new Tabentry(""));
    public String[] TITLE_cols = {"", "CREATED", "ITEM", "SOURCE"};
    public String folderName = null;
    public int folderEntryNum = -1;
@@ -57,7 +56,7 @@ public class streamTable extends TableMap {
    }
    @Override
    public void clear() {
-      root.getChildren().clear();
+      TABLE.getRoot().getChildren().clear();
    }
    @Override
    public TreeTableView<?> getTreeTable() {
@@ -66,6 +65,7 @@ public class streamTable extends TableMap {
          
    public streamTable() {
       TABLE = new TreeTableView<Tabentry>();
+      TABLE.setRoot(new TreeItem<>(new Tabentry("")));
       TABLE.setShowRoot(false); // Don't show the empty root node
       TABLE.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE); // Allow multiple row selection
       
@@ -246,8 +246,7 @@ public class streamTable extends TableMap {
             }
          }
          
-         root.setExpanded(true);
-         TABLE.setRoot(root);
+         TABLE.getRoot().setExpanded(true);
       }
    }
       
@@ -267,7 +266,7 @@ public class streamTable extends TableMap {
       } catch (JSONException e) {
          log.error("streamTable AddTABLERow - " + e.getMessage());
       }
-      root.getChildren().add(item);
+      TABLE.getRoot().getChildren().add(item);
       
       // Adjust column widths to data
       TableUtil.autoSizeTableViewColumns(TABLE, true);
@@ -289,8 +288,8 @@ public class streamTable extends TableMap {
    // (This used when returning back from folder mode to top level mode)
    public void SelectFolder(String folderName) {
       debug.print("folderName=" + folderName);
-      for (int i=0; i<root.getChildren().size(); ++i) {
-         sortableDate s = root.getChildren().get(i).getValue().getCREATED();
+      for (int i=0; i<TABLE.getRoot().getChildren().size(); ++i) {
+         sortableDate s = TABLE.getRoot().getChildren().get(i).getValue().getCREATED();
          if (s.folder) {
             if (s.folderName.equals(folderName)) {
                TABLE.getSelectionModel().clearSelection();
