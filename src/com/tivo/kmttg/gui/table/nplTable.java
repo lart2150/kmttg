@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -419,8 +420,8 @@ public class nplTable extends TableMap {
             if (keyCode == KeyCode.DELETE || keyCode == KeyCode.BACK_SPACE) {
                // Delete key has special action
                String show_names = "";
-               Stack<String> urlsToDelete = new Stack<String>();
-               Stack<String> idsToDelete = new Stack<String>();
+               LinkedHashMap<String,Integer> urlsToDelete = new LinkedHashMap<String,Integer>();
+               LinkedHashMap<String,Integer> idsToDelete = new LinkedHashMap<String,Integer>();
                String id;
                
                // Figure out what selection should be if all selected rows are deleted
@@ -453,13 +454,13 @@ public class nplTable extends TableMap {
                         if (entry.containsKey("url")) {
                            log.warn("Delete url=" + entry.get("url"));
                            if (config.twpDeleteEnabled() && ! config.rpcEnabled(tivoName))
-                              urlsToDelete.add(entry.get("url"));
+                              urlsToDelete.put(entry.get("url"), row);
                            if (config.rpcEnabled(tivoName)) {
                               id = rnpl.findRecordingId(tivoName, entry);
                               if (id != null) {
                                  show_names += "\n" + entry.get("title");
-                                 urlsToDelete.add(entry.get("url"));
-                                 idsToDelete.add(id);
+                                 urlsToDelete.put(entry.get("url"), row);
+                                 idsToDelete.put(id, row);
                               }
                            }
                         }
@@ -468,7 +469,7 @@ public class nplTable extends TableMap {
                      // Delete individual show
                      if (config.twpDeleteEnabled() && ! config.rpcEnabled(tivoName)) {
                         if (s.data.containsKey("url")) {
-                           urlsToDelete.add(s.data.get("url"));
+                           urlsToDelete.put(s.data.get("url"), row);
                         }
                      }
                      if (config.rpcEnabled(tivoName)) {
@@ -485,8 +486,8 @@ public class nplTable extends TableMap {
                            } else {
                               // Not recording so go ahead and delete it
                               show_names += "\n" + s.data.get("title");
-                              urlsToDelete.add(s.data.get("url"));
-                              idsToDelete.add(id);
+                              urlsToDelete.put(s.data.get("url"), row);
+                              idsToDelete.put(id, row);
                            }
                         }
                      }
@@ -497,18 +498,17 @@ public class nplTable extends TableMap {
                      // USE TWP to remove items from entries stack
                      // NOTE: Always revert to top view (not inside a folder)
                      RemoveUrls(urlsToDelete);
-                     RefreshTable();
                   }
                   if (config.rpcEnabled(tivoName)) {
                      // Use rpc remote protocol to remove items
                      log.warn("Deleting selected shows on TiVo '" + tivoName + "':" + show_names);
                      RemoveIds(urlsToDelete, idsToDelete);
-                     RefreshTable();
                   }
                } // if urslToDelete
                
                // After table refresh this is the data of the row to look for to select
                if (final_select != null) {
+                  NowPlaying.getSelectionModel().clearSelection();
                   if (final_select.folder) {
                      Hashtable<String,String> h = new Hashtable<String,String>();
                      h.put("folderName", final_select.folderName);
@@ -612,11 +612,6 @@ public class nplTable extends TableMap {
       } else if (keyCode == KeyCode.T) {
          toggleTreeState();
       }
-   }
-   
-   public void RefreshTable() {
-      folderize(entries);
-      RefreshNowPlaying(entries);
    }
    
    // Return current state of Display Folders boolean for this TiVo
@@ -1031,8 +1026,24 @@ public class nplTable extends TableMap {
    
    public void RemoveRow(int row) {
       TreeItem<Tabentry> item = NowPlaying.getTreeItem(row);
-      if (item != null)
-         NowPlaying.getRoot().getChildren().remove(item);
+      if (item != null) {
+         TreeItem<Tabentry> parent = item.getParent();
+         if (parent != NowPlaying.getRoot()) {
+            // Update parent Tabentry to account for removed entry
+            sortableDate date = parent.getValue().getDATE();
+            Stack<Hashtable<String,String>> new_data = new Stack<Hashtable<String,String>>();
+            for (Hashtable<String,String> hash : date.folderData) {
+               if (hash != item.getValue().getDATE().data)
+                  new_data.add(hash);
+            }
+            parent.setValue(new Tabentry(date.folderName, new_data));
+         }
+         // Remove table entry
+         parent.getChildren().remove(item);
+         
+         // Update table label
+         displayTotals(getTotalsString(entries));
+      }
    }
    
    public void RemoveRows(Stack<Integer> rows) {
@@ -1093,7 +1104,6 @@ public class nplTable extends TableMap {
             if (s.folderName.equals(folderName)) {
                NowPlaying.getSelectionModel().clearSelection();
                NowPlaying.getSelectionModel().select(i);
-               NowPlaying.getSelectionModel().getSelectedItem().setExpanded(true);
                TableUtil.scrollToCenter(NowPlaying, i);
                return;
             }
@@ -1116,7 +1126,6 @@ public class nplTable extends TableMap {
                      sortableDate r = subitem.getValue().getDATE();
                      if (r!= null && r.data != null && r.data.containsKey("ProgramId")) {
                         if (r.data.get("ProgramId").equals(data.get("ProgramId"))) {
-                           item.setExpanded(true);
                            NowPlaying.getSelectionModel().select(subitem);
                         }
                      }
@@ -1140,17 +1149,15 @@ public class nplTable extends TableMap {
    }
    
    @SuppressWarnings("unchecked")
-   private void RemoveUrls(Stack<String> urls) {
+   private void RemoveUrls(LinkedHashMap<String,Integer> urls) {
       // First update table
       Stack<Hashtable<String,String>> copy = (Stack<Hashtable<String, String>>) entries.clone();
       entries.clear();
       Boolean include;
       for (int i=0; i<copy.size(); ++i) {
          include = true;
-         String url;
          if (copy.get(i).containsKey("url")) {
-            for (int j=0; j<urls.size(); ++j) {
-               url = urls.get(j);
+            for (String url : urls.keySet()) {
                if (copy.get(i).get("url").equals(url)) {
                   include = false;
                }
@@ -1162,8 +1169,9 @@ public class nplTable extends TableMap {
       }
       
       // TWP delete calls
-      for (int i=0; i<urls.size(); ++i) {
-         file.TivoWebPlusDelete(urls.get(i));
+      for (String url : urls.keySet()) {
+         file.TivoWebPlusDelete(url);
+         RemoveRow(urls.get(url));
          // Intentionally put a delay here
          try {
             Thread.sleep(2000);
@@ -1172,17 +1180,15 @@ public class nplTable extends TableMap {
    }
    
    @SuppressWarnings("unchecked")
-   private void RemoveIds(Stack<String> urls, Stack<String> ids) {
+   private void RemoveIds(LinkedHashMap<String,Integer> urls, LinkedHashMap<String,Integer> ids) {
       // First update table
       Stack<Hashtable<String,String>> copy = (Stack<Hashtable<String, String>>) entries.clone();
       entries.clear();
       Boolean include;
       for (int i=0; i<copy.size(); ++i) {
          include = true;
-         String url;
          if (copy.get(i).containsKey("url")) {
-            for (int j=0; j<urls.size(); ++j) {
-               url = urls.get(j);
+            for (String url : urls.keySet()) {
                if (copy.get(i).get("url").equals(url)) {
                   include = false;
                }
@@ -1196,14 +1202,17 @@ public class nplTable extends TableMap {
       // Remote delete calls
       JSONArray a = new JSONArray();
       JSONObject json = new JSONObject();
-      for (int i=0; i<ids.size(); ++i) {
-         a.put(ids.get(i));
+      for (String id : ids.keySet()) {
+         a.put(id);
       }
       try {
          json.put("recordingId", a);
          Remote r = config.initRemote(tivoName);
          if (r.success) {
-            r.Command("Delete", json);
+            if (r.Command("Delete", json) != null) {
+               for (String id : ids.keySet())
+                  RemoveRow(ids.get(id));
+            }
             r.disconnect();
          }
       } catch (JSONException e) {
