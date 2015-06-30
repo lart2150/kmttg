@@ -169,6 +169,7 @@ public class TableUtil {
    // Call protected method to do tableview column fit to size
    public static void autoSizeTableViewColumns(final TableView<?> tableView, Boolean force) {
       debug.print("tableView=" + tableView + " force=" + force);
+      int maxRows = 500;
       if (tableView == null)
          return;
       if (!force && config.tableColAutoSize == 0)
@@ -184,7 +185,7 @@ public class TableUtil {
             if (column != null) {
                Method method = skin.getClass().getDeclaredMethod("resizeColumnToFitContent", TableColumn.class, int.class);
                method.setAccessible(true);
-               method.invoke(skin,column, 30);
+               method.invoke(skin,column,maxRows);
             }
          } catch (Throwable e) {
             e = e.getCause();
@@ -198,6 +199,7 @@ public class TableUtil {
    public static void autoSizeTableViewColumns(final TreeTableView<?> tableView, Boolean force) {
       debug.print("tableView=" + tableView + " force=" + force);
       double minImageColWidth = 60;
+      int maxRows = 500;
       if (tableView == null)
          return;
       if (!force && config.tableColAutoSize == 0)
@@ -213,7 +215,7 @@ public class TableUtil {
             if (column != null) {
                Method method = skin.getClass().getDeclaredMethod("resizeColumnToFitContent", TreeTableColumn.class, int.class);
                method.setAccessible(true);
-               method.invoke(skin,column,30);
+               method.invoke(skin,column,maxRows);
                if (columnHeader != null && columnHeader.getTableColumn().getText().equals("")) {
                   // IMAGE column - want min width to be honored
                   column.setMinWidth(minImageColWidth);
