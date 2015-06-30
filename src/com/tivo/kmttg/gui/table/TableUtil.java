@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -133,6 +134,15 @@ public class TableUtil {
       for (int row : stack)
          rows[count++] = row;
       return rows;
+   }
+   
+   public static Integer[] highToLow(int[] unsorted) {
+      Integer[] sorted = new Integer[unsorted.length];
+      int i=0;
+      for (int selected : unsorted)
+         sorted[i++] = selected;
+      Arrays.sort(sorted, Collections.reverseOrder());
+      return sorted;
    }
    
    public static void DeselectRow(TableView<?> TABLE, int row) {
