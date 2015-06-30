@@ -268,9 +268,6 @@ public class streamTable extends TableMap {
          log.error("streamTable AddTABLERow - " + e.getMessage());
       }
       TABLE.getRoot().getChildren().add(item);
-      
-      // Adjust column widths to data
-      TableUtil.autoSizeTableViewColumns(TABLE, true);
    }  
    
    private void BePatient(final TreeItem<Tabentry> item, final String title) {

@@ -990,8 +990,6 @@ public class nplTable extends TableMap {
    public void AddNowPlayingRow(Hashtable<String,String> entry) {
       TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(entry) );
       NowPlaying.getRoot().getChildren().add(item);
-      // Adjust column widths to data
-      TableUtil.autoSizeTableViewColumns(NowPlaying, false);
 
    }   
 
@@ -1002,9 +1000,14 @@ public class nplTable extends TableMap {
          TreeItem<Tabentry> subitem = new TreeItem<>( new Tabentry(folderEntry.get(i)) );
          item.getChildren().add(subitem);
       }
+      // Want to resize columns whenever a tree is expanded or collapsed
+      item.expandedProperty().addListener(new ChangeListener<Boolean>() {
+         @Override
+         public void changed(ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) {
+            TableUtil.autoSizeTableViewColumns(NowPlaying, false);
+         }         
+      });
       NowPlaying.getRoot().getChildren().add(item);
-      // Adjust column widths to data
-      TableUtil.autoSizeTableViewColumns(NowPlaying, false);
    }
  
    // Add a selected file in FILES mode to NowPlaying table

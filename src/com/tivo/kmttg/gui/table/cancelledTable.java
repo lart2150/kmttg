@@ -462,8 +462,6 @@ public class cancelledTable extends TableMap {
          }         
       });
       TABLE.getRoot().getChildren().add(item);
-      // Adjust column widths to data
-      TableUtil.autoSizeTableViewColumns(TABLE, true);
    }
 
    // Look for entry with given folder name and select it
