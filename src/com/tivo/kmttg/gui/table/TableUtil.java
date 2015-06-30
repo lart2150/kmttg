@@ -168,6 +168,7 @@ public class TableUtil {
    
    // Call protected method to do tableview column fit to size
    public static void autoSizeTableViewColumns(final TableView<?> tableView, Boolean force) {
+      debug.print("tableView=" + tableView + " force=" + force);
       if (tableView == null)
          return;
       if (!force && config.tableColAutoSize == 0)
@@ -195,6 +196,7 @@ public class TableUtil {
    // Call protected method to do treetableview column fit to size
    // NOTE: Added min setting for IMAGE column (which has empty title)
    public static void autoSizeTableViewColumns(final TreeTableView<?> tableView, Boolean force) {
+      debug.print("tableView=" + tableView + " force=" + force);
       double minImageColWidth = 60;
       if (tableView == null)
          return;
