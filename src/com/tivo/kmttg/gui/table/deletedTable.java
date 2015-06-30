@@ -1,6 +1,5 @@
 package com.tivo.kmttg.gui.table;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -321,15 +320,9 @@ public class deletedTable extends TableMap {
    // Undelete selected recordings
    public void recoverSingle(final String tivoName) {
       // Get selection set ordered highest to lowest
-      int[] unsorted = TableUtil.GetSelectedRows(TABLE);
-      if (unsorted.length == 0)
+      final Integer[] sorted_final = TableUtil.highToLow(TableUtil.GetSelectedRows(TABLE));
+      if (sorted_final.length == 0)
          return;
-      Integer[] sorted = new Integer[unsorted.length];
-      int i=0;
-      for (int selected : unsorted)
-         sorted[i++] = selected;
-      Arrays.sort(sorted, Collections.reverseOrder());
-      final Integer[] sorted_final = sorted;
       log.print("Recovering individual recordings on TiVo: " + tivoName);
       Task<Void> task = new Task<Void>() {
          @Override public Void call() {
@@ -372,15 +365,9 @@ public class deletedTable extends TableMap {
    // Permanently delete selected recordings
    public void permanentlyDelete(final String tivoName) {
       // Get selection set ordered highest to lowest
-      int[] unsorted = TableUtil.GetSelectedRows(TABLE);
-      if (unsorted.length == 0)
+      final Integer[] sorted_final = TableUtil.highToLow(TableUtil.GetSelectedRows(TABLE));
+      if (sorted_final.length == 0)
          return;
-      Integer[] sorted = new Integer[unsorted.length];
-      int i=0;
-      for (int selected : unsorted)
-         sorted[i++] = selected;
-      Arrays.sort(sorted, Collections.reverseOrder());
-      final Integer[] sorted_final = sorted;
       log.print("Permanently deleting individual recordings on TiVo: " + tivoName);
       Task<Void> task = new Task<Void>() {
          @Override public Void call() {
