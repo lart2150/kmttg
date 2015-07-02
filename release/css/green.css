@@ -1,0 +1,9 @@
+@import "kmttg.css";
+.root {
+    -fx-base: #B2DFDB;
+    -fx-background: #E0F2F1;
+    -fx-control-inner-background: #E8F5E9;
+    -fx-accent: #B2DAEB;
+    -fx-focus-color: #B2DAEB;
+}
+
