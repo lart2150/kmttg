@@ -88,15 +88,17 @@ public class MyTooltip {
             text_split = text_split.replaceAll("</b>", "\n");
             String[] split = text_split.split("\n");
             for (String s : split) {
-               Text t = new Text();
-               if (s.startsWith("BOLD")) {
-                  s = s.replaceFirst("BOLD", "");
-                  t.setFont(Font.font("System", FontWeight.BOLD, 12));
-               } else {
-                  t.setFont(Font.font("System", FontWeight.NORMAL, 12));
+               if (s.length() > 0) {
+                  Text t = new Text();
+                  if (s.startsWith("BOLD")) {
+                     s = s.replaceFirst("BOLD", "");
+                     t.setFont(Font.font("System", FontWeight.BOLD, 12));
+                  } else {
+                     t.setFont(Font.font("System", FontWeight.NORMAL, 12));
+                  }
+                  t.setText(s);
+                  tf.getChildren().add(t);
                }
-               t.setText(s);
-               tf.getChildren().add(t);
             }
             tf.getChildren().add(new Text("\n"));
          } else {
