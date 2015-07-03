@@ -781,11 +781,19 @@ public class gui extends Application {
          saveMessagesMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
                String file = config.programDir + File.separator + "kmttg.log";
+               String eol = "\n";
+               if (config.OS.equals("windows"))
+                  eol = "\r\n";
                try {
                   NodeList list = text.getEngine().getDocument().getElementById("content").getChildNodes();
                   StringBuilder sb = new StringBuilder();
                   for (int i=0; i<list.getLength(); ++i) {
-                     sb.append(list.item(i).getTextContent() + "\r\n");
+                     org.w3c.dom.Node node = list.item(i);
+                     if (node.getNodeName().equalsIgnoreCase("pre")) {
+                        String[] lines = node.getTextContent().split("\n");
+                        for (String line : lines)
+                           sb.append(line + eol);
+                     }
                   }
                   BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
                   ofp.write(sb.toString());
