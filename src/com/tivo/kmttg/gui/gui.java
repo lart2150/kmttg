@@ -2387,7 +2387,7 @@ public class gui extends Application {
          text =  "<b>QS Fix</b><br>";
          text += "If you have VideoRedo available and configured in kmttg, this<br>";
          text += "runs the extremely useful <b>VideoRedo Quick Stream Fix</b> utility.<br>";
-         text += "Without VideoRedo this will run mpeg through *ProjectX* demux filter followed<br>";
+         text += "Without VideoRedo this will run mpeg through <b>ProjectX</b> demux filter followed<br>";
          text += "by a remux with ffmpeg instead if ProjectX is configured in kmttg.<br>";
          text += "If neither tool is configured then this task is unavailable.<br>";
          text += "This task cleans up any potential glitches/errors in mpeg2 video files.<br>";
