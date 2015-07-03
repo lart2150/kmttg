@@ -30,7 +30,6 @@ public class cancelled {
    public ComboBox<String> tivo = null;
    public MyButton refresh = null;
    public MyButton autoresolve = null;
-   public Label label = null;
    public CheckBox includeHistory = null;
    public MyButton record = null;
    public MyButton explain = null;
@@ -59,7 +58,6 @@ public class cancelled {
 
       refresh = new MyButton("Refresh");
       refresh.setPadding(util.smallButtonInsets());
-      label = new Label("Top Level View");
       refresh.setTooltip(tooltip.getToolTip("refresh_cancel_top"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -155,7 +153,6 @@ public class cancelled {
       row1.getChildren().add(refresh_todo);
       row1.getChildren().add(autoresolve);
       row1.getChildren().add(includeHistory);
-      row1.getChildren().add(label);
       
       tab = new cancelledTable();
       VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
