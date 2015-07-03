@@ -114,8 +114,17 @@ public class http {
          URL url = new URL(urlString);
          URLConnection conn = getConnection(url);
          // NOTE: Intentionally connect without authentication to grab cookies
+         conn.setReadTimeout(READ_TIMEOUT*1000);
+         if (offset != null) {
+            conn.setRequestProperty("Range", "bytes=" + offset + "-");
+         }
          try { conn.connect(); }
-         catch (IOException ignore) {};
+         catch (IOException e) {
+            // 401 error OK, other errors not
+            if (! conn.getHeaderField(0).contains("401")) {
+               throw(e);
+            }
+         };
          cm.storeCookies(conn);
          // Print header information
          /*String header = conn.getHeaderField(0);
@@ -129,13 +138,15 @@ public class http {
          }
          log.print("---End of headers---");*/
          
-         // Connect again and init cookies with connection
-         conn = getConnection(url);
-         conn.setReadTimeout(READ_TIMEOUT*1000);
-         if (offset != null) {
-            conn.setRequestProperty("Range", "bytes=" + offset + "-");
+         // Connect again if 401 code and init cookies with connection
+         if (conn.getHeaderField(0).contains("401")) {
+            conn = getConnection(url);
+            conn.setReadTimeout(READ_TIMEOUT*1000);
+            if (offset != null) {
+               conn.setRequestProperty("Range", "bytes=" + offset + "-");
+            }
+            cm.setCookies(conn);
          }
-         cm.setCookies(conn);
          
          // Set authentication and get input stream
          synchronized (Authenticator.class) {
