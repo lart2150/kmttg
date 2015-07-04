@@ -865,6 +865,8 @@ public class nplTable extends TableMap {
    // Compute total size and duration of all given items and return as a string
    private String getTotalsString(Stack<Hashtable<String,String>> h) {
       debug.print("h=" + h);
+      if (tivoName.equals("FILES"))
+         return "";
       // If limiting NPL fetches then no message
       if (config.getLimitNplSetting(tivoName) > 0) {
          return "";

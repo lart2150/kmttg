@@ -465,7 +465,8 @@ public class tivoTab {
    
    public void nplTab_UpdateStatus(String s) {
       debug.print("s=" + s);
-      status.setText(s);
+      if (status != null)
+         status.setText(s);
    }
    
    public void nplTab_clear() {
