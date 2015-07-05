@@ -1,6 +1,6 @@
 # Description (single line, keep short)
 <description>
-mpeg4 container, res x=640 h.264 1.8Mbps video, 48KHz/160Kbps 2 chan aac audio
+480p iPad/iPhone/Android mp4, res x=640 h.264 1.8Mbps video, 2 chan AAC audio
 
 # Encode command or script (single line)
 # Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
