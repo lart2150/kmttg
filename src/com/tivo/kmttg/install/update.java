@@ -67,8 +67,10 @@ public class update {
                            if ( unzip(config.programDir, zipFile) ) {
                               log.print("Successfully updated kmttg installation.");
                               file.delete(zipFile);
+                              // NOTE: With Java 8 runlater doesn't work, so just restart without asking
+                              restartApplication();
                               // Ask user if OK to restart kmttg
-                              Platform.runLater(new Runnable() {
+                              /*Platform.runLater(new Runnable() {
                                  @Override public void run() {
                                     Alert alert = new Alert(AlertType.CONFIRMATION);
                                     alert.setTitle("Confirm");
@@ -80,7 +82,7 @@ public class update {
                                        restartApplication();
                                     }
                                  }
-                              });
+                              });*/
                            } else {
                               log.error("Trouble unzipping file: " + zipFile);
                            }
