@@ -21,6 +21,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
@@ -227,6 +228,7 @@ public class nplTable extends TableMap {
       
       // TIVO mode folder constructor
       public Tabentry(String fName, Stack<Hashtable<String,String>> folderEntry) {
+         image.setAlignment(Pos.CENTER_LEFT);
          image.setImage(gui.Images.get("folder"));
          
          // For date, find most recent recording
@@ -281,6 +283,7 @@ public class nplTable extends TableMap {
 
       // TIVO mode non-folder constructor
       public Tabentry(Hashtable<String,String> entry) {
+         image.setAlignment(Pos.CENTER_LEFT);
          if ( entry.containsKey("ExpirationImage") ) {
             image.setImage(gui.Images.get(entry.get("ExpirationImage")));
          }
