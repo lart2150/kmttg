@@ -1185,6 +1185,7 @@ public class nplTable extends TableMap {
             entries.add(copy.get(i));
          }
       }
+      folderize(entries);
       
       // TWP delete calls
       for (String url : urls.keySet()) {
@@ -1218,6 +1219,7 @@ public class nplTable extends TableMap {
             entries.add(copy.get(i));
          }
       }
+      folderize(entries);
       
       // Remote delete calls
       JSONArray a = new JSONArray();
