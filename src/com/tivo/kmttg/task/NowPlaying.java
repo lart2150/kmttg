@@ -449,6 +449,7 @@ public class NowPlaying extends baseTask implements Serializable {
                // NOTE: Don't have ByteOffset available, so use TimeOffset (secs) instead
                entry.put("TimeOffset", "" + json.getInt("bookmarkPosition")/1000);
                
+               /* This intentionally removed in favor of getting ByteOffset from XML
                if (json.has("size") && json.has("duration")) {
                   // Estimate ByteOffset based on TimeOffset
                   // size (KB) * 1024 * bookmarkPosition/(duration(s)*1000)
@@ -457,7 +458,7 @@ public class NowPlaying extends baseTask implements Serializable {
                   long bookmarkPosition = (long)json.getLong("bookmarkPosition");
                   long ByteOffset = bookmarkPosition*size/duration;
                   entry.put("ByteOffset", "" + ByteOffset);
-               }
+               }*/
             }
             if (json.has("subscriptionIdentifier")) {
                JSONArray a = json.getJSONArray("subscriptionIdentifier");

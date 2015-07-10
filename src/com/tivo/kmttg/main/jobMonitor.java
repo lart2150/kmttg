@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import javafx.application.Platform;
 
 import com.tivo.kmttg.gui.gui;
+import com.tivo.kmttg.util.NplItemXML;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -1003,8 +1004,15 @@ public class jobMonitor {
          job.tivoName     = tivoName;
          if (entry != null && entry.containsKey("duration"))
             job.download_duration = (int) (Long.parseLong(entry.get("duration"))/1000);
-         if (config.resumeDownloads && entry.containsKey("ByteOffset")) {
-            job.offset = entry.get("ByteOffset");
+         if (config.resumeDownloads) {
+            if (! entry.containsKey("ByteOffset") && entry.containsKey("url")) {
+               log.warn(">> Getting ByteOffset for url: " + entry.get("url"));
+               String ByteOffset = NplItemXML.ByteOffset(tivoName, entry.get("url"));
+               if (ByteOffset != null)
+                  entry.put("ByteOffset", ByteOffset);
+            }
+            if (entry.containsKey("ByteOffset"))
+               job.offset = entry.get("ByteOffset");
          }
          if (config.java_downloads == 1) {
             if (config.combine_download_decrypt == 1 && decrypt && config.VrdDecrypt == 0) {
