@@ -980,8 +980,8 @@ public class Remote {
       return allShows;
    }
    
-   // Get flat list of all shows
-   public JSONArray MyShowsWatched() {
+   // Get flat list of all shows with partiallyViewed filter enabled
+   public JSONArray MyShowsWatched(jobData job) {
       JSONArray allShows = new JSONArray();
       Hashtable<String,Integer> collections = new Hashtable<String,Integer>();
       try {
@@ -996,6 +996,12 @@ public class Remote {
          JSONObject result = Command("recordingFolderItemSearch", json);
          if (result != null && result.has("objectIdAndType")) {
             JSONArray ids = result.getJSONArray("objectIdAndType");
+            if (job != null && config.GUIMODE) {
+               String c = "" + ids.length() + " shows";
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + c);
+               if ( jobMonitor.isFirstJobInMonitor(job) )
+                  config.gui.setTitle("playlist: " + c + " " + config.kmttg);
+            }
             JSONObject j = new JSONObject();
             j.put("objectIdAndType", ids);
             result = Command("SearchIds", j);

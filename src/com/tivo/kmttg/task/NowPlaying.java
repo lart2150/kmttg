@@ -93,7 +93,7 @@ public class NowPlaying extends baseTask implements Serializable {
                if (r.success) {
                   job.getURLs = true;
                   if (job.partiallyViewed)
-                     data = r.MyShowsWatched();
+                     data = r.MyShowsWatched(job);
                   else
                      data = r.MyShows(job);
                   if (data != null)
