@@ -980,6 +980,61 @@ public class Remote {
       return allShows;
    }
    
+   // Get flat list of all shows
+   public JSONArray MyShowsWatched() {
+      JSONArray allShows = new JSONArray();
+      Hashtable<String,Integer> collections = new Hashtable<String,Integer>();
+      try {
+         JSONObject json = new JSONObject();
+         json.put("bodyId", bodyId_get());
+         JSONObject filter = new JSONObject();
+         filter.put("type", "recordingFilter");
+         filter.put("filterType", "partiallyViewed");
+         filter.put("active", true);
+         json.put("filter", filter);
+         json.put("format", "idSequence");
+         JSONObject result = Command("recordingFolderItemSearch", json);
+         if (result != null && result.has("objectIdAndType")) {
+            JSONArray ids = result.getJSONArray("objectIdAndType");
+            JSONObject j = new JSONObject();
+            j.put("objectIdAndType", ids);
+            result = Command("SearchIds", j);
+            if (result != null && result.has("recordingFolderItem")) {
+               JSONArray entries = result.getJSONArray("recordingFolderItem");
+               for (int i=0; i<entries.length(); ++i) {
+                  j = entries.getJSONObject(i);
+                  if (j.has("childRecordingId")) {
+                     JSONObject jj = new JSONObject();
+                     jj.put("recordingId", j.getString("childRecordingId"));
+                     result = Command("Search", jj);
+                     if (result != null && result.has("recording")) {
+                        JSONObject entry = result.getJSONArray("recording").getJSONObject(0);
+                        // For series types saved collectionId in collections so as to get seriesId later
+                        if (entry.has("isEpisode") && entry.getBoolean("isEpisode")) {
+                           if (entry.has("collectionId")) {
+                              String s = entry.getString("collectionId");
+                              if ( ! collections.containsKey(s) )
+                                 collections.put(s, 1);
+                           }
+                        }
+                        allShows.put(result);
+                     }
+                  }
+               }
+            }
+         }         
+      } catch (JSONException e) {
+         error("rpc MyShowsWatched error - " + e.getMessage());
+         return null;
+      }
+      
+      // Process collections to efficiently get seriesId information
+      if (collections.size() > 0)
+         addSeriesID(allShows, collections);
+      
+      return allShows;      
+   }
+   
    // Find mfs id based on RPC recordingId and then build equivalent
    // traditional TTG URLs based on the mfs id.
    // This is needed when obtaining NPL listings using only RPC which

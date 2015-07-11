@@ -107,6 +107,7 @@ public class jobData implements Serializable, Cloneable {
    public Long time1=null, time2=null, size1=null, size2=null;
    public String rate = "n/a";
    public Boolean getURLs = false;
+   public Boolean partiallyViewed = false;
    public Integer download_duration = 0;
    
    // pyTivo push related

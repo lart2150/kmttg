@@ -92,7 +92,10 @@ public class NowPlaying extends baseTask implements Serializable {
                Remote r = config.initRemote(job.tivoName);
                if (r.success) {
                   job.getURLs = true;
-                  data = r.MyShows(job);
+                  if (job.partiallyViewed)
+                     data = r.MyShowsWatched();
+                  else
+                     data = r.MyShows(job);
                   if (data != null)
                      success = true;
                   else

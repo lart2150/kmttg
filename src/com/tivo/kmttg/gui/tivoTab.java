@@ -51,6 +51,7 @@ public class tivoTab {
    private MyButton disk_usage = null;
    private Label status = null;
    private CheckBox showFolders = null;
+   private CheckBox partiallyViewed = null;
    private nplTable nplTab = null;
    private fileBrowser browser = null;
    private FileChooser csvBrowser = null;
@@ -187,7 +188,7 @@ public class tivoTab {
          status = new Label();
          row.getChildren().add(status);
          
-         // showFolders
+         // showFolders and partiallyViewed
          if ( ! tivoName.equals("FILES") ) {
             showFolders = new CheckBox("Show Folders");
             showFolders.setOnAction(new EventHandler<ActionEvent>() {
@@ -201,6 +202,12 @@ public class tivoTab {
                }
             });
             row.getChildren().add(showFolders);
+            
+            if (config.rpcEnabled(tivoName)) {
+               partiallyViewed = new CheckBox("Partially Viewed");
+               partiallyViewed.setTooltip(config.gui.getToolTip("partiallyViewed"));
+               row.getChildren().add(partiallyViewed);
+            }
          }
          
          panel.getChildren().add(row);
@@ -215,6 +222,12 @@ public class tivoTab {
       debug.print("");
       if (showFolders == null) return false;
       return showFolders.isSelected();
+   }
+   
+   public Boolean partiallyViewed() {
+      debug.print("");
+      if (partiallyViewed == null) return false;
+      return partiallyViewed.isSelected();
    }
    
    public void showFoldersVisible(Boolean visible) {
