@@ -2352,6 +2352,11 @@ public class gui extends Application {
          text += "Change <b>Files of Type</b> to <b>All Files</b> in File browser to see all file types.<br>";
          text += "NOTE: There must be accompanying pyTivo metadata .txt file for this command to work.";
       }
+      else if (component.equals("partiallyViewed")) {
+         text = "<b>Partially Viewed</b><br>";
+         text += "If enabled then only shows that have been partially watched will be obtained on Refresh.<br>";
+         text += "NOTE: This option only applies when <b>Use RPC to get NPL when possible</b> option is enabled.";
+      }
       else if (component.equals("pyTivo_stream")) {
          text =  "<b>pyTivo stream</b><br>";
          text += "Use TiVoCast HME app with pyTivo as a video server to stream a video file to<br>";
