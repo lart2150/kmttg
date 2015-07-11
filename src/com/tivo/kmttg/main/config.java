@@ -89,7 +89,7 @@ public class config {
    public static int single_download = 0;  // Allow only one download at a time if enabled
    public static int npl_when_started = 0; // Start NPL jobs when kmttg GUI starts
    public static int showHistoryInTable = 0; // If 1 then highlight table entries matching auto.history
-   public static int rpcnpl = 0; // Use RPC to obtain NPL when possible
+   public static int rpcnpl = 1; // Use RPC to obtain NPL when possible
    public static boolean persistQueue = false;	// Save job queue between sessions
 
    public static String comskipIni = "";
