@@ -1013,6 +1013,7 @@ public class jobMonitor {
                if (ByteOffset != null) {
                   if (entry.containsKey("title"))
                      log.warn(">> '" + entry.get("title") + "' ByteOffset=" + ByteOffset);
+                  entry.put("ByteOffset", ByteOffset);
                   job.offset = ByteOffset;
                }
             }
