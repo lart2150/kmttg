@@ -1002,32 +1002,46 @@ public class Remote {
                if ( jobMonitor.isFirstJobInMonitor(job) )
                   config.gui.setTitle("playlist: " + c + " " + config.kmttg);
             }
-            JSONObject j = new JSONObject();
-            j.put("objectIdAndType", ids);
-            result = Command("SearchIds", j);
-            if (result != null && result.has("recordingFolderItem")) {
-               JSONArray entries = result.getJSONArray("recordingFolderItem");
-               for (int i=0; i<entries.length(); ++i) {
-                  j = entries.getJSONObject(i);
-                  if (j.has("childRecordingId")) {
-                     JSONObject jj = new JSONObject();
-                     jj.put("recordingId", j.getString("childRecordingId"));
-                     result = Command("Search", jj);
-                     if (result != null && result.has("recording")) {
-                        JSONObject entry = result.getJSONArray("recording").getJSONObject(0);
-                        // For series types saved collectionId in collections so as to get seriesId later
-                        if (entry.has("isEpisode") && entry.getBoolean("isEpisode")) {
-                           if (entry.has("collectionId")) {
-                              String s = entry.getString("collectionId");
-                              if ( ! collections.containsKey(s) )
-                                 collections.put(s, 1);
+            int max = 50; // limit SearchIds queries to at most 50 at a time
+            int index = 0;
+            while (index < ids.length()) {
+               JSONArray a = new JSONArray();
+               for (int i=0; i<max; ++i) {
+                  if (index < ids.length())
+                     a.put(ids.get(index));
+                  index++;
+               }
+               JSONObject j = new JSONObject();
+               j.put("objectIdAndType", a);
+               result = Command("SearchIds", j);
+               if (result != null && result.has("recordingFolderItem")) {
+                  JSONArray entries = result.getJSONArray("recordingFolderItem");
+                  for (int i=0; i<entries.length(); ++i) {
+                     j = entries.getJSONObject(i);
+                     if (j.has("childRecordingId")) {
+                        JSONObject jj = new JSONObject();
+                        jj.put("recordingId", j.getString("childRecordingId"));
+                        result = Command("Search", jj);
+                        if (result != null && result.has("recording")) {
+                           JSONObject entry = result.getJSONArray("recording").getJSONObject(0);
+                           // For series types saved collectionId in collections so as to get seriesId later
+                           if (entry.has("isEpisode") && entry.getBoolean("isEpisode")) {
+                              if (entry.has("collectionId")) {
+                                 String s = entry.getString("collectionId");
+                                 if ( ! collections.containsKey(s) )
+                                    collections.put(s, 1);
+                              }
                            }
+                           allShows.put(result);
                         }
-                        allShows.put(result);
                      }
                   }
                }
-            }
+               String c = "" + allShows.length() + "/" + ids.length();
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + c);
+               if ( jobMonitor.isFirstJobInMonitor(job) )
+                  config.gui.setTitle("playlist: " + c + " " + config.kmttg);
+            } // while
          }         
       } catch (JSONException e) {
          error("rpc MyShowsWatched error - " + e.getMessage());
