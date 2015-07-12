@@ -55,7 +55,7 @@
 }
 
 /* Eliminate most table cell padding so more rows can fit vertically */
-.tree-table-cell, .table-cell { -fx-padding: 0 2 0 2; -fx-border-color: lightgrey; }
+.tree-table-cell, .table-cell { -fx-padding: 0 2 0 2; -fx-border-color: lightgrey; -fx-font-weight: bold; }
 
 /* TabPane - don't want dark grey background */
 .tab-pane > .tab-header-area > .tab-header-background {
