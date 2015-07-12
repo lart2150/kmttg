@@ -16,11 +16,11 @@
 }
 
 .button {
-    -fx-padding: 0 2 0 2;
+    -fx-padding: 1 2 1 2;
 }
 
 .text-field {
-    -fx-padding: 0 1 0 1;
+    -fx-padding: 1 1 1 1;
 }
 
 .piechart_shows {-fx-font-size: 13pt;}
