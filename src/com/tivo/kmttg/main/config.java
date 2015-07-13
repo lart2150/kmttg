@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.Stack;
 
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.*;
@@ -151,7 +150,6 @@ public class config {
    public static Color tableBkgndRecording = Color.rgb(149, 151, 221); // light blue
    public static Color tableBkgndInHistory = Color.rgb(250, 252, 164); // light yellow
    public static Color lightRed = Color.rgb(250, 190, 190); // light red
-   public static Font  tableFont = new Font("System Bold", FontSize);
    public static int   tableColAutoSize = 1; // If 0 then don't auto size table columns
    public static String tooltipBG = "#fff7c8";
    
