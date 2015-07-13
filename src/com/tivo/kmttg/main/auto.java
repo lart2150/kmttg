@@ -23,6 +23,7 @@ public class auto {
    private static Hashtable<String,String> history_hash = new Hashtable<String,String>();
    private static boolean process_auto = true;
    public static boolean process_web = true;
+   private static String runAsAdmin = config.programDir + "\\service\\win32\\runasadmin.vbs";
    
    // Batch mode processing (no GUI)
    public static void startBatchMode() {
@@ -896,40 +897,26 @@ public class auto {
       return null;
    }
    
-   // Windows only: Starts kmttg service using "sc create kmttg ..."
+   // Windows only: Starts kmttg service using "install-kmttg-service.bat" as admin
    public static void serviceCreate() {
       Task<Void> task = new Task<Void>() {
          @Override public Void call() {
-            String binPath = "\\\"" + config.programDir + "\\service\\win32\\bin\\wrapper.exe\\\" -s ";
-            binPath += "\\\"" + config.programDir + "\\service\\conf\\wrapper.conf\\\"";
             Stack<String> command = new Stack<String>();
-            command.add("cmd");
-            command.add("/c");
-            command.add("sc create kmttg binPath= \"" + binPath + "\" DisplayName= \"kmttg\" start= demand");
+            command.add("cscript");
+            command.add("//nologo");
+            command.add(runAsAdmin);
+            command.add(config.programDir + "\\service\\win32\\install-kmttg-service.bat");
             backgroundProcess process = new backgroundProcess();
             if ( process.run(command) ) {
                process.Wait();
-               Stack<String> result = process.getStdout();
-               if (result.size() > 0) {
-                  Boolean good = false;
-                  // Look for "SUCCESS"
-                  for (int i=0; i<result.size(); ++i) {
-                     if (result.get(i).matches("^.+SUCCESS.*$")) {
-                        good = true;
-                     }
-                  }
-                  if (good) {
-                     log.warn("kmttg service installed successfully");
-                     return null;
-                  } else {
-                     log.error("There was a problem installing kmttg service");
-                     log.error(process.getStdout());
-                     serviceDenied(result);
-                  }
-               } else {
-                  log.error("Problem running command: " + process.toString());
-                  log.error(process.getStderr());
-               }
+               try {
+                  Thread.sleep(4000);
+                  log.warn(serviceStatus());
+                  return null;
+               } catch (InterruptedException e) {
+                  log.error(e.getMessage());
+                  return null;
+               }               
             } else {
                log.error("Command failed: " + process.toString());
                log.error(process.getStderr());
@@ -940,48 +927,27 @@ public class auto {
       new Thread(task).start();
    }
    
-   private static void serviceDenied(Stack<String> messages) {
-      for (String line : messages) {
-         if (line.contains("Access is denied")) {
-            log.error("You will need to run as administrator scripts under: " + config.programDir + "\\service\\win32");
-            return;
-         }
-      }
-   }
-   
-   // Windows only: Starts kmttg service using "sc start kmttg"
+   // Windows only: Starts kmttg service using "sc start kmttg" running as admin
    public static void serviceStart() {
       Task<Void> task = new Task<Void>() {
          @Override public Void call() {
             Stack<String> command = new Stack<String>();
-            command.add("cmd");
-            command.add("/c");
-            command.add("sc");
-            command.add("start");
-            command.add("kmttg");
+            command.add("cscript");
+            command.add("//nologo");
+            command.add(runAsAdmin);
+            command.add("sc start kmttg");
             backgroundProcess process = new backgroundProcess();
             if ( process.run(command) ) {
                process.Wait();
-               Stack<String> result = process.getStdout();
-               if (result.size() > 0) {
-                  // Look for FAILED
-                  for (int i=0; i<result.size(); ++i) {
-                     if (result.get(i).matches("^.+FAILED.+$")) {
-                        log.error(result);
-                        serviceDenied(result);
-                        return null;
-                     }
-                  }
-                  // Seemed to work so sleep for a couple of seconds and print status
-                  try {
-                     Thread.sleep(4000);
-                     log.warn(serviceStatus());
-                     return null;
-                  } catch (InterruptedException e) {
-                     log.error(e.getMessage());
-                     return null;
-                  }               
-               }
+               // Seemed to work so sleep for a couple of seconds and print status
+               try {
+                  Thread.sleep(4000);
+                  log.warn(serviceStatus());
+                  return null;
+               } catch (InterruptedException e) {
+                  log.error(e.getMessage());
+                  return null;
+               }               
             } else {
                log.error("Command failed: " + process.toString());
                log.error(process.getStderr());
@@ -992,39 +958,27 @@ public class auto {
       new Thread(task).start();
    }
    
-   // Windows only: Stops kmttg service using "sc stop kmttg"
+   // Windows only: Starts kmttg service using "sc stop kmttg" running as admin
    public static void serviceStop() {
       Task<Void> task = new Task<Void>() {
          @Override public Void call() {
             Stack<String> command = new Stack<String>();
-            command.add("cmd");
-            command.add("/c");
-            command.add("sc");
-            command.add("stop");
-            command.add("kmttg");
+            command.add("cscript");
+            command.add("//nologo");
+            command.add(runAsAdmin);
+            command.add("sc stop kmttg");
             backgroundProcess process = new backgroundProcess();
             if ( process.run(command) ) {
                process.Wait();
-               Stack<String> result = process.getStdout();
-               if (result.size() > 0) {
-                  // Look for FAILED
-                  for (int i=0; i<result.size(); ++i) {
-                     if (result.get(i).matches("^.+FAILED.+$")) {
-                        log.error(result);
-                        serviceDenied(result);
-                        return null;
-                     }
-                  }
-                  // Seemed to work so sleep for a couple of seconds and print status
-                  try {
-                     Thread.sleep(4000);
-                     log.warn(serviceStatus());
-                     return null;
-                  } catch (InterruptedException e) {
-                     log.error(e.getMessage());
-                     return null;
-                  }               
-               }
+               // Seemed to work so sleep for a couple of seconds and print status
+               try {
+                  Thread.sleep(4000);
+                  log.warn(serviceStatus());
+                  return null;
+               } catch (InterruptedException e) {
+                  log.error(e.getMessage());
+                  return null;
+               }               
             } else {
                log.error("Command failed: " + process.toString());
                log.error(process.getStderr());
@@ -1035,38 +989,34 @@ public class auto {
       new Thread(task).start();
    }
    
-   // Windows only: Deletes kmttg service using "sc delete kmttg"
+   // Windows only: Starts kmttg service using "sc delete kmttg" running as admin
    public static void serviceDelete() {
-      Task<Boolean> task = new Task<Boolean>() {
-         @Override public Boolean call() {
+      Task<Void> task = new Task<Void>() {
+         @Override public Void call() {
             Stack<String> command = new Stack<String>();
-            command.add("cmd");
-            command.add("/c");
-            command.add("sc");
-            command.add("delete");
-            command.add("kmttg");
+            command.add("cscript");
+            command.add("//nologo");
+            command.add(runAsAdmin);
+            command.add("sc delete kmttg");
             backgroundProcess process = new backgroundProcess();
             if ( process.run(command) ) {
                process.Wait();
-               Stack<String> result = process.getStdout();
-               if (result.size() > 0) {
-                  // Look for SUCCESS
-                  for (int i=0; i<result.size(); ++i) {
-                     if (result.get(i).matches("^.+SUCCESS.*$")) {
-                        log.warn("Successfully removed kmttg service");
-                        return true;
-                     }
-                  }
-                  // Did not seem to work
-                  log.error(result);
-                  serviceDenied(result);
-                  return false;
-               }
+               // Seemed to work so sleep for a couple of seconds and print status
+               try {
+                  Thread.sleep(4000);
+                  String status = serviceStatus();
+                  if (status.contains("has not been installed"))
+                     log.warn("kmttg service successfully removed");
+                  return null;
+               } catch (InterruptedException e) {
+                  log.error(e.getMessage());
+                  return null;
+               }               
             } else {
                log.error("Command failed: " + process.toString());
                log.error(process.getStderr());
             }
-            return false;
+            return null;
          }
       };
       new Thread(task).start();
