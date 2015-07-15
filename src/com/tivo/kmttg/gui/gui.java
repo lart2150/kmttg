@@ -2336,7 +2336,7 @@ public class gui extends Application {
       }
       else if (component.equals("add")) {
          text =  "<b>Add...</b><br>";
-         text += "Brings up a file browser for selecting TiVo or mpeg2 video files to process.<br>";
+         text += "Brings up a file browser for selecting video files to process.<br>";
          text += "Selected files are added to files table below.<br>";
          text += "NOTE: For Mac OS you can get to other disk volumes by browsing to<br>";
          text += "<b>/Volumes</b> with the browser.";
@@ -2355,6 +2355,10 @@ public class gui extends Application {
       else if (component.equals("partiallyViewed")) {
          text = "<b>Partially Viewed</b><br>";
          text += "If enabled then only shows that have been partially watched will be obtained on Refresh.<br>";
+         text += "If you refresh with this option turned off then this can be used to toggle between full<br>";
+         text += "listings and only partially watched show listings.<br>";
+         text += "If you refresh with this option turned on, it's a quick way to get only partially viewed<br>";
+         text += "shows compared to retrieving full list of shows.<br>";
          text += "NOTE: This option only applies when <b>Use RPC to get NPL when possible</b> option is enabled.";
       }
       else if (component.equals("pyTivo_stream")) {

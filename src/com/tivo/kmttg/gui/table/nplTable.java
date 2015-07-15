@@ -71,6 +71,7 @@ public class nplTable extends TableMap {
    public String folderName = null;
    public int folderEntryNum = -1;
    private Stack<Hashtable<String,String>> entries = null;
+   private Stack<Hashtable<String,String>> entries_viewed = null;
    private Hashtable<String,Stack<Hashtable<String,String>>> folders = null;
    private Vector<Hashtable<String,String>> sortedOrder = null;
    private String lastUpdated = null;
@@ -772,6 +773,7 @@ public class nplTable extends TableMap {
       // Reset local entries/folders hashes to new entries
       entries = h;
       folderize(h); // populates folders hash
+      viewedFilter(h); // populates entries_viewed hash
       
       // Update table listings
       RefreshNowPlaying(entries);
@@ -854,6 +856,30 @@ public class nplTable extends TableMap {
          if (folders.containsKey(special[i])) {
             AddNowPlayingRow(special[i], folders.get(special[i]));
          }
+      }
+   }
+   
+   // Display only entries with pause points
+   public void displayUpdate(Boolean viewed_filter) {
+      if (entries == null || entries_viewed == null)
+         return;
+      if (entries.size() == entries_viewed.size()) {
+         log.warn("NOTE: Looks like NPL list is already filtered. Refresh with 'Partially Viewed' turned off to get unfiltered list back.");
+      }
+      if (viewed_filter) {
+         folderize(entries_viewed);
+         RefreshNowPlaying(entries_viewed);
+      } else {
+         folderize(entries);
+         RefreshNowPlaying(entries);
+      }
+      
+      // Adjust column widths to data
+      TableUtil.autoSizeTableViewColumns(NowPlaying, false);
+      
+      if (config.showHistoryInTable == 1) {
+         // Update history hash (used for highlighting entries with IDs in auto.history)
+         auto.keywordMatchHistoryFast("bogus", true);
       }
    }
    
@@ -976,6 +1002,23 @@ public class nplTable extends TableMap {
          }
       }
       Collections.sort(sortedOrder, folderSort);
+   }
+   
+   // Set entries_viewed to only items with pause points
+   private void viewedFilter(Stack<Hashtable<String,String>> h) {
+      if (h==null)
+         return;
+      entries_viewed = new Stack<Hashtable<String,String>>();
+      for (int i=0; i<h.size(); ++i) {
+         Hashtable<String,String> entry = h.get(i);
+         Boolean filter = true;
+         if (entry.containsKey("ByteOffset") && ! entry.get("ByteOffset").startsWith("0"))
+            filter = false;
+         if (entry.containsKey("TimeOffset") && ! entry.get("TimeOffset").startsWith("0"))
+            filter = false;
+         if (! filter)
+            entries_viewed.push(entry);
+      }
    }
       
    // Convert seconds to mins

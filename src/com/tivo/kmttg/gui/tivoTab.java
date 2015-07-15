@@ -207,6 +207,11 @@ public class tivoTab {
                partiallyViewed = new CheckBox("Partially Viewed");
                partiallyViewed.setTooltip(config.gui.getToolTip("partiallyViewed"));
                row.getChildren().add(partiallyViewed);
+               partiallyViewed.setOnAction(new EventHandler<ActionEvent>() {
+                  public void handle(ActionEvent e) {
+                     nplTab.displayUpdate(partiallyViewed.isSelected());
+                  }
+               });
             }
          }
          
