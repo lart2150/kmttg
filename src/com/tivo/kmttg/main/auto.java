@@ -33,7 +33,7 @@ public class auto {
       Stack<String> errors = config.parse();
       if(errors.size() > 0) {
          log.error(errors);
-         exitAuto(1);
+         System.exit(1);
       }
       
       // Single loop batch mode
@@ -52,13 +52,13 @@ public class auto {
                Thread.sleep(2000);
             } catch (InterruptedException e) {
                log.error(e.toString());
-               exitAuto(1);
+               System.exit(1);
             }
             jobMonitor.monitor(null);
          }
          
          // Done
-         exitAuto(0);
+         System.exit(0);
          
       } else {
          // Auto mode         
