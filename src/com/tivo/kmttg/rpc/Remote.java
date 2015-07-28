@@ -1974,7 +1974,7 @@ public class Remote {
             Boolean include = true;
             JSONObject json_id = new JSONObject();
             json_id.put("bodyId", bodyId_get());
-            json_id.put("count", 50);
+            json_id.put("count", 20);
             json_id.put("levelOfDetail", "high");
             for (String entry : additional) {
                if (json.has(entry))
@@ -1986,9 +1986,29 @@ public class Remote {
                json_id.put("offerId", id);
             JSONObject result = Command("offerSearch", json_id);
             if (result != null && result.has("offer")) {
+               if (json_id.has("offerId"))
+                  json_id.remove("offerId");
+               if (json_id.has("collectionId"))
+                  json_id.remove("collectionId");
                JSONArray a = result.getJSONArray("offer");
                for (int k=0; k<a.length(); ++k) {
                   JSONObject j = a.getJSONObject(k);
+                  // Collect extra information using contentSearch
+                  // since offerSearch is buggy and hardcoded to levelOfDetail=low
+                  if (j.has("contentId")) {
+                     json_id.put("contentId", j.getString("contentId"));
+                     JSONObject result2 = Command("contentSearch", json_id);
+                     if (result2 != null && result2.has("content")) {
+                        JSONObject j2 = result2.getJSONArray("content").getJSONObject(0);
+                        for (int ii=0; ii<j2.names().length(); ii++) {
+                           String name = j2.names().getString(ii);
+                           if (! j.has(name)) {
+                              j.put(name, j2.get(name));
+                           }
+                        }
+                     }
+                     j.put("levelOfDetail", "high");
+                  }
                   if (job.remote_adv_search_chans != null && j.has("channel")) {
                      // Channel filter
                      include = false;
@@ -2001,20 +2021,15 @@ public class Remote {
                      }
                   } // if channel
                   if (include) {
-                     if (j.has("partnerCollectionId") && j.has("title") && j.has("collectionId")) {
-                        String partner = j.getString("partnerCollectionId");
-                        if ( ! partner.startsWith("epg") )
-                           continue;
-                        match_count++;
-                        if (match_count > job.remote_search_max)
-                           break outerloop;
-                        filtered_entries.put(j);
-                        String message = "Matches: " + match_count ;
-                        config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
-                        if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                           config.gui.setTitle("Adv Search: " + match_count + " " + config.kmttg);
-                        }
-                     } // if partner
+                     match_count++;
+                     if (match_count > job.remote_search_max)
+                        break outerloop;
+                     filtered_entries.put(j);
+                     String message = "Matches: " + match_count ;
+                     config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+                     if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                        config.gui.setTitle("Adv Search: " + match_count + " " + config.kmttg);
+                     }
                   } // if include
                } // for k
             } // result != null
