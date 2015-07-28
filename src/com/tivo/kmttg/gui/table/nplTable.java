@@ -1052,6 +1052,11 @@ public class nplTable extends TableMap {
       item.expandedProperty().addListener(new ChangeListener<Boolean>() {
          @Override
          public void changed(ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) {
+            if (arg2) {
+               // Identify NPL table items associated with queued/running jobs
+               jobMonitor.updateNPLjobStatus();
+            }
+            
             TableUtil.autoSizeTableViewColumns(NowPlaying, false);
          }         
       });
