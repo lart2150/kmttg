@@ -2424,9 +2424,7 @@ public class gui extends Application {
          text =  "<b>rpc Delete</b><br>";
          text += "If you have Series 4 (Premiere) TiVo or later with Network Remote setting enabled<br>";
          text += "then if you enable this task, rpc style communications will be used to<br>";
-         text += "delete show on TiVo following successful decrypt of a downloaded .TiVo file.<br>";
-         text += "NOTE: You must also have <b>Enable rpc style communications with this TiVo</b> option<br>";
-         text += "enabled under <b>Configuration-TiVos</b> for each Premiere that you want this to work with.";
+         text += "delete show on TiVo following successful decrypt of a downloaded .TiVo file.";
       }
       else if (component.equals("comskip")) {
          text =  "<b>Ad Detect</b><br>";
