@@ -79,6 +79,7 @@ public class PopupHandler {
             items.add(new PopupPair("Modify [m]", KeyCode.M, subTabName));
             items.add(new PopupPair("Upcoming [u]", KeyCode.U, subTabName));
             items.add(new PopupPair("Conflicts [o]", KeyCode.O, subTabName));
+            items.add(new PopupPair("Show Information [i]", KeyCode.I, subTabName));
          }
          if (subTabName.equals("Thumbs")) {
             if (config.rpcEnabled(tivoName))
