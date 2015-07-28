@@ -170,13 +170,20 @@ public class ShowDetails {
                               return null;
                         }
                      }
-                     else if (json.has("offerId")) {
-                        j.put("offerId", json.getString("offerId"));
-                        result = r.Command("offerSearch", j);
+                     else if (json.has("contentId")) {
+                        j.put("contentId", json.getString("contentId"));
+                        result = r.Command("contentSearch", j);
                         if (result == null)
                            return null;
-                        if (result.has("offer"))
-                           json = result.getJSONArray("offer").getJSONObject(0);
+                        if (result.has("content")) {
+                           JSONObject content = result.getJSONArray("content").getJSONObject(0);
+                           for (int ii=0; ii<content.names().length(); ii++) {
+                              String name = content.names().getString(ii);
+                              if (! json.has(name)) {
+                                 json.put(name, content.get(name));
+                              }
+                           }
+                        }
                         else {
                            if (! json.has("title"))
                               return null;
@@ -185,7 +192,30 @@ public class ShowDetails {
                   } else {
                      return null;
                   }
+               } // json levelOfDetail
+               
+               if (json.has("idSetSource") && json.getJSONObject("idSetSource").has("collectionId")) {
+                  // For SP table
+                  Remote r = config.initRemote(tivoName);
+                  if (r.success) {
+                     JSONObject j = new JSONObject();
+                     j.put("bodyId", r.bodyId_get());
+                     j.put("count", 1);
+                     j.put("levelOfDetail", "high");
+                     j.put("collectionId", json.getJSONObject("idSetSource").getString("collectionId"));
+                     JSONObject result = r.Command("collectionSearch", j);
+                     if (result == null)
+                        return null;
+                     if (result.has("collection")) {
+                        json = result.getJSONArray("collection").getJSONObject(0);
+                     }
+                     else {
+                        if (! json.has("title"))
+                           return null;
+                     }
+                  }
                }
+               
                //log.print(json.toString(3));
             } catch (JSONException e) {
                log.error("ShowDetails update - " + e.getMessage());
