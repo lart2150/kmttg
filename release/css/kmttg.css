@@ -11,8 +11,16 @@
     -fx-padding: 0 5 0 5;
 }
 
+.list-cell {
+    -fx-padding: 0 1 0 1;
+}
+
 .combo-box > .list-cell {
     -fx-padding: 1 1 1 1;
+}
+
+.list-view {
+    -fx-padding: 0 0 0 0;
 }
 
 .button {
@@ -61,3 +69,4 @@
 .tab-pane > .tab-header-area > .tab-header-background {
     -fx-background-color: -fx-background;
 }
+
