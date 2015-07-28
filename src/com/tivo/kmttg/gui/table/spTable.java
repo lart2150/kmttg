@@ -6,6 +6,8 @@ import java.util.Hashtable;
 import java.util.Optional;
 
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.control.SelectionMode;
@@ -94,6 +96,17 @@ public class spTable extends TableMap {
       TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {
          public void handle(KeyEvent e) {
             KeyPressed(e);
+         }
+      });
+      
+      // Define selection listener to detect table row selection changes
+      TABLE.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tabentry>() {
+         @Override
+         public void changed(ObservableValue<? extends Tabentry> obs, Tabentry oldSelection, Tabentry newSelection) {
+            if (newSelection != null) {
+               if (config.gui.show_details.isShowing())
+                  ShowDetails();
+            }
          }
       });
       
@@ -475,6 +488,15 @@ public class spTable extends TableMap {
           return null;
     }
     
+    private void ShowDetails() {
+       if (currentTivo == null)
+          return;
+       int[] selected = TableUtil.GetSelectedRows(TABLE);
+       if (selected == null || selected.length < 1)
+          return;
+       config.gui.show_details.update(TABLE, currentTivo, GetRowData(selected[0]));
+    }
+    
     // Handle keyboard presses
     private void KeyPressed(KeyEvent e) {
        if (e.isControlDown())
@@ -506,6 +528,9 @@ public class spTable extends TableMap {
        }
        else if (keyCode == KeyCode.O) {
           config.gui.remote_gui.sp_tab.conflicts.fire();
+       }
+       else if (keyCode == KeyCode.I) {
+          ShowDetails();
        }
        else if (keyCode == KeyCode.Q) {
           // Web query currently selected entry
