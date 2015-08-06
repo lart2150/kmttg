@@ -1024,6 +1024,11 @@ public class Remote {
                         result = Command("Search", jj);
                         if (result != null && result.has("recording")) {
                            JSONObject entry = result.getJSONArray("recording").getJSONObject(0);
+                           if (job != null && job.getURLs) {
+                              if (!getURLs(job.tivoName, entry)) {
+                                 return null;
+                              }
+                           }
                            // For series types saved collectionId in collections so as to get seriesId later
                            if (entry.has("isEpisode") && entry.getBoolean("isEpisode")) {
                               if (entry.has("collectionId")) {
