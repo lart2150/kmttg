@@ -229,13 +229,15 @@ public class nplTable extends TableMap {
       
       // TIVO mode folder constructor
       public Tabentry(String fName, Stack<Hashtable<String,String>> folderEntry) {
+         if (folderEntry.size() == 0)
+            return;
          image.setAlignment(Pos.CENTER_LEFT);
          image.setImage(gui.Images.get("folder"));
          
          // For date, find most recent recording
          // For channel see if they are all from same channel
          String chan = "";
-         if (folderEntry.get(0).containsKey("channel")) {
+         if (folderEntry.size() > 0 && folderEntry.get(0).containsKey("channel")) {
             chan = folderEntry.get(0).get("channel");
          }
          Boolean sameChannel = true;
@@ -262,24 +264,24 @@ public class nplTable extends TableMap {
          }
          if (folderEntry.size() > 0) {
             rate_total /= folderEntry.size();
+            show = new sortableShow(fName, folderEntry, gmt_index);
+            date = new sortableDate(fName, folderEntry, gmt_index);
+            
+            if (sameChannel) {
+               if ( folderEntry.get(0).containsKey("channelNum") && folderEntry.get(0).containsKey("channel")) {
+                  channel = new sortableChannel(
+                     folderEntry.get(0).get("channel"),folderEntry.get(0).get("channelNum")
+                  );
+               } else
+                  channel = new sortableChannel("", "");
+            } else {
+               channel = new sortableChannel("<various>", "0");
+            }
+            
+            duration = new sortableDuration(folderEntry);
+            size = new sortableSize(folderEntry);
+            mbps = new sortableDouble(rate_total);         
          }
-         show = new sortableShow(fName, folderEntry, gmt_index);
-         date = new sortableDate(fName, folderEntry, gmt_index);
-         
-         if (sameChannel) {
-            if ( folderEntry.get(0).containsKey("channelNum") && folderEntry.get(0).containsKey("channel")) {
-               channel = new sortableChannel(
-                  folderEntry.get(0).get("channel"),folderEntry.get(0).get("channelNum")
-               );
-            } else
-               channel = new sortableChannel("", "");
-         } else {
-            channel = new sortableChannel("<various>", "0");
-         }
-         
-         duration = new sortableDuration(folderEntry);
-         size = new sortableSize(folderEntry);
-         mbps = new sortableDouble(rate_total);         
       }
 
       // TIVO mode non-folder constructor
@@ -1102,7 +1104,11 @@ public class nplTable extends TableMap {
                if (hash != item.getValue().getDATE().data)
                   new_data.add(hash);
             }
-            parent.setValue(new Tabentry(date.folderName, new_data));
+            if (new_data.size() > 0)
+               parent.setValue(new Tabentry(date.folderName, new_data));
+            else {
+               NowPlaying.getRoot().getChildren().remove(parent);
+            }
          }
          // Remove table entry
          parent.getChildren().remove(item);
