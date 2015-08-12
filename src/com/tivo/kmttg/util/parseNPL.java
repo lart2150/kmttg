@@ -331,6 +331,22 @@ public class parseNPL {
          if (! unique.containsKey(ProgramId_unique)) {
             unique.put(ProgramId_unique, 1);
             UNIQUE.add(ENTRIES.get(i));
+            if (ENTRIES.get(i).containsKey("duration")) {
+               String duration = ENTRIES.get(i).get("duration");
+               String key = ProgramId_unique + "_" + duration;
+               unique.put(key, 1);
+            }
+         } else {
+            // Already have this id, but do some further checking in case we need to include it in UNIQUE stack
+            // Partial recordings have different durations and should not be uniquified
+            if (ENTRIES.get(i).containsKey("duration")) {
+               String duration = ENTRIES.get(i).get("duration");
+               String key = ProgramId_unique + "_" + duration;
+               if ( ! unique.containsKey(key) ) {
+                  unique.put(key, 1);
+                  UNIQUE.add(ENTRIES.get(i));
+               }
+            }
          }
       }
       ENTRIES = null;
