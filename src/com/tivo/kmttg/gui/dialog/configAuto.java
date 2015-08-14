@@ -14,7 +14,7 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
@@ -55,10 +55,10 @@ public class configAuto {
    private static Label text = null;
    private static autoTable table = null;
    private static ScrollPane table_scroll = null;
-   private static ComboBox<String> type = null;
-   private static ComboBox<String> tivo = null;
-   private static ComboBox<String> encoding_name = null;
-   private static ComboBox<String> encoding_name2 = null;
+   private static ChoiceBox<String> type = null;
+   private static ChoiceBox<String> tivo = null;
+   private static ChoiceBox<String> encoding_name = null;
+   private static ChoiceBox<String> encoding_name2 = null;
    private static TextField encoding_name2_suffix = null;
    private static CheckBox enabled = null;
    private static CheckBox metadata = null;
@@ -85,7 +85,7 @@ public class configAuto {
    private static CheckBox useProgramId_unique = null;
    private static CheckBox kuidFilter = null;
    private static CheckBox programIdFilter = null;
-   private static ComboBox<String> dateOperator = null;
+   private static ChoiceBox<String> dateOperator = null;
    private static TextField dateHours = null;
    private static MyButton OK = null;
    private static MyButton CANCEL = null;
@@ -189,12 +189,12 @@ public class configAuto {
       });
 
       Label type_label = new Label("Type");
-      type = new ComboBox<String>();
+      type = new ChoiceBox<String>();
       type.getItems().addAll("title", "keywords");
       type.setValue(type.getItems().get(0));
       
       Label tivo_label = new Label("TiVo");
-      tivo = new ComboBox<String>();
+      tivo = new ChoiceBox<String>();
       for (String s : getTivoFilterNames()) {
          tivo.getItems().add(s);
       }
@@ -252,8 +252,8 @@ public class configAuto {
       
       Label encoding_name_label = new Label("Encoding Name: ");
       
-      encoding_name = new ComboBox<String>();
-      encoding_name2 = new ComboBox<String>();
+      encoding_name = new ChoiceBox<String>();
+      encoding_name2 = new ChoiceBox<String>();
       encoding_name2_suffix = new TextField(); encoding_name2_suffix.setMinWidth(15);
       SetEncodings(encodeConfig.getValidEncodeNames());
       
@@ -271,7 +271,7 @@ public class configAuto {
       noJobWait.setSelected((Boolean)(autoConfig.noJobWait == 1));
       
       dateFilter = new CheckBox("Date Filter");
-      dateOperator = new ComboBox<String>();
+      dateOperator = new ChoiceBox<String>();
       dateOperator.getItems().add("more than");
       dateOperator.getItems().add("less than");
       dateOperator.setValue(dateOperator.getItems().get(0));
@@ -805,7 +805,7 @@ public class configAuto {
       programIdFilter.setSelected((Boolean)(autoConfig.programIdFilter == 1));
    }
    
-   // Set encoding_name combobox choices
+   // Set encoding_name ChoiceBox choices
    public void SetEncodings(Stack<String> values) {
       debug.print("values=" + values);
       

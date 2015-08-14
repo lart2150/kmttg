@@ -9,7 +9,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -37,10 +37,10 @@ public class slingboxgui {
    private TextField pass;
    private TextField dur;
    private TextField chan;
-   private ComboBox<String> type;
-   private ComboBox<String> vbw;
-   private ComboBox<String> res;
-   private ComboBox<String> container;
+   private ChoiceBox<String> type;
+   private ChoiceBox<String> vbw;
+   private ChoiceBox<String> res;
+   private ChoiceBox<String> container;
    private CheckBox raw;
    jobData job = null;
    FileChooser fileBrowser = null;
@@ -215,19 +215,19 @@ public class slingboxgui {
          chan.setText("");
          
          Label res_label = new Label("Video resolution");
-         res = new ComboBox<String>();
+         res = new ChoiceBox<String>();
          res.setTooltip(getToolTip("res"));
          res.getItems().addAll("1920x1080", "640x480");
          res.setValue(config.slingBox_res);
          
          Label vbw_label = new Label("Video bit rate (Kbps)");
-         vbw = new ComboBox<String>();
+         vbw = new ChoiceBox<String>();
          vbw.setTooltip(getToolTip("vbw"));
          vbw.getItems().addAll("4000", "5000", "6000", "7000");
          vbw.setValue(config.slingBox_vbw);
          
          Label type_label = new Label("Slingbox model");
-         type = new ComboBox<String>();
+         type = new ChoiceBox<String>();
          type.setTooltip(getToolTip("type"));
          type.getItems().add("Slingbox 350/500");
          type.getItems().add("Slingbox Pro HD");
@@ -236,7 +236,7 @@ public class slingboxgui {
          type.setValue(config.slingBox_type);
          
          Label container_label = new Label("Video container to use");
-         container = new ComboBox<String>();
+         container = new ChoiceBox<String>();
          container.setTooltip(getToolTip("container"));
          container.getItems().add("mpegts");
          container.getItems().add("matroska");

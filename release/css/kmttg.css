@@ -19,6 +19,10 @@
     -fx-padding: 1 1 1 1;
 }
 
+.choice-box > .label {
+    -fx-padding: 1 1 1 1;
+}
+
 .list-view {
     -fx-padding: 0 0 0 0;
 }

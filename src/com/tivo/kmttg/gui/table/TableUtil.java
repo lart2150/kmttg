@@ -18,7 +18,7 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -64,7 +64,7 @@ public class TableUtil {
    private static TextField searchField = null;
    private static MyButton find = null;
    private static Dialog<?> thumbsDialog = null;
-   private static ComboBox<String> thumbsChoice = null;
+   private static ChoiceBox<String> thumbsChoice = null;
    private static double search_x = -1;
    private static double search_y = -1;
    
@@ -406,7 +406,7 @@ public class TableUtil {
          // Dialog not created yet, so do so
          HBox row1 = new HBox();
          Label rating = new Label("Thumbs Rating: ");
-         thumbsChoice = new ComboBox<String>();
+         thumbsChoice = new ChoiceBox<String>();
          for (int i=-3; i<=3; ++i)
             thumbsChoice.getItems().add("" + i);
          MyButton setMyButton = new MyButton("SET");

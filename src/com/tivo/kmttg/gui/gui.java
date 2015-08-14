@@ -39,7 +39,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -141,7 +141,7 @@ public class gui extends Application {
    public MenuItem searchMenuItem = null;
    public MenuItem thumbsMenuItem = null;
    
-   private ComboBox<String> encoding = null;
+   private ChoiceBox<String> encoding = null;
    private Label encoding_label = null;
    private Label encoding_description_label = null;
    public MyButton start = null;
@@ -506,7 +506,7 @@ public class gui extends Application {
          encoding_label.setTextAlignment(TextAlignment.CENTER);
  
          // Encoding names combo box
-         encoding = new ComboBox<String>();
+         encoding = new ChoiceBox<String>();
          SetEncodings(encodeConfig.getValidEncodeNames());
          encoding.valueProperty().addListener(new ChangeListener<String>() {
             @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
@@ -1473,7 +1473,7 @@ public class gui extends Application {
    
    // Encoding cyclic change callback
    // Set the description according to selected item
-   private void encodingCB(ComboBox<String> combo) {
+   private void encodingCB(ChoiceBox<String> combo) {
       debug.print("combo=" + combo);
       String encodeName = combo.getValue();
       config.encodeName = encodeName;
@@ -1671,14 +1671,14 @@ public class gui extends Application {
       configMain.addTivo(name, ip);
    }
    
-   // Set encoding combobox choices
+   // Set encoding ChoiceBox choices
    public void SetEncodings(final Stack<String> values) {
       debug.print("values=" + values);
 
       if (encoding != null) {
          Platform.runLater(new Runnable() {
             @Override public void run() {
-               // Get existing setting in combobox
+               // Get existing setting in ChoiceBox
                String current = null;
                if (encoding.getItems().size() > 0) {
                   current = encoding.getValue();

@@ -12,7 +12,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -29,7 +29,7 @@ import com.tivo.kmttg.util.log;
 public class spOptions {
    VBox components;
    Label label;
-   ComboBox<String> record, channel, number, until, start, stop, include, startFrom, rentOrBuy, hd;
+   ChoiceBox<String> record, channel, number, until, start, stop, include, startFrom, rentOrBuy, hd;
    TwoWayHashmap<String,String> recordHash = new TwoWayHashmap<String,String>();
    TwoWayHashmap<String,Integer> numberHash = new TwoWayHashmap<String,Integer>();
    TwoWayHashmap<String,String> untilHash = new TwoWayHashmap<String,String>();
@@ -112,13 +112,13 @@ public class spOptions {
    
    private void createComponents() {
       label = new Label();
-      record = new ComboBox<String>();
+      record = new ChoiceBox<String>();
       record.getItems().addAll(
          "Repeats & first-run", "First-run only", "All (with duplicates)"
       );
       record.setValue("First-run only");
       
-      channel = new ComboBox<String>();
+      channel = new ChoiceBox<String>();
       channel.getItems().add("All");
       channel.valueProperty().addListener(new ChangeListener<String>() {
          @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
@@ -128,7 +128,7 @@ public class spOptions {
          }
       });
       
-      number = new ComboBox<String>();
+      number = new ChoiceBox<String>();
       number.getItems().addAll(
          "1 recorded show", "2 recorded shows", "3 recorded shows",
          "4 recorded shows", "5 recorded shows", "10 recorded shows",
@@ -136,18 +136,18 @@ public class spOptions {
       );
       number.setValue("25 recorded shows");
 
-      until = new ComboBox<String>();
+      until = new ChoiceBox<String>();
       until.getItems().addAll("Space needed", "Until I delete");
       until.setValue("Space needed");
 
-      start = new ComboBox<String>();
+      start = new ChoiceBox<String>();
       start.getItems().addAll(
          "On time", "1 minute early", "2 minutes early", "3 minutes early",
          "4 minutes early", "5 minutes early", "10 minutes early"
       );
       start.setValue("On time");
 
-      stop = new ComboBox<String>();
+      stop = new ChoiceBox<String>();
       stop.getItems().addAll(
          "On time", "1 minute late", "2 minutes late", "3 minutes late",
          "4 minutes late", "5 minutes late", "10 minutes late",
@@ -156,7 +156,7 @@ public class spOptions {
       );
       stop.setValue("On time");
       
-      include = new ComboBox<String>();
+      include = new ChoiceBox<String>();
       include.getItems().addAll(
          "Recordings Only", "Recordings & Streaming Videos", "Streaming Only"
       );
@@ -169,19 +169,19 @@ public class spOptions {
          }
       });
       
-      startFrom = new ComboBox<String>();
+      startFrom = new ChoiceBox<String>();
       startFrom.getItems().addAll(
          "Season 1", "New episodes only"
       );
       startFrom.setValue(startFrom.getItems().get(0));
       
-      rentOrBuy = new ComboBox<String>();
+      rentOrBuy = new ChoiceBox<String>();
       rentOrBuy.getItems().addAll(
          "Don't Include", "Include"
       );
       rentOrBuy.setValue(rentOrBuy.getItems().get(0));
       
-      hd = new ComboBox<String>();
+      hd = new ChoiceBox<String>();
       hd.getItems().addAll(
          "If Possible", "Always", "Never"
       );

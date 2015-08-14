@@ -18,7 +18,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -29,7 +29,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 public class seasonpasses {
    public VBox panel = null;
    public spTable tab = null;
-   public ComboBox<String> tivo = null;
+   public ChoiceBox<String> tivo = null;
    public MyButton copy = null;
    public MyButton conflicts = null;
    public MyButton modify = null;
@@ -48,7 +48,7 @@ public class seasonpasses {
 
       Label tivo_label = new Label();
 
-      tivo = new ComboBox<String>();
+      tivo = new ChoiceBox<String>();
       tivo.valueProperty().addListener(new ChangeListener<String>() {
          @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
             if (newVal != null && config.gui.remote_gui != null) {

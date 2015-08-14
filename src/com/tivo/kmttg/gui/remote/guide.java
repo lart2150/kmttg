@@ -20,7 +20,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -36,8 +36,8 @@ public class guide {
    public guideTable tab = null;
    public ListView<String> ChanList = null;
    public  MyButton refresh = null;
-   public ComboBox<String> tivo = null;
-   public ComboBox<String> start = null;
+   public ChoiceBox<String> tivo = null;
+   public ChoiceBox<String> start = null;
    public CheckBox guide_channels = null;
    public MyButton record = null;
    public MyButton recordSP = null;
@@ -59,7 +59,7 @@ public class guide {
       
       Label tivo_label = new Label();
       
-      tivo = new ComboBox<String>();
+      tivo = new ChoiceBox<String>();
       tivo.valueProperty().addListener(new ChangeListener<String>() {
          @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
             // Don't do anything if oldVal is null or kmttg starting (implies values being reset)
@@ -84,7 +84,7 @@ public class guide {
       guide_channels.setTooltip(tooltip.getToolTip("guide_channels"));
       
       Label guide_start_label = new Label("Start");
-      start = new ComboBox<String>();
+      start = new ChoiceBox<String>();
       start.setTooltip(tooltip.getToolTip("guide_start"));
       // When start time changes need to update the table when appropriate
       start.valueProperty().addListener(new ChangeListener<String>() {

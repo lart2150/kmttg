@@ -21,7 +21,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Alert.AlertType;
@@ -32,7 +32,7 @@ import javafx.stage.Stage;
 
 public class info {
    public VBox panel = null;   
-   public ComboBox<String> tivo = null;
+   public ChoiceBox<String> tivo = null;
    public MyButton reboot = null;
    public TextArea text = null;
    public Hashtable<String,String> tivo_data = new Hashtable<String,String>();
@@ -50,7 +50,7 @@ public class info {
 
       Label tivo_label = new Label("");
 
-      tivo = new ComboBox<String>();
+      tivo = new ChoiceBox<String>();
       tivo.valueProperty().addListener(new ChangeListener<String>() {
          @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
             if (newVal != null) {
