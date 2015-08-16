@@ -2178,19 +2178,18 @@ public class Remote {
                            matched++;
                            titles.put(c);
                         }                        
+                        
+                        if (job != null) {
+                           String message = "Ext Matches: " + matched;
+                           config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+                           if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                              config.gui.setTitle("Ext Search: " + matched + " " + config.kmttg);
+                           }
+                        }
                      } // if c.has("contentId")
                   } // for
                } // if result.has("offer")
-            } // if result from offerSearch
-            
-            if (job != null) {
-               String message = "Ext Matches: " + matched;
-               config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
-               if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                  config.gui.setTitle("Ext Search: " + matched + " " + config.kmttg);
-               }
-            }
-            
+            } // if result from offerSearch            
          } // while ! stop
          
          // Sort into collections
