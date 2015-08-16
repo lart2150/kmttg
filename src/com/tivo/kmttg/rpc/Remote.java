@@ -2189,7 +2189,9 @@ public class Remote {
                      } // if c.has("contentId")
                   } // for
                } // if result.has("offer")
-            } // if result from offerSearch            
+            } // if result from offerSearch
+            if (titles.length() >= max)
+               stop = true;
          } // while ! stop
          
          // Sort into collections
