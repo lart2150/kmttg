@@ -2097,7 +2097,7 @@ public class Remote {
       int order = 0;
       int matched = 0;
       try {
-         int count = 25;
+         int count = 50;
          
          // Update job monitor output column name
          if (job != null && config.GUIMODE) {
@@ -2107,6 +2107,7 @@ public class Remote {
          JSONObject json = new JSONObject();
          json.put("bodyId", bodyId_get());
          json.put("count", count);
+         json.put("namespace", "trioserver");
          if (credit == null)
             json.put("keyword", keyword);
          else
@@ -2117,88 +2118,80 @@ public class Remote {
             json.put("includePaid", includePaid);
             json.put("includeVod", includeVod);
          }
-         json.put("orderBy", "strippedTitle");
          json.put("filterUnavailable", filterUnavailable);
          json.put("mergeOverridingCollections", true);
-         json.put("levelOfDetail", "medium");
-         JSONObject result = Command("collectionSearch", json);
-         if (result == null) {
-            log.error("Extended keyword search failed for: '" + keyword + "'");
-         } else {                        
-            if (result.has("collection")) {
-               JSONArray entries = result.getJSONArray("collection");
-               JSONObject j = new JSONObject();
-               j.put("bodyId", bodyId_get());
-               j.put("count", count);
-               j.put("namespace", "trioserver");
-               j.put("mergeOverridingCollections", true);
-               j.put("levelOfDetail", "medium");
-               for (int i=0; i<entries.length(); ++i) {
-                  if (titles.length() >= max)
-                     break;
-                  JSONObject c = entries.getJSONObject(i);
-                  if (c.has("collectionId")) {
-                     Boolean stop = false;
-                     int offset = 0;
-                     while ( ! stop ) {
-                        j.put("collectionId", c.getString("collectionId"));
-                        j.put("offset", offset);
-                        result = Command("offerSearch", j);
-                        if (result != null && result.has("offer")) {
-                           JSONArray a = result.getJSONArray("offer");
-                           offset += a.length();
-                           if (a.length() == 0)
-                              stop = true;
-                           for (int k=0; k<a.length(); ++k) {
-                              JSONObject title = a.getJSONObject(k);
-                              if ( ! stop ) {
-                                 // NOTE: Filter out paid items if includePaid == false
-                                 Boolean add = true;
-                                 if ( title.has("price") && ! includePaid) {
-                                    if ( ! title.getString("price").equals("USD.0") )
-                                       add = false;
-                                 }
-                                 // Filter out no longer supported collectionType=webVideo
-                                 if (title.has("collectionType") && title.getString("collectionType").equals("webVideo"))
-                                    add = false;
-                                 if (add) {
-                                    matched++;
-                                    titles.put(title);
-                                 }
-                              }
-                              if (titles.length() >= max) {
-                                 stop = true;
-                              }
-                           }
-                           if (job != null) {
-                              String message = "Ext Matches: " + matched;
-                              config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
-                              if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                                 config.gui.setTitle("Ext Search: " + matched + " " + config.kmttg);
-                              }
-                           }
-                        } else {
-                           stop = true;
-                           if (! filterUnavailable) {
-                              // No guide data available for this collection
-                              if (titles.length() < max && c.has("description")) {
-                                 matched++;
-                                 titles.put(c);
-                                 if (job != null) {
-                                    String message = "Ext Matches: " + matched;
-                                    config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
-                                    if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                                       config.gui.setTitle("Ext Search: " + matched + " " + config.kmttg);
-                                    }
-                                 }
+         Boolean stop = false;
+         int offset = 0;
+         while (! stop) {
+            json.put("offset", offset);
+            JSONObject result = Command("offerSearch", json);
+            if (result == null) {
+               log.error("Extended keyword search failed for: '" + keyword + "'");
+               stop = true;
+            } else {                        
+               if (result.has("offer")) {
+                  JSONArray entries = result.getJSONArray("offer");
+                  offset += entries.length();
+                  if (entries.length() == 0 || entries.length() < count)
+                     stop = true;
+                  for (int i=0; i<entries.length(); ++i) {
+                     if (titles.length() >= max) {
+                        stop = true;
+                        break;
+                     }
+                     JSONObject c = entries.getJSONObject(i);
+                     // Collect extra information using contentSearch
+                     // since offerSearch is buggy and hardcoded to levelOfDetail=low
+                     if (c.has("contentId")) {
+                        JSONObject j = new JSONObject();
+                        j.put("bodyId", bodyId_get());
+                        j.put("count", 1);
+                        j.put("levelOfDetail", "medium");
+                        j.put("filterUnavailable", filterUnavailable);
+                        if (includeFree || includePaid || includeVod) {
+                           j.put("includeFree", includeFree);
+                           j.put("includePaid", includePaid);
+                           j.put("includeVod", includeVod);
+                        }
+                        j.put("contentId", c.getString("contentId"));
+                        JSONObject result2 = Command("contentSearch", j);
+                        if (result2 != null && result2.has("content")) {
+                           JSONObject j2 = result2.getJSONArray("content").getJSONObject(0);
+                           for (int ii=0; ii<j2.names().length(); ii++) {
+                              String name = j2.names().getString(ii);
+                              if (! c.has(name)) {
+                                 c.put(name, j2.get(name));
                               }
                            }
                         }
-                     } // while
-                  }
-               } // for
+                        
+                        // NOTE: Filter out paid items if includePaid == false
+                        Boolean add = true;
+                        if ( c.has("price") && ! includePaid) {
+                           if ( ! c.getString("price").equals("USD.0") )
+                              add = false;
+                        }
+                        // Filter out no longer supported collectionType=webVideo
+                        if (c.has("collectionType") && c.getString("collectionType").equals("webVideo"))
+                           add = false;
+                        if (add) {
+                           matched++;
+                           titles.put(c);
+                        }                        
+                     } // if c.has("contentId")
+                  } // for
+               } // if result.has("offer")
+            } // if result from offerSearch
+            
+            if (job != null) {
+               String message = "Ext Matches: " + matched;
+               config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+               if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                  config.gui.setTitle("Ext Search: " + matched + " " + config.kmttg);
+               }
             }
-         }
+            
+         } // while ! stop
          
          // Sort into collections
          for (int i=0; i<titles.length(); ++i) {
