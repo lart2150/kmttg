@@ -2108,6 +2108,7 @@ public class Remote {
          json.put("bodyId", bodyId_get());
          json.put("count", count);
          json.put("namespace", "trioserver");
+         json.put("skipPartnerExclusion", true);
          if (credit == null)
             json.put("keyword", keyword);
          else
