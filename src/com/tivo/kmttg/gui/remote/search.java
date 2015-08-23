@@ -43,8 +43,8 @@ public class search {
    public ChoiceBox<String> search_type = null;
    public CheckBox includeFree = null;
    public CheckBox includePaid = null;
-   public CheckBox includeVod = null;
-   public CheckBox unavailable = null;
+   //public CheckBox includeVod = null;
+   //public CheckBox unavailable = null;
    public Hashtable<String,JSONArray> search_info = new Hashtable<String,JSONArray>();
    public AdvSearch advSearch = new AdvSearch();
    public MyButton manual_record = null;
@@ -238,7 +238,7 @@ public class search {
       search_type.setValue("keywords");
       search_type.setTooltip(tooltip.getToolTip("search_type"));
       
-      includeFree = new CheckBox("Free streaming content");
+      includeFree = new CheckBox("Streaming content");
       includeFree.setSelected(false);
       includeFree.setTooltip(tooltip.getToolTip("includeFree"));
       
@@ -246,20 +246,20 @@ public class search {
       includePaid.setSelected(false);
       includePaid.setTooltip(tooltip.getToolTip("includePaid"));
       
-      includeVod = new CheckBox("VOD content");
-      includeVod.setSelected(false);
-      includeVod.setTooltip(tooltip.getToolTip("includeVod"));
+      //includeVod = new CheckBox("VOD content");
+      //includeVod.setSelected(false);
+      //includeVod.setTooltip(tooltip.getToolTip("includeVod"));
       
-      unavailable = new CheckBox("Unavailable");
-      unavailable.setSelected(false);
-      unavailable.setTooltip(tooltip.getToolTip("unavailable"));
+      //unavailable = new CheckBox("Unavailable");
+      //unavailable.setSelected(false);
+      //unavailable.setTooltip(tooltip.getToolTip("unavailable"));
       
       row2.getChildren().add(search_type_label);
       row2.getChildren().add(search_type);
       row2.getChildren().add(includeFree);
       row2.getChildren().add(includePaid);
-      row2.getChildren().add(includeVod);
-      row2.getChildren().add(unavailable);
+      //row2.getChildren().add(includeVod);
+      //row2.getChildren().add(unavailable);
       
       tab = new searchTable();
       VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically

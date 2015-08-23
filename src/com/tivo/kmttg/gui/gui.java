@@ -1874,17 +1874,17 @@ public class gui extends Application {
                ofp.write("\n<rpc_search_includePaid>\n");
                ofp.write("" + includePaid + "\n");
                
-               int includeVod = 0;
-               if (remote_gui.search_tab.includeVod.isSelected())
-                  includeVod = 1;
-               ofp.write("\n<rpc_search_includeVod>\n");
-               ofp.write("" + includeVod + "\n");
+               //int includeVod = 0;
+               //if (remote_gui.search_tab.includeVod.isSelected())
+               //   includeVod = 1;
+               //ofp.write("\n<rpc_search_includeVod>\n");
+               //ofp.write("" + includeVod + "\n");
                
-               int unavailable = 0;
-               if (remote_gui.search_tab.unavailable.isSelected())
-                  unavailable = 1;
-               ofp.write("\n<rpc_search_unavailable>\n");
-               ofp.write("" + unavailable + "\n");
+               //int unavailable = 0;
+               //if (remote_gui.search_tab.unavailable.isSelected())
+               //   unavailable = 1;
+               //ofp.write("\n<rpc_search_unavailable>\n");
+               //ofp.write("" + unavailable + "\n");
                
                // Record dialog
                JSONObject json = util.recordOpt.getValues();
@@ -2227,25 +2227,25 @@ public class gui extends Application {
                }
             }
             
-            if (key.equals("rpc_search_includeVod") && remote_gui != null) {
-               try {
-                  int includeVod = Integer.parseInt(line);
-                  remote_gui.search_tab.includeVod.setSelected(includeVod == 1);
-               }
-               catch (NumberFormatException ex) {
-                  // Don't do anything here
-               }
-            }
+            //if (key.equals("rpc_search_includeVod") && remote_gui != null) {
+            //   try {
+            //      int includeVod = Integer.parseInt(line);
+            //      remote_gui.search_tab.includeVod.setSelected(includeVod == 1);
+            //   }
+            //   catch (NumberFormatException ex) {
+            //      // Don't do anything here
+            //   }
+            //}
             
-            if (key.equals("rpc_search_unavailable") && remote_gui != null) {
-               try {
-                  int unavailable = Integer.parseInt(line);
-                  remote_gui.search_tab.unavailable.setSelected(unavailable == 1);
-               }
-               catch (NumberFormatException ex) {
-                  // Don't do anything here
-               }
-            }
+            //if (key.equals("rpc_search_unavailable") && remote_gui != null) {
+            //   try {
+            //      int unavailable = Integer.parseInt(line);
+            //      remote_gui.search_tab.unavailable.setSelected(unavailable == 1);
+            //   }
+            //   catch (NumberFormatException ex) {
+            //      // Don't do anything here
+            //   }
+            //}
             
             if (key.equals("rpc_includePast") && remote_gui != null) {
                if (line.matches("1"))

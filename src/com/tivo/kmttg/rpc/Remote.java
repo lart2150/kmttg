@@ -1860,10 +1860,8 @@ public class Remote {
          // Add extended search results if requested
          Boolean includeFree = config.gui.remote_gui.search_tab.includeFree.isSelected();
          Boolean includePaid = config.gui.remote_gui.search_tab.includePaid.isSelected();
-         Boolean includeVod = config.gui.remote_gui.search_tab.includeVod.isSelected();
-         Boolean unavailable = config.gui.remote_gui.search_tab.unavailable.isSelected();
-         if (includeFree || includePaid || includeVod || unavailable) {
-            collections = extendedSearch(keyword, credit, includeFree, includePaid, includeVod, ! unavailable, job, max);
+         if (includeFree || includePaid) {
+            collections = extendedSearch(keyword, credit, includeFree, includePaid, job, max);
             if (collections != null && collections.length() > 0) {
                order = collections.getInt("order");
                JSONArray keys = collections.names();
@@ -2090,154 +2088,160 @@ public class Remote {
    
    // Search that includes non-linear content
    public JSONObject extendedSearch(
-         String keyword, JSONArray credit, Boolean includeFree, Boolean includePaid,
-         Boolean includeVod, Boolean filterUnavailable, jobData job, int max) {
-      JSONArray titles = new JSONArray();
+         String keyword, JSONArray credit, Boolean includeFree, Boolean includePaid, jobData job, int max) {
       JSONObject collections = new JSONObject();
-      int order = 0;
-      int matched = 0;
-      try {
-         int count = 50;
-         
-         // Update job monitor output column name
-         if (job != null && config.GUIMODE) {
-            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Extended Search: " + keyword);
-         }
-         
-         JSONObject json = new JSONObject();
-         json.put("bodyId", bodyId_get());
-         json.put("count", count);
-         json.put("namespace", "trioserver");
-         json.put("skipPartnerExclusion", true);
-         if (credit == null)
-            json.put("keyword", keyword);
-         else
-            json.put("credit", credit);
-         json.put("includeBroadcast", true);
-         if (includeFree || includePaid || includeVod) {
-            json.put("includeFree", includeFree);
-            json.put("includePaid", includePaid);
-            json.put("includeVod", includeVod);
-         }
-         json.put("filterUnavailable", filterUnavailable);
-         json.put("mergeOverridingCollections", true);
-         Boolean stop = false;
-         int offset = 0;
-         while (! stop) {
-            json.put("offset", offset);
-            JSONObject result = Command("offerSearch", json);
-            if (result == null) {
-               log.error("Extended keyword search failed for: '" + keyword + "'");
-               stop = true;
-            } else {                        
-               if (result.has("offer")) {
-                  JSONArray entries = result.getJSONArray("offer");
-                  offset += entries.length();
-                  if (entries.length() == 0 || entries.length() < count)
-                     stop = true;
-                  for (int i=0; i<entries.length(); ++i) {
-                     if (titles.length() >= max) {
-                        stop = true;
-                        break;
-                     }
-                     JSONObject c = entries.getJSONObject(i);
-                     // Collect extra information using contentSearch
-                     // since offerSearch is buggy and hardcoded to levelOfDetail=low
-                     if (c.has("contentId")) {
-                        JSONObject j = new JSONObject();
-                        j.put("bodyId", bodyId_get());
-                        j.put("count", 1);
-                        j.put("levelOfDetail", "medium");
-                        j.put("filterUnavailable", filterUnavailable);
-                        if (includeFree || includePaid || includeVod) {
-                           j.put("includeFree", includeFree);
-                           j.put("includePaid", includePaid);
-                           j.put("includeVod", includeVod);
-                        }
-                        j.put("contentId", c.getString("contentId"));
-                        JSONObject result2 = Command("contentSearch", j);
-                        if (result2 != null && result2.has("content")) {
-                           JSONObject j2 = result2.getJSONArray("content").getJSONObject(0);
-                           for (int ii=0; ii<j2.names().length(); ii++) {
-                              String name = j2.names().getString(ii);
-                              if (! c.has(name)) {
-                                 c.put(name, j2.get(name));
-                              }
-                           }
-                        }
-                        
-                        // NOTE: Filter out paid items if includePaid == false
-                        Boolean add = true;
-                        if ( c.has("price") && ! includePaid) {
-                           if ( ! c.getString("price").equals("USD.0") )
-                              add = false;
-                        }
-                        // Filter out no longer supported collectionType=webVideo
-                        if (c.has("collectionType") && c.getString("collectionType").equals("webVideo"))
-                           add = false;
-                        if (add) {
-                           matched++;
-                           titles.put(c);
-                        }                        
-                        
-                        if (job != null) {
-                           String message = "Ext Matches: " + matched;
-                           config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
-                           if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                              config.gui.setTitle("Ext Search: " + matched + " " + config.kmttg);
-                           }
-                        }
-                     } // if c.has("contentId")
-                  } // for
-               } // if result.has("offer")
-            } // if result from offerSearch
-            if (titles.length() >= max)
-               stop = true;
-         } // while ! stop
-         
-         // Sort into collections
-         for (int i=0; i<titles.length(); ++i) {
-            JSONObject j = titles.getJSONObject(i);
-            String partnerId = "";
-            if (j.has("partnerId"))
-               partnerId = j.getString("partnerId");
-            String title = j.getString("title");
-            String collectionId = j.getString("collectionId");
-            String collectionType = "";
-            if (j.has("collectionType"))
-               collectionType = j.getString("collectionType");
-            if (! collections.has(collectionId)) {
-               JSONObject new_json = new JSONObject();
-               if (partnerId.length() > 0)
-                  new_json.put("partnerId", partnerId);
-               new_json.put("collectionId", collectionId);
-               new_json.put("title", title);
-               new_json.put("type", collectionType);
-               new_json.put("entries", new JSONArray());
-               new_json.put("order", order);
-               collections.put(collectionId, new_json);
-               order++;
+      Remote r = new Remote(job.tivoName, true);
+      if (r.success) {
+         JSONArray titles = new JSONArray();
+         int order = 0;
+         int matched = 0;
+         try {
+            int count = 50;
+            
+            // Update job monitor output column name
+            if (job != null && config.GUIMODE) {
+               config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Extended Search: " + keyword);
             }
-            collections.getJSONObject(collectionId).getJSONArray("entries").put(j);
-         }
-         collections.put("order", order);
-         
-         // Sort collections by episode #
-         if (collections.length() > 0) {
-            JSONArray keys = collections.names();
-            for (int i=0; i<keys.length(); ++i) {
-               String key = keys.getString(i);
-               if ( ! key.equals("order") ) {
-                  JSONArray a = collections.getJSONObject(key).getJSONArray("entries");
-                  collections.getJSONObject(key).put("entries", TableUtil.sortByEpisode(a));
+            
+            JSONObject json = new JSONObject();
+            json.put("bodyId", r.bodyId_get());
+            json.put("count", count);
+            if (credit == null)
+               json.put("keyword", keyword);
+            else
+               json.put("credit", credit);
+            json.put("includeBroadcast", true);
+            json.put("orderBy", "strippedTitle");
+            json.put("mergeOverridingCollections", true);
+            JSONObject collectionResult = r.Command("collectionSearch", json);
+            if (collectionResult == null) {
+               log.error("Extended keyword search failed for: '" + keyword + "'");
+            } else {                        
+               if (collectionResult.has("collection")) {
+                  JSONArray collectionEntries = collectionResult.getJSONArray("collection");
+                  for (int i=0; i<collectionEntries.length(); ++i) {
+                     if (titles.length() >= max)
+                        break;
+                     JSONObject c = collectionEntries.getJSONObject(i);
+                     if (c.has("collectionId")) {
+                        // Use contentSearch to get episode details
+                        JSONObject json2 = new JSONObject();
+                        json2.put("bodyId", r.bodyId_get());
+                        json2.put("count", count);
+                        json2.put("levelOfDetail", "medium");
+                        json2.put("collectionId", c.getString("collectionId"));
+                        Boolean stop = false;
+                        int offset = 0;
+                        while (! stop) {
+                           json2.put("offset", offset);
+                           stop = true;
+                           JSONObject contentResult = r.Command("contentSearch", json2);
+                           if (contentResult != null && contentResult.has("content")) {
+                              stop = false;
+                              JSONArray contentEntries = contentResult.getJSONArray("content");
+                              offset += contentEntries.length();
+                              if (contentEntries.length() == 0 || contentEntries.length() < count)
+                                 stop = true;
+                              for (int ii=0; ii<contentEntries.length(); ii++) {
+                                 if (titles.length() >= max)
+                                    break;
+                                 JSONObject entry = contentEntries.getJSONObject(ii);
+                                 
+                                 // NOTE: Filter out paid items if includePaid == false
+                                 Boolean add = true;
+                                 if ( entry.has("episodic") && ! entry.has("episodeNum"))
+                                    add = false;
+                                 if ( entry.has("price") && ! includePaid) {
+                                    if ( ! entry.getString("price").equals("USD.0") )
+                                       add = false;
+                                 }
+                                 // Filter out no longer supported collectionType=webVideo
+                                 if (entry.has("collectionType") && entry.getString("collectionType").equals("webVideo"))
+                                    add = false;
+                                 if (add) {
+                                    String partnerId = null;
+                                    // Call offerSearch to get partnerId
+                                    if (entry.has("contentId")) {
+                                       JSONObject json3 = new JSONObject();
+                                       json3.put("count", 1);
+                                       json3.put("contentId", entry.getString("contentId"));
+                                       json3.put("namespace", "trioserver");
+                                       JSONObject offerResult = r.Command("offerSearch", json3);
+                                       if (offerResult != null && offerResult.has("offer")) {
+                                          JSONObject offer = offerResult.getJSONArray("offer").getJSONObject(0);
+                                          if (offer.has("partnerId"))
+                                             partnerId = offer.getString("partnerId");
+                                       }
+                                    }
+                                    if (partnerId != null) {
+                                       matched++;
+                                       entry.put("partnerId", partnerId);
+                                       titles.put(entry);
+                                    }
+                                 }                        
+                                    
+                                 if (job != null) {
+                                    String message = "Ext Matches: " + matched;
+                                    config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+                                    if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                                       config.gui.setTitle("Ext Search: " + matched + " " + config.kmttg);
+                                    }
+                                 }
+                              } // for ii
+                           } // if contentResult
+                           if (titles.length() >= max)
+                              stop = true;
+                        } // while ! stop
+                     } // if c.has("collectionId")
+                  } // for
+               } // if result.has("collection")
+            } // if collectionResult
+            
+            // Sort into collections
+            for (int i=0; i<titles.length(); ++i) {
+               JSONObject j = titles.getJSONObject(i);
+               String partnerId = "";
+               if (j.has("partnerId"))
+                  partnerId = j.getString("partnerId");
+               String title = j.getString("title");
+               String collectionId = j.getString("collectionId");
+               String collectionType = "";
+               if (j.has("collectionType"))
+                  collectionType = j.getString("collectionType");
+               if (! collections.has(collectionId)) {
+                  JSONObject new_json = new JSONObject();
+                  if (partnerId.length() > 0)
+                     new_json.put("partnerId", partnerId);
+                  new_json.put("collectionId", collectionId);
+                  new_json.put("title", title);
+                  new_json.put("type", collectionType);
+                  new_json.put("entries", new JSONArray());
+                  new_json.put("order", order);
+                  collections.put(collectionId, new_json);
+                  order++;
+               }
+               collections.getJSONObject(collectionId).getJSONArray("entries").put(j);
+            }
+            collections.put("order", order);
+            
+            // Sort collections by episode #
+            if (collections.length() > 0) {
+               JSONArray keys = collections.names();
+               for (int i=0; i<keys.length(); ++i) {
+                  String key = keys.getString(i);
+                  if ( ! key.equals("order") ) {
+                     JSONArray a = collections.getJSONObject(key).getJSONArray("entries");
+                     collections.getJSONObject(key).put("entries", TableUtil.sortByEpisode(a));
+                  }
                }
             }
+            
+            if (job != null)
+               log.warn(">> Extended search completed on TiVo: " + job.tivoName);
+         } catch (JSONException e) {
+            log.error("extendedSearch failed - " + e.getMessage());
          }
-         
-         if (job != null)
-            log.warn(">> Extended search completed on TiVo: " + job.tivoName);
-      } catch (JSONException e) {
-         log.error("extendedSearch failed - " + e.getMessage());
+         r.disconnect();
       }
       
       return collections;
