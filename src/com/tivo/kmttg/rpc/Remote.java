@@ -2090,6 +2090,11 @@ public class Remote {
    public JSONObject extendedSearch(
          String keyword, JSONArray credit, Boolean includeFree, Boolean includePaid, jobData job, int max) {
       JSONObject collections = new JSONObject();
+      if (config.getTivoUsername() == null) {
+         log.error("Streaming entry searches require tivo.com login username and password");
+         log.error("You should supply tivo.com username and password under config-Tivos tab");
+         return collections;
+      }
       JSONObject content = new JSONObject(); // Used to avoid duplicate contentId entries
       Remote r = new Remote(job.tivoName, true);
       if (r.success) {
