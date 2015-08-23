@@ -2090,6 +2090,7 @@ public class Remote {
    public JSONObject extendedSearch(
          String keyword, JSONArray credit, Boolean includeFree, Boolean includePaid, jobData job, int max) {
       JSONObject collections = new JSONObject();
+      JSONObject content = new JSONObject(); // Used to avoid duplicate contentId entries
       Remote r = new Remote(job.tivoName, true);
       if (r.success) {
          JSONArray titles = new JSONArray();
@@ -2126,8 +2127,9 @@ public class Remote {
                      if (c.has("collectionId")) {
                         // Use contentSearch to get episode details
                         JSONObject json2 = new JSONObject();
-                        json2.put("bodyId", r.bodyId_get());
+                        //json2.put("bodyId", r.bodyId_get());
                         json2.put("count", count);
+                        json2.put("namespace", "trioserver");
                         json2.put("levelOfDetail", "medium");
                         json2.put("collectionId", c.getString("collectionId"));
                         Boolean stop = false;
@@ -2135,17 +2137,17 @@ public class Remote {
                         while (! stop) {
                            json2.put("offset", offset);
                            stop = true;
-                           JSONObject contentResult = r.Command("contentSearch", json2);
-                           if (contentResult != null && contentResult.has("content")) {
+                           JSONObject offerResult = r.Command("offerSearch", json2);
+                           if (offerResult != null && offerResult.has("offer")) {
                               stop = false;
-                              JSONArray contentEntries = contentResult.getJSONArray("content");
-                              offset += contentEntries.length();
-                              if (contentEntries.length() == 0 || contentEntries.length() < count)
+                              JSONArray offerEntries = offerResult.getJSONArray("offer");
+                              offset += offerEntries.length();
+                              if (offerEntries.length() == 0 || offerEntries.length() < count)
                                  stop = true;
-                              for (int ii=0; ii<contentEntries.length(); ii++) {
+                              for (int ii=0; ii<offerEntries.length(); ii++) {
                                  if (titles.length() >= max)
                                     break;
-                                 JSONObject entry = contentEntries.getJSONObject(ii);
+                                 JSONObject entry = offerEntries.getJSONObject(ii);
                                  
                                  // NOTE: Filter out paid items if includePaid == false
                                  Boolean add = true;
@@ -2158,25 +2160,14 @@ public class Remote {
                                  // Filter out no longer supported collectionType=webVideo
                                  if (entry.has("collectionType") && entry.getString("collectionType").equals("webVideo"))
                                     add = false;
+                                 if ( ! entry.has("partnerId") || ! entry.has("contentId"))
+                                    add = false;
                                  if (add) {
-                                    String partnerId = null;
-                                    // Call offerSearch to get partnerId
-                                    if (entry.has("contentId")) {
-                                       JSONObject json3 = new JSONObject();
-                                       json3.put("count", 1);
-                                       json3.put("contentId", entry.getString("contentId"));
-                                       json3.put("namespace", "trioserver");
-                                       JSONObject offerResult = r.Command("offerSearch", json3);
-                                       if (offerResult != null && offerResult.has("offer")) {
-                                          JSONObject offer = offerResult.getJSONArray("offer").getJSONObject(0);
-                                          if (offer.has("partnerId"))
-                                             partnerId = offer.getString("partnerId");
-                                       }
-                                    }
-                                    if (partnerId != null) {
+                                    String contentId = entry.getString("contentId");
+                                    if ( ! content.has(contentId) ) {
                                        matched++;
-                                       entry.put("partnerId", partnerId);
                                        titles.put(entry);
+                                       content.put(contentId, 1);
                                     }
                                  }                        
                                     
@@ -2188,7 +2179,7 @@ public class Remote {
                                     }
                                  }
                               } // for ii
-                           } // if contentResult
+                           } // if offerResult
                            if (titles.length() >= max)
                               stop = true;
                         } // while ! stop
