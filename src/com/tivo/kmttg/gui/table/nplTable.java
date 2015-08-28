@@ -621,7 +621,10 @@ public class nplTable extends TableMap {
             }
          }         
       } else if (keyCode == KeyCode.M) {
-         int row = GetSelectedRows()[0];
+         int[] selected = GetSelectedRows();
+         if (selected == null || selected.length < 1)
+            return;
+         int row = selected[0];
          sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
          createMeta.getExtendedMetadata(tivoName, s.data, true);
       } else if (keyCode == KeyCode.T) {
