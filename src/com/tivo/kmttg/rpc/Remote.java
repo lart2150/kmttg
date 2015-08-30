@@ -2110,7 +2110,6 @@ public class Remote {
             }
             
             JSONObject json = new JSONObject();
-            json.put("bodyId", r.bodyId_get());
             json.put("count", count);
             if (credit == null)
                json.put("keyword", keyword);
@@ -2130,9 +2129,8 @@ public class Remote {
                         break;
                      JSONObject c = collectionEntries.getJSONObject(i);
                      if (c.has("collectionId")) {
-                        // Use contentSearch to get episode details
+                        // Use offerSearch to get episode details
                         JSONObject json2 = new JSONObject();
-                        //json2.put("bodyId", r.bodyId_get());
                         json2.put("count", count);
                         json2.put("namespace", "trioserver");
                         json2.put("levelOfDetail", "medium");
