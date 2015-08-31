@@ -77,8 +77,10 @@ public class textpane {
    }
   
    public void appendText(String color, String s) {
-      if (p != null) {
+      if (p != null && p.getEngine() != null) {
          Document doc = p.getEngine().getDocument();
+         if (doc == null)
+            return;
          Element content = doc.getElementById("content");
          limitBuffer(content, s.length());
          // Use <pre> tag so as to preserve whitespace
