@@ -171,10 +171,7 @@ public class tivoTab {
                      csvBrowser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
                      csvBrowser.setInitialDirectory(new File(config.programDir));
                   }
-                  csvBrowser.setInitialFileName(
-                     config.programDir + File.separator + tivoName +
-                     "_npl_" + TableUtil.currentYearMonthDay() + ".csv"
-                  );
+                  csvBrowser.setInitialFileName(tivoName + "_npl_" + TableUtil.currentYearMonthDay() + ".csv");
                   File selectedFile = csvBrowser.showSaveDialog(config.gui.getFrame());
                   if (selectedFile != null) {
                      nplTab.exportNPL(selectedFile.getAbsolutePath());

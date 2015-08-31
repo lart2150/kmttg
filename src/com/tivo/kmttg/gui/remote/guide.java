@@ -122,9 +122,8 @@ public class guide {
             final String tivoName = tivo.getValue();
             config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
             config.gui.remote_gui.Browser.setTitle("Save to file");
-            config.gui.remote_gui.Browser.setInitialFileName(
-               config.programDir + File.separator + tivoName + "_channels.csv"
-            );
+            config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
+            config.gui.remote_gui.Browser.setInitialFileName(tivoName + "_channels.csv");
             final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(frame);
             if (selectedFile != null) {
                Task<Void> task = new Task<Void>() {

@@ -90,9 +90,8 @@ public class seasonpasses {
                   config.gui.remote_gui.Browser.getExtensionFilters().clear();
                   config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("SP Files", "*.sp"));
                   config.gui.remote_gui.Browser.setTitle("Save to file");
-                  config.gui.remote_gui.Browser.setInitialFileName(
-                     config.programDir + File.separator + tivoName + ".sp"
-                  );
+                  config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
+                  config.gui.remote_gui.Browser.setInitialFileName(tivoName + ".sp");
                   final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(frame);
                   if (selectedFile != null) {
                      tab.SPListSave(tivoName, selectedFile.getAbsolutePath());
@@ -111,6 +110,7 @@ public class seasonpasses {
             config.gui.remote_gui.Browser.getExtensionFilters().clear();
             config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("SP Files", "*.sp"));
             config.gui.remote_gui.Browser.setTitle("Load from file");
+            config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
             config.gui.remote_gui.Browser.setInitialFileName(null);
             final File selectedFile = config.gui.remote_gui.Browser.showOpenDialog(frame);
             if (selectedFile != null) {
@@ -134,9 +134,8 @@ public class seasonpasses {
                   config.gui.remote_gui.Browser.getExtensionFilters().clear();
                   config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
                   config.gui.remote_gui.Browser.setTitle("Export to csv file");
-                  config.gui.remote_gui.Browser.setInitialFileName(
-                     config.programDir + File.separator + tivoName + "" + ".csv"
-                  );
+                  config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
+                  config.gui.remote_gui.Browser.setInitialFileName(tivoName + "" + ".csv");
                   final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(frame);
                   if (selectedFile != null) {
                      tab.SPListExport(tivoName, selectedFile.getAbsolutePath());
