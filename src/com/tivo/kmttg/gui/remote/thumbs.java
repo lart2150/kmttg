@@ -74,6 +74,7 @@ public class thumbs {
                }  else {
                   config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("Thumbs Files", "*.thumbs"));
                   config.gui.remote_gui.Browser.setTitle("Save to file");
+                  config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
                   config.gui.remote_gui.Browser.setInitialFileName(null);
                   final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(frame);
                   if (selectedFile != null) {
@@ -94,6 +95,7 @@ public class thumbs {
             if (tivoName != null && tivoName.length() > 0) {
                config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("Thumbs Files", "*.thumbs"));
                config.gui.remote_gui.Browser.setTitle("Load thumbs file");
+               config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
                config.gui.remote_gui.Browser.setInitialFileName(null);
                final File selectedFile = config.gui.remote_gui.Browser.showOpenDialog(frame);
                if (selectedFile != null) {
