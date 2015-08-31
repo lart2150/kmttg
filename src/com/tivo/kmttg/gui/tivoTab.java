@@ -168,6 +168,7 @@ public class tivoTab {
                   if (csvBrowser == null) {
                      csvBrowser = new FileChooser();
                      csvBrowser.setTitle("Export to csv file");
+                     csvBrowser.getExtensionFilters().clear();
                      csvBrowser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
                      csvBrowser.setInitialDirectory(new File(config.programDir));
                   }

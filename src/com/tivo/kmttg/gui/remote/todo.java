@@ -109,6 +109,7 @@ public class todo {
       export.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
             final String tivoName = tivo.getValue();
+            config.gui.remote_gui.Browser.getExtensionFilters().clear();
             config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
             config.gui.remote_gui.Browser.setTitle("Save to file");
             config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
