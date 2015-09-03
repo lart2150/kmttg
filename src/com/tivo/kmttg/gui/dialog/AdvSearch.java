@@ -8,10 +8,12 @@ import java.io.FileWriter;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Optional;
+import java.util.Stack;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -40,6 +42,7 @@ import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -73,6 +76,7 @@ public class AdvSearch {
    private static double pos_y = -1;
 
    public void display(Stage frame, String tivoName, int max_search) {
+      this.tivoName = tivoName;
       // Create dialog if not already created
       if (dialog == null) {
          create(frame);
@@ -80,7 +84,6 @@ public class AdvSearch {
          // Parse saveFile to define current configuration
          readFile(config.programDir + File.separator + saveFile);
       }
-      this.tivoName = tivoName;
       this.max_search = max_search;
       
       // Display the dialog
@@ -140,30 +143,8 @@ public class AdvSearch {
       
       Label category_label = new Label("Category");
       category = new ChoiceBox<String>();
-      category.getItems().addAll(
-         "ALL",
-         "Action Adventure",
-         "Arts",
-         "Comedy",
-         "Daytime",
-         "Documentary",
-         "Drama",
-         "Educational",
-         "Interests",
-         "Kids",
-         "Lifestyle",
-         "Movies",
-         "Mystery and Suspense",
-         "News and Business",
-         "Reality",
-         "Sci-Fi and Fantasy",
-         "Science and Nature",
-         "Shorts",
-         "Sport",
-         "Sports",
-         "Talk Shows",
-         "TV Shows"
-      );
+      category.getItems().add("ALL");
+      addCategories(tivoName); // This runs in background mode
       category.setValue("ALL");
       category.setTooltip(getToolTip("category"));
                         
@@ -702,6 +683,31 @@ public class AdvSearch {
       } catch (JSONException e) {
          log.error("AdvSearch SearchCB error - " + e.getMessage());
       }
+   }
+   
+   // This runs in background mode so as not to hang up GUI
+   private void addCategories(final String tivoName) {
+      Task<Void> task = new Task<Void>() {
+         @Override public Void call() {
+            Remote r = config.initRemote(tivoName);
+            if (r.success) {
+               final Stack<String> categoryNames = r.getCategoryNames(tivoName);
+               if (categoryNames != null) {
+                  class backgroundRun implements Runnable {
+                     @Override public void run() {
+                        for (String categoryName : categoryNames) {
+                           category.getItems().add(categoryName);
+                        }
+                     }
+                  }
+                  Platform.runLater(new backgroundRun());
+               }
+               r.disconnect();
+            }
+            return null;
+         }
+      };
+      new Thread(task).start();
    }
       
    private Tooltip getToolTip(String component) {
