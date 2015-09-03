@@ -1906,7 +1906,9 @@ public class Remote {
             if ( json.has(name) )
                noKeywords = false;
          }
-         if (noKeywords && json.has("collectionType")) {
+         if (noKeywords)
+            commandName = "collectionSearch";
+         if (commandName.equals("collectionSearch") && json.has("collectionType")) {
             if (job.remote_adv_search_cat == null && json.getString("collectionType").equals("movie"))
                if (config.getTivoUsername() != null)
                   job.remote_adv_search_cat = "Movies";
@@ -1942,9 +1944,12 @@ public class Remote {
                log.error("AdvSearch failed.");
                stop = true;
             } else {
-               if (result.has("offerId")) {
+               if (result.has("collectionId") || result.has("offerId")) {
                   JSONArray a;
-                  a = result.getJSONArray("offerId");
+                  if (result.has("collectionId"))
+                     a = result.getJSONArray("collectionId");
+                  else
+                     a = result.getJSONArray("offerId");
                   offset += a.length();
                   String message = "Initial Matches: " + offset ;
                   config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
@@ -1980,7 +1985,10 @@ public class Remote {
                if (json.has(entry))
                   json_id.put(entry, json.get(entry));
             }
-            json_id.put("offerId", id);
+            if (commandName.equals("collectionSearch"))
+               json_id.put("collectionId", id);
+            else
+               json_id.put("offerId", id);
             JSONObject result = Command("offerSearch", json_id);
             if (result != null && result.has("offer")) {
                if (json_id.has("offerId"))
@@ -1990,6 +1998,22 @@ public class Remote {
                JSONArray a = result.getJSONArray("offer");
                for (int k=0; k<a.length(); ++k) {
                   JSONObject j = a.getJSONObject(k);
+                  // Collect extra information using contentSearch
+                  // since offerSearch is buggy and hardcoded to levelOfDetail=low
+                  /*if (j.has("contentId")) {
+                     json_id.put("contentId", j.getString("contentId"));
+                     JSONObject result2 = Command("contentSearch", json_id);
+                     if (result2 != null && result2.has("content")) {
+                        JSONObject j2 = result2.getJSONArray("content").getJSONObject(0);
+                        for (int ii=0; ii<j2.names().length(); ii++) {
+                           String name = j2.names().getString(ii);
+                           if (! j.has(name)) {
+                              j.put(name, j2.get(name));
+                           }
+                        }
+                     }
+                     j.put("levelOfDetail", "high");
+                  }*/
                   if (job.remote_adv_search_chans != null && j.has("channel")) {
                      // Channel filter
                      include = false;
