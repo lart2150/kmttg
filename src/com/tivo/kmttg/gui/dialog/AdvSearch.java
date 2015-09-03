@@ -22,6 +22,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
@@ -55,7 +56,7 @@ public class AdvSearch {
    private ChoiceBox<String> creditKeywordRole = null;
    private ChoiceBox<String> collectionType = null;
    private ChoiceBox<String> minStarRating = null;
-   private ChoiceBox<String> category = null;
+   private ListView<String> category = null;
    private TextField title = null;
    private TextField titleKeyword = null;
    private TextField subtitleKeyword = null;
@@ -142,10 +143,12 @@ public class AdvSearch {
       minStarRating.setTooltip(getToolTip("minStarRating"));
       
       Label category_label = new Label("Category");
-      category = new ChoiceBox<String>();
+      category = new ListView<String>();
+      category.setPrefHeight(100);
       category.getItems().add("ALL");
       addCategories(tivoName); // This runs in background mode
-      category.setValue("ALL");
+      category.getSelectionModel().select("ALL");
+      category.scrollTo("ALL");
       category.setTooltip(getToolTip("category"));
                         
       Label title_label = new Label("Title");
@@ -541,6 +544,7 @@ public class AdvSearch {
             if (json.has("category"))
                text = json.getString("category");
             category.getSelectionModel().select(text);
+            category.scrollTo(text);
             
             text = "";
             if (json.has("keywords"))
@@ -577,6 +581,7 @@ public class AdvSearch {
       collectionType.getSelectionModel().select("ALL");
       minStarRating.getSelectionModel().select("ALL");
       category.getSelectionModel().select("ALL");
+      category.scrollTo("ALL");
       keywords.setText("");
       channels.setText("");
       hdtv.getSelectionModel().select("HD");
@@ -622,6 +627,7 @@ public class AdvSearch {
          if (config.getTivoUsername() == null) {
             cat = null;
             category.getSelectionModel().select("ALL");
+            category.scrollTo("ALL");
          }
          text = string.removeLeadingTrailingSpaces(originalAirYear.getText());
          if (text != null && text.length() > 0) {
