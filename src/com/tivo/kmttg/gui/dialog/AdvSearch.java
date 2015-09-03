@@ -622,7 +622,7 @@ public class AdvSearch {
          if (text != null && text.length() > 0) {
             json.put("descriptionKeyword", text);
          }
-         if (cat.equals("ALL"))
+         if (cat != null && cat.equals("ALL"))
             cat = null;
          if (config.getTivoUsername() == null) {
             cat = null;
