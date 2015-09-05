@@ -70,7 +70,6 @@ public class AdvSearch {
    private CheckBox receivedChannelsOnly = null;
    private CheckBox favoriteChannelsOnly = null;
    private String tivoName = null;
-   private int max_search = 100;
    private String saveFile = "wishlists.ini";
    private LinkedHashMap<String,JSONObject> entries = new LinkedHashMap<String,JSONObject>();
    private static double pos_x = -1;
@@ -85,7 +84,6 @@ public class AdvSearch {
          // Parse saveFile to define current configuration
          readFile(config.programDir + File.separator + saveFile);
       }
-      this.max_search = max_search;
       
       // Display the dialog
       if (config.getTivoUsername() == null)
@@ -678,7 +676,7 @@ public class AdvSearch {
          job.type                   = "remote";
          job.name                   = "Remote";
          job.search                 = config.gui.remote_gui.search_tab.tab;
-         job.remote_search_max      = max_search;
+         job.remote_search_max      = config.gui.remote_gui.search_tab.max.getValue();
          job.remote_adv_search      = true;
          job.remote_adv_search_json = json;
          if (chans != null)
