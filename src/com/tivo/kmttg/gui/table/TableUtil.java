@@ -1127,7 +1127,7 @@ public class TableUtil {
          String name = partnerId;
          if (config.partners.containsKey(partnerId))
             name = config.partners.get(partnerId);
-         if (name.equals(partnerId) && config.getTivoUsername() != null) {
+         /*if (name.equals(partnerId) && config.getTivoUsername() != null) {
             // Not cached, so find it without bodyId from middlemind if tivo.com credentials available
             Remote r = new Remote(config.gui.remote_gui.getTivoName("search"), true);
             if (r.success) {
@@ -1143,7 +1143,7 @@ public class TableUtil {
                   }
                }
             }
-         }
+         }*/
          return name;
       } catch (JSONException e1) {
          log.error("getPartnerName - " + e1.getMessage());
