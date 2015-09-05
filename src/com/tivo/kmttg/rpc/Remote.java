@@ -1705,7 +1705,7 @@ public class Remote {
                }
                
                result = Command("GridSearch", json);
-               if (result != null && result.has("gridRow")) {
+               if (result != null && result.has("gridRow") && result.getJSONArray("gridRow").getJSONObject(0).has("offer")) {
                   JSONArray a = result.getJSONArray("gridRow").getJSONObject(0).getJSONArray("offer");
                   for (int j=0; j<a.length(); ++j) {
                      json = a.getJSONObject(j);
