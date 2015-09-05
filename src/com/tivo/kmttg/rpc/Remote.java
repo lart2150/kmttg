@@ -2165,6 +2165,12 @@ public class Remote {
                                     add = false;
                                  if ( ! entry.has("partnerId") || ! entry.has("contentId"))
                                     add = false;
+                                 
+                                 // Filter out unavailable partners
+                                 String partnerName = TableUtil.getPartnerName(entry);
+                                 if (partnerName.startsWith("tivo:pt"))
+                                    add = false;
+                                 
                                  if (add) {
                                     String contentId = entry.getString("contentId") + entry.getString("partnerId");
                                     if ( ! content.has(contentId) ) {
