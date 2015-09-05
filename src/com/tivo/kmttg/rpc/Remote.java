@@ -2135,6 +2135,7 @@ public class Remote {
                         json2.put("namespace", "trioserver");
                         json2.put("levelOfDetail", "medium");
                         json2.put("collectionId", c.getString("collectionId"));
+                        json2.put("active", true);
                         Boolean stop = false;
                         int offset = 0;
                         while (! stop) {
@@ -2154,7 +2155,7 @@ public class Remote {
                                  
                                  // NOTE: Filter out paid items if includePaid == false
                                  Boolean add = true;
-                                 if ( entry.has("episodic") && ! entry.has("episodeNum"))
+                                 if ( entry.has("episodic") && entry.getBoolean("episodic") && ! entry.has("episodeNum"))
                                     add = false;
                                  if ( entry.has("price") && ! includePaid) {
                                     if ( ! entry.getString("price").equals("USD.0") )
@@ -2166,7 +2167,7 @@ public class Remote {
                                  if ( ! entry.has("partnerId") || ! entry.has("contentId"))
                                     add = false;
                                  if (add) {
-                                    String contentId = entry.getString("contentId");
+                                    String contentId = entry.getString("contentId") + entry.getString("partnerId");
                                     if ( ! content.has(contentId) ) {
                                        matched++;
                                        titles.put(entry);
