@@ -2135,7 +2135,6 @@ public class Remote {
                         json2.put("namespace", "trioserver");
                         json2.put("levelOfDetail", "medium");
                         json2.put("collectionId", c.getString("collectionId"));
-                        json2.put("active", true);
                         Boolean stop = false;
                         int offset = 0;
                         while (! stop) {
