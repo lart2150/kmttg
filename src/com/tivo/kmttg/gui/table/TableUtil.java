@@ -493,6 +493,7 @@ public class TableUtil {
       TABLE.setOnMousePressed(new EventHandler<MouseEvent>() {
          @Override 
          public void handle(MouseEvent event) {
+            PopupHandler.hide();
             if (event.isSecondaryButtonDown())
                PopupHandler.display(TABLE, event);
             }
@@ -505,6 +506,7 @@ public class TableUtil {
       TABLE.setOnMousePressed(new EventHandler<MouseEvent>() {
          @Override 
          public void handle(MouseEvent event) {
+            PopupHandler.hide();
             if (event.isSecondaryButtonDown())
                PopupHandler.display(TABLE, event);
             }

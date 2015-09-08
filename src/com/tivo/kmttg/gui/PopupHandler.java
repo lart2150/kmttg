@@ -17,17 +17,23 @@ import com.tivo.kmttg.main.config;
 public class PopupHandler {
    static TableView<?> TABLE_view = null;
    static TreeTableView<?> TABLE_treeview = null;
+   static ContextMenu popup = null;
+   
+   public static void hide() {
+      if (popup != null)
+         popup.hide();
+   }
    
    public static void display(TableView<?> TABLE, MouseEvent e) {
       TABLE_view = TABLE;
-      ContextMenu popup = display(e);
+      popup = display(e);
       if (popup != null)
          popup.show(TABLE, e.getScreenX(), e.getScreenY());      
    }
    
    public static void display(final TreeTableView<?> TABLE, MouseEvent e) {
       TABLE_treeview = TABLE;
-      ContextMenu popup = display(e);
+      popup = display(e);
       if (popup != null)
          popup.show(TABLE, e.getScreenX(), e.getScreenY());      
    }
@@ -37,7 +43,7 @@ public class PopupHandler {
       String tivoName;
       if (tabName.equals("FILES"))
          return null;
-      ContextMenu popup = new ContextMenu();
+      popup = new ContextMenu();
       Stack<PopupPair> items = new Stack<PopupPair>();
       if (tabName.equals("Remote")) {
          // This is a Remote table
