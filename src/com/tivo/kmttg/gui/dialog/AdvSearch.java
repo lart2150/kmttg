@@ -702,6 +702,10 @@ public class AdvSearch {
                         for (String categoryName : categoryNames) {
                            category.getItems().add(categoryName);
                         }
+                        // Now that categories are populated, set fields for 1st savedEntries name
+                        if (savedEntries.getItems().size() > 1) {
+                           setValues(savedEntries.getItems().get(1));
+                        }
                      }
                   }
                   Platform.runLater(new backgroundRun());
