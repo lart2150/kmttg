@@ -77,6 +77,9 @@ public class deletedTable extends TableMap {
                TABLE.getSortOrder().setAll(Collections.singletonList(TABLE.getColumns().get(date_col)));
                TABLE.getColumns().get(date_col).setSortType(TableColumn.SortType.DESCENDING);
             }
+
+            // If there's a table selection make sure it's visible
+            TableUtil.selectedVisible(TABLE);
          }
       });
       

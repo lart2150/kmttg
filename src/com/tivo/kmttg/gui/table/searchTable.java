@@ -86,6 +86,9 @@ public class searchTable extends TableMap {
                TABLE.getSortOrder().setAll(Collections.singletonList(TABLE.getColumns().get(date_col)));
                TABLE.getColumns().get(date_col).setSortType(TreeTableColumn.SortType.DESCENDING);
             }
+
+            // If there's a table selection make sure it's visible
+            TableUtil.selectedVisible(TABLE);
          }
       });
       

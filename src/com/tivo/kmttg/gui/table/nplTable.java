@@ -110,6 +110,9 @@ public class nplTable extends TableMap {
                NowPlaying.getSortOrder().setAll(Collections.singletonList(NowPlaying.getColumns().get(date_col)));
                NowPlaying.getColumns().get(date_col).setSortType(TreeTableColumn.SortType.DESCENDING);
             }
+
+            // If there's a table selection make sure it's visible
+            TableUtil.selectedVisible(NowPlaying);
          }
       });
       if (tivoName.equals("FILES")) {
