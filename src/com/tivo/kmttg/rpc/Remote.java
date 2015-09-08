@@ -2669,6 +2669,7 @@ public class Remote {
    // Return full list of category names (including sub-categories)
    public Stack<String> getCategoryNames(String tivoName) {
       Stack<String> categories = new Stack<String>();
+      Hashtable<String,Integer> unique = new Hashtable<String,Integer>();
       Remote r = new Remote(tivoName, true);
       if (r.success) {
          try {
@@ -2682,12 +2683,16 @@ public class Remote {
                for (int i=0; i<cat.length(); ++i) {
                   JSONObject j = cat.getJSONObject(i);
                   if (j.has("label")) {
-                     categories.push(j.getString("label"));
+                     String label = j.getString("label");
+                     if (! label.endsWith(" ") && ! unique.containsKey(label)) {
+                        unique.put(label, 1);
+                        categories.push(label);
+                     }
                   }
                }
             }
          } catch (JSONException e) {
-            log.error("Remote getCategoryId - " + e.getMessage());
+            log.error("Remote getCategoryNames - " + e.getMessage());
             return null;
          }
          r.disconnect();
