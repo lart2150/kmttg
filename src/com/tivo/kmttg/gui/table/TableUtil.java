@@ -145,6 +145,22 @@ public class TableUtil {
       return sorted;
    }
    
+   // Make any selected TABLE row visible in viewport
+   public static void selectedVisible(TableView<?> TABLE) {
+      Integer[] selected = highToLow(GetSelectedRows(TABLE));     
+      if (selected != null && selected.length > 0)
+         scrollToCenter(TABLE, selected[0]);
+
+   }
+   
+   // Make any selected TABLE row visible in viewport
+   public static void selectedVisible(TreeTableView<?> TABLE) {
+      Integer[] selected = highToLow(GetSelectedRows(TABLE));     
+      if (selected != null && selected.length > 0)
+         scrollToCenter(TABLE, selected[0]);
+
+   }
+   
    public static void DeselectRow(TableView<?> TABLE, int row) {
       TABLE.getSelectionModel().clearSelection(row);
    }
