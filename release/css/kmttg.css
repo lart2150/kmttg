@@ -7,6 +7,10 @@
 #button_autoconfig_cancel {-fx-background-color: #FABEBE;} /* COLOR.LIGHTRED */
 #progressbar_job {-fx-accent: #90EE90; -fx-background-color: gray;}
 
+.check-box .box {
+    -fx-padding: 0.05em;
+}
+
 .tab-pane > .tab-header-area > .headers-region > .tab {
     -fx-padding: 0 5 0 5;
 }
