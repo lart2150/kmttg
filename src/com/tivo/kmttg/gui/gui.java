@@ -144,8 +144,8 @@ public class gui extends Application {
    private ChoiceBox<String> encoding = null;
    private Label encoding_label = null;
    private Label encoding_description_label = null;
-   public MyButton start = null;
-   public MyButton cancel = null;
+   public Button start = null;
+   public Button cancel = null;
    public CheckBox metadata = null;
    public CheckBox decrypt = null;
    public CheckBox qsfix = null;
@@ -433,7 +433,7 @@ public class gui extends Application {
       if (jContentPane == null) {
                   
          // CANCEL JOBS button
-         cancel = new MyButton("CANCEL JOBS");
+         cancel = new Button("CANCEL JOBS");
          cancel.setPadding(new Insets(1,2,1,2));
          cancel.setTooltip(getToolTip("cancel"));
          cancel.setMinWidth(100);
@@ -445,7 +445,7 @@ public class gui extends Application {
          });
 
          // START JOBS button
-         start = new MyButton("START JOBS");
+         start = new Button("START JOBS");
          start.setPadding(new Insets(1,2,1,2));
          start.setTooltip(getToolTip("start"));
          start.setId("button_job_start");

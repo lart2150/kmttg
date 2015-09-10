@@ -5,6 +5,7 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -12,7 +13,6 @@ import javafx.stage.Stage;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.MyTooltip;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.pushTable;
@@ -140,7 +140,7 @@ public class Pushes {
       VBox content = new VBox();
 
       // Refresh button
-      MyButton refresh = new MyButton("Refresh");
+      Button refresh = new Button("Refresh");
       String tip = "<b>Refresh</b><br>Query queued pushes and refresh table.<br>";
       tip += "NOTE: The mind server listings can be several seconds off compared to what is currently happening.";
       refresh.setTooltip(MyTooltip.make(tip));
@@ -151,7 +151,7 @@ public class Pushes {
       });
 
       // Remove button
-      MyButton remove = new MyButton("Remove");
+      Button remove = new Button("Remove");
       tip = "<b>Remove</b><br>Attempt to remove selected entry in the table from push queue.<br>";
       tip += "NOTE: This will not cancel pushes already in progress or very close to starting.<br>";
       tip += "NOTE: The response to this operation from mind server is always 'success' so there<br>";

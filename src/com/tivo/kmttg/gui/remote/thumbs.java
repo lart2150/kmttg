@@ -2,7 +2,6 @@ package com.tivo.kmttg.gui.remote;
 
 import java.io.File;
 
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.thumbsTable;
 import com.tivo.kmttg.main.config;
@@ -14,6 +13,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -25,9 +25,9 @@ import javafx.stage.FileChooser.ExtensionFilter;
 public class thumbs {
    public VBox panel = null;
    public thumbsTable tab = null;
-   public MyButton refresh = null;
-   public MyButton copy = null;
-   public MyButton update = null;
+   public Button refresh = null;
+   public Button copy = null;
+   public Button update = null;
    public Label label = null;
    public ChoiceBox<String> tivo = null;
    
@@ -60,7 +60,7 @@ public class thumbs {
       });
       tivo.setTooltip(tooltip.getToolTip("tivo_thumbs"));
 
-      MyButton save = new MyButton("Save...");
+      Button save = new Button("Save...");
       save.setPadding(util.smallButtonInsets());
       save.setTooltip(tooltip.getToolTip("save_thumbs"));
       save.setOnAction(new EventHandler<ActionEvent>() {
@@ -86,7 +86,7 @@ public class thumbs {
          }
       });
 
-      MyButton load = new MyButton("Load...");
+      Button load = new Button("Load...");
       load.setPadding(util.smallButtonInsets());
       load.setTooltip(tooltip.getToolTip("load_thumbs"));
       load.setOnAction(new EventHandler<ActionEvent>() {
@@ -108,7 +108,7 @@ public class thumbs {
          }
       });
 
-      copy = new MyButton("Copy");
+      copy = new Button("Copy");
       copy.setPadding(util.smallButtonInsets());
       copy.setTooltip(tooltip.getToolTip("copy_thumbs"));
       copy.setOnAction(new EventHandler<ActionEvent>() {
@@ -120,7 +120,7 @@ public class thumbs {
          }
       });
 
-      refresh = new MyButton("Refresh");
+      refresh = new Button("Refresh");
       refresh.setPadding(util.smallButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_thumbs"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
@@ -134,7 +134,7 @@ public class thumbs {
          }
       });
 
-      update = new MyButton("Modify");
+      update = new Button("Modify");
       update.setPadding(util.smallButtonInsets());
       update.setTooltip(tooltip.getToolTip("update_thumbs"));
       update.setOnAction(new EventHandler<ActionEvent>() {

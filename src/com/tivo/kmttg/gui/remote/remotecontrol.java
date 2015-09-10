@@ -5,7 +5,6 @@ import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.telnet;
 import com.tivo.kmttg.rpc.Remote;
@@ -282,7 +281,7 @@ public class remotecontrol {
       });
       tivo.setTooltip(tooltip.getToolTip("tivo_rc"));
 
-      hme_button = new MyButton("Launch App:");
+      hme_button = new Button("Launch App:");
       disableSpaceAction(hme_button);
       hme_button.setTooltip(tooltip.getToolTip("hme_button"));
       hme_button.setOnAction(new EventHandler<ActionEvent>() {
@@ -402,7 +401,7 @@ public class remotecontrol {
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
      
-      sps_button = new MyButton("SPS backdoor:");
+      sps_button = new Button("SPS backdoor:");
       disableSpaceAction(sps_button);
       sps_button.setTooltip(tooltip.getToolTip("rc_sps_button"));
       sps_button.setOnAction(new EventHandler<ActionEvent>() {
@@ -433,7 +432,7 @@ public class remotecontrol {
          hme_sps.getSelectionModel().select(0);
       }
       
-      jumpto_button = new MyButton("Jump to minute:");
+      jumpto_button = new Button("Jump to minute:");
       AddButtonShortcut(jumpto_button, "Altm", KeyCode.M);
       disableSpaceAction(jumpto_button);
       jumpto_button.setTooltip(tooltip.getToolTip("jumpto_text"));
@@ -475,7 +474,7 @@ public class remotecontrol {
       jumpto_text.setTooltip(tooltip.getToolTip("jumpto_text"));
       jumpto_text.setText("0");
 
-      jumpahead_button = new MyButton("Skip minutes ahead:");
+      jumpahead_button = new Button("Skip minutes ahead:");
       AddButtonShortcut(jumpahead_button, "Alt.", KeyCode.PERIOD);
       disableSpaceAction(jumpahead_button);
       jumpahead_button.setTooltip(tooltip.getToolTip("jumpahead_text"));
@@ -521,7 +520,7 @@ public class remotecontrol {
       jumpahead_text.setTooltip(tooltip.getToolTip("jumpahead_text"));
       jumpahead_text.setText("5");
 
-      jumpback_button = new MyButton("Skip minutes back:");
+      jumpback_button = new Button("Skip minutes back:");
       AddButtonShortcut(jumpback_button, "Alt,", KeyCode.COMMA);
       disableSpaceAction(jumpback_button);
       jumpback_button.setTooltip(tooltip.getToolTip("jumpback_text"));

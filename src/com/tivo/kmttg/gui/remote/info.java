@@ -6,7 +6,6 @@ import java.util.Optional;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
@@ -20,6 +19,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -33,10 +33,10 @@ import javafx.stage.Stage;
 public class info {
    public VBox panel = null;   
    public ChoiceBox<String> tivo = null;
-   public MyButton reboot = null;
+   public Button reboot = null;
    public TextArea text = null;
    public Hashtable<String,String> tivo_data = new Hashtable<String,String>();
-   public Hashtable<String, MyButton> buttons = new Hashtable<String, MyButton>();
+   public Hashtable<String, Button> buttons = new Hashtable<String, Button>();
    
    public info (final Stage frame) {
       
@@ -72,7 +72,7 @@ public class info {
       });
       tivo.setTooltip(tooltip.getToolTip("tivo_info"));
 
-      MyButton refresh = new MyButton("Refresh");
+      Button refresh = new Button("Refresh");
       refresh.setPadding(util.mediumButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_info"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
@@ -84,7 +84,7 @@ public class info {
          }
       });
 
-      MyButton netconnect = new MyButton("Network Connect");
+      Button netconnect = new Button("Network Connect");
       netconnect.setPadding(util.mediumButtonInsets());
       netconnect.setTooltip(tooltip.getToolTip("netconnect_info"));
       netconnect.setOnAction(new EventHandler<ActionEvent>() {
@@ -105,7 +105,7 @@ public class info {
          }
       });
 
-      reboot = new MyButton("Reboot");
+      reboot = new Button("Reboot");
       reboot.setPadding(util.mediumButtonInsets());
       reboot.setTooltip(tooltip.getToolTip("reboot_info"));
       reboot.setOnAction(new EventHandler<ActionEvent>() {

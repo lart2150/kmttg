@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -17,7 +18,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.todoTable;
 import com.tivo.kmttg.main.config;
@@ -31,8 +31,8 @@ public class todo {
    public todoTable tab = null;
    public ChoiceBox<String> tivo = null;
    public Label label = null;
-   public MyButton cancel = null;
-   public MyButton modify = null;
+   public Button cancel = null;
+   public Button modify = null;
    
    public todo(final Stage frame) {
       // ToDo Tab items            
@@ -60,7 +60,7 @@ public class todo {
       });
       tivo.setTooltip(tooltip.getToolTip("tivo_todo"));
 
-      MyButton refresh = new MyButton("Refresh");
+      Button refresh = new Button("Refresh");
       refresh.setPadding(util.mediumButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_todo"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
@@ -82,7 +82,7 @@ public class todo {
          }
       });
 
-      cancel = new MyButton("Cancel");
+      cancel = new Button("Cancel");
       cancel.setPadding(util.mediumButtonInsets());
       cancel.setTooltip(tooltip.getToolTip("cancel_todo"));
       cancel.setOnAction(new EventHandler<ActionEvent>() {
@@ -91,7 +91,7 @@ public class todo {
          }
       });
 
-      modify = new MyButton("Modify");
+      modify = new Button("Modify");
       modify.setPadding(util.mediumButtonInsets());
       modify.setTooltip(tooltip.getToolTip("modify_todo"));
       modify.setOnAction(new EventHandler<ActionEvent>() {
@@ -103,7 +103,7 @@ public class todo {
          }
       });
 
-      MyButton export = new MyButton("Export ...");
+      Button export = new Button("Export ...");
       export.setPadding(util.mediumButtonInsets());
       export.setTooltip(tooltip.getToolTip("export_todo"));
       export.setOnAction(new EventHandler<ActionEvent>() {

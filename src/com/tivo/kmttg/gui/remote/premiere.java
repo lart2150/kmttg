@@ -18,6 +18,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -31,7 +32,6 @@ import javafx.stage.Stage;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.premiereTable;
 import com.tivo.kmttg.main.config;
@@ -48,9 +48,9 @@ public class premiere {
    public ChoiceBox<String> days = null;
    public ListView<String> channels = null;
    public Hashtable<String,JSONArray> channel_info = new Hashtable<String,JSONArray>();
-   public MyButton record = null;
-   public MyButton recordSP = null;
-   public MyButton wishlist = null;
+   public Button record = null;
+   public Button recordSP = null;
+   public Button wishlist = null;
 
    public premiere(final Stage frame) {
       
@@ -89,7 +89,7 @@ public class premiere {
       }
       days.setValue("12");
 
-      MyButton refresh = new MyButton("Search");
+      Button refresh = new Button("Search");
       refresh.setPadding(util.smallButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_premiere"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
@@ -118,7 +118,7 @@ public class premiere {
          }
       });
       
-      record = new MyButton("Record");
+      record = new Button("Record");
       record.setPadding(util.smallButtonInsets());
       record.setTooltip(tooltip.getToolTip("record_premiere"));
       record.setOnAction(new EventHandler<ActionEvent>() {
@@ -129,7 +129,7 @@ public class premiere {
          }
       });
       
-      recordSP = new MyButton("Season Pass");
+      recordSP = new Button("Season Pass");
       recordSP.setPadding(util.smallButtonInsets());
       recordSP.setTooltip(tooltip.getToolTip("recordSP_premiere"));
       recordSP.setOnAction(new EventHandler<ActionEvent>() {
@@ -140,7 +140,7 @@ public class premiere {
          }
       });
       
-      wishlist = new MyButton("WL");
+      wishlist = new Button("WL");
       wishlist.setPadding(util.smallButtonInsets());
       wishlist.setTooltip(tooltip.getToolTip("wishlist_search"));
       wishlist.setOnAction(new EventHandler<ActionEvent>() {
@@ -156,7 +156,7 @@ public class premiere {
          }
       });
       
-      MyButton channels_update = new MyButton("Update Channels");
+      Button channels_update = new Button("Update Channels");
       channels_update.setPadding(util.smallButtonInsets());
       channels_update.setTooltip(tooltip.getToolTip("premiere_channels_update"));
       channels_update.setOnAction(new EventHandler<ActionEvent>() {

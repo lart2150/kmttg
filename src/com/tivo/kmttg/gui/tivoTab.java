@@ -12,6 +12,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
@@ -43,12 +44,12 @@ import com.tivo.kmttg.util.string;
 public class tivoTab {
    String tivoName = null;
    private VBox panel = null;
-   private MyButton add = null;
-   private MyButton remove = null;
-   private MyButton atomic = null;
-   private MyButton pyTivo_stream = null;
-   private MyButton refresh = null;
-   private MyButton disk_usage = null;
+   private Button add = null;
+   private Button remove = null;
+   private Button atomic = null;
+   private Button pyTivo_stream = null;
+   private Button refresh = null;
+   private Button disk_usage = null;
    private Label status = null;
    private CheckBox showFolders = null;
    private CheckBox partiallyViewed = null;
@@ -79,7 +80,7 @@ public class tivoTab {
          browser = new fileBrowser();
          
          // Add button
-         add = new MyButton("Add...");
+         add = new Button("Add...");
          add.setTooltip(config.gui.getToolTip("add"));
          add.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
@@ -88,7 +89,7 @@ public class tivoTab {
          });         
    
          // Remove button
-         remove = new MyButton("Remove");
+         remove = new Button("Remove");
          remove.setTooltip(config.gui.getToolTip("remove"));
          remove.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
@@ -105,7 +106,7 @@ public class tivoTab {
          
          // atomic button
          if ( file.isFile(config.AtomicParsley) ) {
-            atomic = new MyButton("Run AtomicParsley");
+            atomic = new Button("Run AtomicParsley");
             atomic.setTooltip(config.gui.getToolTip("atomic"));
             atomic.setOnAction(new EventHandler<ActionEvent>() {
                public void handle(ActionEvent e) {
@@ -117,7 +118,7 @@ public class tivoTab {
          
          // pyTivo stream button
          if ( config.rpcEnabled() && file.isFile(config.pyTivo_config) ) {
-            pyTivo_stream = new MyButton("pyTivo stream");
+            pyTivo_stream = new Button("pyTivo stream");
             pyTivo_stream.setTooltip(config.gui.getToolTip("pyTivo_stream"));
             pyTivo_stream.setOnAction(new EventHandler<ActionEvent>() {
                public void handle(ActionEvent e) {
@@ -137,7 +138,7 @@ public class tivoTab {
          nplTab.SetNowPlayingHeaders(nplTab.TIVO_cols);
          
          // Refresh button
-         refresh = new MyButton("Refresh");
+         refresh = new Button("Refresh");
          refresh.setTooltip(config.gui.getToolTip("refresh"));
          refresh.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
@@ -149,7 +150,7 @@ public class tivoTab {
          
          // Disk Usage button
          if ( ! tivoName.equals("FILES") ) {
-            disk_usage = new MyButton("Disk Usage");
+            disk_usage = new Button("Disk Usage");
             disk_usage.setTooltip(config.gui.getToolTip("disk_usage"));
             disk_usage.setOnAction(new EventHandler<ActionEvent>() {
                public void handle(ActionEvent e) {
@@ -161,7 +162,7 @@ public class tivoTab {
          
          // Export button
          if ( ! tivoName.equals("FILES") ) {
-            MyButton export = new MyButton("Export...");
+            Button export = new Button("Export...");
             export.setTooltip(config.gui.getToolTip("export_npl"));
             export.setOnAction(new EventHandler<ActionEvent>() {
                public void handle(ActionEvent e) {
@@ -253,7 +254,7 @@ public class tivoTab {
       return panel;
    }
    
-   public MyButton getRefreshButton() {
+   public Button getRefreshButton() {
       debug.print("");
       return refresh;
    }
@@ -265,7 +266,7 @@ public class tivoTab {
    
    // FILES mode add button callback
    // Bring up file browser and add selected entries to Now Playing
-   private void addCB(MyButton button) {
+   private void addCB(Button button) {
       debug.print("button=" + button);
       // Bring up File Browser
       browser.Browser.setTitle("Add");
@@ -294,7 +295,7 @@ public class tivoTab {
 
    // FILES mode remove button callback
    // Remove selected NowPlaying entries from list
-   private void removeCB(MyButton button) {
+   private void removeCB(Button button) {
       debug.print("button=" + button);
       if ( tivoName.equals("FILES") ) {
          int[] rows = nplTab.GetSelectedRows();
@@ -311,7 +312,7 @@ public class tivoTab {
 
    // FILES mode atomic button callback
    // Run AtomicParsley for selected FILES entries
-   private void atomicCB(MyButton button) {
+   private void atomicCB(Button button) {
       debug.print("button=" + button);
       if ( tivoName.equals("FILES") ) {
          if (! file.isFile(config.AtomicParsley)) {

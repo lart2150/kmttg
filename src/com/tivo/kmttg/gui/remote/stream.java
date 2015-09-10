@@ -1,6 +1,5 @@
 package com.tivo.kmttg.gui.remote;
 
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.table.streamTable;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -14,6 +13,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -24,8 +24,8 @@ import javafx.stage.Stage;
 public class stream {
    public VBox panel = null;
    public streamTable tab = null;
-   public MyButton refresh = null;
-   public MyButton remove = null;
+   public Button refresh = null;
+   public Button remove = null;
    public ChoiceBox<String> tivo = null;
    
    public stream(final Stage frame) {
@@ -55,7 +55,7 @@ public class stream {
       });
       tivo.setTooltip(tooltip.getToolTip("tivo_stream"));
       
-      refresh = new MyButton("Refresh");
+      refresh = new Button("Refresh");
       refresh.setPadding(util.smallButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_stream"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
@@ -83,7 +83,7 @@ public class stream {
          }
       });
       
-      remove = new MyButton("Remove");
+      remove = new Button("Remove");
       remove.setPadding(util.smallButtonInsets());
       remove.setTooltip(tooltip.getToolTip("remove_stream"));
       remove.setOnAction(new EventHandler<ActionEvent>() {

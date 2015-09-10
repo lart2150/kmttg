@@ -19,6 +19,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -37,7 +38,6 @@ import javafx.stage.WindowEvent;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.MyTooltip;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.main.config;
@@ -207,7 +207,7 @@ public class AdvSearch {
       favoriteChannelsOnly.setTooltip(getToolTip("favoriteChannelsOnly"));
       favoriteChannelsOnly.setSelected(false);
             
-      MyButton search = new MyButton("Search");
+      Button search = new Button("Search");
       search.setTooltip(getToolTip("search"));
       search.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -215,7 +215,7 @@ public class AdvSearch {
          }
       });
       
-      MyButton save = new MyButton("Save...");
+      Button save = new Button("Save...");
       save.setTooltip(getToolTip("save"));
       save.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -232,7 +232,7 @@ public class AdvSearch {
          }
       });
       
-      MyButton delete = new MyButton("Delete");
+      Button delete = new Button("Delete");
       delete.setTooltip(getToolTip("delete"));
       delete.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -242,7 +242,7 @@ public class AdvSearch {
          }
       });
       
-      MyButton close = new MyButton("Close");
+      Button close = new Button("Close");
       close.setTooltip(getToolTip("close"));
       close.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {

@@ -12,6 +12,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
@@ -97,7 +98,7 @@ public class help {
          }
          content.getChildren().add(grid);
                   
-         MyButton ok = new MyButton("OK");
+         Button ok = new Button("OK");
          ok.setPrefWidth(100);
          ok.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {

@@ -18,6 +18,7 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -46,7 +47,6 @@ import com.sun.javafx.scene.control.skin.TreeTableViewSkin;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.PopupHandler;
 import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.help;
@@ -62,7 +62,7 @@ import com.tivo.kmttg.util.log;
 public class TableUtil {
    private static Stage searchDialog = null;
    private static TextField searchField = null;
-   private static MyButton find = null;
+   private static Button find = null;
    private static Dialog<?> thumbsDialog = null;
    private static ChoiceBox<String> thumbsChoice = null;
    private static double search_x = -1;
@@ -250,7 +250,7 @@ public class TableUtil {
          // Dialog not created yet, so do so
          HBox panel = new HBox();
          panel.setSpacing(5);
-         find = new MyButton("FIND");
+         find = new Button("FIND");
          find.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
@@ -290,7 +290,7 @@ public class TableUtil {
                  }
              }
          });
-         MyButton close = new MyButton("CLOSE");
+         Button close = new Button("CLOSE");
          close.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
@@ -425,8 +425,8 @@ public class TableUtil {
          thumbsChoice = new ChoiceBox<String>();
          for (int i=-3; i<=3; ++i)
             thumbsChoice.getItems().add("" + i);
-         MyButton setMyButton = new MyButton("SET");
-         setMyButton.setOnAction(new EventHandler<ActionEvent>() {
+         Button setButton = new Button("SET");
+         setButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
                Task<Void> task = new Task<Void>() {
                   @Override public Void call() {
@@ -465,7 +465,7 @@ public class TableUtil {
                new Thread(task).start();
             }
          });
-         row1.getChildren().addAll(setMyButton, rating, thumbsChoice);
+         row1.getChildren().addAll(setButton, rating, thumbsChoice);
          thumbsDialog = new Dialog<>();
          config.gui.setFontSize(thumbsDialog, config.FontSize);
          thumbsDialog.setTitle("Thumbs Rating");

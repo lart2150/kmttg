@@ -1,6 +1,5 @@
 package com.tivo.kmttg.gui.remote;
 
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.deletedTable;
 import com.tivo.kmttg.main.config;
@@ -13,6 +12,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -24,10 +24,10 @@ public class deleted {
    public VBox panel = null;
    public deletedTable tab = null;
    public ChoiceBox<String> tivo = null;
-   public MyButton refresh = null;
+   public Button refresh = null;
    public Label label = null;
-   public MyButton recover = null;
-   public MyButton permDelete = null;  
+   public Button recover = null;
+   public Button permDelete = null;  
 
    public deleted(final Stage frame) {
       
@@ -57,7 +57,7 @@ public class deleted {
       });
       tivo.setTooltip(tooltip.getToolTip("tivo_deleted"));
 
-      refresh = new MyButton("Refresh");
+      refresh = new Button("Refresh");
       refresh.setPadding(util.smallButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_deleted"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
@@ -79,7 +79,7 @@ public class deleted {
          }
       });
 
-      recover = new MyButton("Recover");
+      recover = new Button("Recover");
       recover.setPadding(util.smallButtonInsets());
       recover.setTooltip(tooltip.getToolTip("recover_deleted"));
       recover.setOnAction(new EventHandler<ActionEvent>() {
@@ -91,7 +91,7 @@ public class deleted {
          }
       });
 
-      permDelete = new MyButton("Permanently Delete");
+      permDelete = new Button("Permanently Delete");
       permDelete.setPadding(util.smallButtonInsets());
       permDelete.setTooltip(tooltip.getToolTip("permDelete_deleted"));
       permDelete.setOnAction(new EventHandler<ActionEvent>() {

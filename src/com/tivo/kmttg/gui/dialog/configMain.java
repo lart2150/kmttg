@@ -38,7 +38,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.MyTooltip;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.httpserver.kmttgServer;
@@ -60,13 +59,13 @@ public class configMain {
    private static double pos_x = -1;
    private static double pos_y = -1;
    
-   private static MyButton add = null;
-   private static MyButton del = null;
-   private static MyButton share_add = null;
-   private static MyButton share_del = null;
-   private static MyButton OK = null;
-   private static MyButton CANCEL = null;
-   private static MyButton autotune_test = null;
+   private static Button add = null;
+   private static Button del = null;
+   private static Button share_add = null;
+   private static Button share_del = null;
+   private static Button OK = null;
+   private static Button CANCEL = null;
+   private static Button autotune_test = null;
    private static Stage dialog = null;
    private static ChoiceBox<String> tivos = null;
    private static ChoiceBox<String> shares = null;
@@ -2109,10 +2108,10 @@ public class configMain {
       Label shares_label = new Label();
       shares = new ChoiceBox<String>();
 
-      add = new MyButton();
-      del = new MyButton();
-      share_add = new MyButton();
-      share_del = new MyButton();
+      add = new Button();
+      del = new Button();
+      share_add = new Button();
+      share_del = new Button();
       Label VRDexe_label = new Label();
       Label tivo_name_label = new Label();
       Label tivo_ip_label = new Label();
@@ -2229,9 +2228,9 @@ public class configMain {
       autotune_enabled = new CheckBox();
       Label toolTipsDelay_label = new Label();
       Label toolTipsTimeout_label = new Label();
-      OK = new MyButton();
-      CANCEL = new MyButton();
-      autotune_test = new MyButton();
+      OK = new Button();
+      CANCEL = new Button();
+      autotune_test = new Button();
       FileBrowser = new FileChooser(); FileBrowser.setInitialDirectory(new File(config.programDir));
       FileBrowser.setTitle("Choose File");
       DirBrowser = new DirectoryChooser(); DirBrowser.setInitialDirectory(new File(config.programDir));
@@ -2273,7 +2272,7 @@ public class configMain {
       share_name_label.setText("Share Name");
       share_dir_label.setText("Share Directory");
       autotune_channel_interval_label.setText("Channel change interval (secs)");
-      autotune_button_interval_label.setText("MyButton press interval (msecs)");
+      autotune_button_interval_label.setText("Button press interval (msecs)");
       autotune_chan1_label.setText("Channel number for tuner 1");
       autotune_chan2_label.setText("Channel number for tuner 2");
       autotune_tivoName_label.setText("TiVo to Autotune");

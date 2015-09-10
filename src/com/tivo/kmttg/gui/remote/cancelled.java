@@ -1,6 +1,5 @@
 package com.tivo.kmttg.gui.remote;
 
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.cancelledTable;
 import com.tivo.kmttg.main.config;
@@ -16,6 +15,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -28,11 +28,11 @@ public class cancelled {
    public VBox panel = null;
    public cancelledTable tab = null;
    public ChoiceBox<String> tivo = null;
-   public MyButton refresh = null;
-   public MyButton autoresolve = null;
+   public Button refresh = null;
+   public Button autoresolve = null;
    public CheckBox includeHistory = null;
-   public MyButton record = null;
-   public MyButton explain = null;
+   public Button record = null;
+   public Button explain = null;
 
    public cancelled(final Stage frame) {
       
@@ -56,7 +56,7 @@ public class cancelled {
       });
       tivo.setTooltip(tooltip.getToolTip("tivo_cancel"));
 
-      refresh = new MyButton("Refresh");
+      refresh = new Button("Refresh");
       refresh.setPadding(util.smallButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_cancel_top"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
@@ -77,7 +77,7 @@ public class cancelled {
          }
       });
 
-      record = new MyButton("Record");
+      record = new Button("Record");
       record.setPadding(util.smallButtonInsets());
       record.setTooltip(tooltip.getToolTip("record_cancel"));
       record.setOnAction(new EventHandler<ActionEvent>() {
@@ -88,7 +88,7 @@ public class cancelled {
          }
       });
 
-      explain = new MyButton("Explain");
+      explain = new Button("Explain");
       explain.setPadding(util.smallButtonInsets());
       explain.setTooltip(tooltip.getToolTip("explain_cancel"));
       explain.setOnAction(new EventHandler<ActionEvent>() {
@@ -103,7 +103,7 @@ public class cancelled {
          }
       });
 
-      MyButton refresh_todo = new MyButton("Refresh ToDo");
+      Button refresh_todo = new Button("Refresh ToDo");
       refresh_todo.setPadding(util.smallButtonInsets());
       refresh_todo.setTooltip(tooltip.getToolTip("refresh_todo"));
       refresh_todo.setOnAction(new EventHandler<ActionEvent>() {
@@ -123,7 +123,7 @@ public class cancelled {
          }
       });
       
-      autoresolve = new MyButton("Autoresolve");
+      autoresolve = new Button("Autoresolve");
       autoresolve.setPadding(util.smallButtonInsets());
       autoresolve.setTooltip(tooltip.getToolTip("autoresolve"));
       autoresolve.setOnAction(new EventHandler<ActionEvent>() {

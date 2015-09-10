@@ -8,6 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -63,7 +64,7 @@ public class slingboxgui {
          panel.setHgap(5);
          panel.setVgap(1);
          
-         MyButton start = new MyButton("Start");
+         Button start = new Button("Start");
          start.setTooltip(getToolTip("start"));
          start.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
@@ -130,7 +131,7 @@ public class slingboxgui {
             }
          });
          
-         MyButton stop = new MyButton("Stop");
+         Button stop = new Button("Stop");
          stop.setTooltip(getToolTip("stop"));
          stop.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
@@ -141,7 +142,7 @@ public class slingboxgui {
             }
          });
          
-         MyButton Help = new MyButton("Help");
+         Button Help = new Button("Help");
          Help.setTooltip(getToolTip("help"));
          Help.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {

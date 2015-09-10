@@ -3,7 +3,6 @@ package com.tivo.kmttg.gui.remote;
 import java.io.File;
 
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.guideTable;
 import com.tivo.kmttg.main.config;
@@ -19,6 +18,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -35,17 +35,17 @@ public class guide {
    public VBox panel = null;
    public guideTable tab = null;
    public ListView<String> ChanList = null;
-   public  MyButton refresh = null;
+   public  Button refresh = null;
    public ChoiceBox<String> tivo = null;
    public ChoiceBox<String> start = null;
    public CheckBox guide_channels = null;
-   public MyButton record = null;
-   public MyButton recordSP = null;
-   public MyButton wishlist = null;
+   public Button record = null;
+   public Button recordSP = null;
+   public Button wishlist = null;
    public  int range = 12; // Number of hours to show in guide at a time
    public int hour_increment = 12; // Number of hours for date increment
    public int total_range = 11;    // Number of days
-   public MyButton manual_record = null;
+   public Button manual_record = null;
    
    public guide(final Stage frame) {
       
@@ -100,7 +100,7 @@ public class guide {
          }
       });
 
-      refresh = new MyButton("Channels");
+      refresh = new Button("Channels");
       refresh.setPadding(util.smallButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_guide"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
@@ -114,7 +114,7 @@ public class guide {
          }
       });
 
-      MyButton export_channels = new MyButton("Export ...");
+      Button export_channels = new Button("Export ...");
       export_channels.setPadding(util.smallButtonInsets());
       export_channels.setTooltip(tooltip.getToolTip("export_channels"));
       export_channels.setOnAction(new EventHandler<ActionEvent>() {
@@ -142,7 +142,7 @@ public class guide {
          }
       });
 
-      record = new MyButton("Record");
+      record = new Button("Record");
       record.setPadding(util.smallButtonInsets());
       record.setTooltip(tooltip.getToolTip("guide_record"));
       record.setOnAction(new EventHandler<ActionEvent>() {
@@ -154,7 +154,7 @@ public class guide {
          }
       });
 
-      recordSP = new MyButton("Season Pass");
+      recordSP = new Button("Season Pass");
       recordSP.setPadding(util.smallButtonInsets());
       recordSP.setTooltip(tooltip.getToolTip("guide_recordSP"));
       recordSP.setOnAction(new EventHandler<ActionEvent>() {
@@ -166,7 +166,7 @@ public class guide {
          }
       });
       
-      wishlist = new MyButton("WL");
+      wishlist = new Button("WL");
       wishlist.setPadding(util.smallButtonInsets());
       wishlist.setTooltip(tooltip.getToolTip("wishlist_search"));
       wishlist.setOnAction(new EventHandler<ActionEvent>() {
@@ -182,7 +182,7 @@ public class guide {
          }
       });
       
-      manual_record = new MyButton("MR");
+      manual_record = new Button("MR");
       manual_record.setPadding(util.smallButtonInsets());
       manual_record.setTooltip(tooltip.getToolTip("guide_manual_record"));
       manual_record.setOnAction(new EventHandler<ActionEvent>() {
@@ -194,7 +194,7 @@ public class guide {
          }
       });
 
-      MyButton guide_refresh_todo = new MyButton("Refresh ToDo");
+      Button guide_refresh_todo = new Button("Refresh ToDo");
       guide_refresh_todo.setPadding(util.smallButtonInsets());
       guide_refresh_todo.setTooltip(tooltip.getToolTip("guide_refresh_todo"));
       guide_refresh_todo.setOnAction(new EventHandler<ActionEvent>() {

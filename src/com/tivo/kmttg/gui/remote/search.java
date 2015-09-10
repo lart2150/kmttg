@@ -4,7 +4,6 @@ import java.util.Hashtable;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.dialog.AdvSearch;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.searchTable;
@@ -21,6 +20,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -38,7 +38,7 @@ public class search {
    public ChoiceBox<String> tivo = null;
    public searchTable tab = null;
    public TextField text = null;
-   public MyButton button = null;
+   public Button button = null;
    public Spinner<Integer> max = null;
    public ChoiceBox<String> search_type = null;
    public CheckBox includeFree = null;
@@ -47,10 +47,10 @@ public class search {
    //public CheckBox unavailable = null;
    public Hashtable<String,JSONArray> search_info = new Hashtable<String,JSONArray>();
    public AdvSearch advSearch = new AdvSearch();
-   public MyButton manual_record = null;
-   public MyButton record = null;    
-   public MyButton recordSP = null;    
-   public MyButton wishlist = null;    
+   public Button manual_record = null;
+   public Button record = null;    
+   public Button recordSP = null;    
+   public Button wishlist = null;    
    
    public search (final Stage frame) {
       
@@ -80,7 +80,7 @@ public class search {
       });
       tivo.setTooltip(tooltip.getToolTip("tivo_search"));
 
-      button = new MyButton("Search");
+      button = new Button("Search");
       button.setPadding(util.smallButtonInsets());
       button.setTooltip(tooltip.getToolTip("button_search"));
       button.setOnAction(new EventHandler<ActionEvent>() {
@@ -123,7 +123,7 @@ public class search {
 
       text.setTooltip(tooltip.getToolTip("text_search"));
 
-      MyButton adv = new MyButton("Search++");
+      Button adv = new Button("Search++");
       adv.setPadding(util.smallButtonInsets());
       adv.setTooltip(tooltip.getToolTip("adv_search"));
       adv.setOnAction(new EventHandler<ActionEvent>() {
@@ -137,7 +137,7 @@ public class search {
          }
       });
 
-      record = new MyButton("Record");
+      record = new Button("Record");
       record.setPadding(util.smallButtonInsets());
       record.setTooltip(tooltip.getToolTip("record_search"));
       record.setOnAction(new EventHandler<ActionEvent>() {
@@ -149,7 +149,7 @@ public class search {
          }
       });
 
-      recordSP = new MyButton("SP");
+      recordSP = new Button("SP");
       recordSP.setPadding(util.smallButtonInsets());
       recordSP.setTooltip(tooltip.getToolTip("record_sp_search"));
       recordSP.setOnAction(new EventHandler<ActionEvent>() {
@@ -161,7 +161,7 @@ public class search {
          }
       });
       
-      wishlist = new MyButton("WL");
+      wishlist = new Button("WL");
       wishlist.setPadding(util.smallButtonInsets());
       wishlist.setTooltip(tooltip.getToolTip("wishlist_search"));
       wishlist.setOnAction(new EventHandler<ActionEvent>() {
@@ -177,7 +177,7 @@ public class search {
          }
       });
       
-      manual_record = new MyButton("MR");
+      manual_record = new Button("MR");
       manual_record.setPadding(util.smallButtonInsets());
       manual_record.setTooltip(tooltip.getToolTip("guide_manual_record"));
       manual_record.setOnAction(new EventHandler<ActionEvent>() {
@@ -189,7 +189,7 @@ public class search {
          }
       });
 
-      MyButton refresh_todo = new MyButton("Refresh ToDo");
+      Button refresh_todo = new Button("Refresh ToDo");
       refresh_todo.setPadding(util.smallButtonInsets());
       refresh_todo.setTooltip(tooltip.getToolTip("refresh_todo_search"));
       refresh_todo.setOnAction(new EventHandler<ActionEvent>() {

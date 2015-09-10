@@ -13,6 +13,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -27,7 +28,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import com.tivo.kmttg.gui.MyButton;
 import com.tivo.kmttg.gui.MyTooltip;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.gui.table.autoTable;
@@ -49,9 +49,9 @@ public class configAuto {
    
    private static Stage dialog = null;
    private static VBox content = null;
-   private static MyButton add = null;
-   private static MyButton del = null;
-   private static MyButton update = null;
+   private static Button add = null;
+   private static Button del = null;
+   private static Button update = null;
    private static Label text = null;
    private static autoTable table = null;
    private static ScrollPane table_scroll = null;
@@ -87,8 +87,8 @@ public class configAuto {
    private static CheckBox programIdFilter = null;
    private static ChoiceBox<String> dateOperator = null;
    private static TextField dateHours = null;
-   private static MyButton OK = null;
-   private static MyButton CANCEL = null;
+   private static Button OK = null;
+   private static Button CANCEL = null;
    
    private static final String _noSecondEncodingTxt = "Do not encode twice";
 
@@ -167,21 +167,21 @@ public class configAuto {
       message += "\n  => football OR basketball NOT new york";
       text.setText(message);
       
-      add = new MyButton("ADD");
+      add = new Button("ADD");
       add.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
             addCB();
          }
       });
 
-      update = new MyButton("UPDATE");
+      update = new Button("UPDATE");
       update.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
             updateCB();
          }
       });
 
-      del = new MyButton("DEL");
+      del = new Button("DEL");
       del.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
             delCB();
@@ -285,7 +285,7 @@ public class configAuto {
       
       programIdFilter = new CheckBox("Do not process recordings without ProgramId");
       
-      OK = new MyButton("OK");
+      OK = new Button("OK");
       OK.setPrefWidth(200);
       OK.setId("button_autoconfig_ok");
       OK.setOnAction(new EventHandler<ActionEvent>() {
@@ -294,7 +294,7 @@ public class configAuto {
          }
       });
       
-      CANCEL = new MyButton("CANCEL");
+      CANCEL = new Button("CANCEL");
       CANCEL.setPrefWidth(200);
       CANCEL.setId("button_autoconfig_cancel");
       CANCEL.setOnAction(new EventHandler<ActionEvent>() {
