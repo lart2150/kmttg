@@ -28,6 +28,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
 
@@ -121,6 +122,7 @@ public class guide {
          public void handle(ActionEvent e) {
             final String tivoName = tivo.getValue();
             config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
+            config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
             config.gui.remote_gui.Browser.setTitle("Save to file");
             config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
             config.gui.remote_gui.Browser.setInitialFileName(tivoName + "_channels.csv");

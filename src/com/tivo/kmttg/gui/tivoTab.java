@@ -171,6 +171,7 @@ public class tivoTab {
                      csvBrowser.setTitle("Export to csv file");
                      csvBrowser.getExtensionFilters().clear();
                      csvBrowser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
+                     csvBrowser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
                      csvBrowser.setInitialDirectory(new File(config.programDir));
                   }
                   csvBrowser.setInitialFileName(tivoName + "_npl_" + TableUtil.currentYearMonthDay() + ".csv");

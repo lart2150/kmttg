@@ -23,6 +23,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
 
@@ -89,6 +90,7 @@ public class seasonpasses {
                }  else {
                   config.gui.remote_gui.Browser.getExtensionFilters().clear();
                   config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("SP Files", "*.sp"));
+                  config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
                   config.gui.remote_gui.Browser.setTitle("Save to file");
                   config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
                   config.gui.remote_gui.Browser.setInitialFileName(tivoName + ".sp");
@@ -109,6 +111,7 @@ public class seasonpasses {
             // Load SP data from a file
             config.gui.remote_gui.Browser.getExtensionFilters().clear();
             config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("SP Files", "*.sp"));
+            config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
             config.gui.remote_gui.Browser.setTitle("Load from file");
             config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
             config.gui.remote_gui.Browser.setInitialFileName(null);
@@ -133,6 +136,7 @@ public class seasonpasses {
                }  else {
                   config.gui.remote_gui.Browser.getExtensionFilters().clear();
                   config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
+                  config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
                   config.gui.remote_gui.Browser.setTitle("Export to csv file");
                   config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
                   config.gui.remote_gui.Browser.setInitialFileName(tivoName + "" + ".csv");
