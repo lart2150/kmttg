@@ -90,7 +90,6 @@ public class premiere {
       days.setValue("12");
 
       Button refresh = new Button("Search");
-      refresh.setPadding(util.smallButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_premiere"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -119,7 +118,6 @@ public class premiere {
       });
       
       record = new Button("Record");
-      record.setPadding(util.smallButtonInsets());
       record.setTooltip(tooltip.getToolTip("record_premiere"));
       record.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -130,7 +128,6 @@ public class premiere {
       });
       
       recordSP = new Button("Season Pass");
-      recordSP.setPadding(util.smallButtonInsets());
       recordSP.setTooltip(tooltip.getToolTip("recordSP_premiere"));
       recordSP.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -141,7 +138,6 @@ public class premiere {
       });
       
       wishlist = new Button("WL");
-      wishlist.setPadding(util.smallButtonInsets());
       wishlist.setTooltip(tooltip.getToolTip("wishlist_search"));
       wishlist.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -157,7 +153,6 @@ public class premiere {
       });
       
       Button channels_update = new Button("Update Channels");
-      channels_update.setPadding(util.smallButtonInsets());
       channels_update.setTooltip(tooltip.getToolTip("premiere_channels_update"));
       channels_update.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {

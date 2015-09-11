@@ -56,7 +56,6 @@ public class stream {
       tivo.setTooltip(tooltip.getToolTip("tivo_stream"));
       
       refresh = new Button("Refresh");
-      refresh.setPadding(util.smallButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_stream"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -84,7 +83,6 @@ public class stream {
       });
       
       remove = new Button("Remove");
-      remove.setPadding(util.smallButtonInsets());
       remove.setTooltip(tooltip.getToolTip("remove_stream"));
       remove.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {

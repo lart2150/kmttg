@@ -15,7 +15,6 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.log;
 
-import javafx.geometry.Insets;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -80,14 +79,6 @@ public class util {
    public static HBox space(int size) {
       HBox space = new HBox(); space.setMinWidth(size); space.setPrefWidth(size);
       return space;
-   }
-      
-   public static Insets smallButtonInsets() {
-      return new Insets(3,3,3,3);
-   }
-   
-   public static Insets mediumButtonInsets() {
-      return new Insets(3,3,3,3);
    }
    
    public static ColumnConstraints cc_stretch() {

@@ -65,7 +65,6 @@ public class seasonpasses {
       tivo.setTooltip(tooltip.getToolTip("tivo_sp"));
 
       Button refresh = new Button("Refresh");
-      refresh.setPadding(util.smallButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_sp"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -77,7 +76,6 @@ public class seasonpasses {
       });
 
       Button save = new Button("Save...");
-      save.setPadding(util.smallButtonInsets());
       save.setTooltip(tooltip.getToolTip("save_sp"));
       save.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -104,7 +102,6 @@ public class seasonpasses {
       });         
 
       Button load = new Button("Load...");
-      load.setPadding(util.smallButtonInsets());
       load.setTooltip(tooltip.getToolTip("load_sp"));
       load.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -123,7 +120,6 @@ public class seasonpasses {
       });         
 
       Button export = new Button("Export...");
-      export.setPadding(util.smallButtonInsets());
       export.setTooltip(tooltip.getToolTip("export_sp"));
       export.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -150,7 +146,6 @@ public class seasonpasses {
       });         
 
       copy = new Button("Copy");
-      copy.setPadding(util.smallButtonInsets());
       copy.setTooltip(tooltip.getToolTip("copy_sp"));
       copy.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -162,7 +157,6 @@ public class seasonpasses {
       });         
 
       Button delete = new Button("Delete");
-      delete.setPadding(util.smallButtonInsets());
       delete.setTooltip(tooltip.getToolTip("delete_sp"));
       delete.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -171,7 +165,6 @@ public class seasonpasses {
       });         
 
       modify = new Button("Modify");
-      modify.setPadding(util.smallButtonInsets());
       modify.setTooltip(tooltip.getToolTip("modify_sp"));
       modify.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -189,7 +182,6 @@ public class seasonpasses {
       });         
 
       reorder = new Button("Re-order");
-      reorder.setPadding(util.smallButtonInsets());
       reorder.setTooltip(tooltip.getToolTip("reorder_sp"));
       reorder.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -207,7 +199,6 @@ public class seasonpasses {
       });         
 
       upcoming = new Button("Upcoming");
-      upcoming.setPadding(util.smallButtonInsets());
       upcoming.setTooltip(tooltip.getToolTip("upcoming_sp"));
       upcoming.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -243,7 +234,6 @@ public class seasonpasses {
       });
 
       conflicts = new Button("Conflicts");
-      conflicts.setPadding(util.smallButtonInsets());
       conflicts.setTooltip(tooltip.getToolTip("conflicts_sp"));
       conflicts.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {

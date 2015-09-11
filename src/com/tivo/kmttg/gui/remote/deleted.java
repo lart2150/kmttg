@@ -58,7 +58,6 @@ public class deleted {
       tivo.setTooltip(tooltip.getToolTip("tivo_deleted"));
 
       refresh = new Button("Refresh");
-      refresh.setPadding(util.smallButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_deleted"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -80,7 +79,6 @@ public class deleted {
       });
 
       recover = new Button("Recover");
-      recover.setPadding(util.smallButtonInsets());
       recover.setTooltip(tooltip.getToolTip("recover_deleted"));
       recover.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -92,7 +90,6 @@ public class deleted {
       });
 
       permDelete = new Button("Permanently Delete");
-      permDelete.setPadding(util.smallButtonInsets());
       permDelete.setTooltip(tooltip.getToolTip("permDelete_deleted"));
       permDelete.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {

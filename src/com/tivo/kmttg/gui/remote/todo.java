@@ -62,7 +62,6 @@ public class todo {
       tivo.setTooltip(tooltip.getToolTip("tivo_todo"));
 
       Button refresh = new Button("Refresh");
-      refresh.setPadding(util.mediumButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_todo"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -84,7 +83,6 @@ public class todo {
       });
 
       cancel = new Button("Cancel");
-      cancel.setPadding(util.mediumButtonInsets());
       cancel.setTooltip(tooltip.getToolTip("cancel_todo"));
       cancel.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -93,7 +91,6 @@ public class todo {
       });
 
       modify = new Button("Modify");
-      modify.setPadding(util.mediumButtonInsets());
       modify.setTooltip(tooltip.getToolTip("modify_todo"));
       modify.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -105,7 +102,6 @@ public class todo {
       });
 
       Button export = new Button("Export ...");
-      export.setPadding(util.mediumButtonInsets());
       export.setTooltip(tooltip.getToolTip("export_todo"));
       export.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {

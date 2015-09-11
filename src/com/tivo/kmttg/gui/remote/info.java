@@ -73,7 +73,6 @@ public class info {
       tivo.setTooltip(tooltip.getToolTip("tivo_info"));
 
       Button refresh = new Button("Refresh");
-      refresh.setPadding(util.mediumButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_info"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -85,7 +84,6 @@ public class info {
       });
 
       Button netconnect = new Button("Network Connect");
-      netconnect.setPadding(util.mediumButtonInsets());
       netconnect.setTooltip(tooltip.getToolTip("netconnect_info"));
       netconnect.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -106,7 +104,6 @@ public class info {
       });
 
       reboot = new Button("Reboot");
-      reboot.setPadding(util.mediumButtonInsets());
       reboot.setTooltip(tooltip.getToolTip("reboot_info"));
       reboot.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {

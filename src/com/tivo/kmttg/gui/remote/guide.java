@@ -102,7 +102,6 @@ public class guide {
       });
 
       refresh = new Button("Channels");
-      refresh.setPadding(util.smallButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_guide"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -116,7 +115,6 @@ public class guide {
       });
 
       Button export_channels = new Button("Export ...");
-      export_channels.setPadding(util.smallButtonInsets());
       export_channels.setTooltip(tooltip.getToolTip("export_channels"));
       export_channels.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -145,7 +143,6 @@ public class guide {
       });
 
       record = new Button("Record");
-      record.setPadding(util.smallButtonInsets());
       record.setTooltip(tooltip.getToolTip("guide_record"));
       record.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -157,7 +154,6 @@ public class guide {
       });
 
       recordSP = new Button("Season Pass");
-      recordSP.setPadding(util.smallButtonInsets());
       recordSP.setTooltip(tooltip.getToolTip("guide_recordSP"));
       recordSP.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -169,7 +165,6 @@ public class guide {
       });
       
       wishlist = new Button("WL");
-      wishlist.setPadding(util.smallButtonInsets());
       wishlist.setTooltip(tooltip.getToolTip("wishlist_search"));
       wishlist.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -185,7 +180,6 @@ public class guide {
       });
       
       manual_record = new Button("MR");
-      manual_record.setPadding(util.smallButtonInsets());
       manual_record.setTooltip(tooltip.getToolTip("guide_manual_record"));
       manual_record.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -197,7 +191,6 @@ public class guide {
       });
 
       Button guide_refresh_todo = new Button("Refresh ToDo");
-      guide_refresh_todo.setPadding(util.smallButtonInsets());
       guide_refresh_todo.setTooltip(tooltip.getToolTip("guide_refresh_todo"));
       guide_refresh_todo.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {

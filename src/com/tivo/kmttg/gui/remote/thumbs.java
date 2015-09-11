@@ -62,7 +62,6 @@ public class thumbs {
       tivo.setTooltip(tooltip.getToolTip("tivo_thumbs"));
 
       Button save = new Button("Save...");
-      save.setPadding(util.smallButtonInsets());
       save.setTooltip(tooltip.getToolTip("save_thumbs"));
       save.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -89,7 +88,6 @@ public class thumbs {
       });
 
       Button load = new Button("Load...");
-      load.setPadding(util.smallButtonInsets());
       load.setTooltip(tooltip.getToolTip("load_thumbs"));
       load.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -112,7 +110,6 @@ public class thumbs {
       });
 
       copy = new Button("Copy");
-      copy.setPadding(util.smallButtonInsets());
       copy.setTooltip(tooltip.getToolTip("copy_thumbs"));
       copy.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -124,7 +121,6 @@ public class thumbs {
       });
 
       refresh = new Button("Refresh");
-      refresh.setPadding(util.smallButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_thumbs"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -138,7 +134,6 @@ public class thumbs {
       });
 
       update = new Button("Modify");
-      update.setPadding(util.smallButtonInsets());
       update.setTooltip(tooltip.getToolTip("update_thumbs"));
       update.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {

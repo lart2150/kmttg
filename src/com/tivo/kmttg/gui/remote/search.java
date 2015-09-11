@@ -81,7 +81,6 @@ public class search {
       tivo.setTooltip(tooltip.getToolTip("tivo_search"));
 
       button = new Button("Search");
-      button.setPadding(util.smallButtonInsets());
       button.setTooltip(tooltip.getToolTip("button_search"));
       button.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -124,7 +123,6 @@ public class search {
       text.setTooltip(tooltip.getToolTip("text_search"));
 
       Button adv = new Button("Search++");
-      adv.setPadding(util.smallButtonInsets());
       adv.setTooltip(tooltip.getToolTip("adv_search"));
       adv.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -138,7 +136,6 @@ public class search {
       });
 
       record = new Button("Record");
-      record.setPadding(util.smallButtonInsets());
       record.setTooltip(tooltip.getToolTip("record_search"));
       record.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -150,7 +147,6 @@ public class search {
       });
 
       recordSP = new Button("SP");
-      recordSP.setPadding(util.smallButtonInsets());
       recordSP.setTooltip(tooltip.getToolTip("record_sp_search"));
       recordSP.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -162,7 +158,6 @@ public class search {
       });
       
       wishlist = new Button("WL");
-      wishlist.setPadding(util.smallButtonInsets());
       wishlist.setTooltip(tooltip.getToolTip("wishlist_search"));
       wishlist.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -178,7 +173,6 @@ public class search {
       });
       
       manual_record = new Button("MR");
-      manual_record.setPadding(util.smallButtonInsets());
       manual_record.setTooltip(tooltip.getToolTip("guide_manual_record"));
       manual_record.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -190,7 +184,6 @@ public class search {
       });
 
       Button refresh_todo = new Button("Refresh ToDo");
-      refresh_todo.setPadding(util.smallButtonInsets());
       refresh_todo.setTooltip(tooltip.getToolTip("refresh_todo_search"));
       refresh_todo.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {

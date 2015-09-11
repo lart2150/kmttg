@@ -57,7 +57,6 @@ public class cancelled {
       tivo.setTooltip(tooltip.getToolTip("tivo_cancel"));
 
       refresh = new Button("Refresh");
-      refresh.setPadding(util.smallButtonInsets());
       refresh.setTooltip(tooltip.getToolTip("refresh_cancel_top"));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -78,7 +77,6 @@ public class cancelled {
       });
 
       record = new Button("Record");
-      record.setPadding(util.smallButtonInsets());
       record.setTooltip(tooltip.getToolTip("record_cancel"));
       record.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -89,7 +87,6 @@ public class cancelled {
       });
 
       explain = new Button("Explain");
-      explain.setPadding(util.smallButtonInsets());
       explain.setTooltip(tooltip.getToolTip("explain_cancel"));
       explain.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -104,7 +101,6 @@ public class cancelled {
       });
 
       Button refresh_todo = new Button("Refresh ToDo");
-      refresh_todo.setPadding(util.smallButtonInsets());
       refresh_todo.setTooltip(tooltip.getToolTip("refresh_todo"));
       refresh_todo.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -124,7 +120,6 @@ public class cancelled {
       });
       
       autoresolve = new Button("Autoresolve");
-      autoresolve.setPadding(util.smallButtonInsets());
       autoresolve.setTooltip(tooltip.getToolTip("autoresolve"));
       autoresolve.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
