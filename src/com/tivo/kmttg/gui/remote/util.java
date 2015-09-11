@@ -83,11 +83,11 @@ public class util {
    }
       
    public static Insets smallButtonInsets() {
-      return new Insets(2,2,2,2);
+      return new Insets(3,3,3,3);
    }
    
    public static Insets mediumButtonInsets() {
-      return new Insets(4,4,4,4);
+      return new Insets(3,3,3,3);
    }
    
    public static ColumnConstraints cc_stretch() {
