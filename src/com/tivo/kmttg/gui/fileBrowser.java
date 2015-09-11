@@ -13,11 +13,32 @@ public class fileBrowser {
       Browser = new FileChooser();
       Browser.setInitialDirectory(new File(config.TIVOS.get("FILES")));
       FileChooser.ExtensionFilter videoFilter = new FileChooser.ExtensionFilter(
-         "VIDEO FILES", "*.tivo", "*.mpeg", "*.mpg", "*.mpeg2", "*.asf", "*.avi", "*.dvr-ms",
-         "*.flv", "*.m2p", "*.m4v", "*.mkv", "*.mov", "*.mp4", "*.mpeg4", "*.m2ts", "*.mts",
-         "*.ogm", "*.tp", "*.ts", "*.vob", "*.wmv", "*.wtv", "*.xvid", "*.divx", "*.dvx",
-         "*.vprj"
+         "VIDEO FILES",
+         "*.tivo", "*.TiVo", "*.TIVO",
+         "*.mpeg", "*.MPEG",
+         "*.mpg", "*.MPG","*.mpeg2", "*.MPEG2",
+         "*.asf", "*.ASF",
+         "*.avi", "*.AVI",
+         "*.dvr-ms", "*.DVR-MS",
+         "*.flv", "*.FLV",
+         "*.m2p", "*.M2P",
+         "*.m4v", "*.M4V",
+         "*.mkv", "*.MKV",
+         "*.mov", "*.MOV",
+         "*.mp4", "*.mpeg4", "*.MP4", "*.MPEG4",
+         "*.m2ts", "*.mts", "*.M2TS", "*.MTS",
+         "*.ogm", "*.OGM",
+         "*.tp", "*.TP",
+         "*.ts", "*.TS",
+         "*.vob", "*.VOB",
+         "*.wmv", "*.WMV",
+         "*.wtv", "*.WTV",
+         "*.xvid", "*.XVID",
+         "*.divx", "*.DIVX",
+         "*.dvx", "*.DVX",
+         "*.vprj", "*.Vprj", "*.VPRJ"
       );
       Browser.getExtensionFilters().add(videoFilter);
+      Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
    }   
 }
