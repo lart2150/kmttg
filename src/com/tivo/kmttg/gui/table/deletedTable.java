@@ -326,29 +326,32 @@ public class deletedTable extends TableMap {
       log.print("Recovering individual recordings on TiVo: " + tivoName);
       Task<Void> task = new Task<Void>() {
          @Override public Void call() {
-            JSONObject json;
-            String title;
             Remote r = config.initRemote(tivoName);
             if (r.success) {
-               for (int row : sorted_final) {
+               for (final int row : sorted_final) {
                   try {
-                     json = GetRowData(row);
-                     title = json.getString("title");
+                     JSONObject json = GetRowData(row);
+                     final String title = json.getString("title");
                      if (json != null) {
                         JSONObject o = new JSONObject();
                         JSONArray a = new JSONArray();
                         a.put(json.getString("recordingId"));
                         o.put("recordingId", a);
-                        json = r.Command("Undelete", o);
-                        if (json == null) {
-                           TABLE.getSelectionModel().clearSelection(row);
-                           log.error("Failed to recover recording: '" + title + "'");
-                        } else {
-                           log.warn("Recovered recording: '" + title + "' on TiVo: " + tivoName);
-                           TABLE.getItems().remove(row);
-                           tivo_data.get(currentTivo).remove(row);
-                           refreshNumber();
-                        }
+                        final JSONObject result = r.Command("Undelete", o);
+                        Platform.runLater(new Runnable() {
+                           @Override
+                           public void run() {
+                              if (result == null) {
+                                 TABLE.getSelectionModel().clearSelection(row);
+                                 log.error("Failed to recover recording: '" + title + "'");
+                              } else {
+                                 log.warn("Recovered recording: '" + title + "' on TiVo: " + tivoName);
+                                 TABLE.getItems().remove(row);
+                                 tivo_data.get(currentTivo).remove(row);
+                                 refreshNumber();
+                              }
+                           }
+                        });
                      }
                   } catch (JSONException e) {
                      log.error("recoverSingle failed - " + e.getMessage());
@@ -372,30 +375,35 @@ public class deletedTable extends TableMap {
       Task<Void> task = new Task<Void>() {
          @Override public Void call() {
             JSONObject json;
-            String title;
             Remote r = config.initRemote(tivoName);
             if (r.success) {
-               for (int row : sorted_final) {
+               for (final int row : sorted_final) {
                   try {
                      json = GetRowData(row);
                      if (json != null) {
-                        title = json.getString("title");
+                        String title = json.getString("title");
                         if (json.has("subtitle"))
                            title += " - " + json.getString("subtitle");
+                        final String title_final = title;
                         JSONObject o = new JSONObject();
                         JSONArray a = new JSONArray();
                         a.put(json.getString("recordingId"));
                         o.put("recordingId", a);
-                        json = r.Command("PermanentlyDelete", o);
-                        if (json == null) {
-                           TABLE.getSelectionModel().clearSelection(row);
-                           log.error("Failed to permanently delete recording: '" + title + "'");
-                        } else {
-                           log.warn("Permanently deleted recording: '" + title + "' on TiVo: " + tivoName);
-                           TABLE.getItems().remove(row);
-                           tivo_data.get(currentTivo).remove(row);
-                           refreshNumber();
-                        }
+                        final JSONObject result = r.Command("PermanentlyDelete", o);
+                        Platform.runLater(new Runnable() {
+                           @Override
+                           public void run() {
+                              if (result == null) {
+                                 TABLE.getSelectionModel().clearSelection(row);
+                                 log.error("Failed to permanently delete recording: '" + title_final + "'");
+                              } else {
+                                 log.warn("Permanently deleted recording: '" + title_final + "' on TiVo: " + tivoName);
+                                 TABLE.getItems().remove(row);
+                                 tivo_data.get(currentTivo).remove(row);
+                                 refreshNumber();
+                              }
+                           }
+                        });
                      }
                   } catch (JSONException e) {
                      log.error("permanentlyDelete failed - " + e.getMessage());
