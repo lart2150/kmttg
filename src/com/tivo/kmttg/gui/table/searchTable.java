@@ -3,6 +3,7 @@ package com.tivo.kmttg.gui.table;
 import java.util.Collections;
 import java.util.Hashtable;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -10,6 +11,7 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.SortEvent;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
@@ -86,9 +88,18 @@ public class searchTable extends TableMap {
                TABLE.getSortOrder().setAll(Collections.singletonList(TABLE.getColumns().get(date_col)));
                TABLE.getColumns().get(date_col).setSortType(TreeTableColumn.SortType.DESCENDING);
             }
-
-            // If there's a table selection make sure it's visible
-            TableUtil.selectedVisible(TABLE);
+         }
+      });
+      
+      // Keep selection visible following sort event
+      TABLE.setOnSort(new EventHandler<SortEvent<TreeTableView<Tabentry>>>() {
+         @Override public void handle(SortEvent<TreeTableView<Tabentry>> event) {
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  // If there's a table selection make sure it's visible
+                  TableUtil.selectedVisible(TABLE);
+               }
+            });
          }
       });
       

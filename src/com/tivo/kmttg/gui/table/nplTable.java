@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Stack;
 import java.util.Vector;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -23,6 +24,7 @@ import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.SortEvent;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
@@ -110,11 +112,21 @@ public class nplTable extends TableMap {
                NowPlaying.getSortOrder().setAll(Collections.singletonList(NowPlaying.getColumns().get(date_col)));
                NowPlaying.getColumns().get(date_col).setSortType(TreeTableColumn.SortType.DESCENDING);
             }
-
-            // If there's a table selection make sure it's visible
-            TableUtil.selectedVisible(NowPlaying);
          }
       });
+      
+      // Keep selection visible following sort event
+      NowPlaying.setOnSort(new EventHandler<SortEvent<TreeTableView<Tabentry>>>() {
+         @Override public void handle(SortEvent<TreeTableView<Tabentry>> event) {
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  // If there's a table selection make sure it's visible
+                  TableUtil.selectedVisible(NowPlaying);
+               }
+            });
+         }
+      });
+      
       if (tivoName.equals("FILES")) {
          for (String colName : FILE_cols) {
             if (colName.equals("SIZE")) {

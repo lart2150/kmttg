@@ -3,11 +3,13 @@ package com.tivo.kmttg.gui.table;
 import java.util.Collections;
 import java.util.Hashtable;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.SortEvent;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -77,9 +79,18 @@ public class todoTable extends TableMap {
                TABLE.getSortOrder().setAll(Collections.singletonList(TABLE.getColumns().get(date_col)));
                TABLE.getColumns().get(date_col).setSortType(TableColumn.SortType.ASCENDING);
             }
-
-            // If there's a table selection make sure it's visible
-            TableUtil.selectedVisible(TABLE);
+         }
+      });
+      
+      // Keep selection visible following sort event
+      TABLE.setOnSort(new EventHandler<SortEvent<TableView<Tabentry>>>() {
+         @Override public void handle(SortEvent<TableView<Tabentry>> event) {
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  // If there's a table selection make sure it's visible
+                  TableUtil.selectedVisible(TABLE);
+               }
+            });
          }
       });
       
