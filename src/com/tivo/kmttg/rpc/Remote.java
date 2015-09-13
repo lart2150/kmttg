@@ -1886,15 +1886,19 @@ public class Remote {
 
    // Advanced Search (used by AdvSearch GUI and remote task)
    public JSONArray AdvSearch(jobData job) {
+      Boolean includeFree = config.gui.remote_gui.search_tab.includeFree.isSelected();
+      Boolean includePaid = config.gui.remote_gui.search_tab.includePaid.isSelected();
       try {
          String commandName = "offerSearch";
          JSONObject collections = new JSONObject();
          int order = 0;
          Boolean stop = false;
-         int offset = 0;
+         int linearoffset = 0;
+         int streamoffset = 0;
          int count = 50;
          int match_count = 0;
          JSONObject json = job.remote_adv_search_json;
+         JSONObject content = new JSONObject(); // Used to avoid duplicate streaming entries
          
          // Change commandName to collectionSearch if appropriate
          Boolean noKeywords = true;
@@ -1937,8 +1941,9 @@ public class Remote {
          //log.print(json.toString(3)); // debug
          JSONArray entries = new JSONArray();
          while ( ! stop ) {
+            // Linear search
             json.put("count", count);
-            json.put("offset", offset);
+            json.put("offset", linearoffset);
             JSONObject result = Command(commandName, json);
             if (result == null) {
                log.error("AdvSearch failed.");
@@ -1950,11 +1955,11 @@ public class Remote {
                      a = result.getJSONArray("collectionId");
                   else
                      a = result.getJSONArray("offerId");
-                  offset += a.length();
-                  String message = "Initial Matches: " + offset ;
+                  linearoffset += a.length();
+                  String message = "Initial Linear Matches: " + linearoffset ;
                   config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
                   if ( jobMonitor.isFirstJobInMonitor(job) ) {
-                     config.gui.setTitle("Adv Search: " + offset + " " + config.kmttg);
+                     config.gui.setTitle("Adv Search: " + linearoffset + " " + config.kmttg);
                   }
                   for (int i=0; i<a.length(); i++)
                      entries.put(a.get(i));
@@ -1963,6 +1968,39 @@ public class Remote {
                } else {
                   stop = true;
                }
+            }
+            
+            if (includeFree || includePaid) {
+               // Stream search
+               json.put("count", count);
+               json.put("offset", streamoffset);
+               json.put("namespace", "trioserver");
+               result = Command(commandName, json);
+               if (result == null) {
+                  log.error("AdvSearch failed.");
+                  stop = true;
+               } else {
+                  if (result.has("collectionId") || result.has("offerId")) {
+                     JSONArray a;
+                     if (result.has("collectionId"))
+                        a = result.getJSONArray("collectionId");
+                     else
+                        a = result.getJSONArray("offerId");
+                     streamoffset += a.length();
+                     String message = "Initial Stream Matches: " + streamoffset ;
+                     config.gui.jobTab_UpdateJobMonitorRowStatus(job, message);
+                     if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                        config.gui.setTitle("Adv Search: " + streamoffset + " " + config.kmttg);
+                     }
+                     for (int i=0; i<a.length(); i++)
+                        entries.put(a.get(i));
+                     if (result.has("isBottom") && result.getBoolean("isBottom"))
+                        stop = true;
+                  } else {
+                     stop = true;
+                  }
+               }
+               json.remove("namespace");
             }
          } // while
 
@@ -1998,24 +2036,8 @@ public class Remote {
                JSONArray a = result.getJSONArray("offer");
                for (int k=0; k<a.length(); ++k) {
                   JSONObject j = a.getJSONObject(k);
-                  // Collect extra information using contentSearch
-                  // since offerSearch is buggy and hardcoded to levelOfDetail=low
-                  /*if (j.has("contentId")) {
-                     json_id.put("contentId", j.getString("contentId"));
-                     JSONObject result2 = Command("contentSearch", json_id);
-                     if (result2 != null && result2.has("content")) {
-                        JSONObject j2 = result2.getJSONArray("content").getJSONObject(0);
-                        for (int ii=0; ii<j2.names().length(); ii++) {
-                           String name = j2.names().getString(ii);
-                           if (! j.has(name)) {
-                              j.put(name, j2.get(name));
-                           }
-                        }
-                     }
-                     j.put("levelOfDetail", "high");
-                  }*/
+                  // Channel filter
                   if (job.remote_adv_search_chans != null && j.has("channel")) {
-                     // Channel filter
                      include = false;
                      if (j.getJSONObject("channel").has("channelNumber")) {
                         String channelNumber = j.getJSONObject("channel").getString("channelNumber");
@@ -2025,6 +2047,29 @@ public class Remote {
                         }
                      }
                   } // if channel
+                  
+                  // ! includePaid filter
+                  if ( j.has("price") && ! includePaid) {
+                     if ( ! j.getString("price").equals("USD.0") )
+                        include = false;
+                  }
+                  
+                  // Filter out unavailable partners
+                  if (include && (includeFree || includePaid)) {
+                     String partnerName = TableUtil.getPartnerName(j);
+                     if (partnerName.startsWith("tivo:pt"))
+                        include = false;
+                  }
+                  
+                  // Filter out streaming duplicates
+                  if (include && (includeFree || includePaid) && j.has("partnerId")) {
+                     String contentId = j.getString("contentId") + j.getString("partnerId");
+                     if (content.has(contentId))
+                        include = false;
+                     else
+                        content.put(contentId, 1);
+                  }
+                  
                   if (include) {
                      match_count++;
                      if (match_count > job.remote_search_max)
@@ -2062,6 +2107,18 @@ public class Remote {
             collections.getJSONObject(collectionId).getJSONArray("entries").put(j);
          }
          
+         // Sort collections by episode #
+         if (collections.length() > 0) {
+            JSONArray keys = collections.names();
+            for (int i=0; i<keys.length(); ++i) {
+               String key = keys.getString(i);
+               if ( ! key.equals("order") ) {
+                  JSONArray a = collections.getJSONObject(key).getJSONArray("entries");
+                  collections.getJSONObject(key).put("entries", TableUtil.sortByEpisode(a));
+               }
+            }
+         }
+         
          log.warn(">> Advanced search completed on TiVo: " + job.tivoName);
          
          // Now generate table_entries in priority order
@@ -2086,7 +2143,7 @@ public class Remote {
       return null;
    }
    
-   // Search that includes non-linear content
+   // Search streaming content
    public JSONObject extendedSearch(
          String keyword, JSONArray credit, Boolean includeFree, Boolean includePaid, jobData job, int max) {
       JSONObject collections = new JSONObject();
