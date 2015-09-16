@@ -283,7 +283,7 @@ public class gui extends Application {
       );
       
       // Upon startup, try and load saved queue
-      /* Intentionally disabled
+      /* Intentionally disabled - only do this for auto transfers mode now
       if (config.persistQueue)
          jobMonitor.loadAllJobs(10);   // delay load to give gui time to setup*/
       kmttg._startingUp = false;
