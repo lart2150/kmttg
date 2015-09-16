@@ -72,8 +72,9 @@ public class kmttg {
     	      System.exit(0);
     	   } else {
        	   // Upon startup, try and load saved queue. Must be done before starting auto loop
+    	      /* Intentionally disabled
            	if (config.persistQueue)
-           		jobMonitor.loadAllJobs(1);	// doesn't need any time to setup
+           		jobMonitor.loadAllJobs(1);	// doesn't need any time to setup*/
            	_startingUp = false;
             auto.startBatchMode();
     	   }

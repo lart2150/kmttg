@@ -1023,9 +1023,10 @@ public class config {
             if (key.equals("single_download")) {
                single_download = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            /* Intentionally disabled
             if (key.equals("persistQueue")) {
                 persistQueue = Boolean.parseBoolean(string.removeLeadingTrailingSpaces(line));
-             }
+             }*/
             if (key.equals("outputDir")) {
                outputDir = line;
             }
@@ -1364,7 +1365,7 @@ public class config {
          
          ofp.write("<single_download>\n" + single_download + "\n\n");
          
-         ofp.write("<persistQueue>\n" + persistQueue + "\n\n");
+         // Intentionally disabled ofp.write("<persistQueue>\n" + persistQueue + "\n\n");
          
          ofp.write("<tivoFileNameFormat>\n" + tivoFileNameFormat + "\n\n");
          

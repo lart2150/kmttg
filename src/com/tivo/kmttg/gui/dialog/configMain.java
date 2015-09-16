@@ -2806,8 +2806,9 @@ public class configMain {
       tivo_panel.setVgap(5);
       tivo_panel.setHgap(5);
       // npl_when_started
+      /* Intentionally disabled
       gy = 0;
-      tivo_panel.add(npl_when_started, 1, gy);
+      tivo_panel.add(npl_when_started, 1, gy);*/
       
       // Look for Tivos on network
       gy++;
@@ -3169,8 +3170,9 @@ public class configMain {
       program_options_panel.add(rpcnpl, 1, gy);
       
       // persistJobQueue
+      /* Intetionally disabled
       gy++;
-      program_options_panel.add(persistQueue, 0, gy);
+      program_options_panel.add(persistQueue, 0, gy);*/
       
       // comskip_review
       program_options_panel.add(comskip_review, 1, gy);

@@ -254,8 +254,9 @@ public class gui extends Application {
       show_details = new ShowDetails(jFrame, null);
       
       // Start NPL jobs
+      /* Intentionally disabled
       if (config.npl_when_started == 1)
-         initialNPL(config.TIVOS);
+         initialNPL(config.TIVOS);*/
       
       config.gui = this;
       
@@ -282,8 +283,9 @@ public class gui extends Application {
       );
       
       // Upon startup, try and load saved queue
+      /* Intentionally disabled
       if (config.persistQueue)
-         jobMonitor.loadAllJobs(10);   // delay load to give gui time to setup
+         jobMonitor.loadAllJobs(10);   // delay load to give gui time to setup*/
       kmttg._startingUp = false;
    }
    
