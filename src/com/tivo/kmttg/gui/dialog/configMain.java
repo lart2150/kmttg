@@ -3170,9 +3170,8 @@ public class configMain {
       program_options_panel.add(rpcnpl, 1, gy);
       
       // persistJobQueue
-      /* Intetionally disabled
       gy++;
-      program_options_panel.add(persistQueue, 0, gy);*/
+      program_options_panel.add(persistQueue, 0, gy);
       
       // comskip_review
       program_options_panel.add(comskip_review, 1, gy);
@@ -4382,8 +4381,8 @@ public class configMain {
       else if (component.equals("persistQueue")) {
           text =  "<b>Persist Job Queue</b><br>";
           text += "Upon exiting, this will auto save the job queue to a data file.<br>";
-          text += "The next time kmttg is opened, it will restore the previous job queue and resume<br>";
-          text += "the processing. This is particularly useful for running kmttg as a service<br>";
+          text += "For kmttg auto transfers mode this will restore the previous job queue and resume<br>";
+          text += "the processing. This is only useful when running kmttg as a service<br>";
           text += "and the service or host system stops for some reason, then any work it has<br>";
           text += "queued up will not be lost.";
        }
