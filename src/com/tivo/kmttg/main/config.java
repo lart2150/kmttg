@@ -75,6 +75,7 @@ public class config {
    public static int VrdQsFilter = 0;
    public static int VrdDecrypt = 0;
    public static int DsdDecrypt = 0;
+   public static int tivolibreDecrypt = 0; // If 1 decrypt with tivolibre TODO
    public static int VrdAllowMultiple = 0; // Allow multiple VRD instances at once
    public static int VrdCombineCutEncode = 0; // Combine VRD Ad Cut and encode
    public static int VrdQsfixMpeg2ps = 0; // If set force VRD QS Fix to output mpeg2 program stream
@@ -1047,6 +1048,9 @@ public class config {
             if (key.equals("DsdDecrypt")) {
                DsdDecrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("tivolibreDecrypt")) {
+               tivolibreDecrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("dsd")) {
                dsd = line;
             }
@@ -1377,6 +1381,8 @@ public class config {
          ofp.write("<tivodecode>\n" + tivodecode + "\n\n");
          
          ofp.write("<DsdDecrypt>\n" + DsdDecrypt + "\n\n");
+         
+         ofp.write("<tivolibreDecrypt>\n" + tivolibreDecrypt + "\n\n");
          
          ofp.write("<dsd>\n" + dsd + "\n\n");
          

@@ -89,6 +89,7 @@ public class configMain {
    private static CheckBox VrdQsFilter = null;
    private static CheckBox VrdDecrypt = null;
    private static CheckBox DsdDecrypt = null;
+   private static CheckBox tivolibreDecrypt = null;
    private static CheckBox httpserver_enable = null;
    private static CheckBox httpserver_share_filter = null;
    private static CheckBox VrdEncode = null;
@@ -707,6 +708,16 @@ public class configMain {
       else
          DsdDecrypt.setSelected(false);
       
+      // tivolibreDecrypt
+      if (config.tivolibreDecrypt == 1) {
+         tivolibreDecrypt.setSelected(true);
+         DsdDecrypt.setSelected(false);
+         config.DsdDecrypt = 0;
+      }
+      
+      else
+         tivolibreDecrypt.setSelected(false);
+      
       // httpserver_enable
       if (config.httpserver_enable == 1)
          httpserver_enable.setSelected(true);
@@ -1288,10 +1299,18 @@ public class configMain {
          config.VrdDecrypt = 0;
       
       // DsdDecrypt
-      if (DsdDecrypt.isSelected() && file.isFile(config.dsd))
+      if (DsdDecrypt.isSelected())
          config.DsdDecrypt = 1;
       else
          config.DsdDecrypt = 0;
+      
+      // tivolibreDecrypt
+      if (tivolibreDecrypt.isSelected()) {
+         config.tivolibreDecrypt = 1;
+         config.DsdDecrypt = 0;
+      }
+      else
+         config.tivolibreDecrypt = 0;
       
       // httpserver_enable
       if (httpserver_enable.isSelected()) {
@@ -2137,6 +2156,7 @@ public class configMain {
       VrdQsFilter = new CheckBox();
       VrdDecrypt = new CheckBox();
       DsdDecrypt = new CheckBox();
+      tivolibreDecrypt = new CheckBox();
       httpserver_enable = new CheckBox();
       httpserver_share_filter = new CheckBox();
       VrdEncode = new CheckBox();
@@ -2291,6 +2311,7 @@ public class configMain {
       VrdQsFilter.setText("Enable VideoRedo QS Fix video dimension filter");
       VrdDecrypt.setText("Decrypt using VideoRedo instead of tivodecode");
       DsdDecrypt.setText("Decrypt using DirectShow Dump instead of tivodecode");
+      tivolibreDecrypt.setText("Decrypt using tivolibre instead of tivodecode");
       httpserver_enable.setText("Enable web server");
       httpserver_share_filter.setText("Share browser show video files only");
       VrdEncode.setText("Show VideoRedo encoding profiles");
@@ -3154,10 +3175,13 @@ public class configMain {
       // comskip_review
       program_options_panel.add(comskip_review, 1, gy);
       
+      // tivolibreDecrypt
+      gy++;
+      program_options_panel.add(tivolibreDecrypt, 0, gy);
+      
       if (config.OS.equals("windows")) {
          // DsdDecrypt
-         gy++;
-         program_options_panel.add(DsdDecrypt, 0, gy);
+         program_options_panel.add(DsdDecrypt, 1, gy);
       }
       
       // Visual Panel
@@ -3448,6 +3472,7 @@ public class configMain {
       VrdQsFilter.setTooltip(getToolTip("VrdQsFilter"));
       VrdDecrypt.setTooltip(getToolTip("VrdDecrypt"));
       DsdDecrypt.setTooltip(getToolTip("DsdDecrypt"));
+      tivolibreDecrypt.setTooltip(getToolTip("tivolibreDecrypt"));
       httpserver_enable.setTooltip(getToolTip("httpserver_enable"));
       httpserver_share_filter.setTooltip(getToolTip("httpserver_share_filter"));
       VrdEncode.setTooltip(getToolTip("VrdEncode"));
@@ -3760,6 +3785,12 @@ public class configMain {
          text += "NOTE: You must have TiVo Desktop (or at least TiVoDirectShowFilter.dll) installed for this to work.<br>";
          text += "NOTE: DirectShow Dump cannot be combined with download task, so you should disable kmttg<br>";
          text += "config option <b>Combine downlad and tivodecode decrypt</b> if enabled in order to use this option.";
+      }
+      else if (component.equals("tivolibreDecrypt")) {
+         text =  "<b>Decrypt using tivolibre instead of tivodecode</b><br>";
+         text += "Enable this option to decrypt .TiVo files using Java tivolibre instead of the standard<br>";
+         text += "<b>tivodecode</b> program. This is useful for cases when the .TiVo files are in a format that<br>";
+         text += "tivodecode cannot decrypt such as for Transport Stream (TS) format .TiVo files.";
       }
       else if (component.equals("httpserver_enable")) {
          text =  "<b>Enable web server</b><br>";

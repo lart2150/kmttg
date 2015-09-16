@@ -44,6 +44,8 @@ import com.tivo.kmttg.task.qsfix;
 import com.tivo.kmttg.task.remote;
 import com.tivo.kmttg.task.slingbox;
 import com.tivo.kmttg.task.streamfix;
+import com.tivo.kmttg.task.tdownload_decrypt;
+import com.tivo.kmttg.task.tivolibre;
 import com.tivo.kmttg.task.vrdencode;
 import com.tivo.kmttg.task.vrdreview;
 import com.tivo.kmttg.util.backgroundProcess;
@@ -203,7 +205,9 @@ public class jobData implements Serializable, Cloneable {
          "download_decrypt",
          "javadownload",
          "jdownload_decrypt",
+         "tdownload_decrypt",
          "decrypt",
+         "tivolibre",
          "dsd",
          "qsfix",
          "projectx",
@@ -255,6 +259,8 @@ public class jobData implements Serializable, Cloneable {
          job.process = new custom(job);
       if (job.type.equals("decrypt"))
          job.process = new decrypt(job);
+      if (job.type.equals("tivolibre"))
+         job.process = new tivolibre(job);
       if (job.type.equals("download_decrypt"))
          job.process = new download_decrypt(job);
       if (job.type.equals("download"))
@@ -269,6 +275,8 @@ public class jobData implements Serializable, Cloneable {
          job.process = new javametadata(job);
       if (job.type.equals("jdownload_decrypt"))
          job.process = new jdownload_decrypt(job);
+      if (job.type.equals("tdownload_decrypt"))
+         job.process = new tdownload_decrypt(job);
       if (job.type.equals("metadata"))
          job.process = new metadata(job);
       if (job.type.equals("metadataTivo"))
@@ -364,7 +372,13 @@ public class jobData implements Serializable, Cloneable {
       else if (type.equals("jdownload_decrypt")) {
          file = mpegFile;
       }
+      else if (type.equals("tdownload_decrypt")) {
+         file = mpegFile;
+      }
       else if (type.equals("decrypt")) {
+         file = mpegFile;
+      }
+      else if (type.equals("tivolibre")) {
          file = mpegFile;
       }
       else if (type.equals("dsd")) {

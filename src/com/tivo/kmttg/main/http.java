@@ -1,5 +1,7 @@
 package com.tivo.kmttg.main;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,6 +24,8 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+import net.straylightlabs.tivolibre.TivoDecoder;
 
 import com.tivo.kmttg.util.log;
 
@@ -175,9 +179,9 @@ public class http {
       throws IOException, InterruptedException, Exception {
       InputStream in;
       if (cookies)
-         in = http.cookieInputStream(url, username, password, offset);
+         in = cookieInputStream(url, username, password, offset);
       else
-         in = http.noCookieInputStream(url, username, password, offset);
+         in = noCookieInputStream(url, username, password, offset);
       if (in == null) {
          return false;
       } else {
@@ -229,9 +233,9 @@ public class http {
       throws IOException, InterruptedException, Exception {
       InputStream in;
       if (cookies)
-         in = http.cookieInputStream(url, username, password, offset);
+         in = cookieInputStream(url, username, password, offset);
       else
-         in = http.noCookieInputStream(url, username, password, offset);
+         in = noCookieInputStream(url, username, password, offset);
       if (in == null)
          return false;
       
@@ -247,6 +251,49 @@ public class http {
             }
             out.write(buffer, 0, c);
          }
+         out.close();
+         in.close();
+      }
+      catch (FileNotFoundException e) {
+         log.error(url + ": " + e.getMessage());
+         if (out != null) out.close();
+         if (in != null) in.close();
+         throw new FileNotFoundException(e.getMessage());
+      }
+      catch (IOException e) {
+         log.error(url + ": " + e.getMessage());
+         if (out != null) out.close();
+         if (in != null) in.close();
+         throw new IOException(e.getMessage());
+      }
+      catch (Exception e) {
+         log.error(url + ": " + e.getMessage());
+         if (out != null) out.close();
+         if (in != null) in.close();
+         throw new Exception(e.getMessage(), e);
+      }
+      finally {
+         if (out != null) out.close();
+         if (in != null) in.close();
+      }
+
+      return true;
+   }   
+   
+   public static Boolean downloadPipedStream(String url, String username, String password, Boolean cookies, jobData job)
+      throws IOException, InterruptedException, Exception {
+      
+      BufferedInputStream in;
+      if (cookies)
+         in = new BufferedInputStream(cookieInputStream(url, username, password, job.offset));
+      else
+         in = new BufferedInputStream(noCookieInputStream(url, username, password, job.offset));
+      
+      BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(job.mpegFile));
+      try {         
+         // Decrypt
+         TivoDecoder decoder = new TivoDecoder(in, out, config.MAK);
+         decoder.decode();
          out.close();
          in.close();
       }

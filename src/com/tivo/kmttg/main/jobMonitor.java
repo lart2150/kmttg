@@ -295,6 +295,7 @@ public class jobMonitor {
              type.equals("javadownload") ||
              type.equals("download_decrypt") ||
              type.equals("jdownload_decrypt") ||
+             type.equals("tdownload_decrypt") ||
              type.equals("metadata") ||
              type.equals("javametadata") ||
              type.equals("metadataTivo") ||
@@ -1023,6 +1024,9 @@ public class jobMonitor {
                // Combined java download & decrypt
                decrypt = false;
                job.type = "jdownload_decrypt";
+               // Disable this for now
+               //if (config.tivolibreDecrypt == 1)
+               //   job.type = "tdownload_decrypt";
                job.name = "java";
                job.mpegFile = mpegFile;
                if (twpdelete && entry != null && entry.containsKey("url")) {
@@ -1101,7 +1105,10 @@ public class jobMonitor {
          job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
-         if (config.DsdDecrypt == 1) {
+         if (config.tivolibreDecrypt == 1) {
+            job.type      = "tivolibre";
+            job.name      = "tivolibre";            
+         } else if (config.DsdDecrypt == 1) {
             job.type      = "dsd";
             job.name      = config.dsd;            
          } else {
@@ -1561,6 +1568,7 @@ public class jobMonitor {
               job.type.equals("javadownload") ||
               job.type.equals("download_decrypt") ||
               job.type.equals("jdownload_decrypt") ||
+              job.type.equals("tdownload_decrypt") ||
               job.type.equals("metadata"));
    }
 
