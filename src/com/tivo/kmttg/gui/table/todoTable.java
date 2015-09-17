@@ -284,6 +284,7 @@ public class todoTable extends TableMap {
        KeyCode keyCode = e.getCode();
        if (keyCode == KeyCode.DELETE){
           // Delete key has special action
+          e.consume(); // Need this so as not to remove focus which is default key action
           DeleteCB();
        }
        else if (keyCode == KeyCode.C) {
