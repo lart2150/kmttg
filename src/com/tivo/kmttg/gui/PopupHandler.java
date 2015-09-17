@@ -114,7 +114,7 @@ public class PopupHandler {
          if (config.rpcEnabled(tivoName) || config.twpDeleteEnabled())
             items.add(new PopupPair("Delete [delete]", KeyCode.DELETE, tivoName));
          if (config.rpcEnabled(tivoName)) {
-            items.add(new PopupPair("Play [space]", KeyCode.SPACE, tivoName));
+            items.add(new PopupPair("Play [p]", KeyCode.P, tivoName));
             items.add(new PopupPair("Show Information [i]", KeyCode.I, tivoName));
          }
          items.add(new PopupPair("Display data [j]", KeyCode.J, tivoName));

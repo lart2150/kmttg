@@ -435,7 +435,7 @@ public class nplTable extends TableMap {
          return;
       if (keyCode == KeyCode.DELETE ||
                keyCode == KeyCode.BACK_SPACE ||
-               keyCode == KeyCode.SPACE) {
+               keyCode == KeyCode.P) {
          Integer[] selected = TableUtil.highToLow(GetSelectedRows());     
          if (selected != null && selected.length > 0) {
             if (keyCode == KeyCode.DELETE || keyCode == KeyCode.BACK_SPACE) {
@@ -549,8 +549,8 @@ public class nplTable extends TableMap {
                }
             } // if keyCode == KeyCode.DELETE
             
-            if (keyCode == KeyCode.SPACE) {
-               // Space key has special action
+            if (keyCode == KeyCode.P) {
+               // P key has special action
                String id;
                int row = selected[0];
                sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
@@ -568,7 +568,7 @@ public class nplTable extends TableMap {
                      }
                   }
                }
-            } // if keyCode == KeyCode.SPACE            
+            } // if keyCode == KeyCode.P            
          } // if selected != null
       } else if (keyCode == KeyCode.I) {
          // Print all data of selected row to log window by sorted keys
