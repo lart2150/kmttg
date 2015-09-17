@@ -440,6 +440,7 @@ public class nplTable extends TableMap {
          if (selected != null && selected.length > 0) {
             if (keyCode == KeyCode.DELETE || keyCode == KeyCode.BACK_SPACE) {
                // Delete key has special action
+               e.consume(); // Need this so as not to remove focus which is default key action
                String show_names = "";
                LinkedHashMap<String,Integer> urlsToDelete = new LinkedHashMap<String,Integer>();
                LinkedHashMap<String,Integer> idsToDelete = new LinkedHashMap<String,Integer>();

@@ -219,6 +219,7 @@ public class deletedTable extends TableMap {
          config.gui.remote_gui.deleted_tab.recover.fire();
       }
       else if (keyCode == KeyCode.DELETE) {
+         e.consume(); // Need this so as not to remove focus which is default key action
          config.gui.remote_gui.deleted_tab.permDelete.fire();
       }
       else if (keyCode == KeyCode.J) {

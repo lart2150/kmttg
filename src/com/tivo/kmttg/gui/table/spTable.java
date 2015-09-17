@@ -551,6 +551,7 @@ public class spTable extends TableMap {
        }
        else if (keyCode == KeyCode.DELETE) {
           // Remove selected row from TiVo and table
+          e.consume(); // Need this so as not to remove focus which is default key action
           SPListDelete();
        }
        else if (keyCode == KeyCode.UP) {
