@@ -277,7 +277,7 @@ public class jobMonitor {
       job.name               = "curl";
       jobMonitor.submitNewJob(job);
       if (config.java_downloads == 0 || config.rpcnpl == 1 && config.rpcEnabled(name)) {
-         if (config.GUIMODE && config.gui.getTab(name).partiallyViewed()) {
+         if (config.GUIMODE && config.gui.getTab(name) != null && config.gui.getTab(name).partiallyViewed()) {
                job.partiallyViewed = true;
          }
          job.type = "playlist";
