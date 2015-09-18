@@ -32,6 +32,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -64,6 +65,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.web.WebView;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -1753,6 +1755,10 @@ public class gui extends Application {
             double centerDivider = jContentPane.getDividerPositions()[0];
             double bottomDivider = splitBottom.getDividerPositions()[0];
             String tabName = tabbed_panel.getSelectionModel().getSelectedItem().getText();
+            int width = (int)jFrame.getWidth(); if (width <0) width = 0;
+            int height = (int)jFrame.getHeight(); if (height <0) height = 0;
+            int x = (int)jFrame.getX(); if (x <0) x = 0;
+            int y = (int)jFrame.getY(); if (y <0) y = 0;
             BufferedWriter ofp = new BufferedWriter(new FileWriter(config.gui_settings));            
             ofp.write("# kmttg gui preferences file\n");
             ofp.write("<GUI_LOOP>\n"            + config.GUI_LOOP            + "\n");
@@ -1782,10 +1788,10 @@ public class gui extends Application {
             ofp.write("<slingBox_type>\n"       + config.slingBox_type       + "\n");
             ofp.write("<slingBox_container>\n"  + config.slingBox_container  + "\n");
             ofp.write("<jobMonitorFullPaths>\n" + config.jobMonitorFullPaths + "\n");
-            ofp.write("<width>\n"               + (int)jFrame.getWidth()     + "\n");
-            ofp.write("<height>\n"              + (int)jFrame.getHeight()    + "\n");
-            ofp.write("<x>\n"                   + (int)jFrame.getX()         + "\n");
-            ofp.write("<y>\n"                   + (int)jFrame.getY()         + "\n");
+            ofp.write("<width>\n"               + width                      + "\n");
+            ofp.write("<height>\n"              + height                     + "\n");
+            ofp.write("<x>\n"                   + x                          + "\n");
+            ofp.write("<y>\n"                   + y                          + "\n");
             ofp.write("<centerDivider>\n"       + centerDivider              + "\n");
             ofp.write("<bottomDivider>\n"       + bottomDivider              + "\n");
             if (remote_gui != null) {
@@ -2282,12 +2288,17 @@ public class gui extends Application {
             }
          }
          
-         if (width != -1 && height != -1) {
+         if (width >= 0 && height >= 0) {
             jFrame.setWidth(width);
             jFrame.setHeight(height);
          }
          
-         if (x != -1 && y != -1) {
+         if (x >= 0 && y >= 0) {
+            Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+            if (x < bounds.getMinX()) x = (int)bounds.getMinX();
+            if (x > bounds.getMaxX()) x = (int)bounds.getMinX();
+            if (y < bounds.getMinY()) y = (int)bounds.getMinY();
+            if (y > bounds.getMaxY()) y = (int)bounds.getMinY();
             jFrame.setX(x);
             jFrame.setY(y);
          }
