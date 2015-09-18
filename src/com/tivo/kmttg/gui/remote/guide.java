@@ -3,6 +3,7 @@ package com.tivo.kmttg.gui.remote;
 import java.io.File;
 
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.MyListView;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.guideTable;
 import com.tivo.kmttg.main.config;
@@ -22,7 +23,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -35,7 +35,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 public class guide {
    public VBox panel = null;
    public guideTable tab = null;
-   public ListView<String> ChanList = null;
+   public MyListView ChanList = null;
    public  Button refresh = null;
    public ChoiceBox<String> tivo = null;
    public ChoiceBox<String> start = null;
@@ -226,7 +226,7 @@ public class guide {
       tab = new guideTable();
       VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
       
-      ChanList = new ListView<String>();
+      ChanList = new MyListView();
       ChanList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
       ChanList.setOrientation(Orientation.VERTICAL);
       // When a list item is selected, update the table when appropriate

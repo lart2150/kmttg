@@ -21,10 +21,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -34,6 +31,7 @@ import javafx.stage.Stage;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.MyListView;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.premiereTable;
 import com.tivo.kmttg.main.config;
@@ -48,12 +46,11 @@ public class premiere {
    public premiereTable tab = null;   
    public ChoiceBox<String> tivo = null;
    public ChoiceBox<String> days = null;
-   public ListView<String> channels = null;
+   public MyListView channels = null;
    public Hashtable<String,JSONArray> channel_info = new Hashtable<String,JSONArray>();
    public Button record = null;
    public Button recordSP = null;
    public Button wishlist = null;
-   private StringBuilder sb = new StringBuilder();
 
    public premiere(final Stage frame) {
       
@@ -173,22 +170,7 @@ public class premiere {
          }
       });
       
-      channels = new ListView<String>();
-      channels.setOnKeyPressed(new EventHandler<KeyEvent>() {
-         public void handle(KeyEvent key) {
-            handleChannelKey(key);
-         }
-      });
-      channels.focusedProperty().addListener(new ChangeListener<Boolean>() {
-         @Override
-         public void changed(ObservableValue<? extends Boolean> observable, Boolean oldVal, Boolean newVal) {
-            if (newVal) {
-               channels.scrollTo(channels.getSelectionModel().getSelectedIndex());
-            } else {
-               sb.delete(0, sb.length());
-            }
-         }
-      });
+      channels = new MyListView();
       channels.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
       channels.setOrientation(Orientation.VERTICAL);      
       channels.setTooltip(tooltip.getToolTip("premiere_channels"));
@@ -415,35 +397,4 @@ public class premiere {
          }
       }
    }
-   
-   // Handle keyboard pattern matching for channels ListView
-   public void handleChannelKey(KeyEvent event) {
-      event.consume();
-      if (event.getCode() == KeyCode.DOWN || event.getCode() == KeyCode.UP || event.getCode() == KeyCode.TAB) {
-          return;
-      }
-      else if (event.getCode() == KeyCode.BACK_SPACE && sb.length() > 0) {
-          sb.deleteCharAt(sb.length()-1);
-      }
-     else {
-          sb.append(event.getText());
-      }
-
-      if (sb.length() == 0) 
-          return;
-      
-      boolean found = false;
-      ObservableList<String> items = channels.getItems();
-      for (int i=0; i<items.size(); i++) {
-          if (event.getCode() != KeyCode.BACK_SPACE && items.get(i).toString().toLowerCase().startsWith(sb.toString().toLowerCase())) {
-              channels.getSelectionModel().clearAndSelect(i);           
-              channels.scrollTo(channels.getSelectionModel().getSelectedIndex());
-              found = true;
-              break;
-          }
-      }
-      
-      if (!found && sb.length() > 0)
-          sb.deleteCharAt(sb.length() - 1);
-  }
 }
