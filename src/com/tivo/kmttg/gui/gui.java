@@ -254,9 +254,13 @@ public class gui extends Application {
       show_details = new ShowDetails(jFrame, null);
       
       // Start NPL jobs
-      /* Intentionally disabled
-      if (config.npl_when_started == 1)
-         initialNPL(config.TIVOS);*/
+      if (config.npl_when_started == 1) {
+         Platform.runLater(new Runnable() {
+            @Override public void run() {
+               initialNPL(config.TIVOS);               
+            }
+         });
+      }
       
       config.gui = this;
       
@@ -1557,7 +1561,7 @@ public class gui extends Application {
    public void initialNPL(LinkedHashMap<String,String> values) {
       debug.print("values=" + values);
       for (String value : values.keySet()) {
-         if (! value.equals("FILES") && ! value.equals("Remote")) {
+         if (! value.equals("FILES") && ! value.equals("Remote") && config.nplCapable(value)) {
             jobMonitor.getNPL(value);
          }
       }
