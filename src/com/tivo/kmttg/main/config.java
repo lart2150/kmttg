@@ -75,7 +75,7 @@ public class config {
    public static int VrdQsFilter = 0;
    public static int VrdDecrypt = 0;
    public static int DsdDecrypt = 0;
-   public static int tivolibreDecrypt = 0; // If 1 decrypt with tivolibre TODO
+   public static int tivolibreDecrypt = 0; // If 1 decrypt with tivolibre
    public static int VrdAllowMultiple = 0; // Allow multiple VRD instances at once
    public static int VrdCombineCutEncode = 0; // Combine VRD Ad Cut and encode
    public static int VrdQsfixMpeg2ps = 0; // If set force VRD QS Fix to output mpeg2 program stream
