@@ -2288,7 +2288,7 @@ public class gui extends Application {
             }
          }
          
-         if (width >= 0 && height >= 0) {
+         if (width > 0 && height > 0) {
             jFrame.setWidth(width);
             jFrame.setHeight(height);
          }
