@@ -275,8 +275,9 @@ public class jobMonitor {
       job.tivoName           = name;
       job.type               = "playlist";
       job.name               = "curl";
-      jobMonitor.submitNewJob(job);
-      if (config.java_downloads == 0 || config.rpcnpl == 1 && config.rpcEnabled(name)) {
+      submitNewJob(job);
+      if (config.rpcnpl == 1 && config.rpcEnabled(name)) {
+         // RPC NPL
          if (config.GUIMODE && config.gui.getTab(name) != null && config.gui.getTab(name).partiallyViewed()) {
                job.partiallyViewed = true;
          }
@@ -284,6 +285,7 @@ public class jobMonitor {
          new NowPlaying(job).launchJob();
       }
       else {
+         // Java NPL
          job.type = "javaplaylist";
          new javaNowPlaying(job).launchJob();
       }
@@ -962,13 +964,8 @@ public class jobMonitor {
                   job.startFile          = startFile;
                   job.source             = source;
                   job.tivoName           = tivoName;
-                  if (config.java_downloads == 0) {
-                     job.type            = "metadata";
-                     job.name            = "curl";
-                  } else {
-                     job.type            = "javametadata";
-                     job.name            = "java";                     
-                  }
+                  job.type               = "javametadata";
+                  job.name               = "java";                     
                   job.metaFile           = meta_files.get(i);
                   job.url                = entry.get("url_TiVoVideoDetails");
                   if (entry.containsKey("EpisodeNumber"))
@@ -1019,48 +1016,27 @@ public class jobMonitor {
                }
             }
          }
-         if (config.java_downloads == 1) {
-            if (config.combine_download_decrypt == 1 && decrypt && config.VrdDecrypt == 0) {
-               // Combined java download & decrypt
-               decrypt = false;
-               job.type = "jdownload_decrypt";
-               if (config.tivolibreDecrypt == 1)
-                  job.type = "tdownload_decrypt";
-               job.name = "java";
-               job.mpegFile = mpegFile;
-               if (twpdelete && entry != null && entry.containsKey("url")) {
-                  job.twpdelete = true;
-                  job.url       = entry.get("url");
-               }
-               if (rpcdelete && entry != null) {
-                  job.rpcdelete  = true;
-                  job.entry = entry;
-               }
-            } else {
-               // Standalone java download
-               job.type      = "javadownload";
-               job.name      = "java";
+         if (config.combine_download_decrypt == 1 && decrypt && config.VrdDecrypt == 0) {
+            // Combined java download & decrypt
+            decrypt = false;
+            job.type = "jdownload_decrypt";
+            if (config.tivolibreDecrypt == 1)
+               job.type = "tdownload_decrypt";
+            job.name = "java";
+            job.mpegFile = mpegFile;
+            job.mpegFile_cut = mpegFile_cut;
+            if (twpdelete && entry != null && entry.containsKey("url")) {
+               job.twpdelete = true;
+               job.url       = entry.get("url");
+            }
+            if (rpcdelete && entry != null) {
+               job.rpcdelete  = true;
+               job.entry = entry;
             }
          } else {
-            if (config.combine_download_decrypt == 1 && decrypt && config.VrdDecrypt == 0) {
-               // Combined curl download & decrypt
-               decrypt = false;
-               job.type = "download_decrypt";
-               job.name = "curl";
-               job.mpegFile = mpegFile;
-               if (twpdelete && entry != null && entry.containsKey("url")) {
-                  job.twpdelete = true;
-                  job.url       = entry.get("url");
-               }
-               if (rpcdelete && entry != null) {
-                  job.rpcdelete  = true;
-                  job.entry = entry;
-               }
-            } else {
-               // Standalone curl download
-               job.type      = "download";
-               job.name      = "curl";
-            }
+            // Standalone java download
+            job.type      = "javadownload";
+            job.name      = "java";
          }
          job.tivoFile     = tivoFile;
          job.url          = entry.get("url");
