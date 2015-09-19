@@ -666,30 +666,6 @@ public class configAuto {
    // This will decide which options are enabled based on current config settings
    // Options are disabled when associated config entry is not setup
    public void refreshOptions() {
-      if (! file.isFile(config.curl) && config.java_downloads == 0) {
-         metadata.setSelected(false);
-         metadata.setDisable(true);
-      } else {
-         metadata.setDisable(false);
-      }
-      if (! file.isFile(config.tivodecode)) {
-         decrypt.setSelected(false);
-         decrypt.setDisable(true);
-      } else {
-         decrypt.setDisable(false);
-      }
-      // This intentionally disabled for now
-      //if (config.VRD == 0) {
-      //   if (config.OS.equals("windows") && file.isFile(config.mencoder) && encode.isSelected()) {
-      //      qsfix.setEnabled(true);
-      //     qsfix.setSelected(true);
-      //   } else {
-      //      qsfix.setSelected(false);
-      //      qsfix.setEnabled(false);
-      //   }
-      //} else {
-      //   qsfix.setEnabled(true);
-      //}
       if (config.VRD == 0 && ! file.isFile(config.projectx)) {
          qsfix.setSelected(false);
          qsfix.setDisable(true);
