@@ -103,7 +103,6 @@ public class configMain {
    private static CheckBox HideProtectedFiles = null;
    private static CheckBox OverwriteFiles = null;
    private static CheckBox DeleteFailedDownloads = null;
-   private static CheckBox java_downloads = null;
    private static CheckBox toolTips = null;
    private static CheckBox slingBox = null;
    private static CheckBox tableColAutoSize = null;
@@ -130,7 +129,7 @@ public class configMain {
    private static TextField encode_output_dir = null;
    private static TextField tivodecode = null;
    private static TextField dsd = null;
-   private static TextField curl = null;
+   //private static TextField curl = null;
    private static TextField ffmpeg = null;
    private static TextField mediainfo = null;
    private static TextField mencoder = null;
@@ -805,12 +804,6 @@ public class configMain {
       else
          DeleteFailedDownloads.setSelected(false);
       
-      // java_downloads
-      if (config.java_downloads == 1)
-         java_downloads.setSelected(true);
-      else
-         java_downloads.setSelected(false);
-      
       // combine_download_decrypt
       if (config.combine_download_decrypt == 1)
          combine_download_decrypt.setSelected(true);
@@ -920,7 +913,7 @@ public class configMain {
       ccextractor.setText(config.ccextractor);
       
       // curl
-      curl.setText(config.curl);
+      //curl.setText(config.curl);
       
       // AtomicParsley
       AtomicParsley.setText(config.AtomicParsley);
@@ -1400,12 +1393,6 @@ public class configMain {
       else
          config.DeleteFailedDownloads = 0;
       
-      // java_downloads
-      if (java_downloads.isSelected())
-         config.java_downloads = 1;
-      else
-         config.java_downloads = 0;
-      
       // combine_download_decrypt
       if (combine_download_decrypt.isSelected())
          config.combine_download_decrypt = 1;
@@ -1717,7 +1704,7 @@ public class configMain {
       config.ccextractor = value;
       
       // curl
-      value = string.removeLeadingTrailingSpaces(curl.getText());
+      /*value = string.removeLeadingTrailingSpaces(curl.getText());
       if (value.length() == 0) {
          // Reset to default if none given
          value = "";
@@ -1727,7 +1714,7 @@ public class configMain {
             errors++;
          }
       }
-      config.curl = value;
+      config.curl = value;*/
       
       // AtomicParsley
       value = string.removeLeadingTrailingSpaces(AtomicParsley.getText());
@@ -2061,7 +2048,7 @@ public class configMain {
       files_path = new TextField(); files_path.setPrefWidth(30);
       tivodecode = new TextField(); tivodecode.setPrefWidth(30);
       dsd = new TextField(); dsd.setPrefWidth(30);
-      curl = new TextField(); curl.setPrefWidth(30);
+      //curl = new TextField(); curl.setPrefWidth(30);
       ffmpeg = new TextField(); ffmpeg.setPrefWidth(30);
       mediainfo = new TextField(); mediainfo.setPrefWidth(30);
       mencoder = new TextField(); mencoder.setPrefWidth(30);
@@ -2170,7 +2157,6 @@ public class configMain {
       HideProtectedFiles = new CheckBox();
       OverwriteFiles = new CheckBox();
       DeleteFailedDownloads = new CheckBox();
-      java_downloads = new CheckBox();
       combine_download_decrypt = new CheckBox();
       single_download = new CheckBox();
       rpcnpl = new CheckBox();
@@ -2309,7 +2295,7 @@ public class configMain {
       comskip_review.setText("Use comskip GUI to review detected commercials");
       VrdReview_noCuts.setText("Bring up VideoRedo GUI to make manual cuts");
       VrdQsFilter.setText("Enable VideoRedo QS Fix video dimension filter");
-      VrdDecrypt.setText("Decrypt using VideoRedo instead of tivodecode");
+      VrdDecrypt.setText("Decrypt using VideoRedo");
       DsdDecrypt.setText("Decrypt using DirectShow Dump instead of tivodecode");
       tivolibreDecrypt.setText("Decrypt using tivolibre instead of tivodecode");
       httpserver_enable.setText("Enable web server");
@@ -2325,8 +2311,7 @@ public class configMain {
       HideProtectedFiles.setText("Do not show copy protected files in table");
       OverwriteFiles.setText("Overwrite existing files");
       DeleteFailedDownloads.setText("Delete failed downloads");
-      java_downloads.setText("Use Java for downloads instead of curl");
-      combine_download_decrypt.setText("Combine download and tivodecode decrypt");
+      combine_download_decrypt.setText("Combine download and decrypt");
       single_download.setText("Allow only 1 download at a time");
       rpcnpl.setText("Use RPC to get NPL when possible");
       enableRpc.setText("Enable rpc style communications with this TiVo");
@@ -2610,7 +2595,7 @@ public class configMain {
          }
       });
 
-      curl.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      /*curl.setOnMouseClicked(new EventHandler<MouseEvent>() {
          @Override
          public void handle(MouseEvent mouseEvent) {
             if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
@@ -2622,7 +2607,7 @@ public class configMain {
                }
             }
          }
-      });
+      });*/
 
       ffmpeg.setOnMouseClicked(new EventHandler<MouseEvent>() {
          @Override
@@ -3008,8 +2993,8 @@ public class configMain {
       
       // curl
       gy=0;
-      programs_panel.add(curl_label, 0, gy);
-      programs_panel.add(curl, 1, gy);
+      //programs_panel.add(curl_label, 0, gy);
+      //programs_panel.add(curl, 1, gy);
       
       // tivodecode
       gy++;
@@ -3150,9 +3135,6 @@ public class configMain {
       // TSDownload
       gy++;
       program_options_panel.add(TSDownload, 0, gy);
-      
-      // java_downloads
-      program_options_panel.add(java_downloads, 1, gy);
       
       // download_time_estimate
       gy++;
@@ -3486,7 +3468,6 @@ public class configMain {
       HideProtectedFiles.setTooltip(getToolTip("HideProtectedFiles"));
       OverwriteFiles.setTooltip(getToolTip("OverwriteFiles"));
       DeleteFailedDownloads.setTooltip(getToolTip("DeleteFailedDownloads"));
-      java_downloads.setTooltip(getToolTip("java_downloads"));
       combine_download_decrypt.setTooltip(getToolTip("combine_download_decrypt"));
       single_download.setTooltip(getToolTip("single_download"));
       rpcnpl.setTooltip(getToolTip("rpcnpl"));
@@ -3503,7 +3484,7 @@ public class configMain {
       encode_output_dir.setTooltip(getToolTip("encode_output_dir"));
       tivodecode.setTooltip(getToolTip("tivodecode"));
       dsd.setTooltip(getToolTip("dsd"));
-      curl.setTooltip(getToolTip("curl"));
+      //curl.setTooltip(getToolTip("curl"));
       ffmpeg.setTooltip(getToolTip("ffmpeg"));
       mediainfo.setTooltip(getToolTip("mediainfo"));
       mencoder.setTooltip(getToolTip("mencoder"));
@@ -3767,12 +3748,10 @@ public class configMain {
          text += "as the filter and prepares a custom version of VRD vp.vbs file with an added filter line.";
       }
       else if (component.equals("VrdDecrypt")) {
-         text =  "<b>Decrypt using VideoRedo instead of tivodecode</b><br>";
+         text =  "<b>Decrypt using VideoRedo</b><br>";
          text += "If you have VideoRedo and have configured kmttg with the installation path<br>";
          text += "to VideoRedo, when this option is enabled kmttg will use VideoRedo QSFix task<br>";
-         text += "to decrypt .TiVo files instead of the standard <b>tivodecode</b> program. This is<br>";
-         text += "useful for cases when the .TiVo files are in a format that tivodecode cannot decrypt<br>";
-         text += "such as for Transport Stream format .TiVo files.<br>";
+         text += "to decrypt .TiVo files instead of other methods.<br>";
          text += "NOTE: You must have TiVo Desktop (or at least TiVoDirectShowFilter.dll) installed for this to work.";
       }
       else if (component.equals("DsdDecrypt")) {
@@ -3905,19 +3884,14 @@ public class configMain {
          text += "set to 0 or 1. By disabling this option note that you can end up with partial downloads<br>";
          text += "so most users will probably want to keep this option enabled.";
       }
-      else if (component.equals("java_downloads")) {
-         text =  "<b>Use Java for downloads instead of curl</b><br>";
-         text += "If this option is enabled then kmttg will use native Java methods for retrieving Now Playing<br>";
-         text += "lists and downloading shows from TiVos instead of using <b>curl</b>.";
-      }
       else if (component.equals("combine_download_decrypt")) {
-         text =  "<b>Combine download and tivodecode decrypt</b><br>";
+         text =  "<b>Combine download and decrypt</b><br>";
          text += "If this option is enabled then kmttg will try to combine the download and decrypt tasks into<br>";
          text += "a single step instead of the default 2 step process (skipping intermediate TiVo file generation).<br>";
          text += "NOTE: You still need to enable both <b>download</b> and <b>decrypt</b> tasks for a show for this<br>";
          text += "to apply - if you do not enable <b>decrypt</b> task then still only download to TiVo file is performed.<br>";
-         text += "NOTE: This option only applies if using <b>tivodecode</b> to decrypt, not for<br>";
-         text += "VideoRedo qsfix or DirectShow dump decrypt which must be performed separately from downloads.";
+         text += "NOTE: This option is not relevant if using VideoRedo qsfix or DirectShow dump decrypt which must<br>";
+         text += "be performed separately from downloads.";
       }
       else if (component.equals("single_download")) {
          text =  "<b>Allow only 1 download at a time</b><br>";
