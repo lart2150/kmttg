@@ -128,7 +128,7 @@ public class tdownload_decrypt extends baseTask implements Serializable {
    
    public void kill() {
       debug.print("");
-      log.warn("Killing '" + job.type + "' job: " + process.toString());
+      log.warn("Killing '" + job.type + "' file: " + job.mpegFile);
       thread.interrupt();
       thread_running = false;
    }
