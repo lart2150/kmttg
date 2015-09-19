@@ -15,10 +15,10 @@ import com.tivo.kmttg.util.file;
 public class mainInstall {
    
    public static void install() {
-      // If tivodecode not defined then assume tools not installed
+      // If ffmpeg not defined then assume tools not installed
       // and download & install tools package
       // for windows & mac only
-      if ( ! file.isFile(config.tivodecode) ) {
+      if ( ! file.isFile(config.ffmpeg) ) {
          if (config.OS.equals("windows") || config.OS.equals("mac")) {
             Alert alert = new Alert(AlertType.CONFIRMATION);
             alert.setTitle("Confirm");
