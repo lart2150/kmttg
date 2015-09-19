@@ -87,6 +87,47 @@ public class tdownload_decrypt extends baseTask implements Serializable {
       if (config.TSDownload == 1 && job.offset == null)
          url += "&Format=video/x-tivo-mpeg-ts";
 
+      // For transport stream container input files change output file suffix from .mpg to .ts
+      Boolean isFileChanged = false;
+      if (config.TSDownload == 1) {
+         if (job.mpegFile.endsWith(".mpg")) {
+            job.mpegFile = string.replaceSuffix(job.mpegFile, ".ts");
+            isFileChanged = true;
+         }
+      }      
+      if (isFileChanged) {            
+         // If in GUI mode, update job monitor output field
+         if (config.GUIMODE) {
+            String output = string.basename(job.mpegFile);
+            if (config.jobMonitorFullPaths == 1)
+               output = job.mpegFile;
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, output);
+         }
+         
+         // Subsequent jobs need to have mpegFile && mpegFile_cut updated
+         jobMonitor.updatePendingJobFieldValue(job, "mpegFile", job.mpegFile);
+         String mpegFile_cut = job.mpegFile_cut.replaceFirst("_cut.mpg", "_cut.ts");
+         jobMonitor.updatePendingJobFieldValue(job, "mpegFile_cut", mpegFile_cut);
+         
+         // Rename already created metadata file if relevant
+         String meta = string.replaceSuffix(job.mpegFile, ".mpg") + ".txt";
+         if (file.isFile(meta)) {
+            String meta_new = job.mpegFile + ".txt";
+            log.print("Renaming metadata file to: " + meta_new);
+            file.rename(meta, meta_new);
+            // Subsequent jobs need to have metaFile updated
+            jobMonitor.updatePendingJobFieldValue(job, "metaFile", meta_new);
+         }
+         meta = string.replaceSuffix(job.mpegFile_cut, ".mpg") + ".txt";
+         if (file.isFile(meta)) {
+            String meta_new = job.mpegFile_cut + ".txt";
+            log.print("Renaming metadata file to: " + meta_new);
+            file.rename(meta, meta_new);
+            // Subsequent jobs need to have metaFile updated
+            jobMonitor.updatePendingJobFieldValue(job, "metaFile", meta_new);
+         }
+      }
+
       String message = "DOWNLOADING/DECRYPTING";
       if (job.offset != null) {
          message = "RESUMING DOWNLOAD/DECRYPT WITH OFFSET=" + job.offset;
