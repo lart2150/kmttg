@@ -1024,9 +1024,8 @@ public class jobMonitor {
                // Combined java download & decrypt
                decrypt = false;
                job.type = "jdownload_decrypt";
-               // Disable this for now
-               //if (config.tivolibreDecrypt == 1)
-               //   job.type = "tdownload_decrypt";
+               if (config.tivolibreDecrypt == 1)
+                  job.type = "tdownload_decrypt";
                job.name = "java";
                job.mpegFile = mpegFile;
                if (twpdelete && entry != null && entry.containsKey("url")) {
