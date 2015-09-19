@@ -224,7 +224,6 @@ public class javadownload extends baseTask implements Serializable {
                if ( first.toLowerCase().contains("failed") ) failed = 1;
                if ( file.size(job.tivoFile) < 1000 ) failed = 1;
                if (failed == 1) {
-                  process.printStdout();
                   log.error(first);
                }
             }
