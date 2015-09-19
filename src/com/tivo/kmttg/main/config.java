@@ -84,7 +84,6 @@ public class config {
    public static int OverwriteFiles = 0; // Don't overwrite existing files by default
    public static int DeleteFailedDownloads = 1; // Delete failed download files by default
    public static int HideProtectedFiles = 0;   
-   public static int java_downloads = 1;        // Use java instead of curl to download
    public static int combine_download_decrypt = 0; // Combine download and decrypt if possible
    public static int single_download = 0;  // Allow only one download at a time if enabled
    public static int npl_when_started = 0; // Start NPL jobs when kmttg GUI starts
@@ -1011,9 +1010,6 @@ public class config {
             if (key.equals("DeleteFailedDownloads")) {
                DeleteFailedDownloads = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
-            if (key.equals("java_downloads")) {
-               java_downloads = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
             if (key.equals("rpcnpl")) {
                rpcnpl = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1356,8 +1352,6 @@ public class config {
          ofp.write("<OverwriteFiles>\n" + OverwriteFiles + "\n\n");
          
          ofp.write("<DeleteFailedDownloads>\n" + DeleteFailedDownloads + "\n\n");
-         
-         ofp.write("<java_downloads>\n" + java_downloads + "\n\n");
          
          ofp.write("<rpcnpl>\n" + rpcnpl + "\n\n");
          
