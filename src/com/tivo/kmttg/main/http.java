@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.net.Authenticator;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -284,40 +286,54 @@ public class http {
       throws IOException, InterruptedException, Exception {
       
       BufferedInputStream in;
+      int BUFFER_SIZE = 8192;
       if (cookies)
          in = new BufferedInputStream(cookieInputStream(url, username, password, job.offset));
       else
          in = new BufferedInputStream(noCookieInputStream(url, username, password, job.offset));
       
-      BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(job.mpegFile));
-      try {         
-         // Decrypt
-         TivoDecoder decoder = new TivoDecoder(in, out, config.MAK);
-         decoder.decode();
+      final BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(job.mpegFile));
+      final PipedInputStream pipedIn = new PipedInputStream(BUFFER_SIZE);
+      PipedOutputStream pipedOut = new PipedOutputStream(pipedIn);
+      
+      // Start a background tivolibre input pipe
+      Runnable r = new Runnable() {
+         public void run () {
+            TivoDecoder decoder = new TivoDecoder(pipedIn, out, config.MAK);
+            decoder.decode();
+         }
+      };
+      Thread thread = new Thread(r);
+      thread.start();
+      
+      // Read from TiVo and pipe to tivolibre
+      int BUFSIZE = 65536;
+      byte[] buffer = new byte[BUFSIZE];
+      int c;
+      try {
+         while ((c = in.read(buffer, 0, BUFSIZE)) != -1) {
+            if (Thread.interrupted()) {
+               out.close();
+               in.close();
+               pipedOut.flush();
+               pipedOut.close();
+               pipedIn.close();
+               throw new InterruptedException("Killed by user");
+            }
+            pipedOut.write(buffer, 0, c);
+         }
          out.close();
          in.close();
-      }
-      catch (FileNotFoundException e) {
-         log.error(url + ": " + e.getMessage());
-         if (out != null) out.close();
-         if (in != null) in.close();
-         throw new FileNotFoundException(e.getMessage());
-      }
-      catch (IOException e) {
-         log.error(url + ": " + e.getMessage());
-         if (out != null) out.close();
-         if (in != null) in.close();
-         throw new IOException(e.getMessage());
-      }
-      catch (Exception e) {
-         log.error(url + ": " + e.getMessage());
-         if (out != null) out.close();
-         if (in != null) in.close();
-         throw new Exception(e.getMessage(), e);
+         pipedOut.flush();
+         pipedOut.close();
+         pipedIn.close();
+         thread.join();
       }
       finally {
          if (out != null) out.close();
          if (in != null) in.close();
+         if (pipedOut != null) pipedOut.close();
+         if (pipedIn != null) pipedIn.close();
       }
 
       return true;
