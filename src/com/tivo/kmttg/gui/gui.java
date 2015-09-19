@@ -967,17 +967,6 @@ public class gui extends Application {
       if (resumeDownloadsMenuItem == null) {
          resumeDownloadsMenuItem = new CheckMenuItem();
          resumeDownloadsMenuItem.setText("Resume Downloads");
-         resumeDownloadsMenuItem.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            public void changed(ObservableValue<? extends Boolean> e, Boolean oldVal, Boolean newVal) {
-               config.resumeDownloads = newVal;
-               if (config.resumeDownloads) {
-                  if (config.java_downloads == 0) {
-                     config.java_downloads = 1;
-                     log.warn("Turned on Java Downloads option recommended for resume downloads.");
-                  }
-               }
-            }
-         });
       }
       return resumeDownloadsMenuItem;
    }
@@ -1148,8 +1137,8 @@ public class gui extends Application {
                      log.warn("kmttg service already running");
                      return;
                   }
-                  auto.serviceStart();
                }
+               auto.serviceStart();
             }
          });
       }
@@ -1169,8 +1158,8 @@ public class gui extends Application {
                      log.warn("kmttg service already stopped");
                      return;
                   }
-                  auto.serviceStop();
                }
+               auto.serviceStop();
             }
          });
       }
@@ -1286,31 +1275,6 @@ public class gui extends Application {
    // Options are disabled when associated config entry is not setup
    public void refreshOptions(Boolean refreshProfiles) {
       debug.print("refreshProfiles=" + refreshProfiles);
-      if (! file.isFile(config.curl) && config.java_downloads == 0) {
-         metadata.setSelected(false);
-         metadata.setDisable(true);
-      } else {
-         metadata.setDisable(false);
-      }
-      if (! file.isFile(config.tivodecode)) {
-         decrypt.setSelected(false);
-         decrypt.setDisable(true);
-      } else {
-         decrypt.setDisable(false);
-      }
-      /* This intentionally disabled for now
-      if (config.VRD == 0) {
-         if (config.OS.equals("windows") && file.isFile(config.mencoder) && encode.isSelected()) {
-            qsfix.setEnabled(true);
-            qsfix.setSelected(true);
-         } else {
-            qsfix.setSelected(false);
-            qsfix.setEnabled(false);
-         }
-      } else {
-         qsfix.setEnabled(true);
-      }
-      */
       if (config.VRD == 0 && ! file.isFile(config.projectx)) {
          qsfix.setSelected(false);
          qsfix.setDisable(true);
