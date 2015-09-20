@@ -1,18 +1,17 @@
 package com.tivo.kmttg.task;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Stack;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import net.straylightlabs.tivolibre.TivoDecoder;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -33,10 +32,12 @@ import com.tivo.kmttg.util.log;
 
 public class metadataTivo extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
-   private String xmlFile =  "chunk-01-0001.xml";
-   private String xmlFile2 = "chunk-02-0002.xml";
+   private Thread thread = null;
+   private Boolean thread_running = false;
+   private Boolean success = false;
    private backgroundProcess process;
    public jobData job;
+   private List<Document> docList = null;
    
    public metadataTivo(jobData job) {
       debug.print("job=" + job);
@@ -58,10 +59,6 @@ public class metadataTivo extends baseTask implements Serializable {
             log.warn("OVERWRITING EXISTING FILE: " + job.metaFile);
          }
       }
-      if ( ! file.isFile(config.tivodecode) ) {             
-         log.error("tivodecode not found: " + config.tivodecode);
-         schedule = false;
-      }
 
       if (schedule) {
          // Create sub-folders for output file if needed
@@ -82,42 +79,49 @@ public class metadataTivo extends baseTask implements Serializable {
    
    public Boolean start() {
       debug.print("");
-      Stack<String> command = new Stack<String>();
-      command.add(config.tivodecode);
-      command.add("--mak");
-      command.add(config.MAK);
-      command.add("-D");
-      command.add("-x");
-      command.add(job.tivoFile);
-      process = new backgroundProcess();
       log.print(">> CREATING " + job.metaFile + " ...");
-      if ( process.run(command) ) {
-         log.print(process.toString());
-      } else {
-         log.error("Failed to start command: " + process.toString());
-         process.printStderr();
-         process = null;
-         jobMonitor.removeFromJobList(job);
-         return false;
-      }
+      Runnable r = new Runnable() {
+         public void run () {
+            try {
+               BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(job.tivoFile));
+               TivoDecoder decoder = new TivoDecoder(inputStream, null, config.MAK);
+               if (decoder.decodeMetadata()) {
+                  docList = decoder.getMetadata();
+                  if (docList != null && docList.size() >= 2) {
+                     success = true;
+                  } else {
+                     log.error("metadataTivo - unable to retrieve XML data");
+                  }
+               }
+               thread_running = false;
+               decoder = null;
+            } catch (Exception e) {
+               log.error("metadataTivo - " + e.getMessage());
+               success = false;
+               thread_running = false;
+               Thread.currentThread().interrupt();
+            }
+         }
+      };
+      thread_running = true;
+      thread = new Thread(r);
+      thread.start();
+
       return true;
    }
    
    public void kill() {
       debug.print("");
-      process.kill();
-      log.warn("Killing '" + job.type + "' job: " + process.toString());
-      file.delete(xmlFile);
-      file.delete(xmlFile2);
+      thread.interrupt();
+      log.warn("Killing '" + job.type + "' file: " + job.metaFile);
+      thread_running = false;
    }
    
    // Check status of a currently running job
    // Returns true if still running, false if job finished
    // If job is finished then check result
    public Boolean check() {
-      //debug.print("");
-      int exit_code = process.exitStatus();
-      if (exit_code == -1) {
+      if (thread_running) {
          // Still running
          if (config.GUIMODE) {
             // Update STATUS column
@@ -129,58 +133,25 @@ public class metadataTivo extends baseTask implements Serializable {
          jobMonitor.removeFromJobList(job);
          
          // Check for problems
-         int failed = 0;
-         
-         // exit code != 0 => trouble
-         if (exit_code != 0) {
-            failed = 1;
-         }
-         
-         // No or empty output means problems
-         //if ( file.isEmpty(xmlFile2) ) {
-         //   log.error("empty file: " + xmlFile2);
-         //   failed = 1;
-         //}
-         
-         // Check that first line is xml
-         if (failed == 0) {
-            try {
-               BufferedReader xml = new BufferedReader(new FileReader(xmlFile2));
-               String first = xml.readLine();
-               if ( ! first.toLowerCase().matches("^.+xml.+$") ) {
-                  log.error(first);
-                  failed = 1;
-               }
-               xml.close();
+         if (success && docList != null && docList.size() >= 2) {
+            if (metaFileFromXmlDoc(docList.get(docList.size()-1), job.metaFile)) {
+               log.warn("metadataTivo job completed: " + jobMonitor.getElapsedTime(job.time));
+               log.print("---DONE--- job=" + job.type + " output=" + job.metaFile);
+            } else {
+               log.error("metaFileFromXmlFile failed to generate metadata file: " + job.metaFile);
             }
-            catch (IOException ex) {
-               log.error("IOException - " + ex.getMessage());
-               failed = 1;
-            }
-         }
-         
-         if (failed == 1) {
-            log.error("Failed to generate metadata file: " + job.metaFile);
-            log.error("Exit code: " + exit_code);
-            process.printStderr();
          } else {
-            log.warn("metadata job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE--- job=" + job.type + " output=" + job.metaFile);
-            
-            // Success, so generate pyTivo metaFile from xmlFile
-            metaFileFromXmlFile(xmlFile2, job.metaFile);
+            log.error("Failed to generate metadata file: " + job.metaFile);            
          }
       }
-      file.delete(xmlFile);
-      file.delete(xmlFile2);
       
       return false;
    }
    
-   // Create a pyTivo compatible metadata file from a tivodecode xml dump
+   // Create a pyTivo compatible metadata file from a .TiVo XML document
    @SuppressWarnings("unchecked")
-   private Boolean metaFileFromXmlFile(String xmlFile, String metaFile) {
-      debug.print("xmlFile=" + xmlFile + " metaFile=" + metaFile);
+   private Boolean metaFileFromXmlDoc(Document doc, String metaFile) {
+      debug.print("Document=" + doc + " metaFile=" + metaFile);
       try {
          String[] nameValues = {
                "title", "seriesTitle", "description", "time",
@@ -196,9 +167,6 @@ public class metadataTivo extends baseTask implements Serializable {
          };                  
          
          Hashtable<String,Object> data = new Hashtable<String,Object>();
-         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-         Document doc = docBuilder.parse(xmlFile);
 
          // Search for <recordedDuration> elements
          NodeList rdList = doc.getElementsByTagName("recordedDuration");
