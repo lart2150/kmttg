@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Hashtable;
@@ -24,11 +25,40 @@ import net.straylightlabs.tivolibre.TivoDecoder;
 
 public class tivolibre extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
-   private Thread thread = null;
+   private killableThread thread = null;
    private Boolean thread_running = false;
    private Boolean success = false;
    private backgroundProcess process;
    public jobData job;
+   
+   // Special Thread class needed for interrupt
+   // closing inputStream is what really stops it
+   public class killableThread extends Thread {
+      private BufferedInputStream inputStream = null;
+      public void interrupt() {
+         super.interrupt();
+         try {
+            inputStream.close();
+         } catch (IOException e) {}
+      }
+      public void run() {
+         try {
+            inputStream = new BufferedInputStream(new FileInputStream(job.tivoFile));
+            BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(job.mpegFile));
+            TivoDecoder decoder = new TivoDecoder(inputStream, outputStream, config.MAK);
+            success = decoder.decode();
+            inputStream.close();
+            outputStream.close();
+            decoder = null;
+            thread_running = false;
+         }
+         catch (Exception e) {
+            success = false;
+            thread_running = false;
+            Thread.currentThread().interrupt();
+         }
+      }
+   }
    
    public tivolibre(jobData job) {
       debug.print("job=" + job);
@@ -121,29 +151,10 @@ public class tivolibre extends baseTask implements Serializable {
          }
       }
 
-      // Run download method in a separate thread
+      // Run download method in a separate killableThread
       log.print(">> DECRYPTING USING TIVOLIBRE " + job.tivoFile + " ...");
-      Runnable r = new Runnable() {
-         public void run () {
-            try {
-               BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(job.tivoFile));
-               BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(job.mpegFile));
-               TivoDecoder decoder = new TivoDecoder(inputStream, outputStream, config.MAK);
-               success = decoder.decode();
-               inputStream.close();
-               outputStream.close();
-               decoder = null;
-               thread_running = false;
-            }
-            catch (Exception e) {
-               success = false;
-               thread_running = false;
-               Thread.currentThread().interrupt();
-            }
-         }
-      };
       thread_running = true;
-      thread = new Thread(r);
+      thread = new killableThread();
       thread.start();
 
       return true;
