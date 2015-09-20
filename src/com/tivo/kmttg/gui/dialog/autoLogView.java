@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -26,6 +27,8 @@ public class autoLogView {
    private static String logfile = config.autoLog + ".0";
    Timer timer;
    BufferedReader br = null;
+   int max_lines = 100;
+   Stack<String> lines = new Stack<String>();
    
    public autoLogView(Stage frame) {
       debug.print("frame=" + frame);
@@ -94,8 +97,12 @@ public class autoLogView {
       text.setEditable(true);
       try {
          while (( line = br.readLine()) != null) {
-            text.appendText(line + "\n");
+            if (lines.size() > max_lines)
+               lines.remove(0);
+            lines.push(line);
          }
+         for (String l : lines)
+            text.appendText(l + "\n");
       } catch (IOException e) {
          log.error("autoLogView update - " + e.getMessage());
       }
