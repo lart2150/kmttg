@@ -3839,12 +3839,11 @@ public class configMain {
       else if (component.equals("TSDownload")) {
          text =  "<b>Download TiVo files in Transport Stream format</b><br>";
          text += "For TiVo software that properly supports it, this forces TiVo file downloads to use<br>";
-         text += "the faster Transport Stream format instead of the default Program Stream format by adding<br>";
-         text += "<b>&Format=video/x-tivo-mpeg-ts</b> tag to the download URL.<br>";
-         text += "NOTE: Currently only Series 4+, Australia, and New Zealand TiVos support this format and this will<br>";
-         text += "have no effect on other TiVos.<br>";
-         text += "<b>NOTE: 'tivodecode' cannot properly decrypt TS TiVo files so don't enable this option</b><br>";
-         text += "<b>if you are using it to decrypt TiVo files.</b>";
+         text += "the faster Transport Stream format instead of the default Program Stream format.<br>";
+         text += "NOTE: Only Series 4 or later TiVos support this format and this will have no effect on other TiVos.<br>";
+         text += "<b>NOTE: 'tivodecode' cannot properly decrypt TS TiVo files, so if you enable this option</b><br>";
+         text += "<b>you should also turn on option to use 'tivolibre' or 'DirectShowDump' or 'VideoRedo' for the</b><br>";
+         text += "<b>'decrypt' task</b>.";
       }
       else if (component.equals("TivoWebPlusDelete")) {
          text =  "<b>Enable TivoWebPlus Delete task</b><br>";
