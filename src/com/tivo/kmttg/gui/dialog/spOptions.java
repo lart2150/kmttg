@@ -39,7 +39,7 @@ public class spOptions {
    TwoWayHashmap<String,Integer> startFromHash = new TwoWayHashmap<String,Integer>();
    TwoWayHashmap<String,String> rentOrBuyHash = new TwoWayHashmap<String,String>();
    TwoWayHashmap<String,String> hdHash = new TwoWayHashmap<String,String>();
-   Hashtable<String,JSONObject> channelHash = new Hashtable<String,JSONObject>();
+   volatile Hashtable<String,JSONObject> channelHash = new Hashtable<String,JSONObject>();
    
    public spOptions() {      
       recordHash.add("Repeats & first-run",   "rerunsAllowed");
@@ -288,7 +288,7 @@ public class spOptions {
                // Channel & HD preference only applies for non onDemand content
                if (! consumptionSource.equals("onDemand") && j.has("idSetSource")) {
                   JSONObject idSetSource = j.getJSONObject("idSetSource");
-                  if (channelName != null && channelName.equals(" All")) {
+                  if (channelName != null && channelName.equals("All")) {
                      j.put("hdPreference", hdPreference);
                      if (idSetSource.has("channel"))
                         idSetSource.remove("channel");
@@ -303,8 +303,11 @@ public class spOptions {
                         j.remove("hdPreference");
                      if (j.has("hdOnly"))
                         j.remove("hdOnly");
-                     if (channelName != null)
-                        idSetSource.put("channel", channelHash.get(channelName));
+                  }
+                  if (channelName != null && ! channelName.equals("All")) {
+                     if (! channelHash.containsKey(channelName))
+                        setChannelHash(tivoName, json.getString("collectionId"));
+                     idSetSource.put("channel", channelHash.get(channelName));
                   }
                }
                if (consumptionSource.equals("onDemand")) {
@@ -413,7 +416,7 @@ public class spOptions {
       stop.setDisable(!recording);
       
       Boolean hdenable = false;
-      if (channelChoice != null && channelChoice.equals(" All"))
+      if (channelChoice != null && channelChoice.equals("All"))
          hdenable = true;
       if (choice != null && choice.equals("Streaming Only"))
          hdenable = false;
@@ -454,8 +457,7 @@ public class spOptions {
       Task<Void> task = new Task<Void>() {
          @Override public Void call() {
             Stack<String> c = new Stack<String>();
-            c.push(" All");
-            channelHash.clear();
+            c.push("All");
             try {
                resetChannels();
                // Set default choice
@@ -472,21 +474,9 @@ public class spOptions {
                   }
                }
                if (collectionId != null) {
-                  Remote r = config.initRemote(tivoName);
-                  if (r.success) {
-                     JSONArray channels = r.channelSearch(collectionId);
-                     if (channels.length() > 0) {
-                        resetChannels();
-                        for (int i=0; i<channels.length(); ++i) {
-                           JSONObject chan = channels.getJSONObject(i);
-                           JSONObject j = new JSONObject();
-                           j.put("channel", chan);
-                           String channelName = TableUtil.makeChannelName(j);
-                           channelHash.put(channelName, chan);
-                           c.push(channelName);
-                        }
-                     }
-                  }
+                  setChannelHash(tivoName, collectionId);
+                  for (String channelName : channelHash.keySet())
+                     c.push(channelName);
                }
             } catch (JSONException e) {
                log.error("spOptions setChannels - " + e.getMessage());
@@ -525,6 +515,28 @@ public class spOptions {
          } // doInBackground
       }; // backgroundRun
       new Thread(task).start();
+   }
+   
+   private void setChannelHash(final String tivoName, final String collectionId) {
+      Remote r = config.initRemote(tivoName);
+      if (r.success) {
+         JSONArray channels = r.channelSearch(collectionId);
+         if (channels.length() > 0) {
+            channelHash.clear();
+            try {
+               for (int i=0; i<channels.length(); ++i) {
+                  JSONObject chan = channels.getJSONObject(i);
+                  JSONObject j = new JSONObject();
+                  j.put("channel", chan);
+                  String channelName = TableUtil.makeChannelName(j);
+                  channelHash.put(channelName, chan);
+               }
+            } catch (JSONException e) {
+               log.error("setChannelHash - " + e.getMessage());
+            }
+         }
+      }
+
    }
    
    // This runs in background mode so as not to hang up GUI
@@ -619,7 +631,7 @@ public class spOptions {
    private void setChannelChoice(final JSONObject json) {
       Platform.runLater(new Runnable() {
          @Override public void run() {
-            String name = " All";
+            String name = "All";
             String chan = TableUtil.makeChannelName(json);
             if (chan.contains("="))
                name = chan;
@@ -654,8 +666,8 @@ public class spOptions {
          @Override public void run() {
             channel.getItems().clear();
             channelHash = new Hashtable<String,JSONObject>();
-            channel.getItems().add(" All");
-            channel.setValue(" All");
+            channel.getItems().add("All");
+            channel.setValue("All");
          }
       });
    }
