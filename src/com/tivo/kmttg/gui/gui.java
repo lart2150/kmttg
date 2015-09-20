@@ -967,6 +967,11 @@ public class gui extends Application {
       if (resumeDownloadsMenuItem == null) {
          resumeDownloadsMenuItem = new CheckMenuItem();
          resumeDownloadsMenuItem.setText("Resume Downloads");
+         resumeDownloadsMenuItem.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            public void changed(ObservableValue<? extends Boolean> e, Boolean oldVal, Boolean newVal) {
+               config.resumeDownloads = newVal;
+            }
+         });
       }
       return resumeDownloadsMenuItem;
    }
