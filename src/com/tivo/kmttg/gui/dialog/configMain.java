@@ -4353,10 +4353,8 @@ public class configMain {
       else if (component.equals("persistQueue")) {
           text =  "<b>Persist Job Queue</b><br>";
           text += "Upon exiting, this will auto save the job queue to a data file.<br>";
-          text += "For kmttg auto transfers mode this will restore the previous job queue and resume<br>";
-          text += "the processing. This is only useful when running kmttg as a service<br>";
-          text += "and the service or host system stops for some reason, then any work it has<br>";
-          text += "queued up will not be lost.";
+          text += "For kmttg auto transfers mode only this will restore the previous job queue and resume<br>";
+          text += "the processing. This only applies to kmttg running auto transfers in service/batch mode.";
        }
       
        return MyTooltip.make(text);
