@@ -103,6 +103,7 @@ public class autoLogView {
          }
          for (String l : lines)
             text.appendText(l + "\n");
+         lines.clear();
       } catch (IOException e) {
          log.error("autoLogView update - " + e.getMessage());
       }
