@@ -1,6 +1,7 @@
 package com.tivo.kmttg.task;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 
 import com.tivo.kmttg.main.auto;
@@ -148,7 +149,7 @@ public class tdownload_decrypt extends baseTask implements Serializable {
                   success = http.downloadPipedStream(urlString, "tivo", config.MAK, true, job);
                   thread_running = false;
                } catch (Exception e) {
-                  log.error("tdownload_decrypt - " + e.getMessage());
+                  log.error("tdownload_decrypt"); log.error(Arrays.toString(e.getStackTrace()));
                   thread_running = false;
                   success = false;
                   Thread.currentThread().interrupt();
