@@ -327,13 +327,9 @@ public class http {
          pipedOut.flush();
          pipedOut.close();
          pipedIn.close();
-         thread.join();
       }
       finally {
-         if (out != null) out.close();
-         if (in != null) in.close();
-         if (pipedOut != null) pipedOut.close();
-         if (pipedIn != null) pipedIn.close();
+         thread.join();
       }
 
       return true;
