@@ -127,7 +127,7 @@ public class http {
          try { conn.connect(); }
          catch (IOException e) {
             // 401 error OK, other errors not
-            if (! conn.getHeaderField(0).contains("401")) {
+            if (! conn.getHeaderField(0).contains("400") && ! conn.getHeaderField(0).contains("401")) {
                throw(e);
             }
          };
@@ -145,7 +145,7 @@ public class http {
          log.print("---End of headers---");*/
          
          // Connect again if 401 code and init cookies with connection
-         if (conn.getHeaderField(0).contains("401")) {
+         if (conn.getHeaderField(0).contains("400") || conn.getHeaderField(0).contains("401")) {
             conn = getConnection(url);
             conn.setReadTimeout(READ_TIMEOUT*1000);
             if (offset != null) {
