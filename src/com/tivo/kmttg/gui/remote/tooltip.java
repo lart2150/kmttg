@@ -298,7 +298,8 @@ public class tooltip {
       else if (component.equals("max_search")) {
          text = "<b>Max</b><br>";
          text += "Specify maximum number of hits to limit search to.<br>";
-         text += "Depending on keywords the higher you set this limit the longer the search will take.";
+         text += "Depending on keywords the higher you set this limit the longer the search will take.<br>";
+         text += "<b>NOTE: Use the scrollbar to change this number, or you can type in a number and press 'Enter'</b>";
       }
       else if (component.equals("record_search")) {
          text = "<b>Record</b><br>";
