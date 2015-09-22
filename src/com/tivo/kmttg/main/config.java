@@ -22,7 +22,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v2.0r";
+   public static String kmttg = "kmttg v2.0s";
    
    // encoding related
    public static String encProfDir = "";
@@ -470,8 +470,8 @@ public class config {
    public static Boolean nplCapable(String tivoName) {
       Boolean capable = true;
       String tsn = getTsn(tivoName);
-      if (tsn != null && tsn.startsWith("AE2")) {
-         // TiVo Mini is not NPL capable
+      if (tsn != null && tsn.startsWith("A")) {
+         // TiVo Mini is not NPL capable (AE2, A93)
          capable = false;
       }
       return capable;
