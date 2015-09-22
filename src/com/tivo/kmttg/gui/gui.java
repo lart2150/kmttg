@@ -757,6 +757,7 @@ public class gui extends Application {
          exitMenuItem.setText("Exit");
          exitMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
+               saveSettings();
                System.exit(0);
             }
          });
