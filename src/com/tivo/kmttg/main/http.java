@@ -299,7 +299,7 @@ public class http {
       // Start a background tivolibre input pipe
       Runnable r = new Runnable() {
          public void run () {
-            TivoDecoder decoder = new TivoDecoder(pipedIn, out, config.MAK);
+            TivoDecoder decoder = new TivoDecoder.Builder().input(pipedIn).output(out).mak(config.MAK).build();
             decoder.decode();
          }
       };

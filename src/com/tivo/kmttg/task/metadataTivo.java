@@ -84,7 +84,7 @@ public class metadataTivo extends baseTask implements Serializable {
          public void run () {
             try {
                BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(job.tivoFile));
-               TivoDecoder decoder = new TivoDecoder(inputStream, null, config.MAK);
+               TivoDecoder decoder = new TivoDecoder.Builder().input(inputStream).output(null).mak(config.MAK).build();
                if (decoder.decodeMetadata()) {
                   docList = decoder.getMetadata();
                   if (docList != null && docList.size() >= 2) {

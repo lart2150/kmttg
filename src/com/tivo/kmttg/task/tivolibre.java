@@ -45,7 +45,7 @@ public class tivolibre extends baseTask implements Serializable {
          try {
             inputStream = new BufferedInputStream(new FileInputStream(job.tivoFile));
             BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(job.mpegFile));
-            TivoDecoder decoder = new TivoDecoder(inputStream, outputStream, config.MAK);
+            TivoDecoder decoder = new TivoDecoder.Builder().input(inputStream).output(outputStream).mak(config.MAK).build();
             success = decoder.decode();
             inputStream.close();
             outputStream.close();
