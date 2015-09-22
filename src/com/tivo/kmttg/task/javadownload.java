@@ -90,14 +90,14 @@ public class javadownload extends baseTask implements Serializable {
       if (config.TSDownload == 1 && job.offset == null)
          url += "&Format=video/x-tivo-mpeg-ts";
       final String urlString = url;
-      String message = "DOWNLOADING";
+      String message = "DOWNLOADING FROM '" + job.tivoName + "'";
       // NOTE: Series 4 Resume Downloads no longer works so turn it off with message
       /*if (job.offset != null && config.rpcEnabled(job.tivoName)) {
          job.offset = null;
          log.warn("Disabling resume: Resume downloads only works for series 3 or earlier TiVos");
       }*/
       if (job.offset != null) {
-         message = "RESUMING DOWNLOAD WITH OFFSET=" + job.offset;
+         message = "RESUMING DOWNLOAD FROM " + job.tivoName + "' WITH OFFSET=" + job.offset;
          job.tivoFileSize -= Long.parseLong(job.offset);
       }
       log.print(">> " + message + " " + job.tivoFile + " ...");
