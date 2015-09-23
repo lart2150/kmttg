@@ -3959,8 +3959,9 @@ public class configMain {
       else if (component.equals("qsfixDir")) {
          text =  "<b>QS Fix Output Dir</b><br>";
          text += "<b>REQUIRED</b> if you plan to run qsfix task.<br>";
-         text += "This defines location where qsfix output files will be saved to.<br>";
+         text += "This defines temporary location where qsfix output file will be saved to.<br>";
          text += "NOTE: Make sure to have plenty of disk space available at this location.<br>";
+         text += "NOTE: This is NOT the final destination of qsfix file, merely the temporary work area.<br>.";
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("mpeg_cut_dir")) {
