@@ -93,6 +93,7 @@ public class metadataTivo extends baseTask implements Serializable {
                      log.error("metadataTivo - unable to retrieve XML data");
                   }
                }
+               inputStream.close();
                thread_running = false;
                decoder = null;
             } catch (Exception e) {

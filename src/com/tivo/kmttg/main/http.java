@@ -231,6 +231,7 @@ public class http {
       return true;
    }
    
+   @SuppressWarnings("resource")
    public static Boolean downloadPiped(String url, String username, String password, OutputStream out, Boolean cookies, String offset)
       throws IOException, InterruptedException, Exception {
       InputStream in;

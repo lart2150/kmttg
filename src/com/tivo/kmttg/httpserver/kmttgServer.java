@@ -576,6 +576,7 @@ public class kmttgServer extends HTTPServer {
             }
             if (tc.getErrors().length() > 0) {
                resp.sendError(500, tc.getErrors());
+               ss.close();
                return;
             }
          }

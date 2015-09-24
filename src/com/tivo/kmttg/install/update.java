@@ -187,6 +187,7 @@ public class update {
       }
    }
       
+   @SuppressWarnings("resource")
    private static String downloadUrl(String localFileName, String urlString) {
       BufferedInputStream in = null;
       RandomAccessFile out = null;
@@ -233,6 +234,7 @@ public class update {
       return null;
    }
       
+   @SuppressWarnings("resource")
    private static Boolean unzip(String dir, String file) {
        Enumeration<?> entries;
        ZipFile zipFile;
@@ -255,10 +257,9 @@ public class update {
            }
 
            log.print("Extracting file: " + fullName);
-           copyInputStream(
-              zipFile.getInputStream(entry),
-              new BufferedOutputStream(new FileOutputStream(fullName))
-           );
+           BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(fullName));
+           copyInputStream(zipFile.getInputStream(entry), out);
+           out.close();
          }
          zipFile.close();      
                

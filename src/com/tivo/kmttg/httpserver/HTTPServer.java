@@ -1584,7 +1584,8 @@ public class HTTPServer {
             setName(getClass().getSimpleName() + "-" + port);
         }
 
-        @Override
+        @SuppressWarnings("resource")
+      @Override
         public void run() {
             try {
                 while (!serv.isClosed()) {
@@ -1854,7 +1855,8 @@ public class HTTPServer {
      * @param resp the response into which the content is written
      * @throws IOException if an error occurs
      */
-    public void handleTrace(Request req, Response resp) throws IOException {
+    @SuppressWarnings("resource")
+   public void handleTrace(Request req, Response resp) throws IOException {
         ChunkedOutputStream out = resp.getChunkedBody();
         resp.getHeaders().add("Content-Type", "message/http");
         resp.sendHeaders(200);

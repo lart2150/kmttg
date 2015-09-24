@@ -10,6 +10,7 @@ import com.tivo.kmttg.util.log;
 
 public class Unzip {
 
+@SuppressWarnings("resource")
 public static Boolean unzip(String dir, String file) {
    debug.print("dir=" + dir + " file=" + file);
     Enumeration<?> entries;
@@ -33,10 +34,9 @@ public static Boolean unzip(String dir, String file) {
         }
 
         log.print("Extracting file: " + fullName);
-        copyInputStream(
-           zipFile.getInputStream(entry),
-           new BufferedOutputStream(new FileOutputStream(fullName))
-        );
+        BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(fullName));
+        copyInputStream(zipFile.getInputStream(entry), out);
+        out.close();
       }
       zipFile.close();      
             

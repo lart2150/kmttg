@@ -100,7 +100,9 @@ public class Remote {
                 keyInput = new FileInputStream(cdata);
                 cdata = config.programDir + "/cdata.password";
                 if (file.isFile(cdata)) {
-                   password = new Scanner(new File(cdata)).useDelimiter("\\A").next();
+                   Scanner s = new Scanner(new File(cdata));
+                   password = s.useDelimiter("\\A").next();
+                   s.close();
                 } else {
                    error("cdata.p12 file present, but cdata.password is not");
                 }
