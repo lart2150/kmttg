@@ -1,10 +1,8 @@
 package com.tivo.kmttg.task;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.Serializable;
 import java.util.Date;
@@ -86,9 +84,7 @@ public class metadataTivo extends baseTask implements Serializable {
          public void run () {
             try {
                BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(job.tivoFile));
-               String outputFile = file.makeTempFile("meta");
-               BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(outputFile));
-               TivoDecoder decoder = new TivoDecoder.Builder().input(inputStream).output(out).mak(config.MAK).build();
+               TivoDecoder decoder = new TivoDecoder.Builder().input(inputStream).mak(config.MAK).build();
                if (decoder.decodeMetadata()) {
                   docList = decoder.getMetadata();
                   if (docList != null && docList.size() >= 2) {
@@ -98,8 +94,6 @@ public class metadataTivo extends baseTask implements Serializable {
                   }
                }
                inputStream.close();
-               out.close();
-               file.delete(outputFile);
                thread_running = false;
                decoder = null;
             } catch (Exception e) {
