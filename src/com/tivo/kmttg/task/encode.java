@@ -142,12 +142,12 @@ public class encode extends baseTask implements Serializable {
             // Try and determine pct complete
             int pct = -1;
             
-            if (process.toString().contains(config.handbrake)) {
+            if (config.handbrake.length() > 0 && process.toString().contains(config.handbrake)) {
                // Get pct complete from handbrake stdout
                pct = handbrakeGetPct();
             }
             
-            else if (process.toString().contains(config.mencoder)) {
+            else if (config.mencoder.length() > 0 && process.toString().contains(config.mencoder)) {
                // Get pct complete from mencoder stdout
                pct = mencoderGetPct();
             }
