@@ -31,6 +31,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
 import com.tivo.kmttg.gui.help;
+import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -60,6 +61,7 @@ public class update {
                   final String fname = "kmttg_" + current_version + ".zip";
                   final String url = "http://sourceforge.net/projects/kmttg/files/" +
                      fname + "/download?use_mirror=autoselect";
+                  auto.serviceStopIfNeeded();
                   Task<Void> task = new Task<Void>() {
                      @Override public Void call() {
                         String zipFile = downloadUrl(config.programDir + File.separator + fname, url);

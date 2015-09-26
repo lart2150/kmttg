@@ -989,6 +989,16 @@ public class auto {
       new Thread(task).start();
    }
    
+   // For windows, stop service if it is running
+   public static void serviceStopIfNeeded() {
+      if (config.OS.equals("windows")) {
+         String query = serviceStatus();
+         if (query != null && query.matches("^.+RUNNING$")) {
+            serviceStop();
+         }
+      }
+   }
+   
    // Windows only: Starts kmttg service using "sc delete kmttg" running as admin
    public static void serviceDelete() {
       Task<Void> task = new Task<Void>() {
