@@ -7,6 +7,7 @@ import java.util.Stack;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.table.cancelledTable;
+import com.tivo.kmttg.gui.table.channelsTable;
 import com.tivo.kmttg.gui.table.deletedTable;
 import com.tivo.kmttg.gui.table.guideTable;
 import com.tivo.kmttg.gui.table.premiereTable;
@@ -151,6 +152,9 @@ public class jobData implements Serializable, Cloneable {
    
    public Boolean remote_thumbs = false;
    public thumbsTable thumbs = null;
+   
+   public Boolean remote_channelsTable = false;
+   public channelsTable channelsTable = null;
    
    public Boolean remote_spreorder = false;
    public JSONArray remote_orderIds = null;

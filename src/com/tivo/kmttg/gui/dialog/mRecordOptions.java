@@ -180,7 +180,7 @@ public class mRecordOptions {
             log.warn("Getting channel list for '" + tivoName + "'");
             Remote r = config.initRemote(tivoName);
             if (r.success) {
-               final JSONArray channels = r.ChannelList(null);
+               final JSONArray channels = r.ChannelList(null, true);
                r.disconnect();
                if (channels != null) {
                   Platform.runLater(new Runnable() {

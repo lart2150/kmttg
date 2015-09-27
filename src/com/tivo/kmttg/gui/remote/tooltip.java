@@ -230,7 +230,7 @@ public class tooltip {
          text += "Refresh list for selected TiVo.";
       }
       else if (component.equals("update_thumbs")){
-         text = "<b>Update</b><br>";
+         text = "<b>Modify</b><br>";
          text += "Updates thumbs values on TiVo according to changed values in table.<br>";
          text += "NOTE: You can directly edit values in the RATING column of the table.<br>";
          text += "Valid settings for RATING are: -3,-2,-1,0,1,2,3. A value of 0 means no thumbs<br>";
@@ -259,6 +259,43 @@ public class tooltip {
          text += "<b>Loaded: </b> prefix in the TITLE column indicating that these were loaded from a file<br>";
          text += "to distinguish from normal case where they were obtained from displayed TiVo name.<br>";
          text += "Note that loaded thumbs can then be copied to TiVos by selecting the TiVo you want to<br>";
+         text += "copy to, then selecting rows in the table you want to copy and then clicking on the <b>Copy</b><br>";
+         text += "button.";
+      }
+      else if (component.equals("tivo_channels")) {
+         text = "Select TiVo for which to display list of channels.";
+      }
+      else if (component.equals("refresh_channels")){
+         text = "<b>Refresh</b><br>";
+         text += "Refresh list for selected TiVo.";
+      }
+      else if (component.equals("update_channels")){
+         text = "<b>Modify</b><br>";
+         text += "Updates received channel list on TiVo according to changed values in table.<br>";
+         text += "NOTE: You can directly edit values in the RECEIVED column of the table.";
+      }
+      else if (component.equals("copy_channels")){
+         text = "<b>Copy</b><br>";
+         text += "This is used to copy <b>loaded</b> channels in the table to one of your TiVos.<br>";
+         text += "Select the TiVo you want to copy to, load saved channels from a file, and then select<br>";
+         text += "rows in the table that you want copied, then press this button to perform the copy.<br>";
+         text += "If you want to copy from another TiVo, first switch to that TiVo and save its<br>";
+         text += "channels to a file. Then switch to destination TiVo and load the file you just saved.<br>";
+         text += "Now you can select entries in the table and use this button to copy to destination TiVo.";
+      }
+      else if (component.equals("save_channels")){
+         text = "<b>Save</b><br>";
+         text += "Save the currently displayed channels list to a file. This file can then be loaded<br>";
+         text += "at a later date into this table, then entries from the table can be copied to your TiVos<br>";
+         text += "if desired by selecting entries in the table and clicking on <b>Copy</b> button.<br>";
+         text += "i.e. This is a way to backup your received channels list.";
+      }
+      else if (component.equals("load_channels")){
+         text = "<b>Load</b><br>";
+         text += "Load a previously saved channels list from a file. When loaded the table will have a<br>";
+         text += "<b>Loaded: </b> prefix in the TITLE column indicating that these were loaded from a file<br>";
+         text += "to distinguish from normal case where they were obtained from displayed TiVo name.<br>";
+         text += "Note that loaded channels can then be copied to TiVos by selecting the TiVo you want to<br>";
          text += "copy to, then selecting rows in the table you want to copy and then clicking on the <b>Copy</b><br>";
          text += "button.";
       }

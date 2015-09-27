@@ -1571,7 +1571,7 @@ public class Remote {
    }
    
    // Get list of channels received
-   public JSONArray ChannelList(jobData job) {
+   public JSONArray ChannelList(jobData job, Boolean receivedOnly) {
       JSONObject result = null;
       try {
          // Top level list
@@ -1588,8 +1588,10 @@ public class Remote {
             for (int i=0; i<result.getJSONArray("channel").length(); ++i) {
                Boolean add = true;
                json = result.getJSONArray("channel").getJSONObject(i);
-               if (! all_channels && ! json.getBoolean("isReceived"))
-                  add = false;
+               if ( receivedOnly ) {
+                  if (! all_channels && ! json.getBoolean("isReceived"))
+                     add = false;
+               }
                if (add)
                   a.put(json);
             }

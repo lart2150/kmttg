@@ -80,6 +80,8 @@ public class remote extends baseTask implements Serializable {
                   data = r.DeletedShows(job);
                if (job.remote_thumbs)
                   data = r.getThumbs(job);
+               if (job.remote_channelsTable)
+                  data = r.ChannelList(job, false);
                if (job.remote_rnpl) {
                   if (config.rpcEnabled(job.tivoName))
                      data = r.MyShows(job);
@@ -87,7 +89,7 @@ public class remote extends baseTask implements Serializable {
                      data = r.MyShowsS3(job);
                }
                if (job.remote_channels) {
-                  data = r.ChannelList(job);
+                  data = r.ChannelList(job, true);
                }
                if (job.remote_premiere && config.GUIMODE)
                   data = r.SeasonPremieres(
@@ -106,7 +108,7 @@ public class remote extends baseTask implements Serializable {
                      util.updateTodoIfNeeded("Search");
                }
                if (job.remote_guideChannels && config.GUIMODE) {
-                  data = r.ChannelList(job);
+                  data = r.ChannelList(job, true);
                   if (data != null)
                      util.updateTodoIfNeeded("Guide");
                }
@@ -134,6 +136,7 @@ public class remote extends baseTask implements Serializable {
       if (job.remote_cancel)        jobName += " Will Not Record List";
       if (job.remote_deleted)       jobName += " Deleted List";
       if (job.remote_thumbs)        jobName += " Thumbs List";
+      if (job.remote_channelsTable) jobName += " Channels List";
       if (job.remote_rnpl)          jobName += " NP List";
       if (job.remote_channels)      jobName += " Channels List";
       if (job.remote_premiere)      jobName += " Season Premieres";
@@ -162,7 +165,7 @@ public class remote extends baseTask implements Serializable {
          // Still running
          if (config.GUIMODE && ! job.remote_premiere &&
              ! job.remote_cancel && ! job.remote_deleted && ! job.remote_search && 
-             ! job.remote_adv_search && ! job.remote_thumbs) {
+             ! job.remote_adv_search && ! job.remote_thumbs && ! job.remote_channelsTable) {
             // Update STATUS column
             Platform.runLater(new Runnable() {
                @Override public void run() {
@@ -251,6 +254,13 @@ public class remote extends baseTask implements Serializable {
                Platform.runLater(new Runnable() {
                   @Override public void run() {
                      job.thumbs.AddRows(job.tivoName, data);
+                  }
+               });
+            }
+            if (job.remote_channelsTable && job.channelsTable != null) {
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     job.channelsTable.AddRows(job.tivoName, data);
                   }
                });
             }

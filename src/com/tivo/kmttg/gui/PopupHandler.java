@@ -87,7 +87,7 @@ public class PopupHandler {
             items.add(new PopupPair("Conflicts [o]", KeyCode.O, subTabName));
             items.add(new PopupPair("Show Information [i]", KeyCode.I, subTabName));
          }
-         if (subTabName.equals("Thumbs")) {
+         if (subTabName.equals("Thumbs") || subTabName.equals("Channels")) {
             if (config.rpcEnabled(tivoName))
                items.add(new PopupPair("Copy [c]", KeyCode.C, subTabName));
          }
@@ -98,7 +98,8 @@ public class PopupHandler {
                "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
             );
          }
-         if (config.rpcEnabled(tivoName) && !subTabName.equals("Season Passes") && !subTabName.equals("Thumbs"))
+         if (config.rpcEnabled(tivoName) && !subTabName.equals("Season Passes") && !subTabName.equals("Thumbs")
+               && ! subTabName.equals("Channels"))
             items.add(new PopupPair("Show Information [i]", KeyCode.I, subTabName));
          
          // General items for all tables

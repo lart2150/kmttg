@@ -48,6 +48,7 @@ public class remotegui {
    public cancelled cancel_tab = null;
    public deleted deleted_tab = null;
    public thumbs thumbs_tab = null;
+   public channels channels_tab = null;
    public premiere premiere_tab = null;
    public info info_tab = null;
    public search search_tab = null;
@@ -130,6 +131,7 @@ public class remotegui {
       cancel_tab = new cancelled(frame);
       deleted_tab = new deleted(frame);
       thumbs_tab = new thumbs(frame);
+      channels_tab = new channels(frame);
       premiere_tab = new premiere(frame);
       info_tab = new info(frame);
       search_tab = new search(frame);
@@ -144,6 +146,8 @@ public class remotegui {
       addTabPane("Guide", guide_tab.panel);
       addTabPane("Streaming", stream_tab.panel);
       addTabPane("Deleted", deleted_tab.panel);
+      // Intentionally commented out for now
+      //addTabPane("Channels", channels_tab.panel);
       addTabPane("Thumbs", thumbs_tab.panel);
       addTabPane("Remote", rc_tab.panel);
       addTabPane("Info", info_tab.panel);
@@ -159,6 +163,7 @@ public class remotegui {
       TableUtil.autoSizeTableViewColumns(cancel_tab.tab.TABLE, true);
       TableUtil.autoSizeTableViewColumns(deleted_tab.tab.TABLE, true);
       TableUtil.autoSizeTableViewColumns(thumbs_tab.tab.TABLE, true);
+      TableUtil.autoSizeTableViewColumns(channels_tab.tab.TABLE, true);
       TableUtil.autoSizeTableViewColumns(search_tab.tab.TABLE, true);
    }
    
@@ -216,6 +221,8 @@ public class remotegui {
          return deleted_tab.tivo.getValue();
       if (tab.equals("thumbs") || tab.equals("Thumbs"))
          return thumbs_tab.tivo.getValue();
+      if (tab.equals("channels") || tab.equals("Channels"))
+         return channels_tab.tivo.getValue();
       if (tab.equals("search") || tab.equals("Search"))
          return search_tab.tivo.getValue();
       if (tab.equals("rc") || tab.equals("Remote"))
@@ -244,6 +251,8 @@ public class remotegui {
             deleted_tab.tivo.setValue(tivoName);
          if (tab.equals("thumbs"))
             thumbs_tab.tivo.setValue(tivoName);
+         if (tab.equals("channels"))
+            channels_tab.tivo.setValue(tivoName);
          if (tab.equals("search"))
             search_tab.tivo.setValue(tivoName);
          if (tab.equals("rc"))
@@ -269,6 +278,7 @@ public class remotegui {
       cancel_tab.tivo.getItems().clear();
       deleted_tab.tivo.getItems().clear();
       thumbs_tab.tivo.getItems().clear();
+      channels_tab.tivo.getItems().clear();
       search_tab.tivo.getItems().clear();
       rc_tab.tivo.getItems().clear();
       info_tab.tivo.getItems().clear();
@@ -281,6 +291,7 @@ public class remotegui {
             cancel_tab.tivo.getItems().add(tivoName);
             deleted_tab.tivo.getItems().add(tivoName);
             thumbs_tab.tivo.getItems().add(tivoName);            
+            channels_tab.tivo.getItems().add(tivoName);            
             search_tab.tivo.getItems().add(tivoName);
             info_tab.tivo.getItems().add(tivoName);
             premiere_tab.tivo.getItems().add(tivoName);
@@ -299,6 +310,7 @@ public class remotegui {
       setComboDefVal(cancel_tab.tivo);
       setComboDefVal(deleted_tab.tivo);
       setComboDefVal(thumbs_tab.tivo);
+      setComboDefVal(channels_tab.tivo);
       setComboDefVal(search_tab.tivo);
       setComboDefVal(rc_tab.tivo);
       setComboDefVal(info_tab.tivo);
@@ -426,6 +438,10 @@ public class remotegui {
       if (tab.equals("Thumbs")) {
          thumbs_tab.copy.setDisable(!state);
          thumbs_tab.update.setDisable(!state);
+      }
+      if (tab.equals("Channels")) {
+         channels_tab.copy.setDisable(!state);
+         channels_tab.update.setDisable(!state);
       }
       if (tab.equals("Info")) {
          info_tab.reboot.setDisable(!state);
