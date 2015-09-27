@@ -989,12 +989,16 @@ public class auto {
       new Thread(task).start();
    }
    
-   // For windows, stop service if it is running
+   // Stop background auto transfers job if it is running
    public static void serviceStopIfNeeded() {
       if (config.OS.equals("windows")) {
          String query = serviceStatus();
          if (query != null && query.matches("^.+RUNNING$")) {
             serviceStop();
+         }
+      } else {
+         if (unixAutoIsRunning(false)) {
+            unixAutoKill();
          }
       }
    }
