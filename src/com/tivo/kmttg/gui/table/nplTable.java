@@ -1206,8 +1206,8 @@ public class nplTable extends TableMap {
       if (data.containsKey("folderName"))
          SelectFolder(data.get("folderName"));
       else {
-         // Step through all table rows looking for entry with matching ProgramId to select
-         if (data.containsKey("ProgramId")) {
+         // Step through all table rows looking for entry with matching ProgramId_unique to select
+         if (data.containsKey("ProgramId_unique")) {
             for (int i=0; i<NowPlaying.getExpandedItemCount(); ++i) {
                TreeItem<Tabentry> item = NowPlaying.getTreeItem(i);
                if (! item.isLeaf()) {
@@ -1215,18 +1215,20 @@ public class nplTable extends TableMap {
                   for (int j=0; j<item.getChildren().size(); ++j) {
                      TreeItem<Tabentry> subitem = item.getChildren().get(j);
                      sortableDate r = subitem.getValue().getDATE();
-                     if (r!= null && r.data != null && r.data.containsKey("ProgramId")) {
-                        if (r.data.get("ProgramId").equals(data.get("ProgramId"))) {
+                     if (r!= null && r.data != null && r.data.containsKey("ProgramId_unique")) {
+                        if (r.data.get("ProgramId_unique").equals(data.get("ProgramId_unique"))) {
                            NowPlaying.getSelectionModel().select(subitem);
+                           return;
                         }
                      }
                   }
                } else {
                   // Non-folder entry
                   sortableDate r = item.getValue().getDATE();
-                  if (r!= null && r.data != null && r.data.containsKey("ProgramId")) {
-                     if (r.data.get("ProgramId").equals(data.get("ProgramId"))) {
+                  if (r!= null && r.data != null && r.data.containsKey("ProgramId_unique")) {
+                     if (r.data.get("ProgramId_unique").equals(data.get("ProgramId_unique"))) {
                         NowPlaying.getSelectionModel().select(item);
+                        return;
                      }
                   }
                }
