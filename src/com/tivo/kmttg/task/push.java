@@ -62,6 +62,19 @@ public class push extends baseTask implements Serializable {
       debug.print("");
       Boolean schedule = true;
       
+      // videoFile extension may have changed
+      if (! file.isFile(videoFile) && videoFile.endsWith(".mpg")) {
+         String extensions[] = {".ts", ".mp4"};
+         for (String ext : extensions) {
+            String tryit = videoFile;
+            tryit = tryit.replaceFirst(".mpg", ext);
+            if (file.isFile(tryit)) {
+               videoFile = tryit;
+               break;
+            }
+         }
+      }
+      
       // If no pyTivo shares available then nothing can be done
       if (shares == null) {
          log.error("No pyTivo video shares found in pyTivo config file: " + config.pyTivo_config);
