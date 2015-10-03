@@ -46,6 +46,7 @@ import com.tivo.kmttg.gui.comparator.ChannelComparator;
 import com.tivo.kmttg.gui.comparator.DateComparator;
 import com.tivo.kmttg.gui.comparator.DoubleComparator;
 import com.tivo.kmttg.gui.comparator.DurationComparator;
+import com.tivo.kmttg.gui.comparator.ImageComparator;
 import com.tivo.kmttg.gui.comparator.ShowComparator;
 import com.tivo.kmttg.gui.comparator.SizeComparator;
 import com.tivo.kmttg.gui.sortable.sortableChannel;
@@ -149,6 +150,7 @@ public class nplTable extends TableMap {
                TreeTableColumn<Tabentry,imageCell> col = new TreeTableColumn<Tabentry,imageCell>("");
                col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,imageCell>(colName));
                col.setCellFactory(new ImageCellFactory());
+               col.setComparator(new ImageComparator());
                NowPlaying.getColumns().add(col);               
             } else if (colName.equals("SHOW")) {
                TreeTableColumn<Tabentry,sortableShow> col = new TreeTableColumn<Tabentry,sortableShow>(colName);
@@ -248,6 +250,7 @@ public class nplTable extends TableMap {
             return;
          image.setAlignment(Pos.CENTER_LEFT);
          image.setImage(gui.Images.get("folder"));
+         image.imageName = "folder";
          
          // For date, find most recent recording
          // For channel see if they are all from same channel
@@ -304,6 +307,7 @@ public class nplTable extends TableMap {
          image.setAlignment(Pos.CENTER_LEFT);
          if ( entry.containsKey("ExpirationImage") ) {
             image.setImage(gui.Images.get(entry.get("ExpirationImage")));
+            image.imageName = entry.get("ExpirationImage");
          }
          image.setLabel(getPctWatched(entry));
          show = new sortableShow(entry);

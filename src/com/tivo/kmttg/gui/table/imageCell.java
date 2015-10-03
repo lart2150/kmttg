@@ -8,6 +8,7 @@ import javafx.scene.layout.HBox;
 public class imageCell extends HBox {
    private ImageView image = new ImageView();
    private Label label = new Label("");
+   public String imageName = "";
    
    public imageCell() {
       super();
