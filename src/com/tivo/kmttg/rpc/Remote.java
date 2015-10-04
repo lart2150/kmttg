@@ -619,7 +619,7 @@ public class Remote {
             // "anchorChannelIdentifier":{"channelNumber":"761","type":"channelIdentifier","sourceType":"cable"}
             json.put("bodyId", bodyId_get());
             json.put("levelOfDetail", "medium");
-            json.put("isReceived", "true");
+            //json.put("isReceived", "true");
             json.put("orderBy", new JSONArray("[\"channelNumber\"]"));
             req = RpcRequest("gridRowSearch", false, json);
          }
