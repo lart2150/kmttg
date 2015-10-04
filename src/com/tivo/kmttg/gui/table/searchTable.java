@@ -7,7 +7,6 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.control.SelectionMode;
@@ -429,19 +428,6 @@ public class searchTable extends TableMap {
          log.error("searchTable AddTABLERow - " + e.getMessage());
       }
    }  
-   
-   // Toggle between fully expanded and fully collapsed tree states
-   public void toggleTreeState() {
-      Boolean fullyExpanded = true;
-      ObservableList<TreeItem<Tabentry>> obs = TABLE.getRoot().getChildren();
-      for (TreeItem<Tabentry> item : obs) {
-         if (item.getChildren().size() > 0 && ! item.isExpanded())
-            fullyExpanded = false;
-      }
-      for (TreeItem<Tabentry> item : obs) {
-         item.setExpanded(! fullyExpanded);
-      }
-   }
       
    private Boolean isFolder(int row) {
       if (row < 0) return false;
@@ -514,7 +500,7 @@ public class searchTable extends TableMap {
             }
          }
       } else if (keyCode == KeyCode.T) {
-         toggleTreeState();
+         TableUtil.toggleTreeState(TABLE);
       }
    }
    

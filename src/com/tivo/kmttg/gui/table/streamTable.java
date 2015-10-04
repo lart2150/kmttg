@@ -341,6 +341,8 @@ public class streamTable extends TableMap {
       }
       else if (keyCode == KeyCode.R) {
          config.gui.remote_gui.stream_tab.remove.fire();
+      } else if (keyCode == KeyCode.T) {
+         TableUtil.toggleTreeState(TABLE);
       }
    }
    

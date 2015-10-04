@@ -65,6 +65,9 @@ public class PopupHandler {
                "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
             );
          }
+         if (subTabName.equals("Streaming")) {
+            items.add(new PopupPair("Tree state toggle [t]", KeyCode.T, subTabName));
+         }
          if (subTabName.equals("Season Premieres") || subTabName.equals("Search") || subTabName.equals("Guide")) {            
             if (config.rpcEnabled(tivoName)) {
                items.add(new PopupPair("Record [r]", KeyCode.R, subTabName));
@@ -105,7 +108,8 @@ public class PopupHandler {
          // General items for all tables
          items.add(new PopupPair("Display data [j]", KeyCode.J, subTabName));
          items.add(new PopupPair("Web query [q]", KeyCode.Q, subTabName));
-         items.add(new PopupPair("Change thumbs rating [ctrl-t]", config.gui.thumbsMenuItem, subTabName));
+         if (! subTabName.equals("Streaming"))
+            items.add(new PopupPair("Change thumbs rating [ctrl-t]", config.gui.thumbsMenuItem, subTabName));
          items.add(new PopupPair("Search table [ctrl-s]", config.gui.searchMenuItem, subTabName));
       } else {
          // This is a NPL table

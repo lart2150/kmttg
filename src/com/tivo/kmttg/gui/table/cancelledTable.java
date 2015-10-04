@@ -11,7 +11,6 @@ import java.util.Vector;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.control.TreeItem;
@@ -264,7 +263,7 @@ public class cancelledTable extends TableMap {
             }  
          }
       } else if (keyCode == KeyCode.T) {
-         toggleTreeState();
+         TableUtil.toggleTreeState(TABLE);
       }
    }
    
@@ -345,19 +344,6 @@ public class cancelledTable extends TableMap {
       } catch (JSONException e) {
          log.print("AddRows - " + e.getMessage());
       }      
-   }
-   
-   // Toggle between fully expanded and fully collapsed tree states
-   public void toggleTreeState() {
-      Boolean fullyExpanded = true;
-      ObservableList<TreeItem<Tabentry>> obs = TABLE.getRoot().getChildren();
-      for (TreeItem<Tabentry> item : obs) {
-         if (item.getChildren().size() > 0 && ! item.isExpanded())
-            fullyExpanded = false;
-      }
-      for (TreeItem<Tabentry> item : obs) {
-         item.setExpanded(! fullyExpanded);
-      }
    }
    
    // Refresh table with given given entries

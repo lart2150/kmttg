@@ -26,6 +26,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
@@ -134,6 +135,18 @@ public class TableUtil {
       for (int row : stack)
          rows[count++] = row;
       return rows;
+   }
+   
+   // Toggle between fully expanded and fully collapsed tree states
+   public static void toggleTreeState(TreeTableView<?> TABLE) {
+      Boolean fullyExpanded = true;
+      for (TreeItem<?> item : TABLE.getRoot().getChildren()) {
+         if (item.getChildren().size() > 0 && ! item.isExpanded())
+            fullyExpanded = false;
+      }
+      for (TreeItem<?> item : TABLE.getRoot().getChildren()) {
+         item.setExpanded(! fullyExpanded);
+      }
    }
    
    public static Integer[] highToLow(int[] unsorted) {
