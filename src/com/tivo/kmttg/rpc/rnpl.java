@@ -174,6 +174,8 @@ public class rnpl {
          try {
             if (json.has("recordingId"))
                h.put("recordingId", json.getString("recordingId"));
+            if (json.has("contentId"))
+               h.put("contentId", json.getString("contentId"));
             if (json.has("originalAirdate"))
                h.put("originalAirDate", json.getString("originalAirdate"));
             if (json.has("episodeNum") && json.has("seasonNumber")) {
