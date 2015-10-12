@@ -513,8 +513,8 @@ public class configAuto {
          text =  "<b>Do not wait for all jobs to finish before processing new ones</b><br>";
          text += "With this option enabled kmttg will not wait for all jobs to complete<br>";
          text += "to check TiVos for new potential shows to process. The default behavior of<br>";
-         text += "kmttg (this option off) is to wait until all tasks have completed on every TiVo<br>";
-         text += "before looking for new shows to process.";
+         text += "kmttg (this option off) is to wait until all tasks have completed for a TiVo<br>";
+         text += "before looking for new shows to process for that TiVo.";
       }
       else if (component.equals("title")) {
          text =  "<b>title/keywords</b><br>";
