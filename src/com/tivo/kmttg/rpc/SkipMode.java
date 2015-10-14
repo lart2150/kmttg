@@ -28,6 +28,8 @@ public class SkipMode {
    static public Boolean monitor = false;
    static Timer timer = null;
    static Stack<Hashtable<String,Long>> skipData = null;
+   static Stack<Hashtable<String,Long>> skipData_orig = null;
+   static long offset = -1;
    static long end1 = -1;
    static String offerId = null;
    static String recordingId = null;
@@ -68,7 +70,8 @@ public class SkipMode {
                   print("Obtained skip data from file: " + ini);
                } else {
                   print("Attempting to obtain skip data for: " + nplData.get("title"));
-                  skipData = getShowPoints(tivoName, SkipMode.contentId);
+                  skipData_orig = getShowPoints(tivoName, SkipMode.contentId);
+                  skipData = hashCopy(skipData_orig);
                   end1 = -1;
                }
                showSkipData();
@@ -196,6 +199,7 @@ public class SkipMode {
          r.disconnect();
       r = null;
       end1 = -1;
+      offset = -1;
       offerId = null;
       recordingId = null;
       contentId = null;
@@ -297,9 +301,6 @@ public class SkipMode {
                Hashtable<String,Long> h = new Hashtable<String,Long>();
                h.put("start", start);
                h.put("end", end);
-               h.put("delta2", end-start);
-               if (i>0)
-                  h.put("delta1", h.get("start")-points.get(i-1).get("end"));
                points.push(h);
             }
          } else {
@@ -360,14 +361,13 @@ public class SkipMode {
       print("Adjusting commercial points");
       end1 = point;
       if (skipData.size() > 0) {
-         for (int i=0; i<skipData.size()-1; ++i) {
+         offset = point - skipData.get(0).get("end");
+         for (int i=0; i<skipData.size(); ++i) {
             if (i == 0) {
                skipData.get(i).put("end", point);
-               skipData.get(i+1).put("start", point + skipData.get(i+1).get("delta1"));
-               skipData.get(i+1).put("end", skipData.get(i+1).get("start") + skipData.get(i+1).get("delta2"));
             } else {
-               skipData.get(i+1).put("start", skipData.get(i).get("end") + skipData.get(i+1).get("delta1"));
-               skipData.get(i+1).put("end", skipData.get(i+1).get("start") + skipData.get(i+1).get("delta2"));
+               skipData.get(i).put("start", skipData.get(i).get("start") + offset);
+               skipData.get(i).put("end", skipData.get(i).get("end") + offset);
             }
          }
       }
@@ -381,8 +381,9 @@ public class SkipMode {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(ini, true));
          ofp.write("<entry>" + eol);
          ofp.write("contentId=" + contentId + eol);
+         ofp.write("offset=" + offset + eol);
          ofp.write("title=" + title + eol);
-         for (Hashtable<String,Long> entry : skipData) {
+         for (Hashtable<String,Long> entry : skipData_orig) {
             ofp.write(entry.get("start") + " " + entry.get("end") + eol);
          }
          ofp.close();
@@ -405,20 +406,26 @@ public class SkipMode {
                   if (line.startsWith("contentId")) {
                      String[] l = line.split("=");
                      if (l[1].equals(contentId)) {
-                        skipData = new Stack<Hashtable<String,Long>>();
+                        skipData_orig = new Stack<Hashtable<String,Long>>();
                         while (( line = ifp.readLine()) != null) {
                            if (line.equals("<entry>"))
                               break;
+                           if (line.startsWith("offset")) {
+                              l = line.split("=");
+                              offset = Long.parseLong(l[1]);
+                           }
                            if (line.matches("^[0-9]+.*")) {
                               Hashtable<String,Long> h = new Hashtable<String,Long>();
                               l = line.split("\\s+");
                               h.put("start", Long.parseLong(l[0]));
                               h.put("end", Long.parseLong(l[1]));
-                              skipData.push(h);
+                              skipData_orig.push(h);
                            }
                         }
                         ifp.close();
+                        skipData = hashCopy(skipData_orig);
                         if (skipData.size() > 0) {
+                           adjustPoints(skipData_orig.get(0).get("end") + offset);
                            end1 = skipData.get(0).get("end"); // Don't need the pause adjustment
                            print("Using existing saved SkipMode entry for: " + title);
                            return true;
@@ -439,11 +446,20 @@ public class SkipMode {
       return false;
    }
    
-   static void print(String message) {
+   private static Stack<Hashtable<String,Long>> hashCopy(Stack<Hashtable<String,Long>> orig) {
+      Stack<Hashtable<String,Long>> copy = new Stack<Hashtable<String,Long>>();
+      for (Hashtable<String,Long> h : orig) {
+         Hashtable<String,Long> h_copy = new Hashtable<String,Long>(h);
+         copy.push(h_copy);
+      }
+      return copy;
+   }
+   
+   private static void print(String message) {
       log.print("SkipMode: " + message);
    }
    
-   static void error(String message) {
+   private static void error(String message) {
       log.error("SkipMode: " + message);
    }
 

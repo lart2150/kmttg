@@ -58,6 +58,7 @@ import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.createMeta;
 import com.tivo.kmttg.util.debug;
@@ -648,6 +649,21 @@ public class nplTable extends TableMap {
          createMeta.getExtendedMetadata(tivoName, s.data, true);
       } else if (keyCode == KeyCode.T) {
          TableUtil.toggleTreeState(NowPlaying);
+      } else if (keyCode == KeyCode.Z) {
+         if (SkipMode.monitor) {
+            log.print("Scheduling SkipMode disable");
+            SkipMode.monitor = false;
+            return;
+         }
+         if (config.rpcEnabled(tivoName)) {
+            int[] selected = GetSelectedRows();
+            if (selected == null || selected.length < 1)
+               return;
+            int row = selected[0];
+            sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+            log.print("Starting SkipMode");
+            SkipMode.skipPlay(tivoName, s.data);
+         }
       }
    }
    
