@@ -377,6 +377,9 @@ public class NowPlaying extends baseTask implements Serializable {
             if (json.has("contentId")) {
                entry.put("contentId", json.getString("contentId"));
             }
+            if (json.has("offerId")) {
+               entry.put("offerId", json.getString("offerId"));
+            }
             if (json.has("hdtv")) {
                if (json.getBoolean("hdtv"))
                   entry.put("HD", "Yes");
