@@ -137,9 +137,9 @@ public class SkipMode {
             if (pos < skipData.get(0).get("end"))
                skip = false;
          }
-         // If pos > last end point then don't skip
+         // If pos >= last end point then don't skip
          if (skip) {
-            if (pos > skipData.get(skipData.size()-1).get("end"))
+            if (pos >= skipData.get(skipData.size()-1).get("end"))
                skip = false;
          }
          if (skip) {
@@ -231,8 +231,15 @@ public class SkipMode {
    
    // Get the closest non-commercial start point to given pos
    // This will be point to jump to when in a commercial segment
+   // Return value of -1 => no change wanted
    private static long getClosest(long pos) {
       long closest = -1;
+      // If current pos is within any start-end range then no skip necessary
+      for (Hashtable<String,Long> h : skipData) {
+         if (pos >= h.get("start") && pos <= h.get("end"))
+            return -1;
+      }
+      
       if (skipData.size() > 1)
          closest = skipData.get(1).get("start");
       long diff = pos;
