@@ -36,8 +36,12 @@ public class SkipMode {
    static String contentId = null;
    static String title = "";
    static int monitor_count = 1;
-   static int monitor_interval = 10;
+   static int monitor_interval = 6;
    static String tivoName = null;
+   
+   public static Boolean fileExists() {
+      return file.isFile(ini);
+   }
    
    // Run this in background mode so as not to block GUI
    public static void skipPlay(final String tivoName, final Hashtable<String,String> nplData) {
@@ -163,26 +167,78 @@ public class SkipMode {
       }
    }
    
-   private static void shouldStillMonitor() {
-      if (monitor) {
-         Remote rm = new Remote(tivoName);
-         if (rm.success) {
-            JSONObject result = rm.Command("whatsOnSearch", new JSONObject());
-            if (result != null) {
-               try {
-                  if (result.has("whatsOn")) {
-                     JSONObject what = result.getJSONArray("whatsOn").getJSONObject(0);
-                     if (what.has("offerId") && what.getString("offerId").equals(offerId)) {
-                        // Still playing back show so do nothing
-                     } else {
-                        disable();
-                     }
-                  }
-               } catch (JSONException e) {
-                  error("shouldStillMonitor - " + e.getMessage());
-               }
+   // RPC query to get current playback position
+   // This will also listen for 1st pause press (speed==0) if end1 == -1
+   // NOTE: Returns -1 for speed != 100 to avoid any skipping during trick play
+   private static long getPosition() {
+      if (r==null) return -1;
+      JSONObject json = new JSONObject();
+      JSONObject reply = r.Command("Position", json);
+      if (reply == null) {
+         // RPC session may be corrupted, start a new connection
+         r.disconnect();
+         print("Attempting to re-connect.");
+         r = new Remote(tivoName);
+         if (! r.success) {
+            disable();
+            return -1;
+         }
+         reply = r.Command("Position", json);
+      }
+      if (reply != null && reply.has("position")) {
+         try {
+            if (reply.getString("position").equals(reply.getString("end"))) {
+               monitor = false;
+               return -1;
             }
-            rm.disconnect();
+            if (reply.has("speed")) {
+               int speed = reply.getInt("speed");
+               if (end1 == -1 && speed == 0) {
+                  // 1st pause press so adjust skip data accordingly
+                  adjustPoints(reply.getLong("position"));
+                  showSkipData();
+                  saveEntry();
+               }
+               if (speed != 100)
+                  return -1;
+            }
+            return reply.getLong("position");
+         } catch (JSONException e) {
+            error("getPosition - " + e.getMessage());
+         }
+      }
+      return -1;
+   }
+   
+   // RPC query to determine if show being monitored is still being played
+   // If whatsOn query does not have offerId => show no longer being played on TiVo
+   private static void shouldStillMonitor() {
+      if (r==null)
+         return;
+      if (monitor) {
+         JSONObject result = r.Command("whatsOnSearch", new JSONObject());
+         if (result == null) {
+            // RPC session may be corrupted, start a new connection
+            r.disconnect();
+            print("Attempting to re-connect.");
+            r = new Remote(tivoName);
+            if (! r.success) {
+               disable();
+               return;
+            }
+         } else {
+            try {
+               if (result.has("whatsOn")) {
+                  JSONObject what = result.getJSONArray("whatsOn").getJSONObject(0);
+                  if (what.has("offerId") && what.getString("offerId").equals(offerId)) {
+                     // Still playing back show so do nothing
+                  } else {
+                     disable();
+                  }
+               }
+            } catch (JSONException e) {
+               error("shouldStillMonitor - " + e.getMessage());
+            }
          }
       } else {
          disable();
@@ -310,49 +366,6 @@ public class SkipMode {
          error("jsonToShowPoints - " + e.getMessage());
       }
       return points;
-   }
-   
-   // RPC query to get current playback position
-   // This will also listen for 1st pause press (speed==0) if end1 == -1
-   // NOTE: Returns -1 for speed != 100 to avoid any skipping during trick play
-   private static long getPosition() {
-      if (r==null) return -1;
-      JSONObject json = new JSONObject();
-      JSONObject reply = r.Command("Position", json);
-      if (reply == null) {
-         // RPC session may be corrupted, start a new connection
-         r.disconnect();
-         print("Attempting to re-connect.");
-         r = new Remote(tivoName);
-         if (! r.success) {
-            disable();
-            return -1;
-         }
-         reply = r.Command("Position", json);
-      }
-      if (reply != null && reply.has("position")) {
-         try {
-            if (reply.getString("position").equals(reply.getString("end"))) {
-               monitor = false;
-               return -1;
-            }
-            if (reply.has("speed")) {
-               int speed = reply.getInt("speed");
-               if (end1 == -1 && speed == 0) {
-                  // 1st pause press so adjust skip data accordingly
-                  adjustPoints(reply.getLong("position"));
-                  showSkipData();
-                  saveEntry();
-               }
-               if (speed != 100)
-                  return -1;
-            }
-            return reply.getLong("position");
-         } catch (JSONException e) {
-            error("getPosition - " + e.getMessage());
-         }
-      }
-      return -1;
    }
    
    // Adjust skipData segment 1 end position and
