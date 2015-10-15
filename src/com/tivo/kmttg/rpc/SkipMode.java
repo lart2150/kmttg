@@ -446,6 +446,127 @@ public class SkipMode {
       return false;
    }
    
+   // Remove any entries matching given contentId from ini file
+   public static Boolean removeEntry(String contentId) {
+      if (file.isFile(ini)) {
+         try {
+            Boolean itemRemoved = false;
+            Stack<String> lines = new Stack<String>();
+            BufferedReader ifp = new BufferedReader(new FileReader(ini));
+            String line = null;
+            Boolean include = true;
+            while (( line = ifp.readLine()) != null) {
+               if (line.contains("<entry>")) {
+                  include = true;
+                  String nextline = ifp.readLine();
+                  String[] l = nextline.split("=");
+                  if (l[1].equals(contentId)) {
+                     include = false;
+                     itemRemoved = true;
+                  }
+                  if (include) {
+                     lines.push(line);
+                     lines.push(nextline);
+                  }
+               } else {
+                  if (include)
+                     lines.push(line);
+               }
+            }
+            ifp.close();
+            String eol = "\r\n";
+            BufferedWriter ofp = new BufferedWriter(new FileWriter(ini));
+            for (String l : lines) {
+               ofp.write(l + eol);
+            }
+            ofp.close();
+            if (itemRemoved)
+               print("Removed entry: " + contentId);
+            else
+               print("No entry found for: " + contentId);
+            return itemRemoved;
+         } catch (Exception e) {
+            error("removeEntry - " + e.getMessage());
+         }
+      }
+      return false;
+   }
+   
+   // Change offset for given contentId
+   public static Boolean changeEntry(String contentId, String offset) {
+      if (file.isFile(ini)) {
+         try {
+            Boolean itemChanged = false;
+            Stack<String> lines = new Stack<String>();
+            BufferedReader ifp = new BufferedReader(new FileReader(ini));
+            String line = null;
+            while (( line = ifp.readLine()) != null) {
+               if (line.contains("contentId")) {
+                  Boolean changed = false;
+                  String[] l = line.split("=");
+                  if (l[1].equals(contentId)) {
+                     itemChanged = true;
+                     changed = true;
+                  }
+                  String nextline = ifp.readLine();
+                  l = nextline.split("=");
+                  lines.push(line);
+                  if (changed)
+                     lines.push(l[0] + "=" + offset);
+                  else
+                     lines.push(nextline);
+               } else {
+                  lines.push(line);
+               }
+            }
+            ifp.close();
+            String eol = "\r\n";
+            BufferedWriter ofp = new BufferedWriter(new FileWriter(ini));
+            for (String l : lines) {
+               ofp.write(l + eol);
+            }
+            ofp.close();
+            if (itemChanged)
+               print("contentId '" + contentId + "' offset updated to: " + offset);
+            else
+               print("contentId '" + contentId + "' not updated.");
+            return itemChanged;
+         } catch (Exception e) {
+            error("removeEntry - " + e.getMessage());
+         }
+      }
+      return false;
+   }
+   
+   // Return entries for use by SkipDialog table
+   public static JSONArray getEntries() {
+      JSONArray entries = new JSONArray();
+      if (file.isFile(ini)) {
+         try {
+            BufferedReader ifp = new BufferedReader(new FileReader(ini));
+            String line=null, contentId="", title="", offset="";
+            while (( line = ifp.readLine()) != null) {
+               if (line.contains("contentId="))
+                  contentId = line.replaceFirst("contentId=", "");
+               if (line.contains("offset="))
+                  offset = line.replaceFirst("offset=", "");
+               if (line.contains("title=")) {
+                  title = line.replaceFirst("title=", "");
+                  JSONObject json = new JSONObject();
+                  json.put("contentId", contentId);
+                  json.put("offset", offset);
+                  json.put("title", title);
+                  entries.put(json);
+               }
+            }
+            ifp.close();
+         } catch (Exception e) {
+            error("getEntries - " + e.getMessage());
+         }
+      }
+      return entries;
+   }
+   
    private static Stack<Hashtable<String,Long>> hashCopy(Stack<Hashtable<String,Long>> orig) {
       Stack<Hashtable<String,Long>> copy = new Stack<Hashtable<String,Long>>();
       for (Hashtable<String,Long> h : orig) {
