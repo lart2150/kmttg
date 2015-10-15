@@ -646,7 +646,7 @@ public class gui extends Application {
          fileMenu.getItems().add(getResumeDownloadsMenuItem());
          fileMenu.getItems().add(getJobMenu());
          fileMenu.getItems().add(getSearchMenuItem());
-         if (config.rpcEnabled() && SkipMode.fileExists());
+         if (config.rpcEnabled() && SkipMode.fileExists())
             fileMenu.getItems().add(getSkipModeMenuItem());
          //fileMenu.add(getThumbsMenuItem());
          // Create thumbs menu item but don't add to File menu
