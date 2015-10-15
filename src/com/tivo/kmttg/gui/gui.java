@@ -93,6 +93,7 @@ import com.tivo.kmttg.main.encodeConfig;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.main.kmttg;
+import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -645,7 +646,7 @@ public class gui extends Application {
          fileMenu.getItems().add(getResumeDownloadsMenuItem());
          fileMenu.getItems().add(getJobMenu());
          fileMenu.getItems().add(getSearchMenuItem());
-         if (config.rpcEnabled())
+         if (config.rpcEnabled() && SkipMode.fileExists());
             fileMenu.getItems().add(getSkipModeMenuItem());
          //fileMenu.add(getThumbsMenuItem());
          // Create thumbs menu item but don't add to File menu
