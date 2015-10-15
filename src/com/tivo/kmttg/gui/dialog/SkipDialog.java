@@ -87,7 +87,8 @@ public class SkipDialog {
 
       // Change button
       Button change = new Button("Change");
-      tip = "<b>Change</b><br>Update offsets for entries you changed in the table.";
+      tip = "<b>Change</b><br>Update offsets for entries you changed in the table.<br>";
+      tip += "NOTE: The offset value is a time in milliseconds.";
       change.setTooltip(MyTooltip.make(tip));
       change.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
