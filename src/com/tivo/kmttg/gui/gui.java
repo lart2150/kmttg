@@ -74,6 +74,7 @@ import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.dialog.Pushes;
 import com.tivo.kmttg.gui.dialog.ShowDetails;
+import com.tivo.kmttg.gui.dialog.SkipDialog;
 import com.tivo.kmttg.gui.dialog.autoLogView;
 import com.tivo.kmttg.gui.dialog.configAuto;
 import com.tivo.kmttg.gui.dialog.configMain;
@@ -141,6 +142,7 @@ public class gui extends Application {
    private MenuItem saveJobsMenuItem = null;
    private MenuItem loadJobsMenuItem = null;
    public MenuItem searchMenuItem = null;
+   public MenuItem skipModeMenuItem = null;
    public MenuItem thumbsMenuItem = null;
    
    private ChoiceBox<String> encoding = null;
@@ -643,6 +645,8 @@ public class gui extends Application {
          fileMenu.getItems().add(getResumeDownloadsMenuItem());
          fileMenu.getItems().add(getJobMenu());
          fileMenu.getItems().add(getSearchMenuItem());
+         if (config.rpcEnabled())
+            fileMenu.getItems().add(getSkipModeMenuItem());
          //fileMenu.add(getThumbsMenuItem());
          // Create thumbs menu item but don't add to File menu
          getThumbsMenuItem();
@@ -1260,6 +1264,20 @@ public class gui extends Application {
          });
       }
       return searchMenuItem;
+   }
+
+   private MenuItem getSkipModeMenuItem() {
+      debug.print("");
+      if (skipModeMenuItem == null) {
+         skipModeMenuItem = new MenuItem();
+         skipModeMenuItem.setText("SkipMode Table...");
+         skipModeMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
+               new SkipDialog(config.gui.getFrame());
+            }
+         });
+      }
+      return skipModeMenuItem;
    }
 
    private MenuItem getThumbsMenuItem() {
