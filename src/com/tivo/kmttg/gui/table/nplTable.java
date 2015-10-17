@@ -649,6 +649,11 @@ public class nplTable extends TableMap {
          createMeta.getExtendedMetadata(tivoName, s.data, true);
       } else if (keyCode == KeyCode.T) {
          TableUtil.toggleTreeState(NowPlaying);
+      } else if (keyCode == KeyCode.X) {
+         if (SkipMode.monitor) {
+            log.print("Requested skip to 1st commercial point...");
+            SkipMode.jumpTo1st();
+         }
       } else if (keyCode == KeyCode.Z) {
          if (SkipMode.monitor) {
             log.print("Scheduling SkipMode disable");
