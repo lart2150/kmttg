@@ -92,8 +92,10 @@ public class SkipMode {
                      return null;
                   }
                   monitor = true;
-                  if (end1 == -1)
-                     print("REMINDER: 1st pause will be treated as start of 1st commercial");
+                  if (end1 == -1) {
+                     print("REMINDER: 1st pause press will be saved as exact start of 1st commercial");
+                     print("REMINDER: Use 'x' bindkey to jump to close to 1st commercial");
+                  }
                   
                   // Start timer to monitor playback position
                   timer = new Timer();
@@ -153,17 +155,31 @@ public class SkipMode {
             long jumpto = getClosest(pos);
             if (jumpto != -1) {
                print("IN COMMERCIAL. JUMPING TO: " + toMinSec(jumpto));
-               JSONObject json = new JSONObject();
-               try {
-                  json.put("offset", jumpto);
-               } catch (JSONException e) {
-                  error("skipPlayCheck - " + e.getMessage());
-               }
-               r.Command("Jump", json);
+               jumpTo(jumpto);
             }
          }
       } else {
          disable();
+      }
+   }
+   
+   // Jump to given position in playback
+   private static void jumpTo(long position) {
+      JSONObject json = new JSONObject();
+      try {
+         json.put("offset", position);
+      } catch (JSONException e) {
+         error("jumpTo - " + e.getMessage());
+      }
+      r.Command("Jump", json);      
+   }
+   
+   // Jump to end of 1st show segment
+   public static void jumpTo1st() {
+      if (r != null && skipData != null && monitor) {
+         long pos = skipData.get(0).get("end");
+         print("Jumping to: " + toMinSec(pos));
+         jumpTo(pos);
       }
    }
    
@@ -331,6 +347,8 @@ public class SkipMode {
                JSONObject clipData = result.getJSONArray("clipMetadata").getJSONObject(0);
                points = jsonToShowPoints(clipData);
             }
+         } else {
+            log.warn("SkipMode: No skip data available for this show");
          }
       } catch (JSONException e) {
          error("getShowPoints - " + e.getMessage());
