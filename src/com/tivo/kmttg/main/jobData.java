@@ -43,6 +43,7 @@ import com.tivo.kmttg.task.projectxcut;
 import com.tivo.kmttg.task.push;
 import com.tivo.kmttg.task.qsfix;
 import com.tivo.kmttg.task.remote;
+import com.tivo.kmttg.task.skipdetect;
 import com.tivo.kmttg.task.slingbox;
 import com.tivo.kmttg.task.streamfix;
 import com.tivo.kmttg.task.tdownload_decrypt;
@@ -210,6 +211,7 @@ public class jobData implements Serializable, Cloneable {
          "metadataTivo",
          "autotune",
          "remote",
+         "skipdetect",
          "download",
          "download_decrypt",
          "javadownload",
@@ -270,6 +272,8 @@ public class jobData implements Serializable, Cloneable {
          job.process = new decrypt(job);
       if (job.type.equals("tivolibre"))
          job.process = new tivolibre(job);
+      if (job.type.equals("skipdetect"))
+         job.process = new skipdetect(job);
       if (job.type.equals("download_decrypt"))
          job.process = new download_decrypt(job);
       if (job.type.equals("download"))
@@ -368,6 +372,9 @@ public class jobData implements Serializable, Cloneable {
       }
       else if (type.equals("remote")) {
          file = tivoName;
+      }
+      else if (type.equals("skipdetect")) {
+         file = title;
       }
       else if (type.equals("download")) {
          file = tivoFile;
