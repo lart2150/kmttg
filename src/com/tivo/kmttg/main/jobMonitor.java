@@ -294,6 +294,7 @@ public class jobMonitor {
    // If true this job can only be run one at a time per TiVo
    private static Boolean oneJobAtATime(String type) {
       return type.equals("download") ||
+             type.equals("skipdetect") ||
              type.equals("javadownload") ||
              type.equals("download_decrypt") ||
              type.equals("jdownload_decrypt") ||
