@@ -105,14 +105,19 @@ public class jobData implements Serializable, Cloneable {
    public Long tivoFileSize = null;
    public String ProgramId = null;
    String ProgramId_unique = null;
-   String title = null;
-   public String offset = null;
+   public String title = null;
    public Long time1=null, time2=null, size1=null, size2=null;
    public String rate = "n/a";
    public Boolean getURLs = false;
    public Boolean partiallyViewed = false;
    public Integer download_duration = 0;
-   
+
+   // SkipMode related
+   public long limit = 0;
+   public String offset = null;
+   public String SkipPoint = null;
+   public String contentId = null;
+
    // pyTivo push related
    public String pyTivo_tivo = null;
    
