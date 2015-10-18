@@ -654,6 +654,16 @@ public class nplTable extends TableMap {
             log.print("Requested skip to 1st commercial point...");
             SkipMode.jumpTo1st();
          }
+      } else if (keyCode == KeyCode.C) {
+         if (! SkipMode.monitor) {
+            int[] selected = GetSelectedRows();
+            if (selected == null || selected.length < 1)
+               return;
+            int row = selected[0];
+            sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+            log.print("Requested skip mode 1st commercial detect...");
+            SkipMode.autoDetect(tivoName, s.data);
+         }
       } else if (keyCode == KeyCode.Z) {
          if (SkipMode.monitor) {
             log.print("Scheduling SkipMode disable");
