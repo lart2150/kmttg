@@ -1156,7 +1156,7 @@ public class jobMonitor {
       }
       
       if (comskip) {
-         if (config.VRD == 1 && config.UseAdscan == 1) {
+         if (config.VRD == 1 && config.UseAdscan == 1 && ! specs.containsKey("SkipPoint")) {
             jobData job = new jobData();
             job.startFile    = startFile;
             job.source       = source;
@@ -1195,7 +1195,7 @@ public class jobMonitor {
       }
       
       // Schedule VideoRedo GUI manual cuts review if requested (GUI mode only)
-      if (config.VRD == 1 && config.GUIMODE) {
+      if (config.VRD == 1 && config.GUIMODE && ! specs.containsKey("SkipPoint")) {
          if ( (comskip && config.VrdReview == 1) || (comcut && config.VrdReview_noCuts == 1) ) {
             jobData job = new jobData();
             job.startFile    = startFile;
@@ -1213,7 +1213,8 @@ public class jobMonitor {
       }
       
       // Schedule comskip commercial cut point review if requested (GUI mode only)
-      if (comskip && config.UseAdscan == 0 && config.VrdReview == 0 && config.comskip_review == 1 && config.GUIMODE) {
+      if (comskip && config.UseAdscan == 0 && config.VrdReview == 0 &&
+            config.comskip_review == 1 && config.GUIMODE && ! specs.containsKey("SkipPoint")) {
          jobData job = new jobData();
          job.startFile    = startFile;
          job.source       = source;
