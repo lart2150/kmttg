@@ -41,6 +41,7 @@ public class SkipMode {
    static int monitor_count = 1;
    static int monitor_interval = 6;
    static String tivoName = null;
+   static int run_count = 1;
    
    public static Boolean fileExists() {
       return file.isFile(ini);
@@ -77,7 +78,7 @@ public class SkipMode {
                   print("Obtained skip data from file: " + ini);
                } else {
                   print("Attempting to obtain skip data for: " + nplData.get("title"));
-                  skipData_orig = getShowPoints(tivoName, SkipMode.contentId);
+                  skipData_orig = getShowPoints(r, tivoName, SkipMode.contentId);
                   skipData = hashCopy(skipData_orig);
                   end1 = -1;
                }
@@ -216,7 +217,7 @@ public class SkipMode {
                   // 1st pause press so adjust skip data accordingly
                   adjustPoints(reply.getLong("position"));
                   showSkipData();
-                  saveEntry();
+                  saveEntry(contentId, offset, title, skipData_orig);
                }
                if (speed != 100)
                   return -1;
@@ -335,7 +336,7 @@ public class SkipMode {
    
    // RPC query to get skip data based on given contentId
    // Returns null if none found
-   private static Stack<Hashtable<String,Long>> getShowPoints(String tivoName, String contentId) {
+   private static Stack<Hashtable<String,Long>> getShowPoints(Remote r, String tivoName, String contentId) {
       Stack<Hashtable<String,Long>> points = null;
       try {
          JSONObject j = new JSONObject();
@@ -408,7 +409,7 @@ public class SkipMode {
    }
    
    // Save commercial points for current entry to ini file
-   private static void saveEntry() {
+   private static void saveEntry(String contentId, long offset, String title, Stack<Hashtable<String,Long>> data) {
       print("Saving SkipMode entry: " + title);
       try {
          String eol = "\r\n";
@@ -417,7 +418,7 @@ public class SkipMode {
          ofp.write("contentId=" + contentId + eol);
          ofp.write("offset=" + offset + eol);
          ofp.write("title=" + title + eol);
-         for (Hashtable<String,Long> entry : skipData_orig) {
+         for (Hashtable<String,Long> entry : data) {
             ofp.write(entry.get("start") + " " + entry.get("end") + eol);
          }
          ofp.close();
@@ -606,15 +607,18 @@ public class SkipMode {
          log.warn("SkipMode: Already have saved SkipMode entry for: " + entry.get("title"));
          return;
       }
-      r = new Remote(tivoName);
-      if (r.success) {
-         Stack<Hashtable<String,Long>> points = getShowPoints(tivoName, entry.get("contentId"));
-         r.disconnect();
+      Remote r2 = new Remote(tivoName);
+      if (r2.success) {
+         Stack<Hashtable<String,Long>> points = getShowPoints(r2, tivoName, entry.get("contentId"));
+         r2.disconnect();
          if (points != null) {
             float firstEnd = points.get(0).get("end");
             float duration = Float.parseFloat(entry.get("duration"));
             float size = Float.parseFloat(entry.get("size"));
             long limit = (long)((firstEnd+30000) * size/duration);
+            String mpegFile = config.mpegDir + File.separator + "SkipModeTempFile" + run_count + "_" + tivoName + ".mpg";
+            if (file.isFile(mpegFile))
+               file.delete(mpegFile);
             jobData job = new jobData();
             job.source       = entry.get("url_TiVoVideoDetails");
             job.tivoName     = tivoName;
@@ -624,29 +628,28 @@ public class SkipMode {
             job.SkipPoint    = "" + firstEnd;
             job.contentId    = entry.get("contentId");
             job.title        = entry.get("title");
-            job.mpegFile     = config.mpegDir + File.separator + "SkipModeTempFile.mpg";
+            job.mpegFile     = mpegFile;
             job.mpegFile_cut = string.replaceSuffix(job.mpegFile, "_cut.mpg");
             job.startFile    = job.tivoFile;
             job.url          = entry.get("url");
             job.tivoFileSize = Long.parseLong(entry.get("size"));
             print("Launching jobs to try and obtain 1st commercial point close to: " + toMinSec((long)firstEnd));
             jobMonitor.submitNewJob(job);
+            run_count++;
          }
       }
    }
    
    public static void saveWithOffset(String tivoName, String contentId, String title, long offset) {
-      r = new Remote(tivoName);
-      if (r.success) {
-         skipData_orig = getShowPoints(tivoName, contentId);
-         r.disconnect();
-         if (skipData_orig != null) {
-            SkipMode.contentId = contentId;
-            SkipMode.offset = offset - skipData_orig.get(0).get("end");
+      Remote r2 = new Remote(tivoName);
+      if (r2.success) {
+         Stack<Hashtable<String,Long>>points = getShowPoints(r2, tivoName, contentId);
+         r2.disconnect();
+         if (points != null) {
             SkipMode.title = title;
-            saveEntry();
+            saveEntry(contentId, offset - points.get(0).get("end"), title, points);
             print("1st commercial point saved as: " + toMinSec(offset) +
-               " (orig point=" + toMinSec(skipData_orig.get(0).get("end")) + ")");
+               " (orig point=" + toMinSec(points.get(0).get("end")) + ")");
          }
       }      
    }

@@ -56,6 +56,7 @@ import com.tivo.kmttg.gui.sortable.sortableShow;
 import com.tivo.kmttg.gui.sortable.sortableSize;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.SkipMode;
@@ -659,10 +660,18 @@ public class nplTable extends TableMap {
             int[] selected = GetSelectedRows();
             if (selected == null || selected.length < 1)
                return;
-            int row = selected[0];
-            sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
-            log.print("Requested skip mode 1st commercial detect...");
-            SkipMode.autoDetect(tivoName, s.data);
+            for (int row : selected) {
+               sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+               log.print("Requested skip mode 1st commercial detect...");
+               jobData job = new jobData();
+               job.source   = s.data.get("url_TiVoVideoDetails");
+               job.type     = "skipdetect";
+               job.name     = "java";
+               job.tivoName = tivoName;
+               job.entry    = s.data;
+               job.title    = s.data.get("title");
+               jobMonitor.submitNewJob(job);
+            }
          }
       } else if (keyCode == KeyCode.Z) {
          if (SkipMode.monitor) {
