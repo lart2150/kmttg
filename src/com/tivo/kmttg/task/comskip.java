@@ -2,10 +2,12 @@ package com.tivo.kmttg.task;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -15,6 +17,7 @@ import java.util.regex.Pattern;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.ffmpeg;
@@ -223,9 +226,52 @@ public class comskip extends baseTask implements Serializable {
                // NOTE: Only delete a file ending in one of extensions
                if (f.endsWith(extensions[i]) && file.isFile(f)) file.delete(f);
             }
+            if (job.SkipPoint != null && file.isFile(job.edlFile)) {
+               // Analyze edl file
+               long closest = getClosestStart(job.edlFile, job.SkipPoint);
+               cleanUpFiles("SkipModeTempFile");
+               if (closest != -1)
+                  SkipMode.saveWithOffset(job.tivoName, job.contentId, job.title, closest);
+            }
          }
       }
       return false;
+   }
+   
+   private long getClosestStart(String edlFile, String SkipPointStr) {
+      long closest = -1;
+      try {
+         Long SkipPoint = (long)Float.parseFloat(SkipPointStr);
+         BufferedReader ifp = new BufferedReader(new FileReader(edlFile));
+         String line = null;
+         float diff = SkipPoint;
+         while (( line = ifp.readLine()) != null) {
+            if (line.matches("^\\d+.+$")) {
+               String[] l = line.split("\\s+");
+               float start = Float.parseFloat(l[0])*1000;
+               if (Math.abs(start - SkipPoint) < diff) {
+                  diff = Math.abs(start - SkipPoint);
+                  closest = (long)start;
+               }
+            }
+         }
+         ifp.close();
+      } catch (Exception e) {
+         log.error("comskip getClosestStart - " + e.getMessage());
+         log.error(Arrays.toString(e.getStackTrace()));
+      }
+      return closest;
+   }
+   
+   private void cleanUpFiles(String prefix) {
+      log.print("Cleaning up files with prefix: " + prefix);
+      File folderToScan = new File(config.mpegDir); 
+      File[] listOfFiles = folderToScan.listFiles();
+      for (File f : listOfFiles) {
+         if (f.isFile() && f.getName().startsWith(prefix)) {
+            f.delete();
+         }
+      }
    }
    
    // Obtain pct complete from comskip stderr

@@ -1183,6 +1183,12 @@ public class jobMonitor {
                job.vprjFile = string.replaceSuffix(mpegFile, ".VPrj");
             if (specs.containsKey("comskipIni"))
                job.comskipIni = (String) specs.get("comskipIni");
+            if (specs.containsKey("SkipPoint"))
+               job.SkipPoint = (String) specs.get("SkipPoint");
+            if (specs.containsKey("contentId"))
+               job.contentId = (String) specs.get("contentId");
+            if (specs.containsKey("title"))
+               job.title = (String) specs.get("title");
             submitNewJob(job);            
          }
       }

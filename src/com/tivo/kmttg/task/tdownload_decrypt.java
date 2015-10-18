@@ -3,6 +3,7 @@ package com.tivo.kmttg.task;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Hashtable;
 
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
@@ -170,7 +171,8 @@ public class tdownload_decrypt extends baseTask implements Serializable {
    
    public void kill() {
       debug.print("");
-      log.warn("Killing '" + job.type + "' file: " + job.mpegFile);
+      if (job.limit == 0)
+         log.warn("Killing '" + job.type + "' file: " + job.mpegFile);
       thread.interrupt();
       thread_running = false;
    }
@@ -187,7 +189,38 @@ public class tdownload_decrypt extends baseTask implements Serializable {
             Long size = file.size(job.mpegFile);
             String s = String.format("%.2f MB", (float)size/Math.pow(2,20));
             String t = jobMonitor.getElapsedTime(job.time);
-            int pct = Integer.parseInt(String.format("%d", size*100/job.tivoFileSize));
+            int pct;
+            if (job.limit > 0)
+               pct = Integer.parseInt(String.format("%d", size*100/job.limit));
+            else
+               pct = Integer.parseInt(String.format("%d", size*100/job.tivoFileSize));
+            
+            // If job.limit given then stop download once job.limit exceeded
+            if (job.limit > 0 && size > job.limit) {
+               try {kill();} catch (Exception e) {}
+               // Schedule decrypt & comskip jobs
+               Hashtable<String,Object> specs = new Hashtable<String,Object>();
+               specs.put("mode", "FILES");
+               specs.put("tivoName", job.tivoName);
+               specs.put("startFile", job.mpegFile);
+               specs.put("SkipPoint", job.SkipPoint);
+               specs.put("comskip", true);
+               specs.put("decrypt", false);
+               specs.put("metadata", false);
+               specs.put("metadataTivo", false);
+               specs.put("qsfix", false);
+               specs.put("twpdelete", false);
+               specs.put("rpcdelete", false);
+               specs.put("comcut", false);
+               specs.put("captions", false);
+               specs.put("encode", false);
+               specs.put("push", false);
+               specs.put("custom", false);
+               specs.put("contentId", job.contentId);
+               specs.put("title", job.title);
+               jobMonitor.LaunchJobs(specs);
+               return false;
+            }
             
             // Calculate current transfer rate over last dt msecs
             Long dt = (long)5000;
@@ -262,7 +295,7 @@ public class tdownload_decrypt extends baseTask implements Serializable {
                failed = 1;
          }
          
-         if (failed == 1) {
+         if (failed == 1 && job.limit == 0) {
             log.error("Download failed to file: " + job.mpegFile);
             if (config.DeleteFailedDownloads == 1) {
                if (file.delete(job.mpegFile))
