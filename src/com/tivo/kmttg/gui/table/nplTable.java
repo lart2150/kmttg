@@ -656,22 +656,20 @@ public class nplTable extends TableMap {
             SkipMode.jumpTo1st();
          }
       } else if (keyCode == KeyCode.C) {
-         if (! SkipMode.monitor) {
-            int[] selected = GetSelectedRows();
-            if (selected == null || selected.length < 1)
-               return;
-            for (int row : selected) {
-               sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
-               log.print("Requested skip mode 1st commercial detect...");
-               jobData job = new jobData();
-               job.source   = s.data.get("url_TiVoVideoDetails");
-               job.type     = "skipdetect";
-               job.name     = "java";
-               job.tivoName = tivoName;
-               job.entry    = s.data;
-               job.title    = s.data.get("title");
-               jobMonitor.submitNewJob(job);
-            }
+         int[] selected = GetSelectedRows();
+         if (selected == null || selected.length < 1)
+            return;
+         for (int row : selected) {
+            sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+            log.print("Requested skip mode 1st commercial detect...");
+            jobData job = new jobData();
+            job.source   = s.data.get("url_TiVoVideoDetails");
+            job.type     = "skipdetect";
+            job.name     = "java";
+            job.tivoName = tivoName;
+            job.entry    = s.data;
+            job.title    = s.data.get("title");
+            jobMonitor.submitNewJob(job);
          }
       } else if (keyCode == KeyCode.Z) {
          if (SkipMode.monitor) {
