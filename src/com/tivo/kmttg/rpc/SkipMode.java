@@ -18,9 +18,12 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.jobData;
+import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class SkipMode {
    static String ini = config.programDir + File.separator + "SkipMode.ini";
@@ -596,6 +599,56 @@ public class SkipMode {
          }
       }
       return entries;
+   }
+   
+   public static void autoDetect(String tivoName, Hashtable<String,String> entry) {
+      if( readEntry(entry.get("contentId")) ) {
+         log.warn("SkipMode: Already have saved SkipMode entry for: " + entry.get("title"));
+         return;
+      }
+      r = new Remote(tivoName);
+      if (r.success) {
+         Stack<Hashtable<String,Long>> points = getShowPoints(tivoName, entry.get("contentId"));
+         r.disconnect();
+         if (points != null) {
+            float firstEnd = points.get(0).get("end");
+            float duration = Float.parseFloat(entry.get("duration"));
+            float size = Float.parseFloat(entry.get("size"));
+            long limit = (long)((firstEnd+30000) * size/duration);
+            jobData job = new jobData();
+            job.source       = entry.get("url_TiVoVideoDetails");
+            job.tivoName     = tivoName;
+            job.type         = "tdownload_decrypt";
+            job.name         = "java";
+            job.limit        = limit;
+            job.SkipPoint    = "" + firstEnd;
+            job.contentId    = entry.get("contentId");
+            job.title        = entry.get("title");
+            job.mpegFile     = config.mpegDir + File.separator + "SkipModeTempFile.mpg";
+            job.mpegFile_cut = string.replaceSuffix(job.mpegFile, "_cut.mpg");
+            job.startFile    = job.tivoFile;
+            job.url          = entry.get("url");
+            job.tivoFileSize = Long.parseLong(entry.get("size"));
+            print("Launching jobs to try and obtain 1st commercial point close to: " + toMinSec((long)firstEnd));
+            jobMonitor.submitNewJob(job);
+         }
+      }
+   }
+   
+   public static void saveWithOffset(String tivoName, String contentId, String title, long offset) {
+      r = new Remote(tivoName);
+      if (r.success) {
+         skipData_orig = getShowPoints(tivoName, contentId);
+         r.disconnect();
+         if (skipData_orig != null) {
+            SkipMode.contentId = contentId;
+            SkipMode.offset = offset - skipData_orig.get(0).get("end");
+            SkipMode.title = title;
+            saveEntry();
+            print("1st commercial point saved as: " + toMinSec(offset) +
+               " (orig point=" + toMinSec(skipData_orig.get(0).get("end")) + ")");
+         }
+      }      
    }
    
    private static Stack<Hashtable<String,Long>> hashCopy(Stack<Hashtable<String,Long>> orig) {
