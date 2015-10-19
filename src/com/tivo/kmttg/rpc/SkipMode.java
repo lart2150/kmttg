@@ -102,17 +102,7 @@ public class SkipMode {
                   }
                   
                   // Start timer to monitor playback position
-                  timer = new Timer();
-                  timer.schedule(
-                     new TimerTask() {
-                        @Override
-                        public void run() {
-                           skipPlayCheck(tivoName, SkipMode.contentId);
-                        }
-                    }
-                    ,5000,
-                    1000
-                  );                  
+                  startTimer();
                } else {
                   disable();
                }
@@ -121,6 +111,21 @@ public class SkipMode {
          }
       };
       new Thread(task).start();
+   }
+   
+   // Start timer to monitor playback position
+   public static void startTimer() {
+      timer = new Timer();
+      timer.schedule(
+         new TimerTask() {
+            @Override
+            public void run() {
+               skipPlayCheck(tivoName, SkipMode.contentId);
+            }
+        }
+        ,5000,
+        1000
+      );
    }
    
    // This procedure called constantly in a timer
@@ -266,7 +271,7 @@ public class SkipMode {
    }
    
    // Stop monitoring and reset all variables
-   private static void disable() {
+   public static void disable() {
       print("DISABLED");
       monitor = false;
       if (timer != null)
@@ -430,7 +435,7 @@ public class SkipMode {
    // Obtain commercial points for given contentId if it exists
    // Returns true if contentId found, false otherwise
    // NOTE: Reading assumes file entries are structured just like they were originally written
-   private static Boolean readEntry(String contentId) {
+   public static Boolean readEntry(String contentId) {
       if (file.isFile(ini)) {
          try {
             BufferedReader ifp = new BufferedReader(new FileReader(ini));
