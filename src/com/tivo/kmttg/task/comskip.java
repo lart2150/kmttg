@@ -88,6 +88,12 @@ public class comskip extends baseTask implements Serializable {
          schedule = false;
       }
       
+      // Empty mpegFile => don't start
+      if ( schedule && file.size(job.mpegFile) == 0) {
+         log.error("mpeg file empty: " + job.mpegFile);
+         schedule = false;
+      }
+      
       if (file.isFile(config.projectx) && config.VRD == 0) {
          // Want output_projectx=1 in comskipIni if ProjectX configured & VRD not configured
          if ( ! enableXcl() )
