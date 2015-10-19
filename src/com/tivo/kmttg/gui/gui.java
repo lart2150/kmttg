@@ -94,6 +94,7 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.main.kmttg;
 import com.tivo.kmttg.rpc.SkipMode;
+import com.tivo.kmttg.rpc.SkipService;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -144,6 +145,8 @@ public class gui extends Application {
    private MenuItem loadJobsMenuItem = null;
    public MenuItem searchMenuItem = null;
    public MenuItem skipModeMenuItem = null;
+   public CheckMenuItem skipServiceMenuItem = null;
+   private Boolean skipServiceMenuItem_cb = true;
    public MenuItem thumbsMenuItem = null;
    
    private ChoiceBox<String> encoding = null;
@@ -646,8 +649,10 @@ public class gui extends Application {
          fileMenu.getItems().add(getResumeDownloadsMenuItem());
          fileMenu.getItems().add(getJobMenu());
          fileMenu.getItems().add(getSearchMenuItem());
-         if (config.rpcEnabled() && SkipMode.fileExists())
+         if (config.rpcEnabled() && SkipMode.fileExists()) {
             fileMenu.getItems().add(getSkipModeMenuItem());
+            fileMenu.getItems().add(getSkipServiceMenuItem());
+         }
          //fileMenu.add(getThumbsMenuItem());
          // Create thumbs menu item but don't add to File menu
          getThumbsMenuItem();
@@ -1279,6 +1284,50 @@ public class gui extends Application {
          });
       }
       return skipModeMenuItem;
+   }
+
+   private MenuItem getSkipServiceMenuItem() {
+      debug.print("");
+      if (skipServiceMenuItem == null) {
+         skipServiceMenuItem = new CheckMenuItem();
+         skipServiceMenuItem.setText("SkipMode service");
+         skipServiceMenuItem.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            public void changed(ObservableValue<? extends Boolean> e, Boolean oldVal, Boolean newVal) {
+               if (! skipServiceMenuItem_cb)
+                  return;
+               String tivoName = getSelectedTivoName();
+               if (tivoName == null) {
+                  log.error("This command must be run with appropriate TiVo tab selected.");
+                  skipServiceMenuItem_cb = false;
+                  skipServiceMenuItem.setSelected(oldVal);
+                  skipServiceMenuItem_cb = true;
+                  return;
+               }
+               if (! config.rpcEnabled(tivoName)) {
+                  log.error("This TiVo is not RPC enabled.");
+                  skipServiceMenuItem_cb = false;
+                  skipServiceMenuItem.setSelected(oldVal);
+                  skipServiceMenuItem_cb = true;
+                  return;
+               }
+               if (config.skipService == null) {
+                  config.skipService = new SkipService(tivoName);
+               }
+               if ( ! config.skipService.tivoName.equals(tivoName) ) {
+                  config.skipService.stop();
+                  config.skipService = new SkipService(tivoName);
+               }
+               if (newVal) {
+                  if (! config.skipService.isRunning())
+                     config.skipService.start();
+               } else {
+                  if (config.skipService.isRunning())
+                     config.skipService.stop();
+               }
+            }
+         });
+      }
+      return skipServiceMenuItem;
    }
 
    private MenuItem getThumbsMenuItem() {
