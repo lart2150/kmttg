@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -126,6 +127,7 @@ public class SkipDialog {
       
       // Table
       tab = new skipTable();
+      VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
       tab.AddRows(data);
       ScrollPane tabScroll = new ScrollPane(tab.getTable());
       content.getChildren().add(tabScroll);
