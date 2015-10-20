@@ -1187,6 +1187,8 @@ public class jobMonitor {
                job.SkipPoint = (String) specs.get("SkipPoint");
             if (specs.containsKey("contentId"))
                job.contentId = (String) specs.get("contentId");
+            if (specs.containsKey("offerId"))
+               job.offerId = (String) specs.get("offerId");
             if (specs.containsKey("title"))
                job.title = (String) specs.get("title");
             submitNewJob(job);            
