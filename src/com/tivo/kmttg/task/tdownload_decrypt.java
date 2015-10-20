@@ -195,33 +195,6 @@ public class tdownload_decrypt extends baseTask implements Serializable {
             else
                pct = Integer.parseInt(String.format("%d", size*100/job.tivoFileSize));
             
-            // If job.limit given then stop download once job.limit exceeded
-            if (job.limit > 0 && size > job.limit) {
-               try {kill();} catch (Exception e) {}
-               // Schedule decrypt & comskip jobs
-               Hashtable<String,Object> specs = new Hashtable<String,Object>();
-               specs.put("mode", "FILES");
-               specs.put("tivoName", job.tivoName);
-               specs.put("startFile", job.mpegFile);
-               specs.put("SkipPoint", job.SkipPoint);
-               specs.put("comskip", true);
-               specs.put("decrypt", false);
-               specs.put("metadata", false);
-               specs.put("metadataTivo", false);
-               specs.put("qsfix", false);
-               specs.put("twpdelete", false);
-               specs.put("rpcdelete", false);
-               specs.put("comcut", false);
-               specs.put("captions", false);
-               specs.put("encode", false);
-               specs.put("push", false);
-               specs.put("custom", false);
-               specs.put("contentId", job.contentId);
-               specs.put("title", job.title);
-               jobMonitor.LaunchJobs(specs);
-               return false;
-            }
-            
             // Calculate current transfer rate over last dt msecs
             Long dt = (long)5000;
             job.time2 = new Date().getTime();
@@ -266,6 +239,32 @@ public class tdownload_decrypt extends baseTask implements Serializable {
          
          jobMonitor.removeFromJobList(job);
          
+         if (job.limit > 0) {
+            // Skip detect job => Schedule decrypt & comskip jobs
+            Hashtable<String,Object> specs = new Hashtable<String,Object>();
+            specs.put("mode", "FILES");
+            specs.put("tivoName", job.tivoName);
+            specs.put("startFile", job.mpegFile);
+            specs.put("SkipPoint", job.SkipPoint);
+            specs.put("comskip", true);
+            specs.put("decrypt", false);
+            specs.put("metadata", false);
+            specs.put("metadataTivo", false);
+            specs.put("qsfix", false);
+            specs.put("twpdelete", false);
+            specs.put("rpcdelete", false);
+            specs.put("comcut", false);
+            specs.put("captions", false);
+            specs.put("encode", false);
+            specs.put("push", false);
+            specs.put("custom", false);
+            specs.put("contentId", job.contentId);
+            specs.put("offerId", job.offerId);
+            specs.put("title", job.title);
+            jobMonitor.LaunchJobs(specs);
+            return false;
+         }
+         
          // Check for problems
          int failed = 0;
          
@@ -295,7 +294,7 @@ public class tdownload_decrypt extends baseTask implements Serializable {
                failed = 1;
          }
          
-         if (failed == 1 && job.limit == 0) {
+         if (failed == 1) {
             log.error("Download failed to file: " + job.mpegFile);
             if (config.DeleteFailedDownloads == 1) {
                if (file.delete(job.mpegFile))
