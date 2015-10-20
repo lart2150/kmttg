@@ -36,6 +36,7 @@ import com.tivo.kmttg.main.autoConfig;
 import com.tivo.kmttg.main.autoEntry;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.encodeConfig;
+import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -85,6 +86,7 @@ public class configAuto {
    private static CheckBox useProgramId_unique = null;
    private static CheckBox kuidFilter = null;
    private static CheckBox programIdFilter = null;
+   private static CheckBox skipMark = null;
    private static ChoiceBox<String> dateOperator = null;
    private static TextField dateHours = null;
    private static Button OK = null;
@@ -285,6 +287,8 @@ public class configAuto {
       
       programIdFilter = new CheckBox("Do not process recordings without ProgramId");
       
+      skipMark = new CheckBox("SkipMode 1st commercial detection using comskip");
+      
       OK = new Button("OK");
       OK.setPrefWidth(200);
       OK.setId("button_autoconfig_ok");
@@ -405,6 +409,10 @@ public class configAuto {
       
       // noJobWait
       content.getChildren().add(noJobWait);
+      
+      // skipMark
+      if (SkipMode.fileExists())
+         content.getChildren().add(skipMark);
             
       // OK & CANCEL
       HBox last = new HBox();
@@ -466,6 +474,7 @@ public class configAuto {
       useProgramId_unique.setTooltip(getToolTip("useProgramId_unique"));
       kuidFilter.setTooltip(getToolTip("kuidFilter"));
       programIdFilter.setTooltip(getToolTip("programIdFilter"));
+      skipMark.setTooltip(getToolTip("skipMark"));
       dateOperator.setTooltip(getToolTip("dateOperator"));
       dateHours.setTooltip(getToolTip("dateHours"));
       OK.setTooltip(getToolTip("OK"));
@@ -612,6 +621,12 @@ public class configAuto {
          text += "Typically, these are programs that were transferred to your TiVo(s)<br>";
          text += "from a PC or other source other than a recorded TV station or MRV,<br>";
          text += "such as pyTivo or TiVo Desktop transfers.";
+      }
+      else if (component.equals("skipMark")) {
+         text =  "<b>SkipMode 1st commercial detection using comskip</b><br>";
+         text += "If enabled then run the partial download + comskip jobs to detect 1st<br>";
+         text += "commercial point of a program so as to compute the offset needed for SkipMode<br>";
+         text += "that is used for auto commercial skipping during playback.";
       }
       else if (component.equals("OK")) {
          text =  "<b>OK</b><br>";
@@ -779,6 +794,7 @@ public class configAuto {
       suggestionsFilter.setSelected((Boolean)(autoConfig.suggestionsFilter == 1));
       kuidFilter.setSelected((Boolean)(autoConfig.kuidFilter == 1));
       programIdFilter.setSelected((Boolean)(autoConfig.programIdFilter == 1));
+      skipMark.setSelected((Boolean)(autoConfig.skipMark == 1));
    }
    
    // Set encoding_name ChoiceBox choices
@@ -946,6 +962,11 @@ public class configAuto {
             ofp.write("0\n\n");
          ofp.write("<programIdFilter>\n");
          if (programIdFilter.isSelected())
+            ofp.write("1\n\n");
+         else
+            ofp.write("0\n\n");
+         ofp.write("<skipMark>\n");
+         if (skipMark.isSelected())
             ofp.write("1\n\n");
          else
             ofp.write("0\n\n");
