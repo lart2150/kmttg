@@ -309,6 +309,7 @@ public class http {
       
       // Read from TiVo and pipe to tivolibre
       int BUFSIZE = 65536;
+      long bytes = 0;
       byte[] buffer = new byte[BUFSIZE];
       int c;
       try {
@@ -322,14 +323,18 @@ public class http {
                throw new InterruptedException("Killed by user");
             }
             pipedOut.write(buffer, 0, c);
+            bytes += c;
+            if (job.limit > 0 && bytes > job.limit) {
+               break;
+            }
          }
-         out.close();
-         in.close();
          pipedOut.flush();
-         pipedOut.close();
-         pipedIn.close();
       }
       finally {
+         pipedOut.close();
+         pipedIn.close();
+         out.close();
+         in.close();
          thread.join();
       }
 
