@@ -3,8 +3,10 @@ package com.tivo.kmttg.rpc;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
@@ -43,6 +45,8 @@ public class SkipService {
         ,3000,
         interval*1000
       );
+      if (config.GUIMODE && ! config.gui.skipServiceMenuItem.isSelected())
+         config.gui.skipServiceMenuItem.setSelected(true);
    }
    
    public void stop() {
@@ -53,6 +57,8 @@ public class SkipService {
          print("monitor stopped");
          running = false;
       }
+      if (config.GUIMODE && config.gui.skipServiceMenuItem.isSelected())
+         config.gui.skipServiceMenuItem.setSelected(false);
    }
    
    public Boolean isRunning() {
@@ -76,6 +82,14 @@ public class SkipService {
          try {
             if (result.has("whatsOn")) {
                JSONObject what = result.getJSONArray("whatsOn").getJSONObject(0);
+               // Turn off monitoring if tuned to channel 0
+               if (what.has("channelIdentifier")) {
+                  JSONObject chan = what.getJSONObject("channelIdentifier");
+                  if (chan.has("channelNumber") && chan.getString("channelNumber").equals("0")) {
+                     stop();
+                     return;
+                  }
+               }
                if (what.has("offerId")) {
                   String offerId = what.getString("offerId");
                   debug.print("offerId=" + offerId + " SkipMode.offerId=" + SkipMode.offerId);
@@ -109,15 +123,16 @@ public class SkipService {
       }
    }
    
-   // Look for given offerId on tivoName
+   // Look for given offerId in SkipMode ini file
    private JSONObject getOffer(String offerId) {
       try {
-         JSONObject json = new JSONObject();
-         json.put("bodyId", r.bodyId_get());
-         json.put("offerId", offerId);
-         JSONObject result = r.Command("offerSearch", json);
-         if (result != null && result.has("offer")) {
-            return result.getJSONArray("offer").getJSONObject(0);
+         JSONArray entries = SkipMode.getEntries();
+         if (entries == null)
+            return null;
+         for (int i=0; i<entries.length(); ++i) {
+            JSONObject json = entries.getJSONObject(i);
+            if (json.getString("offerId").equals(offerId))
+               return json;
          }
       } catch (JSONException e) {
          error("getOffer - " + e.getMessage());
@@ -133,8 +148,6 @@ public class SkipService {
             SkipMode.contentId = entry.getString("contentId");
             SkipMode.offerId = entry.getString("offerId");
             SkipMode.title = entry.getString("title");
-            if (entry.has("subtitle"))
-               SkipMode.title += " - " + entry.getString("subtitle");
             if (SkipMode.readEntry(entry.getString("contentId"))) {
                if (SkipMode.timer != null) {
                   timer.cancel();
@@ -147,6 +160,7 @@ public class SkipService {
                }
                SkipMode.startTimer();
                SkipMode.monitor = true;
+               print("Entering SkipMode for: " + SkipMode.title);
                SkipMode.showSkipData();
             }
          }

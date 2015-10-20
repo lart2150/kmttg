@@ -78,7 +78,7 @@ public class SkipMode {
                   print("Obtained skip data from file: " + ini);
                } else {
                   print("Attempting to obtain skip data for: " + nplData.get("title"));
-                  skipData_orig = getShowPoints(r, tivoName, SkipMode.contentId);
+                  skipData_orig = getShowPoints(r, tivoName, SkipMode.contentId, SkipMode.title);
                   skipData = hashCopy(skipData_orig);
                   end1 = -1;
                }
@@ -222,7 +222,7 @@ public class SkipMode {
                   // 1st pause press so adjust skip data accordingly
                   adjustPoints(reply.getLong("position"));
                   showSkipData();
-                  saveEntry(contentId, offset, title, skipData_orig);
+                  saveEntry(contentId, offerId, offset, title, skipData_orig);
                }
                if (speed != 100)
                   return -1;
@@ -341,7 +341,7 @@ public class SkipMode {
    
    // RPC query to get skip data based on given contentId
    // Returns null if none found
-   private static Stack<Hashtable<String,Long>> getShowPoints(Remote r, String tivoName, String contentId) {
+   private static Stack<Hashtable<String,Long>> getShowPoints(Remote r, String tivoName, String contentId, String title) {
       Stack<Hashtable<String,Long>> points = null;
       try {
          JSONObject j = new JSONObject();
@@ -357,7 +357,7 @@ public class SkipMode {
                points = jsonToShowPoints(clipData);
             }
          } else {
-            log.warn("SkipMode: No skip data available for this show");
+            log.warn("SkipMode: No skip data available for: " + title);
          }
       } catch (JSONException e) {
          error("getShowPoints - " + e.getMessage());
@@ -398,7 +398,7 @@ public class SkipMode {
    // Adjust skipData segment 1 end position and
    // all subsequent segment points relative to it
    private static void adjustPoints(long point) {
-      print("Adjusting commercial points");
+      //print("Adjusting commercial points");
       end1 = point;
       if (skipData.size() > 0) {
          offset = point - skipData.get(0).get("end");
@@ -414,13 +414,14 @@ public class SkipMode {
    }
    
    // Save commercial points for current entry to ini file
-   private static void saveEntry(String contentId, long offset, String title, Stack<Hashtable<String,Long>> data) {
+   private static void saveEntry(String contentId, String offerId, long offset, String title, Stack<Hashtable<String,Long>> data) {
       print("Saving SkipMode entry: " + title);
       try {
          String eol = "\r\n";
          BufferedWriter ofp = new BufferedWriter(new FileWriter(ini, true));
          ofp.write("<entry>" + eol);
          ofp.write("contentId=" + contentId + eol);
+         ofp.write("offerId=" + offerId + eol);
          ofp.write("offset=" + offset + eol);
          ofp.write("title=" + title + eol);
          for (Hashtable<String,Long> entry : data) {
@@ -450,6 +451,10 @@ public class SkipMode {
                         while (( line = ifp.readLine()) != null) {
                            if (line.equals("<entry>"))
                               break;
+                           if (line.startsWith("offerId")) {
+                              l = line.split("=");
+                              offerId = l[1];
+                           }
                            if (line.startsWith("offset")) {
                               l = line.split("=");
                               offset = Long.parseLong(l[1]);
@@ -467,7 +472,7 @@ public class SkipMode {
                         if (skipData.size() > 0) {
                            adjustPoints(skipData_orig.get(0).get("end") + offset);
                            end1 = skipData.get(0).get("end"); // Don't need the pause adjustment
-                           print("Using existing saved SkipMode entry for: " + title);
+                           //print("Using existing saved SkipMode entry for: " + title);
                            return true;
                         } else {
                            error("NOTE: Failed to read skip data for: " + title);
@@ -584,16 +589,19 @@ public class SkipMode {
       if (file.isFile(ini)) {
          try {
             BufferedReader ifp = new BufferedReader(new FileReader(ini));
-            String line=null, contentId="", title="", offset="";
+            String line=null, contentId="", title="", offset="", offerId="";
             while (( line = ifp.readLine()) != null) {
                if (line.contains("contentId="))
                   contentId = line.replaceFirst("contentId=", "");
+               if (line.contains("offerId="))
+                  offerId = line.replaceFirst("offerId=", "");
                if (line.contains("offset="))
                   offset = line.replaceFirst("offset=", "");
                if (line.contains("title=")) {
                   title = line.replaceFirst("title=", "");
                   JSONObject json = new JSONObject();
                   json.put("contentId", contentId);
+                  json.put("offerId", offerId);
                   json.put("offset", offset);
                   json.put("title", title);
                   entries.put(json);
@@ -608,13 +616,16 @@ public class SkipMode {
    }
    
    public static void autoDetect(String tivoName, Hashtable<String,String> entry) {
+      // Can't process recording or copy protected entries
+      if (entry.containsKey("InProgress") || entry.containsKey("CopyProtected"))
+         return;
       if( readEntry(entry.get("contentId")) ) {
          log.warn("SkipMode: Already have saved SkipMode entry for: " + entry.get("title"));
          return;
       }
       Remote r2 = new Remote(tivoName);
       if (r2.success) {
-         Stack<Hashtable<String,Long>> points = getShowPoints(r2, tivoName, entry.get("contentId"));
+         Stack<Hashtable<String,Long>> points = getShowPoints(r2, tivoName, entry.get("contentId"), entry.get("title"));
          r2.disconnect();
          if (points != null) {
             float firstEnd = points.get(0).get("end");
@@ -632,27 +643,28 @@ public class SkipMode {
             job.limit        = limit;
             job.SkipPoint    = "" + firstEnd;
             job.contentId    = entry.get("contentId");
+            job.offerId      = entry.get("offerId");
             job.title        = entry.get("title");
             job.mpegFile     = mpegFile;
             job.mpegFile_cut = string.replaceSuffix(job.mpegFile, "_cut.mpg");
             job.startFile    = job.tivoFile;
             job.url          = entry.get("url");
             job.tivoFileSize = Long.parseLong(entry.get("size"));
-            print("Launching jobs to try and obtain 1st commercial point close to: " + toMinSec((long)firstEnd));
+            print("'" + entry.get("title") + "': search for 1st commercial point close to: " + toMinSec((long)firstEnd));
             jobMonitor.submitNewJob(job);
             run_count++;
          }
       }
    }
    
-   public static void saveWithOffset(String tivoName, String contentId, String title, long offset) {
+   public static void saveWithOffset(String tivoName, String contentId, String offerId, String title, long offset) {
       Remote r2 = new Remote(tivoName);
       if (r2.success) {
-         Stack<Hashtable<String,Long>>points = getShowPoints(r2, tivoName, contentId);
+         Stack<Hashtable<String,Long>>points = getShowPoints(r2, tivoName, contentId, title);
          r2.disconnect();
          if (points != null) {
             SkipMode.title = title;
-            saveEntry(contentId, offset - points.get(0).get("end"), title, points);
+            saveEntry(contentId, offerId, offset - points.get(0).get("end"), title, points);
             print("1st commercial point saved as: " + toMinSec(offset) +
                " (orig point=" + toMinSec(points.get(0).get("end")) + ")");
          }
