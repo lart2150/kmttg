@@ -236,7 +236,7 @@ public class comskip extends baseTask implements Serializable {
                // Analyze edl file
                long closest = getClosestStart(job.edlFile, job.SkipPoint);
                if (closest != -1)
-                  SkipMode.saveWithOffset(job.tivoName, job.contentId, job.title, closest);
+                  SkipMode.saveWithOffset(job.tivoName, job.contentId, job.offerId, job.title, closest);
             }
             if (job.SkipPoint != null) {
                String prefix = string.replaceSuffix(string.basename(job.mpegFile), "");
