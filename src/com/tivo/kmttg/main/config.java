@@ -17,12 +17,13 @@ import java.util.Stack;
 import javafx.scene.paint.Color;
 
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.SkipService;
 import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v2.0t";
+   public static String kmttg = "kmttg v2.0u_beta6";
    
    // encoding related
    public static String encProfDir = "";
@@ -218,6 +219,9 @@ public class config {
    public static String httpserver_cache_relative = null;
    public static int httpserver_share_filter = 0;
    public static LinkedHashMap<String,String> httpserver_shares = new LinkedHashMap<String,String>();
+   
+   // SkipService related
+   public static SkipService skipService = null;
    
    public static Stack<String> parse() {
       debug.print("");
