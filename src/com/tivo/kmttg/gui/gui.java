@@ -41,6 +41,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -1290,39 +1291,35 @@ public class gui extends Application {
       debug.print("");
       if (skipServiceMenuItem == null) {
          skipServiceMenuItem = new CheckMenuItem();
-         skipServiceMenuItem.setText("SkipMode service");
+         skipServiceMenuItem.setText("SkipMode service...");
          skipServiceMenuItem.selectedProperty().addListener(new ChangeListener<Boolean>() {
             public void changed(ObservableValue<? extends Boolean> e, Boolean oldVal, Boolean newVal) {
+               if ( ! newVal ) {
+                  // Turn off service
+                  config.skipService.stop();
+                  return;
+               }
                if (! skipServiceMenuItem_cb)
                   return;
-               String tivoName = getSelectedTivoName();
-               if (tivoName == null) {
-                  log.error("This command must be run with appropriate TiVo tab selected.");
-                  skipServiceMenuItem_cb = false;
-                  skipServiceMenuItem.setSelected(oldVal);
-                  skipServiceMenuItem_cb = true;
-                  return;
+               
+               // Build list of eligible TiVos
+               Stack<String> all = config.getTivoNames();
+               for (int i=0; i<all.size(); ++i) {
+                  if (! config.rpcEnabled(all.get(i)) )
+                     all.remove(i);
                }
-               if (! config.rpcEnabled(tivoName)) {
-                  log.error("This TiVo is not RPC enabled.");
-                  skipServiceMenuItem_cb = false;
-                  skipServiceMenuItem.setSelected(oldVal);
-                  skipServiceMenuItem_cb = true;
-                  return;
-               }
-               if (config.skipService == null) {
+               
+               // Prompt user to choose a TiVo
+               ChoiceDialog<String> dialog = new ChoiceDialog<String>(all.get(0), all);
+               dialog.setTitle("Choose which TiVo to monitor");
+               dialog.setContentText("TiVo:");
+               String tivoName = null;
+               Optional<String> result = dialog.showAndWait();
+               if (result.isPresent())
+                  tivoName = result.get();
+               if (tivoName != null && tivoName.length() > 0) {               
+                  // Start service for selected TiVo
                   config.skipService = new SkipService(tivoName);
-               }
-               if ( ! config.skipService.tivoName.equals(tivoName) ) {
-                  config.skipService.stop();
-                  config.skipService = new SkipService(tivoName);
-               }
-               if (newVal) {
-                  if (! config.skipService.isRunning())
-                     config.skipService.start();
-               } else {
-                  if (config.skipService.isRunning())
-                     config.skipService.stop();
                }
             }
          });
