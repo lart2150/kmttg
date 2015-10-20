@@ -78,6 +78,7 @@ public class nplTable extends TableMap {
    private Stack<Hashtable<String,String>> entries_viewed = null;
    private Hashtable<String,Stack<Hashtable<String,String>>> folders = null;
    private Vector<Hashtable<String,String>> sortedOrder = null;
+   private JSONArray skipEntries = null;
    private String lastUpdated = null;
    // This needed to flag when calling updateNPLjobStatus so that multiple
    // selection event triggers can be avoided
@@ -855,6 +856,12 @@ public class nplTable extends TableMap {
       debug.print("h=" + h);
       if (h == null) h = entries;
       if (h == null) return;
+      
+      // Update skipEntries
+      if (SkipMode.fileExists()) {
+         skipEntries = SkipMode.getEntries();
+      }
+      
       if (showFolders())
          displayFolderStructure();
       else
@@ -1458,6 +1465,21 @@ public class nplTable extends TableMap {
             Double duration = Double.valueOf(data.get("duration"))/1000;
             int percent = (int)(100*secs/duration);
             pct = "" + percent + "%";
+         }
+      }
+      
+      // If this offerId has an entry in skipmode.ini then mark with an asterisk
+      if (data.containsKey("offerId") && skipEntries != null) {
+         for (int i=0; i<skipEntries.length(); ++i) {
+            try {
+               if (data.containsKey("offerId") && skipEntries.getJSONObject(i).has("offerId")) {
+                  if (skipEntries.getJSONObject(i).getString("offerId").equals(data.get("offerId"))) {
+                     pct = "* " + pct;
+                  }
+               }
+            } catch (JSONException e) {
+               log.error("getPctWatched - " + e.getMessage());
+            }
          }
       }
       return pct;
