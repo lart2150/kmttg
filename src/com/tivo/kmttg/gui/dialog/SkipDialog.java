@@ -5,7 +5,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -129,10 +128,8 @@ public class SkipDialog {
       tab = new skipTable();
       VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
       tab.AddRows(data);
-      ScrollPane tabScroll = new ScrollPane(tab.getTable());
-      content.getChildren().add(tabScroll);
-      tabScroll.setFitToHeight(true);
-      tabScroll.setFitToWidth(true);
+      content.getChildren().add(tab.TABLE);
+      VBox.setVgrow(content, Priority.ALWAYS); // stretch vertically
 
       dialog = new Stage();
       dialog.initOwner(frame);
