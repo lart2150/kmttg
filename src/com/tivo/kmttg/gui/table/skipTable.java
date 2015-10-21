@@ -18,7 +18,7 @@ import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.log;
 
 public class skipTable {
-   private String[] TITLE_cols = {"CONTENTID", "TITLE", "OFFSET"};
+   private String[] TITLE_cols = {"SHOW", "CONTENTID", "AD1_ORIG", "OFFSET", "AD1_ADJ"};
    public TableView<Tabentry> TABLE = null;
 
    public skipTable() {
@@ -27,7 +27,7 @@ public class skipTable {
       for (String colName : TITLE_cols) {
          // Regular String sort
          String cName = colName;
-         if (colName.equals("CONTENTID")) {
+         if (colName.equals("SHOW")) {
             TableColumn<Tabentry,sortableString> col = new TableColumn<Tabentry,sortableString>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableString>(cName));
             TABLE.getColumns().add(col);            
@@ -41,9 +41,14 @@ public class skipTable {
                public void handle(CellEditEvent<Tabentry, String> event) {
                   int row = event.getTablePosition().getRow();
                   Tabentry entry = event.getTableView().getItems().get(row);
+                  try {
                   // Update row Tabentry value
                   entry.offset = event.getNewValue();
+                  entry.ad1_adj = adAdjusted(entry.show.json.getString("ad1"), entry.offset);
                   TABLE.getItems().set(row, entry);
+                  } catch (JSONException e) {
+                     log.error("skipTable - " + e.getMessage());
+                  }
                }
             });
             TABLE.getColumns().add(col);
@@ -69,32 +74,53 @@ public class skipTable {
    }
 
    public class Tabentry {
-      public sortableString contentId = new sortableString();
-      public String title = "";
+      public sortableString show = new sortableString();
+      public String contentId = "";
+      public String ad1_orig = "";
       public String offset = "";
+      public String ad1_adj = "";
 
       public Tabentry(JSONObject json) {
          try {
-            contentId.json = json;
-            contentId.display = json.getString("contentId");
-            title = json.getString("title");
+            show.json = json;
+            show.display = json.getString("title");
+            contentId = json.getString("contentId");
             offset = json.getString("offset");
+            String ad1 = json.getString("ad1");
+            ad1_orig = adStart(ad1);
+            ad1_adj = adAdjusted(ad1, offset);
          } catch (Exception e) {
             log.error("pushTable Tabentry - " + e.getMessage());
          }
       }
 
-      public sortableString getCONTENTID() {
-         return contentId;
+      public sortableString getSHOW() {
+         return show;
       }
-
-      public String getTITLE() {
-         return title;
+      
+      public String getCONTENTID() {
+         return contentId;
       }
 
       public String getOFFSET() {
          return offset;
       }      
+
+      public String getAD1_ORIG() {
+         return ad1_orig;
+      }      
+
+      public String getAD1_ADJ() {
+         return ad1_adj;
+      }      
+   }
+   
+   private String adStart(String ad1) {
+      return SkipMode.toMinSec(Long.parseLong(ad1));
+   }
+   
+   private String adAdjusted(String ad1, String offset) {
+      return SkipMode.toMinSec(Long.parseLong(ad1) + Long.parseLong(offset));
    }
 
    public TableView<?> getTable() {
@@ -126,7 +152,7 @@ public class skipTable {
    }
 
    public JSONObject GetRowData(int row) {
-      return TABLE.getItems().get(row).getCONTENTID().json;
+      return TABLE.getItems().get(row).getSHOW().json;
    }
    
    public String GetValueAt(int row, int col) {
@@ -152,7 +178,7 @@ public class skipTable {
          if (changed.length() > 0) {
             for (int i=0; i<changed.length(); ++i) {
                JSONObject j = changed.getJSONObject(i);
-               SkipMode.changeEntry(j.getString("contentId"), j.getString("offset"));
+               SkipMode.changeEntry(j.getString("contentId"), j.getString("offset"), j.getString("title"));
             }
          }
       } catch (Exception e) {
