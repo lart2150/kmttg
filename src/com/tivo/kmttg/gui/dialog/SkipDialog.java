@@ -138,7 +138,7 @@ public class SkipDialog {
       config.gui.setFontSize(scene, config.FontSize);
       ((VBox) scene.getRoot()).getChildren().add(content);
       dialog.setScene(scene);
-      dialog.setWidth(frame.getWidth()/1.5);
+      dialog.setWidth(frame.getWidth()/1.2);
       dialog.setHeight(frame.getHeight()/3);
       dialog.show();      
    }
