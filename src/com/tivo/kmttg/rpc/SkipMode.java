@@ -553,10 +553,11 @@ public class SkipMode {
                      itemChanged = true;
                      changed = true;
                   }
-                  String nextline = ifp.readLine(); // offerId
-                  nextline = ifp.readLine(); // offset
+                  String offerId = ifp.readLine(); // offerId
+                  String nextline = ifp.readLine(); // offset
                   l = nextline.split("=");
                   lines.push(line);
+                  lines.push(offerId);
                   if (changed)
                      lines.push(l[0] + "=" + offset);
                   else

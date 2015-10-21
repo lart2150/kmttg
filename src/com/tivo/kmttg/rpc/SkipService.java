@@ -24,7 +24,7 @@ public class SkipService {
    public void start() {
       r = new Remote(tivoName);
       if (r.success) {
-         print("monitor started");
+         print("monitor started for: " + tivoName);
          running = true;
       } else {
          error("Cannot RPC connect to: " + tivoName);
@@ -46,7 +46,9 @@ public class SkipService {
         interval*1000
       );
       if (config.GUIMODE && ! config.gui.skipServiceMenuItem.isSelected())
+         config.gui.skipServiceMenuItem_cb = false;
          config.gui.skipServiceMenuItem.setSelected(true);
+         config.gui.skipServiceMenuItem_cb = true;
    }
    
    public void stop() {
@@ -66,6 +68,7 @@ public class SkipService {
    }
    
    private void monitor() {
+      debug.print("");
       if (r==null)
          return;
       JSONObject result = r.Command("whatsOnSearch", new JSONObject());
@@ -125,6 +128,7 @@ public class SkipService {
    
    // Look for given offerId in SkipMode ini file
    private JSONObject getOffer(String offerId) {
+      debug.print("offerId=" + offerId);
       try {
          JSONArray entries = SkipMode.getEntries();
          if (entries == null)
@@ -141,6 +145,7 @@ public class SkipService {
    }
    
    private void monitorEntry(JSONObject entry) {
+      debug.print("entry=" + entry);
       if (entry == null)
          return;
       try {
