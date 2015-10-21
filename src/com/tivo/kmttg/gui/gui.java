@@ -147,7 +147,7 @@ public class gui extends Application {
    public MenuItem searchMenuItem = null;
    public MenuItem skipModeMenuItem = null;
    public CheckMenuItem skipServiceMenuItem = null;
-   private Boolean skipServiceMenuItem_cb = true;
+   public Boolean skipServiceMenuItem_cb = true;
    public MenuItem thumbsMenuItem = null;
    
    private ChoiceBox<String> encoding = null;
@@ -1320,6 +1320,7 @@ public class gui extends Application {
                if (tivoName != null && tivoName.length() > 0) {               
                   // Start service for selected TiVo
                   config.skipService = new SkipService(tivoName);
+                  config.skipService.start();
                }
             }
          });
