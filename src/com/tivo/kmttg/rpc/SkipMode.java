@@ -308,7 +308,7 @@ public class SkipMode {
       }
    }
    
-   private static String toMinSec(long msecs) {
+   public static String toMinSec(long msecs) {
       int mins = (int)msecs/1000/60;
       int secs = (int)(msecs/1000 - 60*mins);
       return String.format("%02d:%02d", mins, secs);
@@ -538,7 +538,7 @@ public class SkipMode {
    }
    
    // Change offset for given contentId
-   public static Boolean changeEntry(String contentId, String offset) {
+   public static Boolean changeEntry(String contentId, String offset, String title) {
       if (file.isFile(ini)) {
          try {
             Boolean itemChanged = false;
@@ -553,7 +553,8 @@ public class SkipMode {
                      itemChanged = true;
                      changed = true;
                   }
-                  String nextline = ifp.readLine();
+                  String nextline = ifp.readLine(); // offerId
+                  nextline = ifp.readLine(); // offset
                   l = nextline.split("=");
                   lines.push(line);
                   if (changed)
@@ -572,9 +573,9 @@ public class SkipMode {
             }
             ofp.close();
             if (itemChanged)
-               print("contentId '" + contentId + "' offset updated to: " + offset);
+               print("'" + title + "' offset updated to: " + offset);
             else
-               print("contentId '" + contentId + "' not updated.");
+               print("'" + title + "' not updated.");
             return itemChanged;
          } catch (Exception e) {
             error("removeEntry - " + e.getMessage());
@@ -599,11 +600,15 @@ public class SkipMode {
                   offset = line.replaceFirst("offset=", "");
                if (line.contains("title=")) {
                   title = line.replaceFirst("title=", "");
+                  line = ifp.readLine();
+                  String[] l = line.split("\\s+");
+                  String ad1 = l[1];
                   JSONObject json = new JSONObject();
                   json.put("contentId", contentId);
                   json.put("offerId", offerId);
                   json.put("offset", offset);
                   json.put("title", title);
+                  json.put("ad1", ad1);
                   entries.put(json);
                }
             }
