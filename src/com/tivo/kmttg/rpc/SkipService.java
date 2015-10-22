@@ -11,10 +11,11 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class SkipService {
-   int interval = 10; // secs between checks
-   Timer timer = null;
-   Boolean running = false;
-   Remote r = null;
+   private int interval = 10; // secs between checks
+   private Timer timer = null;
+   private Boolean running = false;
+   private Remote r = null;
+   private Boolean enabled = true;
    public String tivoName = null;
    
    public SkipService(String tivoName) {
@@ -85,12 +86,26 @@ public class SkipService {
          try {
             if (result.has("whatsOn")) {
                JSONObject what = result.getJSONArray("whatsOn").getJSONObject(0);
-               // Turn off monitoring if tuned to channel 0
-               if (what.has("channelIdentifier")) {
-                  JSONObject chan = what.getJSONObject("channelIdentifier");
-                  if (chan.has("channelNumber") && chan.getString("channelNumber").equals("0")) {
-                     stop();
-                     return;
+               if (what.has("playbackType") && what.getString("playbackType").equals("liveCache")) {
+                  if (what.has("channelIdentifier")) {
+                     JSONObject chan = what.getJSONObject("channelIdentifier");
+                     if (chan.has("channelNumber")) {                        
+                        if (chan.getString("channelNumber").equals("0")) {
+                           if (enabled) {
+                              // Disable if live TV tuned to channel 0
+                              enabled = false;
+                              print("monitor disabled for: " + tivoName);
+                              return;
+                           }
+                        }
+                        if (chan.getString("channelNumber").equals("1")) {
+                           if (! enabled) {
+                              // Re-enable if live TV tuned to channel 1
+                              enabled = true;
+                              print("monitor re-enabled for: " + tivoName);
+                           }
+                        }
+                     }
                   }
                }
                if (what.has("offerId")) {
@@ -113,10 +128,12 @@ public class SkipService {
                         debug.print("SkipService calling SkipMode.disable");
                         SkipMode.disable();
                      }
-                     // If we have skip data for current offerId then start monitoring it
-                     JSONObject entry = getOffer(offerId);
-                     // If we have skip data for this entry then start monitoring it
-                     monitorEntry(entry);
+                     if (enabled) {
+                        // Get entry associated with offerId
+                        JSONObject entry = getOffer(offerId);
+                        // If we have skip data for this entry then start monitoring it
+                        monitorEntry(entry);
+                     }
                   }
                }
             }
