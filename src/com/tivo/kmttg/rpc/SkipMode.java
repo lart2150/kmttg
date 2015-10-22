@@ -222,7 +222,7 @@ public class SkipMode {
                   // 1st pause press so adjust skip data accordingly
                   adjustPoints(reply.getLong("position"));
                   showSkipData();
-                  saveEntry(contentId, offerId, offset, title, skipData_orig);
+                  saveEntry(contentId, offerId, offset, title, tivoName, skipData_orig);
                }
                if (speed != 100)
                   return -1;
@@ -414,7 +414,7 @@ public class SkipMode {
    }
    
    // Save commercial points for current entry to ini file
-   private static void saveEntry(String contentId, String offerId, long offset, String title, Stack<Hashtable<String,Long>> data) {
+   private static void saveEntry(String contentId, String offerId, long offset, String title, String tivoName, Stack<Hashtable<String,Long>> data) {
       print("Saving SkipMode entry: " + title);
       try {
          String eol = "\r\n";
@@ -423,6 +423,7 @@ public class SkipMode {
          ofp.write("contentId=" + contentId + eol);
          ofp.write("offerId=" + offerId + eol);
          ofp.write("offset=" + offset + eol);
+         ofp.write("tivoName=" + tivoName + eol);
          ofp.write("title=" + title + eol);
          for (Hashtable<String,Long> entry : data) {
             ofp.write(entry.get("start") + " " + entry.get("end") + eol);
@@ -591,7 +592,7 @@ public class SkipMode {
       if (file.isFile(ini)) {
          try {
             BufferedReader ifp = new BufferedReader(new FileReader(ini));
-            String line=null, contentId="", title="", offset="", offerId="";
+            String line=null, contentId="", title="", offset="", offerId="", tivoName="";
             while (( line = ifp.readLine()) != null) {
                if (line.contains("contentId="))
                   contentId = line.replaceFirst("contentId=", "");
@@ -599,6 +600,8 @@ public class SkipMode {
                   offerId = line.replaceFirst("offerId=", "");
                if (line.contains("offset="))
                   offset = line.replaceFirst("offset=", "");
+               if (line.contains("tivoName="))
+                  tivoName = line.replaceFirst("tivoName=", "");
                if (line.contains("title=")) {
                   title = line.replaceFirst("title=", "");
                   line = ifp.readLine();
@@ -608,6 +611,7 @@ public class SkipMode {
                   json.put("contentId", contentId);
                   json.put("offerId", offerId);
                   json.put("offset", offset);
+                  json.put("tivoName", tivoName);
                   json.put("title", title);
                   json.put("ad1", ad1);
                   entries.put(json);
@@ -619,6 +623,39 @@ public class SkipMode {
          }
       }
       return entries;
+   }
+   
+   // Remove SkipMode entries that no longer have corresponding NPL entries
+   public static void pruneEntries(String tivoName, Stack<Hashtable<String,String>> nplEntries) {
+      if (nplEntries == null)
+         return;
+      if (nplEntries.size() == 0)
+         return;
+      
+      try {
+         int count = 0;
+         JSONArray skipEntries = getEntries();
+         for (int i=0; i<skipEntries.length(); ++i) {
+            JSONObject json = skipEntries.getJSONObject(i);
+            if (json.getString("tivoName").equals(tivoName)) {
+               Boolean exists = false;
+               for (Hashtable<String,String> nplEntry : nplEntries) {
+                  if (nplEntry.containsKey("offerId")) {
+                     if (nplEntry.get("offerId").equals(json.getString("offerId")))
+                        exists = true;
+                  }
+               }
+               if (! exists) {
+                  removeEntry(json.getString("contentId"));
+                  count++;
+               }
+            }
+         }
+         if (count == 0)
+            log.warn("No entries found to prune");
+      } catch (JSONException e) {
+         error("pruneEntries - " + e.getMessage());
+      }
    }
    
    public static void autoDetect(String tivoName, Hashtable<String,String> entry) {
@@ -670,7 +707,7 @@ public class SkipMode {
          r2.disconnect();
          if (points != null) {
             SkipMode.title = title;
-            saveEntry(contentId, offerId, offset - points.get(0).get("end"), title, points);
+            saveEntry(contentId, offerId, offset - points.get(0).get("end"), title, tivoName, points);
             print("1st commercial point saved as: " + toMinSec(offset) +
                " (orig point=" + toMinSec(points.get(0).get("end")) + ")");
          }
