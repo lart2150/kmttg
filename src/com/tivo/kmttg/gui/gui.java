@@ -2589,6 +2589,12 @@ public class gui extends Application {
          text += "NOTE: The list is exported as displayed, so if you want all individual entries<br>";
          text += "in the spreadsheet then disable <b>Show Folders</b> before exporting.";
       }
+      else if (component.equals("prune_skipTable")) {
+         text =  "<b>Prune skipTable</b><br>";
+         text += "Remove entries in SkipMode table that are deleted from this TiVo.<br>";
+         text += "Instead of manually having to prune SkipMode table this is useful to automatically<br>";
+         text += "remove entries that are no longer useful.";
+      }
       
       return MyTooltip.make(text);
    }
