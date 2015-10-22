@@ -1,5 +1,7 @@
 package com.tivo.kmttg.gui.table;
 
+import java.util.Comparator;
+
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
@@ -20,6 +22,18 @@ import com.tivo.kmttg.util.log;
 public class skipTable {
    private String[] TITLE_cols = {"SHOW", "CONTENTID", "AD1_ORIG", "OFFSET", "AD1_ADJ"};
    public TableView<Tabentry> TABLE = null;
+   
+   class offsetComparator implements Comparator<String> {
+      public int compare(String s1, String s2) {
+         if (s1 != null && s2 != null) {
+            long s1num = Long.parseLong(s1);
+            long s2num = Long.parseLong(s2);
+            if (s1num > s2num) return 1;
+            if (s1num < s2num) return -1;
+         }
+         return 0;
+      }
+   }
 
    public skipTable() {
       TABLE = new TableView<Tabentry>();
@@ -35,6 +49,7 @@ public class skipTable {
             TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(cName));
             col.setCellFactory(TextFieldTableCell.<Tabentry>forTableColumn());
+            col.setComparator(new offsetComparator());
             // This column is editable
             col.setOnEditCommit( new EventHandler<CellEditEvent<Tabentry, String>>() {
                @Override
