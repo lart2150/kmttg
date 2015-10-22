@@ -357,6 +357,8 @@ public class Remote {
          if (debug) {
             print("WRITE: " + data);
          }
+         if (out == null)
+            return false;
          out.write(data.getBytes());
          out.flush();
       } catch (IOException e) {
