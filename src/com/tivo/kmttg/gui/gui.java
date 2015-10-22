@@ -1305,7 +1305,7 @@ public class gui extends Application {
                // Build list of eligible TiVos
                Stack<String> all = config.getTivoNames();
                for (int i=0; i<all.size(); ++i) {
-                  if (! config.rpcEnabled(all.get(i)) )
+                  if (! config.rpcEnabled(all.get(i)) || ! config.nplCapable(all.get(i)))
                      all.remove(i);
                }
                
