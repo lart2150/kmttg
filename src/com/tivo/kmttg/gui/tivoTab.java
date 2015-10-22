@@ -35,6 +35,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -182,6 +183,18 @@ public class tivoTab {
                }
             });
             row.getChildren().add(export);
+         }
+         
+         // Prune button
+         if ( ! tivoName.equalsIgnoreCase("FILES") && config.rpcEnabled(tivoName) && SkipMode.fileExists()) {
+            Button prune = new Button("Prune skipTable");
+            prune.setTooltip(config.gui.getToolTip("prune_skipTable"));
+            prune.setOnAction(new EventHandler<ActionEvent>() {
+               public void handle(ActionEvent e) {
+                  SkipMode.pruneEntries(tivoName, nplTab.getEntries());
+               }
+            });
+            row.getChildren().add(prune);
          }
          
          // Status label
