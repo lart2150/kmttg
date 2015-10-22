@@ -243,6 +243,7 @@ public class tdownload_decrypt extends baseTask implements Serializable {
             // Skip detect job => Schedule decrypt & comskip jobs
             Hashtable<String,Object> specs = new Hashtable<String,Object>();
             specs.put("mode", "FILES");
+            specs.put("source", job.source);
             specs.put("tivoName", job.tivoName);
             specs.put("startFile", job.mpegFile);
             specs.put("SkipPoint", job.SkipPoint);

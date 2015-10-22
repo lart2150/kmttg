@@ -1169,6 +1169,8 @@ public class jobMonitor {
             jobData job = new jobData();
             job.startFile    = startFile;
             job.source       = source;
+            if (specs.containsKey("source"))
+               job.source    = (String)specs.get("source");
             job.tivoName     = tivoName;
             job.type         = "comskip";
             job.name         = config.comskip;
