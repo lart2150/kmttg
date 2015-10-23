@@ -101,12 +101,12 @@ public class remotegui {
             for (PanelKey p : PanelKey.panelKeys) {
                if (p.key == event.getCode()) {
                   if (p.actionName.startsWith("Shift") && ! event.isShiftDown())
-                     return;
+                     break;
                   if (p.actionName.startsWith("Alt") && ! event.isAltDown())
-                     return;
+                     break;
                   rc_tab.RC_keyPress(p.isAscii, p.command);
                   event.consume();
-                  return;
+                  break;
                }
             }
             for (PanelKey p : PanelKey.buttonKeys) {
