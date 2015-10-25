@@ -716,22 +716,22 @@ public class tooltip {
          text = "KP -";
       }
       else if (component.equals("reverse")) {
-         text = "<";
+         text = "Alt <--";
       }
       else if (component.equals("back")) {
-         text = "{";
+         text = "Alt k";
       }
       else if (component.equals("replay")) {
-         text = "(";
+         text = "Alt 9";
       }
       else if (component.equals("play")) {
-         text = "]";
+         text = "Alt ]";
       }
       else if (component.equals("pause")) {
-         text = "[";
+         text = "Alt [";
       }
       else if (component.equals("slow")) {
-         text = "|";
+         text = "Alt \\";
       }
       else if (component.equals("record")) {
          text = "Alt r";
@@ -740,10 +740,10 @@ public class tooltip {
          text = "KP +";
       }
       else if (component.equals("forward")) {
-         text = ">";
+         text = "Alt -->";
       }
       else if (component.equals("advance")) {
-         text = ")";
+         text = "Alt 0";
       }      
       else if (component.equals("standby")){
          text = "<b>Toggle standby</b><br>";

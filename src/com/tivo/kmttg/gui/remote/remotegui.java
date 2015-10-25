@@ -96,28 +96,47 @@ public class remotegui {
       tabbed_panel.setOnKeyPressed(new EventHandler<KeyEvent> () {
          @Override
          public void handle(KeyEvent event) {
+            // Prevent Alt press from triggering menu mnemonic
+            if (event.isAltDown())
+               event.consume();
             if (event.isControlDown())
                return;
-            for (PanelKey p : PanelKey.panelKeys) {
-               if (p.key == event.getCode()) {
-                  if (p.actionName.startsWith("Shift") && ! event.isShiftDown())
-                     break;
-                  if (p.actionName.startsWith("Alt") && ! event.isAltDown())
-                     break;
-                  rc_tab.RC_keyPress(p.isAscii, p.command);
-                  event.consume();
-                  break;
+            if (! event.isAltDown()) {
+               for (PanelKey p : PanelKey.panelKeys) {
+                  if (p.key == event.getCode()) {
+                     if (p.actionName.startsWith("Shift") && ! event.isShiftDown())
+                        continue;
+                     if (! p.actionName.startsWith("Shift") && event.isShiftDown())
+                        continue;
+                     rc_tab.RC_keyPress(p.isAscii, p.command);
+                     event.consume();
+                     return;
+                  }
                }
             }
             for (PanelKey p : PanelKey.buttonKeys) {
-               if (p.key == event.getCode()) {
-                  if (p.actionName.startsWith("Shift") && ! event.isShiftDown())
+               if (event.isAltDown()) {
+                  if (p.actionName.startsWith("Alt")) {
+                     String code = event.getCode().toString();
+                     if (code.equals("ALT"))
+                        return;
+                     if (p.key == event.getCode()) {
+                        p.button.fire();
+                        event.consume();
+                        return;
+                     }
+                  }
+                  continue;
+               } else {
+                  if (p.key == event.getCode()) {
+                     if (p.actionName.startsWith("Shift") && ! event.isShiftDown())
+                        continue;
+                     if (! p.actionName.startsWith("Shift") && event.isShiftDown())
+                        continue;
+                     p.button.fire();
+                     event.consume();
                      return;
-                  if (p.actionName.startsWith("Alt") && ! event.isAltDown())
-                     return;
-                  p.button.fire();
-                  event.consume();
-                  return;
+                  }
                }
             }
          }
