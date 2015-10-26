@@ -414,7 +414,7 @@ public class SkipMode {
    }
    
    // Save commercial points for current entry to ini file
-   private static void saveEntry(String contentId, String offerId, long offset, String title, String tivoName, Stack<Hashtable<String,Long>> data) {
+   public static void saveEntry(String contentId, String offerId, long offset, String title, String tivoName, Stack<Hashtable<String,Long>> data) {
       print("Saving SkipMode entry: " + title);
       try {
          String eol = "\r\n";
