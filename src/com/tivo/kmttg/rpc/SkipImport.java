@@ -33,6 +33,10 @@ public class SkipImport {
          log.error("entry missing offerId: " + entry.get("title"));
          return false;
       }
+      if (! entry.containsKey("duration")) {
+         log.error("entry missing duration: " + entry.get("title"));
+         return false;
+      }
 
       // Look for VPrj or edl file conforming to file naming template
       String name = tivoFileName.buildTivoFileName(entry);
@@ -66,9 +70,9 @@ public class SkipImport {
          if (usedFile != null) {
             log.warn("Importing from file: " + usedFile);
             if (usedFile.endsWith(".VPrj"))
-               cuts = vrdImport(usedFile);
+               cuts = vrdImport(usedFile, Long.parseLong(entry.get("duration")));
             if (usedFile.endsWith(".edl"))
-               cuts = edlImport(usedFile);
+               cuts = edlImport(usedFile, Long.parseLong(entry.get("duration")));
          }
          
          if (cuts != null) {
@@ -85,7 +89,7 @@ public class SkipImport {
    }
    
    // Create skip entries based on VideoRedo .Vprj xml file with cut entries
-   static public Stack<Hashtable<String,Long>> vrdImport(String vprjFile) {
+   static public Stack<Hashtable<String,Long>> vrdImport(String vprjFile, Long duration) {
       Stack<Hashtable<String,Long>> cuts = new Stack<Hashtable<String,Long>>();
       try {
          DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -113,10 +117,10 @@ public class SkipImport {
          log.error("SkipImport vrdImport - " + e.getMessage());
          log.error(Arrays.toString(e.getStackTrace()));
       }
-      return cutsToEntries(cuts);
+      return cutsToEntries(cuts, duration);
    }
    
-   static public Stack<Hashtable<String,Long>> edlImport(String edlFile) {
+   static public Stack<Hashtable<String,Long>> edlImport(String edlFile, Long duration) {
       Stack<Hashtable<String,Long>> cuts = new Stack<Hashtable<String,Long>>();
       try {
          BufferedReader ifp = new BufferedReader(new FileReader(edlFile));
@@ -137,11 +141,11 @@ public class SkipImport {
          log.error("SkipImport edlImport - " + e.getMessage());
          log.error(Arrays.toString(e.getStackTrace()));         
       }
-      return cutsToEntries(cuts);
+      return cutsToEntries(cuts, duration);
    }
    
    // Convert a set of cut points to a set of show points
-   static private Stack<Hashtable<String,Long>> cutsToEntries(Stack<Hashtable<String,Long>> cuts) {
+   static private Stack<Hashtable<String,Long>> cutsToEntries(Stack<Hashtable<String,Long>> cuts, Long duration) {
       Stack<Hashtable<String,Long>> entries = new Stack<Hashtable<String,Long>>();
       if (cuts != null && cuts.size() > 0) {
          for (int i=0; i<cuts.size()-1; ++i) {
@@ -153,6 +157,10 @@ public class SkipImport {
             h.put("end", cuts.get(i+1).get("start"));
             entries.push(h);
          }
+         Hashtable<String,Long> h = new Hashtable<String,Long>();
+         h.put("start", cuts.get(cuts.size()-1).get("end"));
+         h.put("end", duration);
+         entries.push(h);
       }
       return entries;
    }
