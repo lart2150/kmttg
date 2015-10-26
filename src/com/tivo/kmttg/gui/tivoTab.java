@@ -35,6 +35,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.rpc.SkipImport;
 import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -195,6 +196,26 @@ public class tivoTab {
                }
             });
             row.getChildren().add(prune);
+         }
+         
+         // Import skip button
+         if ( ! tivoName.equalsIgnoreCase("FILES") && config.rpcEnabled(tivoName) && SkipMode.fileExists()) {
+            Button import_skip = new Button("Import skip");
+            import_skip.setTooltip(config.gui.getToolTip("import_skip"));
+            import_skip.setOnAction(new EventHandler<ActionEvent>() {
+               public void handle(ActionEvent e) {
+                  int[] rows = nplTab.GetSelectedRows();
+                  int row;
+                  for (int i=0; i<rows.length; i++) {
+                     row = rows[i];
+                     Stack<Hashtable<String,String>> rowData = nplTab.getRowData(row);
+                     for (Hashtable<String,String> h : rowData) {
+                        SkipImport.importEntry(tivoName, h);
+                     }
+                  }
+               }
+            });
+            row.getChildren().add(import_skip);
          }
          
          // Status label
