@@ -57,10 +57,10 @@ public class skipTable {
                   int row = event.getTablePosition().getRow();
                   Tabentry entry = event.getTableView().getItems().get(row);
                   try {
-                  // Update row Tabentry value
-                  entry.offset = event.getNewValue();
-                  entry.ad1_adj = adAdjusted(entry.show.json.getString("ad1"), entry.offset);
-                  TABLE.getItems().set(row, entry);
+                     // Update row Tabentry value
+                     entry.offset = event.getNewValue();
+                     entry.ad1_adj = adAdjusted(entry.show.json.getString("ad1"), entry.offset);
+                     TABLE.getItems().set(row, entry);
                   } catch (JSONException e) {
                      log.error("skipTable - " + e.getMessage());
                   }
