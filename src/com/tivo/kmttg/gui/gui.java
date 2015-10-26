@@ -2595,6 +2595,13 @@ public class gui extends Application {
          text += "Instead of manually having to prune SkipMode table this is useful to automatically<br>";
          text += "remove entries that are no longer useful.";
       }
+      else if (component.equals("import_skip")) {
+         text =  "<b>Import skip</b><br>";
+         text += "For selected entries in the table import skip information from comskip or VideoRedo project<br>";
+         text += "files into skip table. Files are attempted to be located automatically based on the current<br>";
+         text += "naming template and the defined locations for <b>.TiVo Output Dir</b> and/or <b>.mpg Output Dir</b>.<br>";
+         text += "If no file is located automatically then you are prompted to provide one.";
+      }
       
       return MyTooltip.make(text);
    }
