@@ -12,11 +12,13 @@ import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.tivoTab;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -493,7 +495,7 @@ public class SkipMode {
    }
    
    // Remove any entries matching given contentId from ini file
-   public static Boolean removeEntry(String contentId) {
+   public static Boolean removeEntry(final String contentId) {
       if (file.isFile(ini)) {
          try {
             Boolean itemRemoved = false;
@@ -501,6 +503,7 @@ public class SkipMode {
             BufferedReader ifp = new BufferedReader(new FileReader(ini));
             String line = null;
             Boolean include = true;
+            String tivoName = null;
             while (( line = ifp.readLine()) != null) {
                if (line.contains("<entry>")) {
                   include = true;
@@ -509,6 +512,9 @@ public class SkipMode {
                   if (l[1].equals(contentId)) {
                      include = false;
                      itemRemoved = true;
+                     ifp.readLine(); // offerId
+                     ifp.readLine(); // offset
+                     tivoName = ifp.readLine().split("=")[1];
                   }
                   if (include) {
                      lines.push(line);
@@ -526,8 +532,21 @@ public class SkipMode {
                ofp.write(l + eol);
             }
             ofp.close();
-            if (itemRemoved)
+            if (itemRemoved) {
                print("Removed entry: " + contentId);
+               if (tivoName != null && config.GUIMODE) {
+                  // Remove asterisk from associated table
+                  final String final_tivoName = tivoName;
+                  Platform.runLater(new Runnable() {
+                     @Override public void run() {
+                        tivoTab t = config.gui.getTab(final_tivoName);
+                        if (t != null) {
+                           t.getTable().updateSkipStatus(contentId);
+                        }
+                     }
+                  });
+               }
+            }
             else
                print("No entry found for: " + contentId);
             return itemRemoved;
