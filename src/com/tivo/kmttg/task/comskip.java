@@ -235,12 +235,16 @@ public class comskip extends baseTask implements Serializable {
             if (job.SkipPoint != null && file.isFile(job.edlFile)) {
                // Analyze edl file
                long closest = getClosestStart(job.edlFile, job.SkipPoint);
-               if (closest != -1)
+               if (closest != -1) {
                   SkipMode.saveWithOffset(job.tivoName, job.contentId, job.offerId, job.title, closest);
+                  if (config.GUIMODE) {
+                     config.gui.getTab(job.tivoName).getTable().updateSkipStatus(job.contentId);
+                  }
+               }
             }
             if (job.SkipPoint != null) {
                String prefix = string.replaceSuffix(string.basename(job.mpegFile), "");
-               cleanUpFiles(prefix);               
+               cleanUpFiles(prefix);
             }
          }
       }
