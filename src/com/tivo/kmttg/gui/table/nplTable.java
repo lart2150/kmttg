@@ -1446,6 +1446,27 @@ public class nplTable extends TableMap {
       UpdatingNPL = false;
    }
    
+   // Identify NPL table items associated with queued/running jobs
+   public void updateSkipStatus(String contentId) {
+      UpdatingNPL = true;
+      if (SkipMode.fileExists()) {
+         skipEntries = SkipMode.getEntries();
+      }
+      for (int row=0; row<NowPlaying.getExpandedItemCount(); row++) {
+         sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+         if (s != null && s.data != null) {
+            if (s.data.containsKey("contentId")) {
+               NowPlaying.getTreeItem(row).getValue().getIMAGE().setLabel(getPctWatched(s.data));
+            }
+         }
+      }
+      // Hack to refresh image column
+      int col = TableUtil.getColumnIndex(NowPlaying, "");
+      NowPlaying.getColumns().get(col).setVisible(false);
+      NowPlaying.getColumns().get(col).setVisible(true);
+      UpdatingNPL = false;
+   }
+   
    private String getValueAt(int row, int col) {
       return NowPlaying.getColumns().get(col).getCellData(row).toString();
    }
