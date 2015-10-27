@@ -211,7 +211,6 @@ public class tivoTab {
                      Stack<Hashtable<String,String>> rowData = nplTab.getRowData(row);
                      for (Hashtable<String,String> h : rowData) {
                         SkipImport.importEntry(tivoName, h);
-                        config.gui.getTab(tivoName).getTable().updateSkipStatus(h.get("contentId"));
                      }
                   }
                }
