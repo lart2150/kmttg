@@ -416,7 +416,8 @@ public class SkipMode {
    }
    
    // Save commercial points for current entry to ini file
-   public static void saveEntry(String contentId, String offerId, long offset, String title, String tivoName, Stack<Hashtable<String,Long>> data) {
+   public static void saveEntry(final String contentId, String offerId, long offset,
+         String title, final String tivoName, Stack<Hashtable<String,Long>> data) {
       print("Saving SkipMode entry: " + title);
       try {
          String eol = "\r\n";
@@ -432,7 +433,11 @@ public class SkipMode {
          }
          ofp.close();
          if (config.GUIMODE) {
-            config.gui.getTab(tivoName).getTable().updateSkipStatus(contentId);
+            Platform.runLater(new Runnable() {
+               @Override public void run() {
+                  config.gui.getTab(tivoName).getTable().updateSkipStatus(contentId);
+               }
+            });
          }
       } catch (IOException e) {
          error("saveEntry - " + e.getMessage());
