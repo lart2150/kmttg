@@ -431,9 +431,26 @@ public class SkipMode {
             ofp.write(entry.get("start") + " " + entry.get("end") + eol);
          }
          ofp.close();
+         if (config.GUIMODE) {
+            config.gui.getTab(tivoName).getTable().updateSkipStatus(contentId);
+         }
       } catch (IOException e) {
          error("saveEntry - " + e.getMessage());
       }
+   }
+   
+   public static void saveWithOffset(String tivoName, String contentId, String offerId, String title, long offset) {
+      Remote r2 = new Remote(tivoName);
+      if (r2.success) {
+         Stack<Hashtable<String,Long>>points = getShowPoints(r2, tivoName, contentId, title);
+         r2.disconnect();
+         if (points != null) {
+            SkipMode.title = title;
+            saveEntry(contentId, offerId, offset - points.get(0).get("end"), title, tivoName, points);
+            print("1st commercial point saved as: " + toMinSec(offset) +
+               " (orig point=" + toMinSec(points.get(0).get("end")) + ")");
+         }
+      }      
    }
    
    // Obtain commercial points for given contentId if it exists
@@ -717,20 +734,6 @@ public class SkipMode {
             run_count++;
          }
       }
-   }
-   
-   public static void saveWithOffset(String tivoName, String contentId, String offerId, String title, long offset) {
-      Remote r2 = new Remote(tivoName);
-      if (r2.success) {
-         Stack<Hashtable<String,Long>>points = getShowPoints(r2, tivoName, contentId, title);
-         r2.disconnect();
-         if (points != null) {
-            SkipMode.title = title;
-            saveEntry(contentId, offerId, offset - points.get(0).get("end"), title, tivoName, points);
-            print("1st commercial point saved as: " + toMinSec(offset) +
-               " (orig point=" + toMinSec(points.get(0).get("end")) + ")");
-         }
-      }      
    }
    
    private static Stack<Hashtable<String,Long>> hashCopy(Stack<Hashtable<String,Long>> orig) {
