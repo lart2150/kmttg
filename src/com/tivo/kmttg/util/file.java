@@ -172,6 +172,17 @@ public class file {
       return null;
    }
    
+   public static void cleanUpFiles(String prefix) {
+      log.print("Cleaning up files with prefix: " + prefix);
+      File folderToScan = new File(config.mpegDir); 
+      File[] listOfFiles = folderToScan.listFiles();
+      for (File f : listOfFiles) {
+         if (f.isFile() && f.getName().startsWith(prefix)) {
+            f.delete();
+         }
+      }
+   }
+   
    // TivoWebPlus file delete function
    // Note that show id needs to be extracted from given download_url
    // in order to construct the actual delete url
