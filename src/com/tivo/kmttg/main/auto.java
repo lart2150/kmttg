@@ -648,6 +648,13 @@ public class auto {
    // Append a ProgramId entry to the autoHistory file based on job data
    public static int AddHistoryEntry(jobData job) {
       debug.print("job=" + job);
+      
+      // No history entry for SkipMode downloads
+      if (job.tivoFile != null && string.basename(job.tivoFile).startsWith("SkipMode"))
+         return 0;
+      if (job.mpegFile != null && string.basename(job.mpegFile).startsWith("SkipMode"))
+         return 0;
+      
       String ProgramId = job.ProgramId;
       if (job.ProgramId_unique != null)
          ProgramId = job.ProgramId_unique;
