@@ -673,7 +673,11 @@ public class jobMonitor {
             return;
          }
          
-         String name = tivoFileName.buildTivoFileName(entry);
+         String name = null;
+         if ( specs.containsKey("name") )
+            name = (String)specs.get("name");
+         else
+            name = tivoFileName.buildTivoFileName(entry);
          if (name == null) {
             // Invalid file name => abort processing
             return;
@@ -1164,6 +1168,16 @@ public class jobMonitor {
             job.name         = "VRD";
             job.mpegFile     = mpegFile;
             job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
+            if (specs.containsKey("contentId"))
+               job.contentId = (String) specs.get("contentId");
+            if (specs.containsKey("offerId"))
+               job.offerId = (String) specs.get("offerId");
+            if (specs.containsKey("title"))
+               job.title = (String) specs.get("title");
+            if (specs.containsKey("skipmode")) {
+               job.skipmode = true;
+               job.duration = Long.parseLong(entry.get("duration"));
+            }
             submitNewJob(job);
          } else {
             jobData job = new jobData();
@@ -1193,6 +1207,10 @@ public class jobMonitor {
                job.offerId = (String) specs.get("offerId");
             if (specs.containsKey("title"))
                job.title = (String) specs.get("title");
+            if (specs.containsKey("skipmode")) {
+               job.skipmode = true;
+               job.duration = Long.parseLong(entry.get("duration"));
+            }
             submitNewJob(job);            
          }
       }
@@ -1208,6 +1226,13 @@ public class jobMonitor {
             job.name         = "VRD";
             job.mpegFile     = mpegFile;
             job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
+            if (specs.containsKey("skipmode")) {
+               job.skipmode = true;
+               job.contentId = (String) specs.get("contentId");
+               job.offerId = (String) specs.get("offerId");
+               job.title = (String) specs.get("title");
+               job.duration = Long.parseLong(entry.get("duration"));
+            }
             submitNewJob(job);
             // VRD will be used to save output with cuts, so cancel comcut
             if (config.VrdReview_noCuts == 1)
@@ -1230,6 +1255,13 @@ public class jobMonitor {
          if (file.isFile(config.projectx) && config.VRD == 0)
             job.xclFile   = xclFile;
          job.edlFile      = edlFile;
+         if (specs.containsKey("skipmode")) {
+            job.skipmode = true;
+            job.contentId = (String) specs.get("contentId");
+            job.offerId = (String) specs.get("offerId");
+            job.title = (String) specs.get("title");
+            job.duration = Long.parseLong(entry.get("duration"));
+         }
          submitNewJob(job);         
       }
       
