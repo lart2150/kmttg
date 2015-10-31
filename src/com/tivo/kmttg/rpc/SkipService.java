@@ -72,6 +72,8 @@ public class SkipService {
       debug.print("");
       if (r==null)
          return;
+      if (! running)
+         return;
       JSONObject result = r.Command("whatsOnSearch", new JSONObject());
       if (result == null) {
          // RPC session may be corrupted, start a new connection
