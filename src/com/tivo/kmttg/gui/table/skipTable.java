@@ -2,6 +2,8 @@ package com.tivo.kmttg.gui.table;
 
 import java.util.Comparator;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
@@ -73,6 +75,16 @@ public class skipTable {
             TABLE.getColumns().add(col);
          }
       }
+      
+      // Define selection listener to detect table row selection changes
+      TABLE.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tabentry>() {
+         @Override
+         public void changed(ObservableValue<? extends Tabentry> obs, Tabentry oldSelection, Tabentry newSelection) {
+            if (newSelection != null) {
+               TABLERowSelected(newSelection);
+            }
+         }
+      });
       
       // Mouse listener for single click in RATING column
       TABLE.setOnMousePressed(new EventHandler<MouseEvent>() {
@@ -198,6 +210,31 @@ public class skipTable {
          }
       } catch (Exception e) {
          log.error("changeTable - " + e.getMessage());
+      }
+   }
+   
+   private void TABLERowSelected(Tabentry entry) {
+      try {
+         JSONObject json = entry.getSHOW().json;
+         log.print("\nSkipMode data for '" + json.getString("title"));
+         JSONArray cuts = json.getJSONArray("cuts");
+         int index = 0;
+         long offset = Long.parseLong(json.getString("offset"));
+         for (int i=0; i<cuts.length(); ++i) {
+            JSONObject j = cuts.getJSONObject(i);
+            long start = j.getLong("start");
+            if (index > 0)
+               start += offset;
+            long end = j.getLong("end") + offset;
+            String message = "" + index + ": start=";
+            message += SkipMode.toMinSec(start);
+            message += " end=";
+            message += SkipMode.toMinSec(end);         
+            log.print(message);
+            index++;
+         }
+      } catch (JSONException e) {
+         log.error("skipTable TABLERowSelected - " + e.getMessage());
       }
    }
 }
