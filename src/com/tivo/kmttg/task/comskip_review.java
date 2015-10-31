@@ -152,31 +152,19 @@ public class comskip_review extends baseTask implements Serializable {
          }
          jobMonitor.removeFromJobList(job);
          
-         // Check for problems
-         int failed = 0;
-         // No or empty outputFile means problems
-         if ( ! file.isFile(outputFile) || file.isEmpty(outputFile) ) {
-            failed = 1;
-         }
+         log.warn("comskip_review job completed: " + jobMonitor.getElapsedTime(job.time));
+         log.print("---DONE--- job=" + job.type + " output=" + outputFile);
          
-         if (failed == 1) {
-            log.error("comskip_review failed (exit code: " + exit_code + " ) - check command: " + process.toString());
-            process.printStderr();
-         } else {
-            log.warn("comskip_review job completed: " + jobMonitor.getElapsedTime(job.time));
-            log.print("---DONE--- job=" + job.type + " output=" + outputFile);
-            
-            if (job.skipmode && file.isFile(job.edlFile)) {
-               // Skip table entry creation
-               Stack<Hashtable<String,Long>> cuts = SkipImport.edlImport(job.edlFile, job.duration, false);
-               if (cuts != null && cuts.size() > 0) {
-                  if (SkipMode.readEntry(job.contentId))
-                     SkipMode.removeEntry(job.contentId);
-                  SkipMode.saveEntry(job.contentId, job.offerId, 0L, job.title, job.tivoName, cuts);
-               }
-               String prefix = string.replaceSuffix(string.basename(job.mpegFile), "");
-               file.cleanUpFiles(prefix);               
+         if (job.skipmode && file.isFile(job.edlFile)) {
+            // Skip table entry creation
+            Stack<Hashtable<String,Long>> cuts = SkipImport.edlImport(job.edlFile, job.duration, false);
+            if (cuts != null && cuts.size() > 0) {
+               if (SkipMode.readEntry(job.contentId))
+                  SkipMode.removeEntry(job.contentId);
+               SkipMode.saveEntry(job.contentId, job.offerId, 0L, job.title, job.tivoName, cuts);
             }
+            String prefix = string.replaceSuffix(string.basename(job.mpegFile), "");
+            file.cleanUpFiles(prefix);               
          }
       }
       return false;
