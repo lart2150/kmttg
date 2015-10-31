@@ -8,12 +8,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Alert.AlertType;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -634,7 +638,22 @@ public class SkipMode {
          try {
             BufferedReader ifp = new BufferedReader(new FileReader(ini));
             String line=null, contentId="", title="", offset="", offerId="", tivoName="";
+            JSONArray cuts = new JSONArray();
             while (( line = ifp.readLine()) != null) {
+               if (line.contains("<entry>")) {
+                  if (cuts.length() > 0) {
+                     JSONObject json = new JSONObject();
+                     json.put("contentId", contentId);
+                     json.put("offerId", offerId);
+                     json.put("offset", offset);
+                     json.put("tivoName", tivoName);
+                     json.put("title", title);
+                     json.put("ad1", "" + cuts.getJSONObject(0).get("end"));
+                     json.put("cuts", cuts);
+                     entries.put(json);
+                  }
+                  cuts = new JSONArray();
+               }
                if (line.contains("contentId="))
                   contentId = line.replaceFirst("contentId=", "");
                if (line.contains("offerId="))
@@ -643,20 +662,26 @@ public class SkipMode {
                   offset = line.replaceFirst("offset=", "");
                if (line.contains("tivoName="))
                   tivoName = line.replaceFirst("tivoName=", "");
-               if (line.contains("title=")) {
+               if (line.contains("title="))
                   title = line.replaceFirst("title=", "");
-                  line = ifp.readLine();
+               if (line.matches("^[0-9]+.*")) {
                   String[] l = line.split("\\s+");
-                  String ad1 = l[1];
-                  JSONObject json = new JSONObject();
-                  json.put("contentId", contentId);
-                  json.put("offerId", offerId);
-                  json.put("offset", offset);
-                  json.put("tivoName", tivoName);
-                  json.put("title", title);
-                  json.put("ad1", ad1);
-                  entries.put(json);
+                  JSONObject j = new JSONObject();
+                  j.put("start", Long.parseLong(l[0]));
+                  j.put("end", Long.parseLong(l[1]));
+                  cuts.put(j);
                }
+            } // while
+            if (cuts.length() > 0) {
+               JSONObject json = new JSONObject();
+               json.put("contentId", contentId);
+               json.put("offerId", offerId);
+               json.put("offset", offset);
+               json.put("tivoName", tivoName);
+               json.put("title", title);
+               json.put("ad1", "" + cuts.getJSONObject(0).get("end"));
+               json.put("cuts", cuts);
+               entries.put(json);
             }
             ifp.close();
          } catch (Exception e) {
@@ -699,12 +724,20 @@ public class SkipMode {
       }
    }
    
-   public static void autoDetect(String tivoName, Hashtable<String,String> entry) {
+   public static void autoDetect(final String tivoName, final Hashtable<String,String> entry) {
       // Can't process recording or copy protected entries
       if (entry.containsKey("InProgress") || entry.containsKey("CopyProtected"))
          return;
       if( readEntry(entry.get("contentId")) ) {
          log.warn("SkipMode: Already have saved SkipMode entry for: " + entry.get("title"));
+         return;
+      }
+      if (! entry.containsKey("offerId") ) {
+         error("Entry is missing offerId: " + entry.get("title"));
+         return;
+      }
+      if (! entry.containsKey("contentId") ) {
+         error("Entry is missing contentId: " + entry.get("title"));
          return;
       }
       Remote r2 = new Remote(tivoName);
@@ -737,6 +770,46 @@ public class SkipMode {
             print("'" + entry.get("title") + "': search for 1st commercial point close to: " + toMinSec((long)firstEnd));
             jobMonitor.submitNewJob(job);
             run_count++;
+         } else {
+            // No skip data available from tivo.com so prompt for full show flow instead
+            if (config.GUIMODE) {
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     Alert alert = new Alert(AlertType.CONFIRMATION);
+                     alert.setTitle("Run full 'Ad Detect'");
+                     config.gui.setFontSize(alert, config.FontSize);
+                     alert.setContentText("No skip data available. Run full 'Ad Detect' instead?");
+                     Optional<ButtonType> result = alert.showAndWait();
+                     if (result.get() == ButtonType.OK) {
+                        String name = "SkipModeTempFile" + run_count + "_" + tivoName + ".TiVo";
+                        // Setup for download, decrypt, Ad Detect with extra specs set for saving skip entry
+                        Hashtable<String,Object> specs = new Hashtable<String,Object>();
+                        specs.put("mode", "Download");
+                        specs.put("name", name);
+                        specs.put("tivoName", tivoName);
+                        specs.put("entry", entry);
+                        specs.put("metadata", false);
+                        specs.put("metadataTivo", false);
+                        specs.put("decrypt", true);
+                        specs.put("qsfix", false);
+                        specs.put("comskip", true);
+                        specs.put("twpdelete", false);
+                        specs.put("rpcdelete", false);
+                        specs.put("comcut", false);
+                        specs.put("captions", false);
+                        specs.put("encode", false);
+                        specs.put("push", false);
+                        specs.put("custom", false);
+                        specs.put("skipmode", true);
+                        specs.put("contentId", entry.get("contentId"));
+                        specs.put("offerId", entry.get("offerId"));
+                        specs.put("title", entry.get("title"));
+                        jobMonitor.LaunchJobs(specs);                        
+                        run_count++;
+                     }
+                  }
+               });
+            }
          }
       }
    }
