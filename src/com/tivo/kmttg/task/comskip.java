@@ -2,7 +2,6 @@ package com.tivo.kmttg.task;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -17,6 +16,7 @@ import java.util.regex.Pattern;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.rpc.SkipImport;
 import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
@@ -240,7 +240,19 @@ public class comskip extends baseTask implements Serializable {
             }
             if (job.SkipPoint != null) {
                String prefix = string.replaceSuffix(string.basename(job.mpegFile), "");
-               cleanUpFiles(prefix);
+               file.cleanUpFiles(prefix);
+            }
+            
+            if (job.skipmode && config.VrdReview == 0 && config.comskip_review == 0 && file.isFile(job.edlFile)) {
+               // Skip table entry creation
+               Stack<Hashtable<String,Long>> cuts = SkipImport.edlImport(job.edlFile, job.duration, false);
+               if (cuts != null && cuts.size() > 0) {
+                  if (SkipMode.readEntry(job.contentId))
+                     SkipMode.removeEntry(job.contentId);
+                  SkipMode.saveEntry(job.contentId, job.offerId, 0L, job.title, job.tivoName, cuts);
+               }
+               String prefix = string.replaceSuffix(string.basename(job.mpegFile), "");
+               file.cleanUpFiles(prefix);               
             }
          }
       }
@@ -270,17 +282,6 @@ public class comskip extends baseTask implements Serializable {
          log.error(Arrays.toString(e.getStackTrace()));
       }
       return closest;
-   }
-   
-   private void cleanUpFiles(String prefix) {
-      log.print("Cleaning up files with prefix: " + prefix);
-      File folderToScan = new File(config.mpegDir); 
-      File[] listOfFiles = folderToScan.listFiles();
-      for (File f : listOfFiles) {
-         if (f.isFile() && f.getName().startsWith(prefix)) {
-            f.delete();
-         }
-      }
    }
    
    // Obtain pct complete from comskip stderr

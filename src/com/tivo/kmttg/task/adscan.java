@@ -3,15 +3,19 @@ package com.tivo.kmttg.task;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Stack;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.rpc.SkipImport;
+import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.string;
 
 public class adscan extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
@@ -176,6 +180,18 @@ public class adscan extends baseTask implements Serializable {
          } else {
             log.warn("adscan job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " output=" + job.vprjFile);
+            
+            if (job.skipmode && config.VrdReview == 0 && file.isFile(job.vprjFile)) {
+               // Skip table entry creation
+               Stack<Hashtable<String,Long>> cuts = SkipImport.vrdImport(job.vprjFile, job.duration, false);
+               if (cuts != null && cuts.size() > 0) {
+                  if (SkipMode.readEntry(job.contentId))
+                     SkipMode.removeEntry(job.contentId);
+                  SkipMode.saveEntry(job.contentId, job.offerId, 0L, job.title, job.tivoName, cuts);
+               }
+               String prefix = string.replaceSuffix(string.basename(job.mpegFile), "");
+               file.cleanUpFiles(prefix);               
+            }
          }
       }
       if (lockFile != null) file.delete(lockFile);

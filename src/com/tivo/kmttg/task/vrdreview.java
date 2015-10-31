@@ -3,6 +3,7 @@ package com.tivo.kmttg.task;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Stack;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -18,6 +19,8 @@ import org.w3c.dom.Element;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.rpc.SkipImport;
+import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -203,6 +206,18 @@ public class vrdreview extends baseTask implements Serializable {
                   if (file.rename(metaFile, s))
                      log.print("(Renamed " + metaFile + " to " + s);
                }
+            }
+            
+            if (job.skipmode && file.isFile(job.vprjFile)) {
+               // Skip table entry creation
+               Stack<Hashtable<String,Long>> cuts = SkipImport.vrdImport(job.vprjFile, job.duration, false);
+               if (cuts != null && cuts.size() > 0) {
+                  if (SkipMode.readEntry(job.contentId))
+                     SkipMode.removeEntry(job.contentId);
+                  SkipMode.saveEntry(job.contentId, job.offerId, 0L, job.title, job.tivoName, cuts);
+               }
+               String prefix = string.replaceSuffix(string.basename(job.mpegFile), "");
+               file.cleanUpFiles(prefix);               
             }
          }
       }
