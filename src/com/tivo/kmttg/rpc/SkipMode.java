@@ -50,11 +50,13 @@ public class SkipMode {
    static int run_count = 1;
    
    public static Boolean fileExists() {
+      debug.print("");
       return file.isFile(ini);
    }
    
    // Run this in background mode so as not to block GUI
    public static void skipPlay(final String tivoName, final Hashtable<String,String> nplData) {
+      debug.print("tivoName=" + tivoName + " nplData=" + nplData);
       SkipMode.tivoName = tivoName;
       Task<Void> task = new Task<Void>() {
          @Override public Void call() {
@@ -84,11 +86,8 @@ public class SkipMode {
                   print("Obtained skip data from file: " + ini);
                } else {
                   print("Attempting to obtain skip data for: " + nplData.get("title"));
-                  skipData_orig = getShowPoints(r, tivoName, SkipMode.contentId, SkipMode.title);
-                  skipData = hashCopy(skipData_orig);
-                  end1 = -1;
+                  skipData = getShowPoints(r, tivoName, SkipMode.contentId, SkipMode.title);
                }
-               showSkipData();
                if (skipData != null) {
                   // Start playback
                   print("play: " + nplData.get("title"));
@@ -101,14 +100,7 @@ public class SkipMode {
                      monitor = false;
                      return null;
                   }
-                  monitor = true;
-                  if (end1 == -1) {
-                     print("REMINDER: 1st pause press will be saved as exact start of 1st commercial");
-                     print("REMINDER: Use 'x' bindkey to jump to close to 1st commercial");
-                  }
-                  
-                  // Start timer to monitor playback position
-                  startTimer();
+                  enablePauseMode(tivoName, skipData);
                } else {
                   disable();
                }
@@ -119,8 +111,30 @@ public class SkipMode {
       new Thread(task).start();
    }
    
+   public static void enablePauseMode(String tivoName, Stack<Hashtable<String,Long>> points) {
+      debug.print("tivoName=" + tivoName + " points=" + points);
+      SkipMode.tivoName = tivoName;
+      if (r == null) {
+         r = new Remote(tivoName);
+         if (! r.success) {
+            disable();
+            return;
+         }
+      }
+      skipData_orig = points;
+      skipData = hashCopy(skipData_orig);
+      end1 = -1;
+      showSkipData();
+      print("REMINDER: 1st pause press will be saved as exact start of 1st commercial");
+      print("REMINDER: Use 'x' bindkey to jump to close to 1st commercial");
+      monitor = true;
+      // Start timer to monitor playback position
+      startTimer();
+   }
+   
    // Start timer to monitor playback position
    public static void startTimer() {
+      debug.print("");
       timer = new Timer();
       timer.schedule(
          new TimerTask() {
@@ -137,6 +151,7 @@ public class SkipMode {
    // This procedure called constantly in a timer
    // This monitors playback position and skips commercials
    private static void skipPlayCheck(String tivoName, String contentId) {
+      debug.print("tivoName=" + tivoName + " contentId=" + contentId);
       if (monitor && r != null) {
          Boolean skip = true;
          // Call shouldStillMonitor once in a while - this not working
@@ -180,6 +195,7 @@ public class SkipMode {
    
    // Jump to given position in playback
    private static void jumpTo(long position) {
+      debug.print("position=" + position);
       JSONObject json = new JSONObject();
       try {
          json.put("offset", position);
@@ -191,6 +207,7 @@ public class SkipMode {
    
    // Jump to end of 1st show segment
    public static void jumpTo1st() {
+      debug.print("");
       if (r != null && skipData != null && monitor) {
          long pos = skipData.get(0).get("end");
          print("Jumping to: " + toMinSec(pos));
@@ -202,6 +219,7 @@ public class SkipMode {
    // This will also listen for 1st pause press (speed==0) if end1 == -1
    // NOTE: Returns -1 for speed != 100 to avoid any skipping during trick play
    private static long getPosition() {
+      debug.print("");
       if (r==null) return -1;
       JSONObject json = new JSONObject();
       JSONObject reply = r.Command("Position", json);
@@ -244,6 +262,7 @@ public class SkipMode {
    // RPC query to determine if show being monitored is still being played
    // If whatsOn query does not have offerId => show no longer being played on TiVo
    private static void shouldStillMonitor() {
+      debug.print("");
       if (r==null)
          return;
       if (monitor) {
@@ -278,6 +297,7 @@ public class SkipMode {
    
    // Stop monitoring and reset all variables
    public static void disable() {
+      debug.print("");
       print("DISABLED");
       monitor = false;
       if (timer != null)
@@ -297,6 +317,7 @@ public class SkipMode {
    
    // Print current skipData to console
    public static void showSkipData() {
+      debug.print("");
       if (skipData == null) {
          error("showSkipData - no skip data available");
          monitor = false;
@@ -315,6 +336,7 @@ public class SkipMode {
    }
    
    public static String toMinSec(long msecs) {
+      debug.print("msecs=" + msecs);
       int mins = (int)msecs/1000/60;
       int secs = (int)(msecs/1000 - 60*mins);
       return String.format("%02d:%02d", mins, secs);
@@ -324,6 +346,7 @@ public class SkipMode {
    // This will be point to jump to when in a commercial segment
    // Return value of -1 => no change wanted
    private static long getClosest(long pos) {
+      debug.print("pos=" + pos);
       long closest = -1;
       // If current pos is within any start-end range then no skip necessary
       for (Hashtable<String,Long> h : skipData) {
@@ -348,6 +371,7 @@ public class SkipMode {
    // RPC query to get skip data based on given contentId
    // Returns null if none found
    private static Stack<Hashtable<String,Long>> getShowPoints(Remote r, String tivoName, String contentId, String title) {
+      debug.print("r=" + r + " tivoName=" + tivoName + " contentId=" + contentId + " title=" + title);
       Stack<Hashtable<String,Long>> points = null;
       try {
          JSONObject j = new JSONObject();
@@ -372,7 +396,8 @@ public class SkipMode {
    }
    
    // Convert RPC data to skipData hash
-   private static Stack<Hashtable<String,Long>> jsonToShowPoints(JSONObject clipData) {
+   public static Stack<Hashtable<String,Long>> jsonToShowPoints(JSONObject clipData) {
+      debug.print("clipData=" + clipData);
       Stack<Hashtable<String,Long>> points = new Stack<Hashtable<String,Long>>();
       try {
          if (clipData.has("segment")) {
@@ -404,6 +429,7 @@ public class SkipMode {
    // Adjust skipData segment 1 end position and
    // all subsequent segment points relative to it
    private static void adjustPoints(long point) {
+      debug.print("point=" + point);
       //print("Adjusting commercial points");
       end1 = point;
       if (skipData.size() > 0) {
@@ -422,6 +448,7 @@ public class SkipMode {
    // Save commercial points for current entry to ini file
    public static void saveEntry(final String contentId, String offerId, long offset,
          String title, final String tivoName, Stack<Hashtable<String,Long>> data) {
+      debug.print("contentId=" + contentId + " offerId=" + offerId + " offset=" + offset);
       print("Saving SkipMode entry: " + title);
       try {
          String eol = "\r\n";
@@ -449,6 +476,8 @@ public class SkipMode {
    }
    
    public static void saveWithOffset(String tivoName, String contentId, String offerId, String title, long offset) {
+      debug.print("tivoName=" + tivoName + " contentId=" + contentId +
+            " offerId=" + offerId + " title=" + title + " offset=" + offset);
       Remote r2 = new Remote(tivoName);
       if (r2.success) {
          Stack<Hashtable<String,Long>>points = getShowPoints(r2, tivoName, contentId, title);
@@ -466,6 +495,7 @@ public class SkipMode {
    // Returns true if contentId found, false otherwise
    // NOTE: Reading assumes file entries are structured just like they were originally written
    public static Boolean readEntry(String contentId) {
+      debug.print("contentId=" + contentId);
       if (file.isFile(ini)) {
          try {
             BufferedReader ifp = new BufferedReader(new FileReader(ini));
@@ -522,6 +552,7 @@ public class SkipMode {
    
    // Remove any entries matching given contentId from ini file
    public static Boolean removeEntry(final String contentId) {
+      debug.print("contentId=" + contentId);
       if (file.isFile(ini)) {
          try {
             Boolean itemRemoved = false;
@@ -585,6 +616,7 @@ public class SkipMode {
    
    // Change offset for given contentId
    public static Boolean changeEntry(String contentId, String offset, String title) {
+      debug.print("contentId=" + contentId + " offset=" + offset + " title=" + title);
       if (file.isFile(ini)) {
          try {
             Boolean itemChanged = false;
@@ -633,6 +665,7 @@ public class SkipMode {
    
    // Return entries for use by SkipDialog table
    public static JSONArray getEntries() {
+      debug.print("");
       JSONArray entries = new JSONArray();
       if (file.isFile(ini)) {
          try {
@@ -693,6 +726,7 @@ public class SkipMode {
    
    // Remove SkipMode entries that no longer have corresponding NPL entries
    public static void pruneEntries(String tivoName, Stack<Hashtable<String,String>> nplEntries) {
+      debug.print("tivoName=" + tivoName + " nplEntries=" + nplEntries);
       if (nplEntries == null)
          return;
       if (nplEntries.size() == 0)
@@ -725,6 +759,7 @@ public class SkipMode {
    }
    
    public static void autoDetect(final String tivoName, final Hashtable<String,String> entry) {
+      debug.print("tivoName=" + tivoName + " entry=" + entry);
       // Can't process recording or copy protected entries
       if (entry.containsKey("InProgress") || entry.containsKey("CopyProtected"))
          return;
@@ -815,6 +850,7 @@ public class SkipMode {
    }
    
    private static Stack<Hashtable<String,Long>> hashCopy(Stack<Hashtable<String,Long>> orig) {
+      debug.print("orig=" + orig);
       Stack<Hashtable<String,Long>> copy = new Stack<Hashtable<String,Long>>();
       for (Hashtable<String,Long> h : orig) {
          Hashtable<String,Long> h_copy = new Hashtable<String,Long>(h);

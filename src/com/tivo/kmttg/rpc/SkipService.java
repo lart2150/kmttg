@@ -23,6 +23,7 @@ public class SkipService {
    }
    
    public void start() {
+      debug.print("");
       r = new Remote(tivoName);
       if (r.success) {
          print("monitor started for: " + tivoName);
@@ -53,6 +54,7 @@ public class SkipService {
    }
    
    public void stop() {
+      debug.print("");
       if (timer != null) {
          timer.cancel();
          if (r != null)
@@ -65,6 +67,7 @@ public class SkipService {
    }
    
    public Boolean isRunning() {
+      debug.print("");
       return running;
    }
    
@@ -111,6 +114,9 @@ public class SkipService {
                   }
                }
                if (what.has("offerId")) {
+                  String recordingId = null;
+                  if (what.has("recordingId"))
+                     recordingId = what.getString("recordingId");
                   String offerId = what.getString("offerId");
                   debug.print("offerId=" + offerId + " SkipMode.offerId=" + SkipMode.offerId);
                   if (SkipMode.offerId != null && SkipMode.offerId.equals(offerId)) {
@@ -121,7 +127,7 @@ public class SkipService {
                         // Find npl entry matching offerId
                         JSONObject entry = getOffer(offerId);
                         // If we have skip data for this entry then start monitoring it
-                        monitorEntry(entry);
+                        monitorEntry(entry, recordingId);
                      }
                   } else {
                      // Current offerId does not match SkipMode.offerId
@@ -134,7 +140,7 @@ public class SkipService {
                         // Get entry associated with offerId
                         JSONObject entry = getOffer(offerId);
                         // If we have skip data for this entry then start monitoring it
-                        monitorEntry(entry);
+                        monitorEntry(entry, recordingId);
                      }
                   }
                }
@@ -163,10 +169,12 @@ public class SkipService {
       return null;
    }
    
-   private void monitorEntry(JSONObject entry) {
+   private void monitorEntry(JSONObject entry, String recordingId) {
       debug.print("entry=" + entry);
-      if (entry == null)
+      if (entry == null) {
+         monitorEntry(recordingId);
          return;
+      }
       try {
          if (entry.has("contentId")) {
             SkipMode.contentId = entry.getString("contentId");
@@ -174,7 +182,7 @@ public class SkipService {
             SkipMode.title = entry.getString("title");
             if (SkipMode.readEntry(entry.getString("contentId"))) {
                if (SkipMode.timer != null) {
-                  timer.cancel();
+                  SkipMode.timer.cancel();
                }
                if (SkipMode.r == null) {
                   SkipMode.r = new Remote(tivoName);
@@ -190,6 +198,46 @@ public class SkipService {
          }
       } catch (JSONException e) {
          error("monitorEntry - " + e.getMessage());
+      }
+   }
+   
+   // Based on recordingId try and retrieve skip data from tivo.com
+   // and start play in pause mode if found
+   private void monitorEntry(String recordingId) {
+      debug.print("recordingId=" + recordingId);
+      try {
+         JSONObject json = new JSONObject();
+         json.put("recordingId", recordingId);
+         JSONObject result = r.Command("recordingSearch", json);
+         if (result != null && result.has("recording")) {
+            JSONObject recording = result.getJSONArray("recording").getJSONObject(0);
+            if (recording.has("contentId")) {
+               JSONObject j = new JSONObject();
+               j.put("contentId", recording.getString("contentId"));
+               result = r.Command("clipMetadataSearch", j);
+               if (result != null && result.has("clipMetadata")) {
+                  String clipMetadataId = result.getJSONArray("clipMetadata").getJSONObject(0).getString("clipMetadataId");
+                  j.remove("contentId");
+                  j.put("clipMetadataId", clipMetadataId);
+                  result = r.Command("clipMetadataSearch", j);
+                  if (result != null && result.has("clipMetadata")) {
+                     // We have tivo.com data so start monitoring in pause mode
+                     JSONObject clipData = result.getJSONArray("clipMetadata").getJSONObject(0);
+                     SkipMode.offerId = recording.getString("offerId");
+                     SkipMode.contentId = recording.getString("contentId");
+                     String title = "";
+                     if (recording.has("title"))
+                        title = recording.getString("title");
+                     if (recording.has("subtitle"))
+                        title += " - " + recording.getString("title");
+                     SkipMode.title = title;
+                     SkipMode.enablePauseMode(tivoName, SkipMode.jsonToShowPoints(clipData));
+                  }
+               }
+            }
+         }
+      } catch (JSONException e) {
+         error("search - " + e.getMessage());
       }
    }
    
