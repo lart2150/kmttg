@@ -32,26 +32,58 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class SkipMode {
-   static String ini = config.programDir + File.separator + "SkipMode.ini";
-   static Remote r = null;
-   static public Boolean monitor = false;
-   static Timer timer = null;
+   private static String ini = config.programDir + File.separator + "SkipMode.ini";
+   private static Remote r = null;
+   private static Timer timer = null;
+   private static long offset = -1;
+   private static long end1 = -1;
+   private static String offerId = null;
+   private static String contentId = null;
+   private static String title = "";
+   private static int monitor_count = 1;
+   private static int monitor_interval = 6;
+   private static String tivoName = null;
+   private static int run_count = 1;
+   static Boolean monitor = false;
    static Stack<Hashtable<String,Long>> skipData = null;
    static Stack<Hashtable<String,Long>> skipData_orig = null;
-   static long offset = -1;
-   static long end1 = -1;
-   static String offerId = null;
    static String recordingId = null;
-   static String contentId = null;
-   static String title = "";
-   static int monitor_count = 1;
-   static int monitor_interval = 6;
-   static String tivoName = null;
-   static int run_count = 1;
    
    public static Boolean fileExists() {
       debug.print("");
       return file.isFile(ini);
+   }
+   
+   public static Boolean isMonitoring() {
+      return monitor;
+   }
+   
+   public static String offerId() {
+      return offerId;
+   }
+   
+   public static void setMonitor(String tivoName, String offerId, String contentId, String title) {
+      if (SkipMode.tivoName != null && ! SkipMode.tivoName.equals(tivoName)) {
+         disable();
+      }
+      SkipMode.tivoName = tivoName;
+      SkipMode.offerId = offerId;
+      SkipMode.contentId = contentId;
+      SkipMode.title = title;
+      
+      if (r == null) {
+         r = new Remote(tivoName);
+         if (! r.success) {
+            disable();
+            return;
+         }
+      }
+      
+      if (timer == null) {
+         startTimer();
+      }
+      
+      monitor = true;
    }
    
    // Run this in background mode so as not to block GUI
@@ -263,13 +295,13 @@ public class SkipMode {
    // If whatsOn query does not have offerId => show no longer being played on TiVo
    private static void shouldStillMonitor() {
       debug.print("");
-      if (r==null)
+      if (r == null)
          return;
       if (monitor) {
          JSONObject result = r.Command("whatsOnSearch", new JSONObject());
          if (result == null) {
             // RPC session may be corrupted, start a new connection
-            r.disconnect();
+            if (r != null) r.disconnect();
             print("Attempting to re-connect.");
             r = new Remote(tivoName);
             if (! r.success) {

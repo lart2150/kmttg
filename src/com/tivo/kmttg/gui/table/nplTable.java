@@ -652,7 +652,7 @@ public class nplTable extends TableMap {
       } else if (keyCode == KeyCode.T) {
          TableUtil.toggleTreeState(NowPlaying);
       } else if (keyCode == KeyCode.X) {
-         if (SkipMode.monitor) {
+         if (SkipMode.isMonitoring()) {
             log.print("Requested skip to 1st commercial point...");
             SkipMode.jumpTo1st();
          }
@@ -673,9 +673,9 @@ public class nplTable extends TableMap {
             jobMonitor.submitNewJob(job);
          }
       } else if (keyCode == KeyCode.Z) {
-         if (SkipMode.monitor) {
+         if (SkipMode.isMonitoring()) {
             log.print("Scheduling SkipMode disable");
-            SkipMode.monitor = false;
+            SkipMode.disable();
             return;
          }
          if (config.rpcEnabled(tivoName)) {

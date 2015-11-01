@@ -118,9 +118,9 @@ public class SkipService {
                   if (what.has("recordingId"))
                      recordingId = what.getString("recordingId");
                   String offerId = what.getString("offerId");
-                  debug.print("offerId=" + offerId + " SkipMode.offerId=" + SkipMode.offerId);
-                  if (SkipMode.offerId != null && SkipMode.offerId.equals(offerId)) {
-                     if (SkipMode.monitor) {
+                  debug.print("offerId=" + offerId + " SkipMode.offerId()=" + SkipMode.offerId());
+                  if (SkipMode.offerId() != null && SkipMode.offerId().equals(offerId)) {
+                     if (SkipMode.isMonitoring()) {
                         // If SkipMode already monitoring this offerId then nothing to do
                         return;
                      } else {
@@ -132,7 +132,7 @@ public class SkipService {
                   } else {
                      // Current offerId does not match SkipMode.offerId
                      // Disable monitoring of current SkipMode.offerId
-                     if (SkipMode.monitor) {
+                     if (SkipMode.isMonitoring()) {
                         debug.print("SkipService calling SkipMode.disable");
                         SkipMode.disable();
                      }
@@ -177,22 +177,9 @@ public class SkipService {
       }
       try {
          if (entry.has("contentId")) {
-            SkipMode.contentId = entry.getString("contentId");
-            SkipMode.offerId = entry.getString("offerId");
-            SkipMode.title = entry.getString("title");
+            SkipMode.setMonitor(tivoName, entry.getString("offerId"), entry.getString("contentId"), entry.getString("title"));
             if (SkipMode.readEntry(entry.getString("contentId"))) {
-               if (SkipMode.timer != null) {
-                  SkipMode.timer.cancel();
-               }
-               if (SkipMode.r == null) {
-                  SkipMode.r = new Remote(tivoName);
-                  if (! r.success) {
-                     return;
-                  }
-               }
-               SkipMode.startTimer();
-               SkipMode.monitor = true;
-               print("Entering SkipMode for: " + SkipMode.title);
+               print("Entering SkipMode for: " + entry.getString("title"));
                SkipMode.showSkipData();
             }
          }
@@ -223,14 +210,14 @@ public class SkipService {
                   if (result != null && result.has("clipMetadata")) {
                      // We have tivo.com data so start monitoring in pause mode
                      JSONObject clipData = result.getJSONArray("clipMetadata").getJSONObject(0);
-                     SkipMode.offerId = recording.getString("offerId");
-                     SkipMode.contentId = recording.getString("contentId");
                      String title = "";
                      if (recording.has("title"))
                         title = recording.getString("title");
                      if (recording.has("subtitle"))
                         title += " - " + recording.getString("title");
-                     SkipMode.title = title;
+                     SkipMode.setMonitor(
+                        tivoName, recording.getString("offerId"), recording.getString("contentId"), title
+                     );
                      SkipMode.enablePauseMode(tivoName, SkipMode.jsonToShowPoints(clipData));
                   }
                }
