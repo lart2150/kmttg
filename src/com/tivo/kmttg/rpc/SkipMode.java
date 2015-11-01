@@ -491,10 +491,37 @@ public class SkipMode {
       }      
    }
    
+   public static Boolean hasEntry(String contentId) {
+      debug.print("contentId=" + contentId);
+      if (file.isFile(ini)) {
+         try {
+            BufferedReader ifp = new BufferedReader(new FileReader(ini));
+            String line = null;
+            while (( line = ifp.readLine()) != null) {
+               if (line.contains("<entry>")) {
+                  line = ifp.readLine();
+                  if (line.startsWith("contentId")) {
+                     String[] l = line.split("=");
+                     if (l[1].equals(contentId)) {
+                        ifp.close();
+                        return true;
+                     }
+                  }
+               }
+            }
+            ifp.close();
+         } catch (Exception e) {
+            error("readEntry - " + e.getMessage());
+            log.error(Arrays.toString(e.getStackTrace()));
+         }
+      }
+      return false;
+   }
+   
    // Obtain commercial points for given contentId if it exists
    // Returns true if contentId found, false otherwise
    // NOTE: Reading assumes file entries are structured just like they were originally written
-   public static Boolean readEntry(String contentId) {
+   static Boolean readEntry(String contentId) {
       debug.print("contentId=" + contentId);
       if (file.isFile(ini)) {
          try {
