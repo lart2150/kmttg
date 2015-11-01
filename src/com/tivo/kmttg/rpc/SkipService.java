@@ -62,6 +62,7 @@ public class SkipService {
          print("monitor stopped");
          running = false;
       }
+      SkipMode.monitor = false;
       if (config.GUIMODE && config.gui.skipServiceMenuItem.isSelected())
          config.gui.skipServiceMenuItem.setSelected(false);
    }
@@ -113,7 +114,8 @@ public class SkipService {
                      }
                   }
                }
-               if (what.has("offerId")) {
+               if (what.has("playbackType") && what.getString("playbackType").equals("recording") && what.has("offerId")) {
+                  // Recording playing, so see if it can be monitored
                   String recordingId = null;
                   if (what.has("recordingId"))
                      recordingId = what.getString("recordingId");
@@ -192,6 +194,8 @@ public class SkipService {
    // and start play in pause mode if found
    private void monitorEntry(String recordingId) {
       debug.print("recordingId=" + recordingId);
+      if (recordingId == null)
+         return;
       try {
          JSONObject json = new JSONObject();
          json.put("recordingId", recordingId);
