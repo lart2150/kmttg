@@ -22,7 +22,7 @@ import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.log;
 
 public class skipTable {
-   private String[] TITLE_cols = {"SHOW", "CONTENTID", "AD1_ORIG", "OFFSET", "AD1_ADJ"};
+   private String[] TITLE_cols = {"SHOW", "TIVO", "CONTENTID", "AD1_ORIG", "OFFSET", "AD1_ADJ"};
    public TableView<Tabentry> TABLE = null;
    
    class offsetComparator implements Comparator<String> {
@@ -103,6 +103,7 @@ public class skipTable {
    public class Tabentry {
       public sortableString show = new sortableString();
       public String contentId = "";
+      public String tivo = "";
       public String ad1_orig = "";
       public String offset = "";
       public String ad1_adj = "";
@@ -112,6 +113,7 @@ public class skipTable {
             show.json = json;
             show.display = json.getString("title");
             contentId = json.getString("contentId");
+            tivo = json.getString("tivoName");
             offset = json.getString("offset");
             String ad1 = json.getString("ad1");
             ad1_orig = adStart(ad1);
@@ -127,6 +129,10 @@ public class skipTable {
       
       public String getCONTENTID() {
          return contentId;
+      }
+      
+      public String getTIVO() {
+         return tivo;
       }
 
       public String getOFFSET() {
@@ -216,7 +222,7 @@ public class skipTable {
    private void TABLERowSelected(Tabentry entry) {
       try {
          JSONObject json = entry.getSHOW().json;
-         log.print("\nSkipMode data for '" + json.getString("title"));
+         log.print("\nSkipMode data for '" + json.getString("title") + "'");
          JSONArray cuts = json.getJSONArray("cuts");
          int index = 0;
          long offset = Long.parseLong(json.getString("offset"));
