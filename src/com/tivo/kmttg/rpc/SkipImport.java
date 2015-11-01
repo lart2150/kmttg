@@ -77,7 +77,7 @@ public class SkipImport {
          
          if (cuts != null) {
             // If contentId entry already in table then remove it
-            if (SkipMode.readEntry(entry.get("contentId")))
+            if (SkipMode.hasEntry(entry.get("contentId")))
                SkipMode.removeEntry(entry.get("contentId"));
             
             // Save entry to skipMode table with offset=0
