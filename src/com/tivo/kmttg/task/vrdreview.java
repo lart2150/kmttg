@@ -212,7 +212,7 @@ public class vrdreview extends baseTask implements Serializable {
                // Skip table entry creation
                Stack<Hashtable<String,Long>> cuts = SkipImport.vrdImport(job.vprjFile, job.duration, false);
                if (cuts != null && cuts.size() > 0) {
-                  if (SkipMode.readEntry(job.contentId))
+                  if (SkipMode.hasEntry(job.contentId))
                      SkipMode.removeEntry(job.contentId);
                   SkipMode.saveEntry(job.contentId, job.offerId, 0L, job.title, job.tivoName, cuts);
                }
