@@ -220,8 +220,6 @@ public class SkipMode {
                jumpTo(jumpto);
             }
          }
-      } else {
-         disable();
       }
    }
    
