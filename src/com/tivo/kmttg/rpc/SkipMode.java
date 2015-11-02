@@ -79,10 +79,7 @@ public class SkipMode {
          }
       }
       
-      if (timer == null) {
-         startTimer();
-      }
-      
+      startTimer();      
       monitor = true;
    }
    
@@ -167,6 +164,8 @@ public class SkipMode {
    // Start timer to monitor playback position
    public static synchronized void startTimer() {
       debug.print("");
+      if (timer != null)
+         timer.cancel();
       timer = new Timer();
       timer.schedule(
          new TimerTask() {
@@ -340,7 +339,6 @@ public class SkipMode {
       offerId = null;
       recordingId = null;
       contentId = null;
-      timer = null;
       monitor_count = 1;
       title = "";
    }
