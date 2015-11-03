@@ -222,7 +222,7 @@ public class SkipService {
                      SkipMode.setMonitor(
                         tivoName, recording.getString("offerId"), recording.getString("contentId"), title
                      );
-                     SkipMode.enablePauseMode(tivoName, SkipMode.jsonToShowPoints(clipData));
+                     SkipMode.enableMonitor(tivoName, SkipMode.jsonToShowPoints(clipData), -1L);
                   }
                }
             }
