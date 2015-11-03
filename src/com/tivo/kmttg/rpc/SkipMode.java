@@ -116,6 +116,7 @@ public class SkipMode {
                } else {
                   print("Attempting to obtain skip data for: " + nplData.get("title"));
                   skipData = getShowPoints(r, tivoName, SkipMode.contentId, SkipMode.title);
+                  end1 = -1;
                }
                if (skipData != null) {
                   // Start playback
@@ -129,7 +130,7 @@ public class SkipMode {
                      monitor = false;
                      return null;
                   }
-                  enablePauseMode(tivoName, skipData);
+                  enableMonitor(tivoName, skipData, end1);
                } else {
                   disable();
                }
@@ -140,9 +141,11 @@ public class SkipMode {
       new Thread(task).start();
    }
    
-   public static synchronized void enablePauseMode(String tivoName, Stack<Hashtable<String,Long>> points) {
+   // end1 = -1 => pause mode, else normal skip mode without pause
+   public static synchronized void enableMonitor(String tivoName, Stack<Hashtable<String,Long>> points, Long end1) {
       debug.print("tivoName=" + tivoName + " points=" + points);
       SkipMode.tivoName = tivoName;
+      SkipMode.end1 = end1;
       if (r == null) {
          r = new Remote(tivoName);
          if (! r.success) {
@@ -152,10 +155,11 @@ public class SkipMode {
       }
       skipData_orig = points;
       skipData = hashCopy(skipData_orig);
-      end1 = -1;
       showSkipData();
-      print("REMINDER: 1st pause press will be saved as exact start of 1st commercial");
-      print("REMINDER: Use 'x' bindkey to jump to close to 1st commercial");
+      if (end1 == -1) {
+         print("REMINDER: 1st pause press will be saved as exact start of 1st commercial");
+         print("REMINDER: Use 'x' bindkey to jump to close to 1st commercial");
+      }
       monitor = true;
       // Start timer to monitor playback position
       startTimer();
@@ -320,6 +324,7 @@ public class SkipMode {
             }
          }
       } else {
+         print("DISABLED");
          disable();
       }
    }
