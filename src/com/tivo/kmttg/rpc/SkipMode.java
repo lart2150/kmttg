@@ -281,6 +281,10 @@ public class SkipMode {
                   showSkipData();
                   saveEntry(contentId, offerId, offset, title, tivoName, skipData_orig);
                }
+               if (speed == 20 && reply.getLong("position") < end1) {
+                  // slow speed before 1st commercial mark => reset to original skip points
+                  resetPoints();
+               }
                if (speed != 100)
                   return -1;
             }
@@ -476,6 +480,17 @@ public class SkipMode {
             }
          }
       }
+   }
+   
+   // Reset to original skip data to undo mistaken pause mark
+   private static synchronized void resetPoints() {
+      debug.print("");
+      log.warn("Removing marked pause point for 1st commercial");
+      end1 = -1;
+      offset = -1;
+      skipData = hashCopy(skipData_orig);
+      if (hasEntry(contentId))
+         removeEntry(contentId);
    }
    
    // Save commercial points for current entry to ini file
