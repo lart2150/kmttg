@@ -187,7 +187,7 @@ public class tivoTab {
          }
          
          // Prune button
-         if ( ! tivoName.equalsIgnoreCase("FILES") && config.rpcEnabled(tivoName) && SkipMode.fileExists()) {
+         if ( ! tivoName.equalsIgnoreCase("FILES") && config.rpcEnabled(tivoName) && SkipMode.skipEnabled()) {
             Button prune = new Button("Prune skipTable");
             prune.setTooltip(config.gui.getToolTip("prune_skipTable"));
             prune.setOnAction(new EventHandler<ActionEvent>() {
@@ -199,7 +199,7 @@ public class tivoTab {
          }
          
          // Import skip button
-         if ( ! tivoName.equalsIgnoreCase("FILES") && config.rpcEnabled(tivoName) && SkipMode.fileExists()) {
+         if ( ! tivoName.equalsIgnoreCase("FILES") && config.rpcEnabled(tivoName) && SkipMode.skipEnabled()) {
             Button import_skip = new Button("Import skip");
             import_skip.setTooltip(config.gui.getToolTip("import_skip"));
             import_skip.setOnAction(new EventHandler<ActionEvent>() {

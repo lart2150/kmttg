@@ -657,35 +657,39 @@ public class nplTable extends TableMap {
             SkipMode.jumpTo1st();
          }
       } else if (keyCode == KeyCode.C) {
-         int[] selected = GetSelectedRows();
-         if (selected == null || selected.length < 1)
-            return;
-         for (int row : selected) {
-            sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
-            log.print("Requested skip mode 1st commercial detect...");
-            jobData job = new jobData();
-            job.source   = s.data.get("url_TiVoVideoDetails");
-            job.type     = "skipdetect";
-            job.name     = "java";
-            job.tivoName = tivoName;
-            job.entry    = s.data;
-            job.title    = s.data.get("title");
-            jobMonitor.submitNewJob(job);
-         }
-      } else if (keyCode == KeyCode.Z) {
-         if (SkipMode.isMonitoring()) {
-            log.print("Scheduling SkipMode disable");
-            SkipMode.disable();
-            return;
-         }
-         if (config.rpcEnabled(tivoName)) {
+         if (SkipMode.skipEnabled()) {
             int[] selected = GetSelectedRows();
             if (selected == null || selected.length < 1)
                return;
-            int row = selected[0];
-            sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
-            log.print("Starting SkipMode");
-            SkipMode.skipPlay(tivoName, s.data);
+            for (int row : selected) {
+               sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+               log.print("Requested skip mode 1st commercial detect...");
+               jobData job = new jobData();
+               job.source   = s.data.get("url_TiVoVideoDetails");
+               job.type     = "skipdetect";
+               job.name     = "java";
+               job.tivoName = tivoName;
+               job.entry    = s.data;
+               job.title    = s.data.get("title");
+               jobMonitor.submitNewJob(job);
+            }
+         }
+      } else if (keyCode == KeyCode.Z) {
+         if (SkipMode.skipEnabled()) {
+            if (SkipMode.isMonitoring()) {
+               log.print("Scheduling SkipMode disable");
+               SkipMode.disable();
+               return;
+            }
+            if (config.rpcEnabled(tivoName)) {
+               int[] selected = GetSelectedRows();
+               if (selected == null || selected.length < 1)
+                  return;
+               int row = selected[0];
+               sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+               log.print("Starting SkipMode");
+               SkipMode.skipPlay(tivoName, s.data);
+            }
          }
       }
    }
@@ -858,7 +862,7 @@ public class nplTable extends TableMap {
       if (h == null) return;
       
       // Update skipEntries
-      if (SkipMode.fileExists()) {
+      if (SkipMode.skipEnabled()) {
          skipEntries = SkipMode.getEntries();
       }
       
@@ -1449,7 +1453,7 @@ public class nplTable extends TableMap {
    // Identify NPL table items associated with queued/running jobs
    public void updateSkipStatus(String contentId) {
       UpdatingNPL = true;
-      if (SkipMode.fileExists()) {
+      if (SkipMode.skipEnabled()) {
          skipEntries = SkipMode.getEntries();
       }
       for (int row=0; row<NowPlaying.getExpandedItemCount(); row++) {

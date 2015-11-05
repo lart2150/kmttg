@@ -650,7 +650,7 @@ public class gui extends Application {
          fileMenu.getItems().add(getResumeDownloadsMenuItem());
          fileMenu.getItems().add(getJobMenu());
          fileMenu.getItems().add(getSearchMenuItem());
-         if (config.rpcEnabled() && SkipMode.fileExists()) {
+         if (config.rpcEnabled() && SkipMode.skipEnabled()) {
             fileMenu.getItems().add(getSkipModeMenuItem());
             fileMenu.getItems().add(getSkipServiceMenuItem());
          }

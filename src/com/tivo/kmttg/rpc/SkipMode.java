@@ -49,7 +49,7 @@ public class SkipMode {
    static Stack<Hashtable<String,Long>> skipData_orig = null;
    static String recordingId = null;
    
-   public static synchronized Boolean fileExists() {
+   public static synchronized Boolean skipEnabled() {
       debug.print("");
       return file.isFile(ini);
    }

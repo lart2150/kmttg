@@ -411,7 +411,7 @@ public class configAuto {
       content.getChildren().add(noJobWait);
       
       // skipMark
-      if (SkipMode.fileExists())
+      if (SkipMode.skipEnabled())
          content.getChildren().add(skipMark);
             
       // OK & CANCEL
