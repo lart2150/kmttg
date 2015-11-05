@@ -237,6 +237,8 @@ public class comskip extends baseTask implements Serializable {
                long closest = getClosestStart(job.edlFile, job.SkipPoint);
                if (closest != -1)
                   SkipMode.saveWithOffset(job.tivoName, job.contentId, job.offerId, job.title, closest);
+               else
+                  log.warn(job.title + ": Sorry, commercial point not found using automatic method - use z and pause method instead");
             }
             if (job.SkipPoint != null) {
                String prefix = string.replaceSuffix(string.basename(job.mpegFile), "");
