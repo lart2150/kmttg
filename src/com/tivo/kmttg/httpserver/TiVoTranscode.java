@@ -18,6 +18,8 @@ public class TiVoTranscode extends Transcode {
    
    public TiVoTranscode(String inputUrl, String name, String tivo) {
       super(inputUrl);
+      if (!inputUrl.contains("x-tivo-mpeg-ts"))
+         inputUrl += "&Format=video/x-tivo-mpeg-ts";
       this.inputUrl = inputUrl;
       this.name = name;
       this.tivo = tivo;
@@ -49,12 +51,14 @@ public class TiVoTranscode extends Transcode {
       log.print(">> Transcoding TiVo download to HLS " + inputUrl + " ...");
       
       java.lang.Runtime rt = java.lang.Runtime.getRuntime();
-      String[] tivodecode = {
-         config.tivodecode,
+      String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+      String[] tivolibre = {
+         javaBin,
+         "-cp",
+         config.programDir + File.separator + "kmttg.jar",
+         "net.straylightlabs.tivolibre.DecoderApp",
          "--mak",
          config.MAK,
-         "--no-verify",
-         "-"
       };
       String[] ffmpeg = new String[command.size()];
       int i=0;
@@ -63,11 +67,11 @@ public class TiVoTranscode extends Transcode {
       try {         
          log.print(
             inputUrl + " | " +
-            TranscodeTemplates.printArray(tivodecode) + " | " +
+            TranscodeTemplates.printArray(tivolibre) + " | " +
             TranscodeTemplates.printArray(ffmpeg)
          );
          
-         p1 = rt.exec(tivodecode);
+         p1 = rt.exec(tivolibre);
          p2 = rt.exec(ffmpeg);
          
          Piper pipe = new Piper(
