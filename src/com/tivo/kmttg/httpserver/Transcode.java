@@ -7,16 +7,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Hashtable;
 import java.util.Stack;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.kmttg;
 import com.tivo.kmttg.util.backgroundProcess;
-import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.mediainfo;
 import com.tivo.kmttg.util.string;
 
 public class Transcode {
@@ -83,11 +80,15 @@ public class Transcode {
          // Need 2 piped processes
          log.print(">> Transcoding TiVo file to webm " + inputFile + " ...");
          java.lang.Runtime rt = java.lang.Runtime.getRuntime();
-         String[] tivodecode = {
-            config.tivodecode,
+         String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+         String[] tivolibre = {
+            javaBin,
+            "-cp",
+            config.programDir + File.separator + "kmttg.jar",
+            "net.straylightlabs.tivolibre.DecoderApp",
             "--mak",
             config.MAK,
-            "--no-verify",
+            "--input",
             inputFile
          };
          String[] ffmpeg = new String[command.size()];
@@ -95,10 +96,10 @@ public class Transcode {
          for (String s : command)
             ffmpeg[i++] = s;
          try {
-            p1 = rt.exec(tivodecode);
+            p1 = rt.exec(tivolibre);
             p2 = rt.exec(ffmpeg);
             log.print(
-               TranscodeTemplates.printArray(tivodecode) + " | " +
+               TranscodeTemplates.printArray(tivolibre) + " | " +
                TranscodeTemplates.printArray(ffmpeg)
             );
             RunnableInputDrainer des = new RunnableInputDrainer(p2.getErrorStream());
@@ -153,28 +154,18 @@ public class Transcode {
       command.add(segments);
 
       if (isTivoFile) {
-         // Only PS container works with tivodecode, so check container
-         if (file.isFile(config.mediainfo)) {
-            Hashtable<String,String> info = mediainfo.getVideoInfo(inputFile);
-            if (info != null && ! info.get("container").equals("mpeg")) {
-               error("Attempt to transcode non PS .TiVo file aborted: " + inputFile);
-               return null;
-            }
-         } else if (file.isFile(config.ffmpeg)) {
-            Hashtable<String,String> info = ffmpeg.getVideoInfo(inputFile);
-            if (info != null && ! info.get("container").equals("mpeg")) {
-               error("Attempt to transcode non PS .TiVo file aborted: " + inputFile);
-               return null;
-            }            
-         }
          // Need 2 piped processes
          log.print(">> Transcoding TiVo file to HLS " + inputFile + " ...");
          java.lang.Runtime rt = java.lang.Runtime.getRuntime();
-         String[] tivodecode = {
-            config.tivodecode,
+         String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+         String[] tivolibre = {
+            javaBin,
+            "-cp",
+            config.programDir + File.separator + "kmttg.jar",
+            "net.straylightlabs.tivolibre.DecoderApp",
             "--mak",
             config.MAK,
-            "--no-verify",
+            "--input",
             inputFile
          };
          String[] ffmpeg = new String[command.size()];
@@ -182,10 +173,10 @@ public class Transcode {
          for (String s : command)
             ffmpeg[i++] = s;
          try {
-            p1 = rt.exec(tivodecode);
+            p1 = rt.exec(tivolibre);
             p2 = rt.exec(ffmpeg);
             log.print(
-               TranscodeTemplates.printArray(tivodecode) + " | " +
+               TranscodeTemplates.printArray(tivolibre) + " | " +
                TranscodeTemplates.printArray(ffmpeg)
             );
             RunnableInputDrainer des = new RunnableInputDrainer(p2.getErrorStream());
