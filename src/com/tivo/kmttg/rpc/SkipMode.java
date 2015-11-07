@@ -252,7 +252,7 @@ public class SkipMode {
    // NOTE: Returns -1 for speed != 100 to avoid any skipping during trick play
    private static synchronized long getPosition() {
       debug.print("");
-      if (r==null) return -1;
+      if (r==null || ! monitor) return -1;
       JSONObject json = new JSONObject();
       JSONObject reply = r.Command("Position", json);
       if (reply == null) {
