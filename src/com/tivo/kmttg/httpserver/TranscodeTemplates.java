@@ -21,7 +21,7 @@ public class TranscodeTemplates {
    }
    
    public static String webm() {
-      return "-threads 0 -y -vcodec libvpx -crf 19 -b 1M -sn -acodec libvorbis -ac 2 -ab 217k -f webm";
+      return "-threads 0 -y -vcodec libvpx -deadline realtime -b 1M -sn -acodec libvorbis -ac 2 -ab 217k -f webm";
    }
    
    public static String printArray(String[] arr) {
