@@ -268,10 +268,10 @@ public class SkipMode {
       }
       if (reply != null && reply.has("position")) {
          try {
-            if (reply.getString("position").equals(reply.getString("end"))) {
-               disable();
-               return -1;
-            }
+            //if (reply.getString("position").equals(reply.getString("end"))) {
+            //   disable();
+            //   return -1;
+            //}
             if (reply.has("speed")) {
                int speed = reply.getInt("speed");
                if (end1 == -1 && speed == 0) {
