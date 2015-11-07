@@ -91,17 +91,17 @@ public class SkipMode {
          @Override public Void call() {
             if (! nplData.containsKey("contentId")) {
                error("Missing contentId");
-               monitor = false;
+               disable();
                return null;
             }
             if (! nplData.containsKey("offerId")) {
                error("Missing offerId");
-               monitor = false;
+               disable();
                return null;
             }
             if (! nplData.containsKey("recordingId")) {
                error("Missing recordingId");
-               monitor = false;
+               disable();
                return null;
             }
             if (nplData.containsKey("title"))
@@ -127,7 +127,7 @@ public class SkipMode {
                      r.Command("Playback", json);
                   } catch (Exception e) {
                      error("skipPlay - " + e.getMessage());
-                     monitor = false;
+                     disable();
                      return null;
                   }
                   enableMonitor(tivoName, skipData, end1);
@@ -189,7 +189,6 @@ public class SkipMode {
       debug.print("tivoName=" + tivoName + " contentId=" + contentId);
       if (monitor && r != null) {
          Boolean skip = true;
-         // Call shouldStillMonitor once in a while - this not working
          monitor_count++;
          if (monitor_count > monitor_interval) {
             monitor_count = 1;
@@ -270,7 +269,7 @@ public class SkipMode {
       if (reply != null && reply.has("position")) {
          try {
             if (reply.getString("position").equals(reply.getString("end"))) {
-               monitor = false;
+               disable();
                return -1;
             }
             if (reply.has("speed")) {
@@ -328,7 +327,6 @@ public class SkipMode {
             }
          }
       } else {
-         print("DISABLED");
          disable();
       }
    }
@@ -357,7 +355,7 @@ public class SkipMode {
       debug.print("");
       if (skipData == null) {
          error("showSkipData - no skip data available");
-         monitor = false;
+         disable();
          return;
       }
          
