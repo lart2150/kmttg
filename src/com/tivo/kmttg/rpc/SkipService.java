@@ -79,7 +79,7 @@ public class SkipService {
       if (! running)
          return;
       JSONObject result = r.Command("whatsOnSearch", new JSONObject());
-      if (result == null && running) {
+      if (result == null) {
          // RPC session may be corrupted, start a new connection
          r.disconnect();
          print("Attempting to re-connect to " + tivoName);
