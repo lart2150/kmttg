@@ -26,6 +26,7 @@ public class PopupHandler {
    
    public static void display(TableView<?> TABLE, MouseEvent e) {
       TABLE_view = TABLE;
+      TABLE_treeview = null;
       popup = display(e);
       if (popup != null)
          popup.show(TABLE, e.getScreenX(), e.getScreenY());      
@@ -33,6 +34,7 @@ public class PopupHandler {
    
    public static void display(final TreeTableView<?> TABLE, MouseEvent e) {
       TABLE_treeview = TABLE;
+      TABLE_view = null;
       popup = display(e);
       if (popup != null)
          popup.show(TABLE, e.getScreenX(), e.getScreenY());      
