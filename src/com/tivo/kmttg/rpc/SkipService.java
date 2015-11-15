@@ -22,7 +22,7 @@ public class SkipService {
       this.tivoName = tivoName;
    }
    
-   public void start() {
+   public synchronized void start() {
       debug.print("");
       r = new Remote(tivoName);
       if (r.success) {
@@ -34,7 +34,7 @@ public class SkipService {
          return;
       }
       
-      // Start timer to monitor playback position
+      // Start timer to monitor shows being played
       stop();
       timer = new Timer();
       timer.schedule(
@@ -53,7 +53,7 @@ public class SkipService {
          config.gui.skipServiceMenuItem_cb = true;
    }
    
-   public void stop() {
+   public synchronized void stop() {
       debug.print("");
       if (timer != null) {
          timer.cancel();
@@ -67,12 +67,12 @@ public class SkipService {
          config.gui.skipServiceMenuItem.setSelected(false);
    }
    
-   public Boolean isRunning() {
+   public synchronized Boolean isRunning() {
       debug.print("");
       return running;
    }
    
-   private void monitor() {
+   private synchronized void monitor() {
       debug.print("");
       if (r==null)
          return;
@@ -154,7 +154,7 @@ public class SkipService {
    }
    
    // Look for given offerId in SkipMode ini file
-   private JSONObject getOffer(String offerId) {
+   private synchronized JSONObject getOffer(String offerId) {
       debug.print("offerId=" + offerId);
       try {
          JSONArray entries = SkipMode.getEntries();
@@ -171,8 +171,8 @@ public class SkipService {
       return null;
    }
    
-   private void monitorEntry(JSONObject entry, String recordingId) {
-      debug.print("entry=" + entry);
+   private synchronized void monitorEntry(JSONObject entry, String recordingId) {
+      debug.print("entry=" + entry + " recordingId=" + recordingId);
       if (entry == null) {
          monitorEntry(recordingId);
          return;
@@ -192,7 +192,7 @@ public class SkipService {
    
    // Based on recordingId try and retrieve skip data from tivo.com
    // and start play in pause mode if found
-   private void monitorEntry(String recordingId) {
+   private synchronized void monitorEntry(String recordingId) {
       debug.print("recordingId=" + recordingId);
       if (recordingId == null)
          return;
@@ -232,11 +232,11 @@ public class SkipService {
       }
    }
    
-   private void print(String message) {
+   private synchronized void print(String message) {
       log.print("SkipService: " + message);
    }
    
-   private void error(String message) {
+   private synchronized void error(String message) {
       log.error("SkipService: " + message);
    }
 
