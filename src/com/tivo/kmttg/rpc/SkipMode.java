@@ -634,6 +634,7 @@ public class SkipMode {
             String line = null;
             Boolean include = true;
             String tivoName = null;
+            String title = null;
             while (( line = ifp.readLine()) != null) {
                if (line.contains("<entry>")) {
                   include = true;
@@ -645,6 +646,7 @@ public class SkipMode {
                      ifp.readLine(); // offerId
                      ifp.readLine(); // offset
                      tivoName = ifp.readLine().split("=")[1];
+                     title = ifp.readLine().split("=")[1];
                   }
                   if (include) {
                      lines.push(line);
@@ -663,7 +665,7 @@ public class SkipMode {
             }
             ofp.close();
             if (itemRemoved) {
-               print("Removed entry: " + contentId);
+               print("Removed entry for " + tivoName + ": " + title);
                if (tivoName != null && config.GUIMODE) {
                   // Remove asterisk from associated table
                   final String final_tivoName = tivoName;
