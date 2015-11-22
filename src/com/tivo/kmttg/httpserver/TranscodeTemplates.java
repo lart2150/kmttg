@@ -20,8 +20,10 @@ public class TranscodeTemplates {
       return args;
    }
    
-   public static String webm() {
-      return "-threads 0 -y -vcodec libvpx -deadline realtime -b 1M -sn -acodec libvorbis -ac 2 -ab 217k -f webm";
+   public static String webm(String maxrate) {
+      String args = "-threads 0 -y -vcodec libvpx -deadline realtime -b " + maxrate;
+      args += " -sn -acodec libvorbis -ac 2 -ab 217k -f webm";
+      return args;
    }
    
    public static String printArray(String[] arr) {
