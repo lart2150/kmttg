@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -53,6 +55,42 @@ public class Hlsutils {
             line = line.replace(",", "");
             total += Float.parseFloat(line);
          }
+      }
+      return total;
+   }
+   
+   // For webm ffmpeg run try and get latest processed time
+   // Sample line: frame= 1948 fps= 90 q=0.0 size=    9598kB time=00:01:04.99 bitrate=1209.6kbits/s
+   public static float totalTime_webm(Transcode tc) {
+      float total = 0;
+      String line = null;
+      if (tc.process == null) {
+         line = tc.lastStderr;
+      } else {
+         line = tc.process.getStderrLast();
+      }
+      if (line != null && line.contains("time=")) {
+         String[] l = line.split("time=");
+         String[] ll = l[l.length-1].split("\\s+");
+         try {
+            if (ll[0].contains(":")) {
+               // "HH:MM:SS.MS" format
+               Pattern p = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");
+               Matcher m = p.matcher(ll[0]);
+               if (m.matches()) {
+                  long HH = Long.parseLong(m.group(1));
+                  long MM = Long.parseLong(m.group(2));
+                  long SS = Long.parseLong(m.group(3));
+                  long MS = Long.parseLong(m.group(4));
+                  float ms = (MS + 1000*(SS+60*MM+60*60*HH))/(float)1000.0;
+                  return ms;
+               }
+
+            } else {
+               return Float.parseFloat(ll[0]);
+            }
+         }
+         catch (NumberFormatException n) {}
       }
       return total;
    }

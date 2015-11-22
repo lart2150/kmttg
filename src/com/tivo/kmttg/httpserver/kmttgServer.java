@@ -544,8 +544,6 @@ public class kmttgServer extends HTTPServer {
       // File transcode
       Transcode tc = null;
       String returnFile = null;
-      SocketProcessInputStream ss = null;
-      long length = 0;
       if (params.containsKey("file") && params.containsKey("format")) {
          String fileName = string.urlDecode(params.get("file"));
          if ( ! file.isFile(fileName) ) {
@@ -554,20 +552,17 @@ public class kmttgServer extends HTTPServer {
          }
          tc = alreadyRunning(fileName);
          if (tc != null) {
-            if (tc.ss != null)
-               ss = tc.ss;
             if (tc.returnFile != null)
                returnFile = tc.returnFile;
          } else {
             String format = string.urlDecode(params.get("format"));
-            length = new File(fileName).length();
             tc = new Transcode(fileName);
             if (maxrate != null)
                tc.maxrate = maxrate;
             tc.duration = -1; // Setting to -1 to deal with it a little later
             addTranscode(tc);
             if (format.equals("webm"))
-               ss = tc.webm();
+               returnFile = tc.webm();
             else if (format.equals("hls"))
                returnFile = tc.hls();
             else {
@@ -576,7 +571,6 @@ public class kmttgServer extends HTTPServer {
             }
             if (tc.getErrors().length() > 0) {
                resp.sendError(500, tc.getErrors());
-               ss.close();
                return;
             }
          }
@@ -605,7 +599,9 @@ public class kmttgServer extends HTTPServer {
                tc.duration = Integer.parseInt(params.get("duration"));
             }
             addTranscode(tc);
-            if (format.equals("hls"))
+            if (format.equals("webm"))
+               returnFile = tc.webm();
+            else if (format.equals("hls"))
                returnFile = tc.hls();
             else {
                resp.sendError(500, "Unsupported transcode format: " + format);
@@ -618,7 +614,7 @@ public class kmttgServer extends HTTPServer {
          }
       }
       
-      if (ss != null || returnFile != null) {
+      if (returnFile != null) {
          // Transcode stream has been started, so send it out
          String fileName = null;
          if (params.containsKey("file"))
@@ -631,18 +627,6 @@ public class kmttgServer extends HTTPServer {
             if (params.containsKey("download"))
                download = true;
             
-            if (ss != null) {
-               if (download) {
-                  // download mode => simple response to client
-                  if (alreadyRunning(fileName) != null)
-                     resp.send(200, "already running: " + name);
-                  else
-                     resp.send(200, "transcode started for: " + name);
-               } else {
-                  // Streaming mode => send back stream
-                  resp.sendBody(ss, length, null);
-               }
-            }
             if (returnFile != null) {
                if (download) {
                   // download mode => simple response to client
@@ -665,8 +649,6 @@ public class kmttgServer extends HTTPServer {
          } catch (Exception e) {
             // This catches interruptions from client side so we can kill the transcode
             log.error("transcode - " + e.getMessage());
-            if (ss != null)
-               ss.close();
             tc.kill();
          }
          
@@ -715,9 +697,17 @@ public class kmttgServer extends HTTPServer {
                JSONObject json = new JSONObject();
                json.put("name", tc.name);
                json.put("inputFile", tc.inputFile);
-               float time = Hlsutils.totalTime_m3u8(tc.segmentFile);
-               if (time > 0) {
-                  json.put("time", time);
+               if (tc.segmentFile != null) {
+                  float time = Hlsutils.totalTime_m3u8(tc.segmentFile);
+                  if (time > 0) {
+                     json.put("time", time);
+                  }
+               }
+               else if (tc.returnFile != null) {
+                  float time = Hlsutils.totalTime_webm(tc);
+                  if (time > 0) {
+                     json.put("time", time);
+                  }                  
                }
                json.put("duration", tc.duration);
                a.put(json);
@@ -767,8 +757,30 @@ public class kmttgServer extends HTTPServer {
             } catch (JSONException e) {
                log.error("getCached - " + e.getMessage());
             }
-         }
-      }
+         } // m3u8
+         if (f.getAbsolutePath().endsWith(".webm")) {
+            try {
+               JSONObject json = new JSONObject();
+               json.put("url", config.httpserver_cache_relative + string.basename(f.getAbsolutePath()));
+               String textFile = f.getAbsolutePath() + ".txt";
+               if (file.isFile(textFile))
+                  json.put("name", Hlsutils.getTextFileContents(textFile));
+               for (Transcode tc : transcodes) {
+                  if (tc.returnFile != null && tc.returnFile.equals(f.getAbsolutePath())) {
+                     json.put("running", 1);
+                     json.put("duration", tc.duration);
+                     float time = Hlsutils.totalTime_webm(tc);
+                     if (time > 0) {
+                        json.put("time", time);
+                     }
+                  }
+               }
+               a.put(json);
+            } catch (JSONException e) {
+               log.error("getCached - " + e.getMessage());
+            }
+         } // webm
+      } // for File
       return a;
    }
    
@@ -781,16 +793,17 @@ public class kmttgServer extends HTTPServer {
       File[] files = new File(base).listFiles();
       if (target.equals("all")) {
          for (File f : files) {
-            if (f.delete() && f.getAbsolutePath().endsWith(".m3u8"))
+            if (f.delete() && (f.getAbsolutePath().endsWith(".m3u8") || f.getAbsolutePath().endsWith(".webm")))
                count++;
          }
       } else {
          String prefix = target.replaceFirst(config.httpserver_cache_relative, "");
          prefix = prefix.replaceFirst("\\.m3u8", "");
+         prefix = prefix.replaceFirst("\\.webm", "");
          for (File f : files) {
             String fileName = string.basename(f.getAbsolutePath());
             if (fileName.startsWith(prefix)) {
-               if (f.delete() && f.getAbsolutePath().endsWith(".m3u8"))
+               if (f.delete() && (f.getAbsolutePath().endsWith(".m3u8") || f.getAbsolutePath().endsWith(".webm")))
                   count++;               
             }
          }
@@ -852,7 +865,7 @@ public class kmttgServer extends HTTPServer {
       return killed;
    }
    
-   // For transcodes with input file as source, try and get duration usinf mediainfo or ffmpeg
+   // For transcodes with input file as source, try and get duration using mediainfo or ffmpeg
    public void setDuration(Transcode tc) {
       Hashtable<String,String> info = null;
       if (file.isFile(config.mediainfo)) {

@@ -17,7 +17,6 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class Transcode {
-   SocketProcessInputStream ss = null;
    String returnFile = null;
    String segmentFile = null;
    int duration = 0;
@@ -28,6 +27,7 @@ public class Transcode {
    String inputFile = null;
    String base = config.httpserver_cache;
    String prefix = "";
+   String lastStderr = "";
    int count = 0;
    String format = "";
    String maxrate = "3000k";
@@ -40,7 +40,7 @@ public class Transcode {
          new File(base).mkdirs();
       setCachePrefix(); // sets prefix variable
    }
-   public static class RunnableInputDrainer implements Runnable {
+   public class RunnableInputDrainer implements Runnable {
       InputStream is;
       public RunnableInputDrainer(InputStream is) {
          this.is = is;
@@ -48,23 +48,19 @@ public class Transcode {
       public void run() {
          try {
             byte[] b = new byte[2048];
-            while(is.read(b) != -1) {}
+            while(is.read(b) != -1) {lastStderr = new String(b);}
          } catch (IOException e) {log.error("Drainer - " + e.getMessage());}         
       }
    }
    
-   public SocketProcessInputStream webm() {
+   public String webm() {
       boolean isTivoFile = false;
       if (inputFile.toLowerCase().endsWith(".tivo"))
          isTivoFile = true;
-      try {
-         ss = new SocketProcessInputStream();
-      } catch (Exception e) {
-         error("webm - " + e.getMessage());
-         return null;
-      }
-      String sockStr = "tcp://127.0.0.1:" + ss.getPort();
-      String args = TranscodeTemplates.webm() + " " + sockStr;
+      format = "webm";
+      returnFile = base + File.separator + prefix + ".webm";
+      String textFile = returnFile + ".txt";
+      String args = TranscodeTemplates.webm(maxrate);
       String[] ffArgs = args.split(" ");
       Stack<String> command = new Stack<String>();
       command.add(config.ffmpeg);
@@ -75,6 +71,7 @@ public class Transcode {
          command.add(inputFile);
       for (String c : ffArgs)
          command.add(c);
+      command.add(returnFile);
 
       if (isTivoFile) {
          // Need 2 piped processes
@@ -113,13 +110,11 @@ public class Transcode {
             new BufferedOutputStream(p2.getOutputStream())
          );
          new Thread(pipe).start();
-         ss.attachProcess(p1);
       } else {
          process = new backgroundProcess();
          log.print(">> Transcoding to webm " + inputFile + " ...");
          if ( process.run(command) ) {
             log.print(process.toString());
-            ss.attachProcess(process.getProcess());
          } else {
             error("Failed to start command: " + process.toString());
             process.printStderr();
@@ -127,7 +122,28 @@ public class Transcode {
             return null;
          }
       }
-      return ss;
+      createTextFile(textFile, inputFile);
+      try {
+         // Wait for returnFile to get created
+         int counter = 0; int max = config.httpserver_ffmpeg_wait;
+         while( file.size(returnFile) == 0 && counter < max ) {
+            if (process != null && process.exitStatus() != -1) {
+               error("webm ffmpeg transcode stopped: exit status = " + process.exitStatus());
+               log.error(process.getStderr());
+               errors.add(process.getStderrLast());
+               return null;
+            }
+            Thread.sleep(1000);
+            counter++;
+         }
+         if (counter >= max) {
+            error("webm file not being created, assuming ffmpeg error");
+            return null;
+         }
+      } catch (InterruptedException e) {
+         error("Transcode sleep - " + e.getMessage());
+      }
+      return returnFile;
    }
    
    public String hls() {
@@ -210,7 +226,7 @@ public class Transcode {
          int counter = 0; int max = config.httpserver_ffmpeg_wait;
          while( file.size(segmentFile) == 0 && counter < max ) {
             if (process != null && process.exitStatus() != -1) {
-               error("ffmpeg transcode stopped");
+               error("hls ffmpeg transcode stopped");
                log.error(process.getStderr());
                errors.add(process.getStderrLast());
                return null;
@@ -278,7 +294,7 @@ public class Transcode {
    
    public boolean isRunning() {
       // hls is special case since once files are created don't re-create
-      if (count > 0 && format.equals("hls"))
+      if ( count > 0 && format.equals("hls"))
          return true;
       count++;
       boolean running = false;
