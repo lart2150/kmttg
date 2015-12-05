@@ -924,6 +924,67 @@ public class SkipMode {
       }
    }
    
+   /*private static synchronized Stack<Long> visualDetect(String tivoName) {
+      Stack<Long> points = new Stack<Long>();
+      Remote r2 = new Remote(tivoName);
+      if (r2.success) {
+         try {
+            long position = -1, last_position = -5000, margin = 4000;
+            long starting = 0;
+            points.push(0L);
+            
+            // Save current position
+            JSONObject result = r2.Command("Position", new JSONObject());
+            if (result != null && result.has("position")) {
+               starting = result.getLong("position");
+            }
+            
+            // Jump to time 0
+            JSONObject json = new JSONObject();
+            json.put("offset", 0);
+            result = r2.Command("Jump", json);
+            if (result != null) {
+               json.remove("offset");
+               json.put("event", "actionD");
+               Boolean go = true;
+               while (go){
+                  // Send D press recursively and collect time information
+                  result = r2.Command("keyEventSend", json);
+                  
+                  // Get position
+                  Thread.sleep(100);
+                  result = r2.Command("Position", new JSONObject());
+                  if (result != null && result.has("position")) {
+                     position = result.getLong("position");
+                     if (Math.abs(position-last_position) < margin)
+                        go = false;
+                     else
+                        points.push(position);
+                  } else {
+                     go = false;
+                  }
+                  last_position = position;
+                  Thread.sleep(900);
+               }
+               
+               // Jump to starting position
+               json.remove("event");
+               json.put("offset", starting);
+               result = r2.Command("Jump", json);
+            }
+            
+         } catch (Exception e) {
+            error("visualDetect - " + e.getMessage());
+         }
+         r2.disconnect();
+      }
+      for (Long point : points) {
+         print("start=" + point);
+      }
+
+      return points;
+   }*/
+   
    private static synchronized Stack<Hashtable<String,Long>> hashCopy(Stack<Hashtable<String,Long>> orig) {
       debug.print("orig=" + orig);
       Stack<Hashtable<String,Long>> copy = new Stack<Hashtable<String,Long>>();
