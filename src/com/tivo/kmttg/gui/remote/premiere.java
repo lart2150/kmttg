@@ -313,9 +313,12 @@ public class premiere {
          String channelNumber, callSign;
          ObservableList<String> oblist = FXCollections.observableList(new ArrayList<String>());
          for (int i=0; i<channelInfo.length(); ++i) {
-            channelNumber = channelInfo.getJSONObject(i).getString("channelNumber");
-            callSign = channelInfo.getJSONObject(i).getString("callSign");
-            oblist.add(i, channelNumber + "=" + callSign);
+            JSONObject c = channelInfo.getJSONObject(i);
+            if (c.has("channelNumber") && c.has("callSign")) {
+               channelNumber = c.getString("channelNumber");
+               callSign = c.getString("callSign");
+               oblist.add(i, channelNumber + "=" + callSign);
+            }
          }
          channels.setItems(oblist);
          
