@@ -312,12 +312,13 @@ public class premiere {
       try {
          String channelNumber, callSign;
          ObservableList<String> oblist = FXCollections.observableList(new ArrayList<String>());
+         int count = 0;
          for (int i=0; i<channelInfo.length(); ++i) {
             JSONObject c = channelInfo.getJSONObject(i);
             if (c.has("channelNumber") && c.has("callSign")) {
                channelNumber = c.getString("channelNumber");
                callSign = c.getString("callSign");
-               oblist.add(i, channelNumber + "=" + callSign);
+               oblist.add(count++, channelNumber + "=" + callSign);
             }
          }
          channels.setItems(oblist);
