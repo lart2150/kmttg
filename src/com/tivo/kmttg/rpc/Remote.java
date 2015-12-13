@@ -55,6 +55,7 @@ import com.tivo.kmttg.util.string;
 public class Remote {
    public Boolean debug = false;
    public String SchemaVersion = "14";
+   public String SchemaVersion_newer = "17";
    public Boolean success = true;
    private String IP = null;
    private String cdata = null;
@@ -251,12 +252,16 @@ public class Remote {
          String bodyId = "";
          if (data.has("bodyId"))
             bodyId = (String) data.get("bodyId");
+         String schema = SchemaVersion_newer;
+         // Certain tsn #s have older software
+         if (bodyId.startsWith("tsn:8484301"))
+            schema = SchemaVersion;
          rpc_id++;
          String eol = "\r\n";
          String headers =
             "Type: request" + eol +
             "RpcId: " + rpc_id + eol +
-            "SchemaVersion: " + SchemaVersion + eol +
+            "SchemaVersion: " + schema + eol +
             "Content-Type: application/json" + eol +
             "RequestType: " + type + eol +
             "ResponseCount: " + ResponseCount + eol +
