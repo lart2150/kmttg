@@ -1450,7 +1450,7 @@ public class nplTable extends TableMap {
       UpdatingNPL = false;
    }
    
-   // Identify NPL table items associated with queued/running jobs
+   // Identify NPL table items containing skip data
    public void updateSkipStatus(String contentId) {
       UpdatingNPL = true;
       if (SkipMode.skipEnabled()) {
@@ -1492,6 +1492,10 @@ public class nplTable extends TableMap {
             pct = "" + percent + "%";
          }
       }
+      
+      // If clipMetadata present then mark with an "s"
+      if (data.containsKey("clipMetadataId"))
+         pct = "s " + pct;
       
       // If this offerId has an entry in skipmode.ini then mark with an asterisk
       if (data.containsKey("offerId") && skipEntries != null) {
