@@ -254,7 +254,7 @@ public class Remote {
             bodyId = (String) data.get("bodyId");
          String schema = SchemaVersion_newer;
          // Certain tsn #s have older software
-         if (bodyId.startsWith("tsn:8484301"))
+         if (bodyId.startsWith("tsn:8484301") || bodyId.equals("-") || bodyId.length() == 0)
             schema = SchemaVersion;
          rpc_id++;
          String eol = "\r\n";
