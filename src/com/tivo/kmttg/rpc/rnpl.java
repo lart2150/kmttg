@@ -176,6 +176,12 @@ public class rnpl {
                h.put("recordingId", json.getString("recordingId"));
             if (json.has("contentId"))
                h.put("contentId", json.getString("contentId"));
+            if (json.has("clipMetadata")) {
+               JSONArray a = json.getJSONArray("clipMetadata");
+               if (a.length() > 0) {
+                  h.put("clipMetadataId", a.getJSONObject(0).getString("clipMetadataId"));
+               }
+            }
             if (json.has("offerId"))
                h.put("offerId", json.getString("offerId"));
             if (json.has("originalAirdate"))

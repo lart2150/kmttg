@@ -380,6 +380,12 @@ public class NowPlaying extends baseTask implements Serializable {
             if (json.has("offerId")) {
                entry.put("offerId", json.getString("offerId"));
             }
+            if (json.has("clipMetadata")) {
+               JSONArray a = json.getJSONArray("clipMetadata");
+               if (a.length() > 0) {
+                  entry.put("clipMetadataId", a.getJSONObject(0).getString("clipMetadataId"));
+               }
+            }
             if (json.has("hdtv")) {
                if (json.getBoolean("hdtv"))
                   entry.put("HD", "Yes");
