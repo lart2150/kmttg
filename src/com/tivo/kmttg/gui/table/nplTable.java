@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -31,8 +32,10 @@ import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.image.Image;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.TransferMode;
 import javafx.util.Callback;
 
 import com.tivo.kmttg.JSON.JSONArray;
@@ -131,6 +134,28 @@ public class nplTable extends TableMap {
       });
       
       if (tivoName.equals("FILES")) {
+         // Add ability to accept drag and drop files
+         NowPlaying.setOnDragOver(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+               event.acceptTransferModes(TransferMode.COPY);
+               event.consume();
+            }                  
+         });
+         NowPlaying.setOnDragDropped(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+               List<File> fileList = event.getDragboard().getFiles();
+               if (fileList != null && fileList.size() > 0) {
+                  for (File f : fileList) {
+                     AddNowPlayingFileRow(f);
+                  }
+                  event.setDropCompleted(true);
+               }
+               event.consume();
+            }                  
+         });
+
          for (String colName : FILE_cols) {
             if (colName.equals("SIZE")) {
                TreeTableColumn<Tabentry,sortableDouble> col = new TreeTableColumn<Tabentry,sortableDouble>(colName);
