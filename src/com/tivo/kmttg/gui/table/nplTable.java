@@ -1301,6 +1301,37 @@ public class nplTable extends TableMap {
       }
    }
    
+   public void RemoveEntry(String recordingId) {
+      log.print("RemoveEntry " + recordingId);
+      for (int i=0; i<NowPlaying.getExpandedItemCount(); ++i) {
+         TreeItem<Tabentry> item = NowPlaying.getTreeItem(i);
+         if (! item.isLeaf()) {
+            // Folder entry
+            for (int j=0; j<item.getChildren().size(); ++j) {
+               TreeItem<Tabentry> subitem = item.getChildren().get(j);
+               sortableDate r = subitem.getValue().getDATE();
+               if (r!= null && r.data != null && r.data.containsKey("recordingId")) {
+                  if (r.data.get("recordingId").equals(recordingId)) {
+                     item.getParent().getChildren().remove(item);
+                     displayTotals(getTotalsString(entries));
+                     return;
+                  }
+               }
+            }
+         } else {
+            // Non-folder entry
+            sortableDate r = item.getValue().getDATE();
+            if (r!= null && r.data != null && r.data.containsKey("recordingId")) {
+               if (r.data.get("recordingId").equals(recordingId)) {
+                  item.getParent().getChildren().remove(item);
+                  displayTotals(getTotalsString(entries));
+                  return;
+               }
+            }
+         }
+      }
+   }
+   
    public void SetHeaderText(String text, int col) {
       NowPlaying.getColumns().get(col).setText(text);
    }
