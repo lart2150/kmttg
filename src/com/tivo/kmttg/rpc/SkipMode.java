@@ -924,14 +924,13 @@ public class SkipMode {
       }
    }
    
-   /*private static synchronized Stack<Long> visualDetect(String tivoName) {
-      Stack<Long> points = new Stack<Long>();
+   // For Skip enabled program use a D press to detect end of 1st commercial point
+   /*public static synchronized Long visualDetect(String tivoName) {
+      Long point = -1L;
       Remote r2 = new Remote(tivoName);
       if (r2.success) {
          try {
-            long position = -1, last_position = -5000, margin = 4000;
             long starting = 0;
-            points.push(0L);
             
             // Save current position
             JSONObject result = r2.Command("Position", new JSONObject());
@@ -943,31 +942,34 @@ public class SkipMode {
             JSONObject json = new JSONObject();
             json.put("offset", 0);
             result = r2.Command("Jump", json);
+            Thread.sleep(900);
             if (result != null) {
                json.remove("offset");
                json.put("event", "actionD");
-               Boolean go = true;
-               while (go){
-                  // Send D press recursively and collect time information
-                  result = r2.Command("keyEventSend", json);
+               // Send D press and collect time information
+               result = r2.Command("keyEventSend", json);
+               
+               // Get position
+               Thread.sleep(100);
+               result = r2.Command("Position", new JSONObject());
+               if (result != null && result.has("position"))
+                  point = result.getLong("position");
+               
+               if (point < 60000) {
+                  log.print("Too small - jumping again");
+                  // Time likely too small - jump again
+                  Thread.sleep(900);
+                  // Send D press and collect time information
+                  r2.Command("keyEventSend", json);
                   
                   // Get position
                   Thread.sleep(100);
                   result = r2.Command("Position", new JSONObject());
-                  if (result != null && result.has("position")) {
-                     position = result.getLong("position");
-                     if (Math.abs(position-last_position) < margin)
-                        go = false;
-                     else
-                        points.push(position);
-                  } else {
-                     go = false;
-                  }
-                  last_position = position;
-                  Thread.sleep(900);
+                  if (result != null && result.has("position"))
+                     point = result.getLong("position");
                }
                
-               // Jump to starting position
+               // Jump back to starting position
                json.remove("event");
                json.put("offset", starting);
                result = r2.Command("Jump", json);
@@ -978,11 +980,9 @@ public class SkipMode {
          }
          r2.disconnect();
       }
-      for (Long point : points) {
-         print("start=" + point);
-      }
+      print("visualDetect point: " + toMinSec(point));
 
-      return points;
+      return point;
    }*/
    
    private static synchronized Stack<Hashtable<String,Long>> hashCopy(Stack<Hashtable<String,Long>> orig) {
