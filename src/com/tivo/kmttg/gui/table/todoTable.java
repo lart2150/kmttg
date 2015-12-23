@@ -156,9 +156,20 @@ public class todoTable extends TableMap {
                               TableUtil.setRowColor(this, config.tableBkgndRecording);
                         }
                         
-                        if (config.showHistoryInTable == 1 && json.has("partnerCollectionId")) {
-                           if (auto.keywordMatchHistoryFast(json.getString("partnerCollectionId"), false))
-                              TableUtil.setRowColor(this, config.tableBkgndInHistory);
+                        if (config.showHistoryInTable == 1) {
+                           if (json.has("partnerCollectionId")) {
+                              // Series 4 and later TiVos
+                              if (auto.keywordMatchHistoryFast(json.getString("partnerCollectionId"), false))
+                                 TableUtil.setRowColor(this, config.tableBkgndInHistory);
+                           }
+                           if (json.has("partnerContentId")) {
+                              // This is for series 3 TiVos where programId is part of partnerContentId
+                              // example: parternContentId = "epgProvider:ct.EP013898090001"
+                              String programId = json.getString("partnerContentId");
+                              programId = programId.replaceFirst("^.+\\.", "");
+                              if (auto.keywordMatchHistoryFast(programId, false))
+                                 TableUtil.setRowColor(this, config.tableBkgndInHistory);
+                           }
                         }
                      } catch (JSONException e) {
                         log.error("todoTable ColorRowFactory - " + e.getMessage());
