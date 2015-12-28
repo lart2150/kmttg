@@ -32,6 +32,7 @@ import com.tivo.kmttg.task.download;
 import com.tivo.kmttg.task.download_decrypt;
 import com.tivo.kmttg.task.dsd;
 import com.tivo.kmttg.task.encode;
+import com.tivo.kmttg.task.ffcut;
 import com.tivo.kmttg.task.javaNowPlaying;
 import com.tivo.kmttg.task.javadownload;
 import com.tivo.kmttg.task.javametadata;
@@ -230,6 +231,7 @@ public class jobData implements Serializable, Cloneable {
          "comskip_review",
          "vrdreview",
          "comcut",
+         "ffcut",
          "projectxcut",
          "adcut",
          "captions",
@@ -300,6 +302,8 @@ public class jobData implements Serializable, Cloneable {
          job.process = new projectx(job);
       if (job.type.equals("projectxcut"))
          job.process = new projectxcut(job);
+      if (job.type.equals("ffcut"))
+         job.process = new ffcut(job);
       if (job.type.equals("push"))
          job.process = new push(job);
       if (job.type.equals("qsfix"))
@@ -415,8 +419,6 @@ public class jobData implements Serializable, Cloneable {
          file = edlFile;
          if (vprjFile != null)
             file = vprjFile;
-         if (xclFile != null)
-            file = xclFile;
       }
       else if (type.equals("adscan")) {
          file = vprjFile;
@@ -432,6 +434,9 @@ public class jobData implements Serializable, Cloneable {
          file = vprjFile;
       }
       else if (type.equals("comcut")) {
+         file = mpegFile_cut;
+      }
+      else if (type.equals("ffcut")) {
          file = mpegFile_cut;
       }
       else if (type.equals("projectxcut")) {
