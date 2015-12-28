@@ -1301,6 +1301,7 @@ public class nplTable extends TableMap {
       }
    }
    
+   // Remove NPL entry containing given recordingId
    public void RemoveEntry(String recordingId) {
       log.print("RemoveEntry " + recordingId);
       for (int i=0; i<NowPlaying.getExpandedItemCount(); ++i) {
@@ -1310,9 +1311,9 @@ public class nplTable extends TableMap {
             for (int j=0; j<item.getChildren().size(); ++j) {
                TreeItem<Tabentry> subitem = item.getChildren().get(j);
                sortableDate r = subitem.getValue().getDATE();
-               if (r!= null && r.data != null && r.data.containsKey("recordingId")) {
+               if (r != null && r.data != null && r.data.containsKey("recordingId")) {
                   if (r.data.get("recordingId").equals(recordingId)) {
-                     item.getParent().getChildren().remove(item);
+                     subitem.getParent().getChildren().remove(subitem);
                      displayTotals(getTotalsString(entries));
                      return;
                   }
