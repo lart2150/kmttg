@@ -35,6 +35,15 @@ public class string {
          return "";
       }            
    }
+   
+   public static String getSuffix(String name) {
+      String suffix = "";
+      Pattern p = Pattern.compile("^.+\\.(.+)$");
+      Matcher m = p.matcher(name);
+      if (m.matches())
+         return m.group(1);
+      return suffix;
+   }
 
    public static String replaceSuffix(String name, String suffix) {
       if (name.matches("^.+\\..+$"))
