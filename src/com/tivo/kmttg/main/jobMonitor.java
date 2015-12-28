@@ -1301,31 +1301,17 @@ public class jobMonitor {
                submitNewJob(job);
             }
          } else {
+            // Use ffcut
             jobData job = new jobData();
             job.startFile = startFile;
-            if (file.isFile(config.projectx)) {
-               // Use projectx
-               job.source       = source;
-               job.tivoName     = tivoName;
-               job.type         = "projectxcut";
-               job.name         = config.projectx;
-               job.mpegFile     = mpegFile;
-               job.mpegFile_cut = mpegFile_cut;
-               job.edlFile      = edlFile;
-               job.xclFile      = xclFile;               
-            } else {
-               // Use mencoder
-               job.source       = source;
-               job.tivoName     = tivoName;
-               job.type         = "comcut";
-               job.name         = config.mencoder;
-               if (streamfix)
-                  job.mpegFile  = mpegFile_fix;
-               else
-                  job.mpegFile  = mpegFile;
-               job.mpegFile_cut = mpegFile_cut;
-               job.edlFile      = edlFile;
-            }
+            job.source       = source;
+            job.tivoName     = tivoName;
+            job.type         = "ffcut";
+            job.name         = "ffcut";
+            job.mpegFile     = mpegFile;
+            job.mpegFile_cut = mpegFile_cut;
+            job.edlFile      = edlFile;
+            job.xclFile      = xclFile;
             submitNewJob(job);            
          }
       }
