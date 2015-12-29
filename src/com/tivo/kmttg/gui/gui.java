@@ -118,7 +118,6 @@ public class gui extends Application {
    private MenuItem helpAboutMenuItem = null;
    private MenuItem helpUpdateMenuItem = null;
    private MenuItem helpToolsUpdateMenuItem = null;
-   private MenuItem helpToolsProjectXMenuItem = null;
    private MenuItem exitMenuItem = null;
    private MenuItem autoConfigMenuItem = null;
    private MenuItem runInGuiMenuItem = null;
@@ -699,8 +698,6 @@ public class gui extends Application {
          helpMenu.getItems().add(getHelpUpdateMenuItem());
          if (config.OS.equals("windows") || config.OS.equals("mac"))
             helpMenu.getItems().add(getHelpToolsUpdateMenuItem());
-         else
-            helpMenu.getItems().add(getHelpToolsProjectXMenuItem());
       }
       return helpMenu;
    }
@@ -745,20 +742,6 @@ public class gui extends Application {
          });
       }
       return helpToolsUpdateMenuItem;
-   }
-
-   private MenuItem getHelpToolsProjectXMenuItem() {
-      debug.print("");
-      if (helpToolsProjectXMenuItem == null) {
-         helpToolsProjectXMenuItem = new MenuItem();
-         helpToolsProjectXMenuItem.setText("Update/Install ProjectX...");
-         helpToolsProjectXMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent e) {
-               update.update_projectx_background();
-            }
-         });
-      }
-      return helpToolsProjectXMenuItem;
    }
 
    private MenuItem getExitMenuItem() {
@@ -1347,7 +1330,7 @@ public class gui extends Application {
    // Options are disabled when associated config entry is not setup
    public void refreshOptions(Boolean refreshProfiles) {
       debug.print("refreshProfiles=" + refreshProfiles);
-      if (config.VRD == 0 && ! file.isFile(config.projectx)) {
+      if (config.VRD == 0 && ! file.isFile(config.ffmpeg)) {
          qsfix.setSelected(false);
          qsfix.setDisable(true);
       } else {
@@ -1375,7 +1358,7 @@ public class gui extends Application {
          comskip.setDisable(false);
       }
 
-      if (! file.isFile(config.mencoder) && config.VRD == 0 && ! file.isFile(config.projectx)) {
+      if (config.VRD == 0 && ! file.isFile(config.ffmpeg)) {
          comcut.setSelected(false);
          comcut.setDisable(true);
       } else {
@@ -2453,15 +2436,12 @@ public class gui extends Application {
          text =  "<b>QS Fix</b><br>";
          text += "If you have VideoRedo available and configured in kmttg, this<br>";
          text += "runs the extremely useful <b>VideoRedo Quick Stream Fix</b> utility.<br>";
-         text += "Without VideoRedo this will run mpeg through <b>ProjectX</b> demux filter followed<br>";
-         text += "by a remux with ffmpeg instead if ProjectX is configured in kmttg.<br>";
+         text += "Without VideoRedo this will run mpeg through <b>ffmpeg</b> remux.<br>";
          text += "If neither tool is configured then this task is unavailable.<br>";
          text += "This task cleans up any potential glitches/errors in mpeg2 video files.<br>";
-         text += "Highly recommended step if you have VideoRedo and/or ProjectX installed.<br>";
+         text += "Highly recommended step if you have VideoRedo and/or ffmpeg installed.<br>";
          text += "Very highly recommended step if you will be further processing mpeg2 files<br>";
-         text += "for cutting out commercials and/or encoding to new formats.<br>";
-         text += "<b>NOTE: ProjectX does not process closed captions, so if captions are important</b><br>";
-         text += "<b>to you then you should only use QS Fix with VideoRedo.</b>";
+         text += "for cutting out commercials and/or encoding to new formats.";
       }
       else if (component.equals("twpdelete")) {
          text =  "<b>TWP Delete</b><br>";
@@ -2488,23 +2468,17 @@ public class gui extends Application {
       else if (component.equals("comcut")) {
          text =  "<b>Ad Cut</b><br>";
          text += "Automatically cut out commercials detected in <b>Ad Detect</b> step.<br>";
-         text += "NOTE: By default uses <b>ProjectX</b> program to make the cuts if available/configured<br>";
+         text += "NOTE: By default uses <b>ffmpeg</b> program to make the cuts if available/configured<br>";
          text += "in kmttg and VideoRedo not available/configured.<br>";
-         text += "<b>NOTE: ProjectX does not process closed captions, so if captions are important</b><br>";
-         text += "<b>to you then you should use VideoRedo or mencoder instead.</b><br>";
-         text += "NOTE: If ProjectX not available then uses <b>mencoder</b> program to make the cuts which can<br>";
-         text += "cause audio/video sync problems in the resulting files - so ProjectX recommended instead.<br>";
          text += "If you have <b>VideoRedo</b> enabled then this step uses VideoRedo for making<br>";
-         text += "the cuts which is a much better solution than mencoder for preserving proper audio/video sync.";
+         text += "the cuts which is a better solution than ffmpeg for preserving proper audio/video sync.";
       }
       else if (component.equals("captions")) {
          text =  "<b>captions</b><br>";
          text += "Generates a <b>.srt</b> captions file which is a text file containing<br>";
          text += "closed captioning text. This file can be used with several<br>";
          text += "video playback tools to display closed captions during playback.<br>";
-         text += "Also for example <b>streambaby</b> can use this file.<br>";
-         text += "<b>NOTE: ProjectX does not process closed captions, so if ProjectX was part of your flow</b><br>";
-         text += "<b>there will be no captions to extract from the mpeg2 file so this task won't work.</b>";
+         text += "Also for example <b>streambaby</b> can use this file.";
       }
       else if (component.equals("encode")) {
          text =  "<b>encode</b><br>";

@@ -21,7 +21,6 @@ public class toolDownload {
    String tail = "/download?use_mirror=autoselect";
    String windows_file = "kmttg_win32_tools_v2.1a.zip";
    String mac_file = "kmttg_MacOSX_tools_v0p8l.zip";
-   String projectx_file = "ProjectX_0_9_1_0.zip";
    String tools_version = "tools_version";
    
    public String download(String dir, String os) {
@@ -42,14 +41,6 @@ public class toolDownload {
             return null;
          }
       }
-      return null;
-   }
-   
-   public String projectXdownload(String dir) {
-      String urlString = base + projectx_file + tail;
-      String localFileName = config.programDir + File.separator + projectx_file;
-      if (downloadUrl(urlString, localFileName))
-         return localFileName;
       return null;
    }
    

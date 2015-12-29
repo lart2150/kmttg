@@ -151,43 +151,6 @@ public class update {
          new Thread(b).start();
       }
    }
-   
-   public static void update_projectx_background() {
-      final toolDownload t = new toolDownload();
-      String version = t.projectx_file;
-      Alert alert = new Alert(AlertType.CONFIRMATION);
-      alert.setTitle("Confirm");
-      config.gui.setFontSize(alert, config.FontSize);
-      alert.setContentText("Install projectX file: " + version + " ?");
-      Optional<ButtonType> result = alert.showAndWait();
-      if (result.get() == ButtonType.OK) {
-         Task<Void> task = new Task<Void>() {
-            @Override public Void call() {
-               String zipFile = t.projectXdownload(config.programDir);
-               Platform.runLater(new Runnable() {
-                  @Override public void run() {
-                     config.gui.progressBar_setValue(0);
-                     config.gui.setTitle(config.kmttg);
-                  }
-               });
-               if (zipFile != null) {
-                  if (Unzip.unzip(config.programDir, zipFile) ) {
-                     log.warn("projectX install complete");
-                     file.delete(zipFile);
-                     config.parse();
-                     Platform.runLater(new Runnable() {
-                        @Override public void run() {
-                           config.gui.refreshOptions(false);
-                        }
-                     });
-                  }
-               }
-               return null;
-            }
-         };
-         new Thread(task).start();
-      }
-   }
       
    @SuppressWarnings("resource")
    private static String downloadUrl(String localFileName, String urlString) {
