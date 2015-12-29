@@ -1135,6 +1135,7 @@ public class jobMonitor {
          job.name         = "fffix";
          job.mpegFile     = mpegFile;
          job.mpegFile_fix = mpegFile_fix;
+         job.mpegFile_cut = mpegFile_cut;
          submitNewJob(job);
       }
       
@@ -1168,10 +1169,7 @@ public class jobMonitor {
             job.tivoName     = tivoName;
             job.type         = "comskip";
             job.name         = config.comskip;
-            if (streamfix)
-               job.mpegFile  = mpegFile_fix;
-            else
-               job.mpegFile  = mpegFile;
+            job.mpegFile     = mpegFile;
             job.edlFile      = edlFile;
             if (config.VRD == 1)
                job.vprjFile = string.replaceSuffix(mpegFile, ".VPrj");
@@ -1287,6 +1285,7 @@ public class jobMonitor {
             job.mpegFile     = mpegFile;
             job.mpegFile_cut = mpegFile_cut;
             job.edlFile      = edlFile;
+            job.vprjFile     = string.replaceSuffix(job.mpegFile, ".VPrj");
             submitNewJob(job);            
          }
       }
@@ -1298,17 +1297,13 @@ public class jobMonitor {
          job.tivoName     = tivoName;
          job.type         = "captions";
          if (file.isFile(config.t2extract))
-        	 job.name     = config.t2extract;
+            job.name      = config.t2extract;
          else
-        	 job.name     = config.ccextractor;
-         if (streamfix && videoFile.equals(mpegFile))
-            job.videoFile = mpegFile_fix;
-         else {
-            if (file.isFile(config.t2extract))
-               job.videoFile = videoFile;
-            else
-               job.videoFile = mpegFile;
-         }
+            job.name      = config.ccextractor;
+         if (file.isFile(config.t2extract))
+            job.videoFile = videoFile;
+         else
+            job.videoFile = mpegFile;
          job.srtFile      = srtFile;
          submitNewJob(job);
       }
@@ -1321,10 +1316,7 @@ public class jobMonitor {
          job.type         = "encode";
          job.name         = encodeName;
          job.encodeName   = encodeName;
-         if (streamfix)
-            job.mpegFile  = mpegFile_fix;
-         else
-            job.mpegFile  = mpegFile;
+         job.mpegFile     = mpegFile;
          job.mpegFile_cut = mpegFile_cut;
          job.encodeFile   = encodeFile;
          job.srtFile      = srtFile;
@@ -1346,10 +1338,7 @@ public class jobMonitor {
             job.type         = "encode";
             job.name         = encodeName2;
             job.encodeName   = encodeName2;
-            if (streamfix)
-               job.mpegFile  = mpegFile_fix;
-            else
-               job.mpegFile  = mpegFile;
+            job.mpegFile     = mpegFile;
             job.mpegFile_cut = mpegFile_cut;
             job.encodeFile   = encodeFile2;
             job.srtFile      = srtFile;
