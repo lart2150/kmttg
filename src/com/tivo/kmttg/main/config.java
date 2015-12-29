@@ -23,7 +23,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v2.1b";
+   public static String kmttg = "kmttg v2.1c";
    
    // encoding related
    public static String encProfDir = "";
@@ -43,7 +43,6 @@ public class config {
    public static String encodeDir = "";
    public static String ffmpeg = "";
    public static String mediainfo = "";
-   public static String projectx = "";
    public static String mencoder = "";
    public static String handbrake = "";
    public static String comskip = "";
@@ -286,11 +285,6 @@ public class config {
          result = getProgramDefault("mediainfo");
          if ( file.isFile(result) )
             mediainfo = result;
-      }
-      if ( ! file.isFile(projectx) ) {
-         result = getProgramDefault("projectx");
-         if ( file.isFile(result) )
-            projectx = result;
       }
       if ( ! file.isFile(mencoder) ) {
          result = getProgramDefault("mencoder");
@@ -708,7 +702,6 @@ public class config {
       tivodecode    = getProgramDefault("tivodecode");
       dsd           = getProgramDefault("dsd");
       ffmpeg        = getProgramDefault("ffmpeg");
-      //projectx      = getProgramDefault("projectx");
       mencoder      = getProgramDefault("mencoder");
       handbrake     = getProgramDefault("handbrake");
       comskip       = getProgramDefault("comskip");
@@ -798,10 +791,6 @@ public class config {
          if (!file.isFile(mediainfo))
             mediainfo = "";
          return mediainfo;
-      }
-      
-      else if (programName.equals("projectx")) {
-         return programDir + s + "ProjectX" + s + "ProjectX.jar";
       }
       
       else if (programName.equals("mencoder")) {
@@ -1063,9 +1052,6 @@ public class config {
             }
             if (key.equals("mediainfo")) {
                mediainfo = line;
-            }
-            if (key.equals("projectx")) {
-               projectx = line;
             }
             if (key.equals("mencoder")) {
                mencoder = line;
@@ -1390,8 +1376,6 @@ public class config {
          ofp.write("<ffmpeg>\n" + ffmpeg + "\n\n");
          
          ofp.write("<mediainfo>\n" + mediainfo + "\n\n");
-         
-         ofp.write("<projectx>\n" + projectx + "\n\n");
          
          ofp.write("<mencoder>\n" + mencoder + "\n\n");
          
