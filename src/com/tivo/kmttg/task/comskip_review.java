@@ -67,8 +67,6 @@ public class comskip_review extends baseTask implements Serializable {
       if (job.vprjFile != null && config.VRD == 1) {
          outputFile = job.vprjFile;
       }
-      if (outputFile == null && job.xclFile != null && file.isFile(config.projectx))
-         outputFile = job.xclFile;
       if (outputFile == null)
          outputFile = job.edlFile;
       if (outputFile == null) {
