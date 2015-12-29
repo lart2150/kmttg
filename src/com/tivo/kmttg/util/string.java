@@ -41,7 +41,7 @@ public class string {
       Pattern p = Pattern.compile("^.+\\.(.+)$");
       Matcher m = p.matcher(name);
       if (m.matches())
-         return m.group(1);
+         return m.group(1).toLowerCase();
       return suffix;
    }
 
