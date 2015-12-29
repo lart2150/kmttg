@@ -33,14 +33,13 @@ import com.tivo.kmttg.task.download_decrypt;
 import com.tivo.kmttg.task.dsd;
 import com.tivo.kmttg.task.encode;
 import com.tivo.kmttg.task.ffcut;
+import com.tivo.kmttg.task.fffix;
 import com.tivo.kmttg.task.javaNowPlaying;
 import com.tivo.kmttg.task.javadownload;
 import com.tivo.kmttg.task.javametadata;
 import com.tivo.kmttg.task.jdownload_decrypt;
 import com.tivo.kmttg.task.metadata;
 import com.tivo.kmttg.task.metadataTivo;
-import com.tivo.kmttg.task.projectx;
-import com.tivo.kmttg.task.projectxcut;
 import com.tivo.kmttg.task.push;
 import com.tivo.kmttg.task.qsfix;
 import com.tivo.kmttg.task.remote;
@@ -148,7 +147,6 @@ public class jobData implements Serializable, Cloneable {
    
    // demux/remux related
    public Stack<String> demuxFiles = null;
-   public String xclFile = null;
    
    // qsfix related (value can be "decrypt" if using qsfix as decrypt with VRD)
    public String qsfix_mode = "qsfix";
@@ -224,7 +222,7 @@ public class jobData implements Serializable, Cloneable {
          "tivolibre",
          "dsd",
          "qsfix",
-         "projectx",
+         "fffix",
          "streamfix",
          "comskip",
          "adscan",
@@ -232,7 +230,6 @@ public class jobData implements Serializable, Cloneable {
          "vrdreview",
          "comcut",
          "ffcut",
-         "projectxcut",
          "adcut",
          "captions",
          "encode",
@@ -298,10 +295,8 @@ public class jobData implements Serializable, Cloneable {
          job.process = new metadata(job);
       if (job.type.equals("metadataTivo"))
          job.process = new metadataTivo(job);
-      if (job.type.equals("projectx"))
-         job.process = new projectx(job);
-      if (job.type.equals("projectxcut"))
-         job.process = new projectxcut(job);
+      if (job.type.equals("fffix"))
+         job.process = new fffix(job);
       if (job.type.equals("ffcut"))
          job.process = new ffcut(job);
       if (job.type.equals("push"))
@@ -409,7 +404,7 @@ public class jobData implements Serializable, Cloneable {
       else if (type.equals("qsfix")) {
          file = mpegFile_fix;
       }
-      else if (type.equals("projectx")) {
+      else if (type.equals("fffix")) {
          file = mpegFile_fix;
       }
       else if (type.equals("captions")) {
@@ -427,8 +422,6 @@ public class jobData implements Serializable, Cloneable {
          file = edlFile;
          if (vprjFile != null)
             file = vprjFile;
-         if (xclFile != null)
-            file = xclFile;
       }
       else if (type.equals("vrdreview")) {
          file = vprjFile;
@@ -437,9 +430,6 @@ public class jobData implements Serializable, Cloneable {
          file = mpegFile_cut;
       }
       else if (type.equals("ffcut")) {
-         file = mpegFile_cut;
-      }
-      else if (type.equals("projectxcut")) {
          file = mpegFile_cut;
       }
       else if (type.equals("adcut")) {
