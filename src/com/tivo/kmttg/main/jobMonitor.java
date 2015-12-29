@@ -707,7 +707,6 @@ public class jobMonitor {
       }
       
       Boolean streamfix    = false;
-      Boolean demux        = false;
       
       if (metadataTivo) {
          // In FILES mode can only get metadata from .tivo files
@@ -730,7 +729,6 @@ public class jobMonitor {
       String mpegFile     = null;
       String mpegFile_fix = null;
       String edlFile      = null;
-      String xclFile      = null;
       String mpegFile_cut = null;
       String videoFile    = null;
       String srtFile      = null;
@@ -810,7 +808,6 @@ public class jobMonitor {
          mpegFile_fix = qsfixDir + s + mpegFile_fix;
          
          edlFile = string.replaceSuffix(mpegFile, ".edl");
-         xclFile = mpegFile + ".Xcl";
 
          if (mpegCutDir.equals(mpegDir)) {
             Pattern p = Pattern.compile("^(.+)(\\..+$)");
@@ -863,7 +860,6 @@ public class jobMonitor {
          mpegFile_fix = qsfixDir + s + mpegFile_fix;
          
          edlFile = string.replaceSuffix(mpegFile, ".edl");
-         xclFile = mpegFile + ".Xcl";
          
          if (mpegCutDir.equals(mpegDir)) {
             mpegFile_cut = string.replaceSuffix(startFile, "_cut.mpg");
@@ -894,16 +890,6 @@ public class jobMonitor {
          if (comcut)  videoFile = mpegFile_cut;
          srtFile = string.replaceSuffix(videoFile, ".srt");
          if (encode)  srtFile = string.replaceSuffix(encodeFile, ".srt");
-      }
-      
-      // Decide if demux should be enabled
-      // if projectx available & qsfix enabled AND ! vrd => enable
-      if (file.isFile(config.projectx) && qsfix && config.VRD == 0) {
-         qsfix = false;
-         demux = true;
-         // demux can only operate on mpeg files not TiVo files
-         if ( ! decrypt && ! file.isFile(mpegFile) && ! file.isFile(mpegFile_cut) )
-            decrypt = true;
       }
       
       // Check task dependencies and enable prior tasks if necessary
@@ -1108,7 +1094,13 @@ public class jobMonitor {
          submitNewJob(job);
       }
       
+      if (qsfix && config.VRD == 0) {
+         streamfix = true;
+         qsfix = false;
+      }
+      
       if (qsfix || (decrypt && config.VrdDecrypt == 1)) {
+         // VRD qsfix
          jobData job = new jobData();
          job.startFile    = startFile;
          job.source       = source;
@@ -1134,25 +1126,13 @@ public class jobMonitor {
          submitNewJob(job);
       }
       
-      if (demux) {
-         jobData job = new jobData();
-         job.startFile    = startFile;
-         job.source       = source;
-         job.tivoName     = tivoName;
-         job.type         = "projectx";
-         job.name         = config.projectx;
-         job.mpegFile     = mpegFile;
-         job.mpegFile_fix = mpegFile_fix;
-         submitNewJob(job);         
-      }
-      
       if (streamfix) {
          jobData job = new jobData();
          job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
-         job.type         = "streamfix";
-         job.name         = config.mencoder;
+         job.type         = "fffix";
+         job.name         = "fffix";
          job.mpegFile     = mpegFile;
          job.mpegFile_fix = mpegFile_fix;
          submitNewJob(job);
@@ -1193,8 +1173,6 @@ public class jobMonitor {
             else
                job.mpegFile  = mpegFile;
             job.edlFile      = edlFile;
-            if (file.isFile(config.projectx) && config.VRD == 0)
-               job.xclFile   = xclFile;
             if (config.VRD == 1)
                job.vprjFile = string.replaceSuffix(mpegFile, ".VPrj");
             if (specs.containsKey("comskipIni"))
@@ -1252,8 +1230,6 @@ public class jobMonitor {
          job.mpegFile     = mpegFile;
          if (config.VRD == 1)
             job.vprjFile  = string.replaceSuffix(mpegFile, ".VPrj");
-         if (file.isFile(config.projectx) && config.VRD == 0)
-            job.xclFile   = xclFile;
          job.edlFile      = edlFile;
          if (specs.containsKey("skipmode")) {
             job.skipmode = true;
@@ -1311,7 +1287,6 @@ public class jobMonitor {
             job.mpegFile     = mpegFile;
             job.mpegFile_cut = mpegFile_cut;
             job.edlFile      = edlFile;
-            job.xclFile      = xclFile;
             submitNewJob(job);            
          }
       }
