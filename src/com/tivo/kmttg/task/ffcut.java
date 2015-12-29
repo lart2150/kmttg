@@ -183,8 +183,9 @@ public class ffcut extends baseTask implements Serializable {
                   log.print("(Deleted vprj file: " + job.vprjFile + ")");
                if (file.delete(job.edlFile))
                   log.print("(Deleted edl file: " + job.edlFile + ")");
-               if (file.delete(job.xclFile))
-                  log.print("(Deleted xcl file: " + job.xclFile + ")");
+               String xclFile = job.mpegFile + ".Xcl";
+               if (file.isFile(xclFile) && file.delete(xclFile))
+                  log.print("(Deleted xcl file: " + xclFile + ")");
                String txtFile = string.replaceSuffix(job.mpegFile, ".txt");
                if (file.isFile(txtFile) && file.delete(txtFile))
                   log.print("(Deleted comskip txt file: " + txtFile + ")");
