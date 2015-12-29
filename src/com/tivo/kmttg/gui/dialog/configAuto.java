@@ -681,7 +681,7 @@ public class configAuto {
    // This will decide which options are enabled based on current config settings
    // Options are disabled when associated config entry is not setup
    public void refreshOptions() {
-      if (config.VRD == 0 && ! file.isFile(config.projectx)) {
+      if (config.VRD == 0 && ! file.isFile(config.ffmpeg)) {
          qsfix.setSelected(false);
          qsfix.setDisable(true);
       } else {
@@ -709,7 +709,7 @@ public class configAuto {
          comskip.setDisable(false);
       }
 
-      if (! file.isFile(config.mencoder) && config.VRD == 0 && ! file.isFile(config.projectx)) {
+      if (config.VRD == 0 && ! file.isFile(config.ffmpeg)) {
          comcut.setSelected(false);
          comcut.setDisable(true);
       } else {

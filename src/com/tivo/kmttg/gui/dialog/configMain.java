@@ -146,7 +146,6 @@ public class configMain {
    private static TextField mencoder_args = null;
    private static TextField ccextractor = null;
    private static TextField AtomicParsley = null;
-   private static TextField projectx = null;
    private static TextField disk_space = null;
    private static TextField customCommand = null;
    private static TextField toolTipsDelay = null;
@@ -917,9 +916,6 @@ public class configMain {
       
       // AtomicParsley
       AtomicParsley.setText(config.AtomicParsley);
-      
-      // projectx
-      projectx.setText(config.projectx);
       
       // ffmpeg
       ffmpeg.setText(config.ffmpeg);
@@ -1729,19 +1725,6 @@ public class configMain {
       }
       config.AtomicParsley = value;
       
-      // projectx
-      value = string.removeLeadingTrailingSpaces(projectx.getText());
-      if (value.length() == 0) {
-         // Reset to default if none given
-         value = "";
-      } else {
-         if ( ! file.isFile(value) ) {
-            textFieldError(projectx, "ProjectX setting not a valid file: '" + value + "'");
-            errors++;
-         }
-      }
-      config.projectx = value;
-      
       // ffmpeg
       value = string.removeLeadingTrailingSpaces(ffmpeg.getText());
       if (value.length() == 0) {
@@ -2060,7 +2043,6 @@ public class configMain {
       //t2extract_args = new TextField(); t2extract_args.setPrefWidth(30);
       ccextractor = new TextField(); ccextractor.setPrefWidth(30);
       AtomicParsley = new TextField(); AtomicParsley.setPrefWidth(30);
-      projectx = new TextField(); projectx.setPrefWidth(30);
       customCommand = new TextField(); customCommand.setPrefWidth(30);
       web_query = new TextField(); web_query.setPrefWidth(30);
       web_browser = new TextField(); web_browser.setPrefWidth(30);
@@ -2189,7 +2171,6 @@ public class configMain {
       //Label t2extract_args_label = new Label();
       Label ccextractor_label = new Label();
       Label AtomicParsley_label = new Label();
-      Label projectx_label = new Label();
       Label customCommand_label = new Label();
       Label customFiles_label = new Label();
       Label cpu_cores_label = new Label();
@@ -2344,7 +2325,6 @@ public class configMain {
       //t2extract_args_label.setText("t2extract extra arguments");
       ccextractor_label.setText("ccextractor");
       AtomicParsley_label.setText("AtomicParsley");
-      projectx_label.setText("ProjectX");
       customCommand_label.setText("custom command");
       check_space.setText("Check Available Disk Space");      
       available_keywords_label.setText("Available keywords:"); 
@@ -2749,20 +2729,6 @@ public class configMain {
          }
       });
 
-      projectx.setOnMouseClicked(new EventHandler<MouseEvent>() {
-         @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
-               if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     projectx.setText(selectedFile.getPath());
-                  }
-               }
-            }
-         }
-      });
-
       pyTivo_config.setOnMouseClicked(new EventHandler<MouseEvent>() {
          @Override
          public void handle(MouseEvent mouseEvent) {
@@ -3047,11 +3013,6 @@ public class configMain {
       gy++;
       programs_panel.add(AtomicParsley_label, 0, gy);
       programs_panel.add(AtomicParsley, 1, gy);
-      
-      // projectx
-      gy++;
-      programs_panel.add(projectx_label, 0, gy);
-      programs_panel.add(projectx, 1, gy);
       
       // mediainfo
       gy++;
@@ -3496,7 +3457,6 @@ public class configMain {
       //t2extract_args.setTooltip(getToolTip("t2extract_args"));
       ccextractor.setTooltip(getToolTip("ccextractor"));
       AtomicParsley.setTooltip(getToolTip("AtomicParsley"));
-      projectx.setTooltip(getToolTip("projectx"));
       wan_http_port.setTooltip(getToolTip("wan_http_port"));
       wan_https_port.setTooltip(getToolTip("wan_https_port"));
       wan_rpc_port.setTooltip(getToolTip("wan_rpc_port"));
@@ -4111,16 +4071,6 @@ public class configMain {
          text += "NOTE: This will only work if you generate <b>pyTivo metadata</b> files<br>";
          text += "to accompany the mpeg4 video files since information is gathered from those<br>";
          text += "files and passed along to this program by kmttg.<br>";
-         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
-      }
-      else if (component.equals("projectx")) {
-         text =  "<b>ProjectX</b><br>";
-         text += "This defines the full path to the <b>ProjectX.jar</b> java program.<br>";
-         text += "If defined and you don't have VideoRedo configured for use with kmttg then<br>";
-         text += "this program is used for <b>QS Fix</b> task to <b>demux</b> an mpeg2 video file and<br>";
-         text += "clean up errors in the video and audio streams. Following ProjectX demux step<br>";
-         text += "then ffmpeg is used to <b>remux</b> the video and audio streams back together again.<br>";
-         text += "NOTE: If you have VideoRedo configured that it will be used instead for QS Fix tasks.<br>";
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("wan_http_port")) {
