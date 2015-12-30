@@ -27,6 +27,7 @@ public class ffcut extends baseTask implements Serializable {
    private backgroundProcess process;
    private jobData job;
    private String batchFile = null;
+   private Long totalSize = 0L;
 
    // constructor
    public ffcut(jobData job) {
@@ -131,14 +132,39 @@ public class ffcut extends baseTask implements Serializable {
          // Still running
          if (config.GUIMODE) {
             // Update STATUS column
-            String t = jobMonitor.getElapsedTime(job.time);
-            config.gui.jobTab_UpdateJobMonitorRowStatus(job, t);
-            
-            if ( jobMonitor.isFirstJobInMonitor(job) ) {
-               // If 1st job then update title & progress bar
-               String title = String.format("ffcut: %s %s", t, config.kmttg);
-               config.gui.setTitle(title);
-            }
+            if ( file.isFile(job.mpegFile_cut) ) {
+               if (totalSize == 0)
+                  sumSegmentFiles(job.demuxFiles);
+
+               // Update status in job table
+               Long size = file.size(job.mpegFile_cut);
+               String s = String.format("%.2f MB", (float)size/Math.pow(2,20));
+               String t = jobMonitor.getElapsedTime(job.time);
+               int pct = 0;
+               if (totalSize > 0)
+                  pct = Math.round((float)((float)size*100.0/totalSize));
+               
+               if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                  // Update STATUS column
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, t + "---" + s);
+                  
+                  // Update title & progress bar
+                  String title = String.format("ffcut: %d%% %s", pct, config.kmttg);
+                  config.gui.setTitle(title);
+                  config.gui.progressBar_setValue(pct);
+               } else {
+                  // Update STATUS column
+                  config.gui.jobTab_UpdateJobMonitorRowStatus(job, String.format("%d%%",pct) + "---" + s);
+               }
+            } else {
+               String t = jobMonitor.getElapsedTime(job.time);
+               config.gui.jobTab_UpdateJobMonitorRowStatus(job, t);
+               if ( jobMonitor.isFirstJobInMonitor(job) ) {
+                  // If 1st job then update title & progress bar
+                  String title = String.format("ffcut: %s %s", t, config.kmttg);
+                  config.gui.setTitle(title);
+               }               
+            }            
          }         
          return true;
       } else {
@@ -209,6 +235,8 @@ public class ffcut extends baseTask implements Serializable {
          log.error("edlToFFcut returned no commands");
          return null;
       }
+      
+      // Make batch script with ffmpeg commands
       batchFile = config.programDir + File.separator + string.basename(job.mpegFile);
       if (config.OS.equals("windows")) {
          batchFile += ".bat";
@@ -309,6 +337,14 @@ public class ffcut extends baseTask implements Serializable {
       command += " -i \"" + job.mpegFile + "\"";
       command += " -codec copy -ss " + ss + " -t " + t + " -y \"" + outFile + "\"";
       return command;
+   }
+   
+   private void sumSegmentFiles(Stack<String> files) {
+      if (files == null)
+         return;
+      for (String f : files) {
+         totalSize += file.size(f);
+      }
    }
    
    private void removeSegmentFiles(Stack<String> files) {
