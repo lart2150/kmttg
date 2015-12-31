@@ -23,13 +23,10 @@ import com.tivo.kmttg.task.atomic;
 import com.tivo.kmttg.task.autotune;
 import com.tivo.kmttg.task.baseTask;
 import com.tivo.kmttg.task.captions;
-import com.tivo.kmttg.task.comcut;
 import com.tivo.kmttg.task.comskip;
 import com.tivo.kmttg.task.comskip_review;
 import com.tivo.kmttg.task.custom;
 import com.tivo.kmttg.task.decrypt;
-import com.tivo.kmttg.task.download;
-import com.tivo.kmttg.task.download_decrypt;
 import com.tivo.kmttg.task.dsd;
 import com.tivo.kmttg.task.encode;
 import com.tivo.kmttg.task.ffcut;
@@ -45,7 +42,6 @@ import com.tivo.kmttg.task.qsfix;
 import com.tivo.kmttg.task.remote;
 import com.tivo.kmttg.task.skipdetect;
 import com.tivo.kmttg.task.slingbox;
-import com.tivo.kmttg.task.streamfix;
 import com.tivo.kmttg.task.tdownload_decrypt;
 import com.tivo.kmttg.task.tivolibre;
 import com.tivo.kmttg.task.vrdencode;
@@ -213,8 +209,6 @@ public class jobData implements Serializable, Cloneable {
          "autotune",
          "remote",
          "skipdetect",
-         "download",
-         "download_decrypt",
          "javadownload",
          "jdownload_decrypt",
          "tdownload_decrypt",
@@ -223,12 +217,10 @@ public class jobData implements Serializable, Cloneable {
          "dsd",
          "qsfix",
          "fffix",
-         "streamfix",
          "comskip",
          "adscan",
          "comskip_review",
          "vrdreview",
-         "comcut",
          "ffcut",
          "adcut",
          "captions",
@@ -261,8 +253,6 @@ public class jobData implements Serializable, Cloneable {
          job.process = new autotune(job);
       if (job.type.equals("captions"))
          job.process = new captions(job);
-      if (job.type.equals("comcut"))
-         job.process = new comcut(job);
       if (job.type.equals("comskip_review"))
          job.process = new comskip_review(job);
       if (job.type.equals("comskip"))
@@ -275,10 +265,6 @@ public class jobData implements Serializable, Cloneable {
          job.process = new tivolibre(job);
       if (job.type.equals("skipdetect"))
          job.process = new skipdetect(job);
-      if (job.type.equals("download_decrypt"))
-         job.process = new download_decrypt(job);
-      if (job.type.equals("download"))
-         job.process = new download(job);
       if (job.type.equals("dsd"))
          job.process = new dsd(job);
       if (job.type.equals("encode"))
@@ -307,8 +293,6 @@ public class jobData implements Serializable, Cloneable {
          job.process = new remote(job);
       if (job.type.equals("slingbox"))
          job.process = new slingbox(job);
-      if (job.type.equals("streamfix"))
-         job.process = new streamfix(job);
       if (job.type.equals("vrdencode"))
          job.process = new vrdencode(job);
       if (job.type.equals("vrdreview"))
@@ -377,12 +361,6 @@ public class jobData implements Serializable, Cloneable {
       else if (type.equals("skipdetect")) {
          file = title;
       }
-      else if (type.equals("download")) {
-         file = tivoFile;
-      }
-      else if (type.equals("download_decrypt")) {
-         file = mpegFile;
-      }
       else if (type.equals("javadownload")) {
          file = tivoFile;
       }
@@ -426,9 +404,6 @@ public class jobData implements Serializable, Cloneable {
       else if (type.equals("vrdreview")) {
          file = vprjFile;
       }
-      else if (type.equals("comcut")) {
-         file = mpegFile_cut;
-      }
       else if (type.equals("ffcut")) {
          file = mpegFile_cut;
       }
@@ -451,9 +426,6 @@ public class jobData implements Serializable, Cloneable {
     	  // NOTE: Must assign an output file of some sort to prevent job duplication
     	  // across different Tivos
          file = mpegFile;
-      }
-      else if (type.equals("streamfix")) {
-         file = mpegFile_fix;
       }
       else if (type.equals("slingbox")) {
          file = slingbox_file;

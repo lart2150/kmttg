@@ -293,9 +293,7 @@ public class jobMonitor {
    
    // If true this job can only be run one at a time per TiVo
    private static Boolean oneJobAtATime(String type) {
-      return type.equals("download") ||
-             type.equals("javadownload") ||
-             type.equals("download_decrypt") ||
+      return type.equals("javadownload") ||
              type.equals("jdownload_decrypt") ||
              type.equals("tdownload_decrypt") ||
              type.equals("metadata") ||
@@ -1532,9 +1530,7 @@ public class jobMonitor {
    }
    
    private static Boolean isDownloadJob(jobData job) {
-      return (job.type.equals("download") ||
-              job.type.equals("javadownload") ||
-              job.type.equals("download_decrypt") ||
+      return (job.type.equals("javadownload") ||
               job.type.equals("jdownload_decrypt") ||
               job.type.equals("tdownload_decrypt") ||
               job.type.equals("metadata"));
