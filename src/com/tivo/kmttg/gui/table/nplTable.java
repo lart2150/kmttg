@@ -334,8 +334,10 @@ public class nplTable extends TableMap {
          image.setAlignment(Pos.CENTER_LEFT);
          if ( entry.containsKey("ExpirationImage") ) {
             image.setImage(gui.Images.get(entry.get("ExpirationImage")));
-            image.imageName = entry.get("ExpirationImage");
+            image.imageName = entry.get("ExpirationImage");            
          }
+         if (entry.containsKey("clipMetadataId"))
+            image.setImage2(gui.Images.get("skipmode"));
          image.setLabel(getPctWatched(entry));
          show = new sortableShow(entry);
          date = new sortableDate(entry);
@@ -1549,10 +1551,6 @@ public class nplTable extends TableMap {
             pct = "" + percent + "%";
          }
       }
-      
-      // If clipMetadata present then mark with an "s"
-      if (data.containsKey("clipMetadataId"))
-         pct = "s " + pct;
       
       // If this offerId has an entry in skipmode.ini then mark with an asterisk
       if (data.containsKey("offerId") && skipEntries != null) {
