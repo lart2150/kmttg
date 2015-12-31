@@ -1749,7 +1749,7 @@ public class gui extends Application {
          "expires-soon-recording", "save-until-i-delete-recording",
          "in-progress-recording", "in-progress-transfer",
          "expired-recording", "suggestion-recording", "folder",
-         "copy-protected", "running", "queued"
+         "copy-protected", "running", "queued", "skipmode"
       };
       URL url;
       for (int i=0; i<names.length; i++) {
