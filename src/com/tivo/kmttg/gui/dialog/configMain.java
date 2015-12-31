@@ -129,7 +129,6 @@ public class configMain {
    private static TextField encode_output_dir = null;
    private static TextField tivodecode = null;
    private static TextField dsd = null;
-   //private static TextField curl = null;
    private static TextField ffmpeg = null;
    private static TextField mediainfo = null;
    private static TextField mencoder = null;
@@ -907,9 +906,6 @@ public class configMain {
       // ccextractor
       ccextractor.setText(config.ccextractor);
       
-      // curl
-      //curl.setText(config.curl);
-      
       // AtomicParsley
       AtomicParsley.setText(config.AtomicParsley);
       
@@ -1686,20 +1682,7 @@ public class configMain {
          }
       }
       config.ccextractor = value;
-      
-      // curl
-      /*value = string.removeLeadingTrailingSpaces(curl.getText());
-      if (value.length() == 0) {
-         // Reset to default if none given
-         value = "";
-      } else {
-         if ( ! file.isFile(value) ) {
-            textFieldError(curl, "curl setting not a valid file: '" + value + "'");
-            errors++;
-         }
-      }
-      config.curl = value;*/
-      
+            
       // AtomicParsley
       value = string.removeLeadingTrailingSpaces(AtomicParsley.getText());
       if (value.length() == 0) {
@@ -2019,7 +2002,6 @@ public class configMain {
       files_path = new TextField(); files_path.setPrefWidth(30);
       tivodecode = new TextField(); tivodecode.setPrefWidth(30);
       dsd = new TextField(); dsd.setPrefWidth(30);
-      //curl = new TextField(); curl.setPrefWidth(30);
       ffmpeg = new TextField(); ffmpeg.setPrefWidth(30);
       mediainfo = new TextField(); mediainfo.setPrefWidth(30);
       mencoder = new TextField(); mencoder.setPrefWidth(30);
@@ -2141,7 +2123,6 @@ public class configMain {
       Label encode_output_dir_label = new Label();
       Label tivodecode_label = new Label();
       Label dsd_label = new Label();
-      Label curl_label = new Label();
       Label ffmpeg_label = new Label();
       Label mediainfo_label = new Label();
       Label mencoder_label = new Label();
@@ -2294,7 +2275,6 @@ public class configMain {
       encode_output_dir_label.setText("Encode Output Dir"); 
       tivodecode_label.setText("tivodecode"); 
       dsd_label.setText("dsd"); 
-      curl_label.setText("curl"); 
       ffmpeg_label.setText("ffmpeg"); 
       mediainfo_label.setText("mediainfo cli"); 
       mencoder_label.setText("mencoder"); 
@@ -2559,20 +2539,6 @@ public class configMain {
             }
          }
       });
-
-      /*curl.setOnMouseClicked(new EventHandler<MouseEvent>() {
-         @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
-               if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     curl.setText(selectedFile.getPath());
-                  }
-               }
-            }
-         }
-      });*/
 
       ffmpeg.setOnMouseClicked(new EventHandler<MouseEvent>() {
          @Override
@@ -2942,10 +2908,7 @@ public class configMain {
       programs_panel.getColumnConstraints().addAll(util.cc_none(), util.cc_stretch());
       programs_panel.setPadding(new Insets(5,5,5,5)); // top, right, bottom, left
       
-      // curl
       gy=0;
-      //programs_panel.add(curl_label, 0, gy);
-      //programs_panel.add(curl, 1, gy);
       
       // tivodecode
       gy++;
@@ -3425,7 +3388,6 @@ public class configMain {
       encode_output_dir.setTooltip(getToolTip("encode_output_dir"));
       tivodecode.setTooltip(getToolTip("tivodecode"));
       dsd.setTooltip(getToolTip("dsd"));
-      //curl.setTooltip(getToolTip("curl"));
       ffmpeg.setTooltip(getToolTip("ffmpeg"));
       mediainfo.setTooltip(getToolTip("mediainfo"));
       mencoder.setTooltip(getToolTip("mencoder"));
@@ -3930,12 +3892,6 @@ public class configMain {
          text += ".TiVo files in either mpeg2 program stream or transport stream containers.<br>";
          text += "<b>NOTE: This requires you have at least a partial install of TiVo Desktop as well with</b><br>";
          text += "<b>TiVoDirectShowFilter.dll installed</b><br>";
-         text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
-      }
-      else if (component.equals("curl")) {
-         text =  "<b>curl</b><br>";
-         text += "<b>REQUIRED</b> if you plan to download files from your TiVos.<br>";
-         text += "This defines the full path to the <b>curl</b> program.<br>";
          text += "<b>NOTE: Double-click mouse in this field to bring up File Browser</b>.";
       }
       else if (component.equals("ffmpeg")) {

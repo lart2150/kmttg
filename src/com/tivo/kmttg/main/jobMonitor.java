@@ -274,7 +274,7 @@ public class jobMonitor {
       jobData job = new jobData();
       job.tivoName           = name;
       job.type               = "playlist";
-      job.name               = "curl";
+      job.name               = "playlist";
       submitNewJob(job);
       if (config.rpcnpl == 1 && config.rpcEnabled(name)) {
          // RPC NPL

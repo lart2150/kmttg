@@ -33,7 +33,6 @@ public class config {
    public static int cpu_cores = 1;
    
    // 3rd party executable files
-   public static String curl = "";
    public static String tivodecode = "";
    public static String dsd = "";
    public static String outputDir = "";
@@ -258,11 +257,6 @@ public class config {
       
       // Could be the 3rd party tools are installed locally but just configured
       // wrong, so try and automatically correct them
-      if ( ! file.isFile(curl) ) {
-         result = getProgramDefault("curl");
-         if ( file.isFile(result) )
-            curl = result;
-      }
       if ( ! file.isFile(tivodecode) ) {
          result = getProgramDefault("tivodecode");
          if ( file.isFile(result) )
@@ -695,7 +689,6 @@ public class config {
       metadata_entries   = "";
       
       // 3rd party executable defaults
-      curl          = getProgramDefault("curl");
       tivodecode    = getProgramDefault("tivodecode");
       dsd           = getProgramDefault("dsd");
       ffmpeg        = getProgramDefault("ffmpeg");
@@ -729,22 +722,8 @@ public class config {
       if (OS.equals("windows")) {
          exe = ".exe";
       }
-                                          
-      if (programName.equals("curl")) {
-        String curl          = programDir + s + "curl"          + s + "curl"          + exe;
-        if ( ! OS.equals("windows"))
-           curl = "/usr/bin/curl";
-        if (OS.equals("other") && ! file.isFile(curl)) {
-            result = file.unixWhich("curl");
-            if (result != null)
-               curl = result;
-         }
-        if (!file.isFile(curl))
-           curl = "";
-         return curl;
-      }
       
-      else if (programName.equals("tivodecode")) {
+      if (programName.equals("tivodecode")) {
          String tivodecode    = programDir + s + "tivodecode"    + s + "tivodecode"    + exe;      
          if (OS.equals("other") && ! file.isFile(tivodecode)) {
             result = file.unixWhich("tivodecode");
@@ -1040,9 +1019,6 @@ public class config {
             }
             if (key.equals("dsd")) {
                dsd = line;
-            }
-            if (key.equals("curl")) {
-               curl = line;
             }
             if (key.equals("ffmpeg")) {
                ffmpeg = line;
@@ -1364,8 +1340,6 @@ public class config {
          ofp.write("<tivolibreDecrypt>\n" + tivolibreDecrypt + "\n\n");
          
          ofp.write("<dsd>\n" + dsd + "\n\n");
-         
-         ofp.write("<curl>\n" + curl + "\n\n");
          
          ofp.write("<ffmpeg>\n" + ffmpeg + "\n\n");
          

@@ -35,7 +35,6 @@ import com.tivo.kmttg.task.javaNowPlaying;
 import com.tivo.kmttg.task.javadownload;
 import com.tivo.kmttg.task.javametadata;
 import com.tivo.kmttg.task.jdownload_decrypt;
-import com.tivo.kmttg.task.metadata;
 import com.tivo.kmttg.task.metadataTivo;
 import com.tivo.kmttg.task.push;
 import com.tivo.kmttg.task.qsfix;
@@ -203,7 +202,6 @@ public class jobData implements Serializable, Cloneable {
       return new String[] {
          "playlist",
          "javaplaylist",
-         "metadata",
          "javametadata",
          "metadataTivo",
          "autotune",
@@ -277,8 +275,6 @@ public class jobData implements Serializable, Cloneable {
          job.process = new jdownload_decrypt(job);
       if (job.type.equals("tdownload_decrypt"))
          job.process = new tdownload_decrypt(job);
-      if (job.type.equals("metadata"))
-         job.process = new metadata(job);
       if (job.type.equals("metadataTivo"))
          job.process = new metadataTivo(job);
       if (job.type.equals("fffix"))
@@ -342,9 +338,6 @@ public class jobData implements Serializable, Cloneable {
       }
       else if (type.equals("javaplaylist")) {
          file = tivoName;
-      }
-      else if (type.equals("metadata")) {
-         file = metaFile;
       }
       else if (type.equals("javametadata")) {
          file = metaFile;
