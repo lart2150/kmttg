@@ -273,18 +273,19 @@ public class file {
             if (r.Command("Delete", json) != null) {
                log.warn(">> rpc delete succeeded.");
                // Delete entry from TiVo tab if currently displayed
-               Stack<String> tivoNames = config.getNplTivoNames();
-               if (tivoNames.size() > 0) {
-                  for (String tivo : tivoNames) {
-                     if (tivo.equals(tivoName)) {
-                        tivoTab t = config.gui.getTab(tivoName);
-                        if (t != null) {
-                           t.getTable().RemoveEntry(recordingId);
+               if (config.GUIMODE) {
+                  Stack<String> tivoNames = config.getNplTivoNames();
+                  if (tivoNames.size() > 0) {
+                     for (String tivo : tivoNames) {
+                        if (tivo.equals(tivoName)) {
+                           tivoTab t = config.gui.getTab(tivoName);
+                           if (t != null) {
+                              t.getTable().RemoveEntry(recordingId);
+                           }
                         }
                      }
                   }
                }
-
             }
             r.disconnect();
          }
