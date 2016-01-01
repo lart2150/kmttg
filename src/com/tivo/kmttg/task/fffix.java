@@ -69,16 +69,21 @@ public class fffix extends baseTask implements Serializable {
       debug.print("");
       Hashtable<String,String> info = ffmpeg.getVideoInfo(job.mpegFile);
       String format = "dvd";
+      String video = "mpeg2";
       if (info != null) {
          if (info.get("container").equals("mpegts"))
             format = "mpegts";
          if (info.get("container").equals("mp4"))
             format = "mp4";
+         if (info.get("video").equals("h264"))
+            video = "h264";
       }
       Stack<String> command = new Stack<String>();
       command.add(config.ffmpeg);
-      command.add("-fflags");
-      command.add("+genpts+igndts");
+      if (video.equals("mpeg2")) {
+         command.add("-fflags");
+         command.add("+genpts+igndts");
+      }
       command.add("-i");
       command.add(job.mpegFile);
       command.add("-codec");
