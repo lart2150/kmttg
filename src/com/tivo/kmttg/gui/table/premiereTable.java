@@ -32,6 +32,7 @@ import com.tivo.kmttg.gui.comparator.DurationComparator;
 import com.tivo.kmttg.gui.comparator.StringChannelComparator;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
+import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.rnpl;
@@ -284,6 +285,14 @@ public class premiereTable extends TableMap {
           if (json != null) {
              config.gui.show_details.update(TABLE, currentTivo, json);
           }
+       }
+       else if (keyCode == KeyCode.A) {
+          int[] selected = TableUtil.GetSelectedRows(TABLE);
+          if (selected == null || selected.length < 1)
+             return;
+          JSONObject json = GetRowData(selected[0]);
+          if (json != null)
+             auto.AddHistoryEntry(json);
        }
        else if (keyCode == KeyCode.P) {
           config.gui.remote_gui.premiere_tab.recordSP.fire();

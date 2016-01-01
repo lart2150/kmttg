@@ -34,6 +34,7 @@ import com.tivo.kmttg.gui.comparator.DurationComparator;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
+import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -263,6 +264,14 @@ public class guideTable extends TableMap {
          if (json != null) {
             config.gui.show_details.update(TABLE, currentTivo, json);
          }
+      }
+      else if (keyCode == KeyCode.A) {
+         int[] selected = TableUtil.GetSelectedRows(TABLE);
+         if (selected == null || selected.length < 1)
+            return;
+         JSONObject json = GetRowData(selected[0]);
+         if (json != null)
+            auto.AddHistoryEntry(json);
       }
       else if (keyCode == KeyCode.P) {
          config.gui.remote_gui.guide_tab.recordSP.fire();

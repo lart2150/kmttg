@@ -298,6 +298,14 @@ public class todoTable extends TableMap {
           e.consume(); // Need this so as not to remove focus which is default key action
           DeleteCB();
        }
+       else if (keyCode == KeyCode.A) {
+          int[] selected = TableUtil.GetSelectedRows(TABLE);
+          if (selected == null || selected.length < 1)
+             return;
+          JSONObject json = GetRowData(selected[0]);
+          if (json != null)
+             auto.AddHistoryEntry(json);
+       }
        else if (keyCode == KeyCode.C) {
           config.gui.remote_gui.todo_tab.cancel.fire();
        }
