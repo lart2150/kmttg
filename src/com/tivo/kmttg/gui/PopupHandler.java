@@ -57,6 +57,7 @@ public class PopupHandler {
             items.add(new PopupPair(
                "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
             );
+            items.add(new PopupPair("Add to history file [a]", KeyCode.A, subTabName));
          }
          if (subTabName.equals("Won't Record")) {
             if (config.rpcEnabled(tivoName))
@@ -81,6 +82,7 @@ public class PopupHandler {
             items.add(new PopupPair(
                   "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
             );
+            items.add(new PopupPair("Add to history file [a]", KeyCode.A, subTabName));
          }
          if (subTabName.equals("Season Passes")) {
             items.add(new PopupPair("Change Priority [p]", KeyCode.P, subTabName));
