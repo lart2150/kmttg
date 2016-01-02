@@ -13,7 +13,6 @@ import java.util.Stack;
 import javafx.concurrent.Task;
 
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.httpserver.kmttgServer;
 import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.backgroundProcess;
@@ -724,38 +723,35 @@ public class auto {
    public static void AddHistoryEntry(JSONObject entry) {
       try {
          String ProgramId = null;
-         String ProgramId_unique = null;
          String title = "";
          if (entry.has("partnerContentId")) {
             // SEARCH, GUIDE, PREMIERE entry
             ProgramId = entry.getString("partnerContentId");
             ProgramId = ProgramId.replaceFirst("^.+\\.", "");
-            long start = TableUtil.getStartTime(entry);
-            if (start != 0)
-               ProgramId_unique = ProgramId + "_" + start;
          }
          else if (entry.has("partnerCollectionId")) {
-            // TODO entry
+            // todo entry
             ProgramId = entry.getString("partnerCollectionId");
             ProgramId = ProgramId.replaceFirst("^.+\\.", "");
-            long start = TableUtil.getStartTime(entry);
-            if (start != 0)
-               ProgramId_unique = ProgramId + "_" + start;
          }
          if (entry.has("title"))
             title = entry.getString("title");
          if (entry.has("subtitle"))
             title += " - " + entry.getString("subtitle");
-         if (ProgramId != null && ProgramId_unique != null) {
-            Hashtable<String,String> job = new Hashtable<String,String>();
-            job.put("ProgramId", ProgramId);
-            job.put("ProgramId_unique", ProgramId_unique);
-            job.put("title", title);
+         if (ProgramId != null) {
+            jobData job = new jobData();
+            job.ProgramId = ProgramId;
+            job.title = title;
             int result = AddHistoryEntry(job);
             if (result == 2)
                log.warn("History entry already exists, not added");
-            if (result == 1)
+            if (result == 1) {
                log.print("History entry added");
+               if (config.showHistoryInTable == 1) {
+                  // Update history hash (used for highlighting entries with IDs in auto.history)
+                  keywordMatchHistoryFast("bogus", true);
+               }
+            }
             if (result == 0)
                log.error("History entry not added");
          }
