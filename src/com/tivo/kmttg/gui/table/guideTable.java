@@ -158,6 +158,20 @@ public class guideTable extends TableMap {
                   JSONObject json = entry.getDATE().json;
                   if (json != null && json.has("__inTodo__"))
                      TableUtil.setRowColor(this, config.tableBkgndProtected);
+                  
+                  // Mark rows with entries in auto history file
+                  if (config.showHistoryInTable == 1) {
+                     try {
+                        if (json.has("partnerContentId")) {
+                           String programId = json.getString("partnerContentId");
+                           programId = programId.replaceFirst("^.+\\.", "");
+                           if (auto.keywordMatchHistoryFast(programId, false))
+                              TableUtil.setRowColor(this, config.tableBkgndInHistory);
+                        }
+                     } catch (JSONException e) {
+                        log.error("guideTable ColorRowFactory - " + e.getMessage());
+                     }
+                  }
                }
             }
          };
