@@ -84,7 +84,7 @@ public class javaNowPlaying extends baseTask implements Serializable {
       if (testLimit) {
          urlString += "/TiVoConnect?Command=QueryContainer&Container=/NowPlaying&Recurse=Yes&ItemCount=5&AnchorOffset=";
       } else {
-         urlString += "/TiVoConnect?Command=QueryContainer&Container=/NowPlaying&Recurse=Yes&AnchorOffset=";
+         urlString += "/TiVoConnect?Command=QueryContainer&Container=/NowPlaying&Recurse=Yes&ItemCount=32&AnchorOffset=";
       }
       urlString += AnchorOffset;
       final String url = urlString;
