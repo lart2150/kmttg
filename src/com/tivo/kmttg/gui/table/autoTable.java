@@ -3,17 +3,21 @@ package com.tivo.kmttg.gui.table;
 import com.tivo.kmttg.gui.dialog.autoTableEntry;
 import com.tivo.kmttg.main.autoConfig;
 import com.tivo.kmttg.main.autoEntry;
+import com.tivo.kmttg.util.log;
 
+import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 public class autoTable {
    public TableView<Tabentry> TABLE = null;
 
    public autoTable() {
       TABLE = new TableView<Tabentry>();
-      TABLE.setEditable(false);
+      //TABLE.setEditable(false);
       TableColumn<Tabentry,autoTableEntry> col1 = new TableColumn<Tabentry,autoTableEntry>("Type");
       col1.setCellValueFactory(new PropertyValueFactory<Tabentry,autoTableEntry>("Type"));
       col1.setComparator(null); // Disable column sorting
@@ -22,6 +26,13 @@ public class autoTable {
       col2.setCellValueFactory(new PropertyValueFactory<Tabentry,String>("Keywords"));
       col2.setComparator(null); // Disable column sorting
       TABLE.getColumns().add(col2);
+
+      // Add keyboard listener
+      TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {
+         public void handle(KeyEvent e) {
+            KeyPressed(e);
+         }
+      });
    }
 
    public static class Tabentry {
@@ -56,6 +67,10 @@ public class autoTable {
       return TableUtil.GetSelectedRows(TABLE);
    }
    
+   private void InsertRow(int row, autoEntry entry) {
+      TABLE.getItems().add(row, new Tabentry(entry));
+   }
+   
    public void RemoveRow(int row) {
       TABLE.getItems().remove(row);
       resize();
@@ -72,5 +87,46 @@ public class autoTable {
    
    public void resize() {
       TableUtil.autoSizeTableViewColumns(TABLE, true);
+   }
+   
+   private void KeyPressed(KeyEvent e) {
+      if (e.isControlDown())
+         return;
+      KeyCode keyCode = e.getCode();
+      if (keyCode == KeyCode.UP) {
+         // Move selected row up
+         int[] selected = TableUtil.GetSelectedRows(TABLE);
+         if (selected == null || selected.length < 0) {
+            log.error("No rows selected");
+            return;
+         }
+         int row;
+         for (int i=0; i<selected.length; ++i) {
+            row = selected[i];
+            if (row-1 >= 0) {
+               autoEntry entry = GetRowData(row);
+               RemoveRow(row);
+               InsertRow(row-1, entry);
+            }
+         }
+      }
+      else if (keyCode == KeyCode.DOWN) {
+         // Move selected row down
+         int[] selected = TableUtil.GetSelectedRows(TABLE);
+         if (selected == null || selected.length < 0) {
+            log.error("No rows selected");
+            return;
+         }
+         int row;
+         for (int i=0; i<selected.length; ++i) {
+            row = selected[i];
+            if (row < TABLE.getItems().size()-1) {
+               autoEntry entry = GetRowData(row);
+               RemoveRow(row);
+               InsertRow(row+1, entry);
+               TABLE.getSelectionModel().select(row);
+            }
+         }
+      }
    }
 }
