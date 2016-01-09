@@ -490,6 +490,7 @@ public class configAuto {
          text += "desired and then use <b>UPDATE</b> button to apply form settings to the entry.<br>";
          text += "Use <b>ADD</b> button to add a new entry<br>";
          text += "Use <b>DEL</b> button to remove selected entries<br>";
+         text += "Use <b>up</b> and <b>down</b> arrows to move selected row up and down in priority.<br>";
          text += "NOTE: Entry updates are only saved after you <b>OK</b> this form.";
       }
       else if (component.equals("type")) {
