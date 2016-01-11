@@ -1,6 +1,8 @@
 package com.tivo.kmttg.gui.remote;
 
 import java.io.File;
+import java.util.Optional;
+import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -19,6 +21,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -150,9 +153,36 @@ public class seasonpasses {
       copy.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
             // Copy selected SPs to a TiVo
-            String tivoName = tivo.getValue();
-            if (tivoName != null && tivoName.length() > 0)
+            // Build list of eligible TiVos
+            String thisTivo = tivo.getValue();
+            Stack<String> all = config.getTivoNames();
+            for (int i=0; i<all.size(); ++i) {
+               String tivo = all.get(i);
+               if (! config.rpcEnabled(tivo) && ! config.mindEnabled(tivo)) {
+                  all.remove(i);
+                  continue;
+               }
+            }
+            
+            // Prompt user to choose a TiVo
+            ChoiceDialog<String> dialog = new ChoiceDialog<String>(all.get(0), all);
+            dialog.setTitle("Copy To");
+            dialog.setHeaderText("Choose which TiVo to copy to");
+            dialog.setContentText("TiVo:");
+            String tivoName = null;
+            Optional<String> result = dialog.showAndWait();
+            if (result.isPresent())
+               tivoName = result.get();
+            if (tivoName != null && tivoName.length() > 0) {
+               if (tivoName.equals(thisTivo)) {
+                  // Don't copy to self unless in loaded state
+                  if (! tab.isTableLoaded()) {
+                     log.error("Destination TiVo is same as source TiVo: " + tivoName);
+                     return;
+                  }
+               }
                tab.SPListCopy(tivoName);
+            }
          }
       });         
 
