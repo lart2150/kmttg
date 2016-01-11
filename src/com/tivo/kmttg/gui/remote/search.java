@@ -116,6 +116,7 @@ public class search {
                return;
             if( event.getCode() == KeyCode.ENTER ) {
                button.fire();
+               event.consume();
             }
          }
       });
