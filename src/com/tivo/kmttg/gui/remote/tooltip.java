@@ -469,9 +469,8 @@ public class tooltip {
          text += "Load a previously saved Season Pass list from a file. When loaded the table will have a<br>";
          text += "<b>Loaded: </b> prefix in the TITLE column indicating that these were loaded from a file<br>";
          text += "to distinguish from normal case where they were obtained from displayed TiVo name.<br>";
-         text += "Note that loaded season passes can then be copied to TiVos by selecting the TiVo you want to<br>";
-         text += "copy to, then selecting rows in the table you want to copy and then clicking on the <b>Copy</b><br>";
-         text += "button.";
+         text += "Note that loaded season passes can then be copied to TiVos by selecting rows of interest in<br>";
+         text += "the table and then using the <b>Copy</b> button to copy them to a TiVo.";
       }
       else if (component.equals("export_sp")){
          text = "<b>Export</b><br>";
@@ -488,12 +487,11 @@ public class tooltip {
       }
       else if (component.equals("copy_sp")){
          text = "<b>Copy</b><br>";
-         text += "This is used to copy <b>loaded</b> season passes in the table to one of your TiVos.<br>";
-         text += "Select the TiVo you want to copy to, load saved season passes from a saved file, and then<br>";
-         text += "select rows in the table that you want copied, then press this button to perform the copy.<br>";
-         text += "If you want to copy from another TiVo, first switch to that TiVo and save its<br>";
-         text += "season passes to a file. Then switch to destination TiVo and load the file you just saved.<br>";
-         text += "Now you can select entries in the table and use this button to copy to destination TiVo.<br>";
+         text += "This is used to copy selected season passes in the table to one of your TiVos.<br>";
+         text += "Select 1 or more rows in the table that you want copied, then press this button to initiate<br>";
+         text += "the copy. You will be prompted for destination TiVo to copy to.<br>";
+         text += "If you want to copy from a previously saved SP list, then use the <b>Load</b> button to load<br>";
+         text += "season passes from a file, then use this <b>Copy</b> button to copy selected entries to a TiVo.<br>";
          text += "Note that kmttg will attempt to avoid duplicated season passes on the destination TiVo by<br>";
          text += "checking against the current set of season passes already on the TiVo.";
       }
