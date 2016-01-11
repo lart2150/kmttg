@@ -177,6 +177,11 @@ public class searchTable extends TableMap {
                            if (auto.keywordMatchHistoryFast(programId, false))
                               TableUtil.setRowColor(this, config.tableBkgndInHistory);
                         }
+                        else if (json.has("partnerCollectionId")) {
+                           String programId = json.getString("partnerCollectionId");
+                           if (auto.keywordMatchHistoryFast(programId, false))
+                              TableUtil.setRowColor(this, config.tableBkgndInHistory);                           
+                        }
                      } catch (JSONException e) {
                         log.error("searchTable ColorRowFactory - " + e.getMessage());
                      }
