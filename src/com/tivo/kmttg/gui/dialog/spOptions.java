@@ -42,9 +42,9 @@ public class spOptions {
    volatile Hashtable<String,JSONObject> channelHash = new Hashtable<String,JSONObject>();
    
    public spOptions() {      
-      recordHash.add("Repeats & first-run",   "rerunsAllowed");
-      recordHash.add("First-run only",        "firstRunOnly");
-      recordHash.add("All (with duplicates)", "everyEpisode");
+      recordHash.add("New & repeats",   "rerunsAllowed");
+      recordHash.add("New only",        "firstRunOnly");
+      recordHash.add("Everything", "everyEpisode");
             
       numberHash.add("1 recorded show", 1);
       numberHash.add("2 recorded shows", 2);
@@ -114,9 +114,9 @@ public class spOptions {
       label = new Label();
       record = new ChoiceBox<String>();
       record.getItems().addAll(
-         "Repeats & first-run", "First-run only", "All (with duplicates)"
+         "New & repeats", "New only", "Everything"
       );
-      record.setValue("First-run only");
+      record.setValue("New only");
       
       channel = new ChoiceBox<String>();
       channel.getItems().add("All");
@@ -424,7 +424,7 @@ public class spOptions {
    }
    
    private void setChoices(Boolean WL) {
-      String All = "All (with duplicates)";
+      String All = "Everything";
       String c1 = "Recordings Only";
       String c2 = "Recordings & Streaming Videos";
       String c3 = "Streaming Only";
@@ -438,8 +438,8 @@ public class spOptions {
          include.setValue(c1);
          updateStates();
       } else {
-         if( record.getItems().contains(All) )
-            record.getItems().remove(All);         
+         if( ! record.getItems().contains(All) )
+            record.getItems().add(All);
          if( ! include.getItems().contains(c2) )
             include.getItems().add(c2);
          if( ! include.getItems().contains(c3) )
