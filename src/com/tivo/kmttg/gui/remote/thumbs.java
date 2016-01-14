@@ -126,6 +126,10 @@ public class thumbs {
                   all.remove(i);
                   continue;
                }
+               if (! config.nplCapable(tivo)) {
+                  all.remove(i);
+                  continue;
+               }
             }
             
             // Prompt user to choose a TiVo
