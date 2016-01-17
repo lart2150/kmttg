@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Stack;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -20,7 +21,6 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -64,7 +64,7 @@ public class TableUtil {
    private static Stage searchDialog = null;
    private static TextField searchField = null;
    private static Button find = null;
-   private static Dialog<?> thumbsDialog = null;
+   private static Stage thumbsDialog = null;
    private static ChoiceBox<String> thumbsChoice = null;
    private static double search_x = -1;
    private static double search_y = -1;
@@ -434,6 +434,7 @@ public class TableUtil {
       if (thumbsDialog == null) {
          // Dialog not created yet, so do so
          HBox row1 = new HBox();
+         row1.setSpacing(5);
          Label rating = new Label("Thumbs Rating: ");
          thumbsChoice = new ChoiceBox<String>();
          for (int i=-3; i<=3; ++i)
@@ -473,16 +474,22 @@ public class TableUtil {
                   }
                };
                if (thumbsDialog != null) {
-                  thumbsDialog.hide();
+                  Platform.runLater(new Runnable() {
+                     @Override public void run() {
+                        thumbsDialog.hide();
+                     }
+                  });
                }
                new Thread(task).start();
             }
          });
          row1.getChildren().addAll(setButton, rating, thumbsChoice);
-         thumbsDialog = new Dialog<>();
-         config.gui.setFontSize(thumbsDialog, config.FontSize);
+         row1.setPrefWidth(300);
+         thumbsDialog = new Stage();
+         thumbsDialog.initOwner(config.gui.getFrame());
+         thumbsDialog.setScene(new Scene(row1));
+         config.gui.setFontSize(thumbsDialog.getScene(), config.FontSize);
          thumbsDialog.setTitle("Thumbs Rating");
-         thumbsDialog.getDialogPane().setContent(row1);
          thumbsDialog.show();
       }
       
@@ -496,7 +503,12 @@ public class TableUtil {
                   rating = r.getThumbsRating(json);
                   r.disconnect();
                }
-               thumbsChoice.setValue("" + rating);
+               final int rating_final = rating;
+               Platform.runLater(new Runnable() {
+                  @Override public void run() {
+                     thumbsChoice.setValue("" + rating_final);
+                  }
+               });
                return null;
             }
          };
