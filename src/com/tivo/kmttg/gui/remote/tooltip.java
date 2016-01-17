@@ -240,7 +240,7 @@ public class tooltip {
          text = "<b>Copy</b><br>";
          text += "This is used to copy selected thumbs in the table to one of your TiVos.<br>";
          text += "Select 1 or more rows in the table that you want copied, then press this button to initiate<br>";
-         text += "the copy. You will be prompted for destination TiVo to copy to.<br>";
+         text += "the copy. You will be prompted for destination TiVo to copy to (series 4 and later only).<br>";
          text += "If you want to copy from a previously saved thumbs list, then use the <b>Load</b> button to load<br>";
          text += "thumbs from a file, then use this <b>Copy</b> button to copy selected entries to a TiVo.<br>";
          text += "Note that any existing shows with ratings on the destination TiVo will be overriden.";
