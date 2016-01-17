@@ -117,12 +117,12 @@ public class thumbs {
       copy.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
             // Copy selected thumbs to a TiVo
-            // Build list of eligible TiVos
+            // Build list of eligible TiVos (series 4 and later and no Minis)
             String thisTivo = tivo.getValue();
             Stack<String> all = config.getTivoNames();
             for (int i=0; i<all.size(); ++i) {
                String tivo = all.get(i);
-               if (! config.rpcEnabled(tivo) && ! config.mindEnabled(tivo)) {
+               if (! config.rpcEnabled(tivo)) {
                   all.remove(i);
                   continue;
                }
