@@ -54,8 +54,8 @@ public class TableMap {
    }
    
    public static TableMap get(String name) {
-      if (map.containsKey(name))
-         return map.get(name);
+      if (map.containsKey(name.toLowerCase()))
+         return map.get(name.toLowerCase());
       else
          log.error("Missing TableMap for: " + name);
       return null;
@@ -74,8 +74,8 @@ public class TableMap {
    }
    
    public static void clear(String name) {
-      if (map.containsKey(name))
-         map.get(name).clear();
+      if (map.containsKey(name.toLowerCase()))
+         map.get(name.toLowerCase()).clear();
       else
          log.error("Missing TableMap for: " + name);
      
