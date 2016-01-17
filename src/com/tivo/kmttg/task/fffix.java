@@ -86,7 +86,9 @@ public class fffix extends baseTask implements Serializable {
       }
       command.add("-i");
       command.add(job.mpegFile);
-      command.add("-codec");
+      command.add("-acodec");
+      command.add("copy");
+      command.add("-vcodec");
       command.add("copy");
       command.add("-avoid_negative_ts");
       command.add("make_zero");
