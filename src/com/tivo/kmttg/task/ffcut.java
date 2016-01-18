@@ -260,7 +260,7 @@ public class ffcut extends baseTask implements Serializable {
          String format = "";
          if (string.getSuffix(job.mpegFile_cut).equals("mpg"))
             format = "-f dvd";
-         ofp.write("\" -acodec copy -vcodec copy" + format + " -y \"" + job.mpegFile_cut + "\"" + eol);
+         ofp.write("\" -acodec copy -vcodec copy " + format + " -y \"" + job.mpegFile_cut + "\"" + eol);
          ofp.close();
          if ( ! config.OS.equals("windows") ) {
             String[] command = new String[] {"chmod", "ugo+x", batchFile};
