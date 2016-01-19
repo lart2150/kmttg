@@ -237,14 +237,15 @@ public class ffcut extends baseTask implements Serializable {
       }
       
       // Make batch script with ffmpeg commands
-      batchFile = config.programDir + File.separator + string.basename(job.mpegFile);
+      String suffix = ".sh";
       if (config.OS.equals("windows")) {
-         batchFile += ".bat";
+         suffix = ".bat";
          eol += "\r";
-      } else {
-         batchFile += ".sh";
       }
       try {
+         File tmp = File.createTempFile("ffcut", suffix, new File(config.programDir));
+         tmp.deleteOnExit();
+         batchFile = tmp.getPath();
          BufferedWriter ofp = new BufferedWriter(new FileWriter(batchFile, false));
          // Segment file generation
          for (String command : commands) {
