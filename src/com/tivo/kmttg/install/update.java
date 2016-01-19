@@ -138,6 +138,17 @@ public class update {
                   }
                });
                if (zipFile != null) {
+                  // Remove config.programDir/__MACOSX if it exists
+                  String macosx = config.programDir + File.separator + "__MACOSX";
+                  if (file.isDir(macosx)) {
+                     String[] command = new String[] {"/bin/rm", "-fr", macosx};
+                     try {
+                        log.warn("Removing: " + macosx);
+                        Runtime.getRuntime().exec(command);
+                     } catch (IOException e) {
+                        // fail silently
+                     }                     
+                  }
                   if (Unzip.unzip(config.programDir, zipFile) ) {
                      log.warn("Tools update complete");
                      file.delete(zipFile);
