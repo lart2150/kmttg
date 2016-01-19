@@ -241,6 +241,8 @@ public class ffcut extends baseTask implements Serializable {
       if (config.OS.equals("windows")) {
          batchFile += ".bat";
          eol += "\r";
+      } else {
+         batchFile += ".sh";
       }
       try {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(batchFile, false));
