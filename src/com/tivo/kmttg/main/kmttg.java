@@ -20,9 +20,16 @@ public class kmttg {
       debug.enabled = false;
       
       // This is to workaround issue that started with Java 7 update 40 which sets
-      // this property to "MD2, RSA keySize < 1024" and prevents authentication
-      // from working
-      Security.setProperty("jdk.certpath.disabledAlgorithms","");
+      // jdk.certpath.disabledAlgorithms property to "MD2, RSA keySize < 1024" and
+      // prevents authentication from working (because mind.tivo.com has a 512 bit key in chain).
+      // Debug issues using following when running java: -Djavax.net.debug=all
+      // Search for: "Cipher Suite: ..."
+      // This cipher suite works with mind.tivo.com: SSL_RSA_WITH_RC4_128_SHA
+      System.setProperty("https.cipherSuites", "SSL_RSA_WITH_RC4_128_SHA");
+      // This needs to be set to something to override default setting of: "MD2, RSA keySize < 1024"
+      Security.setProperty("jdk.certpath.disabledAlgorithms","TLS_RSA_WITH_AES_128_CBC_SHA, SSL_RSA_WITH_3DES_EDE_CBC_SHA");
+      // This also needed for recent releases of Java 8
+      Security.setProperty("jdk.tls.disabledAlgorithms", "SSLv3");
       
       // Java 7 bug workaround to avoid stacktrace when switching to Remote Guide tab
       System.getProperties().setProperty("java.util.Arrays.useLegacyMergeSort", "true");
