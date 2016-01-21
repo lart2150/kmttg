@@ -27,7 +27,7 @@ public class kmttg {
       // This cipher suite works with mind.tivo.com: SSL_RSA_WITH_RC4_128_SHA
       System.setProperty("https.cipherSuites", "SSL_RSA_WITH_RC4_128_SHA");
       // This needs to be set to something to override default setting of: "MD2, RSA keySize < 1024"
-      Security.setProperty("jdk.certpath.disabledAlgorithms","TLS_RSA_WITH_AES_128_CBC_SHA, SSL_RSA_WITH_3DES_EDE_CBC_SHA");
+      Security.setProperty("jdk.certpath.disabledAlgorithms","");
       // This also needed for recent releases of Java 8
       Security.setProperty("jdk.tls.disabledAlgorithms", "SSLv3");
       
