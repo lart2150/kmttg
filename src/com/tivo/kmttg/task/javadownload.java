@@ -87,8 +87,12 @@ public class javadownload extends baseTask implements Serializable {
          job.url = string.addPort(job.url, wan_port);
       
       String url = job.url;
-      if (config.TSDownload == 1 && job.offset == null)
-         url += "&Format=video/x-tivo-mpeg-ts";
+      if (config.TSDownload == 1) {
+         if (job.offset == null)
+            url += "&Format=video/x-tivo-mpeg-ts";
+         else
+            log.warn("NOTE: Resume doesn't work with TS container - downloading in PS container");
+      }
       final String urlString = url;
       String message = "DOWNLOADING FROM '" + job.tivoName + "'";
       // NOTE: Series 4 Resume Downloads no longer works so turn it off with message

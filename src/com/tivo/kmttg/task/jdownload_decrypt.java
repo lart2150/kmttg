@@ -95,8 +95,12 @@ public class jdownload_decrypt extends baseTask implements Serializable {
          job.url = string.addPort(job.url, wan_port);
       
       String url = job.url;
-      if (config.TSDownload == 1 && job.offset == null)
-         url += "&Format=video/x-tivo-mpeg-ts";
+      if (config.TSDownload == 1) {
+         if (job.offset == null)
+            url += "&Format=video/x-tivo-mpeg-ts";
+         else
+            log.warn("NOTE: Resume doesn't work with TS container - downloading in PS container");
+      }
 
       // Start tivodecode as background process looking at stdin (OutputStream)
       Stack<String> c = new Stack<String>();      
