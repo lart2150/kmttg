@@ -23,7 +23,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v2.1h";
+   public static String kmttg = "kmttg v2.1i";
    
    // encoding related
    public static String encProfDir = "";
@@ -79,7 +79,7 @@ public class config {
    public static int VrdCombineCutEncode = 0; // Combine VRD Ad Cut and encode
    public static int VrdQsfixMpeg2ps = 0; // If set force VRD QS Fix to output mpeg2 program stream
    public static int VrdOneAtATime = 0; // If set only allow 1 VRD job at a time
-   public static int TSDownload = 0;
+   public static int TSDownload = 1;
    public static int OverwriteFiles = 0; // Don't overwrite existing files by default
    public static int DeleteFailedDownloads = 1; // Delete failed download files by default
    public static int HideProtectedFiles = 0;   
