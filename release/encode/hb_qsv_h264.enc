@@ -1,0 +1,12 @@
+# Description (single line, keep short)
+<description>
+Handbrake Intel QuickSync GPU: mp4 container, same res h.264 video, ac3+aac audio
+
+# Encode command or script (single line)
+# Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
+<command>
+HANDBRAKE -i INPUT -t 1 -c 1 -f mp4 --cfr -e qsv_h264 -O -q 22 --encoder-preset=balanced --encoder-profile=main -a 1 -E ac3,faac -x -v -o OUTPUT
+
+# Encoded output file extension
+<extension>
+mp4
