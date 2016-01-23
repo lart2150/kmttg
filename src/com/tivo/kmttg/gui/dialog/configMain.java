@@ -3744,7 +3744,8 @@ public class configMain {
          text += "NOTE: Only Series 4 or later TiVos support this format and this will have no effect on other TiVos.<br>";
          text += "<b>NOTE: 'tivodecode' cannot properly decrypt TS TiVo files, so if you enable this option</b><br>";
          text += "<b>you should also turn on option to use 'tivolibre' or 'DirectShowDump' or 'VideoRedo' for the</b><br>";
-         text += "<b>'decrypt' task</b>.";
+         text += "<b>'decrypt' task</b>.<br>";
+         text += "<b>NOTE: Enabling this option is required for H.264 downloads to work properly</b>.";
       }
       else if (component.equals("TivoWebPlusDelete")) {
          text =  "<b>Enable TivoWebPlus Delete task</b><br>";
