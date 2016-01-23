@@ -1,6 +1,8 @@
 package com.tivo.kmttg.gui.remote;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONException;
@@ -325,6 +327,16 @@ public class remotecontrol {
                               uri = "x-tivo:flash:uuid:EA1DEF9D-D346-4284-91A0-FEA8EAF4CD39";
                            if (name.equals("Launchpad"))
                               uri = "x-tivo:flash:uuid:545E064D-C899-407E-9814-69A021D68DAD";
+                           if (name.equals("streambaby")) {
+                              String ip;
+                              try {
+                                 ip = InetAddress.getLocalHost().getHostAddress();
+                              } catch (UnknownHostException e) {
+                                 ip = "localhost";
+                              }
+                              int port = 7290;
+                              uri = "x-tivo:hme:http://" + ip + ":" + port + "/streambaby";
+                           }
                            json.put("uri", uri);
                            r.Command("Navigate", json);
                         } catch (JSONException e1) {
