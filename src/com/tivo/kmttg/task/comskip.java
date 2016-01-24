@@ -20,10 +20,10 @@ import com.tivo.kmttg.rpc.SkipImport;
 import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
-import com.tivo.kmttg.util.ffmpeg;
+//import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.mediainfo;
+//import com.tivo.kmttg.util.mediainfo;
 import com.tivo.kmttg.util.string;
 
 public class comskip extends baseTask implements Serializable {
@@ -97,8 +97,9 @@ public class comskip extends baseTask implements Serializable {
             schedule = false;
       }
       
+      // Intentionally commented out as commercial versions of comskip do support H.264
       // Check for non-mpeg2 input file
-      Hashtable<String,String> info = null;
+      /*Hashtable<String,String> info = null;
       if (file.isFile(config.mediainfo))
          info = mediainfo.getVideoInfo(job.mpegFile);
       else if (file.isFile(config.ffmpeg))
@@ -108,7 +109,7 @@ public class comskip extends baseTask implements Serializable {
             log.error("input video=" + info.get("video") + ": comskip only supports mpeg2 video");
             schedule = false;
          }
-      }      
+      }*/      
       
       if (schedule) {
          // Create sub-folders for output file if needed
