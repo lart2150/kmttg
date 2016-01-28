@@ -95,6 +95,8 @@ public class ffcut extends baseTask implements Serializable {
       batchFile = makeBatchFile();
       if (file.isFile(batchFile)) {
          Stack<String> command = new Stack<String>();
+         if (! config.OS.equals("windows"))
+            command.add("/bin/sh");
          command.add(batchFile);
          process = new backgroundProcess();
          log.print(">> Running ffcut on " + job.mpegFile + " ...");
