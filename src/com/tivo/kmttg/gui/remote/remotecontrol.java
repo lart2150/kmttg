@@ -883,7 +883,7 @@ public class remotecontrol {
       String[] hmeNames = {
          "Netflix (html)", "YouTube (html)", "Vudu (html)", "Plex",
          "Amazon Prime", "Hulu Plus", "Spotify", "iHeartRadio",
-         "Opera TV Store"
+         "Opera TV Store", "streambaby"
       };
       hme.getItems().clear();
       for (int i=0; i<hmeNames.length; ++i)
