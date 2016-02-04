@@ -100,6 +100,7 @@ public class configMain {
    private static CheckBox TSDownload = null;
    private static CheckBox TivoWebPlusDelete = null;
    private static CheckBox rpcDelete = null;
+   private static CheckBox rpcOld = null;
    private static CheckBox HideProtectedFiles = null;
    private static CheckBox OverwriteFiles = null;
    private static CheckBox DeleteFailedDownloads = null;
@@ -783,6 +784,12 @@ public class configMain {
       else
          rpcDelete.setSelected(false);
       
+      // rpcOld
+      if (config.rpcOld == 1)
+         rpcOld.setSelected(true);
+      else
+         rpcOld.setSelected(false);
+      
       // HideProtectedFiles
       if (config.HideProtectedFiles == 1)
          HideProtectedFiles.setSelected(true);
@@ -1362,6 +1369,12 @@ public class configMain {
          config.rpcDelete = 1;
       else
          config.rpcDelete = 0;
+      
+      // rpcOld
+      if (rpcOld.isSelected())
+         config.rpcOld = 1;
+      else
+         config.rpcOld = 0;
       
       // HideProtectedFiles
       if (HideProtectedFiles.isSelected())
@@ -2105,6 +2118,7 @@ public class configMain {
       TSDownload = new CheckBox();
       TivoWebPlusDelete = new CheckBox();
       rpcDelete = new CheckBox();
+      rpcOld = new CheckBox();
       HideProtectedFiles = new CheckBox();
       OverwriteFiles = new CheckBox();
       DeleteFailedDownloads = new CheckBox();
@@ -2256,6 +2270,7 @@ public class configMain {
       TSDownload.setText("Download TiVo files in Transport Stream format");
       TivoWebPlusDelete.setText("Enable TivoWebPlus Delete task");
       rpcDelete.setText("Enable rpc style delete task");
+      rpcOld.setText("Use old RPC schema version for older TiVo software");
       HideProtectedFiles.setText("Do not show copy protected files in table");
       OverwriteFiles.setText("Overwrite existing files");
       DeleteFailedDownloads.setText("Delete failed downloads");
@@ -3040,6 +3055,9 @@ public class configMain {
       gy++;
       program_options_panel.add(TSDownload, 0, gy);
       
+      // rpcOld
+      program_options_panel.add(rpcOld, 1, gy);
+      
       // download_time_estimate
       gy++;
       program_options_panel.add(download_time_estimate, 0, gy);
@@ -3369,6 +3387,7 @@ public class configMain {
       TSDownload.setTooltip(getToolTip("TSDownload"));
       TivoWebPlusDelete.setTooltip(getToolTip("TivoWebPlusDelete"));
       rpcDelete.setTooltip(getToolTip("rpcDelete"));
+      rpcOld.setTooltip(getToolTip("rpcOld"));
       HideProtectedFiles.setTooltip(getToolTip("HideProtectedFiles"));
       OverwriteFiles.setTooltip(getToolTip("OverwriteFiles"));
       DeleteFailedDownloads.setTooltip(getToolTip("DeleteFailedDownloads"));
@@ -3764,6 +3783,13 @@ public class configMain {
          text += "following a successful decrypt of a downloaded .TiVo file.<br>";
          text += "<b>NOTE: Once you set and save this option you must restart kmttg to see the change.</b>";
 
+      }
+      else if (component.equals("rpcOld")) {
+         text =  "<b>Use old RPC schema version for older TiVo software</b><br>";
+         text += "If you are getting <b>'Unsupported schema version'</b> RPC error messages then<br>";
+         text += "it likely means your TiVo is running old software (probably a cable co supplied TiVo),<br>";
+         text += "and you should enable this option to force kmttg to use older RPC schema version<br>";
+         text += "for RPC operations.";
       }
       else if (component.equals("HideProtectedFiles")) {
          text = "<b>Do not show copy protected files in table</b><br>";

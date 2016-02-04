@@ -23,7 +23,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v2.1i";
+   public static String kmttg = "kmttg v2.1j";
    
    // encoding related
    public static String encProfDir = "";
@@ -64,6 +64,7 @@ public class config {
    public static int UseOldBeacon = 0;
    public static int TivoWebPlusDelete = 0;
    public static int rpcDelete = 0;
+   public static int rpcOld = 0;
    public static int UseAdscan = 0;
    public static int VrdReview = 0;
    public static int comskip_review = 0;
@@ -1140,6 +1141,9 @@ public class config {
             if (key.equals("rpcDelete") || key.equals("iPadDelete")) {
                rpcDelete = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("rpcOld")) {
+               rpcOld = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("cpu_cores")) {
                cpu_cores = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1399,6 +1403,8 @@ public class config {
          ofp.write("<TivoWebPlusDelete>\n" + TivoWebPlusDelete + "\n\n");
          
          ofp.write("<rpcDelete>\n" + rpcDelete + "\n\n");
+         
+         ofp.write("<rpcOld>\n" + rpcOld + "\n\n");
          
          ofp.write("<cpu_cores>\n" + cpu_cores + "\n\n");
          
