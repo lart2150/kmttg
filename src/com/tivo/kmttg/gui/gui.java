@@ -2354,7 +2354,6 @@ public class gui extends Application {
       push.setTooltip(getToolTip("push"));
       custom.setTooltip(getToolTip("custom"));
       encoding.setTooltip(getToolTip("encoding"));
-      jobTab.JobMonitor.setTooltip(getToolTip("JobMonitor"));
    }
      
    public Tooltip getToolTip(String component) {
