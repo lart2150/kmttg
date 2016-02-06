@@ -413,6 +413,12 @@ public class Remote {
             JSONObject j = new JSONObject(buf);
             if (j.has("type") && j.getString("type").equals("error")) {
                error("RPC error response:\n" + j.toString(3));
+               if (j.has("text") && j.getString("text").equals("Unsupported schema version")) {
+                  // Revert to older schema version for older TiVo software versions
+                  log.warn("Reverting to older RPC schema version - try command again.");
+                  config.rpcOld = 1;
+                  config.save();
+               }
                return null;
             }
             j.put("IsFinal", IsFinal);
