@@ -59,7 +59,12 @@ public class update {
                Optional<ButtonType> result = alert.showAndWait();
                if (result.get() == ButtonType.OK) {
                   final String fname = "kmttg_" + current_version + ".zip";
-                  final String url = "http://iweb.dl.sourceforge.net/project/kmttg/" + fname;
+                  String base = baseDownload.getBase();
+                  if (base == null) {
+                     log.error("toolDownload - error retrieving base download URL");
+                     return;
+                  }
+                  final String url = base + "/" + fname;
                   auto.serviceStopIfNeeded();
                   Task<Void> task = new Task<Void>() {
                      @Override public Void call() {

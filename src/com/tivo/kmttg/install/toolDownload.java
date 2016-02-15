@@ -17,21 +17,25 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class toolDownload {
-   String base = "http://iweb.dl.sourceforge.net/project/kmttg/tools/";
-   String tail = "";
    String windows_file = "kmttg_win32_tools_v2.1i.zip";
    String mac_file = "kmttg_MacOSX_tools_v2.1e.zip";
    String tools_version = "tools_version";
    
    public String download(String dir, String os) {
+      String base = baseDownload.getBase();
+      if (base == null) {
+         log.error("toolDownload - error retrieving base download URL");
+         return null;
+      }
+      base += "/tools/";
       debug.print("dir=" + dir + " os=" + os);
       String urlString = null;
       String localFileName = null;
       if (os.equals("windows")) {
-         urlString = base + windows_file + tail;
+         urlString = base + windows_file;
          localFileName = config.programDir + File.separator + windows_file;
       } else if (os.equals("mac")) {
-         urlString = base + mac_file + tail;
+         urlString = base + mac_file;
          localFileName = config.programDir + File.separator + mac_file;
       }
       if (urlString != null) {
