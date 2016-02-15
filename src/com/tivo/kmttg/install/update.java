@@ -59,8 +59,7 @@ public class update {
                Optional<ButtonType> result = alert.showAndWait();
                if (result.get() == ButtonType.OK) {
                   final String fname = "kmttg_" + current_version + ".zip";
-                  final String url = "http://sourceforge.net/projects/kmttg/files/" +
-                     fname + "/download?use_mirror=autoselect";
+                  final String url = "http://iweb.dl.sourceforge.net/project/kmttg/" + fname;
                   auto.serviceStopIfNeeded();
                   Task<Void> task = new Task<Void>() {
                      @Override public Void call() {
