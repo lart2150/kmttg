@@ -22,7 +22,6 @@ public class autoConfig {
    public static int suggestionsFilter = 0;
    public static int kuidFilter = 0;
    public static int programIdFilter = 0;
-   public static int skipMark = 0;
    
    public static Boolean parseAuto(String config) {
       debug.print("config=" + config);
@@ -103,9 +102,6 @@ public class autoConfig {
             }
             if (key.equals("programIdFilter")) {
                programIdFilter = Integer.parseInt(line);
-            }
-            if (key.equals("skipMark")) {
-               skipMark = Integer.parseInt(line);
             }
             if (key.equals("options")) {
                String[] l = line.split("\\s+");

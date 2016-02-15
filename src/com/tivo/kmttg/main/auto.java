@@ -14,7 +14,6 @@ import javafx.concurrent.Task;
 
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.httpserver.kmttgServer;
-import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -26,7 +25,6 @@ public class auto {
    private static boolean process_auto = true;
    public static boolean process_web = true;
    private static String runAsAdmin = config.programDir + "\\service\\win32\\runasadmin.vbs";
-   private static Hashtable<String,Integer> skipHash = new Hashtable<String,Integer>();
    
    // Batch mode processing (no GUI)
    public static void startBatchMode() {
@@ -154,28 +152,10 @@ public class auto {
       for (int j=ENTRIES.size()-1; j>=0; j--) {
          if ( keywordSearch(ENTRIES.get(j)) )
             count++;
-         processSkip(tivoName, ENTRIES.get(j));
       }
       log.print("TOTAL auto matches for '" + tivoName + "' = " + count + "/" + ENTRIES.size());
       if (config.GUI_AUTO > 0)
          config.GUI_AUTO--;
-   }
-   
-   // SkipMode auto identify 1st commercial start point enabled
-   private static void processSkip(String tivoName, Hashtable<String,String> entry) {
-      if (autoConfig.skipMark == 1) {
-         // Can't process recording or copy protected entries
-         if (entry.containsKey("InProgress") || entry.containsKey("CopyProtected"))
-            return;
-         // Already process entries are stored in skipHash
-         if (entry.containsKey("contentId")) {
-            String contentId = entry.get("contentId");
-            if (!skipHash.containsKey(contentId)) {
-               SkipMode.autoDetect(tivoName, entry);
-               skipHash.put(contentId, 1);
-            }
-         }
-      }
    }
    
    // Match title & keywords against an entry
