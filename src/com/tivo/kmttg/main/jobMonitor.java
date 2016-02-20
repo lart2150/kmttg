@@ -1198,6 +1198,7 @@ public class jobMonitor {
             job.tivoName     = tivoName;
             job.type         = "vrdreview";
             job.name         = "VRD";
+            job.tivoFile     = tivoFile; // This used as backup in case mpegFile not available
             job.mpegFile     = mpegFile;
             job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
             if (specs.containsKey("skipmode")) {

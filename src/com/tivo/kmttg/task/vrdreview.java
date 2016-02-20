@@ -67,14 +67,20 @@ public class vrdreview extends baseTask implements Serializable {
          }
       }
                         
-      if ( ! file.isFile(job.mpegFile) ) {
-         log.error("mpeg file not found: " + job.mpegFile);
-         schedule = false;
+      String sourceFile = job.mpegFile;
+      if ( ! file.isFile(sourceFile) ) {
+         if (file.isFile(job.tivoFile)) {
+            sourceFile = job.tivoFile;
+            log.warn("mpegFile not found, so using tivoFile instead: " + sourceFile);
+         } else {
+            log.error("mpeg file not found: " + job.mpegFile);
+            schedule = false;
+         }
       }
       
       // Make a vprjFile with no cuts if requested
       if (config.VrdReview_noCuts == 1 && ! file.isFile(job.vprjFile)) {
-         schedule = createBasicVprjFile(job.vprjFile, job.mpegFile);
+         schedule = createBasicVprjFile(job.vprjFile, sourceFile);
       }
       
       if ( ! file.isFile(job.vprjFile) ) {
