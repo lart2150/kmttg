@@ -90,6 +90,7 @@ public class configMain {
    private static CheckBox VrdDecrypt = null;
    private static CheckBox DsdDecrypt = null;
    private static CheckBox tivolibreDecrypt = null;
+   private static CheckBox tivolibreCompat = null;
    private static CheckBox httpserver_enable = null;
    private static CheckBox httpserver_share_filter = null;
    private static CheckBox VrdEncode = null;
@@ -712,8 +713,11 @@ public class configMain {
          config.DsdDecrypt = 0;
       }
       
+      // tivolibreCompat
+      if (config.tivolibreCompat == 1)
+         tivolibreCompat.setSelected(true);      
       else
-         tivolibreDecrypt.setSelected(false);
+         tivolibreCompat.setSelected(false);
       
       // httpserver_enable
       if (config.httpserver_enable == 1)
@@ -1299,6 +1303,12 @@ public class configMain {
       }
       else
          config.tivolibreDecrypt = 0;
+      
+      // tivolibreCompat
+      if (tivolibreCompat.isSelected())
+         config.tivolibreCompat = 1;
+      else
+         config.tivolibreCompat = 0;
       
       // httpserver_enable
       if (httpserver_enable.isSelected()) {
@@ -2108,6 +2118,7 @@ public class configMain {
       VrdDecrypt = new CheckBox();
       DsdDecrypt = new CheckBox();
       tivolibreDecrypt = new CheckBox();
+      tivolibreCompat = new CheckBox();
       httpserver_enable = new CheckBox();
       httpserver_share_filter = new CheckBox();
       VrdEncode = new CheckBox();
@@ -2260,6 +2271,7 @@ public class configMain {
       VrdDecrypt.setText("Decrypt using VideoRedo");
       DsdDecrypt.setText("Decrypt using DirectShow Dump instead of tivodecode");
       tivolibreDecrypt.setText("Decrypt using tivolibre instead of tivodecode");
+      tivolibreCompat.setText("tivolibre DirectShow compatibility mode");
       httpserver_enable.setText("Enable web server");
       httpserver_share_filter.setText("Share browser show video files only");
       VrdEncode.setText("Show VideoRedo encoding profiles");
@@ -3083,9 +3095,13 @@ public class configMain {
       gy++;
       program_options_panel.add(tivolibreDecrypt, 0, gy);
       
+      // tivolibreCompat
+      program_options_panel.add(tivolibreCompat, 1, gy);
+      
       if (config.OS.equals("windows")) {
+         gy++;
          // DsdDecrypt
-         program_options_panel.add(DsdDecrypt, 1, gy);
+         program_options_panel.add(DsdDecrypt, 0, gy);
       }
       
       // Visual Panel
@@ -3377,6 +3393,7 @@ public class configMain {
       VrdDecrypt.setTooltip(getToolTip("VrdDecrypt"));
       DsdDecrypt.setTooltip(getToolTip("DsdDecrypt"));
       tivolibreDecrypt.setTooltip(getToolTip("tivolibreDecrypt"));
+      tivolibreCompat.setTooltip(getToolTip("tivolibreCompat"));
       httpserver_enable.setTooltip(getToolTip("httpserver_enable"));
       httpserver_share_filter.setTooltip(getToolTip("httpserver_share_filter"));
       VrdEncode.setTooltip(getToolTip("VrdEncode"));
@@ -3690,6 +3707,13 @@ public class configMain {
          text += "Enable this option to decrypt .TiVo files using Java tivolibre instead of the standard<br>";
          text += "<b>tivodecode</b> program. This is useful for cases when the .TiVo files are in a format that<br>";
          text += "tivodecode cannot decrypt such as for Transport Stream (TS) format .TiVo files.";
+      }
+      else if (component.equals("tivolibreCompat")) {
+         text =  "<b>tivolibre DirectShow compatibility mode</b><br>";
+         text += "If enabled then tivolibre DirectShow compatiblity will be used which tries to keep the<br>";
+         text += "resulting decrypted file binary compatible with a DirectShow decryption, complete with<br>";
+         text += "null and unencrypted packets.<br>";
+         text += "This is especially useful for debugging tivolibre issues and comparing vs DirectShowDump.";
       }
       else if (component.equals("httpserver_enable")) {
          text =  "<b>Enable web server</b><br>";
