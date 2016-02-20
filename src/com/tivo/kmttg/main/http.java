@@ -300,7 +300,14 @@ public class http {
       // Start a background tivolibre input pipe
       Runnable r = new Runnable() {
          public void run () {
-            TivoDecoder decoder = new TivoDecoder.Builder().input(pipedIn).output(out).mak(config.MAK).build();
+            Boolean compat_mode = config.tivolibreCompat == 1;
+            log.warn("tivolibre DirectShow compatilibity mode = " + compat_mode);
+            TivoDecoder decoder = new TivoDecoder.Builder()
+               .input(pipedIn)
+               .output(out)
+               .compatibilityMode(compat_mode)
+               .mak(config.MAK)
+               .build();
             decoder.decode();
          }
       };
