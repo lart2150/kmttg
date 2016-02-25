@@ -163,7 +163,7 @@ public class configAuto {
       text = new Label();
       String message = "for Type=keywords: Multiple keywords are allowed separated by '| character";
       message += "\nkeyword=>AND  (keyword)=>OR  -keyword=>NOT";
-      message += "\nEXAMPLE: Type=keywords  keywords=(basketball)|(football)|!new york";
+      message += "\nEXAMPLE: Type=keywords  keywords=(basketball)|(football)|-new york";
       message += "\n  => football OR basketball NOT new york";
       text.setText(message);
       
