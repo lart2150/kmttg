@@ -62,7 +62,7 @@ public class SkipService {
          print("monitor stopped");
          running = false;
       }
-      SkipMode.monitor = false;
+      AutoSkip.monitor = false;
       if (config.GUIMODE && config.gui.skipServiceMenuItem.isSelected())
          config.gui.skipServiceMenuItem.setSelected(false);
    }
@@ -120,10 +120,10 @@ public class SkipService {
                   if (what.has("recordingId"))
                      recordingId = what.getString("recordingId");
                   String offerId = what.getString("offerId");
-                  debug.print("offerId=" + offerId + " SkipMode.offerId()=" + SkipMode.offerId());
-                  if (SkipMode.offerId() != null && SkipMode.offerId().equals(offerId)) {
-                     if (SkipMode.isMonitoring()) {
-                        // If SkipMode already monitoring this offerId then nothing to do
+                  debug.print("offerId=" + offerId + " AutoSkip.offerId()=" + AutoSkip.offerId());
+                  if (AutoSkip.offerId() != null && AutoSkip.offerId().equals(offerId)) {
+                     if (AutoSkip.isMonitoring()) {
+                        // If AutoSkip already monitoring this offerId then nothing to do
                         return;
                      } else {
                         // Find npl entry matching offerId
@@ -132,11 +132,11 @@ public class SkipService {
                         monitorEntry(entry, recordingId);
                      }
                   } else {
-                     // Current offerId does not match SkipMode.offerId
-                     // Disable monitoring of current SkipMode.offerId
-                     if (SkipMode.isMonitoring()) {
-                        debug.print("SkipService calling SkipMode.disable");
-                        SkipMode.disable();
+                     // Current offerId does not match AutoSkip.offerId
+                     // Disable monitoring of current AutoSkip.offerId
+                     if (AutoSkip.isMonitoring()) {
+                        debug.print("SkipService calling AutoSkip.disable");
+                        AutoSkip.disable();
                      }
                      if (enabled) {
                         // Get entry associated with offerId
@@ -153,11 +153,11 @@ public class SkipService {
       }
    }
    
-   // Look for given offerId in SkipMode ini file
+   // Look for given offerId in AutoSkip ini file
    private synchronized JSONObject getOffer(String offerId) {
       debug.print("offerId=" + offerId);
       try {
-         JSONArray entries = SkipMode.getEntries();
+         JSONArray entries = AutoSkip.getEntries();
          if (entries == null)
             return null;
          for (int i=0; i<entries.length(); ++i) {
@@ -179,10 +179,10 @@ public class SkipService {
       }
       try {
          if (entry.has("contentId")) {
-            SkipMode.setMonitor(tivoName, entry.getString("offerId"), entry.getString("contentId"), entry.getString("title"));
-            if (SkipMode.readEntry(entry.getString("contentId"))) {
-               print("Entering SkipMode for: " + entry.getString("title"));
-               SkipMode.showSkipData();
+            AutoSkip.setMonitor(tivoName, entry.getString("offerId"), entry.getString("contentId"), entry.getString("title"));
+            if (AutoSkip.readEntry(entry.getString("contentId"))) {
+               print("Entering AutoSkip for: " + entry.getString("title"));
+               AutoSkip.showSkipData();
             }
          }
       } catch (JSONException e) {
@@ -219,10 +219,10 @@ public class SkipService {
                         title = recording.getString("title");
                      if (recording.has("subtitle"))
                         title += " - " + recording.getString("title");
-                     SkipMode.setMonitor(
+                     AutoSkip.setMonitor(
                         tivoName, recording.getString("offerId"), recording.getString("contentId"), title
                      );
-                     SkipMode.enableMonitor(tivoName, SkipMode.jsonToShowPoints(clipData), -1L);
+                     AutoSkip.enableMonitor(tivoName, AutoSkip.jsonToShowPoints(clipData), -1L);
                   }
                }
             }

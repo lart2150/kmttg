@@ -13,7 +13,7 @@ import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.sortable.sortableString;
-import com.tivo.kmttg.rpc.SkipMode;
+import com.tivo.kmttg.rpc.AutoSkip;
 import com.tivo.kmttg.util.log;
 
 public class skipTable {
@@ -96,7 +96,7 @@ public class skipTable {
    }
    
    private String adStart(String ad1) {
-      return SkipMode.toMinSec(Long.parseLong(ad1));
+      return AutoSkip.toMinSec(Long.parseLong(ad1));
    }
 
    public TableView<?> getTable() {
@@ -154,7 +154,7 @@ public class skipTable {
          if (changed.length() > 0) {
             for (int i=0; i<changed.length(); ++i) {
                JSONObject j = changed.getJSONObject(i);
-               SkipMode.changeEntry(j.getString("contentId"), j.getString("offset"), j.getString("title"));
+               AutoSkip.changeEntry(j.getString("contentId"), j.getString("offset"), j.getString("title"));
             }
          }
       } catch (Exception e) {
@@ -165,7 +165,7 @@ public class skipTable {
    private void TABLERowSelected(Tabentry entry) {
       try {
          JSONObject json = entry.getSHOW().json;
-         log.print("\nSkipMode data for '" + json.getString("title") + "'");
+         log.print("\nAutoSkip data for '" + json.getString("title") + "'");
          JSONArray cuts = json.getJSONArray("cuts");
          int index = 0;
          long offset = Long.parseLong(json.getString("offset"));
@@ -176,9 +176,9 @@ public class skipTable {
                start += offset;
             long end = j.getLong("end") + offset;
             String message = "" + index + ": start=";
-            message += SkipMode.toMinSec(start);
+            message += AutoSkip.toMinSec(start);
             message += " end=";
-            message += SkipMode.toMinSec(end);         
+            message += AutoSkip.toMinSec(end);         
             log.print(message);
             index++;
          }

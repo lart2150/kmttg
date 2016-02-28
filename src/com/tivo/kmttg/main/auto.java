@@ -630,10 +630,10 @@ public class auto {
    public static int AddHistoryEntry(jobData job) {
       debug.print("job=" + job);
       
-      // No history entry for SkipMode downloads
-      if (job.tivoFile != null && string.basename(job.tivoFile).startsWith("SkipMode"))
+      // No history entry for AutoSkip downloads
+      if (job.tivoFile != null && string.basename(job.tivoFile).startsWith("AutoSkip"))
          return 0;
-      if (job.mpegFile != null && string.basename(job.mpegFile).startsWith("SkipMode"))
+      if (job.mpegFile != null && string.basename(job.mpegFile).startsWith("AutoSkip"))
          return 0;
       
       String ProgramId = job.ProgramId;

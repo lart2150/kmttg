@@ -16,7 +16,7 @@ import com.tivo.kmttg.gui.MyTooltip;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.skipTable;
 import com.tivo.kmttg.main.config;
-import com.tivo.kmttg.rpc.SkipMode;
+import com.tivo.kmttg.rpc.AutoSkip;
 import com.tivo.kmttg.util.log;
 
 public class SkipDialog {
@@ -30,11 +30,11 @@ public class SkipDialog {
       getEntries();
    }
    
-   // Retrieve entries from SkipMode.ini file
+   // Retrieve entries from AutoSkip.ini file
    private void getEntries() {
       if (tab != null)
          tab.clear();
-      data = SkipMode.getEntries();      
+      data = AutoSkip.getEntries();      
       if (data != null && data.length() > 0) {
          if (dialog == null)
             init();
@@ -58,7 +58,7 @@ public class SkipDialog {
             try {
                for (int i=0; i<entries.length(); ++i) {
                   JSONObject json = entries.getJSONObject(i);
-                  SkipMode.removeEntry(json.getString("contentId"));
+                  AutoSkip.removeEntry(json.getString("contentId"));
                }
             } catch (Exception e) {
                log.error("removeEntries - " + e.getMessage());
@@ -77,7 +77,7 @@ public class SkipDialog {
 
       // Refresh button
       Button refresh = new Button("Refresh");
-      String tip = "<b>Refresh</b><br>Get list of SkipMode entries and refresh table.";
+      String tip = "<b>Refresh</b><br>Get list of AutoSkip entries and refresh table.";
       refresh.setTooltip(MyTooltip.make(tip));
       refresh.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -87,7 +87,7 @@ public class SkipDialog {
 
       // Remove button
       Button remove = new Button("Remove");
-      tip = "<b>Remove</b><br>Remove selected entry in the table from SkipMode file.";
+      tip = "<b>Remove</b><br>Remove selected entry in the table from AutoSkip file.";
       remove.setTooltip(MyTooltip.make(tip));
       remove.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -122,7 +122,7 @@ public class SkipDialog {
 
       dialog = new Stage();
       dialog.initOwner(frame);
-      dialog.setTitle("SkipMode Entries");
+      dialog.setTitle("AutoSkip Entries");
       Scene scene = new Scene(new VBox());
       config.gui.setFontSize(scene, config.FontSize);
       ((VBox) scene.getRoot()).getChildren().add(content);

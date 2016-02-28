@@ -108,13 +108,13 @@ public class jobData implements Serializable, Cloneable {
    public Boolean partiallyViewed = false;
    public Integer download_duration = 0;
 
-   // SkipMode related
+   // AutoSkip related
    public long limit = 0;
    public String offset = null;
    public String SkipPoint = null;
    public String contentId = null;
    public String offerId = null;
-   public Boolean skipmode = false;
+   public Boolean autoskip = false;
 
    // pyTivo push related
    public String pyTivo_tivo = null;

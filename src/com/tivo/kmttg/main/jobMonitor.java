@@ -1153,8 +1153,8 @@ public class jobMonitor {
                job.offerId = (String) specs.get("offerId");
             if (specs.containsKey("title"))
                job.title = (String) specs.get("title");
-            if (specs.containsKey("skipmode")) {
-               job.skipmode = true;
+            if (specs.containsKey("autoskip")) {
+               job.autoskip = true;
                job.duration = Long.parseLong(entry.get("duration"));
             }
             submitNewJob(job);
@@ -1181,8 +1181,8 @@ public class jobMonitor {
                job.offerId = (String) specs.get("offerId");
             if (specs.containsKey("title"))
                job.title = (String) specs.get("title");
-            if (specs.containsKey("skipmode")) {
-               job.skipmode = true;
+            if (specs.containsKey("autoskip")) {
+               job.autoskip = true;
                job.duration = Long.parseLong(entry.get("duration"));
             }
             submitNewJob(job);            
@@ -1201,8 +1201,8 @@ public class jobMonitor {
             job.tivoFile     = tivoFile; // This used as backup in case mpegFile not available
             job.mpegFile     = mpegFile;
             job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
-            if (specs.containsKey("skipmode")) {
-               job.skipmode = true;
+            if (specs.containsKey("autoskip")) {
+               job.autoskip = true;
                job.contentId = (String) specs.get("contentId");
                job.offerId = (String) specs.get("offerId");
                job.title = (String) specs.get("title");
@@ -1228,8 +1228,8 @@ public class jobMonitor {
          if (config.VRD == 1)
             job.vprjFile  = string.replaceSuffix(mpegFile, ".VPrj");
          job.edlFile      = edlFile;
-         if (specs.containsKey("skipmode")) {
-            job.skipmode = true;
+         if (specs.containsKey("autoskip")) {
+            job.autoskip = true;
             job.contentId = (String) specs.get("contentId");
             job.offerId = (String) specs.get("offerId");
             job.title = (String) specs.get("title");

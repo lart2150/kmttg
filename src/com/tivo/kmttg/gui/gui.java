@@ -95,7 +95,7 @@ import com.tivo.kmttg.main.encodeConfig;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.main.kmttg;
-import com.tivo.kmttg.rpc.SkipMode;
+import com.tivo.kmttg.rpc.AutoSkip;
 import com.tivo.kmttg.rpc.SkipService;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -145,7 +145,7 @@ public class gui extends Application {
    private MenuItem saveJobsMenuItem = null;
    private MenuItem loadJobsMenuItem = null;
    public MenuItem searchMenuItem = null;
-   public MenuItem skipModeMenuItem = null;
+   public MenuItem autoSkipMenuItem = null;
    public CheckMenuItem skipServiceMenuItem = null;
    public Boolean skipServiceMenuItem_cb = true;
    public MenuItem thumbsMenuItem = null;
@@ -650,8 +650,8 @@ public class gui extends Application {
          fileMenu.getItems().add(getResumeDownloadsMenuItem());
          fileMenu.getItems().add(getJobMenu());
          fileMenu.getItems().add(getSearchMenuItem());
-         if (config.rpcEnabled() && SkipMode.skipEnabled()) {
-            fileMenu.getItems().add(getSkipModeMenuItem());
+         if (config.rpcEnabled() && AutoSkip.skipEnabled()) {
+            fileMenu.getItems().add(getAutoSkipMenuItem());
             fileMenu.getItems().add(getSkipServiceMenuItem());
          }
          //fileMenu.add(getThumbsMenuItem());
@@ -1257,25 +1257,25 @@ public class gui extends Application {
       return searchMenuItem;
    }
 
-   private MenuItem getSkipModeMenuItem() {
+   private MenuItem getAutoSkipMenuItem() {
       debug.print("");
-      if (skipModeMenuItem == null) {
-         skipModeMenuItem = new MenuItem();
-         skipModeMenuItem.setText("SkipMode Table...");
-         skipModeMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+      if (autoSkipMenuItem == null) {
+         autoSkipMenuItem = new MenuItem();
+         autoSkipMenuItem.setText("AutoSkip Table...");
+         autoSkipMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
                new SkipDialog(config.gui.getFrame());
             }
          });
       }
-      return skipModeMenuItem;
+      return autoSkipMenuItem;
    }
 
    private MenuItem getSkipServiceMenuItem() {
       debug.print("");
       if (skipServiceMenuItem == null) {
          skipServiceMenuItem = new CheckMenuItem();
-         skipServiceMenuItem.setText("SkipMode service...");
+         skipServiceMenuItem.setText("AutoSkip service...");
          skipServiceMenuItem.selectedProperty().addListener(new ChangeListener<Boolean>() {
             public void changed(ObservableValue<? extends Boolean> e, Boolean oldVal, Boolean newVal) {
                if ( ! newVal ) {
@@ -1287,7 +1287,7 @@ public class gui extends Application {
                   return;
                
                // Don't do anything if no skip data available
-               JSONArray skipData = SkipMode.getEntries();
+               JSONArray skipData = AutoSkip.getEntries();
                if (skipData == null || skipData.length() == 0) {
                   log.warn("No skip table data available - ignoring skip service request");
                   return;
@@ -2572,8 +2572,8 @@ public class gui extends Application {
       }
       else if (component.equals("prune_skipTable")) {
          text =  "<b>Prune skipTable</b><br>";
-         text += "Remove entries in SkipMode table that are deleted from this TiVo.<br>";
-         text += "Instead of manually having to prune SkipMode table this is useful to automatically<br>";
+         text += "Remove entries in AutoSkip table that are deleted from this TiVo.<br>";
+         text += "Instead of manually having to prune AutoSkip table this is useful to automatically<br>";
          text += "remove entries that are no longer useful.";
       }
       else if (component.equals("import_skip")) {

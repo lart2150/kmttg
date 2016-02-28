@@ -19,8 +19,8 @@ import org.w3c.dom.Element;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.rpc.AutoSkip;
 import com.tivo.kmttg.rpc.SkipImport;
-import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -214,13 +214,13 @@ public class vrdreview extends baseTask implements Serializable {
                }
             }
             
-            if (job.skipmode && file.isFile(job.vprjFile)) {
+            if (job.autoskip && file.isFile(job.vprjFile)) {
                // Skip table entry creation
                Stack<Hashtable<String,Long>> cuts = SkipImport.vrdImport(job.vprjFile, job.duration, false);
                if (cuts != null && cuts.size() > 0) {
-                  if (SkipMode.hasEntry(job.contentId))
-                     SkipMode.removeEntry(job.contentId);
-                  SkipMode.saveEntry(job.contentId, job.offerId, 0L, job.title, job.tivoName, cuts);
+                  if (AutoSkip.hasEntry(job.contentId))
+                     AutoSkip.removeEntry(job.contentId);
+                  AutoSkip.saveEntry(job.contentId, job.offerId, 0L, job.title, job.tivoName, cuts);
                }
                String prefix = string.replaceSuffix(string.basename(job.mpegFile), "");
                file.cleanUpFiles(prefix);               

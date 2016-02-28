@@ -77,11 +77,11 @@ public class SkipImport {
          
          if (cuts != null) {
             // If contentId entry already in table then remove it
-            if (SkipMode.hasEntry(entry.get("contentId")))
-               SkipMode.removeEntry(entry.get("contentId"));
+            if (AutoSkip.hasEntry(entry.get("contentId")))
+               AutoSkip.removeEntry(entry.get("contentId"));
             
-            // Save entry to skipMode table with offset=0
-            SkipMode.saveEntry(entry.get("contentId"), entry.get("offerId"), 0L, entry.get("title"), tivoName, cuts);
+            // Save entry to AutoSkip table with offset=0
+            AutoSkip.saveEntry(entry.get("contentId"), entry.get("offerId"), 0L, entry.get("title"), tivoName, cuts);
             return true;
          }
       }

@@ -43,7 +43,7 @@ public class skipdetect extends baseTask implements Serializable {
       // Run in a separate thread
       Runnable r = new Runnable() {
          public void run () {
-            //SkipMode.autoDetect(job.tivoName, job.entry);
+            //AutoSkip.autoDetect(job.tivoName, job.entry);
             thread_running = false;
          }
       };
