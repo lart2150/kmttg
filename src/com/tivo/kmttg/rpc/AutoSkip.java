@@ -43,8 +43,8 @@ public class AutoSkip {
    
    public static synchronized Boolean skipEnabled() {
       debug.print("");
-      //return file.isFile(ini);
-      return true;
+      // At least 1 TiVo needs to be RPC enabled
+      return config.rpcEnabled();
    }
    
    public static synchronized Boolean isMonitoring() {
