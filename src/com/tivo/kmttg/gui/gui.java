@@ -71,6 +71,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import com.sun.javafx.css.StyleManager;
+import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.dialog.Pushes;
@@ -1284,6 +1285,13 @@ public class gui extends Application {
                }
                if (! skipServiceMenuItem_cb)
                   return;
+               
+               // Don't do anything if no skip data available
+               JSONArray skipData = SkipMode.getEntries();
+               if (skipData == null || skipData.length() == 0) {
+                  log.warn("No skip table data available - ignoring skip service request");
+                  return;
+               }
                
                // Build list of eligible TiVos
                Stack<String> all = config.getTivoNames();

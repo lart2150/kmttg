@@ -85,17 +85,6 @@ public class SkipDialog {
          }
       });
 
-      // Change button
-      Button change = new Button("Change");
-      tip = "<b>Change</b><br>Update offsets for entries you changed in the table.<br>";
-      tip += "NOTE: The offset value is a time in milliseconds.";
-      change.setTooltip(MyTooltip.make(tip));
-      change.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            tab.changeTable();
-         }
-      });
-
       // Remove button
       Button remove = new Button("Remove");
       tip = "<b>Remove</b><br>Remove selected entry in the table from SkipMode file.";
@@ -121,7 +110,7 @@ public class SkipDialog {
       // Row 1 = buttons
       HBox row1 = new HBox();
       row1.setSpacing(5);
-      row1.getChildren().addAll(refresh, change, remove);
+      row1.getChildren().addAll(refresh, remove);
       content.getChildren().add(row1);
       
       // Table

@@ -59,7 +59,6 @@ import com.tivo.kmttg.gui.sortable.sortableShow;
 import com.tivo.kmttg.gui.sortable.sortableSize;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
-import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.SkipMode;
@@ -678,12 +677,14 @@ public class nplTable extends TableMap {
          createMeta.getExtendedMetadata(tivoName, s.data, true);
       } else if (keyCode == KeyCode.T) {
          TableUtil.toggleTreeState(NowPlaying);
-      } else if (keyCode == KeyCode.X) {
+      }
+      /*else if (keyCode == KeyCode.X) {
          if (SkipMode.isMonitoring()) {
             log.print("Requested skip to 1st commercial point...");
             SkipMode.jumpTo1st();
          }
-      } else if (keyCode == KeyCode.C) {
+      }
+      else if (keyCode == KeyCode.C) {
          if (SkipMode.skipEnabled()) {
             int[] selected = GetSelectedRows();
             if (selected == null || selected.length < 1)
@@ -701,7 +702,8 @@ public class nplTable extends TableMap {
                jobMonitor.submitNewJob(job);
             }
          }
-      } else if (keyCode == KeyCode.Z) {
+      }*/
+      else if (keyCode == KeyCode.Z) {
          if (SkipMode.skipEnabled()) {
             if (SkipMode.isMonitoring()) {
                log.print("Scheduling SkipMode disable");
@@ -1552,13 +1554,13 @@ public class nplTable extends TableMap {
          }
       }
       
-      // If this offerId has an entry in skipmode.ini then mark with an asterisk
+      // If this offerId has an entry in skipmode.ini then mark with an S
       if (data.containsKey("offerId") && skipEntries != null) {
          for (int i=0; i<skipEntries.length(); ++i) {
             try {
                if (data.containsKey("offerId") && skipEntries.getJSONObject(i).has("offerId")) {
                   if (skipEntries.getJSONObject(i).getString("offerId").equals(data.get("offerId"))) {
-                     pct = "* " + pct;
+                     pct = "S " + pct;
                   }
                }
             } catch (JSONException e) {

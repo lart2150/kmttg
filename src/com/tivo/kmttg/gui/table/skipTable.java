@@ -4,14 +4,9 @@ import java.util.Comparator;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.input.MouseEvent;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -22,7 +17,7 @@ import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.log;
 
 public class skipTable {
-   private String[] TITLE_cols = {"SHOW", "TIVO", "CONTENTID", "AD1_ORIG", "OFFSET", "AD1_ADJ"};
+   private String[] TITLE_cols = {"SHOW", "TIVO", "CONTENTID", "AD1"};
    public TableView<Tabentry> TABLE = null;
    
    class offsetComparator implements Comparator<String> {
@@ -47,28 +42,6 @@ public class skipTable {
             TableColumn<Tabentry,sortableString> col = new TableColumn<Tabentry,sortableString>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableString>(cName));
             TABLE.getColumns().add(col);            
-         } else if (colName.equals("OFFSET")) {
-            TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(cName));
-            col.setCellFactory(TextFieldTableCell.<Tabentry>forTableColumn());
-            col.setComparator(new offsetComparator());
-            // This column is editable
-            col.setOnEditCommit( new EventHandler<CellEditEvent<Tabentry, String>>() {
-               @Override
-               public void handle(CellEditEvent<Tabentry, String> event) {
-                  int row = event.getTablePosition().getRow();
-                  Tabentry entry = event.getTableView().getItems().get(row);
-                  try {
-                     // Update row Tabentry value
-                     entry.offset = event.getNewValue();
-                     entry.ad1_adj = adAdjusted(entry.show.json.getString("ad1"), entry.offset);
-                     TABLE.getItems().set(row, entry);
-                  } catch (JSONException e) {
-                     log.error("skipTable - " + e.getMessage());
-                  }
-               }
-            });
-            TABLE.getColumns().add(col);
          } else {
             TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(cName));
@@ -85,28 +58,13 @@ public class skipTable {
             }
          }
       });
-      
-      // Mouse listener for single click in RATING column
-      TABLE.setOnMousePressed(new EventHandler<MouseEvent>() {
-         @Override 
-         public void handle(MouseEvent event) {
-            // Trigger edit for single click in RATING cell
-            if (event.getClickCount() == 1 && event.getTarget().getClass() == TextFieldTableCell.class) {
-               @SuppressWarnings("unchecked")
-               TablePosition<Tabentry,?> pos = TABLE.getSelectionModel().getSelectedCells().get(0);
-               TABLE.edit(pos.getRow(), pos.getTableColumn());
-            }
-         }
-      });
    }
 
    public class Tabentry {
       public sortableString show = new sortableString();
       public String contentId = "";
       public String tivo = "";
-      public String ad1_orig = "";
-      public String offset = "";
-      public String ad1_adj = "";
+      public String ad1 = "";
 
       public Tabentry(JSONObject json) {
          try {
@@ -114,10 +72,7 @@ public class skipTable {
             show.display = json.getString("title");
             contentId = json.getString("contentId");
             tivo = json.getString("tivoName");
-            offset = json.getString("offset");
-            String ad1 = json.getString("ad1");
-            ad1_orig = adStart(ad1);
-            ad1_adj = adAdjusted(ad1, offset);
+            ad1 = adStart(json.getString("ad1"));
          } catch (Exception e) {
             log.error("pushTable Tabentry - " + e.getMessage());
          }
@@ -135,25 +90,13 @@ public class skipTable {
          return tivo;
       }
 
-      public String getOFFSET() {
-         return offset;
-      }      
-
-      public String getAD1_ORIG() {
-         return ad1_orig;
-      }      
-
-      public String getAD1_ADJ() {
-         return ad1_adj;
+      public String getAD1() {
+         return ad1;
       }      
    }
    
    private String adStart(String ad1) {
       return SkipMode.toMinSec(Long.parseLong(ad1));
-   }
-   
-   private String adAdjusted(String ad1, String offset) {
-      return SkipMode.toMinSec(Long.parseLong(ad1) + Long.parseLong(offset));
    }
 
    public TableView<?> getTable() {

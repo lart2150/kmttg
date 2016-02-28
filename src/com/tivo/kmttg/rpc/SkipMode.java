@@ -8,28 +8,21 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.Optional;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Alert.AlertType;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.tivoTab;
 import com.tivo.kmttg.main.config;
-import com.tivo.kmttg.main.jobData;
-import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class SkipMode {
    private static String ini = config.programDir + File.separator + "SkipMode.ini";
@@ -43,7 +36,6 @@ public class SkipMode {
    private static int monitor_count = 1;
    private static int monitor_interval = 6;
    private static String tivoName = null;
-   private static int run_count = 1;
    static Boolean monitor = false;
    static Stack<Hashtable<String,Long>> skipData = null;
    static Stack<Hashtable<String,Long>> skipData_orig = null;
@@ -51,7 +43,8 @@ public class SkipMode {
    
    public static synchronized Boolean skipEnabled() {
       debug.print("");
-      return file.isFile(ini);
+      //return file.isFile(ini);
+      return true;
    }
    
    public static synchronized Boolean isMonitoring() {
@@ -114,9 +107,9 @@ public class SkipMode {
                if (readEntry(SkipMode.contentId)) {
                   print("Obtained skip data from file: " + ini);
                } else {
-                  print("Attempting to obtain skip data for: " + nplData.get("title"));
-                  skipData = getShowPoints(r, tivoName, SkipMode.contentId, SkipMode.title);
-                  end1 = -1;
+                  error("No skip data available for " + title);
+                  disable();
+                  return null;
                }
                if (skipData != null) {
                   // Start playback
@@ -248,7 +241,6 @@ public class SkipMode {
    }
    
    // RPC query to get current playback position
-   // This will also listen for 1st pause press (speed==0) if end1 == -1
    // NOTE: Returns -1 for speed != 100 to avoid any skipping during trick play
    private static synchronized long getPosition() {
       debug.print("");
@@ -268,22 +260,8 @@ public class SkipMode {
       }
       if (reply != null && reply.has("position")) {
          try {
-            //if (reply.getString("position").equals(reply.getString("end"))) {
-            //   disable();
-            //   return -1;
-            //}
             if (reply.has("speed")) {
                int speed = reply.getInt("speed");
-               if (end1 == -1 && speed == 0) {
-                  // 1st pause press so adjust skip data accordingly
-                  adjustPoints(reply.getLong("position"));
-                  showSkipData();
-                  saveEntry(contentId, offerId, offset, title, tivoName, skipData_orig);
-               }
-               if (speed == 20 && reply.getLong("position") < end1) {
-                  // slow speed before 1st commercial mark => reset to original skip points
-                  resetPoints();
-               }
                if (speed != 100)
                   return -1;
             }
@@ -403,33 +381,6 @@ public class SkipMode {
       return closest;
    }
    
-   // RPC query to get skip data based on given contentId
-   // Returns null if none found
-   private static synchronized Stack<Hashtable<String,Long>> getShowPoints(Remote r, String tivoName, String contentId, String title) {
-      debug.print("r=" + r + " tivoName=" + tivoName + " contentId=" + contentId + " title=" + title);
-      Stack<Hashtable<String,Long>> points = null;
-      try {
-         JSONObject j = new JSONObject();
-         j.put("contentId", contentId);
-         JSONObject result = r.Command("clipMetadataSearch", j);
-         if (result != null && result.has("clipMetadata")) {
-            String clipMetadataId = result.getJSONArray("clipMetadata").getJSONObject(0).getString("clipMetadataId");
-            j.remove("contentId");
-            j.put("clipMetadataId", clipMetadataId);
-            result = r.Command("clipMetadataSearch", j);
-            if (result != null && result.has("clipMetadata")) {
-               JSONObject clipData = result.getJSONArray("clipMetadata").getJSONObject(0);
-               points = jsonToShowPoints(clipData);
-            }
-         } else {
-            log.warn("SkipMode: No skip data available for: " + title);
-         }
-      } catch (JSONException e) {
-         error("getShowPoints - " + e.getMessage());
-      }
-      return points;
-   }
-   
    // Convert RPC data to skipData hash
    public static synchronized Stack<Hashtable<String,Long>> jsonToShowPoints(JSONObject clipData) {
       debug.print("clipData=" + clipData);
@@ -480,17 +431,6 @@ public class SkipMode {
       }
    }
    
-   // Reset to original skip data to undo mistaken pause mark
-   private static synchronized void resetPoints() {
-      debug.print("");
-      log.warn("Removing marked pause point for 1st commercial");
-      end1 = -1;
-      offset = -1;
-      skipData = hashCopy(skipData_orig);
-      if (hasEntry(contentId))
-         removeEntry(contentId);
-   }
-   
    // Save commercial points for current entry to ini file
    public static synchronized void saveEntry(final String contentId, String offerId, long offset,
          String title, final String tivoName, Stack<Hashtable<String,Long>> data) {
@@ -519,22 +459,6 @@ public class SkipMode {
       } catch (IOException e) {
          error("saveEntry - " + e.getMessage());
       }
-   }
-   
-   public static synchronized void saveWithOffset(String tivoName, String contentId, String offerId, String title, long offset) {
-      debug.print("tivoName=" + tivoName + " contentId=" + contentId +
-            " offerId=" + offerId + " title=" + title + " offset=" + offset);
-      Remote r2 = new Remote(tivoName);
-      if (r2.success) {
-         Stack<Hashtable<String,Long>>points = getShowPoints(r2, tivoName, contentId, title);
-         r2.disconnect();
-         if (points != null) {
-            SkipMode.title = title;
-            saveEntry(contentId, offerId, offset - points.get(0).get("end"), title, tivoName, points);
-            print("1st commercial point saved as: " + toMinSec(offset) +
-               " (orig point=" + toMinSec(points.get(0).get("end")) + ")");
-         }
-      }      
    }
    
    public static synchronized Boolean hasEntry(String contentId) {
@@ -830,97 +754,6 @@ public class SkipMode {
             log.warn("No entries found to prune");
       } catch (JSONException e) {
          error("pruneEntries - " + e.getMessage());
-      }
-   }
-   
-   public static synchronized void autoDetect(final String tivoName, final Hashtable<String,String> entry) {
-      debug.print("tivoName=" + tivoName + " entry=" + entry);
-      // Can't process recording or copy protected entries
-      if (entry.containsKey("InProgress") || entry.containsKey("CopyProtected"))
-         return;
-      if( readEntry(entry.get("contentId")) ) {
-         log.warn("SkipMode: Already have saved SkipMode entry for: " + entry.get("title"));
-         return;
-      }
-      if (! entry.containsKey("offerId") ) {
-         error("Entry is missing offerId: " + entry.get("title"));
-         return;
-      }
-      if (! entry.containsKey("contentId") ) {
-         error("Entry is missing contentId: " + entry.get("title"));
-         return;
-      }
-      Remote r2 = new Remote(tivoName);
-      if (r2.success) {
-         Stack<Hashtable<String,Long>> points = getShowPoints(r2, tivoName, entry.get("contentId"), entry.get("title"));
-         r2.disconnect();
-         if (points != null) {
-            float firstEnd = points.get(0).get("end");
-            float duration = Float.parseFloat(entry.get("duration"));
-            float size = Float.parseFloat(entry.get("size"));
-            long limit = (long)((firstEnd+30000) * size/duration);
-            String mpegFile = config.mpegDir + File.separator + "SkipModeTempFile" + run_count + "_" + tivoName + ".mpg";
-            if (file.isFile(mpegFile))
-               file.delete(mpegFile);
-            jobData job = new jobData();
-            job.source       = entry.get("url_TiVoVideoDetails");
-            job.tivoName     = tivoName;
-            job.type         = "tdownload_decrypt";
-            job.name         = "java";
-            job.limit        = limit;
-            job.SkipPoint    = "" + firstEnd;
-            job.contentId    = entry.get("contentId");
-            job.offerId      = entry.get("offerId");
-            job.title        = entry.get("title");
-            job.mpegFile     = mpegFile;
-            job.mpegFile_cut = string.replaceSuffix(job.mpegFile, "_cut.mpg");
-            job.startFile    = job.tivoFile;
-            job.url          = entry.get("url");
-            job.tivoFileSize = Long.parseLong(entry.get("size"));
-            print("'" + entry.get("title") + "': search for 1st commercial point close to: " + toMinSec((long)firstEnd));
-            jobMonitor.submitNewJob(job);
-            run_count++;
-         } else {
-            // No skip data available from tivo.com so prompt for full show flow instead
-            if (config.GUIMODE) {
-               Platform.runLater(new Runnable() {
-                  @Override public void run() {
-                     Alert alert = new Alert(AlertType.CONFIRMATION);
-                     alert.setTitle("Run full 'Ad Detect'");
-                     config.gui.setFontSize(alert, config.FontSize);
-                     alert.setContentText("No skip data available. Run full 'Ad Detect' instead?");
-                     Optional<ButtonType> result = alert.showAndWait();
-                     if (result.get() == ButtonType.OK) {
-                        String name = "SkipModeTempFile" + run_count + "_" + tivoName + ".TiVo";
-                        // Setup for download, decrypt, Ad Detect with extra specs set for saving skip entry
-                        Hashtable<String,Object> specs = new Hashtable<String,Object>();
-                        specs.put("mode", "Download");
-                        specs.put("name", name);
-                        specs.put("tivoName", tivoName);
-                        specs.put("entry", entry);
-                        specs.put("metadata", false);
-                        specs.put("metadataTivo", false);
-                        specs.put("decrypt", true);
-                        specs.put("qsfix", false);
-                        specs.put("comskip", true);
-                        specs.put("twpdelete", false);
-                        specs.put("rpcdelete", false);
-                        specs.put("comcut", false);
-                        specs.put("captions", false);
-                        specs.put("encode", false);
-                        specs.put("push", false);
-                        specs.put("custom", false);
-                        specs.put("skipmode", true);
-                        specs.put("contentId", entry.get("contentId"));
-                        specs.put("offerId", entry.get("offerId"));
-                        specs.put("title", entry.get("title"));
-                        jobMonitor.LaunchJobs(specs);                        
-                        run_count++;
-                     }
-                  }
-               });
-            }
-         }
       }
    }
    

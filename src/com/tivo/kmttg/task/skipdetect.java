@@ -5,7 +5,6 @@ import java.util.Date;
 
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
-import com.tivo.kmttg.rpc.SkipMode;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
@@ -44,7 +43,7 @@ public class skipdetect extends baseTask implements Serializable {
       // Run in a separate thread
       Runnable r = new Runnable() {
          public void run () {
-            SkipMode.autoDetect(job.tivoName, job.entry);
+            //SkipMode.autoDetect(job.tivoName, job.entry);
             thread_running = false;
          }
       };
