@@ -174,7 +174,7 @@ public class SkipService {
    private synchronized void monitorEntry(JSONObject entry, String recordingId) {
       debug.print("entry=" + entry + " recordingId=" + recordingId);
       if (entry == null) {
-         monitorEntry(recordingId);
+         //monitorEntry(recordingId);
          return;
       }
       try {
@@ -192,7 +192,7 @@ public class SkipService {
    
    // Based on recordingId try and retrieve skip data from tivo.com
    // and start play in pause mode if found
-   private synchronized void monitorEntry(String recordingId) {
+   /*private synchronized void monitorEntry(String recordingId) {
       debug.print("recordingId=" + recordingId);
       if (recordingId == null)
          return;
@@ -230,7 +230,7 @@ public class SkipService {
       } catch (JSONException e) {
          error("search - " + e.getMessage());
       }
-   }
+   }*/
    
    private synchronized void print(String message) {
       log.print("SkipService: " + message);
