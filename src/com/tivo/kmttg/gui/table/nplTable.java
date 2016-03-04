@@ -157,9 +157,9 @@ public class nplTable extends TableMap {
 
          for (String colName : FILE_cols) {
             if (colName.equals("SIZE")) {
-               TreeTableColumn<Tabentry,sortableDouble> col = new TreeTableColumn<Tabentry,sortableDouble>(colName);
-               col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableDouble>(colName));
-               col.setComparator(new DoubleComparator());
+               TreeTableColumn<Tabentry,sortableSize> col = new TreeTableColumn<Tabentry,sortableSize>(colName);
+               col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableSize>(colName));
+               col.setComparator(new SizeComparator());
                NowPlaying.getColumns().add(col);
             } else {
                // Regular String sort
