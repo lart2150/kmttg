@@ -738,7 +738,8 @@ public class configMain {
          VRD.setSelected(false);
       
       // VRDexe
-      VRDexe.setText(config.VRDexe);
+      if (config.VRD == 1)
+         VRDexe.setText(config.VRDexe);
       
       // VrdEncode
       if (config.VrdEncode == 1)
@@ -1249,8 +1250,10 @@ public class configMain {
     	   if (file.isFile(value)) {
     	      config.VRDexe = value;
     	   } else {
-            textFieldError(VRDexe, "Configured path to VRD executable doesn't exist: '" + value + "'");
-            errors++;
+    	      if (config.VRD == 1) {
+    	         textFieldError(VRDexe, "Configured path to VRD executable doesn't exist: '" + value + "'");
+    	         errors++;
+    	      }
     	   }
       }
       
