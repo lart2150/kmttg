@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -1844,7 +1845,10 @@ public class jobMonitor {
          if ( ! waitForJobs(tivoName) && launchTime == -1 ) {
             // Setup to launch new jobs after user configured sleep time
             launch.put(tivoName, now + autoConfig.CHECK_TIVOS_INTERVAL*60*1000);
-            log.print("\n'" + tivoName + "' AUTO TRANSFERS PROCESSING SLEEPING " + autoConfig.CHECK_TIVOS_INTERVAL + " mins ...");
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+            String time = sdf.format(new Date());
+            log.print("\n'" + tivoName + "' AUTO TRANSFERS PROCESSING COMPLETED @ " + time);
+            log.print("'" + tivoName + "' AUTO TRANSFERS PROCESSING SLEEPING " + autoConfig.CHECK_TIVOS_INTERVAL + " mins ...");
          }
       }
    }
