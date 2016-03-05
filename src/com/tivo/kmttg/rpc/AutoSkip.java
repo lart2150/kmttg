@@ -48,14 +48,17 @@ public class AutoSkip {
    }
    
    public static synchronized Boolean isMonitoring() {
+      debug.print("");
       return monitor;
    }
    
    public static synchronized String offerId() {
+      debug.print("");
       return offerId;
    }
    
    public static synchronized void setMonitor(String tivoName, String offerId, String contentId, String title) {
+      debug.print("tivoName=" + tivoName + " offerId=" + offerId + " contentId=" + contentId + " title=" + title);
       if (AutoSkip.tivoName != null && ! AutoSkip.tivoName.equals(tivoName)) {
          disable();
       }
