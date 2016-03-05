@@ -202,6 +202,12 @@ public class vrdreview extends baseTask implements Serializable {
                   if (file.delete(job.mpegFile))
                      log.print("(Deleted mpeg file: " + job.mpegFile + ")");
                }
+               
+               // Remove .TiVo file if option enabled
+               if (config.RemoveTivoFile == 1 && job.tivoFile != null) {
+                  if (file.delete(job.tivoFile))
+                     log.print("(Deleted tivo file: " + job.tivoFile + ")");
+               }
             }
             
             // If job.mpegFile ends in .ts might have to rename metaFile
