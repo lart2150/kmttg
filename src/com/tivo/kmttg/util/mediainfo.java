@@ -101,6 +101,15 @@ public class mediainfo {
                      info.put("DAR_y", fields[2]);
                   }
                }
+               if (section.matches("^Text.*$") && line.matches("^Format.+$")) {
+                  // Caption information such as EIA-608 and EIA-708
+                  // Format : EIA-608
+                  String dar = line.replaceFirst(" ", "");
+                  String fields[] = dar.split(":");
+                  if (fields.length == 2) {
+                     info.put(fields[1], "1");
+                  }
+               }
             }
             if (info.size() == 0)
                info = null;
