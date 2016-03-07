@@ -2,6 +2,7 @@ package com.tivo.kmttg.task;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Stack;
 
 import com.tivo.kmttg.main.config;
@@ -11,6 +12,7 @@ import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.mediainfo;
 import com.tivo.kmttg.util.string;
 
 public class captions extends baseTask implements Serializable {
@@ -132,6 +134,25 @@ public class captions extends baseTask implements Serializable {
     	  executable = "ccextractor";
     	  command.add(config.ccextractor);
     	  log.print(">> Running ccextractor on " + job.videoFile + " ...");
+      }
+      if (executable.equalsIgnoreCase("ccextractor")) {
+         // Collect mediainfo information when possible to add arguments if only EIA-708 captions present
+         if (file.isFile(config.mediainfo)) {
+            Hashtable<String,String> info = mediainfo.getVideoInfo(job.videoFile);
+            if (info != null) {
+               if (! info.containsKey("EIA-608") && info.containsKey("EIA-708")) {
+                  // EIA-708 captions require special options
+                  // -autoprogram  -out=srt -bom -latin1 --nofontcolor -svc 1
+                  command.add("-autoprogram");
+                  command.add("-out=srt");
+                  command.add("-bom");
+                  command.add("-latin1");
+                  command.add("--nofontcolor");
+                  command.add("-svc");
+                  command.add("1");
+               }
+            }
+         }
       }
       command.add(job.videoFile);
       process = new backgroundProcess();
