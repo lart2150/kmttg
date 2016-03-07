@@ -109,8 +109,10 @@ public class SkipImport {
                   if (attribute.getNodeName().equals("CutTimeEnd"))
                      h.put("end", Long.parseLong(attribute.getTextContent())/10000);
                }
-               if (h.containsKey("start") && h.containsKey("end"))
-                  cuts.push(h);
+               if (h.containsKey("start") && h.containsKey("end")) {
+                  if (h.get("start") != 0 || h.get("end") != 0)
+                     cuts.push(h);
+               }
             }
          }
       } catch (Exception e) {
@@ -131,9 +133,11 @@ public class SkipImport {
                String[] l = line.split("\\s+");
                float start = Float.parseFloat(l[0])*1000;
                float end = Float.parseFloat(l[1])*1000;
-               h.put("start", (long)start);
-               h.put("end", (long)end);
-               cuts.push(h);
+               if (start != 0 || end != 0) {
+                  h.put("start", (long)start);
+                  h.put("end", (long)end);
+                  cuts.push(h);
+               }
             }
          }
          ifp.close();
