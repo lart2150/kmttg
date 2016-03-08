@@ -10,15 +10,16 @@ public class SkipShare {
    
    public static void Import(String shareSrt, String shareCut, String mySrt, Boolean debug) {
       srtSync csync = new srtSync(shareSrt, mySrt, false);
+      if (csync.ccstack == null) return;
       if (debug) {
          System.out.println("---DEBUG: srtSync data---");
          csync.print();
       }
       Stack<Hashtable<String,Long>> points;
       if (shareCut.endsWith(".Vprj"))
-         points = SkipImport.vrdImport(shareCut, 0L, false);
+         points = SkipImport.vrdImport(shareCut, 0L);
       else
-         points = SkipImport.edlImport(shareCut, 0L, false);
+         points = SkipImport.edlImport(shareCut, 0L);
       if (debug)
          printImportedCuts(points);
       if (points == null) return;

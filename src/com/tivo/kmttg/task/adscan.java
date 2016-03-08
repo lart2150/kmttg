@@ -183,7 +183,7 @@ public class adscan extends baseTask implements Serializable {
             
             if (job.autoskip && config.VrdReview == 0 && file.isFile(job.vprjFile)) {
                // Skip table entry creation
-               Stack<Hashtable<String,Long>> cuts = SkipImport.vrdImport(job.vprjFile, job.duration, false);
+               Stack<Hashtable<String,Long>> cuts = SkipImport.vrdImport(job.vprjFile, job.duration);
                if (cuts != null && cuts.size() > 0) {
                   if (AutoSkip.hasEntry(job.contentId))
                      AutoSkip.removeEntry(job.contentId);

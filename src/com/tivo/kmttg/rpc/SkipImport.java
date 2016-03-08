@@ -70,9 +70,9 @@ public class SkipImport {
          if (usedFile != null) {
             log.warn("Importing from file: " + usedFile);
             if (usedFile.endsWith(".VPrj"))
-               cuts = vrdImport(usedFile, Long.parseLong(entry.get("duration")), false);
+               cuts = vrdImport(usedFile, Long.parseLong(entry.get("duration")));
             if (usedFile.endsWith(".edl"))
-               cuts = edlImport(usedFile, Long.parseLong(entry.get("duration")), false);
+               cuts = edlImport(usedFile, Long.parseLong(entry.get("duration")));
          }
          
          if (cuts != null) {
@@ -89,7 +89,7 @@ public class SkipImport {
    }
    
    // Create skip entries based on VideoRedo .Vprj xml file with cut entries
-   static public Stack<Hashtable<String,Long>> vrdImport(String vprjFile, Long duration, Boolean ignoreFirst) {
+   static public Stack<Hashtable<String,Long>> vrdImport(String vprjFile, Long duration) {
       Stack<Hashtable<String,Long>> cuts = new Stack<Hashtable<String,Long>>();
       try {
          DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -119,10 +119,10 @@ public class SkipImport {
          log.error("SkipImport vrdImport - " + e.getMessage());
          log.error(Arrays.toString(e.getStackTrace()));
       }
-      return cutsToEntries(cuts, duration, ignoreFirst);
+      return cutsToEntries(cuts, duration);
    }
    
-   static public Stack<Hashtable<String,Long>> edlImport(String edlFile, Long duration, Boolean ignoreFirst) {
+   static public Stack<Hashtable<String,Long>> edlImport(String edlFile, Long duration) {
       Stack<Hashtable<String,Long>> cuts = new Stack<Hashtable<String,Long>>();
       try {
          BufferedReader ifp = new BufferedReader(new FileReader(edlFile));
@@ -145,40 +145,32 @@ public class SkipImport {
          log.error("SkipImport edlImport - " + e.getMessage());
          log.error(Arrays.toString(e.getStackTrace()));         
       }
-      return cutsToEntries(cuts, duration, ignoreFirst);
+      return cutsToEntries(cuts, duration);
    }
    
    // Convert a set of cut points to a set of show points
-   static private Stack<Hashtable<String,Long>> cutsToEntries(Stack<Hashtable<String,Long>> cuts, Long duration, Boolean ignoreFirst) {
+   static private Stack<Hashtable<String,Long>> cutsToEntries(Stack<Hashtable<String,Long>> cuts, Long duration) {
       Stack<Hashtable<String,Long>> entries = new Stack<Hashtable<String,Long>>();
       if (cuts != null && cuts.size() > 0) {
-         for (int i=0; i<cuts.size()-1; ++i) {
+         for (int i=0; i<cuts.size(); ++i) {
             Hashtable<String,Long> h = new Hashtable<String,Long>();
             if (i==0)
                h.put("start", 0L);
-            else {
-               if (ignoreFirst)
-                  h.put("start", cuts.get(i).get("end"));
-               else
-                  h.put("start", cuts.get(i-1).get("end"));
-            }
-            if (ignoreFirst)
-               h.put("end", cuts.get(i+1).get("start"));
             else
-               h.put("end", cuts.get(i).get("start"));
-            entries.push(h);
+               h.put("start", cuts.get(i-1).get("end"));
+            h.put("end", cuts.get(i).get("start"));
+            if (h.get("start") != 0 || h.get("end") != 0)
+               entries.push(h);
          }
-         if (! ignoreFirst && cuts.size() > 1) {
-            Hashtable<String,Long> h = new Hashtable<String,Long>();
-            h.put("start", cuts.get(cuts.size()-2).get("end"));
-            h.put("end", cuts.get(cuts.size()-1).get("start"));
-            entries.push(h);
-         }
+         // Last entry
          if (cuts.size() > 0) {
-            Hashtable<String,Long> h = new Hashtable<String,Long>();
-            h.put("start", cuts.get(cuts.size()-1).get("end"));
-            h.put("end", duration);
-            entries.push(h);
+            long last_end = cuts.get(cuts.size()-1).get("end");
+            if (duration > last_end) {
+               Hashtable<String,Long> h = new Hashtable<String,Long>();
+               h.put("start", last_end);
+               h.put("end", duration);
+               entries.push(h);
+            }
          }
       }
       return entries;

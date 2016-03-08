@@ -230,7 +230,7 @@ public class comskip extends baseTask implements Serializable {
             
             if (job.autoskip && config.VrdReview == 0 && config.comskip_review == 0 && file.isFile(job.edlFile)) {
                // Skip table entry creation
-               Stack<Hashtable<String,Long>> cuts = SkipImport.edlImport(job.edlFile, job.duration, false);
+               Stack<Hashtable<String,Long>> cuts = SkipImport.edlImport(job.edlFile, job.duration);
                if (cuts != null && cuts.size() > 0) {
                   if (AutoSkip.hasEntry(job.contentId))
                      AutoSkip.removeEntry(job.contentId);
