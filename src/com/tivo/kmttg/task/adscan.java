@@ -115,7 +115,7 @@ public class adscan extends baseTask implements Serializable {
          log.error("Failed to start command: " + process.toString());
          process.printStderr();
          process = null;
-         jobMonitor.removeFromJobList(job);
+         jobMonitor.kill(job);
          if (lockFile != null) file.delete(lockFile);
          return false;
       }
@@ -177,6 +177,7 @@ public class adscan extends baseTask implements Serializable {
          if (failed == 1) {
             log.error("adscan failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
+            jobMonitor.kill(job); // This called so that family of jobs is killed
          } else {
             log.warn("adscan job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " output=" + job.vprjFile);

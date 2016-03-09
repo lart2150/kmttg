@@ -232,6 +232,7 @@ public class tivolibre extends baseTask implements Serializable {
             }
          } else {
             log.error("tivolibre decrypt failed for file: " + job.tivoFile);
+            jobMonitor.kill(job); // This called so that family of jobs is killed
          }
 
          return false;         

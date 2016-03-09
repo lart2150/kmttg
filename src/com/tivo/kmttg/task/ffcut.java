@@ -106,14 +106,14 @@ public class ffcut extends baseTask implements Serializable {
             log.error("Failed to start command: " + process.toString());
             process.printStderr();
             process = null;
-            jobMonitor.removeFromJobList(job);
+            jobMonitor.kill(job);
             return false;
          }
          return true;
       } else {
          log.error("Failed to create batch script file: " + batchFile);
          process = null;
-         jobMonitor.removeFromJobList(job);
+         jobMonitor.kill(job);
          return false;
       }
    }
@@ -195,6 +195,7 @@ public class ffcut extends baseTask implements Serializable {
          if (failed == 1) {
             log.error("ffcut failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
+            jobMonitor.kill(job); // This called so that family of jobs is killed
          } else {
             log.warn("ffcut job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type);

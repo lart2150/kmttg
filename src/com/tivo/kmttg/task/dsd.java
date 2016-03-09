@@ -133,7 +133,7 @@ public class dsd extends baseTask implements Serializable {
          log.error("Failed to start command: " + process.toString());
          process.printStderr();
          process = null;
-         jobMonitor.removeFromJobList(job);
+         jobMonitor.kill(job);
          return false;
       }
       return true;
@@ -206,6 +206,7 @@ public class dsd extends baseTask implements Serializable {
             log.error("NOTE: You must have at least partial TiVo Desktop install for DirectShow Dump to work");
             process.printStderr();
             log.error(process.getStdout());
+            jobMonitor.kill(job); // This called so that family of jobs is killed
          } else {
             log.warn("dsd job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " output=" + job.mpegFile);

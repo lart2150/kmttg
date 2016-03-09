@@ -71,7 +71,7 @@ public class javametadata extends baseTask implements Serializable {
       debug.print("");
       if (job.url == null || job.url.length() == 0) {
          log.error("URL not given");
-         jobMonitor.removeFromJobList(job);
+         jobMonitor.kill(job);
          return false;
       }
       

@@ -84,7 +84,7 @@ public class jdownload_decrypt extends baseTask implements Serializable {
       debug.print("");
       if (job.url == null || job.url.length() == 0) {
          log.error("URL not given");
-         jobMonitor.removeFromJobList(job);
+         jobMonitor.kill(job);
          cleanup();
          return false;
       }
@@ -129,7 +129,7 @@ public class jdownload_decrypt extends baseTask implements Serializable {
          log.error("Failed to start command: " + process.toString());
          process.printStderr();
          process = null;
-         jobMonitor.removeFromJobList(job);
+         jobMonitor.kill(job);
          return false;
       }
       
@@ -274,6 +274,7 @@ public class jdownload_decrypt extends baseTask implements Serializable {
                jobMonitor.submitNewJob(job);
             } else {
                log.error(string.basename(job.mpegFile) + ": Too many failed downloads, GIVING UP!!");
+               jobMonitor.kill(job); // This called so that family of jobs is killed
             }
          } else {
             log.print("---DONE--- job=" + job.type + " output=" + job.mpegFile);

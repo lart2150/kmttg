@@ -147,7 +147,7 @@ public class comskip extends baseTask implements Serializable {
          log.error("Failed to start command: " + process.toString());
          process.printStderr();
          process = null;
-         jobMonitor.removeFromJobList(job);
+         jobMonitor.kill(job);
          return false;
       }
       return true;
@@ -211,6 +211,7 @@ public class comskip extends baseTask implements Serializable {
          if (failed == 1) {
             log.error("comskip failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
+            jobMonitor.kill(job); // This called so that family of jobs is killed
          } else {
             fixVprj(); // comskip generated scene marker entries may need to be fixed
             log.warn("comskip job completed: " + jobMonitor.getElapsedTime(job.time));

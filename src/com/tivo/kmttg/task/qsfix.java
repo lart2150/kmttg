@@ -118,7 +118,7 @@ public class qsfix extends baseTask implements Serializable {
          }
          if (info == null) {
             log.error("Unable to determine info on file: " + sourceFile);
-            jobMonitor.removeFromJobList(job);
+            jobMonitor.kill(job);
             return false;
          }    
       }
@@ -186,7 +186,7 @@ public class qsfix extends baseTask implements Serializable {
       if ( ! file.isFile(vrdscript) ) {
          log.error("File does not exist: " + vrdscript);
          log.error("Aborting. Fix incomplete kmttg installation");
-         jobMonitor.removeFromJobList(job);
+         jobMonitor.kill(job);
          return false;
       }
 
@@ -220,7 +220,7 @@ public class qsfix extends baseTask implements Serializable {
          log.error("Failed to start command: " + process.toString());
          process.printStderr();
          process = null;
-         jobMonitor.removeFromJobList(job);
+         jobMonitor.kill(job);
          if (lockFile != null) file.delete(lockFile);
          return false;
       }
@@ -288,6 +288,7 @@ public class qsfix extends baseTask implements Serializable {
          if (failed == 1) {
             log.error("qsfix failed (exit code: " + exit_code + " ) - check command: " + process.toString());
             process.printStderr();
+            jobMonitor.kill(job); // This called so that family of jobs is killed
          } else {
             log.warn("qsfix job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " output=" + job.mpegFile_fix);

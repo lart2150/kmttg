@@ -77,7 +77,7 @@ public class javadownload extends baseTask implements Serializable {
       debug.print("");
       if (job.url == null || job.url.length() == 0) {
          log.error("URL not given");
-         jobMonitor.removeFromJobList(job);
+         jobMonitor.kill(job);
          return false;
       }
       
@@ -258,6 +258,7 @@ public class javadownload extends baseTask implements Serializable {
                jobMonitor.submitNewJob(job);
             } else {
                log.error(string.basename(job.tivoFile) + ": Too many failed downloads, GIVING UP!!");
+               jobMonitor.kill(job); // This called so that family of jobs is killed
             }
          } else {
             log.print("---DONE--- job=" + job.type + " output=" + job.tivoFile);
