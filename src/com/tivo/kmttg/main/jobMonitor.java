@@ -1489,12 +1489,13 @@ public class jobMonitor {
       int majorId = (int)major_float;
       float mf;
       int m;
-      for (int i=0; i<JOBS.size(); ++i) {
-         mf = JOBS.get(i).familyId;
+      Stack<jobData> jobs_copy = JOBS;
+      for (jobData j : jobs_copy) {
+         mf = j.familyId;
          m = (int)mf;
          if (m == majorId && mf > major_float) {
-            log.warn("Removing job: " + JOBS.get(i).toString());
-            removeFromJobList(JOBS.get(i));
+            log.warn("Removing job: " + j.toString());
+            removeFromJobList(j);
          }
       }
    }
