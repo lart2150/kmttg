@@ -5,6 +5,7 @@ import java.util.Stack;
 public class srtSync {
    public Stack<ccdiff> ccstack;
    int minSize = 8; // Require at least this many characters in synced cc text
+   int maxDiff = 60*1000; // Max msec time sync difference allowed
    Boolean debug = false;
    
    public srtSync(String srtFile1, String srtFile2, Boolean debug) {
@@ -29,13 +30,14 @@ public class srtSync {
       Stack<cc> cc2stack = s2.ccstack;
       if (cc2stack == null)
          return false;
+      int index1 = 0;
       int index2 = 0;
       for (cc cc1 : cc1stack) {
          String text1 = cc1.text;
          if (text1.length() >= minSize) {
             for (int i=index2; i<cc2stack.size(); ++i) {
                cc cc2 = cc2stack.get(i);
-               if (text1.equals(cc2.text)) {
+               if (text1.equals(cc2.text) && Math.abs(cc1.start - cc2.start) < maxDiff) {
                   index2 = i;
                   ccdiff cdiff = new ccdiff();
                   cdiff.start1 = cc1.start;
@@ -43,11 +45,14 @@ public class srtSync {
                   cdiff.stop1 = cc1.stop;
                   cdiff.stop2 = cc2.stop;
                   cdiff.text = text1;
+                  cdiff.index1 = index1 + 1;
+                  cdiff.index2 = index2 + 1;
                   ccstack.push(cdiff);
                   break;
                }
             }
          }
+         index1++;
       }
       return true;
    }
