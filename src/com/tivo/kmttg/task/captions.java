@@ -194,14 +194,7 @@ public class captions extends baseTask implements Serializable {
             }
          }
         return true;
-      } else {
-         // Job finished
-         if (executable.equals("ccextractor")) {
-            if (try_again)
-               jobMonitor.removeFromJobList(job);
-         } else
-            jobMonitor.removeFromJobList(job);
-         
+      } else {         
          // Check for problems
          int failed = 0;
          // No or empty srtFile means problems
@@ -236,7 +229,9 @@ public class captions extends baseTask implements Serializable {
                   return true;
                }
             }
+            jobMonitor.removeFromJobList(job);
          } else {
+            jobMonitor.removeFromJobList(job);
             log.warn(executable + " job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " output=" + job.srtFile);
             // Rename srtFile to job.srtFile if they are different
