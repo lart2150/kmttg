@@ -21,6 +21,7 @@ public class captions extends baseTask implements Serializable {
    private backgroundProcess process;
    private jobData job;
    private String executable;
+   private Boolean try_again = false;
 
    // constructor
    public captions(jobData job) {
@@ -135,12 +136,13 @@ public class captions extends baseTask implements Serializable {
     	  command.add(config.ccextractor);
     	  log.print(">> Running ccextractor on " + job.videoFile + " ...");
       }
-      if (executable.equalsIgnoreCase("ccextractor")) {
+      if (executable.equals("ccextractor")) {
          // Collect mediainfo information when possible to add arguments if only EIA-708 captions present
          if (file.isFile(config.mediainfo)) {
             Hashtable<String,String> info = mediainfo.getVideoInfo(job.videoFile);
             if (info != null) {
-               if (! info.containsKey("EIA-608") && info.containsKey("EIA-708")) {
+               if (try_again || (! info.containsKey("EIA-608") && info.containsKey("EIA-708"))) {
+                  try_again = true;
                   // EIA-708 captions require special options
                   // -autoprogram  -out=srt -bom -latin1 --nofontcolor -svc 1
                   command.add("-autoprogram");
@@ -193,8 +195,12 @@ public class captions extends baseTask implements Serializable {
          }
         return true;
       } else {
-         // Job finished         
-         jobMonitor.removeFromJobList(job);
+         // Job finished
+         if (executable.equals("ccextractor")) {
+            if (try_again)
+               jobMonitor.removeFromJobList(job);
+         } else
+            jobMonitor.removeFromJobList(job);
          
          // Check for problems
          int failed = 0;
@@ -203,14 +209,33 @@ public class captions extends baseTask implements Serializable {
             failed = 1;
          }
          
+         if (failed == 0) {
+            // Very small file means problems
+            if (file.size(srtFile) < 1000) {
+               log.error("srt file size < 1000 probably means a problem");
+               failed = 1;
+            }
+         }
+         
          // exit code != 0 => trouble
          if (exit_code != 0) {
             failed = 1;
          }
          
          if (failed == 1) {
-            log.error(executable + " failed (exit code: " + exit_code + " ) - check command: " + process.toString());
-            process.printStderr();
+            if (try_again || ! executable.equals("ccextractor")) {
+               log.error(executable + " failed (exit code: " + exit_code + " ) - check command: " + process.toString());
+               process.printStderr();
+            } else {
+               try_again = true;
+               log.warn("Trying ccextractor again with different options");
+               if ( start() ) {
+                  job.process = this;
+                  jobMonitor.updateJobStatus(job, "running");
+                  job.time = new Date().getTime();
+                  return true;
+               }
+            }
          } else {
             log.warn(executable + " job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " output=" + job.srtFile);
