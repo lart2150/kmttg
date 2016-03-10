@@ -16,6 +16,7 @@ public class SkipShare {
          csync.print();
       }
       Stack<Hashtable<String,Long>> points;
+      Stack<Hashtable<String,Long>> points_adj = new Stack<Hashtable<String,Long>>();
       if (shareCut.endsWith(".Vprj"))
          points = SkipImport.vrdImport(shareCut, 0L);
       else
@@ -33,12 +34,24 @@ public class SkipShare {
          if (start > 0) {
             ccdiff cc = csync.findAfter(start);
             if (cc != null) {
+               if (debug) {
+                  System.out.println(
+                     "\ncc after start=" + com.tivo.kmttg.captions.util.toHourMinSec(start) +
+                     ":\n" + cc.toString()
+                  );
+               }
                adjusted_start = start + cc.startDiff();
             }
          }
          if (end > 0) {
             ccdiff cc = csync.findBefore(end);
             if (cc != null) {
+               if (debug) {
+                  System.out.println(
+                     "\ncc before end=" + com.tivo.kmttg.captions.util.toHourMinSec(end) +
+                     ":\n" + cc.toString()
+                  );
+               }
                adjusted_end = end + cc.stopDiff();
             }
          }
@@ -47,10 +60,20 @@ public class SkipShare {
          if (adjusted_start == 0 && adjusted_end == 0)
             continue;
          else {
+            Hashtable<String,Long> h = new Hashtable<String,Long>();
+            h.put("start", adjusted_start);
+            h.put("end", adjusted_end);
+            points_adj.push(h);
             System.out.println(line);
             i++;
          }
       }
+      
+      String title = "Of Kings and Prophets - Offerings of Blood";
+      String offerId = "tivo:of.ctd.7515777.1007.cable.2016-03-09-06-00-00.3600";
+      String contentId = "tivo:ct.337947375";
+      String tivoName = "Roamio";
+      //AutoSkip.saveEntry(contentId, offerId, 0L, title, tivoName, points_adj);
    }
    
    public static void printImportedCuts(Stack<Hashtable<String,Long>> points) {
