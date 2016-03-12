@@ -152,6 +152,8 @@ public class captions extends baseTask implements Serializable {
                   command.add("--nofontcolor");
                   command.add("-svc");
                   command.add("1");
+                  command.add("-o");
+                  command.add(srtFile);
                }
             }
          }
