@@ -107,6 +107,7 @@ public class jobData implements Serializable, Cloneable {
    public Boolean getURLs = false;
    public Boolean partiallyViewed = false;
    public Integer download_duration = 0;
+   public Integer TSDownload = 0;
 
    // AutoSkip related
    public long limit = 0;
