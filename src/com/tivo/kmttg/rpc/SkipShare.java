@@ -62,7 +62,7 @@ public class SkipShare {
                adjusted_end = end;
             if (adjusted_start == 0 && adjusted_end == 0)
                continue;
-            if (adjusted_end == end && adjusted_start == 0)
+            if (adjusted_end - adjusted_start == duration)
                continue;
             else {
                Hashtable<String,Long> h = new Hashtable<String,Long>();
@@ -91,11 +91,6 @@ public class SkipShare {
       String name = tivoFileName.buildTivoFileName(entry);
       if (name != null) {
          try {
-            JSONObject json = new JSONObject();
-            json.put("title", entry.get("title"));
-            json.put("offerId", entry.get("offerId"));
-            json.put("contentId", entry.get("contentId"));
-            json.put("duration", Long.parseLong(entry.get("duration")));
             String zip = "";
             String srt = "";
             String[] dirs = {config.outputDir, config.mpegDir};
@@ -107,14 +102,14 @@ public class SkipShare {
                if (file.isFile(f))
                   zip = f;
             }
-            new com.tivo.kmttg.gui.dialog.SkipShare(config.gui.getFrame(), tivoName, json, zip, srt);
+            new com.tivo.kmttg.gui.dialog.SkipShare(config.gui.getFrame(), tivoName, entry, zip, srt);
          } catch (Exception er) {
             log.error(er.getMessage());
          }
       }
    }
    
-   public static Boolean Import(
+   public static Boolean ZipImport(
       String tivoName, JSONObject json, String zipFile,
       String srt_ref, Boolean debug) {
       try {

@@ -1,27 +1,33 @@
 package com.tivo.kmttg.gui.dialog;
 
 import java.io.File;
+import java.util.Hashtable;
+import java.util.Optional;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.MyTooltip;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.jobData;
+import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.main.tivoFileName;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
@@ -36,20 +42,70 @@ public class SkipShare {
    private String tivo = null;
    private JSONObject json = null;
    
-   public SkipShare(Stage frame, String tivo, JSONObject json, String zipFileName, String srtFileName) {
+   public SkipShare(Stage frame, String tivoName, Hashtable<String,String> entry, String zipFileName, String srtFileName) {
       this.frame = frame;
-      this.tivo = tivo;
-      this.json = json;
-      if (dialog == null)
-         init();
-      else
-         dialog.show();
+      this.tivo = tivoName;
+      try {
+         json = new JSONObject();
+         json.put("title", entry.get("title"));
+         json.put("offerId", entry.get("offerId"));
+         json.put("contentId", entry.get("contentId"));
+         json.put("duration", Long.parseLong(entry.get("duration")));
+         if (! file.isFile(srtFileName)) {
+            // Prompt to download/create srt file if it doesn't exist
+            if (srtDownload(tivoName, entry))
+               return;
+         }
+      } catch (JSONException e) {
+         log.error("SkipShare - " + e.getMessage());
+      }
+      init();
       zipFile.setText(zipFileName);
       srtFile.setText(srtFileName);
    }
+   
+   private Boolean srtDownload(String tivoName, Hashtable<String,String> entry) {
+      Alert alert = new Alert(AlertType.CONFIRMATION);
+      alert.setTitle("Confirm");
+      config.gui.setFontSize(alert, config.FontSize);
+      alert.setContentText("Local srt file for this show not detected. Download and create it?");
+      Optional<ButtonType> result = alert.showAndWait();
+      if (result.get() == ButtonType.OK) {
+         String startFile = tivoFileName.buildTivoFileName(entry);
+         String mpegFile = config.mpegDir + File.separator + string.replaceSuffix(startFile, ".ts");
+         // tdownload_decrypt job
+         config.tivolibreCompat = 1;
+         jobData job = new jobData();
+         job.startFile    = startFile;
+         job.source       = entry.get("url_TiVoVideoDetails");
+         job.url          = entry.get("url");
+         job.tivoFileSize = Long.parseLong(entry.get("size"));
+         job.tivoName     = tivoName;
+         job.type         = "tdownload_decrypt";
+         job.name         = "java";
+         job.TSDownload   = 1;
+         job.mpegFile     = mpegFile;
+         job.mpegFile_cut = string.replaceSuffix(mpegFile, "_cut.ts");                  
+         jobMonitor.submitNewJob(job);
+         
+         // captions job
+         jobData job2 = new jobData();
+         job2.source    = job.source;
+         job2.startFile = startFile;
+         job2.tivoName  = tivoName;
+         job2.type      = "captions";
+         job2.name      = config.ccextractor;
+         job2.videoFile = mpegFile;
+         job2.srtFile   = string.replaceSuffix(mpegFile, ".srt");;
+         jobMonitor.submitNewJob(job2);
+         
+         return true;
+      }
+      return false;
+   }
          
    private void init() {
-      FileBrowser = new FileChooser(); FileBrowser.setInitialDirectory(new File(config.programDir));
+      FileBrowser = new FileChooser(); FileBrowser.setInitialDirectory(new File(config.mpegDir));
       // Define content for dialog window
       VBox content = new VBox();
       content.setPadding(new Insets(5,5,5,5));
@@ -64,7 +120,7 @@ public class SkipShare {
 
       // Import button
       Button Import = new Button("Import");
-      String tip = "<b>Import</b><br>Import given zip file and srt file into AutoSkip table.";
+      String tip = "<b>Import</b><br>Import skip share zip file and local srt file into AutoSkip table.";
       Import.setTooltip(MyTooltip.make(tip));
       Import.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
@@ -78,7 +134,7 @@ public class SkipShare {
                log.error("srt file not found: " + srt);
                return;
             }
-            if (com.tivo.kmttg.rpc.SkipShare.Import(tivo, json, zip, srt, debug.isSelected())) {
+            if (com.tivo.kmttg.rpc.SkipShare.ZipImport(tivo, json, zip, srt, debug.isSelected())) {
                log.print("Successfully imported skip share");
                dialog.close();
             } else {
@@ -89,59 +145,58 @@ public class SkipShare {
       
       // debug boolean
       debug = new CheckBox("ENABLE DEBUG");
-      
+      tip = "<b>ENABLE DEBUG</b><br>Print debug info to message window.";
+      debug.setTooltip(MyTooltip.make(tip));      
       panel.add(Import, 0, 0);
       panel.add(debug, 1, 0);
 
-      // Row 2 = zipFile field
-      Label zipFile_label = new Label("Zip File (double click to browse)");
-      zipFile = new TextField();
-      zipFile.setPrefWidth(50);
-      zipFile.setOnMouseClicked(new EventHandler<MouseEvent>() {
-         @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
-               if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     zipFile.setText(selectedFile.getPath());
-                  }
-               }
+      // Row 2 = zipFile
+      Button zipFile_button = new Button("Skip Share Zip File...");
+      tip = "<b>Skip Share Zip File...</b><br>Browse for skip share zip file";
+      zipFile_button.setTooltip(MyTooltip.make(tip));      
+      zipFile_button.setOnAction(new EventHandler<ActionEvent>() {
+         public void handle(ActionEvent e) {
+            File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
+            if (selectedFile != null) {
+               zipFile.setText(selectedFile.getPath());
             }
          }
       });
-      panel.add(zipFile_label, 0, 1);
+      zipFile = new TextField();
+      tip = "Skip share zip file containing cut points and srt file generated by someone else";
+      zipFile.setTooltip(MyTooltip.make(tip));      
+      zipFile.setPrefWidth(80);
+      panel.add(zipFile_button, 0, 1);
       panel.add(zipFile, 1, 1);
       
-      // srtFile
-      Label srtFile_label = new Label("srt File (double click to browse)");
-      srtFile = new TextField();
-      srtFile.setPrefWidth(50);
-      srtFile.setOnMouseClicked(new EventHandler<MouseEvent>() {
-         @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
-               if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     srtFile.setText(selectedFile.getPath());
-                  }
-               }
+      // Row 3 = srtFile
+      Button srtFile_button = new Button("Local srt File...");
+      tip = "<b>Local srt File...</b><br>Browse for local srt captions file used for time sync";
+      srtFile_button.setTooltip(MyTooltip.make(tip));      
+      srtFile_button.setOnAction(new EventHandler<ActionEvent>() {
+         public void handle(ActionEvent e) {
+            File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
+            if (selectedFile != null) {
+               srtFile.setText(selectedFile.getPath());
             }
          }
       });
-      panel.add(srtFile_label, 0, 2);
+      srtFile = new TextField();
+      tip = "srt captions file generated by you and used for time sync";
+      srtFile.setTooltip(MyTooltip.make(tip));      
+      srtFile.setPrefWidth(80);
+      panel.add(srtFile_button, 0, 2);
       panel.add(srtFile, 1, 2);
       content.getChildren().add(panel);
 
       dialog = new Stage();
       dialog.initOwner(frame);
-      dialog.setTitle("AutoSkip Import");
+      dialog.setTitle("Skip Share Import");
       Scene scene = new Scene(new VBox());
       config.gui.setFontSize(scene, config.FontSize);
       ((VBox) scene.getRoot()).getChildren().add(content);
       dialog.setScene(scene);
-      dialog.setMinWidth(600);
+      dialog.setMinWidth(800);
       dialog.show();      
    }
 }
