@@ -678,6 +678,16 @@ public class nplTable extends TableMap {
       } else if (keyCode == KeyCode.T) {
          TableUtil.toggleTreeState(NowPlaying);
       }
+      else if (keyCode == KeyCode.C) {
+         // Import Skip Share
+         int[] selected = GetSelectedRows();
+         if (selected == null || selected.length < 1)
+            return;
+         sortableDate s = NowPlaying.getTreeItem(selected[0]).getValue().getDATE();
+         if ( ! s.folder && s.data != null ) {
+            com.tivo.kmttg.rpc.SkipShare.tableImport(s.data, tivoName);
+         }
+      }
       /*else if (keyCode == KeyCode.X) {
          if (AutoSkip.isMonitoring()) {
             log.print("Requested skip to 1st commercial point...");
