@@ -91,7 +91,7 @@ public class tdownload_decrypt extends baseTask implements Serializable {
 
       // For transport stream container input files change output file suffix from .mpg to .ts
       Boolean isFileChanged = false;
-      if (config.TSDownload == 1) {
+      if (config.TSDownload == 1 || job.TSDownload == 1) {
          if (job.mpegFile.endsWith(".mpg")) {
             job.mpegFile = string.replaceSuffix(job.mpegFile, ".ts");
             isFileChanged = true;
