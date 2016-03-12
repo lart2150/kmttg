@@ -353,9 +353,7 @@ public class AutoSkip {
    
    public static synchronized String toMinSec(long msecs) {
       debug.print("msecs=" + msecs);
-      int mins = (int)msecs/1000/60;
-      int secs = (int)(msecs/1000 - 60*mins);
-      return String.format("%02d:%02d", mins, secs);
+      return com.tivo.kmttg.captions.util.toHourMinSec(msecs);
    }
    
    // Get the closest non-commercial start point to given pos
