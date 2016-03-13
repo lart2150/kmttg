@@ -17,7 +17,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class toolDownload {
-   String windows_file = "kmttg_win32_tools_v2.1k.zip";
+   String windows_file = "kmttg_win32_tools_v2.1n.zip";
    String mac_file = "kmttg_MacOSX_tools_v2.1e.zip";
    String tools_version = "tools_version";
    
