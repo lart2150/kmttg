@@ -55,7 +55,10 @@ public class jobMonitor {
       
       // Handle auto transfers GUI run if "Loop in GUI" menu item enabled
       if (config.GUIMODE && config.GUI_LOOP == 1) {
-         handleLoopInGUI();
+         if (file.isFile(config.autoIni) && file.size(config.autoIni) > 0)
+            handleLoopInGUI();
+         else
+            config.gui.autoLoopInGUICB(false);
       }
       
       // Check for new tivos
