@@ -541,6 +541,10 @@ public class tivoTab {
          for (int i=0; i<rows.length; i++) {
             row = rows[i];
             Hashtable<String,String> entry = nplTab.NowPlayingGetSelectionData(row);
+            if (entry == null) {
+               log.warn("Please select a non folder entry in table");
+               continue;
+            }
             if (entry.containsKey("titleOnly")) {
                auto.autoAddTitleEntryToFile(entry.get("titleOnly"));
             }
@@ -565,6 +569,10 @@ public class tivoTab {
          for (int i=0; i<rows.length; i++) {
             row = rows[i];
             Hashtable<String,String> entry = nplTab.NowPlayingGetSelectionData(row);
+            if (entry == null) {
+               log.warn("Please select a non folder entry in table");
+               continue;
+            }
             if (entry.containsKey("ProgramId")) {
                int result = auto.AddHistoryEntry(entry);
                if (result == 1) {
