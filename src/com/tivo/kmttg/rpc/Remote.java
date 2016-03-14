@@ -913,7 +913,7 @@ public class Remote {
 
       try {
          JSONObject json = new JSONObject();
-         json.put("count", count);
+         //json.put("count", count);
          json.put("flatten", true);
          JSONArray items = new JSONArray();
          while (! stop) {
@@ -921,6 +921,7 @@ public class Remote {
             result = Command("MyShows", json);
             if (result != null && result.has("recordingFolderItem")) {
                JSONArray a = result.getJSONArray("recordingFolderItem");
+               count = a.length();
                for (int i=0; i<a.length(); ++i) {
                   JSONObject j = a.getJSONObject(i);
                   // Single item
@@ -928,7 +929,7 @@ public class Remote {
                   if (! unique.containsKey(id))
                      items.put(j);
                } // for i
-               if (a.length() == 0)
+               if (count == 0)
                   stop = true;
             } else {
                stop = true;
