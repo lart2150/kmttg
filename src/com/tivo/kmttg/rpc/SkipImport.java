@@ -3,6 +3,9 @@ package com.tivo.kmttg.rpc;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -15,6 +18,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.tivoFileName;
@@ -94,8 +98,10 @@ public class SkipImport {
       try {
          DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
          DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-         Document doc = docBuilder.parse(vprjFile);
-         NodeList nList = doc.getElementsByTagName("CutList");
+         // Read vprjFile into xml string to lowercase it
+         String xml = new String(Files.readAllBytes(Paths.get(vprjFile)));
+         Document doc = docBuilder.parse(new InputSource(new StringReader(xml.toLowerCase())));
+         NodeList nList = doc.getElementsByTagName("cutlist");
          if (nList.getLength() > 0) {
             Node cutListNode = nList.item(0);
             NodeList cutList = cutListNode.getChildNodes();
@@ -104,9 +110,9 @@ public class SkipImport {
                Hashtable<String,Long> h = new Hashtable<String,Long>();
                for (int j=0; j<cut.getLength(); ++j) {
                   Node attribute = cut.item(j);
-                  if (attribute.getNodeName().equals("CutTimeStart"))
+                  if (attribute.getNodeName().equals("cuttimestart"))
                      h.put("start", Long.parseLong(attribute.getTextContent())/10000);
-                  if (attribute.getNodeName().equals("CutTimeEnd"))
+                  if (attribute.getNodeName().equals("cuttimeend"))
                      h.put("end", Long.parseLong(attribute.getTextContent())/10000);
                }
                if (h.containsKey("start") && h.containsKey("end")) {
