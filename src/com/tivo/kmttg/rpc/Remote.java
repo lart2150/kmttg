@@ -928,7 +928,7 @@ public class Remote {
                   if (! unique.containsKey(id))
                      items.put(j);
                } // for i
-               if (a.length() < count)
+               if (a.length() == 0)
                   stop = true;
             } else {
                stop = true;
