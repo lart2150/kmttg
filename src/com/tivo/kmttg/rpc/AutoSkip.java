@@ -13,6 +13,7 @@ import javafx.concurrent.Task;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -182,8 +183,9 @@ public class AutoSkip {
             return;
          if (end1 == -1)
             return;
+         int pad = config.autoskip_padding*1000;
          for (Hashtable<String,Long> h : skipData) {
-            if (pos > h.get("start") && pos < h.get("end")) {
+            if (pos >= (h.get("start")-pad) && pos <= (h.get("end")+pad)) {
                skip = false;
             }
          }
@@ -200,8 +202,8 @@ public class AutoSkip {
          if (skip) {
             long jumpto = getClosest(pos);
             if (jumpto != -1) {
-               print("IN COMMERCIAL. JUMPING TO: " + SkipManager.toMinSec(jumpto));
-               jumpTo(jumpto);
+               print("IN COMMERCIAL. JUMPING TO: " + SkipManager.toMinSec(jumpto-pad));
+               jumpTo(jumpto-pad);
             }
          }
       }
