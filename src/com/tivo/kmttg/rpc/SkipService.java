@@ -6,7 +6,6 @@ import java.util.TimerTask;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
@@ -17,16 +16,22 @@ public class SkipService {
    private Remote r = null;
    private Boolean enabled = true;
    public String tivoName = null;
+   public AutoSkip skip = null;
    
    public SkipService(String tivoName) {
       this.tivoName = tivoName;
+      skip = SkipManager.getSkip(tivoName);
+      if (skip == null) {
+         SkipManager.addSkip(tivoName);
+         skip = SkipManager.getSkip(tivoName);
+      }
    }
    
    public synchronized void start() {
       debug.print("");
       r = new Remote(tivoName);
       if (r.success) {
-         print("monitor started for: " + tivoName);
+         print("monitor started");
          running = true;
       } else {
          error("Cannot RPC connect to: " + tivoName);
@@ -47,10 +52,6 @@ public class SkipService {
         ,3000,
         interval*1000
       );
-      if (config.GUIMODE && ! config.gui.skipServiceMenuItem.isSelected())
-         config.gui.skipServiceMenuItem_cb = false;
-         config.gui.skipServiceMenuItem.setSelected(true);
-         config.gui.skipServiceMenuItem_cb = true;
    }
    
    public synchronized void stop() {
@@ -62,9 +63,7 @@ public class SkipService {
          print("monitor stopped");
          running = false;
       }
-      AutoSkip.monitor = false;
-      if (config.GUIMODE && config.gui.skipServiceMenuItem.isSelected())
-         config.gui.skipServiceMenuItem.setSelected(false);
+      SkipManager.disableMonitor(tivoName);
    }
    
    public synchronized Boolean isRunning() {
@@ -120,9 +119,9 @@ public class SkipService {
                   if (what.has("recordingId"))
                      recordingId = what.getString("recordingId");
                   String offerId = what.getString("offerId");
-                  debug.print("offerId=" + offerId + " AutoSkip.offerId()=" + AutoSkip.offerId());
-                  if (AutoSkip.offerId() != null && AutoSkip.offerId().equals(offerId)) {
-                     if (AutoSkip.isMonitoring()) {
+                  debug.print("offerId=" + offerId + " AutoSkip.offerId()=" + skip.offerId());
+                  if (skip.offerId() != null && skip.offerId().equals(offerId)) {
+                     if (skip.isMonitoring()) {
                         // If AutoSkip already monitoring this offerId then nothing to do
                         return;
                      } else {
@@ -134,9 +133,9 @@ public class SkipService {
                   } else {
                      // Current offerId does not match AutoSkip.offerId
                      // Disable monitoring of current AutoSkip.offerId
-                     if (AutoSkip.isMonitoring()) {
+                     if (skip.isMonitoring()) {
                         debug.print("SkipService calling AutoSkip.disable");
-                        AutoSkip.disable();
+                        skip.disable();
                      }
                      if (enabled) {
                         // Get entry associated with offerId
@@ -157,7 +156,7 @@ public class SkipService {
    private synchronized JSONObject getOffer(String offerId) {
       debug.print("offerId=" + offerId);
       try {
-         JSONArray entries = AutoSkip.getEntries();
+         JSONArray entries = SkipManager.getEntries();
          if (entries == null)
             return null;
          for (int i=0; i<entries.length(); ++i) {
@@ -179,10 +178,10 @@ public class SkipService {
       }
       try {
          if (entry.has("contentId")) {
-            AutoSkip.setMonitor(tivoName, entry.getString("offerId"), entry.getString("contentId"), entry.getString("title"));
-            if (AutoSkip.readEntry(entry.getString("contentId"))) {
+            skip.setMonitor(tivoName, entry.getString("offerId"), entry.getString("contentId"), entry.getString("title"));
+            if (skip.readEntry(entry.getString("contentId"))) {
                print("Entering AutoSkip for: " + entry.getString("title"));
-               AutoSkip.showSkipData();
+               skip.showSkipData();
             }
          }
       } catch (JSONException e) {
@@ -233,11 +232,11 @@ public class SkipService {
    }*/
    
    private synchronized void print(String message) {
-      log.print("SkipService: " + message);
+      log.print("SkipService (" + tivoName + "): " + message);
    }
    
    private synchronized void error(String message) {
-      log.error("SkipService: " + message);
+      log.error("SkipService (" + tivoName + "): " + message);
    }
 
 }

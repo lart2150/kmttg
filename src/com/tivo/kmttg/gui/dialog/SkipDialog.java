@@ -16,7 +16,7 @@ import com.tivo.kmttg.gui.MyTooltip;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.skipTable;
 import com.tivo.kmttg.main.config;
-import com.tivo.kmttg.rpc.AutoSkip;
+import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.util.log;
 
 public class SkipDialog {
@@ -34,7 +34,7 @@ public class SkipDialog {
    private void getEntries() {
       if (tab != null)
          tab.clear();
-      data = AutoSkip.getEntries();      
+      data = SkipManager.getEntries();      
       if (data != null && data.length() > 0) {
          if (dialog == null)
             init();
@@ -58,7 +58,7 @@ public class SkipDialog {
             try {
                for (int i=0; i<entries.length(); ++i) {
                   JSONObject json = entries.getJSONObject(i);
-                  AutoSkip.removeEntry(json.getString("contentId"));
+                  SkipManager.removeEntry(json.getString("contentId"));
                }
             } catch (Exception e) {
                log.error("removeEntries - " + e.getMessage());

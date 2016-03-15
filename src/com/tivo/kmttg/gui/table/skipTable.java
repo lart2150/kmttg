@@ -13,7 +13,7 @@ import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.sortable.sortableString;
-import com.tivo.kmttg.rpc.AutoSkip;
+import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.util.log;
 
 public class skipTable {
@@ -96,7 +96,7 @@ public class skipTable {
    }
    
    private String adStart(String ad1) {
-      return AutoSkip.toMinSec(Long.parseLong(ad1));
+      return SkipManager.toMinSec(Long.parseLong(ad1));
    }
 
    public TableView<?> getTable() {
@@ -154,7 +154,7 @@ public class skipTable {
          if (changed.length() > 0) {
             for (int i=0; i<changed.length(); ++i) {
                JSONObject j = changed.getJSONObject(i);
-               AutoSkip.changeEntry(j.getString("contentId"), j.getString("offset"), j.getString("title"));
+               SkipManager.changeEntry(j.getString("contentId"), j.getString("offset"), j.getString("title"));
             }
          }
       } catch (Exception e) {
@@ -176,9 +176,9 @@ public class skipTable {
                start += offset;
             long end = j.getLong("end") + offset;
             String message = "" + index + ": start=";
-            message += AutoSkip.toMinSec(start);
+            message += SkipManager.toMinSec(start);
             message += " end=";
-            message += AutoSkip.toMinSec(end);         
+            message += SkipManager.toMinSec(end);         
             log.print(message);
             index++;
          }

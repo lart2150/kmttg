@@ -41,7 +41,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -95,8 +94,7 @@ import com.tivo.kmttg.main.encodeConfig;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.main.kmttg;
-import com.tivo.kmttg.rpc.AutoSkip;
-import com.tivo.kmttg.rpc.SkipService;
+import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -146,8 +144,7 @@ public class gui extends Application {
    private MenuItem loadJobsMenuItem = null;
    public MenuItem searchMenuItem = null;
    public MenuItem autoSkipMenuItem = null;
-   public CheckMenuItem skipServiceMenuItem = null;
-   public Boolean skipServiceMenuItem_cb = true;
+   private Menu autoSkipServiceMenu = null;
    public MenuItem thumbsMenuItem = null;
    
    private ChoiceBox<String> encoding = null;
@@ -650,9 +647,9 @@ public class gui extends Application {
          fileMenu.getItems().add(getResumeDownloadsMenuItem());
          fileMenu.getItems().add(getJobMenu());
          fileMenu.getItems().add(getSearchMenuItem());
-         if (config.rpcEnabled() && AutoSkip.skipEnabled()) {
+         if (config.rpcEnabled() && SkipManager.skipEnabled()) {
             fileMenu.getItems().add(getAutoSkipMenuItem());
-            fileMenu.getItems().add(getSkipServiceMenuItem());
+            fileMenu.getItems().add(getAutoSkipServiceMenu());
          }
          //fileMenu.add(getThumbsMenuItem());
          // Create thumbs menu item but don't add to File menu
@@ -1271,56 +1268,55 @@ public class gui extends Application {
       return autoSkipMenuItem;
    }
 
-   private MenuItem getSkipServiceMenuItem() {
+   private Menu getAutoSkipServiceMenu() {
       debug.print("");
-      if (skipServiceMenuItem == null) {
-         skipServiceMenuItem = new CheckMenuItem();
-         skipServiceMenuItem.setText("AutoSkip service...");
-         skipServiceMenuItem.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            public void changed(ObservableValue<? extends Boolean> e, Boolean oldVal, Boolean newVal) {
-               if ( ! newVal ) {
-                  // Turn off service
-                  if (config.skipService != null)
-                     config.skipService.stop();
-                  return;
-               }
-               if (! skipServiceMenuItem_cb)
-                  return;
-               
-               // Don't do anything if no skip data available
-               JSONArray skipData = AutoSkip.getEntries();
-               if (skipData == null || skipData.length() == 0) {
-                  log.warn("No skip table data available - ignoring skip service request");
-                  skipServiceMenuItem.setSelected(false);
-                  return;
-               }
-               
-               // Build list of eligible TiVos
-               Stack<String> all = config.getTivoNames();
-               for (int i=0; i<all.size(); ++i) {
-                  if (! config.rpcEnabled(all.get(i)))
-                     all.remove(i);
-               }
-               
-               // Prompt user to choose a TiVo
-               ChoiceDialog<String> dialog = new ChoiceDialog<String>(all.get(0), all);
-               dialog.setTitle("Choose which TiVo to monitor");
-               dialog.setContentText("TiVo:");
-               String tivoName = null;
-               Optional<String> result = dialog.showAndWait();
-               if (result.isPresent())
-                  tivoName = result.get();
-               if (tivoName != null && tivoName.length() > 0) {               
-                  // Start service for selected TiVo
-                  config.skipService = new SkipService(tivoName);
-                  config.skipService.start();
-               } else {
-                  skipServiceMenuItem.setSelected(false);
-               }
-            }
-         });
+      if (autoSkipServiceMenu == null) {
+         autoSkipServiceMenu = new Menu();
+         autoSkipServiceMenu.setText("AutoSkip Service");
       }
-      return skipServiceMenuItem;
+      return autoSkipServiceMenu;
+   }
+   
+   public void addAutoSkipServiceItem(String tivoName) {
+      for (MenuItem item : autoSkipServiceMenu.getItems()) {
+         if (item.getText().equals(tivoName))
+            return;
+      }
+      CheckMenuItem item = new CheckMenuItem();
+      item.setText(tivoName);
+      item.selectedProperty().addListener(new ChangeListener<Boolean>() {
+         public void changed(ObservableValue<? extends Boolean> e, Boolean oldVal, Boolean newVal) {
+            if (! newVal) {
+               SkipManager.stopService(tivoName);
+               return;
+            }
+            
+            JSONArray skipData = SkipManager.getEntries();
+            if (skipData == null || skipData.length() == 0) {
+               log.warn("No skip table data available - ignoring skip service request");
+               disableAutoSkipServiceItem(tivoName);
+               return;
+            }
+            SkipManager.startService(tivoName);
+         }
+      });
+      autoSkipServiceMenu.getItems().add(item);
+   }
+   
+   public void removeAutoSkipServiceItem(String tivoName) {
+      for (MenuItem item : autoSkipServiceMenu.getItems()) {
+         if (item.getText().equals(tivoName)) {
+            autoSkipServiceMenu.getItems().remove(item);
+         }            
+      }
+   }
+
+   private void disableAutoSkipServiceItem(String tivoName) {
+      for (MenuItem item : autoSkipServiceMenu.getItems()) {
+         CheckMenuItem check = (CheckMenuItem)item;
+         if (check.getText().equals(tivoName))
+            check.setSelected(false);
+      }
    }
 
    private MenuItem getThumbsMenuItem() {

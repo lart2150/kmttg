@@ -1,71 +1,57 @@
 package com.tivo.kmttg.rpc;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.tivoTab;
-import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
 public class AutoSkip {
-   private static String ini = config.programDir + File.separator + "AutoSkip.ini";
-   private static Remote r = null;
-   private static Timer timer = null;
-   private static long offset = -1;
-   private static long end1 = -1;
-   private static String offerId = null;
-   private static String contentId = null;
-   private static String title = "";
-   private static int monitor_count = 1;
-   private static int monitor_interval = 6;
-   private static String tivoName = null;
-   static Boolean monitor = false;
-   static Stack<Hashtable<String,Long>> skipData = null;
-   static Stack<Hashtable<String,Long>> skipData_orig = null;
-   static String recordingId = null;
+   private Remote r = null;
+   private Timer timer = null;
+   private long offset = -1;
+   private long end1 = -1;
+   private String offerId = null;
+   private String contentId = null;
+   private String title = "";
+   private int monitor_count = 1;
+   private int monitor_interval = 6;
+   private String tivoName = null;
+   Boolean monitor = false;
+   Stack<Hashtable<String,Long>> skipData = null;
+   Stack<Hashtable<String,Long>> skipData_orig = null;
+   String recordingId = null;
    
-   public static synchronized Boolean skipEnabled() {
-      debug.print("");
-      // At least 1 TiVo needs to be RPC enabled
-      return config.rpcEnabled();
-   }
-   
-   public static synchronized Boolean isMonitoring() {
+   public synchronized Boolean isMonitoring() {
       debug.print("");
       return monitor;
    }
    
-   public static synchronized String offerId() {
+   public synchronized String offerId() {
       debug.print("");
       return offerId;
    }
    
-   public static synchronized void setMonitor(String tivoName, String offerId, String contentId, String title) {
+   public synchronized void setMonitor(String tivoName, String offerId, String contentId, String title) {
       debug.print("tivoName=" + tivoName + " offerId=" + offerId + " contentId=" + contentId + " title=" + title);
-      if (AutoSkip.tivoName != null && ! AutoSkip.tivoName.equals(tivoName)) {
+      if (this.tivoName != null && ! this.tivoName.equals(tivoName)) {
          disable();
       }
-      AutoSkip.tivoName = tivoName;
-      AutoSkip.offerId = offerId;
-      AutoSkip.contentId = contentId;
-      AutoSkip.title = title;
+      this.tivoName = tivoName;
+      this.offerId = offerId;
+      this.contentId = contentId;
+      this.title = title;
       
       if (r == null) {
          r = new Remote(tivoName);
@@ -80,9 +66,9 @@ public class AutoSkip {
    }
    
    // Run this in background mode so as not to block GUI
-   public static synchronized void skipPlay(final String tivoName, final Hashtable<String,String> nplData) {
+   public synchronized void skipPlay(final String tivoName, final Hashtable<String,String> nplData) {
       debug.print("tivoName=" + tivoName + " nplData=" + nplData);
-      AutoSkip.tivoName = tivoName;
+      this.tivoName = tivoName;
       Task<Void> task = new Task<Void>() {
          @Override public Void call() {
             if (! nplData.containsKey("contentId")) {
@@ -101,14 +87,14 @@ public class AutoSkip {
                return null;
             }
             if (nplData.containsKey("title"))
-               AutoSkip.title = nplData.get("title");
-            AutoSkip.contentId = nplData.get("contentId");
-            AutoSkip.offerId = nplData.get("offerId");
-            AutoSkip.recordingId = nplData.get("recordingId");
+               title = nplData.get("title");
+            contentId = nplData.get("contentId");
+            offerId = nplData.get("offerId");
+            recordingId = nplData.get("recordingId");
             r = new Remote(tivoName);
             if (r.success) {
-               if (readEntry(AutoSkip.contentId)) {
-                  print("Obtained skip data from file: " + ini);
+               if (readEntry(contentId)) {
+                  print("Obtained skip data from file: " + SkipManager.iniFile());
                } else {
                   error("No skip data available for " + title);
                   disable();
@@ -138,10 +124,10 @@ public class AutoSkip {
    }
    
    // end1 = -1 => pause mode, else normal skip mode without pause
-   public static synchronized void enableMonitor(String tivoName, Stack<Hashtable<String,Long>> points, Long end1) {
+   public synchronized void enableMonitor(String tivoName, Stack<Hashtable<String,Long>> points, Long end1) {
       debug.print("tivoName=" + tivoName + " points=" + points);
-      AutoSkip.tivoName = tivoName;
-      AutoSkip.end1 = end1;
+      this.tivoName = tivoName;
+      this.end1 = end1;
       if (r == null) {
          r = new Remote(tivoName);
          if (! r.success) {
@@ -162,7 +148,7 @@ public class AutoSkip {
    }
    
    // Start timer to monitor playback position
-   public static synchronized void startTimer() {
+   public synchronized void startTimer() {
       debug.print("");
       if (timer != null)
          timer.cancel();
@@ -171,7 +157,7 @@ public class AutoSkip {
          new TimerTask() {
             @Override
             public void run() {
-               skipPlayCheck(tivoName, AutoSkip.contentId);
+               skipPlayCheck(tivoName, contentId);
             }
         }
         ,5000,
@@ -181,7 +167,7 @@ public class AutoSkip {
    
    // This procedure called constantly in a timer
    // This monitors playback position and skips commercials
-   private static synchronized void skipPlayCheck(String tivoName, String contentId) {
+   private synchronized void skipPlayCheck(String tivoName, String contentId) {
       debug.print("tivoName=" + tivoName + " contentId=" + contentId);
       if (monitor && r != null) {
          Boolean skip = true;
@@ -214,7 +200,7 @@ public class AutoSkip {
          if (skip) {
             long jumpto = getClosest(pos);
             if (jumpto != -1) {
-               print("IN COMMERCIAL. JUMPING TO: " + toMinSec(jumpto));
+               print("IN COMMERCIAL. JUMPING TO: " + SkipManager.toMinSec(jumpto));
                jumpTo(jumpto);
             }
          }
@@ -222,7 +208,7 @@ public class AutoSkip {
    }
    
    // Jump to given position in playback
-   private static synchronized void jumpTo(long position) {
+   private synchronized void jumpTo(long position) {
       debug.print("position=" + position);
       JSONObject json = new JSONObject();
       try {
@@ -234,18 +220,18 @@ public class AutoSkip {
    }
    
    // Jump to end of 1st show segment
-   public static synchronized void jumpTo1st() {
+   public synchronized void jumpTo1st() {
       debug.print("");
       if (r != null && skipData != null && monitor) {
          long pos = skipData.get(0).get("end");
-         print("Jumping to: " + toMinSec(pos));
+         print("Jumping to: " + SkipManager.toMinSec(pos));
          jumpTo(pos);
       }
    }
    
    // RPC query to get current playback position
    // NOTE: Returns -1 for speed != 100 to avoid any skipping during trick play
-   private static synchronized long getPosition() {
+   private synchronized long getPosition() {
       debug.print("");
       if (r==null || ! monitor) return -1;
       JSONObject json = new JSONObject();
@@ -278,7 +264,7 @@ public class AutoSkip {
    
    // RPC query to determine if show being monitored is still being played
    // If whatsOn query does not have offerId => show no longer being played on TiVo
-   private static synchronized void shouldStillMonitor() {
+   private synchronized void shouldStillMonitor() {
       debug.print("");
       if (r == null)
          return;
@@ -313,7 +299,7 @@ public class AutoSkip {
    }
    
    // Stop monitoring and reset all variables
-   public static synchronized void disable() {
+   public synchronized void disable() {
       debug.print("");
       print("DISABLED");
       monitor = false;
@@ -332,7 +318,7 @@ public class AutoSkip {
    }
    
    // Print current skipData to console
-   public static synchronized void showSkipData() {
+   public synchronized void showSkipData() {
       debug.print("");
       if (skipData == null) {
          error("showSkipData - no skip data available");
@@ -343,23 +329,18 @@ public class AutoSkip {
       int index = 1;
       for (Hashtable<String,Long> h : skipData) {
          String message = "" + index + ": start=";
-         message += toMinSec(h.get("start"));
+         message += SkipManager.toMinSec(h.get("start"));
          message += " end=";
-         message += toMinSec(h.get("end"));         
+         message += SkipManager.toMinSec(h.get("end"));         
          log.print(message);
          index++;
       }
    }
    
-   public static synchronized String toMinSec(long msecs) {
-      debug.print("msecs=" + msecs);
-      return com.tivo.kmttg.captions.util.toHourMinSec(msecs);
-   }
-   
    // Get the closest non-commercial start point to given pos
    // This will be point to jump to when in a commercial segment
    // Return value of -1 => no change wanted
-   private static synchronized long getClosest(long pos) {
+   private synchronized long getClosest(long pos) {
       debug.print("pos=" + pos);
       long closest = -1;
       // If current pos is within any start-end range then no skip necessary
@@ -383,7 +364,7 @@ public class AutoSkip {
    }
    
    // Convert RPC data to skipData hash
-   public static synchronized Stack<Hashtable<String,Long>> jsonToShowPoints(JSONObject clipData) {
+   public synchronized Stack<Hashtable<String,Long>> jsonToShowPoints(JSONObject clipData) {
       debug.print("clipData=" + clipData);
       Stack<Hashtable<String,Long>> points = new Stack<Hashtable<String,Long>>();
       try {
@@ -415,7 +396,7 @@ public class AutoSkip {
    
    // Adjust skipData segment 1 end position and
    // all subsequent segment points relative to it
-   private static synchronized void adjustPoints(long point) {
+   private synchronized void adjustPoints(long point) {
       debug.print("point=" + point);
       //print("Adjusting commercial points");
       end1 = point;
@@ -432,71 +413,14 @@ public class AutoSkip {
       }
    }
    
-   // Save commercial points for current entry to ini file
-   public static synchronized void saveEntry(final String contentId, String offerId, long offset,
-         String title, final String tivoName, Stack<Hashtable<String,Long>> data) {
-      debug.print("contentId=" + contentId + " offerId=" + offerId + " offset=" + offset);
-      print("Saving AutoSkip entry: " + title);
-      try {
-         String eol = "\r\n";
-         BufferedWriter ofp = new BufferedWriter(new FileWriter(ini, true));
-         ofp.write("<entry>" + eol);
-         ofp.write("contentId=" + contentId + eol);
-         ofp.write("offerId=" + offerId + eol);
-         ofp.write("offset=" + offset + eol);
-         ofp.write("tivoName=" + tivoName + eol);
-         ofp.write("title=" + title + eol);
-         for (Hashtable<String,Long> entry : data) {
-            ofp.write(entry.get("start") + " " + entry.get("end") + eol);
-         }
-         ofp.close();
-         if (config.GUIMODE) {
-            Platform.runLater(new Runnable() {
-               @Override public void run() {
-                  config.gui.getTab(tivoName).getTable().updateSkipStatus(contentId);
-               }
-            });
-         }
-      } catch (IOException e) {
-         error("saveEntry - " + e.getMessage());
-      }
-   }
-   
-   public static synchronized Boolean hasEntry(String contentId) {
-      debug.print("contentId=" + contentId);
-      if (file.isFile(ini)) {
-         try {
-            BufferedReader ifp = new BufferedReader(new FileReader(ini));
-            String line = null;
-            while (( line = ifp.readLine()) != null) {
-               if (line.contains("<entry>")) {
-                  line = ifp.readLine();
-                  if (line.startsWith("contentId")) {
-                     String[] l = line.split("=");
-                     if (l[1].equals(contentId)) {
-                        ifp.close();
-                        return true;
-                     }
-                  }
-               }
-            }
-            ifp.close();
-         } catch (Exception e) {
-            error("readEntry - " + e.getMessage());
-            log.error(Arrays.toString(e.getStackTrace()));
-         }
-      }
-      return false;
-   }
-   
    // Obtain commercial points for given contentId if it exists
    // Returns true if contentId found, false otherwise
    // NOTE: Reading assumes file entries are structured just like they were originally written
-   static synchronized Boolean readEntry(String contentId) {
+   synchronized Boolean readEntry(String contentId) {
       debug.print("contentId=" + contentId);
-      if (file.isFile(ini)) {
+      if (file.isFile(SkipManager.iniFile())) {
          try {
-            BufferedReader ifp = new BufferedReader(new FileReader(ini));
+            BufferedReader ifp = new BufferedReader(new FileReader(SkipManager.iniFile()));
             String line = null;
             while (( line = ifp.readLine()) != null) {
                if (line.contains("<entry>")) {
@@ -542,222 +466,12 @@ public class AutoSkip {
             ifp.close();
          } catch (Exception e) {
             error("readEntry - " + e.getMessage());
-            log.error(Arrays.toString(e.getStackTrace()));
+            error(Arrays.toString(e.getStackTrace()));
          }
       }
       return false;
    }
-   
-   // Remove any entries matching given contentId from ini file
-   public static synchronized Boolean removeEntry(final String contentId) {
-      debug.print("contentId=" + contentId);
-      if (file.isFile(ini)) {
-         try {
-            Boolean itemRemoved = false;
-            Stack<String> lines = new Stack<String>();
-            BufferedReader ifp = new BufferedReader(new FileReader(ini));
-            String line = null;
-            Boolean include = true;
-            String tivoName = null;
-            String title = null;
-            while (( line = ifp.readLine()) != null) {
-               if (line.contains("<entry>")) {
-                  include = true;
-                  String nextline = ifp.readLine();
-                  String[] l = nextline.split("=");
-                  if (l[1].equals(contentId)) {
-                     include = false;
-                     itemRemoved = true;
-                     ifp.readLine(); // offerId
-                     ifp.readLine(); // offset
-                     tivoName = ifp.readLine().split("=")[1];
-                     title = ifp.readLine().split("=")[1];
-                  }
-                  if (include) {
-                     lines.push(line);
-                     lines.push(nextline);
-                  }
-               } else {
-                  if (include)
-                     lines.push(line);
-               }
-            }
-            ifp.close();
-            String eol = "\r\n";
-            BufferedWriter ofp = new BufferedWriter(new FileWriter(ini));
-            for (String l : lines) {
-               ofp.write(l + eol);
-            }
-            ofp.close();
-            if (itemRemoved) {
-               print("Removed entry for " + tivoName + ": " + title);
-               if (tivoName != null && config.GUIMODE) {
-                  // Remove asterisk from associated table
-                  final String final_tivoName = tivoName;
-                  Platform.runLater(new Runnable() {
-                     @Override public void run() {
-                        tivoTab t = config.gui.getTab(final_tivoName);
-                        if (t != null) {
-                           t.getTable().updateSkipStatus(contentId);
-                        }
-                     }
-                  });
-               }
-            }
-            else
-               print("No entry found for: " + contentId);
-            return itemRemoved;
-         } catch (Exception e) {
-            error("removeEntry - " + e.getMessage());
-         }
-      }
-      return false;
-   }
-   
-   // Change offset for given contentId
-   public static synchronized Boolean changeEntry(String contentId, String offset, String title) {
-      debug.print("contentId=" + contentId + " offset=" + offset + " title=" + title);
-      if (file.isFile(ini)) {
-         try {
-            Boolean itemChanged = false;
-            Stack<String> lines = new Stack<String>();
-            BufferedReader ifp = new BufferedReader(new FileReader(ini));
-            String line = null;
-            while (( line = ifp.readLine()) != null) {
-               if (line.contains("contentId")) {
-                  Boolean changed = false;
-                  String[] l = line.split("=");
-                  if (l[1].equals(contentId)) {
-                     itemChanged = true;
-                     changed = true;
-                  }
-                  String offerId = ifp.readLine(); // offerId
-                  String nextline = ifp.readLine(); // offset
-                  l = nextline.split("=");
-                  lines.push(line);
-                  lines.push(offerId);
-                  if (changed)
-                     lines.push(l[0] + "=" + offset);
-                  else
-                     lines.push(nextline);
-               } else {
-                  lines.push(line);
-               }
-            }
-            ifp.close();
-            String eol = "\r\n";
-            BufferedWriter ofp = new BufferedWriter(new FileWriter(ini));
-            for (String l : lines) {
-               ofp.write(l + eol);
-            }
-            ofp.close();
-            if (itemChanged)
-               print("'" + title + "' offset updated to: " + offset);
-            else
-               print("'" + title + "' not updated.");
-            return itemChanged;
-         } catch (Exception e) {
-            error("removeEntry - " + e.getMessage());
-         }
-      }
-      return false;
-   }
-   
-   // Return entries for use by SkipDialog table
-   public static synchronized JSONArray getEntries() {
-      debug.print("");
-      JSONArray entries = new JSONArray();
-      if (file.isFile(ini)) {
-         try {
-            BufferedReader ifp = new BufferedReader(new FileReader(ini));
-            String line=null, contentId="", title="", offset="", offerId="", tivoName="";
-            JSONArray cuts = new JSONArray();
-            while (( line = ifp.readLine()) != null) {
-               if (line.contains("<entry>")) {
-                  if (cuts.length() > 0) {
-                     JSONObject json = new JSONObject();
-                     json.put("contentId", contentId);
-                     json.put("offerId", offerId);
-                     json.put("offset", offset);
-                     json.put("tivoName", tivoName);
-                     json.put("title", title);
-                     json.put("ad1", "" + cuts.getJSONObject(0).get("end"));
-                     json.put("cuts", cuts);
-                     entries.put(json);
-                  }
-                  cuts = new JSONArray();
-               }
-               if (line.contains("contentId="))
-                  contentId = line.replaceFirst("contentId=", "");
-               if (line.contains("offerId="))
-                  offerId = line.replaceFirst("offerId=", "");
-               if (line.contains("offset="))
-                  offset = line.replaceFirst("offset=", "");
-               if (line.contains("tivoName="))
-                  tivoName = line.replaceFirst("tivoName=", "");
-               if (line.contains("title="))
-                  title = line.replaceFirst("title=", "");
-               if (line.matches("^[0-9]+.*")) {
-                  String[] l = line.split("\\s+");
-                  JSONObject j = new JSONObject();
-                  j.put("start", Long.parseLong(l[0]));
-                  j.put("end", Long.parseLong(l[1]));
-                  cuts.put(j);
-               }
-            } // while
-            if (cuts.length() > 0) {
-               JSONObject json = new JSONObject();
-               json.put("contentId", contentId);
-               json.put("offerId", offerId);
-               json.put("offset", offset);
-               json.put("tivoName", tivoName);
-               json.put("title", title);
-               json.put("ad1", "" + cuts.getJSONObject(0).get("end"));
-               json.put("cuts", cuts);
-               entries.put(json);
-            }
-            ifp.close();
-         } catch (Exception e) {
-            error("getEntries - " + e.getMessage());
-         }
-      }
-      return entries;
-   }
-   
-   // Remove AutoSkip entries that no longer have corresponding NPL entries
-   public static synchronized void pruneEntries(String tivoName, Stack<Hashtable<String,String>> nplEntries) {
-      debug.print("tivoName=" + tivoName + " nplEntries=" + nplEntries);
-      if (nplEntries == null)
-         return;
-      if (nplEntries.size() == 0)
-         return;
-      
-      try {
-         int count = 0;
-         JSONArray skipEntries = getEntries();
-         for (int i=0; i<skipEntries.length(); ++i) {
-            JSONObject json = skipEntries.getJSONObject(i);
-            if (json.getString("tivoName").equals(tivoName)) {
-               Boolean exists = false;
-               for (Hashtable<String,String> nplEntry : nplEntries) {
-                  if (nplEntry.containsKey("offerId")) {
-                     if (nplEntry.get("offerId").equals(json.getString("offerId")))
-                        exists = true;
-                  }
-               }
-               if (! exists) {
-                  removeEntry(json.getString("contentId"));
-                  count++;
-               }
-            }
-         }
-         if (count == 0)
-            log.warn("No entries found to prune");
-      } catch (JSONException e) {
-         error("pruneEntries - " + e.getMessage());
-      }
-   }
-   
+
    // For Skip enabled program use a D press to detect end of 1st commercial point
    /*public static synchronized Long visualDetect(String tivoName) {
       Long point = -1L;
@@ -819,7 +533,7 @@ public class AutoSkip {
       return point;
    }*/
    
-   private static synchronized Stack<Hashtable<String,Long>> hashCopy(Stack<Hashtable<String,Long>> orig) {
+   private synchronized Stack<Hashtable<String,Long>> hashCopy(Stack<Hashtable<String,Long>> orig) {
       debug.print("orig=" + orig);
       Stack<Hashtable<String,Long>> copy = new Stack<Hashtable<String,Long>>();
       for (Hashtable<String,Long> h : orig) {
@@ -829,12 +543,12 @@ public class AutoSkip {
       return copy;
    }
    
-   private static synchronized void print(String message) {
-      log.print("AutoSkip: " + message);
+   private synchronized void print(String message) {
+      log.print("AutoSkip (" + tivoName + "): " + message);
    }
    
-   private static synchronized void error(String message) {
-      log.error("AutoSkip: " + message);
+   private synchronized void error(String message) {
+      log.error("AutoSkip (" + tivoName + "): " + message);
    }
 
 }

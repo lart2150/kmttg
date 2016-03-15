@@ -35,8 +35,8 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
-import com.tivo.kmttg.rpc.AutoSkip;
 import com.tivo.kmttg.rpc.SkipImport;
+import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
@@ -187,19 +187,19 @@ public class tivoTab {
          }
          
          // Prune button
-         if ( ! tivoName.equalsIgnoreCase("FILES") && config.rpcEnabled(tivoName) && AutoSkip.skipEnabled()) {
+         if ( ! tivoName.equalsIgnoreCase("FILES") && config.rpcEnabled(tivoName) && SkipManager.skipEnabled()) {
             Button prune = new Button("Prune skipTable");
             prune.setTooltip(config.gui.getToolTip("prune_skipTable"));
             prune.setOnAction(new EventHandler<ActionEvent>() {
                public void handle(ActionEvent e) {
-                  AutoSkip.pruneEntries(tivoName, nplTab.getEntries());
+                  SkipManager.pruneEntries(tivoName, nplTab.getEntries());
                }
             });
             row.getChildren().add(prune);
          }
          
          // Import skip button
-         if ( ! tivoName.equalsIgnoreCase("FILES") && config.rpcEnabled(tivoName) && AutoSkip.skipEnabled()) {
+         if ( ! tivoName.equalsIgnoreCase("FILES") && config.rpcEnabled(tivoName) && SkipManager.skipEnabled()) {
             Button import_skip = new Button("Import skip");
             import_skip.setTooltip(config.gui.getToolTip("import_skip"));
             import_skip.setOnAction(new EventHandler<ActionEvent>() {

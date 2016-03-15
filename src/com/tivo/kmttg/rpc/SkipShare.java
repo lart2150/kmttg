@@ -80,9 +80,9 @@ public class SkipShare {
          if (json.has("subtitle"))
             title = title + " - " + json.getString("subtitle");
          String contentId = json.getString("contentId");
-         if (AutoSkip.hasEntry(contentId))
-            AutoSkip.removeEntry(contentId);
-         AutoSkip.saveEntry(contentId, json.getString("offerId"), 0L, title, tivoName, points_adj);
+         if (SkipManager.hasEntry(contentId))
+            SkipManager.removeEntry(contentId);
+         SkipManager.saveEntry(contentId, json.getString("offerId"), 0L, title, tivoName, points_adj);
       } catch (Exception e) {
          log.error("SkipShare Import - " + e.getMessage());
       }
