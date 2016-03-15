@@ -216,6 +216,9 @@ public class config {
    public static int httpserver_share_filter = 0;
    public static LinkedHashMap<String,String> httpserver_shares = new LinkedHashMap<String,String>();
    
+   // autoskip related
+   public static int autoskip_padding = 0;
+   
    public static Stack<String> parse() {
       debug.print("");
       String result;
@@ -986,10 +989,9 @@ public class config {
             if (key.equals("single_download")) {
                single_download = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
-            /* Intentionally disabled
             if (key.equals("persistQueue")) {
                 persistQueue = Boolean.parseBoolean(string.removeLeadingTrailingSpaces(line));
-             }*/
+            }
             if (key.equals("outputDir")) {
                outputDir = line;
             }
@@ -1155,6 +1157,9 @@ public class config {
             }
             if (key.equals("download_delay")) {
                download_delay = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
+            if (key.equals("autoskip_padding")) {
+               autoskip_padding = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("download_time_estimate")) {
                download_time_estimate = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
@@ -1323,7 +1328,7 @@ public class config {
          
          ofp.write("<single_download>\n" + single_download + "\n\n");
          
-         // Intentionally disabled ofp.write("<persistQueue>\n" + persistQueue + "\n\n");
+         ofp.write("<persistQueue>\n" + persistQueue + "\n\n");
          
          ofp.write("<tivoFileNameFormat>\n" + tivoFileNameFormat + "\n\n");
          
@@ -1419,6 +1424,8 @@ public class config {
          ofp.write("<download_time_estimate>\n" + download_time_estimate + "\n\n");
          
          ofp.write("<download_check_length>\n" + download_check_length + "\n\n");
+         
+         ofp.write("<autoskip_padding>\n" + autoskip_padding + "\n\n");
          
          ofp.write("<autoLogSizeMB>\n" + autoLogSizeMB + "\n\n");
          
