@@ -154,6 +154,7 @@ public class configMain {
    private static TextField download_tries = null;
    private static TextField download_retry_delay = null;
    private static TextField download_delay = null;
+   private static TextField autoskip_padding = null;
    private static TextField metadata_entries = null;
    private static TextField httpserver_port = null;
    private static TextField httpserver_cache = null;
@@ -953,6 +954,9 @@ public class configMain {
       
       // download_delay
       download_delay.setText("" + config.download_delay);
+      
+      // download_delay
+      autoskip_padding.setText("" + config.autoskip_padding);
       
       // metadata_entries
       metadata_entries.setText("" + config.metadata_entries);
@@ -1881,6 +1885,22 @@ public class configMain {
          config.download_delay = 10;
       }
       
+      // autoskip_padding
+      value = string.removeLeadingTrailingSpaces(autoskip_padding.getText());
+      if (value.length() > 0) {
+         try {
+            config.autoskip_padding = Integer.parseInt(value);
+         } catch(NumberFormatException e) {
+            textFieldError(autoskip_padding, "Illegal setting for autoskip padding: '" + value + "'");
+            log.error("Setting to 0");
+            config.autoskip_padding = 0;
+            autoskip_padding.setText("" + config.autoskip_padding);
+            errors++;
+         }
+      } else {
+         config.autoskip_padding = 0;
+      }
+      
       // autoLogSizeMB
       value = string.removeLeadingTrailingSpaces(autoLogSizeMB.getText());
       if (value.length() > 0) {
@@ -2068,6 +2088,7 @@ public class configMain {
       download_tries = new TextField(); download_tries.setPrefWidth(15);
       download_retry_delay = new TextField(); download_retry_delay.setPrefWidth(15);
       download_delay = new TextField(); download_delay.setPrefWidth(15);
+      autoskip_padding = new TextField(); autoskip_padding.setPrefWidth(15);
       metadata_entries = new TextField(); metadata_entries.setPrefWidth(15);
       httpserver_port = new TextField(); httpserver_port.setPrefWidth(15);
       httpserver_cache = new TextField(); httpserver_cache.setPrefWidth(15);
@@ -2172,6 +2193,7 @@ public class configMain {
       Label download_tries_label = new Label();
       Label download_retry_delay_label = new Label();
       Label download_delay_label = new Label();
+      Label autoskip_padding_label = new Label();
       Label metadata_entries_label = new Label();
       Label httpserver_port_label = new Label();
       Label httpserver_cache_label = new Label();
@@ -2327,6 +2349,7 @@ public class configMain {
       download_tries_label.setText("# download attempts");
       download_retry_delay_label.setText("seconds between download retry attempts");
       download_delay_label.setText("start delay in seconds for download tasks");
+      autoskip_padding_label.setText("autoskip padding in seconds");
       metadata_entries_label.setText("extra metadata entries (comma separated)");
       httpserver_port_label.setText("web server port");
       httpserver_cache_label.setText("web server cache dir");
@@ -3049,6 +3072,11 @@ public class configMain {
       program_options_panel.add(download_delay_label, 0, gy);
       program_options_panel.add(download_delay, 1, gy);
       
+      // autoskip_padding
+      gy++;
+      program_options_panel.add(autoskip_padding_label, 0, gy);
+      program_options_panel.add(autoskip_padding, 1, gy);
+      
       // metadata_files
       gy++;
       program_options_panel.add(metadata_files_label, 0, gy);
@@ -3459,6 +3487,7 @@ public class configMain {
       download_tries.setTooltip(getToolTip("download_tries"));
       download_retry_delay.setTooltip(getToolTip("download_retry_delay"));
       download_delay.setTooltip(getToolTip("download_delay"));
+      autoskip_padding.setTooltip(getToolTip("autoskip_padding"));
       metadata_entries.setTooltip(getToolTip("metadata_entries"));
       httpserver_port.setTooltip(getToolTip("httpserver_port"));
       httpserver_cache.setTooltip(getToolTip("httpserver_cache"));
@@ -4184,6 +4213,13 @@ public class configMain {
          text =  "<b>start delay in seconds for download tasks</b><br>";
          text += "For any download task delay the start of the task by this number of seconds.<br>";
          text += "This helps take stress off TiVo web server to avoid potential <b>server busy</b> messages.";
+      }
+      else if (component.equals("autoskip_padding")) {
+         text =  "<b>autoskip padding in seconds</b><br>";
+         text += "During AutoSkip play this padding will be applied to show start and end points.<br>";
+         text += "The idea is to pad start and end points so that actual show segments are not clipped.<br>";
+         text += "show start points: new start point = start point - padding<br>";
+         text += "show end points: new end point = end point + padding";
       }
       else if (component.equals("autoLogSizeMB")) {
          text = "<b>auto log file size limit (MB)</b><br>";
