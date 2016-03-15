@@ -1,11 +1,11 @@
 # Description (single line, keep short)
 <description>
-ffmpeg Intel QuickSync GPU: mp4 container, same res h.264 video, aac audio
+ffmpeg Intel QuickSync GPU: mp4 container, same res 8 Mbps h.264 video, aac audio
 
 # Encode command or script (single line)
 # Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
 <command>
-FFMPEG -y -i INPUT -vcodec h264_qsv -preset:v medium -profile:v main -level 4.0 -acodec aac -strict -2 -ac 2 -ab 160k -ar 48000 -f mp4 OUTPUT
+FFMPEG -y -i INPUT -vcodec h264_qsv -preset:v medium -profile:v main -level 4.0 -b:v 8000k -acodec aac -strict -2 -ac 2 -ab 160k -ar 48000 -f mp4 OUTPUT
 
 # Encoded output file extension
 <extension>
