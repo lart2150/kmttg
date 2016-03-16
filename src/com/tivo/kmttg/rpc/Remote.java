@@ -2980,6 +2980,38 @@ public class Remote {
       };
       new Thread(task).start();
    }
+   
+   // RPC query for tivo.com SKIP data based on contentId
+   public void getClipData(String contentId) {
+      try {
+         JSONObject json = new JSONObject();
+         json.put("contentId", contentId);
+         JSONObject result = Command("clipMetadataSearch", json);
+         if (result != null && result.has("clipMetadata")) {
+            JSONObject clip = result.getJSONArray("clipMetadata").getJSONObject(0);
+            json.remove("contentId");
+            JSONArray clipId = new JSONArray();
+            clipId.put(clip.getString("clipMetadataId"));
+            json.put("clipMetadataId", clipId);
+            result = Command("clipMetadataSearch", json);
+            if (result != null) {
+               log.warn("\nSKIP data available for contentId: " + contentId);
+               JSONObject data = result.getJSONArray("clipMetadata").getJSONObject(0);
+               if (data.has("syncMark"))
+                  data.remove("syncMark");
+               data.put("syncMark", "<syncMark array removed for display purposes>");
+               log.print(data.toString(3));
+            } else {
+               log.warn("\nSKIP data not available for contentId: " + contentId);
+            }
+         } else {
+            log.warn("\nSKIP data not available for contentId: " + contentId);
+         }
+      } catch (JSONException e) {
+         log.error("getClipData - " + e.getMessage());
+      }
+      disconnect();
+   }
       
    private void print(String message) {
       log.print(message);

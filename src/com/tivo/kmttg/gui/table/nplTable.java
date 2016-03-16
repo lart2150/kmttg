@@ -675,6 +675,26 @@ public class nplTable extends TableMap {
          int row = selected[0];
          sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
          createMeta.getExtendedMetadata(tivoName, s.data, true);
+      } else if (keyCode == KeyCode.K) {
+         int[] selected = GetSelectedRows();
+         if (selected == null || selected.length < 1)
+            return;
+         int row = selected[0];
+         sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+         if (s.data.containsKey("contentId")) {
+            final String contentId = s.data.get("contentId");
+            Task<Void> task = new Task<Void>() {
+               @Override public Void call() {
+                  Remote r = config.initRemote(tivoName);
+                  if (r.success) {
+                     r.getClipData(contentId);
+                     r.disconnect();
+                  }
+                  return null;
+               }
+            };
+            new Thread(task).start();            
+         }
       } else if (keyCode == KeyCode.T) {
          TableUtil.toggleTreeState(NowPlaying);
       }
