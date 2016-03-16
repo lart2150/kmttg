@@ -2988,19 +2988,28 @@ public class Remote {
          json.put("contentId", contentId);
          JSONObject result = Command("clipMetadataSearch", json);
          if (result != null && result.has("clipMetadata")) {
-            JSONObject clip = result.getJSONArray("clipMetadata").getJSONObject(0);
-            json.remove("contentId");
             JSONArray clipId = new JSONArray();
-            clipId.put(clip.getString("clipMetadataId"));
+            JSONArray clipMetadata = result.getJSONArray("clipMetadata");
+            for (int i=0; i<clipMetadata.length(); ++i) {
+               JSONObject clip = clipMetadata.getJSONObject(i);
+               clipId.put(clip.getString("clipMetadataId"));
+            }
+            json.remove("contentId");
             json.put("clipMetadataId", clipId);
             result = Command("clipMetadataSearch", json);
-            if (result != null) {
-               log.warn("\nSKIP data available for contentId: " + contentId);
-               JSONObject data = result.getJSONArray("clipMetadata").getJSONObject(0);
-               if (data.has("syncMark"))
-                  data.remove("syncMark");
-               data.put("syncMark", "<syncMark array removed for display purposes>");
-               log.print(data.toString(3));
+            if (result != null && result.has("clipMetadata")) {
+               clipMetadata = result.getJSONArray("clipMetadata");
+               log.warn(
+                  "\nSKIP data available for contentId: " + contentId +
+                  " (entries=" + clipMetadata.length() + ")"
+               );
+               for (int i=0; i<clipMetadata.length(); ++i) {
+                  JSONObject data = result.getJSONArray("clipMetadata").getJSONObject(i);
+                  if (data.has("syncMark"))
+                     data.remove("syncMark");
+                  data.put("syncMark", "<syncMark array removed for display purposes>");
+                  log.print(data.toString(3));
+               }
             } else {
                log.warn("\nSKIP data not available for contentId: " + contentId);
             }
