@@ -40,7 +40,7 @@ public class SkipManager {
    public static synchronized Boolean skipEnabled() {
       debug.print("");
       // At least 1 TiVo needs to be RPC enabled
-      return config.rpcEnabled();
+      return config.autoskip_enabled == 1 && config.rpcEnabled();
    }
    
    public static synchronized void addSkip(String tivoName) {
