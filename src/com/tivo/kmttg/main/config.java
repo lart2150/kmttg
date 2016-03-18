@@ -217,6 +217,9 @@ public class config {
    public static LinkedHashMap<String,String> httpserver_shares = new LinkedHashMap<String,String>();
    
    // autoskip related
+   public static int autoskip_enabled = 1;
+   public static int autoskip_import = 1;
+   public static int autoskip_prune = 0;
    public static int autoskip_padding = 0;
    
    public static Stack<String> parse() {
@@ -1158,6 +1161,15 @@ public class config {
             if (key.equals("download_delay")) {
                download_delay = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("autoskip_enabled")) {
+               autoskip_enabled = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
+            if (key.equals("autoskip_import")) {
+               autoskip_import = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
+            if (key.equals("autoskip_prune")) {
+               autoskip_prune = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("autoskip_padding")) {
                autoskip_padding = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1424,6 +1436,12 @@ public class config {
          ofp.write("<download_time_estimate>\n" + download_time_estimate + "\n\n");
          
          ofp.write("<download_check_length>\n" + download_check_length + "\n\n");
+         
+         ofp.write("<autoskip_enabled>\n" + autoskip_enabled + "\n\n");
+         
+         ofp.write("<autoskip_import>\n" + autoskip_import + "\n\n");
+         
+         ofp.write("<autoskip_prune>\n" + autoskip_prune + "\n\n");
          
          ofp.write("<autoskip_padding>\n" + autoskip_padding + "\n\n");
          

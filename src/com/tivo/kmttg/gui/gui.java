@@ -143,7 +143,7 @@ public class gui extends Application {
    private MenuItem saveJobsMenuItem = null;
    private MenuItem loadJobsMenuItem = null;
    public MenuItem searchMenuItem = null;
-   public MenuItem autoSkipMenuItem = null;
+   private MenuItem autoSkipMenuItem = null;
    private Menu autoSkipServiceMenu = null;
    public MenuItem thumbsMenuItem = null;
    
@@ -1278,6 +1278,7 @@ public class gui extends Application {
    }
    
    public void addAutoSkipServiceItem(String tivoName) {
+      if ( ! SkipManager.skipEnabled() ) return;
       for (MenuItem item : autoSkipServiceMenu.getItems()) {
          if (item.getText().equals(tivoName))
             return;

@@ -110,6 +110,9 @@ public class configMain {
    private static CheckBox tableColAutoSize = null;
    private static CheckBox jobMonitorFullPaths = null;
    private static CheckBox autotune_enabled = null;
+   private static CheckBox autoskip_enabled = null;
+   private static CheckBox autoskip_import = null;
+   private static CheckBox autoskip_prune = null;
    private static CheckBox combine_download_decrypt = null;
    private static CheckBox single_download = null;
    private static CheckBox rpcnpl = null;
@@ -955,7 +958,16 @@ public class configMain {
       // download_delay
       download_delay.setText("" + config.download_delay);
       
-      // download_delay
+      // autoskip_enabled
+      autoskip_enabled.setSelected(config.autoskip_enabled == 1);
+      
+      // autoskip_enabled
+      autoskip_import.setSelected(config.autoskip_import == 1);
+      
+      // autoskip_prune
+      autoskip_prune.setSelected(config.autoskip_prune == 1);
+      
+      // autoskip_padding
       autoskip_padding.setText("" + config.autoskip_padding);
       
       // metadata_entries
@@ -1885,6 +1897,24 @@ public class configMain {
          config.download_delay = 10;
       }
       
+      // autoskip_enabled
+      if (autoskip_enabled.isSelected())
+         config.autoskip_enabled = 1;
+      else
+         config.autoskip_enabled = 0;
+      
+      // autoskip_import
+      if (autoskip_import.isSelected())
+         config.autoskip_import = 1;
+      else
+         config.autoskip_import = 0;
+      
+      // autoskip_prune
+      if (autoskip_prune.isSelected())
+         config.autoskip_prune = 1;
+      else
+         config.autoskip_prune = 0;
+      
       // autoskip_padding
       value = string.removeLeadingTrailingSpaces(autoskip_padding.getText());
       if (value.length() > 0) {
@@ -2230,6 +2260,9 @@ public class configMain {
       tableColAutoSize = new CheckBox();
       jobMonitorFullPaths = new CheckBox();
       autotune_enabled = new CheckBox();
+      autoskip_enabled = new CheckBox();
+      autoskip_import = new CheckBox();
+      autoskip_prune = new CheckBox();
       Label toolTipsDelay_label = new Label();
       Label toolTipsTimeout_label = new Label();
       OK = new Button();
@@ -2452,6 +2485,12 @@ public class configMain {
       jobMonitorFullPaths.setText("Show full paths in Job Monitor");
       
       autotune_enabled.setText("Tune to specified channels before a download");
+      
+      autoskip_enabled.setText("Enable AutoSkip functionality");
+      
+      autoskip_import.setText("Automatically Import to Skip Table after Ad Cut");
+      
+      autoskip_prune.setText("Prune Skip Table automatically after NPL refresh");
             
       OK.setText("OK");
       OK.setId("button_config_ok");
@@ -2863,6 +2902,25 @@ public class configMain {
       gy++;
       autotune_panel.add(autotune_test, 1, gy);
       
+      // autoskip_panel
+      GridPane autoskip_panel = new GridPane();
+      autoskip_panel.setAlignment(Pos.CENTER);
+      autoskip_panel.setVgap(5);
+      autoskip_panel.setHgap(5);
+      
+      gy = 0;
+      autoskip_panel.add(autoskip_enabled, 1, gy);
+      
+      gy++;
+      autoskip_panel.add(autoskip_import, 1, gy);
+      
+      gy++;
+      autoskip_panel.add(autoskip_prune, 1, gy);
+      
+      gy++;
+      autoskip_panel.add(autoskip_padding_label, 0, gy);
+      autoskip_panel.add(autoskip_padding, 1, gy);
+      
       // Files panel
       GridPane files_panel = new GridPane();      
       files_panel.setAlignment(Pos.CENTER);
@@ -3071,11 +3129,6 @@ public class configMain {
       gy++;
       program_options_panel.add(download_delay_label, 0, gy);
       program_options_panel.add(download_delay, 1, gy);
-      
-      // autoskip_padding
-      gy++;
-      program_options_panel.add(autoskip_padding_label, 0, gy);
-      program_options_panel.add(autoskip_padding, 1, gy);
       
       // metadata_files
       gy++;
@@ -3354,6 +3407,7 @@ public class configMain {
          addTabPane("VideoRedo", vrd_panel);
       addTabPane("pyTivo", pyTivo_panel);
       addTabPane("Autotune", autotune_panel);
+      addTabPane("AutoSkip", autoskip_panel);
       
       // Main panel
       VBox main_panel = new VBox();
@@ -3487,6 +3541,9 @@ public class configMain {
       download_tries.setTooltip(getToolTip("download_tries"));
       download_retry_delay.setTooltip(getToolTip("download_retry_delay"));
       download_delay.setTooltip(getToolTip("download_delay"));
+      autoskip_enabled.setTooltip(getToolTip("autoskip_enabled"));
+      autoskip_import.setTooltip(getToolTip("autoskip_import"));
+      autoskip_prune.setTooltip(getToolTip("autoskip_prune"));
       autoskip_padding.setTooltip(getToolTip("autoskip_padding"));
       metadata_entries.setTooltip(getToolTip("metadata_entries"));
       httpserver_port.setTooltip(getToolTip("httpserver_port"));
@@ -4213,6 +4270,21 @@ public class configMain {
          text =  "<b>start delay in seconds for download tasks</b><br>";
          text += "For any download task delay the start of the task by this number of seconds.<br>";
          text += "This helps take stress off TiVo web server to avoid potential <b>server busy</b> messages.";
+      }
+      else if (component.equals("autoskip_enabled")) {
+         text =  "<b>Enable AutoSkip functionality</b><br>";
+         text += "Enable AutoSkip functionality for series 4 and later TiVos/Minis.<br>";
+         text += "NOTE: You should re-start kmttg after changing this setting to see the changes in the GUI.";
+      }
+      else if (component.equals("autoskip_import")) {
+         text =  "<b>Automatically Import to Skip Table after Ad Cut</b><br>";
+         text += "If enabled, following Ad Cut job kmttg will attempt to automatically import the cut file<br>";
+         text += "into AutoSkip table";
+      }
+      else if (component.equals("autoskip_prune")) {
+         text =  "<b>Prune Skip Table automatically after NPL refresh</b><br>";
+         text += "If enabled, following an NPL tab refresh any shows that have been deleted from the TiVo<br>";
+         text += "that have corresponding AutoSkip Table entries will be deleted from AutoSkip table automatically.";
       }
       else if (component.equals("autoskip_padding")) {
          text =  "<b>autoskip padding in seconds</b><br>";
