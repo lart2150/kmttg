@@ -16,6 +16,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.util.*;
 
 public class NowPlaying extends baseTask implements Serializable {
@@ -136,6 +137,11 @@ public class NowPlaying extends baseTask implements Serializable {
                   
                   log.warn("NPL job completed: " + jobMonitor.getElapsedTime(job.time));
                   log.print("---DONE--- job=" + job.type + " tivo=" + job.tivoName);
+                  
+                  if (SkipManager.skipEnabled() && config.autoskip_prune == 1) {
+                     log.warn("Pruning AutoSkip table entries");
+                     SkipManager.pruneEntries(job.tivoName, ENTRIES);
+                  }
                }
             }
          }
