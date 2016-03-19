@@ -161,7 +161,7 @@ public class AutoSkip {
                skipPlayCheck(tivoName, contentId);
             }
         }
-        ,5000,
+        ,2000,
         1000
       );
    }
@@ -190,10 +190,10 @@ public class AutoSkip {
             }
          }
          // If pos < first end point then don't skip
-         if (skip) {
-            if (pos < skipData.get(0).get("end"))
-               skip = false;
-         }
+         //if (skip) {
+         //   if (pos < skipData.get(0).get("end"))
+         //      skip = false;
+         //}
          // If pos >= last end point then don't skip
          if (skip) {
             if (pos >= skipData.get(skipData.size()-1).get("end"))
@@ -352,7 +352,7 @@ public class AutoSkip {
       }
       
       if (skipData.size() > 1)
-         closest = skipData.get(1).get("start");
+         closest = skipData.get(0).get("start");
       long diff = pos;
       for (Hashtable<String,Long> h : skipData) {
          if (pos < h.get("start")) {
