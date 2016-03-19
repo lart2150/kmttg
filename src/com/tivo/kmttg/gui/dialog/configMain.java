@@ -2488,7 +2488,7 @@ public class configMain {
       
       autoskip_enabled.setText("Enable AutoSkip functionality");
       
-      autoskip_import.setText("Automatically Import to Skip Table after Ad Cut");
+      autoskip_import.setText("Automatically Import to Skip Table after Ad Detect");
       
       autoskip_prune.setText("Prune Skip Table automatically after NPL refresh");
             
@@ -4277,9 +4277,9 @@ public class configMain {
          text += "NOTE: You should re-start kmttg after changing this setting to see the changes in the GUI.";
       }
       else if (component.equals("autoskip_import")) {
-         text =  "<b>Automatically Import to Skip Table after Ad Cut</b><br>";
-         text += "If enabled, following Ad Cut job kmttg will attempt to automatically import the cut file<br>";
-         text += "into AutoSkip table";
+         text =  "<b>Automatically Import to Skip Table after Ad Detect</b><br>";
+         text += "If enabled, following Ad Detect or Ad Review job kmttg will attempt to automatically<br>";
+         text += "import the cuts file into AutoSkip table";
       }
       else if (component.equals("autoskip_prune")) {
          text =  "<b>Prune Skip Table automatically after NPL refresh</b><br>";

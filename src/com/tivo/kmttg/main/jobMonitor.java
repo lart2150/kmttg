@@ -22,6 +22,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
+import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.task.*;
 
 public class jobMonitor {
@@ -1151,15 +1152,12 @@ public class jobMonitor {
             job.name         = "VRD";
             job.mpegFile     = mpegFile;
             job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
-            if (specs.containsKey("contentId"))
-               job.contentId = (String) specs.get("contentId");
-            if (specs.containsKey("offerId"))
-               job.offerId = (String) specs.get("offerId");
-            if (specs.containsKey("title"))
-               job.title = (String) specs.get("title");
-            if (specs.containsKey("autoskip")) {
-               job.autoskip = true;
-               job.duration = Long.parseLong(entry.get("duration"));
+            if (mode.equals("Download") && SkipManager.skipEnabled() && config.autoskip_import == 1) {
+               job.autoskip  = true;
+               job.contentId = entry.get("contentId");
+               job.offerId   = entry.get("offerId");
+               job.title     = entry.get("title");
+               job.duration  = Long.parseLong(entry.get("duration"));
             }
             submitNewJob(job);
          } else {
@@ -1177,17 +1175,12 @@ public class jobMonitor {
                job.vprjFile = string.replaceSuffix(mpegFile, ".VPrj");
             if (specs.containsKey("comskipIni"))
                job.comskipIni = (String) specs.get("comskipIni");
-            if (specs.containsKey("SkipPoint"))
-               job.SkipPoint = (String) specs.get("SkipPoint");
-            if (specs.containsKey("contentId"))
-               job.contentId = (String) specs.get("contentId");
-            if (specs.containsKey("offerId"))
-               job.offerId = (String) specs.get("offerId");
-            if (specs.containsKey("title"))
-               job.title = (String) specs.get("title");
-            if (specs.containsKey("autoskip")) {
-               job.autoskip = true;
-               job.duration = Long.parseLong(entry.get("duration"));
+            if (mode.equals("Download") && SkipManager.skipEnabled() && config.autoskip_import == 1) {
+               job.autoskip  = true;
+               job.contentId = entry.get("contentId");
+               job.offerId   = entry.get("offerId");
+               job.title     = entry.get("title");
+               job.duration  = Long.parseLong(entry.get("duration"));
             }
             submitNewJob(job);            
          }
@@ -1205,12 +1198,12 @@ public class jobMonitor {
             job.tivoFile     = tivoFile; // This used as backup in case mpegFile not available
             job.mpegFile     = mpegFile;
             job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
-            if (specs.containsKey("autoskip")) {
-               job.autoskip = true;
-               job.contentId = (String) specs.get("contentId");
-               job.offerId = (String) specs.get("offerId");
-               job.title = (String) specs.get("title");
-               job.duration = Long.parseLong(entry.get("duration"));
+            if (mode.equals("Download") && SkipManager.skipEnabled() && config.autoskip_import == 1) {
+               job.autoskip  = true;
+               job.contentId = entry.get("contentId");
+               job.offerId   = entry.get("offerId");
+               job.title     = entry.get("title");
+               job.duration  = Long.parseLong(entry.get("duration"));
             }
             submitNewJob(job);
             // VRD will be used to save output with cuts, so cancel comcut
@@ -1232,12 +1225,12 @@ public class jobMonitor {
          if (config.VRD == 1)
             job.vprjFile  = string.replaceSuffix(mpegFile, ".VPrj");
          job.edlFile      = edlFile;
-         if (specs.containsKey("autoskip")) {
-            job.autoskip = true;
-            job.contentId = (String) specs.get("contentId");
-            job.offerId = (String) specs.get("offerId");
-            job.title = (String) specs.get("title");
-            job.duration = Long.parseLong(entry.get("duration"));
+         if (mode.equals("Download") && SkipManager.skipEnabled() && config.autoskip_import == 1) {
+            job.autoskip  = true;
+            job.contentId = entry.get("contentId");
+            job.offerId   = entry.get("offerId");
+            job.title     = entry.get("title");
+            job.duration  = Long.parseLong(entry.get("duration"));
          }
          submitNewJob(job);         
       }

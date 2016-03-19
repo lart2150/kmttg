@@ -237,8 +237,6 @@ public class comskip extends baseTask implements Serializable {
                      SkipManager.removeEntry(job.contentId);
                   SkipManager.saveEntry(job.contentId, job.offerId, 0L, job.title, job.tivoName, cuts);
                }
-               String prefix = string.replaceSuffix(string.basename(job.mpegFile), "");
-               file.cleanUpFiles(prefix);               
             }
          }
       }

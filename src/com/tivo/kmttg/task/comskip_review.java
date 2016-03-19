@@ -152,17 +152,15 @@ public class comskip_review extends baseTask implements Serializable {
          
          log.warn("comskip_review job completed: " + jobMonitor.getElapsedTime(job.time));
          log.print("---DONE--- job=" + job.type + " output=" + outputFile);
-         
+                  
          if (job.autoskip && file.isFile(job.edlFile)) {
-            // Skip table entry creation
+            // AutoSkip table entry creation
             Stack<Hashtable<String,Long>> cuts = SkipImport.edlImport(job.edlFile, job.duration);
             if (cuts != null && cuts.size() > 0) {
                if (SkipManager.hasEntry(job.contentId))
                   SkipManager.removeEntry(job.contentId);
                SkipManager.saveEntry(job.contentId, job.offerId, 0L, job.title, job.tivoName, cuts);
             }
-            String prefix = string.replaceSuffix(string.basename(job.mpegFile), "");
-            file.cleanUpFiles(prefix);               
          }
       }
       return false;

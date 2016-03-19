@@ -15,7 +15,6 @@ import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.string;
 
 public class adscan extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
@@ -190,8 +189,6 @@ public class adscan extends baseTask implements Serializable {
                      SkipManager.removeEntry(job.contentId);
                   SkipManager.saveEntry(job.contentId, job.offerId, 0L, job.title, job.tivoName, cuts);
                }
-               String prefix = string.replaceSuffix(string.basename(job.mpegFile), "");
-               file.cleanUpFiles(prefix);               
             }
          }
       }
