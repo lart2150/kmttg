@@ -39,6 +39,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import com.tivo.kmttg.gui.MyTooltip;
+import com.tivo.kmttg.gui.help;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.httpserver.kmttgServer;
 import com.tivo.kmttg.main.beacon;
@@ -1921,7 +1922,7 @@ public class configMain {
          try {
             config.autoskip_padding = Integer.parseInt(value);
          } catch(NumberFormatException e) {
-            textFieldError(autoskip_padding, "Illegal setting for autoskip padding: '" + value + "'");
+            textFieldError(autoskip_padding, "Illegal setting for AutoSkip padding: '" + value + "'");
             log.error("Setting to 0");
             config.autoskip_padding = 0;
             autoskip_padding.setText("" + config.autoskip_padding);
@@ -2382,7 +2383,7 @@ public class configMain {
       download_tries_label.setText("# download attempts");
       download_retry_delay_label.setText("seconds between download retry attempts");
       download_delay_label.setText("start delay in seconds for download tasks");
-      autoskip_padding_label.setText("autoskip padding in seconds");
+      autoskip_padding_label.setText("AutoSkip padding in seconds");
       metadata_entries_label.setText("extra metadata entries (comma separated)");
       httpserver_port_label.setText("web server port");
       httpserver_cache_label.setText("web server cache dir");
@@ -2908,7 +2909,18 @@ public class configMain {
       autoskip_panel.setVgap(5);
       autoskip_panel.setHgap(5);
       
+      Button autoskip_doc = new Button("Documentation");
+      autoskip_doc.setTooltip(getToolTip("autoskip_doc"));
+      autoskip_doc.setOnAction(new EventHandler<ActionEvent>() {
+         public void handle(ActionEvent e) {
+            help.showInBrowser("https://sourceforge.net/p/kmttg/wiki/AutoSkip/");
+         }
+      });
+
       gy = 0;
+      autoskip_panel.add(autoskip_doc, 1, gy);
+      
+      gy++;
       autoskip_panel.add(autoskip_enabled, 1, gy);
       
       gy++;
@@ -4271,6 +4283,10 @@ public class configMain {
          text += "For any download task delay the start of the task by this number of seconds.<br>";
          text += "This helps take stress off TiVo web server to avoid potential <b>server busy</b> messages.";
       }
+      else if (component.equals("autoskip_doc")) {
+         text =  "<b>Documentation</b><br>";
+         text += "Click to bring up Wiki documentation on AutoSkip.";
+      }
       else if (component.equals("autoskip_enabled")) {
          text =  "<b>Enable AutoSkip functionality</b><br>";
          text += "Enable AutoSkip functionality for series 4 and later TiVos/Minis.<br>";
@@ -4287,7 +4303,7 @@ public class configMain {
          text += "that have corresponding AutoSkip Table entries will be deleted from AutoSkip table automatically.";
       }
       else if (component.equals("autoskip_padding")) {
-         text =  "<b>autoskip padding in seconds</b><br>";
+         text =  "<b>AutoSkip padding in seconds</b><br>";
          text += "During AutoSkip play this padding will be applied to show start and end points.<br>";
          text += "The idea is to pad start and end points so that actual show segments are not clipped.<br>";
          text += "show start points: new start point = start point - padding<br>";
