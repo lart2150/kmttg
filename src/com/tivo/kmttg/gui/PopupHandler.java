@@ -13,6 +13,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.SkipManager;
 
 public class PopupHandler {
    static TableView<?> TABLE_view = null;
@@ -129,6 +130,9 @@ public class PopupHandler {
          items.add(new PopupPair("Display data [j]", KeyCode.J, tivoName));
          if (config.rpcEnabled(tivoName) || config.mindEnabled(tivoName))
             items.add(new PopupPair("Display RPC data [r]", KeyCode.R, tivoName));
+         if (SkipManager.skipEnabled()) {
+            items.add(new PopupPair("Export AutoSkip to VPrj [e]", KeyCode.E, tivoName));
+         }
          // Intentionally hidden for now
          //if (config.rpcEnabled(tivoName)) {
          //   items.add(new PopupPair("Display SKIP data [k]", KeyCode.K, tivoName));
