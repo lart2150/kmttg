@@ -124,7 +124,7 @@ public class AutoSkip {
    }
    
    // end1 = -1 => pause mode, else normal skip mode without pause
-   public synchronized void enableMonitor(String tivoName, Stack<Hashtable<String,Long>> points, Long end1) {
+   private synchronized void enableMonitor(String tivoName, Stack<Hashtable<String,Long>> points, Long end1) {
       debug.print("tivoName=" + tivoName + " points=" + points);
       this.tivoName = tivoName;
       this.end1 = end1;
@@ -148,7 +148,7 @@ public class AutoSkip {
    }
    
    // Start timer to monitor playback position
-   public synchronized void startTimer() {
+   private synchronized void startTimer() {
       debug.print("");
       if (timer != null)
          timer.cancel();
@@ -221,14 +221,14 @@ public class AutoSkip {
    }
    
    // Jump to end of 1st show segment
-   public synchronized void jumpTo1st() {
+   /*private synchronized void jumpTo1st() {
       debug.print("");
       if (r != null && skipData != null && monitor) {
          long pos = skipData.get(0).get("end");
          print("Jumping to: " + SkipManager.toMinSec(pos));
          jumpTo(pos);
       }
-   }
+   }*/
    
    // RPC query to get current playback position
    // NOTE: Returns -1 for speed != 100 to avoid any skipping during trick play
