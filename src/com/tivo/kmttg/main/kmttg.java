@@ -45,7 +45,8 @@ public class kmttg {
           // This method is called during shutdown
           public void run() {
              System.out.println("Shutdown hook executing");
-             log.warn("SHUTTING DOWN");             
+             log.warn("SHUTTING DOWN");
+             log.stopLogger();
              config.GUIMODE = false;             
              _shuttingDown = true; // Global flag used by various methods
              
