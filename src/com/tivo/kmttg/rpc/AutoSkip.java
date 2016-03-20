@@ -10,7 +10,6 @@ import java.util.TimerTask;
 
 import javafx.concurrent.Task;
 
-import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
@@ -366,7 +365,7 @@ public class AutoSkip {
    }
    
    // Convert RPC data to skipData hash
-   public synchronized Stack<Hashtable<String,Long>> jsonToShowPoints(JSONObject clipData) {
+   /*public synchronized Stack<Hashtable<String,Long>> jsonToShowPoints(JSONObject clipData) {
       debug.print("clipData=" + clipData);
       Stack<Hashtable<String,Long>> points = new Stack<Hashtable<String,Long>>();
       try {
@@ -394,7 +393,7 @@ public class AutoSkip {
          error("jsonToShowPoints - " + e.getMessage());
       }
       return points;
-   }
+   }*/
    
    // Adjust skipData segment 1 end position and
    // all subsequent segment points relative to it
