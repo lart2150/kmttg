@@ -61,6 +61,7 @@ import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.SkipImport;
 import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.createMeta;
@@ -451,7 +452,15 @@ public class nplTable extends TableMap {
          };
          return cell;
       }
-   }   
+   } 
+   
+   private sortableDate getFirstSelected() {
+      int[] selected = GetSelectedRows();
+      if (selected == null || selected.length < 1)
+         return null;
+      return NowPlaying.getTreeItem(selected[0]).getValue().getDATE();
+
+   }
    
    // Handle keyboard presses
    private void KeyPressed(KeyEvent e) {
@@ -584,13 +593,11 @@ public class nplTable extends TableMap {
             
             if (keyCode == KeyCode.P) {
                // P key has special action
-               String id;
-               int row = selected[0];
-               sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+               sortableDate s = getFirstSelected(); if (s == null) return;
                if ( ! s.folder ) {
                   // Play individual show
                   if (config.rpcEnabled(tivoName)) {
-                     id = rnpl.findRecordingId(tivoName, s.data);
+                     String id = rnpl.findRecordingId(tivoName, s.data);
                      if (id != null) {
                         // Use rpc remote protocol to play given item
                         String title = "";
@@ -605,19 +612,13 @@ public class nplTable extends TableMap {
          } // if selected != null
       } else if (keyCode == KeyCode.I) {
          // Print all data of selected row to log window by sorted keys
-         int[] selected = GetSelectedRows();
-         if (selected == null || selected.length < 1)
-            return;
-         sortableDate s = NowPlaying.getTreeItem(selected[0]).getValue().getDATE();
-         if ( ! s.folder && s.data != null && s.data.containsKey("recordingId")) {
+         sortableDate s = getFirstSelected(); if (s == null) return;
+         if (! s.folder && s.data != null && s.data.containsKey("recordingId")) {
             config.gui.show_details.update(NowPlaying, tivoName, s.data.get("recordingId"));
          }
       } else if (keyCode == KeyCode.J) {
          // Print all data of selected row to log window by sorted keys
-         int[] selected = GetSelectedRows();
-         if (selected == null || selected.length < 1)
-            return;
-         sortableDate s = NowPlaying.getTreeItem(selected[0]).getValue().getDATE();
+         sortableDate s = getFirstSelected(); if (s == null) return;
          if ( ! s.folder && s.data != null ) {
             Vector<String> v = new Vector<String>(s.data.keySet());
             Collections.sort(v);            
@@ -628,19 +629,13 @@ public class nplTable extends TableMap {
          }
       } else if (keyCode == KeyCode.Q) {
          // Web query currently selected entry
-         int[] selected = GetSelectedRows();
-         if (selected == null || selected.length < 1)
-            return;
-         sortableDate s = NowPlaying.getTreeItem(selected[0]).getValue().getDATE();
+         sortableDate s = getFirstSelected(); if (s == null) return;
          if ( ! s.folder && s.data != null && s.data.containsKey("title")) {
             TableUtil.webQuery(s.data.get("title"));
          }
       } else if (keyCode == KeyCode.R) {
          // Collect and print RPC data of selected row
-         int[] selected = GetSelectedRows();
-         if (selected == null || selected.length < 1)
-            return;
-         sortableDate s = NowPlaying.getTreeItem(selected[0]).getValue().getDATE();
+         sortableDate s = getFirstSelected(); if (s == null) return;
          if ( ! s.folder && s.data != null ) {
             if (s.data.containsKey("recordingId")) {
                final String recordingId = s.data.get("recordingId");
@@ -669,18 +664,10 @@ public class nplTable extends TableMap {
             }
          }         
       } else if (keyCode == KeyCode.M) {
-         int[] selected = GetSelectedRows();
-         if (selected == null || selected.length < 1)
-            return;
-         int row = selected[0];
-         sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+         sortableDate s = getFirstSelected(); if (s == null) return;
          createMeta.getExtendedMetadata(tivoName, s.data, true);
       } else if (keyCode == KeyCode.K) {
-         int[] selected = GetSelectedRows();
-         if (selected == null || selected.length < 1)
-            return;
-         int row = selected[0];
-         sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+         sortableDate s = getFirstSelected(); if (s == null) return;
          if (s.data.containsKey("contentId")) {
             final String contentId = s.data.get("contentId");
             Task<Void> task = new Task<Void>() {
@@ -695,15 +682,17 @@ public class nplTable extends TableMap {
             };
             new Thread(task).start();            
          }
+      } else if (keyCode == KeyCode.E) {
+         sortableDate s = getFirstSelected(); if (s == null) return;
+         if (s.data.containsKey("contentId") && s.data.containsKey("duration")) {
+            SkipImport.vrdExport(s.data);
+         }
       } else if (keyCode == KeyCode.T) {
          TableUtil.toggleTreeState(NowPlaying);
       }
       else if (keyCode == KeyCode.C) {
          // Import Skip Share
-         int[] selected = GetSelectedRows();
-         if (selected == null || selected.length < 1)
-            return;
-         sortableDate s = NowPlaying.getTreeItem(selected[0]).getValue().getDATE();
+         sortableDate s = getFirstSelected(); if (s == null) return;
          if ( ! s.folder && s.data != null ) {
             com.tivo.kmttg.rpc.SkipShare.tableImport(s.data, tivoName);
          }
@@ -741,11 +730,7 @@ public class nplTable extends TableMap {
                return;
             }
             if (config.rpcEnabled(tivoName)) {
-               int[] selected = GetSelectedRows();
-               if (selected == null || selected.length < 1)
-                  return;
-               int row = selected[0];
-               sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+               sortableDate s = getFirstSelected(); if (s == null) return;
                log.print("Starting AutoSkip");
                SkipManager.skipPlay(tivoName, s.data);
             }
