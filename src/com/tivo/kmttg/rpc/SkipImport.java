@@ -1,8 +1,10 @@
 package com.tivo.kmttg.rpc;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -180,5 +182,73 @@ public class SkipImport {
          }
       }
       return entries;
+   }
+   
+   static public void vrdExport(Hashtable<String,String> nplEntry) {
+      if (! nplEntry.containsKey("duration") || ! nplEntry.containsKey("contentId")) {
+         log.error("Entry is missing duration and/or contentId");
+         return;
+      }
+      Stack<Hashtable<String,Long>> entries = SkipManager.getEntry(nplEntry.get("contentId"));
+      long duration = Long.parseLong(nplEntry.get("duration"));
+      if (entries.size() > 0) {
+         String tivoFile = config.outputDir + File.separator + tivoFileName.buildTivoFileName(nplEntry);
+         String vprjFile = string.replaceSuffix(tivoFile, ".VPrj");
+         log.warn("AutoSkip exporting cut points to VRD VPrj file: " + vprjFile);
+         try {
+            BufferedWriter ofp = new BufferedWriter(new FileWriter(vprjFile, false));
+            ofp.write("<VideoReDoProject Version=\"3\">\r\n");
+            ofp.write("<Filename>" + tivoFile + "</Filename>\r\n");
+            ofp.write("<CutList>\r\n");
+            Stack<Hashtable<String,Long>> cuts = entriesToCuts(entries, duration);
+            for (Hashtable<String,Long> cut : cuts) {
+               ofp.write("<Cut>");
+               long start = cut.get("start")*10000;
+               ofp.write(" <CutTimeStart>" + start + "</CutTimeStart> ");
+               long end = cut.get("end")*10000;
+               ofp.write("<CutTimeEnd>" + end + "</CutTimeEnd> ");
+               ofp.write("</Cut>\r\n");
+            }
+            ofp.write("</CutList>\r\n");
+            ofp.write("</VideoReDoProject>\r\n");
+            ofp.close();
+         }
+         catch (Exception ex) {
+            log.error("Failed to write to file: " + vprjFile);
+            log.error(ex.toString());
+         }
+      } else {
+         log.error("No AutoSkip data available for this entry");
+      }
+   }
+   
+   static private Stack<Hashtable<String,Long>> entriesToCuts(Stack<Hashtable<String,Long>> entries, long duration) {
+      Stack<Hashtable<String,Long>> cuts = new Stack<Hashtable<String,Long>>();
+      if (entries != null && entries.size() > 0) {
+         for (int i=0; i<entries.size()-1; ++i) {
+            long start = entries.get(i).get("start");
+            long end = entries.get(i).get("end");
+            if (i==0) {
+               if (start != 0) {
+                  Hashtable<String,Long> h = new Hashtable<String,Long>();
+                  h.put("start", 0L); h.put("end", start);
+                  cuts.push(h);
+               }
+            }
+            Hashtable<String,Long> h = new Hashtable<String,Long>();
+            h.put("start", end);
+            start = entries.get(i+1).get("start");
+            h.put("end", start);
+            cuts.push(h);
+         }
+         long end = entries.get(entries.size()-1).get("end");
+         if (end < duration) {
+            Hashtable<String,Long> h = new Hashtable<String,Long>();
+            h.put("start", end);
+            h.put("end", duration);
+            cuts.push(h);            
+         }
+      }
+      return cuts;
    }
 }
