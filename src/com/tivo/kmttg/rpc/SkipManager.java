@@ -276,6 +276,45 @@ public class SkipManager {
       return false;
    }
    
+   public static Stack<Hashtable<String,Long>> getEntry(String contentId) {
+      debug.print("contentId=" + contentId);
+      Stack<Hashtable<String,Long>> entry = new Stack<Hashtable<String,Long>>();
+      if (file.isFile(SkipManager.iniFile())) {
+         try {
+            BufferedReader ifp = new BufferedReader(new FileReader(SkipManager.iniFile()));
+            String line = null;
+            while (( line = ifp.readLine()) != null) {
+               if (line.contains("<entry>")) {
+                  line = ifp.readLine();
+                  if (line.startsWith("contentId")) {
+                     String[] l = line.split("=");
+                     if (l[1].equals(contentId)) {
+                        while (( line = ifp.readLine()) != null) {
+                           if (line.equals("<entry>"))
+                              break;
+                           if (line.matches("^[0-9]+.*")) {
+                              Hashtable<String,Long> h = new Hashtable<String,Long>();
+                              l = line.split("\\s+");
+                              h.put("start", Long.parseLong(l[0]));
+                              h.put("end", Long.parseLong(l[1]));
+                              entry.push(h);
+                           }
+                        }
+                        break;
+                     }
+                  }
+               }
+            }
+            ifp.close();
+         } catch (Exception e) {
+            log.error("SkipManager getEntry - " + e.getMessage());
+            log.error(Arrays.toString(e.getStackTrace()));
+         }
+      }
+      return entry;
+   }
+
+   
    // Return entries for use by SkipDialog table
    public static synchronized JSONArray getEntries() {
       debug.print("");
