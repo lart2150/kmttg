@@ -130,7 +130,7 @@ public class PopupHandler {
          items.add(new PopupPair("Display data [j]", KeyCode.J, tivoName));
          if (config.rpcEnabled(tivoName) || config.mindEnabled(tivoName))
             items.add(new PopupPair("Display RPC data [r]", KeyCode.R, tivoName));
-         if (SkipManager.skipEnabled() && config.VRD == 1) {
+         if (SkipManager.skipEnabled() && config.VRD == 1 && config.rpcEnabled(tivoName)) {
             items.add(new PopupPair("Export AutoSkip to VPrj [e]", KeyCode.E, tivoName));
          }
          // Intentionally hidden for now
