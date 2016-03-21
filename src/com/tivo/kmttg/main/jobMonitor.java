@@ -654,6 +654,18 @@ public class jobMonitor {
       
       return String.format("%.2f Mbps", rate);
    }
+   
+   private static void skipImport(String mode, String tivoName, jobData job, Hashtable<String,String> entry) {
+      if (mode.equals("Download") && SkipManager.skipEnabled() && config.autoskip_import == 1) {
+         if (config.rpcEnabled(tivoName)) {
+            job.autoskip  = true;
+            job.contentId = entry.get("contentId");
+            job.offerId   = entry.get("offerId");
+            job.title     = entry.get("title");
+            job.duration  = Long.parseLong(entry.get("duration"));
+         }
+      }
+   }
      
    // Master job launch function (in both GUI & auto modes)
    // Builds file names & launches jobs according to specs
@@ -1152,13 +1164,8 @@ public class jobMonitor {
             job.name         = "VRD";
             job.mpegFile     = mpegFile;
             job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
-            if (mode.equals("Download") && SkipManager.skipEnabled() && config.autoskip_import == 1) {
-               job.autoskip  = true;
-               job.contentId = entry.get("contentId");
-               job.offerId   = entry.get("offerId");
-               job.title     = entry.get("title");
-               job.duration  = Long.parseLong(entry.get("duration"));
-            }
+            // Setup job for skip table import if relevant
+            skipImport(mode, tivoName, job, entry);
             submitNewJob(job);
          } else {
             jobData job = new jobData();
@@ -1175,13 +1182,8 @@ public class jobMonitor {
                job.vprjFile = string.replaceSuffix(mpegFile, ".VPrj");
             if (specs.containsKey("comskipIni"))
                job.comskipIni = (String) specs.get("comskipIni");
-            if (mode.equals("Download") && SkipManager.skipEnabled() && config.autoskip_import == 1) {
-               job.autoskip  = true;
-               job.contentId = entry.get("contentId");
-               job.offerId   = entry.get("offerId");
-               job.title     = entry.get("title");
-               job.duration  = Long.parseLong(entry.get("duration"));
-            }
+            // Setup job for skip table import if relevant
+            skipImport(mode, tivoName, job, entry);
             submitNewJob(job);            
          }
       }
@@ -1198,13 +1200,8 @@ public class jobMonitor {
             job.tivoFile     = tivoFile; // This used as backup in case mpegFile not available
             job.mpegFile     = mpegFile;
             job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
-            if (mode.equals("Download") && SkipManager.skipEnabled() && config.autoskip_import == 1) {
-               job.autoskip  = true;
-               job.contentId = entry.get("contentId");
-               job.offerId   = entry.get("offerId");
-               job.title     = entry.get("title");
-               job.duration  = Long.parseLong(entry.get("duration"));
-            }
+            // Setup job for skip table import if relevant
+            skipImport(mode, tivoName, job, entry);
             submitNewJob(job);
             // VRD will be used to save output with cuts, so cancel comcut
             if (config.VrdReview_noCuts == 1)
@@ -1225,13 +1222,8 @@ public class jobMonitor {
          if (config.VRD == 1)
             job.vprjFile  = string.replaceSuffix(mpegFile, ".VPrj");
          job.edlFile      = edlFile;
-         if (mode.equals("Download") && SkipManager.skipEnabled() && config.autoskip_import == 1) {
-            job.autoskip  = true;
-            job.contentId = entry.get("contentId");
-            job.offerId   = entry.get("offerId");
-            job.title     = entry.get("title");
-            job.duration  = Long.parseLong(entry.get("duration"));
-         }
+         // Setup job for skip table import if relevant
+         skipImport(mode, tivoName, job, entry);
          submitNewJob(job);         
       }
       
