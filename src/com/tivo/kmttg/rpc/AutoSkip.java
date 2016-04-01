@@ -201,7 +201,9 @@ public class AutoSkip {
          if (skip) {
             long jumpto = getClosest(pos);
             if (jumpto != -1) {
-               print("IN COMMERCIAL. JUMPING TO: " + SkipManager.toMinSec(jumpto-pad));
+               print("(pos=" + SkipManager.toMinSec(pos) +
+                  ") IN COMMERCIAL. JUMPING TO: " + SkipManager.toMinSec(jumpto-pad)
+               );
                jumpTo(jumpto-pad);
             }
          }
@@ -353,13 +355,24 @@ public class AutoSkip {
       if (skipData.size() > 1)
          closest = skipData.get(0).get("start");
       long diff = pos;
+      int count = 0; int index = 0;
       for (Hashtable<String,Long> h : skipData) {
-         if (pos < h.get("start")) {
-            if (h.get("start") - pos < diff) {
-               diff = h.get("start") - pos;
-               closest = h.get("start");
+         long start = h.get("start");
+         if (pos < start) {
+            if (start - pos < diff) {
+               diff = start - pos;
+               closest = start;
+               index = count;
             }
          }
+         count++;
+      }
+      if (closest < pos) {
+         // Don't jump backwards
+         if (index+1 < skipData.size())
+            closest = skipData.get(index+1).get("start");
+         if (closest < pos)
+            return -1;
       }
       return closest;
    }
