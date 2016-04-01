@@ -64,6 +64,8 @@ public class SkipShare {
                continue;
             if (adjusted_end - adjusted_start == duration)
                continue;
+            if (i>1 && adjusted_start == 0)
+               continue;
             else {
                Hashtable<String,Long> h = new Hashtable<String,Long>();
                h.put("start", adjusted_start);
