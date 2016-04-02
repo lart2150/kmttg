@@ -7,6 +7,7 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SortEvent;
@@ -328,6 +329,29 @@ public class todoTable extends TableMap {
           JSONObject json = GetRowData(selected[0]);
           if (json != null)
              rnpl.pprintJSON(json);
+       } else if (keyCode == KeyCode.K) {
+          int[] selected = TableUtil.GetSelectedRows(TABLE);
+          if (selected == null || selected.length < 1)
+             return;
+          JSONObject json = GetRowData(selected[0]);
+          if (json.has("contentId")) {
+             try {
+                final String contentId = json.getString("contentId");
+                Task<Void> task = new Task<Void>() {
+                   @Override public Void call() {
+                      Remote r = config.initRemote(currentTivo);
+                      if (r.success) {
+                         r.getClipData(contentId);
+                         r.disconnect();
+                      }
+                      return null;
+                   }
+                };
+                new Thread(task).start();            
+             } catch (JSONException e1) {
+                log.error("KeyPressed K - " + e1.getMessage());
+             }
+          }
        } else if (keyCode == KeyCode.Q) {
           // Web query currently selected entry
           int[] selected = TableUtil.GetSelectedRows(TABLE);
