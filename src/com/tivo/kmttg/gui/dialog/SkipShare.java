@@ -72,7 +72,7 @@ public class SkipShare {
       Optional<ButtonType> result = alert.showAndWait();
       if (result.get() == ButtonType.OK) {
          String startFile = tivoFileName.buildTivoFileName(entry);
-         String mpegFile = config.mpegDir + File.separator + string.replaceSuffix(startFile, ".ts");
+         String mpegFile = config.mpegDir + File.separator + string.replaceSuffix(startFile, ".mpg");
          // tdownload_decrypt job
          config.tivolibreCompat = 1;
          jobData job = new jobData();
@@ -83,7 +83,6 @@ public class SkipShare {
          job.tivoName     = tivoName;
          job.type         = "tdownload_decrypt";
          job.name         = "java";
-         job.TSDownload   = 1;
          job.mpegFile     = mpegFile;
          job.mpegFile_cut = string.replaceSuffix(mpegFile, "_cut.ts");                  
          jobMonitor.submitNewJob(job);
