@@ -1279,6 +1279,8 @@ public class gui extends Application {
    
    public void addAutoSkipServiceItem(String tivoName) {
       if ( ! SkipManager.skipEnabled() ) return;
+      if (autoSkipServiceMenu == null)
+         getAutoSkipServiceMenu();
       for (MenuItem item : autoSkipServiceMenu.getItems()) {
          if (item.getText().equals(tivoName))
             return;
