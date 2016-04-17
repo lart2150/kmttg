@@ -424,7 +424,7 @@ public class remotegui {
       }
       if (tab.equals("Season Passes")) {
          sp_tab.reorder.setDisable(!state);
-         sp_tab.copy.setDisable(!state);
+         //sp_tab.copy.setDisable(!state);
       }
       if (tab.equals("Won't Record")) {
          cancel_tab.record.setDisable(!state);
