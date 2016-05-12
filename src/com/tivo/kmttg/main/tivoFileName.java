@@ -71,21 +71,25 @@ public class tivoFileName {
       // Split up into season & episode components (assuming episode # is 2 digits)
       String epnum = entry.get("EpisodeNumber");
       String SeriesEpNumber="";
-      if (epnum.length() > 2) {
-         String s="", e="";
-         if (epnum.length() <= 3) {
-            s = epnum.substring(0,1);
-            e = epnum.substring(1);
-         } else {
-            s = epnum.substring(0,2);
-            e = epnum.substring(2);
-         }
-         if (s.length() == 1)
-            s = "0" + s;
-         if (s.length() > 0 && e.length() > 0) {
-            SeriesEpNumber = "s" + s + "e" + e;
-            entry.put("season", s);
-            entry.put("episode", e);
+      if (entry.containsKey("season") && entry.containsKey("episode")) {
+         SeriesEpNumber = "s" + entry.get("season") + "e" + entry.get("episode");
+      } else {
+         if (epnum.length() > 2) {
+            String s="", e="";
+            if (epnum.length() <= 3) {
+               s = epnum.substring(0,1);
+               e = epnum.substring(1);
+            } else {
+               s = epnum.substring(0,2);
+               e = epnum.substring(2);
+            }
+            if (s.length() == 1)
+               s = "0" + s;
+            if (s.length() > 0 && e.length() > 0) {
+               SeriesEpNumber = "s" + s + "e" + e;
+               entry.put("season", s);
+               entry.put("episode", e);
+            }
          }
       }
       entry.put("SeriesEpNumber", SeriesEpNumber);

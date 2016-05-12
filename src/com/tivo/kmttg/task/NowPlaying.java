@@ -229,6 +229,8 @@ public class NowPlaying extends baseTask implements Serializable {
                   entry.put("channelNum", chan.getString("channelNumber"));
             }
             if (json.has("episodeNum") && json.has("seasonNumber")) {
+               entry.put("season", String.format("%02d", json.get("seasonNumber")));
+               entry.put("episode", String.format("%02d", json.getJSONArray("episodeNum").get(0)));
                entry.put(
                   "EpisodeNumber",
                   "" + json.get("seasonNumber") +

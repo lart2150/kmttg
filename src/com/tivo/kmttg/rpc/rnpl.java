@@ -205,6 +205,8 @@ public class rnpl {
             if (json.has("originalAirdate"))
                h.put("originalAirDate", json.getString("originalAirdate"));
             if (json.has("episodeNum") && json.has("seasonNumber")) {
+               h.put("season", String.format("%02d", json.get("seasonNumber")));
+               h.put("episode", String.format("%02d", json.getJSONArray("episodeNum").get(0)));
                h.put(
                   "EpisodeNumber",
                   "" + json.get("seasonNumber") +
