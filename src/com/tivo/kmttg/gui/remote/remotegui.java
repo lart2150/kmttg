@@ -335,8 +335,6 @@ public class remotegui {
          }
          if (config.rpcEnabled(tivoName)) {
             stream_tab.tivo.getItems().add(tivoName);
-            // AutoSkip service capable
-            config.gui.addAutoSkipServiceItem(tivoName);
          }
          // Remote tab always valid as it can use RPC or telnet
          rc_tab.tivo.getItems().add(tivoName);
