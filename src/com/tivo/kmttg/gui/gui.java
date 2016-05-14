@@ -271,6 +271,17 @@ public class gui extends Application {
       
       jFrame.show();
       
+      // Initialize AutoSkip entries with possible auto starts
+      // to after configuration reads and gui setups.
+      for (int i = 0; i < config.getTivoNames().size(); i++) {
+          String tivoName = config.getTivoNames().get(i);
+          if (config.rpcEnabled(tivoName)) {
+              // AutoSkip service capable
+              config.gui.addAutoSkipServiceItem(tivoName);
+          }
+      }
+
+      
       // Create NowPlaying icons
       CreateImages();
       
@@ -1309,6 +1320,8 @@ public class gui extends Application {
          public void changed(ObservableValue<? extends Boolean> e, Boolean oldVal, Boolean newVal) {
             if (! newVal) {
                SkipManager.stopService(tivoName);
+               config.autoskip_ServiceItems.put(tivoName, false);
+               config.save();
                return;
             }
             
@@ -1316,12 +1329,23 @@ public class gui extends Application {
             if (skipData == null || skipData.length() == 0) {
                log.warn("No skip table data available - ignoring skip service request");
                disableAutoSkipServiceItem(tivoName);
+               config.autoskip_ServiceItems.put(tivoName, false);
+               config.save();
                return;
             }
             SkipManager.startService(tivoName);
+            Boolean b = config.autoskip_ServiceItems.get(tivoName);
+            if( b == null || b == false) {
+                config.autoskip_ServiceItems.put(tivoName, true);
+                config.save();
+            }
          }
       });
       autoSkipServiceMenu.getItems().add(item);
+      Boolean b = config.autoskip_ServiceItems.get(tivoName);
+      if (b != null && b) {
+          item.setSelected(true);
+      }
    }
    
    public void removeAutoSkipServiceItem(String tivoName) {

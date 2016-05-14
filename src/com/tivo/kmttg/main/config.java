@@ -238,6 +238,7 @@ public class config {
    public static int autoskip_import = 1;
    public static int autoskip_prune = 0;
    public static int autoskip_padding = 0;
+   public static Hashtable<String,Boolean> autoskip_ServiceItems = new Hashtable<String,Boolean>();
    
    public static Stack<String> parse() {
       debug.print("");
@@ -1190,6 +1191,18 @@ public class config {
             if (key.equals("autoskip_padding")) {
                autoskip_padding = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("autoskip_ServiceItems")) {
+               String name;
+               Boolean value;
+               String l[] = line.split("\\s+");
+               value = Boolean.parseBoolean(l[l.length-1]);
+               name = "";
+               for (int i=0; i<l.length-1; i++) {
+                  name += l[i] + " ";
+               }
+               name = name.substring(0,name.length()-1);
+               autoskip_ServiceItems.put(name, value);
+            }
             if (key.equals("download_time_estimate")) {
                download_time_estimate = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1461,6 +1474,11 @@ public class config {
          ofp.write("<autoskip_prune>\n" + autoskip_prune + "\n\n");
          
          ofp.write("<autoskip_padding>\n" + autoskip_padding + "\n\n");
+         
+         ofp.write("<autoskip_ServiceItems>\n");
+         for (String name : autoskip_ServiceItems.keySet())
+            ofp.write(String.format("%-20s %-20s\n", name, autoskip_ServiceItems.get(name)));
+         ofp.write("\n");
          
          ofp.write("<autoLogSizeMB>\n" + autoLogSizeMB + "\n\n");
          
