@@ -110,7 +110,12 @@ public class ffmpeg {
    // i.e. If output_known is "width" then return computed height, else if "height" return computed width
    // Return 0 on failure
    private static int computeOutputDimensions(String videoFile, String output_known, int output_dim) {
-      Hashtable<String,String> source_info = getVideoInfo(videoFile);
+      Hashtable<String,String> source_info;
+      if (file.isFile(config.mediainfo)) {
+         source_info = mediainfo.getVideoInfo(videoFile);
+      } else {
+         source_info = getVideoInfo(videoFile);
+      }
       if (source_info == null) {
          // Try once again in case of transient issue
          log.warn("2nd try to obtain video file dimensions from file: " + videoFile);
@@ -127,21 +132,23 @@ public class ffmpeg {
          }
          
          // Assume DAR = source video dimensions if not found from videoFile
-         if (DAR_x == 0) DAR_x = Integer.parseInt(source_info.get("x"));
-         if (DAR_y == 0) DAR_y = Integer.parseInt(source_info.get("y"));
-         
-         if (output_known.equals("width")) {              
-            int output_height = output_dim*DAR_y/DAR_x;
-            // Want even number
-            if (output_height % 2 != 0) output_height += 1;
-            return output_height;
-         }
-         
-         if (output_known.equals("height")) {              
-            int output_width = output_dim*DAR_x/DAR_y;
-            // Want even number
-            if (output_width % 2 != 0) output_width += 1;
-            return output_width;
+         if (source_info.containsKey("x") && source_info.containsKey("y")) {
+            if (DAR_x == 0) DAR_x = Integer.parseInt(source_info.get("x"));
+            if (DAR_y == 0) DAR_y = Integer.parseInt(source_info.get("y"));
+            
+            if (output_known.equals("width")) {              
+               int output_height = output_dim*DAR_y/DAR_x;
+               // Want even number
+               if (output_height % 2 != 0) output_height += 1;
+               return output_height;
+            }
+            
+            if (output_known.equals("height")) {              
+               int output_width = output_dim*DAR_x/DAR_y;
+               // Want even number
+               if (output_width % 2 != 0) output_width += 1;
+               return output_width;
+            }
          }
       }
       return 0;
