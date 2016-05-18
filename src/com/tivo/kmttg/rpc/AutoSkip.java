@@ -47,6 +47,7 @@ public class AutoSkip {
    private int monitor_interval = 6;
    private String tivoName = null;
    Boolean monitor = false;
+   private long posEnd = -1;
    Stack<Hashtable<String,Long>> skipData = null;
    Stack<Hashtable<String,Long>> skipData_orig = null;
    String recordingId = null;
@@ -213,10 +214,21 @@ public class AutoSkip {
          //}
          // If pos >= last end point then don't skip
          if (skip) {
-            if (pos >= skipData.get(skipData.size()-1).get("end"))
+            if (pos >= skipData.get(skipData.size()-1).get("end")) {
+               if (config.autoskip_jumpToEnd == 1) {
+                  if( posEnd != pos ) {
+                     long jumpto = pos + (1000 * 60 * 24);  // arbitrarily jump 1 day
+                     print("(pos=" + SkipManager.toMinSec(pos) +
+                           ") IN LAST COMMERCIAL. JUMPING TO END");
+                     jumpTo(jumpto);
+                     posEnd = getPosition();
+                  }
+               }
                skip = false;
+            }
          }
          if (skip) {
+            posEnd = -1;
             long jumpto = getClosest(pos);
             if (jumpto != -1) {
                print("(pos=" + SkipManager.toMinSec(pos) +
@@ -336,6 +348,7 @@ public class AutoSkip {
       contentId = null;
       monitor_count = 1;
       title = "";
+      posEnd = -1;
    }
    
    // Print current skipData to console
