@@ -41,6 +41,7 @@ import javafx.stage.Stage;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.MyTooltip;
+import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -208,6 +209,7 @@ public class SkipShare {
 
       dialog = new Stage();
       dialog.initOwner(frame);
+      gui.LoadIcons(dialog);
       dialog.setTitle("Skip Share Import");
       Scene scene = new Scene(new VBox());
       config.gui.setFontSize(scene, config.FontSize);

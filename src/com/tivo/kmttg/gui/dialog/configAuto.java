@@ -47,6 +47,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import com.tivo.kmttg.gui.MyTooltip;
+import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.gui.table.autoTable;
 import com.tivo.kmttg.gui.table.autoTable.Tabentry;
@@ -440,6 +441,7 @@ public class configAuto {
          }
       });
       dialog.initOwner(frame);
+      gui.LoadIcons(dialog);
       dialog.initModality(Modality.NONE);
       dialog.setTitle("kmttg auto transfers configuration");
       Scene scene = new Scene(new VBox());

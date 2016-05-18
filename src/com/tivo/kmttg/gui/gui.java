@@ -217,6 +217,9 @@ public class gui extends Application {
       Scene scene = new Scene(new VBox());
       MenuBar menubar = getMenuBar();
       
+      // Load icons for system usage
+      LoadIcons(jFrame);
+      
       // Build main canvas components
       getContentPane();
       config.gui = this;
@@ -1815,7 +1818,21 @@ public class gui extends Application {
             Images.put(names[i], new Image(new File("images/" + names[i] + ".png").toURI().toString()));            
          }
       }
-   }   
+   }
+   
+   public static void LoadIcons(Stage stage) {
+      String[] icons = {
+            "TtGo_blue_16x16_8", "TtGo_blue_16x16_32",
+            "TtGo_blue_32x32_8", "TtGo_blue_32x32_32",
+            "TtGo_blue_48x48_8", "TtGo_blue_48x48_32" };
+      try {
+         for (int i = 0; i < icons.length; i++) {
+            stage.getIcons().add(new Image(gui.class.getResourceAsStream("/" + icons[i] + ".png")));
+         }
+      } catch (Exception e) {
+         debug.print(e.toString());
+      }
+   }
    
    // Save current GUI settings to a file
    public void saveSettings() {

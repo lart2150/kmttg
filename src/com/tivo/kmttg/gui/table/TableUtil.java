@@ -68,6 +68,7 @@ import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.PopupHandler;
 import com.tivo.kmttg.gui.TableMap;
+import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.help;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.gui.sortable.sortableDate;
@@ -333,6 +334,7 @@ public class TableUtil {
          searchDialog = new Stage();
          searchDialog.initModality(Modality.NONE); // Non modal
          searchDialog.initOwner(config.gui.getFrame());
+         gui.LoadIcons(searchDialog);
          searchDialog.setTitle("Search Table");
          // This so we can restore original dialog position when re-opened
          searchDialog.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -505,6 +507,7 @@ public class TableUtil {
          row1.setPrefWidth(300);
          thumbsDialog = new Stage();
          thumbsDialog.initOwner(config.gui.getFrame());
+         gui.LoadIcons(thumbsDialog);
          thumbsDialog.setScene(new Scene(row1));
          config.gui.setFontSize(thumbsDialog.getScene(), config.FontSize);
          thumbsDialog.setTitle("Thumbs Rating");

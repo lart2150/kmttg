@@ -26,6 +26,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -107,6 +108,7 @@ public class recordOptions {
       );
    }
    
+   @SuppressWarnings("static-access")
    public JSONObject promptUser(String title, JSONObject json) {
       try {
          if (json != null)
@@ -114,6 +116,7 @@ public class recordOptions {
          label.setText(title);
          Dialog<?> dialog = new Dialog<>();
          dialog.initOwner(config.gui.getFrame());
+         config.gui.LoadIcons((Stage) dialog.getDialogPane().getScene().getWindow());
          config.gui.setFontSize(dialog, config.FontSize);
          dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
          dialog.setTitle("Recording Options");

@@ -31,6 +31,7 @@ import javafx.stage.Stage;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.MyTooltip;
+import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.skipTable;
 import com.tivo.kmttg.main.config;
@@ -140,6 +141,7 @@ public class SkipDialog {
 
       dialog = new Stage();
       dialog.initOwner(frame);
+      gui.LoadIcons(dialog);
       dialog.setTitle("AutoSkip Entries");
       Scene scene = new Scene(new VBox());
       config.gui.setFontSize(scene, config.FontSize);

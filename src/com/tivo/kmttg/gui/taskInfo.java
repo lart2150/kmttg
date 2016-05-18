@@ -87,6 +87,7 @@ public class taskInfo {
       dialog = new Stage();
       dialog.initModality(Modality.NONE); // Non modal
       dialog.initOwner(frame);
+      gui.LoadIcons(dialog);
       dialog.setTitle("Task stdout/stderr viewer");
       Scene scene = new Scene(new VBox());
       config.gui.setFontSize(scene, config.FontSize);

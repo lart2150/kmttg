@@ -35,6 +35,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -145,6 +146,7 @@ public class mRecordOptions {
       sun.setDisable(!state);
    }
    
+   @SuppressWarnings("static-access")
    public void promptUser(String tivoName) {
       this.tivoName = tivoName;
       try {
@@ -157,6 +159,7 @@ public class mRecordOptions {
          // Show dialog and get user response
          Dialog<?> dialog = new Dialog<>();
          dialog.initOwner(config.gui.getFrame());
+         config.gui.LoadIcons((Stage) dialog.getDialogPane().getScene().getWindow());
          config.gui.setFontSize(dialog, config.FontSize);
          dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
          dialog.setTitle("Manual Recording - " + tivoName);

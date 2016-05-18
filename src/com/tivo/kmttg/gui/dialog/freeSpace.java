@@ -40,6 +40,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 import com.sun.javafx.charts.Legend;
+import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.bitrateTable;
 import com.tivo.kmttg.main.config;
@@ -155,6 +156,7 @@ public class freeSpace {
       // create and display dialog window
       dialog = new Stage();
       dialog.initOwner(frame);
+      gui.LoadIcons(dialog);
       dialog.setTitle(tivoName + " Disk Usage Analysis");
       dialog.setScene(new Scene(content));
       config.gui.setFontSize(dialog.getScene(), config.FontSize);

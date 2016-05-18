@@ -52,6 +52,7 @@ public class help {
       if (dialog == null) {
          dialog = new Stage();
          dialog.initOwner(config.gui.getFrame());
+         gui.LoadIcons(dialog);
          dialog.initModality(Modality.NONE); // Non modal
          dialog.setTitle("About kmttg");
          content = new VBox();

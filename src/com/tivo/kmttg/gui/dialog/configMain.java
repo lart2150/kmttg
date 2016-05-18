@@ -57,6 +57,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import com.tivo.kmttg.gui.MyTooltip;
+import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.help;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.httpserver.kmttgServer;
@@ -3453,6 +3454,7 @@ public class configMain {
          }
       });
       dialog.initOwner(frame);
+      gui.LoadIcons(dialog);
       dialog.initModality(Modality.NONE); // Non modal
       dialog.setTitle("kmttg configuration");
       Scene scene = new Scene(new VBox());

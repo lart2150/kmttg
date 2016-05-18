@@ -34,6 +34,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -82,6 +83,7 @@ public class autoLogView {
       dialog.setWidth(600);
       dialog.setHeight(400);
       dialog.initOwner(frame);
+      gui.LoadIcons(dialog);
       dialog.show();
 
       // Start a timer that updates stdout/stderr text areas dynamically

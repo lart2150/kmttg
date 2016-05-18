@@ -34,6 +34,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -223,6 +224,7 @@ public class spOptions {
       updateStates();
    }
    
+   @SuppressWarnings("static-access")
    public JSONObject promptUser(String tivoName, String title, JSONObject json, Boolean WL) {
       setChoices(WL);
       try {
@@ -244,6 +246,7 @@ public class spOptions {
          label.setText(title);
          Dialog<?> dialog = new Dialog<>();
          dialog.initOwner(config.gui.getFrame());
+         config.gui.LoadIcons((Stage) dialog.getDialogPane().getScene().getWindow());
          config.gui.setFontSize(dialog, config.FontSize);
          dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
          dialog.setTitle("Season Pass Options");

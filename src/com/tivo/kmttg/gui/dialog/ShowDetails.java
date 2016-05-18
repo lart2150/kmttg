@@ -40,6 +40,7 @@ import javafx.stage.WindowEvent;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
@@ -131,6 +132,7 @@ public class ShowDetails {
          dialog.setResizable(false);
          dialog.setTitle("Show information");
          dialog.initOwner(frame);
+         gui.LoadIcons(dialog);
          // This so we can restore original dialog position when re-opened
          dialog.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override

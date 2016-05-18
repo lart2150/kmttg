@@ -29,6 +29,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -126,6 +127,7 @@ public class wlOptions {
       }
    }*/
    
+   @SuppressWarnings("static-access")
    public JSONObject promptUser(String title, Hashtable<String,String> hash) {
       if (hash != null && hash.size() > 0) {
          clearFields();
@@ -134,6 +136,7 @@ public class wlOptions {
       label.setText(title);
       Dialog<?> dialog = new Dialog<>();
       dialog.initOwner(config.gui.getFrame());
+      config.gui.LoadIcons((Stage) dialog.getDialogPane().getScene().getWindow());
       config.gui.setFontSize(dialog, config.FontSize);
       dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
       dialog.setTitle("Create Wishlist");
