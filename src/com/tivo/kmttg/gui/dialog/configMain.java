@@ -133,6 +133,7 @@ public class configMain {
    private static CheckBox autoskip_enabled = null;
    private static CheckBox autoskip_import = null;
    private static CheckBox autoskip_prune = null;
+   private static CheckBox autoskip_jumpToEnd = null;
    private static CheckBox combine_download_decrypt = null;
    private static CheckBox single_download = null;
    private static CheckBox rpcnpl = null;
@@ -986,6 +987,9 @@ public class configMain {
       
       // autoskip_prune
       autoskip_prune.setSelected(config.autoskip_prune == 1);
+      
+      // autoskip_jumpToEnd
+      autoskip_jumpToEnd.setSelected(config.autoskip_jumpToEnd == 1);
       
       // autoskip_padding
       autoskip_padding.setText("" + config.autoskip_padding);
@@ -1935,6 +1939,12 @@ public class configMain {
       else
          config.autoskip_prune = 0;
       
+      // autoskip_jumpToEnd
+      if (autoskip_jumpToEnd.isSelected())
+         config.autoskip_jumpToEnd = 1;
+      else
+         config.autoskip_jumpToEnd = 0;
+      
       // autoskip_padding
       value = string.removeLeadingTrailingSpaces(autoskip_padding.getText());
       if (value.length() > 0) {
@@ -2283,6 +2293,7 @@ public class configMain {
       autoskip_enabled = new CheckBox();
       autoskip_import = new CheckBox();
       autoskip_prune = new CheckBox();
+      autoskip_jumpToEnd = new CheckBox();
       Label toolTipsDelay_label = new Label();
       Label toolTipsTimeout_label = new Label();
       OK = new Button();
@@ -2511,6 +2522,8 @@ public class configMain {
       autoskip_import.setText("Automatically Import to Skip Table after Ad Detect");
       
       autoskip_prune.setText("Prune Skip Table automatically after NPL refresh");
+      
+      autoskip_jumpToEnd.setText("Jump to end of recording when last skip block entered");
             
       OK.setText("OK");
       OK.setId("button_config_ok");
@@ -2947,6 +2960,9 @@ public class configMain {
       
       gy++;
       autoskip_panel.add(autoskip_prune, 1, gy);
+      
+      gy++;
+      autoskip_panel.add(autoskip_jumpToEnd, 1, gy);
       
       gy++;
       autoskip_panel.add(autoskip_padding_label, 0, gy);
@@ -3576,6 +3592,7 @@ public class configMain {
       autoskip_enabled.setTooltip(getToolTip("autoskip_enabled"));
       autoskip_import.setTooltip(getToolTip("autoskip_import"));
       autoskip_prune.setTooltip(getToolTip("autoskip_prune"));
+      autoskip_jumpToEnd.setTooltip(getToolTip("autoskip_jumpToEnd"));
       autoskip_padding.setTooltip(getToolTip("autoskip_padding"));
       metadata_entries.setTooltip(getToolTip("metadata_entries"));
       httpserver_port.setTooltip(getToolTip("httpserver_port"));
@@ -4321,6 +4338,12 @@ public class configMain {
          text =  "<b>Prune Skip Table automatically after NPL refresh</b><br>";
          text += "If enabled, following an NPL tab refresh any shows that have been deleted from the TiVo<br>";
          text += "that have corresponding AutoSkip Table entries will be deleted from AutoSkip table automatically.";
+      }
+      else if (component.equals("autoskip_jumpToEnd")) {
+         text =  "<b>Jump to end of recording when last skip block entered</b><br>";
+         text += "If enabled, when the last skip block is entered, automatically jump to the end of the recording.<br>";
+         text += "When used with TiVo's \"Play all recordings in this group\", this provides a seemless viewing<br>";
+         text += "experience of all recordings in the group.";
       }
       else if (component.equals("autoskip_padding")) {
          text =  "<b>AutoSkip padding in seconds</b><br>";
