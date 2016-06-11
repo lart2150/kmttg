@@ -21,6 +21,7 @@ package com.tivo.kmttg.gui.comparator;
 import java.util.Comparator;
 
 import com.tivo.kmttg.gui.sortable.sortableShow;
+import com.tivo.kmttg.main.config;
 
 public class ShowComparator implements Comparator<sortableShow> {
    public int compare(sortableShow s1, sortableShow s2) {
@@ -31,7 +32,11 @@ public class ShowComparator implements Comparator<sortableShow> {
             e2 = Integer.parseInt(s2.episodeNum);
          }
          // Sort 1st by titleOnly, then by episode, then by date
-         int result = s1.TiVoTitle.compareToIgnoreCase(s2.TiVoTitle);
+         int result;
+         if (config.TiVoSort == 1)         
+            result = s1.TiVoTitle.compareToIgnoreCase(s2.TiVoTitle);
+         else
+            result = s1.titleOnly.compareToIgnoreCase(s2.titleOnly);
          if (result == 0) {
             if (e1 > e2) result = 1;
             if (e1 < e2) result = -1;

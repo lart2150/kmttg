@@ -123,6 +123,7 @@ public class configMain {
    private static CheckBox rpcDelete = null;
    private static CheckBox rpcOld = null;
    private static CheckBox HideProtectedFiles = null;
+   private static CheckBox TiVoSort = null;
    private static CheckBox OverwriteFiles = null;
    private static CheckBox DeleteFailedDownloads = null;
    private static CheckBox toolTips = null;
@@ -826,6 +827,12 @@ public class configMain {
       else
          HideProtectedFiles.setSelected(false);
       
+      // TiVoSort
+      if (config.TiVoSort == 1)
+         TiVoSort.setSelected(true);
+      else
+         TiVoSort.setSelected(false);
+      
       // OverwriteFiles
       if (config.OverwriteFiles == 1)
          OverwriteFiles.setSelected(true);
@@ -1434,6 +1441,12 @@ public class configMain {
          config.HideProtectedFiles = 1;
       else
          config.HideProtectedFiles = 0;
+      
+      // TiVoSort
+      if (TiVoSort.isSelected())
+         config.TiVoSort = 1;
+      else
+         config.TiVoSort = 0;
       
       // OverwriteFiles
       if (OverwriteFiles.isSelected())
@@ -2215,6 +2228,7 @@ public class configMain {
       rpcDelete = new CheckBox();
       rpcOld = new CheckBox();
       HideProtectedFiles = new CheckBox();
+      TiVoSort = new CheckBox();
       OverwriteFiles = new CheckBox();
       DeleteFailedDownloads = new CheckBox();
       combine_download_decrypt = new CheckBox();
@@ -2373,6 +2387,7 @@ public class configMain {
       rpcDelete.setText("Enable rpc style delete task");
       rpcOld.setText("Use old RPC schema version for older TiVo software");
       HideProtectedFiles.setText("Do not show copy protected files in table");
+      TiVoSort.setText("Sort table show titles as a TiVo does");
       OverwriteFiles.setText("Overwrite existing files");
       DeleteFailedDownloads.setText("Delete failed downloads");
       combine_download_decrypt.setText("Combine download and decrypt");
@@ -3279,6 +3294,10 @@ public class configMain {
       // HideProtectedFiles
       gy++;
       visual_panel.add(HideProtectedFiles, 0, gy);
+
+      // TiVoSort
+      gy++;
+      visual_panel.add(TiVoSort, 0, gy);
       
       // tableColAutoSize
       gy++;
@@ -3539,6 +3558,7 @@ public class configMain {
       rpcDelete.setTooltip(getToolTip("rpcDelete"));
       rpcOld.setTooltip(getToolTip("rpcOld"));
       HideProtectedFiles.setTooltip(getToolTip("HideProtectedFiles"));
+      TiVoSort.setTooltip(getToolTip("TiVoSort"));
       OverwriteFiles.setTooltip(getToolTip("OverwriteFiles"));
       DeleteFailedDownloads.setTooltip(getToolTip("DeleteFailedDownloads"));
       combine_download_decrypt.setTooltip(getToolTip("combine_download_decrypt"));
@@ -3957,6 +3977,11 @@ public class configMain {
          text = "<b>Do not show copy protected files in table</b><br>";
          text += "If this option is enabled then copy protected TiVo shows are not displayed in the<br>";
          text += "TiVo Now Playing lists.";
+      }
+      else if (component.equals("TiVoSort")) {
+         text = "<b>Sort table show titles as a TiVo does</b><br>";
+         text += "If this option is enabled then table show column sort behaves as a TiVo<br>";
+         text += "alphabetical sort by ignoring leading articles (A , An , & The).";
       }
       else if (component.equals("OverwriteFiles")) {
          text =  "<b>Overwrite existing files</b><br>";

@@ -100,7 +100,8 @@ public class config {
    public static int TSDownload = 1;
    public static int OverwriteFiles = 0; // Don't overwrite existing files by default
    public static int DeleteFailedDownloads = 1; // Delete failed download files by default
-   public static int HideProtectedFiles = 0;   
+   public static int HideProtectedFiles = 0;
+   public static int TiVoSort = 0;
    public static int combine_download_decrypt = 0; // Combine download and decrypt if possible
    public static int single_download = 0;  // Allow only one download at a time if enabled
    public static int npl_when_started = 0; // Start NPL jobs when kmttg GUI starts
@@ -996,6 +997,9 @@ public class config {
             if (key.equals("HideProtectedFiles")) {
                HideProtectedFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("TiVoSort")) {
+               TiVoSort = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("OverwriteFiles")) {
                OverwriteFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1363,6 +1367,8 @@ public class config {
          ofp.write("<TSDownload>\n" + TSDownload + "\n\n");
          
          ofp.write("<HideProtectedFiles>\n" + HideProtectedFiles + "\n\n");
+         
+         ofp.write("<TiVoSort>\n" + TiVoSort + "\n\n");
          
          ofp.write("<OverwriteFiles>\n" + OverwriteFiles + "\n\n");
          
