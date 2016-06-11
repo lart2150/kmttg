@@ -23,6 +23,7 @@ import java.util.Stack;
 
 public class sortableShow {
    public String titleOnly;
+   public String TiVoTitle;
    public String title;
    public String episodeTitle = "";
    public String episodeNum = "";
@@ -31,11 +32,13 @@ public class sortableShow {
    public Boolean folder = false;
    public int numEntries = 0;
    public String folderName = "";
+   public String[] ARTICLES = {"a ","an ", "the "};
    
    // Single entry constructor
    public sortableShow(Hashtable<String,String> entry) {
       title = (String)entry.get("title");
       titleOnly = (String)entry.get("titleOnly");
+      TiVoTitle = removeLeadingArticles(titleOnly);
       gmt = Long.parseLong(entry.get("gmt"));
       if (entry.containsKey("episodeTitle"))
          episodeTitle = entry.get("episodeTitle");
@@ -56,6 +59,17 @@ public class sortableShow {
       titleOnly = folderEntry.get(0).get("titleOnly");
       title = titleOnly;
    }
+   
+   public String removeLeadingArticles(String title) {
+      String stitle = title.toLowerCase();
+      for (String article : ARTICLES) {
+         if (stitle.startsWith(article)) {
+            stitle = stitle.substring(article.length());
+            break;
+         }
+      }
+      return stitle;
+   }   
    
    public String toString() {
       if (folder) {

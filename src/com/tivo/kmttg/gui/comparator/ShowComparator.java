@@ -31,7 +31,7 @@ public class ShowComparator implements Comparator<sortableShow> {
             e2 = Integer.parseInt(s2.episodeNum);
          }
          // Sort 1st by titleOnly, then by episode, then by date
-         int result = s1.titleOnly.compareToIgnoreCase(s2.titleOnly);
+         int result = s1.TiVoTitle.compareToIgnoreCase(s2.TiVoTitle);
          if (result == 0) {
             if (e1 > e2) result = 1;
             if (e1 < e2) result = -1;
