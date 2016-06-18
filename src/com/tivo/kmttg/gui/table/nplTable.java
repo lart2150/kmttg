@@ -308,22 +308,30 @@ public class nplTable extends TableMap {
          Double rate;
          long gmt, largestGmt=0;
          int gmt_index=0;
+         int clipDataNum=0;
          for (int i=0; i<folderEntry.size(); ++i) {
-            gmt = Long.parseLong(folderEntry.get(i).get("gmt"));
+            Hashtable<String,String> entry = folderEntry.get(i);
+            gmt = Long.parseLong(entry.get("gmt"));
             if (gmt > largestGmt) {
                largestGmt = gmt;
                gmt_index = i;
             }
-            if (folderEntry.get(i).containsKey("channel")) {
-               if ( ! folderEntry.get(i).get("channel").equals(chan) ) {
+            if (entry.containsKey("channel")) {
+               if ( ! entry.get("channel").equals(chan) ) {
                   sameChannel = false;
                }
             }
             rate = 0.0;
-            if (folderEntry.get(i).containsKey("size") && folderEntry.get(i).containsKey("duration")) {
-               rate = bitRate(folderEntry.get(i).get("size"), folderEntry.get(i).get("duration"));
+            if (entry.containsKey("size") && entry.containsKey("duration")) {
+               rate = bitRate(entry.get("size"), entry.get("duration"));
             }
+            if (entry.containsKey("clipMetadataId"))
+               clipDataNum++;
             rate_total += rate;
+         }
+         if (clipDataNum > 0) {
+            image.setImage2(gui.Images.get("skipmode"));
+            image.setLabel(" " + clipDataNum);
          }
          if (folderEntry.size() > 0) {
             rate_total /= folderEntry.size();
