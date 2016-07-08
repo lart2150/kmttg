@@ -57,6 +57,7 @@ public class sortableShow {
       numEntries = folderEntry.size();
       gmt = Long.parseLong(folderEntry.get(gmt_index).get("gmt"));
       titleOnly = folderEntry.get(0).get("titleOnly");
+      TiVoTitle = removeLeadingArticles(titleOnly);
       title = titleOnly;
    }
    
