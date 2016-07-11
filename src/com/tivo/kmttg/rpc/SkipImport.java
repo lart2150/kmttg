@@ -93,9 +93,9 @@ public class SkipImport {
          
          if (usedFile != null) {
             log.warn("Importing from file: " + usedFile);
-            if (usedFile.endsWith(".VPrj"))
+            if (usedFile.toLowerCase().endsWith(".vprj"))
                cuts = vrdImport(usedFile, Long.parseLong(entry.get("duration")));
-            if (usedFile.endsWith(".edl"))
+            if (usedFile.toLowerCase().endsWith(".edl"))
                cuts = edlImport(usedFile, Long.parseLong(entry.get("duration")));
          }
          
