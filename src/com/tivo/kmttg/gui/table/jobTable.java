@@ -50,6 +50,7 @@ public class jobTable {
          // Regular String sort
          TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
          col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(colName));
+         col.setComparator(null); // Disable column sorting
          JobMonitor.getColumns().add(col);
       }
       JobMonitor.setOnMousePressed(new EventHandler<MouseEvent>() {
