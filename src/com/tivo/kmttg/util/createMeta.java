@@ -23,6 +23,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -77,7 +79,11 @@ public class createMeta {
          Hashtable<String,Object> data = new Hashtable<String,Object>();
          DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
          DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-         Document doc = docBuilder.parse(outputFile);
+         // Convert file to String so we can parse out pad input entities such as &
+         String inputStr = new String(Files.readAllBytes(Paths.get(outputFile)));
+         // Get rid of bad xml contents that TiVo sometimes generates: replace &&amp; with &amp;
+         inputStr = inputStr.replaceAll("&&amp;", "&amp;");
+         Document doc = docBuilder.parse(new ByteArrayInputStream(inputStr.getBytes()));
 
          // Search for <recordedDuration> elements
          NodeList rdList = doc.getElementsByTagName("recordedDuration");
