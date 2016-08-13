@@ -61,9 +61,9 @@ public class guide {
    public Button record = null;
    public Button recordSP = null;
    public Button wishlist = null;
-   public  int range = 12; // Number of hours to show in guide at a time
-   public int hour_increment = 12; // Number of hours for date increment
-   public int total_range = 11;    // Number of days
+   public  int range = 24; // Number of hours to show in guide at a time
+   public int hour_increment = 24; // Number of hours for date increment
+   public int total_range = 13;    // Number of days
    public Button manual_record = null;
    
    public guide(final Stage frame) {
