@@ -510,7 +510,10 @@ public class guideTable extends TableMap {
                                  TABLE.sort();
                                  TableUtil.autoSizeTableViewColumns(TABLE, true);
                               } catch (Exception e) {
-                                 log.error("guideTable updateFolder - " + e.getMessage());
+                                 if (e.getMessage().contains("not found")) {
+                                    log.error("No guide data available for selected date.");
+                                 } else
+                                    log.error("guideTable updateFolder - " + e.getMessage());
                               }
                            }
                         });
