@@ -218,8 +218,14 @@ public class vrdreview extends baseTask implements Serializable {
             
             if (config.VrdReview_noCuts == 1) {
                if (config.RemoveComcutFiles == 1) {
-                  if (file.delete(job.vprjFile))
-                     log.print("(Deleted vprj file: " + job.vprjFile + ")");
+                  if (jobMonitor.getJobInFamily(job, "vrdencode") == null) {
+                     // No VRD encode task following, so OK to delete .Vprj file
+                     if (file.delete(job.vprjFile))
+                        log.print("(Deleted vprj file: " + job.vprjFile + ")");
+                  } else {
+                     // VRD encode task follows, so may need to use .Vprj file
+                     log.warn("Not deleting Vprj file, since VRD encode task follows");
+                  }
                   String xclFile = job.mpegFile + ".Xcl";
                   if (file.isFile(xclFile) && file.delete(xclFile))
                      log.print("(Deleted xcl file: " + xclFile + ")");
