@@ -119,6 +119,12 @@ public class vrdencode extends baseTask implements Serializable {
             mpeg = tryit;
       }
       
+      // If vprjFile exists then use it
+      if (job.vprjFile != null && file.isFile(job.vprjFile)) {
+         mpeg = job.vprjFile;
+         log.warn("NOTE: vrdencode using project file as input: " + mpeg);
+      }
+      
       if ( ! file.isFile(mpeg)) {
          mpeg = job.tivoFile;
       }
@@ -307,6 +313,10 @@ public class vrdencode extends baseTask implements Serializable {
                if (file.isFile(txtFile) && file.delete(txtFile))
                   log.print("(Deleted comskip txt file: " + txtFile + ")");
             }
+            
+            if (config.RemoveComcutFiles == 1 && file.isFile(job.vprjFile))
+               if (file.delete(job.vprjFile))
+                  log.print("(Deleted vprj file: " + job.vprjFile + ")");
             
             // Schedule an AtomicParsley job if relevant
             scheduleAtomicParsley();
