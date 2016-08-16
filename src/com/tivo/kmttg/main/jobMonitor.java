@@ -1330,6 +1330,7 @@ public class jobMonitor {
             // VRD encode selected => vrdencode job
             job.type      = "vrdencode";
             job.tivoFile  = tivoFile;
+            job.vprjFile  = string.replaceSuffix(job.mpegFile, ".VPrj");
          }
          // Indicate we need to keep source file longer
          if (encodeName2 != null)
@@ -1352,6 +1353,7 @@ public class jobMonitor {
                // VRD encode selected => vrdencode job
                job.type      = "vrdencode";
                job.tivoFile  = tivoFile;
+               job.vprjFile  = string.replaceSuffix(job.mpegFile, ".VPrj");
             }
             submitNewJob(job);
          }
@@ -1536,6 +1538,21 @@ public class jobMonitor {
             active = false;
       }
       return active;
+   }
+   
+   // Given an existing job, return associated job in same family with given type
+   public static jobData getJobInFamily(jobData job, String jobType) {
+      float mf1 = job.familyId;
+      int jobMajor = (int)mf1;
+      for (int i=0; i<JOBS.size(); ++i) {
+         float mf = JOBS.get(i).familyId;
+         int major = (int)mf;
+         if (major == jobMajor) {
+            if ((JOBS.get(i).type).equals(jobType))
+               return JOBS.get(i);
+         }
+      }
+      return null;
    }
    
    private static Boolean isDownloadJob(jobData job) {
