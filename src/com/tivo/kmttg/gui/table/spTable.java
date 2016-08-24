@@ -567,6 +567,12 @@ public class spTable extends TableMap {
              }
           }
        }
+       else if (keyCode == KeyCode.Z) {
+          // Check OnePass stationId vs available guide channel data
+          String tivoName = config.gui.remote_gui.getTivoName("sp");
+          if (tivoName != null)
+             CheckOnePasses(tivoName);
+       }
        else if (keyCode == KeyCode.DELETE) {
           // Remove selected row from TiVo and table
           e.consume(); // Need this so as not to remove focus which is default key action
@@ -869,6 +875,22 @@ public class spTable extends TableMap {
              }
           } // json != null
        } // selected.length > 0
+    }
+    
+    // Check OnePass stationId vs available guide channel data
+    private void CheckOnePasses(String tivoName) {
+       log.print("Checking OnePasses for TiVo: " + tivoName + " ...");
+       Task<Void> task = new Task<Void>() {
+          @Override public Void call() {
+             Remote r = config.initRemote(tivoName);
+             if (r.success) {
+                r.checkOnePasses(tivoName);
+                r.disconnect();
+             }
+             return null;
+          }
+       };
+       new Thread(task).start();
     }
     
     // Update SP priority order to match current SP table

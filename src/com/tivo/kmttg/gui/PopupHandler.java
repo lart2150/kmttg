@@ -112,6 +112,7 @@ public class PopupHandler {
             items.add(new PopupPair("Upcoming [u]", KeyCode.U, subTabName));
             items.add(new PopupPair("Conflicts [o]", KeyCode.O, subTabName));
             items.add(new PopupPair("Show Information [i]", KeyCode.I, subTabName));
+            items.add(new PopupPair("Check OnePasses [z]", KeyCode.Z, subTabName));
          }
          if (subTabName.equals("Thumbs") || subTabName.equals("Channels")) {
             if (config.rpcEnabled(tivoName))
