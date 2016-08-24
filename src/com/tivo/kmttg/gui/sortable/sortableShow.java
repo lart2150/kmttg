@@ -62,6 +62,7 @@ public class sortableShow {
    }
    
    public String removeLeadingArticles(String title) {
+      if (title == null) return "";
       String stitle = title.toLowerCase();
       for (String article : ARTICLES) {
          if (stitle.startsWith(article)) {
