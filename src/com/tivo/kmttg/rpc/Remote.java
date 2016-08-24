@@ -3039,6 +3039,73 @@ public class Remote {
       }
       disconnect();
    }
+   
+   // Go through all OnePasses and check that stationId of each OnePass has a corresponding
+   // guide channel stationId
+   // NOTE: This procedure should be called in background mode
+   public void checkOnePasses(String tivoName) {
+      JSONArray passes = SeasonPasses(null);
+      int warnings = 0;
+      if (passes != null) {
+         JSONArray channels = ChannelList(null, false);
+         if (channels != null) {
+            // TODO
+            try {
+               Hashtable<String,JSONObject> channelMap = new Hashtable<String,JSONObject>();
+               for (int i=0; i<channels.length(); ++i) {
+                  JSONObject channel = channels.getJSONObject(i);
+                  if (channel.has("channelNumber")) {
+                     channelMap.put(channel.getString("channelNumber"), channel);
+                  }
+               }
+               for (int i=0; i<passes.length(); ++i) {
+                  JSONObject pass = passes.getJSONObject(i);
+                  if (pass.has("idSetSource")) {
+                     String pass_title = pass.getString("title");
+                     JSONObject id = pass.getJSONObject("idSetSource");
+                     if (id.has("channel")) {
+                        JSONObject channel = id.getJSONObject("channel");
+                        String pass_channelNumber = null;
+                        String pass_stationId = null;
+                        if (channel.has("channelNumber")) {
+                           pass_channelNumber = channel.getString("channelNumber");
+                        }
+                        if (channel.has("stationId")) {
+                           pass_stationId = channel.getString("stationId");
+                        }
+                        if (pass_channelNumber != null && pass_stationId != null) {
+                           String pass_callSign = channel.getString("callSign");
+                           if (channelMap.containsKey(pass_channelNumber)) {
+                              JSONObject guide_channel = channelMap.get(pass_channelNumber);
+                              String guide_stationId = guide_channel.getString("stationId");
+                              String guide_callSign = guide_channel.getString("callSign");
+                              log.print("INFO: pass title=" + pass_title + " channelNum=" + pass_channelNumber + " callSign=" + pass_callSign + " stationId=" + pass_stationId +
+                                 " : guide callSign=" + guide_callSign + " stationId=" + guide_stationId);
+                              if (! guide_stationId.equals(pass_stationId)) {
+                                 warnings++;
+                                 log.warn("Mismatch for OnePass: " + pass_title);
+                                 log.warn("OnePass channelNum=" + pass_channelNumber +  ", OnePass stationId=" + pass_stationId +
+                                   ": guide stationId=" + guide_stationId + ", guide callSign=" + guide_callSign);
+                              }
+                           } else {
+                              warnings++;
+                              log.warn("OnePass channelNumber=" + pass_channelNumber + " not available in guide channel list: " + pass_title);
+                           }
+                        }
+                     }
+                  }
+               } // for
+               log.print("OnePass checks completed with " + warnings + " warnings");
+            } catch (JSONException e) {
+               error("checkOnePasses - " + e.getMessage());
+            }
+         } else {
+            error("checkOnePasses - trouble getting channel data");
+         }
+      } else {
+         error("checkOnePasses - trouble getting OnePass data");
+      }
+   }
       
    private void print(String message) {
       log.print(message);
