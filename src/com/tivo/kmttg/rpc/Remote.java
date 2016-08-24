@@ -3049,7 +3049,6 @@ public class Remote {
       if (passes != null) {
          JSONArray channels = ChannelList(null, false);
          if (channels != null) {
-            // TODO
             try {
                Hashtable<String,JSONObject> channelMap = new Hashtable<String,JSONObject>();
                for (int i=0; i<channels.length(); ++i) {
