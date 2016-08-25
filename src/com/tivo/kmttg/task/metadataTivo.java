@@ -278,8 +278,12 @@ public class metadataTivo extends baseTask implements Serializable {
          // Not sure why I had isEpisodic override isEpisode, commenting out for now
          //if ( data.containsKey("isEpisodic") )
          //   data.put("isEpisode", data.get("isEpisodic"));
-         if ( data.containsKey("description") )
-            data.put("description", ((String) (data.get("description"))).replaceFirst("Copyright Tribune Media Services, Inc.", ""));
+         if ( data.containsKey("description") ) {
+            String desc = (String)data.get("description");
+            desc = desc.replaceFirst("Copyright Tribune Media Services, Inc.", "");
+            desc = desc.replaceFirst("Copyright Rovi, Inc.", "");
+            data.put("description", desc);
+         }
          
          if ( data.containsKey("mpaaRating") ) {
             Hashtable<String,String> map = new Hashtable<String,String>();

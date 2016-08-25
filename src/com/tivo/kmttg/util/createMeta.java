@@ -154,8 +154,12 @@ public class createMeta {
          // Override isEpisode since it seems to be wrong most of the time
          if ( data.containsKey("isEpisodic") )
             data.put("isEpisode", data.get("isEpisodic"));
-         if ( data.containsKey("description") )
-            data.put("description", ((String) (data.get("description"))).replaceFirst("Copyright Tribune Media Services, Inc.", ""));
+         if ( data.containsKey("description") ) {
+            String desc = (String)data.get("description");
+            desc = desc.replaceFirst("Copyright Tribune Media Services, Inc.", "");
+            desc = desc.replaceFirst("Copyright Rovi, Inc.", "");
+            data.put("description", desc);
+         }
          
          if ( data.containsKey("mpaaRating") ) {
             Hashtable<String,String> map = new Hashtable<String,String>();

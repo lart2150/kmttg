@@ -163,6 +163,7 @@ public class parseNPL {
                value = line[j].replaceFirst("^(.+)<\\/.+$", "$1");
                value = Entities.replaceHtmlEntities(value);
                value = value.replaceFirst("Copyright Tribune Media Services, Inc.", "");
+               value = value.replaceFirst("Copyright Rovi, Inc.", "");
                h.put("description", value);
             }
 
