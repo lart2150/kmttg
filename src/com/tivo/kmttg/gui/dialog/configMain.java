@@ -3832,7 +3832,9 @@ public class configMain {
          text += "<b>NOTE: Be sure to specify the output file using the VRD default ' (02).mpg'</b><br>";
          text += "<b>suffix or using the kmttg conventional '_cut.mpg' suffix when saving output file</b>.<br>";
          text += "NOTE: When using this option you normally want to disable <b>Ad Detect</b> task<br>";
-         text += "and enable <b>Ad Cut</b> task.";
+         text += "and enable <b>Ad Cut</b> task.<br>";
+         text += "NOTE: The .Vprj file will be deleted following completion of this task unless there<br>";
+         text += "is an upcoming <b>encode</b> task using a VRD encoding profile.";
       }
       else if (component.equals("VrdQsFilter")) {
          text =  "<b>Enable VideoRedo QS Fix video dimension filter</b><br>";
