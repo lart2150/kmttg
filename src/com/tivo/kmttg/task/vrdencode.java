@@ -23,9 +23,17 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Stack;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.util.Entities;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -119,8 +127,8 @@ public class vrdencode extends baseTask implements Serializable {
             mpeg = tryit;
       }
       
-      // If vprjFile exists then use it
-      if (job.vprjFile != null && file.isFile(job.vprjFile)) {
+      // If vprjFile exists and Filename it refers to exists then use it
+      if (job.vprjFile != null && file.isFile(job.vprjFile) && vprjReferenceExists(job.vprjFile)) {
          mpeg = job.vprjFile;
          log.warn("NOTE: vrdencode using project file as input: " + mpeg);
       }
@@ -368,6 +376,31 @@ public class vrdencode extends baseTask implements Serializable {
          }
       }
       return 0;
+   }
+   
+   private Boolean vprjReferenceExists(String vprjFile) {
+      try {
+         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+         Document doc = docBuilder.parse(vprjFile);
+         NodeList rdList = doc.getElementsByTagName("Filename");
+         if (rdList.getLength() > 0) {
+            String fileName;
+            Node n = rdList.item(0);
+            if ( n != null) {
+               fileName = n.getTextContent();
+               if (file.isFile(fileName))
+                  return true;
+               fileName = Entities.replaceHtmlEntities(fileName);
+               if (file.isFile(fileName))
+                  return true;
+            }
+         }
+      } catch (Exception e) {
+         log.error("" + e.getMessage());
+      }
+      log.warn("vrdeconde: Referenced file in .Vprj file doesn't exist, so not using it: " + vprjFile);
+      return false;
    }
 
 }
