@@ -46,6 +46,7 @@ import com.tivo.kmttg.gui.comparator.DateComparator;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.id;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
@@ -337,8 +338,10 @@ public class streamTable extends TableMap {
          if (selected == null || selected.length < 1)
             return;
          JSONObject json = GetRowData(selected[0]);
-         if (json != null)
+         if (json != null) {
             rnpl.pprintJSON(json);
+            id.printIds(json);
+         }
       }
       else if (keyCode == KeyCode.Q) {
          // Web query currently selected entry

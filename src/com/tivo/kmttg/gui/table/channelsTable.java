@@ -44,6 +44,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.id;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
@@ -181,8 +182,10 @@ public class channelsTable extends TableMap {
          if (selected == null || selected.length < 1)
             return;
          JSONObject json = GetRowData(selected[0]);
-         if (json != null)
+         if (json != null) {
             rnpl.pprintJSON(json);
+            id.printIds(json);
+         }
       }
       else if (keyCode == KeyCode.C) {
          config.gui.remote_gui.channels_tab.copy.fire();

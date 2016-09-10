@@ -55,6 +55,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.id;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.log;
 
@@ -526,8 +527,14 @@ public class spTable extends TableMap {
           if (selected == null || selected.length < 1)
              return;
           JSONObject json = GetRowData(selected[0]);
-          if (json != null)
+          if (json != null) {
              rnpl.pprintJSON(json);
+             if (json.has("idSetSource")) {
+                try {
+                  id.printIds(json.getJSONObject("idSetSource"));
+               } catch (JSONException e1) {}
+             }
+          }
        }
        else if (keyCode == KeyCode.C) {
           config.gui.remote_gui.sp_tab.copy.fire();
