@@ -39,7 +39,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -71,10 +71,10 @@ import com.tivo.kmttg.util.string;
 public class AdvSearch {
    private Stage dialog = null;
    private VBox content = null;
-   private ComboBox<String> savedEntries = null;
-   private ComboBox<String> creditKeywordRole = null;
-   private ComboBox<String> collectionType = null;
-   private ComboBox<String> minStarRating = null;
+   private ChoiceBox<String> savedEntries = null;
+   private ChoiceBox<String> creditKeywordRole = null;
+   private ChoiceBox<String> collectionType = null;
+   private ChoiceBox<String> minStarRating = null;
    private ListView<String> category = null;
    private TextField title = null;
    private TextField titleKeyword = null;
@@ -85,7 +85,7 @@ public class AdvSearch {
    private TextField channels = null;
    private TextField originalAirYear = null;
    private TextField creditKeyword = null;
-   private ComboBox<String> hdtv = null;
+   private ChoiceBox<String> hdtv = null;
    private CheckBox receivedChannelsOnly = null;
    private CheckBox favoriteChannelsOnly = null;
    private String tivoName = null;
@@ -125,7 +125,7 @@ public class AdvSearch {
    private void create(Stage frame) {      
       // Create all the components of the dialog
       Label savedEntries_label = new Label("Saved entries");
-      savedEntries = new ComboBox<String>();
+      savedEntries = new ChoiceBox<String>();
       savedEntries.getItems().add("Default");
       savedEntries.setValue("Default");
       savedEntries.setTooltip(getToolTip("savedEntries"));
@@ -136,19 +136,19 @@ public class AdvSearch {
          }
       });
 
-      creditKeywordRole = new ComboBox<String>();
+      creditKeywordRole = new ChoiceBox<String>();
       creditKeywordRole.getItems().addAll("actor", "director", "producer", "executiveProducer", "writer");
       creditKeywordRole.setValue("actor");
       creditKeywordRole.setTooltip(getToolTip("creditKeywordRole"));
       
       Label collectionType_label = new Label("Genre");
-      collectionType = new ComboBox<String>();
+      collectionType = new ChoiceBox<String>();
       collectionType.getItems().addAll("ALL", "movie", "series", "special");
       collectionType.setValue("ALL");
       collectionType.setTooltip(getToolTip("collectionType"));
       
       Label minStarRating_label = new Label("Minimum rating");
-      minStarRating = new ComboBox<String>();
+      minStarRating = new ChoiceBox<String>();
       minStarRating.getItems().addAll(
          "ALL",
          "one", "onePointFive",
@@ -213,7 +213,7 @@ public class AdvSearch {
       creditKeyword.setTooltip(getToolTip("creditKeyword"));
       
       Label hdtv_label = new Label("Recording types");
-      hdtv = new ComboBox<String>();
+      hdtv = new ChoiceBox<String>();
       hdtv.getItems().addAll("both", "HD", "SD");
       hdtv.setTooltip(getToolTip("hdtv"));
       hdtv.setValue("HD");

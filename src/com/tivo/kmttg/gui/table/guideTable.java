@@ -31,7 +31,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SortEvent;
 import javafx.scene.control.TableColumn;
@@ -379,7 +379,7 @@ public class guideTable extends TableMap {
    }
    
    // Refresh a combo box with new date range
-   public void setComboBoxDates(ComboBox<String> widget, int hourIncrement, int numDays) {
+   public void setChoiceBoxDates(ChoiceBox<String> widget, int hourIncrement, int numDays) {
       // 1st get current setting to restore selection if still relevant
       String current = widget.getSelectionModel().getSelectedItem();
       

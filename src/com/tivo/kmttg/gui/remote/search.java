@@ -40,7 +40,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
@@ -53,12 +53,12 @@ import javafx.stage.Stage;
 
 public class search {
    public VBox panel = null;
-   public ComboBox<String> tivo = null;
+   public ChoiceBox<String> tivo = null;
    public searchTable tab = null;
    public TextField text = null;
    public Button button = null;
    public Spinner<Integer> max = null;
-   public ComboBox<String> search_type = null;
+   public ChoiceBox<String> search_type = null;
    public CheckBox includeFree = null;
    public CheckBox includePaid = null;
    //public CheckBox includeVod = null;
@@ -87,7 +87,7 @@ public class search {
       
       Label tivo_label = new Label();
       
-      tivo = new ComboBox<String>();
+      tivo = new ChoiceBox<String>();
       tivo.valueProperty().addListener(new ChangeListener<String>() {
          @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
             if (newVal != null && config.gui.remote_gui != null) {
@@ -243,7 +243,7 @@ public class search {
       
       Label search_type_label = new Label("Type");
       
-      search_type = new ComboBox<String>();
+      search_type = new ChoiceBox<String>();
       search_type.getItems().addAll(
          "keywords", "actor", "director", "producer", "executiveProducer", "writer"
       );

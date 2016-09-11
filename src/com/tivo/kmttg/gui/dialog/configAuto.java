@@ -33,6 +33,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -74,8 +75,8 @@ public class configAuto {
    private static Label text = null;
    private static autoTable table = null;
    private static ScrollPane table_scroll = null;
-   private static ComboBox<String> type = null;
-   private static ComboBox<String> tivo = null;
+   private static ChoiceBox<String> type = null;
+   private static ChoiceBox<String> tivo = null;
    private static ComboBox<String> encoding_name = null;
    private static ComboBox<String> encoding_name2 = null;
    private static TextField encoding_name2_suffix = null;
@@ -104,7 +105,7 @@ public class configAuto {
    private static CheckBox useProgramId_unique = null;
    private static CheckBox kuidFilter = null;
    private static CheckBox programIdFilter = null;
-   private static ComboBox<String> dateOperator = null;
+   private static ChoiceBox<String> dateOperator = null;
    private static TextField dateHours = null;
    private static Button OK = null;
    private static Button CANCEL = null;
@@ -208,12 +209,12 @@ public class configAuto {
       });
 
       Label type_label = new Label("Type");
-      type = new ComboBox<String>();
+      type = new ChoiceBox<String>();
       type.getItems().addAll("title", "keywords");
       type.setValue(type.getItems().get(0));
       
       Label tivo_label = new Label("TiVo");
-      tivo = new ComboBox<String>();
+      tivo = new ChoiceBox<String>();
       for (String s : getTivoFilterNames()) {
          tivo.getItems().add(s);
       }
@@ -290,7 +291,7 @@ public class configAuto {
       noJobWait.setSelected((Boolean)(autoConfig.noJobWait == 1));
       
       dateFilter = new CheckBox("Date Filter");
-      dateOperator = new ComboBox<String>();
+      dateOperator = new ChoiceBox<String>();
       dateOperator.getItems().add("more than");
       dateOperator.getItems().add("less than");
       dateOperator.setValue(dateOperator.getItems().get(0));
