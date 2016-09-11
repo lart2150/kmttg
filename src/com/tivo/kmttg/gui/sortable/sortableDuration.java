@@ -39,6 +39,8 @@ public class sortableDuration {
             sortable = (long)0;
          }
       }
+      if (sortable/3600000 > 100)
+         sortable /= 1000;
       display = millisecsToHMS(sortable, false);
    }
    
@@ -64,11 +66,15 @@ public class sortableDuration {
    // simple long value constructor used by bitrateTable
    public sortableDuration(long value) {
       sortable = value;
+      if (sortable/3600000 > 100)
+         sortable /= 1000;
       display = millisecsToHMS(sortable, true);
    }
    
    public sortableDuration(long value, Boolean showSecs) {
       sortable = value;
+      if (sortable/3600000 > 100)
+         sortable /= 1000;
       if (value == 0)
          display = "";
       else
