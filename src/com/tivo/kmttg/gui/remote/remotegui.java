@@ -97,6 +97,13 @@ public class remotegui {
             if (selected.equals("Guide")) {
                // Reset date range in Guide start time combo box
                guide_tab.tab.setChoiceBoxDates(guide_tab.start, guide_tab.hour_increment, guide_tab.total_range);
+               
+               // Populate channels if empty
+               if (guide_tab.ChanList.getItems().isEmpty()) {
+                  if (! guide_tab.tivo.getItems().isEmpty()) {
+                     guide_tab.refresh.fire();
+                  }
+               }
             }
             if (selected.equals("Remote")) {
                // Set focus on tabbed_panel
