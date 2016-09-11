@@ -41,7 +41,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -57,9 +57,9 @@ import javafx.stage.Stage;
 
 public class remotecontrol {
    public VBox panel = null;
-   public ChoiceBox<String> tivo = null;
-   public ChoiceBox<String> hme = null;
-   public ChoiceBox<String> hme_sps = null;
+   public ComboBox<String> tivo = null;
+   public ComboBox<String> hme = null;
+   public ComboBox<String> hme_sps = null;
    public TextField jumpto_text = null;
    public TextField jumpahead_text = null;
    public TextField jumpback_text = null;
@@ -290,7 +290,7 @@ public class remotecontrol {
       Label label = new Label("TiVo");
       label.setStyle("-fx-text-fill: " + text_color + ";");
 
-      tivo = new ChoiceBox<String>();
+      tivo = new ComboBox<String>();
       tivo.valueProperty().addListener(new ChangeListener<String>() {
          @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
             if (newVal != null && config.gui.remote_gui != null) {
@@ -370,7 +370,7 @@ public class remotecontrol {
          }
       });
       
-      hme = new ChoiceBox<String>();
+      hme = new ComboBox<String>();
       hme.setTooltip(tooltip.getToolTip("hme_rc"));
 
       // util.SPS backdoors
@@ -447,7 +447,7 @@ public class remotecontrol {
          }
       });
       
-      hme_sps = new ChoiceBox<String>();
+      hme_sps = new ComboBox<String>();
       hme_sps.valueProperty().addListener(new ChangeListener<String>() {
          @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
             if (newVal != null) {

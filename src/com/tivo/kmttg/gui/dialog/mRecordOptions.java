@@ -30,7 +30,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
@@ -46,8 +46,8 @@ import com.tivo.kmttg.util.log;
 
 public class mRecordOptions {
    GridPane components;
-   ChoiceBox<String> often, day, channel;
-   ChoiceBox<String> start_hour, start_min, start_ampm, dur_hour, dur_min;
+   ComboBox<String> often, day, channel;
+   ComboBox<String> start_hour, start_min, start_ampm, dur_hour, dur_min;
    CheckBox mon,tue,wed,thu,fri,sat,sun;
    String tivoName;
    Hashtable<String,JSONObject> channelHash = new Hashtable<String,JSONObject>();
@@ -57,7 +57,7 @@ public class mRecordOptions {
    }
    
    private void createComponents() {
-      often = new ChoiceBox<String>();
+      often = new ComboBox<String>();
       often.getItems().addAll("Once", "Repeat");
       often.valueProperty().addListener(new ChangeListener<String>() {
          @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
@@ -70,14 +70,14 @@ public class mRecordOptions {
          }
       });
       often.setValue("Once");
-      channel = new ChoiceBox<String>();
-      start_hour = new ChoiceBox<String>();
-      start_min = new ChoiceBox<String>();
-      start_ampm = new ChoiceBox<String>();
-      dur_hour = new ChoiceBox<String>();
-      dur_min = new ChoiceBox<String>();
+      channel = new ComboBox<String>();
+      start_hour = new ComboBox<String>();
+      start_min = new ComboBox<String>();
+      start_ampm = new ComboBox<String>();
+      dur_hour = new ComboBox<String>();
+      dur_min = new ComboBox<String>();
       
-      day = new ChoiceBox<String>();
+      day = new ComboBox<String>();
       mon = new CheckBox("Mon");
       tue = new CheckBox("Tue");
       wed = new CheckBox("Wed");

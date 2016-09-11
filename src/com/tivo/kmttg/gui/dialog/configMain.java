@@ -36,7 +36,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
@@ -87,8 +87,8 @@ public class configMain {
    private static Button CANCEL = null;
    private static Button autotune_test = null;
    private static Stage dialog = null;
-   private static ChoiceBox<String> tivos = null;
-   private static ChoiceBox<String> shares = null;
+   private static ComboBox<String> tivos = null;
+   private static ComboBox<String> shares = null;
    private static CheckBox remove_tivo = null;
    private static CheckBox remove_comcut = null;
    private static CheckBox remove_comcut_mpeg = null;
@@ -194,14 +194,14 @@ public class configMain {
    private static TextField autotune_button_interval = null;
    private static TextField autotune_chan1 = null;
    private static TextField autotune_chan2 = null;
-   private static ChoiceBox<String> MinChanDigits = null;
-   private static ChoiceBox<String> pyTivo_tivo = null;
-   private static ChoiceBox<String> pyTivo_files = null;
-   private static ChoiceBox<String> metadata_files = null;
-   private static ChoiceBox<String> keywords = null;
-   private static ChoiceBox<String> customFiles = null;
-   private static ChoiceBox<String> autotune_tivoName = null;
-   private static ChoiceBox<String> lookAndFeel = null;
+   private static ComboBox<String> MinChanDigits = null;
+   private static ComboBox<String> pyTivo_tivo = null;
+   private static ComboBox<String> pyTivo_files = null;
+   private static ComboBox<String> metadata_files = null;
+   private static ComboBox<String> keywords = null;
+   private static ComboBox<String> customFiles = null;
+   private static ComboBox<String> autotune_tivoName = null;
+   private static ComboBox<String> lookAndFeel = null;
    private static FileChooser FileBrowser = null;
    private static DirectoryChooser DirBrowser = null;
    private static TabPane tabbed_panel = null;
@@ -300,7 +300,7 @@ public class configMain {
    // Callback for tivo add button
    private static void addCB() {
       debug.print("");
-      // Add name=ip to tivos ChoiceBox
+      // Add name=ip to tivos ComboBox
       String name = string.removeLeadingTrailingSpaces(tivo_name.getText());
       String ip = string.removeLeadingTrailingSpaces(tivo_ip.getText());
       if ( name.length() == 0) {
@@ -337,7 +337,7 @@ public class configMain {
    // Callback for share add button
    private static void share_addCB() {
       debug.print("");
-      // Add name=dir to shares ChoiceBox
+      // Add name=dir to shares ComboBox
       String name = string.removeLeadingTrailingSpaces(share_name.getText());
       String dir = string.removeLeadingTrailingSpaces(share_dir.getText());
       if ( name.length() == 0) {
@@ -419,7 +419,7 @@ public class configMain {
    // Callback for tivo del button
    private static void delCB() {
       debug.print("");
-      // Remove current selection in tivos ChoiceBox
+      // Remove current selection in tivos ComboBox
       int selected = tivos.getSelectionModel().getSelectedIndex();
       if (selected > -1) {
          tivos.getItems().remove(selected);
@@ -431,7 +431,7 @@ public class configMain {
    // Callback for share del button
    private static void share_delCB() {
       debug.print("");
-      // Remove current selection in shares ChoiceBox
+      // Remove current selection in shares ComboBox
       int selected = shares.getSelectionModel().getSelectedIndex();
       if (selected > -1) {
          shares.getItems().remove(selected);
@@ -509,7 +509,7 @@ public class configMain {
       }
    }
    
-   // Callback for keywords ChoiceBox
+   // Callback for keywords ComboBox
    private static void keywordsCB(String keyword) {
       debug.print("");
       if (keyword != null) {
@@ -522,7 +522,7 @@ public class configMain {
       keywords.setValue(null);
    }
    
-   // Callback for customFiles ChoiceBox
+   // Callback for customFiles ComboBox
    private static void customFilesCB(String keyword) {
       debug.print("");
       
@@ -533,7 +533,7 @@ public class configMain {
       customCommand.replaceSelection(keyword);
    }
    
-   // Callback for autotune_tivoName ChoiceBox
+   // Callback for autotune_tivoName ComboBox
    private static void autotune_tivoNameCB(String name) {
       debug.print("");
       if (name != null && name.length() > 0) {
@@ -2171,7 +2171,7 @@ public class configMain {
       FontSize = new TextField(); FontSize.setPrefWidth(5);
       
       Label tivos_label = new Label();
-      tivos = new ChoiceBox<String>();
+      tivos = new ComboBox<String>();
       tivos.valueProperty().addListener(new ChangeListener<String>() {
          @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
             if (newVal != null) {
@@ -2183,7 +2183,7 @@ public class configMain {
       });
       
       Label shares_label = new Label();
-      shares = new ChoiceBox<String>();
+      shares = new ComboBox<String>();
 
       add = new Button();
       del = new Button();
@@ -2284,14 +2284,14 @@ public class configMain {
       Label pyTivo_files_label = new Label();
       Label metadata_files_label = new Label();
       Label lookAndFeel_label = new Label();
-      MinChanDigits = new ChoiceBox<String>();
-      pyTivo_tivo = new ChoiceBox<String>();
-      pyTivo_files = new ChoiceBox<String>();
-      metadata_files = new ChoiceBox<String>();
-      lookAndFeel = new ChoiceBox<String>();
-      keywords = new ChoiceBox<String>();
-      customFiles = new ChoiceBox<String>();
-      autotune_tivoName = new ChoiceBox<String>();
+      MinChanDigits = new ComboBox<String>();
+      pyTivo_tivo = new ComboBox<String>();
+      pyTivo_files = new ComboBox<String>();
+      metadata_files = new ComboBox<String>();
+      lookAndFeel = new ComboBox<String>();
+      keywords = new ComboBox<String>();
+      customFiles = new ComboBox<String>();
+      autotune_tivoName = new ComboBox<String>();
       check_space = new CheckBox();
       Label disk_space_label = new Label();
       beacon = new CheckBox();
@@ -2859,7 +2859,7 @@ public class configMain {
       gy++;
       tivo_panel.add(UseOldBeacon, 1, gy);
       
-      // Tivo ChoiceBox
+      // Tivo ComboBox
       gy++;
       tivo_panel.add(tivos_label, 0, gy);
       tivo_panel.add(tivos, 1, gy);
@@ -3349,7 +3349,7 @@ public class configMain {
       gy++;
       web_panel.add(httpserver_share_filter, 0, gy);
       
-      // shares ChoiceBox
+      // shares ComboBox
       gy++;
       web_panel.add(shares_label, 0, gy);
       web_panel.add(shares, 1, gy);

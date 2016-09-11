@@ -28,7 +28,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyEvent;
@@ -96,7 +96,7 @@ public class remotegui {
             }
             if (selected.equals("Guide")) {
                // Reset date range in Guide start time combo box
-               guide_tab.tab.setChoiceBoxDates(guide_tab.start, guide_tab.hour_increment, guide_tab.total_range);
+               guide_tab.tab.setComboBoxDates(guide_tab.start, guide_tab.hour_increment, guide_tab.total_range);
             }
             if (selected.equals("Remote")) {
                // Set focus on tabbed_panel
@@ -189,7 +189,7 @@ public class remotegui {
       addTabPane("Remote", rc_tab.panel);
       addTabPane("Info", info_tab.panel);
       
-      // Init the tivo ChoiceBoxes
+      // Init the tivo ComboBoxes
       setTivoNames();
             
       // Pack table columns
@@ -233,7 +233,7 @@ public class remotegui {
    public String getGuideStartTime() {
 	  String start = guide_tab.start.getValue();
 	  if (start == null || start.length() == 0) {
-	     guide_tab.tab.setChoiceBoxDates(guide_tab.start, guide_tab.hour_increment, guide_tab.total_range);
+	     guide_tab.tab.setComboBoxDates(guide_tab.start, guide_tab.hour_increment, guide_tab.total_range);
 		  start = guide_tab.start.getValue();
 	  }
       return start;
@@ -354,7 +354,7 @@ public class remotegui {
       setComboDefVal(premiere_tab.tivo);
    }
    
-   private void setComboDefVal(ChoiceBox<String> box) {
+   private void setComboDefVal(ComboBox<String> box) {
       if(box.getItems().size() > 0)
          box.getSelectionModel().select(box.getItems().get(0));      
    }

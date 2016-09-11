@@ -24,7 +24,7 @@ import java.util.Optional;
 
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -49,7 +49,7 @@ public class wlOptions {
    TextField tf_title, tf_keyword, tf_title_keyword, tf_actor, tf_director;
    CheckBox cb_autorecord;
    Label l_categories = null;
-   ChoiceBox<String> cb_categories = null;
+   ComboBox<String> cb_categories = null;
    JSONArray wishlistCategories = null;
    
    public wlOptions() {      
@@ -107,7 +107,7 @@ public class wlOptions {
       }
       if (wishlistCategories != null) {
          l_categories = new Label("Category");
-         cb_categories = new ChoiceBox();
+         cb_categories = new ComboBox();
          cb_categories.addItem("");
          try {
             for (int i=0; i<wishlistCategories.length(); ++i) {

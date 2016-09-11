@@ -37,7 +37,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.GridPane;
@@ -62,8 +62,8 @@ import com.tivo.kmttg.util.log;
 public class premiere {
    public VBox panel = null;
    public premiereTable tab = null;   
-   public ChoiceBox<String> tivo = null;
-   public ChoiceBox<String> days = null;
+   public ComboBox<String> tivo = null;
+   public ComboBox<String> days = null;
    public MyListView channels = null;
    public Hashtable<String,JSONArray> channel_info = new Hashtable<String,JSONArray>();
    public Button record = null;
@@ -82,7 +82,7 @@ public class premiere {
       
       Label tivo_label = new Label();
       
-      tivo = new ChoiceBox<String>();
+      tivo = new ComboBox<String>();
       tivo.valueProperty().addListener(new ChangeListener<String>() {
          @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
             if (newVal != null) {   
@@ -100,7 +100,7 @@ public class premiere {
       tivo.setTooltip(tooltip.getToolTip("tivo_premiere"));
 
       Label days_label = new Label("Days");      
-      days = new ChoiceBox<String>();
+      days = new ComboBox<String>();
       days.setTooltip(tooltip.getToolTip("premiere_days"));
       for (int i=1; i<=12; ++i) {
          days.getItems().add("" + i);

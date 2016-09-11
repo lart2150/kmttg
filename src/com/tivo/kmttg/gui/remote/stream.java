@@ -32,7 +32,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -44,7 +44,7 @@ public class stream {
    public streamTable tab = null;
    public Button refresh = null;
    public Button remove = null;
-   public ChoiceBox<String> tivo = null;
+   public ComboBox<String> tivo = null;
    
    public stream(final Stage frame) {
       
@@ -58,7 +58,7 @@ public class stream {
       
       Label tivo_label = new Label();
       
-      tivo = new ChoiceBox<String>();
+      tivo = new ComboBox<String>();
       tivo.valueProperty().addListener(new ChangeListener<String>() {
          @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
             if (newVal != null && config.gui.remote_gui != null) {

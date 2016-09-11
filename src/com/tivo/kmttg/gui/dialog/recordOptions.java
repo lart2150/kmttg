@@ -22,7 +22,7 @@ import java.util.Optional;
 
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -37,7 +37,7 @@ import com.tivo.kmttg.util.log;
 public class recordOptions {
    VBox components;
    Label label;
-   ChoiceBox<String> record, number, until, start, stop;
+   ComboBox<String> record, number, until, start, stop;
    CheckBox anywhere;
    TwoWayHashmap<String,String> untilHash = new TwoWayHashmap<String,String>();
    TwoWayHashmap<String,Integer> startHash = new TwoWayHashmap<String,Integer>();
@@ -74,18 +74,18 @@ public class recordOptions {
    private void createComponents() {
       label = new Label();
       label.setText("");
-      until = new ChoiceBox<String>();
+      until = new ComboBox<String>();
       until.getItems().addAll("Space needed", "Until I delete");
       until.setValue("Space needed");
 
-      start = new ChoiceBox<String>();
+      start = new ComboBox<String>();
       start.getItems().addAll(
          "On time", "1 minute early", "2 minutes early", "3 minutes early",
          "4 minutes early", "5 minutes early", "10 minutes early"
       );
       start.setValue("On time");
 
-      stop = new ChoiceBox<String>();
+      stop = new ComboBox<String>();
       stop.getItems().addAll(
          "On time", "1 minute late", "2 minutes late", "3 minutes late",
          "4 minutes late", "5 minutes late", "10 minutes late",
