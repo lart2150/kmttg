@@ -2224,8 +2224,18 @@ public class gui extends Application {
                } catch (NumberFormatException e) {
                   value = 0;
                }
-               if (remote_gui != null)
-                  remote_gui.getPanel().getSelectionModel().select(value);
+               if (remote_gui != null) {
+                  class backgroundRun implements Runnable {
+                     int value;
+                     public backgroundRun(int value) {
+                        this.value = value;
+                     }
+                     @Override public void run() {
+                        remote_gui.getPanel().getSelectionModel().select(value);
+                     }
+                  }
+                  Platform.runLater(new backgroundRun(value));
+               }
             }
             if (key.equals("centerDivider")) {
                try {
