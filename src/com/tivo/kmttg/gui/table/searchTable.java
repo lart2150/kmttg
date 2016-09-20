@@ -49,6 +49,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.comparator.DateComparator;
 import com.tivo.kmttg.gui.comparator.DurationComparator;
 import com.tivo.kmttg.gui.comparator.StringChannelComparator;
+import com.tivo.kmttg.gui.comparator.StringShowComparator;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
 import com.tivo.kmttg.main.auto;
@@ -148,6 +149,8 @@ public class searchTable extends TableMap {
             col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,String>(colName));
             if (colName.equals("CHANNEL"))
                col.setComparator(new StringChannelComparator()); // Custom column sort
+            if (colName.equals("SHOW"))
+               col.setComparator(new StringShowComparator()); // Custom column sort strips off leading price
             TABLE.getColumns().add(col);
          }
       }
