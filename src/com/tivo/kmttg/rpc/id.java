@@ -11,7 +11,7 @@ public class id {
       if (p != null || s != null)
          log.print("pyTivo metadata id fields:");
       if (p != null)
-         log.print("programdId : " + p);
+         log.print("programId : " + p);
       if (s != null)
          log.print("seriesId : " + s);
    }
