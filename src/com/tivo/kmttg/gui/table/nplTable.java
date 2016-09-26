@@ -1651,6 +1651,7 @@ public class nplTable extends TableMap {
                      continue;
                   }
                   String val = getValueAt(row, c);
+                  if (val == null) val = "";
                   Tabentry e = NowPlaying.getTreeItem(row).getValue();
                   val = val.trim();
                   if (val.equals("")) {
