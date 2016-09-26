@@ -365,7 +365,7 @@ public class channelsTable extends TableMap {
                // Get channel list for destination TiVo
                // Get selection list from table
                // Compare entries and update channels where isReceived is different
-               Hashtable<String,Integer> received = new Hashtable<String,Integer>();
+               Hashtable<String,Boolean> received = new Hashtable<String,Boolean>();
                log.print("Getting current channel list for TiVo: " + tivoName);
                try {
                   Remote r = config.initRemote(tivoName);
@@ -377,13 +377,16 @@ public class channelsTable extends TableMap {
                      if (result != null && result.has("channel")) {
                         for (int i=0; i<result.getJSONArray("channel").length(); ++i) {
                            json = result.getJSONArray("channel").getJSONObject(i);
-                           if (json.has("channelNumber") && json.has("isReceived") && json.getBoolean("isReceived")) {
-                              received.put(json.getString("channelNumber"), 1);
+                           if (json.has("channelNumber")) {
+                              Boolean rec = false;
+                              if (json.has("isReceived"))
+                                 rec = json.getBoolean("isReceived");
+                              received.put(json.getString("channelNumber"), rec);
                            }
                         }
                      }
                      r.disconnect();
-                     // This array will contain list of channels we want to update
+                     // This channels array will contain list of channels we want to update
                      JSONArray channels = new JSONArray();
                      for (int i=0; i<selected.length; ++i) {
                         int row = selected[i];
@@ -391,11 +394,12 @@ public class channelsTable extends TableMap {
                         JSONObject rowJson = GetRowData(row);
                         if (rowJson != null && rowJson.has("channelNumber")) {
                            String channelNumber = rowJson.getString("channelNumber");
-                           Boolean tivoReceived = false;
-                           if (received.containsKey(channelNumber))
-                              tivoReceived = true;
-                           if (tivoReceived != tableReceived)
-                              channels.put(formatChannel(rowJson, tableReceived));
+                           if (received.containsKey(channelNumber)) {
+                              // Only look at updating channels that are currently available on the TiVo
+                              Boolean tivoReceived = received.get(channelNumber);
+                              if (tivoReceived != tableReceived)
+                                 channels.put(formatChannel(rowJson, tableReceived));
+                           }
                         }
                      }
                      rpcUpdateChannels(tivoName, channels);   
@@ -422,11 +426,11 @@ public class channelsTable extends TableMap {
             if (r.success) {
                for (int i=0; i<changed.length(); ++i) {
                   JSONObject channel = changed.getJSONObject(i);
-                  log.print("Setting " + channel.getString("callSign") +
+                  log.print("Setting " + channel.getString("channelNumber") + "=" + channel.getString("callSign") +
                      " isReceived=" + channel.getBoolean("isReceived"));
                   JSONObject result = r.Command("ChannelUpdate", channel);
                   if (result == null)
-                     log.error("Failed to change channel: " + channel.getString("callSign"));
+                     log.error("Failed to change channel: " + channel.getString("channelNumber") + "=" + channel.getString("callSign"));
                }
                r.disconnect();
                log.warn("Channel update requests completed");
