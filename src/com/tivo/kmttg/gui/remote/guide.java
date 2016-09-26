@@ -18,15 +18,12 @@
  */
 package com.tivo.kmttg.gui.remote;
 
-import java.io.File;
-
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.MyListView;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.guideTable;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.kmttg;
-import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
 
 import javafx.beans.value.ChangeListener;
@@ -46,9 +43,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.FileChooser.ExtensionFilter;
 
 public class guide {
    public VBox panel = null;
@@ -132,34 +127,6 @@ public class guide {
          }
       });
 
-      Button export_channels = new Button("Export ...");
-      export_channels.setTooltip(tooltip.getToolTip("export_channels"));
-      export_channels.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            final String tivoName = tivo.getValue();
-            config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
-            config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
-            config.gui.remote_gui.Browser.setTitle("Save to file");
-            config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
-            config.gui.remote_gui.Browser.setInitialFileName(tivoName + "_channels.csv");
-            final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(frame);
-            if (selectedFile != null) {
-               Task<Void> task = new Task<Void>() {
-                  @Override public Void call() {
-                     log.warn("Exporting '" + tivoName + "' channel list to csv file: " + selectedFile.getAbsolutePath());
-                     Remote r = config.initRemote(tivoName);
-                     if (r.success) {
-                        r.ChannelLineupCSV(selectedFile);
-                        r.disconnect();
-                     }
-                     return null;
-                  }
-               };
-               new Thread(task).start();
-            }
-         }
-      });
-
       record = new Button("Record");
       record.setTooltip(tooltip.getToolTip("guide_record"));
       record.setOnAction(new EventHandler<ActionEvent>() {
@@ -234,7 +201,6 @@ public class guide {
       row1.getChildren().add(start);
       row1.getChildren().add(guide_channels);
       row1.getChildren().add(refresh);
-      row1.getChildren().add(export_channels);
       row1.getChildren().add(record);
       row1.getChildren().add(recordSP);
       row1.getChildren().add(wishlist);
