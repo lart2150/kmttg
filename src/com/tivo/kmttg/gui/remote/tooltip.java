@@ -287,8 +287,8 @@ public class tooltip {
       }
       else if (component.equals("update_channels")){
          text = "<b>Modify</b><br>";
-         text += "Updates received channel list on TiVo according to changed values in table.<br>";
-         text += "NOTE: You can directly edit values in the RECEIVED column of the table.";
+         text += "Update received channel list on TiVo according to RECEIVED column changes made to table.<br>";
+         text += "NOTE: You can directly edit boolean values in the RECEIVED column of the table.";
       }
       else if (component.equals("copy_channels")){
          text = "<b>Copy</b><br>";
@@ -300,7 +300,7 @@ public class tooltip {
       }
       else if (component.equals("save_channels")){
          text = "<b>Save</b><br>";
-         text += "Save the currently displayed channels list to a file. This file can then be loaded<br>";
+         text += "Save channels list for currently selected TiVo to a file. This file can then be loaded<br>";
          text += "at a later date into this table, then entries from the table can be copied to your TiVos<br>";
          text += "if desired by selecting entries in the table and clicking on <b>Copy</b> button.<br>";
          text += "i.e. This is a way to backup your received channels list.";
