@@ -19,20 +19,25 @@
 package com.tivo.kmttg.gui.remote;
 
 import java.io.File;
+import java.util.Optional;
+import java.util.Stack;
 
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.channelsTable;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -126,15 +131,74 @@ public class channels {
             }
          }
       });
+      
+      Button export_channels = new Button("Export ...");
+      export_channels.setTooltip(tooltip.getToolTip("export_channels"));
+      export_channels.setOnAction(new EventHandler<ActionEvent>() {
+         public void handle(ActionEvent e) {
+            final String tivoName = tivo.getValue();
+            config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
+            config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
+            config.gui.remote_gui.Browser.setTitle("Save to file");
+            config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
+            config.gui.remote_gui.Browser.setInitialFileName(tivoName + "_channels.csv");
+            final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(frame);
+            if (selectedFile != null) {
+               Task<Void> task = new Task<Void>() {
+                  @Override public Void call() {
+                     log.warn("Exporting '" + tivoName + "' channel list to csv file: " + selectedFile.getAbsolutePath());
+                     Remote r = config.initRemote(tivoName);
+                     if (r.success) {
+                        r.ChannelLineupCSV(selectedFile);
+                        r.disconnect();
+                     }
+                     return null;
+                  }
+               };
+               new Thread(task).start();
+            }
+         }
+      });
 
       copy = new Button("Copy");
       copy.setTooltip(tooltip.getToolTip("copy_channels"));
       copy.setOnAction(new EventHandler<ActionEvent>() {
          public void handle(ActionEvent e) {
-            // Copy selected channels
-            String tivoName = tivo.getValue();
-            if (tivoName != null && tivoName.length() > 0)
+            // Copy selected channel settings to a TiVo
+            // Build list of eligible TiVos
+            String thisTivo = tivo.getValue();
+            Stack<String> all = config.getTivoNames();
+            for (int i=0; i<all.size(); ++i) {
+               String tivo = all.get(i);
+               if (! config.rpcEnabled(tivo) && ! config.mindEnabled(tivo)) {
+                  all.remove(i);
+                  continue;
+               }
+               if (! config.nplCapable(tivo)) {
+                  all.remove(i);
+                  continue;
+               }
+            }
+            
+            // Prompt user to choose a TiVo
+            ChoiceDialog<String> dialog = new ChoiceDialog<String>(all.get(0), all);
+            dialog.setTitle("Copy To");
+            dialog.setHeaderText("Choose which TiVo to copy to");
+            dialog.setContentText("TiVo:");
+            String tivoName = null;
+            Optional<String> result = dialog.showAndWait();
+            if (result.isPresent())
+               tivoName = result.get();
+            if (tivoName != null && tivoName.length() > 0) {
+               if (tivoName.equals(thisTivo)) {
+                  // Don't copy to self unless in loaded state
+                  if (! tab.isTableLoaded()) {
+                     log.error("Destination TiVo is same as source TiVo: " + tivoName);
+                     return;
+                  }
+               }
                tab.copyChannels(tivoName);
+            }
          }
       });
 
@@ -171,6 +235,7 @@ public class channels {
       row1.getChildren().add(refresh);
       row1.getChildren().add(save);
       row1.getChildren().add(load);
+      row1.getChildren().add(export_channels);
       row1.getChildren().add(copy);
       row1.getChildren().add(update);
       row1.getChildren().add(label);
