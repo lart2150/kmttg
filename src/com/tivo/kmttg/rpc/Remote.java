@@ -727,6 +727,34 @@ public class Remote {
             //o.put("bodyGeneratesCandidates", true);
             req = RpcRequest("subscribe", false, o);
          }
+         else if (type.equals("ChannelUpdate")) {
+            // Update a channel isReceived/isFavorite settings
+            // Expects a channel info json with info such as example below
+            // "type" : "channel"
+            // "channelNumber" : "298"
+            // "sourceType" : "cable"
+            // "stationId" : "tivo:st.67251839"
+            // "isReceived" : false
+            // "isFavorite" : false
+            
+            // fieldNumber map: 16=isFavorite, 19=isReceived, 29=isBlocked
+            //JSONObject favorite = new JSONObject();
+            //favorite.put("type", "updateTemplate");
+            //favorite.put("fieldNumber", 16);
+            JSONObject received = new JSONObject();
+            received.put("type", "updateTemplate");
+            received.put("fieldNumber", 19);
+            
+            JSONArray template = new JSONArray();
+            //template.put(favorite);
+            template.put(received);
+            
+            JSONObject o = new JSONObject();
+            o.put("bodyId", bodyId_get());
+            o.put("channel", json);
+            o.put("updateTemplate", template);
+            req = RpcRequest("channelUpdate", false, o);
+         }
          else if (type.equals("ModifySP")) {
             // Modify a season pass
             // Expects several fields in json, (levelOfDetail=medium)
