@@ -191,7 +191,7 @@ public class remotegui {
       addTabPane("Streaming", stream_tab.panel);
       addTabPane("Deleted", deleted_tab.panel);
       // Intentionally commented out for now
-      //addTabPane("Channels", channels_tab.panel);
+      addTabPane("Channels", channels_tab.panel);
       addTabPane("Thumbs", thumbs_tab.panel);
       addTabPane("Remote", rc_tab.panel);
       addTabPane("Info", info_tab.panel);
