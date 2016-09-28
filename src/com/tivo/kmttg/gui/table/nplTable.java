@@ -656,7 +656,7 @@ public class nplTable extends TableMap {
       } else if (keyCode == KeyCode.N) {
          sortableDate s = getFirstSelected(); if (s == null) return;
          if (! s.folder && s.data != null && s.data.containsKey("collectionId"))
-            TableUtil.PrintEpisodes(s.data.get("collectionId"));
+            TableUtil.PrintEpisodes(s.data.get("titleOnly"), s.data.get("collectionId"));
       } else if (keyCode == KeyCode.Q) {
          // Web query currently selected entry
          sortableDate s = getFirstSelected(); if (s == null) return;
