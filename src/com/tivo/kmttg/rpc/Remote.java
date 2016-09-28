@@ -2573,7 +2573,8 @@ public class Remote {
          int count = 25;
          int offset = 0;
          JSONObject json = new JSONObject();
-         json.put("bodyId", bodyId_get());
+         if (! awayMode())
+            json.put("bodyId", bodyId_get());
          json.put("collectionId", collectionId);
          if (! awayMode())
             json.put("filterUnavailable", false);
