@@ -139,7 +139,7 @@ public class tooltip {
       else if (component.equals("guideChanList")) {
          text = "<b>Guide Channels</b><br>";
          text += "Select a channel in this list to obtain guide listings for with the given start time.<br>";
-         text += "Listings will be shown in the table to the right for a 12 hour window.";
+         text += "Listings will be shown in the table to the right for a 24 hour window.";
       }
       else if (component.equals("guide_refresh_todo")) {
          text = "<b>Refresh ToDo</b><br>";
