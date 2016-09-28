@@ -18,6 +18,9 @@
  */
 package com.tivo.kmttg.gui.table;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
@@ -29,6 +32,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Stack;
 
 import javafx.application.Platform;
@@ -39,6 +43,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -54,9 +59,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 import com.sun.javafx.scene.control.skin.NestedTableColumnHeader;
 import com.sun.javafx.scene.control.skin.TableColumnHeader;
@@ -1217,6 +1224,7 @@ public class TableUtil {
    static public void PrintEpisodes(JSONObject json) {
       if (json == null) return;
       String collectionId = null;
+      String title = null;
       try {
          if (json.has("collectionId")) {
             collectionId = json.getString("collectionId");
@@ -1227,6 +1235,8 @@ public class TableUtil {
                   collectionId = idSetSource.getString("collectionId");
             }
          }
+         if (json.has("title"))
+            title = json.getString("title");
       } catch (JSONException e) {
          log.error("PrintEpisodes - " + e.getMessage());
       }
@@ -1234,14 +1244,16 @@ public class TableUtil {
          log.warn("No collectionId available for this entry");
          return;
       }
-      PrintEpisodes(collectionId);
+      if (title == null)
+         title = collectionId;
+      PrintEpisodes(title, collectionId);
    }
    
-   static public void PrintEpisodes(String collectionId) {
+   static public void PrintEpisodes(String title, String collectionId) {
       String tivoName = config.getFirstRpcEnabled();
       if (tivoName == null)
          return;
-      log.warn(">> Collecting episode data for collectionId: " + collectionId);
+      log.warn(">> Collecting episode data for: " + title);
       Task<Void> task = new Task<Void>() {
          @Override public Void call() {
             Remote r = new Remote(tivoName, true);
@@ -1249,18 +1261,21 @@ public class TableUtil {
                try {
                   JSONArray entries = r.getEpisodes(collectionId);
                   r.disconnect();
+                  JSONArray episodes = new JSONArray();
                   for (int i=0; i<entries.length(); ++i) {
                      JSONObject entry = entries.getJSONObject(i);
                      if (entry.has("episodeNum")) {
-                        String message = TableUtil.makeShowTitle(entry);
-                        String programId = id.programId(entry);
-                        String seriesId = id.seriesId(entry);
-                        if (programId != null)
-                           message += "\n\tprogramId=" + programId;
-                        if (seriesId != null)
-                           message += " seriesId=" + seriesId;
-                        log.print(message);
+                        episodes.put(entry);
                      }
+                  }
+                  if (episodes.length() > 0) {
+                     Platform.runLater(new Runnable() {
+                        @Override public void run() {
+                           PrintEpisodes_GUI(title, episodes);
+                        }
+                     });
+                  } else {
+                     log.warn("No episodes found for: " + title);
                   }
                } catch (JSONException e) {
                   log.error("searchTable GetEpisodes - " + e.getMessage());
@@ -1270,6 +1285,65 @@ public class TableUtil {
          }
       };
       new Thread(task).start();
+   }
+   
+   static public void PrintEpisodes_GUI(String title, JSONArray episodes) {
+      List<String> choices = new ArrayList<>();
+      choices.add("Output CSV File");
+      choices.add("Output to table");
+
+      ChoiceDialog<String> dialog = new ChoiceDialog<>("Output CSV File", choices);
+      dialog.setTitle("Choose Output");
+      dialog.setHeaderText("Episode Output for: " + title);
+      dialog.setContentText("Choose output type:");
+
+      Optional<String> result = dialog.showAndWait();
+      if (result.isPresent()){
+         switch (result.get()) {
+            case "Output CSV File":
+               config.gui.remote_gui.Browser.getExtensionFilters().clear();
+               config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
+               config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
+               config.gui.remote_gui.Browser.setTitle("Export to csv file");
+               config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
+               config.gui.remote_gui.Browser.setInitialFileName(title + "" + ".csv");
+               final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(config.gui.getFrame());
+               if (selectedFile != null) {
+                  String file = selectedFile.getAbsolutePath();
+                  try {
+                     BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
+                     ofp.write("EPISODE NAME,PROGRAMID,SERIESID\r\n");
+                     for (int i=0; i<episodes.length(); ++i) {
+                        JSONObject episode = episodes.getJSONObject(i);
+                        String programId = id.programId(episode);
+                        String seriesId = id.seriesId(episode);
+                        if (programId == null) programId = "NONE";
+                        if (seriesId == null) seriesId = "NONE";
+                        ofp.write("\"" + makeShowTitle(episode) + "\"");
+                        ofp.write("," + programId);
+                        ofp.write("," + seriesId);
+                        ofp.write("\r\n");
+                     }
+                     ofp.close();
+                     log.print("Output " + "'" + title + "' episodes to csv file: " + file);
+                  } catch (Exception e) {
+                     log.error("PrintEpisodes_GUI - " + e.getMessage());
+                  }
+               }
+               break;
+            case "Output to table":
+               try {
+                  streamTable tab = config.gui.remote_gui.stream_tab.tab;
+                  String tivoName = config.gui.remote_gui.getTivoName("Streaming");
+                  tab.AddRows(tivoName, episodes);
+                  config.gui.remote_gui.getPanel().getSelectionModel().select(6);
+                  config.gui.SetTivo("Remote");
+               } catch (Exception e) {
+                  log.error("PrintEpisodes_GUI - " + e.getMessage());
+               }
+               break;
+         }
+      }
    }
 
 }
