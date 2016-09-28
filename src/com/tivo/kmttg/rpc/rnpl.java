@@ -192,6 +192,8 @@ public class rnpl {
          try {
             if (json.has("recordingId"))
                h.put("recordingId", json.getString("recordingId"));
+            if (json.has("collectionId"))
+               h.put("collectionId", json.getString("collectionId"));
             if (json.has("contentId"))
                h.put("contentId", json.getString("contentId"));
             if (json.has("clipMetadata")) {

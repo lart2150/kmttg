@@ -350,6 +350,11 @@ public class todoTable extends TableMap {
              rnpl.pprintJSON(json);
              id.printIds(json);
           }
+       } else if (keyCode == KeyCode.N) {
+          int[] selected = TableUtil.GetSelectedRows(TABLE);
+          if (selected == null || selected.length < 1)
+             return;
+          TableUtil.PrintEpisodes(GetRowData(selected[0]));
        } else if (keyCode == KeyCode.K) {
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)

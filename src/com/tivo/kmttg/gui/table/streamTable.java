@@ -332,6 +332,12 @@ public class streamTable extends TableMap {
             config.gui.show_details.update(TABLE, currentTivo, json);
          }
       }
+      else if (keyCode == KeyCode.N) {
+         int[] selected = TableUtil.GetSelectedRows(TABLE);
+         if (selected == null || selected.length < 1)
+            return;
+         TableUtil.PrintEpisodes(GetRowData(selected[0]));         
+      }
       else if (keyCode == KeyCode.J) {
          // Print json of selected row to log window
          int[] selected = TableUtil.GetSelectedRows(TABLE);

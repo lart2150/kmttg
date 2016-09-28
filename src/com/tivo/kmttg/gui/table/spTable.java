@@ -536,6 +536,12 @@ public class spTable extends TableMap {
              }
           }
        }
+       else if (keyCode == KeyCode.N) {
+          int[] selected = TableUtil.GetSelectedRows(TABLE);
+          if (selected == null || selected.length < 1)
+             return;
+          TableUtil.PrintEpisodes(GetRowData(selected[0]));
+       }
        else if (keyCode == KeyCode.C) {
           config.gui.remote_gui.sp_tab.copy.fire();
        }

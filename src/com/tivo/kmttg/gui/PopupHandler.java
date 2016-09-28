@@ -131,6 +131,7 @@ public class PopupHandler {
          
          // General items for all tables
          items.add(new PopupPair("Display data [j]", KeyCode.J, subTabName));
+         items.add(new PopupPair("Episode Info [n]", KeyCode.N, subTabName));
          items.add(new PopupPair("Web query [q]", KeyCode.Q, subTabName));
          if (! subTabName.equals("Streaming"))
             items.add(new PopupPair("Change thumbs rating [ctrl-t]", config.gui.thumbsMenuItem, subTabName));
@@ -148,6 +149,7 @@ public class PopupHandler {
          }
          items.add(new PopupPair("Display data [j]", KeyCode.J, tivoName));
          if (config.rpcEnabled(tivoName) || config.mindEnabled(tivoName))
+            items.add(new PopupPair("Episode Info [n]", KeyCode.N, tivoName));
             items.add(new PopupPair("Display RPC data [r]", KeyCode.R, tivoName));
          if (SkipManager.skipEnabled() && config.VRD == 1 && config.rpcEnabled(tivoName)) {
             items.add(new PopupPair("Export AutoSkip to VPrj [e]", KeyCode.E, tivoName));

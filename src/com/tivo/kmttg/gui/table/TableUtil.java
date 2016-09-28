@@ -75,6 +75,7 @@ import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.id;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
@@ -1212,4 +1213,63 @@ public class TableUtil {
          return "STREAMING";
       }
    }
+   
+   static public void PrintEpisodes(JSONObject json) {
+      if (json == null) return;
+      String collectionId = null;
+      try {
+         if (json.has("collectionId")) {
+            collectionId = json.getString("collectionId");
+         } else {
+            if (json.has("idSetSource")) {
+               JSONObject idSetSource = json.getJSONObject("idSetSource");
+               if (idSetSource.has("collectionId"))
+                  collectionId = idSetSource.getString("collectionId");
+            }
+         }
+      } catch (JSONException e) {
+         log.error("PrintEpisodes - " + e.getMessage());
+      }
+      if (collectionId == null) {
+         log.warn("No collectionId available for this entry");
+         return;
+      }
+      PrintEpisodes(collectionId);
+   }
+   
+   static public void PrintEpisodes(String collectionId) {
+      String tivoName = config.getFirstRpcEnabled();
+      if (tivoName == null)
+         return;
+      log.warn(">> Collecting episode data for collectionId: " + collectionId);
+      Task<Void> task = new Task<Void>() {
+         @Override public Void call() {
+            Remote r = new Remote(tivoName, true);
+            if (r.success) {
+               try {
+                  JSONArray entries = r.getEpisodes(collectionId);
+                  r.disconnect();
+                  for (int i=0; i<entries.length(); ++i) {
+                     JSONObject entry = entries.getJSONObject(i);
+                     if (entry.has("episodeNum")) {
+                        String message = TableUtil.makeShowTitle(entry);
+                        String programId = id.programId(entry);
+                        String seriesId = id.seriesId(entry);
+                        if (programId != null)
+                           message += "\n\tprogramId=" + programId;
+                        if (seriesId != null)
+                           message += " seriesId=" + seriesId;
+                        log.print(message);
+                     }
+                  }
+               } catch (JSONException e) {
+                  log.error("searchTable GetEpisodes - " + e.getMessage());
+               }
+            }
+            return null;
+         }
+      };
+      new Thread(task).start();
+   }
+
 }

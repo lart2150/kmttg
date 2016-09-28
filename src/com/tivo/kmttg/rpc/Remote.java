@@ -2575,7 +2575,8 @@ public class Remote {
          JSONObject json = new JSONObject();
          json.put("bodyId", bodyId_get());
          json.put("collectionId", collectionId);
-         json.put("filterUnavailable", false);
+         if (! awayMode())
+            json.put("filterUnavailable", false);
          JSONArray orderBy = new JSONArray();
          orderBy.put("seasonNumber");
          orderBy.put("episodeNum");

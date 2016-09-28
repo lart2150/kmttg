@@ -571,6 +571,16 @@ public class config {
       return rpcSetting;
    }
    
+   // Return name of 1st rpc enabled TiVo
+   public static String getFirstRpcEnabled() {
+      Stack<String> current_tivoNames = getTivoNames();
+      for (int i=0; i<current_tivoNames.size(); ++i) {
+         if (rpcEnabled(current_tivoNames.get(i)))
+            return current_tivoNames.get(i);
+      }
+      return null;
+   }
+   
    // Return true if this is a series 3 TiVo and tivo.com username & password available
    public static Boolean mindEnabled(String tivoName) {
       if (getTivoUsername() != null && getTivoPassword() != null) {
