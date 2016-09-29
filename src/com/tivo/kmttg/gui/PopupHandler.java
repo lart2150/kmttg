@@ -131,10 +131,11 @@ public class PopupHandler {
          
          // General items for all tables
          items.add(new PopupPair("Display data [j]", KeyCode.J, subTabName));
-         items.add(new PopupPair("Episode Info [n]", KeyCode.N, subTabName));
          items.add(new PopupPair("Web query [q]", KeyCode.Q, subTabName));
-         if (! subTabName.equals("Streaming"))
+         if (! subTabName.equals("Streaming")) {
             items.add(new PopupPair("Change thumbs rating [ctrl-t]", config.gui.thumbsMenuItem, subTabName));
+            items.add(new PopupPair("Episode Info [n]", KeyCode.N, subTabName));
+         }
          items.add(new PopupPair("Search table [ctrl-s]", config.gui.searchMenuItem, subTabName));
       } else {
          // This is a NPL table
