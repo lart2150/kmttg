@@ -111,6 +111,7 @@ public class tivoFileName {
       if (keys.get("originalAirDate").length() == 0) {
          keys.put("originalAirDate", keys.get("year") + "-" + keys.get("monthNum") + "-" + keys.get("mday"));
       }
+      keys.put("oad_no_dashes", keys.get("originalAirDate").replaceAll("-", ""));
       
       // Special keyword "[/]" means use sub-folders
       file = file.replaceAll("\\[/\\]", "__separator__");
@@ -200,7 +201,7 @@ public class tivoFileName {
                "title", "mainTitle", "episodeTitle", "channelNum", "channel",
                "min", "hour", "wday", "mday", "month", "monthNum", "year",
                "startTime", "SeriesEpNumber", "season", "episode", "EpisodeNumber",
-               "description", "tivoName", "originalAirDate", "movieYear"
+               "description", "tivoName", "originalAirDate", "oad_no_dashes", "movieYear"
             };
             for (String k : keywords) {
                String replacement = k;

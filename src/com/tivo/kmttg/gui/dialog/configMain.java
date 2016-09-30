@@ -2448,7 +2448,7 @@ public class configMain {
       keywords.getItems().addAll(
          "[title]", "[mainTitle]", "[episodeTitle]", "[channelNum]",
          "[channel]", "[min]", "[hour]", "[wday]", "[mday]", "[month]",
-         "[monthNum]", "[year]", "[movieYear]", "[originalAirDate]", "[season]", "[episode]", 
+         "[monthNum]", "[year]", "[movieYear]", "[originalAirDate]", "[oad_no_dashes]", "[season]", "[episode]", 
          "[EpisodeNumber]", "[SeriesEpNumber]", "[description]", "[tivoName]", "[startTime]", "[/]"
       );
       keywords.valueProperty().addListener(new ChangeListener<String>() {
