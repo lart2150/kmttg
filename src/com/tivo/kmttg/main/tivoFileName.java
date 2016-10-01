@@ -225,7 +225,7 @@ public class tivoFileName {
       return l;
    }
    
-   private static String removeSpecialChars(String s) {
+   public static String removeSpecialChars(String s) {
       //s = s.replaceAll("\\s+","_");
       s = s.replaceAll("/", "_");
       s = s.replaceAll("\\*", "");
