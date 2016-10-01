@@ -2563,6 +2563,7 @@ public class Remote {
    // Given a collectionId return all episodes
    public JSONArray getEpisodes(String collectionId) {
       JSONArray episodes = new JSONArray();
+      Hashtable<String,Integer> unique = new Hashtable<String,Integer>();
       try {
          // If there's a SP with matching collectionId then may restrict seasons
          int startFrom = 1;
@@ -2606,6 +2607,12 @@ public class Remote {
                      int start = getStartSeasonOrYear(j);
                      if (start != -1 && start < startFrom)
                         continue;
+                  }
+                  String title = TableUtil.makeShowTitle(j);
+                  if (title != null && title.length() > 0) {
+                     if (unique.containsKey(title))
+                        continue;
+                     unique.put(title, 1);
                   }
                   episodes.put(j);
                }
