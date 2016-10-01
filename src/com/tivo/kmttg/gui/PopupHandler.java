@@ -134,7 +134,8 @@ public class PopupHandler {
          items.add(new PopupPair("Web query [q]", KeyCode.Q, subTabName));
          if (! subTabName.equals("Streaming")) {
             items.add(new PopupPair("Change thumbs rating [ctrl-t]", config.gui.thumbsMenuItem, subTabName));
-            items.add(new PopupPair("Episode Info [n]", KeyCode.N, subTabName));
+            if (config.rpcEnabled(tivoName))
+               items.add(new PopupPair("Episode Info [n]", KeyCode.N, subTabName));
          }
          items.add(new PopupPair("Search table [ctrl-s]", config.gui.searchMenuItem, subTabName));
       } else {
