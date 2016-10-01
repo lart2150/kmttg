@@ -81,6 +81,7 @@ import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.tivoFileName;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.id;
 import com.tivo.kmttg.rpc.rnpl;
@@ -1289,61 +1290,74 @@ public class TableUtil {
    
    static public void PrintEpisodes_GUI(String title, JSONArray episodes) {
       List<String> choices = new ArrayList<>();
+      choices.add("Output to table and CSV File");
       choices.add("Output CSV File");
       choices.add("Output to table");
 
-      ChoiceDialog<String> dialog = new ChoiceDialog<>("Output CSV File", choices);
+      ChoiceDialog<String> dialog = new ChoiceDialog<>("Output to table and CSV File", choices);
       dialog.setTitle("Choose Output");
       dialog.setHeaderText("Episode Output for: " + title);
-      dialog.setContentText("Choose output type:");
+      dialog.setContentText("Choose output:");
 
       Optional<String> result = dialog.showAndWait();
       if (result.isPresent()){
          switch (result.get()) {
+            case "Output to table and CSV File":
+               PrintEpisodes_table(episodes);
+               PrintEpisodes_csv(title, episodes);
+               break;               
             case "Output CSV File":
-               config.gui.remote_gui.Browser.getExtensionFilters().clear();
-               config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
-               config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
-               config.gui.remote_gui.Browser.setTitle("Export to csv file");
-               config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
-               config.gui.remote_gui.Browser.setInitialFileName(title + "" + ".csv");
-               final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(config.gui.getFrame());
-               if (selectedFile != null) {
-                  String file = selectedFile.getAbsolutePath();
-                  try {
-                     BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
-                     ofp.write("EPISODE NAME,PROGRAMID,SERIESID\r\n");
-                     for (int i=0; i<episodes.length(); ++i) {
-                        JSONObject episode = episodes.getJSONObject(i);
-                        String programId = id.programId(episode);
-                        String seriesId = id.seriesId(episode);
-                        if (programId == null) programId = "NONE";
-                        if (seriesId == null) seriesId = "NONE";
-                        ofp.write("\"" + makeShowTitle(episode) + "\"");
-                        ofp.write("," + programId);
-                        ofp.write("," + seriesId);
-                        ofp.write("\r\n");
-                     }
-                     ofp.close();
-                     log.print("Output " + "'" + title + "' episodes to csv file: " + file);
-                  } catch (Exception e) {
-                     log.error("PrintEpisodes_GUI - " + e.getMessage());
-                  }
-               }
+               PrintEpisodes_csv(title, episodes);
                break;
             case "Output to table":
-               try {
-                  streamTable tab = config.gui.remote_gui.stream_tab.tab;
-                  String tivoName = config.gui.remote_gui.getTivoName("Streaming");
-                  tab.AddRows(tivoName, episodes);
-                  config.gui.remote_gui.getPanel().getSelectionModel().select(6);
-                  config.gui.SetTivo("Remote");
-               } catch (Exception e) {
-                  log.error("PrintEpisodes_GUI - " + e.getMessage());
-               }
+               PrintEpisodes_table(episodes);
                break;
          }
       }
+   }
+   
+   static public void PrintEpisodes_csv(String title, JSONArray episodes) {
+      config.gui.remote_gui.Browser.getExtensionFilters().clear();
+      config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
+      config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
+      config.gui.remote_gui.Browser.setTitle("Export to csv file");
+      config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
+      config.gui.remote_gui.Browser.setInitialFileName(tivoFileName.removeSpecialChars(title) + "" + ".csv");
+      final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(config.gui.getFrame());
+      if (selectedFile != null) {
+         String file = selectedFile.getAbsolutePath();
+         try {
+            BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
+            ofp.write("EPISODE NAME,PROGRAMID,SERIESID\r\n");
+            for (int i=0; i<episodes.length(); ++i) {
+               JSONObject episode = episodes.getJSONObject(i);
+               String programId = id.programId(episode);
+               String seriesId = id.seriesId(episode);
+               if (programId == null) programId = "NONE";
+               if (seriesId == null) seriesId = "NONE";
+               ofp.write("\"" + makeShowTitle(episode) + "\"");
+               ofp.write("," + programId);
+               ofp.write("," + seriesId);
+               ofp.write("\r\n");
+            }
+            ofp.close();
+            log.print("Output " + "'" + title + "' episodes to csv file: " + file);
+         } catch (Exception e) {
+            log.error("PrintEpisodes_GUI - " + e.getMessage());
+         }
+      }
+   }
+   
+   static public void PrintEpisodes_table(JSONArray episodes) {
+      try {
+         streamTable tab = config.gui.remote_gui.stream_tab.tab;
+         String tivoName = config.gui.remote_gui.getTivoName("Streaming");
+         tab.AddRows(tivoName, episodes);
+         config.gui.remote_gui.getPanel().getSelectionModel().select(6);
+         config.gui.SetTivo("Remote");
+      } catch (Exception e) {
+         log.error("PrintEpisodes_table - " + e.getMessage());
+      }      
    }
 
 }
