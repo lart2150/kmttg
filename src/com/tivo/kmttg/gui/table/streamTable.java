@@ -76,6 +76,7 @@ public class streamTable extends TableMap {
    @Override
    public void clear() {
       TABLE.getRoot().getChildren().clear();
+      episode_data = new Hashtable<String,JSONArray>();
    }
    @Override
    public TreeTableView<?> getTreeTable() {
