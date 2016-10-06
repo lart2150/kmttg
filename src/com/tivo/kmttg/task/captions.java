@@ -241,6 +241,7 @@ public class captions extends baseTask implements Serializable {
                process.printStderr();
             } else {
                try_again = true;
+               file.delete(job.srtFile);
                log.warn("Trying ccextractor again with different options");
                if ( start() ) {
                   job.process = this;
