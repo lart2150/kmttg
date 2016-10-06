@@ -3079,6 +3079,9 @@ public class Remote {
    
    // Go through all OnePasses and check that stationId of each OnePass has a corresponding
    // guide channel stationId
+   // Also check that idSetSource/collectionId matches collectionId of future linear airings of
+   // the series if there are any. This was born out of the fact that Rovi data sometimes
+   // changes collectionId of a series making it so OnePasses don't record future recordings
    // NOTE: This procedure should be called in background mode
    public void checkOnePasses(String tivoName) {
       JSONArray passes = SeasonPasses(null);
@@ -3099,6 +3102,7 @@ public class Remote {
                   if (pass.has("idSetSource")) {
                      String pass_title = pass.getString("title");
                      JSONObject id = pass.getJSONObject("idSetSource");
+                     // stationId check
                      if (id.has("channel")) {
                         JSONObject channel = id.getJSONObject("channel");
                         String pass_channelNumber = null;
@@ -3126,6 +3130,33 @@ public class Remote {
                            } else {
                               warnings++;
                               log.warn("OnePass channelNumber=" + pass_channelNumber + " not available in guide channel list: " + pass_title);
+                           }
+                        }
+                     }
+                     
+                     // collectionId check
+                     if (id.has("collectionId")) {
+                        String collectionId = id.getString("collectionId");
+                        JSONObject j = new JSONObject();
+                        j.put("bodyId", bodyId_get());
+                        j.put("title", pass_title);
+                        j.put("collectionType", "series");
+                        JSONObject result = Command("offerSearch", j);
+                        if (result != null && result.has("offer")) {
+                           JSONArray offers = result.getJSONArray("offer");
+                           if (offers.length() > 0) {
+                              JSONObject offer = offers.getJSONObject(0);
+                              if (offer.has("collectionId")) {
+                                 //log.print(pass_title + " checking against collectionId=" + offer.getString("collectionId"));
+                                 if ( ! collectionId.equals(offer.getString("collectionId")) ) {
+                                    log.warn("Potential issue for OnePass: " + pass_title);
+                                    log.warn(
+                                       "OnePass collectionId=" + collectionId +
+                                       " doesn't match collectionId of upcoming recordings with same title"
+                                    );
+                                    warnings++;
+                                 }
+                              }
                            }
                         }
                      }
