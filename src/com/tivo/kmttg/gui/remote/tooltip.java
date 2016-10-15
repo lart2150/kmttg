@@ -52,6 +52,13 @@ public class tooltip {
          text += "Export selected TiVo ToDo list to a csv file which can be easily<br>";
          text += "imported into an Excel spreadsheet or equivalent.";
       }
+      else if (component.equals("trim_todo")){
+         text = "<b>Select Repeats</b><br>";
+         text += "Search for and select table entries that are likely repeats.<br>";
+         text += "Entries with same title and subtitle are treated as repeats.<br>";
+         text += "Entries containing a subtitle and same programId are treated as repeats.<br>";
+         text += "Use the <b>Cancel</b> button to unschedule selected entries.";
+      }
       else if (component.equals("tivo_guide")) {
          text = "Select TiVo for which to retrieve guide listings.<br>";
          text += "NOTE: If a series 3 TiVo is missing in this list go to Config-Tivos and provide<br>";
