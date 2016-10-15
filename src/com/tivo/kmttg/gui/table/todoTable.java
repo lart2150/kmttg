@@ -60,6 +60,7 @@ public class todoTable extends TableMap {
    public TableView<Tabentry> TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private String currentTivo = null;
+   private Boolean searchingRepeats = false;
    
    // TableMap overrides
    @Override
@@ -280,6 +281,8 @@ public class todoTable extends TableMap {
     }
     
     private void TABLERowSelected(Tabentry entry) {
+       if (searchingRepeats)
+          return;
        // Get column items for selected row 
        sortableDate s = entry.getDATE();
        if (s.folder) {
@@ -474,11 +477,13 @@ public class todoTable extends TableMap {
     public void trimRepeats(String tivoName) {
        if (! tivo_data.containsKey(tivoName))
           return;
+       searchingRepeats = true;
        TABLE.getSelectionModel().clearSelection(); // Clear selection
        Hashtable<String,JSONObject> map = new Hashtable<String,JSONObject>();
        JSONArray shows = tivo_data.get(tivoName);
        
        try {
+          int repeatCount = 0;
           for (int i=0; i<shows.length(); ++i) {
              JSONObject show = shows.getJSONObject(i);
              
@@ -490,6 +495,7 @@ public class todoTable extends TableMap {
                    JSONObject first = map.get(pid);
                    log.warn("Same programId as: " + TableUtil.makeShowSummary(first));
                    selectRow(show);
+                   repeatCount++;
                 }
                 else
                    map.put(pid, show);
@@ -503,13 +509,16 @@ public class todoTable extends TableMap {
                    JSONObject first = map.get(title);
                    log.warn("Same title & subtitle as: " + TableUtil.makeShowSummary(first));
                    selectRow(show);
+                   repeatCount++;
                 }
                 else
                    map.put(title, show);
              }
           }
+          log.print("Number of repeat entries selected in table: " + repeatCount);
        } catch (JSONException e) {
           log.error("trimRepeats - " + e.getMessage());
        }
+       searchingRepeats = false;
     }
 }
