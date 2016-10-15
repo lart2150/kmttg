@@ -148,6 +148,16 @@ public class todo {
          }
       });
       
+      Button trim = new Button("Select repeats");
+      trim.setTooltip(tooltip.getToolTip("trim_todo"));
+      trim.setOnAction(new EventHandler<ActionEvent>() {
+         public void handle(ActionEvent e) {
+            final String tivoName = tivo.getValue();
+            if (tivoName != null)
+               tab.trimRepeats(tivoName);
+         }
+      });
+      
       label = new Label();
       
       row1.getChildren().add(title);
@@ -157,6 +167,7 @@ public class todo {
       row1.getChildren().add(cancel);
       row1.getChildren().add(modify);
       row1.getChildren().add(export);
+      row1.getChildren().add(trim);
       row1.getChildren().add(label);
       
       tab = new todoTable();

@@ -308,6 +308,17 @@ public class todoTable extends TableMap {
        }
     }
     
+    private void selectRow(JSONObject json) {
+       for (int row=0; row<TABLE.getItems().size(); ++row) {
+          JSONObject rowData = GetRowData(row);
+          if (rowData == json) {
+             TABLE.getSelectionModel().select(row);
+             TableUtil.scrollToCenter(TABLE, row);
+             TABLE.requestFocus();
+          }
+       }
+    }
+    
     // Handle keyboard presses
     private void KeyPressed(KeyEvent e) {
        if (e.isControlDown())
@@ -456,6 +467,49 @@ public class todoTable extends TableMap {
              entries.put(json);
           }
           TableUtil.recordSingleCB(tivoName, entries);
+       }
+    }
+    
+    // Look for repeated recordings to trim
+    public void trimRepeats(String tivoName) {
+       if (! tivo_data.containsKey(tivoName))
+          return;
+       TABLE.getSelectionModel().clearSelection(); // Clear selection
+       Hashtable<String,JSONObject> map = new Hashtable<String,JSONObject>();
+       JSONArray shows = tivo_data.get(tivoName);
+       
+       try {
+          for (int i=0; i<shows.length(); ++i) {
+             JSONObject show = shows.getJSONObject(i);
+             
+             // Repeated programId
+             String pid = id.programId(show);
+             if (pid != null && show.has("subtitle")) {
+                if (map.containsKey(pid)) {
+                   log.warn("Repeat: " + TableUtil.makeShowSummary(show));
+                   JSONObject first = map.get(pid);
+                   log.warn("Same programId as: " + TableUtil.makeShowSummary(first));
+                   selectRow(show);
+                }
+                else
+                   map.put(pid, show);
+             }
+             
+             // Repeated title + subtitle
+             if (show.has("title") && show.has("subtitle")) {
+                String title = show.getString("title") + " - " + show.getString("subtitle");
+                if (map.containsKey(title)) {
+                   log.warn("Repeat: " + TableUtil.makeShowSummary(show));
+                   JSONObject first = map.get(title);
+                   log.warn("Same title & subtitle as: " + TableUtil.makeShowSummary(first));
+                   selectRow(show);
+                }
+                else
+                   map.put(title, show);
+             }
+          }
+       } catch (JSONException e) {
+          log.error("trimRepeats - " + e.getMessage());
        }
     }
 }
