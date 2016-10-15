@@ -719,6 +719,22 @@ public class TableUtil {
       return channel;
    }
    
+   private static String makeDate(JSONObject json) {
+      if (json.has("startTime")) {
+         SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy hh:mm a");
+         long start = getStartTime(json);
+         return sdf.format(start);
+      }
+      return "";
+   }
+   
+   public static String makeShowSummary(JSONObject json) {
+      String date = makeDate(json);
+      String channel = makeChannelName(json);
+      String title = makeShowTitle(json);
+      return date + " " + channel + " " + title;
+   }
+   
    // Used by TABLERowSelected callbacks for printing show info to message window
    public static String makeShowSummary(sortableDate s, sortableDuration dur) {
       try {
