@@ -86,7 +86,7 @@ public class todoTable extends TableMap {
    
    public todoTable() {
       TABLE = new TableView<Tabentry>();
-      TABLE.getSelectionModel().setSelectionMode(SelectionMode.SINGLE); // Allow only single row selection
+      TABLE.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE); // Allow multiple row selection
       TABLE.setRowFactory(new ColorRowFactory()); // For row background color handling
       // Special sort listener to set sort order to ascending date when no sort is selected
       TABLE.getSortOrder().addListener(new ListChangeListener<TableColumn<Tabentry, ?>>() {
@@ -412,44 +412,46 @@ public class todoTable extends TableMap {
     }
     
     public void DeleteCB() {
-       int[] selected = TableUtil.GetSelectedRows(TABLE);
-       if (selected == null || selected.length != 1) {
-          log.error("Must select a single table row.");
+       Integer[] selected = TableUtil.highToLow(TableUtil.GetSelectedRows(TABLE));
+       if (selected == null) {
+          log.error("Must select 1 or more table rows.");
           return;
        }
        if (currentTivo == null) {
           log.error("Table not initialized");
           return;
        }
-       int row;
        String title;
        JSONObject json;
        Remote r = config.initRemote(currentTivo);
        if (r.success) {
-          // NOTE: Intentionally only remove 1 row at a time because removing rows from table
-          row = selected[0];
-          json = GetRowData(row);
-          if (json != null) {
-             try {
-                title = json.getString("title");
-                if (json.has("subtitle"))
-                   title += " - " + json.getString("subtitle");
-                log.warn("Cancelling ToDo show on TiVo '" + currentTivo + "': " + title);
-                JSONObject o = new JSONObject();
-                JSONArray a = new JSONArray();
-                a.put(json.getString("recordingId"));
-                o.put("recordingId", a);
-                if ( r.Command("Cancel", o) != null ) {
-                   TABLE.getItems().remove(row);
-                   tivo_data.get(currentTivo).remove(row);
-                   refreshNumber();
+          for (int row : selected) {
+             json = GetRowData(row);
+             if (json != null) {
+                try {
+                   title = json.getString("title");
+                   if (json.has("subtitle"))
+                      title += " - " + json.getString("subtitle");
+                   log.warn("Cancelling ToDo show on TiVo '" + currentTivo + "': " + title);
+                   JSONObject o = new JSONObject();
+                   JSONArray a = new JSONArray();
+                   a.put(json.getString("recordingId"));
+                   o.put("recordingId", a);
+                   if ( r.Command("Cancel", o) != null ) {
+                      tivo_data.get(currentTivo).remove(row);
+                      refreshNumber();
+                   } else {
+                      // Remove from selection list since cancel failed
+                      TABLE.getSelectionModel().clearSelection(row);
+                   }
+                } catch (JSONException e1) {
+                   log.error("ToDo cancel - " + e1.getMessage());
                 }
-             } catch (JSONException e1) {
-                log.error("ToDo cancel - " + e1.getMessage());
              }
           }
           r.disconnect();                   
        }
+       TABLE.getItems().removeAll(TABLE.getSelectionModel().getSelectedItems());
     }
     
     // Refresh the # SHOWS label in the ToDo tab
