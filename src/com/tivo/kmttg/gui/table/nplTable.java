@@ -704,7 +704,7 @@ public class nplTable extends TableMap {
                @Override public Void call() {
                   Remote r = config.initRemote(tivoName);
                   if (r.success) {
-                     r.getClipData(contentId);
+                     r.printClipData(contentId);
                      r.disconnect();
                   }
                   return null;
@@ -752,6 +752,16 @@ public class nplTable extends TableMap {
             }
          }
       }*/
+      else if (keyCode == KeyCode.V) {
+         sortableDate s = getFirstSelected(); if (s == null) return;
+         if ( ! s.folder && s.data != null ) {
+            if (s.data.containsKey("clipMetadataId") && s.data.containsKey("recordingId")) {
+               SkipManager.visualDetect(tivoName, s.data);
+            } else {
+               log.error("No SkipMode data available for this show");
+            }
+         }
+      }
       else if (keyCode == KeyCode.Z) {
          if (SkipManager.skipEnabled()) {
             if (SkipManager.isMonitoring(tivoName)) {

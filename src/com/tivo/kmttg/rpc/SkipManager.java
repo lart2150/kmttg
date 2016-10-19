@@ -428,6 +428,149 @@ public class SkipManager {
       }
    }
       
+   // For Skip enabled program jump to end of playback, then use channel down
+   // presses to find commercial end points backwards
+   // Backwards way used because doing it forwards could result in false first point
+   public static synchronized Stack<Long> visualDetect(String tivoName, Hashtable<String,String> data) {
+      String recordingId = data.get("recordingId");
+      String contentId = data.get("contentId");
+      Long point = -1L, lastPoint = -1L;
+      int delta = 5000;
+      int sleep_time = 900;
+      Stack<Long> points = new Stack<Long>();
+      Remote r = new Remote(tivoName);
+      if (r.success) {
+         try {
+            
+            // Obtain clipData
+            JSONObject clipData = r.getClipData(contentId);
+            if (clipData == null) {
+               r.disconnect();
+               log.error("Failed to retrieve SkipMode data for contentId: " + contentId);
+               return null;
+            }
+            // This Stack holds the show segment lengths to compute stop points with
+            Stack<Long> lengths = getSegmentLengths(clipData);
+            
+            // Use TiVo channelDown to show start cut points
+            long starting = 0;
+            
+            // Start play
+            JSONObject j = new JSONObject();
+            j.put("id", recordingId);
+            JSONObject result = r.Command("Playback", j);
+            if (result == null)
+               return null;
+            Thread.sleep(sleep_time);
+            
+            // Save current position and get end point
+            long end = 0L;
+            result = r.Command("Position", new JSONObject());
+            if (result != null ) {
+               if (result.has("position"))
+                  starting = result.getLong("position");
+               if (result.has("end"))
+                  end = result.getLong("end");
+               else {
+                  Thread.sleep(sleep_time);
+                  result = r.Command("Position", new JSONObject());
+                  if (result != null && result.has("end"))
+                     end = result.getLong("end");
+               }
+            }
+            
+            if (end == 0) {
+               log.error("Could not determine playback end point");
+               return null;
+            }
+            
+            // Jump to end
+            end -= 5000;
+            JSONObject json = new JSONObject();
+            json.put("offset", end);
+            result = r.Command("Jump", json);
+            Thread.sleep(sleep_time);
+            if (result != null) {
+               json.remove("offset");
+               Boolean go = true;
+               while (go) {
+                  // Send Channel down press and collect time information
+                  json.put("event", "channelDown");
+                  result = r.Command("keyEventSend", json);
+                  json.put("event", "pause");
+                  result = r.Command("keyEventSend", json);
+                  
+                  // Get position
+                  Thread.sleep(sleep_time);
+                  result = r.Command("Position", new JSONObject());
+                  if (result != null && result.has("position"))
+                     point = result.getLong("position");
+                  
+                  if (Math.abs(point-lastPoint) > delta)
+                     points.push(point);
+                  else
+                     go = false;
+                  lastPoint = point;
+                  json.put("event", "pause");
+                  result = r.Command("keyEventSend", json);
+                  Thread.sleep(sleep_time);
+               } // while
+               
+               // Jump back to starting position
+               json.remove("event");
+               json.put("offset", starting);
+               result = r.Command("Jump", json);
+               
+               // TiVo button press
+               Thread.sleep(sleep_time);
+               json.remove("offset");
+               json.put("event", "tivo");
+               result = r.Command("keyEventSend", json);
+            }
+            
+            points = reverseStack(points);
+            int count = 1;
+            for (Long start : points) {
+               Long stop = start + lengths.elementAt(count-1);
+               log.print("segment " + count + ": " + toMinSec(start) + " - " + toMinSec(stop));
+               count++;
+            }
+            
+         } catch (Exception e) {
+            log.error("visualDetect - " + e.getMessage());
+         }
+         r.disconnect();
+      }
+
+      return points;
+   }
+   
+   private static Stack<Long> getSegmentLengths(JSONObject clipData) {
+      Stack<Long> lengths = new Stack<Long>();
+      try {
+         if (clipData.has("segment")) {
+            JSONArray segments = clipData.getJSONArray("segment");
+            for (int i=0; i<segments.length(); ++i) {
+               JSONObject segment = segments.getJSONObject(i);
+               long startOffset = Long.parseLong(segment.getString("startOffset"));
+               long endOffset = Long.parseLong(segment.getString("endOffset"));
+               lengths.push(endOffset-startOffset);
+            }
+         }
+      } catch (JSONException e) {
+         log.error("getSegmentLengths - " + e.getMessage());
+      }
+      return lengths;
+   }
+   
+   private static Stack<Long> reverseStack(Stack<Long> stack){
+      Stack<Long> reverse = new Stack<Long>();
+      while(!stack.empty()){
+         reverse.push(stack.pop());
+      }
+      return reverse;
+   }
+      
    public static synchronized String toMinSec(long msecs) {
       debug.print("msecs=" + msecs);
       return com.tivo.kmttg.captions.util.toHourMinSec(msecs);

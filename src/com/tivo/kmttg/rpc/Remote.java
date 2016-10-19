@@ -3037,44 +3037,44 @@ public class Remote {
    }
    
    // RPC query for tivo.com SKIP data based on contentId
-   public void getClipData(String contentId) {
+   public JSONObject getClipData(String contentId) {
       try {
          JSONObject json = new JSONObject();
          json.put("contentId", contentId);
          JSONObject result = Command("clipMetadataSearch", json);
          if (result != null && result.has("clipMetadata")) {
-            JSONArray clipId = new JSONArray();
-            JSONArray clipMetadata = result.getJSONArray("clipMetadata");
-            for (int i=0; i<clipMetadata.length(); ++i) {
-               JSONObject clip = clipMetadata.getJSONObject(i);
-               clipId.put(clip.getString("clipMetadataId"));
-            }
+            String clipMetadataId = result.getJSONArray("clipMetadata").getJSONObject(0).getString("clipMetadataId");
             json.remove("contentId");
-            json.put("clipMetadataId", clipId);
+            JSONArray idArray = new JSONArray();
+            idArray.put(clipMetadataId);
+            json.put("clipMetadataId", idArray);
             result = Command("clipMetadataSearch", json);
             if (result != null && result.has("clipMetadata")) {
-               clipMetadata = result.getJSONArray("clipMetadata");
-               log.warn(
-                  "\nSKIP data available for contentId: " + contentId +
-                  " (entries=" + clipMetadata.length() + ")"
-               );
-               for (int i=0; i<clipMetadata.length(); ++i) {
-                  JSONObject data = result.getJSONArray("clipMetadata").getJSONObject(i);
-                  if (data.has("syncMark"))
-                     data.remove("syncMark");
-                  data.put("syncMark", "<syncMark array removed for display purposes>");
-                  log.print(data.toString(3));
-               }
-            } else {
-               log.warn("\nSKIP data not available for contentId: " + contentId);
+               return result.getJSONArray("clipMetadata").getJSONObject(0);
             }
-         } else {
-            log.warn("\nSKIP data not available for contentId: " + contentId);
          }
       } catch (JSONException e) {
          log.error("getClipData - " + e.getMessage());
       }
-      disconnect();
+      return null;
+   }
+   
+   // RPC query for tivo.com SKIP data based on contentId
+   public void printClipData(String contentId) {
+      try {
+         JSONObject data = getClipData(contentId);
+         if (data != null) {
+            log.warn("\nSKIP data available for contentId: " + contentId);
+            if (data.has("syncMark"))
+               data.remove("syncMark");
+            data.put("syncMark", "<syncMark array removed for display purposes>");
+            log.print(data.toString(3));
+         } else {
+            log.warn("\nSKIP data not available for contentId: " + contentId);
+         }
+      } catch (JSONException e) {
+         log.error("printClipData - " + e.getMessage());
+      }
    }
    
    // Go through all OnePasses and check that stationId of each OnePass has a corresponding

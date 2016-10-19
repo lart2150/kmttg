@@ -381,7 +381,7 @@ public class todoTable extends TableMap {
                    @Override public Void call() {
                       Remote r = config.initRemote(currentTivo);
                       if (r.success) {
-                         r.getClipData(contentId);
+                         r.printClipData(contentId);
                          r.disconnect();
                       }
                       return null;
