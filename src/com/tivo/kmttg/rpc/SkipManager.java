@@ -529,12 +529,28 @@ public class SkipManager {
             }
             
             points = reverseStack(points);
-            int count = 1;
+            Stack<Hashtable<String,Long>> cuts = new Stack<Hashtable<String,Long>>();
+            int count = 0;
+            Long stop;
             for (Long start : points) {
-               Long stop = start + lengths.elementAt(count-1);
-               log.print("segment " + count + ": " + toMinSec(start) + " - " + toMinSec(stop));
+               if (count < lengths.size())
+                  stop = start + lengths.elementAt(count);
+               else {
+                  log.warn("NOTE: End of segment # " + count + " not available");
+                  stop = end;
+               }
+               log.print("" + count + ": start=" + toMinSec(start) + " end=" + toMinSec(stop));
+               Hashtable<String,Long> h = new Hashtable<String,Long>();
+               h.put("start", start);
+               h.put("end", stop);
+               cuts.push(h);
                count++;
             }
+            
+            // Save entry to AutoSkip table with offset=0
+            SkipManager.saveEntry(
+               contentId, data.get("offerId"), 0L, data.get("title"), tivoName, cuts
+            );
             
          } catch (Exception e) {
             log.error("visualDetect - " + e.getMessage());
