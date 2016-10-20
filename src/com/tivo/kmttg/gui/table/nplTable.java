@@ -31,6 +31,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -41,6 +42,9 @@ import javafx.collections.ListChangeListener;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SortEvent;
 import javafx.scene.control.TreeItem;
@@ -48,6 +52,7 @@ import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.input.DragEvent;
@@ -755,11 +760,7 @@ public class nplTable extends TableMap {
       else if (keyCode == KeyCode.V) {
          sortableDate s = getFirstSelected(); if (s == null) return;
          if ( ! s.folder && s.data != null ) {
-            if (s.data.containsKey("clipMetadataId") && s.data.containsKey("recordingId")) {
-               SkipManager.visualDetect(tivoName, s.data);
-            } else {
-               log.error("No SkipMode data available for this show");
-            }
+            visualDetect(s);
          }
       }
       else if (keyCode == KeyCode.Z) {
@@ -1692,6 +1693,35 @@ public class nplTable extends TableMap {
       } catch (IOException e) {
          log.error("exportNPL - " + e.getMessage());
       }
+   }
+   
+   private void visualDetect(sortableDate s) {
+      Platform.runLater(new Runnable() {
+         @Override
+         public void run() {
+            if (s.data.containsKey("clipMetadataId") && s.data.containsKey("contentId")) {
+               Boolean go = true;
+               if (SkipManager.hasEntry(s.data.get("contentId"))) {
+                  go = false;
+                  Alert alert = new Alert(AlertType.CONFIRMATION);
+                  Button cancel = (Button)alert.getDialogPane().lookupButton(ButtonType.CANCEL);
+                  cancel.setDefaultButton(true);
+                  alert.setTitle("Confirm");
+                  config.gui.setFontSize(alert, config.FontSize);
+                  alert.setContentText("Override existing AutoSkip data?");
+                  Optional<ButtonType> result = alert.showAndWait();
+                  if (result.get() == ButtonType.OK) {
+                     go = true;
+                  }
+               }
+               if (go) {
+                  SkipManager.visualDetect(tivoName, s.data);
+               }
+            } else {
+               log.error("No SkipMode data available for this show");
+            }
+         }
+      });
    }
 
 }
