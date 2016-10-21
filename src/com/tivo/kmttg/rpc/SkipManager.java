@@ -504,8 +504,15 @@ public class SkipManager {
                   json.put("offset", end);
                   result = r.Command("Jump", json);
                   Thread.sleep(sleep_time);
+                  json.remove("offset");
+                  
+                  // Reverse a little then pause just in case beyond end of show
+                  json.put("event", "reverse");
+                  r.Command("keyEventSend", json);
+                  Thread.sleep(sleep_time);
+                  json.put("event", "play");
+                  r.Command("keyEventSend", json);
                   if (result != null) {
-                     json.remove("offset");
                      Boolean go = true;
                      while (go) {
                         // Send Channel down press and collect time information
