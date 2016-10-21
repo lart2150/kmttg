@@ -451,8 +451,10 @@ public class todoTable extends TableMap {
           }
           r.disconnect();                   
        }
+       int count = TABLE.getSelectionModel().getSelectedItems().size();
        TABLE.getItems().removeAll(TABLE.getSelectionModel().getSelectedItems());
-       TABLE.getSelectionModel().clearSelection();
+       if (count > 1)
+          TABLE.getSelectionModel().clearSelection();
     }
     
     // Refresh the # SHOWS label in the ToDo tab
