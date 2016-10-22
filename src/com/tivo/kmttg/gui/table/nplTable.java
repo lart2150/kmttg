@@ -720,7 +720,10 @@ public class nplTable extends TableMap {
       } else if (keyCode == KeyCode.E) {
          sortableDate s = getFirstSelected(); if (s == null) return;
          if (s.data.containsKey("contentId") && s.data.containsKey("duration")) {
-            SkipImport.vrdExport(s.data);
+            if (config.VRD == 1)
+               SkipImport.vrdExport(s.data);
+            else
+               SkipImport.edlExport(s.data);
          }
       } else if (keyCode == KeyCode.T) {
          TableUtil.toggleTreeState(NowPlaying);
