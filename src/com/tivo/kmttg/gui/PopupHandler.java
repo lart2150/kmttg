@@ -154,14 +154,15 @@ public class PopupHandler {
             items.add(new PopupPair("Episode Info [n]", KeyCode.N, tivoName));
             items.add(new PopupPair("Display RPC data [r]", KeyCode.R, tivoName));
          if (SkipManager.skipEnabled() && config.rpcEnabled(tivoName)) {
+            items.add(new PopupPair("Import AutoSkip cuts [c]", KeyCode.C, tivoName));
             items.add(new PopupPair("Export AutoSkip cuts [e]", KeyCode.E, tivoName));
             items.add(new PopupPair("AutoSkip from SkipMode [v]", KeyCode.V, tivoName));
             items.add(new PopupPair("Play in AutoSkip mode [z]", KeyCode.Z, tivoName));
          }
-         // Intentionally hidden for now
-         //if (config.rpcEnabled(tivoName)) {
-         //   items.add(new PopupPair("Display SKIP data [k]", KeyCode.K, tivoName));
-         //}
+         if (config.rpcEnabled(tivoName)) {
+            // Intentionally hidden for now
+            //items.add(new PopupPair("Display SKIP data [k]", KeyCode.K, tivoName));
+         }
          items.add(new PopupPair("Web query [q]", KeyCode.Q, tivoName));
          items.add(new PopupPair("Tree state toggle [t]", KeyCode.T, tivoName));
          items.add(new PopupPair("Add to auto transfers", config.gui.addSelectedTitlesMenuItem, tivoName));
