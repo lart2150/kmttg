@@ -153,8 +153,10 @@ public class PopupHandler {
          if (config.rpcEnabled(tivoName) || config.mindEnabled(tivoName))
             items.add(new PopupPair("Episode Info [n]", KeyCode.N, tivoName));
             items.add(new PopupPair("Display RPC data [r]", KeyCode.R, tivoName));
-         if (SkipManager.skipEnabled() && config.VRD == 1 && config.rpcEnabled(tivoName)) {
-            items.add(new PopupPair("Export AutoSkip to VPrj [e]", KeyCode.E, tivoName));
+         if (SkipManager.skipEnabled() && config.rpcEnabled(tivoName)) {
+            items.add(new PopupPair("Export AutoSkip cuts [e]", KeyCode.E, tivoName));
+            items.add(new PopupPair("AutoSkip from SkipMode [v]", KeyCode.V, tivoName));
+            items.add(new PopupPair("Play in AutoSkip mode [z]", KeyCode.Z, tivoName));
          }
          // Intentionally hidden for now
          //if (config.rpcEnabled(tivoName)) {
