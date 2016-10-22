@@ -930,16 +930,16 @@ public class nplTable extends TableMap {
       folderize(h); // populates folders hash
       viewedFilter(h); // populates entries_viewed hash
       
+      if (config.showHistoryInTable == 1) {
+         // Update history hash (used for highlighting entries with IDs in auto.history)
+         auto.keywordMatchHistoryFast("bogus", true);
+      }
+      
       // Update table listings
       RefreshNowPlaying(entries);
             
       // Adjust column widths to data
       TableUtil.autoSizeTableViewColumns(NowPlaying, false);
-      
-      if (config.showHistoryInTable == 1) {
-         // Update history hash (used for highlighting entries with IDs in auto.history)
-         auto.keywordMatchHistoryFast("bogus", true);
-      }
    }
    
    // Refresh table with given NowPlaying entries
@@ -1024,6 +1024,12 @@ public class nplTable extends TableMap {
    public void displayUpdate(Boolean viewed_filter) {
       if (entries == null || entries_viewed == null)
          return;
+      
+      if (config.showHistoryInTable == 1) {
+         // Update history hash (used for highlighting entries with IDs in auto.history)
+         auto.keywordMatchHistoryFast("bogus", true);
+      }
+
       if (entries.size() == entries_viewed.size()) {
          log.warn("NOTE: Looks like NPL list is already filtered. Refresh with 'Partially Viewed' turned off to get unfiltered list back.");
       }
@@ -1037,11 +1043,6 @@ public class nplTable extends TableMap {
       
       // Adjust column widths to data
       TableUtil.autoSizeTableViewColumns(NowPlaying, false);
-      
-      if (config.showHistoryInTable == 1) {
-         // Update history hash (used for highlighting entries with IDs in auto.history)
-         auto.keywordMatchHistoryFast("bogus", true);
-      }
    }
    
    // Simple string matching to string array
