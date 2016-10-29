@@ -1700,6 +1700,10 @@ public class nplTable extends TableMap {
    }
    
    private void visualDetect(sortableDate s) {
+      if (config.visualDetect_running) {
+         log.error("Please wait until current 'AutoSkip from SkipMode' run finishes before starting another");
+         return;
+      }
       Platform.runLater(new Runnable() {
          @Override
          public void run() {

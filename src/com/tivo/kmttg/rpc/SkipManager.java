@@ -436,6 +436,7 @@ public class SkipManager {
    public static synchronized void visualDetect(String tivoName, Hashtable<String,String> data) {
       Task<Void> task = new Task<Void>() {
          @Override public Void call() {
+            config.visualDetect_running = true;
             log.warn(
                tivoName + ": Scanning SkipMode cut points for '" +
                data.get("title") + "'"
@@ -457,6 +458,7 @@ public class SkipManager {
                   if (clipData == null) {
                      r.disconnect();
                      log.error("Failed to retrieve SkipMode data for contentId: " + contentId);
+                     config.visualDetect_running = false;
                      return null;
                   }
                   // This Stack holds the show segment lengths to compute stop points with
@@ -469,8 +471,10 @@ public class SkipManager {
                   JSONObject j = new JSONObject();
                   j.put("id", recordingId);
                   JSONObject result = r.Command("Playback", j);
-                  if (result == null)
+                  if (result == null) {
+                     config.visualDetect_running = false;
                      return null;
+                  }
                   Thread.sleep(sleep_time);
                   
                   // Save current position and get end point
@@ -495,6 +499,7 @@ public class SkipManager {
                      js.put("event", "tivo");
                      result = r.Command("keyEventSend", js);
                      r.disconnect();
+                     config.visualDetect_running = false;
                      return null;
                   }
                   
@@ -578,6 +583,7 @@ public class SkipManager {
                }
                r.disconnect();
             }
+            config.visualDetect_running = false;
             return null;
          }
       };

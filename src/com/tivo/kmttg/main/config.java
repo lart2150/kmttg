@@ -241,6 +241,7 @@ public class config {
    public static int autoskip_jumpToEnd = 0;
    public static int autoskip_padding = 0;
    public static Hashtable<String,Boolean> autoskip_ServiceItems = new Hashtable<String,Boolean>();
+   public static Boolean visualDetect_running = false;
    
    public static Stack<String> parse() {
       debug.print("");
