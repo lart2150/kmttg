@@ -157,6 +157,7 @@ public class PopupHandler {
             items.add(new PopupPair("Import AutoSkip cuts [c]", KeyCode.C, tivoName));
             items.add(new PopupPair("Export AutoSkip cuts [e]", KeyCode.E, tivoName));
             items.add(new PopupPair("AutoSkip from SkipMode [v]", KeyCode.V, tivoName));
+            items.add(new PopupPair("AutoSkip from SkipMode - ALL [w]", KeyCode.W, tivoName));
             items.add(new PopupPair("Play in AutoSkip mode [z]", KeyCode.Z, tivoName));
          }
          if (config.rpcEnabled(tivoName)) {

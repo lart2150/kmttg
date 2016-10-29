@@ -766,6 +766,9 @@ public class nplTable extends TableMap {
             visualDetect(s);
          }
       }
+      else if (keyCode == KeyCode.W) {
+         visualDetectAll();
+      }
       else if (keyCode == KeyCode.Z) {
          if (SkipManager.skipEnabled()) {
             if (SkipManager.isMonitoring(tivoName)) {
@@ -1723,13 +1726,45 @@ public class nplTable extends TableMap {
                   }
                }
                if (go) {
-                  SkipManager.visualDetect(tivoName, s.data);
+                  Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
+                  stack.push(s.data);
+                  SkipManager.visualDetect(tivoName, stack);
                }
             } else {
                log.error("No SkipMode data available for this show");
             }
          }
       });
+   }
+   
+   private void visualDetectAll() {
+      // Build stack of eligible entries to run visualDetect on
+      Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
+      for (Hashtable<String,String> entry : entries) {
+         if ( ! shouldHideEntry(entry) && entry.containsKey("contentId")) {
+            if (entry.containsKey("clipMetadataId") && ! SkipManager.hasEntry(entry.get("contentId"))) {
+               stack.push(entry);
+            }
+         }
+      }
+      if (stack.isEmpty()) {
+         log.error("No entries found for processing AutoSkip from SkipMode");
+      } else {
+         log.warn("" + stack.size() + " entries found to process for AutoSkip from SkipMode:");
+         for (Hashtable<String,String> entry : stack)
+            log.warn("   " + entry.get("title"));
+         Alert alert = new Alert(AlertType.CONFIRMATION);
+         Button cancel = (Button)alert.getDialogPane().lookupButton(ButtonType.CANCEL);
+         cancel.setDefaultButton(true);
+         alert.setTitle("Confirm");
+         config.gui.setFontSize(alert, config.FontSize);
+         alert.setContentText("Run AutoSkip from SkipMode for " + stack.size() + " entries (show in message window)?");
+         Optional<ButtonType> result = alert.showAndWait();
+         if (result.get() != ButtonType.OK) {
+            return;
+         }
+         SkipManager.visualDetect(tivoName, stack);
+      }
    }
 
 }
