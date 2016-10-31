@@ -153,7 +153,9 @@ public class channelsTable extends TableMap {
          try {
             if (entry.has("callSign"))
                channelName = new jsonString(entry, entry.getString("callSign"));
-            if (entry.has("channelNumber") && entry.has("callSign"))
+            else
+               channelName = new jsonString(entry, "To be announced");
+            if (entry.has("channelNumber"))
                channelNum = new sortableChannelNum(entry.getString("channelNumber"));
             if (entry.has("isReceived"))
                received.set(entry.getBoolean("isReceived"));                    
