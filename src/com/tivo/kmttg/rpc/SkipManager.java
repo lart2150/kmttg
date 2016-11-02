@@ -545,10 +545,10 @@ public class SkipManager {
                         json.put("offset", starting);
                         result = r.Command("Jump", json);
                         
-                        // TiVo button press
+                        // liveTv button press
                         Thread.sleep(sleep_time);
                         json.remove("offset");
-                        json.put("event", "tivo");
+                        json.put("event", "liveTv");
                         result = r.Command("keyEventSend", json);
                      }
                      
