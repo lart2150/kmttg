@@ -464,8 +464,13 @@ public class SkipManager {
                      // This Stack holds the show segment lengths to compute stop points with
                      Stack<Long> lengths = getSegmentLengths(clipData);
                      
-                     // Use TiVo channelDown to show start cut points
+                     // Sequence of button simulated button presses to discover show start points
                      long starting = 0;
+                     if (data.containsKey("TimeOffset"))
+                        starting = Long.parseLong(data.get("TimeOffset"))*1000;
+                     long end = 60*60*5*1000;
+                     if (data.containsKey("duration"))
+                        end = Long.parseLong(data.get("duration"));
                      
                      // Start play
                      JSONObject j = new JSONObject();
@@ -475,32 +480,7 @@ public class SkipManager {
                         continue;
                      }
                      Thread.sleep(sleep_time);
-                     
-                     // Save current position and get end point
-                     long end = 0L;
-                     result = r.Command("Position", new JSONObject());
-                     if (result != null ) {
-                        if (result.has("position"))
-                           starting = result.getLong("position");
-                        if (result.has("end") && result.getLong("end") != 0)
-                           end = result.getLong("end");
-                        else {
-                           Thread.sleep(2*sleep_time);
-                           result = r.Command("Position", new JSONObject());
-                           if (result != null && result.has("end"))
-                              end = result.getLong("end");
-                        }
-                     }
-                     
-                     if (end == 0) {
-                        log.error("Could not determine playback end point, try again.");
-                        JSONObject js = new JSONObject();
-                        js.put("event", "tivo");
-                        result = r.Command("keyEventSend", js);
-                        r.disconnect();
-                        continue;
-                     }
-                     
+                                          
                      // Jump to end
                      end -= 5000;
                      JSONObject json = new JSONObject();
