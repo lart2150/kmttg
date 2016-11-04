@@ -95,8 +95,13 @@ public class adcut extends baseTask implements Serializable {
       }
             
       if ( ! file.isFile(job.mpegFile) ) {
-         log.error("mpeg file not found: " + job.mpegFile);
-         schedule = false;
+         if ( file.isFile(job.tivoFile)) {
+            log.warn("adcut: mpeg file not found, so using TiVo file instead");
+            job.mpegFile = job.tivoFile;
+         } else {
+            log.error("mpeg file not found: " + job.mpegFile);
+            schedule = false;
+         }
       }
       
       if (schedule) {

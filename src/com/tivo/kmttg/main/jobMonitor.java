@@ -1134,30 +1134,43 @@ public class jobMonitor {
       }
       
       if (qsfix || (decrypt && config.VrdDecrypt == 1)) {
-         // VRD qsfix
-         jobData job = new jobData();
-         job.startFile    = startFile;
-         job.source       = source;
-         job.tivoName     = tivoName;
-         job.type         = "qsfix";
-         job.name         = "VRD";
-         job.mpegFile     = mpegFile;
-         job.mpegFile_cut = mpegFile_cut;
-         job.mpegFile_fix = mpegFile_fix;
-         if (config.VrdDecrypt == 1) {
-            job.tivoFile  = tivoFile;
-            if (twpdelete && entry != null && entry.containsKey("url")) {
-               job.twpdelete = true;
-               job.url       = entry.get("url");
-            }
-            if (rpcdelete && entry != null) {
-               job.rpcdelete  = true;
-               job.entry = entry;
-            }
+         Boolean doit = true;
+         if (config.VrdDecrypt == 1 && comcut) {
+            // Don't need to decrypt if VrdDecrypt enabled (TiVo Desktop installed) and
+            // comcut task enabled
+            doit = false;
          }
-         if (! qsfix)
-            job.qsfix_mode = "decrypt";
-         submitNewJob(job);
+         if (! doit) {
+            // If Ad Detect enabled with comskip then mpg file required, so qsfix needed
+            if (comskip && config.UseAdscan == 0)
+               doit = true;
+         }
+         if (doit) {
+            // VRD qsfix
+            jobData job = new jobData();
+            job.startFile    = startFile;
+            job.source       = source;
+            job.tivoName     = tivoName;
+            job.type         = "qsfix";
+            job.name         = "VRD";
+            job.mpegFile     = mpegFile;
+            job.mpegFile_cut = mpegFile_cut;
+            job.mpegFile_fix = mpegFile_fix;
+            if (config.VrdDecrypt == 1) {
+               job.tivoFile  = tivoFile;
+               if (twpdelete && entry != null && entry.containsKey("url")) {
+                  job.twpdelete = true;
+                  job.url       = entry.get("url");
+               }
+               if (rpcdelete && entry != null) {
+                  job.rpcdelete  = true;
+                  job.entry = entry;
+               }
+            }
+            if (! qsfix)
+               job.qsfix_mode = "decrypt";
+            submitNewJob(job);
+         }
       }
       
       if (streamfix) {
@@ -1182,6 +1195,7 @@ public class jobMonitor {
          } else {
             if (config.VRD == 1 && config.UseAdscan == 1 && ! specs.containsKey("SkipPoint")) {
                jobData job = new jobData();
+               job.tivoFile     = tivoFile;
                job.startFile    = startFile;
                job.source       = source;
                job.tivoName     = tivoName;
@@ -1284,6 +1298,7 @@ public class jobMonitor {
                job.tivoName     = tivoName;
                job.type         = "adcut";
                job.name         = "VRD";
+               job.tivoFile     = tivoFile;
                job.mpegFile     = mpegFile;
                job.mpegFile_cut = mpegFile_cut;
                job.edlFile      = edlFile;
