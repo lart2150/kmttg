@@ -98,7 +98,14 @@ public class vrdreview extends baseTask implements Serializable {
       
       // Make a vprjFile with no cuts if requested
       if (config.VrdReview_noCuts == 1 && ! file.isFile(job.vprjFile)) {
-         schedule = createBasicVprjFile(job.vprjFile, sourceFile);
+         if (job.entry != null &&
+             job.entry.containsKey("contentId") &&
+             SkipManager.hasEntry(job.entry.get("contentId"))) {
+            log.warn("vrdreview: Using AutoSkip entry cut points");
+            SkipImport.vrdExport(job.entry);
+         } else {
+            schedule = createBasicVprjFile(job.vprjFile, sourceFile);
+         }
       }
       
       if ( ! file.isFile(job.vprjFile) ) {

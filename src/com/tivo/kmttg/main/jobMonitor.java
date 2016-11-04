@@ -40,6 +40,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
+import com.tivo.kmttg.rpc.SkipImport;
 import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.task.*;
 
@@ -1173,36 +1174,43 @@ public class jobMonitor {
       }
       
       if (comskip) {
-         if (config.VRD == 1 && config.UseAdscan == 1 && ! specs.containsKey("SkipPoint")) {
-            jobData job = new jobData();
-            job.startFile    = startFile;
-            job.source       = source;
-            job.tivoName     = tivoName;
-            job.type         = "adscan";
-            job.name         = "VRD";
-            job.mpegFile     = mpegFile;
-            job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
-            // Setup job for skip table import if relevant
-            skipImport(mode, tivoName, job, entry);
-            submitNewJob(job);
-         } else {
-            jobData job = new jobData();
-            job.startFile    = startFile;
-            job.source       = source;
-            if (specs.containsKey("source"))
-               job.source    = (String)specs.get("source");
-            job.tivoName     = tivoName;
-            job.type         = "comskip";
-            job.name         = config.comskip;
-            job.mpegFile     = mpegFile;
-            job.edlFile      = edlFile;
+         if (entry.containsKey("contentId") && SkipManager.hasEntry(entry.get("contentId"))) {
             if (config.VRD == 1)
-               job.vprjFile = string.replaceSuffix(mpegFile, ".VPrj");
-            if (specs.containsKey("comskipIni"))
-               job.comskipIni = (String) specs.get("comskipIni");
-            // Setup job for skip table import if relevant
-            skipImport(mode, tivoName, job, entry);
-            submitNewJob(job);            
+               SkipImport.vrdExport(entry);
+            else
+               SkipImport.edlExport(entry);
+         } else {
+            if (config.VRD == 1 && config.UseAdscan == 1 && ! specs.containsKey("SkipPoint")) {
+               jobData job = new jobData();
+               job.startFile    = startFile;
+               job.source       = source;
+               job.tivoName     = tivoName;
+               job.type         = "adscan";
+               job.name         = "VRD";
+               job.mpegFile     = mpegFile;
+               job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
+               // Setup job for skip table import if relevant
+               skipImport(mode, tivoName, job, entry);
+               submitNewJob(job);
+            } else {
+               jobData job = new jobData();
+               job.startFile    = startFile;
+               job.source       = source;
+               if (specs.containsKey("source"))
+                  job.source    = (String)specs.get("source");
+               job.tivoName     = tivoName;
+               job.type         = "comskip";
+               job.name         = config.comskip;
+               job.mpegFile     = mpegFile;
+               job.edlFile      = edlFile;
+               if (config.VRD == 1)
+                  job.vprjFile = string.replaceSuffix(mpegFile, ".VPrj");
+               if (specs.containsKey("comskipIni"))
+                  job.comskipIni = (String) specs.get("comskipIni");
+               // Setup job for skip table import if relevant
+               skipImport(mode, tivoName, job, entry);
+               submitNewJob(job);            
+            }
          }
       }
       
@@ -1218,6 +1226,7 @@ public class jobMonitor {
             job.tivoFile     = tivoFile; // This used as backup in case mpegFile not available
             job.mpegFile     = mpegFile;
             job.vprjFile     = string.replaceSuffix(mpegFile, ".VPrj");
+            job.entry        = entry;
             // Setup job for skip table import if relevant
             skipImport(mode, tivoName, job, entry);
             submitNewJob(job);
