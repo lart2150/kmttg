@@ -22,9 +22,13 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.main.config;
 
 public class parseNPL {
@@ -370,6 +374,174 @@ public class parseNPL {
       }
       ENTRIES = null;
       return UNIQUE;
+   }
+   
+   public static Hashtable<String,String> rpcToHashEntry(String tivoName, JSONObject json) {
+      Hashtable<String,String> entry = new Hashtable<String,String>();
+      try {
+         entry.put("tivoName", tivoName);
+         if (json.has("title")) {
+            entry.put("titleOnly", json.getString("title"));
+            entry.put("title", json.getString("title"));
+         }
+         if (json.has("subtitle")) {
+            entry.put("episodeTitle", json.getString("subtitle"));
+            if (json.has("title"))
+               entry.put("title", json.getString("title") + " - " + json.getString("subtitle"));
+         }
+         if (json.has("description")) {
+            entry.put("description", json.getString("description"));
+         }
+         if (json.has("recordingId")) {
+            entry.put("recordingId", json.getString("recordingId"));
+         }
+         if (json.has("collectionId")) {
+            entry.put("collectionId", json.getString("collectionId"));
+         }
+         if (json.has("contentId")) {
+            entry.put("contentId", json.getString("contentId"));
+         }
+         if (json.has("offerId")) {
+            entry.put("offerId", json.getString("offerId"));
+         }
+         if (json.has("clipMetadata")) {
+            JSONArray a = json.getJSONArray("clipMetadata");
+            if (a.length() > 0) {
+               entry.put("clipMetadataId", a.getJSONObject(0).getString("clipMetadataId"));
+            }
+         }
+         if (json.has("hdtv")) {
+            if (json.getBoolean("hdtv"))
+               entry.put("HD", "Yes");
+         }
+         if (json.has("size")) {
+            long sizeKB = json.getLong("size");
+            long size = sizeKB*1024;
+            entry.put("size", "" + size);
+            double GB = Math.pow(2,30);
+            entry.put("sizeGB", String.format("%.2f GB", size/GB));
+         }
+         if (json.has("originalAirdate")) {
+            entry.put("originalAirDate", json.getString("originalAirdate"));
+         }
+         if (json.has("channel")) {
+            JSONObject chan = json.getJSONObject("channel");
+            if (chan.has("callSign"))
+               entry.put("channel", chan.getString("callSign"));
+            else
+               if (chan.has("name"))
+                  entry.put("channel", chan.getString("name"));
+            if (chan.has("channelNumber"))
+               entry.put("channelNum", chan.getString("channelNumber"));
+         }
+         if (json.has("episodeNum") && json.has("seasonNumber")) {
+            entry.put("season", String.format("%02d", json.get("seasonNumber")));
+            entry.put("episode", String.format("%02d", json.getJSONArray("episodeNum").get(0)));
+            entry.put(
+               "EpisodeNumber",
+               "" + json.get("seasonNumber") +
+               String.format("%02d", json.getJSONArray("episodeNum").get(0))
+            );
+         }
+         if (json.has("startTime") && json.has("duration")) {
+            long start = TableUtil.getStartTime(json);
+            entry.put("gmt", "" + start);
+            SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yyyy");
+            entry.put("date", sdf.format(start));
+            sdf = new SimpleDateFormat("E MM/dd/yyyy hh:mm aa");
+            entry.put("date_long", sdf.format(start));
+            entry.put("duration", "" + json.getInt("duration")*1000);
+         }
+         if (json.has("partnerCollectionId")) {
+            entry.put("ProgramId", json.getString("partnerCollectionId"));
+            if (entry.containsKey("gmt"))
+               entry.put("ProgramId_unique", entry.get("ProgramId") + "_" + entry.get("gmt"));
+         }
+         if (json.has("__SeriesId__")) {
+            // This data not in TiVo database - added by Remote MyShows method
+            entry.put("SeriesId", json.getString("__SeriesId__"));
+         }
+         if (json.has("drm")) {
+            JSONObject drm = json.getJSONObject("drm");
+            if (drm.has("tivoToGo")) {
+               if (! drm.getBoolean("tivoToGo")) {
+                  //entry.put("ExpirationImage", "copy-protected");
+                  entry.put("CopyProtected", "Yes");
+               }
+            }
+         }
+         if (json.has("desiredDeletion")) {
+            long desired = TableUtil.getLongDateFromString(json.getString("desiredDeletion"));
+            long now = new Date().getTime();
+            long diff = desired - now;
+            double hours = diff/(1000*60*60);
+            if (hours > 0 && hours < 24)
+               entry.put("ExpirationImage", "expires-soon-recording");
+            if (hours < 0)
+               entry.put("ExpirationImage", "expired-recording");
+         }
+         if (json.has("deletionPolicy")) {
+            String policy = json.getString("deletionPolicy");
+            if(policy.equals("neverDelete")) {
+               entry.put("ExpirationImage", "save-until-i-delete-recording");
+               entry.put("kuid", "yes");                  
+            }
+         }
+         if (json.has("bookmarkPosition")) {
+            // NOTE: Don't have ByteOffset available, so use TimeOffset (secs) instead
+            entry.put("TimeOffset", "" + json.getInt("bookmarkPosition")/1000);
+            
+            /* This intentionally removed in favor of getting ByteOffset from XML
+            if (json.has("size") && json.has("duration")) {
+               // Estimate ByteOffset based on TimeOffset
+               // size (KB) * 1024 * bookmarkPosition/(duration(s)*1000)
+               long size = (long)json.getLong("size")*1024;
+               long duration = (long)json.getLong("duration")*1000;
+               long bookmarkPosition = (long)json.getLong("bookmarkPosition");
+               long ByteOffset = bookmarkPosition*size/duration;
+               entry.put("ByteOffset", "" + ByteOffset);
+            }*/
+         }
+         if (json.has("subscriptionIdentifier")) {
+            JSONArray a = json.getJSONArray("subscriptionIdentifier");
+            for (int j=0; j<a.length(); ++j) {
+               JSONObject o = a.getJSONObject(j);
+               if (o.has("subscriptionType")) {
+                  if (o.getString("subscriptionType").startsWith("suggestion")) {
+                     entry.put("ExpirationImage", "suggestion-recording");
+                     entry.put("suggestion", "yes");                        
+                  }
+               }
+            }
+         }
+         // In progress recordings trump any other kind of icon
+         if (json.has("state")) {
+            if (json.getString("state").equals("inProgress")) {
+               entry.put("ExpirationImage", "in-progress-recording");
+               entry.put("InProgress", "Yes");
+               if (json.has("collectionTitle")) {
+                  String c = json.getString("collectionTitle");
+                  if (c.equals("pcBodySubscription"))
+                     entry.put("ExpirationImage", "in-progress-transfer");
+               }
+            }
+         }
+         if (json.has("movieYear")) {
+            entry.put("movieYear", "" + json.get("movieYear"));
+         }
+         if (json.has("__url__")) {
+            entry.put("url", json.getString("__url__"));
+            json.remove("__url__");
+         }
+         if (json.has("__url_TiVoVideoDetails__")) {
+            entry.put("url_TiVoVideoDetails", json.getString("__url_TiVoVideoDetails__"));
+            json.remove("__url_TiVoVideoDetails__");
+         }
+      } catch (Exception e) {
+         log.error("rpcToHashEntry - " + e.getMessage());
+         entry = null;
+      }
+      return entry;
    }
 
 }
