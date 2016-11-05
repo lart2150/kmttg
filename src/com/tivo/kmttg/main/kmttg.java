@@ -22,6 +22,7 @@ import java.security.Security;
 import java.util.Arrays;
 import java.util.Timer;
 
+import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
@@ -33,6 +34,7 @@ public class kmttg {
    public static boolean _shuttingDown = false;
    public static boolean _startingUp = true;
    static Boolean autoconflicts = false; // Special batch mode run for RPC conflicts
+   static String autoskip = null; // Special batch mode for AutoSkip from SkipMode
       
    public static void main(String[] argv) {
       debug.enabled = false;
@@ -96,6 +98,11 @@ public class kmttg {
     	      rnpl.AutomaticConflictsHandler();
     	      log.print("\nEND AUTO-CONFLICTS RESOLVER");
     	      System.exit(0);
+    	   } else if (autoskip != null) {
+    	      _startingUp = false;
+            log.print("Processing AutoSkip from SkipMode for tivo '" + autoskip + "'");
+            SkipManager.visualDetectBatch(autoskip);
+            System.exit(0);
     	   } else {
        	   // Upon startup, try and load saved queue. Must be done before starting auto loop
            	if (config.persistQueue)
@@ -131,6 +138,10 @@ public class kmttg {
          else if (arg.equals("-h")) {
             useage();
          }
+         else if (arg.equals("-s")) {
+            autoskip = argv[i++];
+            gui_mode = false;
+         }
          else if (arg.equals("-v")) {
             gui_mode = false;
             String[] s = config.kmttg.split("\\s+");
@@ -148,6 +159,7 @@ public class kmttg {
       System.out.println("-b => Run in auto download batch mode - single loop\n");
       System.out.println("-c => Run auto-conflict resolver in batch mode - single run\n");
       System.out.println("-d => Enable verbose debug mode\n");
+      System.out.println("-s \"tivoName\" => Process AutoSkip from SkipMode for given TiVo\n");
       System.out.println("-v => Print version and exit\n");
       System.exit(0);
    }   
