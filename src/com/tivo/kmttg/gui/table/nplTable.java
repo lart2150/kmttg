@@ -1728,7 +1728,7 @@ public class nplTable extends TableMap {
                if (go) {
                   Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
                   stack.push(s.data);
-                  SkipManager.visualDetect(tivoName, stack);
+                  SkipManager.visualDetect(tivoName, stack, true);
                }
             } else {
                log.error("No SkipMode data available for this show");
@@ -1763,7 +1763,7 @@ public class nplTable extends TableMap {
          if (result.get() != ButtonType.OK) {
             return;
          }
-         SkipManager.visualDetect(tivoName, stack);
+         SkipManager.visualDetect(tivoName, stack, true);
       }
    }
 
