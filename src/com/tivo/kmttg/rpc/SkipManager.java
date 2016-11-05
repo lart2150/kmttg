@@ -39,6 +39,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.parseNPL;
 
 public class SkipManager {
    private static String ini = config.programDir + File.separator + "AutoSkip.ini";
@@ -428,145 +429,188 @@ public class SkipManager {
          log.error("pruneEntries - " + e.getMessage());
       }
    }
+   
+   private static synchronized void visualDetect(String tivoName, Stack<Hashtable<String,String>> stack) {
+      config.visualDetect_running = true;
+      for (Hashtable<String,String> data : stack) {
+         log.warn(
+            tivoName + ": Scanning SkipMode cut points for '" +
+            data.get("title") + "'"
+         );
+         String recordingId = data.get("recordingId");
+         String contentId = data.get("contentId");
+         if (hasEntry(contentId))
+            removeEntry(contentId);
+         Long point = -1L, lastPoint = -1L;
+         int delta = 5000;
+         int sleep_time = 900;
+         Stack<Long> points = new Stack<Long>();
+         Remote r = new Remote(tivoName);
+         if (r.success) {
+            try {
+               
+               // Obtain clipData
+               JSONObject clipData = r.getClipData(contentId);
+               if (clipData == null) {
+                  r.disconnect();
+                  log.error("Failed to retrieve SkipMode data for contentId: " + contentId);
+                  continue;
+               }
+               // This Stack holds the show segment lengths to compute stop points with
+               Stack<Long> lengths = getSegmentLengths(clipData);
+               
+               // Sequence of button simulated button presses to discover show start points
+               long starting = 0;
+               if (data.containsKey("TimeOffset"))
+                  starting = Long.parseLong(data.get("TimeOffset"))*1000;
+               long end = 60*60*5*1000;
+               if (data.containsKey("duration"))
+                  end = Long.parseLong(data.get("duration"));
+               
+               // Start play
+               JSONObject j = new JSONObject();
+               j.put("id", recordingId);
+               JSONObject result = r.Command("Playback", j);
+               if (result == null) {
+                  continue;
+               }
+               Thread.sleep(sleep_time);
+                                    
+               // Jump to end
+               end -= 5000;
+               JSONObject json = new JSONObject();
+               json.put("offset", end);
+               result = r.Command("Jump", json);
+               Thread.sleep(sleep_time);
+               json.remove("offset");
+               
+               // Reverse a little then pause just in case beyond end of show
+               json.put("event", "reverse");
+               r.Command("keyEventSend", json);
+               Thread.sleep(sleep_time);
+               json.put("event", "play");
+               r.Command("keyEventSend", json);
+               if (result != null) {
+                  Boolean go = true;
+                  while (go) {
+                     // Send Channel down press and collect time information
+                     json.put("event", "channelDown");
+                     result = r.Command("keyEventSend", json);
+                     json.put("event", "pause");
+                     result = r.Command("keyEventSend", json);
+                     
+                     // Get position
+                     Thread.sleep(sleep_time);
+                     result = r.Command("Position", new JSONObject());
+                     if (result != null && result.has("position"))
+                        point = result.getLong("position");
+                     
+                     if (Math.abs(point-lastPoint) > delta)
+                        points.push(point);
+                     else
+                        go = false;
+                     lastPoint = point;
+                     json.put("event", "pause");
+                     result = r.Command("keyEventSend", json);
+                     Thread.sleep(sleep_time);
+                  } // while
+                  
+                  // Jump back to starting position
+                  json.remove("event");
+                  json.put("offset", starting);
+                  result = r.Command("Jump", json);
+                  
+                  // liveTv button press
+                  Thread.sleep(sleep_time);
+                  json.remove("offset");
+                  json.put("event", "liveTv");
+                  result = r.Command("keyEventSend", json);
+               }
+               
+               points = reverseStack(points);
+               Stack<Hashtable<String,Long>> cuts = new Stack<Hashtable<String,Long>>();
+               int count = 0;
+               Long stop;
+               for (Long start : points) {
+                  if (count < lengths.size())
+                     stop = start + lengths.elementAt(count);
+                  else {
+                     log.warn("NOTE: End of segment # " + count + " not available");
+                     stop = end;
+                  }
+                  log.print("" + count + ": start=" + toMinSec(start) + " end=" + toMinSec(stop));
+                  Hashtable<String,Long> h = new Hashtable<String,Long>();
+                  h.put("start", start);
+                  h.put("end", stop);
+                  cuts.push(h);
+                  count++;
+               }
+               
+               // Save entry to AutoSkip table with offset=0
+               SkipManager.saveEntry(
+                  contentId, data.get("offerId"), 0L, data.get("title"), tivoName, cuts
+               );
+               
+            } catch (Exception e) {
+               log.error("visualDetect - " + e.getMessage());
+            }
+            r.disconnect();
+         }
+      }
+      config.visualDetect_running = false;
+   }
       
    // For Skip enabled program jump to end of playback, then use channel down
    // presses to find commercial end points backwards
    // Backwards way used because doing it forwards could result in false first point
-   // This runs as a background thread
-   public static synchronized void visualDetect(String tivoName, Stack<Hashtable<String,String>> stack) {
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
-            config.visualDetect_running = true;
-            for (Hashtable<String,String> data : stack) {
-               log.warn(
-                  tivoName + ": Scanning SkipMode cut points for '" +
-                  data.get("title") + "'"
-               );
-               String recordingId = data.get("recordingId");
-               String contentId = data.get("contentId");
-               if (hasEntry(contentId))
-                  removeEntry(contentId);
-               Long point = -1L, lastPoint = -1L;
-               int delta = 5000;
-               int sleep_time = 900;
-               Stack<Long> points = new Stack<Long>();
-               Remote r = new Remote(tivoName);
-               if (r.success) {
-                  try {
-                     
-                     // Obtain clipData
-                     JSONObject clipData = r.getClipData(contentId);
-                     if (clipData == null) {
-                        r.disconnect();
-                        log.error("Failed to retrieve SkipMode data for contentId: " + contentId);
-                        continue;
+   // This runs as a background thread if background boolean is true
+   public static synchronized void visualDetect(String tivoName, Stack<Hashtable<String,String>> stack, Boolean background) {
+      if (background) {
+         // Non blocking mode
+         Task<Void> task = new Task<Void>() {
+            @Override public Void call() {
+               visualDetect(tivoName, stack);
+               return null;
+            }
+         };
+         new Thread(task).start();
+      } else {
+         // Blocking mode
+         visualDetect(tivoName, stack);
+      }
+   }
+   
+   // This designed to be called from kmttg command line to run visualDetect in batch mode
+   public static synchronized void visualDetectBatch(String tivoName) {
+      Remote r = config.initRemote(tivoName);
+      if (r.success) {
+         JSONArray data = r.MyShows(null);
+         if (data != null) {
+            Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
+            for (int i=0; i<data.length(); ++i) {
+               try {
+                  JSONObject json = data.getJSONObject(i).getJSONArray("recording").getJSONObject(0);
+                  Hashtable<String,String> entry = parseNPL.rpcToHashEntry(tivoName, json);
+                  if (entry != null && entry.containsKey("contentId")) {
+                     if (entry.containsKey("clipMetadataId") && ! hasEntry(entry.get("contentId"))) {
+                        stack.push(entry);
                      }
-                     // This Stack holds the show segment lengths to compute stop points with
-                     Stack<Long> lengths = getSegmentLengths(clipData);
-                     
-                     // Sequence of button simulated button presses to discover show start points
-                     long starting = 0;
-                     if (data.containsKey("TimeOffset"))
-                        starting = Long.parseLong(data.get("TimeOffset"))*1000;
-                     long end = 60*60*5*1000;
-                     if (data.containsKey("duration"))
-                        end = Long.parseLong(data.get("duration"));
-                     
-                     // Start play
-                     JSONObject j = new JSONObject();
-                     j.put("id", recordingId);
-                     JSONObject result = r.Command("Playback", j);
-                     if (result == null) {
-                        continue;
-                     }
-                     Thread.sleep(sleep_time);
-                                          
-                     // Jump to end
-                     end -= 5000;
-                     JSONObject json = new JSONObject();
-                     json.put("offset", end);
-                     result = r.Command("Jump", json);
-                     Thread.sleep(sleep_time);
-                     json.remove("offset");
-                     
-                     // Reverse a little then pause just in case beyond end of show
-                     json.put("event", "reverse");
-                     r.Command("keyEventSend", json);
-                     Thread.sleep(sleep_time);
-                     json.put("event", "play");
-                     r.Command("keyEventSend", json);
-                     if (result != null) {
-                        Boolean go = true;
-                        while (go) {
-                           // Send Channel down press and collect time information
-                           json.put("event", "channelDown");
-                           result = r.Command("keyEventSend", json);
-                           json.put("event", "pause");
-                           result = r.Command("keyEventSend", json);
-                           
-                           // Get position
-                           Thread.sleep(sleep_time);
-                           result = r.Command("Position", new JSONObject());
-                           if (result != null && result.has("position"))
-                              point = result.getLong("position");
-                           
-                           if (Math.abs(point-lastPoint) > delta)
-                              points.push(point);
-                           else
-                              go = false;
-                           lastPoint = point;
-                           json.put("event", "pause");
-                           result = r.Command("keyEventSend", json);
-                           Thread.sleep(sleep_time);
-                        } // while
-                        
-                        // Jump back to starting position
-                        json.remove("event");
-                        json.put("offset", starting);
-                        result = r.Command("Jump", json);
-                        
-                        // liveTv button press
-                        Thread.sleep(sleep_time);
-                        json.remove("offset");
-                        json.put("event", "liveTv");
-                        result = r.Command("keyEventSend", json);
-                     }
-                     
-                     points = reverseStack(points);
-                     Stack<Hashtable<String,Long>> cuts = new Stack<Hashtable<String,Long>>();
-                     int count = 0;
-                     Long stop;
-                     for (Long start : points) {
-                        if (count < lengths.size())
-                           stop = start + lengths.elementAt(count);
-                        else {
-                           log.warn("NOTE: End of segment # " + count + " not available");
-                           stop = end;
-                        }
-                        log.print("" + count + ": start=" + toMinSec(start) + " end=" + toMinSec(stop));
-                        Hashtable<String,Long> h = new Hashtable<String,Long>();
-                        h.put("start", start);
-                        h.put("end", stop);
-                        cuts.push(h);
-                        count++;
-                     }
-                     
-                     // Save entry to AutoSkip table with offset=0
-                     SkipManager.saveEntry(
-                        contentId, data.get("offerId"), 0L, data.get("title"), tivoName, cuts
-                     );
-                     
-                  } catch (Exception e) {
-                     log.error("visualDetect - " + e.getMessage());
                   }
-                  r.disconnect();
+               } catch (JSONException e) {
+                  log.error("visualDetectBatch - " + e.getMessage());
+                  return;
                }
             }
-            config.visualDetect_running = false;
-            return null;
+            if (stack.isEmpty()) {
+               log.warn("No entries found for processing AutoSkip from SkipMode");
+            } else {
+               log.print("" + stack.size() + " entries found to process for AutoSkip from SkipMode:");
+               for (Hashtable<String,String> e : stack)
+                  log.print("   " + e.get("title"));
+               visualDetect(tivoName, stack, false);
+            }
          }
-      };
-      new Thread(task).start();
+      }
    }
    
    private static Stack<Long> getSegmentLengths(JSONObject clipData) {
