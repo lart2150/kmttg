@@ -1187,7 +1187,7 @@ public class jobMonitor {
       }
       
       if (comskip) {
-         if (entry.containsKey("contentId") && SkipManager.hasEntry(entry.get("contentId"))) {
+         if (entry != null && entry.containsKey("contentId") && SkipManager.hasEntry(entry.get("contentId"))) {
             if (config.VRD == 1)
                SkipImport.vrdExport(entry);
             else
