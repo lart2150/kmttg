@@ -226,8 +226,12 @@ public class SkipImport {
       Stack<Hashtable<String,Long>> entries = SkipManager.getEntry(nplEntry.get("contentId"));
       long duration = Long.parseLong(nplEntry.get("duration"));
       if (entries.size() > 0) {
-         String videoFile = videoToUseForExport(nplEntry);         
+         String videoFile = videoToUseForExport(nplEntry);
          String vprjFile = string.replaceSuffix(videoFile, ".VPrj");
+         if (! file.createDirIfNeeded(vprjFile)) {
+            log.error("Can't create directory for: " + vprjFile);
+            return;
+         }
          log.warn("AutoSkip exporting cut points to VRD VPrj file: " + vprjFile);
          log.warn("(video file used: " + videoFile + ")");
          try {
@@ -267,6 +271,10 @@ public class SkipImport {
       if (entries.size() > 0) {
          String videoFile = videoToUseForExport(nplEntry);         
          String edlFile = string.replaceSuffix(videoFile, ".edl");
+         if (! file.createDirIfNeeded(edlFile)) {
+            log.error("Can't create directory for: " + edlFile);
+            return;
+         }
          log.warn("AutoSkip exporting cut points to comskip edl file: " + edlFile);
          try {
             BufferedWriter ofp = new BufferedWriter(new FileWriter(edlFile, false));
