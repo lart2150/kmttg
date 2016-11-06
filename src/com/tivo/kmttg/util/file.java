@@ -65,6 +65,19 @@ public class file {
       }
    }
    
+   public static Boolean createDirIfNeeded(String f) {
+      debug.print("f=" + f);
+      String baseDir = string.dirname(f);
+      if ( ! file.isDir(baseDir) ) {
+         if ( ! new File(baseDir).mkdirs() ) {
+            log.error("Failed to create path: " + baseDir);
+            return false;
+         }
+      }
+      return true;
+   }
+
+   
    public static long size(String f) {
       debug.print("f=" + f);
       try {
