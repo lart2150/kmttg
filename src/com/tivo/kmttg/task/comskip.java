@@ -69,8 +69,15 @@ public class comskip extends baseTask implements Serializable {
    public Boolean launchJob() {
       debug.print("");
       Boolean schedule = true;
+      if (job.exportSkip) {
+         if (job.vprjFile != null)
+            SkipImport.vrdExport(job.entry);
+         else
+            SkipImport.edlExport(job.entry);
+         schedule = false;
+      }
       // Don't comskip if outputFile already exists
-      if ( file.isFile(outputFile) ) {
+      if ( schedule && file.isFile(outputFile) ) {
          if (config.OverwriteFiles == 0) {
             log.warn("SKIPPING COMSKIP, FILE ALREADY EXISTS: " + outputFile);
             schedule = false;
@@ -79,7 +86,7 @@ public class comskip extends baseTask implements Serializable {
          }
       }
       
-      if ( ! file.isFile(config.comskip) ) {
+      if ( schedule && ! file.isFile(config.comskip) ) {
          log.error("comskip not found: " + config.comskip);
          schedule = false;
       }
@@ -92,12 +99,12 @@ public class comskip extends baseTask implements Serializable {
          }
       }
       
-      if ( ! file.isFile(comskipIni) ) {
+      if ( schedule && ! file.isFile(comskipIni) ) {
          log.error("comskip.ini not found: " + comskipIni);
          schedule = false;
       }
       
-      if ( ! file.isFile(job.mpegFile) ) {
+      if ( schedule && ! file.isFile(job.mpegFile) ) {
          log.error("mpeg file not found: " + job.mpegFile);
          schedule = false;
       }

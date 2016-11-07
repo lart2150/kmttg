@@ -55,8 +55,12 @@ public class adscan extends baseTask implements Serializable {
    public Boolean launchJob() {
       debug.print("");
       Boolean schedule = true;
+      if (job.exportSkip) {
+         SkipImport.vrdExport(job.entry);
+         schedule = false;
+      }
       // Don't adscan if vprjFile already exists
-      if ( file.isFile(job.vprjFile) ) {
+      if ( schedule && file.isFile(job.vprjFile) ) {
          if (config.OverwriteFiles == 0) {
             log.warn("SKIPPING ADSCAN, FILE ALREADY EXISTS: " + job.vprjFile);
             schedule = false;
@@ -69,24 +73,24 @@ public class adscan extends baseTask implements Serializable {
       cscript = System.getenv("SystemRoot") + s + "system32" + s + "cscript.exe";
       
       vrdscript = config.programDir + "\\VRDscripts\\adscan.vbs";      
-      if ( ! file.isFile(vrdscript) ) {
+      if ( schedule && ! file.isFile(vrdscript) ) {
          log.error("File does not exist: " + vrdscript);
          log.error("Aborting. Fix incomplete kmttg installation");
          schedule = false;
       }
       
       lockFile = file.makeTempFile("VRDLock");      
-      if ( lockFile == null || ! file.isFile(lockFile) ) {
+      if ( schedule && (lockFile == null || ! file.isFile(lockFile)) ) {
          log.error("Failed to created lock file: " + lockFile);
          schedule = false;
       }
       
-      if ( ! file.isFile(cscript) ) {
+      if ( schedule && ! file.isFile(cscript) ) {
          log.error("File does not exist: " + cscript);
          schedule = false;
       }
                   
-      if ( ! file.isFile(job.mpegFile) ) {
+      if ( schedule && ! file.isFile(job.mpegFile) ) {
          if ( file.isFile(job.tivoFile)) {
             log.warn("adscan: mpeg file not found, so using TiVo file instead");
             job.mpegFile = job.tivoFile;
