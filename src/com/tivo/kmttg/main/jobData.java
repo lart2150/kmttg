@@ -134,6 +134,7 @@ public class jobData implements Serializable, Cloneable {
    public String contentId = null;
    public String offerId = null;
    public Boolean autoskip = false;
+   public Boolean exportSkip = false;
 
    // pyTivo push related
    public String pyTivo_tivo = null;
