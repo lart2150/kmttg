@@ -56,8 +56,9 @@ public class adscan extends baseTask implements Serializable {
       debug.print("");
       Boolean schedule = true;
       if (job.exportSkip) {
-         SkipImport.vrdExport(job.entry);
-         schedule = false;
+         String vprjFile = SkipImport.vrdExport(job.entry);
+         if (vprjFile != null)
+            schedule = false;
       }
       // Don't adscan if vprjFile already exists
       if ( schedule && file.isFile(job.vprjFile) ) {
