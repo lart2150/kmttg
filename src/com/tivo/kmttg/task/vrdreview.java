@@ -102,7 +102,11 @@ public class vrdreview extends baseTask implements Serializable {
              job.entry.containsKey("contentId") &&
              SkipManager.hasEntry(job.entry.get("contentId"))) {
             log.warn("vrdreview: Using AutoSkip entry cut points");
-            SkipImport.vrdExport(job.entry);
+            String vprjFile = SkipImport.vrdExport(job.entry);
+            if (vprjFile != null)
+               job.vprjFile = vprjFile;
+            else
+               schedule = createBasicVprjFile(job.vprjFile, sourceFile);
          } else {
             schedule = createBasicVprjFile(job.vprjFile, sourceFile);
          }
