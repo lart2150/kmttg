@@ -218,19 +218,34 @@ public class SkipImport {
       return videoFile;
    }
    
-   static public void vrdExport(Hashtable<String,String> nplEntry) {
+   static private String buildVprjFile(Hashtable<String,String> nplEntry) {
+      String baseName = tivoFileName.buildTivoFileName(nplEntry);
+      String mpegName = string.replaceSuffix(baseName, ".mpg");
+      String mpegFile = config.mpegDir + File.separator + mpegName;
+      return string.replaceSuffix(mpegFile, ".VPrj");
+   }
+   
+   static private String buildEdlFile(Hashtable<String,String> nplEntry) {
+      String baseName = tivoFileName.buildTivoFileName(nplEntry);
+      String mpegName = string.replaceSuffix(baseName, ".mpg");
+      String mpegFile = config.mpegDir + File.separator + mpegName;
+      return string.replaceSuffix(mpegFile, ".edl");
+   }
+   
+   static public String vrdExport(Hashtable<String,String> nplEntry) {
       if (! nplEntry.containsKey("duration") || ! nplEntry.containsKey("contentId")) {
          log.error("Entry is missing duration and/or contentId");
-         return;
+         return null;
       }
+      String vprjFile = null;
       Stack<Hashtable<String,Long>> entries = SkipManager.getEntry(nplEntry.get("contentId"));
       long duration = Long.parseLong(nplEntry.get("duration"));
       if (entries.size() > 0) {
          String videoFile = videoToUseForExport(nplEntry);
-         String vprjFile = string.replaceSuffix(videoFile, ".VPrj");
+         vprjFile = buildVprjFile(nplEntry);
          if (! file.createDirIfNeeded(vprjFile)) {
             log.error("Can't create directory for: " + vprjFile);
-            return;
+            return null;
          }
          log.warn("AutoSkip exporting cut points to VRD VPrj file: " + vprjFile);
          log.warn("(video file used: " + videoFile + ")");
@@ -255,25 +270,27 @@ public class SkipImport {
          catch (Exception ex) {
             log.error("Failed to write to file: " + vprjFile);
             log.error(ex.toString());
+            vprjFile = null;
          }
       } else {
          log.error("No AutoSkip data available for this entry");
       }
+      return vprjFile;
    }
    
-   static public void edlExport(Hashtable<String,String> nplEntry) {
+   static public String edlExport(Hashtable<String,String> nplEntry) {
       if (! nplEntry.containsKey("duration") || ! nplEntry.containsKey("contentId")) {
          log.error("Entry is missing duration and/or contentId");
-         return;
+         return null;
       }
+      String edlFile = null;
       Stack<Hashtable<String,Long>> entries = SkipManager.getEntry(nplEntry.get("contentId"));
       long duration = Long.parseLong(nplEntry.get("duration"));
       if (entries.size() > 0) {
-         String videoFile = videoToUseForExport(nplEntry);         
-         String edlFile = string.replaceSuffix(videoFile, ".edl");
+         edlFile = buildEdlFile(nplEntry);
          if (! file.createDirIfNeeded(edlFile)) {
             log.error("Can't create directory for: " + edlFile);
-            return;
+            return null;
          }
          log.warn("AutoSkip exporting cut points to comskip edl file: " + edlFile);
          try {
@@ -289,10 +306,12 @@ public class SkipImport {
          catch (Exception ex) {
             log.error("Failed to write to file: " + edlFile);
             log.error(ex.toString());
+            edlFile = null;
          }
       } else {
          log.error("No AutoSkip data available for this entry");
       }
+      return edlFile;
    }
    
    static private Stack<Hashtable<String,Long>> entriesToCuts(Stack<Hashtable<String,Long>> entries, long duration) {
