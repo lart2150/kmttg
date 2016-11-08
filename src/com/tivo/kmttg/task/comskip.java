@@ -70,11 +70,19 @@ public class comskip extends baseTask implements Serializable {
       debug.print("");
       Boolean schedule = true;
       if (job.exportSkip) {
-         if (job.vprjFile != null)
-            SkipImport.vrdExport(job.entry);
-         else
-            SkipImport.edlExport(job.entry);
-         schedule = false;
+         String exportFile = null;
+         if (job.vprjFile != null) {
+            exportFile = SkipImport.vrdExport(job.entry);
+            if (exportFile != null)
+               job.vprjFile = exportFile;
+         }
+         else {
+            exportFile = SkipImport.edlExport(job.entry);
+            if (exportFile != null)
+               job.edlFile = exportFile;
+         }
+         if (exportFile != null)
+            schedule = false;
       }
       // Don't comskip if outputFile already exists
       if ( schedule && file.isFile(outputFile) ) {
