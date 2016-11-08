@@ -1281,7 +1281,7 @@ public class TableUtil {
                   JSONArray episodes = new JSONArray();
                   for (int i=0; i<entries.length(); ++i) {
                      JSONObject entry = entries.getJSONObject(i);
-                     if (entry.has("episodeNum")) {
+                     if (entry.has("description")) {
                         episodes.put(entry);
                      }
                   }
@@ -1306,11 +1306,11 @@ public class TableUtil {
    
    static public void PrintEpisodes_GUI(String title, JSONArray episodes) {
       List<String> choices = new ArrayList<>();
-      choices.add("Output to table and CSV File");
-      choices.add("Output CSV File");
       choices.add("Output to table");
+      choices.add("Output CSV File");
+      choices.add("Output to table and CSV File");
 
-      ChoiceDialog<String> dialog = new ChoiceDialog<>("Output to table and CSV File", choices);
+      ChoiceDialog<String> dialog = new ChoiceDialog<>("Output to table", choices);
       dialog.setTitle("Choose Output");
       dialog.setHeaderText("Episode Output for: " + title);
       dialog.setContentText("Choose output:");
