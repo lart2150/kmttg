@@ -35,6 +35,7 @@ public class kmttg {
    public static boolean _startingUp = true;
    static Boolean autoconflicts = false; // Special batch mode run for RPC conflicts
    static String autoskip = null; // Special batch mode for AutoSkip from SkipMode
+   static String autoskipService = null; // Special batch mode for AutoSkip service
       
    public static void main(String[] argv) {
       debug.enabled = false;
@@ -98,6 +99,9 @@ public class kmttg {
     	      rnpl.AutomaticConflictsHandler();
     	      log.print("\nEND AUTO-CONFLICTS RESOLVER");
     	      System.exit(0);
+    	   } else if (autoskipService != null) {
+    	     _startingUp = false;
+    	      SkipManager.skipServiceBatch(autoskipService);
     	   } else if (autoskip != null) {
     	      _startingUp = false;
             log.print("Processing AutoSkip from SkipMode for tivo '" + autoskip + "'");
@@ -137,6 +141,10 @@ public class kmttg {
          }
          else if (arg.equals("-h")) {
             useage();
+         }
+         else if (arg.equals("-k")) {
+            autoskipService = argv[i++];
+            gui_mode = false;
          }
          else if (arg.equals("-s")) {
             autoskip = argv[i++];
