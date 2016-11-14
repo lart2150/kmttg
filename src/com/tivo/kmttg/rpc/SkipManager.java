@@ -643,5 +643,36 @@ public class SkipManager {
       debug.print("msecs=" + msecs);
       return com.tivo.kmttg.captions.util.toHourMinSec(msecs);
    }
+   
+   public static synchronized void skipServiceBatch(String tivoName) {
+      JSONArray skipData = SkipManager.getEntries();
+      if (skipData == null || skipData.length() == 0) {
+         log.error("No skip table data available - ignoring skip service request");
+         System.exit(1);
+      }
+      
+      if (tivoName.toLowerCase().equals("all")) {
+         // Enabled AutoSkip service on all RPC enabled TiVos
+         int count = 0;
+         Stack<String> tivoNames = config.getTivoNames();
+         for (String name : tivoNames) {
+            if (config.rpcEnabled(name)) {
+               SkipManager.startService(name);
+               count++;
+            }
+         }
+         if (count == 0) {
+            log.error("No RPC enabled TiVos found - exiting");
+            System.exit(1);
+         }
+      } else {
+         // Enable AutoSkip service on specific TiVo
+         if ( ! config.rpcEnabled(tivoName) ) {
+            log.error("Given TiVo not RPC enabled - '" + tivoName + "'");
+            System.exit(1);
+         }
+         SkipManager.startService(tivoName);
+      }
+   }
 
 }
