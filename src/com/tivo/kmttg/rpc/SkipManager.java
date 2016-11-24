@@ -430,7 +430,7 @@ public class SkipManager {
       }
    }
    
-   private static synchronized void visualDetect(String tivoName, Stack<Hashtable<String,String>> stack) {
+   private static void visualDetect(String tivoName, Stack<Hashtable<String,String>> stack) {
       config.visualDetect_running = true;
       for (Hashtable<String,String> data : stack) {
          log.warn(
@@ -547,9 +547,11 @@ public class SkipManager {
                }
                
                // Save entry to AutoSkip table with offset=0
-               SkipManager.saveEntry(
-                  contentId, data.get("offerId"), 0L, data.get("title"), tivoName, cuts
-               );
+               if (cuts.size() > 0) {
+                  SkipManager.saveEntry(
+                     contentId, data.get("offerId"), 0L, data.get("title"), tivoName, cuts
+                  );
+               }
                
             } catch (Exception e) {
                log.error("visualDetect - " + e.getMessage());
@@ -564,7 +566,7 @@ public class SkipManager {
    // presses to find commercial end points backwards
    // Backwards way used because doing it forwards could result in false first point
    // This runs as a background thread if background boolean is true
-   public static synchronized void visualDetect(String tivoName, Stack<Hashtable<String,String>> stack, Boolean background) {
+   public static void visualDetect(String tivoName, Stack<Hashtable<String,String>> stack, Boolean background) {
       if (background) {
          // Non blocking mode
          Task<Void> task = new Task<Void>() {
