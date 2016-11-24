@@ -80,6 +80,8 @@ public class comskip extends baseTask implements Serializable {
             exportFile = SkipImport.edlExport(job.entry);
             if (exportFile != null)
                job.edlFile = exportFile;
+            // Add vprj creation here by user request (not normally needed)
+            SkipImport.vrdExport(job.entry);
          }
          if (exportFile != null)
             schedule = false;
