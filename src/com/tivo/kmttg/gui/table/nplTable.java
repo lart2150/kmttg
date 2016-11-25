@@ -1707,34 +1707,29 @@ public class nplTable extends TableMap {
          log.error("Please wait until current 'AutoSkip from SkipMode' run finishes before starting another");
          return;
       }
-      Platform.runLater(new Runnable() {
-         @Override
-         public void run() {
-            if (s.data.containsKey("clipMetadataId") && s.data.containsKey("contentId")) {
-               Boolean go = true;
-               if (SkipManager.hasEntry(s.data.get("contentId"))) {
-                  go = false;
-                  Alert alert = new Alert(AlertType.CONFIRMATION);
-                  Button cancel = (Button)alert.getDialogPane().lookupButton(ButtonType.CANCEL);
-                  cancel.setDefaultButton(true);
-                  alert.setTitle("Confirm");
-                  config.gui.setFontSize(alert, config.FontSize);
-                  alert.setContentText("Override existing AutoSkip data?");
-                  Optional<ButtonType> result = alert.showAndWait();
-                  if (result.get() == ButtonType.OK) {
-                     go = true;
-                  }
-               }
-               if (go) {
-                  Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
-                  stack.push(s.data);
-                  SkipManager.visualDetect(tivoName, stack, true);
-               }
-            } else {
-               log.error("No SkipMode data available for this show");
+      if (s.data.containsKey("clipMetadataId") && s.data.containsKey("contentId")) {
+         Boolean go = true;
+         if (SkipManager.hasEntry(s.data.get("contentId"))) {
+            go = false;
+            Alert alert = new Alert(AlertType.CONFIRMATION);
+            Button cancel = (Button)alert.getDialogPane().lookupButton(ButtonType.CANCEL);
+            cancel.setDefaultButton(true);
+            alert.setTitle("Confirm");
+            config.gui.setFontSize(alert, config.FontSize);
+            alert.setContentText("Override existing AutoSkip data?");
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == ButtonType.OK) {
+               go = true;
             }
          }
-      });
+         if (go) {
+            Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
+            stack.push(s.data);
+            SkipManager.visualDetect(tivoName, stack, true);
+         }
+      } else {
+         log.error("No SkipMode data available for this show");
+      }
    }
    
    private void visualDetectAll() {
