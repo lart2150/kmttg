@@ -586,6 +586,23 @@ public class SkipManager {
    public static synchronized void visualDetectBatch(String tivoName) {
       Remote r = config.initRemote(tivoName);
       if (r.success) {
+         // Switch between My Shows and TiVo to force new SKIP processing on TiVo
+         try {
+            JSONObject j = new JSONObject();
+            j.put("event", "nowShowing");
+            r.Command("keyEventSend", j);
+            Thread.sleep(4000);
+            j.put("event", "tivo");
+            r.Command("keyEventSend", j);
+            Thread.sleep(4000);
+            j.put("event", "nowShowing");
+            r.Command("keyEventSend", j);
+            Thread.sleep(4000);
+         } catch (Exception e) {
+            log.error("visualDetectBatch - " + e.getMessage());
+            return;            
+         }
+
          JSONArray data = r.MyShows(null);
          if (data != null) {
             Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
