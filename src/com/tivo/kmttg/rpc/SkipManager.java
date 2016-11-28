@@ -551,6 +551,8 @@ public class SkipManager {
                   SkipManager.saveEntry(
                      contentId, data.get("offerId"), 0L, data.get("title"), tivoName, cuts
                   );
+               } else {
+                  log.warn("Failed to retrieve cut points for: '" + data.get("title") + "'");
                }
                
             } catch (Exception e) {
