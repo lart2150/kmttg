@@ -584,6 +584,7 @@ public class config {
    
    // Return true if this is a series 3 TiVo and tivo.com username & password available
    public static Boolean mindEnabled(String tivoName) {
+      /* TiVo broke tivo.com for series 3, so always return false now
       if (getTivoUsername() != null && getTivoPassword() != null) {
          String [] supported = {"648", "652", "658"};
          String tsn = getTsn(tivoName);
@@ -601,7 +602,7 @@ public class config {
                   return true;
             }
          }
-      }
+      }*/
       return false;
    }
    
