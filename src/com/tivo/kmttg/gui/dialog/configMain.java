@@ -4403,17 +4403,15 @@ public class configMain {
       }
       else if (component.equals("tivo_username")) {
          text =  "<b>tivo.com username</b><br>";
-         text += "For TiVo models older than series 4 the kmttg Remote can use your tivo.com login to<br>";
-         text += "obtain some of the information needed for kmttg Remote functions.<br>";
-         text += "This setting is optional. For series 4 or later enabling rpc style communications<br>";
-         text += "is a lot more useful.";
+         text += "tivo.com login can be used for Remote--Search and Search++ if provided to enhance<br>";
+         text += "search capabilities to include OTT/streaming titles in addition to linear.<br>";
+         text += "This setting is optional but useful to add if you have any series 4 or later TiVos.";
       }
       else if (component.equals("tivo_password")) {
          text =  "<b>tivo.com password</b><br>";
-         text += "For TiVo models older than series 4 the kmttg Remote can use your tivo.com login to<br>";
-         text += "obtain some of the information needed for kmttg Remote functions.<br>";
-         text += "This setting is optional. For series 4 or later enabling rpc style communications<br>";
-         text += "is a lot more useful.";
+         text += "tivo.com login can be used for Remote--Search and Search++ if provided to enhance<br>";
+         text += "search capabilities to include OTT/streaming titles in addition to linear.<br>";
+         text += "This setting is optional but useful to add if you have any series 4 or later TiVos.";
       }
       else if (component.equals("pyTivo_host")) {
          text =  "<b>pyTivo host name</b><br>";
