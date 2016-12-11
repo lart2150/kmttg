@@ -24,6 +24,7 @@ import java.util.TimerTask;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
@@ -52,7 +53,7 @@ public class SkipService {
          print("monitor started");
          running = true;
       } else {
-         error("Cannot RPC connect to: " + tivoName);
+         error("Cannot RPC connect");
          running = false;
          return;
       }
@@ -64,7 +65,17 @@ public class SkipService {
          new TimerTask() {
             @Override
             public void run() {
-               monitor();
+               try {
+                  monitor();
+               } catch (Exception e) {
+                  error("SkipService start failed");
+                  if (! config.GUIMODE) {
+                     // If in batch mode, exit
+                     System.exit(1);
+                  }
+                  running = false;
+                  return;
+               }
             }
         }
         ,3000,
@@ -99,7 +110,7 @@ public class SkipService {
       if (result == null) {
          // RPC session may be corrupted, start a new connection
          r.disconnect();
-         print("Attempting to re-connect to " + tivoName);
+         print("Attempting to re-connect");
          r = new Remote(tivoName);
          if (! r.success) {
             stop();
@@ -117,7 +128,7 @@ public class SkipService {
                            if (enabled) {
                               // Disable if live TV tuned to channel 0
                               enabled = false;
-                              print("monitor disabled for: " + tivoName);
+                              print("monitor disabled");
                               return;
                            }
                         }
@@ -125,7 +136,7 @@ public class SkipService {
                            if (! enabled) {
                               // Re-enable if live TV tuned to channel 1
                               enabled = true;
-                              print("monitor re-enabled for: " + tivoName);
+                              print("monitor re-enabled");
                            }
                         }
                      }
