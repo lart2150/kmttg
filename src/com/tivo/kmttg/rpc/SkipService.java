@@ -113,7 +113,12 @@ public class SkipService {
          print("Attempting to re-connect");
          r = new Remote(tivoName);
          if (! r.success) {
-            stop();
+            if (config.GUIMODE) {
+               SkipManager.stopService(tivoName);
+               config.gui.disableAutoSkipServiceItem(tivoName);
+            } else {
+               stop();
+            }
             return;
          }
       } else {
