@@ -36,6 +36,8 @@ public class SkipService {
    private Boolean enabled = true;
    public String tivoName = null;
    public AutoSkip skip = null;
+   private int keepTryingMax = 50;
+   private int keepTryingNum = 0;
    
    public SkipService(String tivoName) {
       this.tivoName = tivoName;
@@ -117,11 +119,23 @@ public class SkipService {
                SkipManager.stopService(tivoName);
                config.gui.disableAutoSkipServiceItem(tivoName);
             } else {
-               stop();
+               keepTryingNum++;
+               if (keepTryingNum < keepTryingMax) {
+                  print("re-connect attempt # " + keepTryingNum);
+                  try {
+                     Thread.sleep(interval*1000);
+                     monitor();
+                  } catch (InterruptedException e) {
+                     System.exit(1);
+                  }
+               }
+               else
+                  System.exit(1);
             }
             return;
          }
       } else {
+         keepTryingNum = 0;
          try {
             if (result.has("whatsOn")) {
                JSONObject what = result.getJSONArray("whatsOn").getJSONObject(0);
