@@ -1359,7 +1359,7 @@ public class gui extends Application {
       }
    }
 
-   private void disableAutoSkipServiceItem(String tivoName) {
+   public void disableAutoSkipServiceItem(String tivoName) {
       for (MenuItem item : autoSkipServiceMenu.getItems()) {
          CheckMenuItem check = (CheckMenuItem)item;
          if (check.getText().equals(tivoName))
