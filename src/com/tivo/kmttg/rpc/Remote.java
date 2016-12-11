@@ -463,8 +463,8 @@ public class Remote {
    
    public void disconnect() {
       try {
-         out.close();
-         in.close();
+         if (out != null) out.close();
+         if (in != null) in.close();
       } catch (IOException e) {
          error("rpc disconnect error - " + e.getMessage());
       }
