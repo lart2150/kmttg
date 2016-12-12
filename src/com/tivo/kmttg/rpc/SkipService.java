@@ -115,22 +115,30 @@ public class SkipService {
          print("Attempting to re-connect");
          r = new Remote(tivoName);
          if (! r.success) {
-            if (config.GUIMODE) {
-               SkipManager.stopService(tivoName);
-               config.gui.disableAutoSkipServiceItem(tivoName);
-            } else {
-               keepTryingNum++;
-               if (keepTryingNum < keepTryingMax) {
-                  print("re-connect attempt # " + keepTryingNum);
-                  try {
-                     Thread.sleep(interval*1000);
-                     monitor();
-                  } catch (InterruptedException e) {
+            keepTryingNum++;
+            if (keepTryingNum < keepTryingMax) {
+               print("re-connect attempt # " + keepTryingNum);
+               try {
+                  Thread.sleep(interval*1000);
+                  monitor();
+               } catch (InterruptedException e) {
+                  if (config.GUIMODE) {
+                     SkipManager.stopService(tivoName);
+                     config.gui.disableAutoSkipServiceItem(tivoName);                     
+                  } else {
                      System.exit(1);
                   }
                }
-               else
+            }
+            else {
+               // Re-connect attempts maxed out so give up
+               error("Re-connect attempts maxed out");
+               if (config.GUIMODE) {
+                  SkipManager.stopService(tivoName);
+                  config.gui.disableAutoSkipServiceItem(tivoName);                     
+               } else {
                   System.exit(1);
+               }
             }
             return;
          }
