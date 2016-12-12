@@ -348,8 +348,8 @@ public class config {
       // Error checking
       if (MAK.equals(""))
          errors.add("MAK not defined!");
-      if ( ! file.isFile(tivodecode) )
-         errors.add("tivodecode not defined!");
+      //if ( ! file.isFile(tivodecode) )
+      //   errors.add("tivodecode not defined!");
 
       if (outputDir.equals("")) {
          errors.add("Output Dir not defined!");
