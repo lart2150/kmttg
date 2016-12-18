@@ -439,6 +439,7 @@ public class SkipManager {
          );
          String recordingId = data.get("recordingId");
          String contentId = data.get("contentId");
+         String clipMetadataId = data.get("clipMetadataId");
          if (hasEntry(contentId))
             removeEntry(contentId);
          Long point = -1L, lastPoint = -1L;
@@ -450,7 +451,7 @@ public class SkipManager {
             try {
                
                // Obtain clipData
-               JSONObject clipData = r.getClipData(contentId);
+               JSONObject clipData = r.getClipData(contentId, clipMetadataId);
                if (clipData == null) {
                   r.disconnect();
                   log.error("Failed to retrieve SkipMode data for contentId: " + contentId);
@@ -495,9 +496,9 @@ public class SkipManager {
                   while (go) {
                      // Send Channel down press and collect time information
                      json.put("event", "channelDown");
-                     result = r.Command("keyEventSend", json);
+                     r.Command("keyEventSend", json);
                      json.put("event", "pause");
-                     result = r.Command("keyEventSend", json);
+                     r.Command("keyEventSend", json);
                      
                      // Get position
                      Thread.sleep(sleep_time);
@@ -510,9 +511,14 @@ public class SkipManager {
                      else
                         go = false;
                      lastPoint = point;
-                     json.put("event", "pause");
-                     result = r.Command("keyEventSend", json);
                      Thread.sleep(sleep_time);
+                     json.remove("event");
+                     json.put("offset", point-3000);
+                     r.Command("Jump", json);
+                     Thread.sleep(sleep_time);
+                     json.remove("offset");
+                     json.put("event", "play");
+                     r.Command("keyEventSend", json);
                   } // while
                   
                   // Jump back to starting position
