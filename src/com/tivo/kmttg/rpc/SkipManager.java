@@ -521,10 +521,15 @@ public class SkipManager {
                      r.Command("keyEventSend", json);
                   } // while
                   
-                  // Jump back to starting position
+                  // Pause and jump back to starting position
+                  Thread.sleep(sleep_time);
+                  json.put("event", "pause");
+                  r.Command("keyEventSend", json);
+                  Thread.sleep(sleep_time);
                   json.remove("event");
                   json.put("offset", starting);
                   result = r.Command("Jump", json);
+                  Thread.sleep(sleep_time);
                   
                   // liveTv button press
                   Thread.sleep(sleep_time);
