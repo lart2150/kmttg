@@ -3037,20 +3037,28 @@ public class Remote {
    }
    
    // RPC query for tivo.com SKIP data based on contentId
-   public JSONObject getClipData(String contentId) {
+   public JSONObject getClipData(String contentId, String clipMetadataId) {
       try {
          JSONObject json = new JSONObject();
-         json.put("contentId", contentId);
+         if (clipMetadataId == null) {
+            json.put("contentId", contentId);
+            JSONObject result = Command("clipMetadataSearch", json);
+            if (result != null && result.has("clipMetadata")) {
+               clipMetadataId = result.getJSONArray("clipMetadata").getJSONObject(0).getString("clipMetadataId");
+            } else
+               return null;
+         }
+         json = new JSONObject();
+         JSONArray idArray = new JSONArray();
+         idArray.put(clipMetadataId);
+         json.put("clipMetadataId", idArray);
          JSONObject result = Command("clipMetadataSearch", json);
          if (result != null && result.has("clipMetadata")) {
-            String clipMetadataId = result.getJSONArray("clipMetadata").getJSONObject(0).getString("clipMetadataId");
-            json.remove("contentId");
-            JSONArray idArray = new JSONArray();
-            idArray.put(clipMetadataId);
-            json.put("clipMetadataId", idArray);
-            result = Command("clipMetadataSearch", json);
-            if (result != null && result.has("clipMetadata")) {
-               return result.getJSONArray("clipMetadata").getJSONObject(0);
+            JSONArray clipMetadata = result.getJSONArray("clipMetadata");
+            for (int i=0; i<clipMetadata.length(); ++i) {
+               JSONObject clip = clipMetadata.getJSONObject(i);
+               if (clip.has("clipMetadataId") && clip.getString("clipMetadataId").equals(clipMetadataId))
+                  return clip;
             }
          }
       } catch (JSONException e) {
@@ -3062,7 +3070,7 @@ public class Remote {
    // RPC query for tivo.com SKIP data based on contentId
    public void printClipData(String contentId) {
       try {
-         JSONObject data = getClipData(contentId);
+         JSONObject data = getClipData(contentId, null);
          if (data != null) {
             log.warn("\nSKIP data available for contentId: " + contentId);
             if (data.has("syncMark"))
