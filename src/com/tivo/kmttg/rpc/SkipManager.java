@@ -156,6 +156,8 @@ public class SkipManager {
    
    public static synchronized Boolean hasEntry(String contentId) {
       debug.print("contentId=" + contentId);
+      if (! skipEnabled() )
+         return false;
       if (file.isFile(ini)) {
          try {
             BufferedReader ifp = new BufferedReader(new FileReader(ini));
