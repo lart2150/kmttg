@@ -29,10 +29,7 @@ public class tooltip {
       debug.print("component=" + component);
       String text = "";
       if (component.equals("tivo_todo")) {
-         text = "Select TiVo for which to retrieve To Do list.<br>";
-         text += "NOTE: If a series 3 TiVo is missing in this list go to Config-Tivos and provide<br>";
-         text += "tivo.com username & password for older units for more limited Remote functionality.<br>";
-         text += "Then re-start kmttg after updating those settings.";
+         text = "Select TiVo for which to retrieve To Do list.";
       }
       else if (component.equals("refresh_todo")){
          text = "<b>Refresh</b><br>";
@@ -60,10 +57,7 @@ public class tooltip {
          text += "Use the <b>Cancel</b> button to unschedule selected entries.";
       }
       else if (component.equals("tivo_guide")) {
-         text = "Select TiVo for which to retrieve guide listings.<br>";
-         text += "NOTE: If a series 3 TiVo is missing in this list go to Config-Tivos and provide<br>";
-         text += "tivo.com username & password for older units for more limited Remote functionality.<br>";
-         text += "Then re-start kmttg after updating those settings.";
+         text = "Select TiVo for which to retrieve guide listings.";
       }
       else if (component.equals("guide_start")) {
          text = "<b>Start</b><br>";
@@ -159,10 +153,7 @@ public class tooltip {
       else if (component.equals("tivo_cancel")) {
          text = "Select TiVo for which to display list of shows that will not record.<br>";
          text += "When changing TiVo selection the table below is NOT automatically updated so that you are<br>";
-         text += "able to schedule to record a show on another TiVo.<br>";
-         text += "NOTE: If a series 3 TiVo is missing in this list go to Config-Tivos and provide<br>";
-         text += "tivo.com username & password for older units for more limited Remote functionality.<br>";
-         text += "Then re-start kmttg after updating those settings.";
+         text += "able to schedule to record a show on another TiVo.";
       }
       else if (component.equals("refresh_cancel_top")){
          text = "<b>Refresh</b><br>";
@@ -226,10 +217,7 @@ public class tooltip {
          text += "automatically without having to run it manually from the GUI.";
       }
       else if (component.equals("tivo_deleted")) {
-         text = "Select TiVo for which to display list of deleted shows (in Recently Deleted state)<br>";
-         text += "NOTE: If a series 3 TiVo is missing in this list go to Config-Tivos and provide<br>";
-         text += "tivo.com username & password for older units for more limited Remote functionality.<br>";
-         text += "Then re-start kmttg after updating those settings.";
+         text = "Select TiVo for which to display list of deleted shows (in Recently Deleted state)";
       }
       else if (component.equals("refresh_deleted")){
          text = "<b>Refresh</b><br>";
@@ -245,10 +233,7 @@ public class tooltip {
          text += "NOTE: Once deleted these shows are removed from Recently Deleted and can't be recovered.";
       }
       else if (component.equals("tivo_thumbs")) {
-         text = "Select TiVo for which to display list of thumbed shows.<br>";
-         text += "NOTE: If a series 3 TiVo is missing in this list go to Config-Tivos and provide<br>";
-         text += "tivo.com username & password for older units for more limited Remote functionality.<br>";
-         text += "Then re-start kmttg after updating those settings.";
+         text = "Select TiVo for which to display list of thumbed shows.";
       }
       else if (component.equals("refresh_thumbs")){
          text = "<b>Refresh</b><br>";
@@ -323,10 +308,7 @@ public class tooltip {
       else if (component.equals("tivo_search")) {
          text = "Select TiVo for which to perform search with.<br>";
          text += "When changing TiVo selection the table below is NOT automatically updated so that you are<br>";
-         text += "able to schedule to record a show on another TiVo.<br>";
-         text += "NOTE: If a series 3 TiVo is missing in this list go to Config-Tivos and provide<br>";
-         text += "tivo.com username & password for older units for more limited Remote functionality.<br>";
-         text += "Then re-start kmttg after updating those settings.";
+         text += "able to schedule to record a show on another TiVo.";
       }
       else if (component.equals("search_type")) {
          text = "Select type of search to perform:<br>";
@@ -409,10 +391,7 @@ public class tooltip {
          text += "Return to top level folder view.";
       }
       else if (component.equals("tivo_sp")) {
-         text = "Select TiVo for which to retrieve Season Passes list.<br>";
-         text += "NOTE: If a series 3 TiVo is missing in this list go to Config-Tivos and provide<br>";
-         text += "tivo.com username & password for older units for more limited Remote functionality.<br>";
-         text += "Then re-start kmttg after updating those settings.";
+         text = "Select TiVo for which to retrieve Season Passes list.";
       }
       else if (component.equals("tivo_rc")) {
          text = "Select which TiVo you want to control.<br>";
@@ -422,10 +401,7 @@ public class tooltip {
       else if (component.equals("tivo_premiere")) {
          text = "Select TiVo to use for finding shows that are Season or Series premieres.<br>";
          text += "When changing TiVo selection the table below is NOT automatically updated so that you are<br>";
-         text += "able to schedule to record a show on another TiVo.<br>";
-         text += "NOTE: If a series 3 TiVo is missing in this list go to Config-Tivos and provide<br>";
-         text += "tivo.com username & password for older units for more limited Remote functionality.<br>";
-         text += "Then re-start kmttg after updating those settings.";
+         text += "able to schedule to record a show on another TiVo.";
       }
       else if (component.equals("refresh_premiere")){
          text = "<b>Search</b><br>";
@@ -592,10 +568,7 @@ public class tooltip {
          text += "NOTE: html type also works for series 4 and later TiVos.";
       }
       if (component.equals("tivo_info")) {
-         text = "Select TiVo for which to retrieve system information.<br>";
-         text += "NOTE: If a series 3 TiVo is missing in this list go to Config-Tivos and provide<br>";
-         text += "tivo.com username & password for older units for more limited Remote functionality.<br>";
-         text += "Then re-start kmttg after updating those settings.";
+         text = "Select TiVo for which to retrieve system information.";
       }
       if (component.equals("bookmark_web")) {
          text = "<b>Bookmark</b><br>";
