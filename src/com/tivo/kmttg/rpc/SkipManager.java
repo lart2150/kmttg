@@ -643,8 +643,18 @@ public class SkipManager {
                   log.print("   " + e.get("title"));
                visualDetect(tivoName, stack, false);
             }
+         } // If data != null
+         if (config.autoskip_batch_standby == 1) {
+            try {
+               JSONObject j = new JSONObject();
+               j.put("event", "standby");
+               r.Command("keyEventSend", j);               
+            } catch (JSONException e) {
+               log.error("visualDetectBatch - " + e.getMessage());
+            }
          }
-      }
+         r.disconnect();
+      } // If r.success
    }
    
    private static Stack<Long> getSegmentLengths(JSONObject clipData) {
