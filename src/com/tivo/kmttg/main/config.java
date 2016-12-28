@@ -240,6 +240,7 @@ public class config {
    public static int autoskip_prune = 0;
    public static int autoskip_jumpToEnd = 0;
    public static int autoskip_padding = 0;
+   public static int autoskip_batch_standby = 0;
    public static Hashtable<String,Boolean> autoskip_ServiceItems = new Hashtable<String,Boolean>();
    public static Boolean visualDetect_running = false;
    
@@ -1205,6 +1206,9 @@ public class config {
             if (key.equals("autoskip_prune")) {
                autoskip_prune = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("autoskip_batch_standby")) {
+               autoskip_batch_standby = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("autoskip_jumpToEnd")) {
                autoskip_jumpToEnd = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1494,6 +1498,8 @@ public class config {
          ofp.write("<autoskip_import>\n" + autoskip_import + "\n\n");
          
          ofp.write("<autoskip_prune>\n" + autoskip_prune + "\n\n");
+         
+         ofp.write("<autoskip_batch_standby>\n" + autoskip_batch_standby + "\n\n");
          
          ofp.write("<autoskip_jumpToEnd>\n" + autoskip_jumpToEnd + "\n\n");
          
