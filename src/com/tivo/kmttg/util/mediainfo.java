@@ -151,8 +151,10 @@ public class mediainfo {
                log.error("actual download duration not within expected tolerance => error");
                return false;
             }
-         } else
+         } else {
             log.error("Unable to determine duration using mediainfo from file: " + videoFile);
+            return false;
+         }
       }
       return true;
    }
