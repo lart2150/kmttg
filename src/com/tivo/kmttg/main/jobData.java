@@ -54,7 +54,7 @@ import com.tivo.kmttg.task.javadownload;
 import com.tivo.kmttg.task.javametadata;
 import com.tivo.kmttg.task.jdownload_decrypt;
 import com.tivo.kmttg.task.metadataTivo;
-import com.tivo.kmttg.task.push;
+//import com.tivo.kmttg.task.push;
 import com.tivo.kmttg.task.qsfix;
 import com.tivo.kmttg.task.remote;
 import com.tivo.kmttg.task.skipdetect;
@@ -137,7 +137,7 @@ public class jobData implements Serializable, Cloneable {
    public Boolean exportSkip = false;
 
    // pyTivo push related
-   public String pyTivo_tivo = null;
+   //public String pyTivo_tivo = null;
    
    // TWP delete related
    public Boolean twpdelete = false;
@@ -246,7 +246,7 @@ public class jobData implements Serializable, Cloneable {
          "vrdencode",
          "atomic",
          "custom",
-         "push",
+         //"push",
          "slingbox"
       };
    }
@@ -301,8 +301,8 @@ public class jobData implements Serializable, Cloneable {
          job.process = new fffix(job);
       if (job.type.equals("ffcut"))
          job.process = new ffcut(job);
-      if (job.type.equals("push"))
-         job.process = new push(job);
+      //if (job.type.equals("push"))
+      //   job.process = new push(job);
       if (job.type.equals("qsfix"))
          job.process = new qsfix(job);
       if (job.type.equals("remote"))
@@ -432,9 +432,9 @@ public class jobData implements Serializable, Cloneable {
       else if (type.equals("atomic")) {
          file = encodeFile;
       }
-      else if (type.equals("push")) {
-         file = videoFile;
-      }
+      //else if (type.equals("push")) {
+      //   file = videoFile;
+      //}
       else if (type.equals("custom")) {
     	  // NOTE: Must assign an output file of some sort to prevent job duplication
     	  // across different Tivos

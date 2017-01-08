@@ -19,8 +19,8 @@
 package com.tivo.kmttg.task;
 
 import java.io.Serializable;
-import java.net.HttpURLConnection;
-import java.net.URL;
+//import java.net.HttpURLConnection;
+//import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Hashtable;
@@ -40,15 +40,15 @@ public class push extends baseTask implements Serializable {
    private static final long serialVersionUID = 1L;
    private Thread thread = null;
    private Boolean thread_running = false;
-   private String host = "localhost";
-   private String port = "9032";
-   private int timeout_http = 60;
+   //private String host = "localhost";
+   //private String port = "9032";
+   //private int timeout_http = 60;
    private int timeout_ffmpeg = 10;
    private Stack<Hashtable<String,String>> shares = null;
    private String videoFile = null; // file to be pushed
-   private String share = null;     // pyTivo share name to push to
+   //private String share = null;     // pyTivo share name to push to
    private String path = null;      // pyTivo file path relative to share path
-   private String push_file = null; // pyTivo file base name
+   //private String push_file = null; // pyTivo file base name
    private Boolean success = false;
    private backgroundProcess process;
    public jobData job;
@@ -64,11 +64,13 @@ public class push extends baseTask implements Serializable {
          }
       }
       this.job = job;
+      /* Disabled because push disabled
       if (config.pyTivo_config != null) {
          shares = pyTivo.parsePyTivoConf(config.pyTivo_config);
          port = config.pyTivo_port;
       }
       host = config.pyTivo_host;
+      */
       videoFile = pyTivo.lowerCaseVolume(job.videoFile);
    }
    
@@ -94,6 +96,7 @@ public class push extends baseTask implements Serializable {
       }
       
       // If no pyTivo shares available then nothing can be done
+      /* Disabled because push disabled
       if (shares == null) {
          log.error("No pyTivo video shares found in pyTivo config file: " + config.pyTivo_config);
          return false;
@@ -102,6 +105,7 @@ public class push extends baseTask implements Serializable {
          log.error("No pyTivo video shares found in pyTivo config file: " + config.pyTivo_config);
          return false;
       }
+      */
       // Check that file to be pushed resides under a pyTivo share
       // NOTE: This will define share, path & push_file strings
       if ( ! inPyTivoShare(videoFile) ) {
@@ -111,10 +115,12 @@ public class push extends baseTask implements Serializable {
          schedule = false;
       }
       
+      /* Disabled because push disabled
       if ( job.pyTivo_tivo == null ) {
          log.error("tivoName to push to not defined");
          schedule = false;
       }
+      */
       // Check that file to be pushed is a video file
       if ( ! isVideo(videoFile) ) {
          log.error("This is not a valid video file to be pushed");
@@ -139,7 +145,9 @@ public class push extends baseTask implements Serializable {
       class AutoThread implements Runnable {
          AutoThread() {}       
          public void run () {
+            /* Disabled because push disabled
             success = push_file(job.pyTivo_tivo, share, path, push_file);
+            */
          }
       }
       thread_running = true;
@@ -199,8 +207,10 @@ public class push extends baseTask implements Serializable {
       for (int i=0; i<shares.size(); ++i) {
          if (videoFile.startsWith(shares.get(i).get("path"))) {
             String shareDir = shares.get(i).get("path");
+            /* Disabled because push disabled
             share = shares.get(i).get("share");
             push_file = videoFile;
+            */
             path = string.dirname(videoFile.substring(shareDir.length()+1, videoFile.length()));
             if (config.OS.equals("windows")) {
                path = path.replaceAll("\\\\", "/");
@@ -253,6 +263,7 @@ public class push extends baseTask implements Serializable {
    }
    
    // Contact pyTivo to push a file
+   /* Disabled because push disabled
    private Boolean push_file(String tivoName, String share, String path, String push_file) {
       if (file.isFile(push_file)) {
          String header = "http://" + host + ":" + port + "/TiVoConnect?Command=Push&Container=";
@@ -294,6 +305,7 @@ public class push extends baseTask implements Serializable {
       thread_running = false;
       return false;
    }
+   */
    
    public static String urlEncode(String s) {
       String encoded;

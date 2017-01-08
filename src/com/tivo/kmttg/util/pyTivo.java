@@ -24,15 +24,15 @@ import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLEncoder;
+//import java.net.URLEncoder;
 import java.util.Hashtable;
 import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.JSON.XML;
 import com.tivo.kmttg.main.config;
-import com.tivo.kmttg.main.http;
-import com.tivo.kmttg.rpc.Remote;
+//import com.tivo.kmttg.main.http;
+//import com.tivo.kmttg.rpc.Remote;
 
 public class pyTivo {
    
@@ -40,7 +40,7 @@ public class pyTivo {
       Stack<Hashtable<String,String>> s = new Stack<Hashtable<String,String>>();
       String username = null;
       String password = null;
-      String mind = null;
+      //String mind = null;
       
       try {
          BufferedReader ifp = new BufferedReader(new FileReader(conf));
@@ -70,7 +70,7 @@ public class pyTivo {
                if (line.matches("(?i)^port\\s*=.+")) {
                   String[] l = line.split("=");
                   if (l.length > 1) {
-                     config.pyTivo_port = string.removeLeadingTrailingSpaces(l[1]);
+                     //config.pyTivo_port = string.removeLeadingTrailingSpaces(l[1]);
                   }
                }
                if (line.matches("(?i)^tivo_username\\s*=.+")) {
@@ -85,12 +85,12 @@ public class pyTivo {
                      password = string.removeLeadingTrailingSpaces(l[1]);
                   }
                }
-               if (line.matches("(?i)^tivo_mind\\s*=.+")) {
+               /*if (line.matches("(?i)^tivo_mind\\s*=.+")) {
                   String[] l = line.split("=");
                   if (l.length > 1) {
                      mind = string.removeLeadingTrailingSpaces(l[1]);
                   }
-               }
+               }*/
                continue;
             }
             if (line.matches("(?i)^type\\s*=.+")) {
@@ -135,8 +135,8 @@ public class pyTivo {
             config.setTivoUsername(username);
          if (config.getTivoPassword() == null)
             config.setTivoPassword(password);
-         if (mind != null)
-            config.pyTivo_mind = mind;
+         //if (mind != null)
+         //   config.pyTivo_mind = mind;
 
       }
       catch (Exception ex) {
@@ -165,7 +165,7 @@ public class pyTivo {
       return lowercased;
    }
       
-   private static Hashtable<String,String> getShareInfo(String videoFile, Stack<Hashtable<String,String>> shares) {
+   /*private static Hashtable<String,String> getShareInfo(String videoFile, Stack<Hashtable<String,String>> shares) {
       if (shares == null) {
          return null;
       }
@@ -190,11 +190,12 @@ public class pyTivo {
          }
       }
       return null;
-   }
+   }*/
   
    public static Boolean streamFile(String tivoName, String videoFile) {
       videoFile = pyTivo.lowerCaseVolume(videoFile);
-      
+
+      /* Disabled because push disabled
       Stack<Hashtable<String,String>> shares = pyTivo.parsePyTivoConf(config.pyTivo_config);      
       if (shares == null) {
          log.error("No pyTivo video shares found in pyTivo config file: " + config.pyTivo_config);
@@ -306,10 +307,11 @@ public class pyTivo {
          log.error("streamFile - " + e.getMessage());
          return false;
       }
+      */
       return true;
    }
    
-   private static String urlEncode(String s) {
+   /*private static String urlEncode(String s) {
       String encoded;
       try {
          encoded = URLEncoder.encode(s, "UTF-8");
@@ -319,7 +321,7 @@ public class pyTivo {
          log.error(e.toString());
          return s;
       }
-   }
+   }*/
    
    // Get details on a specific video
    public static JSONObject getVideoDetails(String pyTivo_host, String pyTivo_port, String share, String path, String file) {

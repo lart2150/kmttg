@@ -194,12 +194,12 @@ public class config {
    public static String metadata_entries = "";
    
    // pyTivo push related
-   public static String pyTivo_config = null;
+   /*public static String pyTivo_config = null;
    public static String pyTivo_host = "localhost";
    public static String pyTivo_tivo = "";
    public static String pyTivo_files = "last";
    public static String pyTivo_port = "9032";
-   public static String pyTivo_mind = "mind.tivo.com:8181";
+   public static String pyTivo_mind = "mind.tivo.com:8181";*/
    
    // web query related
    public static String web_query = "http://www.imdb.com/find?s=all&q=";
@@ -343,8 +343,8 @@ public class config {
       encodeConfig.parseEncodingProfiles();
       
       // Parse pyTivo config if specified
-      if (file.isFile(pyTivo_config))
-         pyTivo.parsePyTivoConf(pyTivo_config);
+      /*if (file.isFile(pyTivo_config))
+         pyTivo.parsePyTivoConf(pyTivo_config);*/
       
       // Error checking
       if (MAK.equals(""))
@@ -719,9 +719,9 @@ public class config {
       encodeDir          = outputDir;
       customCommand      = "";
       cpu_cores          = Runtime.getRuntime().availableProcessors();
-      pyTivo_host        = "localhost";
-      pyTivo_config      = "";
-      pyTivo_files       = "last";
+      //pyTivo_host        = "localhost";
+      //pyTivo_config      = "";
+      //pyTivo_files       = "last";
       metadata_files     = "last";
       metadata_entries   = "";
       
@@ -1133,7 +1133,7 @@ public class config {
             if (key.equals("tivo_password")) {
                tivo_password = line;
             }
-            if (key.equals("pyTivo_config")) {
+            /*if (key.equals("pyTivo_config")) {
                pyTivo_config = line;
             }
             if (key.equals("pyTivo_host")) {
@@ -1144,7 +1144,7 @@ public class config {
             }
             if (key.equals("pyTivo_files")) {
                pyTivo_files = line;
-            }
+            }*/
             if (key.equals("metadata_files")) {
                metadata_files = line;
             }
@@ -1455,13 +1455,13 @@ public class config {
          
          ofp.write("<tivo_password>\n" + tivo_password + "\n\n");
          
-         ofp.write("<pyTivo_config>\n" + pyTivo_config + "\n\n");
+         //ofp.write("<pyTivo_config>\n" + pyTivo_config + "\n\n");
          
-         ofp.write("<pyTivo_host>\n" + pyTivo_host + "\n\n");
+         //ofp.write("<pyTivo_host>\n" + pyTivo_host + "\n\n");
          
-         ofp.write("<pyTivo_tivo>\n" + pyTivo_tivo + "\n\n");
+         //ofp.write("<pyTivo_tivo>\n" + pyTivo_tivo + "\n\n");
          
-         ofp.write("<pyTivo_files>\n" + pyTivo_files + "\n\n");
+         //ofp.write("<pyTivo_files>\n" + pyTivo_files + "\n\n");
          
          ofp.write("<metadata_files>\n" + metadata_files + "\n\n");
          

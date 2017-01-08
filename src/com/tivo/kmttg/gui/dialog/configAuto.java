@@ -90,7 +90,7 @@ public class configAuto {
    private static CheckBox comcut = null;
    private static CheckBox captions = null;
    private static CheckBox encode = null;
-   private static CheckBox push = null;
+   //private static CheckBox push = null;
    private static CheckBox custom = null;
    private static CheckBox dry_run = null;
    private static CheckBox noJobWait = null;
@@ -239,7 +239,7 @@ public class configAuto {
          }
       });
       encode    = new CheckBox("encode");
-      push      = new CheckBox("push");
+      //push      = new CheckBox("push");
       suggestionsFilter_single = new CheckBox("Filter out TiVo Suggestions");
       useProgramId_unique = new CheckBox("Treat each recording as unique");
       // This intentionally disabled for now
@@ -357,7 +357,7 @@ public class configAuto {
       if (config.rpcDeleteEnabled()) {
          row4.getChildren().add(rpcdelete);         
       }
-      row4.getChildren().addAll(comskip, comcut, captions, encode, custom, push);
+      row4.getChildren().addAll(comskip, comcut, captions, encode, custom);
       content.getChildren().add(row4);
       
       // row5
@@ -463,7 +463,7 @@ public class configAuto {
       comcut.setTooltip(config.gui.getToolTip("comcut"));
       captions.setTooltip(config.gui.getToolTip("captions"));
       encode.setTooltip(config.gui.getToolTip("encode"));
-      push.setTooltip(config.gui.getToolTip("push"));
+      //push.setTooltip(config.gui.getToolTip("push"));
       custom.setTooltip(config.gui.getToolTip("custom"));
       encoding_name.setTooltip(config.gui.getToolTip("encoding"));
       encoding_name2.setTooltip(config.gui.getToolTip("encoding2"));
@@ -743,12 +743,12 @@ public class configAuto {
          encode.setDisable(false);
       }
 
-      if ( ! file.isFile(config.pyTivo_config) ) {
+      /*if ( ! file.isFile(config.pyTivo_config) ) {
          push.setSelected(false);
          push.setDisable(true);
       } else {
          push.setDisable(false);
-      }
+      }*/
       
       if ( ! com.tivo.kmttg.task.custom.customCommandExists() ) {
          custom.setSelected(false);
@@ -1002,7 +1002,7 @@ public class configAuto {
                ofp.write("comcut "              + entry.comcut              + "\n");               
                ofp.write("captions "            + entry.captions            + "\n");               
                ofp.write("encode "              + entry.encode              + "\n");
-               ofp.write("push "                + entry.push                + "\n");
+               //ofp.write("push "                + entry.push                + "\n");
                ofp.write("custom "              + entry.custom              + "\n");
                ofp.write("suggestionsFilter "   + entry.suggestionsFilter   + "\n");
                ofp.write("useProgramId_unique " + entry.useProgramId_unique + "\n");
@@ -1053,7 +1053,7 @@ public class configAuto {
       comcut.setSelected((Boolean)(entry.comcut == 1));
       captions.setSelected((Boolean)(entry.captions == 1));
       encode.setSelected((Boolean)(entry.encode == 1));
-      push.setSelected((Boolean)(entry.push == 1));
+      //push.setSelected((Boolean)(entry.push == 1));
       custom.setSelected((Boolean)(entry.custom == 1));
       suggestionsFilter_single.setSelected((Boolean)(entry.suggestionsFilter == 1));
       useProgramId_unique.setSelected((Boolean)(entry.useProgramId_unique == 1));
@@ -1149,10 +1149,10 @@ public class configAuto {
       else
          entry.encode = 0;
       
-      if (push.isSelected())
+      /*if (push.isSelected())
          entry.push = 1;
       else
-         entry.push = 0;
+         entry.push = 0;*/
       
       if (custom.isSelected())
          entry.custom = 1;

@@ -91,7 +91,7 @@ import com.sun.javafx.css.StyleManager;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.dialog.Pushes;
+//import com.tivo.kmttg.gui.dialog.Pushes;
 import com.tivo.kmttg.gui.dialog.ShowDetails;
 import com.tivo.kmttg.gui.dialog.SkipDialog;
 import com.tivo.kmttg.gui.dialog.autoLogView;
@@ -157,7 +157,7 @@ public class gui extends Application {
    private MenuItem saveMessagesMenuItem = null;
    private MenuItem clearMessagesMenuItem = null;
    //private MenuItem resetServerMenuItem = null;
-   private MenuItem pushesMenuItem = null;
+   //private MenuItem pushesMenuItem = null;
    private MenuItem saveJobsMenuItem = null;
    private MenuItem loadJobsMenuItem = null;
    public MenuItem searchMenuItem = null;
@@ -179,7 +179,7 @@ public class gui extends Application {
    public CheckBox comcut = null;
    public CheckBox captions = null;
    public CheckBox encode = null;
-   public CheckBox push = null;
+   //public CheckBox push = null;
    public CheckBox custom = null;
    private WebView text = null;
    private textpane textp = null;
@@ -518,7 +518,7 @@ public class gui extends Application {
          comcut = new CheckBox("Ad Cut"); comcut.setSelected(false);        
          captions = new CheckBox("captions"); captions.setSelected(false);        
          encode = new CheckBox("encode"); encode.setSelected(false);
-         push = new CheckBox("push"); push.setSelected(false);
+         //push = new CheckBox("push"); push.setSelected(false);
          custom = new CheckBox("custom"); custom.setSelected(false);
          
          // Tasks row
@@ -542,7 +542,7 @@ public class gui extends Application {
          tasks_panel.getChildren().add(captions);
          tasks_panel.getChildren().add(encode);
          tasks_panel.getChildren().add(custom);
-         tasks_panel.getChildren().add(push);
+         //tasks_panel.getChildren().add(push);
          
          // Encoding row
          // Encoding label
@@ -674,8 +674,8 @@ public class gui extends Application {
          fileMenu.getItems().add(getSaveMessagesMenuItem());
          fileMenu.getItems().add(getClearMessagesMenuItem());
          //fileMenu.getItems().add(getResetServerMenuItem());
-         if (config.getTivoUsername() != null)
-            fileMenu.getItems().add(getPushesMenuItem());
+         //if (config.getTivoUsername() != null)
+         //   fileMenu.getItems().add(getPushesMenuItem());
          fileMenu.getItems().add(getResumeDownloadsMenuItem());
          fileMenu.getItems().add(getJobMenu());
          fileMenu.getItems().add(getSearchMenuItem());
@@ -887,7 +887,7 @@ public class gui extends Application {
       return resetServerMenuItem;
    }*/
 
-   private MenuItem getPushesMenuItem() {
+   /*private MenuItem getPushesMenuItem() {
       debug.print("");
       if (pushesMenuItem == null) {
          pushesMenuItem = new MenuItem();
@@ -909,7 +909,7 @@ public class gui extends Application {
          });
       }
       return pushesMenuItem;
-   }
+   }*/
    
    private MenuItem getToggleLaunchingJobsMenuItem() {
       debug.print("");
@@ -1437,12 +1437,12 @@ public class gui extends Application {
          encode.setDisable(false);
       }
       
-      if ( ! file.isFile(config.pyTivo_config) ) {
+      /*if ( ! file.isFile(config.pyTivo_config) ) {
          push.setSelected(false);
          push.setDisable(true);
       } else {
          push.setDisable(false);
-      }
+      }*/
       
       if ( ! com.tivo.kmttg.task.custom.customCommandExists() ) {
          custom.setSelected(false);
@@ -1860,7 +1860,7 @@ public class gui extends Application {
             ofp.write("<comcut>\n"              + comcut_setting()           + "\n");
             ofp.write("<captions>\n"            + captions_setting()         + "\n");
             ofp.write("<encode>\n"              + encode_setting()           + "\n");
-            ofp.write("<push>\n"                + push_setting()             + "\n");
+            //ofp.write("<push>\n"                + push_setting()             + "\n");
             ofp.write("<custom>\n"              + custom_setting()           + "\n");
             ofp.write("<encode_name>\n"         + config.encodeName          + "\n");
             ofp.write("<toolTips>\n"            + config.toolTips            + "\n");
@@ -2114,12 +2114,12 @@ public class gui extends Application {
                else
                   encode.setSelected(false);
             }
-            if (key.equals("push")) {
+            /*if (key.equals("push")) {
                if (line.matches("1"))
                   push.setSelected(true);
                else
                   push.setSelected(false);
-            }
+            }*/
             if (key.equals("custom")) {
                if (line.matches("1"))
                   custom.setSelected(true);
@@ -2431,7 +2431,7 @@ public class gui extends Application {
       comcut.setTooltip(getToolTip("comcut"));
       captions.setTooltip(getToolTip("captions"));
       encode.setTooltip(getToolTip("encode"));
-      push.setTooltip(getToolTip("push"));
+      //push.setTooltip(getToolTip("push"));
       custom.setTooltip(getToolTip("custom"));
       encoding.setTooltip(getToolTip("encoding"));
    }
@@ -2819,12 +2819,12 @@ public class gui extends Application {
       if (encode.isSelected()) selected = 1;
       return selected;
    }
-   public int push_setting() {
+   /*public int push_setting() {
       debug.print("");
       int selected = 0;
       if (push.isSelected()) selected = 1;
       return selected;
-   }
+   }*/
    public int custom_setting() {
       debug.print("");
       int selected = 0;

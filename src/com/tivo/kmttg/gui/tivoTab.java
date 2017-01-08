@@ -19,11 +19,11 @@
 package com.tivo.kmttg.gui;
 
 import java.io.File;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Optional;
+//import java.util.Optional;
 import java.util.Stack;
 
 import javafx.event.ActionEvent;
@@ -32,7 +32,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceDialog;
+//import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.layout.ColumnConstraints;
@@ -50,7 +50,7 @@ import com.tivo.kmttg.gui.table.nplTable.Tabentry;
 import com.tivo.kmttg.gui.table.nplTable;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
-import com.tivo.kmttg.main.http;
+//import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.SkipImport;
@@ -58,7 +58,7 @@ import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
-import com.tivo.kmttg.util.pyTivo;
+//import com.tivo.kmttg.util.pyTivo;
 import com.tivo.kmttg.util.string;
 
 public class tivoTab {
@@ -67,7 +67,7 @@ public class tivoTab {
    private Button add = null;
    private Button remove = null;
    private Button atomic = null;
-   private Button pyTivo_stream = null;
+   //private Button pyTivo_stream = null;
    private Button refresh = null;
    private Button disk_usage = null;
    private Label status = null;
@@ -137,7 +137,7 @@ public class tivoTab {
          }
          
          // pyTivo stream button
-         if ( config.rpcEnabled() && file.isFile(config.pyTivo_config) ) {
+         /*if ( config.rpcEnabled() && file.isFile(config.pyTivo_config) ) {
             pyTivo_stream = new Button("pyTivo stream");
             pyTivo_stream.setTooltip(config.gui.getToolTip("pyTivo_stream"));
             pyTivo_stream.setOnAction(new EventHandler<ActionEvent>() {
@@ -146,7 +146,7 @@ public class tivoTab {
                }
             });
             row.getChildren().addAll(util.space(20), pyTivo_stream);
-         }
+         }*/
          
          panel.getChildren().add(row);
       } else {         
@@ -414,7 +414,7 @@ public class tivoTab {
    }
 
    // FILES mode pyTivo stream button callback
-   private void pyTivo_streamCB() {
+   /*private void pyTivo_streamCB() {
       debug.print("");
       if ( tivoName.equals("FILES") ) {
          if (! file.isFile(config.pyTivo_config)) {
@@ -464,7 +464,7 @@ public class tivoTab {
             log.error("No RPC enabled TiVos found in kmttg config");
          }
       }
-   }
+   }*/
 
    // Start button callback
    // Process selected Now Playing entries
@@ -515,7 +515,7 @@ public class tivoTab {
                h.put("comcut",     config.gui.comcut.isSelected());
                h.put("captions",   config.gui.captions.isSelected());
                h.put("encode",     config.gui.encode.isSelected());
-               h.put("push",       config.gui.push.isSelected());
+               //h.put("push",       config.gui.push.isSelected());
                h.put("custom",     config.gui.custom.isSelected());
                jobMonitor.LaunchJobs(h);
             }

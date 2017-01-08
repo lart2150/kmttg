@@ -55,7 +55,8 @@ public class Mind {
    public String server;
    private String mindVer = "mind9";
    
-   public static final String DEFAULT_MIND_SERVER = config.pyTivo_mind;
+   //public static final String DEFAULT_MIND_SERVER = config.pyTivo_mind;
+   public static final String DEFAULT_MIND_SERVER = "mind.tivo.com:8181";
    SimpleCookieManager cm = new SimpleCookieManager();
    
    public Mind(String mindServer) {

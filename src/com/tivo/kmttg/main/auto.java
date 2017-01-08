@@ -571,7 +571,7 @@ public class auto {
       h.put("comcut",              (Boolean)(auto.comcut    == 1));
       h.put("captions",            (Boolean)(auto.captions  == 1));
       h.put("encode",              (Boolean)(auto.encode    == 1));
-      h.put("push",                (Boolean)(auto.push      == 1));
+      //h.put("push",                (Boolean)(auto.push      == 1));
       h.put("custom",              (Boolean)(auto.custom    == 1));
       h.put("useProgramId_unique", (Boolean)(auto.useProgramId_unique == 1));
       if (auto.encode_name != null)
@@ -816,7 +816,7 @@ public class auto {
             ofp.write("captions "    + config.gui.captions_setting()  + "\n");
             ofp.write("encode "      + config.gui.encode_setting()    + "\n");
             ofp.write("encode_name " + config.encodeName              + "\n");
-            ofp.write("push "        + config.gui.push_setting()      + "\n");
+            //ofp.write("push "        + config.gui.push_setting()      + "\n");
             ofp.write("custom "      + config.gui.custom_setting()    + "\n");
             ofp.write("comskipIni "  + "none"                         + "\n");
             ofp.write("suggestionsFilter " + "0"                      + "\n");

@@ -185,19 +185,19 @@ public class configMain {
    private static TextField httpserver_port = null;
    private static TextField httpserver_cache = null;
    private static TextField autoLogSizeMB = null;
-   private static TextField pyTivo_host = null;
+   //private static TextField pyTivo_host = null;
    private static TextField web_query = null;
    private static TextField web_browser = null;
    private static TextField tivo_username = null;
    private static TextField tivo_password = null;
-   private static TextField pyTivo_config = null;
+   //private static TextField pyTivo_config = null;
    private static TextField autotune_channel_interval = null;
    private static TextField autotune_button_interval = null;
    private static TextField autotune_chan1 = null;
    private static TextField autotune_chan2 = null;
    private static ChoiceBox<String> MinChanDigits = null;
-   private static ChoiceBox<String> pyTivo_tivo = null;
-   private static ChoiceBox<String> pyTivo_files = null;
+   //private static ChoiceBox<String> pyTivo_tivo = null;
+   //private static ChoiceBox<String> pyTivo_files = null;
    private static ChoiceBox<String> metadata_files = null;
    private static ChoiceBox<String> keywords = null;
    private static ChoiceBox<String> customFiles = null;
@@ -1018,7 +1018,7 @@ public class configMain {
       autoLogSizeMB.setText("" + config.autoLogSizeMB);
       
       // pyTivo_host
-      pyTivo_host.setText("" + config.pyTivo_host);
+      //pyTivo_host.setText("" + config.pyTivo_host);
       
       // web_query
       if (config.web_query.length() > 0)
@@ -1045,10 +1045,10 @@ public class configMain {
          tivo_password.setText("");
       
       // pyTivo_config
-      pyTivo_config.setText("" + config.pyTivo_config);
+      //pyTivo_config.setText("" + config.pyTivo_config);
       
       // pyTivo_tivo
-      Stack<String> names = config.getNplTivoNames();
+      /*Stack<String> names = config.getNplTivoNames();
       if (names.size() > 0) {
          String setting = names.get(0);
          for (int i=0; i<names.size(); ++i) {
@@ -1057,10 +1057,10 @@ public class configMain {
             }
          }
          pyTivo_tivo.setValue(setting);
-      }
+      }*/
       
       // pyTivo_files
-      pyTivo_files.setValue(config.pyTivo_files);
+      //pyTivo_files.setValue(config.pyTivo_files);
       
       // metadata_files
       metadata_files.setValue(config.metadata_files);
@@ -2042,12 +2042,12 @@ public class configMain {
       }
       
       // pyTivo_host
-      value = string.removeLeadingTrailingSpaces(pyTivo_host.getText());
+      /*value = string.removeLeadingTrailingSpaces(pyTivo_host.getText());
       if (value.length() == 0) {
          // Reset to default if none given
          value = "localhost";
       }
-      config.pyTivo_host = value;
+      config.pyTivo_host = value;*/
       
       // web_query
       value = string.removeLeadingTrailingSpaces(web_query.getText());
@@ -2082,18 +2082,18 @@ public class configMain {
       config.setTivoPassword(value);
       
       // pyTivo_config
-      value = string.removeLeadingTrailingSpaces(pyTivo_config.getText());
+      /*value = string.removeLeadingTrailingSpaces(pyTivo_config.getText());
       if (value.length() == 0) {
          // Reset to default if none given
          value = "";
       }
-      config.pyTivo_config = value;
+      config.pyTivo_config = value;*/
       
       // pyTivo_tivo
-      config.pyTivo_tivo = pyTivo_tivo.getValue();
+      //config.pyTivo_tivo = pyTivo_tivo.getValue();
       
       // pyTivo_files
-      config.pyTivo_files = pyTivo_files.getValue();
+      //config.pyTivo_files = pyTivo_files.getValue();
       
       // metadata_files
       config.metadata_files = metadata_files.getValue();
@@ -2146,7 +2146,7 @@ public class configMain {
       web_browser = new TextField(); web_browser.setPrefWidth(30);
       tivo_username = new TextField(); tivo_username.setPrefWidth(30);
       tivo_password = new TextField(); tivo_password.setPrefWidth(30);
-      pyTivo_config = new TextField(); pyTivo_config.setPrefWidth(30);
+      //pyTivo_config = new TextField(); pyTivo_config.setPrefWidth(30);
       
       VRDexe = new TextField(); VRDexe.setPrefWidth(20);
       tivo_name = new TextField(); tivo_name.setPrefWidth(20);
@@ -2157,7 +2157,7 @@ public class configMain {
       autotune_button_interval = new TextField(); autotune_button_interval.setPrefWidth(20);
       autotune_chan1 = new TextField(); autotune_chan1.setPrefWidth(20);
       autotune_chan2 = new TextField(); autotune_chan2.setPrefWidth(20);
-      pyTivo_host = new TextField(); pyTivo_host.setPrefWidth(20);
+      //pyTivo_host = new TextField(); pyTivo_host.setPrefWidth(20);
       
       MAK = new TextField(); MAK.setPrefWidth(15);
       wan_http_port = new TextField(); wan_http_port.setPrefWidth(15);
@@ -2283,20 +2283,20 @@ public class configMain {
       Label httpserver_cache_label = new Label();
       Label autoLogSizeMB_label = new Label();
       Label available_keywords_label = new Label();
-      Label pyTivo_host_label = new Label();
+      //Label pyTivo_host_label = new Label();
       Label web_query_label = new Label();
       Label web_browser_label = new Label();
       Label tivo_username_label = new Label();
       Label tivo_password_label = new Label();
-      Label pyTivo_config_label = new Label();
-      Label pyTivo_tivo_label = new Label();
+      //Label pyTivo_config_label = new Label();
+      //Label pyTivo_tivo_label = new Label();
       Label MinChanDigits_label = new Label();
-      Label pyTivo_files_label = new Label();
+      //Label pyTivo_files_label = new Label();
       Label metadata_files_label = new Label();
       Label lookAndFeel_label = new Label();
       MinChanDigits = new ChoiceBox<String>();
-      pyTivo_tivo = new ChoiceBox<String>();
-      pyTivo_files = new ChoiceBox<String>();
+      //pyTivo_tivo = new ChoiceBox<String>();
+      //pyTivo_files = new ChoiceBox<String>();
       metadata_files = new ChoiceBox<String>();
       lookAndFeel = new ChoiceBox<String>();
       keywords = new ChoiceBox<String>();
@@ -2448,10 +2448,10 @@ public class configMain {
       web_browser_label.setText("web browser binary");
       tivo_username_label.setText("tivo.com username");
       tivo_password_label.setText("tivo.com password");
-      pyTivo_host_label.setText("pyTivo host name");
-      pyTivo_config_label.setText("pyTivo.conf file");
-      pyTivo_tivo_label.setText("pyTivo push destination");
-      pyTivo_files_label.setText("Files to push");
+      //pyTivo_host_label.setText("pyTivo host name");
+      //pyTivo_config_label.setText("pyTivo.conf file");
+      //pyTivo_tivo_label.setText("pyTivo push destination");
+      //pyTivo_files_label.setText("Files to push");
       metadata_files_label.setText("metadata files");
       lookAndFeel_label.setText("look and feel");
       MinChanDigits_label.setText("Min # Channel Digits");
@@ -2483,14 +2483,14 @@ public class configMain {
       MinChanDigits.getItems().addAll("1","2","3","4");
       MinChanDigits.getSelectionModel().select(0);
       
-      for (String name : config.getNplTivoNames())
+      /*for (String name : config.getNplTivoNames())
          pyTivo_tivo.getItems().add(name);
       pyTivo_tivo.getSelectionModel().select(0);
       
       pyTivo_files.getItems().addAll(
          "tivoFile", "mpegFile", "mpegFile_cut", "encodeFile", "last", "all"
       );
-      pyTivo_files.getSelectionModel().select(0);
+      pyTivo_files.getSelectionModel().select(0);*/
       
       metadata_files.getItems().addAll(
          "tivoFile", "mpegFile", "mpegFile_cut", "encodeFile", "last", "all"
@@ -2833,7 +2833,7 @@ public class configMain {
          }
       });
 
-      pyTivo_config.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      /*pyTivo_config.setOnMouseClicked(new EventHandler<MouseEvent>() {
          @Override
          public void handle(MouseEvent mouseEvent) {
             if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
@@ -2850,7 +2850,7 @@ public class configMain {
                }
             }
          }
-      });
+      });*/
 
       // Start of layout management
       int gy = 0;
@@ -3442,7 +3442,7 @@ public class configMain {
       vrd_panel.add(VrdOneAtATime, 1, gy);
       
       // pyTivo Panel
-      GridPane pyTivo_panel = new GridPane();      
+      /*GridPane pyTivo_panel = new GridPane();      
       pyTivo_panel.setAlignment(Pos.CENTER);
       pyTivo_panel.setVgap(5);
       pyTivo_panel.setHgap(5);
@@ -3467,7 +3467,7 @@ public class configMain {
       // pyTivo_files
       gy++;
       pyTivo_panel.add(pyTivo_files_label, 0, gy);
-      pyTivo_panel.add(pyTivo_files, 1, gy);
+      pyTivo_panel.add(pyTivo_files, 1, gy);*/
       
       // Common panel
       HBox common_panel = new HBox();
@@ -3487,7 +3487,7 @@ public class configMain {
       addTabPane("Web", web_panel);
       if (config.OS.equals("windows"))
          addTabPane("VideoRedo", vrd_panel);
-      addTabPane("pyTivo", pyTivo_panel);
+      //addTabPane("pyTivo", pyTivo_panel);
       addTabPane("Autotune", autotune_panel);
       addTabPane("AutoSkip", autoskip_panel);
       
@@ -3639,10 +3639,10 @@ public class configMain {
       web_browser.setTooltip(getToolTip("web_browser"));
       tivo_username.setTooltip(getToolTip("tivo_username"));
       tivo_password.setTooltip(getToolTip("tivo_password"));
-      pyTivo_host.setTooltip(getToolTip("pyTivo_host"));
-      pyTivo_config.setTooltip(getToolTip("pyTivo_config"));
-      pyTivo_tivo.setTooltip(getToolTip("pyTivo_tivo"));
-      pyTivo_files.setTooltip(getToolTip("pyTivo_files"));
+      //pyTivo_host.setTooltip(getToolTip("pyTivo_host"));
+      //pyTivo_config.setTooltip(getToolTip("pyTivo_config"));
+      //pyTivo_tivo.setTooltip(getToolTip("pyTivo_tivo"));
+      //pyTivo_files.setTooltip(getToolTip("pyTivo_files"));
       metadata_files.setTooltip(getToolTip("metadata_files"));
       lookAndFeel.setTooltip(getToolTip("lookAndFeel"));
       MinChanDigits.setTooltip(getToolTip("MinChanDigits"));

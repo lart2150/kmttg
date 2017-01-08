@@ -460,9 +460,9 @@ public class jobMonitor {
          }
          
          // For push jobs add push Tivo name
-         if (job.type.equals("push")) {
-            output = "(" + job.pyTivo_tivo + ") " + output;
-         }
+         //if (job.type.equals("push")) {
+         //   output = "(" + job.pyTivo_tivo + ") " + output;
+         //}
          
          class backgroundRun implements Runnable {
             String output;
@@ -732,7 +732,7 @@ public class jobMonitor {
       Boolean comcut       = (Boolean)specs.get("comcut");
       Boolean captions     = (Boolean)specs.get("captions");
       Boolean encode       = (Boolean)specs.get("encode");
-      Boolean push         = (Boolean)specs.get("push");
+      //Boolean push         = (Boolean)specs.get("push");
       Boolean custom       = (Boolean)specs.get("custom");
       Boolean useProgramId_unique = false;
       if (specs.containsKey("useProgramId_unique")) {
@@ -1389,7 +1389,7 @@ public class jobMonitor {
          }
       }
             
-      if (push) {
+      /*if (push) {
          // NOTE: encodeFile2 arg intentionally set to null to avoid push of 2nd encoding
          Stack<String> push_files = videoFilesToProcess(
             mode, decrypt, comcut, encode, config.pyTivo_files,
@@ -1411,7 +1411,7 @@ public class jobMonitor {
          } else {
             log.error("push files setting=" + config.pyTivo_files + " but file(s) not available for this task set");
          }
-      }
+      }*/
       
       if (custom) {
          jobData job = new jobData();
