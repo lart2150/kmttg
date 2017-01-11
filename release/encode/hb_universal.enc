@@ -1,0 +1,12 @@
+# Description (single line, keep short)
+<description>
+Handbrake universal: mp4 container, res x=720 h.264 video, aac audio
+
+# Encode command or script (single line)
+# Known keywords: FFMPEG, MENCODER, HANDBRAKE, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
+<command>
+HANDBRAKE -i INPUT -e x264 -q 20.0 -r 30 --pfr -a 1,1 -E ffaac,copy:ac3 -B 160,160 -6 dpl2,none -R Auto,Auto -D 0.0,0.0 --audio-copy-mask aac,ac3,dtshd,dts,mp3 --audio-fallback ffac3 -f mp4 -X 720 -Y 576 --loose-anamorphic --modulus 2 -m --x264-preset fast --h264-profile baseline --h264-level 3.0 -o OUTPUT
+ 
+# Encoded output file extension
+<extension>
+m4v
