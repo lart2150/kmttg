@@ -531,13 +531,19 @@ public class SkipManager {
                   json.remove("event");
                   json.put("offset", starting);
                   result = r.Command("Jump", json);
-                  Thread.sleep(sleep_time);
                   
                   // liveTv button press
                   Thread.sleep(sleep_time);
                   json.remove("offset");
                   json.put("event", "liveTv");
                   result = r.Command("keyEventSend", json);
+                  
+                  // Reset bookmark position (starting==0 doesn't always work with Jump)
+                  json = new JSONObject();
+                  json.put("bodyId", r.bodyId_get());
+                  json.put("recordingId", recordingId);
+                  json.put("bookmarkPosition", starting);
+                  r.Command("recordingUpdate", json);
                }
                
                points = reverseStack(points);
