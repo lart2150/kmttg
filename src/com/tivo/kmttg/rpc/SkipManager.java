@@ -539,6 +539,7 @@ public class SkipManager {
                   result = r.Command("keyEventSend", json);
                   
                   // Reset bookmark position (starting==0 doesn't always work with Jump)
+                  log.print("(Setting pause point=" + starting + ")");
                   json = new JSONObject();
                   json.put("bodyId", r.bodyId_get());
                   json.put("recordingId", recordingId);
