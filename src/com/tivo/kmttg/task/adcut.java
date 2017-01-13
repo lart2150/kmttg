@@ -286,6 +286,16 @@ public class adcut extends baseTask implements Serializable {
                if (file.isFile(f) && file.delete(f))
                   log.print("(Deleted comskip txt file: " + f + ")");
             }
+            
+            // Remove .TiVo file if option enabled
+            if (config.RemoveTivoFile == 1 && file.isFile(job.tivoFile)) {
+               if ( file.delete(job.tivoFile) ) {
+                  log.print("(Deleted file: " + job.tivoFile + ")");
+               } else {
+                  log.error("Failed to delete file: "+ job.tivoFile);
+               }
+            }
+            
             // Remove .mpg file if option enabled
             if ( config.RemoveComcutFiles_mpeg == 1 ) {
                if (file.delete(job.mpegFile))
