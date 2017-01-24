@@ -143,12 +143,12 @@ public class PopupHandler {
          tivoName = tabName;
          if (!config.rpcEnabled(tivoName) && !config.mindEnabled(tivoName))
             items.add(new PopupPair("Get extended metadata [m]", KeyCode.M, tivoName));
-         if (config.rpcEnabled(tivoName) || config.twpDeleteEnabled())
-            items.add(new PopupPair("Delete [delete]", KeyCode.DELETE, tivoName));
          if (config.rpcEnabled(tivoName)) {
             items.add(new PopupPair("Play [p]", KeyCode.P, tivoName));
             items.add(new PopupPair("Show Information [i]", KeyCode.I, tivoName));
          }
+         if (config.rpcEnabled(tivoName) || config.twpDeleteEnabled())
+            items.add(new PopupPair("Delete [delete]", KeyCode.DELETE, tivoName));
          items.add(new PopupPair("Display data [j]", KeyCode.J, tivoName));
          if (config.rpcEnabled(tivoName) || config.mindEnabled(tivoName))
             items.add(new PopupPair("Episode Info [n]", KeyCode.N, tivoName));
