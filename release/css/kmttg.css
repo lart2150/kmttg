@@ -1,6 +1,6 @@
 /* kmttg only changes to default settings */
-#button_job_start {-fx-background-color: #90EE90;} /* COLOR.LIGHTGREEN */
-#button_job_cancel {-fx-background-color: #FABEBE;} /* COLOR.LIGHTRED */
+#button_job_start {-fx-background-color: #90EE90; -fx-border-color: black;} /* COLOR.LIGHTGREEN */
+#button_job_cancel {-fx-background-color: #FABEBE; -fx-border-color: black;} /* COLOR.LIGHTRED */
 #button_config_ok {-fx-background-color: #90EE90;} /* COLOR.LIGHTGREEN */
 #button_config_cancel {-fx-background-color: #FABEBE;} /* COLOR.LIGHTRED */
 #button_autoconfig_ok {-fx-background-color: #90EE90;} /* COLOR.LIGHTGREEN */
