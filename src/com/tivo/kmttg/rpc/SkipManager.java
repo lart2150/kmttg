@@ -653,8 +653,8 @@ public class SkipManager {
          } // If data != null
          if (config.autoskip_batch_standby == 1) {
             try {
-               log.print("Switching to standby mode for TiVo: " + tivoName);
                JSONObject j = new JSONObject();
+               log.print("Switching to standby mode for TiVo: " + tivoName);
                j.put("event", "standby");
                r.Command("keyEventSend", j);               
             } catch (JSONException e) {
