@@ -783,7 +783,7 @@ public class jobMonitor {
          encodeName = encodeConfig.getEncodeName();
       }
       if (encode && ! encodeConfig.isValidEncodeName(encodeName) ) {
-         log.error("Cancelling encode task");
+         log.error("Cancelling encode task due to invalid encoding profile specified: " + encodeName);
          encode = false;
       }
       
@@ -795,7 +795,7 @@ public class jobMonitor {
          encodeName2 = null;	// null will = no second encoding later on
       }
       if (encode && encodeName2 != null && ! encodeConfig.isValidEncodeName(encodeName2) ) {
-         log.error("Cancelling second encode task");
+         log.error("Cancelling second encode task due to invalid encoding profile specified: " + encodeName2);
       }
 
       String outputDir = config.outputDir;
