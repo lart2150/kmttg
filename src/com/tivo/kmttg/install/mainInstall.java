@@ -92,6 +92,7 @@ public class mainInstall {
                prompt += "\nTivo Central-Messages&Settings-Account&System Information-Media Access Key";
                TextInputDialog d = new TextInputDialog("");
                d.setTitle(prompt);
+               d.setHeaderText(prompt);
                Optional<String> result = d.showAndWait();
                if (result.isPresent()){
                    if (result.get().length() > 0) {
