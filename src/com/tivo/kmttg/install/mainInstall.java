@@ -91,7 +91,7 @@ public class mainInstall {
                prompt += "\nYou can find it on any of your Tivos under";
                prompt += "\nTivo Central-Messages&Settings-Account&System Information-Media Access Key";
                TextInputDialog d = new TextInputDialog("");
-               d.setTitle(prompt);
+               d.setTitle("Enter 10 digit MAK");
                d.setHeaderText(prompt);
                Optional<String> result = d.showAndWait();
                if (result.isPresent()){
