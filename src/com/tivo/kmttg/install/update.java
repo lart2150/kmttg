@@ -86,7 +86,15 @@ public class update {
                   auto.serviceStopIfNeeded();
                   Task<Void> task = new Task<Void>() {
                      @Override public Void call() {
-                        String zipFile = downloadUrl(config.programDir + File.separator + fname, url);
+                        String filename = config.programDir + File.separator + fname;
+                        String zipFile = downloadUrl(filename, url);
+                        if (zipFile != null) {
+                           // Determine if zipFile contains a redirect
+                           String redirect = util.getRedirect(zipFile);
+                           if (redirect != null) {
+                              zipFile = downloadUrl(filename, redirect);
+                           }
+                        }
                         if (zipFile != null) {
                            if ( unzip(config.programDir, zipFile) ) {
                               log.print("Successfully updated kmttg installation.");

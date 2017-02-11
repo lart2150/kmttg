@@ -58,6 +58,15 @@ public class toolDownload {
       }
       if (urlString != null) {
          if (downloadUrl(urlString, localFileName)) {
+            // Determine if localFileName contains a redirect
+            String redirect = util.getRedirect(localFileName);
+            if (redirect != null) {
+               if (downloadUrl(redirect, localFileName)) {
+                  return localFileName;
+               } else {
+                  return null;
+               }
+            }
             return localFileName;
          } else {
             return null;
