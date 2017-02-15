@@ -549,7 +549,9 @@ public class SkipManager {
                
                points = reverseStack(points);
                Stack<Hashtable<String,Long>> cuts = new Stack<Hashtable<String,Long>>();
-               int count = 0;
+               // NOTE: count start may be > 0 if lengths size > points size
+               int count = lengths.size() - points.size();
+               debug.print("count start=" + count);
                Long stop;
                for (Long start : points) {
                   if (count < lengths.size())
