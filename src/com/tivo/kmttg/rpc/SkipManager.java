@@ -549,8 +549,16 @@ public class SkipManager {
                
                points = reverseStack(points);
                Stack<Hashtable<String,Long>> cuts = new Stack<Hashtable<String,Long>>();
-               // NOTE: count start may be > 0 if lengths size > points size
-               int count = lengths.size() - points.size();
+               // If lengths.size() != points.size() then decide if we need to skip 1st or last lengths entry
+               int diff_size = lengths.size() - points.size();
+               int count = 0;
+               if (diff_size == 1) {
+                  // More clipSegments available than detected start points
+                  // Need to decide which clipSegments to use
+                  // Skip 1st entry if 1st segment length shorter than last one
+                  if (lengths.elementAt(0) < lengths.elementAt(lengths.size()-1))
+                     count = 1;
+               }
                debug.print("count start=" + count);
                Long stop;
                for (Long start : points) {
