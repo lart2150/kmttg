@@ -45,6 +45,7 @@ public class SkipManager {
    private static String ini = config.programDir + File.separator + "AutoSkip.ini";
    private static Hashtable<String,AutoSkip> instances = new Hashtable<String,AutoSkip>();
    private static Hashtable<String,SkipService> serviceInstances = new Hashtable<String,SkipService>();
+   private static Hashtable<String,Boolean> tryagain = new Hashtable<String,Boolean>();
    
    public static synchronized String iniFile() {
       return ini;
@@ -583,6 +584,14 @@ public class SkipManager {
                   );
                } else {
                   log.warn("Failed to retrieve cut points for: '" + data.get("title") + "'");
+                  if (tryagain.containsKey(recordingId)) {
+                     tryagain.remove(recordingId);
+                  } else {
+                     tryagain.put(recordingId, true);
+                     r.disconnect();
+                     log.warn("Trying one more time.");
+                     visualDetect(tivoName, stack);
+                  }
                }
                
             } catch (Exception e) {
