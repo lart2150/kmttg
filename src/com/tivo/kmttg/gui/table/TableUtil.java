@@ -1375,5 +1375,26 @@ public class TableUtil {
          log.error("PrintEpisodes_table - " + e.getMessage());
       }      
    }
+   
+   static public void PrintClipData(String tivoName, JSONObject json) {
+      if (json != null && json.has("contentId")) {
+         try {
+            final String contentId = json.getString("contentId");
+            Task<Void> task = new Task<Void>() {
+               @Override public Void call() {
+                  Remote r = config.initRemote(tivoName);
+                  if (r.success) {
+                     r.printClipData(contentId);
+                     r.disconnect();
+                  }
+                  return null;
+               }
+            };
+            new Thread(task).start();
+         } catch (JSONException e) {
+            log.error("PrintClipData - " + e.getMessage());
+         }
+      }
+   }
 
 }
