@@ -522,6 +522,14 @@ public class searchTable extends TableMap {
          if (json != null)
             auto.AddHistoryEntry(json);
       }
+      else if (keyCode == KeyCode.K) {
+         // Print skipmode information if available
+         int[] selected = TableUtil.GetSelectedRows(TABLE);
+         if (selected == null || selected.length < 1)
+            return;
+         JSONObject json = GetRowData(selected[0]);
+         TableUtil.PrintClipData(currentTivo, json);
+      }
       else if (keyCode == KeyCode.P) {
          config.gui.remote_gui.search_tab.recordSP.fire();
       }
