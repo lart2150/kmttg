@@ -45,7 +45,6 @@ public class SkipManager {
    private static String ini = config.programDir + File.separator + "AutoSkip.ini";
    private static Hashtable<String,AutoSkip> instances = new Hashtable<String,AutoSkip>();
    private static Hashtable<String,SkipService> serviceInstances = new Hashtable<String,SkipService>();
-   private static Hashtable<String,Boolean> tryagain = new Hashtable<String,Boolean>();
    
    public static synchronized String iniFile() {
       return ini;
@@ -433,7 +432,7 @@ public class SkipManager {
       }
    }
    
-   private static void visualDetect(String tivoName, Stack<Hashtable<String,String>> stack) {
+   private static void visualDetect(Boolean first_try, String tivoName, Stack<Hashtable<String,String>> stack) {
       config.visualDetect_running = true;
       for (Hashtable<String,String> data : stack) {
          log.warn(
@@ -584,13 +583,12 @@ public class SkipManager {
                   );
                } else {
                   log.warn("Failed to retrieve cut points for: '" + data.get("title") + "'");
-                  if (tryagain.containsKey(recordingId)) {
-                     tryagain.remove(recordingId);
-                  } else {
-                     tryagain.put(recordingId, true);
+                  if (first_try) {
                      r.disconnect();
                      log.warn("Trying one more time.");
-                     visualDetect(tivoName, stack);
+                     Stack<Hashtable<String,String>> new_stack = new Stack<Hashtable<String,String>>();
+                     new_stack.push(data);
+                     visualDetect(false, tivoName, new_stack);
                   }
                }
                
@@ -612,14 +610,14 @@ public class SkipManager {
          // Non blocking mode
          Task<Void> task = new Task<Void>() {
             @Override public Void call() {
-               visualDetect(tivoName, stack);
+               visualDetect(true, tivoName, stack);
                return null;
             }
          };
          new Thread(task).start();
       } else {
          // Blocking mode
-         visualDetect(tivoName, stack);
+         visualDetect(true, tivoName, stack);
       }
    }
    
