@@ -378,8 +378,9 @@ public class AutoSkip {
       debug.print("pos=" + pos);
       long closest = -1;
       // If current pos is within any start-end range then no skip necessary
+      int pad = config.autoskip_padding*1000;
       for (Hashtable<String,Long> h : skipData) {
-         if (pos >= h.get("start") && pos <= h.get("end"))
+         if (pos >= (h.get("start")-pad) && pos <= (h.get("end")+pad))
             return -1;
       }
       
