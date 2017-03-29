@@ -71,7 +71,7 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class Remote {
-   public Boolean debug = false;
+   public Boolean debug = com.tivo.kmttg.util.debug.enabled;
    public String SchemaVersion = "14";
    public String SchemaVersion_newer = "17";
    public Boolean success = true;
