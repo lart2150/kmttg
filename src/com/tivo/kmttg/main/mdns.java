@@ -19,6 +19,7 @@
 package com.tivo.kmttg.main;
 
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 //import java.util.Date;
@@ -39,7 +40,11 @@ public class mdns {
    
    public mdns() {
       try {
-         jmdns = JmDNS.create(InetAddress.getLocalHost());
+         DatagramSocket socket = new DatagramSocket();
+         socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+         //log.print("IP=" + socket.getLocalAddress().getHostAddress());
+         jmdns = JmDNS.create(socket.getLocalAddress());
+         socket.close();
          //start_time = new Date().getTime();
       } catch (UnknownHostException e) {
          log.error("mdns error: " + e.getMessage());
