@@ -180,7 +180,8 @@ public class configMain {
    private static TextField download_tries = null;
    private static TextField download_retry_delay = null;
    private static TextField download_delay = null;
-   private static TextField autoskip_padding = null;
+   private static TextField autoskip_padding_start = null;
+   private static TextField autoskip_padding_stop = null;
    private static TextField metadata_entries = null;
    private static TextField httpserver_port = null;
    private static TextField httpserver_cache = null;
@@ -1002,8 +1003,11 @@ public class configMain {
       // autoskip_jumpToEnd
       autoskip_jumpToEnd.setSelected(config.autoskip_jumpToEnd == 1);
       
-      // autoskip_padding
-      autoskip_padding.setText("" + config.autoskip_padding);
+      // autoskip_padding_start
+      autoskip_padding_start.setText("" + config.autoskip_padding_start);
+      
+      // autoskip_padding_stop
+      autoskip_padding_stop.setText("" + config.autoskip_padding_stop);
       
       // metadata_entries
       metadata_entries.setText("" + config.metadata_entries);
@@ -1968,20 +1972,36 @@ public class configMain {
       else
          config.autoskip_jumpToEnd = 0;
       
-      // autoskip_padding
-      value = string.removeLeadingTrailingSpaces(autoskip_padding.getText());
+      // autoskip_padding_start
+      value = string.removeLeadingTrailingSpaces(autoskip_padding_start.getText());
       if (value.length() > 0) {
          try {
-            config.autoskip_padding = Integer.parseInt(value);
+            config.autoskip_padding_start = Integer.parseInt(value);
          } catch(NumberFormatException e) {
-            textFieldError(autoskip_padding, "Illegal setting for AutoSkip padding: '" + value + "'");
+            textFieldError(autoskip_padding_start, "Illegal setting for AutoSkip padding start: '" + value + "'");
             log.error("Setting to 0");
-            config.autoskip_padding = 0;
-            autoskip_padding.setText("" + config.autoskip_padding);
+            config.autoskip_padding_start = 0;
+            autoskip_padding_start.setText("" + config.autoskip_padding_start);
             errors++;
          }
       } else {
-         config.autoskip_padding = 0;
+         config.autoskip_padding_start = 0;
+      }
+      
+      // autoskip_padding_stop
+      value = string.removeLeadingTrailingSpaces(autoskip_padding_stop.getText());
+      if (value.length() > 0) {
+         try {
+            config.autoskip_padding_stop = Integer.parseInt(value);
+         } catch(NumberFormatException e) {
+            textFieldError(autoskip_padding_stop, "Illegal setting for AutoSkip padding stop: '" + value + "'");
+            log.error("Setting to 0");
+            config.autoskip_padding_stop = 0;
+            autoskip_padding_stop.setText("" + config.autoskip_padding_stop);
+            errors++;
+         }
+      } else {
+         config.autoskip_padding_stop = 0;
       }
       
       // autoLogSizeMB
@@ -2171,7 +2191,8 @@ public class configMain {
       download_tries = new TextField(); download_tries.setPrefWidth(15);
       download_retry_delay = new TextField(); download_retry_delay.setPrefWidth(15);
       download_delay = new TextField(); download_delay.setPrefWidth(15);
-      autoskip_padding = new TextField(); autoskip_padding.setPrefWidth(15);
+      autoskip_padding_start = new TextField(); autoskip_padding_start.setPrefWidth(15);
+      autoskip_padding_stop = new TextField(); autoskip_padding_stop.setPrefWidth(15);
       metadata_entries = new TextField(); metadata_entries.setPrefWidth(15);
       httpserver_port = new TextField(); httpserver_port.setPrefWidth(15);
       httpserver_cache = new TextField(); httpserver_cache.setPrefWidth(15);
@@ -2277,7 +2298,8 @@ public class configMain {
       Label download_tries_label = new Label();
       Label download_retry_delay_label = new Label();
       Label download_delay_label = new Label();
-      Label autoskip_padding_label = new Label();
+      Label autoskip_padding_start_label = new Label();
+      Label autoskip_padding_stop_label = new Label();
       Label metadata_entries_label = new Label();
       Label httpserver_port_label = new Label();
       Label httpserver_cache_label = new Label();
@@ -2439,7 +2461,8 @@ public class configMain {
       download_tries_label.setText("# download attempts");
       download_retry_delay_label.setText("seconds between download retry attempts");
       download_delay_label.setText("start delay in seconds for download tasks");
-      autoskip_padding_label.setText("AutoSkip padding in seconds");
+      autoskip_padding_start_label.setText("AutoSkip start point padding in msecs");
+      autoskip_padding_stop_label.setText("AutoSkip end point padding in msecs");
       metadata_entries_label.setText("extra metadata entries (comma separated)");
       httpserver_port_label.setText("web server port");
       httpserver_cache_label.setText("web server cache dir");
@@ -2996,8 +3019,12 @@ public class configMain {
       autoskip_panel.add(autoskip_jumpToEnd, 1, gy);
       
       gy++;
-      autoskip_panel.add(autoskip_padding_label, 0, gy);
-      autoskip_panel.add(autoskip_padding, 1, gy);
+      autoskip_panel.add(autoskip_padding_start_label, 0, gy);
+      autoskip_panel.add(autoskip_padding_start, 1, gy);
+      
+      gy++;
+      autoskip_panel.add(autoskip_padding_stop_label, 0, gy);
+      autoskip_panel.add(autoskip_padding_stop, 1, gy);
       
       // Files panel
       GridPane files_panel = new GridPane();      
@@ -3630,7 +3657,8 @@ public class configMain {
       autoskip_prune.setTooltip(getToolTip("autoskip_prune"));
       autoskip_batch_standby.setTooltip(getToolTip("autoskip_batch_standby"));
       autoskip_jumpToEnd.setTooltip(getToolTip("autoskip_jumpToEnd"));
-      autoskip_padding.setTooltip(getToolTip("autoskip_padding"));
+      autoskip_padding_start.setTooltip(getToolTip("autoskip_padding_start"));
+      autoskip_padding_stop.setTooltip(getToolTip("autoskip_padding_stop"));
       metadata_entries.setTooltip(getToolTip("metadata_entries"));
       httpserver_port.setTooltip(getToolTip("httpserver_port"));
       httpserver_cache.setTooltip(getToolTip("httpserver_cache"));
@@ -4393,12 +4421,29 @@ public class configMain {
          text += "When used with TiVo's \"Play all recordings in this group\", this provides a seemless viewing<br>";
          text += "experience of all recordings in the group.";
       }
-      else if (component.equals("autoskip_padding")) {
-         text =  "<b>AutoSkip padding in seconds</b><br>";
-         text += "During AutoSkip play this padding will be applied to show start and end points.<br>";
-         text += "The idea is to pad start and end points so that actual show segments are not clipped.<br>";
-         text += "show start points: new start point = start point - padding<br>";
-         text += "show end points: new end point = end point + padding";
+      else if (component.equals("autoskip_padding_start")) {
+         text =  "<b>AutoSkip start point padding in msecs</b><br>";
+         text += "During AutoSkip play this padding will be applied to show start points.<br>";
+         text += "This allows you to add an offset to all show start points according to your preference.<br>";
+         text += "NOTE: Enter time in msecs = seconds * 1000 (so for 2.5 seconds enter 2500)<br>";
+         text += "new start point = start point + padding<br>";
+         text += "=> Value of zero means use originally detected/configured start points.<br>";
+         text += "=> Use positive value if you want to start later (more likely to start in show).<br>";
+         text += "=> Use negative value if you want to start sooner (more likely to start in commercial).<br>";
+         text += "If using AutoSkip from SkipMode often a zero value is appropriate here since<br>";
+         text += "detected start points tend to be pretty accurate.";
+      }
+      else if (component.equals("autoskip_padding_stop")) {
+         text =  "<b>AutoSkip end point padding in msecs</b><br>";
+         text += "During AutoSkip play this padding will be applied to show end points.<br>";
+         text += "This allows you to add an offset to all show end points according to your preference.<br>";
+         text += "NOTE: Enter time in msecs = seconds * 1000 (so for -2.5 seconds enter -2500)<br>";
+         text += "new end point = end point + padding<br>";
+         text += "=> Value of zero means use originally detected/configured end points.<br>";
+         text += "=> Use positive value if you want to end later (more likely to end in commercial).<br>";
+         text += "=> Use negative value if you want to end sooner (more likely to end in show).<br>";
+         text += "If using AutoSkip from SkipMode often a negative value is appropriate here if you<br>";
+         text += "find you are getting too many starts of commercials during AutoSkip play.";
       }
       else if (component.equals("autoLogSizeMB")) {
          text = "<b>auto log file size limit (MB)</b><br>";

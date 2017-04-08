@@ -201,9 +201,10 @@ public class AutoSkip {
             return;
          if (end1 == -1)
             return;
-         int pad = config.autoskip_padding*1000;
+         int pad_start = config.autoskip_padding_start;
+         int pad_stop = config.autoskip_padding_stop;
          for (Hashtable<String,Long> h : skipData) {
-            if (pos >= (h.get("start")-pad) && pos <= (h.get("end")+pad)) {
+            if (pos >= (h.get("start")+pad_start) && pos <= (h.get("end")+pad_stop)) {
                skip = false;
             }
          }
@@ -231,10 +232,14 @@ public class AutoSkip {
             posEnd = -1;
             long jumpto = getClosest(pos);
             if (jumpto != -1) {
-               print("(pos=" + SkipManager.toMinSec(pos) +
-                  ") IN COMMERCIAL. JUMPING TO: " + SkipManager.toMinSec(jumpto-pad)
-               );
-               jumpTo(jumpto-pad);
+               String message = "(pos=" + SkipManager.toMinSec(pos) +
+                  ") IN COMMERCIAL. JUMPING TO: " + SkipManager.toMinSec(jumpto+pad_start);
+               if (pad_start != 0 || pad_stop != 0) {
+                  message += " (start padding=" + config.autoskip_padding_start + " msecs" +
+                     ", end padding=" + config.autoskip_padding_stop + " msecs)";
+               }
+               print(message);
+               jumpTo(jumpto+pad_start);
             }
          }
       }
@@ -378,9 +383,10 @@ public class AutoSkip {
       debug.print("pos=" + pos);
       long closest = -1;
       // If current pos is within any start-end range then no skip necessary
-      int pad = config.autoskip_padding*1000;
+      int pad_start = config.autoskip_padding_start;
+      int pad_stop = config.autoskip_padding_stop;
       for (Hashtable<String,Long> h : skipData) {
-         if (pos >= (h.get("start")-pad) && pos <= (h.get("end")+pad))
+         if (pos >= (h.get("start")+pad_start) && pos <= (h.get("end")+pad_stop))
             return -1;
       }
       

@@ -255,13 +255,14 @@ public class SkipImport {
             ofp.write("<Filename>" + videoFile + "</Filename>\r\n");
             ofp.write("<CutList>\r\n");
             Stack<Hashtable<String,Long>> cuts = entriesToCuts(entries, duration);
-            int pad = config.autoskip_padding*1000;
+            int pad_start = config.autoskip_padding_start;
+            int pad_stop = config.autoskip_padding_stop;
             for (Hashtable<String,Long> cut : cuts) {
                ofp.write("<Cut>");
-               long start = (cut.get("start")+pad)*10000;
+               long start = (cut.get("start")-pad_start)*10000;
                if (start < 0) start = 0;
                ofp.write(" <CutTimeStart>" + start + "</CutTimeStart> ");
-               long end = (cut.get("end")-pad)*10000;
+               long end = (cut.get("end")-pad_stop)*10000;
                if (end < 0) end = 0;
                ofp.write("<CutTimeEnd>" + end + "</CutTimeEnd> ");
                ofp.write("</Cut>\r\n");
@@ -299,11 +300,12 @@ public class SkipImport {
          try {
             BufferedWriter ofp = new BufferedWriter(new FileWriter(edlFile, false));
             Stack<Hashtable<String,Long>> cuts = entriesToCuts(entries, duration);
-            int pad = config.autoskip_padding*1000;
+            int pad_start = config.autoskip_padding_start;
+            int pad_stop = config.autoskip_padding_stop;
             for (Hashtable<String,Long> cut : cuts) {
-               float start = (float) ((cut.get("start")+pad)/1000.0);
+               float start = (float) ((cut.get("start")-pad_start)/1000.0);
                if (start < 0) start = 0;
-               float end = (float) ((cut.get("end")-pad)/1000.0);
+               float end = (float) ((cut.get("end")-pad_stop)/1000.0);
                if (end < 0) end = 0;
                ofp.write("" + start + "  " + end + "  0\r\n");
             }

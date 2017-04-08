@@ -239,7 +239,8 @@ public class config {
    public static int autoskip_import = 1;
    public static int autoskip_prune = 0;
    public static int autoskip_jumpToEnd = 0;
-   public static int autoskip_padding = 0;
+   public static int autoskip_padding_start = 0; // NOTE: time is stored in msecs
+   public static int autoskip_padding_stop = 0; // NOTE: time is stored in msecs
    public static int autoskip_batch_standby = 0;
    public static Hashtable<String,Boolean> autoskip_ServiceItems = new Hashtable<String,Boolean>();
    public static Boolean visualDetect_running = false;
@@ -1212,8 +1213,11 @@ public class config {
             if (key.equals("autoskip_jumpToEnd")) {
                autoskip_jumpToEnd = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
-            if (key.equals("autoskip_padding")) {
-               autoskip_padding = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            if (key.equals("autoskip_padding_start")) {
+               autoskip_padding_start = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
+            if (key.equals("autoskip_padding_stop")) {
+               autoskip_padding_stop = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
             if (key.equals("autoskip_ServiceItems")) {
                String name;
@@ -1503,7 +1507,9 @@ public class config {
          
          ofp.write("<autoskip_jumpToEnd>\n" + autoskip_jumpToEnd + "\n\n");
          
-         ofp.write("<autoskip_padding>\n" + autoskip_padding + "\n\n");
+         ofp.write("<autoskip_padding_start>\n" + autoskip_padding_start + "\n\n");
+         
+         ofp.write("<autoskip_padding_stop>\n" + autoskip_padding_stop + "\n\n");
          
          ofp.write("<autoskip_ServiceItems>\n");
          for (String name : autoskip_ServiceItems.keySet())
