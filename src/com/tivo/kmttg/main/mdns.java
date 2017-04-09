@@ -42,8 +42,11 @@ public class mdns {
       try {
          DatagramSocket socket = new DatagramSocket();
          socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+         InetAddress IP = socket.getLocalAddress();
+         if (! IP.isReachable(3000))
+            IP = InetAddress.getLocalHost();
          //log.print("IP=" + socket.getLocalAddress().getHostAddress());
-         jmdns = JmDNS.create(socket.getLocalAddress());
+         jmdns = JmDNS.create(IP);
          socket.close();
          //start_time = new Date().getTime();
       } catch (UnknownHostException e) {
