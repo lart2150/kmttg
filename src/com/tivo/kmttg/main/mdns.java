@@ -45,6 +45,8 @@ public class mdns {
          InetAddress IP = socket.getLocalAddress();
          if (! IP.isReachable(3000))
             IP = InetAddress.getLocalHost();
+         if (! IP.isReachable(3000))
+            log.error("mdns error: Can't determine valid IP for host running kmttg");
          //log.print("IP=" + socket.getLocalAddress().getHostAddress());
          jmdns = JmDNS.create(IP);
          socket.close();
