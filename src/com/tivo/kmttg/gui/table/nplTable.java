@@ -725,12 +725,17 @@ public class nplTable extends TableMap {
          for (int i=0; i<selected.length; ++i) {
             int row = selected[i];
             sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
-            if (s.folder) continue;
+            if (s.folder) {
+               log.warn("Skipping folder entry");
+               continue;
+            }
             if (s.data.containsKey("contentId") && s.data.containsKey("duration")) {
                if (config.VRD == 1)
                   SkipImport.vrdExport(s.data);
                else
                   SkipImport.edlExport(s.data);
+            } else {
+               log.warn("Entry missing contentId and/or duration - skipping");
             }
          }
       } else if (keyCode == KeyCode.T) {
@@ -1743,7 +1748,9 @@ public class nplTable extends TableMap {
             log.error("No SkipMode data available for this show - skipping");
          }        
       } // for
-      if (! stack.isEmpty())
+      if (stack.isEmpty())
+         log.warn("No valid entries found to process in selected set");
+      else
          SkipManager.visualDetect(tivoName, stack, true);
    }
    
