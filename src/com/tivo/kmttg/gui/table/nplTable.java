@@ -718,12 +718,20 @@ public class nplTable extends TableMap {
             new Thread(task).start();            
          }
       } else if (keyCode == KeyCode.E) {
-         sortableDate s = getFirstSelected(); if (s == null) return;
-         if (s.data.containsKey("contentId") && s.data.containsKey("duration")) {
-            if (config.VRD == 1)
-               SkipImport.vrdExport(s.data);
-            else
-               SkipImport.edlExport(s.data);
+         // Operate on entire selected set
+         Integer[] selected = TableUtil.highToLow(GetSelectedRows());
+         if (selected == null) return;
+         if (selected.length == 0) return;
+         for (int i=0; i<selected.length; ++i) {
+            int row = selected[i];
+            sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+            if (s.folder) continue;
+            if (s.data.containsKey("contentId") && s.data.containsKey("duration")) {
+               if (config.VRD == 1)
+                  SkipImport.vrdExport(s.data);
+               else
+                  SkipImport.edlExport(s.data);
+            }
          }
       } else if (keyCode == KeyCode.T) {
          TableUtil.toggleTreeState(NowPlaying);
@@ -761,10 +769,11 @@ public class nplTable extends TableMap {
          }
       }*/
       else if (keyCode == KeyCode.V) {
-         sortableDate s = getFirstSelected(); if (s == null) return;
-         if ( ! s.folder && s.data != null ) {
-            visualDetect(s);
-         }
+         // Operate on entire selected set
+         Integer[] selected = TableUtil.highToLow(GetSelectedRows());
+         if (selected == null) return;
+         if (selected.length == 0) return;
+         visualDetect(selected);
       }
       else if (keyCode == KeyCode.W) {
          visualDetectAll();
@@ -1702,34 +1711,40 @@ public class nplTable extends TableMap {
       }
    }
    
-   private void visualDetect(sortableDate s) {
+   private void visualDetect(Integer[] selected) {
       if (config.visualDetect_running) {
          log.error("Please wait until current 'AutoSkip from SkipMode' run finishes before starting another");
          return;
       }
-      if (s.data.containsKey("clipMetadataId") && s.data.containsKey("contentId")) {
-         Boolean go = true;
-         if (SkipManager.hasEntry(s.data.get("contentId"))) {
-            go = false;
-            Alert alert = new Alert(AlertType.CONFIRMATION);
-            Button cancel = (Button)alert.getDialogPane().lookupButton(ButtonType.CANCEL);
-            cancel.setDefaultButton(true);
-            alert.setTitle("Confirm");
-            config.gui.setFontSize(alert, config.FontSize);
-            alert.setContentText("Override existing AutoSkip data?");
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.get() == ButtonType.OK) {
-               go = true;
+      Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
+      for (int i=0; i<selected.length; ++i) {
+         int row = selected[i];
+         sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+         if (s.folder) continue;
+         if (s.data.containsKey("clipMetadataId") && s.data.containsKey("contentId")) {
+            Boolean go = true;
+            if (SkipManager.hasEntry(s.data.get("contentId"))) {
+               go = false;
+               Alert alert = new Alert(AlertType.CONFIRMATION);
+               Button cancel = (Button)alert.getDialogPane().lookupButton(ButtonType.CANCEL);
+               cancel.setDefaultButton(true);
+               alert.setTitle("Confirm");
+               config.gui.setFontSize(alert, config.FontSize);
+               alert.setContentText("Override existing AutoSkip data?");
+               Optional<ButtonType> result = alert.showAndWait();
+               if (result.get() == ButtonType.OK) {
+                  go = true;
+               }
             }
-         }
-         if (go) {
-            Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
-            stack.push(s.data);
-            SkipManager.visualDetect(tivoName, stack, true);
-         }
-      } else {
-         log.error("No SkipMode data available for this show");
-      }
+            if (go) {
+               stack.push(s.data);
+            }
+         } else {
+            log.error("No SkipMode data available for this show - skipping");
+         }        
+      } // for
+      if (! stack.isEmpty())
+         SkipManager.visualDetect(tivoName, stack, true);
    }
    
    private void visualDetectAll() {
