@@ -293,6 +293,17 @@ public class vrdencode extends baseTask implements Serializable {
                }
             }
             
+            // Remove .TiVo file if option enabled
+            if ( !job.hasMoreEncodingJobs && job.tivoFile != null && job.inputFile.equals(job.tivoFile) )  {
+               if (config.RemoveTivoFile == 1 && file.isFile(job.tivoFile)) {
+                  if ( file.delete(job.tivoFile) ) {
+                     log.print("(Deleted file: " + job.tivoFile + ")");
+                  } else {
+                     log.error("Failed to delete file: "+ job.tivoFile);
+                  }
+               }
+            }
+            
             // Remove .mpg file if option enabled
             if (!job.hasMoreEncodingJobs && config.RemoveMpegFile == 1) {
                if ( file.delete(job.inputFile) ) {
