@@ -18,10 +18,8 @@
  */
 package com.tivo.kmttg.main;
 
-import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 //import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -51,11 +49,9 @@ public class mdns {
          jmdns = JmDNS.create(IP);
          socket.close();
          //start_time = new Date().getTime();
-      } catch (UnknownHostException e) {
+      } catch (Exception e) {
          log.error("mdns error: " + e.getMessage());
-      } catch (IOException e) {
-         log.error(e.getMessage());
-      }
+      } 
    }
    
    public void close() {
