@@ -101,6 +101,7 @@ public class custom extends baseTask implements Serializable {
          string = string.replaceAll("\\[mpegFile_cut\\]", escapeBackSlashes(mpegFile_cut));
          string = string.replaceAll("\\[srtFile\\]", escapeBackSlashes(job.srtFile));
          string = string.replaceAll("\\[encodeFile\\]", escapeBackSlashes(job.encodeFile));
+         string = string.replaceAll("\\[nplID\\]", idFromUrl(escapeBackSlashes(job.url)));
          command.add(string);
       }
       
@@ -201,6 +202,15 @@ public class custom extends baseTask implements Serializable {
    // It's crazy but in Java regex one backslash = 4 ...
    private static String escapeBackSlashes(String s) {
       return s.replaceAll("\\\\", "\\\\\\\\");
+   }
+   
+   private static String idFromUrl(String url) {
+      Pattern p = Pattern.compile("^.+id=([0-9]+).*$");
+      Matcher m = p.matcher(url);
+      if (m.matches()) {
+         return m.group(1);
+      }
+      return url;
    }
    
 }

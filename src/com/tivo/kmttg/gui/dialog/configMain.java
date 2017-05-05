@@ -2533,7 +2533,8 @@ public class configMain {
 
       customFiles_label.setText("Available file args:");
       customFiles.getItems().addAll(
-         "[tivoFile]", "[metaFile]", "[mpegFile]", "[mpegFile_cut]", "[srtFile]", "[encodeFile]"
+         "[tivoFile]", "[metaFile]", "[mpegFile]", "[mpegFile_cut]", "[srtFile]", "[encodeFile]",
+         "[nplID]"
       );
       customFiles.getSelectionModel().select(0);
       customFiles.valueProperty().addListener(new ChangeListener<String>() {
