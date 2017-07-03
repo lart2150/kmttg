@@ -950,7 +950,7 @@ public class Remote {
       JSONArray allShows = new JSONArray();
       JSONObject result = null;
       Boolean stop = false;
-      int count = 50;
+      int count = 25;
       int offset = 0;
       int limit_npl_fetches = 0;
       if (job != null)
@@ -1024,7 +1024,7 @@ public class Remote {
                stop = true;
             }
             count++;
-            if (job != null && config.GUIMODE && count % 50 == 0) {
+            if (job != null && config.GUIMODE && count % 25 == 0) {
                String c = "" + allShows.length() + "/" + total;
                config.gui.jobTab_UpdateJobMonitorRowOutput(job, "NP List: " + c);
                if ( jobMonitor.isFirstJobInMonitor(job) )
@@ -1065,7 +1065,7 @@ public class Remote {
                if ( jobMonitor.isFirstJobInMonitor(job) )
                   config.gui.setTitle("playlist: " + c + " " + config.kmttg);
             }
-            int max = 50; // limit SearchIds queries to at most 50 at a time
+            int max = 25; // limit SearchIds queries to at most 25 at a time
             int index = 0;
             while (index < ids.length()) {
                JSONArray a = new JSONArray();
@@ -1172,7 +1172,7 @@ public class Remote {
          Hashtable<String,String> map = new Hashtable<String,String>();
          for (String collectionId : collections.keySet())
             ids.put(collectionId);
-         int max = 50; // Limit searches to 50 at a time
+         int max = 25; // Limit searches to 25 at a time
          int index = 0;
          JSONArray a = new JSONArray();
          while (index < ids.length()) {
