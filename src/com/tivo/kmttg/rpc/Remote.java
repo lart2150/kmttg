@@ -964,6 +964,7 @@ public class Remote {
          JSONArray items = new JSONArray();
          while (! stop) {
             json.put("offset", offset);
+            json.put("count", 25);
             result = Command("MyShows", json);
             if (result != null && result.has("recordingFolderItem")) {
                JSONArray a = result.getJSONArray("recordingFolderItem");
