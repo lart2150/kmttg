@@ -205,7 +205,7 @@ public class custom extends baseTask implements Serializable {
    }
    
    private static String escapeAmpersand(String url) {
-      if (config.OS.equals("windows"))
+      if (url != null && config.OS.equals("windows"))
          url = url.replaceAll("&", "^^^&");
       return url;
    }

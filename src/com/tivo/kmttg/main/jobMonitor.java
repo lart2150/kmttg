@@ -1419,7 +1419,8 @@ public class jobMonitor {
          job.mpegFile_cut = mpegFile_cut;
          job.srtFile      = srtFile;
          job.encodeFile   = encodeFile;
-         job.url          = entry.get("url");
+         if (entry != null && entry.containsKey("url"))
+            job.url       = entry.get("url");
          submitNewJob(job);
       }
       
