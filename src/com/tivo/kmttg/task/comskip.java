@@ -70,6 +70,7 @@ public class comskip extends baseTask implements Serializable {
       debug.print("");
       Boolean schedule = true;
       if (job.exportSkip) {
+         // Generate cut points from AutoSkip data if available
          String exportFile = null;
          if (job.vprjFile != null) {
             exportFile = SkipImport.vrdExport(job.entry);

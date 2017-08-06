@@ -56,6 +56,7 @@ public class adscan extends baseTask implements Serializable {
       debug.print("");
       Boolean schedule = true;
       if (job.exportSkip) {
+         // Generate cut points from AutoSkip data if available
          String vprjFile = SkipImport.vrdExport(job.entry);
          if (vprjFile != null)
             schedule = false;

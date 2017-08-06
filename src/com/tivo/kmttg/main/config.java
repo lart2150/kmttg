@@ -39,7 +39,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v2.2v";
+   public static String kmttg = "kmttg v2.3a";
    
    // encoding related
    public static String encProfDir = "";
@@ -237,6 +237,7 @@ public class config {
    // autoskip related
    public static int autoskip_enabled = 1;
    public static int autoskip_import = 1;
+   public static int autoskip_cutonly = 0;
    public static int autoskip_prune = 0;
    public static int autoskip_jumpToEnd = 0;
    public static int autoskip_padding_start = 0; // NOTE: time is stored in msecs
@@ -1204,6 +1205,9 @@ public class config {
             if (key.equals("autoskip_import")) {
                autoskip_import = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("autoskip_cutonly")) {
+               autoskip_cutonly = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("autoskip_prune")) {
                autoskip_prune = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1500,6 +1504,8 @@ public class config {
          ofp.write("<autoskip_enabled>\n" + autoskip_enabled + "\n\n");
          
          ofp.write("<autoskip_import>\n" + autoskip_import + "\n\n");
+         
+         ofp.write("<autoskip_cutonly>\n" + autoskip_cutonly + "\n\n");
          
          ofp.write("<autoskip_prune>\n" + autoskip_prune + "\n\n");
          

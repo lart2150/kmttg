@@ -133,6 +133,7 @@ public class configMain {
    private static CheckBox autotune_enabled = null;
    private static CheckBox autoskip_enabled = null;
    private static CheckBox autoskip_import = null;
+   private static CheckBox autoskip_cutonly = null;
    private static CheckBox autoskip_prune = null;
    private static CheckBox autoskip_batch_standby = null;
    private static CheckBox autoskip_jumpToEnd = null;
@@ -993,6 +994,9 @@ public class configMain {
       
       // autoskip_enabled
       autoskip_import.setSelected(config.autoskip_import == 1);
+      
+      // autoskip_cutonly
+      autoskip_cutonly.setSelected(config.autoskip_cutonly == 1);
       
       // autoskip_prune
       autoskip_prune.setSelected(config.autoskip_prune == 1);
@@ -1954,6 +1958,12 @@ public class configMain {
       else
          config.autoskip_import = 0;
       
+      // autoskip_cutonly
+      if (autoskip_cutonly.isSelected())
+         config.autoskip_cutonly = 1;
+      else
+         config.autoskip_cutonly = 0;
+      
       // autoskip_prune
       if (autoskip_prune.isSelected())
          config.autoskip_prune = 1;
@@ -2338,6 +2348,7 @@ public class configMain {
       autotune_enabled = new CheckBox();
       autoskip_enabled = new CheckBox();
       autoskip_import = new CheckBox();
+      autoskip_cutonly = new CheckBox();
       autoskip_prune = new CheckBox();
       autoskip_batch_standby = new CheckBox();
       autoskip_jumpToEnd = new CheckBox();
@@ -2570,6 +2581,8 @@ public class configMain {
       autoskip_enabled.setText("Enable AutoSkip functionality");
       
       autoskip_import.setText("Automatically Import to Skip Table after Ad Detect");
+      
+      autoskip_cutonly.setText("Only run Ad Skip/Ad Detect for shows with AutoSkip data");
       
       autoskip_prune.setText("Prune Skip Table automatically after NPL refresh");
       
@@ -3009,6 +3022,9 @@ public class configMain {
       
       gy++;
       autoskip_panel.add(autoskip_import, 1, gy);
+      
+      gy++;
+      autoskip_panel.add(autoskip_cutonly, 1, gy);
       
       gy++;
       autoskip_panel.add(autoskip_prune, 1, gy);
@@ -3655,6 +3671,7 @@ public class configMain {
       download_delay.setTooltip(getToolTip("download_delay"));
       autoskip_enabled.setTooltip(getToolTip("autoskip_enabled"));
       autoskip_import.setTooltip(getToolTip("autoskip_import"));
+      autoskip_cutonly.setTooltip(getToolTip("autoskip_cutonly"));
       autoskip_prune.setTooltip(getToolTip("autoskip_prune"));
       autoskip_batch_standby.setTooltip(getToolTip("autoskip_batch_standby"));
       autoskip_jumpToEnd.setTooltip(getToolTip("autoskip_jumpToEnd"));
@@ -4406,6 +4423,11 @@ public class configMain {
          text =  "<b>Automatically Import to Skip Table after Ad Detect</b><br>";
          text += "If enabled, following Ad Detect or Ad Review job kmttg will attempt to automatically<br>";
          text += "import the cuts file into AutoSkip table";
+      }
+      else if (component.equals("autoskip_cutonly")) {
+         text =  "<b>Only run Ad Skip/Ad Detect for shows with AutoSkip data</b><br>";
+         text += "If enabled, only run Ad Skip and Ad Detect tasks for shows that have AutoSkip data;<br>";
+         text += "shows without AutoSkip data will not schedule Ad Skip and Ad Detect tasks.";
       }
       else if (component.equals("autoskip_prune")) {
          text =  "<b>Prune Skip Table automatically after NPL refresh</b><br>";
