@@ -982,8 +982,7 @@ public class jobMonitor {
       }
                            
       // Launch jobs depending on selections
-      Hashtable<String,String> entry = (Hashtable<String,String>)specs.get("entry");
-      
+      Hashtable<String,String> entry = (Hashtable<String,String>)specs.get("entry");      
       
       // If config.autoskip_cutonly enabled, then may have to cancel Ad Detect & Ad Skip
       if (comskip && config.autoskip_cutonly == 1 && entry != null) {
