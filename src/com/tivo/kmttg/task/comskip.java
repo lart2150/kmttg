@@ -236,6 +236,7 @@ public class comskip extends baseTask implements Serializable {
          int failed = 0;
          // No or empty outputFile means problems
          if ( ! file.isFile(outputFile) || file.isEmpty(outputFile) ) {
+            log.error("Output file not generated or empty: " + outputFile);
             failed = 1;
          }
          
