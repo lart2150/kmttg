@@ -84,7 +84,7 @@ public class createMeta {
          // Get rid of bad xml contents that TiVo sometimes generates: replace &&amp; with &amp;
          inputStr = inputStr.replaceAll("&&amp;", "&amp;");
          // & in xml needs to be &amp, TiVo has bug where it doesn't always have that
-         inputStr = inputStr.replaceAll("\\s+&\\s+", " &amp ");
+         inputStr = inputStr.replaceAll("\\s+&\\s+", " &amp; ");
          Document doc = docBuilder.parse(new ByteArrayInputStream(inputStr.getBytes()));
 
          // Search for <recordedDuration> elements
