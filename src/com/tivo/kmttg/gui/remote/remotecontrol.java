@@ -19,8 +19,8 @@
 package com.tivo.kmttg.gui.remote;
 
 import java.io.File;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONException;
@@ -348,14 +348,22 @@ public class remotecontrol {
                            if (name.equals("streambaby")) {
                               String ip;
                               try {
-                                 ip = InetAddress.getLocalHost().getHostAddress();
-                              } catch (UnknownHostException e) {
+                                 DatagramSocket socket = new DatagramSocket();
+                                 socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+                                 InetAddress IP = socket.getLocalAddress();
+                                 if (IP.isReachable(3000))
+                                    ip = IP.getHostAddress();
+                                 else
+                                    ip = InetAddress.getLocalHost().getHostAddress();
+                                 socket.close();
+                              } catch (Exception e) {
                                  ip = "localhost";
                               }
                               int port = 7290;
                               uri = "x-tivo:hme:http://" + ip + ":" + port + "/streambaby";
                            }
                            json.put("uri", uri);
+                           log.print("Launching " + uri);
                            r.Command("Navigate", json);
                         } catch (JSONException e1) {
                            log.error("Launch App - " + e1.getMessage());
