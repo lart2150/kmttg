@@ -351,8 +351,11 @@ public class remotecontrol {
                                  DatagramSocket socket = new DatagramSocket();
                                  socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
                                  InetAddress IP = socket.getLocalAddress();
-                                 if (IP.isReachable(3000))
+                                 if (IP.isReachable(3000)) {
                                     ip = IP.getHostAddress();
+                                    if (ip.equals("0.0.0.0"))
+                                       ip = InetAddress.getLocalHost().getHostAddress();
+                                 }
                                  else
                                     ip = InetAddress.getLocalHost().getHostAddress();
                                  socket.close();
