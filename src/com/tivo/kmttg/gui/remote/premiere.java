@@ -227,7 +227,7 @@ public class premiere {
    
    // Read channel info from a file
    // Columns are:
-   // channelNumber, callSign, sourceType, isSelected
+   // channelNumber, callSign, channelId, stationId, sourceType, isSelected
    public void loadChannelInfo(String tivoName) {
       String fileName = config.programDir + File.separator + tivoName + ".channels";
       if (file.isFile(fileName)) {
@@ -246,9 +246,11 @@ public class premiere {
                JSONObject json = new JSONObject();
                json.put("channelNumber", Fields[0]);
                json.put("callSign", Fields[1]);
-               json.put("sourceType", Fields[2]);
-               json.put("isSelected", Fields[3]);
-               if (Fields[3].equals("true"))
+               json.put("channelId", Fields[2]);
+               json.put("stationId", Fields[3]);
+               json.put("sourceType", Fields[4]);
+               json.put("isSelected", Fields[5]);
+               if (Fields[5].equals("true"))
                   selected.add(count);
                a.put(json);
                count++;
@@ -359,7 +361,7 @@ public class premiere {
    
    // Write channel info to a file
    // Columns are:
-   // channelNumber, callSign, sourceType, isSelected
+   // channelNumber, callSign, channelId, stationId, sourceType, isSelected
    public void saveChannelInfo(String tivoName) {
        try {
          JSONObject json;
@@ -368,11 +370,19 @@ public class premiere {
             log.warn("Saving channel info to file: " + fileName);
             BufferedWriter ofp = new BufferedWriter(new FileWriter(fileName));
             String eol = "\r\n";
-            ofp.write("#channelNumber, callSign, sourceType, isSelected" + eol);
+            ofp.write("#channelNumber, callSign, channelId, stationId, sourceType, isSelected" + eol);
             for (int i=0; i<channel_info.get(tivoName).length(); ++i) {
                json = channel_info.get(tivoName).getJSONObject(i);
+               String channelId = "none";
+               String stationId = "none";
+               if (json.has("channelId"))
+                  channelId = json.getString("channelId");
+               if (json.has("stationId"))
+                  stationId = json.getString("stationId");
                ofp.write(json.getString("channelNumber"));
                ofp.write(", " + json.getString("callSign"));
+               ofp.write(", " + channelId);
+               ofp.write(", " + stationId);
                ofp.write(", " + json.getString("sourceType"));
                ofp.write(", " + json.getString("isSelected") + eol);
             } // for

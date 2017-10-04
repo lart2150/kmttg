@@ -1752,6 +1752,12 @@ public class Remote {
                c.put("channelNumber", channel.getString("channelNumber"));
                c.put("type", "channelIdentifier");
                c.put("sourceType", channel.getString("sourceType"));
+               if (! channel.getString("channelId").equals("none")) {
+                  c.put("channelId", channel.getString("channelId"));
+               }
+               if (! channel.getString("stationId").equals("none")) {
+                  c.put("stationId", channel.getString("stationId"));
+               }
                json.put("anchorChannelIdentifier", c);
                json.put("maxStartTime", rnpl.getStringFromLongDate(stop));
                json.put("minEndTime", rnpl.getStringFromLongDate(start));
