@@ -29,10 +29,12 @@ import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SortEvent;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
@@ -41,9 +43,11 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.TableMap;
+import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.comparator.DateComparator;
 import com.tivo.kmttg.gui.comparator.DurationComparator;
+import com.tivo.kmttg.gui.comparator.ImageViewComparator;
 import com.tivo.kmttg.gui.comparator.StringChannelComparator;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
@@ -56,7 +60,7 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class todoTable extends TableMap {
-   private String[] TITLE_cols = {"DATE", "SHOW", "CHANNEL", "DUR"};
+   private String[] TITLE_cols = {"", "DATE", "SHOW", "CHANNEL", "DUR"};
    public TableView<Tabentry> TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private String currentTivo = null;
@@ -116,7 +120,15 @@ public class todoTable extends TableMap {
       });
       
       for (String colName : TITLE_cols) {
-         if (colName.equals("DATE")) {
+         if (colName.length() == 0)
+            colName = "IMAGE";
+         if (colName.equals("IMAGE")) {
+            TableColumn<Tabentry,ImageView> col = new TableColumn<Tabentry,ImageView>("");
+            col.setCellValueFactory(new PropertyValueFactory<Tabentry,ImageView>(colName));
+            col.setCellFactory(new ImageCellFactory());
+            col.setComparator(new ImageViewComparator());
+            TABLE.getColumns().add(col);               
+         } else if (colName.equals("DATE")) {
             TableColumn<Tabentry,sortableDate> col = new TableColumn<Tabentry,sortableDate>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableDate>(colName));
             col.setComparator(new DateComparator()); // Custom column sort
@@ -159,6 +171,24 @@ public class todoTable extends TableMap {
       TableUtil.AddRightMouseListener(TABLE);
       
    }
+   
+   private class ImageCellFactory implements Callback<TableColumn<Tabentry, ImageView>, TableCell<Tabentry, ImageView>> {
+      public TableCell<Tabentry, ImageView> call(TableColumn<Tabentry, ImageView> param) {
+         TableCell<Tabentry, ImageView> cell = new TableCell<Tabentry, ImageView>() {
+            @Override
+            public void updateItem(final ImageView item, boolean empty) {
+               super.updateItem(item,  empty);
+               if (empty) {
+                  setGraphic(null);
+               } else {
+                  if (item != null)
+                     setGraphic(item);
+               }
+            }
+         };
+         return cell;
+      }
+   }   
 
    // ColorRowFactory for setting row background color
    private class ColorRowFactory implements Callback<TableView<Tabentry>, TableRow<Tabentry>> {
@@ -204,6 +234,7 @@ public class todoTable extends TableMap {
    }   
    
    public static class Tabentry {
+      ImageView image = new ImageView();
       public String title = "";
       public sortableDate date;
       public String channel = "";
@@ -227,9 +258,23 @@ public class todoTable extends TableMap {
             
             date = new sortableDate(data, start);
             duration = new sortableDuration(end-start, false);
+            if (data.has("subscriptionIdentifier")) {
+               JSONObject id = data.getJSONArray("subscriptionIdentifier").getJSONObject(0);
+               String type = id.getString("subscriptionType");
+               if (type.equals("repeatingTimeChannel") || type.equals("seasonPass"))
+                  image.setImage(gui.Images.get("image-season-pass"));
+               if (type.equals("wishList"))
+                  image.setImage(gui.Images.get("image-season-pass-wishlist"));
+               if (type.startsWith("single"))
+                  image.setImage(gui.Images.get("image-single-explicit-record"));
+            }
          } catch (Exception e) {
             log.error("todoTable Tabentry - " + e.getMessage());
          }
+      }
+      
+      public ImageView getIMAGE() {
+         return image;
       }
       
       public sortableDate getDATE() {
