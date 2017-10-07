@@ -1805,7 +1805,9 @@ public class gui extends Application {
          "expires-soon-recording", "save-until-i-delete-recording",
          "in-progress-recording", "in-progress-transfer",
          "expired-recording", "suggestion-recording", "folder",
-         "copy-protected", "running", "queued", "skipmode"
+         "copy-protected", "running", "queued", "skipmode",
+         "image-season-pass", "image-season-pass-wishlist",
+         "image-single-explicit-record"
       };
       URL url;
       for (int i=0; i<names.length; i++) {
