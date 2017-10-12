@@ -81,6 +81,8 @@ public class captions extends baseTask implements Serializable {
       }
       
       // Find TiVo or mpeg2 video file to process if job.videoFile not available
+      if (! file.isFile(job.videoFile))
+         log.warn("Intended video file not found, looking for alternate input file...");
       String videoFile = job.videoFile;
       String tryit;
       if ( ! file.isFile(videoFile) && config.VrdReview_noCuts == 1) {
@@ -93,15 +95,18 @@ public class captions extends baseTask implements Serializable {
       String[] suffixes = {".mpg", ".ts", ".mp4", ".TiVo"};
       for (int i=0; i<suffixes.length; ++i) {
          if ( ! file.isFile(videoFile) ) {
-            tryit = string.replaceSuffix(videoFile, "_cut" + suffixes[i]);
+            tryit = string.replaceSuffix(videoFile, suffixes[i]);
             if (file.isFile(tryit)) {
                videoFile = tryit;
             }
          }
-         if ( ! file.isFile(videoFile) ) {
-            tryit = string.replaceSuffix(videoFile, suffixes[i]);
+         if ( ! file.isFile(videoFile) && videoFile.contains("_cut")) {
+            String v = videoFile.replaceFirst("_cut", "");
+            tryit = string.replaceSuffix(v, suffixes[i]);
             if (file.isFile(tryit)) {
                videoFile = tryit;
+               job.srtFile = string.replaceSuffix(v, ".srt");
+               srtFile = job.srtFile;
             }
          }
       }
