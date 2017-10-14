@@ -226,27 +226,34 @@ public class TableUtil {
    // Call protected method to do tableview column fit to size
    public static void autoSizeTableViewColumns(final TableView<?> tableView, Boolean force) {
       debug.print("tableView=" + tableView + " force=" + force);
-      int maxRows = 500;
-      if (tableView == null)
-         return;
-      if (!force && config.tableColAutoSize == 0)
-         return;
-      TableViewSkin<?> skin = (TableViewSkin<?>) tableView.getSkin();
-      if (skin == null)
-         return;
-      TableHeaderRow headerRow = skin.getTableHeaderRow();
-      NestedTableColumnHeader rootHeader = headerRow.getRootHeader();
-      for (TableColumnHeader columnHeader : rootHeader.getColumnHeaders()) {
-         try {
-            TableColumn<?, ?> column = (TableColumn<?, ?>) columnHeader.getTableColumn();
-            if (column != null) {
-               Method method = skin.getClass().getDeclaredMethod("resizeColumnToFitContent", TableColumn.class, int.class);
-               method.setAccessible(true);
-               method.invoke(skin,column,maxRows);
+      if (! System.getProperty("java.version").startsWith("1")) {
+         // Java 9 doesn't work with custom code so default to built in
+         if (!force && config.tableColAutoSize == 0)
+            return;
+         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+      } else {
+         int maxRows = 500;
+         if (tableView == null)
+            return;
+         if (!force && config.tableColAutoSize == 0)
+            return;
+         TableViewSkin<?> skin = (TableViewSkin<?>) tableView.getSkin();
+         if (skin == null)
+            return;
+         TableHeaderRow headerRow = skin.getTableHeaderRow();
+         NestedTableColumnHeader rootHeader = headerRow.getRootHeader();
+         for (TableColumnHeader columnHeader : rootHeader.getColumnHeaders()) {
+            try {
+               TableColumn<?, ?> column = (TableColumn<?, ?>) columnHeader.getTableColumn();
+               if (column != null) {
+                  Method method = skin.getClass().getDeclaredMethod("resizeColumnToFitContent", TableColumn.class, int.class);
+                  method.setAccessible(true);
+                  method.invoke(skin,column,maxRows);
+               }
+            } catch (Throwable e) {
+               e = e.getCause();
+               e.printStackTrace(System.err);
             }
-         } catch (Throwable e) {
-            e = e.getCause();
-            e.printStackTrace(System.err);
          }
       }
    }
@@ -255,32 +262,39 @@ public class TableUtil {
    // NOTE: Added min setting for IMAGE column (which has empty title)
    public static void autoSizeTableViewColumns(final TreeTableView<?> tableView, Boolean force) {
       debug.print("tableView=" + tableView + " force=" + force);
-      double minImageColWidth = 60;
-      int maxRows = 500;
-      if (tableView == null)
-         return;
-      if (!force && config.tableColAutoSize == 0)
-         return;
-      TreeTableViewSkin<?> skin = (TreeTableViewSkin<?>) tableView.getSkin();
-      if (skin == null)
-         return;
-      TableHeaderRow headerRow = skin.getTableHeaderRow();
-      NestedTableColumnHeader rootHeader = headerRow.getRootHeader();
-      for (TableColumnHeader columnHeader : rootHeader.getColumnHeaders()) {
-         try {
-            TreeTableColumn<?, ?> column = (TreeTableColumn<?, ?>) columnHeader.getTableColumn();
-            if (column != null) {
-               Method method = skin.getClass().getDeclaredMethod("resizeColumnToFitContent", TreeTableColumn.class, int.class);
-               method.setAccessible(true);
-               method.invoke(skin,column,maxRows);
-               if (columnHeader != null && columnHeader.getTableColumn().getText().equals("")) {
-                  // IMAGE column - want min width to be honored
-                  column.setMinWidth(minImageColWidth);
+      if (! System.getProperty("java.version").startsWith("1")) {
+         // Java 9 doesn't work with custom code so default to built in
+         if (!force && config.tableColAutoSize == 0)
+            return;
+         tableView.setColumnResizePolicy(TreeTableView.CONSTRAINED_RESIZE_POLICY);
+      } else {
+         double minImageColWidth = 60;
+         int maxRows = 500;
+         if (tableView == null)
+            return;
+         if (!force && config.tableColAutoSize == 0)
+            return;
+         TreeTableViewSkin<?> skin = (TreeTableViewSkin<?>) tableView.getSkin();
+         if (skin == null)
+            return;
+         TableHeaderRow headerRow = skin.getTableHeaderRow();
+         NestedTableColumnHeader rootHeader = headerRow.getRootHeader();
+         for (TableColumnHeader columnHeader : rootHeader.getColumnHeaders()) {
+            try {
+               TreeTableColumn<?, ?> column = (TreeTableColumn<?, ?>) columnHeader.getTableColumn();
+               if (column != null) {
+                  Method method = skin.getClass().getDeclaredMethod("resizeColumnToFitContent", TreeTableColumn.class, int.class);
+                  method.setAccessible(true);
+                  method.invoke(skin,column,maxRows);
+                  if (columnHeader != null && columnHeader.getTableColumn().getText().equals("")) {
+                     // IMAGE column - want min width to be honored
+                     column.setMinWidth(minImageColWidth);
+                  }
                }
+            } catch (Throwable e) {
+               e = e.getCause();
+               e.printStackTrace(System.err);
             }
-         } catch (Throwable e) {
-            e = e.getCause();
-            e.printStackTrace(System.err);
          }
       }
    }
