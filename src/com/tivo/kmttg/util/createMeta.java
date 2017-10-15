@@ -21,10 +21,9 @@ package com.tivo.kmttg.util;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.StringWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -80,12 +79,14 @@ public class createMeta {
          DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
          DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
          // Convert file to String so we can parse out pad input entities such as &
-         String inputStr = new String(Files.readAllBytes(Paths.get(outputFile)));
+         /*String inputStr = new String(Files.readAllBytes(Paths.get(outputFile)));
          // Get rid of bad xml contents that TiVo sometimes generates: replace &&amp; with &amp;
          inputStr = inputStr.replaceAll("&&amp;", "&amp;");
          // & in xml needs to be &amp, TiVo has bug where it doesn't always have that
          inputStr = inputStr.replaceAll("\\s+&\\s+", " &amp; ");
-         Document doc = docBuilder.parse(new ByteArrayInputStream(inputStr.getBytes()));
+         Document doc = docBuilder.parse(new ByteArrayInputStream(inputStr.getBytes()));*/
+         // The above breaks UTF encoding, so revert back to simple way
+         Document doc = docBuilder.parse(new File(outputFile));
 
          // Search for <recordedDuration> elements
          NodeList rdList = doc.getElementsByTagName("recordedDuration");
