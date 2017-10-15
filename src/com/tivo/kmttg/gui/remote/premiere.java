@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Stack;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -93,7 +94,12 @@ public class premiere {
                if (config.gui.remote_gui != null)
                   config.gui.remote_gui.updateButtonStates(tivoName, "Season Premieres");
                // Load channel list for this TiVo
-               loadChannelInfo(tivoName);
+               Platform.runLater(new Runnable() {
+                  @Override
+                  public void run() {
+                     loadChannelInfo(tivoName);
+                  }
+               });
             }
          }
       });
@@ -230,6 +236,7 @@ public class premiere {
    // channelNumber, callSign, channelId, stationId, sourceType, isSelected
    public void loadChannelInfo(String tivoName) {
       String fileName = config.programDir + File.separator + tivoName + ".channels";
+      JSONArray fullList = null;
       if (file.isFile(fileName)) {
          try {
             JSONArray a = new JSONArray();
@@ -244,16 +251,53 @@ public class premiere {
                if (line.matches("^#.+")) continue; // skip comment lines
                String Fields[] = line.split(", ");
                JSONObject json = new JSONObject();
-               json.put("channelNumber", Fields[0]);
-               json.put("callSign", Fields[1]);
-               json.put("channelId", Fields[2]);
-               json.put("stationId", Fields[3]);
-               json.put("sourceType", Fields[4]);
-               json.put("isSelected", Fields[5]);
-               if (Fields[5].equals("true"))
-                  selected.add(count);
-               a.put(json);
-               count++;
+               if (Fields.length == 6) {
+                  json.put("channelNumber", Fields[0]);
+                  json.put("callSign", Fields[1]);
+                  json.put("channelId", Fields[2]);
+                  json.put("stationId", Fields[3]);
+                  json.put("sourceType", Fields[4]);
+                  json.put("isSelected", Fields[5]);
+                  if (Fields[5].equals("true"))
+                     selected.add(count);
+                  a.put(json);
+                  count++;
+               } else {
+                  // Legacy file format has only 4 fields
+                  // So get channel list to fill in missing information
+                  if (fullList == null) {
+                     log.print("Legacy channel file - fixing to new format");
+                     Remote r = config.initRemote(tivoName);
+                     if (r.success) {
+                        fullList = r.ChannelList(null, true);
+                        r.disconnect();
+                     }
+                  }
+                  json.put("channelNumber", Fields[0]);
+                  json.put("callSign", Fields[1]);
+                  json.put("sourceType", Fields[2]);
+                  json.put("isSelected", Fields[3]);
+                  if (fullList != null) {
+                     for (int i=0; i<fullList.length(); ++i) {
+                        JSONObject c = fullList.getJSONObject(i);
+                        if (c.has("isReceived") && c.getBoolean("isReceived")) {
+                           if (c.has("channelNumber")) {
+                              String channelNumber = c.getString("channelNumber");
+                              if (channelNumber.equals(Fields[0])) {
+                                 if (c.has("channelId"))
+                                    json.put("channelId", c.getString("channelId"));
+                                 if (c.has("stationId"))
+                                    json.put("stationId", c.getString("stationId"));
+                              }
+                           }
+                        }
+                     }
+                  }
+                  if (Fields[3].equals("true"))
+                     selected.add(count);
+                  a.put(json);
+                  count++;
+               }
             }
             ifp.close();
             if (a.length() > 0) {
