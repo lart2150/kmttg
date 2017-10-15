@@ -230,7 +230,7 @@ public class TableUtil {
          // Java 9 doesn't work with custom code so default to built in
          if (!force && config.tableColAutoSize == 0)
             return;
-         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+         tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
       } else {
          int maxRows = 500;
          if (tableView == null)
@@ -266,7 +266,7 @@ public class TableUtil {
          // Java 9 doesn't work with custom code so default to built in
          if (!force && config.tableColAutoSize == 0)
             return;
-         tableView.setColumnResizePolicy(TreeTableView.CONSTRAINED_RESIZE_POLICY);
+         tableView.setColumnResizePolicy(TreeTableView.UNCONSTRAINED_RESIZE_POLICY);
       } else {
          double minImageColWidth = 60;
          int maxRows = 500;
