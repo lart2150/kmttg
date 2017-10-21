@@ -1467,7 +1467,7 @@ public class gui extends Application {
          addTabPane("Slingbox", tabbed_panel, slingbox_gui.getPanel());
       }
       if (config.slingBox == 0 && slingbox_gui != null) {
-         tabbed_panel.getTabs().remove(slingbox_gui.getPanel());
+         tabbed_panel.getTabs().remove((Object)slingbox_gui.getPanel());
       }
    }
    
@@ -1701,7 +1701,7 @@ public class gui extends Application {
    private void tivoTabRemove(String name) {
       debug.print("name=" + name);
       if (tivoTabs.containsKey(name)) {
-         tabbed_panel.getTabs().remove(tivoTabs.get(name));
+         tabbed_panel.getTabs().remove((Object)tivoTabs.get(name));
          tivoTabs.remove(name);
       }
    }
