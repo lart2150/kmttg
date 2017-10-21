@@ -97,7 +97,9 @@ public class nplTable extends TableMap {
    public String tivoName = null;
    public TreeTableView<Tabentry> NowPlaying = null;
    public String[] FILE_cols = {"FILE", "SIZE", "DIR"};
+   private double[] FILE_weights = {41, 12, 47};
    public String[] TIVO_cols = {"", "SHOW", "DATE", "CHANNEL", "DUR", "SIZE", "Mbps"};
+   private double[] TIVO_weights = {12, 32, 18, 17, 6, 9, 6};
    public String folderName = null;
    public int folderEntryNum = -1;
    private Stack<Hashtable<String,String>> entries = null;
@@ -192,6 +194,7 @@ public class nplTable extends TableMap {
                NowPlaying.getColumns().add(col);
             }
          }
+         TableUtil.setWeights(NowPlaying, FILE_cols, FILE_weights);
       } else {
          for (String colName : TIVO_cols) {
             if (colName.length() == 0)
@@ -238,6 +241,7 @@ public class nplTable extends TableMap {
                NowPlaying.getColumns().add(col);
             }
          }
+         TableUtil.setWeights(NowPlaying, TIVO_cols, TIVO_weights);
       }
       
       // Add right mouse button handler

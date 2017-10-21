@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
@@ -223,6 +224,46 @@ public class TableUtil {
       table.scrollTo(rowIndex);
    }
    
+   public static void setWeights(TableView<?> TABLE, String[] names, double[] weights) {
+      // Only do this for Java 9 or later for now
+      if (System.getProperty("java.version").startsWith("1"))
+         return;
+      TABLE.setColumnResizePolicy( TableView.UNCONSTRAINED_RESIZE_POLICY );
+      int c = 0;
+      double sum = 0;
+      Hashtable<String,Double> h = new Hashtable<String,Double>();
+      for (double weight : weights) {
+         h.put(names[c++], weight);
+         sum += weight;
+         sum *= 1.01;
+      }
+      for (int i=0; i<TABLE.getColumns().size(); i++) {
+         TableColumn<?,?> col = TABLE.getColumns().get(i);
+         String cname = (String)col.getText();
+         col.prefWidthProperty().bind(TABLE.widthProperty().multiply(h.get(cname)/sum));
+      }
+   }
+   
+   public static void setWeights(TreeTableView<?> TABLE, String[] names, double[] weights) {
+      // Only do this for Java 9 or later for now
+      if (System.getProperty("java.version").startsWith("1"))
+         return;
+      TABLE.setColumnResizePolicy( TreeTableView.UNCONSTRAINED_RESIZE_POLICY );
+      int c = 0;
+      double sum = 0;
+      Hashtable<String,Double> h = new Hashtable<String,Double>();
+      for (double weight : weights) {
+         h.put(names[c++], weight);
+         sum += weight;
+         sum *= 1.01;
+      }
+      for (int i=0; i<TABLE.getColumns().size(); i++) {
+         TreeTableColumn<?,?> col = TABLE.getColumns().get(i);
+         String cname = (String)col.getText();
+         col.prefWidthProperty().bind(TABLE.widthProperty().multiply(h.get(cname)/sum));
+      }
+   }
+   
    // Call protected method to do tableview column fit to size
    public static void autoSizeTableViewColumns(final TableView<?> tableView, Boolean force) {
       debug.print("tableView=" + tableView + " force=" + force);
@@ -230,7 +271,7 @@ public class TableUtil {
          // Java 9 doesn't work with custom code so default to built in
          if (!force && config.tableColAutoSize == 0)
             return;
-         tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+         //tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
       } else {
          int maxRows = 500;
          if (tableView == null)
@@ -266,7 +307,7 @@ public class TableUtil {
          // Java 9 doesn't work with custom code so default to built in
          if (!force && config.tableColAutoSize == 0)
             return;
-         tableView.setColumnResizePolicy(TreeTableView.UNCONSTRAINED_RESIZE_POLICY);
+         //tableView.setColumnResizePolicy(TreeTableView.UNCONSTRAINED_RESIZE_POLICY);
       } else {
          double minImageColWidth = 60;
          int maxRows = 500;

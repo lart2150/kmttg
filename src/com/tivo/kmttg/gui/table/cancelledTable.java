@@ -63,6 +63,7 @@ public class cancelledTable extends TableMap {
    private String currentTivo = null;
    public TreeTableView<Tabentry> TABLE = null;
    public String[] TITLE_cols = {"", "SHOW", "DATE", "CHANNEL", "DUR"};
+   private double[] weights = {7, 58, 17, 12, 6};
    public String folderName = null;
    public int folderEntryNum = -1;
    private Hashtable<String,Stack<JSONObject>> folders = null;
@@ -124,6 +125,7 @@ public class cancelledTable extends TableMap {
                col.setComparator(new StringChannelComparator()); // Custom column sort
             TABLE.getColumns().add(col);
          }
+         TableUtil.setWeights(TABLE, TITLE_cols, weights);
       }
       
       // Add keyboard listener

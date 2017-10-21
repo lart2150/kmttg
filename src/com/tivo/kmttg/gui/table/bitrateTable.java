@@ -33,6 +33,7 @@ import javafx.util.Callback;
 
 public class bitrateTable {
    private String[] TITLE_cols = {"CHANNEL", "SIZE (GB)", "TIME", "RATE (Mbps)", "RATE (GB/hour)"};
+   private double[] weights = {20, 20, 20, 20, 20};
    public TableView<Tabentry> TABLE = null;
 
    public bitrateTable() {
@@ -60,6 +61,7 @@ public class bitrateTable {
             TABLE.getColumns().add(col);
          }
       }            
+      TableUtil.setWeights(TABLE, TITLE_cols, weights);
    }
 
    public static class Tabentry {

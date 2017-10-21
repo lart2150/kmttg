@@ -65,6 +65,7 @@ public class guideTable extends TableMap {
    private String currentTivo = null;
    public TableView<Tabentry> TABLE = null;
    public String[] TITLE_cols = {"DATE", "SHOW", "DUR"};
+   private double[] weights = {18, 76, 6};
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();   
@@ -141,6 +142,7 @@ public class guideTable extends TableMap {
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(colName));
             TABLE.getColumns().add(col);
          }
+         TableUtil.setWeights(TABLE, TITLE_cols, weights);
       }
       
       // Add keyboard listener

@@ -56,6 +56,7 @@ public class channelsTable extends TableMap {
    private String currentTivo = null;
    public TableView<Tabentry> TABLE = null;
    public String[] TITLE_cols = {"NAME", "NUMBER", "RECEIVED"};
+   private double[] weights = {40, 30, 30};
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
@@ -122,6 +123,7 @@ public class channelsTable extends TableMap {
             col.setStyle("-fx-alignment: CENTER;");
             TABLE.getColumns().add(col);
          }
+         TableUtil.setWeights(TABLE, TITLE_cols, weights);
       }
       
       // Add keyboard listener

@@ -56,6 +56,7 @@ public class deletedTable extends TableMap {
    private String currentTivo = null;
    public TableView<Tabentry> TABLE = null;
    public String[] TITLE_cols = {"SHOW", "DELETED", "RECORDED", "CHANNEL", "DUR"};
+   private double[] weights = {45, 17, 17, 15, 6};
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
@@ -133,6 +134,7 @@ public class deletedTable extends TableMap {
                col.setComparator(new StringChannelComparator()); // Custom column sort
             TABLE.getColumns().add(col);
          }
+         TableUtil.setWeights(TABLE, TITLE_cols, weights);
       }
       
       // Add keyboard listener

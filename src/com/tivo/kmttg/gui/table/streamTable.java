@@ -55,6 +55,7 @@ public class streamTable extends TableMap {
    private String currentTivo = null;
    public TreeTableView<Tabentry> TABLE = null;
    public String[] TITLE_cols = {"", "CREATED", "ITEM", "SOURCE"};
+   private double[] weights = {9, 17, 59, 15};
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
@@ -109,6 +110,7 @@ public class streamTable extends TableMap {
             col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,String>(colName));
             TABLE.getColumns().add(col);
          }
+         TableUtil.setWeights(TABLE, TITLE_cols, weights);
       }
       
       // Add keyboard listener

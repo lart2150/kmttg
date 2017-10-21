@@ -61,6 +61,7 @@ import com.tivo.kmttg.util.log;
 
 public class spTable extends TableMap {
    private String[] TITLE_cols = {"PRIORITY", "SHOW", "INCLUDE", "SEASON", "CHANNEL", "RECORD", "KEEP", "NUM", "START", "END"};
+   private double[] weights = {8, 35, 7, 8, 10, 10, 7, 5, 5, 5};
    public TableView<Tabentry> TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private String currentTivo = null;
@@ -109,6 +110,7 @@ public class spTable extends TableMap {
                col.setStyle("-fx-alignment: CENTER;");
             TABLE.getColumns().add(col);
          }
+         TableUtil.setWeights(TABLE, TITLE_cols, weights);
       }
 
       // Add keyboard listener

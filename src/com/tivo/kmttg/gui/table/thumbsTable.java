@@ -56,6 +56,7 @@ public class thumbsTable extends TableMap {
    private String currentTivo = null;
    public TableView<Tabentry> TABLE = null;
    public String[] TITLE_cols = {"TYPE", "SHOW", "RATING"};
+   private double[] weights = {15, 75, 10};
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
@@ -133,6 +134,7 @@ public class thumbsTable extends TableMap {
             });
             TABLE.getColumns().add(col);
          }
+         TableUtil.setWeights(TABLE, TITLE_cols, weights);
       }
       
       // Add keyboard listener

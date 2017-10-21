@@ -36,6 +36,7 @@ import com.tivo.kmttg.util.log;
 
 public class skipTable {
    private String[] TITLE_cols = {"SHOW", "TIVO", "CONTENTID", "AD1"};
+   private double[] weights = {52, 20, 15, 13};
    public TableView<Tabentry> TABLE = null;
    
    class offsetComparator implements Comparator<String> {
@@ -65,6 +66,7 @@ public class skipTable {
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(cName));
             TABLE.getColumns().add(col);
          }
+         TableUtil.setWeights(TABLE, TITLE_cols, weights);
       }
       
       // Define selection listener to detect table row selection changes

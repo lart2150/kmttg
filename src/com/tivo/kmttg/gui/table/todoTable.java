@@ -61,6 +61,7 @@ import com.tivo.kmttg.util.log;
 
 public class todoTable extends TableMap {
    private String[] TITLE_cols = {"", "DATE", "SHOW", "CHANNEL", "DUR"};
+   private double[] weights = {3, 17, 62, 12, 6};
    public TableView<Tabentry> TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private String currentTivo = null;
@@ -148,6 +149,7 @@ public class todoTable extends TableMap {
                col.setComparator(new StringChannelComparator()); // Custom column sort
             TABLE.getColumns().add(col);
          }
+         TableUtil.setWeights(TABLE, TITLE_cols, weights);
       }
       
       // Add keyboard listener

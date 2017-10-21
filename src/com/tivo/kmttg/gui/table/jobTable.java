@@ -40,6 +40,7 @@ import com.tivo.kmttg.util.log;
 
 public class jobTable {
    private String[] TITLE_cols = {"STATUS", "JOB", "SOURCE", "OUTPUT"};
+   private double[] weights = {25, 15, 15, 45};
 
    public TableView<Tabentry> JobMonitor = null;
    
@@ -53,6 +54,7 @@ public class jobTable {
          col.setComparator(null); // Disable column sorting
          JobMonitor.getColumns().add(col);
       }
+      TableUtil.setWeights(JobMonitor, TITLE_cols, weights);
       JobMonitor.setOnMousePressed(new EventHandler<MouseEvent>() {
          @Override 
          public void handle(MouseEvent event) {

@@ -64,6 +64,7 @@ public class searchTable extends TableMap {
    private String currentTivo = null;
    public TreeTableView<Tabentry> TABLE = null;
    public String[] TITLE_cols = {"", "TYPE", "SHOW", "DATE", "CHANNEL", "DUR"};
+   private double[] weights = {7, 12, 40, 20, 15, 6};
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
@@ -153,6 +154,7 @@ public class searchTable extends TableMap {
                col.setComparator(new StringShowComparator()); // Custom column sort strips off leading price
             TABLE.getColumns().add(col);
          }
+         TableUtil.setWeights(TABLE, TITLE_cols, weights);
       }
       
       // Add keyboard listener
