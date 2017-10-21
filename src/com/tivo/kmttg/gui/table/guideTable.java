@@ -142,7 +142,7 @@ public class guideTable extends TableMap {
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(colName));
             TABLE.getColumns().add(col);
          }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights);
+         TableUtil.setWeights(TABLE, TITLE_cols, weights, true);
       }
       
       // Add keyboard listener

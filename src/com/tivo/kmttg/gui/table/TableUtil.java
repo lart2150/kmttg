@@ -22,7 +22,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
+//import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -66,11 +66,11 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.stage.FileChooser.ExtensionFilter;
 
-import com.sun.javafx.scene.control.skin.NestedTableColumnHeader;
-import com.sun.javafx.scene.control.skin.TableColumnHeader;
-import com.sun.javafx.scene.control.skin.TableHeaderRow;
-import com.sun.javafx.scene.control.skin.TableViewSkin;
-import com.sun.javafx.scene.control.skin.TreeTableViewSkin;
+//import javafx.scene.control.skin.NestedTableColumnHeader;
+//import javafx.scene.control.skin.TableColumnHeader;
+//import javafx.scene.control.skin.TableHeaderRow;
+//import javafx.scene.control.skin.TableViewSkin;
+//import javafx.scene.control.skin.TreeTableViewSkin;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -224,9 +224,11 @@ public class TableUtil {
       table.scrollTo(rowIndex);
    }
    
-   public static void setWeights(TableView<?> TABLE, String[] names, double[] weights) {
+   public static void setWeights(TableView<?> TABLE, String[] names, double[] weights, Boolean force) {
       // Only do this for Java 9 or later for now
-      if (System.getProperty("java.version").startsWith("1"))
+      //if (System.getProperty("java.version").startsWith("1"))
+      //   return;
+      if (!force && config.tableColAutoSize == 0)
          return;
       TABLE.setColumnResizePolicy( TableView.UNCONSTRAINED_RESIZE_POLICY );
       int c = 0;
@@ -244,9 +246,11 @@ public class TableUtil {
       }
    }
    
-   public static void setWeights(TreeTableView<?> TABLE, String[] names, double[] weights) {
+   public static void setWeights(TreeTableView<?> TABLE, String[] names, double[] weights, Boolean force) {
       // Only do this for Java 9 or later for now
-      if (System.getProperty("java.version").startsWith("1"))
+      //if (System.getProperty("java.version").startsWith("1"))
+      //   return;
+      if (!force && config.tableColAutoSize == 0)
          return;
       TABLE.setColumnResizePolicy( TreeTableView.UNCONSTRAINED_RESIZE_POLICY );
       int c = 0;
@@ -267,12 +271,12 @@ public class TableUtil {
    // Call protected method to do tableview column fit to size
    public static void autoSizeTableViewColumns(final TableView<?> tableView, Boolean force) {
       debug.print("tableView=" + tableView + " force=" + force);
-      if (! System.getProperty("java.version").startsWith("1")) {
+      //if (! System.getProperty("java.version").startsWith("1")) {
          // Java 9 doesn't work with custom code so default to built in
          if (!force && config.tableColAutoSize == 0)
             return;
          //tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-      } else {
+      /*} else {
          int maxRows = 500;
          if (tableView == null)
             return;
@@ -296,19 +300,19 @@ public class TableUtil {
                e.printStackTrace(System.err);
             }
          }
-      }
+      }*/
    }
    
    // Call protected method to do treetableview column fit to size
    // NOTE: Added min setting for IMAGE column (which has empty title)
    public static void autoSizeTableViewColumns(final TreeTableView<?> tableView, Boolean force) {
       debug.print("tableView=" + tableView + " force=" + force);
-      if (! System.getProperty("java.version").startsWith("1")) {
+      //if (! System.getProperty("java.version").startsWith("1")) {
          // Java 9 doesn't work with custom code so default to built in
          if (!force && config.tableColAutoSize == 0)
             return;
          //tableView.setColumnResizePolicy(TreeTableView.UNCONSTRAINED_RESIZE_POLICY);
-      } else {
+      /*} else {
          double minImageColWidth = 60;
          int maxRows = 500;
          if (tableView == null)
@@ -337,7 +341,7 @@ public class TableUtil {
                e.printStackTrace(System.err);
             }
          }
-      }
+      }*/
    }
    
    // Bring up a dialog to allow searching SHOW column of given table

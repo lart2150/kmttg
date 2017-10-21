@@ -110,7 +110,7 @@ public class streamTable extends TableMap {
             col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,String>(colName));
             TABLE.getColumns().add(col);
          }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights);
+         TableUtil.setWeights(TABLE, TITLE_cols, weights, true);
       }
       
       // Add keyboard listener

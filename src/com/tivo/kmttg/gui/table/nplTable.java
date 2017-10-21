@@ -194,7 +194,7 @@ public class nplTable extends TableMap {
                NowPlaying.getColumns().add(col);
             }
          }
-         TableUtil.setWeights(NowPlaying, FILE_cols, FILE_weights);
+         TableUtil.setWeights(NowPlaying, FILE_cols, FILE_weights, false);
       } else {
          for (String colName : TIVO_cols) {
             if (colName.length() == 0)
@@ -241,7 +241,7 @@ public class nplTable extends TableMap {
                NowPlaying.getColumns().add(col);
             }
          }
-         TableUtil.setWeights(NowPlaying, TIVO_cols, TIVO_weights);
+         TableUtil.setWeights(NowPlaying, TIVO_cols, TIVO_weights, false);
       }
       
       // Add right mouse button handler

@@ -134,7 +134,7 @@ public class thumbsTable extends TableMap {
             });
             TABLE.getColumns().add(col);
          }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights);
+         TableUtil.setWeights(TABLE, TITLE_cols, weights, true);
       }
       
       // Add keyboard listener

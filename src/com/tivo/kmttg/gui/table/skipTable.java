@@ -66,7 +66,7 @@ public class skipTable {
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(cName));
             TABLE.getColumns().add(col);
          }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights);
+         TableUtil.setWeights(TABLE, TITLE_cols, weights, true);
       }
       
       // Define selection listener to detect table row selection changes

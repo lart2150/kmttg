@@ -125,7 +125,7 @@ public class cancelledTable extends TableMap {
                col.setComparator(new StringChannelComparator()); // Custom column sort
             TABLE.getColumns().add(col);
          }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights);
+         TableUtil.setWeights(TABLE, TITLE_cols, weights, true);
       }
       
       // Add keyboard listener

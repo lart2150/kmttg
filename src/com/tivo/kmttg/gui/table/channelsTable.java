@@ -123,7 +123,7 @@ public class channelsTable extends TableMap {
             col.setStyle("-fx-alignment: CENTER;");
             TABLE.getColumns().add(col);
          }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights);
+         TableUtil.setWeights(TABLE, TITLE_cols, weights, true);
       }
       
       // Add keyboard listener

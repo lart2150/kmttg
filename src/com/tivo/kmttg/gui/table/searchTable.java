@@ -154,7 +154,7 @@ public class searchTable extends TableMap {
                col.setComparator(new StringShowComparator()); // Custom column sort strips off leading price
             TABLE.getColumns().add(col);
          }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights);
+         TableUtil.setWeights(TABLE, TITLE_cols, weights, true);
       }
       
       // Add keyboard listener
