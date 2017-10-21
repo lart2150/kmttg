@@ -260,7 +260,11 @@ public class gui extends Application {
       });
       
       // Restore last GUI run settings from file
-      readSettings();
+      Platform.runLater(new Runnable() {
+         @Override public void run() {
+            readSettings();               
+         }
+      });
       
       // Enable/disable options according to configuration
       refreshOptions(true);
@@ -2278,7 +2282,11 @@ public class gui extends Application {
                   ObservableList<TreeTableColumn<Tabentry, ?>> cols = tivoTabs.get(name).getTable().NowPlaying.getColumns();
                   int j=0;
                   for (TreeTableColumn<Tabentry, ?> col : cols) {
-                     col.setPrefWidth(widths[j++]);
+                     try {
+                        col.setPrefWidth(widths[j++]);
+                     } catch (Exception e) {
+                        // This seems to fail with recent java releases for some reason
+                     }
                   }
                }
             }
@@ -2418,6 +2426,7 @@ public class gui extends Application {
       }         
       catch (Exception ex) {
          log.warn("Problem parsing config file: " + config.gui_settings);
+         log.warn(Arrays.toString(ex.getStackTrace()));
       }
    }
    
