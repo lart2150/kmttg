@@ -36,31 +36,31 @@ import java.util.Iterator;
 public class XML {
 
     /** The Character '&amp;'. */
-    public static final Character AMP   = new Character('&');
+    public static final Character AMP   = "&".charAt(0);
 
     /** The Character '''. */
-    public static final Character APOS  = new Character('\'');
+    public static final Character APOS  = "'".charAt(0);
 
     /** The Character '!'. */
-    public static final Character BANG  = new Character('!');
+    public static final Character BANG  = "!".charAt(0);
 
     /** The Character '='. */
-    public static final Character EQ    = new Character('=');
+    public static final Character EQ    = "=".charAt(0);
 
     /** The Character '>'. */
-    public static final Character GT    = new Character('>');
+    public static final Character GT    = ">".charAt(0);
 
     /** The Character '&lt;'. */
-    public static final Character LT    = new Character('<');
+    public static final Character LT    = "<".charAt(0);
 
     /** The Character '?'. */
-    public static final Character QUEST = new Character('?');
+    public static final Character QUEST = "?".charAt(0);
 
     /** The Character '"'. */
-    public static final Character QUOT  = new Character('"');
+    public static final Character QUOT  = "\"".charAt(0);
 
     /** The Character '/'. */
-    public static final Character SLASH = new Character('/');
+    public static final Character SLASH = "/".charAt(0);
 
     /**
      * Replace special characters with XML escapes:
@@ -314,7 +314,7 @@ public class XML {
             return JSONObject.NULL;
         }
         if ("0".equals(string)) {
-            return new Integer(0);
+            return Integer.parseInt("0");
         }
 
 // If it might be a number, try converting it. If that doesn't work,
@@ -334,9 +334,10 @@ public class XML {
                 if (string.indexOf('.') >= 0) {
                     return Double.valueOf(string);
                 } else if (string.indexOf('e') < 0 && string.indexOf('E') < 0) {
-                    Long myLong = new Long(string);
+                    Long myLong = Long.parseLong(string);
                     if (myLong.longValue() == myLong.intValue()) {
-                        return new Integer(myLong.intValue());
+                       Integer i = (int) myLong.intValue();
+                        return i;
                     } else {
                         return myLong;
                     }
