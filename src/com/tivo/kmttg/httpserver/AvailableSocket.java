@@ -51,7 +51,7 @@ public class AvailableSocket {
       this(InetAddress.getByName(null));
    }
    public synchronized boolean open(int s) {
-      if (usedSockets.contains(new Integer(s)))
+      if (usedSockets.contains(Integer.valueOf(s)))
             return false;
       try {
          ServerSocket server = new ServerSocket(s, 1, bindAddr );
@@ -60,12 +60,12 @@ public class AvailableSocket {
          return false;
       }
       socket = s;
-      usedSockets.add(new Integer(s));
+      usedSockets.add(Integer.valueOf(s));
       return true;
    }
    public synchronized void close() {
       if (socket != -1) {
-         usedSockets.remove(new Integer(socket));
+         usedSockets.remove(Integer.valueOf(socket));
          socket = -1;
       }
    }
