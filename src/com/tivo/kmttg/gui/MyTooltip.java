@@ -133,6 +133,9 @@ public class MyTooltip {
    }
    
    public static void setTooltipDelay(int open_secs, int timeout_secs) {
+      // This only works for Java 8, so don't execute for Java 9
+      if (! System.getProperty("java.version").startsWith("1"))
+         return;
       setupCustomTooltipBehavior(open_secs*1000, timeout_secs*1000, close_delay);
    }
    
