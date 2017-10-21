@@ -164,13 +164,13 @@ public class string {
       
       Long msecs = Long.parseLong("0");
       if (days > 0)
-         msecs += new Double(days*24*60*60*1000).longValue();
+         msecs = (long) (msecs + days*24*60*60*1000);
       if (hours > 0)
-         msecs += new Double(hours*60*60*1000).longValue();
+         msecs = (long) (msecs + hours*60*60*1000);
       if (minutes > 0)
-         msecs += new Double(minutes*60*1000).longValue();
+         msecs = (long) (msecs + minutes*60*1000);
       if (seconds > 0)
-         msecs += new Double(seconds*1000).longValue();
+         msecs = (long) (msecs + seconds*1000);
       
       return msecs * plusMinus;
    }
