@@ -374,8 +374,7 @@ public class ShowDetails {
                         setImage(json.getJSONArray("image"));
                      }
                      else {
-                        image.setText("");
-                        image.setGraphic(null);
+                        searchImage(tivoName, json);
                      }
                   } catch (JSONException e) {
                      log.error("ShowDetails update - " + e.getMessage());
@@ -414,6 +413,46 @@ public class ShowDetails {
    
    public Boolean isShowing() {
       return dialog.isShowing();
+   }
+   
+   // Use contentId or collectionId to find and set image from given sourceJson
+   private void searchImage(String tivoName, JSONObject sourceJson) {
+      image.setText("");
+      image.setGraphic(null);
+      Remote r = config.initRemote(tivoName);
+      if (r.success) {
+         try {
+            JSONObject json = new JSONObject();
+            JSONObject template = new JSONObject();
+            template.put("type", "responseTemplate");
+            template.put("typeName", "category");
+            template.put("fieldName", new JSONArray("[\"image\"]"));
+            json.put("responseTemplate", template);
+            if (sourceJson.has("contentId")) {
+               json.put("contentId", sourceJson.getString("contentId"));
+               JSONObject result = r.Command("contentSearch", json);
+               if (result != null && result.has("content")) {
+                  JSONObject content = result.getJSONArray("content").getJSONObject(0);
+                  if (content.has("image")) {
+                     setImage(content.getJSONArray("image"));
+                  }
+               }
+            }
+            else if (sourceJson.has("collectionId")) {
+               json.put("collectionId", sourceJson.getString("collecionId"));
+               JSONObject result = r.Command("collectionSearch", json);
+               if (result != null && result.has("collection")) {
+                  JSONObject collection = result.getJSONArray("collection").getJSONObject(0);
+                  if (collection.has("image")) {
+                     setImage(collection.getJSONArray("image"));
+                  }
+               }               
+            }
+         } catch (JSONException e) {
+            log.error("ShowDetails searchImage - " + e.getMessage());
+         }
+         r.disconnect();
+      }
    }
    
    private void setImage(JSONArray imageArray) {
