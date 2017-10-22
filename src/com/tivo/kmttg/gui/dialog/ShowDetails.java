@@ -439,7 +439,7 @@ public class ShowDetails {
                }
             }
             else if (sourceJson.has("collectionId")) {
-               json.put("collectionId", sourceJson.getString("collecionId"));
+               json.put("collectionId", sourceJson.getString("collectionId"));
                JSONObject result = r.Command("collectionSearch", json);
                if (result != null && result.has("collection")) {
                   JSONObject collection = result.getJSONArray("collection").getJSONObject(0);
