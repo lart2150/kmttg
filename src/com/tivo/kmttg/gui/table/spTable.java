@@ -60,8 +60,8 @@ import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.log;
 
 public class spTable extends TableMap {
-   private String[] TITLE_cols = {"PRIORITY", "SHOW", "INCLUDE", "SEASON", "CHANNEL", "RECORD", "KEEP", "NUM", "START", "END"};
-   private double[] weights = {8, 35, 7, 8, 10, 10, 7, 5, 5, 5};
+   private String[] TITLE_cols = {"PRI", "SHOW", "INCLUDE", "SEASON", "CHANNEL", "RECORD", "KEEP", "NUM", "START", "END"};
+   private double[] weights = {4, 34, 9, 8, 13, 10, 7, 5, 5, 5};
    public TableView<Tabentry> TABLE = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private String currentTivo = null;
@@ -96,7 +96,7 @@ public class spTable extends TableMap {
       TABLE.setRowFactory(new ColorRowFactory()); // For row background color handling & drag and drop support
       
       for (String colName : TITLE_cols) {
-         if (colName.equals("PRIORITY")) {
+         if (colName.equals("PRI")) {
             TableColumn<Tabentry,sortableInt> col = new TableColumn<Tabentry,sortableInt>(colName);
             col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableInt>(colName));
             col.setComparator(null); // Disable column sorting
@@ -144,7 +144,7 @@ public class spTable extends TableMap {
                super.updateItem(entry,  empty);
                styleProperty().unbind(); setStyle("");
                if (entry != null) {
-                  JSONObject json = entry.getPRIORITY().json;
+                  JSONObject json = entry.getPRI().json;
                   if (json != null && json.has("__conflicts"))
                      TableUtil.setRowColor(this, config.lightRed);
                }
@@ -297,7 +297,7 @@ public class spTable extends TableMap {
          }            
       }
       
-      public sortableInt getPRIORITY() {
+      public sortableInt getPRI() {
          return priority;
       }
       
@@ -381,7 +381,7 @@ public class spTable extends TableMap {
     }
     
     public JSONObject GetRowData(int row) {
-       return TABLE.getItems().get(row).getPRIORITY().json;
+       return TABLE.getItems().get(row).getPRI().json;
     }
     
     public String GetRowTitle(int row) {
@@ -493,7 +493,7 @@ public class spTable extends TableMap {
        JSONArray array = new JSONArray();
        sortableInt s;
        for (int row=0; row<count; ++row) {
-          s = TABLE.getItems().get(row).getPRIORITY();
+          s = TABLE.getItems().get(row).getPRI();
           if (s != null && s.json.has("subscriptionId")) {
              try {
                 array.put(s.json.getString("subscriptionId"));
