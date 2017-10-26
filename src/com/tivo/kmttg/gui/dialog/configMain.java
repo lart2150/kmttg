@@ -2572,7 +2572,7 @@ public class configMain {
 
       slingBox.setText("Show Slingbox capture tab");
 
-      tableColAutoSize.setText("Auto size NPL column widths");
+      tableColAutoSize.setText("Auto size table column widths");
       
       jobMonitorFullPaths.setText("Show full paths in Job Monitor");
       
@@ -4368,8 +4368,9 @@ public class configMain {
          text += "Enable or disable display of Slingbox capture tab.";
       }
       else if (component.equals("tableColAutoSize")) {
-         text =  "<b>Auto size NPL column widths</b><br>";
-         text += "If enabled then automatically size to fit text NPL table column widths.";
+         text =  "<b>Auto size table column widths</b><br>";
+         text += "If enabled then automatically size table column widths.<br>";
+         text += "Else manually set table column widths will be saved/restored between kmttg sessions.";
       }
       else if (component.equals("jobMonitorFullPaths")) {
          text =  "<b>Show full paths in Job Monitor</b><br>";

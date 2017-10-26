@@ -54,7 +54,7 @@ public class jobTable {
          col.setComparator(null); // Disable column sorting
          JobMonitor.getColumns().add(col);
       }
-      TableUtil.setWeights(JobMonitor, TITLE_cols, weights, true);
+      TableUtil.setWeights(JobMonitor, TITLE_cols, weights, false);
       JobMonitor.setOnMousePressed(new EventHandler<MouseEvent>() {
          @Override 
          public void handle(MouseEvent event) {

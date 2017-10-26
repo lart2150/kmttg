@@ -69,9 +69,12 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
@@ -1934,6 +1937,20 @@ public class gui extends Application {
                }
                ofp.write("\n");
             }
+            
+            writeWidths("jobTable", config.gui.jobTab.JobMonitor, ofp);
+            if (remote_gui != null) {
+               writeWidths("todoTable", remote_gui.todo_tab.tab.TABLE, ofp);
+               writeWidths("spTable", remote_gui.sp_tab.tab.TABLE, ofp);
+               writeWidths("premiereTable", remote_gui.premiere_tab.tab.TABLE, ofp);
+               writeWidths("guideTable", remote_gui.guide_tab.tab.TABLE, ofp);
+               writeWidths("deletedTable", remote_gui.deleted_tab.tab.TABLE, ofp);
+               writeWidths("channelsTable", remote_gui.channels_tab.tab.TABLE, ofp);
+               writeWidths("thumbsTable", remote_gui.thumbs_tab.tab.TABLE, ofp);
+               writeWidths("cancelTable", remote_gui.cancel_tab.tab.TABLE, ofp);
+               writeWidths("searchTable", remote_gui.search_tab.tab.TABLE, ofp);
+               writeWidths("streamTable", remote_gui.stream_tab.tab.TABLE, ofp);
+            }
             ofp.write("\n");
             
             ofp.write("<showFolders>\n");
@@ -2278,7 +2295,7 @@ public class gui extends Application {
                for (int i=0; i<order.length; ++i) {
                   widths[i] = Integer.parseInt(order[i]);
                }
-               if (tivoTabs.containsKey(l[0])) {
+               if (tivoTabs.containsKey(name)) {
                   ObservableList<TreeTableColumn<Tabentry, ?>> cols = tivoTabs.get(name).getTable().NowPlaying.getColumns();
                   int j=0;
                   for (TreeTableColumn<Tabentry, ?> col : cols) {
@@ -2288,6 +2305,31 @@ public class gui extends Application {
                         // This seems to fail with recent java releases for some reason
                      }
                   }
+               }
+               if (name.equals("jobTable")) {
+                  setWidths(config.gui.jobTab.JobMonitor, widths);
+               }
+               if (remote_gui != null) {
+                  if (name.equals("todoTable"))
+                     setWidths(remote_gui.todo_tab.tab.TABLE, widths);
+                  if (name.equals("spTable"))
+                     setWidths(remote_gui.sp_tab.tab.TABLE, widths);
+                  if (name.equals("premiereTable"))
+                     setWidths(remote_gui.premiere_tab.tab.TABLE, widths);
+                  if (name.equals("guideTable"))
+                     setWidths(remote_gui.guide_tab.tab.TABLE, widths);
+                  if (name.equals("deletedTable"))
+                     setWidths(remote_gui.deleted_tab.tab.TABLE, widths);
+                  if (name.equals("channelsTable"))
+                     setWidths(remote_gui.channels_tab.tab.TABLE, widths);
+                  if (name.equals("thumbsTable"))
+                     setWidths(remote_gui.thumbs_tab.tab.TABLE, widths);
+                  if (name.equals("cancelTable"))
+                     setWidths(remote_gui.cancel_tab.tab.TABLE, widths);
+                  if (name.equals("searchTable"))
+                     setWidths(remote_gui.search_tab.tab.TABLE, widths);
+                  if (name.equals("streamTable"))
+                     setWidths(remote_gui.stream_tab.tab.TABLE, widths);
                }
             }
             if (key.equals("showFolders")) {
@@ -2427,6 +2469,66 @@ public class gui extends Application {
       catch (Exception ex) {
          log.warn("Problem parsing config file: " + config.gui_settings);
          log.warn(Arrays.toString(ex.getStackTrace()));
+      }
+   }
+   
+   private void writeWidths(String name, TableView<?> table, BufferedWriter ofp) {
+      try {
+         ofp.write("" + name + "=");
+         int i=0;
+         for (TableColumn<?,?> col : table.getColumns()) {
+            int w = (int)col.getWidth();
+            if (i==0)
+               ofp.write("" + w);
+            else
+               ofp.write("," + w);
+            i++;
+         }
+         ofp.write("\n");
+      } catch (Exception e) {
+         log.error("writeWidths - " + e.getMessage());
+      }
+   }
+   
+   private void setWidths(TableView<?> table, int[] widths) {
+      int i=0;
+      for (TableColumn<?,?> col : table.getColumns()) {
+         try {
+            col.setPrefWidth(widths[i]);
+         } catch (Exception e) {
+            // Ignore exceptions
+         }
+         i++;
+      }
+   }
+   
+   private void writeWidths(String name, TreeTableView<?> table, BufferedWriter ofp) {
+      try {
+         ofp.write("" + name + "=");
+         int i=0;
+         for (TreeTableColumn<?,?> col : table.getColumns()) {
+            int w = (int)col.getWidth();
+            if (i==0)
+               ofp.write("" + w);
+            else
+               ofp.write("," + w);
+            i++;
+         }
+         ofp.write("\n");
+      } catch (Exception e) {
+         log.error("writeWidths - " + e.getMessage());
+      }
+   }
+   
+   private void setWidths(TreeTableView<?> table, int[] widths) {
+      int i=0;
+      for (TreeTableColumn<?,?> col : table.getColumns()) {
+         try {
+            col.setPrefWidth(widths[i]);
+         } catch (Exception e) {
+            // Ignore exceptions
+         }
+         i++;
       }
    }
    
