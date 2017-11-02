@@ -477,7 +477,7 @@ public class SkipManager {
                if (result == null) {
                   continue;
                }
-               Thread.sleep(sleep_time);
+               Thread.sleep(sleep_time*3);
                                     
                // Jump to end
                end -= 5000;
@@ -521,6 +521,7 @@ public class SkipManager {
                      json.remove("offset");
                      json.put("event", "play");
                      r.Command("keyEventSend", json);
+                     Thread.sleep(sleep_time);
                   } // while
                   
                   // Pause and jump back to starting position
@@ -561,6 +562,7 @@ public class SkipManager {
                }
                debug.print("count start=" + count);
                Long stop;
+               long total = 0;
                for (Long start : points) {
                   if (count < lengths.size())
                      stop = start + lengths.elementAt(count);
@@ -573,14 +575,16 @@ public class SkipManager {
                   h.put("start", start);
                   h.put("end", stop);
                   cuts.push(h);
+                  total += (stop-start);
                   count++;
                }
                
                // Save entry to AutoSkip table with offset=0
                if (cuts.size() > 0) {
-                  SkipManager.saveEntry(
+                  saveEntry(
                      contentId, data.get("offerId"), 0L, data.get("title"), tivoName, cuts
                   );
+                  log.print("TOTAL show time: " + toMinSec(total));
                } else {
                   log.warn("Failed to retrieve cut points for: '" + data.get("title") + "'");
                   if (first_try) {
@@ -699,6 +703,25 @@ public class SkipManager {
          log.error("getSegmentLengths - " + e.getMessage());
       }
       return lengths;
+   }
+   
+   public static void logTimeSum(JSONArray cuts, long offset) {
+      try {
+         long total = 0;
+         int index = 0;
+         for (int i=0; i<cuts.length(); ++i) {
+            JSONObject j = cuts.getJSONObject(i);
+            long start = j.getLong("start");
+            if (index > 0)
+               start += offset;
+            long end = j.getLong("end") + offset;
+            total += (end-start);
+            index++;
+         }
+         log.print("TOTAL show time: " + toMinSec(total));
+      } catch (JSONException e) {
+         log.error("skipTable TABLERowSelected - " + e.getMessage());
+      }
    }
    
    private static Stack<Long> reverseStack(Stack<Long> stack){

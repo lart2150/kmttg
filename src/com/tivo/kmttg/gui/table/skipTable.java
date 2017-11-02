@@ -202,6 +202,7 @@ public class skipTable {
             log.print(message);
             index++;
          }
+         SkipManager.logTimeSum(cuts, offset);
       } catch (JSONException e) {
          log.error("skipTable TABLERowSelected - " + e.getMessage());
       }
