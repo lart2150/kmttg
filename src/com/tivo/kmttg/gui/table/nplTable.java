@@ -1565,6 +1565,7 @@ public class nplTable extends TableMap {
    // Identify NPL table items associated with queued/running jobs
    public void updateNPLjobStatus(Hashtable<String,String> map) {
       UpdatingNPL = true;
+      Tabentry entry = null;
       for (int row=0; row<NowPlaying.getExpandedItemCount(); row++) {
          sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
          if (s != null && s.data != null) {
@@ -1572,23 +1573,25 @@ public class nplTable extends TableMap {
                String source = s.data.get("url_TiVoVideoDetails");
                if (map.containsKey(source)) {
                   // Has associated queued or running job, so set special icon
-                  NowPlaying.getTreeItem(row).getValue().setIMAGE(gui.Images.get(map.get(source)));
+                  entry = NowPlaying.getTreeItem(row).getValue();
+                  entry.setIMAGE(gui.Images.get(map.get(source)));
+                  NowPlaying.getTreeItem(row).setValue(entry);
                } else {
                   // Has no associated queued or running job so reset icon
-                  NowPlaying.getTreeItem(row).getValue().setIMAGE(null);
+                  entry = NowPlaying.getTreeItem(row).getValue();
+                  entry.setIMAGE(null);
+                  NowPlaying.getTreeItem(row).setValue(entry);
                   
                   // Set to ExpirationImage icon if available
                   if ( s.data.containsKey("ExpirationImage") ) {
-                     NowPlaying.getTreeItem(row).getValue().setIMAGE(gui.Images.get(s.data.get("ExpirationImage")));
+                     entry = NowPlaying.getTreeItem(row).getValue();
+                     entry.setIMAGE(gui.Images.get(s.data.get("ExpirationImage")));
+                     NowPlaying.getTreeItem(row).setValue(entry);
                   }
                }
             }
          }
       }
-      // Hack to refresh image column
-      int col = TableUtil.getColumnIndex(NowPlaying, "");
-      NowPlaying.getColumns().get(col).setVisible(false);
-      NowPlaying.getColumns().get(col).setVisible(true);
       UpdatingNPL = false;
    }
    
@@ -1602,14 +1605,12 @@ public class nplTable extends TableMap {
          sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
          if (s != null && s.data != null) {
             if (s.data.containsKey("contentId")) {
-               NowPlaying.getTreeItem(row).getValue().getIMAGE().setLabel(getPctWatched(s.data));
+               Tabentry entry = NowPlaying.getTreeItem(row).getValue();
+               entry.getIMAGE().setLabel(getPctWatched(s.data));
+               NowPlaying.getTreeItem(row).setValue(entry);
             }
          }
       }
-      // Hack to refresh image column
-      int col = TableUtil.getColumnIndex(NowPlaying, "");
-      NowPlaying.getColumns().get(col).setVisible(false);
-      NowPlaying.getColumns().get(col).setVisible(true);
       UpdatingNPL = false;
    }
    

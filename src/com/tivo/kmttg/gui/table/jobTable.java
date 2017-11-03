@@ -198,41 +198,29 @@ public class jobTable {
           jobEntry e = entry.getJobEntry();
           if (e.job == job) {
              entry.status = status;
-             int col = getColumnIndex("STATUS");
-             if (col > -1) {
-                // Hack to refresh STATUS column
-                JobMonitor.getColumns().get(col).setVisible(false);
-                JobMonitor.getColumns().get(col).setVisible(true);
-             }
-             TableUtil.autoSizeTableViewColumns(JobMonitor, true);
+             JobMonitor.getItems().set(row, entry);
              return;
           }
        }
     }
     
-    private int getColumnIndex(String name) {
+    /*private int getColumnIndex(String name) {
        String cname;
        for (int i=0; i<JobMonitor.getColumns().size(); i++) {
           cname = (String)JobMonitor.getColumns().get(i).getText();
           if (cname.equals(name)) return i;
        }
        return -1;
-    }
+    }*/
     
     public void UpdateJobMonitorRowOutput(jobData job, String text) {
        int numrows = JobMonitor.getItems().size(); 
-       for(int i=0; i<numrows; i++) {
-          Tabentry entry = JobMonitor.getItems().get(i);
+       for(int row=0; row<numrows; row++) {
+          Tabentry entry = JobMonitor.getItems().get(row);
           jobEntry e = entry.getJobEntry();
           if (e.job == job) {
              entry.output = text;
-             int col = getColumnIndex("OUTPUT");
-             if (col > -1) {
-                // Hack to refresh OUTPUT column
-                JobMonitor.getColumns().get(col).setVisible(false);
-                JobMonitor.getColumns().get(col).setVisible(true);
-             }
-             TableUtil.autoSizeTableViewColumns(JobMonitor, true);
+             JobMonitor.getItems().set(row, entry);
              return;
           }
        }
