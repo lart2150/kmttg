@@ -106,7 +106,7 @@ public class textpane {
          pre.setTextContent(s);
          // NOTE: display: inline prevents newline from being added for <pre> tag
          // NOTE: white-space: pre-wrap allows horizontal work wrapping to avoid horizontal scrollbar
-         pre.setAttribute("style", "white-space: pre-wrap; display: inline; color:" + color);
+         pre.setAttribute("style", "font-size: " + config.FontSize + "pt; white-space: pre-wrap; display: inline; color:" + color);
          if (content.getChildNodes().getLength() > 0)
             content.appendChild(doc.createElement("br"));
          content.appendChild(pre);
