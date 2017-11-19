@@ -501,6 +501,10 @@ public class parseNPL {
                long ByteOffset = bookmarkPosition*size/duration;
                entry.put("ByteOffset", "" + ByteOffset);
             }*/
+         } else {
+            if (json.has("watchedTime")) {
+               entry.put("TimeOffset", "" + json.getInt("watchedTime")*60);
+            }
          }
          if (json.has("subscriptionIdentifier")) {
             JSONArray a = json.getJSONArray("subscriptionIdentifier");
