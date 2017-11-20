@@ -504,6 +504,12 @@ public class parseNPL {
          } else {
             if (json.has("watchedTime")) {
                entry.put("TimeOffset", "" + json.getInt("watchedTime")*60);
+               // If TimeOffset > duration then remove
+               if (json.has("duration")) {
+                  long duration = json.getLong("duration");
+                  if(json.getInt("watchedTime")*60 > duration)
+                     entry.remove("TimeOffset");
+               }
             }
          }
          if (json.has("subscriptionIdentifier")) {
