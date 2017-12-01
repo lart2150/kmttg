@@ -136,6 +136,7 @@ public class configMain {
    private static CheckBox autoskip_cutonly = null;
    private static CheckBox autoskip_prune = null;
    private static CheckBox autoskip_batch_standby = null;
+   private static CheckBox autoskip_indicate_skip = null;
    private static CheckBox autoskip_jumpToEnd = null;
    private static CheckBox combine_download_decrypt = null;
    private static CheckBox single_download = null;
@@ -1003,6 +1004,9 @@ public class configMain {
       
       // autoskip_batch_standby
       autoskip_batch_standby.setSelected(config.autoskip_batch_standby == 1);
+      
+      // autoskip_indicate_skip
+      autoskip_indicate_skip.setSelected(config.autoskip_indicate_skip == 1);
       
       // autoskip_jumpToEnd
       autoskip_jumpToEnd.setSelected(config.autoskip_jumpToEnd == 1);
@@ -1976,6 +1980,12 @@ public class configMain {
       else
          config.autoskip_batch_standby = 0;
       
+      // autoskip_indicate_skip
+      if (autoskip_indicate_skip.isSelected())
+         config.autoskip_indicate_skip = 1;
+      else
+         config.autoskip_indicate_skip = 0;
+      
       // autoskip_jumpToEnd
       if (autoskip_jumpToEnd.isSelected())
          config.autoskip_jumpToEnd = 1;
@@ -2351,6 +2361,7 @@ public class configMain {
       autoskip_cutonly = new CheckBox();
       autoskip_prune = new CheckBox();
       autoskip_batch_standby = new CheckBox();
+      autoskip_indicate_skip = new CheckBox();
       autoskip_jumpToEnd = new CheckBox();
       Label toolTipsDelay_label = new Label();
       Label toolTipsTimeout_label = new Label();
@@ -2587,6 +2598,8 @@ public class configMain {
       autoskip_prune.setText("Prune Skip Table automatically after NPL refresh");
       
       autoskip_batch_standby.setText("Set standby mode after batch AutoSkip from SkipMode");
+      
+      autoskip_indicate_skip.setText("Indicate with play when skipping");
       
       autoskip_jumpToEnd.setText("Jump to end of recording when last skip block entered");
             
@@ -3028,6 +3041,9 @@ public class configMain {
       
       gy++;
       autoskip_panel.add(autoskip_prune, 1, gy);
+      
+      gy++;
+      autoskip_panel.add(autoskip_indicate_skip, 1, gy);
       
       gy++;
       autoskip_panel.add(autoskip_batch_standby, 1, gy);
@@ -3674,6 +3690,7 @@ public class configMain {
       autoskip_cutonly.setTooltip(getToolTip("autoskip_cutonly"));
       autoskip_prune.setTooltip(getToolTip("autoskip_prune"));
       autoskip_batch_standby.setTooltip(getToolTip("autoskip_batch_standby"));
+      autoskip_indicate_skip.setTooltip(getToolTip("autoskip_indicate_skip"));
       autoskip_jumpToEnd.setTooltip(getToolTip("autoskip_jumpToEnd"));
       autoskip_padding_start.setTooltip(getToolTip("autoskip_padding_start"));
       autoskip_padding_stop.setTooltip(getToolTip("autoskip_padding_stop"));
@@ -4438,6 +4455,10 @@ public class configMain {
       else if (component.equals("autoskip_batch_standby")) {
          text =  "<b>Set standby mode after batch AutoSkip from SkipMode</b><br>";
          text += "If enabled, following a batch mode <b>AutoSkip from SkipMode</b> run put the TiVo in standby mode.";
+      }
+      else if (component.equals("autoskip_indicate_skip")) {
+         text =  "<b>Indicate with play when skipping</b><br>";
+         text += "If enabled, play command is sent to TiVo following a skip as indication of a skip.";
       }
       else if (component.equals("autoskip_jumpToEnd")) {
          text =  "<b>Jump to end of recording when last skip block entered</b><br>";

@@ -249,12 +249,16 @@ public class AutoSkip {
    private synchronized void jumpTo(long position) {
       debug.print("position=" + position);
       JSONObject json = new JSONObject();
+      JSONObject j = new JSONObject();
       try {
          json.put("offset", position);
+         j.put("event", "play");
       } catch (JSONException e) {
          error("jumpTo - " + e.getMessage());
       }
-      r.Command("Jump", json);      
+      r.Command("Jump", json);
+      if (config.autoskip_indicate_skip == 1)
+         r.Command("keyEventSend", j);
    }
    
    // Jump to end of 1st show segment

@@ -243,6 +243,7 @@ public class config {
    public static int autoskip_padding_start = 0; // NOTE: time is stored in msecs
    public static int autoskip_padding_stop = 0; // NOTE: time is stored in msecs
    public static int autoskip_batch_standby = 0;
+   public static int autoskip_indicate_skip = 0;
    public static Hashtable<String,Boolean> autoskip_ServiceItems = new Hashtable<String,Boolean>();
    public static Boolean visualDetect_running = false;
    
