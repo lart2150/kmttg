@@ -502,6 +502,7 @@ public class parseNPL {
                entry.put("ByteOffset", "" + ByteOffset);
             }*/
          } else {
+            /* Comment this out since watchedTime can't be set after AutoSkip from SkipMode
             if (json.has("watchedTime")) {
                entry.put("TimeOffset", "" + json.getInt("watchedTime")*60);
                // If TimeOffset > duration then remove
@@ -510,7 +511,7 @@ public class parseNPL {
                   if(json.getInt("watchedTime")*60 > duration)
                      entry.remove("TimeOffset");
                }
-            }
+            }*/
          }
          if (json.has("subscriptionIdentifier")) {
             JSONArray a = json.getJSONArray("subscriptionIdentifier");
