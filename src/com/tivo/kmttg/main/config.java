@@ -39,7 +39,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v2.4c";
+   public static String kmttg = "kmttg v2.4d";
    
    // encoding related
    public static String encProfDir = "";
@@ -1215,6 +1215,9 @@ public class config {
             if (key.equals("autoskip_batch_standby")) {
                autoskip_batch_standby = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("autoskip_indicate_skip")) {
+               autoskip_indicate_skip = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+            }
             if (key.equals("autoskip_jumpToEnd")) {
                autoskip_jumpToEnd = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1511,6 +1514,8 @@ public class config {
          ofp.write("<autoskip_prune>\n" + autoskip_prune + "\n\n");
          
          ofp.write("<autoskip_batch_standby>\n" + autoskip_batch_standby + "\n\n");
+         
+         ofp.write("<autoskip_indicate_skip>\n" + autoskip_indicate_skip + "\n\n");
          
          ofp.write("<autoskip_jumpToEnd>\n" + autoskip_jumpToEnd + "\n\n");
          
