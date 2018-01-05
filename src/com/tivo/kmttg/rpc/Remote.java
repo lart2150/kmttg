@@ -2479,6 +2479,7 @@ public class Remote {
          int count = 30;
          int offset = 0;
          JSONObject json = new JSONObject();
+         JSONObject last = new JSONObject();
          json.put("collectionId", collectionId);
          json.put("filterUnavailable", false);
          json.put("orderBy", "seasonNumber");
@@ -2498,6 +2499,12 @@ public class Remote {
                   stop = true;
                for (int i=0; i<matches.length(); ++i) {
                   JSONObject j = matches.getJSONObject(i);
+                  // This code needed because in many cases isBottom/isTop not in result so would never stop
+                  if (i==0 && last != null && last.has("content")) {
+                     JSONObject c = last.getJSONArray("content").getJSONObject(0);
+                     if (c.has("contentId") && j.has("contentId") && c.getString("contentId").equals(j.getString("contentId")))
+                        stop = true;
+                  }
                   // Skip non episode matches
                   if (j.has("isEpisode") && ! j.getBoolean("isEpisode"))
                      continue;
@@ -2528,7 +2535,8 @@ public class Remote {
             } else {
                stop = true;
             }
-         }
+            last = result;
+         } // while
          if (seasons.size() > 0) {
             for (int season : seasons.keySet()) {
                if (season > maxSeason)
