@@ -739,8 +739,8 @@ public class SkipManager {
    
    public static synchronized void skipServiceBatch(String tivoName) {
       JSONArray skipData = SkipManager.getEntries();
-      if (skipData == null || skipData.length() == 0) {
-         log.error("No skip table data available - ignoring skip service request");
+      if (skipData == null) {
+         log.error("AutoSkip not configured");
          System.exit(1);
       }
       
