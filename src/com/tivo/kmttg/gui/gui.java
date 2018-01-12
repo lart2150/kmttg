@@ -1336,7 +1336,7 @@ public class gui extends Application {
             }
             
             JSONArray skipData = SkipManager.getEntries();
-            if (skipData == null || skipData.length() == 0) {
+            if (skipData == null) {
                log.warn("No skip table data available - ignoring skip service request");
                disableAutoSkipServiceItem(tivoName);
                config.autoskip_ServiceItems.put(tivoName, false);
