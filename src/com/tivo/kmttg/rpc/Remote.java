@@ -2514,12 +2514,18 @@ public class Remote {
                   if (j.has("originalAirYear"))
                      year = j.getInt("originalAirYear");
                   if (season > 0) {
-                     if (! seasons.containsKey(season))
-                        seasons.put(season, new Stack<Integer>());
-                     if (year > 0) {
-                        Stack<Integer> years_stack = seasons.get(season);
-                        years_stack.push(year);
-                        seasons.put(season, years_stack);
+                     if (season < 100) {
+                        // Assuming any season < 100 is an actual season rather than a Rovi year
+                        if (! seasons.containsKey(season))
+                           seasons.put(season, new Stack<Integer>());
+                        if (year > 0) {
+                           Stack<Integer> years_stack = seasons.get(season);
+                           years_stack.push(year);
+                           seasons.put(season, years_stack);
+                        }
+                     } else {
+                        // Rovi has some season numbers as years, so treat it as years
+                        years.put(season, new Stack<Integer>());
                      }
                   }
                   if (year > 0) {
