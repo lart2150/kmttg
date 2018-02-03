@@ -291,6 +291,9 @@ public class AutoSkip {
       }
       if (reply != null && reply.has("position")) {
          try {
+            // DEBUG log.print("reply=" + reply.toString(3));  // TODO
+            // DEBUG JSONObject w = r.Command("whatsOnSearch", new JSONObject());
+            // DEBUG log.print("w=" + w.toString(3));
             if (reply.has("speed")) {
                int speed = reply.getInt("speed");
                if (speed != 100)
