@@ -285,6 +285,20 @@ public class remotecontrol {
             }
          }
       });
+      
+      Button find_remote = new CustomButton("Find remote", "Find remote", null);
+      panel_controls.getChildren().add(find_remote);
+      find_remote.setLayoutX(500);
+      find_remote.setLayoutY(100);
+      find_remote.setOnAction(new EventHandler<ActionEvent>() {
+         public void handle(ActionEvent e) {
+            String tivoName = (String)tivo.getValue();
+            // Use telnet interface
+            log.print("Find remote pressed");
+            String[] sequence = new String[] {"FIND_REMOTE"};
+            new telnet(config.TIVOS.get(tivoName), sequence);
+         }
+      });
             
       // Other components for the panel      
       Label label = new Label("TiVo");
