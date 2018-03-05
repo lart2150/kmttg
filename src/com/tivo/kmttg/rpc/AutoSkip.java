@@ -204,8 +204,15 @@ public class AutoSkip {
          int pad_start = config.autoskip_padding_start;
          int pad_stop = config.autoskip_padding_stop;
          for (Hashtable<String,Long> h : skipData) {
-            if (pos >= (h.get("start")+pad_start) && pos <= (h.get("end")+pad_stop)) {
-               skip = false;
+            if (pad_start <= 0) {
+               if (pos >= (h.get("start")+pad_start) && pos <= (h.get("end")+pad_stop)) {
+                  skip = false;
+               }
+            } else {
+               // Can't use pad_start here when positive, else can double skip if user using D press
+               if (pos >= h.get("start") && pos <= (h.get("end")+pad_stop)) {
+                  skip = false;
+               }               
             }
          }
          // If pos < first end point then don't skip
