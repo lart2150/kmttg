@@ -176,7 +176,7 @@ public class qsfix extends baseTask implements Serializable {
             
             // Subsequent jobs need to have mpegFile && mpegFile_cut updated
             jobMonitor.updatePendingJobFieldValue(job, "mpegFile", job.mpegFile);
-            String mpegFile_cut = job.mpegFile_cut.replaceFirst("_cut.mpg", "_cut.ts");
+            String mpegFile_cut = job.mpegFile_cut.replaceFirst("_cut\\.mpg", "_cut.ts");
             jobMonitor.updatePendingJobFieldValue(job, "mpegFile_cut", mpegFile_cut);
             
             // Rename already created metadata file if relevant
