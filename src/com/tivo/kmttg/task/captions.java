@@ -45,7 +45,7 @@ public class captions extends baseTask implements Serializable {
    public captions(jobData job) {
       debug.print("job=" + job);
       if (job.videoFile.endsWith(".qsfix"))
-         job.videoFile = job.videoFile.replaceFirst(".qsfix", "");
+         job.videoFile = job.videoFile.replaceFirst("\\.qsfix", "");
       if (config.VrdReview_noCuts == 1) {
          // Look for VRD default edit file output
          if (! file.isFile(job.videoFile)) {
