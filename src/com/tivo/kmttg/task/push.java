@@ -87,7 +87,7 @@ public class push extends baseTask implements Serializable {
          String extensions[] = {".ts", ".mp4"};
          for (String ext : extensions) {
             String tryit = videoFile;
-            tryit = tryit.replaceFirst(".mpg", ext);
+            tryit = tryit.replaceFirst("\\.mpg", ext);
             if (file.isFile(tryit)) {
                videoFile = tryit;
                break;
