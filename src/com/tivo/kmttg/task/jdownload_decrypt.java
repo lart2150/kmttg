@@ -63,7 +63,7 @@ public class jdownload_decrypt extends baseTask implements Serializable {
       // Don't decrypt if mpegFile already exists
       if ( file.isFile(job.mpegFile) ) {
          if (job.offset != null) {
-            job.mpegFile = job.mpegFile.replaceFirst(".mpg", "(2).mpg");
+            job.mpegFile = job.mpegFile.replaceFirst("\\.mpg", "(2).mpg");
             log.warn("NOTE: Renaming mpeg file to avoid overwrite: " + job.mpegFile);
             jobMonitor.updatePendingJobFieldValue(job, "mpegFile", job.mpegFile);
          } else {
