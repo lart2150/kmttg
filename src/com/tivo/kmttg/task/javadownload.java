@@ -60,7 +60,7 @@ public class javadownload extends baseTask implements Serializable {
       Boolean schedule = true;
       if ( file.isFile(job.tivoFile) ) {
          if (job.offset != null) {
-            job.tivoFile = job.tivoFile.replaceFirst(".TiVo", "(2).TiVo");
+            job.tivoFile = job.tivoFile.replaceFirst("\\.TiVo", "(2).TiVo");
             log.warn("NOTE: Renaming TiVo file to avoid overwrite: " + job.tivoFile);
             jobMonitor.updatePendingJobFieldValue(job, "tivoFile", job.tivoFile);
          } else {
