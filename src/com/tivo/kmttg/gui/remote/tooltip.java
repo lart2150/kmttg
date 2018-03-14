@@ -751,6 +751,11 @@ public class tooltip {
          text = "<b>My Shows</b><br>";
          text += "My Shows (AKA Now Playing List).";
       }
+      else if (component.equals("Find remote")){
+         text = "<b>Find remote</b><br>";
+         text += "Make remote control play tune (for supported TiVo remote models only).<br>";
+         text += "NOTE: This uses telnet protocol only since there is no RPC equivalent.";
+      }
       else if (component.contains("SPS")) {
          text = util.SPS.get(component + "_tooltip");
       }
