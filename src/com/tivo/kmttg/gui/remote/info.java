@@ -121,6 +121,33 @@ public class info {
          }
       });
 
+      Button connectStatus = new Button("Connection Status");
+      connectStatus.setTooltip(tooltip.getToolTip("connectStatus"));
+      connectStatus.setOnAction(new EventHandler<ActionEvent>() {
+         public void handle(ActionEvent e) {
+            // Print net connect status for selected TiVo
+            String tivoName = tivo.getValue();
+            if (tivoName != null && tivoName.length() > 0) {
+               Remote r = config.initRemote(tivoName);
+               if (r.success) {
+                  try {
+                     JSONObject json = new JSONObject();
+                     json.put("bodyId", r.bodyId_get());
+                     JSONObject result = r.Command("phoneHomeStatusEventRegister", json);
+                     if (result != null) {
+                        text.setEditable(true);
+                        text.setText(result.toString(3));
+                        text.setEditable(false);                     
+                     }
+                  } catch (Exception ex) {
+                     log.error("connectStatus - " + ex.getMessage());
+                  }
+                  r.disconnect();
+               }
+            }
+         }
+      });
+
       reboot = new Button("Reboot");
       reboot.setTooltip(tooltip.getToolTip("reboot_info"));
       reboot.setOnAction(new EventHandler<ActionEvent>() {
@@ -153,6 +180,7 @@ public class info {
       row1.getChildren().add(util.space(40));
       row1.getChildren().add(refresh);
       row1.getChildren().add(netconnect);
+      row1.getChildren().add(connectStatus);
       row1.getChildren().add(util.space(40));
       row1.getChildren().add(reboot);
 
@@ -213,6 +241,47 @@ public class info {
                      }
 
                      if (! r.awayMode() ) {
+                        // More detailed info
+                        JSONObject j = new JSONObject();
+                        j.put("bodyId", r.bodyId_get());
+                        JSONObject response = r.Command("systemInformationGet", j);
+                        if (response != null) {
+                           String integers[] = {
+                              "remoteAddress", "recordingCapacityHdHours",
+                              "recordingCapacitySdHours", "freeDiskSpaceSdHours",
+                              "freeDiskSpaceHdHours"
+                           };
+                           String strings[] = {
+                              "internalTemperature",
+                              "zipCode", "remoteBatteryLevel", "activeVideoOutputFormat",
+                              "platform", "netflixEsn",
+                              "hdcpVersionInfo", "collabSliceVersion",
+                              "programInfoTo", "gcCompletionTime", "indexCompletionTime",
+                              "dialInCode", "serviceState", "serviceLevel", "serviceMapInfo",
+                           };
+                           String jsons[] = { "serviceConnectionInfo", "vcmConnectionInfo" };
+                           for (int i=0; i<strings.length; ++i) {
+                              if (response.has(strings[i]))
+                                 info += String.format(
+                                    "%-30s %s\n", strings[i], response.getString(strings[i])
+                                 );
+                           }                           
+                           for (int i=0; i<jsons.length; ++i) {
+                              if (response.has(jsons[i])) {
+                                 response.getJSONObject(jsons[i]).remove("type");
+                                 info += String.format(
+                                    "%s:\n%s\n", jsons[i], response.getJSONObject(jsons[i]).toString(3)
+                                 );
+                              }
+                           }                           
+                           for (int i=0; i<integers.length; ++i) {
+                              if (response.has(integers[i]))
+                                 info += String.format(
+                                    "%-30s %d\n", integers[i], response.getInt(integers[i])
+                                 );
+                           }
+                        }
+                        
                         // What's On info
                         String [] whatson = getWhatsOn(tivoName);
                         if (whatson != null) {
