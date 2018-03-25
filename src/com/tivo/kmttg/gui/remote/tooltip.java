@@ -586,6 +586,10 @@ public class tooltip {
          text = "<b>Network Connect</b><br>";
          text += "Start a Network Connection (call home) for selected TiVo.";
       }
+      else if (component.equals("connectStatus")){
+         text = "<b>Connection Status</b><br>";
+         text += "Print Network Connection (call home) status for selected TiVo.";
+      }
       else if (component.equals("reboot_info")){
          text = "<b>Reboot</b><br>";
          text += "Reboot selected TiVo. This button is a macro that directs selected DVR to<br>";
