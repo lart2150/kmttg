@@ -266,11 +266,10 @@ public class gui extends Application {
       Platform.runLater(new Runnable() {
          @Override public void run() {
             readSettings();               
+            // Enable/disable options according to configuration
+            refreshOptions(true);
          }
       });
-      
-      // Enable/disable options according to configuration
-      refreshOptions(true);
       
       // Create and enable/disable component tooltips
       MyTooltip.enableToolTips(config.toolTips);
