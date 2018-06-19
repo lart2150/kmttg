@@ -446,21 +446,30 @@ public class premiere {
             JSONArray existing = r.SeasonPasses(null);
             if (existing != null) {
                // Add special json entry to mark entries that already have season passes
-               String sp_title, entry_title;
+               String sp_id, entry_id;
                try {
                   for (int i=0; i<existing.length(); ++i) {
-                     sp_title = existing.getJSONObject(i).getString("title");
-                     for (int j=0; j<data.length(); ++j) {
-                        entry_title = data.getJSONObject(j).getString("title");
-                        if (sp_title.equals(entry_title)) {
-                           // Add flag to JSON object indicating it's already a scheduled SP on this TiVo
-                           if (data.getJSONObject(j).has("__SPscheduled__")) {
-                              data.getJSONObject(j).put("__SPscheduled__",
-                                 data.getJSONObject(j).getString("__SPscheduled__") +
-                                 ", " + tivoName
-                              );
-                           } else {
-                              data.getJSONObject(j).put("__SPscheduled__", tivoName);
+                     JSONObject sp_json = existing.getJSONObject(i);
+                     if (sp_json.has("idSetSource")) {
+                        JSONObject sp_source = sp_json.getJSONObject("idSetSource");
+                        if (sp_source.has("collectionId")) {
+                           sp_id = sp_source.getString("collectionId");
+                           for (int j=0; j<data.length(); ++j) {
+                              JSONObject entry_json = data.getJSONObject(j);
+                              if (entry_json.has("collectionId")) {
+                                 entry_id = entry_json.getString("collectionId");
+                                 if (sp_id.equals(entry_id)) {
+                                    // Add flag to JSON object indicating it's already a scheduled SP on this TiVo
+                                    if (data.getJSONObject(j).has("__SPscheduled__")) {
+                                       data.getJSONObject(j).put("__SPscheduled__",
+                                          data.getJSONObject(j).getString("__SPscheduled__") +
+                                          ", " + tivoName
+                                       );
+                                    } else {
+                                       data.getJSONObject(j).put("__SPscheduled__", tivoName);
+                                    }
+                                 }
+                              }
                            }
                         }
                      }
