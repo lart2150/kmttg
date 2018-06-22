@@ -1095,7 +1095,8 @@ public class jobMonitor {
          if (entry.containsKey("title")) {
             job.title = entry.get("title");
          }
-         submitNewJob(job);
+         if (! specs.containsKey("nodownload"))
+            submitNewJob(job);
       }
       
       if (metadataTivo) {
