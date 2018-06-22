@@ -163,6 +163,7 @@ public class gui extends Application {
    //private MenuItem pushesMenuItem = null;
    private MenuItem saveJobsMenuItem = null;
    private MenuItem loadJobsMenuItem = null;
+   private MenuItem metadataMenuItem = null;
    public MenuItem searchMenuItem = null;
    private MenuItem autoSkipMenuItem = null;
    private Menu autoSkipServiceMenu = null;
@@ -369,10 +370,10 @@ public class gui extends Application {
                   configureMenuItem.fire();
                   e.consume();
                }
-               /*if (e.getCode() == KeyCode.R) {
-                  resetServerMenuItem.fire();
-                  return true;
-               }*/
+               if (e.getCode() == KeyCode.R) {
+                  metadataMenuItem.fire();
+                  e.consume();
+               }
                if (e.getCode() == KeyCode.S) {
                   searchMenuItem.fire();
                   e.consume();
@@ -684,6 +685,7 @@ public class gui extends Application {
          //   fileMenu.getItems().add(getPushesMenuItem());
          fileMenu.getItems().add(getResumeDownloadsMenuItem());
          fileMenu.getItems().add(getJobMenu());
+         fileMenu.getItems().add(getMetadataMenuItem());
          fileMenu.getItems().add(getSearchMenuItem());
          if (config.rpcEnabled() && SkipManager.skipEnabled()) {
             fileMenu.getItems().add(getAutoSkipMenuItem());
@@ -1275,6 +1277,56 @@ public class gui extends Application {
          });
       }
       return backgroundJobDisableMenuItem;
+   }
+
+   private MenuItem getMetadataMenuItem() {
+      debug.print("");
+      if (metadataMenuItem == null) {
+         metadataMenuItem = new MenuItem();
+         metadataMenuItem.setText("Download Metadata");
+         metadataMenuItem.setAccelerator(KeyCombination.keyCombination("Ctrl+R"));
+         metadataMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
+               String tivoName = getSelectedTivoName();
+               nplTable nplTab = tivoTabs.get(tivoName).getTable();
+               int[] rows = nplTab.GetSelectedRows();
+               if (rows.length > 0) {
+                  int row;
+                  for (int i=0; i<rows.length; i++) {
+                     row = rows[i];
+                     Stack<Hashtable<String,Object>> entries = new Stack<Hashtable<String,Object>>();
+                     Stack<Hashtable<String,String>> rowData = nplTab.getRowData(row);
+                     for (int j=0; j<rowData.size(); ++j) {
+                        Hashtable<String,Object> h = new Hashtable<String,Object>();
+                        h.put("tivoName", tivoName);
+                        h.put("mode", "Download");
+                        h.put("nodownload", true);
+                        h.put("entry", rowData.get(j));
+                        entries.add(h);
+                     }
+                     
+                     // Launch metadata jobs
+                     for (int j=0; j<entries.size(); ++j) {
+                        Hashtable<String,Object> h = entries.get(j);
+                        h.put("metadata",     true);
+                        h.put("metadataTivo", false);
+                        h.put("decrypt",      false);
+                        h.put("qsfix",        false);
+                        h.put("twpdelete",    false);
+                        h.put("rpcdelete",    false);
+                        h.put("comskip",      false);
+                        h.put("comcut",       false);
+                        h.put("captions",     false);
+                        h.put("encode",       false);
+                        h.put("custom",       false);
+                        jobMonitor.LaunchJobs(h);
+                     }
+                  }
+               }
+            }
+         });
+      }
+      return metadataMenuItem;
    }
 
    private MenuItem getSearchMenuItem() {
