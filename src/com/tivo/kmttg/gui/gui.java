@@ -1288,6 +1288,10 @@ public class gui extends Application {
          metadataMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
                String tivoName = getSelectedTivoName();
+               if (tivoName == null) {
+                  log.error("Please select 1 or more shows in a TiVo tab for metadata creation command");
+                  return;
+               }
                nplTable nplTab = tivoTabs.get(tivoName).getTable();
                int[] rows = nplTab.GetSelectedRows();
                if (rows.length > 0) {
