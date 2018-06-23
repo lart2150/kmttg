@@ -2918,6 +2918,24 @@ public class Remote {
             }
          }
          
+         // If schedule == false and collectionId exists check for same collectionId
+         // If different collectionId then this should be new, not modify
+         if (! schedule) {
+            if (existingSP.has("idSetSource")) {
+               JSONObject sp_id = existingSP.getJSONObject("idSetSource");
+               if (sp_id.has("collectionId")) {
+                  if (json.has("collectionId")) {
+                     String sp_cid = sp_id.getString("collectionId");
+                     String json_cid = json.getString("collectionId");
+                     if (! sp_cid.equals(json_cid)) {
+                        schedule = true;
+                        existingSP = null;
+                     }
+                  }
+               }
+            }
+         }
+         
          // OK to subscribe
          class backgroundRun implements Runnable {
             Boolean schedule;
