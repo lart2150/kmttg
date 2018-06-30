@@ -118,7 +118,6 @@ public class configMain {
    private static CheckBox VrdCombineCutEncode = null;
    private static CheckBox VrdQsfixMpeg2ps = null;
    private static CheckBox VrdOneAtATime = null;
-   private static CheckBox TSDownload = null;
    private static CheckBox TivoWebPlusDelete = null;
    private static CheckBox rpcDelete = null;
    private static CheckBox rpcOld = null;
@@ -801,12 +800,6 @@ public class configMain {
       else
     	  VrdOneAtATime.setSelected(false);
       
-      // TSDownload
-      if (config.TSDownload == 1)
-         TSDownload.setSelected(true);
-      else
-         TSDownload.setSelected(false);
-      
       // TivoWebPlusDelete
       if (config.twpDeleteEnabled())
          TivoWebPlusDelete.setSelected(true);
@@ -1427,12 +1420,6 @@ public class configMain {
          config.VrdOneAtATime = 1;
       else
          config.VrdOneAtATime = 0;
-      
-      // TSDownload
-      if (TSDownload.isSelected())
-         config.TSDownload = 1;
-      else
-         config.TSDownload = 0;
       
       // TivoWebPlusDelete
       if (TivoWebPlusDelete.isSelected())
@@ -2274,7 +2261,6 @@ public class configMain {
       VrdCombineCutEncode = new CheckBox();
       VrdQsfixMpeg2ps = new CheckBox();
       VrdOneAtATime = new CheckBox();
-      TSDownload = new CheckBox();
       TivoWebPlusDelete = new CheckBox();
       rpcDelete = new CheckBox();
       rpcOld = new CheckBox();
@@ -2437,7 +2423,6 @@ public class configMain {
       VrdCombineCutEncode.setText("Combine Ad Cut & Encode");
       VrdQsfixMpeg2ps.setText("Force QS Fix output to always be mpeg2 Program Stream");
       VrdOneAtATime.setText("Only allow 1 VRD job at a time");
-      TSDownload.setText("Download TiVo files in Transport Stream format");
       TivoWebPlusDelete.setText("Enable TivoWebPlus Delete task");
       rpcDelete.setText("Enable rpc style delete task");
       rpcOld.setText("Use old RPC schema version for older TiVo software");
@@ -3285,45 +3270,41 @@ public class configMain {
       // rpcDelete
       program_options_panel.add(rpcDelete, 1, gy);
       
-      // TSDownload
-      gy++;
-      program_options_panel.add(TSDownload, 0, gy);
-      
-      // rpcOld
-      program_options_panel.add(rpcOld, 1, gy);
-      
       // download_time_estimate
       gy++;
       program_options_panel.add(download_time_estimate, 0, gy);
       
+      // rpcOld
+      program_options_panel.add(rpcOld, 1, gy);
+      
       // combine_download_decrypt
-      program_options_panel.add(combine_download_decrypt, 1, gy);
+      gy++;
+      program_options_panel.add(combine_download_decrypt, 0, gy);
       
       // single_download
-      gy++;
-      program_options_panel.add(single_download, 0, gy);
+      program_options_panel.add(single_download, 1, gy);
       
       // rpcnpl
-      program_options_panel.add(rpcnpl, 1, gy);
+      gy++;
+      program_options_panel.add(rpcnpl, 0, gy);
       
       // persistJobQueue
-      gy++;
-      program_options_panel.add(persistQueue, 0, gy);
+      program_options_panel.add(persistQueue, 1, gy);
       
       // comskip_review
-      program_options_panel.add(comskip_review, 1, gy);
+      gy++;
+      program_options_panel.add(comskip_review, 0, gy);
       
       // tivolibreDecrypt
-      gy++;
-      program_options_panel.add(tivolibreDecrypt, 0, gy);
+      program_options_panel.add(tivolibreDecrypt, 1, gy);
       
       // tivolibreCompat
-      program_options_panel.add(tivolibreCompat, 1, gy);
+      gy++;
+      program_options_panel.add(tivolibreCompat, 0, gy);
       
       if (config.OS.equals("windows")) {
-         gy++;
          // DsdDecrypt
-         program_options_panel.add(DsdDecrypt, 0, gy);
+         program_options_panel.add(DsdDecrypt, 1, gy);
       }
       
       // Visual Panel
@@ -3629,7 +3610,6 @@ public class configMain {
       VrdCombineCutEncode.setTooltip(getToolTip("VrdCombineCutEncode"));
       VrdQsfixMpeg2ps.setTooltip(getToolTip("VrdQsfixMpeg2ps"));
       VrdOneAtATime.setTooltip(getToolTip("VrdOneAtATime"));
-      TSDownload.setTooltip(getToolTip("TSDownload"));
       TivoWebPlusDelete.setTooltip(getToolTip("TivoWebPlusDelete"));
       rpcDelete.setTooltip(getToolTip("rpcDelete"));
       rpcOld.setTooltip(getToolTip("rpcOld"));

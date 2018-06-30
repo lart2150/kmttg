@@ -39,7 +39,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v2.4i";
+   public static String kmttg = "kmttg v2.4j";
    
    // encoding related
    public static String encProfDir = "";
@@ -1007,9 +1007,6 @@ public class config {
             if (key.equals("VrdOneAtATime")) {
             	VrdOneAtATime = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
              }
-            if (key.equals("TSDownload")) {
-               TSDownload = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
             if (key.equals("HideProtectedFiles")) {
                HideProtectedFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1391,8 +1388,6 @@ public class config {
          ofp.write("<VrdQsfixMpeg2ps>\n" + VrdQsfixMpeg2ps + "\n\n");
          
          ofp.write("<VrdOneAtATime>\n" + VrdOneAtATime + "\n\n");
-         
-         ofp.write("<TSDownload>\n" + TSDownload + "\n\n");
          
          ofp.write("<HideProtectedFiles>\n" + HideProtectedFiles + "\n\n");
          

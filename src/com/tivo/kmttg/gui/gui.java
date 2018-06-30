@@ -174,6 +174,7 @@ public class gui extends Application {
    private Label encoding_description_label = null;
    public Button start = null;
    public Button cancel = null;
+   public CheckBox TSdownload = null;
    public CheckBox metadata = null;
    public CheckBox decrypt = null;
    public CheckBox qsfix = null;
@@ -510,6 +511,18 @@ public class gui extends Application {
             }
          });
          
+         // Download option
+         TSdownload = new CheckBox("TS downloads"); TSdownload.setSelected(true);
+         TSdownload.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+               if (newValue)
+                  config.TSDownload = 1;
+               else
+                  config.TSDownload = 0;
+            }
+         });
+         
          // Tasks
          metadata = new CheckBox("metadata"); metadata.setSelected(false);
          decrypt = new CheckBox("decrypt"); decrypt.setSelected(true);        
@@ -535,6 +548,7 @@ public class gui extends Application {
          tasks_panel.setSpacing(5);
          tasks_panel.getChildren().add(start);
          tasks_panel.getChildren().add(util.space(5));
+         tasks_panel.getChildren().add(TSdownload);
          tasks_panel.getChildren().add(metadata);
          tasks_panel.getChildren().add(decrypt);
          tasks_panel.getChildren().add(qsfix);
@@ -1448,6 +1462,12 @@ public class gui extends Application {
    // Options are disabled when associated config entry is not setup
    public void refreshOptions(Boolean refreshProfiles) {
       debug.print("refreshProfiles=" + refreshProfiles);
+      
+      if (config.TSDownload == 1)
+         TSdownload.setSelected(true);
+      else
+         TSdownload.setSelected(false);
+
       if (config.VRD == 0 && ! file.isFile(config.ffmpeg)) {
          qsfix.setSelected(false);
          qsfix.setDisable(true);
@@ -1915,11 +1935,12 @@ public class gui extends Application {
             BufferedWriter ofp = new BufferedWriter(new FileWriter(config.gui_settings));            
             ofp.write("# kmttg gui preferences file\n");
             ofp.write("<GUI_LOOP>\n"            + config.GUI_LOOP            + "\n");
+            ofp.write("<TSdownload>\n"          + TSdownload_setting()       + "\n");
             ofp.write("<metadata>\n"            + metadata_setting()         + "\n");
             ofp.write("<decrypt>\n"             + decrypt_setting()          + "\n");
             ofp.write("<qsfix>\n"               + qsfix_setting()            + "\n");
             ofp.write("<twpdelete>\n"           + twpdelete_setting()        + "\n");
-            ofp.write("<rpcdelete>\n"          + rpcdelete_setting()       + "\n");
+            ofp.write("<rpcdelete>\n"           + rpcdelete_setting()        + "\n");
             ofp.write("<comskip>\n"             + comskip_setting()          + "\n");
             ofp.write("<comcut>\n"              + comcut_setting()           + "\n");
             ofp.write("<captions>\n"            + captions_setting()         + "\n");
@@ -2137,6 +2158,12 @@ public class gui extends Application {
             if (key.equals("GUI_LOOP")) {
                if (line.matches("1"))
                   loopInGuiMenuItem.setSelected(true);
+            }
+            if (key.equals("TSdownload")) {
+               if (line.matches("1"))
+                  TSdownload.setSelected(true);
+               else
+                  TSdownload.setSelected(false);
             }
             if (key.equals("metadata")) {
                if (line.matches("1"))
@@ -2590,6 +2617,7 @@ public class gui extends Application {
    // Component tooltip setup
    public void setToolTips() {
       debug.print("");
+      TSdownload.setTooltip(getToolTip("TSdownload"));
       metadata.setTooltip(getToolTip("metadata"));
       decrypt.setTooltip(getToolTip("decrypt"));
       qsfix.setTooltip(getToolTip("qsfix"));
@@ -2659,6 +2687,15 @@ public class gui extends Application {
       else if (component.equals("back")) {
          text =  "<b>Back</b><br>";
          text += "Exit folder view and return to top level Now Playing List for this TiVo.";
+      }
+      else if (component.equals("TSdownload")) {
+         text =  "<b>TS downloads</b><br>";
+         text += "If enabled then downloads from TiVo will be using Transport Stream<br>";
+         text += "contanier instead of mpeg2 Program Stream container.<br>";
+         text += "H.264 recordings <b>MUST</b> be downloaded as Transport Stream or<br>";
+         text += "else you will only get audio as part of the download.<br>";
+         text += "TS downloads can contain more glitches and <b>Resume Downloads</b><br>";
+         text += "don't work with TS downloads, so there are disadvantages to them.";
       }
       else if (component.equals("metadata")) {
          text =  "<b>metadata</b><br>";
@@ -2933,6 +2970,12 @@ public class gui extends Application {
    }
    
    // Returns state of checkbox options (as int for writing to auto.ini purposes)
+   public int TSdownload_setting() {
+      debug.print("");
+      int selected = 0;
+      if (TSdownload.isSelected()) selected = 1;
+      return selected;
+   }
    public int metadata_setting() {
       debug.print("");
       int selected = 0;
