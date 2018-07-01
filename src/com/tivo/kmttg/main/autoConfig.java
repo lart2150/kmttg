@@ -151,6 +151,8 @@ public class autoConfig {
                }
                if (name.matches("enabled"))
                   entry.enabled = Integer.parseInt(value);
+               if (name.matches("TSDownload"))
+                  entry.TSDownload = Integer.parseInt(value);
                if (name.matches("metadata"))
                   entry.metadata = Integer.parseInt(value);
                if (name.matches("decrypt"))

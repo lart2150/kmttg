@@ -27,6 +27,7 @@ public class autoEntry {
    
    // options
    public String tivo  = "all";
+   public int TSDownload = 0;
    public int metadata  = 0;
    public int decrypt   = 0;
    public int qsfix     = 0;

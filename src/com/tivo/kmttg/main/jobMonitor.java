@@ -722,6 +722,9 @@ public class jobMonitor {
 
       // Determine which actions are enabled
       String startFile     = (String)specs.get("startFile");
+      Integer TSDownload   = 0;
+      if (specs.containsKey("TSDownload"))
+         TSDownload = (Integer)specs.get("TSDownload");
       Boolean metadata     = (Boolean)specs.get("metadata");
       Boolean metadataTivo = (Boolean)specs.get("metadataTivo");
       Boolean decrypt      = (Boolean)specs.get("decrypt");
@@ -1045,6 +1048,7 @@ public class jobMonitor {
 
          // Download
          jobData job = new jobData();
+         job.TSDownload   = TSDownload;
          job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;

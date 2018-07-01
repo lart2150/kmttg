@@ -81,6 +81,7 @@ public class configAuto {
    private static ComboBox<String> encoding_name2 = null;
    private static TextField encoding_name2_suffix = null;
    private static CheckBox enabled = null;
+   private static CheckBox TSDownload = null;
    private static CheckBox metadata = null;
    private static CheckBox decrypt = null;
    private static CheckBox qsfix = null;
@@ -223,15 +224,16 @@ public class configAuto {
       
       title = new TextField();
             
-      enabled   = new CheckBox("enabled"); enabled.setSelected(true);
-      metadata  = new CheckBox("metadata");
-      decrypt   = new CheckBox("decrypt");
-      qsfix     = new CheckBox("QS Fix");
-      twpdelete = new CheckBox("TWP Delete");
-      rpcdelete = new CheckBox("rpc Delete");
-      comskip   = new CheckBox("Ad Detect");
-      comcut    = new CheckBox("Ad Cut");
-      captions  = new CheckBox("captions");
+      enabled    = new CheckBox("enabled"); enabled.setSelected(true);
+      TSDownload = new CheckBox("TS Downloads");
+      metadata   = new CheckBox("metadata");
+      decrypt    = new CheckBox("decrypt");
+      qsfix      = new CheckBox("QS Fix");
+      twpdelete  = new CheckBox("TWP Delete");
+      rpcdelete  = new CheckBox("rpc Delete");
+      comskip    = new CheckBox("Ad Detect");
+      comcut     = new CheckBox("Ad Cut");
+      captions   = new CheckBox("captions");
       qsfix.setOnAction(new EventHandler<ActionEvent>() {
          // Call refreshOptions whenever this is toggled
          public void handle(ActionEvent e) {
@@ -350,7 +352,7 @@ public class configAuto {
       // row4
       HBox row4 = new HBox();
       row4.setSpacing(5);
-      row4.getChildren().addAll(metadata, decrypt, qsfix);
+      row4.getChildren().addAll(TSDownload, metadata, decrypt, qsfix);
       if (config.twpDeleteEnabled()) {
          row4.getChildren().add(twpdelete);         
       }
@@ -454,6 +456,7 @@ public class configAuto {
    // Component tooltip setup
    public void setToolTips() {
       enabled.setTooltip(getToolTip("enabled"));
+      TSDownload.setTooltip(config.gui.getToolTip("TSDownload"));
       metadata.setTooltip(config.gui.getToolTip("metadata"));
       decrypt.setTooltip(config.gui.getToolTip("decrypt"));
       qsfix.setTooltip(config.gui.getToolTip("qsfix"));
@@ -993,6 +996,7 @@ public class configAuto {
                ofp.write("<options>\n");
                ofp.write("enabled "             + entry.enabled             + "\n");
                ofp.write("tivo "                + entry.tivo                + "\n");
+               ofp.write("TSDownload "          + entry.TSDownload          + "\n");               
                ofp.write("metadata "            + entry.metadata            + "\n");               
                ofp.write("decrypt "             + entry.decrypt             + "\n");               
                ofp.write("qsfix "               + entry.qsfix               + "\n");               
@@ -1044,6 +1048,7 @@ public class configAuto {
    // This will update component settings according to selected row data
    private void TableRowSelected(autoEntry entry) {
       enabled.setSelected((Boolean)(entry.enabled == 1));
+      TSDownload.setSelected((Boolean)(entry.TSDownload == 1));
       metadata.setSelected((Boolean)(entry.metadata == 1));
       decrypt.setSelected((Boolean)(entry.decrypt == 1));
       qsfix.setSelected((Boolean)(entry.qsfix == 1));
@@ -1103,6 +1108,11 @@ public class configAuto {
          entry.enabled = 1;
       else
          entry.enabled = 0;
+      
+      if (TSDownload.isSelected())
+         entry.TSDownload = 1;
+      else
+         entry.TSDownload = 0;
       
       if (metadata.isSelected())
          entry.metadata = 1;

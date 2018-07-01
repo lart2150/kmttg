@@ -105,7 +105,7 @@ public class javadownload extends baseTask implements Serializable {
          job.url = string.addPort(job.url, wan_port);
       
       String url = job.url;
-      if (config.TSDownload == 1 || job.TSDownload == 1) {
+      if (job.TSDownload == 1) {
          if (job.offset == null)
             url += "&Format=video/x-tivo-mpeg-ts";
          else

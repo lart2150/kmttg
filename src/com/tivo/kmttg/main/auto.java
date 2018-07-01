@@ -561,12 +561,13 @@ public class auto {
       h.put("tivoName", tivoName);
       h.put("mode", "Download");
       h.put("entry",               entry);   
+      h.put("TSDownload",          auto.TSDownload);
       h.put("metadata",            (Boolean)(auto.metadata  == 1));
       h.put("metadataTivo",        false);
       h.put("decrypt",             (Boolean)(auto.decrypt   == 1));
       h.put("qsfix",               (Boolean)(auto.qsfix     == 1));
       h.put("twpdelete",           (Boolean)(auto.twpdelete == 1 && config.twpDeleteEnabled()));
-      h.put("rpcdelete",          (Boolean)(auto.rpcdelete == 1 && config.rpcEnabled(tivoName)));
+      h.put("rpcdelete",           (Boolean)(auto.rpcdelete == 1 && config.rpcEnabled(tivoName)));
       h.put("comskip",             (Boolean)(auto.comskip   == 1));
       h.put("comcut",              (Boolean)(auto.comcut    == 1));
       h.put("captions",            (Boolean)(auto.captions  == 1));
@@ -806,6 +807,7 @@ public class auto {
             ofp.write("<options>\n");
             ofp.write("enabled "     + "1"                            + "\n");
             ofp.write("tivo "        + "all"                          + "\n");
+            ofp.write("TSDownload "  + config.gui.TSdownload_setting() + "\n");
             ofp.write("metadata "    + config.gui.metadata_setting()  + "\n");
             ofp.write("decrypt "     + config.gui.decrypt_setting()   + "\n");
             ofp.write("qsfix "       + config.gui.qsfix_setting()     + "\n");
