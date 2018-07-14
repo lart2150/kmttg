@@ -183,6 +183,8 @@ public class configMain {
    private static TextField download_delay = null;
    private static TextField autoskip_padding_start = null;
    private static TextField autoskip_padding_stop = null;
+   private static TextField autoskip_chan_off = null;
+   private static TextField autoskip_chan_on = null;
    private static TextField metadata_entries = null;
    private static TextField httpserver_port = null;
    private static TextField httpserver_cache = null;
@@ -1009,6 +1011,12 @@ public class configMain {
       
       // autoskip_padding_stop
       autoskip_padding_stop.setText("" + config.autoskip_padding_stop);
+      
+      // autoskip_chan_off
+      autoskip_chan_off.setText("" + config.autoskip_chan_off);
+      
+      // autoskip_chan_off
+      autoskip_chan_on.setText("" + config.autoskip_chan_on);
       
       // metadata_entries
       metadata_entries.setText("" + config.metadata_entries);
@@ -2011,6 +2019,22 @@ public class configMain {
          config.autoskip_padding_stop = 0;
       }
       
+      // autoskip_chan_off
+      value = string.removeLeadingTrailingSpaces(autoskip_chan_off.getText());
+      if (value.length() > 0) {
+         config.autoskip_chan_off = value;
+      } else {
+         config.autoskip_chan_off = "0";
+      }
+      
+      // autoskip_chan_on
+      value = string.removeLeadingTrailingSpaces(autoskip_chan_on.getText());
+      if (value.length() > 0) {
+         config.autoskip_chan_on = value;
+      } else {
+         config.autoskip_chan_on = "1";
+      }
+      
       // autoLogSizeMB
       value = string.removeLeadingTrailingSpaces(autoLogSizeMB.getText());
       if (value.length() > 0) {
@@ -2200,6 +2224,8 @@ public class configMain {
       download_delay = new TextField(); download_delay.setPrefWidth(15);
       autoskip_padding_start = new TextField(); autoskip_padding_start.setPrefWidth(15);
       autoskip_padding_stop = new TextField(); autoskip_padding_stop.setPrefWidth(15);
+      autoskip_chan_off = new TextField(); autoskip_chan_off.setPrefWidth(15);
+      autoskip_chan_on = new TextField(); autoskip_chan_on.setPrefWidth(15);
       metadata_entries = new TextField(); metadata_entries.setPrefWidth(15);
       httpserver_port = new TextField(); httpserver_port.setPrefWidth(15);
       httpserver_cache = new TextField(); httpserver_cache.setPrefWidth(15);
@@ -2306,6 +2332,8 @@ public class configMain {
       Label download_delay_label = new Label();
       Label autoskip_padding_start_label = new Label();
       Label autoskip_padding_stop_label = new Label();
+      Label autoskip_chan_off_label = new Label();
+      Label autoskip_chan_on_label = new Label();
       Label metadata_entries_label = new Label();
       Label httpserver_port_label = new Label();
       Label httpserver_cache_label = new Label();
@@ -2470,6 +2498,8 @@ public class configMain {
       download_delay_label.setText("start delay in seconds for download tasks");
       autoskip_padding_start_label.setText("AutoSkip start point padding in msecs");
       autoskip_padding_stop_label.setText("AutoSkip end point padding in msecs");
+      autoskip_chan_off_label.setText("AutoSkip service disable channel");
+      autoskip_chan_on_label.setText("AutoSkip service enable channel");
       metadata_entries_label.setText("extra metadata entries (comma separated)");
       httpserver_port_label.setText("web server port");
       httpserver_cache_label.setText("web server cache dir");
@@ -3043,6 +3073,14 @@ public class configMain {
       gy++;
       autoskip_panel.add(autoskip_padding_stop_label, 0, gy);
       autoskip_panel.add(autoskip_padding_stop, 1, gy);
+      
+      gy++;
+      autoskip_panel.add(autoskip_chan_off_label, 0, gy);
+      autoskip_panel.add(autoskip_chan_off, 1, gy);
+      
+      gy++;
+      autoskip_panel.add(autoskip_chan_on_label, 0, gy);
+      autoskip_panel.add(autoskip_chan_on, 1, gy);
       
       // Files panel
       GridPane files_panel = new GridPane();      
@@ -3674,6 +3712,8 @@ public class configMain {
       autoskip_jumpToEnd.setTooltip(getToolTip("autoskip_jumpToEnd"));
       autoskip_padding_start.setTooltip(getToolTip("autoskip_padding_start"));
       autoskip_padding_stop.setTooltip(getToolTip("autoskip_padding_stop"));
+      autoskip_chan_off.setTooltip(getToolTip("autoskip_chan_off"));
+      autoskip_chan_on.setTooltip(getToolTip("autoskip_chan_on"));
       metadata_entries.setTooltip(getToolTip("metadata_entries"));
       httpserver_port.setTooltip(getToolTip("httpserver_port"));
       httpserver_cache.setTooltip(getToolTip("httpserver_cache"));
@@ -4469,6 +4509,19 @@ public class configMain {
          text += "=> Use negative value if you want to end sooner (more likely to end in show).<br>";
          text += "If using AutoSkip from SkipMode often a negative value is appropriate here if you<br>";
          text += "find you are getting too many starts of commercials during AutoSkip play.";
+      }
+      else if (component.equals("autoskip_chan_off")) {
+         text =  "<b>AutoSkip service disable channel</b><br>";
+         text += "With AutoSkip service enabled you can tune to this channel in live TV to<br>";
+         text += "suspend AutoSkip service from a TiVo. This does not disable AutoSkip<br>";
+         text += "service in kmttg, but suspends AutoSkip service functionality which<br>";
+         text += "can be resumed again by tuning to configured <b>AutoSkip service enable channel</b>.";
+      }
+      else if (component.equals("autoskip_chan_on")) {
+         text =  "<b>AutoSkip service enable channel</b><br>";
+         text += "With AutoSkip service enabled you can tune to this channel in live TV to<br>";
+         text += "resume AutoSkip service from a TiVo. This resumes AutoSkip service that was<br>";
+         text += "previously suspended by tuning to configured <b>AutoSkip service disable channel</b>.";
       }
       else if (component.equals("autoLogSizeMB")) {
          text = "<b>auto log file size limit (MB)</b><br>";

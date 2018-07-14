@@ -151,17 +151,17 @@ public class SkipService {
                   if (what.has("channelIdentifier")) {
                      JSONObject chan = what.getJSONObject("channelIdentifier");
                      if (chan.has("channelNumber")) {                        
-                        if (chan.getString("channelNumber").equals("0")) {
+                        if (chan.getString("channelNumber").equals(config.autoskip_chan_off)) {
                            if (enabled) {
-                              // Disable if live TV tuned to channel 0
+                              // Disable if live TV tuned to autoskip_chan_off channel
                               enabled = false;
                               print("monitor disabled");
                               return;
                            }
                         }
-                        if (chan.getString("channelNumber").equals("1")) {
+                        if (chan.getString("channelNumber").equals(config.autoskip_chan_on)) {
                            if (! enabled) {
-                              // Re-enable if live TV tuned to channel 1
+                              // Re-enable if live TV tuned to autoskip_chan_on channel
                               enabled = true;
                               print("monitor re-enabled");
                            }

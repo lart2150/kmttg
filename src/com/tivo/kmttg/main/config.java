@@ -244,6 +244,8 @@ public class config {
    public static int autoskip_padding_stop = 0; // NOTE: time is stored in msecs
    public static int autoskip_batch_standby = 0;
    public static int autoskip_indicate_skip = 0;
+   public static String autoskip_chan_off = "0";
+   public static String autoskip_chan_on = "1";
    public static Hashtable<String,Boolean> autoskip_ServiceItems = new Hashtable<String,Boolean>();
    public static Boolean visualDetect_running = false;
    
@@ -1215,6 +1217,12 @@ public class config {
             if (key.equals("autoskip_indicate_skip")) {
                autoskip_indicate_skip = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
+            if (key.equals("autoskip_chan_off")) {
+               autoskip_chan_off = string.removeLeadingTrailingSpaces(line);
+            }
+            if (key.equals("autoskip_chan_on")) {
+               autoskip_chan_on = string.removeLeadingTrailingSpaces(line);
+            }
             if (key.equals("autoskip_jumpToEnd")) {
                autoskip_jumpToEnd = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
             }
@@ -1511,6 +1519,10 @@ public class config {
          ofp.write("<autoskip_batch_standby>\n" + autoskip_batch_standby + "\n\n");
          
          ofp.write("<autoskip_indicate_skip>\n" + autoskip_indicate_skip + "\n\n");
+         
+         ofp.write("<autoskip_chan_off>\n" + autoskip_chan_off + "\n\n");
+         
+         ofp.write("<autoskip_chan_on>\n" + autoskip_chan_on + "\n\n");
          
          ofp.write("<autoskip_jumpToEnd>\n" + autoskip_jumpToEnd + "\n\n");
          
