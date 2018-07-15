@@ -497,6 +497,19 @@ public class Remote {
             json.put("parameters", parameters);
             req = RpcRequest("uiNavigate", false, json);
          }
+         else if (type.equals("Playgroup")) {
+            // Play a group of recordings
+            // Expects "id" jsonArray
+            json.put("uri", "x-tivo:classicui:playback");
+            JSONObject parameters = new JSONObject();
+            parameters.put("fUseTrioId", "true");
+            parameters.put("recordingId", json.getJSONArray("id"));
+            parameters.put("iCurrentRecording", 0);
+            parameters.put("fHideBannerOnEnter", "false");
+            json.remove("id");
+            json.put("parameters", parameters);
+            req = RpcRequest("uiNavigate", false, json);
+         }
          else if (type.equals("Flash")) {
             // Run a flash swf (ActionScript 2)
             // Expects swf uri in json.

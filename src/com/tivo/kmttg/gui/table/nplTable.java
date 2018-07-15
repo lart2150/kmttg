@@ -628,19 +628,38 @@ public class nplTable extends TableMap {
             
             if (keyCode == KeyCode.P) {
                // P key has special action
-               sortableDate s = getFirstSelected(); if (s == null) return;
-               if ( ! s.folder ) {
-                  // Play individual show
-                  if (config.rpcEnabled(tivoName)) {
-                     String id = rnpl.findRecordingId(tivoName, s.data);
-                     if (id != null) {
-                        // Use rpc remote protocol to play given item
+               if (config.rpcEnabled(tivoName)) {
+                  int[] rows = GetSelectedRows();
+                  if (rows == null) return;
+                  JSONArray ids = new JSONArray();
+                  Stack<String> titles = new Stack<String>();
+                  for (int i=0; i<rows.length; ++i) {
+                     int row = rows[i];
+                     sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+                     if (s.folder) {
+                        // NOTE: Do this backwards as usually most recent is 1st
+                        for (int j=s.folderData.size()-1; j>=0; j--) {
+                           Hashtable<String,String> entry = s.folderData.get(j);
+                           String id = rnpl.findRecordingId(tivoName, entry);
+                           if (id != null)
+                              ids.put(id);
+                           String title = "";
+                           if (entry.containsKey("title"))
+                              title = entry.get("title");
+                           titles.add(title);
+                        }
+                     } else {
+                        String id = rnpl.findRecordingId(tivoName, s.data);
+                        if (id != null)
+                           ids.put(id);
                         String title = "";
                         if (s.data.containsKey("title"))
-                           title += s.data.get("title");
-                        log.warn("Playing show on TiVo '" + tivoName + "': " + title);
-                        PlayShow(id);
+                           title = s.data.get("title");
+                        titles.add(title);
                      }
+                  }
+                  if (ids.length() > 0) {
+                     PlayShow(ids, titles);
                   }
                }
             } // if keyCode == KeyCode.P            
@@ -1519,14 +1538,27 @@ public class nplTable extends TableMap {
       return deleted;
    }
    
-   private void PlayShow(String id) {
+   private void PlayShow(JSONArray ids, Stack<String> titles) {
       JSONObject json = new JSONObject();
       try {
-         json.put("id", id);
-         Remote r = config.initRemote(tivoName);
-         if (r.success) {
-            r.Command("Playback", json);
-            r.disconnect();
+         if (ids.length() == 1) {
+            log.warn("Playing show on TiVo '" + tivoName + "': " + titles.get(0));
+            json.put("id", ids.get(0));
+            Remote r = config.initRemote(tivoName);
+            if (r.success) {
+               r.Command("Playback", json);  
+               r.disconnect();
+            }
+         } else {
+            log.warn("Playing group of shows on TiVo '" + tivoName + "':");
+            for (int i=0; i<titles.size(); ++i)
+               log.warn(titles.get(i));
+            json.put("id", ids);
+            Remote r = config.initRemote(tivoName);
+            if (r.success) {
+               r.Command("Playgroup", json);  
+               r.disconnect();
+            }
          }
       } catch (JSONException e) {
          log.print("PlayShow failed - " + e.getMessage());
