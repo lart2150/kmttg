@@ -544,8 +544,10 @@ public class rnpl {
       String message = "";
       try {
          if (json.has("startTime") && json.has("duration")) {
-            String start = jsonTimeToLocalTime(json.getString("startTime"), 0);
-            String stop = jsonTimeToLocalTime(json.getString("startTime"), json.getLong("duration"));
+            long start_long = TableUtil.getStartTime(json);
+            long stop_long = TableUtil.getEndTime(json);
+            String start = longTimeToString(start_long);
+            String stop = longTimeToString(stop_long);
             message += start + "-" + stop + " -- ";
          }
          if(json.has("title"))
@@ -565,10 +567,15 @@ public class rnpl {
       return message;
    }
    
-   private static String jsonTimeToLocalTime(String jsonTime, long offset) {
+   /*private static String jsonTimeToLocalTime(String jsonTime, long offset) {
       long gmt = TableUtil.getLongDateFromString(jsonTime) + offset*1000;
       SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy hh:mm a");
       return sdf.format(gmt);
+   }*/
+   
+   private static String longTimeToString(long t) {
+      SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy hh:mm a");
+      return sdf.format(t);
    }
    
    // Dump JSON contents to message window as 1 line per key/value pair
