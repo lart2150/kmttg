@@ -667,8 +667,8 @@ public class SkipManager {
                log.warn("No entries found for processing AutoSkip from SkipMode");
             } else {
                log.print("" + stack.size() + " entries found to process for AutoSkip from SkipMode:");
-               if (skipEnabled() && config.autoskip_prune == 1)
-                  pruneEntries(tivoName, stack);
+               //if (skipEnabled() && config.autoskip_prune == 1)
+               //   pruneEntries(tivoName, stack);
                for (Hashtable<String,String> e : stack)
                   log.print("   " + e.get("title"));
                visualDetect(tivoName, stack, false);
