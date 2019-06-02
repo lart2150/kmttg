@@ -21,7 +21,6 @@ package com.tivo.kmttg.httpserver;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,16 +36,44 @@ import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.util.createMeta;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.ffmpeg;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.mediainfo;
+import com.tivo.kmttg.util.parseNPL;
 import com.tivo.kmttg.util.string;
 
 public class kmttgServer extends HTTPServer {
    private Stack<Transcode> transcodes = new Stack<Transcode>();
    public int transcode_counter = 0;
+   
+   /** Calls HTTPServer.addContentType for all the video file types important to kmttg.
+    * You can call getContentType with a file or path to get the registered content type. */
+   private static void addVideoContentTypes() {
+       // moyekj added these
+       addContentType("application/x-mpegurl", "m3u8");
+       addContentType("video/webm", "webm");
+       
+       // all Hlsutils.isVideoFile suffixes:
+       addContentType("video/mp4", "mp4"); // type per Internet
+       addContentType("video/mpeg", "mpeg");
+       addContentType("video/mpeg", "vob"); // another mpeg suffix per Internet
+       addContentType("video/mpeg", "mpg");
+       addContentType("video/mpeg", "mpeg2");
+       addContentType("video/mpeg", "mp2");
+       addContentType("video/x-msvideo", "avi"); // type per Internet
+       addContentType("video/x-ms-wmv", "wmv"); // type per Internet
+       addContentType("video/x-ms-asf", "asf"); // likely type per Internet
+       addContentType("video/x-matroska", "mkv"); // likely type per Internet
+       addContentType("video/mpeg", "tivo"); // type choice for streaming TO a tivo - makes it pass the "playable" test and TiVo does the rest.
+       addContentType("video/mp4", "m4v"); // likely type per Internet
+       addContentType("video/3gpp", "3gp"); // type per Internet
+       addContentType("video/quicktime", "mov"); // type per Internet
+       addContentType("video/x-flv", "flv"); // type per Internet
+       addContentType("video/MP2T", "ts"); // type per Internet, but this is likely a ts-transferred mp4
+   }
    
    public kmttgServer() {
       try {
@@ -56,6 +83,7 @@ public class kmttgServer extends HTTPServer {
             return;
          }
          config.httpserver = new kmttgServer(config.httpserver_port);
+         addVideoContentTypes();
          config.httpserver_cache_relative = "/web/cache/";
          VirtualHost host = config.httpserver.getVirtualHost(null);
          host.setAllowGeneratedIndex(true);
@@ -126,9 +154,14 @@ public class kmttgServer extends HTTPServer {
       
       // Get list of video files in kmttg video places
       if (path.equals("/getVideoFiles")) {
-         handleVideoFiles(resp);
+         handleVideoFiles(resp, false);
          return;
       }
+      // list video file name and array of related suffixes.
+      if (path.equals("/getVideoFileDetails")) {
+          handleVideoFiles(resp, true);
+          return;
+       }
       
       // Get list of browser shares
       if (path.equals("/getBrowserShares")) {
@@ -166,6 +199,12 @@ public class kmttgServer extends HTTPServer {
          return;
       }
       
+      // start a single FILES/filename or tivo/json job
+      if (path.equals("/startJob")) {
+          startJob(req, resp);
+          return;
+      }
+      
       // This is normal/default handling
       ContextHandler handler = req.getVirtualHost().getContext(path);
       if (handler == null) {
@@ -196,11 +235,12 @@ public class kmttgServer extends HTTPServer {
       if (params.containsKey("operation") && params.containsKey("tivo")) {
          try {
             String operation = params.get("operation");
-            String tivo = string.urlDecode(params.get("tivo"));
+            // params is already url decoded. decoding again would convert any literal "+" to a space and have issues for any literal "%".
+            String tivo = params.get("tivo");
             
             if (operation.equals("keyEventMacro")) {
                // Special case
-               String sequence = string.urlDecode(params.get("sequence"));
+               String sequence = params.get("sequence");
                String[] s = sequence.split(" ");
                Remote r = new Remote(tivo);
                if (r.success) {
@@ -253,7 +293,7 @@ public class kmttgServer extends HTTPServer {
             
             if (operation.equals("SPLoad")) {
                // Special case
-               String fileName = string.urlDecode(params.get("file"));
+               String fileName = params.get("file");
                JSONArray a = JSONFile.readJSONArray(fileName);
                if ( a != null ) {
                   resp.send(200, a.toString());
@@ -266,7 +306,7 @@ public class kmttgServer extends HTTPServer {
             // General purpose remote operation
             JSONObject json;
             if (params.containsKey("json"))
-               json = new JSONObject(string.urlDecode(params.get("json")));
+               json = new JSONObject(params.get("json"));
             else
                json = new JSONObject();
             Remote r = new Remote(tivo);
@@ -310,6 +350,10 @@ public class kmttgServer extends HTTPServer {
                json.put("rpc", 1);
             else
                json.put("rpc", 0);
+            if (config.nplCapable(tivoName))
+                json.put("npl", 1);
+             else
+                json.put("npl", 0);
             a.put(json);
          }
          resp.send(200, a.toString());
@@ -336,7 +380,7 @@ public class kmttgServer extends HTTPServer {
    }
    
    // Return list of video files known to kmttg
-   public void handleVideoFiles(Response resp) throws IOException {
+   public void handleVideoFiles(Response resp, boolean addDetails) throws IOException {
       // LinkedHashMap is used to keep hash keys unique
       LinkedHashMap<String,Integer> dirs = new LinkedHashMap<String,Integer>();
       if (config.httpserver_shares.isEmpty()) {
@@ -351,20 +395,224 @@ public class kmttgServer extends HTTPServer {
             dirs.put(config.httpserver_shares.get(dir), 1);
          }
       }
-      LinkedHashMap<String,Integer> h = new LinkedHashMap<String,Integer>();
+      LinkedHashMap<String,JSONArray> h = new LinkedHashMap<String,JSONArray>();
       for (String dir : dirs.keySet())
          getVideoFiles(dir, h);
       JSONArray a = new JSONArray();
-      for (String key : h.keySet()) {
-         a.put(key);
+      if(addDetails) {
+    	  try {
+		      for (String key : h.keySet()) {
+	            JSONObject json = new JSONObject();
+	            json.put("videoFile", key);
+	            
+	            // add some details from the metadata
+                String encodeFile = key;
+// from gui.tivotab.atomiccb:
+                String metaFile = encodeFile + ".txt";
+                if ( ! file.isFile(metaFile) ) {
+                   metaFile = string.replaceSuffix(encodeFile, "_cut.mpg.txt");
+                }
+                if ( ! file.isFile(metaFile) ) {
+                   metaFile = string.replaceSuffix(encodeFile, ".mpg.txt");
+                }
+                if ( ! file.isFile(metaFile) ) {
+                   metaFile = string.replaceSuffix(encodeFile, ".TiVo.txt");
+                }
+        		if (file.isFile(metaFile)) {
+	                addMetaToVideoFile(json, metaFile);
+        		}
+                
+	            json.put("size", file.size(key));
+	            
+	            String url = getShareUrlForPath(key);
+	            if(url != null) {
+	            	json.put("sharePath", url);
+	            }
+	            if(url != null) {
+	            	json.put("format", getContentType(key, null));
+	            }
+	            if(h.get(key).length() > 0) {
+	            	json.put("suffixes", h.get(key));
+	            }
+		        a.put(json);
+			  }
+          } catch (JSONException e) {
+              resp.sendError(500, "handleVideoFiles - Error providing detailed files list");
+              log.error("handleVideoFiles - " + e.getMessage());
+          }
+      } else {
+	      for (String key : h.keySet()) {
+	         a.put(key);
+	      }
       }
       resp.send(200, a.toString());
    }
+
+   /** 
+    * Import metaFile data (using createMeta.readMetaFile) 
+    * into the VideoFile JSON object in fields equivalent to a Recording
+    */
+	private void addMetaToVideoFile(JSONObject json, String metaFile) throws JSONException {
+		if (file.isFile(metaFile)) {
+			// directly mapped fields.
+			Hashtable<String, String> metaToRecording = new Hashtable<String, String>();
+		/* Stack<String> names:
+		       "vActor", "vDirector", "vExecProducer", "vProducer",
+		       "vProgramGenre", "vSeriesGenre", "vAdvisory", "vHost",
+		       "vGuestStar", "vWriter", "vChoreographer"
+		 */
+		/* metadata example:
+		title : 
+		seriesTitle : (same as title)
+		description :  
+		time : 2019-03-03T13:00:00Z
+		mpaaRating : G1
+		isEpisode : true
+		iso_duration : PT29M57S
+		originalAirDate : 2018-04-07T00:00:00Z
+		episodeTitle : Divide
+		isEpisodic : true
+		showingBits : 4641
+		tvRating : x1
+		displayMajorNumber : 1715
+		callsign : DISNEYHD-E
+		seriesId : SH0325106442
+		programId : EP0325106442-0387057061
+		 */
+			metaToRecording.put("title", "title"); // actually this is seriesTitle + episodeTitle per pytivo docs.
+		 	metaToRecording.put("episodeTitle", "subtitle");
+		 	metaToRecording.put("seriesTitle", "collectionTitle");
+			metaToRecording.put("description", "description");
+			metaToRecording.put("seriesId", "__SeriesId__");
+			metaToRecording.put("programId", "partnerCollectionId");
+			metaToRecording.put("starRating", "starRating"); // wrong format e.g. x6 instead of 4.0 or four
+			// should be an integer, not a string, but handles it fine.
+			metaToRecording.put("movieYear", "movieYear");
+			//episodeNumber // season + episode in a single number.
+			//metaToRecording.put("time", "startTime");// - wrong format (T->space Z->timezone convert time?))
+			metaToRecording.put("originalAirDate", "originalAirdate");// - wrong format (need to drop T00:00:00Z)
+			metaToRecording.put("tvRating", "tvRating"); // "x1" format, though
+			metaToRecording.put("mpaaRating", "mpaaRating"); // "G1" format, though
+			//Boolean("isEpisodic") -> "episodic"
+			//iso_duration -> int duration
+			/*
+	colorCode
+	This is shown on the Details screen. It uses the second character to determine the color mode. The list is as follows:
+	
+	x1 = B & W
+	x2 = Color and B & W
+	x3 = Colorized
+	x4 = Color Series
+			 */
+			
+			Hashtable<String, Object> meta = createMeta.readMetaFile(metaFile);
+			for(String metaKey : meta.keySet()) {
+				String jsonKey = metaToRecording.get(metaKey);
+				if(jsonKey != null) {
+					Object value = meta.get(metaKey);
+					if(value instanceof String) {
+						String val = (String)value;
+						json.put(jsonKey, val);
+					} else if(value instanceof Stack<?>) {
+						JSONArray vals = new JSONArray();
+						@SuppressWarnings("unchecked")
+						Stack<String> stack = (Stack<String>) value;
+						for(String val : stack) {
+							vals.put(val);
+						}
+						json.put(jsonKey, vals);
+					}
+				}
+			}
+			try {
+				//"displayMajorNumber",  // channel number
+				//"displayMinorNumber", // *-x channel subnumber most likely
+				//"callsign"
+			   if(meta.get("callsign") != null) {
+				   JSONObject channel = new JSONObject();
+				//metaToRecording.put("displayMajorNumber", "channel"); // channel number
+				//metaToRecording.put("displayMinorNumber", "channel"); // *-x channel subnumber most likely
+				   if(meta.get("displayMajorNumber") != null) {
+					   if(meta.get("displayMinorNumber") != null) {
+						   channel.put("channelNumber", meta.get("displayMajorNumber")+"-"+meta.get("displayMinorNumber"));
+					   } else {
+						   channel.put("channelNumber", meta.get("displayMajorNumber"));
+					   }
+				   }
+				   channel.put("name", meta.get("callsign"));
+				   channel.put("callSign", meta.get("callsign"));
+				   
+				   json.put("channel", channel);
+			   }
+			} catch(Exception e) { }
+			try {
+				long bits = Long.parseLong(String.valueOf(meta.get("showingBits")));
+				// per Pytivo docs:
+				/*
+				This tells the TiVo to display various combinations things in parentheses at the end of the description. It only accepts numerical digits, if any alpha digits are entered, common error* occurs. Field must have a value present or be omitted from the document completely. If field is present with no value entered, common error* occurs. More than one field can be present in one document, but only the last value will be used, any preceding will be ignored. The field is the sum of the following values:
+				
+				1 = CC
+				2 = Stereo
+				4 = Sub (subtitled)
+				8 = In Prog
+				16 = Class (classroom)
+				32 = SAP
+				64 = Blackout
+				128 = Intercast
+				256 = Three D
+				512 = R (repeat)
+				1024 = Letterbox
+				4096 = HD (High Definition)
+				65536 = S (sex rating)
+				131072 = V (violence rating)
+				262144 = L (language rating)
+				524288 = D (dialog rating)
+				1048576 = FV (fantasy violence rating)
+						 */
+				if((1 & bits) > 0) json.put("cc", true);
+				if((512 & bits) > 0) json.put("repeat", true);
+				if((4096 & bits) > 0) json.put("hdtv", true);
+				
+			} catch(Exception e) {}
+
+		}
+	}
    
-   public void handleMyShows(Request req, Response resp) throws IOException {
+   private String getShareUrlForPath(String path) {
+	   String result = null;
+       if (config.httpserver_shares.isEmpty()) {
+       // No custom shares defined - so use default list
+       //dirs.put(config.outputDir,null);
+           if(path.startsWith(config.mpegDir)) {
+        	   result= File.separator +"mpegDir"+path.substring(config.mpegDir.length());
+           }
+           if(path.startsWith(config.mpegCutDir)) {
+        	   result= File.separator +"mpegCutDir"+path.substring(config.mpegCutDir.length());
+           }
+           if(path.startsWith(config.encodeDir)) {
+        	   result= File.separator +"encodeDir"+path.substring(config.encodeDir.length());
+           }
+       } else {
+	       // Custom shares defined - so use them
+	       for (String dir : config.httpserver_shares.keySet()) {
+	          String physical = config.httpserver_shares.get(dir);
+	          if(path.startsWith(physical)) {
+	        	  result= File.separator +dir+path.substring(physical.length());
+	        	  break;
+	          }
+	       }
+       }
+       
+		if(result != null)
+		       result = result.replace(File.separatorChar, '/');
+
+       return result;  
+   }
+
+public void handleMyShows(Request req, Response resp) throws IOException {
       Map<String,String> params = req.getParams();
       if (params.containsKey("tivo")) {
-         String tivo = string.urlDecode(params.get("tivo"));
+         String tivo = params.get("tivo");
          if (params.containsKey("xml")) {
             // Non RPC method requested returns XML
             int offset = 0;
@@ -412,7 +660,7 @@ public class kmttgServer extends HTTPServer {
    public void handleToDo(Request req, Response resp) throws IOException {
       Map<String,String> params = req.getParams();
       if (params.containsKey("tivo")) {
-         String tivo = string.urlDecode(params.get("tivo"));
+         String tivo = params.get("tivo");
          Remote r = new Remote(tivo);
          if (r.success) {
             jobData job = new jobData();
@@ -432,7 +680,7 @@ public class kmttgServer extends HTTPServer {
    public void handleReboot(Request req, Response resp) throws IOException {
       Map<String,String> params = req.getParams();
       if (params.containsKey("tivo")) {
-         String tivo = string.urlDecode(params.get("tivo"));
+         String tivo = params.get("tivo");
          Remote r = new Remote(tivo);
          if (r.success) {
             r.reboot(tivo);
@@ -446,26 +694,136 @@ public class kmttgServer extends HTTPServer {
       }
    }
    
-   private void getVideoFiles(String pathname, LinkedHashMap<String,Integer> h) {
+   private void getVideoFiles(String pathname, LinkedHashMap<String,JSONArray> h) {
       File f = new File(pathname);
       File[] listfiles = f.listFiles();
       for (int i = 0; i < listfiles.length; i++) {
          if (listfiles[i].isDirectory()) {
             File[] internalFile = listfiles[i].listFiles();
             for (int j = 0; j < internalFile.length; j++) {
-               if (Hlsutils.isVideoFile(internalFile[j].getAbsolutePath()))
-                  h.put(internalFile[j].getAbsolutePath(), 1);
+            	String selectedFile = internalFile[j].getAbsolutePath();
+               if (Hlsutils.isVideoFile(selectedFile))
+                  h.put(selectedFile, getRelatedFileSuffixes(selectedFile, internalFile));
                if (internalFile[j].isDirectory()) {
-                  String name = internalFile[j].getAbsolutePath();
+                  String name = selectedFile;
                   getVideoFiles(name, h);
                }
             }
          } else {
-            if (Hlsutils.isVideoFile(listfiles[i].getAbsolutePath()))
-               h.put(listfiles[i].getAbsolutePath(), 1);
+        	 String selectedFile = listfiles[i].getAbsolutePath();
+            if (Hlsutils.isVideoFile(selectedFile))
+               h.put(selectedFile, getRelatedFileSuffixes(selectedFile, listfiles));
          }
       }
    }
+   
+   /**
+    * array of e.g. "mpg.txt" "edl" "srt" etc. suffixes that aren't video files or the original file.
+    * @param fileAbsolutePath
+    * @param candidateFiles
+    * @return
+    */
+   private JSONArray getRelatedFileSuffixes(String fileAbsolutePath, File[] candidateFiles) {
+	   JSONArray a = new JSONArray();
+	   int lastDot = fileAbsolutePath.lastIndexOf('.');
+	   String fileBase;
+	   if(lastDot >=0) {
+		   fileBase = fileAbsolutePath.substring(0, lastDot+1);
+	   } else {
+		   fileBase = fileAbsolutePath;
+	   }
+	   for(int i = 0 ; i < candidateFiles.length ; ++i) {
+		   String candidate = candidateFiles[i].getAbsolutePath();
+		   if(candidate.startsWith(fileBase)) {
+			   String suffix = candidate.substring(fileBase.length());
+			   if(!fileAbsolutePath.equals(candidate) && !Hlsutils.isVideoFile(candidate)) {
+				   a.put(suffix);
+			   }
+		   }
+	   }
+	   return a;
+   }
+   
+    private void startJob(Request req, Response resp) throws IOException {
+        Map<String, String> params = req.getParams();
+        if (params.containsKey("tivo")) {
+            String tivo = params.get("tivo");
+            if (params.containsKey("recording")) {
+                String recording = params.get("recording");
+                try {
+                    startJob(tivo, recording);
+                } catch (Exception e) {
+                    resp.sendError(500, "startJob - " + e.getMessage());
+                    return;
+                }
+                resp.send(200, "Started job");
+                return;
+            }
+        }
+        resp.sendError(400, "startJob request missing relevant parameters");
+    }
+
+    /** single-job equivalent of tivoTab.startCB */
+    private void startJob(String tivoName, String recordingJsonOrFile) throws JSONException {
+        debug.print("");
+
+        Stack<Hashtable<String, Object>> entries = new Stack<Hashtable<String, Object>>();
+        if (tivoName.equals("FILES")) {
+            Hashtable<String, Object> h = new Hashtable<String, Object>();
+            h.put("tivoName", tivoName);
+            h.put("mode", "FILES");
+            String fileName = recordingJsonOrFile;
+            if (fileName != null) {
+                h.put("startFile", fileName);
+                entries.add(h);
+            }
+        } else {
+            JSONObject json = new JSONObject(recordingJsonOrFile);
+            Hashtable<String, String> data = parseNPL.rpcToHashEntry(tivoName, json);
+
+            Hashtable<String, Object> h = new Hashtable<String, Object>();
+            h.put("tivoName", tivoName);
+            h.put("mode", "Download");
+            h.put("entry", data);
+            entries.add(h);
+        }
+
+        boolean metadata = config.gui.metadata.isSelected(),
+                decrypt = config.gui.decrypt.isSelected(),
+                qsfix = config.gui.qsfix.isSelected(),
+                twpdelete = config.gui.twpdelete.isSelected(), 
+                rpcdelete = config.gui.rpcdelete.isSelected(), 
+                comskip = config.gui.comskip.isSelected(), 
+                comcut = config.gui.comcut.isSelected(), 
+                captions = config.gui.captions.isSelected(), 
+                encode = config.gui.encode.isSelected(),
+                //push = config.gui.push.isSelected(),
+                custom = config.gui.custom.isSelected();
+        // Launch jobs appropriately
+        for (int j = 0; j < entries.size(); ++j) {
+            Hashtable<String, Object> h = entries.get(j);
+            if (tivoName.equals("FILES")) {
+                h.put("metadataTivo", metadata);
+                h.put("metadata", false);
+            } else {
+                h.put("metadata", metadata);
+                h.put("metadataTivo", false);
+            }
+            h.put("TSDownload", config.TSDownload);
+            h.put("decrypt", decrypt);
+            h.put("qsfix", qsfix);
+            h.put("twpdelete", twpdelete);
+            h.put("rpcdelete", rpcdelete && config.rpcEnabled(tivoName));
+            h.put("comskip", comskip);
+            h.put("comcut", comcut);
+            h.put("captions", captions);
+            h.put("encode", encode);
+            // h.put("push", push);
+            h.put("custom", custom);
+            jobMonitor.LaunchJobs(h);
+        }
+    }
+
    
    private void handleJobs(Request req, Response resp) throws IOException {
       Map<String,String> params = req.getParams();
@@ -480,6 +838,8 @@ public class kmttgServer extends HTTPServer {
                   job.put("status", j.status);
                   job.put("type", j.type);
                   job.put("source", j.tivoName);
+                  // the url_TiVoVideoDetails
+                  job.put("sourceFile", j.source);
                   job.put("output", j.getOutputFile());
                   job.put("familyId", j.familyId);
                   jobs.put(job);
@@ -494,7 +854,7 @@ public class kmttgServer extends HTTPServer {
       }
       
       if (params.containsKey("kill")) {
-         String id = string.urlDecode(params.get("kill"));
+         String id = params.get("kill");
          if (jobMonitor.JOBS != null) {
             for (int i=0; i<jobMonitor.JOBS.size(); ++i) {
                jobData j = jobMonitor.JOBS.get(i);
@@ -527,7 +887,7 @@ public class kmttgServer extends HTTPServer {
       }
       
       if (params.containsKey("kill")) {
-         String fileName = string.urlDecode(params.get("kill"));
+         String fileName = params.get("kill");
          String jobName = killTranscode(fileName);
          if (jobName == null)
             resp.sendError(500, "Failed to kill job: " + fileName);
@@ -563,7 +923,7 @@ public class kmttgServer extends HTTPServer {
       Transcode tc = null;
       String returnFile = null;
       if (params.containsKey("file") && params.containsKey("format")) {
-         String fileName = string.urlDecode(params.get("file"));
+         String fileName = params.get("file");
          if ( ! file.isFile(fileName) ) {
             resp.sendError(404, "Cannot find video file: '" + fileName + "'");
             return;
@@ -573,7 +933,7 @@ public class kmttgServer extends HTTPServer {
             if (tc.returnFile != null)
                returnFile = tc.returnFile;
          } else {
-            String format = string.urlDecode(params.get("format"));
+            String format = params.get("format");
             tc = new Transcode(fileName);
             if (maxrate != null)
                tc.maxrate = maxrate;
@@ -598,7 +958,7 @@ public class kmttgServer extends HTTPServer {
       if (params.containsKey("url") && params.containsKey("format")
             && params.containsKey("name") && params.containsKey("tivo")) {
          String url = params.get("url");
-         String tivo = string.urlDecode(params.get("tivo"));;
+         String tivo = params.get("tivo");
          if ( ! isOnlyTivo(tivo) ) {
             resp.sendError(500, "Only 1 tivo download at a time allowed: " + tivo);
             return;
@@ -608,8 +968,8 @@ public class kmttgServer extends HTTPServer {
             if (tc.returnFile != null)
                returnFile = tc.returnFile;
          } else {
-            String format = string.urlDecode(params.get("format"));
-            String name = string.urlDecode(params.get("name"));
+            String format = params.get("format");
+            String name = params.get("name");
             tc = new TiVoTranscode(url, name, tivo);
             if (maxrate != null)
                tc.maxrate = maxrate;
@@ -636,10 +996,10 @@ public class kmttgServer extends HTTPServer {
          // Transcode stream has been started, so send it out
          String fileName = null;
          if (params.containsKey("file"))
-            fileName = string.urlDecode(params.get("file"));
+            fileName = params.get("file");
          String name = null;
          if (params.containsKey("name"))
-            name = string.urlDecode(params.get("name"));
+            name = params.get("name");
          try {
             Boolean download = false;
             if (params.containsKey("download"))
@@ -862,7 +1222,7 @@ public class kmttgServer extends HTTPServer {
          // name might be the original full path inputFile
          for (int i=0; i<transcodes.size(); ++i) {
             Transcode tc = transcodes.get(i);
-            if (name.equals(string.urlDecode(tc.inputFile))) {
+            if (name.equals(tc.inputFile)) {
                tc.kill();
                transcodes.remove(i);
                jobName = tc.name;

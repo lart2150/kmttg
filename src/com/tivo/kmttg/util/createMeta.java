@@ -18,10 +18,14 @@
  */
 package com.tivo.kmttg.util;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -254,6 +258,48 @@ public class createMeta {
       if (cookieFile != null) file.delete(cookieFile);
       file.delete(outputFile);
       return true;
+   }
+   
+   /**
+    * Read a .txt metadata file into a Hashtable of names where the values are 
+    * String values or Stacks of String values for e.g. 2 or more vActor fields.
+    * @param metaFile
+    * @return empty Hashtable if there were any errors.
+    */
+   public static Hashtable<String, Object> readMetaFile(String metaFile) {
+	   Hashtable<String, Object> result = new Hashtable<String, Object>();
+	   try {
+		   BufferedReader reader = new BufferedReader(new FileReader(new File(metaFile)));
+		   try {
+			   for(String line = reader.readLine(); line != null ; line = reader.readLine()) {
+				   String pair[] = line.split(" : ", 2);
+				   if(pair.length == 2) {
+					   String name = pair[0];
+					   String value = pair[1];
+					   // "vName" type entry names are often vectors of multiple entries.
+					   if(result.containsKey(name)) {
+						   if(result.get(name) instanceof String) {
+							   String firstValue = (String) result.get(name);
+							   Stack<String> stack = new Stack<String>();
+							   stack.add(firstValue);
+							   result.put(name, stack);
+						   }
+						   if(result.get(name) instanceof Stack<?>) {
+							   @SuppressWarnings("unchecked")
+							   Stack<String> stack = (Stack<String>)result.get(name);
+							   stack.add(value);
+						   }
+					   } else {
+						   result.put(name, value);
+					   }
+				   }
+			   }
+		   } finally {
+			   reader.close();
+		   }
+	   } catch (Exception e){
+	   }
+	   return result;
    }
       
    public static Node getNodeByName(Document doc, Node n, String name) {
