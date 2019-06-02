@@ -27,6 +27,8 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -547,6 +549,22 @@ public class Remote {
             json.put("noLimit", "true");
             req = RpcRequest("uiDestinationInstanceSearch", false, json);
          }
+         else if (type.equals("Webdestinations")) {
+            // List available web html destinations for uiNavigate
+            //json.put("bodyId", bodyId_get());
+            json.put("uiDestinationType", "web");
+            json.put("levelOfDetail", "high");
+            json.put("noLimit", "true");
+            req = RpcRequest("uiDestinationInstanceSearch", false, json);
+         }
+//         else if (type.equals("Uidestinations")) {
+//             // List available classic ui destinations for uiNavigate
+//             //json.put("bodyId", bodyId_get());
+//             json.put("uiDestinationType", "classicui");
+//             json.put("levelOfDetail", "high");
+//             json.put("noLimit", "true");
+//             req = RpcRequest("uiDestinationInstanceSearch", false, json);
+//          }
          else if (type.equals("Delete")) {
             // Delete an existing recording
             // Expects "recordingId" of type JSONArray in json
@@ -3241,4 +3259,56 @@ public class Remote {
    private void error(String message) {
       log.error(message);
    }
+
+   /**
+    * Perform a "Navigate" command for the provided uri, 
+    * substituting localhost IP information as needed using getLocalIP.
+    * Specifically, substitutes the substring "http://localhost" with 
+    * e.g. "http://0.0.0.0" where 0.0.0.0 is the result of getLocalIP("localhost"). 
+    * @param uri
+    */
+	public void navigate(String uri) {
+		try {
+		    JSONObject json = new JSONObject();
+		    if(uri == null) uri = "";
+		    
+		    String hmeLocalHost = "http://localhost";
+		    int localhost = uri.indexOf(hmeLocalHost);
+		    if (localhost > 0) {
+		       String ip = getLocalIP("localhost");
+		       uri = uri.substring(0, localhost) + 
+		           "http://" + ip + 
+		           uri.substring(localhost + hmeLocalHost.length());
+		    }
+		    json.put("uri", uri);
+		    log.print("Launching " + uri);
+		    Command("Navigate", json);
+	    } catch (JSONException e1) {
+	        log.error("Launch App - " + e1.getMessage());
+	    }
+	}
+	
+	/**
+	 * get the ip address of the local machine.  
+	 * If there is an exception, return the provided default 
+	 */
+	public static String getLocalIP(String defaultResult) {
+	   String ip;
+	   try {
+	      DatagramSocket socket = new DatagramSocket();
+	      socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+	      InetAddress IP = socket.getLocalAddress();
+	      if (IP.isReachable(3000)) {
+	         ip = IP.getHostAddress();
+	         if (ip.equals("0.0.0.0"))
+	            ip = InetAddress.getLocalHost().getHostAddress();
+	      }
+	      else
+	         ip = InetAddress.getLocalHost().getHostAddress();
+	      socket.close();
+	   } catch (Exception e) {
+	      ip = defaultResult;
+	   }
+	   return ip;
+	}
 }

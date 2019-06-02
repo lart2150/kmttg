@@ -1,0 +1,120 @@
+[
+{
+"name":"Tivos ToGether: KMTTG HME",
+"uri":"x-tivo:hme:http://localhost:7291/ttg",
+"channel":"0-0",
+"description":"HME App interface to some features of KMTTG, if available",
+"disabled":true
+},
+{
+"name":"Netflix (html)",
+"uri":"x-tivo:netflix:netflix",
+"channel":"0-1",
+"description":"Telnet remote interface can do IRCODE NETFLIX. TiVo Premiere Q & Suddenlink: channel 3000, eleven other launch channels used by different lineups per https://help.netflix.com/en/node/23925"
+},
+{
+"name":"Netflix (flash)",
+"uri":"x-tivo:flash:uuid:F23D193D-D2C2-4D18-9ABE-FA6B8488302F",
+"description":"2.4l doesn't list, but does support. Telnet remote interface can do IRCODE NETFLIX",
+"disabled":true
+},
+{
+"name":"YouTube (html)",
+"uri":"x-tivo:web:https://www.youtube.com/tv"
+},
+{
+"name":"YouTube",
+"description":"2.4l doesn't list, but does support",
+"uri":"x-tivo:flash:uuid:B8CEA236-0C3D-41DA-9711-ED220480778E",
+"disabled":true
+},
+{
+"name":"Vudu (html)",
+"uri":"x-tivo:vudu:vudu",
+"channel":"0-4",
+"description":"I wonder if Telnet remote interface can do IRCODE VUDU"
+},
+{
+"name":"Plex",
+"uri":"x-tivo:web:https://plex.tv/web/tv/tivo",
+"channel":"0-3"
+},
+{
+"name":"Amazon Prime",
+"uri":"x-tivo:web:https://atv-ext.amazon.com/cdp/resources/app_host/index.html?deviceTypeID=A3UXGKN0EORVOF"
+},
+{
+"name":"Amazon (hme)",
+"uri":"x-tivo:hme:uuid:35FE011C-3850-2228-FBC5-1B9EDBBE5863",
+"description":"2.4l doesn't list, but does support",
+"disabled":true
+},
+{
+"name":"Hulu Plus",
+"uri":"x-tivo:flash:uuid:802897EB-D16B-40C8-AEEF-0CCADB480559",
+"channel":"0-2",
+"description":"TiVo Premiere Q: channel 3001, Shentel: channel 3000"
+},
+{
+"name":"Pandora",
+"uri":"x-tivo:flash:pandora",
+"channel":"1-1",
+"description":"I wonder if Telnet remote interface can do IRCODE PANDORA",
+"disabled":true
+},
+{
+"name":"Spotify",
+"uri":"x-tivo:web:https://d27nv3bwly96dm.cloudfront.net/indexOperav2.html",
+"channel":"1-2"
+},
+{
+"name":"iHeartRadio",
+"uri":"x-tivo:web:https://tv.iheart.com/tivo/",
+"channel":"1-3"
+},
+{
+"name":"Launchpad",
+"uri":"x-tivo:flash:uuid:545E064D-C899-407E-9814-69A021D68DAD",
+"description":"2.4l lists only on web"
+},
+{
+"name":"Opera TV Store",
+"uri":"x-tivo:web:tvstore",
+"description":"Telnet remote interface can do IRCODE TVSTORE"
+},
+{
+"name":"My Opera TV Store Apps",
+"uri":"x-tivo:web:tvstore:https://tivo.tvstore.opera.com/?startwith=myapps",
+"description":"2.4l doesn't list, but does support",
+"disabled":true
+},
+{
+"name":"Minnesota Vikings Opera TV Store App example",
+"uri":"x-tivo:web:tvstore:https://tivo.appstore.vewd.com:84/api/tvapps/runapp/vikings-now/?closeWindowMessage=1",
+"disabled":true
+},
+{
+"name":"streambaby",
+"uri":"x-tivo:hme:http://localhost:7290/streambaby",
+"channel":"0-5",
+"description":"(localhost in uri will be replaced by local ip address)"
+},
+{
+"name":"AOL On",
+"uri":"x-tivo:flash:uuid:EA1DEF9D-D346-4284-91A0-FEA8EAF4CD39",
+"description":"2.4l doesn't list, but does support",
+"disabled":true
+},
+{
+"name":"Archive On Demand (PG filtered, html)",
+"uri":"x-tivo:web:http://aod.enterwebz.tv",
+"description":"enterwebz.tv (html version of Archive On Demand - not finished).",
+"disabled":true
+},
+{
+"name":"Archive On Demand",
+"uri":"x-tivo:hme:http://66.193.212.44:7291/archiveorg",
+"channel":"0-6",
+"description":"enterwebz.tv public domain videos HME app"
+}
+]

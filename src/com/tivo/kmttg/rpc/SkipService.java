@@ -38,6 +38,7 @@ public class SkipService {
    public AutoSkip skip = null;
    private int keepTryingMax = 50;
    private int keepTryingNum = 0;
+   private final ChannelNavigator channelNavigator;
    
    public SkipService(String tivoName) {
       this.tivoName = tivoName;
@@ -46,6 +47,10 @@ public class SkipService {
          SkipManager.addSkip(tivoName);
          skip = SkipManager.getSkip(tivoName);
       }
+      
+      // Hang the channel-based app launcher off of this service 
+      // since it already monitors for special channel changes.
+      this.channelNavigator = new ChannelNavigator(tivoName);
    }
    
    public synchronized void start() {
@@ -151,7 +156,8 @@ public class SkipService {
                   if (what.has("channelIdentifier")) {
                      JSONObject chan = what.getJSONObject("channelIdentifier");
                      if (chan.has("channelNumber")) {                        
-                        if (chan.getString("channelNumber").equals(config.autoskip_chan_off)) {
+                    	String channelNumber = chan.getString("channelNumber");
+                        if (channelNumber.equals(config.autoskip_chan_off)) {
                            if (enabled) {
                               // Disable if live TV tuned to autoskip_chan_off channel
                               enabled = false;
@@ -159,12 +165,17 @@ public class SkipService {
                               return;
                            }
                         }
-                        if (chan.getString("channelNumber").equals(config.autoskip_chan_on)) {
+                        else if (channelNumber.equals(config.autoskip_chan_on)) {
                            if (! enabled) {
                               // Re-enable if live TV tuned to autoskip_chan_on channel
                               enabled = true;
                               print("monitor re-enabled");
                            }
+                        }
+                        
+                        if (channelNavigator.navigate(channelNumber)) {
+                        	// if navigate returned true it has already sent the tivo to the navigation destination.
+                            print("channel navigation");
                         }
                      }
                   }
