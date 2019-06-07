@@ -422,7 +422,8 @@ public class kmttgServer extends HTTPServer {
 	                addMetaToVideoFile(json, metaFile);
         		}
                 
-	            json.put("size", file.size(key));
+        		// report size in K, same as rpc recording json does.
+	            json.put("size", file.size(key)/1024);
 	            
 	            String url = getShareUrlForPath(key);
 	            if(url != null) {
@@ -485,16 +486,15 @@ public class kmttgServer extends HTTPServer {
 			metaToRecording.put("description", "description");
 			metaToRecording.put("seriesId", "__SeriesId__");
 			metaToRecording.put("programId", "partnerCollectionId");
-			metaToRecording.put("starRating", "starRating"); // wrong format e.g. x6 instead of 4.0 or four
-			// should be an integer, not a string, but handles it fine.
+			metaToRecording.put("starRating", "starRating"); // readMetaFile cleans from wrong format e.g. x6 instead of 4.0 or four
 			metaToRecording.put("movieYear", "movieYear");
-			//episodeNumber // season + episode in a single number.
-			//metaToRecording.put("time", "startTime");// - wrong format (T->space Z->timezone convert time?))
-			metaToRecording.put("originalAirDate", "originalAirdate");// - wrong format (need to drop T00:00:00Z)
-			metaToRecording.put("tvRating", "tvRating"); // "x1" format, though
-			metaToRecording.put("mpaaRating", "mpaaRating"); // "G1" format, though
+			metaToRecording.put("episodeNumber", "CONVERTED"); // "seasonNumber" and "episodeNum" convert from in a single number.
+			metaToRecording.put("time", "CONVERTED");// "startTime" convert from wrong format
+			metaToRecording.put("iso_duration","CONVERTED"); // "duration" iso format convert to numeric total seconds.
+			metaToRecording.put("originalAirDate", "originalAirdate");// TODO wrong format (need to drop T00:00:00Z) need to convert with createMeta.printableDateFromExtendedTime
+			metaToRecording.put("tvRating", "tvRating"); // readMetaFile cleans from "x1" format, though
+			metaToRecording.put("mpaaRating", "mpaaRating"); // readMetaFile cleans from "G1" format, though
 			//Boolean("isEpisodic") -> "episodic"
-			//iso_duration -> int duration
 			/*
 	colorCode
 	This is shown on the Details screen. It uses the second character to determine the color mode. The list is as follows:
@@ -512,7 +512,46 @@ public class kmttgServer extends HTTPServer {
 					Object value = meta.get(metaKey);
 					if(value instanceof String) {
 						String val = (String)value;
-						json.put(jsonKey, val);
+						
+						if("iso_duration".equals(metaKey)) {
+							json.put("duration", createMeta.jsonDurationFromIsoDuration(val));
+						}
+						else
+						if("time".equals(metaKey)) {
+							//startTime should be in format "yyyy-MM-dd HH:mm:ss"
+							// "time" seems to show up in local timezone, not GMT, although pyTivo wiki claims it is GMT.
+							json.put("startTime", createMeta.jsonDateFromExtendedLocalTime(val));
+						}
+						else
+							//TODO it's possible this would show up as a Stack<String> when there are 2+ episode numbers.
+						if("episodeNumber".equals(metaKey)) {
+							// conversion copied from atomic task
+							try {
+							   String ep = val;
+					           if (ep.length() <= 3) {
+					              ep = ep.substring(1, ep.length());
+					           } else {
+					              ep = ep.substring(2, ep.length());
+					           }
+
+							  String season = val;
+					          if (season.length() == 3)
+					             season = season.substring(0, 1);
+					          else if (season.length() == 4)
+					             season = season.substring(0, 2);
+					          else if (season.length() == 5)
+					             season = season.substring(0, 2);
+					          
+					          json.put("seasonNumber", season);//season
+					          json.put("episodeNum", new JSONArray().put(ep));//episode
+							} catch(Exception e) {
+								json.put(metaKey, val);
+							}
+						} else {
+							
+							json.put(jsonKey, val);
+							
+						}
 					} else if(value instanceof Stack<?>) {
 						JSONArray vals = new JSONArray();
 						@SuppressWarnings("unchecked")
@@ -525,14 +564,11 @@ public class kmttgServer extends HTTPServer {
 				}
 			}
 			try {
-				//"displayMajorNumber",  // channel number
-				//"displayMinorNumber", // *-x channel subnumber most likely
-				//"callsign"
 			   if(meta.get("callsign") != null) {
 				   JSONObject channel = new JSONObject();
-				//metaToRecording.put("displayMajorNumber", "channel"); // channel number
-				//metaToRecording.put("displayMinorNumber", "channel"); // *-x channel subnumber most likely
+				   // channel number
 				   if(meta.get("displayMajorNumber") != null) {
+					   // *-x channel subnumber most likely
 					   if(meta.get("displayMinorNumber") != null) {
 						   channel.put("channelNumber", meta.get("displayMajorNumber")+"-"+meta.get("displayMinorNumber"));
 					   } else {

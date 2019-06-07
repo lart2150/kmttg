@@ -25,7 +25,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -61,6 +60,7 @@ public class createMeta {
    private static HashMap<String,String> humanTvRatings = null;
    private static HashMap<String,String> mpaaRatings = null;
    private static HashMap<String,String> humanMpaaRatings = null;
+   private static HashMap<String,String> starRatings = null;
    
    // Create a pyTivo compatible metadata file from a TiVoVideoDetails xml download
    @SuppressWarnings("unchecked")
@@ -263,6 +263,7 @@ public class createMeta {
    /**
     * Read a .txt metadata file into a Hashtable of names where the values are 
     * String values or Stacks of String values for e.g. 2 or more vActor fields.
+    * Also does cleaning to more closely match metadata standard.
     * @param metaFile
     * @return empty Hashtable if there were any errors.
     */
@@ -297,10 +298,55 @@ public class createMeta {
 		   } finally {
 			   reader.close();
 		   }
+		   // Clean some of the data to the pyTivo metadata standard
+		   String key;
+		   key = "tvRating";
+		   if(result.containsKey(key) && result.get(key) instanceof String) {
+			   result.put(key, createMeta.tvRating2contentRating((String) result.get(key)));
+		   }
+
+		   key = "mpaaRating";
+		   if(result.containsKey(key) && result.get(key) instanceof String) {
+			   result.put(key, createMeta.mpaaRating2contentRating((String) result.get(key)));
+		   }
+		   
+		   key = "starRating";
+		   if(result.containsKey(key) && result.get(key) instanceof String) {
+			   result.put(key, createMeta.starRating2numericStars((String) result.get(key)));
+		   }
+		   
 	   } catch (Exception e){
 	   }
 	   return result;
    }
+   /*
+per pytivo wiki on Metadata:
+1 Keywords
+1.1 time : yyyy-mm-ddThh:mm:ssZ (GMT/Zulu time)
+1.2 originalAirDate : yyyy-mm-ddThh:mm:ssZ (GMT/Zulu time)
+1.3 movieYear
+1.4 seriesTitle
+1.5 title
+1.6 episodeTitle
+1.7 description
+1.8 isEpisode
+1.9 seriesId : SH is for general TV shows. MV is for movies (e.g. Amazon Unbox). SP is for sports. TS is for Tivocast content. SeriesId can be located at zap2it.com for a show. These values will all start with EP and must be changed to SH before using.
+1.10 episodeNumber
+1.11 displayMajorNumber
+1.12 callsign
+1.13 showingBits : 1 = CC 2 = Stereo 4 = Sub (subtitled) 8 = In Prog 16 = Class (classroom) 32 = SAP 64 = Blackout 128 = Intercast 256 = Three D 512 = R (repeat) 1024 = Letterbox 4096 = HD (High Definition) 65536 = S (sex rating) 131072 = V (violence rating) 262144 = L (language rating) 524288 = D (dialog rating) 1048576 = FV (fantasy violence rating)
+1.14 displayMinorNumber : (wiki doesn't know what this is, I think it's part of the channel number "3-2" major is 3, minor is 2)
+1.15 tvRating : with or without the "TV-" prefix. Y7 Y G PG 14 MA NR
+1.16 starRating : 1 1.5 2 2.5 3 3.5 4
+1.17 mpaaRating : G PG PG-13 R X NC-17 NR
+1.18 colorCode : x1 = B & W x2 = Color and B & W x3 = Colorized x4 = Color Series 
+1.19 vProgramGenre
+1.20 vSeriesGenre
+1.21 vActor : lastname|firstname
+1.22 vGuestStar, vDirector, vExecProducer, vProducer, vWriter, vHost, vChoreographer
+1.23 partCount
+1.24 partIndex
+    */
       
    public static Node getNodeByName(Document doc, Node n, String name) {
       DocumentTraversal docTraversal = (DocumentTraversal)doc;
@@ -437,6 +483,39 @@ public class createMeta {
          humanMpaaRatings.put("6", "NC-17");
          humanMpaaRatings.put("8", "Unrated");
       }
+      if (starRatings == null) {
+    	  starRatings = new HashMap<String,String>();
+    	  starRatings.put("POINTFIVE",      "0.5");
+    	  starRatings.put("ZEROPOINTFIVE",  "0.5");
+    	  starRatings.put("ONE",            "1");
+    	  starRatings.put("ONEPOINTFIVE",   "1.5");
+    	  starRatings.put("TWO",            "2");
+    	  starRatings.put("TWOPOINTFIVE",   "2.5");
+    	  starRatings.put("THREE",          "3");
+    	  starRatings.put("THREEPOINTFIVE", "3.5");
+    	  starRatings.put("FOUR",           "4");
+    	  
+    	  starRatings.put("XPOINTFIVE",      "0.5");
+    	  starRatings.put("XZEROPOINTFIVE",  "0.5");
+    	  starRatings.put("XONE",            "1");
+    	  starRatings.put("XONEPOINTFIVE",   "1.5");
+    	  starRatings.put("XTWO",            "2");
+    	  starRatings.put("XTWOPOINTFIVE",   "2.5");
+    	  starRatings.put("XTHREE",          "3");
+    	  starRatings.put("XTHREEPOINTFIVE", "3.5");
+    	  starRatings.put("XFOUR",           "4");
+    	  
+    	  // assumed mapping based on x6 for 4... but I've seen x7 on a recording (that should also be 4 stars).
+    	  // what would be 0.5 stars? that's usually possible.
+    	  starRatings.put("X0",       "1");
+    	  starRatings.put("X1",       "1.5");
+    	  starRatings.put("X2",       "2");
+    	  starRatings.put("X3",       "2.5");
+    	  starRatings.put("X4",       "3");
+    	  starRatings.put("X5",       "3.5");
+    	  starRatings.put("X6",       "4");
+    	  // X7 = 4.5? X8 = 5.0?
+      }
    }
    
    // This used for mapping to AtomicParsley --contentRating argument
@@ -461,6 +540,15 @@ public class createMeta {
       if (intermediate != null && humanMpaaRatings.containsKey(intermediate))
          return humanMpaaRatings.get(intermediate);
       return mpaaRating;
+   }
+   
+   /** map various text ratings to a numeric 1, 1.5, etc. rating */
+   public static String starRating2numericStars(String starRating) {
+      initHashes();
+      String upperRating = starRating.toUpperCase();
+      if (starRatings.containsKey(upperRating))
+         return starRatings.get(upperRating);
+      return starRating;
    }
    
    // Get extended metatadata and store in given Hashtable
@@ -541,11 +629,47 @@ public class createMeta {
          return 0;
       }
    }
+
+   /**
+    * same as {@link #getLongDateFromExtendedTime(String)} but doesn't assume GMT timezone.
+    * @param date
+    * @return
+    */
+   private static long getLongDateFromExtendedLocalTime(String date) {
+      try {
+         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+         Date d = format.parse(date);
+         return d.getTime();
+      } catch (ParseException e) {
+         log.error("getLongDateFromExtendedTime - " + e.getMessage());
+         return 0;
+      }
+   }
    
    // Return date format such as 2013-02-28_1815
    public static String printableDateFromExtendedTime(String date) {
       long start = getLongDateFromExtendedTime(date);
       SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HHmm");
       return sdf.format(start);
+   }
+   
+   /** 
+    * use {@link #getLongDateFromExtendedLocalTime(String)} 
+    * and format the result as 2013-02-28 18:15:00 
+    */
+   public static String jsonDateFromExtendedLocalTime(String date) {
+      long start = getLongDateFromExtendedLocalTime(date);
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      return sdf.format(start);
+   }
+   
+   /** get the seconds from the PT29M57S type format */
+   public static long jsonDurationFromIsoDuration(String duration) {
+	   try {
+		   java.time.Duration d = java.time.Duration.parse(duration);
+		   return d.getSeconds();
+	   } catch(Exception e) {
+		   return -1;
+	   }
    }
 }
