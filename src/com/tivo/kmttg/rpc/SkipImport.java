@@ -46,9 +46,7 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class SkipImport {
-   public static final String UTF8_BOM = "﻿";
-   
+public class SkipImport {   
    static public Boolean importEntry(String tivoName, Hashtable<String,String> entry) {
       if (! entry.containsKey("contentId")) {
          log.error("entry missing contentId: " + entry.get("title"));
@@ -122,8 +120,8 @@ public class SkipImport {
          // Read vprjFile into xml string to lowercase it
          String xml = new String(Files.readAllBytes(Paths.get(vprjFile)));
          // VRD 6 uses UTF8_BOM, so strip out the BOM characters before parsing
-         if (xml.startsWith(UTF8_BOM)) {
-            xml = xml.substring(UTF8_BOM.length());
+         if (!xml.startsWith("<")) {
+            xml = xml.replaceFirst("^.+<", "<");
          }
          Document doc = docBuilder.parse(new InputSource(new StringReader(xml.toLowerCase())));
          NodeList nList = doc.getElementsByTagName("cutlist");
