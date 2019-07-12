@@ -19,8 +19,10 @@
 package com.tivo.kmttg.gui.remote;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.LinkedHashMap;
 import java.util.Stack;
 
@@ -875,17 +877,76 @@ public class remotecontrol {
     * @return
     */
    public static JSONArray readAppConfiguration() {
-	   String filename = "rc_apps.json";
-       String webdir = config.httpserver_home;
-       
+      String filename = "rc_apps.json";
+      String webdir = config.httpserver_home;
+      File file = new File(webdir + File.separator + filename);
+      
+      // data for default rc_apps.json with no disabled items
+      JSONArray default_apps = new JSONArray();
+      String[][] data = new String[][] {
+//         new String[] {"Tivos ToGether: KMTTG HME", "x-tivo:hme:http://localhost:7291/ttg", 
+//               "0-0", "HME App interface to some features of KMTTG, if available"},
+         new String[] {"Netflix (html)", "x-tivo:netflix:netflix", 
+               "0-1", "Telnet remote interface can do IRCODE NETFLIX. TiVo Premiere Q & Suddenlink: channel 3000, eleven other launch channels used by different lineups per https://help.netflix.com/en/node/23925"},
+         new String[] {"YouTube (html)", "x-tivo:web:https://www.youtube.com/tv", 
+               null, ""},
+         new String[] {"Vudu (html)", "x-tivo:vudu:vudu", 
+               "0-4", ""},
+         new String[] {"Plex", "x-tivo:web:https://plex.tv/web/tv/tivo", 
+               "0-3", ""},
+         new String[] {"Amazon Prime", "x-tivo:web:https://atv-ext.amazon.com/cdp/resources/app_host/index.html?deviceTypeID=A3UXGKN0EORVOF", 
+               null, ""},
+         new String[] {"Hulu Plus", "x-tivo:flash:uuid:802897EB-D16B-40C8-AEEF-0CCADB480559",
+               "0-2", "TiVo Premiere Q: channel 3001, Shentel: channel 3000"},
+         new String[] {"Spotify", "x-tivo:web:https://d27nv3bwly96dm.cloudfront.net/indexOperav2.html",
+               "1-2", ""},
+         new String[] {"iHeartRadio", "x-tivo:web:https://tv.iheart.com/tivo/",
+               "1-3", ""},
+         new String[] {"Launchpad", "x-tivo:flash:uuid:545E064D-C899-407E-9814-69A021D68DAD", 
+               null, "2.4l lists only on web"},
+         new String[] {"Opera TV Store", "x-tivo:web:tvstore", 
+               null, "Telnet remote interface can do IRCODE TVSTORE"},
+         new String[] {"streambaby", "x-tivo:hme:http://localhost:7290/streambaby",
+               "0-5", "(localhost in uri will be replaced by local ip address)"},
+         new String[] {"Archive On Demand", "x-tivo:hme:http://66.193.212.44:7291/archiveorg",
+               "0-6", "enterwebz.tv public domain videos HME app"},
+      };
+      for(String[] d : data) {
+         String[] headings = new String[] {"name", "uri", "channel", "description"};
+         try {
+            JSONObject entry = new JSONObject();
+            for(int i = 0 ; i < headings.length ; ++i) {
+               if(d.length > i && d[i] != null && d[i].length() > 0)
+                  entry.put(headings[i], d[i]);
+            }
+            default_apps.put(entry);
+         } catch (Exception e) {
+            log.error("readAppConfiguration - " + e.getMessage());
+         }
+      }
+      
+      // generate a default rc_apps.json
+      if (!file.exists()) {
+         try {
+            BufferedWriter os = new BufferedWriter(new FileWriter(file));
+            os.write(default_apps.toString(2));
+            os.close();
+         } catch (Exception e) {
+            log.error("readAppConfiguration - " + e.getMessage());
+            // at least use defaults, better than null
+            return default_apps;
+         }
+      }
+      
       JSONArray rc_apps = new JSONArray();
       try {
-         BufferedReader is = new BufferedReader(new FileReader(webdir + File.separator + filename));
+         BufferedReader is = new BufferedReader(new FileReader(file));
          rc_apps = new JSONArray(new JSONTokener(is));
          is.close();
       } catch (Exception e) {
-         log.error("getAppData - " + e.getMessage());
-         return null;
+         log.error("readAppConfiguration - " + e.getMessage());
+         // at least use defaults, better than null
+         return default_apps;
       }
       return rc_apps;
    }
