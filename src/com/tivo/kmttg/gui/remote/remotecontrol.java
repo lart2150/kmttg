@@ -405,6 +405,87 @@ public class remotecontrol {
       sps_text += "When enabled a 4th FF press resumes normal play as was the case with older TiVo software.<br>";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
+      
+      sps_name = "1.1x quickplay: SPS71S";
+      util.SPS.put(sps_name, "select play select 7 1 select clear");
+      sps_text = "<b>" + sps_name + "</b><br>";
+      sps_text += util.SPS.get(sps_name) + "<br>";
+      sps_text += "Sets quickplay speed to 1.1x speed.<br>";
+      sps_text += "Only supported for series 5 and later models with quickplay.";
+      sps_text += sps_text_end;
+      util.SPS.put(sps_name + "_tooltip", sps_text);
+      
+      sps_name = "1.2x quickplay: SPS72S";
+      util.SPS.put(sps_name, "select play select 7 2 select clear");
+      sps_text = "<b>" + sps_name + "</b><br>";
+      sps_text += util.SPS.get(sps_name) + "<br>";
+      sps_text += "Sets quickplay speed to 1.2x speed.<br>";
+      sps_text += "Only supported for series 5 and later models with quickplay.";
+      sps_text += sps_text_end;
+      util.SPS.put(sps_name + "_tooltip", sps_text);
+      
+      sps_name = "1.3x quickplay: SPS73S";
+      util.SPS.put(sps_name, "select play select 7 3 select clear");
+      sps_text = "<b>" + sps_name + "</b><br>";
+      sps_text += util.SPS.get(sps_name) + "<br>";
+      sps_text += "Sets quickplay speed to 1.3x speed.<br>";
+      sps_text += "Only supported for series 5 and later models with quickplay.";
+      sps_text += sps_text_end;
+      util.SPS.put(sps_name + "_tooltip", sps_text);
+      
+      sps_name = "1.4x quickplay: SPS74S";
+      util.SPS.put(sps_name, "select play select 7 4 select clear");
+      sps_text = "<b>" + sps_name + "</b><br>";
+      sps_text += util.SPS.get(sps_name) + "<br>";
+      sps_text += "Sets quickplay speed to 1.4x speed.<br>";
+      sps_text += "Only supported for series 5 and later models with quickplay.";
+      sps_text += sps_text_end;
+      util.SPS.put(sps_name + "_tooltip", sps_text);
+      
+      sps_name = "1.5x quickplay: SPS75S";
+      util.SPS.put(sps_name, "select play select 7 5 select clear");
+      sps_text = "<b>" + sps_name + "</b><br>";
+      sps_text += util.SPS.get(sps_name) + "<br>";
+      sps_text += "Sets quickplay speed to 1.5x speed.<br>";
+      sps_text += "Only supported for series 5 and later models with quickplay.";
+      sps_text += sps_text_end;
+      util.SPS.put(sps_name + "_tooltip", sps_text);
+      
+      sps_name = "1.6x quickplay: SPS76S";
+      util.SPS.put(sps_name, "select play select 7 6 select clear");
+      sps_text = "<b>" + sps_name + "</b><br>";
+      sps_text += util.SPS.get(sps_name) + "<br>";
+      sps_text += "Sets quickplay speed to 1.6x speed.<br>";
+      sps_text += "Only supported for series 5 and later models with quickplay.";
+      sps_text += sps_text_end;
+      util.SPS.put(sps_name + "_tooltip", sps_text);
+      
+      sps_name = "1.7x quickplay: SPS77S";
+      util.SPS.put(sps_name, "select play select 7 7 select clear");
+      sps_text = "<b>" + sps_name + "</b><br>";
+      sps_text += util.SPS.get(sps_name) + "<br>";
+      sps_text += "Sets quickplay speed to 1.7x speed.<br>";
+      sps_text += "Only supported for series 5 and later models with quickplay.";
+      sps_text += sps_text_end;
+      util.SPS.put(sps_name + "_tooltip", sps_text);
+      
+      sps_name = "1.8x quickplay: SPS78S";
+      util.SPS.put(sps_name, "select play select 8 1 select clear");
+      sps_text = "<b>" + sps_name + "</b><br>";
+      sps_text += util.SPS.get(sps_name) + "<br>";
+      sps_text += "Sets quickplay speed to 1.8x speed.<br>";
+      sps_text += "Only supported for series 5 and later models with quickplay.";
+      sps_text += sps_text_end;
+      util.SPS.put(sps_name + "_tooltip", sps_text);
+      
+      sps_name = "1.9x quickplay: SPS79S";
+      util.SPS.put(sps_name, "select play select 7 9 select clear");
+      sps_text = "<b>" + sps_name + "</b><br>";
+      sps_text += util.SPS.get(sps_name) + "<br>";
+      sps_text += "Sets quickplay speed to 1.9x speed.<br>";
+      sps_text += "Only supported for series 5 and later models with quickplay.";
+      sps_text += sps_text_end;
+      util.SPS.put(sps_name + "_tooltip", sps_text);
      
       sps_button = new Button("SPS backdoor:");
       disableSpaceAction(sps_button);
