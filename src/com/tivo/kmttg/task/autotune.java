@@ -165,7 +165,7 @@ public class autotune extends baseTask implements Serializable {
          if (job.autotune_channel_interval != -1 && name.equals("channel_interval")) {
             interval = job.autotune_channel_interval;
          } else if (job.autotune_button_interval != -1 && name.equals("button_interval")) {
-            interval = job.autotune_channel_interval;
+            interval = job.autotune_button_interval;
          } else {
             interval = Integer.parseInt(
                string.removeLeadingTrailingSpaces(config.autotune.get(job.tivoName).get(name))

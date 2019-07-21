@@ -1,7 +1,7 @@
 package com.tivo.kmttg.httpserver;
 
 /*
- *  Copyright © 2005-2012 Amichai Rothman
+ *  Copyright (c) 2005-2012 Amichai Rothman
  *
  *  This file is part of JLHTTP - the Java Lightweight HTTP Server.
  *

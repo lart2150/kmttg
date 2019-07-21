@@ -23,6 +23,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Stack;
 
@@ -49,6 +50,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -304,7 +306,62 @@ public class remotecontrol {
             new telnet(config.TIVOS.get(tivoName), sequence);
          }
       });
-            
+
+    Button search_command = new CustomButton("Search...", "Search for entered title", null);
+    panel_controls.getChildren().add(search_command);
+    search_command.setLayoutX(500);
+    search_command.setLayoutY(130);
+    search_command.setOnAction(new EventHandler<ActionEvent>() {
+       public void handle(ActionEvent e) {
+          // NOTE JavaFX TextInputDialog requires a particular minimum java version (JDK 1.8.0_40).
+          TextInputDialog alert = new TextInputDialog();
+          alert.setHeaderText("Enter search to perform with Network Remote Control.");
+          alert.showAndWait();
+          String search = alert.getResult();
+          if (search == null) {
+             return;
+          }
+          String tivoName = (String)tivo.getValue();
+          // prepare macro interface
+          log.print("Search for: "+search);
+          String commands[];
+          if(search.length() > 0) {
+              commands = new String[search.length()+2];
+              int i = 0;
+              commands[i++] = "search";
+              // search can show up with previous search which would be appended to.
+              commands[i++] = "clear";
+              for(char c : search.toCharArray()) {
+                 commands[i++] = String.valueOf(c);
+              }
+          } else {
+             commands = new String[] {"search"};
+          }
+          // 200 still wasn't enough interval - some keys were being lost.
+          executeMacro(tivoName, commands, 300);
+//          new telnet(config.TIVOS.get(tivoName), commands, 300);
+       }
+    });
+//      Button telnet_command = new CustomButton("IRCODE...", "IRCODE...", null);
+//      panel_controls.getChildren().add(telnet_command);
+//      telnet_command.setLayoutX(500);
+//      telnet_command.setLayoutY(130);
+//      telnet_command.setOnAction(new EventHandler<ActionEvent>() {
+//         public void handle(ActionEvent e) {
+//        	 TextInputDialog alert = new TextInputDialog("IRCODE TIVO");
+//        	 alert.setHeaderText("telnet command to try (e.g. IRCODE NETFLIX; TELEPORT LIVETV; KEYBOARD SEMICOLON):"); //, "Delete " + selection + " ?", ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+//        	 alert.showAndWait();
+//        	 String command = alert.getResult();
+//        	 if (command == null) {
+//        		 return;
+//        	 }     	 
+//            String tivoName = (String)tivo.getValue();
+//            // Use telnet interface
+//            log.print("telnet command: "+command);
+//            new telnet(config.TIVOS.get(tivoName), command);
+//         }
+//      });
+
       // Other components for the panel      
       Label label = new Label("TiVo");
       label.setStyle("-fx-text-fill: " + text_color + ";");
@@ -873,14 +930,26 @@ public class remotecontrol {
    }
 
    private void executeMacro(final String tivoName, final String[] sequence) {
+      executeMacro(tivoName, sequence, telnet.DEFAULT_BUTTON_INTERVAL);
+   }
+   private void executeMacro(final String tivoName, final String[] sequence, final int telnetInterval) {
       Task<Void> task = new Task<Void>() {
          @Override public Void call() {
             if (config.rpcEnabled(tivoName)) {
                Remote r = config.initRemote(tivoName);
-               r.keyEventMacro(sequence);
+               String[] seq;
+               if(sequence.length > 0 && sequence[0].equals("search")) {
+                  r.navigate("x-tivo:flash:tivo_hdui?screenName=search");
+                  seq = (String[]) Arrays.copyOfRange(sequence, 1, sequence.length);
+               } else {
+                  seq = sequence;
+               }
+               if(seq.length > 0) {
+                  r.keyEventMacro(seq);
+               }
             } else {
                // Use telnet protocol
-               new telnet(config.TIVOS.get(tivoName), mapToTelnet(sequence));
+               new telnet(config.TIVOS.get(tivoName), mapToTelnet(sequence), telnetInterval);
             }
             // Set focus on tabbed_panel
             Platform.runLater(new Runnable() {

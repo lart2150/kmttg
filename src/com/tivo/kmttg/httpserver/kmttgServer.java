@@ -32,9 +32,11 @@ import com.tivo.kmttg.JSON.JSONFile;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.encodeConfig;
 import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.main.telnet;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.createMeta;
 import com.tivo.kmttg.util.debug;
@@ -205,6 +207,14 @@ public class kmttgServer extends HTTPServer {
           return;
       }
       
+      // invoke the telnet class for a "search", "text", or a semicolon-separated "codes" list
+      // (if you want to use RPC, pass space-separated events with /rpc?operation=keyEventMacro&sequence= 
+      //  to type, have a sequence of space-separated single characters and use "forward" for space)
+      if (path.equals("/ircode")) {
+         ircode(req, resp);
+         return;
+      }
+      
       // This is normal/default handling
       ContextHandler handler = req.getVirtualHost().getContext(path);
       if (handler == null) {
@@ -244,6 +254,8 @@ public class kmttgServer extends HTTPServer {
                String[] s = sequence.split(" ");
                Remote r = new Remote(tivo);
                if (r.success) {
+                  // Single character strings are sent as ascii character
+                  // A SPACE would have to be "FORWARD". 
                   r.keyEventMacro(s);
                   resp.send(200, "");
                } else {
@@ -302,6 +314,12 @@ public class kmttgServer extends HTTPServer {
                }
                return;
             }
+// receive a URL and print whatever is in "tivo" parameter.  Mainly for passing testing data from HTML5 apps.
+//            if(operation.equals("testdata")) {
+//            	log.print(tivo);
+//            	resp.send(200,"");
+//            	return;
+//            }
             
             // General purpose remote operation
             JSONObject json;
@@ -737,7 +755,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
          if (listfiles[i].isDirectory()) {
             File[] internalFile = listfiles[i].listFiles();
             for (int j = 0; j < internalFile.length; j++) {
-            	String selectedFile = internalFile[j].getAbsolutePath();
+               String selectedFile = internalFile[j].getAbsolutePath();
                if (Hlsutils.isVideoFile(selectedFile))
                   h.put(selectedFile, getRelatedFileSuffixes(selectedFile, internalFile));
                if (internalFile[j].isDirectory()) {
@@ -746,7 +764,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
                }
             }
          } else {
-        	 String selectedFile = listfiles[i].getAbsolutePath();
+            String selectedFile = listfiles[i].getAbsolutePath();
             if (Hlsutils.isVideoFile(selectedFile))
                h.put(selectedFile, getRelatedFileSuffixes(selectedFile, listfiles));
          }
@@ -780,14 +798,72 @@ public void handleMyShows(Request req, Response resp) throws IOException {
 	   return a;
    }
    
+    private void ircode(Request req, Response resp) throws IOException {
+        Map<String, String> params = req.getParams();
+        if (params.containsKey("tivo")) {
+            String tivo = params.get("tivo");
+            String commands[] = null;
+            if (params.containsKey("search")) {
+                String search = params.get("search");
+                if(search.length() > 0) {
+                   int clears = 3;
+                   commands = new String[search.length()+1+clears];
+                   int i = 0;
+                   commands[i++] = "SEARCH";
+                   // search can show up with previous search which would be appended to.
+                   for (int j = 0 ; j < clears ; ++j) {
+                      commands[i++] = "CLEAR";
+                   }
+                   for(char c : search.toCharArray()) {
+                      commands[i++] = String.valueOf(c);
+                   }
+                } else {
+                   commands = new String[] {"SEARCH"};
+                }
+            }
+            else
+            if (params.containsKey("text")) {
+                String text = params.get("text");
+                if(text.length() > 0) {
+                    commands = new String[text.length()];
+                    int i = 0;
+                    for(char c : text.toCharArray()) {
+                       commands[i++] = String.valueOf(c);
+                    }
+                }
+            }
+            else
+            if (params.containsKey("codes")) {
+                String codes = params.get("codes");
+                commands = codes.split(";");
+            }
+            if(commands != null) {
+               try {
+                  // 200 still wasn't enough interval - some keys were being lost.
+                  new telnet(config.TIVOS.get(tivo), commands, 300);
+               } catch (Exception e) {
+                  resp.sendError(500, "ircode - " + e.getMessage());
+                  return;
+               }
+               resp.send(200, "code sent");
+               return;
+            }
+        }
+        resp.sendError(400, "ircode request missing relevant parameters");
+    }
+    
     private void startJob(Request req, Response resp) throws IOException {
         Map<String, String> params = req.getParams();
         if (params.containsKey("tivo")) {
             String tivo = params.get("tivo");
+            String settings = null;
+            if (params.containsKey("settings")) {
+               settings = params.get("settings");
+            }
             if (params.containsKey("recording")) {
                 String recording = params.get("recording");
                 try {
-                    startJob(tivo, recording);
+                    startJob(tivo, recording, settings);
                 } catch (Exception e) {
                     resp.sendError(500, "startJob - " + e.getMessage());
                     return;
@@ -799,8 +875,20 @@ public void handleMyShows(Request req, Response resp) throws IOException {
         resp.sendError(400, "startJob request missing relevant parameters");
     }
 
+    // list of job settings json names used here and displayed in app.
+    final String tsArg = "TS download";
+    final String metaArg = "metadata";
+    final String decArg = "decrypt";
+    final String qsArg = "QS Fix";
+    final String detArg = "Ad Detect";
+    final String cutArg = "Ad Cut";
+    final String ccArg = "captions";
+    final String encArg = "encode";
+    final String nameArg = "encodeName";
+    final String encodeNamesArg = "ENCODE_NAMES";
+
     /** single-job equivalent of tivoTab.startCB */
-    private void startJob(String tivoName, String recordingJsonOrFile) throws JSONException {
+    private void startJob(String tivoName, String recordingJsonOrFile, String settingsJson) throws JSONException {
         debug.print("");
 
         Stack<Hashtable<String, Object>> entries = new Stack<Hashtable<String, Object>>();
@@ -823,18 +911,80 @@ public void handleMyShows(Request req, Response resp) throws IOException {
             h.put("entry", data);
             entries.add(h);
         }
-
-        boolean metadata = config.gui.metadata.isSelected(),
-                decrypt = config.gui.decrypt.isSelected(),
-                qsfix = config.gui.qsfix.isSelected(),
-                twpdelete = config.gui.twpdelete.isSelected(), 
-                rpcdelete = config.gui.rpcdelete.isSelected(), 
-                comskip = config.gui.comskip.isSelected(), 
-                comcut = config.gui.comcut.isSelected(), 
-                captions = config.gui.captions.isSelected(), 
-                encode = config.gui.encode.isSelected(),
-                //push = config.gui.push.isSelected(),
-                custom = config.gui.custom.isSelected();
+        String encodeName;
+        int tsdownload;
+        boolean metadata,
+                decrypt,
+                qsfix,
+                twpdelete, 
+                rpcdelete, 
+                comskip, 
+                comcut, 
+                captions, 
+                encode,
+                //push,
+                custom;
+        if(settingsJson == null || settingsJson.trim().length() == 0) {
+         settingsJson = "{}";
+        }
+        JSONObject settings = new JSONObject(settingsJson);
+        
+        // these job items are not included in JSON settings currently
+        twpdelete = config.gui.twpdelete.isSelected(); 
+        rpcdelete = config.gui.rpcdelete.isSelected(); 
+        //push = config.gui.push.isSelected();
+        custom = config.gui.custom.isSelected();
+        
+        if(settings.has(tsArg)) {
+           if(settings.getBoolean(tsArg)) {
+              tsdownload = 1;
+           } else {
+              tsdownload = 0;
+           }
+        } else {
+           tsdownload = config.TSDownload;
+        }
+        if(settings.has(metaArg)) {
+           metadata = settings.getBoolean(metaArg);
+        } else {
+           metadata = config.gui.metadata.isSelected();
+        }
+        if(settings.has(decArg)) {
+           decrypt = settings.getBoolean(decArg);
+        } else {
+           decrypt = config.gui.decrypt.isSelected();
+        }
+        if(settings.has(qsArg)) {
+           qsfix = settings.getBoolean(qsArg);
+        } else {
+           qsfix = config.gui.qsfix.isSelected();
+        }
+        if(settings.has(detArg)) {
+           comskip = settings.getBoolean(detArg);
+        } else {
+           comskip = config.gui.comskip.isSelected();
+        }
+        if(settings.has(cutArg)) {
+           comcut = settings.getBoolean(cutArg);
+        } else {
+           comcut = config.gui.comcut.isSelected();
+        }
+        if(settings.has(ccArg)) {
+           captions = settings.getBoolean(ccArg);
+        } else {
+           captions = config.gui.captions.isSelected(); 
+        }
+        if(settings.has(encArg)) {
+           encode = settings.getBoolean(encArg);
+        } else {
+           encode = config.gui.encode.isSelected();
+        }
+        if(settings.has(nameArg)) {
+           encodeName = settings.getString(nameArg);
+        } else {
+           encodeName = null;
+        }
+    	
         // Launch jobs appropriately
         for (int j = 0; j < entries.size(); ++j) {
             Hashtable<String, Object> h = entries.get(j);
@@ -845,7 +995,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
                 h.put("metadata", metadata);
                 h.put("metadataTivo", false);
             }
-            h.put("TSDownload", config.TSDownload);
+            h.put("TSDownload", tsdownload);
             h.put("decrypt", decrypt);
             h.put("qsfix", qsfix);
             h.put("twpdelete", twpdelete);
@@ -854,6 +1004,9 @@ public void handleMyShows(Request req, Response resp) throws IOException {
             h.put("comcut", comcut);
             h.put("captions", captions);
             h.put("encode", encode);
+            if(encodeName != null) {
+               h.put("encodeName", encodeName);
+            }
             // h.put("push", push);
             h.put("custom", custom);
             jobMonitor.LaunchJobs(h);
@@ -887,6 +1040,35 @@ public void handleMyShows(Request req, Response resp) throws IOException {
          }
          resp.send(200, jobs.toString());
          return;
+      }
+      
+      if (params.containsKey("settings")) {
+         JSONObject settings = new JSONObject();
+// these job items are not included in JSON settings currently
+//          twpdelete = config.gui.twpdelete.isSelected(); 
+//          rpcdelete = config.gui.rpcdelete.isSelected(); 
+//          //push = config.gui.push.isSelected();
+//          custom = config.gui.custom.isSelected();
+          
+          try {
+            settings.put(tsArg, (config.TSDownload > 0));
+            settings.put(metaArg, config.gui.metadata.isSelected());
+            settings.put(decArg, config.gui.decrypt.isSelected());
+            settings.put(qsArg, config.gui.qsfix.isSelected());
+            settings.put(detArg, config.gui.comskip.isSelected());
+            settings.put(cutArg, config.gui.comcut.isSelected());
+            settings.put(ccArg, config.gui.captions.isSelected()); 
+            settings.put(encArg, config.gui.encode.isSelected());
+            if(encodeConfig.getEncodeName() != null) {
+               settings.put(nameArg, encodeConfig.getEncodeName());
+            }
+            settings.put(encodeNamesArg,config.ENCODE_NAMES);
+            resp.send(200, settings.toString());
+            return;
+          } catch (Exception e) {
+              resp.sendError(500, "getJobs - " + e.getMessage());
+              return;
+          }
       }
       
       if (params.containsKey("kill")) {
@@ -1057,7 +1239,25 @@ public void handleMyShows(Request req, Response resp) throws IOException {
                      message += name;
                   if (fileName != null)
                      message += fileName;
-                  resp.send(200, "<a href=\"" + returnFile + "\">" + message + "</a>");
+                  if(params.containsKey("json")) {
+                     String url = null;
+                     if(params.containsKey("url"))
+                        url = params.get("url");
+
+                     JSONObject jsonResult = new JSONObject();
+                     jsonResult.put("format",tc.format); // sort of from params
+                     jsonResult.put("playPath",returnFile);// (relative) url to play
+                     //jsonResult.put("segmentFile",tc.segmentFile); // disk location of file.
+
+                     jsonResult.put("sourceFile",tc.inputFile);// from file or url parameter
+                     jsonResult.put("videoFile",fileName);// from file parameter
+                     jsonResult.put("__url__",url);// from url parameter
+
+                     jsonResult.put("name",name); // from params (required if using url)
+                     resp.send(200, jsonResult.toString());
+                  } else {
+                     resp.send(200, "<a href=\"" + returnFile + "\">" + message + "</a>");
+                  }
                }
             }
          } catch (Exception e) {

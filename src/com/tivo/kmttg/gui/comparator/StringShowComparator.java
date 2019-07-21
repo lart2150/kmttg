@@ -21,7 +21,7 @@ package com.tivo.kmttg.gui.comparator;
 import java.util.Comparator;
 
 // Strip off leading price before regular string sort applied
-// “($1.99) Rizzoli & Isles [Ep 703] - Cops vs. Zombies”
+// "($1.99) Rizzoli & Isles [Ep 703] - Cops vs. Zombies"
 public class StringShowComparator implements Comparator<String> {
    public int compare(String o1, String o2) {
       if (o1 != null && o2 != null) {

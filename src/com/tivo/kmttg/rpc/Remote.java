@@ -19,45 +19,22 @@
 package com.tivo.kmttg.rpc;
 
 import java.io.BufferedWriter;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.URLEncoder;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
-import java.util.Random;
-import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -68,177 +45,92 @@ import com.tivo.kmttg.gui.sortable.sortableDuration;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
-import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class Remote {
-   public Boolean debug = com.tivo.kmttg.util.debug.enabled;
-   public String SchemaVersion = "14";
-   public String SchemaVersion_newer = "17";
-   public Boolean success = true;
-   private String IP = null;
-   private String cdata = null;
-   private String tivoName = null;
-   private Boolean away = false;
-   private int port = 1413;
-   private String MAK = null;
-   private int timeout = 120; // read timeout in secs
-   private int rpc_id = 0;
-   private int session_id = 0;
-   private SSLSocket socket = null;
-   private DataInputStream in = null;
-   private DataOutputStream out = null;
-   private SSLSocketFactory sslSocketFactory = null;
-   private int attempt = 0;
+public class Remote extends TiVoRPC {
+   public final Boolean success;
+   private final String tivoName;
+   private final boolean away;
    
-   public class NaiveTrustManager implements X509TrustManager {
-     // Doesn't throw an exception, so this is how it approves a certificate.
-     public void checkClientTrusted ( X509Certificate[] cert, String authType )
-                 throws CertificateException {}
-
-     // Doesn't throw an exception, so this is how it approves a certificate.
-     public void checkServerTrusted ( X509Certificate[] cert, String authType ) 
-        throws CertificateException {}
-
-     public X509Certificate[] getAcceptedIssuers () {
-        return new X509Certificate[0];
-     }
-   }
-   
-   public final void createSocketFactory() {
-     if ( sslSocketFactory == null ) {
-       try {
-          KeyStore keyStore = KeyStore.getInstance("PKCS12");
-          // This is default USA password
-          String password = "5vPNhg6sV4tD"; // expires 12/18/2020
-          //String password = "LwrbLEFYvG"; // expires 4/29/2018
-          InputStream keyInput;
-          if (cdata == null) {
-             // Installation dir cdata.p12 file takes priority if it exists
-             String cdata = config.programDir + "/cdata.p12";
-             if ( file.isFile(cdata) ) {
-                keyInput = new FileInputStream(cdata);
-                cdata = config.programDir + "/cdata.password";
-                if (file.isFile(cdata)) {
-                   Scanner s = new Scanner(new File(cdata));
-                   password = s.useDelimiter("\\A").next();
-                   s.close();
-                } else {
-                   error("cdata.p12 file present, but cdata.password is not");
-                }
-             } else {
-                // Read default USA cdata.p12 from kmttg.jar
-                keyInput = getClass().getResourceAsStream("/cdata.p12");
-             }
-          }
-          else
-             keyInput = new FileInputStream(cdata);
-          keyStore.load(keyInput, password.toCharArray());
-          keyInput.close();
-          KeyManagerFactory fac = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-          fac.init(keyStore, password.toCharArray());
-          SSLContext context = SSLContext.getInstance("TLS");
-          TrustManager[] tm = new TrustManager[] { new NaiveTrustManager() };
-          context.init(fac.getKeyManagers(), tm, new SecureRandom());
-          sslSocketFactory = context.getSocketFactory();
-       } catch (KeyManagementException e) {
-         error("KeyManagementException - " + e.getMessage()); 
-       } catch (NoSuchAlgorithmException e) {
-         error("NoSuchAlgorithmException - " + e.getMessage());
-       } catch (KeyStoreException e) {
-          error("KeyStoreException - " + e.getMessage());
-       } catch (FileNotFoundException e) {
-          error("FileNotFoundException - " + e.getMessage());
-       } catch (CertificateException e) {
-          error("CertificateException - " + e.getMessage());
-       } catch (IOException e) {
-          error("IOException - " + e.getMessage());
-       } catch (UnrecoverableKeyException e) {
-          error("UnrecoverableKeyException - " + e.getMessage());
-       }
-     }
+   /** perform a socket setup and auth. all public constructors call this. */
+   private Remote(String tivoName, boolean away, String IP, String mak, String programDir, int port, String cdata) {
+      super(IP, mak, programDir, port, cdata,
+            // oldSchema, debug
+            (config.rpcOld == 1), com.tivo.kmttg.util.debug.enabled);
+      // super calls RemoteInit which in turn calls Auth which is overridden in this class to also call Auth_web() or bodyId_get()
+      this.tivoName = tivoName;
+      this.away = away;
+      
+      // record the init result in the expected public field
+      this.success = getSuccess();
    }
    
    // This constructor designed to be use by kmttg
    public Remote(String tivoName) {
-      this.MAK = config.MAK;
-      String IP = config.TIVOS.get(tivoName);
-      if (IP == null)
-         IP = tivoName;
-      int use_port = port;
-      String wan_port = config.getWanSetting(tivoName, "rpc");
-      if (wan_port != null)
-         use_port = Integer.parseInt(wan_port);
-
-      RemoteInit(IP, use_port, MAK);
+      this(null, false, // doesn't actually set this.tivoName
+            // if config for tivoName is null, pass tivoName as IP, else config
+            config.TIVOS.get(tivoName) == null ? 
+                  tivoName 
+                  : config.TIVOS.get(tivoName), 
+                  config.MAK, config.programDir, 
+            // if "rpc" WanSetting for tivoName is null, use default port, else WanSetting
+            config.getWanSetting(tivoName, "rpc") == null ?
+                  -1 // use default port
+                  : Integer.parseInt(config.getWanSetting(tivoName, "rpc")),
+                  null);
    }
    
-   // This constructor designed to be use by kmttg
+   /**
+    * This constructor designed to be use by kmttg.
+    * Remote that uses middlemind configuration explicitly - thus calling Auth_web().
+    * @param tivoName
+    * @param away always true.  Behavior not defined if this is false.
+    */
    public Remote(String tivoName, Boolean away) {
-      this.tivoName = tivoName;
-      this.away = away;
-      this.MAK = config.MAK;
-      String IP = config.middlemind_host;
-      int port = config.middlemind_port;
-      RemoteInit(IP, port, MAK);
+      this(tivoName, away, 
+            config.middlemind_host, config.MAK, config.programDir, 
+            config.middlemind_port, null);
    }
    
    // This constructor designed for use without kmttg config
    public Remote(String IP, int port, String MAK, String cdata) {
-      this.MAK = MAK;
-      this.cdata = cdata;
-      RemoteInit(IP, port, MAK);
+      this(null, false,
+            IP, MAK, config.programDir, 
+            port, cdata);
    }
    
    // This constructor designed for use without kmttg config
    public Remote(String tivoName, String IP, int port, String MAK, String cdata) {
-      this.tivoName = tivoName;
-      this.MAK = MAK;
-      this.cdata = cdata;
-      RemoteInit(IP, port, MAK);
+      this(tivoName, false,
+            IP, MAK, config.programDir, 
+            port, cdata);
    }
    
-   private void RemoteInit(String IP, int port, String MAK) {
-      this.IP = IP;
-      this.port = port;
-      createSocketFactory();
-      session_id = new Random(0x27dc20).nextInt();
-      try {
-         socket = (SSLSocket) sslSocketFactory.createSocket(IP, port);
-         socket.setNeedClientAuth(true);
-         socket.setEnableSessionCreation(true);
-         socket.setSoTimeout(timeout*1000);
-         socket.startHandshake();
-         in = new DataInputStream(socket.getInputStream());
-         out = new DataOutputStream(socket.getOutputStream());
-         if (IP.endsWith("tivo.com")) {
-            if ( ! Auth_web() ) {
-               success = false;
-               return;
-            }
-         } else {
-            if ( ! Auth() ) {
-               success = false;
-               return;
-            }
-            bodyId_get();
-         }
-      } catch (Exception e) {
-         if (attempt == 0 && e.getMessage() != null && e.getMessage().contains("UNKNOWN ALERT")) {
-            // Try it again as this could be temporary glitch
-            attempt = 1;
-            log.warn("RemoteInit 2nd attempt...");
-            RemoteInit(IP, port, MAK);
-            return;
-         }
-         error("RemoteInit - (IP=" + IP + ", port=" + port + "): " + e.getMessage());
-         error(Arrays.toString(e.getStackTrace()));
-         success = false;
-      }
+   /**
+    * Override performs a tivo.com authentication if IP ends with tivo.com, else performs default followed by a bodyId_get()
+    */
+   @Override
+   protected boolean Auth(String IP, String MAK) {
+     if (IP.endsWith("tivo.com")) {
+       if ( ! Auth_web() ) {
+          return false;
+       }
+     } else {
+       if ( ! super.Auth(IP, MAK) ) {
+          return false;
+       }
+       bodyId_get();
+     }
+     return true;
    }
    
-   // NOTE: This retrieves and stores bodyId in config hashtable if not previously stored
+   
+   /**
+    * Returns cached bodyId or performs a bodyConfigSearch and returns the bodyId.
+    * NOTE: This retrieves and stores bodyId in config hashtable if not previously stored
+    * @return bodyId or "-"
+    */
    public String bodyId_get() {
       String id = config.bodyId_get(IP, port);
       if (id.equals("")) {
@@ -263,63 +155,11 @@ public class Remote {
          id = "-";
       return id;
    }
-   
-   public String RpcRequest(String type, Boolean monitor, JSONObject data) {
-      try {
-         String ResponseCount = "single";
-         if (monitor)
-            ResponseCount = "multiple";
-         String bodyId = "";
-         if (data.has("bodyId"))
-            bodyId = (String) data.get("bodyId");
-         String schema = SchemaVersion_newer;
-         if (config.rpcOld == 1)
-            schema = SchemaVersion;
-         rpc_id++;
-         String eol = "\r\n";
-         String headers =
-            "Type: request" + eol +
-            "RpcId: " + rpc_id + eol +
-            "SchemaVersion: " + schema + eol +
-            "Content-Type: application/json" + eol +
-            "RequestType: " + type + eol +
-            "ResponseCount: " + ResponseCount + eol +
-            "BodyId: " + bodyId + eol +
-            "X-ApplicationName: Quicksilver" + eol +
-            "X-ApplicationVersion: 1.2" + eol +
-            String.format("X-ApplicationSessionId: 0x%x", session_id) + eol;
-         data.put("type", type);
 
-         String body = data.toString();
-         String start_line = String.format("MRPC/2 %d %d", headers.length()+2, body.length());
-         return start_line + eol + headers + eol + body + "\n";
-      } catch (Exception e) {
-         error("RpcRequest error: " + e.getMessage());
-         return null;
-      }
-   }
-   
-   private Boolean Auth() {
-      try {
-         JSONObject credential = new JSONObject();
-         JSONObject h = new JSONObject();
-         credential.put("type", "makCredential");
-         credential.put("key", MAK);
-         h.put("credential", credential);
-         String req = RpcRequest("bodyAuthenticate", false, h);
-         if (Write(req) ) {
-            JSONObject result = Read();
-            if (result.has("status")) {
-               if (result.get("status").equals("success"))
-                  return true;
-            }
-         }
-      } catch (Exception e) {
-         error("rpc Auth error - " + e.getMessage());
-      }
-      return false;
-   }
-   
+   /**
+    * Perform a middlemind tivo.com bodyAuthenticate with configured username/password
+    * @return
+    */
    private Boolean Auth_web() {
       try {
          if (config.getTivoUsername() == null) {
@@ -335,7 +175,7 @@ public class Remote {
          h.put("credential", credential);
          String req = RpcRequest("bodyAuthenticate", false, h);
          if (Write(req) ) {
-            JSONObject result = Read();
+            JSONObject result = ReadRemote();
             if (result.has("status")) {
                if (result.get("status").equals("success")) {
                   // Look for tivoName bodyId in deviceId JSONArray
@@ -375,101 +215,43 @@ public class Remote {
       }
       return false;
    }
-   
-   public Boolean Write(String data) {
-      try {
-         if (debug) {
-            print("WRITE: " + data);
-         }
-         if (out == null)
-            return false;
-         out.write(data.getBytes());
-         out.flush();
-      } catch (IOException e) {
-         error("rpc Write error - " + e.getMessage());
-         return false;
-      }
-      return true;
-   }
-   
-   @SuppressWarnings("deprecation")
-   public JSONObject Read() {
-      String buf = "";
-      Integer head_len;
-      Integer body_len;
-      
-      try {
-         // Expect line of format: MRPC/2 76 1870
-         // 1st number is header length, 2nd number body length
-         buf = in.readLine();
-         if (debug) {
-            print("READ: " + buf);
-         }
-         if (buf != null && buf.matches("^.*MRPC/2.+$")) {
-            String[] split = buf.split(" ");
-            head_len = Integer.parseInt(split[1]);
-            body_len = Integer.parseInt(split[2]);
-            
-            byte[] headers = new byte[head_len];
-            readBytes(headers, head_len);
-   
-            byte[] body = new byte[body_len];
-            readBytes(body, body_len);
-            
-            if (debug) {
-               print("READ: " + new String(headers) + new String(body));
-            }
-            
-            // Pull out IsFinal value from header
-            Boolean IsFinal;
-            buf = new String(headers, "UTF8");
-            if (buf.contains("IsFinal: true"))
-               IsFinal = true;
-            else
-               IsFinal = false;
-            
-            // Return json contents with IsFinal flag added
-            buf = new String(body, "UTF8");
-            JSONObject j = new JSONObject(buf);
-            if (j.has("type") && j.getString("type").equals("error")) {
-               error("RPC error response:\n" + j.toString(3));
-               if (j.has("text") && j.getString("text").equals("Unsupported schema version")) {
-                  // Revert to older schema version for older TiVo software versions
-                  log.warn("Reverting to older RPC schema version - try command again.");
-                  config.rpcOld = 1;
-                  config.save();
-               }
-               return null;
-            }
-            j.put("IsFinal", IsFinal);
-            return j;
 
-         }         
+   /**
+    * Perform {@link #Read()}, if rpcOld got set, update config, return null if the result is an error.
+    * @return null if there was an error, otherwise the response.
+    */
+   private synchronized JSONObject ReadRemote() {
+      boolean rpcPre = rpcOld;
+      
+      // do the actual read
+      JSONObject result = Read();
+      
+      // update config if rpcOld was changed as a result of the Read.
+      // note, that also means this will have been an error so null is returned below.
+      if (!rpcPre && rpcOld) {
+         config.rpcOld = 1;
+         config.save();
+      }
+      
+      // expecting null result for errors.
+      try {
+         if (result.has("type") && result.getString("type").equals("error")) {
+            return null;
+         }
       } catch (Exception e) {
          error("rpc Read error - " + e.getMessage());
          return null;
       }
-      return null;
+      
+      return result;
    }
    
+   /**
+    * true if this Remote is connected via middlemind 
+    * (means {@link #Remote(String, Boolean)} constructor was used (and passed true)) 
+    */
    public Boolean awayMode() {
       return away;
-   }
-   
-   private void readBytes(byte[] body, int len) throws IOException {
-      int bytesRead = 0;
-      while (bytesRead < len) {
-         bytesRead += in.read(body, bytesRead, len - bytesRead);
-      }
-   }
-   
-   public void disconnect() {
-      try {
-         if (out != null) out.close();
-         if (in != null) in.close();
-      } catch (IOException e) {
-         error("rpc disconnect error - " + e.getMessage());
-      }
    }
    
    // RPC command set
@@ -557,14 +339,6 @@ public class Remote {
             json.put("noLimit", "true");
             req = RpcRequest("uiDestinationInstanceSearch", false, json);
          }
-//         else if (type.equals("Uidestinations")) {
-//             // List available classic ui destinations for uiNavigate
-//             //json.put("bodyId", bodyId_get());
-//             json.put("uiDestinationType", "classicui");
-//             json.put("levelOfDetail", "high");
-//             json.put("noLimit", "true");
-//             req = RpcRequest("uiDestinationInstanceSearch", false, json);
-//          }
          else if (type.equals("Delete")) {
             // Delete an existing recording
             // Expects "recordingId" of type JSONArray in json
@@ -960,8 +734,9 @@ public class Remote {
          }
          
          if (req != null) {
-            if ( Write(req) )
-               return Read();
+            if ( Write(req) ) {
+               return ReadRemote();
+            }
             else
                return null;
          } else {
@@ -1769,7 +1544,7 @@ public class Remote {
       long stop = start + day_increment;
       try {
          // Set shorter timeout in case some requests fail
-         socket.setSoTimeout(20*1000);
+         setSoTimeout(20*1000);
          // Search 1 day at a time
          int item = 0;
          int total_items = total_days*channelNumbers.length();
@@ -3062,6 +2837,12 @@ public class Remote {
          for (int i=0; i<sequence.length; ++i) {
             JSONObject json = new JSONObject();
             if (sequence[i].matches("^[0-9]")) {
+//TODO future replacement for above line.
+//            // TODO why is this different? remotecontrol.RC_keyPress first sends an event of "text" before the ascii/value pair.
+//            // single-character "command" is a keyboard key. 
+//            if(sequence[i].length() == 1) {
+//                json.put("event", "text");
+//                result = Command("keyEventSend", json);
                json.put("event", "ascii");
                json.put("value", sequence[i].toCharArray()[0]);
             } else {
@@ -3252,12 +3033,19 @@ public class Remote {
       }
    }
       
-   private void print(String message) {
+   @Override
+   protected void print(String message) {
       log.print(message);
    }
    
-   private void error(String message) {
+   @Override
+   protected void error(String message) {
       log.error(message);
+   }
+   
+   @Override
+   protected void warn(String message) {
+      log.warn(message);
    }
 
    /**

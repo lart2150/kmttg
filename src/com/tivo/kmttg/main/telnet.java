@@ -28,11 +28,13 @@ import java.net.UnknownHostException;
 import com.tivo.kmttg.util.log;
 
 public class telnet {
+   public static final int DEFAULT_BUTTON_INTERVAL = 100;
+   
    private String IP = null;
    private int port = 31339;
    private Socket socket = null;
    private int timeout = 5;
-   private int button_interval = 100;
+   private int button_interval = DEFAULT_BUTTON_INTERVAL;
    private PrintStream pout = null;
    public Boolean success = true;
    private String valid[] = {
@@ -41,18 +43,17 @@ public class telnet {
        "LEFT", "UP", "RIGHT", "DOWN", "SELECT", "THUMBSUP", "THUMBSDOWN",
        "CHANNELUP", "CHANNELDOWN", "RECORD", "CLEAR", "ENTER",
        "PLAY", "REVERSE", "PAUSE", "FORWARD", "REPLAY", "SLOW", "ADVANCE",
-       "CC_ON", "CC_OFF", "STANDBY", "NOWSHOWING", "FIND_REMOTE"
+       "CC_ON", "CC_OFF", "STANDBY", "NOWSHOWING", "FIND_REMOTE",
+       "NETFLIX", "VIDEO_ON_DEMAND", "EXIT", "SEARCH"
    };
    
    // Constructor for dual tuner channel change
    public telnet(String IP, int pause_time, int button_interval, String[] seq1, String[] seq2) {
-      this.IP = IP;
-      this.button_interval = button_interval;
       try {
-         telnet t1 = new telnet(IP, seq1);
+         telnet t1 = new telnet(IP, seq1, button_interval);
          if (t1.success) {
             Thread.sleep(1000*pause_time);
-            t1 = new telnet(IP, seq2);
+            t1 = new telnet(IP, seq2, button_interval);
             success = t1.success;
          } else {
             success = false;
@@ -65,8 +66,20 @@ public class telnet {
 
    // Constructor for single sequence
    public telnet(String IP, String[] buttons) {
+	   this(IP, buttons, DEFAULT_BUTTON_INTERVAL);
+   }
+   /** Constructor for single sequence with custom interval */
+   public telnet(String IP, String[] buttons, int button_interval) {
       this.IP = IP;
+      this.button_interval = button_interval;
       success = send(buttons);
+      disconnect();
+   }
+   
+   /** Constructor to run a single unvalidated, unmapped command */
+   public telnet(String IP, String command) {
+      this.IP = IP;
+      success = write(command);
       disconnect();
    }
    
@@ -80,17 +93,36 @@ public class telnet {
          mapped = "KEYBOARD LSHIFT\rKEYBOARD " + code;
          return mapped;
       }
-      if (code.equals("*")) {
-         mapped = "KEYBOARD LSHIFT\rKEYBOARD NUM8";
-         return mapped;
-      }
-      if (code.equals("_")) {
-         mapped = "KEYBOARD LSHIFT\rKEYBOARD MINUS";
-         return mapped;
-      }
-      if (code.equals("&")) {
-         mapped = "KEYBOARD LSHIFT\rKEYBOARD NUM7";
-         return mapped;
+      if (code.length() == 1) {
+         boolean shift = true;
+         switch(code.charAt(0)) {
+         case '_': code = "MINUS";break;
+         case '+': code = "EQUALS";break;
+         case '{': code = "LBRACKET";break;
+         case '}': code = "RBRACKET";break;
+         case '|': code = "BACKSLASH";break;
+         case ':': code = "SEMICOLON";break;
+         case '"': code = "QUOTE";break;
+         case '<': code = "COMMA";break;
+         case '>': code = "PERIOD";break;
+         case '?': code = "SLASH";break;
+         case '~': code = "BACKQUOTE";break;
+         case '!': code = "NUM1";break;
+         case '@': code = "NUM2";break;
+         case '#': code = "NUM3";break;
+         case '$': code = "NUM4";break;
+         case '%': code = "NUM5";break;
+         case '^': code = "NUM6";break;
+         case '&': code = "NUM7";break;
+         case '*': code = "NUM8";break;
+         case '(': code = "NUM9";break;
+         case ')': code = "NUM0";break;
+         default: shift = false;break;
+         }
+         if (shift) {
+            mapped = "KEYBOARD LSHIFT\rKEYBOARD "+code;
+            return mapped;
+         }
       }
       mapped = code.toUpperCase();
       // [0-9] maps to NUM[0-9]
