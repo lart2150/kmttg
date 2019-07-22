@@ -279,7 +279,8 @@ public class AutoSkip {
    }*/
    
    // RPC query to get current playback position
-   // NOTE: Returns -1 for speed != 100 to avoid any skipping during trick play
+   // NOTE: Returns -1 for speed < 100  or speed > 190 to avoid any skipping during trick play
+   // but allowing skipping during quickmode
    private synchronized long getPosition() {
       debug.print("");
       if (r==null || ! monitor) return -1;
@@ -298,12 +299,14 @@ public class AutoSkip {
       }
       if (reply != null && reply.has("position")) {
          try {
-            // DEBUG log.print("reply=" + reply.toString(3));  // TODO
+            // DEBUG log.print("reply=" + reply.toString(3));
             // DEBUG JSONObject w = r.Command("whatsOnSearch", new JSONObject());
             // DEBUG log.print("w=" + w.toString(3));
             if (reply.has("speed")) {
+               // Check if fast forward (>190) or slow motion (<100) are in play,
+               // but allow normal (==100) or quickmode (>=110 && <=190)
                int speed = reply.getInt("speed");
-               if (speed != 100)
+               if (!(speed >= 100 && speed <= 190))
                   return -1;
             }
             return reply.getLong("position");
