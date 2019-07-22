@@ -307,7 +307,7 @@ public class remotecontrol {
          }
       });
 
-    Button search_command = new CustomButton("Search...", "Search for entered title", null);
+    Button search_command = new CustomButton("Search...", "Search prompt", null);
     panel_controls.getChildren().add(search_command);
     search_command.setLayoutX(500);
     search_command.setLayoutY(130);
@@ -832,9 +832,9 @@ public class remotecontrol {
          });
       }
       
-      public CustomButton(String label, String toolTip, String[] macro) {
+      public CustomButton(String label, String toolTipKey, String[] macro) {
          super(label);
-         setTooltip(tooltip.getToolTip(toolTip));
+         setTooltip(tooltip.getToolTip(toolTipKey));
          if (macro != null)
             setMacroCB(this, macro);
          setStyle(STYLE_LABEL1);

@@ -760,6 +760,11 @@ public class tooltip {
          text += "Make remote control play tune (for supported TiVo remote models only).<br>";
          text += "NOTE: This uses telnet protocol only since there is no RPC equivalent.";
       }
+      else if (component.equals("Search prompt")){
+         text = "<b>Search for title</b><br>";
+         text += "Opens a prompt for text, then launch TiVo Search page and type the text you enter in the prompt.<br>";
+         text += "NOTE: Sometimes the TiVo drops a few letters while starting the Search page.";
+      }
       else if (component.contains("SPS")) {
          text = util.SPS.get(component + "_tooltip");
       }
