@@ -50,8 +50,9 @@ public class TiVoRPC {
    
    private Boolean success = true;
    
-   protected String IP = null;
-   protected int port = DEFAULT_PORT;
+   protected final String tivoName;
+   protected final String IP;
+   protected final int port;
    
    private String cdata = null;
    private String programDir;
@@ -79,11 +80,12 @@ public class TiVoRPC {
    }
    
    public TiVoRPC(String IP, String mak, String programDir) {
-      this(IP, mak, programDir, -1, null, false, false);
+      this(null, IP, mak, programDir, -1, null, false, false);
    }
    
    /**
     * Establish an authorized RPC connection.  Check {@link #getSuccess()} for result.
+    * @param tivoName the "friendly name" of the TiVo device - not required by default implementation
     * @param IP address to which socket will be connected.
     * @param mak Media Access Key used in authentication
     * @param programDir folder containing cdata files.
@@ -92,15 +94,18 @@ public class TiVoRPC {
     * @param oldSchema true if old Schema should be used (automatically gets set to true if new schema fails on first try)
     * @param debug true if debugging should be performed.
     */
-   public TiVoRPC(String IP, String mak, String programDir, int port, String cdata, boolean oldSchema, boolean debug) {
+   public TiVoRPC(String tivoName, String IP, String mak, String programDir, int port, String cdata, boolean oldSchema, boolean debug) {
       this.cdata = cdata;
       this.programDir = programDir;
       this.rpcOld = oldSchema;
       this.debug = debug;
+      this.tivoName = tivoName;
+      this.IP = IP;
       if(port <= 0) port = DEFAULT_PORT;
-      RemoteInit(IP, port, mak);
+      this.port = port;
+      RemoteInit(mak);
    }
-
+   
    /**
     * The result of initialization
     * @return true if the connection was established.
@@ -252,9 +257,7 @@ public class TiVoRPC {
     }
 
     /** perform a (non-web) socket setup and auth.  should be followed by If getSuccess() bodyId_get() */
-    private void RemoteInit(String IP, int port, String MAK) {
-       this.IP = IP;
-       this.port = port;
+    private void RemoteInit(String MAK) {
        createSocketFactory();
        //TODO this is going to produce the exact same session_id in every instance.  Should seed Random with e.g. the current time.
        session_id = new Random(0x27dc20).nextInt();
@@ -267,14 +270,14 @@ public class TiVoRPC {
           in = new DataInputStream(socket.getInputStream());
           out = new DataOutputStream(socket.getOutputStream());
           
-          success = Auth(IP, MAK);
+          success = Auth(MAK);
           
        } catch (Exception e) {
           if (attempt == 0 && e.getMessage() != null && e.getMessage().contains("UNKNOWN ALERT")) {
              // Try it again as this could be temporary glitch
              attempt = 1;
              warn("RemoteInit 2nd attempt...");
-             RemoteInit(IP, port, MAK);
+             RemoteInit(MAK);
              return;
           }
           error("RemoteInit - (IP=" + IP + ", port=" + port + "): " + e.getMessage());
@@ -286,15 +289,10 @@ public class TiVoRPC {
 
     /**
      * default implementation: perform a bodyAuthenticate RPC request to the connected device
-     * @param IP not used in default implementation
      * @param MAK the makCredential to use in the bodyAuthenticate
      * @return true if response status equals "success"
      */
-   protected boolean Auth(String IP, String MAK) {
-     return Auth(MAK);
-   }
-   
-   private boolean Auth(String MAK) {
+   protected boolean Auth(String MAK) {
        try {
           JSONObject credential = new JSONObject();
           JSONObject h = new JSONObject();

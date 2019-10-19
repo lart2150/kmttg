@@ -50,16 +50,14 @@ import com.tivo.kmttg.util.string;
 
 public class Remote extends TiVoRPC {
    public final Boolean success;
-   private final String tivoName;
    private final boolean away;
    
    /** perform a socket setup and auth. all public constructors call this. */
    private Remote(String tivoName, boolean away, String IP, String mak, String programDir, int port, String cdata) {
-      super(IP, mak, programDir, port, cdata,
+      super(tivoName, IP, mak, programDir, port, cdata,
             // oldSchema, debug
             (config.rpcOld == 1), com.tivo.kmttg.util.debug.enabled);
       // super calls RemoteInit which in turn calls Auth which is overridden in this class to also call Auth_web() or bodyId_get()
-      this.tivoName = tivoName;
       this.away = away;
       
       // record the init result in the expected public field
@@ -69,15 +67,9 @@ public class Remote extends TiVoRPC {
    // This constructor designed to be use by kmttg
    public Remote(String tivoName) {
       this(null, false, // doesn't actually set this.tivoName
-            // if config for tivoName is null, pass tivoName as IP, else config
-            config.TIVOS.get(tivoName) == null ? 
-                  tivoName 
-                  : config.TIVOS.get(tivoName), 
-                  config.MAK, config.programDir, 
-            // if "rpc" WanSetting for tivoName is null, use default port, else WanSetting
-            config.getWanSetting(tivoName, "rpc") == null ?
-                  -1 // use default port
-                  : Integer.parseInt(config.getWanSetting(tivoName, "rpc")),
+            getIPForTivo(tivoName),
+            config.MAK, config.programDir, 
+            getPortForTivo(tivoName),
                   null);
    }
    
@@ -107,17 +99,39 @@ public class Remote extends TiVoRPC {
             port, cdata);
    }
    
+   private static String getIPForTivo(String tivoName) {
+      String tivoIP = config.TIVOS.get(tivoName);
+
+      // if config for tivoName is null, pass tivoName as IP, else config
+      if (tivoIP != null) {
+         return tivoIP;
+      } else {
+         return tivoName;
+      }
+   }
+   
+   private static int getPortForTivo(String tivoName) {
+      String wanrpc = config.getWanSetting(tivoName, "rpc");
+      
+      // if "rpc" WanSetting for tivoName is null, use default port, else WanSetting
+      if (wanrpc != null) {
+         return Integer.parseInt(wanrpc);
+      } else {
+         return -1; // use default port
+      }
+   }
+
    /**
     * Override performs a tivo.com authentication if IP ends with tivo.com, else performs default followed by a bodyId_get()
     */
    @Override
-   protected boolean Auth(String IP, String MAK) {
+   protected boolean Auth(String MAK) {
      if (IP.endsWith("tivo.com")) {
        if ( ! Auth_web() ) {
           return false;
        }
      } else {
-       if ( ! super.Auth(IP, MAK) ) {
+       if ( ! super.Auth(MAK) ) {
           return false;
        }
        bodyId_get();
