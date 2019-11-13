@@ -77,7 +77,10 @@ end if
 
 '  Decide on output types
 if ( ver = 6 ) then
-    profileName = "Transport Stream"
+    profileName = "Program Stream"
+    if ( c = "mpegts" ) then
+        profileName = "Transport Stream"
+    end if
     if ( c = "mp4" ) then
         profileName = "MP4"
     end if
