@@ -207,8 +207,8 @@ public class TiVoRPC {
         try {
            KeyStore keyStore = KeyStore.getInstance("PKCS12");
            // This is default USA password
-           String password = "5vPNhg6sV4tD"; // expires 12/18/2020
-           //String password = "LwrbLEFYvG"; // expires 4/29/2018
+           String password = "XF7x4714qw"; // expires 12/11/2022
+           //String password = "5vPNhg6sV4tD"; // expires 12/18/2020
            InputStream keyInput;
            if (cdata == null) {
               // Installation dir cdata.p12 file takes priority if it exists
