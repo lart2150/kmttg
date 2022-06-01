@@ -26,6 +26,7 @@ import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
+import com.tivo.kmttg.gui.JavaFX;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class kmttg {
@@ -36,6 +37,8 @@ public class kmttg {
    static Boolean autoconflicts = false; // Special batch mode run for RPC conflicts
    static String autoskip = null; // Special batch mode for AutoSkip from SkipMode
    static String autoskipService = null; // Special batch mode for AutoSkip service
+   static String seasonPassTivo = null; // Special batch mode for exporting the sesonpass list to a file
+   static String seasonPassFile = null; //Special batch mode for exporting the sesonpass list to a file
       
    public static void main(String[] argv) {
       debug.enabled = false;
@@ -54,6 +57,11 @@ public class kmttg {
       
       // Java 7 bug workaround to avoid stacktrace when switching to Remote Guide tab
       System.getProperties().setProperty("java.util.Arrays.useLegacyMergeSort", "true");
+      
+      if (!JavaFX.checkForJavaFX()) {
+    	  System.err.println(JavaFX.message);
+    	  System.exit(-100);
+      }
       
       // Parse command lines and set options accordingly
       getopt(argv);
@@ -107,6 +115,10 @@ public class kmttg {
             log.print("Processing AutoSkip from SkipMode for tivo '" + autoskip + "'");
             SkipManager.visualDetectBatch(autoskip);
             System.exit(0);
+    	   } else if (seasonPassTivo != null && seasonPassFile != null) {
+    		_startingUp = false;
+    		SeasonPassExport.SaveToFile(seasonPassTivo, seasonPassFile);
+    		System.exit(0);
     	   } else {
        	   // Upon startup, try and load saved queue. Must be done before starting auto loop
            	if (config.persistQueue)
@@ -150,6 +162,14 @@ public class kmttg {
             autoskip = argv[i++];
             gui_mode = false;
          }
+         else if (arg.equals("-sp")) {
+        	seasonPassTivo = argv[i++];
+            gui_mode = false;
+         }
+         else if (arg.equals("-spf")) {
+            seasonPassFile = argv[i++];
+            gui_mode = false;
+         }
          else if (arg.equals("-v")) {
             gui_mode = false;
             String[] s = config.kmttg.split("\\s+");
@@ -170,6 +190,7 @@ public class kmttg {
       System.out.println("-k \"tivoName\" => Run background mode AutoSkip service for given TiVo\n");
       System.out.println("-k all => Run background mode AutoSkip service for all eligible TiVos\n");
       System.out.println("-s \"tivoName\" => Process AutoSkip from SkipMode for given TiVo\n");
+      System.out.println("-sp \"tivoName\" -spf \"Backup.sp\" => Export the Season Pass list to Backup.sp\n");
       System.out.println("-v => Print version and exit\n");
       System.exit(0);
    }   

@@ -183,9 +183,15 @@ public class Remote extends TiVoRPC {
 
          JSONObject credential = new JSONObject();
          JSONObject h = new JSONObject();
-         credential.put("type", "mmaCredential");
-         credential.put("username", config.getTivoUsername());
-         credential.put("password", config.getTivoPassword());
+         JSONObject domainToken = new JSONObject();
+         domainToken.put("domain", "tivo");
+         domainToken.put("type", "domainToken");
+         domainToken.put("token", config.getTivoUsername());
+         
+         credential.put("type", "domainTokenCredential");
+         credential.put("domainToken", domainToken);
+//         credential.put("username", config.getTivoUsername());
+//         credential.put("password", config.getTivoPassword());
          h.put("credential", credential);
          String req = RpcRequest("bodyAuthenticate", false, h);
          if (Write(req) ) {

@@ -42,6 +42,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.embed.swing.JFXPanel;
 import javafx.util.Callback;
 
 import com.tivo.kmttg.JSON.JSONArray;
@@ -921,5 +922,34 @@ public class spTable extends TableMap {
           job.remote_orderIds  = order;
           jobMonitor.submitNewJob(job);
        }
+    }
+    
+    public static void SaveToFile(String tivoName, String file) {
+    	try  {
+        JFXPanel p = new JFXPanel();//need to init javafx
+		spTable tab = new spTable();
+    	
+        jobData job = new jobData();
+        job.source      = tivoName;
+        job.tivoName    = tivoName;
+        job.type        = "remote";
+        job.name        = "Remote";
+        job.remote_sp   = true;
+        job.sp          = tab;
+        log.warn("Querying '" + tivoName + "' for SP list");
+        jobMonitor.submitNewJob(job);
+        
+        boolean finished = false;
+        while (job.check()) {
+        	log.warn("tick");
+        	try {
+        		Thread.sleep(5000);
+        	} catch (Exception e) {}
+        }
+        tab.SPListSave(tivoName, file);
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		System.exit(-1);
+    	}
     }
 }

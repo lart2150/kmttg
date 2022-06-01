@@ -207,7 +207,8 @@ public class TiVoRPC {
         try {
            KeyStore keyStore = KeyStore.getInstance("PKCS12");
            // This is default USA password
-           String password = "XF7x4714qw"; // expires 12/11/2022
+           String password = "vlZaKoduom"; // expires 2024
+           //String password = "XF7x4714qw"; // expires 12/11/2022
            //String password = "5vPNhg6sV4tD"; // expires 12/18/2020
            InputStream keyInput;
            if (cdata == null) {
