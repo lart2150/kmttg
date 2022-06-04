@@ -176,9 +176,23 @@ public class Remote extends TiVoRPC {
     */
    private Boolean Auth_web() {
       try {
-         if (config.getTivoUsername() == null) {
+         if (config.getTivoUsername() == null || config.getTivoPassword() == null) {
             log.error("tivo.com username & password not set in kmttg or pyTivo config");
             return false;
+         }
+         if (config.isDomainTokenExpired() || config.getDomainToken() == null) {
+        	 log.warn("Domain Token expired refreshing token");
+        	 GetDomainToken getDT = new GetDomainToken();
+        	 try {
+        		 getDT.getToken();
+        	 } catch (Exception e) {
+        		 log.error("Failed to get domain token.  Check your tivo.com username or password.");
+        		 return false;
+        	 }
+        	 if (config.isDomainTokenExpired()) {
+        		 log.error("Failed to get domain token.  Check your tivo.com username or password.");
+        		 return false;
+        	 }
          }
 
          JSONObject credential = new JSONObject();
@@ -186,7 +200,7 @@ public class Remote extends TiVoRPC {
          JSONObject domainToken = new JSONObject();
          domainToken.put("domain", "tivo");
          domainToken.put("type", "domainToken");
-         domainToken.put("token", config.getTivoUsername());
+         domainToken.put("token", config.getDomainToken());
          
          credential.put("type", "domainTokenCredential");
          credential.put("domainToken", domainToken);

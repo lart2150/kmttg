@@ -1,7 +1,11 @@
 package com.tivo.kmttg.rpc;
 
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.nio.ByteBuffer;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.core5.http.ClassicHttpRequest;
@@ -35,7 +39,8 @@ public class GetDomainToken {
 	public Cookie getToken() throws Exception {
 		HttpGet httpget = new HttpGet("https://online.tivo.com/start/watch/JustForMeTVE?forceAuth=1");
 		CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(httpget);
-		String responseBody = new String(response.getEntity().getContent().readAllBytes());
+		
+		String responseBody = readResponseBody(response);
 		//System.out.println(responseBody);
 		
 		Pattern pattern = Pattern.compile("name=\\\"SAMLRequest\\\" value=\\\"([^\\\"]*)\\\"", Pattern.MULTILINE);
@@ -64,7 +69,7 @@ public class GetDomainToken {
         URI redirectUrl = redirectLocations.get(redirectLocations.size()-1);
         
         
-		responseBody = new String(response.getEntity().getContent().readAllBytes());
+		responseBody = readResponseBody(response);
 		//System.out.println(responseBody);
 		
         pattern = Pattern.compile("auraConfig = ([^;]*);", Pattern.MULTILINE);
@@ -95,7 +100,7 @@ public class GetDomainToken {
                 .build();
         
         response = (CloseableHttpResponse) httpClient.execute(login);
-		responseBody = new String(response.getEntity().getContent().readAllBytes());
+		responseBody = readResponseBody(response);
 		//System.out.println(responseBody);
 		JSONObject loginResponse = new JSONObject(responseBody);
 		if (! (loginResponse.get("events") instanceof JSONArray) ) {
@@ -106,7 +111,7 @@ public class GetDomainToken {
 		
 		httpget = new HttpGet(frontDoor);
 		response = (CloseableHttpResponse) httpClient.execute(httpget);
-		responseBody = new String(response.getEntity().getContent().readAllBytes());
+		responseBody = readResponseBody(response);
 		
         pattern = Pattern.compile("window\\.location\\.href=\\\"([^\\\"]*)\\\"", Pattern.MULTILINE);
         matcher = pattern.matcher(responseBody);
@@ -115,7 +120,7 @@ public class GetDomainToken {
         
 		httpget = new HttpGet("https://tivoidp.tivo.com" + frontDoorResponse);
 		response = (CloseableHttpResponse) httpClient.execute(httpget);
-		responseBody = new String(response.getEntity().getContent().readAllBytes());
+		responseBody = readResponseBody(response);
 		
         pattern = Pattern.compile("name=\\\"SAMLResponse\\\" value=\\\"([^\\\"]*)\\\"", Pattern.MULTILINE);
         matcher = pattern.matcher(responseBody);
@@ -133,19 +138,31 @@ public class GetDomainToken {
                 .build();
         
         response = (CloseableHttpResponse) httpClient.execute(login);
-		responseBody = new String(response.getEntity().getContent().readAllBytes());
-		
-		
-		for (Cookie cookie : this.cookieStore.getCookies()) {
-			if (cookie.getName().equals("domainToken")) {
-				return cookie;
-			}
-		}
-		return null;
+        responseBody = readResponseBody(response);
+        for (Cookie cookie : this.cookieStore.getCookies()) {
+        	if (cookie.getName().equals("domainToken")) {
+        		config.setDomainToken(cookie.getValue(), cookie.getExpiryDate().getTime());
+        		config.save();
+        		return cookie;
+        	}
+    	}
+        return null;
 	}
 
+	private String readResponseBody(CloseableHttpResponse response) throws UnsupportedOperationException, IOException {
+		ByteBuffer bb = ByteBuffer.allocate(1024*1024);
+		InputStream is = response.getEntity().getContent();
+		byte[] data = new byte[4096];
+		int read = 0;
+
+		while ((read = is.read(data, 0, data.length)) != -1) {
+		    bb.put(data, 0, read);
+		}
+		return new String(bb.array());
+	}
     
     public static void main(String args[]) throws Exception {
+    	//config.parse();
     	GetDomainToken dt = new GetDomainToken();
     	Cookie cookie = dt.getToken();
     	System.out.println(cookie);

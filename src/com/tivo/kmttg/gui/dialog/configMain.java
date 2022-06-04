@@ -66,6 +66,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.main.mdns;
+import com.tivo.kmttg.rpc.GetDomainToken;
 import com.tivo.kmttg.task.autotune;
 import com.tivo.kmttg.task.custom;
 import com.tivo.kmttg.util.debug;
@@ -81,6 +82,7 @@ public class configMain {
    
    private static Button add = null;
    private static Button del = null;
+   private static Button domain_token = null;
    private static Button share_add = null;
    private static Button share_del = null;
    private static Button OK = null;
@@ -431,6 +433,29 @@ public class configMain {
       } else {
          log.error("No tivo entries left to remove");
       }
+   }
+   
+   // Callback for tivo del button
+   private static void domainTokenCB() {
+	 log.warn("Refreshing token");
+	 Thread t = new Thread()
+	 {
+	     public void run() {
+	    	 GetDomainToken getDT = new GetDomainToken();
+	    	 try {
+	    		 getDT.getToken();
+	    	 } catch (Exception e) {
+	    		 log.error("Failed to get domain token.  Check your tivo.com username or password.");
+	    		 return;
+	    	 }
+	    	 if (config.isDomainTokenExpired()) {
+	    		 log.error("Failed to get domain token.  Check your tivo.com username or password.");
+	    		 return;
+	    	 }
+	    	 log.warn("Successfully got token");
+	     }
+	 };
+	 t.start();
    }
    
    // Callback for share del button
@@ -2251,6 +2276,7 @@ public class configMain {
 
       add = new Button();
       del = new Button();
+      domain_token = new Button();
       share_add = new Button();
       share_del = new Button();
       Label VRDexe_label = new Label();
@@ -2402,6 +2428,14 @@ public class configMain {
             delCB();
          }
       });
+      
+      domain_token.setText("Refresh Token"); 
+      domain_token.setOnAction(new EventHandler<ActionEvent>() {
+         public void handle(ActionEvent e) {
+        	 domainTokenCB();
+         }
+      });
+      
       
       share_add.setText("ADD"); 
       share_add.setOnAction(new EventHandler<ActionEvent>() {
@@ -2995,6 +3029,8 @@ public class configMain {
       gy++;
       tivo_panel.add(tivo_password_label, 0, gy);
       tivo_panel.add(tivo_password, 1, gy);
+      tivo_panel.add(domain_token, 4, gy);
+
 
       // autotune panel
       GridPane autotune_panel = new GridPane();
@@ -3616,7 +3652,8 @@ public class configMain {
       autotune_chan2.setTooltip(getToolTip("autotune_chan2"));
       autotune_tivoName.setTooltip(getToolTip("autotune_tivoName"));
       add.setTooltip(getToolTip("add")); 
-      del.setTooltip(getToolTip("del")); 
+      del.setTooltip(getToolTip("del"));
+      domain_token.setTooltip(getToolTip("domain_token")); 
       share_add.setTooltip(getToolTip("share_add")); 
       share_del.setTooltip(getToolTip("share_del")); 
       remove_tivo.setTooltip(getToolTip("remove_tivo"));
@@ -3810,9 +3847,13 @@ public class configMain {
          text =  "<b>DEL</b><br>";
          text += "Remove currently selected entry in <b>Tivos</b> list.";
       }
-      else if (component.equals("share_add")) {
-         text =  "<b>ADD</b><br>";
-         text += "Add specified <b>Share Name</b> and associated <b>Share Directory</b> to <b>Shares</b> list.";
+      else if (component.equals("del")) {
+          text =  "<b>DEL</b><br>";
+          text += "Remove currently selected entry in <b>Tivos</b> list.";
+       }
+      else if (component.equals("domain_token")) {
+         text =  "<b>Refresh Domain token</b><br>";
+         text += "Force a refresh of your domain token. This uses the tivo.com username and password.";
       }
       else if (component.equals("share_del")) {
          text =  "<b>DEL</b><br>";

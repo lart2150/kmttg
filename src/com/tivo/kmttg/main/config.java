@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -39,7 +40,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v2.4p";
+   public static String kmttg = "kmttg v2.5-l";
    
    // encoding related
    public static String encProfDir = "";
@@ -222,6 +223,8 @@ public class config {
    public static int middlemind_port = 443;
    private static String tivo_username = "";
    private static String tivo_password = "";
+   private static String tivo_domain_token = "";
+   private static long tivo_domain_token_expires = 0;
    
    // httpserver related
    public static int httpserver_enable = 0;
@@ -659,6 +662,24 @@ public class config {
    public static void setTivoPassword(String password) {
       tivo_password = password;
    }
+   
+   public static String getDomainToken() {
+      if (tivo_domain_token.length() == 0 && !isDomainTokenExpired())
+          return null;
+       return tivo_domain_token;
+   }
+   
+   public static boolean isDomainTokenExpired() {
+	   System.out.println("DomainToken: " + tivo_domain_token_expires);
+	   System.out.println("now: " + (new Date()).getTime());
+	   return (new Date()).getTime() > tivo_domain_token_expires;
+   }
+   
+   public static void setDomainToken(String token, long expires) {
+	   tivo_domain_token = token;
+	   tivo_domain_token_expires = expires;
+   }
+   
 
    private static void defineDefaults() {
       debug.print("");
@@ -1135,6 +1156,12 @@ public class config {
             if (key.equals("tivo_password")) {
                tivo_password = line;
             }
+            if (key.equals("tivo_domain_token")) {
+            	tivo_domain_token = line;
+             }
+            if (key.equals("tivo_domain_token_expires")) {
+                tivo_domain_token_expires = Long.parseLong(string.removeLeadingTrailingSpaces(line));
+             }
             /*if (key.equals("pyTivo_config")) {
                pyTivo_config = line;
             }
@@ -1469,6 +1496,10 @@ public class config {
          ofp.write("<tivo_username>\n" + tivo_username + "\n\n");
          
          ofp.write("<tivo_password>\n" + tivo_password + "\n\n");
+         
+         ofp.write("<tivo_domain_token>\n" + tivo_domain_token + "\n\n");
+         
+         ofp.write("<tivo_domain_token_expires>\n" + tivo_domain_token_expires + "\n\n");
          
          //ofp.write("<pyTivo_config>\n" + pyTivo_config + "\n\n");
          
