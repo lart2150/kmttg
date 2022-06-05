@@ -42,6 +42,11 @@ import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
@@ -77,15 +82,10 @@ public class update {
                Optional<ButtonType> result = alert.showAndWait();
                if (result.get() == ButtonType.OK) {
                   final String fname = "kmttg_" + current_version + ".zip";
-                  String base = baseDownload.getBase();
-                  if (base == null) {
-                     log.error("toolDownload - error retrieving base download URL");
-                     return;
-                  }
-                  final String url = base + "/" + fname;
+                  final String url = "https://github.com/lart2150/kmttg/releases/download/"+current_version+"/kmttg_"+current_version+".zip";
                   auto.serviceStopIfNeeded();
                   Task<Void> task = new Task<Void>() {
-                     @Override public Void call() {
+                     public Void call() {
                         String filename = config.programDir + File.separator + fname;
                         String zipFile = downloadUrl(filename, url);
                         if (zipFile != null) {
@@ -101,20 +101,6 @@ public class update {
                               file.delete(zipFile);
                               // NOTE: With Java 8 runlater doesn't work, so just restart without asking
                               restartApplication();
-                              // Ask user if OK to restart kmttg
-                              /*Platform.runLater(new Runnable() {
-                                 @Override public void run() {
-                                    Alert alert = new Alert(AlertType.CONFIRMATION);
-                                    alert.setTitle("Confirm");
-                                    config.gui.setFontSize(alert, config.FontSize);
-                                    alert.setContentText("OK to restart kmttg?");
-                                    Optional<ButtonType> result = alert.showAndWait();
-                                    if (result.get() == ButtonType.OK) {
-                                       //System.exit(0);
-                                       restartApplication();
-                                    }
-                                 }
-                              });*/
                            } else {
                               log.error("Trouble unzipping file: " + zipFile);
                            }
@@ -199,11 +185,14 @@ public class update {
       RandomAccessFile out = null;
       int BLOCK_SIZE = 4096;
       try {
-          URL url = new URL(urlString);
+          HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+          HttpClient httpClient = httpClientBuilder.build();
+    	  HttpGet httpget = new HttpGet(urlString);
+
           log.print("Downloading file: " + urlString + " ...");
-          URLConnection con = url.openConnection();
           
-          in = new BufferedInputStream(con.getInputStream());          
+    	  CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(httpget);
+          in = new BufferedInputStream(response.getEntity().getContent());          
           out = new RandomAccessFile(localFileName, "rw");
           
           Integer howManyBytes;

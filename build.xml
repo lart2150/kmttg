@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="kmttg" basedir="." default="all">
-    <property name="rversion" value="v2.5-l"/>
+    <property name="rversion" value="v2.5a-l"/>
     <tstamp/>
     <property name="bversion" value="${DSTAMP}-${TSTAMP}"/>
     <property name="lib" value="lib"/>
@@ -49,7 +49,7 @@
         </jar>
     </target>
     <target name="build" depends="create">
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+        <javac includeantruntime="false" debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
             <src path="src"/>
             <classpath refid="main.classpath"/>
         </javac>
@@ -87,7 +87,7 @@
         </copy>
         <chmod file="dist/${dist}/${release}/kmttg" perm="ugo+x"/>
         <zip destfile="dist/${dist}.zip">
-            <zipfileset dir="dist/${dist}/${release}" filemode="755" includes="**"/>
+            <zipfileset dir="dist/${dist}/${release}" filemode="755" includes="**" excludes="*.ini,auto.*,*.sp,*.csv"/>
         </zip>
         <delete dir="dist/${dist}"/>
     </target>

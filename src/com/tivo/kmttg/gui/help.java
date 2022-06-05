@@ -25,6 +25,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.LinkedHashMap;
 
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -75,7 +80,7 @@ public class help {
          link1.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-               showInBrowser("http://sourceforge.net/projects/kmttg/files/kmttg_" + version + ".zip");
+               showInBrowser("https://github.com/lart2150/kmttg/releases/latest");
             }
          });
          row.getChildren().addAll(lab1, link1);
@@ -133,17 +138,19 @@ public class help {
    
    public static String getVersion() {
       debug.print("");
+      HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+      HttpClient httpClient = httpClientBuilder.build();
       String version = null;
-      String version_url = "http://svn.code.sf.net/p/kmttg/code/trunk/version";
+      String version_url = "https://raw.githubusercontent.com/lart2150/kmttg/master/version";
       try {
-         URL url = new URL(version_url);
-         URLConnection con = url.openConnection();
-         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    	 HttpGet httpget = new HttpGet(version_url);
+    	 CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(httpget);
+         BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
          String inputLine;
-         while ((inputLine = in.readLine()) != null) 
-            version = inputLine;
+         version = in.readLine();
          in.close();
       } catch (Exception ex) {
+    	  log.error(ex.getMessage());
          version = null;
       }
       return version;
