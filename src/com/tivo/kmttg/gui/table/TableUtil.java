@@ -66,11 +66,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.stage.FileChooser.ExtensionFilter;
 
-//import javafx.scene.control.skin.NestedTableColumnHeader;
-//import javafx.scene.control.skin.TableColumnHeader;
-//import javafx.scene.control.skin.TableHeaderRow;
-//import javafx.scene.control.skin.TableViewSkin;
-//import javafx.scene.control.skin.TreeTableViewSkin;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -97,6 +92,12 @@ public class TableUtil {
    private static ChoiceBox<String> thumbsChoice = null;
    private static double search_x = -1;
    private static double search_y = -1;
+   public static Color tableBkgndDarker = Color.rgb(235,235,235); // light grey
+   public static Color tableBkgndLight = Color.WHITE;
+   public static Color tableBkgndProtected = Color.rgb(191,156,94); // tan
+   public static Color tableBkgndRecording = Color.rgb(149, 151, 221); // light blue
+   public static Color tableBkgndInHistory = Color.rgb(250, 252, 164); // light yellow
+   public static Color lightRed = Color.rgb(250, 190, 190); // light red
    
    public static String getColumnName(TableView<?> TABLE, int c) {
       return TABLE.getColumns().get(c).getText();

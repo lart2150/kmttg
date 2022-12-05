@@ -147,7 +147,7 @@ public class spTable extends TableMap {
                if (entry != null) {
                   JSONObject json = entry.getPRI().json;
                   if (json != null && json.has("__conflicts"))
-                     TableUtil.setRowColor(this, config.lightRed);
+                     TableUtil.setRowColor(this, TableUtil.lightRed);
                }
                
                // Row drag and drop support

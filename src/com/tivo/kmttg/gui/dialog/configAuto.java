@@ -50,6 +50,7 @@ import javafx.stage.WindowEvent;
 import com.tivo.kmttg.gui.MyTooltip;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.remote.util;
+import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.autoTable;
 import com.tivo.kmttg.gui.table.autoTable.Tabentry;
 import com.tivo.kmttg.main.autoConfig;
@@ -149,7 +150,7 @@ public class configAuto {
    private void textFieldError(TextField f, String message) {
       debug.print("f=" + f + " message=" + message);
       log.error(message);
-      f.setStyle("-fx-background-color: " + config.gui.getWebColor(config.lightRed));
+      f.setStyle("-fx-background-color: " + config.gui.getWebColor(TableUtil.lightRed));
       errors.add(f);
    }
    

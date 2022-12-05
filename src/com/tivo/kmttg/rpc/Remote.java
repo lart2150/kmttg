@@ -126,7 +126,7 @@ public class Remote extends TiVoRPC {
     */
    @Override
    protected boolean Auth(String MAK) {
-     if (IP.endsWith("tivo.com")) {
+     if (IP.endsWith("tivo.com") || IP.endsWith("tivoservice.com")) {
        if ( ! Auth_web() ) {
           return false;
        }
@@ -1854,6 +1854,7 @@ public class Remote extends TiVoRPC {
             // Linear search
             json.put("count", count);
             json.put("offset", linearoffset);
+            System.out.println("advanced Search: " + json.toString());
             JSONObject result = Command(commandName, json);
             if (result == null) {
                log.error("AdvSearch failed.");

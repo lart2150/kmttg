@@ -60,6 +60,7 @@ import com.tivo.kmttg.gui.MyTooltip;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.help;
 import com.tivo.kmttg.gui.remote.util;
+import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.httpserver.kmttgServer;
 import com.tivo.kmttg.main.beacon;
 import com.tivo.kmttg.main.config;
@@ -244,12 +245,12 @@ public class configMain {
    private static void textFieldError(TextField f, String message) {
       debug.print("f=" + f + " message=" + message);
       log.error(message);
-      f.setStyle("-fx-background-color: " + config.gui.getWebColor(config.lightRed));
+      f.setStyle("-fx-background-color: " + config.gui.getWebColor(TableUtil.lightRed));
       errors.add(f);
       // Set tab background of this text field to error color as well
       Tab tab = getParentTab(f);
       if (f != null)
-         tab.setStyle("-fx-background-color: " + config.gui.getWebColor(config.lightRed));         
+         tab.setStyle("-fx-background-color: " + config.gui.getWebColor(TableUtil.lightRed));         
    }
    
    private static Tab getParentTab(Node node) {

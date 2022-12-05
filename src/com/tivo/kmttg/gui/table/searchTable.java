@@ -190,7 +190,7 @@ public class searchTable extends TableMap {
                   // Mark rows that are already in To Do
                   JSONObject json = entry.getDATE().json;
                   if (json != null && json.has("__inTodo__"))
-                     TableUtil.setRowColor(this, config.tableBkgndProtected);
+                     TableUtil.setRowColor(this, TableUtil.tableBkgndProtected);
                   
                   // Mark rows with entries in auto history file
                   if (config.showHistoryInTable == 1) {
@@ -199,12 +199,12 @@ public class searchTable extends TableMap {
                            String programId = json.getString("partnerContentId");
                            programId = programId.replaceFirst("^.+\\.", "");
                            if (auto.keywordMatchHistoryFast(programId, false))
-                              TableUtil.setRowColor(this, config.tableBkgndInHistory);
+                              TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);
                         }
                         else if (json.has("partnerCollectionId")) {
                            String programId = json.getString("partnerCollectionId");
                            if (auto.keywordMatchHistoryFast(programId, false))
-                              TableUtil.setRowColor(this, config.tableBkgndInHistory);                           
+                              TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);                           
                         }
                      } catch (JSONException e) {
                         log.error("searchTable ColorRowFactory - " + e.getMessage());

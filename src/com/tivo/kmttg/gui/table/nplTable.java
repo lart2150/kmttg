@@ -448,20 +448,20 @@ public class nplTable extends TableMap {
                   sortableDate d = entry.getDATE();
                   if (d != null && d.data != null) {
                      if (d.data.containsKey("CopyProtected"))
-                        TableUtil.setRowColor(this, config.tableBkgndProtected);
+                        TableUtil.setRowColor(this, TableUtil.tableBkgndProtected);
                      
                      if (d.data.containsKey("ExpirationImage") &&
                          (d.data.get("ExpirationImage").equals("in-progress-recording") ||
                           d.data.get("ExpirationImage").equals("in-progress-transfer")))
-                        TableUtil.setRowColor(this, config.tableBkgndRecording);
+                        TableUtil.setRowColor(this, TableUtil.tableBkgndRecording);
                      
                      if (config.showHistoryInTable == 1) {
                         if (d.data.containsKey("ProgramId") &&
                               auto.keywordMatchHistoryFast(d.data.get("ProgramId"), false))
-                           TableUtil.setRowColor(this, config.tableBkgndInHistory);
+                           TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);
                         if (d.data.containsKey("ProgramId_unique") &&
                               auto.keywordMatchHistoryFast(d.data.get("ProgramId_unique"), false))
-                           TableUtil.setRowColor(this, config.tableBkgndInHistory);
+                           TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);
                      }
                   }
                }

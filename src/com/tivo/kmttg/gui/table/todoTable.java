@@ -206,14 +206,14 @@ public class todoTable extends TableMap {
                      try {
                         if (json.has("state")) {
                            if (json.getString("state").equals("inProgress"))
-                              TableUtil.setRowColor(this, config.tableBkgndRecording);
+                              TableUtil.setRowColor(this, TableUtil.tableBkgndRecording);
                         }
                         
                         if (config.showHistoryInTable == 1) {
                            if (json.has("partnerCollectionId")) {
                               // Series 4 and later TiVos
                               if (auto.keywordMatchHistoryFast(json.getString("partnerCollectionId"), false))
-                                 TableUtil.setRowColor(this, config.tableBkgndInHistory);
+                                 TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);
                            }
                            if (json.has("partnerContentId")) {
                               // This is for series 3 TiVos where programId is part of partnerContentId
@@ -221,7 +221,7 @@ public class todoTable extends TableMap {
                               String programId = json.getString("partnerContentId");
                               programId = programId.replaceFirst("^.+\\.", "");
                               if (auto.keywordMatchHistoryFast(programId, false))
-                                 TableUtil.setRowColor(this, config.tableBkgndInHistory);
+                                 TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);
                            }
                         }
                      } catch (JSONException e) {

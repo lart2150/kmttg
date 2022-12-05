@@ -32,8 +32,6 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Stack;
 
-import javafx.scene.paint.Color;
-
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
@@ -163,12 +161,6 @@ public class config {
    public static String slingBox_container = "mpegts";
 
    // GUI table related
-   public static Color tableBkgndDarker = Color.rgb(235,235,235); // light grey
-   public static Color tableBkgndLight = Color.WHITE;
-   public static Color tableBkgndProtected = Color.rgb(191,156,94); // tan
-   public static Color tableBkgndRecording = Color.rgb(149, 151, 221); // light blue
-   public static Color tableBkgndInHistory = Color.rgb(250, 252, 164); // light yellow
-   public static Color lightRed = Color.rgb(250, 190, 190); // light red
    public static int   tableColAutoSize = 1; // If 0 then don't auto size table columns
    public static String tooltipBG = "#fff7c8";
    
@@ -219,7 +211,7 @@ public class config {
    
    // rpc remote related
    private static Hashtable<String,String> bodyId = null;
-   public static String middlemind_host = "middlemind.tivo.com";
+   public static String middlemind_host = "middlemind-tp2.tivoservice.com";
    public static int middlemind_port = 443;
    private static String tivo_username = "";
    private static String tivo_password = "";

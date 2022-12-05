@@ -177,9 +177,9 @@ public class guideTable extends TableMap {
                if (entry != null) {
                   // Mark rows that are already in To Do
                   JSONObject json = entry.getDATE().json;
-                  if (json != null && json.has("__inTodo__"))
-                     TableUtil.setRowColor(this, config.tableBkgndProtected);
-                  
+                  if (json != null && json.has("__inTodo__")) {
+                     TableUtil.setRowColor(this, TableUtil.tableBkgndProtected);
+                  }
                   // Mark rows with entries in auto history file
                   if (config.showHistoryInTable == 1) {
                      try {
@@ -187,7 +187,7 @@ public class guideTable extends TableMap {
                            String programId = json.getString("partnerContentId");
                            programId = programId.replaceFirst("^.+\\.", "");
                            if (auto.keywordMatchHistoryFast(programId, false))
-                              TableUtil.setRowColor(this, config.tableBkgndInHistory);
+                              TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);
                         }
                      } catch (JSONException e) {
                         log.error("guideTable ColorRowFactory - " + e.getMessage());

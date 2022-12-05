@@ -39,7 +39,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
-import com.sun.javafx.charts.Legend;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.bitrateTable;
@@ -59,18 +58,9 @@ public class freeSpace {
    private float disk_space = 0;
    private Hashtable<String,Hashtable<String,Double>> chanData = new Hashtable<String,Hashtable<String,Double>>();
    private Hashtable<String,Object> totalsData = new Hashtable<String,Object>();
-   private MyPie chart = null;
+   private PieChart chart = null;
    private String[] labels = {"Keep Until I Delete", "Keep Until Space Needed", "Suggestions", "Free Space"};
    private Color[] colors = {Color.GREEN, Color.YELLOW, Color.ORANGE, Color.BLUE};
-   
-   class MyPie extends PieChart {
-      public Legend legend;
-      
-      public MyPie() {
-         super();
-         legend = (Legend) getLegend();
-      }
-   }
 
    class PieData {
       ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
@@ -89,7 +79,7 @@ public class freeSpace {
    }
    
    private void init() {      
-      chart = new MyPie();
+      chart = new PieChart();
       chart.setPrefWidth(frame.getWidth());
       chart.getStyleClass().add("piechart_shows");
       chart.setTitle(tivoName + " Disk Space Usage");
@@ -251,17 +241,7 @@ public class freeSpace {
       
       // Update Pie Chart data
       chart.setData(dataset.pieChartData);
-      
-      // Update pie colors to be what we want
-      for (PieChart.Data d : dataset.pieChartData) {
-         int idx = dataset.pieChartData.indexOf(d);
-         Color color = dataset.pieChartColors.get(idx);
-         d.getNode().setStyle(
-            "-fx-pie-color: " + color.toString().replace("0x", "#") + ";"
-         );
-         chart.legend.getItems().get(idx).setSymbol(new Rectangle(8, 8, color));
-     }
-      
+
       // Complete Totals data (recordings, bytes, duration set so far)
       totalsData.put("rate", bitrateTable.bitRate((Double)totalsData.get("bytes"),(Double)totalsData.get("duration")));
       totalsData.put("rate", String.format("%.2f", (Double)totalsData.get("rate")));

@@ -90,7 +90,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import com.sun.javafx.css.StyleManager;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -191,6 +190,7 @@ public class gui extends Application {
    private jobTable jobTab = null;
    private ProgressBar progressBar = null;
    public  ScrollPane jobPane = null;
+   private Scene scene = null; 
    
    private Hashtable<String,tivoTab> tivoTabs = new Hashtable<String,tivoTab>();
    public static Hashtable<String,Image> Images;
@@ -219,7 +219,8 @@ public class gui extends Application {
    public void start(Stage stage) {
       debug.print("stage=" + stage);
       jFrame = stage;
-      Scene scene = new Scene(new VBox());
+      scene = new Scene(new VBox());
+      
       MenuBar menubar = getMenuBar();
       
       // Load icons for system usage
@@ -429,7 +430,7 @@ public class gui extends Application {
       if (f.exists()) {
          // NOTE: This css will apply to any/all Stages
          Application.setUserAgentStylesheet(null);
-         StyleManager.getInstance().addUserAgentStylesheet(f.toURI().toString());
+         scene.getStylesheets().add(f.toURI().toString());
       } else {
          log.error("Unable to load css file: " + f.getAbsolutePath());
       }

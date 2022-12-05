@@ -177,7 +177,7 @@ public class premiereTable extends TableMap {
                   JSONObject json = entry.getDATE().json;
                   // Mark rows that already have SPs scheduled
                   if (json != null && json.has("__SPscheduled__")) {
-                     TableUtil.setRowColor(this, config.tableBkgndProtected);
+                     TableUtil.setRowColor(this, TableUtil.tableBkgndProtected);
                   }
                }
             }
