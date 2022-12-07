@@ -5,7 +5,7 @@ import javax.swing.JOptionPane;
 
 
 public class JavaFX {
-	public static final String message = "KMTTG requires JavaFX.  Please use either the oracle jre or a opendjk with JavaFX like Zulu with ZuluFX";
+	public static final String message = "KMTTG requires JavaFX.  Please use either the oracle jre or a opendjk with JavaFX.";
 	
 	public static boolean checkForJavaFX()
 	{

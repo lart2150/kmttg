@@ -58,11 +58,6 @@ public class kmttg {
       // Java 7 bug workaround to avoid stacktrace when switching to Remote Guide tab
       System.getProperties().setProperty("java.util.Arrays.useLegacyMergeSort", "true");
       
-      if (!JavaFX.checkForJavaFX()) {
-    	  System.err.println(JavaFX.message);
-    	  System.exit(-100);
-      }
-      
       // Parse command lines and set options accordingly
       getopt(argv);
       
@@ -88,6 +83,10 @@ public class kmttg {
       });
       
       if (gui_mode) {
+          if (!JavaFX.checkForJavaFX()) {
+        	  System.err.println(JavaFX.message);
+        	  System.exit(-100);
+          }
          // GUI mode
          config.gui = new gui();
          config.parse();
