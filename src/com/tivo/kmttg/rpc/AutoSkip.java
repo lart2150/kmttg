@@ -193,7 +193,9 @@ public class AutoSkip {
          monitor_count++;
          if (monitor_count > monitor_interval) {
             monitor_count = 1;
-            shouldStillMonitor();
+            if (!shouldStillMonitor()) {
+               return;
+            }
          }
          long pos = getPosition();
          debug.print("pos=" + pos + " end1=" + end1);
@@ -224,6 +226,9 @@ public class AutoSkip {
          if (skip) {
             if (pos >= skipData.get(skipData.size()-1).get("end")) {
                if (config.autoskip_jumpToEnd == 1) {
+                  if (!shouldStillMonitor()) {
+                     return;
+                  }
                   if( posEnd != pos ) {
                      long jumpto = pos + (1000 * 60 * 24);  // arbitrarily jump 1 day
                      print("(pos=" + SkipManager.toMinSec(pos) +
@@ -239,6 +244,9 @@ public class AutoSkip {
             posEnd = -1;
             long jumpto = getClosest(pos);
             if (jumpto != -1) {
+               if (!shouldStillMonitor()) {
+                  return;
+               }
                String message = "(pos=" + SkipManager.toMinSec(pos) +
                   ") IN COMMERCIAL. JUMPING TO: " + SkipManager.toMinSec(jumpto+pad_start);
                if (pad_start != 0 || pad_stop != 0) {
@@ -319,10 +327,10 @@ public class AutoSkip {
    
    // RPC query to determine if show being monitored is still being played
    // If whatsOn query does not have offerId => show no longer being played on TiVo
-   private synchronized void shouldStillMonitor() {
+   private synchronized boolean shouldStillMonitor() {
       debug.print("");
       if (r == null)
-         return;
+         return true;
       if (monitor) {
          JSONObject result = r.Command("whatsOnSearch", new JSONObject());
          if (result == null) {
@@ -332,7 +340,7 @@ public class AutoSkip {
             r = new Remote(tivoName);
             if (! r.success) {
                disable();
-               return;
+               return true;
             }
          } else {
             try {
@@ -342,6 +350,7 @@ public class AutoSkip {
                      // Still playing back show so do nothing
                   } else {
                      disable();
+                     return false;
                   }
                }
             } catch (JSONException e) {
@@ -350,7 +359,9 @@ public class AutoSkip {
          }
       } else {
          disable();
+         return false;
       }
+      return true;
    }
    
    // Stop monitoring and reset all variables
@@ -431,38 +442,7 @@ public class AutoSkip {
       }
       return closest;
    }
-   
-   // Convert RPC data to skipData hash
-   /*public synchronized Stack<Hashtable<String,Long>> jsonToShowPoints(JSONObject clipData) {
-      debug.print("clipData=" + clipData);
-      Stack<Hashtable<String,Long>> points = new Stack<Hashtable<String,Long>>();
-      try {
-         if (clipData.has("segment")) {
-            JSONArray segment = clipData.getJSONArray("segment");
-            long offset = 0;
-            for (int i=0; i<segment.length(); ++i) {
-               JSONObject seg = segment.getJSONObject(i);
-               long start = Long.parseLong(seg.getString("startOffset"));
-               if (i == 0) {
-                  offset = start;
-               }
-               start -= offset;
-               long end = Long.parseLong(seg.getString("endOffset"));
-               end -= offset;
-               Hashtable<String,Long> h = new Hashtable<String,Long>();
-               h.put("start", start);
-               h.put("end", end);
-               points.push(h);
-            }
-         } else {
-            error("jsonToShowPoints - segment data missing");
-         }
-      } catch (JSONException e) {
-         error("jsonToShowPoints - " + e.getMessage());
-      }
-      return points;
-   }*/
-   
+
    // Adjust skipData segment 1 end position and
    // all subsequent segment points relative to it
    private synchronized void adjustPoints(long point) {
@@ -541,66 +521,7 @@ public class AutoSkip {
       return false;
    }
 
-   // For Skip enabled program use a D press to detect end of 1st commercial point
-   /*public static synchronized Long visualDetect(String tivoName) {
-      Long point = -1L;
-      Remote r2 = new Remote(tivoName);
-      if (r2.success) {
-         try {
-            long starting = 0;
-            
-            // Save current position
-            JSONObject result = r2.Command("Position", new JSONObject());
-            if (result != null && result.has("position")) {
-               starting = result.getLong("position");
-            }
-            
-            // Jump to time 0
-            JSONObject json = new JSONObject();
-            json.put("offset", 0);
-            result = r2.Command("Jump", json);
-            Thread.sleep(900);
-            if (result != null) {
-               json.remove("offset");
-               json.put("event", "actionD");
-               // Send D press and collect time information
-               result = r2.Command("keyEventSend", json);
-               
-               // Get position
-               Thread.sleep(100);
-               result = r2.Command("Position", new JSONObject());
-               if (result != null && result.has("position"))
-                  point = result.getLong("position");
-               
-               if (point < 60000) {
-                  log.print("Too small - jumping again");
-                  // Time likely too small - jump again
-                  Thread.sleep(900);
-                  // Send D press and collect time information
-                  r2.Command("keyEventSend", json);
-                  
-                  // Get position
-                  Thread.sleep(100);
-                  result = r2.Command("Position", new JSONObject());
-                  if (result != null && result.has("position"))
-                     point = result.getLong("position");
-               }
-               
-               // Jump back to starting position
-               json.remove("event");
-               json.put("offset", starting);
-               result = r2.Command("Jump", json);
-            }
-            
-         } catch (Exception e) {
-            error("visualDetect - " + e.getMessage());
-         }
-         r2.disconnect();
-      }
-      print("visualDetect point: " + toMinSec(point));
 
-      return point;
-   }*/
    
    private synchronized Stack<Hashtable<String,Long>> hashCopy(Stack<Hashtable<String,Long>> orig) {
       debug.print("orig=" + orig);
