@@ -141,6 +141,7 @@ public class ShowDetails {
             }
          });
          Scene scene = new Scene(new VBox());
+         config.gui.addScene(scene);
          config.gui.setFontSize(scene, config.FontSize);
          ((VBox) scene.getRoot()).getChildren().add(main_panel);
          dialog.setScene(scene);

@@ -21,8 +21,6 @@ package com.tivo.kmttg.gui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.LinkedHashMap;
 
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -130,7 +128,9 @@ public class help {
             }
          });
          content.getChildren().add(ok);
-         dialog.setScene(new Scene(content));
+         Scene scene = new Scene(content);
+         config.gui.addScene(scene);
+         dialog.setScene(scene);
          config.gui.setFontSize(dialog.getScene(), config.FontSize);
       }
       dialog.show();         
@@ -146,7 +146,6 @@ public class help {
     	 HttpGet httpget = new HttpGet(version_url);
     	 CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(httpget);
          BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-         String inputLine;
          version = in.readLine();
          in.close();
       } catch (Exception ex) {

@@ -90,6 +90,7 @@ public class taskInfo {
       gui.LoadIcons(dialog);
       dialog.setTitle("Task stdout/stderr viewer");
       Scene scene = new Scene(new VBox());
+      config.gui.addScene(scene);
       config.gui.setFontSize(scene, config.FontSize);
       ((VBox) scene.getRoot()).getChildren().add(content);
       dialog.setScene(scene);

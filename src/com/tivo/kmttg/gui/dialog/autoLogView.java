@@ -78,7 +78,9 @@ public class autoLogView {
       // create and display dialog window
       dialog = new Stage();
       dialog.setTitle(logfile);
-      dialog.setScene(new Scene(content));
+      Scene scene = new Scene(content);
+	  config.gui.addScene(scene);
+      dialog.setScene(scene);
       config.gui.setFontSize(dialog.getScene(), config.FontSize);
       dialog.setWidth(600);
       dialog.setHeight(400);

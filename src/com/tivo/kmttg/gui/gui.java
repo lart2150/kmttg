@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
 import org.w3c.dom.NodeList;
 
@@ -121,6 +122,7 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class gui extends Application {
+   private Vector<Scene> sceneList = new Vector<Scene>();
 
    private Stage jFrame = null;
    private configAuto config_auto = null;
@@ -200,6 +202,7 @@ public class gui extends Application {
    
    public ShowDetails show_details = null;
    
+   
    public Stage getFrame() {
       debug.print("");
       return jFrame;
@@ -220,6 +223,7 @@ public class gui extends Application {
       debug.print("stage=" + stage);
       jFrame = stage;
       scene = new Scene(new VBox());
+      sceneList.add(scene);
       
       MenuBar menubar = getMenuBar();
       
@@ -430,10 +434,26 @@ public class gui extends Application {
       if (f.exists()) {
          // NOTE: This css will apply to any/all Stages
          Application.setUserAgentStylesheet(null);
-         scene.getStylesheets().add(f.toURI().toString());
+         String css = f.toURI().toString();
+         for (Scene scene : sceneList) {
+	         while (scene.getStylesheets().size() > 0) {
+	        	 scene.getStylesheets().remove(0);
+	         }
+	         scene.getStylesheets().add(css);
+         }
       } else {
          log.error("Unable to load css file: " + f.getAbsolutePath());
       }
+   }
+   
+   public void addScene(Scene newScene) {
+	   sceneList.add(newScene);
+	   while (newScene.getStylesheets().size() > 0) {
+		   newScene.getStylesheets().remove(0);
+       }
+	   if (scene.getStylesheets().size() > 0) {
+		   newScene.getStylesheets().add(scene.getStylesheets().get(0));
+	   }
    }
    
    public List<String> getAvailableLooks() {

@@ -148,7 +148,9 @@ public class freeSpace {
       dialog.initOwner(frame);
       gui.LoadIcons(dialog);
       dialog.setTitle(tivoName + " Disk Usage Analysis");
-      dialog.setScene(new Scene(content));
+      Scene scene = new Scene(content);
+      config.gui.addScene(scene);
+      dialog.setScene(scene);
       config.gui.setFontSize(dialog.getScene(), config.FontSize);
       dialog.show();
       TableUtil.autoSizeTableViewColumns(tab.TABLE, true);

@@ -212,6 +212,7 @@ public class SkipShare {
       gui.LoadIcons(dialog);
       dialog.setTitle("Skip Share Import");
       Scene scene = new Scene(new VBox());
+      config.gui.addScene(scene);
       config.gui.setFontSize(scene, config.FontSize);
       ((VBox) scene.getRoot()).getChildren().add(content);
       dialog.setScene(scene);

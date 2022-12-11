@@ -2598,7 +2598,7 @@ public class configMain {
       lookAndFeel.valueProperty().addListener(new ChangeListener<String>() {
          @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
             if (newVal != null) {
-               config.gui.setLookAndFeel(newVal); 
+               config.gui.setLookAndFeel(newVal);
             }
          }
       });
@@ -3625,6 +3625,7 @@ public class configMain {
       dialog.initModality(Modality.NONE); // Non modal
       dialog.setTitle("kmttg configuration");
       Scene scene = new Scene(new VBox());
+      config.gui.addScene(scene);
       config.gui.setFontSize(scene, config.FontSize);
       ((VBox) scene.getRoot()).getChildren().add(main_panel);
       dialog.setScene(scene);
