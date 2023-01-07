@@ -58,6 +58,7 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
+import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 
 import net.straylightlabs.tivolibre.TivoDecoder;
@@ -117,6 +118,7 @@ public class http {
 					.setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
 							.setSslContext(
 									SSLContextBuilder.create().loadTrustMaterial(TrustAllStrategy.INSTANCE).build())
+							.setTlsVersions(TLS.V_1_0, TLS.V_1_1, TLS.V_1_2)
 							.setHostnameVerifier(NoopHostnameVerifier.INSTANCE).build())
 					.build();
 		}
