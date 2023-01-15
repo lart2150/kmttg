@@ -41,6 +41,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.TableMap;
@@ -202,7 +203,7 @@ public class premiereTable extends TableMap {
                title += data.getString("title");
             if (data.has("subtitle"))
                title += " - " + data.getString("subtitle");
-            channel = TableUtil.makeChannelName(data);
+            channel = JSONConverter.makeChannelName(data);
             if (data.has("seasonNumber")) {
                season = String.format("%02d", data.getInt("seasonNumber"));
             }

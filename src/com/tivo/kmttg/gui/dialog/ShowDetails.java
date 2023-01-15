@@ -38,10 +38,10 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.gui;
-import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
@@ -283,10 +283,10 @@ public class ShowDetails {
                      // time
                      String t = "";
                      if (json.has("startTime")) {
-                        t = TableUtil.printableTimeFromJSON(json);
+                        t = JSONConverter.printableTimeFromJSON(json);
                         if (json.has("duration")) {
-                           long s = TableUtil.getStartTime(json);
-                           long e = TableUtil.getEndTime(json);
+                           long s = JSONConverter.getStartTime(json);
+                           long e = JSONConverter.getEndTime(json);
                            t += " (" + (int)Math.ceil((e-s)/60000.0) + " mins)";
                         }
                      }

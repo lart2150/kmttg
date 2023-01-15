@@ -39,10 +39,10 @@ import java.util.concurrent.Executors;
 import javafx.concurrent.Task;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.JSON.JSONTokener;
-import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -380,7 +380,7 @@ public class rnpl {
                if (includeOtherTimes && ! entry.has(inTodo)) {
                   if (todo.has("contentId") && entry.has("contentId")) {
                      if (entry.getString("contentId").equals(todo.getString("contentId")))
-                        entry.put(inTodo, tivo + ": " + TableUtil.printableTimeFromJSON(todo));
+                        entry.put(inTodo, tivo + ": " + JSONConverter.printableTimeFromJSON(todo));
                   }
                }
             }
@@ -544,8 +544,8 @@ public class rnpl {
       String message = "";
       try {
          if (json.has("startTime") && json.has("duration")) {
-            long start_long = TableUtil.getStartTime(json);
-            long stop_long = TableUtil.getEndTime(json);
+            long start_long = JSONConverter.getStartTime(json);
+            long stop_long = JSONConverter.getEndTime(json);
             String start = longTimeToString(start_long);
             String stop = longTimeToString(stop_long);
             message += start + "-" + stop + " -- ";

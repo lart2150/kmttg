@@ -43,6 +43,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.TableMap;
@@ -215,9 +216,9 @@ public class guideTable extends TableMap {
             // If entry is in 1 of todo lists then add special __inTodo__ JSON entry
             config.gui.remote_gui.flagIfInTodo(entry, false);
             String startString = entry.getString("startTime");
-            long start = TableUtil.getLongDateFromString(startString);
+            long start = JSONConverter.getLongDateFromString(startString);
             long dur = entry.getLong("duration")*1000;
-            title = TableUtil.makeShowTitle(entry);
+            title = JSONConverter.makeShowTitle(entry);
             date = new sortableDate(entry, start);
             duration = new sortableDuration(dur, false);
          } catch (JSONException e1) {

@@ -37,9 +37,9 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
 import com.tivo.kmttg.main.config;
@@ -1168,7 +1168,7 @@ public class Remote extends TiVoRPC {
          return null;
       }
 
-      return TableUtil.sortByOldestStartDate(allShows);
+      return JSONConverter.sortByOldestStartDate(allShows);
    }
    
    // Create CSV file from todo list
@@ -1185,12 +1185,12 @@ public class Remote extends TiVoRPC {
                long start=0, end=0;
                if (json.has("scheduledStartTime")) {
                   startString = json.getString("scheduledStartTime");
-                  start = TableUtil.getLongDateFromString(startString);
+                  start = JSONConverter.getLongDateFromString(startString);
                   endString = json.getString("scheduledEndTime");
-                  end = TableUtil.getLongDateFromString(endString);
+                  end = JSONConverter.getLongDateFromString(endString);
                } else if (json.has("startTime")) {
-                  start = TableUtil.getStartTime(json);
-                  end = TableUtil.getEndTime(json);
+                  start = JSONConverter.getStartTime(json);
+                  end = JSONConverter.getEndTime(json);
                }
                if (end != 0 && start != 0)
                   duration = string.removeLeadingTrailingSpaces(sortableDuration.millisecsToHMS(end-start, false));
@@ -1202,8 +1202,8 @@ public class Remote extends TiVoRPC {
                   sdf = new SimpleDateFormat("yyyyMMddHHmm");
                   date_sortable = sdf.format(start);
                }
-               String show = string.removeLeadingTrailingSpaces(TableUtil.makeShowTitle(json));
-               String channel = string.removeLeadingTrailingSpaces(TableUtil.makeChannelName(json));
+               String show = string.removeLeadingTrailingSpaces(JSONConverter.makeShowTitle(json));
+               String channel = string.removeLeadingTrailingSpaces(JSONConverter.makeChannelName(json));
                ofp.write(date + "," + date_sortable + ",\"" + show + "\"," + channel + "," + duration + "\r\n");
             }
          } else {
@@ -1235,7 +1235,7 @@ public class Remote extends TiVoRPC {
          return null;
       }
 
-      return TableUtil.sortByOldestStartDate(allShows);
+      return JSONConverter.sortByOldestStartDate(allShows);
    }
    
    // Get list of all shows that won't record
@@ -1298,7 +1298,7 @@ public class Remote extends TiVoRPC {
          return null;
       }
 
-      return TableUtil.sortByOldestStartDate(allShows);
+      return JSONConverter.sortByOldestStartDate(allShows);
    }
    
    // Get list of all conflicts with cancellationReason=programSourceConflict
@@ -1313,7 +1313,7 @@ public class Remote extends TiVoRPC {
                json = data.getJSONObject(i);
                if (json.has("scheduledStartTime")) {
                   // Filter out past recordings
-                  Long start = TableUtil.getLongDateFromString(json.getString("scheduledStartTime"));
+                  Long start = JSONConverter.getLongDateFromString(json.getString("scheduledStartTime"));
                   if (start >= now) {
                      // Filter out by cancellationReason
                      if (json.has("cancellationReason") &&
@@ -1394,7 +1394,7 @@ public class Remote extends TiVoRPC {
          return null;
       }
 
-      return TableUtil.sortByLatestStartDate(allShows);
+      return JSONConverter.sortByLatestStartDate(allShows);
    }
    
    // Get all season passes
@@ -1664,7 +1664,7 @@ public class Remote extends TiVoRPC {
          error("SeasonPremieres - " + e.getMessage());
          return null;
       }
-      return TableUtil.sortByOldestStartDate(data);
+      return JSONConverter.sortByOldestStartDate(data);
    }
    
    // This returns JSONArray of JSON objects each of following structure:
@@ -1967,7 +1967,7 @@ public class Remote extends TiVoRPC {
                   
                   // Filter out unavailable partners
                   if (include && (includeFree || includePaid)) {
-                     String partnerName = TableUtil.getPartnerName(j);
+                     String partnerName = JSONConverter.getPartnerName(j);
                      if (partnerName.startsWith("tivo:pt"))
                         include = false;
                   }
@@ -1995,7 +1995,7 @@ public class Remote extends TiVoRPC {
                } // for k
             } // result != null
          } // for
-         filtered_entries = TableUtil.sortByOldestStartDate(filtered_entries);
+         filtered_entries = JSONConverter.sortByOldestStartDate(filtered_entries);
          
          // Sort into collections
          for (int i=0; i<filtered_entries.length(); ++i) {
@@ -2025,7 +2025,7 @@ public class Remote extends TiVoRPC {
                String key = keys.getString(i);
                if ( ! key.equals("order") ) {
                   JSONArray a = collections.getJSONObject(key).getJSONArray("entries");
-                  collections.getJSONObject(key).put("entries", TableUtil.sortByEpisode(a));
+                  collections.getJSONObject(key).put("entries", JSONConverter.sortByEpisode(a));
                }
             }
          }
@@ -2135,7 +2135,7 @@ public class Remote extends TiVoRPC {
                                     add = false;
                                  
                                  // Filter out unavailable partners
-                                 String partnerName = TableUtil.getPartnerName(entry);
+                                 String partnerName = JSONConverter.getPartnerName(entry);
                                  if (partnerName.startsWith("tivo:pt"))
                                     add = false;
                                  
@@ -2199,7 +2199,7 @@ public class Remote extends TiVoRPC {
                   String key = keys.getString(i);
                   if ( ! key.equals("order") ) {
                      JSONArray a = collections.getJSONObject(key).getJSONArray("entries");
-                     collections.getJSONObject(key).put("entries", TableUtil.sortByEpisode(a));
+                     collections.getJSONObject(key).put("entries", JSONConverter.sortByEpisode(a));
                   }
                }
             }
@@ -2470,7 +2470,7 @@ public class Remote extends TiVoRPC {
                      if (start != -1 && start < startFrom)
                         continue;
                   }
-                  String title = TableUtil.makeShowTitle(j);
+                  String title = JSONConverter.makeShowTitle(j);
                   if (title != null && title.length() > 0) {
                      if (unique.containsKey(title))
                         continue;
@@ -2840,7 +2840,7 @@ public class Remote extends TiVoRPC {
                      JSONObject result = Command("Seasonpass", o);
                      if (result != null) {
                         log.print("success");
-                        TableUtil.addTivoNameFlagtoJson(json, "__SPscheduled__", tivoName);
+                        JSONConverter.addTivoNameFlagtoJson(json, "__SPscheduled__", tivoName);
                         // Set thumbs rating if not already set
                         setThumbsRating(json, 1, false);
                      }
@@ -2849,7 +2849,7 @@ public class Remote extends TiVoRPC {
                   log.warn("Existing SP with same title + callSign found, prompting to modify instead.");
                   if (existingSP != null) {
                      JSONObject result = util.spOpt.promptUser(
-                        tivoName, "(" + tivoName + ") " + "Modify SP - " + title, existingSP, TableUtil.isWL(existingSP)
+                        tivoName, "(" + tivoName + ") " + "Modify SP - " + title, existingSP, JSONConverter.isWL(existingSP)
                      );
                      if (result != null) {
                         if (Command("ModifySP", result) != null) {

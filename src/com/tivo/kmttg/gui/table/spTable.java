@@ -46,6 +46,7 @@ import javafx.embed.swing.JFXPanel;
 import javafx.util.Callback;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONFile;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -855,7 +856,7 @@ public class spTable extends TableMap {
              try {
                 final String title = json.getString("title");
                 final JSONObject result = util.spOpt.promptUser(
-                   tivoName, "(" + tivoName + ")" + "Modify SP - " + title, json, TableUtil.isWL(json)
+                   tivoName, "(" + tivoName + ")" + "Modify SP - " + title, json, JSONConverter.isWL(json)
                 );
                 if (result != null) {
                    Task<Void> task = new Task<Void>() {
@@ -939,7 +940,6 @@ public class spTable extends TableMap {
         log.warn("Querying '" + tivoName + "' for SP list");
         jobMonitor.submitNewJob(job);
         
-        boolean finished = false;
         while (job.check()) {
         	log.warn("tick");
         	try {

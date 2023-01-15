@@ -42,9 +42,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.comparator.DateComparator;
@@ -188,15 +188,15 @@ public class cancelledTable extends TableMap {
             long start=0, end=0;
             if (entry.has("scheduledStartTime")) {
                startString = entry.getString("scheduledStartTime");
-               start = TableUtil.getLongDateFromString(startString);
+               start = JSONConverter.getLongDateFromString(startString);
                endString = entry.getString("scheduledEndTime");
-               end = TableUtil.getLongDateFromString(endString);
+               end = JSONConverter.getLongDateFromString(endString);
             } else if (entry.has("startTime")) {
-               start = TableUtil.getStartTime(entry);
-               end = TableUtil.getEndTime(entry);
+               start = JSONConverter.getStartTime(entry);
+               end = JSONConverter.getEndTime(entry);
             }
-            title = TableUtil.makeShowTitle(entry);
-            channel = TableUtil.makeChannelName(entry);   
+            title = JSONConverter.makeShowTitle(entry);
+            channel = JSONConverter.makeChannelName(entry);   
             date = new sortableDate(entry, start);
             duration = new sortableDuration(end-start, false);
          } catch (JSONException e) {
@@ -500,7 +500,7 @@ public class cancelledTable extends TableMap {
       try {
          if (entry.has("scheduledStartTime")) {
             startString = entry.getString("scheduledStartTime");
-            return TableUtil.getLongDateFromString(startString);
+            return JSONConverter.getLongDateFromString(startString);
          } else
             return 0;
       } catch (JSONException e) {

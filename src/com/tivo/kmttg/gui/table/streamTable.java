@@ -37,9 +37,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.comparator.DateComparator;
@@ -162,15 +162,15 @@ public class streamTable extends TableMap {
          try {
             long start = -1;
             if (entry.has("startTime"))
-               start = TableUtil.getLongDateFromString(entry.getString("startTime"));
-            title = TableUtil.makeShowTitle(entry);
+               start = JSONConverter.getLongDateFromString(entry.getString("startTime"));
+            title = JSONConverter.makeShowTitle(entry);
             if (entry.has("isFolder") && entry.getBoolean("isFolder")) {
                image = new ImageView(gui.Images.get("folder"));
                created = new sortableDate(title, entry, start);
             } else {
                created = new sortableDate(entry, start);
             }
-            source = TableUtil.getPartnerName(entry);
+            source = JSONConverter.getPartnerName(entry);
          } catch (JSONException e1) {
             log.error("streamTable Tabentry - " + e1.getMessage());
          }

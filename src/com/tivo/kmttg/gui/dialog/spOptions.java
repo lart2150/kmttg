@@ -37,9 +37,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.TwoWayHashmap;
@@ -549,7 +549,7 @@ public class spOptions {
                   JSONObject chan = channels.getJSONObject(i);
                   JSONObject j = new JSONObject();
                   j.put("channel", chan);
-                  String channelName = TableUtil.makeChannelName(j);
+                  String channelName = JSONConverter.makeChannelName(j);
                   channelHash.put(channelName, chan);
                }
             } catch (JSONException e) {
@@ -653,7 +653,7 @@ public class spOptions {
       Platform.runLater(new Runnable() {
          @Override public void run() {
             String name = "All";
-            String chan = TableUtil.makeChannelName(json);
+            String chan = JSONConverter.makeChannelName(json);
             if (chan.contains("="))
                name = chan;
             Boolean needToAdd = true;

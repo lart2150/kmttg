@@ -27,8 +27,8 @@ import java.util.Hashtable;
 import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.main.config;
 
 public class parseNPL {
@@ -444,7 +444,7 @@ public class parseNPL {
             );
          }
          if (json.has("startTime") && json.has("duration")) {
-            long start = TableUtil.getStartTime(json);
+            long start = JSONConverter.getStartTime(json);
             entry.put("gmt", "" + start);
             SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yyyy");
             entry.put("date", sdf.format(start));
@@ -471,7 +471,7 @@ public class parseNPL {
             }
          }
          if (json.has("desiredDeletion")) {
-            long desired = TableUtil.getLongDateFromString(json.getString("desiredDeletion"));
+            long desired = JSONConverter.getLongDateFromString(json.getString("desiredDeletion"));
             long now = new Date().getTime();
             long diff = desired - now;
             double hours = diff/(1000*60*60);

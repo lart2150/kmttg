@@ -41,9 +41,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.comparator.DateComparator;
@@ -256,17 +256,17 @@ public class searchTable extends TableMap {
                JSONArray entries = entry.getJSONArray("entries");
                String chan = "";
                if (entries.getJSONObject(0).has("channel"))
-                  chan = TableUtil.makeChannelName(entries.getJSONObject(0));
+                  chan = JSONConverter.makeChannelName(entries.getJSONObject(0));
                else if (entry.has("partnerId"))
-                  chan = TableUtil.getPartnerName(entries.getJSONObject(0));
+                  chan = JSONConverter.getPartnerName(entries.getJSONObject(0));
                Boolean sameChannel = true;
                for (int i=1; i<num; ++i) {
                   String fchan = "";
                   JSONObject j = entries.getJSONObject(i);
                   if (j.has("channel"))
-                     fchan = TableUtil.makeChannelName(j);
+                     fchan = JSONConverter.makeChannelName(j);
                   else if (j.has("partnerId"))
-                     fchan = TableUtil.getPartnerName(j);
+                     fchan = JSONConverter.getPartnerName(j);
                   if (! fchan.equals(chan))
                      sameChannel = false;
                }
@@ -281,11 +281,11 @@ public class searchTable extends TableMap {
                long start = -1;
                if (entry.getJSONArray("entries").getJSONObject(0).has("startTime")) {
                   startString = entry.getJSONArray("entries").getJSONObject(0).getString("startTime");
-                  start = TableUtil.getLongDateFromString(startString);
+                  start = JSONConverter.getLongDateFromString(startString);
                }
                else if (entry.getJSONArray("entries").getJSONObject(0).has("releaseDate")) {
                   startString = entry.getJSONArray("entries").getJSONObject(0).getString("releaseDate");
-                  start = TableUtil.getLongDateFromString(startString);
+                  start = JSONConverter.getLongDateFromString(startString);
                }
                date = new sortableDate(entry.getString("title"), entry, start);
                if (entry.getJSONArray("entries").getJSONObject(0).has("partnerId")) {
@@ -300,10 +300,10 @@ public class searchTable extends TableMap {
                config.gui.remote_gui.flagIfInTodo(entry, false);
                long start = -1;
                if (entry.has("startTime")) {
-                  start = TableUtil.getLongDateFromString(entry.getString("startTime"));
+                  start = JSONConverter.getLongDateFromString(entry.getString("startTime"));
                }
                else if (entry.has("releaseDate")) {
-                  start = TableUtil.getLongDateFromString(entry.getString("releaseDate"));
+                  start = JSONConverter.getLongDateFromString(entry.getString("releaseDate"));
                }
                long dur = 0;
                if (entry.has("duration"))
@@ -312,7 +312,7 @@ public class searchTable extends TableMap {
                if (entry.has("collectionType")) {
                   type = entry.getString("collectionType");
                }
-               title = TableUtil.makeShowTitle(entry);
+               title = JSONConverter.makeShowTitle(entry);
                if (entry.has("partnerId")) {
                   if (entry.has("hdtv") && entry.getBoolean("hdtv"))
                   title += " [HD]";
@@ -328,9 +328,9 @@ public class searchTable extends TableMap {
                }
                channel = "";
                if (entry.has("channel"))
-                  channel = TableUtil.makeChannelName(entry);
+                  channel = JSONConverter.makeChannelName(entry);
                else if (entry.has("partnerId"))
-                  channel = TableUtil.getPartnerName(entry);
+                  channel = JSONConverter.getPartnerName(entry);
                
                date = new sortableDate(entry, start);
                duration = new sortableDuration(dur, false);

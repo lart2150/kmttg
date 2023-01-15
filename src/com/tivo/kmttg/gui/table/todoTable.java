@@ -40,11 +40,11 @@ import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.gui;
-import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.comparator.DateComparator;
 import com.tivo.kmttg.gui.comparator.DurationComparator;
 import com.tivo.kmttg.gui.comparator.ImageViewComparator;
@@ -248,15 +248,15 @@ public class todoTable extends TableMap {
             long start=0, end=0;
             if (data.has("scheduledStartTime")) {
                startString = data.getString("scheduledStartTime");
-               start = TableUtil.getLongDateFromString(startString);
+               start = JSONConverter.getLongDateFromString(startString);
                endString = data.getString("scheduledEndTime");
-               end = TableUtil.getLongDateFromString(endString);
+               end = JSONConverter.getLongDateFromString(endString);
             } else if (data.has("startTime")) {
-               start = TableUtil.getStartTime(data);
-               end = TableUtil.getEndTime(data);
+               start = JSONConverter.getStartTime(data);
+               end = JSONConverter.getEndTime(data);
             }
-            title = TableUtil.makeShowTitle(data);
-            channel = TableUtil.makeChannelName(data);
+            title = JSONConverter.makeShowTitle(data);
+            channel = JSONConverter.makeChannelName(data);
             
             date = new sortableDate(data, start);
             duration = new sortableDuration(end-start, false);

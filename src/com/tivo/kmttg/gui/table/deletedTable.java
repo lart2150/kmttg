@@ -37,10 +37,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.TableMap;
-import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.comparator.DateComparator;
 import com.tivo.kmttg.gui.comparator.DurationComparator;
 import com.tivo.kmttg.gui.comparator.StringChannelComparator;
@@ -171,19 +171,19 @@ public class deletedTable extends TableMap {
             long start=0, end=0, del=0;
             if (entry.has("scheduledStartTime")) {
                startString = entry.getString("scheduledStartTime");
-               start = TableUtil.getLongDateFromString(startString);
+               start = JSONConverter.getLongDateFromString(startString);
                endString = entry.getString("scheduledEndTime");
-               end = TableUtil.getLongDateFromString(endString);
+               end = JSONConverter.getLongDateFromString(endString);
             } else {
-               start = TableUtil.getStartTime(entry);
-               end = TableUtil.getEndTime(entry);
+               start = JSONConverter.getStartTime(entry);
+               end = JSONConverter.getEndTime(entry);
             }
             if (entry.has("deletionTime")) {
                delString = entry.getString("deletionTime");
-               del = TableUtil.getLongDateFromString(delString);            
+               del = JSONConverter.getLongDateFromString(delString);            
             }
-            title = TableUtil.makeShowTitle(entry);
-            channel = TableUtil.makeChannelName(entry);
+            title = JSONConverter.makeShowTitle(entry);
+            channel = JSONConverter.makeChannelName(entry);
       
             deleted = new sortableDate(entry, del);
             recorded = new sortableDate(new JSONObject(), start);

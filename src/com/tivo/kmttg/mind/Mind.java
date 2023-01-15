@@ -42,12 +42,10 @@ import java.util.List;
 import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.JSON.XML;
-import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.main.config;
-import com.tivo.kmttg.mind.EasySSLHelper;
-import com.tivo.kmttg.mind.SimpleCookieManager;
 import com.tivo.kmttg.util.log;
 
 public class Mind {
@@ -496,8 +494,8 @@ public class Mind {
    
    public class DateComparator implements Comparator<JSONObject> {      
       public int compare(JSONObject j1, JSONObject j2) {
-         long start1 = TableUtil.getStartTime(j1);
-         long start2 = TableUtil.getStartTime(j2);
+         long start1 = JSONConverter.getStartTime(j1);
+         long start2 = JSONConverter.getStartTime(j2);
          if (start1 > start2){
             return 1;
          } else if (start1 < start2){
