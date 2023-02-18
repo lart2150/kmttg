@@ -1,7 +1,6 @@
 package com.tivo.kmttg.rpc;
 
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -32,7 +31,7 @@ public class GetDomainToken {
 		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 		cookieStore = new BasicCookieStore();
 		httpClientBuilder.setDefaultCookieStore(cookieStore);
-		httpClientBuilder.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36");
+		httpClientBuilder.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36");
 		httpClient = httpClientBuilder.build();
 	}
 	
@@ -70,7 +69,6 @@ public class GetDomainToken {
         
         
 		responseBody = readResponseBody(response);
-		//System.out.println(responseBody);
 		
         pattern = Pattern.compile("auraConfig = ([^;]*);", Pattern.MULTILINE);
         matcher = pattern.matcher(responseBody);
@@ -130,7 +128,9 @@ public class GetDomainToken {
         pattern = Pattern.compile("action=\\\"([^\\\"]*)\\\"", Pattern.MULTILINE);
         matcher = pattern.matcher(responseBody);
         matcher.find();
-        String SAMLResponseAction = matcher.group(1);
+        String SAMLResponseAction = matcher.group(1)
+        		.replaceAll("&#x3a;", ":")
+        		.replaceAll("&#x2f;", "/");
         
         login = ClassicRequestBuilder.post()
                 .setUri(new URI(SAMLResponseAction))
