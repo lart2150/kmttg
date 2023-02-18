@@ -1,3 +1,15 @@
 #!/bin/sh
 DIRNAME=`dirname "$0"`
-java -Djava.net.preferIPv4Stack=true -jar "$DIRNAME/kmttg.jar" $@
+
+if [ -d "$DIRNAME/javafx-sdk" ]
+then
+  WEBJAR=`find "$DIRNAME/javafx-sdk" -name javafx.web.jar`
+  MODULEPATH=$(dirname "$WEBJAR")
+fi
+
+if [ ! -z $WEBJAR ] && [ -d "$MODULEPATH" ]
+then
+  java --module-path "$MODULEPATH" --add-modules javafx.web -Djava.net.preferIPv4Stack=true  -jar "$DIRNAME/kmttg.jar" $@
+else
+  java -Djava.net.preferIPv4Stack=true  -jar "$DIRNAME/kmttg.jar" $@
+fi
