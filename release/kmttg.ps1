@@ -1,6 +1,5 @@
 
 $kttgDir = Split-Path $MyInvocation.MyCommand.Path -Parent
-$kttgDir="C:\brian\kmttg"
 $javaFXweb = Get-Childitem –Path $kttgDir -Include "javafx.web.jar" -Recurse -ErrorAction SilentlyContinue
 
 if ($javaFXweb) {
