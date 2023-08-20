@@ -1341,18 +1341,30 @@ public class Remote extends TiVoRPC {
 
       try {
          int total = 0;
+         Boolean stop = false;
          if (job != null && config.GUIMODE && ! away) {
             // Get total count quickly
-            JSONObject j = new JSONObject();
-            j.put("format", "idSequence");
-            j.put("noLimit", "true");
-            result = Command("Deleted", j);
-            if (result != null && result.has("objectIdAndType")) {
-               total = result.getJSONArray("objectIdAndType").length();
+           	while (!stop) {
+               JSONObject j = new JSONObject();
+               j.put("format", "idSequence");
+               j.put("noLimit", "true");
+               if (total > 0) {
+                  j.put("offset", total);
+               }
+               result = Command("Deleted", j);
+               if (result != null && result.has("objectIdAndType")) {
+                  int batch = result.getJSONArray("objectIdAndType").length();
+                  total += batch;
+                  if (batch < 1000) {//I don't know if it's just my bolt with TE4 but I only get back 1k deleted recordings
+                     stop = true;
+                  }
+               } else {
+                  stop = true;
+               }
             }
          }
          // Top level list - run in a loop to grab all items, 20 at a time
-         Boolean stop = false;
+         stop = false;
          JSONObject json = new JSONObject();
          json.put("count", 20);
          int offset = 0;
@@ -1366,8 +1378,9 @@ public class Remote extends TiVoRPC {
                   allShows.put(a.getJSONObject(i));
                offset += a.length();
                json.put("offset", offset);
-               if (a.length() == 0)
+               if (a.length() < 20) {
                   stop = true;
+               }
             } else {
                stop = true;
             }
