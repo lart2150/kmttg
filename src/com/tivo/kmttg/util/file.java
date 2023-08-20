@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 //import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.URI;
 //import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -248,7 +249,7 @@ public class file {
          log.warn(">> Issuing TivoWebPlus show delete request: " + urlString);
          try {
             // Run the http request in separate thread so as not to hang up the main program
-            final URL url = new URL(urlString);
+            final URL url = new URI(urlString).toURL();
             class AutoThread implements Runnable {
                AutoThread() {}       
                public void run () {

@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 //import java.net.URLEncoder;
@@ -329,7 +330,7 @@ public class pyTivo {
       "/TiVoConnect?Command=TVBusQuery&Container=";
       urlString += share + "&File=" + path + "/" + file;
       try {
-         URL url = new URL(urlString);
+         URL url = new URI(urlString).toURL();
          URLConnection con = url.openConnection();
          BufferedReader in = new BufferedReader( new InputStreamReader(con.getInputStream()));
          String line;

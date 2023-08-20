@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
@@ -140,7 +141,7 @@ public class http {
 	public static Boolean download(String urlString, String username, String password, String outFile, Boolean cookies,
 			String offset) throws IOException, InterruptedException, Exception {
 		CloseableHttpResponse in;
-		URL url = new URL(urlString);
+		URL url = new URI(urlString).toURL();
 
 		CloseableHttpClient httpclient = createInsecureHttpClient(url.getHost(), url.getPort(), username, password);
 
@@ -213,7 +214,7 @@ public class http {
 	public static Boolean downloadPiped(String urlString, String username, String password, OutputStream out,
 			Boolean cookies, String offset) throws IOException, InterruptedException, Exception {
 		CloseableHttpResponse in;
-		URL url = new URL(urlString);
+		URL url = new URI(urlString).toURL();
 
 		CloseableHttpClient httpclient = createInsecureHttpClient(url.getHost(), url.getPort(), username, password);
 
@@ -286,7 +287,7 @@ public class http {
 		BufferedInputStream in;
 		CloseableHttpResponse response;
 		int BUFFER_SIZE = 8192;
-		URL url = new URL(urlString);
+		URL url = new URI(urlString).toURL();
 
 		CloseableHttpClient httpclient = createInsecureHttpClient(url.getHost(), url.getPort(), username, password);
 
@@ -352,7 +353,7 @@ public class http {
 	// Check URL is alive with specificed connection timeout
 	public static Boolean isAlive(String urlString, int timeout) {
 		try {
-			URL url = new URL(urlString);
+			URL url = new URI(urlString).toURL();
 			URLConnection conn = getConnection(url);
 			conn.setConnectTimeout(timeout * 1000);
 			conn.connect();

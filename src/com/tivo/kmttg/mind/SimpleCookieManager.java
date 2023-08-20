@@ -19,6 +19,8 @@
 package com.tivo.kmttg.mind;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.DateFormat;
@@ -222,13 +224,13 @@ public class SimpleCookieManager {
    public static void main(String[] args) { 
       SimpleCookieManager cm = new SimpleCookieManager();
       try {
-         URL url = new URL("http://www.hccp.org/test/cookieTest.jsp");
+         URL url = new URI("http://www.hccp.org/test/cookieTest.jsp").toURL();
          URLConnection conn = url.openConnection();
          conn.connect();
          cm.storeCookies(conn);
          System.out.println(cm);
          cm.setCookies(url.openConnection());
-      } catch (IOException ioe) {
+      } catch (IOException | URISyntaxException ioe) {
          ioe.printStackTrace();
       }
    }

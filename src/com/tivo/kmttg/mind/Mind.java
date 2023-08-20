@@ -27,6 +27,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -77,7 +79,7 @@ public class Mind {
          urlData = urlData + "&" + "cams_cb_username=" + encode(login);
          urlData = urlData + "&" + "cams_cb_password=" + encode(password);
          urlData = urlData + "&" + "cams_original_url=" + encode("/mind/" + mindVer + "?type=infoGet");
-         URL url = new URL(urlString);
+         URL url = new URI(urlString).toURL();
          URLConnection con = EasySSLHelper.openEasySSLConnection(url);
          con.setDoOutput(true);
          OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
@@ -105,7 +107,7 @@ public class Mind {
          in.close();
          return success;
       }
-      catch (MalformedURLException e) {
+      catch (MalformedURLException | URISyntaxException e) {
          log.error(e.toString() + " - " + urlString);
          return false;
       } 
@@ -121,7 +123,7 @@ public class Mind {
       try {
          // Open connection and post data
          byte urlData[] = dictcode(data);
-         URL url = new URL(urlString);
+         URL url = new URI(urlString).toURL();
          URLConnection con = EasySSLHelper.openEasySSLConnection(url);
          cm.setCookies(con);
          con.setDoInput(true);
@@ -144,7 +146,7 @@ public class Mind {
          in.close();
          return s;
       }
-      catch (MalformedURLException e) {
+      catch (MalformedURLException | URISyntaxException e) {
          log.error(e.toString() + " - " + urlString);
          return null;
       } 
@@ -161,7 +163,7 @@ public class Mind {
    }   
    
    @SuppressWarnings({ "unchecked", "rawtypes" })
-   public Boolean pushVideo(Hashtable info) throws MalformedURLException {
+   public Boolean pushVideo(Hashtable info) throws MalformedURLException,URISyntaxException {
       // At minimum tsn & url required
       if (info.get("tsn") == null || info.get("url") == null) {
          log.error("tsn & url required");
@@ -189,7 +191,7 @@ public class Mind {
          info.put("publishDate", getDateTime());
       }
       if (info.get("size") == null) {
-         URL url = new URL((String)info.get("url"));
+         URL url = new URI((String)info.get("url")).toURL();
          String name = url.getFile().replaceFirst("^.+file:(.+)$", "$1");
          File f = new File(name);
          info.put("size", String.valueOf(f.length()));

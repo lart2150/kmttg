@@ -25,6 +25,7 @@ import java.io.RandomAccessFile;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -82,7 +83,7 @@ public class toolDownload {
       Integer size = 0;
       int BLOCK_SIZE = 4096;
       try {
-          URL url = new URL(urlString);
+          URL url = new URI(urlString).toURL();
           log.warn("Downloading file: " + urlString + " ...");
           URLConnection con = url.openConnection();
           size = con.getContentLength();

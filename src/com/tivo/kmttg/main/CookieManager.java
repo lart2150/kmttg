@@ -220,13 +220,13 @@ public class CookieManager {
     public static void main(String[] args) { 
    CookieManager cm = new CookieManager();
    try {
-       URL url = new URL("http://www.hccp.org/test/cookieTest.jsp");
+       URL url = new URI("http://www.hccp.org/test/cookieTest.jsp").toURL();
        URLConnection conn = url.openConnection();
        conn.connect();
        cm.storeCookies(conn);
        System.out.println(cm);
        cm.setCookies(url.openConnection());
-   } catch (IOException ioe) {
+   } catch (IOException | URISyntaxException ioe) {
        ioe.printStackTrace();
    }
     }

@@ -102,9 +102,7 @@ public class atomic extends baseTask implements Serializable {
       debug.print("");
       Stack<String> command = new Stack<String>();
       command.add(config.AtomicParsley);
-      for (int i=0; i<args.size(); ++i) {
-         command.add(args.get(i));
-      }
+      command.addAll(args);
       process = new backgroundProcess();
       log.print(">> Running AtomicParsley on " + job.encodeFile + " ...");
       if ( process.run(command) ) {

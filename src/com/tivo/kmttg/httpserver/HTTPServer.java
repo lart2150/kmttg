@@ -1233,8 +1233,8 @@ public class HTTPServer {
             int pos = host.indexOf(':');
             host = pos == -1 ? host : host.substring(0, pos);
             try {
-                return new URL("http", host, port, "");
-            } catch (MalformedURLException mue) {
+                return new URI("http", null, host, port, "", null, null).toURL();
+            } catch (MalformedURLException | URISyntaxException mue) {
                 return null;
             }
         }

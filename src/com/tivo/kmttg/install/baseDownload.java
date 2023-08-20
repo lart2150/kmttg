@@ -20,6 +20,7 @@ package com.tivo.kmttg.install;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -31,7 +32,7 @@ public class baseDownload {
       String base = null;
       String base_url = "http://svn.code.sf.net/p/kmttg/code/trunk/baseDownload";
       try {
-         URL url = new URL(base_url);
+         URL url = new URI(base_url).toURL();
          URLConnection con = url.openConnection();
          BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
          String inputLine;

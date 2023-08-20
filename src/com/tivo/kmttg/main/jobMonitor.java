@@ -1643,7 +1643,7 @@ public class jobMonitor {
    public void shutdown() {
       if (config.OS.equals("windows")) {
          try {
-            Runtime.getRuntime().exec("shutdown.exe -f -s");
+            Runtime.getRuntime().exec(new String[]{"shutdown.exe", "-f", "-s"});
          }
          catch(Exception e) {
             log.error(e.toString());
@@ -1769,9 +1769,11 @@ public class jobMonitor {
 			//new File(config.programDir + File.separator + jobDataFile).setReadable(true, false);
 			if (!config.OS.equals("windows")) {
 				try {
-					Runtime.getRuntime().exec(
-							"chmod ugo+r \"" + config.programDir
-									+ File.separator + jobDataFile + "\"");
+					Runtime.getRuntime().exec(new String[]{
+							"chmod",
+							"ugo+r",
+							config.programDir + File.separator + jobDataFile
+					});
 				} catch (Exception e) {
 					// quiet...
 				}

@@ -231,7 +231,9 @@ public class slingbox extends baseTask implements Serializable {
             try {
                String c = "taskkill /f /t /pid " + pid;
                log.warn(c);
-               Process p = Runtime.getRuntime().exec(c);
+               Process p = Runtime.getRuntime().exec(new String[]{
+                     "taskkill", "/f", "/t", "/pid", pid
+               });
                p.waitFor();
             } catch (Exception e) {
                log.error("Exception finding/killing pid (" + pid + "): " + Arrays.toString(e.getStackTrace()));
