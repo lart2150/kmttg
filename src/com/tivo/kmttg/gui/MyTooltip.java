@@ -194,7 +194,7 @@ public class MyTooltip {
           ttbehaviourField.set(Tooltip.class, newTTBehaviour);
            
       } catch (Exception e) {
-          log.error("Aborted setup due to error:" + e.getMessage());
+          //catch silently.  This does not seem to work with recent java 8 builds.
       }
   }
    
