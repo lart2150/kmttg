@@ -24,6 +24,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -38,7 +41,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v2.7-l";
+   public static String kmttg = "kmttg v2.8-l-pre";
    
    // encoding related
    public static String encProfDir = "";
@@ -51,6 +54,7 @@ public class config {
    public static String tivodecode = "";
    public static String dsd = "";
    public static String outputDir = "";
+   public static String tempDir = "";
    public static String mpegDir = "";
    public static String qsfixDir = "";
    public static String mpegCutDir = "";
@@ -703,7 +707,20 @@ public class config {
          if ( ! file.isDir(tmpDir) ) {
             tmpDir = programDir;
          }
-      }      
+      }
+      
+      try {
+         Path temp = Paths.get(tmpDir + File.separator + "kmttg_temp");
+         Files.createDirectories(temp);
+         tmpDir = temp.toString();
+
+         Files.walk(temp)
+            .filter(Files::isRegularFile)
+            .map(Path::toFile)
+            .forEach(File::delete);
+      } catch (IOException e) {
+        // fallback to program dir if we didn't create it.  don't fall back if we failed deleting files
+      }
       
       // Try and get MAK from ~/.tivodecode_mak
       String result = getMakFromFile();

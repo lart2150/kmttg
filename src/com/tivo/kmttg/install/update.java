@@ -86,7 +86,7 @@ public class update {
                   auto.serviceStopIfNeeded();
                   Task<Void> task = new Task<Void>() {
                      public Void call() {
-                        String filename = config.programDir + File.separator + fname;
+                        String filename = config.tmpDir + File.separator + fname;
                         String zipFile = downloadUrl(filename, url);
                         if (zipFile != null) {
                            // Determine if zipFile contains a redirect
@@ -103,6 +103,7 @@ public class update {
                               restartApplication();
                            } else {
                               log.error("Trouble unzipping file: " + zipFile);
+                              file.delete(zipFile);
                            }
                         }
                         return null;
