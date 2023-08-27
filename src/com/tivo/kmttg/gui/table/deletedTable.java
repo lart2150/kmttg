@@ -420,7 +420,9 @@ public class deletedTable extends TableMap {
                   try {
                      json = GetRowData(row);
                      if (json != null) {
-                        String title = json.getString("title");
+                        String title = "";
+                        if (json.has("title"))
+                           title = json.getString("title");
                         if (json.has("subtitle"))
                            title += " - " + json.getString("subtitle");
                         final String title_final = title;
