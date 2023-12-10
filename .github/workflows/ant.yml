@@ -28,3 +28,7 @@ jobs:
        unzip javafx.zip
        sed -i.bak 's/<property name="fxlib" value=".*"\/>/<property name="fxlib" value="javafx-sdk-21.0.1\/lib"\/>/g' build.xml
        ant -noinput -buildfile build.xml
+    - uses: actions/upload-artifact@v3
+      with:
+        name: Package
+        path: release/kmttg.jar
