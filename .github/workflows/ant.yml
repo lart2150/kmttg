@@ -38,5 +38,5 @@ jobs:
         ant -noinput -buildfile build.xml
     - uses: actions/upload-artifact@v3
       with:
-        name: Package
         path: release/kmttg.jar
+        if-no-files-found: error

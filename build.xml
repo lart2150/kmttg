@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="kmttg" basedir="." default="all">
-    <property name="rversion" value="v2.8-l-pre"/>
+    <property name="rversion" value="v2.8-l"/>
     <tstamp/>
     <property name="bversion" value="${DSTAMP}-${TSTAMP}"/>
     <property name="lib" value="lib"/>
@@ -58,7 +58,15 @@
         </jar>
     </target>
     <target name="build" depends="create">
-        <javac includeantruntime="false" debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+        <javac
+        	includeantruntime="false"
+        	debug="true"
+        	debuglevel="${debuglevel}"
+        	destdir="bin"
+        	source="${source}"
+        	target="${target}"
+        	>
+        	<!-- to better test java 8 compatability bootclasspath="C:\Program Files\Eclipse Adoptium\jdk-8.0.362.9-hotspot\jre\lib\rt.jar" -->
             <src path="src"/>
             <classpath refid="main.classpath"/>
         	<compilerarg value="-Xlint:deprecation" />
