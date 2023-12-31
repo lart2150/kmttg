@@ -106,6 +106,10 @@ public class TiVoRPC {
       RemoteInit(mak);
    }
    
+   public boolean isConnected() {
+      return this.socket.isConnected();
+   }
+   
    /**
     * The result of initialization
     * @return true if the connection was established.

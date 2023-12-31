@@ -1,0 +1,10 @@
+/rc_images
+/dist
+/release
+/bin
+/.gradle
+/.settings
+/config.ini
+/css
+/cdata.*
+/*.jar

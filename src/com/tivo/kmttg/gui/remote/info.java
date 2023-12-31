@@ -240,61 +240,61 @@ public class info {
                            info += String.format("%-30s %s\n", fields[i], json.get(fields[i]));
                      }
 
-                     if (! r.awayMode() ) {
-                        // More detailed info
-                        JSONObject j = new JSONObject();
-                        j.put("bodyId", r.bodyId_get());
-                        JSONObject response = r.Command("systemInformationGet", j);
-                        if (response != null) {
-                           String integers[] = {
-                              "remoteAddress", "recordingCapacityHdHours",
-                              "recordingCapacitySdHours", "freeDiskSpaceSdHours",
-                              "freeDiskSpaceHdHours"
-                           };
-                           String strings[] = {
-                              "internalTemperature",
-                              "zipCode", "remoteBatteryLevel", "activeVideoOutputFormat",
-                              "platform", "netflixEsn",
-                              "hdcpVersionInfo", "collabSliceVersion",
-                              "programInfoTo", "gcCompletionTime", "indexCompletionTime",
-                              "dialInCode", "serviceState", "serviceLevel", "serviceMapInfo",
-                           };
-                           String jsons[] = { "serviceConnectionInfo", "vcmConnectionInfo" };
-                           for (int i=0; i<strings.length; ++i) {
-                              if (response.has(strings[i]))
-                                 info += String.format(
-                                    "%-30s %s\n", strings[i], response.getString(strings[i])
-                                 );
-                           }                           
-                           for (int i=0; i<jsons.length; ++i) {
-                              if (response.has(jsons[i])) {
-                                 response.getJSONObject(jsons[i]).remove("type");
-                                 info += String.format(
-                                    "%s:\n%s\n", jsons[i], response.getJSONObject(jsons[i]).toString(3)
-                                 );
-                              }
-                           }                           
-                           for (int i=0; i<integers.length; ++i) {
-                              if (response.has(integers[i]))
-                                 info += String.format(
-                                    "%-30s %d\n", integers[i], response.getInt(integers[i])
-                                 );
+                     // More detailed info
+                     JSONObject j = new JSONObject();
+                     j.put("bodyId", r.bodyId_get());
+                     JSONObject response = r.Command("systemInformationGet", j);
+                     if (response != null) {
+                        String integers[] = {
+                           "remoteAddress", "recordingCapacityHdHours",
+                           "recordingCapacitySdHours", "freeDiskSpaceSdHours",
+                           "freeDiskSpaceHdHours"
+                        };
+                        String strings[] = {
+                           "internalTemperature",
+                           "zipCode", "remoteBatteryLevel", "activeVideoOutputFormat",
+                           "platform", "netflixEsn",
+                           "hdcpVersionInfo", "collabSliceVersion",
+                           "programInfoTo", "gcCompletionTime", "indexCompletionTime",
+                           "dialInCode", "serviceState", "serviceLevel", "serviceMapInfo",
+                        };
+                        String jsons[] = { "serviceConnectionInfo", "vcmConnectionInfo" };
+                        for (int i=0; i<strings.length; ++i) {
+                           if (response.has(strings[i]))
+                              info += String.format(
+                                 "%-30s %s\n", strings[i], response.getString(strings[i])
+                              );
+                        }                           
+                        for (int i=0; i<jsons.length; ++i) {
+                           if (response.has(jsons[i])) {
+                              response.getJSONObject(jsons[i]).remove("type");
+                              info += String.format(
+                                 "%s:\n%s\n", jsons[i], response.getJSONObject(jsons[i]).toString(3)
+                              );
                            }
+                        }                           
+                        for (int i=0; i<integers.length; ++i) {
+                           if (response.has(integers[i]))
+                              info += String.format(
+                                 "%-30s %d\n", integers[i], response.getInt(integers[i])
+                              );
                         }
-                        
-                        // What's On info
-                        String [] whatson = getWhatsOn(tivoName);
-                        if (whatson != null) {
-                           info += String.format("%-30s ", "What's On");
-                           for (int i=0; i<whatson.length; ++i) {
-                              if (i>0)
-                                 info += "; ";
-                              info += whatson[i];
-                           }
-                           info += "\n";
+                     }
+                     
+                     // What's On info
+                     String [] whatson = getWhatsOn(tivoName);
+                     if (whatson != null) {
+                        info += String.format("%-30s ", "What's On");
+                        for (int i=0; i<whatson.length; ++i) {
+                           if (i>0)
+                              info += "; ";
+                           info += whatson[i];
                         }
                         info += "\n";
+                     }
+                     info += "\n";
                      
+                     if (! r.awayMode() ) {
                         // Tuner info
                         reply = r.Command("TunerInfo", new JSONObject());
                         if (reply != null && reply.has("state")) {

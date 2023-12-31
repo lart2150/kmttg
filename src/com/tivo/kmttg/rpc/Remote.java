@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -48,25 +49,44 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-public class Remote extends TiVoRPC {
-   public final Boolean success;
-   private final boolean away;
+public class Remote{
+   public Boolean success;
+   protected TiVoRPCWS ws;
+   protected TiVoRPC s;
+   protected final boolean away;
+   private String tivoName;
+   protected final String IP;
+   protected final int port;
    
    /** perform a socket setup and auth. all public constructors call this. */
    private Remote(String tivoName, boolean away, String IP, String mak, String programDir, int port, String cdata) {
-      super(tivoName, IP, mak, programDir, port, cdata,
-            // oldSchema, debug
-            (config.rpcOld == 1), com.tivo.kmttg.util.debug.enabled);
-      // super calls RemoteInit which in turn calls Auth which is overridden in this class to also call Auth_web() or bodyId_get()
+      this.tivoName = tivoName;
+      this.IP = IP;
+      this.port = port;
       this.away = away;
-      
-      // record the init result in the expected public field
-      this.success = getSuccess();
+      try {
+         if (away) {
+            ws = TiVoRPCWS.init(
+                  tivoName,
+                  IP,
+                  port
+              );
+            this.success = ws.waitForReady();
+         } else {
+            s = new TiVoRPC(tivoName, IP, mak, programDir, port, cdata,
+            (config.rpcOld == 1), com.tivo.kmttg.util.debug.enabled);
+            this.success = s.getSuccess();
+         }
+      } catch (URISyntaxException | InterruptedException e) {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+         this.success = false;
+      }
    }
    
    // This constructor designed to be use by kmttg
    public Remote(String tivoName) {
-      this(null, false, // doesn't actually set this.tivoName
+      this(tivoName, false, // doesn't actually set this.tivoName
             getIPForTivo(tivoName),
             config.MAK, config.programDir, 
             getPortForTivo(tivoName),
@@ -99,7 +119,7 @@ public class Remote extends TiVoRPC {
             port, cdata);
    }
    
-   private static String getIPForTivo(String tivoName) {
+   public static String getIPForTivo(String tivoName) {
       String tivoIP = config.TIVOS.get(tivoName);
 
       // if config for tivoName is null, pass tivoName as IP, else config
@@ -110,7 +130,13 @@ public class Remote extends TiVoRPC {
       }
    }
    
-   private static int getPortForTivo(String tivoName) {
+   public boolean isConnected() {
+      return this.away
+            ? this.ws.isOpen()
+            : this.s.isConnected();
+   }
+   
+   public static int getPortForTivo(String tivoName) {
       String wanrpc = config.getWanSetting(tivoName, "rpc");
       
       // if "rpc" WanSetting for tivoName is null, use default port, else WanSetting
@@ -122,30 +148,14 @@ public class Remote extends TiVoRPC {
    }
 
    /**
-    * Override performs a tivo.com authentication if IP ends with tivo.com, else performs default followed by a bodyId_get()
-    */
-   @Override
-   protected boolean Auth(String MAK) {
-     if (IP.endsWith("tivo.com") || IP.endsWith("tivoservice.com")) {
-       if ( ! Auth_web() ) {
-          return false;
-       }
-     } else {
-       if ( ! super.Auth(MAK) ) {
-          return false;
-       }
-       bodyId_get();
-     }
-     return true;
-   }
-   
-   
-   /**
     * Returns cached bodyId or performs a bodyConfigSearch and returns the bodyId.
     * NOTE: This retrieves and stores bodyId in config hashtable if not previously stored
     * @return bodyId or "-"
     */
    public String bodyId_get() {
+      if (this.away) {
+         return ws.getTsn();
+      }
       String id = config.bodyId_get(IP, port);
       if (id.equals("")) {
          JSONObject json = new JSONObject();
@@ -169,104 +179,24 @@ public class Remote extends TiVoRPC {
          id = "-";
       return id;
    }
-
-   /**
-    * Perform a middlemind tivo.com bodyAuthenticate with configured username/password
-    * @return
-    */
-   private Boolean Auth_web() {
-      try {
-         if (config.getTivoUsername() == null || config.getTivoPassword() == null) {
-            log.error("tivo.com username & password not set in kmttg or pyTivo config");
-            return false;
-         }
-         if (config.isDomainTokenExpired() || config.getDomainToken() == null) {
-        	 log.warn("Domain Token expired refreshing token");
-        	 GetDomainToken getDT = new GetDomainToken();
-        	 try {
-        		 getDT.getToken();
-        	 } catch (Exception e) {
-        		 log.error("Failed to get domain token.  Check your tivo.com username or password.");
-        		 return false;
-        	 }
-        	 if (config.isDomainTokenExpired()) {
-        		 log.error("Failed to get domain token.  Check your tivo.com username or password.");
-        		 return false;
-        	 }
-         }
-
-         JSONObject credential = new JSONObject();
-         JSONObject h = new JSONObject();
-         JSONObject domainToken = new JSONObject();
-         domainToken.put("domain", "tivo");
-         domainToken.put("type", "domainToken");
-         domainToken.put("token", config.getDomainToken());
-         
-         credential.put("type", "domainTokenCredential");
-         credential.put("domainToken", domainToken);
-//         credential.put("username", config.getTivoUsername());
-//         credential.put("password", config.getTivoPassword());
-         h.put("credential", credential);
-         String req = RpcRequest("bodyAuthenticate", false, h);
-         if (Write(req) ) {
-            JSONObject result = ReadRemote();
-            if (result.has("status")) {
-               if (result.get("status").equals("success")) {
-                  // Look for tivoName bodyId in deviceId JSONArray
-                  Boolean found = false;
-                  if (result.has("deviceId")) {
-                     JSONArray a = result.getJSONArray("deviceId");
-                     for (int i=0; i<a.length(); ++i) {
-                        JSONObject j = a.getJSONObject(i);
-                        if (j.has("friendlyName")) {
-                           if (j.getString("friendlyName").equals(tivoName) && j.has("id")) {
-                              found = true;
-                              config.bodyId_set(IP, port, j.getString("id"));
-                              if (config.getTsn(tivoName) == null) {
-                                 String tsn = j.getString("id");
-                                 tsn = tsn.replaceFirst("tsn:", "");
-                                 config.setTsn(tivoName, tsn);
-                              }
-                           }
-                        }
-                     }
-                  }
-                  if (! found) {
-                     // Couldn't get id from response so try getting tsn from kmttg
-                     String tsn = config.getTsn(tivoName);
-                     if (tsn == null) {
-                        log.error("Can't determine bodyId for TiVo: " + tivoName);
-                        return null;
-                     }
-                     config.bodyId_set(IP, port, "tsn:" + tsn);
-                  }
-                  return true;
-               }
-            }
-         }
-      } catch (Exception e) {
-         error("rpc Auth error - " + e.getMessage());
-      }
-      return false;
-   }
-
+   
    /**
     * Perform {@link #Read()}, if rpcOld got set, update config, return null if the result is an error.
     * @return null if there was an error, otherwise the response.
     */
    private synchronized JSONObject ReadRemote() {
-      boolean rpcPre = rpcOld;
-      
+      boolean rpcPre = s.rpcOld;
+
       // do the actual read
-      JSONObject result = Read();
-      
+      JSONObject result = s.Read();
+
       // update config if rpcOld was changed as a result of the Read.
       // note, that also means this will have been an error so null is returned below.
-      if (!rpcPre && rpcOld) {
+      if (!rpcPre && s.rpcOld) {
          config.rpcOld = 1;
          config.save();
       }
-      
+
       // expecting null result for errors.
       try {
          if (result.has("type") && result.getString("type").equals("error")) {
@@ -276,16 +206,22 @@ public class Remote extends TiVoRPC {
          error("rpc Read error - " + e.getMessage());
          return null;
       }
-      
+
       return result;
    }
-   
+
    /**
     * true if this Remote is connected via middlemind 
     * (means {@link #Remote(String, Boolean)} constructor was used (and passed true)) 
     */
    public Boolean awayMode() {
       return away;
+   }
+   
+   public synchronized String RpcRequest(String type, Boolean monitor, JSONObject data) {
+      return this.away
+            ? ws.RpcRequest(type, monitor, data)
+            : s.RpcRequest(type, monitor, data);
    }
    
    // RPC command set
@@ -752,10 +688,11 @@ public class Remote extends TiVoRPC {
          else if (type.equals("PhoneHome")) {
             // Request a network connection
             json.put("bodyId", bodyId_get());
-            if (away)
+            if (away) {
+               req = RpcRequest("phoneHomeRequest", false, json);
+            } else {
                req = RpcRequest("phoneHomeSend", false, json);
-            else
-               req = RpcRequest("phoneHomeRequest", true, json);
+            }
          }
          else if (type.equals("WhatsOn")) {
             // Request info on what is currently playing on the TiVo
@@ -768,11 +705,15 @@ public class Remote extends TiVoRPC {
          }
          
          if (req != null) {
-            if ( Write(req) ) {
-               return ReadRemote();
+            if (this.away) {
+               return ws.sendRequestAndWaitForResponse(req);
+            } else {
+               if ( s.Write(req) ) {
+                  return ReadRemote();
+               }
+               else
+                  return null;
             }
-            else
-               return null;
          } else {
             error("rpc: unhandled Key type: " + type);
             return null;
@@ -1591,7 +1532,7 @@ public class Remote extends TiVoRPC {
       long stop = start + day_increment;
       try {
          // Set shorter timeout in case some requests fail
-         setSoTimeout(20*1000);
+         //setSoTimeout(20*1000);
          // Search 1 day at a time
          int item = 0;
          int total_items = total_days*channelNumbers.length();
@@ -2222,7 +2163,7 @@ public class Remote extends TiVoRPC {
          } catch (JSONException e) {
             log.error("extendedSearch failed - " + e.getMessage());
          }
-         r.disconnect();
+         disconnect();
       }
       
       return collections;
@@ -2699,7 +2640,7 @@ public class Remote extends TiVoRPC {
             log.error("Remote getCategoryNames - " + e.getMessage());
             return null;
          }
-         r.disconnect();
+         disconnect();
       }
       return categories;      
    }
@@ -2722,7 +2663,7 @@ public class Remote extends TiVoRPC {
                for (int i=0; i<top.length(); ++i) {
                   JSONObject j = top.getJSONObject(i);
                   if (j.has("label") && j.getString("label").equals(categoryName)) {
-                     r.disconnect();
+                     disconnect();
                      return j.getString("categoryId");
                   }
                }
@@ -2731,7 +2672,7 @@ public class Remote extends TiVoRPC {
             log.error("Remote getCategoryId - " + e.getMessage());
             return null;
          }
-         r.disconnect();
+         disconnect();
       }
       return null;
    }
@@ -3081,17 +3022,17 @@ public class Remote extends TiVoRPC {
       }
    }
       
-   @Override
+
    protected void print(String message) {
       log.print(message);
    }
    
-   @Override
+
    protected void error(String message) {
       log.error(message);
    }
    
-   @Override
+
    protected void warn(String message) {
       log.warn(message);
    }
@@ -3147,4 +3088,12 @@ public class Remote extends TiVoRPC {
 	   }
 	   return ip;
 	}
+	
+   public void disconnect() {
+      if (away) {
+         this.ws.close();
+      } else {
+         this.s.disconnect();
+      }
+  }
 }
