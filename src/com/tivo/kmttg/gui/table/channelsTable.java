@@ -430,6 +430,11 @@ public class channelsTable extends TableMap {
             if (r.success) {
                for (int i=0; i<changed.length(); ++i) {
                   JSONObject channel = changed.getJSONObject(i);
+                  if (!channel.has("channelNumber") || !channel.has("callSign") ) {
+                     log.warn("channel missing number or sign: " + channel.toString());
+                     continue;
+                  }
+
                   log.print("Setting " + channel.getString("channelNumber") + "=" + channel.getString("callSign") +
                      " isReceived=" + channel.getBoolean("isReceived"));
                   JSONObject result = r.Command("ChannelUpdate", channel);
