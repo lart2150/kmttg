@@ -887,7 +887,7 @@ public class jobMonitor {
          // Download mode
          // NOTE: Be careful using basename function here - need to honor file naming with folders
          tivoFile = outputDir + s + startFile;
-         mpegFile = string.replaceSuffix(startFile, ".mpg");
+         mpegFile = string.replaceSuffix(startFile, TSDownload == 1 ? ".ts" : ".mpg");
          mpegFile = mpegDir + s + mpegFile;
          metaFile = mpegFile + ".txt";
          
