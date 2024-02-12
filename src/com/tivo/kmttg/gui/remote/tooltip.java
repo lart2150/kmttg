@@ -232,6 +232,10 @@ public class tooltip {
          text += "Permanently delete selected individual show(s) in table on specified TiVo.<br>";
          text += "NOTE: Once deleted these shows are removed from Recently Deleted and can't be recovered.";
       }
+      else if (component.equals("export_deleted")){
+         text = "<b>Export</b><br>";
+         text += "Export the list of deleted shows to a csv";
+      }
       else if (component.equals("tivo_thumbs")) {
          text = "Select TiVo for which to display list of thumbed shows.";
       }

@@ -18,14 +18,19 @@
  */
 package com.tivo.kmttg.gui.remote;
 
+import java.io.File;
+
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.deletedTable;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.util.log;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -36,7 +41,9 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 public class deleted {
    public VBox panel = null;
@@ -84,14 +91,7 @@ public class deleted {
             label.setText("");
             String tivoName = tivo.getValue();
             if (tivoName != null && tivoName.length() > 0) {
-               jobData job = new jobData();
-               job.source         = tivoName;
-               job.tivoName       = tivoName;
-               job.type           = "remote";
-               job.name           = "Remote";
-               job.remote_deleted = true;
-               job.deleted        = tab;
-               jobMonitor.submitNewJob(job);
+               deletedJob(tivoName);
             }
          }
       });
@@ -118,6 +118,40 @@ public class deleted {
          }
       });
       
+      Button export = new Button("Export");
+      export.setTooltip(tooltip.getToolTip("export_deleted"));
+      export.setOnAction(new EventHandler<ActionEvent>() {
+         public void handle(ActionEvent e) {
+            String tivoName = tivo.getValue();
+            if (tivoName == null || tivoName.length() == 0) {
+               log.warn("select a tivo to export the deleted list" );
+               return;
+            }
+            config.gui.remote_gui.Browser.getExtensionFilters().clear();
+            config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
+            config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
+            config.gui.remote_gui.Browser.setTitle("Save to file");
+            config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
+            config.gui.remote_gui.Browser.setInitialFileName(tivoName + "_deleted.csv");
+            final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(frame);
+            if (selectedFile != null) {
+               Task<Void> task = new Task<Void>() {
+                  @Override public Void call() {
+                     log.warn("Exporting '" + tivoName + "' deleted list to csv file: " + selectedFile.getAbsolutePath());
+                     Remote r = config.initRemote(tivoName);
+                     if (r.success) {
+                        jobData job = deletedJob(tivoName);
+                        r.DeletedShowsCSV(selectedFile, job);
+                        r.disconnect();
+                     }
+                     return null;
+                  }
+               };
+               new Thread(task).start();
+            }
+         }
+      });
+      
       label = new Label();
       
       row1.getChildren().add(title);
@@ -126,6 +160,7 @@ public class deleted {
       row1.getChildren().add(refresh);
       row1.getChildren().add(recover);
       row1.getChildren().add(permDelete);
+      row1.getChildren().add(export);
       row1.getChildren().add(label);
       
       tab = new deletedTable();
@@ -135,5 +170,17 @@ public class deleted {
       panel.setSpacing(1);
       panel.getChildren().addAll(row1, tab.TABLE);
       
+   }
+   
+   private jobData deletedJob(String tivoName) {
+      jobData job = new jobData();
+      job.source         = tivoName;
+      job.tivoName       = tivoName;
+      job.type           = "remote";
+      job.name           = "Remote";
+      job.remote_deleted = true;
+      job.deleted        = tab;
+      jobMonitor.submitNewJob(job);
+      return job;
    }
 }

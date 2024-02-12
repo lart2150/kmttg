@@ -169,11 +169,35 @@ public class JSONConverter {
 		return title;
 	}
 
+	/**
+	 * Gets the start time as a local Date
+	 * @param entry
+	 * @return
+	 */
 	public static String printableTimeFromJSON(JSONObject entry) {
 		long start = getStartTime(entry);
 		SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy hh:mm a");
 		return sdf.format(start);
 	}
+	
+	/**
+	 * Returns the selected key as a local timestamp or a empty string on error
+	 * @param entry json object
+	 * @param key json key
+	 * @return
+	 */
+	  public static String printableTimeFromJSON(JSONObject entry, String key) {
+	     if (entry.has(key)) {
+         try {
+            String dateString = entry.getString(key);
+            long start = getLongDateFromString(dateString);
+            SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yy hh:mm a");
+            return sdf.format(start);
+         } catch (JSONException e) {
+         }
+	     }
+	     return "";
+	   }
 
 	// Return friendly name of a partner based on id, such as Netflix, Hulu, etc.
 	static public String getPartnerName(JSONObject entry) {

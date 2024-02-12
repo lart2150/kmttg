@@ -407,4 +407,9 @@ public class file {
       }
       return null;
    }
+   
+   public static String csvField(String field) {
+      return "\"" + field
+            .replace("\"", "\"\"")+ "\",";
+   }
 }

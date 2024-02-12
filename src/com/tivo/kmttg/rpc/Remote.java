@@ -21,6 +21,7 @@ package com.tivo.kmttg.rpc;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.URISyntaxException;
@@ -46,6 +47,7 @@ import com.tivo.kmttg.gui.sortable.sortableDuration;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
+import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
@@ -1349,6 +1351,51 @@ public class Remote{
       }
 
       return JSONConverter.sortByLatestStartDate(allShows);
+   }
+   
+   public void DeletedShowsCSV(File csvFile, jobData job) {
+      try {
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(csvFile));
+         ofp.write("Title,Subtitle,Description,Season,Episode,Orginal Air Date,Movie Year,Channel,Start Time,Delete time,Delete Reason,Delete Policy,Content ID,Recording id,Size,Duration\r\n");
+         JSONArray allShows = DeletedShows(job);
+         for (int i = 0; i < allShows.length(); i++) {
+            JSONObject show = allShows.getJSONObject(i);
+            String episodeNum = "" + JSONConverter.getEpisodeNum(show);
+            
+            ofp.write(
+                  file.csvField(getStringIfHas(show, "title"))
+                  + file.csvField(getStringIfHas(show, "subtitle"))
+                  + file.csvField(getStringIfHas(show,"description"))
+                  + file.csvField(getStringIfHas(show, "seasonNumber"))
+                  + file.csvField(episodeNum)
+                  + file.csvField(getStringIfHas(show, "originalAirdate"))
+                  + file.csvField(getStringIfHas(show, "movieYear"))
+                  + file.csvField(JSONConverter.makeChannelName(show))
+                  + file.csvField(JSONConverter.printableTimeFromJSON(show))
+                  + file.csvField(JSONConverter.printableTimeFromJSON(show, "deletionTime"))
+                  + file.csvField(getStringIfHas(show, "deletionReason"))
+                  + file.csvField(getStringIfHas(show, "contentId"))
+                  + file.csvField(getStringIfHas(show, "recordingId"))
+                  + file.csvField(getStringIfHas(show, "size"))
+                  + file.csvField(getStringIfHas(show, "duration"))
+                  + "\r\n"
+            );
+         }
+         ofp.close();
+      } catch (IOException | JSONException e) {
+         log.error("Error writing to csv: " + e.getMessage());
+      }
+   }
+   
+   
+   protected String getStringIfHas(JSONObject json, String key) {
+      if (json.has(key)) {
+         try {
+            return json.get(key).toString();
+         } catch (JSONException e) {
+         }
+      }
+      return "";
    }
    
    // Get all season passes
