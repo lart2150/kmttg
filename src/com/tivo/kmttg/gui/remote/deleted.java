@@ -113,7 +113,13 @@ public class deleted {
          public void handle(ActionEvent e) {
             String tivoName = tivo.getValue();
             if (tivoName != null && tivoName.length() > 0) {
-               tab.permanentlyDelete(tivoName);
+               Task<Void> task = new Task<Void>() {
+                  @Override public Void call() {
+                        tab.permanentlyDelete(tivoName);
+                        return null;
+                  }
+               };
+               new Thread(task).start();
             }
          }
       });
