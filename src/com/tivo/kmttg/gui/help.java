@@ -21,6 +21,14 @@ package com.tivo.kmttg.gui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Enumeration;
 import java.util.LinkedHashMap;
 
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -43,12 +51,36 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.util.GetKeyStore;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class help {
    private static Stage dialog = null;
    private static VBox content = null;
+   
+   static String getKeyExpires() {
+      GetKeyStore getKeyStore;
+      try {
+         getKeyStore = new GetKeyStore(null, config.programDir);
+         KeyStore keyStore = getKeyStore.getKeyStore();
+
+         Enumeration<String> aliases = keyStore.aliases();
+
+         while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+            X509Certificate crt = (X509Certificate) keyStore.getCertificate(alias);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM d YYYY");
+            return simpleDateFormat.format(crt.getNotAfter());
+         }
+
+         return "No certs in cstore";
+      } catch (Exception e) {
+         System.out.println("Error Loading cert");
+         System.out.println(e);
+         return "Error Loading Cert";
+      }
+   }
    
    static void showHelp() {
       debug.print("");
@@ -83,7 +115,16 @@ public class help {
          });
          row.getChildren().addAll(lab1, link1);
          content.getChildren().add(row);
-                  
+         
+         HBox certRow = new HBox();
+         certRow.setSpacing(5);
+         certRow.setAlignment(Pos.CENTER);
+         certRow.getChildren().addAll(
+               new Label("Certificate Expires: "),
+               new Label(help.getKeyExpires())
+         );
+         content.getChildren().add(certRow);
+
          final LinkedHashMap<String,String> links = new LinkedHashMap<String,String>();
          links.put("kmttg Home Page", "http://sourceforge.net/p/kmttg/wiki/Home");
          links.put("kmttg downloads", "http://sourceforge.net/projects/kmttg/files");

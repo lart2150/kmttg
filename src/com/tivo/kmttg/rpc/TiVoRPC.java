@@ -17,6 +17,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -28,6 +29,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.util.GetKeyStore;
 
 /**
  * Establish an RPC connection route with a TiVo using the provided cdata files.
@@ -209,35 +211,12 @@ public class TiVoRPC {
    private final void createSocketFactory() {
       if ( sslSocketFactory == null ) {
         try {
-           KeyStore keyStore = KeyStore.getInstance("PKCS12");
-           // This is default USA password
-           String password = "KllX3KygL9"; // expires 1/24/2026
-           //String password = "vlZaKoduom"; // expires 5/3/2024
-           InputStream keyInput;
-           if (cdata == null) {
-              // Installation dir cdata.p12 file takes priority if it exists
-              String cdata = programDir + "/cdata.p12";
-              if ( new File(cdata).isFile() ) {
-                 keyInput = new FileInputStream(cdata);
-                 cdata = programDir + "/cdata.password";
-                 if (new File(cdata).isFile()) {
-                    Scanner s = new Scanner(new File(cdata));
-                    password = s.useDelimiter("\\A").next();
-                    s.close();
-                 } else {
-                    error("cdata.p12 file present, but cdata.password is not");
-                 }
-              } else {
-                 // Read default USA cdata.p12 from kmttg.jar
-                 keyInput = getClass().getResourceAsStream("/cdata.p12");
-              }
-           }
-           else
-              keyInput = new FileInputStream(cdata);
-           keyStore.load(keyInput, password.toCharArray());
-           keyInput.close();
+           GetKeyStore getKeyStore = new GetKeyStore(cdata, programDir);
+           KeyStore keyStore = getKeyStore.getKeyStore();
+           String keyPassword = getKeyStore.getKeyPassword();
+
            KeyManagerFactory fac = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-           fac.init(keyStore, password.toCharArray());
+           fac.init(keyStore, keyPassword.toCharArray());
            SSLContext context = SSLContext.getInstance("TLS");
            TrustManager[] tm = new TrustManager[] { new NaiveTrustManager() };
            context.init(fac.getKeyManagers(), tm, new SecureRandom());
