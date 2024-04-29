@@ -16,6 +16,12 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Random;
@@ -30,6 +36,7 @@ import javax.net.ssl.X509TrustManager;
 
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.util.GetKeyStore;
+import com.tivo.kmttg.util.log;
 
 /**
  * Establish an RPC connection route with a TiVo using the provided cdata files.
@@ -214,6 +221,21 @@ public class TiVoRPC {
            GetKeyStore getKeyStore = new GetKeyStore(cdata, programDir);
            KeyStore keyStore = getKeyStore.getKeyStore();
            String keyPassword = getKeyStore.getKeyPassword();
+
+           Enumeration<String> aliases = keyStore.aliases();
+
+           while (aliases.hasMoreElements()) {
+              String alias = aliases.nextElement();
+              X509Certificate crt = (X509Certificate) keyStore.getCertificate(alias);
+              LocalDateTime notAfter = crt.getNotAfter().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+              int expiresDays = (int) ChronoUnit.DAYS.between(LocalDateTime.now(), notAfter);
+              if (expiresDays < 14) {
+                 log.error("RPC Certificate expires in " + expiresDays + " days.");
+              } else if (expiresDays < 90) {
+                 log.warn("RPC Certificate expires in " + expiresDays + " days.");
+              }
+           }
 
            KeyManagerFactory fac = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
            fac.init(keyStore, keyPassword.toCharArray());
