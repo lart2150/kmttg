@@ -18,8 +18,8 @@ public class GetKeyStore {
    {
       keyStore = KeyStore.getInstance("PKCS12");
       // This is default USA password
-      keyPassword = "KllX3KygL9"; // expires 1/24/2026
-      //String password = "vlZaKoduom"; // expires 5/3/2024
+      keyPassword = "piUYKNH7Sb"; // expires 11/17/2026
+      //keyPassword = "KllX3KygL9"; // expires 1/24/2026
       InputStream keyInput;
       if (cdata == null) {
          // Installation dir cdata.p12 file takes priority if it exists
