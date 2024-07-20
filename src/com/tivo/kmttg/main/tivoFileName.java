@@ -98,7 +98,8 @@ public class tivoFileName {
       String[] names = {
          "title", "titleOnly", "episodeTitle", "channelNum", "channel",
          "EpisodeNumber", "SeriesEpNumber", "season", "episode", "description",
-         "tivoName", "originalAirDate", "movieYear"
+         "tivoName", "originalAirDate", "movieYear",
+         "recordingId", "contentId", "collectionId"
       };
       for (String name : names) {
          if (entry.containsKey(name)) {
@@ -201,7 +202,8 @@ public class tivoFileName {
                "title", "mainTitle", "episodeTitle", "channelNum", "channel",
                "min", "hour", "wday", "mday", "month", "monthNum", "year",
                "startTime", "SeriesEpNumber", "season", "episode", "EpisodeNumber",
-               "description", "tivoName", "originalAirDate", "oad_no_dashes", "movieYear"
+               "description", "tivoName", "originalAirDate", "oad_no_dashes", "movieYear",
+               "recordingId", "contentId", "collectionId"
             };
             for (String k : keywords) {
                String replacement = k;
