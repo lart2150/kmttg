@@ -67,10 +67,9 @@ public class JavaFX {
 		String zipName = currentJar.getParent() + "/openfx-sdk.zip";
 		String downloadLink = "";
 		if (getJreMajorVersion() < 17) {
-		   downloadLink = "https://download2.gluonhq.com/openjfx/19.0.2.1/openjfx-19.0.2.1_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
+		   downloadLink = "https://download2.gluonhq.com/openjfx/17.0.12/openjfx-17.0.12_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
 		} else {
-		   //https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_windows-x64_bin-sdk.zip
-		   downloadLink = "https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
+		   downloadLink = "https://download2.gluonhq.com/openjfx/21.0.4/openjfx-21.0.4_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
 		}
 		String zipFile = update.downloadUrl(zipName, downloadLink);
 		if (zipFile != null) {
