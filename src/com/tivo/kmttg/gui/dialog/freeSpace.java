@@ -39,6 +39,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
+import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONException;
+import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.bitrateTable;
@@ -59,8 +62,8 @@ public class freeSpace {
    private Hashtable<String,Hashtable<String,Double>> chanData = new Hashtable<String,Hashtable<String,Double>>();
    private Hashtable<String,Object> totalsData = new Hashtable<String,Object>();
    private PieChart chart = null;
-   private String[] labels = {"Keep Until I Delete", "Keep Until Space Needed", "Suggestions", "Free Space"};
-   private Color[] colors = {Color.GREEN, Color.YELLOW, Color.ORANGE, Color.BLUE};
+   private String[] labels = {"Keep Until I Delete", "Keep Until Space Needed", "Suggestions", "Deleted", "Free Space"};
+   private Color[] colors = {Color.GREEN, Color.YELLOW, Color.ORANGE, Color.RED, Color.BLUE};
 
    class PieData {
       ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
@@ -146,6 +149,9 @@ public class freeSpace {
       // create and display dialog window
       dialog = new Stage();
       dialog.initOwner(frame);
+      if (frame.getWidth() > 1000) {
+         dialog.setWidth(1000);
+      }
       gui.LoadIcons(dialog);
       dialog.setTitle(tivoName + " Disk Usage Analysis");
       Scene scene = new Scene(content);
@@ -162,12 +168,14 @@ public class freeSpace {
       data.put("suggestions", (float)0.0);
       data.put("kuid",        (float)0.0);
       data.put("kusn",        (float)0.0);
+      data.put("deleted",     (float)0.0);
       
       // Init totalsData to 0
       totalsData.put("bytes", (double)0.0);
       totalsData.put("duration", (double)0.0);
       
       Stack<Hashtable<String,String>> entries = config.gui.getTab(tivoName).getTable().getEntries();
+      JSONArray tivoDeleted = config.gui.remote_gui.deleted_tab.tab.tivo_data.get(tivoName);
       if (entries == null) return false;
       Double duration, bytes;
       float sizeGB;
@@ -210,6 +218,20 @@ public class freeSpace {
          }
          data.put("kusn", data.get("kusn") + sizeGB);
       }
+      if (tivoDeleted != null) {
+         for (int i=0; i<tivoDeleted.length(); i++) {
+            try {
+               JSONObject show = tivoDeleted.getJSONObject(i);
+               if (show.has("size")) {
+                  sizeGB = (float) ((float)show.getInt("size")/(float)1048576);
+                  data.put("deleted", data.get("deleted") + sizeGB);
+               }
+            } catch (JSONException e) {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            }
+         }
+      }
             
       // Compute free space
       float available = getDiskSpace();
@@ -220,7 +242,7 @@ public class freeSpace {
          available = used - small;
          config.diskSpace.put(tivoName, available);
       }
-      float free = available - used;
+      float free = available - used - data.get("deleted");
       if (free < 0) {
          // Set disk space available to used space if used > available
          disk_space = used;
@@ -232,7 +254,7 @@ public class freeSpace {
       int numSets = data.size();
       String[] legendLabels = new String[numSets];
       PieData dataset = new PieData();
-      String[] keys = {"kuid", "kusn", "suggestions", "free"};
+      String[] keys = {"kuid", "kusn", "suggestions", "deleted", "free"};
       for (int i=0; i<keys.length; ++i) {
          legendLabels[i] = String.format(
             "%s: %.2f GB (%.1f%%)",
