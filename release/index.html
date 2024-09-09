@@ -1,30 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>kmttg web server pages</title>
+    <link rel="stylesheet" href="web/css/pure-min.css">
+    <link rel="stylesheet" href="web/css/main.css">
+    <title>kmttg web server pages</title>
 </head>
 <body>
 
-<h2>Web server pages</h2>
-This web server is still a work in progress, offering a small subset of kmttg capabilities via a web browser, and also adding streaming video to browser capabilities. The Video Streaming capability only works for browsers supporting HLS and has only been tested on iOS Safari, but should work for Android Chrome as well.<br>
-These pages should be accessed via kmttg web server only, not directly as a file with a web browser. For documentation on enabling kmttg web server consult the <a target="_blank" href="http://sourceforge.net/p/kmttg/wiki/web_interface">kmttg web interface</a> Wiki page.<br><br>
+<div class="pure-menu pure-menu-horizontal pure-menu-scrollable" id="tuckedMenu">
+    <ul class="pure-menu-list">
+        <li class="pure-menu-item"><a href="web/Stream.html" class="pure-menu-link">Streaming</a></li>
+        <li class="pure-menu-item"><a href="web/Browser.html" class="pure-menu-link">Shares</a></li>
+        <li class="pure-menu-item"><a href="web/Remote.html" class="pure-menu-link">Remote</a></li>
+        <li class="pure-menu-item"><a href="web/ToDo.html" class="pure-menu-link">ToDo</a></li>
+        <li class="pure-menu-item"><a href="web/SeasonPasses.html" class="pure-menu-link">Seaon Passes</a></li>
+        <li class="pure-menu-item"><a href="web/Info.html" class="pure-menu-link">Info</a></li>
+        <li class="pure-menu-item"><a href="web/Jobs.html" class="pure-menu-link">Job Monitor</a></li>
+    </ul>
+</div>
+<div class="pure-g" id="content">
+    <div class="pure-u-lg-1-5 pure-u-0"></div>
+    <div class="pure-u-lg-3-5 pure-u-1 p-1">
+        <h2>Web server pages</h2>
+        This web server is still a work in progress, offering a small subset of kmttg capabilities via a web browser, and also adding streaming video to browser capabilities. The Video Streaming capability only works for browsers supporting HLS and has only been tested on iOS Safari, but should work for Android Chrome as well.<br>
+        These pages should be accessed via kmttg web server only, not directly as a file with a web browser. For documentation on enabling kmttg web server consult the <a target="_blank" href="http://sourceforge.net/p/kmttg/wiki/web_interface">kmttg web interface</a> Wiki page.<br><br>
 
-Choose which web server page you want here once connected to kmttg web server:
- <ul>
-  <li><a target="_blank" href="web/Stream.html" >Video Streaming</a></li>
-  <li><a target="_blank" href="web/Browser.html" >Share Browser</a></li>
-  <li><a target="_blank" href="web/Remote.html">Remote</a></li>
-  <li><a target="_blank" href="web/ToDo.html">ToDo</a></li>
-  <li><a target="_blank" href="web/SeasonPasses.html">Season Passes</a></li>
-  <li><a target="_blank" href="web/Info.html">Info</a></li>
-  <li><a target="_blank" href="web/Jobs.html">Job Monitor</a></li>
- </ul>
- 
-<h3>kmttg documentation</h3>
-Unrelated to web server pages above, this page offers links to kmttg Wiki documentation documents:
- <ul>
-  <li><a target="_blank" href="README.html">README.html</a></li>
- </ul>
- 
+        Choose which web server page you want here once connected to kmttg web server:
+        <ul>
+        <li><a target="_blank" href="web/Stream.html" >Video Streaming</a></li>
+        <li><a target="_blank" href="web/Browser.html" >Share Browser</a></li>
+        <li><a target="_blank" href="web/Remote.html">Remote</a></li>
+        <li><a target="_blank" href="web/ToDo.html">ToDo</a></li>
+        <li><a target="_blank" href="web/SeasonPasses.html">Season Passes</a></li>
+        <li><a target="_blank" href="web/Info.html">Info</a></li>
+        <li><a target="_blank" href="web/Jobs.html">Job Monitor</a></li>
+        </ul>
+        
+        <h3>kmttg documentation</h3>
+        Unrelated to web server pages above, this page offers links to kmttg Wiki documentation documents:
+        <ul>
+        <li><a target="_blank" href="README.html">README.html</a></li>
+        </ul>
+    </div>
+</div>
 </body>
 </html>

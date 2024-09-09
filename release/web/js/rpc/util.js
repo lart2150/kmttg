@@ -98,3 +98,8 @@ function util_handleError(prefix, xhr, status) {
       showDialog(prefix,message,'error');
    }
 }
+
+const util_handleFetchError = (prefix, error) => {
+   const message = typeof error === 'string' ? error : 'message' in error ? error.message : 'Error';
+   showDialog(prefix, message, 'error');
+}

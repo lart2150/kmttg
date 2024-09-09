@@ -1,31 +1,41 @@
-$(document).ready(function() {
+(async () => {
    // Info.html document elements
-   TIVO = document.getElementById("TIVO");
-   INFO = document.getElementById("INFO");
+   window.TIVO = document.getElementById("TIVO");
+   window.INFO = document.getElementById("INFO");
 
-   // Retrieve rpc enabled TiVos
-   $.getJSON("/getRpcTivos", function(data) {
-      $.each(data, function( i, value ) {
+   try {
+      const response = await fetch('/getRpcTivos');
+      const data = await response.json();
+      for (const tivo of data) {
          var option = document.createElement("option");
-         option.text = value;
-         option.value = value;
+         option.text = tivo;
+         option.value = tivo;
          TIVO.appendChild(option);
-      });
-      $('.TIVO').change(function() { tivoChanged(); });
-   })
-   .error(function(xhr, status) {
-      util_handleError("/getRpcTivos", xhr, status);
-   });
-});
+      }
+      TIVO.addEventListener("change", tivoChanged);
+   } catch (e) {
+      util_handleFetchError("/getRpcTivos", e);
+   }
+})();
 
 //button callback - RPC call to retrieve information on selected TiVo
-function Info() {
+const Info = async () => {
    INFO.innerHTML = "";
-   var url = "/rpc?operation=SysInfo&tivo=" + encodeURIComponent(TIVO.value);
-   $.getJSON(url, SysInfo)
-   .error(function(xhr, status) {
-      util_handleError("SysInfo", xhr, status);
-   });
+   const url = new URL('/rpc?operation=SysInfo', window.location);
+   url.searchParams.set('tivo', TIVO.value);
+
+   try {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+         util_handleFetchError("SysInfo", "Error");
+      }
+      
+      await SysInfo(await response.json());
+   } catch (e) {
+      util_handleFetchError("SysInfo", e);
+      return;
+   }
 }
 
 function tivoChanged() {
@@ -37,7 +47,7 @@ function tivoChanged() {
    Info();
 }
 
-function SysInfo(data) {
+const SysInfo = async (data) => {
    var html = "";
    if (data.hasOwnProperty("bodyConfig")) {
       var json = data.bodyConfig[0];
@@ -59,17 +69,27 @@ function SysInfo(data) {
       }
    }
    INFO.innerHTML += "<pre>" + html + "</pre>";  
-   var url = "/rpc?operation=WhatsOn&tivo=" + encodeURIComponent(TIVO.value);
-   $.getJSON(url, WhatsOn)
-   .error(function(xhr, status) {
-      util_handleError("WhatsOn", xhr, status);
-   });
+   const url = new URL('/rpc?operation=WhatsOn', window.location);
+   url.searchParams.set('tivo', TIVO.value);
+
+   try {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+         util_handleFetchError("WhatsOn", "Error");
+      }
+      
+      await WhatsOn(await response.json());
+   } catch (e) {
+      util_handleFetchError("WhatsOn", e);
+      return;
+   }
 }
 
-function WhatsOn(data) {
+const WhatsOn = async (data) => {
    var html = "";
    if (data.hasOwnProperty("whatsOn")) {
-      $.each(data.whatsOn, function(i, json) {
+      for (const json of data.whatsOn){
          if (json.hasOwnProperty("playbackType")) {
             html += "%25s %s".sprintf("What's On", json.playbackType);
          }
@@ -79,20 +99,31 @@ function WhatsOn(data) {
             }
          }
          html += "\n";
-      });
+      };
    }
    INFO.innerHTML += "<pre>" + html + "</pre>";  
-   var url = "/rpc?operation=TunerInfo&tivo=" + encodeURIComponent(TIVO.value);
-   $.getJSON(url, TunerInfo)
-   .error(function(xhr, status) {
-      util_handleError("TunerInfo", xhr, status);
-   });
+   const url = new URL('/rpc?operation=TunerInfo', window.location);
+   url.searchParams.set('tivo', TIVO.value);
+   
+   try {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+         util_handleFetchError("TunerInfo", "Error");
+      }
+      
+      await TunerInfo(await response.json());
+   } catch (e) {
+      util_handleFetchError("TunerInfo", e);
+      return;
+   }
 }
 
-function TunerInfo(data) {
+
+const TunerInfo = async (data) => {
    var html = "";
    if (data.hasOwnProperty("state")) {
-      $.each(data.state, function(i, json) {
+      for (const json of data.state){
          html += "%25s %s\n".sprintf("tunerId", json.tunerId);
          if (json.hasOwnProperty("channel")) {
             html += "%25s %s".sprintf("channelNumber", json.channel.channelNumber);
@@ -101,7 +132,7 @@ function TunerInfo(data) {
             }
             html += "\n\n";
          }
-      });
+      };
    }
    INFO.innerHTML += "<pre>" + html + "</pre>";
    // Cache the information
@@ -109,25 +140,43 @@ function TunerInfo(data) {
 }
 
 // Network Connect button callback
-function NetworkConnect() {
-   var url = "/rpc?operation=PhoneHome&tivo=" + encodeURIComponent(TIVO.value);
-   $.get(url, function(response) {
-      showDialog("Network Connect",response,'warning',2);
-   })
-   .error(function(xhr, status) {
-      util_handleError("NetworkConnect", xhr, status);
-   });
+const NetworkConnect = async () => {
+   const url = new URL('/rpc?operation=PhoneHome', window.location);
+   url.searchParams.set('tivo', TIVO.value);
+   
+   try {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+         util_handleFetchError("NetworkConnect", "Error");
+         return;
+      }
+      
+      showDialog("NetworkConnect",response,'warning',2)
+   } catch (e) {
+      util_handleFetchError("NetworkConnect", e);
+      return;
+   }
 }
 
 // Reboot button callback
-function Reboot() {
+const Reboot = async () => {
    if (confirm('Reboot ' + TIVO.value + '?')) {
-      var url = "/reboot?tivo=" + encodeURIComponent(TIVO.value);
-      $.get(url, function(response) {
+      const url = new URL('/reboot', window.location);
+      url.searchParams.set('tivo', TIVO.value);
+      
+      try {
+         const response = await fetch(url);
+   
+         if (!response.ok) {
+            util_handleFetchError("NetworkConnect", "Error");
+            return;
+         }
+         
          showDialog("Reboot",response,'warning',2);
-      })
-      .error(function(xhr, status) {
-         util_handleError("Reboot", xhr, status);
-      });
+      } catch (e) {
+         util_handleFetchError("TunerInfo", e);
+         return;
+      }
    }
 }

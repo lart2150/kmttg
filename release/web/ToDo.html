@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
- <link rel="stylesheet" type="text/css" href="dialog/dialog_box.css">
- <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/media/css/jquery.dataTables.css">
- <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/extensions/TableTools/css/dataTables.tableTools.css">
+   <link rel="stylesheet" href="css/pure-min.css">
+   <link rel="stylesheet" href="css/main.css">
+   <link rel="stylesheet" href="dialog/dialog_box.css">
+   <link rel="stylesheet" href="DataTables-2.1.6/datatables.min.css">
 <style>
 table, th, td {
     border: 1px solid grey;
@@ -21,24 +22,36 @@ tr.shown td.details-control {
  <title>ToDo</title>
 </head>
 <body>
-<div id="content">
- <label>TiVo:&nbsp;&nbsp;</label><select id="TIVO" class="TIVO"></select>
- <button type="button" onclick="Refresh()">Refresh</button>
- <button type="button" onclick="Cancel()">Cancel</button>
- <div id="MESSAGE"></div>
-</div>
- <div id="TABLE_DIV">
- <table id="TABLE" class="display">
- <thead>
-  <tr><th></th><th>DATE</th><th>SHOW</th><th>CHANNEL</th><th>DUR</th></tr>
- </thead>
- <tbody>
- </tbody>
- </table>
- </div>
- <script type="text/javascript" src="js/jquery-1.11.1.js"></script>
- <script type="text/javascript" src="DataTables-1.10.3/media/js/jquery.dataTables.js"></script>
- <script type="text/javascript" src="DataTables-1.10.3/extensions/TableTools/js/dataTables.tableTools.js"></script>
+   <div class="pure-menu pure-menu-horizontal pure-menu-scrollable" id="tuckedMenu">
+      <ul class="pure-menu-list">
+          <li class="pure-menu-item"><a href="Stream.html" class="pure-menu-link">Streaming</a></li>
+          <li class="pure-menu-item"><a href="Browser.html" class="pure-menu-link">Shares</a></li>
+          <li class="pure-menu-item"><a href="Remote.html" class="pure-menu-link">Remote</a></li>
+          <li class="pure-menu-item"><a href="ToDo.html" class="pure-menu-link">ToDo</a></li>
+          <li class="pure-menu-item"><a href="SeasonPasses.html" class="pure-menu-link">Seaon Passes</a></li>
+          <li class="pure-menu-item"><a href="Info.html" class="pure-menu-link">Info</a></li>
+          <li class="pure-menu-item"><a href="Jobs.html" class="pure-menu-link">Job Monitor</a></li>
+      </ul>
+  </div>
+  <div class="p-1">
+   <div id="content">
+      <label>TiVo:&nbsp;&nbsp;</label><select id="TIVO" class="TIVO"></select>
+      <button type="button" onclick="Refresh()">Refresh</button>
+      <button type="button" onclick="Cancel()">Cancel</button>
+      <div id="MESSAGE"></div>
+   </div>
+   <div id="TABLE_DIV">
+   <table id="TABLE" class="display">
+   <thead>
+   <tr><th></th><th>DATE</th><th>SHOW</th><th>CHANNEL</th><th>DUR</th></tr>
+   </thead>
+   <tbody>
+   </tbody>
+   </table>
+   </div>
+  </div>
+ <script type="text/javascript" src="js/jquery-3.7.1.min.js"></script>
+ <script type="text/javascript" src="DataTables-2.1.6/datatables.min.js"></script>
  <script type="text/javascript" src="js/String.js"></script>
  <script type="text/javascript" src="js/rpc/util.js"></script>
  <script type="text/javascript" src="js/rpc/ToDo.js"></script>

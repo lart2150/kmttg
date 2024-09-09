@@ -1,22 +1,23 @@
-$(document).ready(function() {
-   TIVO = document.getElementById("TIVO");
-   MESSAGE = document.getElementById("MESSAGE");
-   TABLE = document.getElementById("TABLE");
-   NUMCOLS = 5;
+(async () => {
+   // Info.html document elements
+   window.TIVO = document.getElementById("TIVO");
+   window.INFO = document.getElementById("INFO");
+   window.TABLE = document.getElementById("TABLE");
+   window.NUMCOLS = 5;
 
-   // Retrieve rpc enabled TiVos
-   $.getJSON("/getRpcTivos", function(data) {
-      $.each(data, function( i, value ) {
+   try {
+      const response = await fetch('/getRpcTivos');
+      const data = await response.json();
+      for (const tivo of data) {
          var option = document.createElement("option");
-         option.text = value;
-         option.value = value;
+         option.text = tivo;
+         option.value = tivo;
          TIVO.appendChild(option);
-      });
-      $('.TIVO').change(function() { tivoChanged(); });
-   })
-   .error(function(xhr, status) {
-      util_handleError("/getRpcTivos", xhr, status);
-   });
+      }
+      TIVO.addEventListener("change", tivoChanged);
+   } catch (e) {
+      util_handleFetchError("/getRpcTivos", e);
+   }
 
    // NOTE: column 0 is a special column reserved for display
    // of additional row information
@@ -45,12 +46,18 @@ $(document).ready(function() {
    });
    
    // Add event listener for opening and closing row details
-   $('#TABLE tbody').on('click', 'td.details-control', detailsClicked);
-});
+   $('#TABLE tbody')
+      .on('click', 'td.details-control', detailsClicked)
+      .on('click', 'tr', (e) => {
+         console.log(e);
+         e.currentTarget.classList.toggle('selected');
+      });
+})();
 
 // Callback when details column is clicked on in a row
 // Hides or unhides row child data
 function detailsClicked() {
+   console.log('ping');
    var table = $('#TABLE').DataTable();
    var tr = $(this).closest('tr');
    var row = table.row(tr);
@@ -82,30 +89,39 @@ function tivoChanged() {
    Refresh();
 }
 
-function Refresh() {
+const Refresh = async () => {
    var html = '<div style="color: blue">';
    message = 'PLEASE WAIT: GETTING TODO FROM ' + TIVO.value + ' ...';
    html += message + '</div>';
    MESSAGE.innerHTML = html;
    clearTable();
-   var format = $('input[name="type"]:checked').val();
-   var tivo = encodeURIComponent(TIVO.value);
-   var url = "/getToDo?tivo=" + tivo;
-   $.getJSON(url, function(data) {
-      loadData(data, tivo);
+
+   const url = new URL('/getToDo', window.location);
+   url.searchParams.set('tivo', TIVO.value);
+
+   try {
+      const response = await fetch(url);
       MESSAGE.innerHTML = "";
-   })
-   .error(function(xhr, status) {
+
+      if (!response.ok) {
+         util_handleFetchError("ToDo", "Error");
+         go = 0;
+         return;
+      }
+      
+      loadData(await response.json());
+   } catch (e) {
+      MESSAGE.innerHTML = "";
       go = 0;
-      MESSAGE.innerHTML = "";
-      util_handleError("ToDo", xhr, status);
-   });
+      util_handleFetchError("ToDo", e);
+      return;
+   }
+
 }
 
 // Load ToDo data
-function loadData(data, tivo) {
-   $.each(data, function (i, json) {
-      //console.log(JSON.stringify(json, null, 3));
+function loadData(data) {
+   for (const json of data) {
 
       var date = "";
       var start = 0;
@@ -120,8 +136,6 @@ function loadData(data, tivo) {
          date = util_getTime(json.startTime);
          end = util_getTimeLong(json.endTime);
       }
-      
-      var duration = end - start;
       var dur = util_secsToHM(json.duration);   
       var show_name = util_getShowName(json);
       var channel = util_getChannel(json);
@@ -132,35 +146,35 @@ function loadData(data, tivo) {
          ["", date, show_name, channel, dur, json]
       );
       row.draw();
-   });
+   }
 }
 
 // For each selected row, send rpc cancel operation & delete table row
-function Cancel() {
+const Cancel = async () => {
    var table = $('#TABLE').DataTable();
-   $.each(table.rows('.selected'), function(i, rowNum) {
+   for (const rowNum of $('#TABLE').DataTable().rows('.selected')[0]) {
+      console.log('rowNum', rowNum);
       var row = table.row(rowNum);
       var json = row.data()[NUMCOLS];
       if (json.recordingId) {
-         var url = "/rpc?operation=Cancel&tivo=";
-         url += encodeURIComponent(TIVO.value);
-         var js = '{"recordingId":["' + json.recordingId + '"]}';
-         url += "&json=" + encodeURIComponent(js);
-         $.getJSON(url, function(data) {
-            console.log(JSON.stringify(data, null, 3));
-            if (data.type && data.type == "success") {
-               row.remove().draw(false);
+         const url = new URL('/rpc?operation=Cancel', window.location);
+         url.searchParams.set('tivo', TIVO.value);
+         url.searchParams.set('json', JSON.stringify({recordingId: [json.recordingId]}));
+         console.log(url.toString());
+
+         try {
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data?.type && data.type == "success") {
                showDialog("Cancelled",json.title,'warning',2);
-            }
-            else {
+            } else {
                showDialog("Cancel failed",JSON.stringify(data, null, 3),'error');
             }
-         })
-         .error(function(xhr, status) {
-            util_handleError("Cancel", xhr, status);
-         });
+         } catch (e) {
+            util_handleFetchError("Cancel", e);
+         }
       }
-   });
+   };
 }
 
 function clearTable() {
@@ -174,7 +188,9 @@ function saveTable() {
 
 // Load cached table data
 function loadTable() {
-   var table = $('#TABLE').DataTable();
+   const table = $('#TABLE').DataTable();
+
+
    var rows = TABLE[TIVO.value];
    $.each(rows, function(i, row) {
       table.row.add(row).draw();
