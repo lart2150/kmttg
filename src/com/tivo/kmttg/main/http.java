@@ -282,7 +282,7 @@ public class http {
 	}
 
 	public static Boolean downloadPipedStream(String urlString, String username, String password, Boolean cookies,
-			jobData job) throws IOException, InterruptedException, Exception {
+			jobData job, String offset) throws IOException, InterruptedException, Exception {
 
 		BufferedInputStream in;
 		CloseableHttpResponse response;
@@ -292,6 +292,9 @@ public class http {
 		CloseableHttpClient httpclient = createInsecureHttpClient(url.getHost(), url.getPort(), username, password);
 
 		final HttpGet httpget = new HttpGet(urlString);
+		if (offset != null) {
+			httpget.setHeader("Range", "bytes=" + offset + "-");
+		}
 
 		response = httpclient.execute(httpget);
 

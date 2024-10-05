@@ -165,7 +165,7 @@ public class tdownload_decrypt extends baseTask implements Serializable {
             }
             public void run() {
                try {
-                  success = http.downloadPipedStream(urlString, "tivo", config.MAK, true, job);
+                  success = http.downloadPipedStream(urlString, "tivo", config.MAK, true, job, job.offset);
                   thread_running = false;
                } catch (Exception e) {
                   log.error("tdownload_decrypt"); log.error(Arrays.toString(e.getStackTrace()));
