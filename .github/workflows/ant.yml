@@ -15,14 +15,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         architecture: x64
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       id: javafx-cache
       with:
         path: javafx-sdk-21.0.1
@@ -36,7 +36,7 @@ jobs:
       run: |
         sed -i.bak 's/<property name="fxlib" value=".*"\/>/<property name="fxlib" value="javafx-sdk-21.0.5\/lib"\/>/g' build.xml
         ant -noinput -buildfile build.xml
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         path: release/kmttg.jar
         if-no-files-found: error
