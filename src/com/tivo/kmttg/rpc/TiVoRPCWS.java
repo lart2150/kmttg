@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
@@ -29,6 +30,7 @@ public class TiVoRPCWS extends WebSocketClient {
    protected final String IP;
    protected final int port;
    protected Boolean ready = false;
+   private final ReentrantLock lock = new ReentrantLock();
    
    private String tsn;
    private HashMap<Integer, String> responseMap = new HashMap<Integer, String>();
@@ -75,33 +77,33 @@ public class TiVoRPCWS extends WebSocketClient {
       if (this.ready) {
          return true;
       }
-      synchronized(this.ready){
-         while (!this.ready) {
-            if (!this.isOpen()) {
-               return false;
-            }
-            this.ready.wait();
-         }
-         return this.isOpen();
+      this.lock.lock();
+      synchronized (this.lock ) {
+	      if (!this.isOpen()) {
+	         return false;
+	      }
+	      this.lock.wait();
+	      this.lock.unlock();
       }
+      return this.isOpen();
    }
    
    
    @Override
    public void onOpen(ServerHandshake handshakedata) {
-      //send("Hello, it is me. Mario :)");
       log.print("WS connection started");
       TiVoRPCWS wc = this;
       Thread thread = new Thread(){
          public void run(){
-            Boolean readyLock = wc.ready;
+         	String token = config.getDomainToken();
+         	ReentrantLock readyLock = wc.lock;
             try {
                JSONObject credential = new JSONObject();
                JSONObject h = new JSONObject();
                JSONObject domainToken = new JSONObject();
                domainToken.put("domain", "tivo");
                domainToken.put("type", "domainToken");
-               domainToken.put("token", config.getDomainToken());
+               domainToken.put("token", token);
                
                credential.put("type", "domainTokenCredential");
                credential.put("domainToken", domainToken);
@@ -134,6 +136,7 @@ public class TiVoRPCWS extends WebSocketClient {
                                     }
                                     wc.tsn = tsn;
                                     wc.ready = true;
+                                    log.print("WS connection established");
                                     break;
                                  }
                               }
@@ -157,13 +160,21 @@ public class TiVoRPCWS extends WebSocketClient {
                            }
                         }
                      }
+                  } else if (result.has("type") && result.getString("type").equals("error")) {
+                  	String err = "";
+                  	if (result.has("text")) {
+                  		err = ": " + result.getString("text");
+                  	}
+                  	log.error("Error establishing WS connection" + err);
                   }
                }
             } catch (Exception e) {
+            	e.printStackTrace();
                error("rpc Auth error - " + e.getMessage());
             }
             synchronized(readyLock){
                readyLock.notifyAll();
+            	log.print("notifyAll");
             }
          }
       };

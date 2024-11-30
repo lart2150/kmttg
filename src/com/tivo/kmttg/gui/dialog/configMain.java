@@ -442,18 +442,7 @@ public class configMain {
 	 Thread t = new Thread()
 	 {
 	     public void run() {
-	    	 GetDomainToken getDT = new GetDomainToken();
-	    	 try {
-	    		 getDT.getToken();
-	    	 } catch (Exception e) {
-	    		 log.error("Failed to get domain token.  Check your tivo.com username or password.");
-	    		 return;
-	    	 }
-	    	 if (config.isDomainTokenExpired()) {
-	    		 log.error("Failed to get domain token.  Check your tivo.com username or password.");
-	    		 return;
-	    	 }
-	    	 log.warn("Successfully got token");
+	    	 config.refreshDomainToken();
 	     }
 	 };
 	 t.start();

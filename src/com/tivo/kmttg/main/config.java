@@ -35,8 +35,8 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Stack;
 
+import com.tivo.kmttg.rpc.GetDomainToken;
 import com.tivo.kmttg.rpc.Remote;
-import com.tivo.kmttg.rpc.TiVoRPCWS;
 import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
@@ -659,14 +659,29 @@ public class config {
    }
    
    public static String getDomainToken() {
-      if (tivo_domain_token.length() == 0 && !isDomainTokenExpired())
-          return null;
+      if (tivo_domain_token.length() == 0 || isDomainTokenExpired())
+          return refreshDomainToken();
        return tivo_domain_token;
    }
    
+   public static String refreshDomainToken() {
+   	 GetDomainToken getDT = new GetDomainToken();
+   	 String token = "";
+   	 try {
+   		 token = getDT.getToken().getValue();
+   	 } catch (Exception e) {
+   		 log.error("Failed to get domain token.  Check your tivo.com username or password.");
+   		 return null;
+   	 }
+   	 if (config.isDomainTokenExpired()) {
+   		 log.error("Failed to get domain token.  Check your tivo.com username or password.");
+   		 return null;
+   	 }
+   	 log.warn("Successfully got token");
+   	 return token;
+   }
+   
    public static boolean isDomainTokenExpired() {
-	   System.out.println("DomainToken: " + tivo_domain_token_expires);
-	   System.out.println("now: " + (new Date()).getTime());
 	   return (new Date()).getTime() > tivo_domain_token_expires;
    }
    
