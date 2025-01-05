@@ -691,9 +691,9 @@ public class Remote{
             // Request a network connection
             json.put("bodyId", bodyId_get());
             if (away) {
-               req = RpcRequest("phoneHomeRequest", false, json);
+            	req = RpcRequest("phoneHomeSend", false, json);
             } else {
-               req = RpcRequest("phoneHomeSend", false, json);
+            	req = RpcRequest("phoneHomeRequest", false, json);
             }
          }
          else if (type.equals("WhatsOn")) {
