@@ -2065,7 +2065,7 @@ public class Remote{
          return collections;
       }
       JSONObject content = new JSONObject(); // Used to avoid duplicate contentId entries
-      Remote r = new Remote(job.tivoName, true);
+      Remote r = new Remote(job.tivoName);
       if (r.success) {
          JSONArray titles = new JSONArray();
          int order = 0;
