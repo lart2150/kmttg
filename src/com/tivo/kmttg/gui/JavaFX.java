@@ -68,11 +68,11 @@ public class JavaFX {
 		String downloadLink = "";
 		int majorVersion = getJreMajorVersion();
 		if (majorVersion < 17) {
-		   downloadLink = "https://download2.gluonhq.com/openjfx/17.0.13/openjfx-17.0.13_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
-		} else if (majorVersion < 21) {
-			downloadLink = "https://download2.gluonhq.com/openjfx/21.0.5/openjfx-21.0.5_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
+		   downloadLink = "https://download2.gluonhq.com/openjfx/17.0.15/openjfx-17.0.15_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
+		} else if (majorVersion < 22) {
+			downloadLink = "https://download2.gluonhq.com/openjfx/21.0.7/openjfx-21.0.7_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
 		} else {
-		   downloadLink = "https://download2.gluonhq.com/openjfx/23.0.1/openjfx-23.0.1_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
+		   downloadLink = "https://download2.gluonhq.com/openjfx/24.0.1/openjfx-24.0.1_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
 		}
 		String zipFile = update.downloadUrl(zipName, downloadLink);
 		if (zipFile != null) {
