@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <project name="kmttg" basedir="." default="all">
-    <property name="rversion" value="v2.9.1-l"/>
+    <property name="rversion" value="v2.9.2-l"/>
     <tstamp/>
     <property name="bversion" value="${DSTAMP}-${TSTAMP}"/>
     <property name="lib" value="lib"/>
-    <property name="fxlib" value="C:\Program Files\Eclipse Adoptium\javafx-sdk-17.0.12\lib"/>
+    <property name="fxlib" value="C:\Program Files\Eclipse Adoptium\javafx-sdk-21.0.7\lib"/>
     <property name="release" value="release"/>
     <property name="main" value="."/>
     <property name="main.class" value="com.tivo.kmttg.main.kmttg"/>

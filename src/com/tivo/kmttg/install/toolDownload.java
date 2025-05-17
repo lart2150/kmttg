@@ -94,7 +94,7 @@ public class toolDownload {
           out = new RandomAccessFile(localFileName, "rw");
           
           Integer howManyBytes;
-          byte[] bytesIn = new byte[BLOCK_SIZE]
+          byte[] bytesIn = new byte[BLOCK_SIZE];
           while ((howManyBytes = in.read(bytesIn)) >= 0) {
              out.write(bytesIn, 0, howManyBytes);
           }
