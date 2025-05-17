@@ -25,11 +25,13 @@ import java.io.RandomAccessFile;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
 
-import javafx.application.Platform;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.DefaultRedirectStrategy;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
@@ -46,7 +48,6 @@ public class toolDownload {
          log.error("toolDownload - error retrieving base download URL");
          return null;
       }
-      base += "/tools/";
       debug.print("dir=" + dir + " os=" + os);
       String urlString = null;
       String localFileName = null;
@@ -80,39 +81,24 @@ public class toolDownload {
    private Boolean downloadUrl(String urlString, String localFileName) {
       BufferedInputStream in = null;
       RandomAccessFile out = null;
-      Integer size = 0;
       int BLOCK_SIZE = 4096;
       try {
-          URL url = new URI(urlString).toURL();
           log.warn("Downloading file: " + urlString + " ...");
-          URLConnection con = url.openConnection();
-          size = con.getContentLength();
+          HttpClientBuilder httpClientBuilder = HttpClientBuilder.create()
+                .setRedirectStrategy(new DefaultRedirectStrategy());
+          HttpClient httpClient = httpClientBuilder.build();
+          HttpGet httpget = new HttpGet(urlString);
           
-          in = new BufferedInputStream(con.getInputStream());          
+          CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(httpget);
+          in = new BufferedInputStream(response.getEntity().getContent());         
           out = new RandomAccessFile(localFileName, "rw");
           
           Integer howManyBytes;
-          Integer readSoFar = 0;
-          byte[] bytesIn = new byte[BLOCK_SIZE];
-          int last_pct = 0;
-          
+          byte[] bytesIn = new byte[BLOCK_SIZE]
           while ((howManyBytes = in.read(bytesIn)) >= 0) {
              out.write(bytesIn, 0, howManyBytes);
-             readSoFar += howManyBytes;
-             Float f = 100*readSoFar.floatValue()/size.floatValue();
-             final Integer pct = f.intValue();
-             final String title = String.format("download: %d%% %s", pct, config.kmttg);
-             if (pct % 5 == 0 && pct > last_pct) {
-                last_pct += 5;
-                Platform.runLater(new Runnable() {
-                   @Override public void run() {
-                      config.gui.progressBar_setValue(pct);
-                      config.gui.setTitle(title);
-                   }
-                });
-             }
           }
-          
+
           // Done
           in.close();
           out.close();            

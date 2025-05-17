@@ -188,11 +188,11 @@ public class update {
       try {
           HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
           HttpClient httpClient = httpClientBuilder.build();
-    	  HttpGet httpget = new HttpGet(urlString);
+          HttpGet httpget = new HttpGet(urlString);
 
           log.print("Downloading file: " + urlString + " ...");
           
-    	  CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(httpget);
+          CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(httpget);
           in = new BufferedInputStream(response.getEntity().getContent());          
           out = new RandomAccessFile(localFileName, "rw");
           

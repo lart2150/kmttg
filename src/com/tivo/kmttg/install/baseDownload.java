@@ -18,29 +18,30 @@
  */
 package com.tivo.kmttg.install;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 
 import com.tivo.kmttg.util.debug;
+import com.tivo.kmttg.util.log;
 
 public class baseDownload {
    public static String getBase() {
       debug.print("");
       String base = null;
-      String base_url = "http://svn.code.sf.net/p/kmttg/code/trunk/baseDownload";
+      String base_url = "https://raw.githubusercontent.com/lart2150/kmttg/refs/heads/master/baseDownload";
       try {
-         URL url = new URI(base_url).toURL();
-         URLConnection con = url.openConnection();
-         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-         String inputLine;
-         while ((inputLine = in.readLine()) != null) 
-            base = inputLine;
-         in.close();
+         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+         HttpClient httpClient = httpClientBuilder.build();
+         HttpGet httpget = new HttpGet(base_url);
+         try (CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(httpget)) {
+         	base = EntityUtils.toString(response.getEntity()).trim();
+         }
       } catch (Exception ex) {
          base = null;
+         log.error("Error getting tool download path");
       }
       return  base;
    }
