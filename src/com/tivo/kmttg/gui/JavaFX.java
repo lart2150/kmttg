@@ -21,6 +21,11 @@ public class JavaFX {
 			Color c = javafx.scene.paint.Color.BLUE;
 		} catch (NoClassDefFoundError e) {
 			try {
+				int majorVersion = getJreMajorVersion();
+				if (majorVersion < 11) {
+					JOptionPane.showMessageDialog(null, "Your JRE is missing javafx.  KMTTG can auto download javafx for JRE 11+ however you ar running a older version.");
+				}
+
 				final File currentJar = new File(
 						JavaFX.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 				String javaFXPath = findJavaFXLib(currentJar);
