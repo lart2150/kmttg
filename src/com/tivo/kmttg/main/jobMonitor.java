@@ -1027,7 +1027,7 @@ public class jobMonitor {
                   if (entry.containsKey("ProgramId"))
                      job.ProgramId = entry.get("ProgramId");
                   // Only submit job if metaFile doesn't exist already
-                  if (! file.isFile(job.metaFile))
+                  if (! file.isFile(job.metaFile) || config.OverwriteFiles != 0)
                      submitNewJob(job);
                }
             } else {
