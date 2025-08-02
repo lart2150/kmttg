@@ -84,7 +84,7 @@ public class GetDomainToken {
         auraContext.put("loaded", loaded);
         //System.out.println(auraContext);
         
-        JSONObject auth = new JSONObject("{\"actions\":[{\"id\":\"87;a\",\"descriptor\":\"apex://Tivo_idp_LightningLoginFormController/ACTION$login\",\"callingDescriptor\":\"markup://c:tivo_idp_login_form\",\"params\": {\"username\":username,\"password\":password,\"startUrl\":\"[\\\"startURL=/idp/login?app=0sp380000004COf\\\"]\",\"relayState\":\"binding=HttpPost\"}}]}");
+        JSONObject auth = new JSONObject("{\"actions\":[{\"id\":\"87;a\",\"descriptor\":\"apex://Tivo_idp_LightningLoginFormController/ACTION$login\",\"callingDescriptor\":\"markup://c:tivo_idp_login_form\",\"params\": {\"username\":username,\"password\":password,\"startUrl\":\"[\\\"startURL=/idp/login?app=0spfI0000001IzF\\\"]\",\"relayState\":\"RelayState=web%3A%2Fstart%2Fwatch%2Fscreens%2Fall%3FforceAuth%3D1\"}}]}");
         JSONObject authParams = auth.getJSONArray("actions").getJSONObject(0).getJSONObject("params");
         authParams.put("username", config.getTivoUsername());
         authParams.put("password", config.getTivoPassword());
