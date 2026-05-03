@@ -22,8 +22,8 @@ public class JavaFX {
 		} catch (NoClassDefFoundError e) {
 			try {
 				int majorVersion = getJreMajorVersion();
-				if (majorVersion < 11) {
-					JOptionPane.showMessageDialog(null, "Your JRE is missing javafx.  KMTTG can auto download javafx for JRE 11-24.");
+				if (majorVersion < 11 || majorVersion > 26) {
+					JOptionPane.showMessageDialog(null, "Your JRE is missing javafx.  KMTTG can auto download javafx for JRE 11-26.");
 				}
 
 				final File currentJar = new File(
@@ -73,11 +73,13 @@ public class JavaFX {
 		String downloadLink = "";
 		int majorVersion = getJreMajorVersion();
 		if (majorVersion < 17) {
-		   downloadLink = "https://download2.gluonhq.com/openjfx/17.0.18/openjfx-17.0.18_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
+		   downloadLink = "https://download2.gluonhq.com/openjfx/17.0.19/openjfx-17.0.19_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
 		} else if (majorVersion < 22) {
-			downloadLink = "https://download2.gluonhq.com/openjfx/21.0.10/openjfx-21.0.10_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
+		   downloadLink = "https://download2.gluonhq.com/openjfx/21.0.11/openjfx-21.0.11_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
+		} else if (majorVersion < 24) {
+		   downloadLink = "https://download2.gluonhq.com/openjfx/25.0.3/openjfx-25.0.3_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
 		} else {
-		   downloadLink = "https://download2.gluonhq.com/openjfx/25.0.2/openjfx-25.0.2_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
+		   downloadLink = "https://download2.gluonhq.com/openjfx/26.0.1/openjfx-26.0.1_" +downloadOs+ "-" + arch + "_bin-sdk.zip";
 		}
 		String zipFile = update.downloadUrl(zipName, downloadLink);
 		if (zipFile != null) {
