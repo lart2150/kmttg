@@ -20,7 +20,6 @@ package com.tivo.kmttg.install;
 
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 
@@ -36,9 +35,7 @@ public class baseDownload {
          HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
          HttpClient httpClient = httpClientBuilder.build();
          HttpGet httpget = new HttpGet(base_url);
-         try (CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(httpget)) {
-         	base = EntityUtils.toString(response.getEntity()).trim();
-         }
+         base = httpClient.execute(httpget, response -> EntityUtils.toString(response.getEntity()).trim());
       } catch (Exception ex) {
          base = null;
          log.error("Error getting tool download path");

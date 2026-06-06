@@ -52,13 +52,13 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 
@@ -116,11 +116,11 @@ public class http {
 			throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		if (insecureConnectionManager == null) {
 			insecureConnectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-					.setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+					.setTlsSocketStrategy(ClientTlsStrategyBuilder.create()
 							.setSslContext(
 									SSLContextBuilder.create().loadTrustMaterial(TrustAllStrategy.INSTANCE).build())
 							.setTlsVersions(TLS.V_1_0, TLS.V_1_1, TLS.V_1_2)
-							.setHostnameVerifier(NoopHostnameVerifier.INSTANCE).build())
+							.setHostnameVerifier(NoopHostnameVerifier.INSTANCE).buildClassic())
 					.build();
 		}
 
@@ -140,7 +140,7 @@ public class http {
 
 	public static Boolean download(String urlString, String username, String password, String outFile, Boolean cookies,
 			String offset) throws IOException, InterruptedException, Exception {
-		CloseableHttpResponse in;
+		ClassicHttpResponse in;
 		URL url = new URI(urlString).toURL();
 
 		CloseableHttpClient httpclient = createInsecureHttpClient(url.getHost(), url.getPort(), username, password);
@@ -150,7 +150,7 @@ public class http {
 			httpget.setHeader("Range", "bytes=" + offset + "-");
 		}
 
-		in = httpclient.execute(httpget);
+		in = httpclient.executeOpen(null, httpget, null);
 		if (in == null) {
 			return false;
 		} else {
@@ -213,7 +213,7 @@ public class http {
 	@SuppressWarnings("resource")
 	public static Boolean downloadPiped(String urlString, String username, String password, OutputStream out,
 			Boolean cookies, String offset) throws IOException, InterruptedException, Exception {
-		CloseableHttpResponse in;
+		ClassicHttpResponse in;
 		URL url = new URI(urlString).toURL();
 
 		CloseableHttpClient httpclient = createInsecureHttpClient(url.getHost(), url.getPort(), username, password);
@@ -223,7 +223,7 @@ public class http {
 			httpget.setHeader("Range", "bytes=" + offset + "-");
 		}
 
-		in = httpclient.execute(httpget);
+		in = httpclient.executeOpen(null, httpget, null);
 
 		if (in == null)
 			return false;
@@ -285,7 +285,7 @@ public class http {
 			jobData job, String offset) throws IOException, InterruptedException, Exception {
 
 		BufferedInputStream in;
-		CloseableHttpResponse response;
+		ClassicHttpResponse response;
 		int BUFFER_SIZE = 8192;
 		URL url = new URI(urlString).toURL();
 
@@ -296,7 +296,7 @@ public class http {
 			httpget.setHeader("Range", "bytes=" + offset + "-");
 		}
 
-		response = httpclient.execute(httpget);
+		response = httpclient.executeOpen(null, httpget, null);
 
 		in = new BufferedInputStream(response.getEntity().getContent());
 
