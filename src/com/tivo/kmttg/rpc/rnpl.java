@@ -36,8 +36,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javafx.concurrent.Task;
-
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
@@ -398,7 +396,7 @@ public class rnpl {
    // ToDo lists are retrieved in parallel instead of sequentially
    public static Hashtable<String,JSONArray> getTodoLists(Stack<String> tivoNames) {
       // This used to run a background Remote job
-      class Counter extends Task<Void> {
+      class Counter implements Runnable {
          CountDownLatch latch;
          String tivoName;
          Hashtable<String,JSONArray> h;
@@ -410,25 +408,24 @@ public class rnpl {
          }
 
          @Override
-         protected Void call() throws Exception {
-            Remote r = config.initRemote(tivoName);
-            if (r.success) {
-               JSONArray todo = r.ToDo(null);
-               // Add todo to hash
-               if (todo != null)
-                  h.put(tivoName, todo);
-               else
-                  log.error("Failed to refresh todo list for TiVo: " + tivoName);
-               r.disconnect();
-            } else {
-               log.error("Failed to connect to TiVo: " + tivoName);
+         public void run() {
+            try {
+               Remote r = config.initRemote(tivoName);
+               if (r.success) {
+                  JSONArray todo = r.ToDo(null);
+                  // Add todo to hash
+                  if (todo != null)
+                     h.put(tivoName, todo);
+                  else
+                     log.error("Failed to refresh todo list for TiVo: " + tivoName);
+                  r.disconnect();
+               } else {
+                  log.error("Failed to connect to TiVo: " + tivoName);
+               }
+            } finally {
+               // Job done so decrement latch
+               latch.countDown();
             }
-            return null;
-         }
-
-         protected void done() {
-            // Job done so decrement latch
-            latch.countDown();
          }
       }
       

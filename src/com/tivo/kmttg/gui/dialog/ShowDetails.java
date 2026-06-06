@@ -18,137 +18,126 @@
  */
 package com.tivo.kmttg.gui.dialog;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Image;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTable;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.gui;
+import com.tivo.kmttg.gui.swing.SwingUtil;
+import com.tivo.kmttg.gui.swing.TreeTable;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
 
 public class ShowDetails {
-   private Stage dialog = null;
-   private Label mainTitle = null;
-   private Label subTitle = null;
-   private Label time = null;
-   private Label channel = null;
-   private Label description = null;
-   private Label otherInfo = null;
-   private Label actorInfo = null;
-   private Label image = null;
-   private double x=-1, y=-1;
-   
-   public ShowDetails(Stage frame, JSONObject json) {
+   private JDialog dialog = null;
+   private JLabel mainTitle = null;
+   private JLabel subTitle = null;
+   private JLabel time = null;
+   private JLabel channel = null;
+   private JLabel description = null;
+   private JLabel otherInfo = null;
+   private JLabel actorInfo = null;
+   private JLabel image = null;
+   private int x=-1, y=-1;
+
+   public ShowDetails(JFrame frame, JSONObject json) {
       create(frame);
    }
-   
-   private void create(Stage frame) {
+
+   private void create(JFrame frame) {
       int minWidth = 400;
       if (dialog == null) {
-         mainTitle = new Label("");
-         mainTitle.setMinWidth(minWidth);
-         mainTitle.setMaxWidth(minWidth);
-         mainTitle.setWrapText(true);
-         mainTitle.getStyleClass().add("show_details_title");
+         mainTitle = makeWrapLabel(minWidth);
          // Increase font size
          mainTitle.setFont(
-            new Font(
-               mainTitle.getFont().getFamily(),
-               mainTitle.getFont().getSize()+5
+            mainTitle.getFont().deriveFont(
+               mainTitle.getFont().getSize2D()+5
             )
          );
-         
-         subTitle = new Label("");
-         subTitle.setMinWidth(minWidth);
-         subTitle.setMaxWidth(minWidth);
-         subTitle.setWrapText(true);
-         subTitle.getStyleClass().add("show_details_title");
-         
-         time = new Label("");
-         time.getStyleClass().add("show_details_other");
-         
-         channel = new Label("");
-         channel.getStyleClass().add("show_details_other");
-         
-         description = new Label("");
-         description.setMinWidth(minWidth);
-         description.setMaxWidth(minWidth);
-         description.setWrapText(true);
-         description.getStyleClass().add("show_details_text");
-         
-         otherInfo = new Label("");
-         otherInfo.setMinWidth(minWidth);
-         otherInfo.setMaxWidth(minWidth);
-         otherInfo.setWrapText(true);
-         otherInfo.getStyleClass().add("show_details_other");
-         
-         actorInfo = new Label("");
-         actorInfo.setMinWidth(minWidth);
-         actorInfo.setMaxWidth(minWidth);
-         actorInfo.setWrapText(true);
-         actorInfo.getStyleClass().add("show_details_actor");
-         
-         image = new Label("");
-         image.getStyleClass().add("show_details_title");
-         
-         // Start of layout management         
-         VBox left_panel = new VBox();
-         left_panel.setPadding(new Insets(0,0,0,3));
-         left_panel.getStyleClass().add("show_details_bg");
-         left_panel.setSpacing(2);
-         left_panel.getChildren().addAll(mainTitle, subTitle, time, channel, description, otherInfo, actorInfo);         
-         
-         VBox right_panel = new VBox();         
-         right_panel.setAlignment(Pos.CENTER);
-         right_panel.getStyleClass().add("show_details_bg");
-         right_panel.setSpacing(2);         
-         right_panel.getChildren().add(image);         
-         
-         HBox main_panel = new HBox();
-         main_panel.setSpacing(0);
-         main_panel.getChildren().addAll(left_panel, right_panel);
-         
-         dialog = new Stage();
+
+         subTitle = makeWrapLabel(minWidth);
+
+         time = new JLabel("");
+
+         channel = new JLabel("");
+
+         description = makeWrapLabel(minWidth);
+
+         otherInfo = makeWrapLabel(minWidth);
+
+         actorInfo = makeWrapLabel(minWidth);
+
+         image = new JLabel("");
+
+         // Start of layout management
+         JPanel left_panel = new JPanel();
+         left_panel.setLayout(new BoxLayout(left_panel, BoxLayout.Y_AXIS));
+         left_panel.add(mainTitle);
+         left_panel.add(subTitle);
+         left_panel.add(time);
+         left_panel.add(channel);
+         left_panel.add(description);
+         left_panel.add(otherInfo);
+         left_panel.add(actorInfo);
+
+         JPanel right_panel = new JPanel();
+         right_panel.setLayout(new BoxLayout(right_panel, BoxLayout.Y_AXIS));
+         right_panel.add(image);
+
+         JPanel main_panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+         main_panel.add(left_panel);
+         main_panel.add(right_panel);
+
+         dialog = new JDialog(frame);
          dialog.setResizable(false);
          dialog.setTitle("Show information");
-         dialog.initOwner(frame);
-         gui.LoadIcons(dialog);
+         SwingUtil.loadIcons(dialog);
          // This so we can restore original dialog position when re-opened
-         dialog.setOnCloseRequest(new EventHandler<WindowEvent>() {
+         dialog.addWindowListener(new WindowAdapter() {
             @Override
-            public void handle(WindowEvent arg0) {
+            public void windowClosing(WindowEvent arg0) {
                x = dialog.getX(); y = dialog.getY();
             }
          });
-         Scene scene = new Scene(new VBox());
-         config.gui.addScene(scene);
-         config.gui.setFontSize(scene, config.FontSize);
-         ((VBox) scene.getRoot()).getChildren().add(main_panel);
-         dialog.setScene(scene);
+         JPanel root = new JPanel(new BorderLayout());
+         root.add(main_panel, BorderLayout.CENTER);
+         dialog.getContentPane().add(root);
       }
    }
-   
-   public void update(Node node, String tivoName, String recordingId) {
+
+   // Build a fixed-width wrapping label (was JavaFX
+   // setMinWidth/setMaxWidth/setWrapText). HTML body enables Swing wrapping.
+   private JLabel makeWrapLabel(int width) {
+      JLabel label = new JLabel("");
+      label.setPreferredSize(new Dimension(width, label.getPreferredSize().height));
+      return label;
+   }
+
+   // Set wrapping label text using html so the label wraps at its width
+   private void setWrapText(JLabel label, String text) {
+      label.setText("<html><body style='width: 395px'>" + text + "</body></html>");
+   }
+
+   public void update(JTable node, String tivoName, String recordingId) {
       if ( ! config.rpcEnabled(tivoName) )
          return;
       JSONObject json = new JSONObject();
@@ -160,15 +149,39 @@ public class ShowDetails {
          log.error("ShowDetails update - " + e.getMessage());
       }
    }
-   
+
+   public void update(TreeTable<?> node, String tivoName, String recordingId) {
+      if ( ! config.rpcEnabled(tivoName) )
+         return;
+      JSONObject json = new JSONObject();
+      try {
+         json.put("levelOfDetail", "medium");
+         json.put("recordingId", recordingId);
+         update(node, tivoName, json);
+      } catch (JSONException e) {
+         log.error("ShowDetails update - " + e.getMessage());
+      }
+   }
+
    // Update dialog components with given JSON (runs as background task)
-   public void update(final Node node, final String tivoName, final JSONObject initialJson) {
+   public void update(final JTable node, final String tivoName, final JSONObject initialJson) {
+      updateImpl(node, null, tivoName, initialJson);
+   }
+
+   // Update dialog components with given JSON (runs as background task)
+   public void update(final TreeTable<?> node, final String tivoName, final JSONObject initialJson) {
+      updateImpl(null, node, tivoName, initialJson);
+   }
+
+   // Common background-update implementation. The node argument (JTable or
+   // TreeTable) is only used to restore keyboard focus after the dialog shows.
+   private void updateImpl(final JTable jtableNode, final TreeTable<?> treeNode, final String tivoName, final JSONObject initialJson) {
       if ( ! config.rpcEnabled(tivoName) )
          return;
       if (initialJson == null)
          return;
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             JSONObject json = initialJson;
             try {
                // Need high level of detail
@@ -183,19 +196,19 @@ public class ShowDetails {
                         j.put("recordingId", json.getString("recordingId"));
                         result = r.Command("recordingSearch", j);
                         if (result == null)
-                           return null;
+                           return;
                         if (result.has("recording"))
                            json = result.getJSONArray("recording").getJSONObject(0);
                         else {
                            if (! json.has("title"))
-                              return null;
+                              return;
                         }
                      }
                      else if (json.has("contentId")) {
                         j.put("contentId", json.getString("contentId"));
                         result = r.Command("contentSearch", j);
                         if (result == null)
-                           return null;
+                           return;
                         if (result.has("content")) {
                            JSONObject content = result.getJSONArray("content").getJSONObject(0);
                            for (int ii=0; ii<content.names().length(); ii++) {
@@ -207,14 +220,14 @@ public class ShowDetails {
                         }
                         else {
                            if (! json.has("title"))
-                              return null;
+                              return;
                         }
                      }
                   } else {
-                     return null;
+                     return;
                   }
                } // json levelOfDetail
-               
+
                if (json.has("idSetSource") && json.getJSONObject("idSetSource").has("collectionId")) {
                   // For SP table
                   Remote r = config.initRemote(tivoName);
@@ -226,21 +239,21 @@ public class ShowDetails {
                      j.put("collectionId", json.getJSONObject("idSetSource").getString("collectionId"));
                      JSONObject result = r.Command("collectionSearch", j);
                      if (result == null)
-                        return null;
+                        return;
                      if (result.has("collection")) {
                         json = result.getJSONArray("collection").getJSONObject(0);
                      }
                      else {
                         if (! json.has("title"))
-                           return null;
+                           return;
                      }
                   }
                }
-               
+
                //log.print(json.toString(3));
             } catch (JSONException e) {
                log.error("ShowDetails update - " + e.getMessage());
-               return null;
+               return;
             }
             class backgroundRun implements Runnable {
                JSONObject json;
@@ -255,8 +268,8 @@ public class ShowDetails {
                         title = json.getString("title");
                      if (json.has("movieYear"))
                         title += " (" + json.get("movieYear") + ")";
-                     mainTitle.setText(title);            
-                     
+                     setWrapText(mainTitle, title);
+
                      // Subtitle (possibly with season & episode information)
                      String subtitle = "";
                      if (json.has("subtitle"))
@@ -267,8 +280,8 @@ public class ShowDetails {
                         subtitle += " (Sea " + json.get("seasonNumber") +
                         " Ep " + json.getJSONArray("episodeNum").get(0) + ")";
                      }
-                     subTitle.setText(subtitle);
-                     
+                     setWrapText(subTitle, subtitle);
+
                      // channel
                      String chan = "";
                      if (json.has("channel")) {
@@ -279,7 +292,7 @@ public class ShowDetails {
                            chan += " " + c.getString("callSign");
                      }
                      channel.setText(chan);
-            
+
                      // time
                      String t = "";
                      if (json.has("startTime")) {
@@ -291,7 +304,7 @@ public class ShowDetails {
                         }
                      }
                      time.setText(t);
-                        
+
                      // description
                      String desc = "";
                      if (json.has("description")) {
@@ -299,8 +312,8 @@ public class ShowDetails {
                         if (json.has("cc") && json.getBoolean("cc"))
                            desc += " (CC)";
                      }
-                     description.setText(desc);
-                     
+                     setWrapText(description, desc);
+
                      // otherInfo
                      String other = "";
                      if (json.has("mpaaRating"))
@@ -324,8 +337,8 @@ public class ShowDetails {
                      }
                      if (other.length() > 0)
                         other = other.substring(0, other.length()-2);
-                     otherInfo.setText(other);
-                     
+                     setWrapText(otherInfo, other);
+
                      // actorInfo
                      String actors = "";
                      if (json.has("credit")) {
@@ -364,11 +377,11 @@ public class ShowDetails {
                                     count++;
                                  }
                               }
-                           }                     
+                           }
                         }
                      }
-                     actorInfo.setText(actors);
-                     
+                     setWrapText(actorInfo, actors);
+
                      // Right panel image
                      if (json.has("image")) {
                         image.setText("");
@@ -381,25 +394,27 @@ public class ShowDetails {
                      log.error("ShowDetails update - " + e.getMessage());
                      return;
                   }
-                  dialog.sizeToScene();
+                  dialog.pack();
                   if (x != -1 && ! dialog.isShowing()) {
-                     dialog.setX(x); dialog.setY(y);
+                     dialog.setLocation(x, y);
                   }
-                  dialog.show();
-                  Platform.runLater(new Runnable() {
+                  dialog.setVisible(true);
+                  SwingUtil.runLater(new Runnable() {
                      @Override public void run() {
-                        node.requestFocus();
+                        if (jtableNode != null)
+                           jtableNode.requestFocus();
+                        else if (treeNode != null)
+                           treeNode.table.requestFocus();
                      }
                   });
                }
             }
-            Platform.runLater(new backgroundRun(json));
-            return null;
+            SwingUtil.runLater(new backgroundRun(json));
          }
       };
       new Thread(task).start();
    }
-   
+
    private String starsToNum(String name) {
       name = name.toLowerCase();
       name = name.replace("zero", "0");
@@ -411,15 +426,15 @@ public class ShowDetails {
       name = name.replace("point", ".");
       return name;
    }
-   
+
    public Boolean isShowing() {
       return dialog.isShowing();
    }
-   
+
    // Use contentId or collectionId to find and set image from given sourceJson
    private void searchImage(String tivoName, JSONObject sourceJson) {
       image.setText("");
-      image.setGraphic(null);
+      image.setIcon(null);
       Remote r = config.initRemote(tivoName);
       if (r.success) {
          try {
@@ -447,7 +462,7 @@ public class ShowDetails {
                   if (collection.has("image")) {
                      setImage(collection.getJSONArray("image"));
                   }
-               }               
+               }
             }
          } catch (JSONException e) {
             log.error("ShowDetails searchImage - " + e.getMessage());
@@ -455,7 +470,7 @@ public class ShowDetails {
          r.disconnect();
       }
    }
-   
+
    private void setImage(JSONArray imageArray) {
       try {
          int diff = 500;
@@ -476,8 +491,18 @@ public class ShowDetails {
          log.error("ShowDetails setImage - " + e.getMessage());
       }
    }
-   
-   private void setImage(String urlString) {
-      image.setGraphic(new ImageView(new Image(urlString)));
+
+   private void setImage(final String urlString) {
+      try {
+         Image img = ImageIO.read(new URL(urlString));
+         final ImageIcon icon = (img == null) ? null : new ImageIcon(img);
+         SwingUtil.runLater(new Runnable() {
+            @Override public void run() {
+               image.setIcon(icon);
+            }
+         });
+      } catch (Exception e) {
+         log.error("ShowDetails setImage - " + e.getMessage());
+      }
    }
 }

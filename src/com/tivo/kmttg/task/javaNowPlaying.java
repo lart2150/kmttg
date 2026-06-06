@@ -25,8 +25,7 @@ import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Stack;
 
-import javafx.application.Platform;
-
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.http;
@@ -148,7 +147,7 @@ public class javaNowPlaying extends baseTask implements Serializable {
          if (config.GUIMODE) {
             // Update STATUS column
             final String t = jobMonitor.getElapsedTime(job.time);
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override public void run() {
                   config.gui.jobTab_UpdateJobMonitorRowStatus(job, t);
                   if ( jobMonitor.isFirstJobInMonitor(job) ) {
@@ -163,7 +162,7 @@ public class javaNowPlaying extends baseTask implements Serializable {
          // Job finished
          if (config.GUIMODE) {
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      config.gui.setTitle(config.kmttg);
                   }
@@ -252,7 +251,7 @@ public class javaNowPlaying extends baseTask implements Serializable {
          ENTRIES = parseNPL.uniquify(ENTRIES, unique);
          if (config.GUI_AUTO > 0) {
             // Update NPL
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override public void run() {
                   config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
                }
@@ -262,7 +261,7 @@ public class javaNowPlaying extends baseTask implements Serializable {
          }
          else if (config.GUIMODE) {
             // GUI mode: populate NPL table
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override public void run() {
                   config.gui.nplTab_SetNowPlaying(job.tivoName, ENTRIES);
                }

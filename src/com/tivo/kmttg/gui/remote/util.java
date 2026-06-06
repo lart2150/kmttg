@@ -33,11 +33,6 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.log;
 
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.RowConstraints;
-
 public class util {
    public static LinkedHashMap<String,String> SPS = new LinkedHashMap<String,String>();
    public static mRecordOptions mRecordOpt = new mRecordOptions();   
@@ -94,27 +89,8 @@ public class util {
          all_todo.get(tivoName).put(json);
    }
    
-   public static HBox space(int size) {
-      HBox space = new HBox(); space.setMinWidth(size); space.setPrefWidth(size);
-      return space;
-   }
-   
-   public static ColumnConstraints cc_stretch() {
-      ColumnConstraints cc_stretch = new ColumnConstraints();
-      cc_stretch.setHgrow(Priority.ALWAYS);
-      return cc_stretch;
-   }
-   
-   public static RowConstraints rc_stretch() {
-      RowConstraints rc_stretch = new RowConstraints();
-      rc_stretch.setVgrow(Priority.ALWAYS);
-      return rc_stretch;
-   }
-   
-   public static ColumnConstraints cc_none() {
-      ColumnConstraints cc_none = new ColumnConstraints();
-      cc_none.setHgrow(Priority.NEVER);
-      return cc_none;
+   public static java.awt.Component space(int size) {
+      return javax.swing.Box.createHorizontalStrut(size);
    }
 
 }

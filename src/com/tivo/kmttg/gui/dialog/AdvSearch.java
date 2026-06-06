@@ -18,6 +18,11 @@
  */
 package com.tivo.kmttg.gui.dialog;
 
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -25,40 +30,29 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.Optional;
 import java.util.Stack;
 
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+
+import net.miginfocom.swing.MigLayout;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.MyListView;
 import com.tivo.kmttg.gui.MyTooltip;
-import com.tivo.kmttg.gui.gui;
-import com.tivo.kmttg.gui.remote.util;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -69,321 +63,307 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class AdvSearch {
-   private Stage dialog = null;
-   private VBox content = null;
-   private ChoiceBox<String> savedEntries = null;
-   private ChoiceBox<String> creditKeywordRole = null;
-   private ChoiceBox<String> collectionType = null;
-   private ChoiceBox<String> minStarRating = null;
-   private ListView<String> category = null;
-   private TextField title = null;
-   private TextField titleKeyword = null;
-   private TextField subtitleKeyword = null;
-   private TextField keywords = null;
-   private TextField subtitle = null;
-   private TextField descriptionKeyword = null;
-   private TextField channels = null;
-   private TextField originalAirYear = null;
-   private TextField creditKeyword = null;
-   private ChoiceBox<String> hdtv = null;
-   private CheckBox receivedChannelsOnly = null;
-   private CheckBox favoriteChannelsOnly = null;
+   private JDialog dialog = null;
+   private JPanel content = null;
+   private JComboBox<String> savedEntries = null;
+   private JComboBox<String> creditKeywordRole = null;
+   private JComboBox<String> collectionType = null;
+   private JComboBox<String> minStarRating = null;
+   private MyListView category = null;
+   private JTextField title = null;
+   private JTextField titleKeyword = null;
+   private JTextField subtitleKeyword = null;
+   private JTextField keywords = null;
+   private JTextField subtitle = null;
+   private JTextField descriptionKeyword = null;
+   private JTextField channels = null;
+   private JTextField originalAirYear = null;
+   private JTextField creditKeyword = null;
+   private JComboBox<String> hdtv = null;
+   private JCheckBox receivedChannelsOnly = null;
+   private JCheckBox favoriteChannelsOnly = null;
    private String tivoName = null;
    private String saveFile = "wishlists.ini";
    private LinkedHashMap<String,JSONObject> entries = new LinkedHashMap<String,JSONObject>();
-   private static double pos_x = -1;
-   private static double pos_y = -1;
+   private static int pos_x = -1;
+   private static int pos_y = -1;
 
-   public void display(Stage frame, String tivoName, int max_search) {
+   public void display(JFrame frame, String tivoName, int max_search) {
       this.tivoName = tivoName;
       // Create dialog if not already created
       if (dialog == null) {
          create(frame);
-         
+
          // Parse saveFile to define current configuration
          readFile(config.programDir + File.separator + saveFile);
       }
-      
+
       // Display the dialog
       if (config.getTivoUsername() == null)
-         category.setDisable(true);
+         category.setEnabled(false);
       else
-         category.setDisable(false);
+         category.setEnabled(true);
       if (pos_x != -1)
-         dialog.setX(pos_x);
-      if (pos_y != -1)
-         dialog.setY(pos_y);
-      dialog.show();
-      Platform.runLater(new Runnable() {
+         dialog.setLocation(pos_x, pos_y);
+      dialog.setVisible(true);
+      SwingUtil.runLater(new Runnable() {
          @Override
          public void run() {
             title.requestFocus();
          }
       });
    }
-  
-   private void create(Stage frame) {      
+
+   private void create(JFrame frame) {
       // Create all the components of the dialog
-      Label savedEntries_label = new Label("Saved entries");
-      savedEntries = new ChoiceBox<String>();
-      savedEntries.getItems().add("Default");
-      savedEntries.setValue("Default");
-      savedEntries.setTooltip(getToolTip("savedEntries"));
-      savedEntries.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
+      JLabel savedEntries_label = new JLabel("Saved entries");
+      savedEntries = new JComboBox<String>();
+      savedEntries.addItem("Default");
+      savedEntries.setSelectedItem("Default");
+      savedEntries.setToolTipText(getToolTip("savedEntries"));
+      savedEntries.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+             String newVal = (String)savedEntries.getSelectedItem();
              if (newVal != null)
                 setValues(newVal);
          }
       });
 
-      creditKeywordRole = new ChoiceBox<String>();
-      creditKeywordRole.getItems().addAll("actor", "director", "producer", "executiveProducer", "writer");
-      creditKeywordRole.setValue("actor");
-      creditKeywordRole.setTooltip(getToolTip("creditKeywordRole"));
-      
-      Label collectionType_label = new Label("Genre");
-      collectionType = new ChoiceBox<String>();
-      collectionType.getItems().addAll("ALL", "movie", "series", "special");
-      collectionType.setValue("ALL");
-      collectionType.setTooltip(getToolTip("collectionType"));
-      
-      Label minStarRating_label = new Label("Minimum rating");
-      minStarRating = new ChoiceBox<String>();
-      minStarRating.getItems().addAll(
+      creditKeywordRole = new JComboBox<String>();
+      creditKeywordRole.addItem("actor");
+      creditKeywordRole.addItem("director");
+      creditKeywordRole.addItem("producer");
+      creditKeywordRole.addItem("executiveProducer");
+      creditKeywordRole.addItem("writer");
+      creditKeywordRole.setSelectedItem("actor");
+      creditKeywordRole.setToolTipText(getToolTip("creditKeywordRole"));
+
+      JLabel collectionType_label = new JLabel("Genre");
+      collectionType = new JComboBox<String>();
+      collectionType.addItem("ALL");
+      collectionType.addItem("movie");
+      collectionType.addItem("series");
+      collectionType.addItem("special");
+      collectionType.setSelectedItem("ALL");
+      collectionType.setToolTipText(getToolTip("collectionType"));
+
+      JLabel minStarRating_label = new JLabel("Minimum rating");
+      minStarRating = new JComboBox<String>();
+      String[] ratings = {
          "ALL",
          "one", "onePointFive",
          "two", "twoPointFive",
          "three", "threePointFive",
          "four"
-      );
-      minStarRating.setValue("ALL");
-      minStarRating.setTooltip(getToolTip("minStarRating"));
-      
-      Label category_label = new Label("Category");
-      category = new ListView<String>();
-      category.setPrefHeight(100);
-      category.getItems().add("ALL");
+      };
+      for (String r : ratings)
+         minStarRating.addItem(r);
+      minStarRating.setSelectedItem("ALL");
+      minStarRating.setToolTipText(getToolTip("minStarRating"));
+
+      JLabel category_label = new JLabel("Category");
+      category = new MyListView();
+      category.getItems().addElement("ALL");
       addCategories(tivoName); // This runs in background mode
-      category.getSelectionModel().select("ALL");
-      category.scrollTo("ALL");
-      category.setTooltip(getToolTip("category"));
-                        
-      Label title_label = new Label("Title");
-      title = new TextField();
-      title.setPrefWidth(30);
-      title.setTooltip(getToolTip("title"));
-      
-      Label titleKeyword_label = new Label("Title keyword");
-      titleKeyword = new TextField();
-      titleKeyword.setPrefWidth(30);
-      titleKeyword.setTooltip(getToolTip("titleKeyword"));
-      
-      Label subtitleKeyword_label = new Label("Subtitle keyword");
-      subtitleKeyword = new TextField();
-      subtitleKeyword.setPrefWidth(30);
-      subtitleKeyword.setTooltip(getToolTip("subtitleKeyword"));
+      category.setSelectedValue("ALL", true);
+      category.setToolTipText(getToolTip("category"));
 
-      Label keywords_label = new Label("Keywords");
-      keywords = new TextField();
-      keywords.setPrefWidth(30);
-      keywords.setTooltip(getToolTip("keywords"));
+      JLabel title_label = new JLabel("Title");
+      title = new JTextField(); title.setColumns(30);
+      title.setToolTipText(getToolTip("title"));
 
-      Label subtitle_label = new Label("Subtitle");
-      subtitle = new TextField();
-      subtitle.setPrefWidth(30);
-      subtitle.setTooltip(getToolTip("subtitle"));
+      JLabel titleKeyword_label = new JLabel("Title keyword");
+      titleKeyword = new JTextField(); titleKeyword.setColumns(30);
+      titleKeyword.setToolTipText(getToolTip("titleKeyword"));
 
-      Label descriptionKeyword_label = new Label("Description keyword");
-      descriptionKeyword = new TextField();
-      descriptionKeyword.setPrefWidth(30);
-      descriptionKeyword.setTooltip(getToolTip("descriptionKeyword"));
+      JLabel subtitleKeyword_label = new JLabel("Subtitle keyword");
+      subtitleKeyword = new JTextField(); subtitleKeyword.setColumns(30);
+      subtitleKeyword.setToolTipText(getToolTip("subtitleKeyword"));
 
-      Label channels_label = new Label("Restrict channels");
-      channels = new TextField();
-      channels.setPrefWidth(30);
-      channels.setTooltip(getToolTip("channels"));
+      JLabel keywords_label = new JLabel("Keywords");
+      keywords = new JTextField(); keywords.setColumns(30);
+      keywords.setToolTipText(getToolTip("keywords"));
 
-      Label originalAirYear_label = new Label("Year");
-      originalAirYear = new TextField();
-      originalAirYear.setPrefWidth(30);
-      originalAirYear.setTooltip(getToolTip("originalAirYear"));
+      JLabel subtitle_label = new JLabel("Subtitle");
+      subtitle = new JTextField(); subtitle.setColumns(30);
+      subtitle.setToolTipText(getToolTip("subtitle"));
 
-      creditKeyword = new TextField();
-      creditKeyword.setPrefWidth(30);
-      creditKeyword.setTooltip(getToolTip("creditKeyword"));
-      
-      Label hdtv_label = new Label("Recording types");
-      hdtv = new ChoiceBox<String>();
-      hdtv.getItems().addAll("both", "HD", "SD");
-      hdtv.setTooltip(getToolTip("hdtv"));
-      hdtv.setValue("HD");
-      
-      receivedChannelsOnly = new CheckBox("Received channels only");
-      receivedChannelsOnly.setTooltip(getToolTip("receivedChannelsOnly"));
+      JLabel descriptionKeyword_label = new JLabel("Description keyword");
+      descriptionKeyword = new JTextField(); descriptionKeyword.setColumns(30);
+      descriptionKeyword.setToolTipText(getToolTip("descriptionKeyword"));
+
+      JLabel channels_label = new JLabel("Restrict channels");
+      channels = new JTextField(); channels.setColumns(30);
+      channels.setToolTipText(getToolTip("channels"));
+
+      JLabel originalAirYear_label = new JLabel("Year");
+      originalAirYear = new JTextField(); originalAirYear.setColumns(30);
+      originalAirYear.setToolTipText(getToolTip("originalAirYear"));
+
+      creditKeyword = new JTextField(); creditKeyword.setColumns(30);
+      creditKeyword.setToolTipText(getToolTip("creditKeyword"));
+
+      JLabel hdtv_label = new JLabel("Recording types");
+      hdtv = new JComboBox<String>();
+      hdtv.addItem("both");
+      hdtv.addItem("HD");
+      hdtv.addItem("SD");
+      hdtv.setToolTipText(getToolTip("hdtv"));
+      hdtv.setSelectedItem("HD");
+
+      receivedChannelsOnly = new JCheckBox("Received channels only");
+      receivedChannelsOnly.setToolTipText(getToolTip("receivedChannelsOnly"));
       receivedChannelsOnly.setSelected(true);
-      
-      favoriteChannelsOnly = new CheckBox("Favorite channels only");
-      favoriteChannelsOnly.setTooltip(getToolTip("favoriteChannelsOnly"));
+
+      favoriteChannelsOnly = new JCheckBox("Favorite channels only");
+      favoriteChannelsOnly.setToolTipText(getToolTip("favoriteChannelsOnly"));
       favoriteChannelsOnly.setSelected(false);
-            
-      Button search = new Button("Search");
-      search.setTooltip(getToolTip("search"));
-      search.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+
+      JButton search = new JButton("Search");
+      search.setToolTipText(getToolTip("search"));
+      search.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             SearchCB();
          }
       });
-      
-      Button save = new Button("Save...");
-      save.setTooltip(getToolTip("save"));
-      save.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String text = (String)savedEntries.getSelectionModel().getSelectedItem();
+
+      JButton save = new JButton("Save...");
+      save.setToolTipText(getToolTip("save"));
+      save.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String text = (String)savedEntries.getSelectedItem();
             if (text.equals("Default"))
                text = "";
-            TextInputDialog d = new TextInputDialog(text);
-            d.setTitle("Enter wishlist name");
-            Optional<String> result = d.showAndWait();
-            if (result.isPresent()){
-                if (result.get().length() > 0)
-                   addEntry(result.get());
+            String result = JOptionPane.showInputDialog(
+               dialog, "Enter wishlist name", text
+            );
+            if (result != null){
+                if (result.length() > 0)
+                   addEntry(result);
             }
          }
       });
-      
-      Button delete = new Button("Delete");
-      delete.setTooltip(getToolTip("delete"));
-      delete.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String entry = (String)savedEntries.getSelectionModel().getSelectedItem();
+
+      JButton delete = new JButton("Delete");
+      delete.setToolTipText(getToolTip("delete"));
+      delete.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String entry = (String)savedEntries.getSelectedItem();
             if (! entry.equals("Default"))
                deleteEntry(entry);
          }
       });
-      
-      Button close = new Button("Close");
-      close.setTooltip(getToolTip("close"));
-      close.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+
+      JButton close = new JButton("Close");
+      close.setToolTipText(getToolTip("close"));
+      close.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             pos_x = dialog.getX(); pos_y = dialog.getY();
-            dialog.hide();
+            dialog.setVisible(false);
          }
       });
-      
+
       // layout manager start
-      content = new VBox();
-      content.setPadding(new Insets(5,5,5,5));
-      content.setSpacing(5);
-            
-      HBox row = new HBox();
-      row.setSpacing(5);
-      row.getChildren().addAll(savedEntries_label, savedEntries, save, delete);
-      content.getChildren().add(row);
-      
+      content = new JPanel();
+      content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+
+      JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      row.add(savedEntries_label); row.add(savedEntries); row.add(save); row.add(delete);
+      content.add(row);
+
       // Grid pane layout with 2 columns
-      GridPane grid = new GridPane();
-      int gy = 0;
-      grid.setHgap(5);
       // Setup Col 1 fixed, Col 2 fill horizontally
-      ColumnConstraints noFill = new ColumnConstraints();
-      noFill.setHgrow(Priority.NEVER);
-      ColumnConstraints fillColumn = new ColumnConstraints();
-      fillColumn.setFillWidth(true);
-      fillColumn.setHgrow(Priority.ALWAYS);
-      grid.getColumnConstraints().addAll(noFill, fillColumn); 
-      
-      grid.add(title_label, 0, gy);
-      grid.add(title, 1, gy);
-      
+      JPanel grid = new JPanel(new MigLayout("gapx 5", "[][grow,fill]", ""));
+      int gy = 0;
+
+      grid.add(title_label, "cell 0 " + gy);
+      grid.add(title, "cell 1 " + gy + ", growx");
+
       gy++;
-      grid.add(titleKeyword_label, 0, gy);
-      grid.add(titleKeyword, 1, gy);
-      
+      grid.add(titleKeyword_label, "cell 0 " + gy);
+      grid.add(titleKeyword, "cell 1 " + gy + ", growx");
+
       gy++;
-      grid.add(subtitle_label, 0, gy);
-      grid.add(subtitle, 1, gy);
-      
+      grid.add(subtitle_label, "cell 0 " + gy);
+      grid.add(subtitle, "cell 1 " + gy + ", growx");
+
       gy++;
-      grid.add(subtitleKeyword_label, 0, gy);
-      grid.add(subtitleKeyword, 1, gy);
-      
+      grid.add(subtitleKeyword_label, "cell 0 " + gy);
+      grid.add(subtitleKeyword, "cell 1 " + gy + ", growx");
+
       gy++;
-      grid.add(keywords_label, 0, gy);
-      grid.add(keywords, 1, gy);
-      
+      grid.add(keywords_label, "cell 0 " + gy);
+      grid.add(keywords, "cell 1 " + gy + ", growx");
+
       gy++;
-      grid.add(descriptionKeyword_label, 0, gy);
-      grid.add(descriptionKeyword, 1, gy);
-      
+      grid.add(descriptionKeyword_label, "cell 0 " + gy);
+      grid.add(descriptionKeyword, "cell 1 " + gy + ", growx");
+
       gy++;
-      grid.add(channels_label, 0, gy);
-      grid.add(channels, 1, gy);
-      
+      grid.add(channels_label, "cell 0 " + gy);
+      grid.add(channels, "cell 1 " + gy + ", growx");
+
       gy++;
-      grid.add(originalAirYear_label, 0, gy);
-      grid.add(originalAirYear, 1, gy);
-      
+      grid.add(originalAirYear_label, "cell 0 " + gy);
+      grid.add(originalAirYear, "cell 1 " + gy + ", growx");
+
       gy++;
-      grid.add(creditKeywordRole, 0, gy);
-      grid.add(creditKeyword, 1, gy);
-      
+      grid.add(creditKeywordRole, "cell 0 " + gy);
+      grid.add(creditKeyword, "cell 1 " + gy + ", growx");
+
       gy++;
-      row = new HBox();
-      row.setSpacing(5);
-      row.getChildren().addAll(collectionType, hdtv_label, hdtv);
-      grid.add(collectionType_label, 0, gy);
-      grid.add(row, 1, gy);
-      
+      row = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      row.add(collectionType); row.add(hdtv_label); row.add(hdtv);
+      grid.add(collectionType_label, "cell 0 " + gy);
+      grid.add(row, "cell 1 " + gy);
+
       gy++;
-      row = new HBox();
-      row.setSpacing(5);
-      row.getChildren().addAll(category);
-      grid.add(category_label, 0, gy);
-      grid.add(row, 1, gy);
-      
+      row = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      JScrollPane categoryScroll = new JScrollPane(category);
+      categoryScroll.setPreferredSize(new java.awt.Dimension(200, 100));
+      row.add(categoryScroll);
+      grid.add(category_label, "cell 0 " + gy);
+      grid.add(row, "cell 1 " + gy);
+
       gy++;
-      row = new HBox();
-      row.setSpacing(5);
-      row.getChildren().addAll(minStarRating);
-      grid.add(minStarRating_label, 0, gy);
-      grid.add(row, 1, gy);
-      
-      content.getChildren().add(grid);
-      
-      row = new HBox();
-      row.setSpacing(5);
-      row.getChildren().addAll(receivedChannelsOnly, favoriteChannelsOnly);
-      content.getChildren().add(row);
-      
-      row = new HBox();
-      row.setAlignment(Pos.CENTER);
-      row.setSpacing(5);
-      row.getChildren().addAll(search, util.space(50), close);
-      content.getChildren().add(row);
-   
+      row = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      row.add(minStarRating);
+      grid.add(minStarRating_label, "cell 0 " + gy);
+      grid.add(row, "cell 1 " + gy);
+
+      content.add(grid);
+
+      row = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      row.add(receivedChannelsOnly); row.add(favoriteChannelsOnly);
+      content.add(row);
+
+      row = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+      row.add(search); row.add(Box.createHorizontalStrut(50)); row.add(close);
+      content.add(row);
+
       // create dialog window
-      dialog = new Stage();
-      dialog.setOnCloseRequest(new EventHandler<WindowEvent>() {
+      dialog = new JDialog(frame);
+      dialog.addWindowListener(new WindowAdapter() {
          @Override
-         public void handle(WindowEvent arg0) {
+         public void windowClosing(WindowEvent arg0) {
             pos_x = dialog.getX(); pos_y = dialog.getY();
          }
       });
 
       dialog.setTitle("Advanced Search");
-      dialog.setScene(new Scene(content));
-      config.gui.setFontSize(dialog.getScene(), config.FontSize);
-      dialog.initOwner(frame);
-      gui.LoadIcons(dialog);
-      dialog.show();
+      dialog.getContentPane().add(content);
+      SwingUtil.loadIcons(dialog);
+      dialog.pack();
+      dialog.setLocationRelativeTo(frame);
+      dialog.setVisible(true);
    }
-   
+
    private void deleteEntry(String entry) {
       entries.remove(entry);
-      savedEntries.getItems().remove(savedEntries.getSelectionModel().getSelectedIndex());
+      savedEntries.removeItem(entry);
       saveEntries();
    }
-   
+
    private void readFile(String inputFile) {
       if (! file.isFile(inputFile))
          return;
@@ -391,7 +371,7 @@ public class AdvSearch {
          BufferedReader ini = new BufferedReader(new FileReader(inputFile));
          String line = null;
          String key = null;
-         JSONObject json = new JSONObject();         
+         JSONObject json = new JSONObject();
          while (( line = ini.readLine()) != null) {
             // Get rid of leading and trailing white space
             line = line.replaceFirst("^\\s*(.*$)", "$1");
@@ -407,7 +387,7 @@ public class AdvSearch {
                json = new JSONObject();
                continue;
             }
-            
+
             String name = line.replaceFirst("=.+", "");
             String value = line.replaceFirst("^.+=", "");
             json.put(name, value);
@@ -418,13 +398,13 @@ public class AdvSearch {
             uniqueEntry(key);
          }
          ini.close();
-         if (savedEntries.getItems().size() > 1)
-            savedEntries.getSelectionModel().select(1);
+         if (savedEntries.getItemCount() > 1)
+            savedEntries.setSelectedIndex(1);
       } catch (Exception e) {
          log.error("AdvSearch readFile error - " + e.getMessage());
       }
    }
-   
+
    private void saveEntries() {
       String wFile = config.programDir + File.separator + saveFile;
       if (entries.isEmpty()) {
@@ -455,7 +435,7 @@ public class AdvSearch {
          log.error("AdvSearch saveEntries error - " + e.getMessage());
       }
    }
-   
+
    private void addEntry(String entry) {
       try {
          log.warn("Saving wishlist entry: " + entry);
@@ -467,13 +447,13 @@ public class AdvSearch {
          json.put("descriptionKeyword", string.removeLeadingTrailingSpaces(descriptionKeyword.getText()));
          json.put("originalAirYear", string.removeLeadingTrailingSpaces(originalAirYear.getText()));
          json.put("creditKeyword", string.removeLeadingTrailingSpaces(creditKeyword.getText()));
-         json.put("creditKeywordRole", creditKeywordRole.getSelectionModel().getSelectedItem());
-         json.put("collectionType", collectionType.getSelectionModel().getSelectedItem());
-         json.put("minStarRating", minStarRating.getSelectionModel().getSelectedItem());
-         json.put("category", category.getSelectionModel().getSelectedItem());
+         json.put("creditKeywordRole", creditKeywordRole.getSelectedItem());
+         json.put("collectionType", collectionType.getSelectedItem());
+         json.put("minStarRating", minStarRating.getSelectedItem());
+         json.put("category", category.getSelectedValue());
          json.put("keywords", string.removeLeadingTrailingSpaces(keywords.getText()));
          json.put("channels", string.removeLeadingTrailingSpaces(channels.getText()));
-         json.put("hdtv", hdtv.getSelectionModel().getSelectedItem());
+         json.put("hdtv", hdtv.getSelectedItem());
          if (receivedChannelsOnly.isSelected())
             json.put("receivedChannelsOnly", "on");
          else
@@ -489,18 +469,18 @@ public class AdvSearch {
          log.error("AdvSearch addEntry error - " + e.getMessage());
       }
    }
-   
+
    private void uniqueEntry(String entry) {
       Boolean add = true;
-      for (int i=0; i<savedEntries.getItems().size(); ++i) {
-         if (savedEntries.getItems().get(i).equals(entry))
+      for (int i=0; i<savedEntries.getItemCount(); ++i) {
+         if (savedEntries.getItemAt(i).equals(entry))
             add = false;
       }
       if (add)
-         savedEntries.getItems().add(entry);
-      savedEntries.getSelectionModel().select(entry);
+         savedEntries.addItem(entry);
+      savedEntries.setSelectedItem(entry);
    }
-   
+
    private void setValues(String entry) {
       if (entry.equals("Default"))
          resetToDefaults();
@@ -512,73 +492,72 @@ public class AdvSearch {
             if (json.has("title"))
                text = json.getString("title");
             title.setText(text);
-            
+
             text = "";
             if (json.has("titleKeyword"))
                text = json.getString("titleKeyword");
             titleKeyword.setText(text);
-            
+
             text = "";
             if (json.has("subtitleKeyword"))
                text = json.getString("subtitleKeyword");
             subtitleKeyword.setText(text);
-            
+
             text = "";
             if (json.has("subtitle"))
                text = json.getString("subtitle");
             subtitle.setText(text);
-            
+
             text = "";
             if (json.has("descriptionKeyword"))
                text = json.getString("descriptionKeyword");
             descriptionKeyword.setText(text);
-            
+
             text = "";
             if (json.has("originalAirYear"))
                text = json.getString("originalAirYear");
             originalAirYear.setText(text);
-            
+
             text = "";
             if (json.has("creditKeyword"))
                text = json.getString("creditKeyword");
             creditKeyword.setText(text);
-           
+
             text = "actor";
             if (json.has("creditKeywordRole"))
                text = json.getString("creditKeywordRole");
-            creditKeywordRole.getSelectionModel().select(text);
-            
+            creditKeywordRole.setSelectedItem(text);
+
             text = "ALL";
             if (json.has("collectionType"))
                text = json.getString("collectionType");
-            collectionType.getSelectionModel().select(text);
-            
+            collectionType.setSelectedItem(text);
+
             text = "ALL";
             if (json.has("minStarRating"))
                text = json.getString("minStarRating");
-            minStarRating.getSelectionModel().select(text);
-            
+            minStarRating.setSelectedItem(text);
+
             text = "ALL";
             if (json.has("category"))
                text = json.getString("category");
-            category.getSelectionModel().select(text);
-            category.scrollTo(text);
-            
+            category.setSelectedValue(text, true);
+
             text = "";
             if (json.has("keywords"))
                text = json.getString("keywords");
             keywords.setText(text);
-            
+
             text = "";
             if (json.has("channels"))
                text = json.getString("channels");
             channels.setText(text);
-            
+
             text = "HD";
             if (json.has("hdtv"))
                text = json.getString("hdtv");
-            hdtv.getSelectionModel().select(text);
-            
+            hdtv.setSelectedItem(text);
+
             receivedChannelsOnly.setSelected(json.getString("receivedChannelsOnly").equals("on"));
             favoriteChannelsOnly.setSelected(json.getString("favoriteChannelsOnly").equals("on"));
          } catch (JSONException e) {
@@ -586,7 +565,7 @@ public class AdvSearch {
          }
       }
    }
-   
+
    private void resetToDefaults() {
       title.setText("");
       titleKeyword.setText("");
@@ -595,18 +574,17 @@ public class AdvSearch {
       descriptionKeyword.setText("");
       originalAirYear.setText("");
       creditKeyword.setText("");
-      creditKeywordRole.getSelectionModel().select("actor");
-      collectionType.getSelectionModel().select("ALL");
-      minStarRating.getSelectionModel().select("ALL");
-      category.getSelectionModel().select("ALL");
-      category.scrollTo("ALL");
+      creditKeywordRole.setSelectedItem("actor");
+      collectionType.setSelectedItem("ALL");
+      minStarRating.setSelectedItem("ALL");
+      category.setSelectedValue("ALL", true);
       keywords.setText("");
       channels.setText("");
-      hdtv.getSelectionModel().select("HD");
+      hdtv.setSelectedItem("HD");
       receivedChannelsOnly.setSelected(true);
       favoriteChannelsOnly.setSelected(false);
    }
-   
+
    private void SearchCB() {
       try {
          String text;
@@ -617,8 +595,8 @@ public class AdvSearch {
          Date now = new Date();
          json.put("minStartTime", rnpl.getStringFromLongDate(now.getTime()));
 
-         String type = (String)(collectionType.getSelectionModel().getSelectedItem());
-         String cat = (String)category.getSelectionModel().getSelectedItem();
+         String type = (String)(collectionType.getSelectedItem());
+         String cat = (String)category.getSelectedValue();
 
          text = string.removeLeadingTrailingSpaces(title.getText());
          if (text != null && text.length() > 0) {
@@ -644,8 +622,7 @@ public class AdvSearch {
             cat = null;
          if (config.getTivoUsername() == null) {
             cat = null;
-            category.getSelectionModel().select("ALL");
-            category.scrollTo("ALL");
+            category.setSelectedValue("ALL", true);
          }
          text = string.removeLeadingTrailingSpaces(originalAirYear.getText());
          if (text != null && text.length() > 0) {
@@ -656,14 +633,14 @@ public class AdvSearch {
          }
          text = string.removeLeadingTrailingSpaces(creditKeyword.getText());
          if (text != null && text.length() > 0) {
-            JSONArray creditArray = rnpl.parseCreditString(text, (String)creditKeywordRole.getSelectionModel().getSelectedItem());
+            JSONArray creditArray = rnpl.parseCreditString(text, (String)creditKeywordRole.getSelectedItem());
             json.put("credit", creditArray);
          }
-         text = (String)collectionType.getSelectionModel().getSelectedItem();
+         text = (String)collectionType.getSelectedItem();
          if (! text.equals("ALL")) {
             json.put("collectionType", text);
          }
-         text = (String)minStarRating.getSelectionModel().getSelectedItem();
+         text = (String)minStarRating.getSelectedItem();
          if (! text.equals("ALL")) {
             if (type.equals("movie") || cat != null)
                json.put("minStarRating", text);
@@ -679,7 +656,7 @@ public class AdvSearch {
          if (text != null && text.length() > 0) {
             chans = text.split("\\s+");
          }
-         text = (String)hdtv.getSelectionModel().getSelectedItem();
+         text = (String)hdtv.getSelectedItem();
          if (text.equals("HD"))
             json.put("hdtv", true);
          if (text.equals("SD"))
@@ -696,7 +673,7 @@ public class AdvSearch {
          job.type                   = "remote";
          job.name                   = "Remote";
          job.search                 = config.gui.remote_gui.search_tab.tab;
-         job.remote_search_max      = config.gui.remote_gui.search_tab.max.getValue();
+         job.remote_search_max      = (Integer)config.gui.remote_gui.search_tab.max.getValue();
          job.remote_adv_search      = true;
          job.remote_adv_search_json = json;
          if (chans != null)
@@ -708,11 +685,11 @@ public class AdvSearch {
          log.error("AdvSearch SearchCB error - " + e.getMessage());
       }
    }
-   
+
    // This runs in background mode so as not to hang up GUI
    private void addCategories(final String tivoName) {
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             Remote r = config.initRemote(tivoName);
             if (r.success) {
                final Stack<String> categoryNames = r.getCategoryNames(tivoName);
@@ -720,25 +697,24 @@ public class AdvSearch {
                   class backgroundRun implements Runnable {
                      @Override public void run() {
                         for (String categoryName : categoryNames) {
-                           category.getItems().add(categoryName);
+                           category.getItems().addElement(categoryName);
                         }
                         // Now that categories are populated, set fields for 1st savedEntries name
-                        if (savedEntries.getItems().size() > 1) {
-                           setValues(savedEntries.getItems().get(1));
+                        if (savedEntries.getItemCount() > 1) {
+                           setValues(savedEntries.getItemAt(1));
                         }
                      }
                   }
-                  Platform.runLater(new backgroundRun());
+                  SwingUtil.runLater(new backgroundRun());
                }
                r.disconnect();
             }
-            return null;
          }
       };
       new Thread(task).start();
    }
-      
-   private Tooltip getToolTip(String component) {
+
+   private String getToolTip(String component) {
       String text = "";
       if (component.equals("title")) {
          text =  "<b>Title</b><br>";
@@ -877,7 +853,7 @@ public class AdvSearch {
          text =  "<b>Close</b><br>";
          text += "Close the <b>Advanced Search</b> dialog window.";
       }
-      
+
       return MyTooltip.make(text);
    }
 }

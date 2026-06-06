@@ -28,12 +28,10 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Stack;
 
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.gui.tivoTab;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
@@ -143,7 +141,7 @@ public class SkipManager {
          }
          ofp.close();
          if (config.GUIMODE) {
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override public void run() {
                   config.gui.getTab(tivoName).getTable().updateSkipStatus(contentId);
                }
@@ -229,7 +227,7 @@ public class SkipManager {
                if (tivoName != null && config.GUIMODE) {
                   // Remove asterisk from associated table
                   final String final_tivoName = tivoName;
-                  Platform.runLater(new Runnable() {
+                  SwingUtil.runLater(new Runnable() {
                      @Override public void run() {
                         tivoTab t = config.gui.getTab(final_tivoName);
                         if (t != null) {
@@ -612,10 +610,9 @@ public class SkipManager {
    public static void visualDetect(String tivoName, Stack<Hashtable<String,String>> stack, Boolean background) {
       if (background) {
          // Non blocking mode
-         Task<Void> task = new Task<Void>() {
-            @Override public Void call() {
+         Runnable task = new Runnable() {
+            @Override public void run() {
                visualDetect(true, tivoName, stack);
-               return null;
             }
          };
          new Thread(task).start();

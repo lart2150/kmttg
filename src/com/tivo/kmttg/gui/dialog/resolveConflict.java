@@ -18,16 +18,14 @@
  */
 package com.tivo.kmttg.gui.dialog;
 
-import java.util.Optional;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -37,54 +35,50 @@ import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.log;
 
 public class resolveConflict {
-   VBox components;
-   Label label;
+   JPanel components;
+   JLabel label;
    JSONArray conflicts;
    int tuners;
-   
+
    resolveConflict(JSONArray conflicts, int tuners) {
       this.conflicts = conflicts;
       this.tuners = tuners;
-      createComponents();      
+      createComponents();
    }
-   
+
    private void createComponents() {
-      components = new VBox();
-      components.getChildren().add(new Label(""));
+      components = new JPanel();
+      components.setLayout(new BoxLayout(components, BoxLayout.Y_AXIS));
+      label = new JLabel("");
+      components.add(label);
       try {
          for (int i=0; i<conflicts.length(); ++i) {
             JSONObject json = conflicts.getJSONObject(i);
             String text = rnpl.formatEntry(json);
-            CheckBox box = new CheckBox(text);
-            box.setOnAction(new EventHandler<ActionEvent>() {
-               public void handle(ActionEvent e) {
+            JCheckBox box = new JCheckBox(text);
+            box.addActionListener(new ActionListener() {
+               public void actionPerformed(ActionEvent e) {
                   // Limited number of tuners means only that many shows can be enabled at a time
                   checkTuners();
                }
             });
-            components.getChildren().add(box);
+            components.add(box);
          }
       } catch (JSONException e) {
          log.error("Conflicts dialog error: " + e.getMessage());
       }
    }
-   
-   @SuppressWarnings("static-access")
+
    public JSONArray promptUser(String title) {
       try {
          label.setText(title);
-         Dialog<?> dialog = new Dialog<>();
-         dialog.initOwner(config.gui.getFrame());
-         config.gui.LoadIcons((Stage) dialog.getDialogPane().getScene().getWindow());
-         config.gui.setFontSize(dialog, config.FontSize);
-         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-         dialog.setTitle("Resolve conflicts");
-         dialog.getDialogPane().setContent(components);
-         Optional<?> response = dialog.showAndWait();
-         if (response != null && response.get().equals(ButtonType.OK)) {
+         int response = JOptionPane.showConfirmDialog(
+            config.gui.getFrame(), components, "Resolve conflicts", JOptionPane.OK_CANCEL_OPTION
+         );
+         if (response == JOptionPane.OK_OPTION) {
             for (int i=0; i<conflicts.length(); ++i) {
                JSONObject json = conflicts.getJSONObject(i);
-               CheckBox box = (CheckBox)components.getChildren().get(i+1);
+               JCheckBox box = (JCheckBox)components.getComponent(i+1);
                if (box.isSelected()) {
                   json.put("__record__", "yes");
                }
@@ -98,11 +92,11 @@ public class resolveConflict {
          return null;
       }
    }
-   
+
    private void checkTuners() {
       int count = 0;
       for (int i=0; i<conflicts.length(); ++i) {
-         CheckBox box = (CheckBox)components.getChildren().get(i+1);
+         JCheckBox box = (JCheckBox)components.getComponent(i+1);
          if (box.isSelected()) {
             count++;
             if (count > tuners) {

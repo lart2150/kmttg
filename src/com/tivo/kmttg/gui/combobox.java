@@ -18,15 +18,16 @@
  */
 package com.tivo.kmttg.gui;
 
-import javafx.scene.control.ComboBox;
+import javax.swing.JComboBox;
 
 public class combobox {
-   public static void Add(ComboBox<String> box, String value) {
-      box.getItems().add(value);
-   }   
-   
-   public static void SetValues(ComboBox<String> box, String[] values) {
-      box.getItems().clear();
-      box.getItems().addAll(values);
+   public static void Add(JComboBox<String> box, String value) {
+      box.addItem(value);
+   }
+
+   public static void SetValues(JComboBox<String> box, String[] values) {
+      box.removeAllItems();
+      for (String value : values)
+         box.addItem(value);
    }
 }

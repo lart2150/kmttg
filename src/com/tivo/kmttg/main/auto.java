@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
 
-import javafx.concurrent.Task;
 
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.httpserver.kmttgServer;
@@ -969,8 +968,8 @@ public class auto {
    
    // Windows only: Starts kmttg service using "install-kmttg-service.bat" as admin
    public static void serviceCreate() {
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             Stack<String> command = new Stack<String>();
             command.add("cscript");
             command.add("//nologo");
@@ -982,16 +981,13 @@ public class auto {
                try {
                   Thread.sleep(4000);
                   log.warn(serviceStatus());
-                  return null;
                } catch (InterruptedException e) {
                   log.error(e.getMessage());
-                  return null;
-               }               
+               }
             } else {
                log.error("Command failed: " + process.toString());
                log.error(process.getStderr());
             }
-            return null;
          }
       };
       new Thread(task).start();
@@ -999,8 +995,8 @@ public class auto {
    
    // Windows only: Starts kmttg service using "sc start kmttg" running as admin
    public static void serviceStart() {
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             Stack<String> command = new Stack<String>();
             command.add("cscript");
             command.add("//nologo");
@@ -1013,16 +1009,13 @@ public class auto {
                try {
                   Thread.sleep(4000);
                   log.warn(serviceStatus());
-                  return null;
                } catch (InterruptedException e) {
                   log.error(e.getMessage());
-                  return null;
-               }               
+               }
             } else {
                log.error("Command failed: " + process.toString());
                log.error(process.getStderr());
             }
-            return null;
          }
       };
       new Thread(task).start();
@@ -1030,8 +1023,8 @@ public class auto {
    
    // Windows only: Starts kmttg service using "sc stop kmttg" running as admin
    public static void serviceStop() {
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             Stack<String> command = new Stack<String>();
             command.add("cscript");
             command.add("//nologo");
@@ -1044,16 +1037,13 @@ public class auto {
                try {
                   Thread.sleep(4000);
                   log.warn(serviceStatus());
-                  return null;
                } catch (InterruptedException e) {
                   log.error(e.getMessage());
-                  return null;
-               }               
+               }
             } else {
                log.error("Command failed: " + process.toString());
                log.error(process.getStderr());
             }
-            return null;
          }
       };
       new Thread(task).start();
@@ -1075,8 +1065,8 @@ public class auto {
    
    // Windows only: Starts kmttg service using "sc delete kmttg" running as admin
    public static void serviceDelete() {
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             Stack<String> command = new Stack<String>();
             command.add("cscript");
             command.add("//nologo");
@@ -1091,16 +1081,13 @@ public class auto {
                   String status = serviceStatus();
                   if (status.contains("has not been installed"))
                      log.warn("kmttg service successfully removed");
-                  return null;
                } catch (InterruptedException e) {
                   log.error(e.getMessage());
-                  return null;
-               }               
+               }
             } else {
                log.error("Command failed: " + process.toString());
                log.error(process.getStderr());
             }
-            return null;
          }
       };
       new Thread(task).start();

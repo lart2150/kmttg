@@ -18,21 +18,20 @@
  */
 package com.tivo.kmttg.gui;
 
+import java.awt.BorderLayout;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
+import javax.swing.BoxLayout;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
-import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 
@@ -42,61 +41,58 @@ public class taskInfo {
    Timer timer;
    private Stack<String> owatch = new Stack<String>();
    private Stack<String> ewatch = new Stack<String>();
-   
-   private Stage dialog;
-   private TextArea stdout = null;
-   private TextArea stderr = null;     
-   
-   public taskInfo(Stage frame, String description, backgroundProcess process) {
+
+   private JDialog dialog;
+   private JTextArea stdout = null;
+   private JTextArea stderr = null;
+
+   public taskInfo(JFrame frame, String description, backgroundProcess process) {
       debug.print("frame=" + frame + " description=" + description + " process=" + process);
-      Label job_label;
-      Label stdout_label;
-      Label stderr_label;
+      JLabel job_label;
+      JLabel stdout_label;
+      JLabel stderr_label;
       this.process = process;
-      
+
       // Define content for dialog window
-      VBox content = new VBox();
-      content.setSpacing(2);
-      HBox.setHgrow(content, Priority.ALWAYS);  // stretch horizontally
-      
+      JPanel content = new JPanel();
+      content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+
       // job description label
-      job_label = new Label(description);
-      HBox.setHgrow(job_label, Priority.ALWAYS);  // stretch horizontally
-            
+      job_label = new JLabel(description);
+
       // stdout label
-      stdout_label = new Label("stdout");
-      
+      stdout_label = new JLabel("stdout");
+
       // stdout text area
-      stdout = new TextArea();
-      VBox.setVgrow(stdout, Priority.ALWAYS);  // stretch vertically
+      stdout = new JTextArea();
       stdout.setEditable(false);
-      stdout.setWrapText(true);
-      
+      stdout.setLineWrap(true);
+      stdout.setWrapStyleWord(true);
+
       // stderr label
-      stderr_label = new Label("stderr");
-      
+      stderr_label = new JLabel("stderr");
+
       // stderr text area
-      stderr = new TextArea();
-      VBox.setVgrow(stderr, Priority.ALWAYS);  // stretch vertically
+      stderr = new JTextArea();
       stderr.setEditable(false);
-      stderr.setWrapText(true);
-      
-      content.getChildren().addAll(job_label, stdout_label, stdout, stderr_label, stderr);
-     
+      stderr.setLineWrap(true);
+      stderr.setWrapStyleWord(true);
+
+      content.add(job_label);
+      content.add(stdout_label);
+      content.add(new JScrollPane(stdout));  // stretch vertically
+      content.add(stderr_label);
+      content.add(new JScrollPane(stderr));  // stretch vertically
+
       // create and display dialog window
-      dialog = new Stage();
-      dialog.initModality(Modality.NONE); // Non modal
-      dialog.initOwner(frame);
-      gui.LoadIcons(dialog);
+      dialog = new JDialog(frame); // Non modal
+      SwingUtil.loadIcons(dialog);
       dialog.setTitle("Task stdout/stderr viewer");
-      Scene scene = new Scene(new VBox());
-      config.gui.addScene(scene);
-      config.gui.setFontSize(scene, config.FontSize);
-      ((VBox) scene.getRoot()).getChildren().add(content);
-      dialog.setScene(scene);
-      dialog.setWidth(600); dialog.setHeight(400);
-      dialog.show();
-      
+      dialog.getContentPane().add(content, BorderLayout.CENTER);
+      dialog.setSize(600, 400);
+      dialog.setLocationRelativeTo(frame);
+      dialog.setVisible(true);
+
       // print available stdout/stderr
       appendStdout(process.getStdout());
       appendStderr(process.getStderr());
@@ -104,14 +100,14 @@ public class taskInfo {
       // Setup process child handler to add to owatch/ewatch stacks
       process.setStdoutWatch(owatch);
       process.setStderrWatch(ewatch);
-      
+
       // Start a timer that updates stdout/stderr text areas dynamically
       timer = new Timer();
       timer.schedule(
          new TimerTask() {
             @Override
             public void run() {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      update();
                   }
@@ -122,7 +118,7 @@ public class taskInfo {
         1000
       );
    }
-     
+
    // Update text area stdout/stderr fields with process stdout/stderr
    public void update() {
       // Stop timer if dialog no longer displayed
@@ -149,21 +145,21 @@ public class taskInfo {
          ewatch.clear();
       }
    }
-      
+
    public void appendStdout(Stack<String> s) {
       if (s != null && s.size() > 0) {
          stdout.setEditable(true);
          for (int i=0; i<s.size(); ++i)
-            stdout.appendText(s.get(i) + "\n");
+            stdout.append(s.get(i) + "\n");
          stdout.setEditable(false);
       }
    }
-   
+
    public void appendStderr(Stack<String> s) {
       if (s != null && s.size() > 0) {
          stderr.setEditable(true);
          for (int i=0; i<s.size(); ++i)
-            stderr.appendText(s.get(i) + "\n");
+            stderr.append(s.get(i) + "\n");
          stderr.setEditable(false);
       }
    }

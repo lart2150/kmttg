@@ -24,8 +24,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 
-import javafx.application.Platform;
-
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.http;
@@ -183,7 +182,7 @@ public class javadownload extends baseTask implements Serializable {
                job.rate = string.getTimeRemaining(job.time2, job.time, job.tivoFileSize, size);
             }
             
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override public void run() {
                   if ( jobMonitor.isFirstJobInMonitor(job) ) {
                      // Update STATUS column 
@@ -205,7 +204,7 @@ public class javadownload extends baseTask implements Serializable {
          // Job finished
          if (config.GUIMODE) {
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      config.gui.setTitle(config.kmttg);
                      config.gui.progressBar_setValue(0);

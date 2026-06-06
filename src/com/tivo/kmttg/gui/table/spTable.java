@@ -18,32 +18,18 @@
  */
 package com.tivo.kmttg.gui.table;
 
+import java.awt.Color;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.Hashtable;
-import java.util.Optional;
 
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
-import javafx.embed.swing.JFXPanel;
-import javafx.util.Callback;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONConverter;
@@ -53,6 +39,10 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.gui.sortable.sortableInt;
+import com.tivo.kmttg.gui.swing.KmttgTable;
+import com.tivo.kmttg.gui.swing.KmttgTableModel;
+import com.tivo.kmttg.gui.swing.RowColorer;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -64,12 +54,12 @@ import com.tivo.kmttg.util.log;
 public class spTable extends TableMap {
    private String[] TITLE_cols = {"PRI", "SHOW", "INCLUDE", "SEASON", "CHANNEL", "RECORD", "KEEP", "NUM", "START", "END"};
    private double[] weights = {4, 34, 9, 8, 13, 10, 7, 5, 5, 5};
-   public TableView<Tabentry> TABLE = null;
+   public JTable TABLE = null;
+   public KmttgTableModel<Tabentry> MODEL = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private String currentTivo = null;
    private Boolean loaded = false;
-   private DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
-   
+
    // TableMap overrides
    @Override
    public JSONObject getJson(int row) {
@@ -85,127 +75,63 @@ public class spTable extends TableMap {
    }
    @Override
    public void clear() {
-      TABLE.getItems().clear();
+      MODEL.clear();
    }
    @Override
-   public TableView<?> getTable() {
+   public JTable getTable() {
       return TABLE;
    }
-   
+
    public spTable() {
-      TABLE = new TableView<Tabentry>();
-      TABLE.getSelectionModel().setSelectionMode(SelectionMode.SINGLE); // Allow only single row selection
-      TABLE.setRowFactory(new ColorRowFactory()); // For row background color handling & drag and drop support
-      
+      MODEL = new KmttgTableModel<Tabentry>(TITLE_cols);
+      MODEL.setSortingEnabled(false); // SP priority order matters
+      // Column sorting is disabled for all columns in this table (SP order matters)
+      TABLE = KmttgTable.create(MODEL, new ColorRow());
+      // -fx-alignment: CENTER for all columns except SHOW and CHANNEL
       for (String colName : TITLE_cols) {
-         if (colName.equals("PRI")) {
-            TableColumn<Tabentry,sortableInt> col = new TableColumn<Tabentry,sortableInt>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableInt>(colName));
-            col.setComparator(null); // Disable column sorting
-            col.setStyle("-fx-alignment: CENTER;");
-            TABLE.getColumns().add(col);
-         } else {
-            TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(colName));
-            col.setComparator(null); // Disable column sorting
-            if (! colName.equals("SHOW") && ! colName.equals("CHANNEL"))
-               col.setStyle("-fx-alignment: CENTER;");
-            TABLE.getColumns().add(col);
-         }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
+         if (! colName.equals("SHOW") && ! colName.equals("CHANNEL"))
+            KmttgTable.setColumnAlignment(TABLE, colName, JLabel.CENTER);
       }
+      TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
 
       // Add keyboard listener
-      TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {
-         public void handle(KeyEvent e) {
+      TABLE.addKeyListener(new KeyAdapter() {
+         @Override
+         public void keyPressed(KeyEvent e) {
             KeyPressed(e);
          }
       });
-      
+
       // Define selection listener to detect table row selection changes
-      TABLE.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tabentry>() {
+      TABLE.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
          @Override
-         public void changed(ObservableValue<? extends Tabentry> obs, Tabentry oldSelection, Tabentry newSelection) {
-            if (newSelection != null) {
+         public void valueChanged(ListSelectionEvent e) {
+            if (e.getValueIsAdjusting())
+               return;
+            int row = TABLE.getSelectionModel().getLeadSelectionIndex();
+            if (row >= 0 && row < MODEL.size() && TABLE.isRowSelected(row)) {
                if (config.gui.show_details.isShowing())
                   ShowDetails();
             }
          }
       });
-      
+
       // Add right mouse button handler
       TableUtil.AddRightMouseListener(TABLE);
-   }   
+   }
 
-   // ColorRowFactory for setting row background color
-   private class ColorRowFactory implements Callback<TableView<Tabentry>, TableRow<Tabentry>> {
-      public TableRow<Tabentry> call(TableView<Tabentry> tableView) {
-         TableRow<Tabentry> row = new TableRow<Tabentry>() {
-            @Override
-            public void updateItem(Tabentry entry, boolean empty) {
-               super.updateItem(entry,  empty);
-               styleProperty().unbind(); setStyle("");
-               if (entry != null) {
-                  JSONObject json = entry.getPRI().json;
-                  if (json != null && json.has("__conflicts"))
-                     TableUtil.setRowColor(this, TableUtil.lightRed);
-               }
-               
-               // Row drag and drop support
-               this.setOnDragDetected(new EventHandler<MouseEvent>() {
-                  @Override
-                  public void handle(MouseEvent event) {
-                     if (! isEmpty()) {
-                        Integer index = getIndex();
-                        Dragboard db = startDragAndDrop(TransferMode.MOVE);
-                        db.setDragView(snapshot(null, null));
-                        ClipboardContent cc = new ClipboardContent();
-                        cc.put(SERIALIZED_MIME_TYPE, index);
-                        db.setContent(cc);
-                        event.consume();
-                    }
-                  }                  
-               });
-               
-               this.setOnDragOver(new EventHandler<DragEvent>() {
-                  @Override
-                  public void handle(DragEvent event) {
-                     Dragboard db = event.getDragboard();
-                     if (db.hasContent(SERIALIZED_MIME_TYPE)) {
-                         if (getIndex() != ((Integer)db.getContent(SERIALIZED_MIME_TYPE)).intValue()) {
-                             event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-                             event.consume();
-                         }
-                     }
-                  }                  
-               });
-               
-               this.setOnDragDropped(new EventHandler<DragEvent>() {
-                  @Override
-                  public void handle(DragEvent event) {
-                     Dragboard db = event.getDragboard();
-                     if (db.hasContent(SERIALIZED_MIME_TYPE)) {
-                         int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
-                         Tabentry entry = TABLE.getItems().remove(draggedIndex);
-                         int dropIndex ; 
-                         if (isEmpty()) {
-                             dropIndex = TABLE.getItems().size() ;
-                         } else {
-                             dropIndex = getIndex();
-                         }
-                         TABLE.getItems().add(dropIndex, entry);
-                         event.setDropCompleted(true);
-                         TABLE.getSelectionModel().select(dropIndex);
-                         event.consume();
-                     }
-                  }                  
-               });
-            }
-         };
-         return row;
+   // Row background color handling
+   private class ColorRow implements RowColorer<Tabentry> {
+      public Color getColor(Tabentry entry) {
+         if (entry != null) {
+            JSONObject json = entry.getPRI().json;
+            if (json != null && json.has("__conflicts"))
+               return TableUtil.lightRed;
+         }
+         return null;
       }
-   }  
-   
+   }
+
    public static class Tabentry {
       public sortableInt priority = null;
       public String show = "";
@@ -239,14 +165,14 @@ public class spTable extends TableMap {
                int count = data.getJSONArray("__upcoming").length();
                show += " (" + count + ")";
             }
-            
+
             include = "linear";
             if (data.has("idSetSource")) {
                o = data.getJSONObject("idSetSource");
                if (o.has("consumptionSource"))
                   include = o.getString("consumptionSource");
             }
-            
+
             season = "1";
             if (data.has("idSetSource")) {
                o = data.getJSONObject("idSetSource");
@@ -257,7 +183,7 @@ public class spTable extends TableMap {
                      season = "0";
                }
             }
-            
+
             channel = "";
             if (data.has("idSetSource")) {
                o = data.getJSONObject("idSetSource");
@@ -296,13 +222,13 @@ public class spTable extends TableMap {
                keep = data.getString("keepBehavior");
          } catch (Exception e) {
             log.error("spTable Tabentry - " + e.getMessage());
-         }            
+         }
       }
-      
+
       public sortableInt getPRI() {
          return priority;
       }
-      
+
       public String getSHOW() {
          return show;
       }
@@ -338,12 +264,12 @@ public class spTable extends TableMap {
       public String getEND() {
          return end;
       }
-      
+
       public String toString() {
          return show;
       }
    }
-    
+
     // Add given data to table
     public Boolean AddRows(JSONArray data) {
        try {
@@ -367,69 +293,70 @@ public class spTable extends TableMap {
              config.gui.remote_gui.setTivoName("sp", tivoName);
        }
     }
-    
+
     private void AddRow(JSONObject data, int priority) {
        try {
           data.put("__priority__", priority);
        } catch (JSONException e) {
           log.error("AddRow - " + e.getMessage());
        }
-       TABLE.getItems().add(new Tabentry(data, priority));
+       MODEL.addRow(new Tabentry(data, priority));
     }
-    
+
     public void setSelectedRow(int row) {
-       TABLE.getSelectionModel().select(row);
+       TABLE.addRowSelectionInterval(row, row);
        TableUtil.scrollToCenter(TABLE, row);
     }
-    
+
     public JSONObject GetRowData(int row) {
-       return TABLE.getItems().get(row).getPRI().json;
+       return MODEL.getRow(row).getPRI().json;
     }
-    
+
     public String GetRowTitle(int row) {
-       String s = (String) TABLE.getItems().get(row).getSHOW();
+       String s = (String) MODEL.getRow(row).getSHOW();
        if (s != null)
           return s;
        return null;
     }
-    
+
     public void updateTitleCols(String name) {
-       for (int row=0; row<TABLE.getItems().size(); ++row) {
-          Tabentry e = TABLE.getItems().get(row);
+       for (int row=0; row<MODEL.size(); ++row) {
+          Tabentry e = MODEL.getRow(row);
           e.show = name + e.show;
        }
     }
-    
+
     private void InsertRow(int row, JSONObject data) {
        try {
-          TABLE.getItems().add(row, new Tabentry(data, data.getInt("__priority__")));
+          MODEL.getRows().add(row, new Tabentry(data, data.getInt("__priority__")));
+          MODEL.fireTableDataChanged();
        } catch (JSONException e) {
           log.error("spTable InsertRow - " + e.getMessage());
        }
     }
-    
+
     public void RemoveRow(int row) {
-       TABLE.getItems().remove(row);
+       MODEL.removeRow(row);
     }
-    
+
     private void changeRowPrompt(int from) {
        int from_prompt = from + 1;
-       TextInputDialog dialog = new TextInputDialog("" + from_prompt);
-       dialog.setTitle("Change Priority");
-       dialog.setHeaderText("");
-       dialog.setContentText("Eenter desired new priority #:");
-
-       Optional<String> result = dialog.showAndWait();
-       if (result.isPresent()){
-           String answer = result.get();
+       String result = JOptionPane.showInputDialog(
+          config.gui.getFrame(),
+          "Eenter desired new priority #:",
+          "Change Priority",
+          JOptionPane.QUESTION_MESSAGE
+       );
+       if (result != null) {
+           String answer = result;
            try {
               int to = Integer.parseInt(answer) - 1;
-              if (to >= 0 && to < TABLE.getItems().size()) {
+              if (to >= 0 && to < MODEL.size()) {
                  if (to != from) {
                     JSONObject data = GetRowData(from);
                     RemoveRow(from);
                     InsertRow(to, data);
-                    TABLE.getSelectionModel().select(to);
+                    TABLE.addRowSelectionInterval(to, to);
                     TableUtil.scrollToCenter(TABLE, to);
                  }
               } else {
@@ -440,23 +367,21 @@ public class spTable extends TableMap {
            }
        }
     }
-    
+
     public Boolean isTableLoaded() {
        return loaded;
     }
-    
+
     public void setLoaded(Boolean flag) {
        if (flag) {
           loaded = true;
-          TABLE.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
        } else {
           loaded = false;
-          TABLE.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
        }
     }
-    
+
     public void updateLoadedStatus() {
-       if (TABLE.getItems().size() > 0) {
+       if (MODEL.size() > 0) {
           String title = GetRowTitle(0);
           if (title != null && title.startsWith(" Loaded"))
              setLoaded(true);
@@ -464,7 +389,7 @@ public class spTable extends TableMap {
              setLoaded(false);
        }
     }
-    
+
     private Boolean removeJson(String tivoName, JSONObject json) {
        Boolean removed = false;
        try {
@@ -483,7 +408,7 @@ public class spTable extends TableMap {
 
     // Return array of subscriptionId's according to current table row order
     public JSONArray GetOrderedIds() {
-       int count = TABLE.getItems().size();
+       int count = MODEL.size();
        if (count == 0) {
           log.error("Table is empty");
           return null;
@@ -495,7 +420,7 @@ public class spTable extends TableMap {
        JSONArray array = new JSONArray();
        sortableInt s;
        for (int row=0; row<count; ++row) {
-          s = TABLE.getItems().get(row).getPRI();
+          s = MODEL.getRow(row).getPRI();
           if (s != null && s.json.has("subscriptionId")) {
              try {
                 array.put(s.json.getString("subscriptionId"));
@@ -510,7 +435,7 @@ public class spTable extends TableMap {
        else
           return null;
     }
-    
+
     private void ShowDetails() {
        if (currentTivo == null)
           return;
@@ -519,13 +444,13 @@ public class spTable extends TableMap {
           return;
        config.gui.show_details.update(TABLE, currentTivo, GetRowData(selected[0]));
     }
-    
+
     // Handle keyboard presses
     private void KeyPressed(KeyEvent e) {
        if (e.isControlDown())
           return;
-       KeyCode keyCode = e.getCode();
-       if (keyCode == KeyCode.J) {
+       int keyCode = e.getKeyCode();
+       if (keyCode == KeyEvent.VK_J) {
           // Print json of selected row to log window
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
@@ -540,34 +465,34 @@ public class spTable extends TableMap {
              }
           }
        }
-       else if (keyCode == KeyCode.N) {
+       else if (keyCode == KeyEvent.VK_N) {
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
              return;
           TableUtil.PrintEpisodes(GetRowData(selected[0]));
        }
-       else if (keyCode == KeyCode.C) {
-          config.gui.remote_gui.sp_tab.copy.fire();
+       else if (keyCode == KeyEvent.VK_C) {
+          config.gui.remote_gui.sp_tab.copy.doClick();
        }
-       else if (keyCode == KeyCode.M) {
-          config.gui.remote_gui.sp_tab.modify.fire();
+       else if (keyCode == KeyEvent.VK_M) {
+          config.gui.remote_gui.sp_tab.modify.doClick();
        }
-       else if (keyCode == KeyCode.P) {
+       else if (keyCode == KeyEvent.VK_P) {
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
              return;
           changeRowPrompt(selected[0]);
        }
-       else if (keyCode == KeyCode.U) {
-          config.gui.remote_gui.sp_tab.upcoming.fire();
+       else if (keyCode == KeyEvent.VK_U) {
+          config.gui.remote_gui.sp_tab.upcoming.doClick();
        }
-       else if (keyCode == KeyCode.O) {
-          config.gui.remote_gui.sp_tab.conflicts.fire();
+       else if (keyCode == KeyEvent.VK_O) {
+          config.gui.remote_gui.sp_tab.conflicts.doClick();
        }
-       else if (keyCode == KeyCode.I) {
+       else if (keyCode == KeyEvent.VK_I) {
           ShowDetails();
        }
-       else if (keyCode == KeyCode.Q) {
+       else if (keyCode == KeyEvent.VK_Q) {
           // Web query currently selected entry
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
@@ -584,18 +509,18 @@ public class spTable extends TableMap {
              }
           }
        }
-       else if (keyCode == KeyCode.Z) {
+       else if (keyCode == KeyEvent.VK_Z) {
           // Check OnePass stationId vs available guide channel data
           String tivoName = config.gui.remote_gui.getTivoName("sp");
           if (tivoName != null)
              CheckOnePasses(tivoName);
        }
-       else if (keyCode == KeyCode.DELETE) {
+       else if (keyCode == KeyEvent.VK_DELETE) {
           // Remove selected row from TiVo and table
           e.consume(); // Need this so as not to remove focus which is default key action
           SPListDelete();
        }
-       else if (keyCode == KeyCode.UP) {
+       else if (keyCode == KeyEvent.VK_UP) {
           // Move selected row up
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 0) {
@@ -616,7 +541,7 @@ public class spTable extends TableMap {
              }
           }
        }
-       else if (keyCode == KeyCode.DOWN) {
+       else if (keyCode == KeyEvent.VK_DOWN) {
           // Move selected row down
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 0) {
@@ -630,16 +555,16 @@ public class spTable extends TableMap {
           int row;
           for (int i=0; i<selected.length; ++i) {
              row = selected[i];
-             if (row < TABLE.getItems().size()-1) {
+             if (row < MODEL.size()-1) {
                 JSONObject data = GetRowData(row);
                 RemoveRow(row);
                 InsertRow(row+1, data);
-                TABLE.getSelectionModel().select(row);
+                TABLE.addRowSelectionInterval(row, row);
              }
           }
        }
     }
-    
+
     // Delete selected Season Pass entries from TiVo and table
     public void SPListDelete() {
        // Remove selected row from TiVo and table
@@ -679,7 +604,7 @@ public class spTable extends TableMap {
                          smallest -= 1;
                          if (smallest < 0)
                             smallest = 0;
-                         if (TABLE.getItems().size() > 0)
+                         if (MODEL.size() > 0)
                             setSelectedRow(smallest);
                          // Find and remove data entry
                          removeJson(currentTivo, json);
@@ -690,10 +615,10 @@ public class spTable extends TableMap {
                 }
              }
           }
-          r.disconnect();                   
+          r.disconnect();
        }
     }
-    
+
     public void SPListSave(String tivoName, String file) {
        if (tivo_data.containsKey(tivoName) && tivo_data.get(tivoName).length() > 0) {
           log.warn("Saving '" + tivoName + "' SP list to file: " + file);
@@ -702,7 +627,7 @@ public class spTable extends TableMap {
           log.error("No data available to save.");
        }
     }
-    
+
     public void SPListLoad(String file) {
        log.print("Loading SP data from file: " + file);
        JSONArray data = JSONFile.readJSONArray(file);
@@ -726,27 +651,26 @@ public class spTable extends TableMap {
           setLoaded(true);
        }
     }
-    
-    // NOTE: The current table structure + sorting is used    
+
+    // NOTE: The current table structure + sorting is used
     public void SPListExport(String tivoName, String file) {
        if (tivo_data.containsKey(tivoName) && tivo_data.get(tivoName).length() > 0) {
           try {
              log.warn("Exporting '" + tivoName + "' SP list to csv file: " + file);
              BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
              int col = 0;
-             int numCols = TABLE.getColumns().size();
+             int numCols = TITLE_cols.length;
              // Write column headers
-             for (TableColumn<Tabentry,?> column : TABLE.getColumns()) {
-                String name = column.getText();
+             for (String name : TITLE_cols) {
                 ofp.write(name);
                 if (col<numCols-1)
                    ofp.write(",");
              }
              ofp.write("\r\n");
-             for (int row=0; row<TABLE.getItems().size(); row++) {
-                for (TableColumn<Tabentry,?> column : TABLE.getColumns()) {
-                   String colName = column.getText();
-                   String val = column.getCellData(row).toString();
+             for (int row=0; row<MODEL.size(); row++) {
+                for (int c=0; c<TITLE_cols.length; c++) {
+                   String colName = TITLE_cols[c];
+                   String val = MODEL.getValueAt(row, c).toString();
                    val = val.trim();
                    if (colName.equals("SHOW")) {
                       val = val.replaceFirst("\\(\\d+\\)$", "");
@@ -763,10 +687,10 @@ public class spTable extends TableMap {
          log.error("No data available to export.");
        }
     }
-    
+
     public void SPListCopy(final String tivoName) {
-       Task<Void> task = new Task<Void>() {
-          @Override public Void call() {
+       Runnable task = new Runnable() {
+          @Override public void run() {
              //SeasonPasses
              int[] selected = TableUtil.GetSelectedRows(TABLE);
              if (selected.length > 0) {
@@ -780,7 +704,7 @@ public class spTable extends TableMap {
                    if (existing == null) {
                       log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
                       r.disconnect();
-                      return null;
+                      return;
                    }
                    // Now proceed with subscriptions
                    log.print("Copying Season Passes to TiVo: " + tivoName);
@@ -817,7 +741,7 @@ public class spTable extends TableMap {
                                   }
                                }
                             }
-                            
+
                             // OK to subscribe
                             if (schedule) {
                                log.print("Scheduling: " + json.getString("title"));
@@ -837,12 +761,11 @@ public class spTable extends TableMap {
                    r.disconnect();
                 }
              }
-             return null;
           }
        };
        new Thread(task).start();
     }
-    
+
     public void SPListModify(final String tivoName) {
        if (isTableLoaded()) {
           log.error("Cannot modify SPs from loaded file.");
@@ -859,30 +782,29 @@ public class spTable extends TableMap {
                    tivoName, "(" + tivoName + ")" + "Modify SP - " + title, json, JSONConverter.isWL(json)
                 );
                 if (result != null) {
-                   Task<Void> task = new Task<Void>() {
-                      @Override public Void call() {
+                   Runnable task = new Runnable() {
+                      @Override public void run() {
                          Remote r = config.initRemote(tivoName);
                          if (r.success) {
                             if (r.Command("ModifySP", result) != null) {
                                log.warn("Modified SP '" + title + "' for TiVo: " + tivoName);
                             }
-                            
+
                             // Update SP table
                             log.warn(">> Updating table, please be patient...");
                             final JSONArray a = r.SeasonPasses(new jobData());
                             if( a != null) {
                                log.warn(">> Finished updating table");
-                               Platform.runLater(new Runnable() {
+                               SwingUtil.runLater(new Runnable() {
                                   @Override public void run() {
                                      clear();
                                      AddRows(tivoName, a);
                                      setSelectedRow(row);
                                   }
                                });
-                            }                            
+                            }
                             r.disconnect();
                          }
-                         return null;
                       }
                    };
                    new Thread(task).start();
@@ -893,23 +815,22 @@ public class spTable extends TableMap {
           } // json != null
        } // selected.length > 0
     }
-    
+
     // Check OnePass stationId vs available guide channel data
     private void CheckOnePasses(String tivoName) {
        log.print("Checking OnePasses for TiVo: " + tivoName + " ...");
-       Task<Void> task = new Task<Void>() {
-          @Override public Void call() {
+       Runnable task = new Runnable() {
+          @Override public void run() {
              Remote r = config.initRemote(tivoName);
              if (r.success) {
                 r.checkOnePasses(tivoName);
                 r.disconnect();
              }
-             return null;
           }
        };
        new Thread(task).start();
     }
-    
+
     // Update SP priority order to match current SP table
     public void SPReorderCB(String tivoName) {
        JSONArray order = GetOrderedIds();
@@ -924,12 +845,11 @@ public class spTable extends TableMap {
           jobMonitor.submitNewJob(job);
        }
     }
-    
+
     public static void SaveToFile(String tivoName, String file) {
     	try  {
-        JFXPanel p = new JFXPanel();//need to init javafx
-		spTable tab = new spTable();
-    	
+			spTable tab = new spTable();
+
         jobData job = new jobData();
         job.source      = tivoName;
         job.tivoName    = tivoName;
@@ -939,7 +859,7 @@ public class spTable extends TableMap {
         job.sp          = tab;
         log.warn("Querying '" + tivoName + "' for SP list");
         jobMonitor.submitNewJob(job);
-        
+
         while (job.check()) {
         	log.warn("tick");
         	try {

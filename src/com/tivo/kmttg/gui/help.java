@@ -22,11 +22,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
@@ -36,28 +32,31 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+
+import net.miginfocom.swing.MigLayout;
+
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.GetKeyStore;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class help {
-   private static Stage dialog = null;
-   private static VBox content = null;
+   private static JDialog dialog = null;
+   private static JPanel content = null;
    
    static String getKeyExpires() {
       GetKeyStore getKeyStore;
@@ -85,45 +84,36 @@ public class help {
    static void showHelp() {
       debug.print("");
       if (dialog == null) {
-         dialog = new Stage();
-         dialog.initOwner(config.gui.getFrame());
-         gui.LoadIcons(dialog);
-         dialog.initModality(Modality.NONE); // Non modal
+         dialog = new JDialog(config.gui.getFrame()); // Non modal
+         SwingUtil.loadIcons(dialog);
          dialog.setTitle("About kmttg");
-         content = new VBox();
-         content.setPadding(new Insets(0,0,5,0));
-         content.setAlignment(Pos.CENTER);
-         
-         Label title = new Label(config.kmttg);
-         title.setStyle("-fx-font-weight: bold");
-         content.getChildren().add(title);
-         
+         content = new JPanel();
+         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+
+         JLabel title = new JLabel(config.kmttg);
+         title.setFont(title.getFont().deriveFont(Font.BOLD));
+         title.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
+         content.add(title);
+
          final String version = getVersion();
-         
-         HBox row = new HBox();
-         row.setSpacing(5);
-         row.setAlignment(Pos.CENTER);
-         Label lab1 = new Label("Latest version: ");
-         Hyperlink link1 = new Hyperlink();
-         link1.setStyle("-fx-text-fill: black;");
-         link1.setText(version);
-         link1.setOnAction(new EventHandler<ActionEvent>() {
+
+         JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+         JLabel lab1 = new JLabel("Latest version: ");
+         JButton link1 = makeLink(version);
+         link1.addActionListener(new ActionListener() {
             @Override
-            public void handle(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {
                showInBrowser("https://github.com/lart2150/kmttg/releases/latest");
             }
          });
-         row.getChildren().addAll(lab1, link1);
-         content.getChildren().add(row);
-         
-         HBox certRow = new HBox();
-         certRow.setSpacing(5);
-         certRow.setAlignment(Pos.CENTER);
-         certRow.getChildren().addAll(
-               new Label("Certificate Expires: "),
-               new Label(help.getKeyExpires())
-         );
-         content.getChildren().add(certRow);
+         row.add(lab1);
+         row.add(link1);
+         content.add(row);
+
+         JPanel certRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+         certRow.add(new JLabel("Certificate Expires: "));
+         certRow.add(new JLabel(help.getKeyExpires()));
+         content.add(certRow);
 
          final LinkedHashMap<String,String> links = new LinkedHashMap<String,String>();
          links.put("kmttg Home Page", "http://sourceforge.net/p/kmttg/wiki/Home");
@@ -135,23 +125,19 @@ public class help {
          links.put("Windows Installation", "http://sourceforge.net/p/kmttg/wiki/windows_installation");
          links.put("Mac OSX Installation", "http://sourceforge.net/p/kmttg/wiki/mac_osx_installation");
          links.put("Linux Installation", "http://sourceforge.net/p/kmttg/wiki/linux_installation");
-         GridPane grid = new GridPane();
-         grid.setHgap(5);
-         grid.setAlignment(Pos.CENTER);
+         JPanel grid = new JPanel(new MigLayout("gapx 5"));
          int col = 0;
          int gy = 0;
          for (String s : links.keySet()) {
-            Hyperlink link = new Hyperlink();
-            link.setText(s);
-            link.setStyle("-fx-text-fill: black;");
-            link.setOnAction(new EventHandler<ActionEvent>() {
+            JButton link = makeLink(s);
+            link.addActionListener(new ActionListener() {
                 @Override
-                public void handle(ActionEvent e) {
-                   Hyperlink h = (Hyperlink)e.getSource();
+                public void actionPerformed(ActionEvent e) {
+                   JButton h = (JButton)e.getSource();
                    showInBrowser(links.get(h.getText()));
                 }
             });
-            grid.add(link, col, gy);
+            grid.add(link, "cell " + col + " " + gy);
             if (col == 0)
                col = 1;
             else {
@@ -159,22 +145,33 @@ public class help {
                gy++;
             }
          }
-         content.getChildren().add(grid);
-                  
-         Button ok = new Button("OK");
-         ok.setPrefWidth(100);
-         ok.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent e) {
-               dialog.hide();
+         content.add(grid);
+
+         JButton ok = new JButton("OK");
+         ok.setPreferredSize(new java.awt.Dimension(100, ok.getPreferredSize().height));
+         ok.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
+         ok.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               dialog.setVisible(false);
             }
          });
-         content.getChildren().add(ok);
-         Scene scene = new Scene(content);
-         config.gui.addScene(scene);
-         dialog.setScene(scene);
-         config.gui.setFontSize(dialog.getScene(), config.FontSize);
+         content.add(ok);
+         dialog.getContentPane().add(content);
+         dialog.pack();
+         dialog.setLocationRelativeTo(config.gui.getFrame());
       }
-      dialog.show();         
+      dialog.setVisible(true);
+   }
+
+   // Borderless button used as a hyperlink replacement
+   private static JButton makeLink(String text) {
+      JButton link = new JButton(text);
+      link.setBorderPainted(false);
+      link.setContentAreaFilled(false);
+      link.setForeground(Color.BLUE);
+      link.setHorizontalAlignment(SwingConstants.LEFT);
+      link.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+      return link;
    }
    
    public static String getVersion() {

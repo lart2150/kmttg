@@ -18,51 +18,35 @@
  */
 package com.tivo.kmttg.gui.table;
 
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.UnsupportedEncodingException;
-//import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.Optional;
 import java.util.Stack;
 
-import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableRow;
-import javafx.scene.control.TreeTableView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-import javafx.stage.FileChooser.ExtensionFilter;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.TableColumn;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONConverter;
@@ -70,11 +54,13 @@ import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.PopupHandler;
 import com.tivo.kmttg.gui.TableMap;
-import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.help;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
+import com.tivo.kmttg.gui.swing.KmttgTableModel;
+import com.tivo.kmttg.gui.swing.SwingUtil;
+import com.tivo.kmttg.gui.swing.TreeTable;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.tivoFileName;
 import com.tivo.kmttg.rpc.Remote;
@@ -84,100 +70,59 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class TableUtil {
-   private static Stage searchDialog = null;
-   private static TextField searchField = null;
-   private static Button find = null;
-   private static Stage thumbsDialog = null;
-   private static ChoiceBox<String> thumbsChoice = null;
-   private static double search_x = -1;
-   private static double search_y = -1;
-   public static Color tableBkgndDarker = Color.rgb(235,235,235); // light grey
+   private static JDialog searchDialog = null;
+   private static JTextField searchField = null;
+   private static JButton find = null;
+   private static JDialog thumbsDialog = null;
+   private static JComboBox<String> thumbsChoice = null;
+   private static int search_x = -1;
+   private static int search_y = -1;
+   public static Color tableBkgndDarker = new Color(235,235,235); // light grey
    public static Color tableBkgndLight = Color.WHITE;
-   public static Color tableBkgndProtected = Color.rgb(191,156,94); // tan
-   public static Color tableBkgndRecording = Color.rgb(149, 151, 221); // light blue
-   public static Color tableBkgndInHistory = Color.rgb(250, 252, 164); // light yellow
-   public static Color lightRed = Color.rgb(250, 190, 190); // light red
-   
-   public static String getColumnName(TableView<?> TABLE, int c) {
-      return TABLE.getColumns().get(c).getText();
+   public static Color tableBkgndProtected = new Color(191,156,94); // tan
+   public static Color tableBkgndRecording = new Color(149, 151, 221); // light blue
+   public static Color tableBkgndInHistory = new Color(250, 252, 164); // light yellow
+   public static Color lightRed = new Color(250, 190, 190); // light red
+
+   public static String getColumnName(JTable TABLE, int c) {
+      return TABLE.getModel().getColumnName(c);
    }
-   
-   public static int getColumnIndex(TableView<?> TABLE, String name) {
+
+   public static int getColumnIndex(JTable TABLE, String name) {
       String cname;
-      for (int i=0; i<TABLE.getColumns().size(); i++) {
-         cname = TABLE.getColumns().get(i).getText();
+      for (int i=0; i<TABLE.getModel().getColumnCount(); i++) {
+         cname = TABLE.getModel().getColumnName(i);
          if (cname.equals(name)) return i;
       }
       return -1;
    }
-   
-   public static int getColumnIndex(TreeTableView<?> TABLE, String name) {
-      String cname;
-      for (int i=0; i<TABLE.getColumns().size(); i++) {
-         cname = (String)TABLE.getColumns().get(i).getText();
-         if (cname.equals(name)) return i;
-      }
-      return -1;
+
+   public static int getColumnIndex(TreeTable<?> TABLE, String name) {
+      return getColumnIndex(TABLE.table, name);
    }
-   
-   public static void setRowColor(TableRow<?> row, Color color) {
-      row.styleProperty().bind(
-         Bindings.when(row.selectedProperty())
-            .then("")
-            .otherwise("-fx-opacity: 0.65; -fx-background-color: " + config.gui.getWebColor(color))
-       );
-   }
-   
-   public static void setRowColor(TreeTableRow<?> row, Color color) {
-      row.styleProperty().bind(
-         Bindings.when(row.selectedProperty())
-            .then("")
-            .otherwise("-fx-opacity: 0.65; -fx-background-color: " + config.gui.getWebColor(color))
-       );
-   }
-   
-   public static int[] GetSelectedRows(TableView<?> TABLE) {
+
+   public static int[] GetSelectedRows(JTable TABLE) {
       debug.print("");
-      // NOTE: getSelectionModel.getSelectedIndices() is buggy, so avoid using it
-      Stack<Integer> stack = new Stack<Integer>();
-      for (int i=0; i<TABLE.getItems().size(); ++i) {
-         if (TABLE.getSelectionModel().isSelected(i))
-            stack.push(i);
-      }
-      int[] rows = new int[stack.size()];
-      int count = 0;
-      for (int row : stack)
-         rows[count++] = row;
-      return rows;
+      return TABLE.getSelectedRows();
    }
-   
-   public static int[] GetSelectedRows(TreeTableView<?> TABLE) {
+
+   public static int[] GetSelectedRows(TreeTable<?> TABLE) {
       debug.print("");
-      // NOTE: getSelectionModel.getSelectedIndices() is buggy, so avoid using it
-      Stack<Integer> stack = new Stack<Integer>();
-      for (int i=0; i<TABLE.getExpandedItemCount(); ++i) {
-         if (TABLE.getSelectionModel().isSelected(i))
-            stack.push(i);
-      }
-      int[] rows = new int[stack.size()];
-      int count = 0;
-      for (int row : stack)
-         rows[count++] = row;
-      return rows;
+      return TABLE.table.getSelectedRows();
    }
-   
+
    // Toggle between fully expanded and fully collapsed tree states
-   public static void toggleTreeState(TreeTableView<?> TABLE) {
+   public static <T> void toggleTreeState(TreeTable<T> TABLE) {
       Boolean fullyExpanded = true;
-      for (TreeItem<?> item : TABLE.getRoot().getChildren()) {
+      for (TreeTable.TreeItem<T> item : TABLE.getRoot().getChildren()) {
          if (item.getChildren().size() > 0 && ! item.isExpanded())
             fullyExpanded = false;
       }
-      for (TreeItem<?> item : TABLE.getRoot().getChildren()) {
+      for (TreeTable.TreeItem<T> item : TABLE.getRoot().getChildren()) {
          item.setExpanded(! fullyExpanded);
       }
    }
-   
+
    public static Integer[] highToLow(int[] unsorted) {
       Integer[] sorted = new Integer[unsorted.length];
       int i=0;
@@ -186,174 +131,98 @@ public class TableUtil {
       Arrays.sort(sorted, Collections.reverseOrder());
       return sorted;
    }
-   
+
    // Make any selected TABLE row visible in viewport
-   public static void selectedVisible(TableView<?> TABLE) {
-      Integer[] selected = highToLow(GetSelectedRows(TABLE));     
+   public static void selectedVisible(JTable TABLE) {
+      Integer[] selected = highToLow(GetSelectedRows(TABLE));
       if (selected != null && selected.length > 0)
          scrollToCenter(TABLE, selected[0]);
-
    }
-   
+
    // Make any selected TABLE row visible in viewport
-   public static void selectedVisible(TreeTableView<?> TABLE) {
-      Integer[] selected = highToLow(GetSelectedRows(TABLE));     
+   public static void selectedVisible(TreeTable<?> TABLE) {
+      Integer[] selected = highToLow(GetSelectedRows(TABLE));
       if (selected != null && selected.length > 0)
          scrollToCenter(TABLE, selected[0]);
+   }
 
+   public static void DeselectRow(JTable TABLE, int row) {
+      TABLE.removeRowSelectionInterval(row, row);
    }
-   
-   public static void DeselectRow(TableView<?> TABLE, int row) {
-      TABLE.getSelectionModel().clearSelection(row);
-   }
-   
-   public static void clear(TableView<?> TABLE) {
+
+   public static void clear(JTable TABLE) {
       debug.print("");
-      TABLE.getItems().clear();
+      ((KmttgTableModel<?>)TABLE.getModel()).clear();
    }
-      
-   public static void RemoveRow(TableView<?> table, int row) {
-      table.getItems().remove(row);
+
+   public static void RemoveRow(JTable table, int row) {
+      ((KmttgTableModel<?>)table.getModel()).removeRow(row);
    }
-   
-   public static void scrollToCenter(final TableView<?> table, int rowIndex) {
-      table.scrollTo(rowIndex);
+
+   public static void scrollToCenter(final JTable table, int rowIndex) {
+      Rectangle rect = table.getCellRect(rowIndex, 0, true);
+      table.scrollRectToVisible(rect);
    }
-   
-   public static void scrollToCenter(final TreeTableView<?> table, int rowIndex) {
-      table.scrollTo(rowIndex);
+
+   public static void scrollToCenter(final TreeTable<?> table, int rowIndex) {
+      table.scrollToCenter(rowIndex);
    }
-   
-   public static void setWeights(TableView<?> TABLE, String[] names, double[] weights, Boolean force) {
-      // Only do this for Java 9 or later for now
-      //if (System.getProperty("java.version").startsWith("1"))
-      //   return;
+
+   public static void setWeights(JTable TABLE, String[] names, double[] weights, Boolean force) {
       if (!force && config.tableColAutoSize == 0)
          return;
-      TABLE.setColumnResizePolicy( TableView.UNCONSTRAINED_RESIZE_POLICY );
+      setWeightsImpl(TABLE, names, weights);
+   }
+
+   public static void setWeights(TreeTable<?> TABLE, String[] names, double[] weights, Boolean force) {
+      if (!force && config.tableColAutoSize == 0)
+         return;
+      setWeightsImpl(TABLE.table, names, weights);
+   }
+
+   // Distribute column widths according to relative weights. With
+   // AUTO_RESIZE_ALL_COLUMNS JTable preserves relative proportions when the
+   // table itself is resized.
+   private static void setWeightsImpl(JTable TABLE, String[] names, double[] weights) {
+      TABLE.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
       int c = 0;
       double sum = 0;
       Hashtable<String,Double> h = new Hashtable<String,Double>();
       for (double weight : weights) {
-         h.put(names[c++], weight);
+         String name = names[c++];
+         if (name.length() == 0)
+            name = "";
+         h.put(name, weight);
          sum += weight;
-         sum *= 1.01;
       }
-      for (int i=0; i<TABLE.getColumns().size(); i++) {
-         TableColumn<?,?> col = TABLE.getColumns().get(i);
-         String cname = (String)col.getText();
-         col.prefWidthProperty().bind(TABLE.widthProperty().multiply(h.get(cname)/sum));
-      }
-   }
-   
-   public static void setWeights(TreeTableView<?> TABLE, String[] names, double[] weights, Boolean force) {
-      // Only do this for Java 9 or later for now
-      //if (System.getProperty("java.version").startsWith("1"))
-      //   return;
-      if (!force && config.tableColAutoSize == 0)
-         return;
-      TABLE.setColumnResizePolicy( TreeTableView.UNCONSTRAINED_RESIZE_POLICY );
-      int c = 0;
-      double sum = 0;
-      Hashtable<String,Double> h = new Hashtable<String,Double>();
-      for (double weight : weights) {
-         h.put(names[c++], weight);
-         sum += weight;
-         sum *= 1.01;
-      }
-      for (int i=0; i<TABLE.getColumns().size(); i++) {
-         TreeTableColumn<?,?> col = TABLE.getColumns().get(i);
-         String cname = (String)col.getText();
-         col.prefWidthProperty().bind(TABLE.widthProperty().multiply(h.get(cname)/sum));
+      for (int i=0; i<TABLE.getColumnModel().getColumnCount(); i++) {
+         TableColumn col = TABLE.getColumnModel().getColumn(i);
+         String cname = TABLE.getModel().getColumnName(col.getModelIndex());
+         Double weight = h.get(cname);
+         if (weight != null)
+            col.setPreferredWidth((int)(1000 * weight / sum));
       }
    }
-   
-   // Call protected method to do tableview column fit to size
-   public static void autoSizeTableViewColumns(final TableView<?> tableView, Boolean force) {
+
+   // Historical no-op carried over from JavaFX implementation (built-in
+   // column resize policies handle this)
+   public static void autoSizeTableViewColumns(final JTable tableView, Boolean force) {
       debug.print("tableView=" + tableView + " force=" + force);
-      //if (! System.getProperty("java.version").startsWith("1")) {
-         // Java 9 doesn't work with custom code so default to built in
-         if (!force && config.tableColAutoSize == 0)
-            return;
-         //tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-      /*} else {
-         int maxRows = 500;
-         if (tableView == null)
-            return;
-         if (!force && config.tableColAutoSize == 0)
-            return;
-         TableViewSkin<?> skin = (TableViewSkin<?>) tableView.getSkin();
-         if (skin == null)
-            return;
-         TableHeaderRow headerRow = skin.getTableHeaderRow();
-         NestedTableColumnHeader rootHeader = headerRow.getRootHeader();
-         for (TableColumnHeader columnHeader : rootHeader.getColumnHeaders()) {
-            try {
-               TableColumn<?, ?> column = (TableColumn<?, ?>) columnHeader.getTableColumn();
-               if (column != null) {
-                  Method method = skin.getClass().getDeclaredMethod("resizeColumnToFitContent", TableColumn.class, int.class);
-                  method.setAccessible(true);
-                  method.invoke(skin,column,maxRows);
-               }
-            } catch (Throwable e) {
-               e = e.getCause();
-               e.printStackTrace(System.err);
-            }
-         }
-      }*/
    }
-   
-   // Call protected method to do treetableview column fit to size
-   // NOTE: Added min setting for IMAGE column (which has empty title)
-   public static void autoSizeTableViewColumns(final TreeTableView<?> tableView, Boolean force) {
+
+   public static void autoSizeTableViewColumns(final TreeTable<?> tableView, Boolean force) {
       debug.print("tableView=" + tableView + " force=" + force);
-      //if (! System.getProperty("java.version").startsWith("1")) {
-         // Java 9 doesn't work with custom code so default to built in
-         if (!force && config.tableColAutoSize == 0)
-            return;
-         //tableView.setColumnResizePolicy(TreeTableView.UNCONSTRAINED_RESIZE_POLICY);
-      /*} else {
-         double minImageColWidth = 60;
-         int maxRows = 500;
-         if (tableView == null)
-            return;
-         if (!force && config.tableColAutoSize == 0)
-            return;
-         TreeTableViewSkin<?> skin = (TreeTableViewSkin<?>) tableView.getSkin();
-         if (skin == null)
-            return;
-         TableHeaderRow headerRow = skin.getTableHeaderRow();
-         NestedTableColumnHeader rootHeader = headerRow.getRootHeader();
-         for (TableColumnHeader columnHeader : rootHeader.getColumnHeaders()) {
-            try {
-               TreeTableColumn<?, ?> column = (TreeTableColumn<?, ?>) columnHeader.getTableColumn();
-               if (column != null) {
-                  Method method = skin.getClass().getDeclaredMethod("resizeColumnToFitContent", TreeTableColumn.class, int.class);
-                  method.setAccessible(true);
-                  method.invoke(skin,column,maxRows);
-                  if (columnHeader != null && columnHeader.getTableColumn().getText().equals("")) {
-                     // IMAGE column - want min width to be honored
-                     column.setMinWidth(minImageColWidth);
-                  }
-               }
-            } catch (Throwable e) {
-               e = e.getCause();
-               e.printStackTrace(System.err);
-            }
-         }
-      }*/
    }
-   
+
    // Bring up a dialog to allow searching SHOW column of given table
    public static void SearchGUI() {
       if (searchDialog == null) {
          // Dialog not created yet, so do so
-         HBox panel = new HBox();
-         panel.setSpacing(5);
-         find = new Button("FIND");
-         find.setOnAction(new EventHandler<ActionEvent>() {
+         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+         find = new JButton("FIND");
+         find.addActionListener(new ActionListener() {
             @Override
-            public void handle(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {
                String text = searchField.getText();
                if (text.length() > 0) {
                   // Issue warning and return for irrelevant tabs/tables
@@ -380,78 +249,62 @@ public class TableUtil {
                }
             }
          });
-         searchField = new TextField();
-         searchField.setPrefWidth(150);
-         searchField.setOnKeyPressed(new EventHandler<KeyEvent>() {
-             @Override
-             public void handle(KeyEvent e) {
-                 if (e.getCode().equals(KeyCode.ENTER)) {
-                     find.fire();
-                 }
-             }
-         });
-         Button close = new Button("CLOSE");
-         close.setOnAction(new EventHandler<ActionEvent>() {
+         searchField = new JTextField(15);
+         searchField.addActionListener(new ActionListener() {
             @Override
-            public void handle(ActionEvent e) {
-               search_x = searchDialog.getX(); search_y = searchDialog.getY();
-               searchDialog.close();
+            public void actionPerformed(ActionEvent e) {
+               find.doClick();
             }
          });
-         panel.getChildren().addAll(find, searchField, close);
-         searchDialog = new Stage();
-         searchDialog.initModality(Modality.NONE); // Non modal
-         searchDialog.initOwner(config.gui.getFrame());
-         gui.LoadIcons(searchDialog);
+         JButton close = new JButton("CLOSE");
+         close.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               search_x = searchDialog.getX(); search_y = searchDialog.getY();
+               searchDialog.setVisible(false);
+            }
+         });
+         panel.add(find);
+         panel.add(searchField);
+         panel.add(close);
+         searchDialog = new JDialog(config.gui.getFrame()); // Non modal
+         SwingUtil.loadIcons(searchDialog);
          searchDialog.setTitle("Search Table");
-         // This so we can restore original dialog position when re-opened
-         searchDialog.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent arg0) {
-               search_x = searchDialog.getX(); search_y = searchDialog.getY();
-            }
-         });
-         Scene scene = new Scene(new VBox());
-         config.gui.setFontSize(scene, config.FontSize);
-         ((VBox) scene.getRoot()).getChildren().add(panel);
-         searchDialog.setScene(scene);
+         searchDialog.getContentPane().add(panel);
+         searchDialog.pack();
+         searchDialog.setLocationRelativeTo(config.gui.getFrame());
       }
-      
+
       // Dialog already created, so display it and highlight any existing search text
       if (search_x != -1)
-         searchDialog.setX(search_x);
-      if (search_y != -1)
-         searchDialog.setY(search_y);
+         searchDialog.setLocation(search_x, search_y);
+      searchDialog.setVisible(true);
       searchField.requestFocus();
       searchField.selectAll();
-      searchDialog.show();
    }
-   
+
    // Perform a search in given TABLE column name for searchString
-   private static void Search(TableView<?> TABLE, String searchString, String colName) {
-      int lastRow = TABLE.getItems().size()-1;
-      int startRow = TABLE.getSelectionModel().getFocusedIndex();
+   private static void Search(JTable TABLE, String searchString, String colName) {
+      int lastRow = TABLE.getRowCount()-1;
+      int startRow = TABLE.getSelectionModel().getLeadSelectionIndex();
       if (startRow < 0)
          startRow = 0;
       startRow += 1;
       if (startRow > lastRow)
          startRow = 0;
-      TABLE.getSelectionModel().clearSelection(); // Clear selection
+      TABLE.clearSelection(); // Clear selection
       Boolean result = searchMatch(TABLE, colName, searchString, startRow, lastRow);
       if (!result && startRow > 0) {
          searchMatch(TABLE, colName, searchString, 0, startRow);
       }
    }
 
-   public static Boolean searchMatch(TableView<?> TABLE, String colName, String searchString, int start, int stop) {
+   public static Boolean searchMatch(JTable TABLE, String colName, String searchString, int start, int stop) {
       String v;
+      KmttgTableModel<?> model = (KmttgTableModel<?>)TABLE.getModel();
       for (int row=start; row<=stop; row++) {
-         Object o = TABLE.getItems().get(row);
-         v = null;
-         if (o instanceof String)
-            v = (String)o;
-         else if (o.getClass().toString().contains("Tabentry"));
-            v = o.toString();
+         Object o = model.getRow(row);
+         v = o == null ? null : o.toString();
          if ( v == null ) {
             log.error("searchMatch: Unimplemented SHOW type found");
          } else {
@@ -459,40 +312,36 @@ public class TableUtil {
             if (v.matches("^.*" + searchString.toLowerCase() + ".*$")) {
                // scroll to and set selection to given row
                scrollToCenter(TABLE, row);
-               TABLE.getSelectionModel().select(row);
+               TABLE.addRowSelectionInterval(row, row);
                TABLE.requestFocus();
                return true;
             }
          }
       }
-      return false;      
+      return false;
    }
-   
+
    // Perform a search in given TABLE column name for searchString
-   private static void Search(TreeTableView<?> TABLE, String searchString, String colName) {
+   private static void Search(TreeTable<?> TABLE, String searchString, String colName) {
       int lastRow = TABLE.getExpandedItemCount()-1;
-      int startRow = TABLE.getSelectionModel().getFocusedIndex();
+      int startRow = TABLE.table.getSelectionModel().getLeadSelectionIndex();
       if (startRow < 0)
          startRow = 0;
       startRow += 1;
       if (startRow > lastRow)
          startRow = 0;
-      TABLE.getSelectionModel().clearSelection(); // Clear selection
+      TABLE.clearSelection(); // Clear selection
       Boolean result = searchMatch(TABLE, colName, searchString, startRow, lastRow);
       if (!result && startRow > 0) {
          searchMatch(TABLE, colName, searchString, 0, startRow);
       }
    }
 
-   public static Boolean searchMatch(final TreeTableView<?> TABLE, String colName, String searchString, int start, int stop) {
+   public static Boolean searchMatch(final TreeTable<?> TABLE, String colName, String searchString, int start, int stop) {
       String v;
       for (int row=start; row<=stop; row++) {
          Object o = TABLE.getTreeItem(row).getValue();
-         v = null;
-         if (o instanceof String)
-            v = (String)o;
-         else if (o.getClass().toString().contains("Tabentry"));
-            v = o.toString();
+         v = o == null ? null : o.toString();
          if ( v == null ) {
             log.error("searchMatch: Unimplemented SHOW type found");
          } else {
@@ -500,15 +349,15 @@ public class TableUtil {
             if (v.matches("^.*" + searchString.toLowerCase() + ".*$")) {
                // scroll to and set selection to given row
                scrollToCenter(TABLE, row);
-               TABLE.getSelectionModel().select(row);
-               TABLE.requestFocus();
+               TABLE.select(row);
+               TABLE.table.requestFocus();
                return true;
             }
          }
       }
-      return false;      
+      return false;
    }
-   
+
    // Bring up set thumbs dialog
    public static void ThumbsGUI() {
       final String tivoName = config.gui.getCurrentRemoteTivoName();
@@ -521,25 +370,24 @@ public class TableUtil {
          return;
       if (thumbsDialog == null) {
          // Dialog not created yet, so do so
-         HBox row1 = new HBox();
-         row1.setSpacing(5);
-         Label rating = new Label("Thumbs Rating: ");
-         thumbsChoice = new ChoiceBox<String>();
+         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+         JLabel rating = new JLabel("Thumbs Rating: ");
+         thumbsChoice = new JComboBox<String>();
          for (int i=-3; i<=3; ++i)
-            thumbsChoice.getItems().add("" + i);
-         Button setButton = new Button("SET");
-         setButton.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent e) {
-               Task<Void> task = new Task<Void>() {
-                  @Override public Void call() {
+            thumbsChoice.addItem("" + i);
+         JButton setButton = new JButton("SET");
+         setButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               Runnable task = new Runnable() {
+                  @Override public void run() {
                      // Determine tivoName and json of currently selected table
                      String tivoName = config.gui.getCurrentRemoteTivoName();
                      if (tivoName == null)
-                        return null;
+                        return;
                      JSONObject json = config.gui.getCurrentRemoteJson();
                      if (json == null)
-                        return null;
-                     String setting = "" + thumbsChoice.getValue();
+                        return;
+                     String setting = "" + thumbsChoice.getSelectedItem();
                      int thumbsRating = Integer.parseInt(setting);
                      Remote r = config.initRemote(tivoName);
                      if (r.success) {
@@ -558,34 +406,34 @@ public class TableUtil {
                         else
                            log.error("Failed to set thumbs rating for '" + title + "'");
                      }
-                     return null;
                   }
                };
                if (thumbsDialog != null) {
-                  Platform.runLater(new Runnable() {
+                  SwingUtil.runLater(new Runnable() {
                      @Override public void run() {
-                        thumbsDialog.hide();
+                        thumbsDialog.setVisible(false);
                      }
                   });
                }
                new Thread(task).start();
             }
          });
-         row1.getChildren().addAll(setButton, rating, thumbsChoice);
-         row1.setPrefWidth(300);
-         thumbsDialog = new Stage();
-         thumbsDialog.initOwner(config.gui.getFrame());
-         gui.LoadIcons(thumbsDialog);
-         thumbsDialog.setScene(new Scene(row1));
-         config.gui.setFontSize(thumbsDialog.getScene(), config.FontSize);
+         row1.add(setButton);
+         row1.add(rating);
+         row1.add(thumbsChoice);
+         thumbsDialog = new JDialog(config.gui.getFrame());
+         SwingUtil.loadIcons(thumbsDialog);
+         thumbsDialog.getContentPane().add(row1);
          thumbsDialog.setTitle("Thumbs Rating");
-         thumbsDialog.show();
+         thumbsDialog.pack();
+         thumbsDialog.setLocationRelativeTo(config.gui.getFrame());
+         thumbsDialog.setVisible(true);
       }
-      
+
       // Set default rating
       if (json != null) {
-         Task<Void> task = new Task<Void>() {
-            @Override public Void call() {
+         Runnable task = new Runnable() {
+            @Override public void run() {
                int rating = 0;
                Remote r = config.initRemote(tivoName);
                if (r.success) {
@@ -593,17 +441,16 @@ public class TableUtil {
                   r.disconnect();
                }
                final int rating_final = rating;
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
-                     thumbsChoice.setValue("" + rating_final);
+                     thumbsChoice.setSelectedItem("" + rating_final);
                   }
                });
-               return null;
             }
          };
          new Thread(task).start();
       }
-      
+
       // Set title
       String title = "Set thumbs: ";
       try {
@@ -613,44 +460,52 @@ public class TableUtil {
          log.error("ThumbsGUI - " + e.getMessage());
       }
       thumbsDialog.setTitle(title);
-      
+
       // Display dialog and set default thumbs rating
-      thumbsDialog.show();
+      thumbsDialog.setVisible(true);
    }
 
    // Add right mouse button listener
-   public static void AddRightMouseListener(final TableView<?> TABLE) {            
-      TABLE.setOnMousePressed(new EventHandler<MouseEvent>() {
-         @Override 
-         public void handle(MouseEvent event) {
+   public static void AddRightMouseListener(final JTable TABLE) {
+      TABLE.addMouseListener(new MouseAdapter() {
+         @Override
+         public void mousePressed(MouseEvent event) {
             PopupHandler.hide();
-            if (event.isSecondaryButtonDown())
+            if (event.isPopupTrigger())
                PopupHandler.display(TABLE, event);
-            }
          }
-      );
+         @Override
+         public void mouseReleased(MouseEvent event) {
+            if (event.isPopupTrigger())
+               PopupHandler.display(TABLE, event);
+         }
+      });
    }
 
    // Add right mouse button listener
-   public static void AddRightMouseListener(final TreeTableView<?> TABLE) {            
-      TABLE.setOnMousePressed(new EventHandler<MouseEvent>() {
-         @Override 
-         public void handle(MouseEvent event) {
+   public static void AddRightMouseListener(final TreeTable<?> TABLE) {
+      TABLE.table.addMouseListener(new MouseAdapter() {
+         @Override
+         public void mousePressed(MouseEvent event) {
             PopupHandler.hide();
-            if (event.isSecondaryButtonDown())
+            if (event.isPopupTrigger())
                PopupHandler.display(TABLE, event);
-            }
          }
-      );
+         @Override
+         public void mouseReleased(MouseEvent event) {
+            if (event.isPopupTrigger())
+               PopupHandler.display(TABLE, event);
+         }
+      });
    }
-   
-   
+
+
    public static String getSortableDate(sortableDate s) {
       SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
       long gmt = Long.parseLong(s.sortable);
       return sdf.format(gmt);
    }
-      
+
    public static String currentYearMonthDay() {
       SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd");
       return sdf.format(new Date().getTime());
@@ -664,14 +519,14 @@ public class TableUtil {
       }
       return "";
    }
-   
+
    public static String makeShowSummary(JSONObject json) {
       String date = makeDate(json);
       String channel = JSONConverter.makeChannelName(json);
       String title = JSONConverter.makeShowTitle(json);
       return date + " " + channel + " " + title;
    }
-   
+
    // Used by TABLERowSelected callbacks for printing show info to message window
    public static String makeShowSummary(sortableDate s, sortableDuration dur) {
       try {
@@ -703,7 +558,7 @@ public class TableUtil {
          }
          if (d.length() > 0)
             message += ", Duration = " + d;
-         
+
          if (s.json.has("seasonNumber"))
             message += ", season " + s.json.get("seasonNumber");
          if (s.json.has("episodeNum"))
@@ -712,10 +567,10 @@ public class TableUtil {
             message += ", originalAirdate: " + s.json.getString("originalAirdate");
          if (s.json.has("movieYear"))
             message += ", movieYear: " + s.json.get("movieYear");
-         
+
          if (description != null) {
             message += "\n" + description;
-         }         
+         }
          return message;
       } catch (Exception e) {
          log.error("makeShowSummary - " + e.getMessage());
@@ -735,7 +590,7 @@ public class TableUtil {
       }
       return(false);
    }
-   
+
    // Main engine for single show scheduling. This can be a new show
    // or an existing show for which to modify recording options.
    private static Boolean recordSingle(final String tivoName, final JSONObject json) {
@@ -786,13 +641,13 @@ public class TableUtil {
                   else
                      message = "Modified recording: '" + title + "' on Tivo: " + tivoName;
                   final String _message = message;
-                  class backgroundRun extends Task<Object> {
+                  class backgroundRun implements Runnable {
                      JSONObject json;
                      public backgroundRun(JSONObject json) {
                         this.json = json;
                      }
                      @Override
-                     protected Object call() {
+                     public void run() {
                         Remote r = config.initRemote(tivoName);
                         if (r.success) {
                            JSONObject result = r.Command("Singlerecording", o);
@@ -806,12 +661,10 @@ public class TableUtil {
                                  r.setThumbsRating(json, 1, false);
                               } else {
                                  log.error(conflicts);
-                                 return(false);
                               }
                            }
                            r.disconnect();
                         }
-                        return null;
                      }
                   }
                   backgroundRun b = new backgroundRun(json);
@@ -819,13 +672,13 @@ public class TableUtil {
                } else {
                   if (existing == null) {
                      // Attempt to schedule using all RPC enabled TiVos
-                     class backgroundRun extends Task<Object> {
+                     class backgroundRun implements Runnable {
                         JSONObject json;
                         public backgroundRun(JSONObject json) {
                            this.json = json;
                         }
                         @Override
-                        protected Object call() {
+                        public void run() {
                            Stack<String> tivo_stack = config.getTivoNames();
                            Stack<String> tivos = new Stack<String>();
                            tivos.add(tivoName); // Put original target tivo 1st in stack
@@ -857,7 +710,7 @@ public class TableUtil {
                                        log.warn(message);
                                        // Set thumbs rating if it doesn't exist for this collection
                                        r.setThumbsRating(json, 1, false);
-                                       return(true);
+                                       return;
                                     } else {
                                        log.warn("Cannot schedule '" + _title + "' on '" + name + "' due to conflicts");
                                     }
@@ -865,11 +718,10 @@ public class TableUtil {
                                  r.disconnect();
                               }
                            }
-                           return null;
                         }
                      }
                      backgroundRun b = new backgroundRun(json);
-                     new Thread(b).start();                     
+                     new Thread(b).start();
                   }
                }
             }
@@ -888,12 +740,12 @@ public class TableUtil {
                }
                return(false);
             }
-            
+
             if (json.has("collectionId")) {
                // Non-series type with collectionId may be possible to bookmark
                return bookmarkIfPossible(tivoName, json);
             }
-            
+
             // Exhausted all possibilities so error out
             log.error("Missing contentId and/or offerId for: '" + title + "'");
             return(false);
@@ -904,9 +756,9 @@ public class TableUtil {
       }
       return(true);
    }
-   
+
    private static Boolean bookmarkIfPossible(String tivoName, JSONObject json) {
-      class backgroundRun extends Task<Object> {
+      class backgroundRun implements Runnable {
          String tivoName;
          JSONObject json;
          public backgroundRun(String tivoName, JSONObject json) {
@@ -914,7 +766,7 @@ public class TableUtil {
             this.json = json;
          }
          @Override
-         protected Boolean call() {
+         public void run() {
             JSONObject result;
             Remote r = config.initRemote(tivoName);
             if (r.success) {
@@ -935,7 +787,7 @@ public class TableUtil {
                   if (! json.has("contentId")) {
                      log.error("Unable to determine/find contentId");
                      r.disconnect();
-                     return false;
+                     return;
                   }
                   // Have contentId and collectionId, so proceed with adding content locator
                   String title = "UNTITLED";
@@ -950,25 +802,22 @@ public class TableUtil {
                      // Set thumbs rating if it doesn't exist for this collection
                      r.setThumbsRating(json, 1, false);
                      r.disconnect();
-                     return true;
                   } else {
                      log.error("Failed to create content locator for: " + title);
                      r.disconnect();
-                     return false;
                   }
                } catch (JSONException e) {
                   log.error("bookmarkIfPossible - " + e.getMessage());
                }
             } // if r.success
-            return false;
-         } // doInBackground
+         } // run
       } // class backgroundRun
-      
+
       backgroundRun b = new backgroundRun(tivoName, json);
-      new Thread(b).start();                    
+      new Thread(b).start();
       return true;
    }
-   
+
    // Method used by various RPC tables for single item recording
    public static void recordSingleCB(final String tivoName, final JSONArray entries) {
       if (entries.length() > 0) {
@@ -989,7 +838,7 @@ public class TableUtil {
          }
       }
    }
-   
+
    // Send url to web browser
    static public void webQuery(String title) {
       try {
@@ -999,8 +848,8 @@ public class TableUtil {
          log.error("webQuery - " + e.getMessage());
       }
    }
-   
-   
+
+
    static public void PrintEpisodes(JSONObject json) {
       if (json == null) return;
       String collectionId = null;
@@ -1028,14 +877,14 @@ public class TableUtil {
          title = collectionId;
       PrintEpisodes(title, collectionId);
    }
-   
+
    static public void PrintEpisodes(String title, String collectionId) {
       String tivoName = config.getFirstRpcEnabled();
       if (tivoName == null)
          return;
       log.warn(">> Collecting episode data for: " + title);
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             Remote r = new Remote(tivoName, true);
             if (r.success) {
                try {
@@ -1049,7 +898,7 @@ public class TableUtil {
                      }
                   }
                   if (episodes.length() > 0) {
-                     Platform.runLater(new Runnable() {
+                     SwingUtil.runLater(new Runnable() {
                         @Override public void run() {
                            PrintEpisodes_GUI(title, episodes);
                         }
@@ -1061,30 +910,31 @@ public class TableUtil {
                   log.error("searchTable GetEpisodes - " + e.getMessage());
                }
             }
-            return null;
          }
       };
       new Thread(task).start();
    }
-   
+
    static public void PrintEpisodes_GUI(String title, JSONArray episodes) {
-      List<String> choices = new ArrayList<>();
-      choices.add("Output to table");
-      choices.add("Output CSV File");
-      choices.add("Output to table and CSV File");
+      String[] choices = {
+         "Output to table",
+         "Output CSV File",
+         "Output to table and CSV File"
+      };
 
-      ChoiceDialog<String> dialog = new ChoiceDialog<>("Output to table", choices);
-      dialog.setTitle("Choose Output");
-      dialog.setHeaderText("Episode Output for: " + title);
-      dialog.setContentText("Choose output:");
-
-      Optional<String> result = dialog.showAndWait();
-      if (result.isPresent()){
-         switch (result.get()) {
+      Object result = JOptionPane.showInputDialog(
+         config.gui.getFrame(),
+         "Episode Output for: " + title + "\nChoose output:",
+         "Choose Output",
+         JOptionPane.QUESTION_MESSAGE,
+         null, choices, choices[0]
+      );
+      if (result != null) {
+         switch ((String)result) {
             case "Output to table and CSV File":
                PrintEpisodes_table(episodes);
                PrintEpisodes_csv(title, episodes);
-               break;               
+               break;
             case "Output CSV File":
                PrintEpisodes_csv(title, episodes);
                break;
@@ -1094,17 +944,17 @@ public class TableUtil {
          }
       }
    }
-   
+
    static public void PrintEpisodes_csv(String title, JSONArray episodes) {
-      config.gui.remote_gui.Browser.getExtensionFilters().clear();
-      config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
-      config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
-      config.gui.remote_gui.Browser.setTitle("Export to csv file");
-      config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
-      config.gui.remote_gui.Browser.setInitialFileName(tivoFileName.removeSpecialChars(title) + "" + ".csv");
-      final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(config.gui.getFrame());
-      if (selectedFile != null) {
-         String file = selectedFile.getAbsolutePath();
+      config.gui.remote_gui.Browser.resetChoosableFileFilters();
+      config.gui.remote_gui.Browser.addChoosableFileFilter(new FileNameExtensionFilter("CSV Files", "csv"));
+      config.gui.remote_gui.Browser.setDialogTitle("Export to csv file");
+      config.gui.remote_gui.Browser.setSelectedFile(new File(
+         config.programDir, tivoFileName.removeSpecialChars(title) + "" + ".csv"
+      ));
+      int response = config.gui.remote_gui.Browser.showSaveDialog(config.gui.getFrame());
+      if (response == javax.swing.JFileChooser.APPROVE_OPTION) {
+         String file = config.gui.remote_gui.Browser.getSelectedFile().getAbsolutePath();
          try {
             BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
             ofp.write("EPISODE NAME,PROGRAMID,SERIESID\r\n");
@@ -1126,31 +976,30 @@ public class TableUtil {
          }
       }
    }
-   
+
    static public void PrintEpisodes_table(JSONArray episodes) {
       try {
          streamTable tab = config.gui.remote_gui.stream_tab.tab;
          String tivoName = config.gui.remote_gui.getTivoName("Streaming");
          tab.AddRows(tivoName, episodes);
-         config.gui.remote_gui.getPanel().getSelectionModel().select(6);
+         config.gui.remote_gui.getPanel().setSelectedIndex(6);
          config.gui.SetTivo("Remote");
       } catch (Exception e) {
          log.error("PrintEpisodes_table - " + e.getMessage());
-      }      
+      }
    }
-   
+
    static public void PrintClipData(String tivoName, JSONObject json) {
       if (json != null && json.has("contentId")) {
          try {
             final String contentId = json.getString("contentId");
-            Task<Void> task = new Task<Void>() {
-               @Override public Void call() {
+            Runnable task = new Runnable() {
+               @Override public void run() {
                   Remote r = config.initRemote(tivoName);
                   if (r.success) {
                      r.printClipData(contentId);
                      r.disconnect();
                   }
-                  return null;
                }
             };
             new Thread(task).start();

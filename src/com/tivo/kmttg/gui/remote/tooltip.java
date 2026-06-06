@@ -18,14 +18,12 @@
  */
 package com.tivo.kmttg.gui.remote;
 
-import javafx.scene.control.Tooltip;
-
 import com.tivo.kmttg.gui.MyTooltip;
 import com.tivo.kmttg.util.debug;
 
 public class tooltip {
-   
-   public static Tooltip getToolTip(String component) {
+
+   public static String getToolTip(String component) {
       debug.print("component=" + component);
       String text = "";
       if (component.equals("tivo_todo")) {
@@ -307,7 +305,7 @@ public class tooltip {
          text += "<b>Loaded: </b> prefix in the TITLE column indicating that these were loaded from a file<br>";
          text += "to distinguish from normal case where they were obtained from displayed TiVo name.<br>";
          text += "Note that loaded channels can then be copied to TiVos by selecting rows of interest in<br>";
-         text += "the table and then using the <b>Copy</b> button to copy them to a TiVo.";         
+         text += "the table and then using the <b>Copy</b> button to copy them to a TiVo.";
       }
       else if (component.equals("tivo_search")) {
          text = "Select TiVo for which to perform search with.<br>";
@@ -744,7 +742,7 @@ public class tooltip {
       }
       else if (component.equals("advance")) {
          text = "Alt 0";
-      }      
+      }
       else if (component.equals("standby")){
          text = "<b>Toggle standby</b><br>";
          text += "Toggle standby mode. In off mode audio/video outputs are disabled on the TiVo<br>";
@@ -772,7 +770,7 @@ public class tooltip {
       else if (component.contains("SPS")) {
          text = util.SPS.get(component + "_tooltip");
       }
-      
+
       return MyTooltip.make(text);
    }
 

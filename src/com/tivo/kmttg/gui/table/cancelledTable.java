@@ -18,6 +18,8 @@
  */
 package com.tivo.kmttg.gui.table;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -26,20 +28,9 @@ import java.util.Hashtable;
 import java.util.Stack;
 import java.util.Vector;
 
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
-import javafx.scene.control.cell.TreeItemPropertyValueFactory;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.util.Callback;
+import javax.swing.JLabel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONConverter;
@@ -49,9 +40,14 @@ import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.comparator.DateComparator;
 import com.tivo.kmttg.gui.comparator.DurationComparator;
+import com.tivo.kmttg.gui.comparator.ImageComparator;
 import com.tivo.kmttg.gui.comparator.StringChannelComparator;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
+import com.tivo.kmttg.gui.swing.KmttgTable;
+import com.tivo.kmttg.gui.swing.SwingUtil;
+import com.tivo.kmttg.gui.swing.TreeTable;
+import com.tivo.kmttg.gui.swing.TreeTable.TreeItem;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.id;
@@ -61,7 +57,7 @@ import com.tivo.kmttg.util.log;
 
 public class cancelledTable extends TableMap {
    private String currentTivo = null;
-   public TreeTableView<Tabentry> TABLE = null;
+   public TreeTable<Tabentry> TABLE = null;
    public String[] TITLE_cols = {"", "SHOW", "DATE", "CHANNEL", "DUR"};
    private double[] weights = {7, 58, 17, 12, 6};
    public String folderName = null;
@@ -69,7 +65,7 @@ public class cancelledTable extends TableMap {
    private Hashtable<String,Stack<JSONObject>> folders = null;
    private Vector<JSONObject> sortedOrder = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
-   
+
    // TableMap overrides
    @Override
    public JSONObject getJson(int row) {
@@ -85,96 +81,62 @@ public class cancelledTable extends TableMap {
    }
    @Override
    public void clear() {
-      TABLE.getRoot().getChildren().clear();
+      TABLE.getRoot().clearChildren();
    }
    @Override
-   public TreeTableView<?> getTreeTable() {
+   public TreeTable<?> getTreeTable() {
       return TABLE;
    }
-   
+
    public cancelledTable() {
-      TABLE = new TreeTableView<Tabentry>();
-      TABLE.setRoot(new TreeItem<>(new Tabentry("")));
-      TABLE.setShowRoot(false); // Don't show the empty root node
-      
-      for (String colName : TITLE_cols) {
-         if (colName.length() == 0)
-            colName = "IMAGE";
-         if (colName.equals("IMAGE")) {
-            TreeTableColumn<Tabentry,ImageView> col = new TreeTableColumn<Tabentry,ImageView>("");
-            col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,ImageView>(colName));
-            col.setCellFactory(new ImageCellFactory());
-            TABLE.getColumns().add(col);               
-         } else if (colName.equals("DATE")) {
-            TreeTableColumn<Tabentry,sortableDate> col = new TreeTableColumn<Tabentry,sortableDate>(colName);
-            col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableDate>(colName));
-            col.setComparator(new DateComparator()); // Custom column sort
-            col.setStyle("-fx-alignment: CENTER-RIGHT;");
-            TABLE.getColumns().add(col);
-         } else if (colName.equals("DUR")) {
-            TreeTableColumn<Tabentry,sortableDuration> col = new TreeTableColumn<Tabentry,sortableDuration>(colName);
-            col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableDuration>(colName));
-            col.setComparator(new DurationComparator());
-            col.setStyle("-fx-alignment: CENTER;");
-            TABLE.getColumns().add(col);
-         } else {
-            // Regular String sort
-            TreeTableColumn<Tabentry,String> col = new TreeTableColumn<Tabentry,String>(colName);
-            col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,String>(colName));
-            if (colName.equals("CHANNEL"))
-               col.setComparator(new StringChannelComparator()); // Custom column sort
-            TABLE.getColumns().add(col);
-         }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
-      }
-      
-      // Add keyboard listener
-      TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {
-         public void handle(KeyEvent e) {
-            KeyPressed(e);
-         }
-      });
-      
-      // Define selection listener to detect table row selection changes
-      TABLE.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<Tabentry>>() {
-         @Override
-         public void changed(ObservableValue<? extends TreeItem<Tabentry>> obs, TreeItem<Tabentry> oldSelection, TreeItem<Tabentry> newSelection) {
-            if (newSelection != null) {
-               TABLERowSelected(newSelection.getValue());
-            }
+      TABLE = new TreeTable<Tabentry>(TITLE_cols);
+      TABLE.setComparator("", new ImageComparator());
+      TABLE.setComparator("DATE", new DateComparator()); // Custom column sort
+      TABLE.setComparator("DUR", new DurationComparator());
+      TABLE.setComparator("CHANNEL", new StringChannelComparator()); // Custom column sort
+      KmttgTable.setColumnAlignment(TABLE.table, "DATE", JLabel.RIGHT);
+      KmttgTable.setColumnAlignment(TABLE.table, "DUR", JLabel.CENTER);
+      TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
+
+      // Want to resize columns whenever a tree is expanded
+      TABLE.setOnExpand(new Runnable() {
+         @Override public void run() {
+            TableUtil.autoSizeTableViewColumns(TABLE, true);
          }
       });
 
-      
+      // Add keyboard listener
+      TABLE.table.addKeyListener(new KeyAdapter() {
+         @Override
+         public void keyPressed(KeyEvent e) {
+            KeyPressed(e);
+         }
+      });
+
+      // Define selection listener to detect table row selection changes
+      TABLE.table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+         @Override
+         public void valueChanged(ListSelectionEvent e) {
+            if (e.getValueIsAdjusting())
+               return;
+            int row = TABLE.table.getSelectionModel().getLeadSelectionIndex();
+            if (row >= 0 && row < TABLE.getExpandedItemCount() && TABLE.isSelected(row))
+               TABLERowSelected(TABLE.getTreeItem(row).getValue());
+         }
+      });
+
+
       // Add right mouse button handler
       TableUtil.AddRightMouseListener(TABLE);
    }
 
-   private class ImageCellFactory implements Callback<TreeTableColumn<Tabentry, ImageView>, TreeTableCell<Tabentry, ImageView>> {
-      public TreeTableCell<Tabentry, ImageView> call(TreeTableColumn<Tabentry, ImageView> param) {
-         TreeTableCell<Tabentry, ImageView> cell = new TreeTableCell<Tabentry, ImageView>() {
-            @Override
-            public void updateItem(final ImageView item, boolean empty) {
-               super.updateItem(item,  empty);
-               if (empty) {
-                  setGraphic(null);
-               } else {
-                  if (item != null)
-                     setGraphic(item);
-               }
-            }
-         };
-         return cell;
-      }
-   }   
-   
    public static class Tabentry {
-      ImageView image = new ImageView();
+      imageCell image = new imageCell();
       public String title = "";
       public String channel = "";
       public sortableDate date;
       public sortableDuration duration;
-      
+
       // Root node constructor
       public Tabentry(String s) {
          // Do nothing
@@ -196,21 +158,22 @@ public class cancelledTable extends TableMap {
                end = JSONConverter.getEndTime(entry);
             }
             title = JSONConverter.makeShowTitle(entry);
-            channel = JSONConverter.makeChannelName(entry);   
+            channel = JSONConverter.makeChannelName(entry);
             date = new sortableDate(entry, start);
             duration = new sortableDuration(end-start, false);
          } catch (JSONException e) {
             log.error("cancelledTable Tabentry - " + e.getMessage());
          }
       }
-      
+
       public Tabentry(String fName, Stack<JSONObject> folderEntry) {
          image.setImage(gui.Images.get("folder"));
+         image.imageName = "folder";
          title = fName;
          date = new sortableDate(fName, folderEntry);
       }
-      
-      public ImageView getIMAGE() {
+
+      public imageCell getIMAGE() {
          return image;
       }
 
@@ -229,22 +192,22 @@ public class cancelledTable extends TableMap {
       public sortableDuration getDUR() {
          return duration;
       }
-      
+
       public String toString() {
          return title;
       }
    }
-   
+
    public JSONObject GetRowData(int row) {
       return TABLE.getTreeItem(row).getValue().getDATE().json;
    }
-   
+
    // Handle keyboard presses
    private void KeyPressed(KeyEvent e) {
       if (e.isControlDown())
          return;
-      KeyCode keyCode = e.getCode();
-      if (keyCode == KeyCode.I) {
+      int keyCode = e.getKeyCode();
+      if (keyCode == KeyEvent.VK_I) {
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
             return;
@@ -253,13 +216,13 @@ public class cancelledTable extends TableMap {
             config.gui.show_details.update(TABLE, currentTivo, json);
          }
       }
-      else if (keyCode == KeyCode.R) {
-         config.gui.remote_gui.cancel_tab.record.fire();
+      else if (keyCode == KeyEvent.VK_R) {
+         config.gui.remote_gui.cancel_tab.record.doClick();
       }
-      else if (keyCode == KeyCode.E) {
-         config.gui.remote_gui.cancel_tab.explain.fire();
+      else if (keyCode == KeyEvent.VK_E) {
+         config.gui.remote_gui.cancel_tab.explain.doClick();
       }
-      else if (keyCode == KeyCode.J) {
+      else if (keyCode == KeyEvent.VK_J) {
          // Print json of selected row to log window
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
@@ -269,12 +232,12 @@ public class cancelledTable extends TableMap {
             rnpl.pprintJSON(json);
             id.printIds(json);
          }
-      } else if (keyCode == KeyCode.N) {
+      } else if (keyCode == KeyEvent.VK_N) {
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
             return;
          TableUtil.PrintEpisodes(GetRowData(selected[0]));
-      } else if (keyCode == KeyCode.Q) {
+      } else if (keyCode == KeyEvent.VK_Q) {
          // Web query currently selected entry
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
@@ -288,20 +251,20 @@ public class cancelledTable extends TableMap {
                TableUtil.webQuery(title);
             } catch (JSONException e1) {
                log.error("KeyPressed Q - " + e1.getMessage());
-            }  
+            }
          }
-      } else if (keyCode == KeyCode.T) {
+      } else if (keyCode == KeyEvent.VK_T) {
          TableUtil.toggleTreeState(TABLE);
       }
    }
-   
+
    // Procedure to mimic expanding folder in row 0
    public void expandFirstFolder() {
       // NOTE: Sleep seems to be necessary to get properly sized columns
       try {
          Thread.sleep(1000);
       } catch (InterruptedException e) {}
-      Platform.runLater(new Runnable() {
+      SwingUtil.runLater(new Runnable() {
          @Override public void run() {
             if (TABLE.getExpandedItemCount() > 0) {
                TABLE.getTreeItem(0).setExpanded(true);
@@ -310,9 +273,9 @@ public class cancelledTable extends TableMap {
          }
       });
    }
-         
+
    private void TABLERowSelected(Tabentry entry) {
-      // Get column items for selected row 
+      // Get column items for selected row
       sortableDate s = entry.getDATE();
       if (s.folder) {
          // Folder entry - don't display anything
@@ -330,7 +293,7 @@ public class cancelledTable extends TableMap {
                title += " (to be recorded on " + s.json.getString("__inTodo__") + ")";
             log.warn(title);
             log.print(message);
-            
+
             if (config.gui.show_details.isShowing())
                config.gui.show_details.update(TABLE, currentTivo, s.json);
          } catch (JSONException e) {
@@ -371,9 +334,9 @@ public class cancelledTable extends TableMap {
             config.gui.remote_gui.setTivoName("cancel", tivoName);
       } catch (JSONException e) {
          log.print("AddRows - " + e.getMessage());
-      }      
+      }
    }
-   
+
    // Refresh table with given given entries
    public void Refresh(Stack<JSONObject> o) {
       if (o == null) {
@@ -386,7 +349,7 @@ public class cancelledTable extends TableMap {
          TABLE.getRoot().setExpanded(true);
       }
    }
-   
+
    // Update table display to show top level folderized entries
    public void displayFolderStructure() {
       debug.print("");
@@ -403,7 +366,7 @@ public class cancelledTable extends TableMap {
          }
       }
    }
-   
+
    private Boolean shouldIgnoreFolder(String folderName) {
       Boolean ignore = false;
       String[] ignoreFolders = {"none", "convertedLiveCache", "expired"};
@@ -411,9 +374,9 @@ public class cancelledTable extends TableMap {
          if (folderName.equals(ignoreFolders[i]))
             ignore = true;
       }
-      return ignore;   
+      return ignore;
    }
-   
+
    // Create data structure to organize entries in folder format
    private void folderize(Stack<JSONObject> entries) {
       debug.print("entries=" + entries);
@@ -435,7 +398,7 @@ public class cancelledTable extends TableMap {
             folders.get(name).add(entries.get(i));
             }
          }
-         
+
          // Define default sort order for all folder entries
          // Sort by largest start time first
          Comparator<JSONObject> folderSort = new Comparator<JSONObject>() {
@@ -446,7 +409,7 @@ public class cancelledTable extends TableMap {
                if (gmt1 > gmt2) return -1;
                return 0;
             }
-         };      
+         };
          JSONObject entry;
          sortedOrder = new Vector<JSONObject>();
          for (Enumeration<String> e=folders.keys(); e.hasMoreElements();) {
@@ -463,19 +426,12 @@ public class cancelledTable extends TableMap {
 
    // Add a folder entry to table
    public void AddTABLERow(String fName, Stack<JSONObject> folderEntry) {
-      TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(fName, folderEntry) );
+      TreeItem<Tabentry> item = new TreeItem<Tabentry>( new Tabentry(fName, folderEntry) );
       for (int i=0; i<folderEntry.size(); ++i) {
-         TreeItem<Tabentry> subitem = new TreeItem<>( new Tabentry(folderEntry.get(i)) );
-         item.getChildren().add(subitem);
+         TreeItem<Tabentry> subitem = new TreeItem<Tabentry>( new Tabentry(folderEntry.get(i)) );
+         item.addChild(subitem);
       }
-      // Want to resize columns whenever a tree is expanded or collapsed
-      item.expandedProperty().addListener(new ChangeListener<Boolean>() {
-         @Override
-         public void changed(ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) {
-            TableUtil.autoSizeTableViewColumns(TABLE, true);
-         }         
-      });
-      TABLE.getRoot().getChildren().add(item);
+      TABLE.getRoot().addChild(item);
    }
 
    // Look for entry with given folder name and select it
@@ -486,15 +442,14 @@ public class cancelledTable extends TableMap {
          sortableDate s = TABLE.getRoot().getChildren().get(i).getValue().getDATE();
          if (s.folder) {
             if (s.folderName.equals(folderName)) {
-               TABLE.getSelectionModel().clearSelection();
-               TABLE.getSelectionModel().select(i);
-               TableUtil.scrollToCenter(TABLE, i);
+               TABLE.clearSelection();
+               TABLE.select(TABLE.getRoot().getChildren().get(i));
                return;
             }
          }
       }
    }
-      
+
    private long getStartTime(JSONObject entry) {
       String startString;
       try {
@@ -508,7 +463,7 @@ public class cancelledTable extends TableMap {
          return 0;
       }
    }
-   
+
    // Schedule a single recording
    public void recordSingle(String tivoName) {
       int[] selected = TableUtil.GetSelectedRows(TABLE);
@@ -524,12 +479,12 @@ public class cancelledTable extends TableMap {
          TableUtil.recordSingleCB(tivoName, entries);
       }
    }
-   
+
    // For show in given row try and obtain and print conflict details to message window
    // This only applies to entries under programSourceConflict folder
    public void getConflictDetails(final String tivoName, final int row) {
-     Task<Void> task = new Task<Void>() {
-        @Override public Void call() {
+     Runnable task = new Runnable() {
+        @Override public void run() {
             JSONObject json = GetRowData(row);
             try {
                if (json != null && json.getString("cancellationReason").equals("programSourceConflict")) {
@@ -558,11 +513,10 @@ public class cancelledTable extends TableMap {
             } catch (JSONException e) {
                log.error("getConflictDetails error - " + e.getMessage());
             }
-            return null;
          }
       };
       new Thread(task).start();
-      
+
    }
 
 }

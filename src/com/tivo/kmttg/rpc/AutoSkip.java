@@ -26,8 +26,6 @@ import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javafx.concurrent.Task;
-
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
@@ -88,22 +86,22 @@ public class AutoSkip {
    public synchronized void skipPlay(final String tivoName, final Hashtable<String,String> nplData) {
       debug.print("tivoName=" + tivoName + " nplData=" + nplData);
       this.tivoName = tivoName;
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             if (! nplData.containsKey("contentId")) {
                error("Missing contentId");
                disable();
-               return null;
+               return;
             }
             if (! nplData.containsKey("offerId")) {
                error("Missing offerId");
                disable();
-               return null;
+               return;
             }
             if (! nplData.containsKey("recordingId")) {
                error("Missing recordingId");
                disable();
-               return null;
+               return;
             }
             if (nplData.containsKey("title"))
                title = nplData.get("title");
@@ -117,7 +115,7 @@ public class AutoSkip {
                } else {
                   error("No skip data available for " + title);
                   disable();
-                  return null;
+                  return;
                }
                if (skipData != null) {
                   // Start playback
@@ -129,14 +127,13 @@ public class AutoSkip {
                   } catch (Exception e) {
                      error("skipPlay - " + e.getMessage());
                      disable();
-                     return null;
+                     return;
                   }
                   enableMonitor(tivoName, skipData, end1);
                } else {
                   disable();
                }
             }
-            return null;
          }
       };
       new Thread(task).start();

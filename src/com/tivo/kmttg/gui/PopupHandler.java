@@ -18,193 +18,178 @@
  */
 package com.tivo.kmttg.gui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.util.Stack;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TreeTableView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JTable;
 
+import com.tivo.kmttg.gui.swing.TreeTable;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.SkipManager;
 
 public class PopupHandler {
-   static TableView<?> TABLE_view = null;
-   static TreeTableView<?> TABLE_treeview = null;
-   static ContextMenu popup = null;
-   
+   static JTable TABLE_target = null;
+   static JPopupMenu popup = null;
+
    public static void hide() {
       if (popup != null)
-         popup.hide();
+         popup.setVisible(false);
    }
-   
-   public static void display(TableView<?> TABLE, MouseEvent e) {
-      TABLE_view = TABLE;
-      TABLE_treeview = null;
+
+   public static void display(JTable TABLE, MouseEvent e) {
+      TABLE_target = TABLE;
       popup = display(e);
       if (popup != null)
-         popup.show(TABLE, e.getScreenX(), e.getScreenY());      
+         popup.show(TABLE, e.getX(), e.getY());
    }
-   
-   public static void display(final TreeTableView<?> TABLE, MouseEvent e) {
-      TABLE_treeview = TABLE;
-      TABLE_view = null;
+
+   public static void display(TreeTable<?> TABLE, MouseEvent e) {
+      TABLE_target = TABLE.table;
       popup = display(e);
       if (popup != null)
-         popup.show(TABLE, e.getScreenX(), e.getScreenY());      
+         popup.show(TABLE.table, e.getX(), e.getY());
    }
-   
-   private static ContextMenu display(MouseEvent e) {
+
+   private static JPopupMenu display(MouseEvent e) {
       String tabName = config.gui.getCurrentTabName();
       String tivoName;
       if (tabName.equals("FILES"))
          return null;
-      popup = new ContextMenu();
+      popup = new JPopupMenu();
       Stack<PopupPair> items = new Stack<PopupPair>();
       if (tabName.equals("Remote")) {
          // This is a Remote table
          String subTabName = config.gui.remote_gui.getCurrentTabName();
          tivoName = config.gui.remote_gui.getTivoName(subTabName);
-         if (config.rpcEnabled(tivoName) && subTabName.equals("ToDo")) {            
-            items.add(new PopupPair("Cancel [c]", KeyCode.C, subTabName));
-            items.add(new PopupPair("Modify [m]", KeyCode.M, subTabName));
+         if (config.rpcEnabled(tivoName) && subTabName.equals("ToDo")) {
+            items.add(new PopupPair("Cancel [c]", KeyEvent.VK_C, subTabName));
+            items.add(new PopupPair("Modify [m]", KeyEvent.VK_M, subTabName));
             items.add(new PopupPair(
                "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
             );
-            items.add(new PopupPair("Add to history file [a]", KeyCode.A, subTabName));
+            items.add(new PopupPair("Add to history file [a]", KeyEvent.VK_A, subTabName));
          }
          if (subTabName.equals("Won't Record")) {
             if (config.rpcEnabled(tivoName))
-               items.add(new PopupPair("Record [r]", KeyCode.R, subTabName));
-            items.add(new PopupPair("Explain [e]", KeyCode.E, subTabName));
-            items.add(new PopupPair("Tree state toggle [t]", KeyCode.T, subTabName));
+               items.add(new PopupPair("Record [r]", KeyEvent.VK_R, subTabName));
+            items.add(new PopupPair("Explain [e]", KeyEvent.VK_E, subTabName));
+            items.add(new PopupPair("Tree state toggle [t]", KeyEvent.VK_T, subTabName));
             items.add(new PopupPair(
                "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
             );
          }
          if (subTabName.equals("Streaming")) {
-            items.add(new PopupPair("Tree state toggle [t]", KeyCode.T, subTabName));
+            items.add(new PopupPair("Tree state toggle [t]", KeyEvent.VK_T, subTabName));
          }
-         if (subTabName.equals("Season Premieres") || subTabName.equals("Search") || subTabName.equals("Guide")) {            
+         if (subTabName.equals("Season Premieres") || subTabName.equals("Search") || subTabName.equals("Guide")) {
             if (config.rpcEnabled(tivoName)) {
-               items.add(new PopupPair("Record [r]", KeyCode.R, subTabName));
-               items.add(new PopupPair("Season Pass [p]", KeyCode.P, subTabName));
-               items.add(new PopupPair("Wishlist [w]", KeyCode.W, subTabName));
+               items.add(new PopupPair("Record [r]", KeyEvent.VK_R, subTabName));
+               items.add(new PopupPair("Season Pass [p]", KeyEvent.VK_P, subTabName));
+               items.add(new PopupPair("Wishlist [w]", KeyEvent.VK_W, subTabName));
                if (subTabName.equals("Search"))
-                  items.add(new PopupPair("Tree state toggle [t]", KeyCode.T, subTabName));
+                  items.add(new PopupPair("Tree state toggle [t]", KeyEvent.VK_T, subTabName));
             }
             items.add(new PopupPair(
                   "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
             );
-            items.add(new PopupPair("Add to history file [a]", KeyCode.A, subTabName));
+            items.add(new PopupPair("Add to history file [a]", KeyEvent.VK_A, subTabName));
          }
          if (subTabName.equals("Season Passes")) {
-            items.add(new PopupPair("Change Priority [p]", KeyCode.P, subTabName));
-            items.add(new PopupPair("Delete [delete]", KeyCode.DELETE, subTabName));
+            items.add(new PopupPair("Change Priority [p]", KeyEvent.VK_P, subTabName));
+            items.add(new PopupPair("Delete [delete]", KeyEvent.VK_DELETE, subTabName));
             if (config.rpcEnabled(tivoName))
-               items.add(new PopupPair("Copy [c]", KeyCode.C, subTabName));
-            items.add(new PopupPair("Modify [m]", KeyCode.M, subTabName));
-            items.add(new PopupPair("Upcoming [u]", KeyCode.U, subTabName));
-            items.add(new PopupPair("Conflicts [o]", KeyCode.O, subTabName));
-            items.add(new PopupPair("Show Information [i]", KeyCode.I, subTabName));
-            items.add(new PopupPair("Check OnePasses [z]", KeyCode.Z, subTabName));
+               items.add(new PopupPair("Copy [c]", KeyEvent.VK_C, subTabName));
+            items.add(new PopupPair("Modify [m]", KeyEvent.VK_M, subTabName));
+            items.add(new PopupPair("Upcoming [u]", KeyEvent.VK_U, subTabName));
+            items.add(new PopupPair("Conflicts [o]", KeyEvent.VK_O, subTabName));
+            items.add(new PopupPair("Show Information [i]", KeyEvent.VK_I, subTabName));
+            items.add(new PopupPair("Check OnePasses [z]", KeyEvent.VK_Z, subTabName));
          }
          if (subTabName.equals("Thumbs") || subTabName.equals("Channels")) {
             if (config.rpcEnabled(tivoName))
-               items.add(new PopupPair("Copy [c]", KeyCode.C, subTabName));
+               items.add(new PopupPair("Copy [c]", KeyEvent.VK_C, subTabName));
          }
-         if (config.rpcEnabled(tivoName) && subTabName.equals("Deleted")) {            
-            items.add(new PopupPair("Recover [r]", KeyCode.R, subTabName));
-            items.add(new PopupPair("Permanently Delete [delete]", KeyCode.DELETE, subTabName));
+         if (config.rpcEnabled(tivoName) && subTabName.equals("Deleted")) {
+            items.add(new PopupPair("Recover [r]", KeyEvent.VK_R, subTabName));
+            items.add(new PopupPair("Permanently Delete [delete]", KeyEvent.VK_DELETE, subTabName));
             items.add(new PopupPair(
                "Add to auto transfers", config.gui.addSelectedTitlesMenuItem, subTabName)
             );
          }
          if (config.rpcEnabled(tivoName) && !subTabName.equals("Season Passes") && !subTabName.equals("Thumbs")
                && ! subTabName.equals("Channels"))
-            items.add(new PopupPair("Show Information [i]", KeyCode.I, subTabName));
-         
+            items.add(new PopupPair("Show Information [i]", KeyEvent.VK_I, subTabName));
+
          // General items for all tables
-         items.add(new PopupPair("Display data [j]", KeyCode.J, subTabName));
-         items.add(new PopupPair("Web query [q]", KeyCode.Q, subTabName));
+         items.add(new PopupPair("Display data [j]", KeyEvent.VK_J, subTabName));
+         items.add(new PopupPair("Web query [q]", KeyEvent.VK_Q, subTabName));
          if (! subTabName.equals("Streaming")) {
             items.add(new PopupPair("Change thumbs rating [ctrl-t]", config.gui.thumbsMenuItem, subTabName));
             if (config.rpcEnabled(tivoName))
-               items.add(new PopupPair("Episode Info [n]", KeyCode.N, subTabName));
+               items.add(new PopupPair("Episode Info [n]", KeyEvent.VK_N, subTabName));
          }
          items.add(new PopupPair("Search table [ctrl-s]", config.gui.searchMenuItem, subTabName));
       } else {
          // This is a NPL table
          tivoName = tabName;
          if (!config.rpcEnabled(tivoName) && !config.mindEnabled(tivoName))
-            items.add(new PopupPair("Get extended metadata [m]", KeyCode.M, tivoName));
+            items.add(new PopupPair("Get extended metadata [m]", KeyEvent.VK_M, tivoName));
          if (config.rpcEnabled(tivoName)) {
-            items.add(new PopupPair("Play [p]", KeyCode.P, tivoName));
-            items.add(new PopupPair("Show Information [i]", KeyCode.I, tivoName));
+            items.add(new PopupPair("Play [p]", KeyEvent.VK_P, tivoName));
+            items.add(new PopupPair("Show Information [i]", KeyEvent.VK_I, tivoName));
          }
          if (config.rpcEnabled(tivoName) || config.twpDeleteEnabled())
-            items.add(new PopupPair("Delete [delete]", KeyCode.DELETE, tivoName));
-         items.add(new PopupPair("Display data [j]", KeyCode.J, tivoName));
+            items.add(new PopupPair("Delete [delete]", KeyEvent.VK_DELETE, tivoName));
+         items.add(new PopupPair("Display data [j]", KeyEvent.VK_J, tivoName));
          if (config.rpcEnabled(tivoName) || config.mindEnabled(tivoName))
-            items.add(new PopupPair("Episode Info [n]", KeyCode.N, tivoName));
-            items.add(new PopupPair("Display RPC data [r]", KeyCode.R, tivoName));
+            items.add(new PopupPair("Episode Info [n]", KeyEvent.VK_N, tivoName));
+            items.add(new PopupPair("Display RPC data [r]", KeyEvent.VK_R, tivoName));
          if (SkipManager.skipEnabled() && config.rpcEnabled(tivoName)) {
-            items.add(new PopupPair("Import AutoSkip cuts [c]", KeyCode.C, tivoName));
-            items.add(new PopupPair("Export AutoSkip cuts [e]", KeyCode.E, tivoName));
-            items.add(new PopupPair("AutoSkip from SkipMode [v]", KeyCode.V, tivoName));
-            items.add(new PopupPair("AutoSkip from SkipMode - ALL [w]", KeyCode.W, tivoName));
-            items.add(new PopupPair("Play in AutoSkip mode [z]", KeyCode.Z, tivoName));
+            items.add(new PopupPair("Import AutoSkip cuts [c]", KeyEvent.VK_C, tivoName));
+            items.add(new PopupPair("Export AutoSkip cuts [e]", KeyEvent.VK_E, tivoName));
+            items.add(new PopupPair("AutoSkip from SkipMode [v]", KeyEvent.VK_V, tivoName));
+            items.add(new PopupPair("AutoSkip from SkipMode - ALL [w]", KeyEvent.VK_W, tivoName));
+            items.add(new PopupPair("Play in AutoSkip mode [z]", KeyEvent.VK_Z, tivoName));
          }
-         if (config.rpcEnabled(tivoName)) {
-            // Intentionally hidden for now
-            //items.add(new PopupPair("Display SKIP data [k]", KeyCode.K, tivoName));
-         }
-         items.add(new PopupPair("Web query [q]", KeyCode.Q, tivoName));
-         items.add(new PopupPair("Tree state toggle [t]", KeyCode.T, tivoName));
+         items.add(new PopupPair("Web query [q]", KeyEvent.VK_Q, tivoName));
+         items.add(new PopupPair("Tree state toggle [t]", KeyEvent.VK_T, tivoName));
          items.add(new PopupPair("Add to auto transfers", config.gui.addSelectedTitlesMenuItem, tivoName));
          items.add(new PopupPair("Add to history file", config.gui.addSelectedHistoryMenuItem, tivoName));
          items.add(new PopupPair("Search table [ctrl-s]", config.gui.searchMenuItem, tivoName));
       }
-      
+
       for (int i=0; i<items.size(); ++i) {
-         final KeyCode key = items.get(i).key;
-         MenuItem item = new MenuItem(items.get(i).name);
-         //final String tableName = items.get(i).tableName;
-         final MenuItem menuitem = items.get(i).menuitem;
+         final int key = items.get(i).key;
+         JMenuItem item = new JMenuItem(items.get(i).name);
+         final JMenuItem menuitem = items.get(i).menuitem;
          if (menuitem == null) {
-            // Action bound to key event
-            item.setOnAction(new EventHandler<ActionEvent>() {
-               public void handle(ActionEvent e) {
-                  if (TABLE_view != null) {
+            // Action bound to key event - dispatch synthetic key press to
+            // table so its KeyListener performs the action
+            item.addActionListener(new ActionListener() {
+               public void actionPerformed(ActionEvent e) {
+                  if (TABLE_target != null) {
                      KeyEvent keyEvent = new KeyEvent(
-                        TABLE_view, TABLE_view, KeyEvent.KEY_PRESSED, key.getName(),
-                        key.getName(), key, false, false, false, false
+                        TABLE_target, KeyEvent.KEY_PRESSED, System.currentTimeMillis(),
+                        0, key, KeyEvent.CHAR_UNDEFINED
                      );
-                     TABLE_view.fireEvent(keyEvent);
-                  }
-                  if (TABLE_treeview != null) {
-                     KeyEvent keyEvent = new KeyEvent(
-                        TABLE_treeview, TABLE_treeview, KeyEvent.KEY_PRESSED, key.getName(),
-                        key.getName(), key, false, false, false, false
-                     );
-                     TABLE_treeview.fireEvent(keyEvent);
+                     TABLE_target.dispatchEvent(keyEvent);
                   }
                }
             });
          } else {
             // Action bound to menu item
-            item.setOnAction(new EventHandler<ActionEvent>() {
-               public void handle(ActionEvent e) {
-                  menuitem.fire();
+            item.addActionListener(new ActionListener() {
+               public void actionPerformed(ActionEvent e) {
+                  menuitem.doClick();
                }
             });
          }
-         popup.getItems().add(item);
+         popup.add(item);
       }
       return popup;
    }

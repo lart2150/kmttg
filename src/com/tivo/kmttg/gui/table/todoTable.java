@@ -18,26 +18,15 @@
  */
 package com.tivo.kmttg.gui.table;
 
-import java.util.Collections;
+import java.awt.Color;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Hashtable;
 
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.SortEvent;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.util.Callback;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONConverter;
@@ -47,10 +36,13 @@ import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.comparator.DateComparator;
 import com.tivo.kmttg.gui.comparator.DurationComparator;
-import com.tivo.kmttg.gui.comparator.ImageViewComparator;
+import com.tivo.kmttg.gui.comparator.ImageComparator;
 import com.tivo.kmttg.gui.comparator.StringChannelComparator;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
+import com.tivo.kmttg.gui.swing.KmttgTable;
+import com.tivo.kmttg.gui.swing.KmttgTableModel;
+import com.tivo.kmttg.gui.swing.RowColorer;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
@@ -62,11 +54,12 @@ import com.tivo.kmttg.util.log;
 public class todoTable extends TableMap {
    private String[] TITLE_cols = {"", "DATE", "SHOW", "CHANNEL", "DUR"};
    private double[] weights = {3, 17, 62, 12, 6};
-   public TableView<Tabentry> TABLE = null;
+   public JTable TABLE = null;
+   public KmttgTableModel<Tabentry> MODEL = null;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private String currentTivo = null;
    private Boolean searchingRepeats = false;
-   
+
    // TableMap overrides
    @Override
    public JSONObject getJson(int row) {
@@ -82,161 +75,93 @@ public class todoTable extends TableMap {
    }
    @Override
    public void clear() {
-      TABLE.getItems().clear();
+      MODEL.clear();
    }
    @Override
-   public TableView<?> getTable() {
+   public JTable getTable() {
       return TABLE;
    }
-   
+
    public todoTable() {
-      TABLE = new TableView<Tabentry>();
-      TABLE.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE); // Allow multiple row selection
-      TABLE.setRowFactory(new ColorRowFactory()); // For row background color handling
-      // Special sort listener to set sort order to ascending date when no sort is selected
-      TABLE.getSortOrder().addListener(new ListChangeListener<TableColumn<Tabentry, ?>>() {
-         @Override
-         public void onChanged(Change<? extends TableColumn<Tabentry, ?>> change) {
-            change.next();
-            if (change != null && change.toString().contains("removed")) {
-               if (change.getRemoved().get(0).getText().equals("DATE"))
-                  return;
-               int date_col = TableUtil.getColumnIndex(TABLE, "DATE");
-               TABLE.getSortOrder().setAll(Collections.singletonList(TABLE.getColumns().get(date_col)));
-               TABLE.getColumns().get(date_col).setSortType(TableColumn.SortType.ASCENDING);
-            }
-         }
-      });
-      
-      // Keep selection visible following sort event
-      TABLE.setOnSort(new EventHandler<SortEvent<TableView<Tabentry>>>() {
-         @Override public void handle(SortEvent<TableView<Tabentry>> event) {
-            Platform.runLater(new Runnable() {
-               @Override public void run() {
-                  // If there's a table selection make sure it's visible
-                  TableUtil.selectedVisible(TABLE);
-               }
-            });
-         }
-      });
-      
-      for (String colName : TITLE_cols) {
-         if (colName.length() == 0)
-            colName = "IMAGE";
-         if (colName.equals("IMAGE")) {
-            TableColumn<Tabentry,ImageView> col = new TableColumn<Tabentry,ImageView>("");
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,ImageView>(colName));
-            col.setCellFactory(new ImageCellFactory());
-            col.setComparator(new ImageViewComparator());
-            TABLE.getColumns().add(col);               
-         } else if (colName.equals("DATE")) {
-            TableColumn<Tabentry,sortableDate> col = new TableColumn<Tabentry,sortableDate>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableDate>(colName));
-            col.setComparator(new DateComparator()); // Custom column sort
-            col.setStyle("-fx-alignment: CENTER-RIGHT;");
-            TABLE.getColumns().add(col);
-         } else if (colName.equals("DUR")) {
-            TableColumn<Tabentry,sortableDuration> col = new TableColumn<Tabentry,sortableDuration>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableDuration>(colName));
-            col.setComparator(new DurationComparator()); // Custom column sort
-            col.setStyle("-fx-alignment: CENTER;");
-            TABLE.getColumns().add(col);
-         } else {
-            // Regular String sort
-            TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(colName));
-            if (colName.equals("CHANNEL"))
-               col.setComparator(new StringChannelComparator()); // Custom column sort
-            TABLE.getColumns().add(col);
-         }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
-      }
-      
+      MODEL = new KmttgTableModel<Tabentry>(TITLE_cols);
+      MODEL.setComparator("", new ImageComparator());
+      MODEL.setComparator("DATE", new DateComparator());
+      MODEL.setComparator("DUR", new DurationComparator());
+      MODEL.setComparator("CHANNEL", new StringChannelComparator());
+      // Default sort is ascending date when no column sort is selected
+      MODEL.setDefaultSort("DATE", true);
+      TABLE = KmttgTable.create(MODEL, new ColorRow());
+      KmttgTable.setImageColumn(TABLE, "");
+      KmttgTable.setColumnAlignment(TABLE, "DATE", JLabel.RIGHT);
+      KmttgTable.setColumnAlignment(TABLE, "DUR", JLabel.CENTER);
+      TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
+
       // Add keyboard listener
-      TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {
-         public void handle(KeyEvent e) {
+      TABLE.addKeyListener(new KeyAdapter() {
+         @Override
+         public void keyPressed(KeyEvent e) {
             KeyPressed(e);
          }
       });
-      
+
       // Define selection listener to detect table row selection changes
-      TABLE.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tabentry>() {
+      TABLE.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
          @Override
-         public void changed(ObservableValue<? extends Tabentry> obs, Tabentry oldSelection, Tabentry newSelection) {
-            if (newSelection != null) {
-               TABLERowSelected(newSelection);
+         public void valueChanged(ListSelectionEvent e) {
+            if (e.getValueIsAdjusting())
+               return;
+            int row = TABLE.getSelectionModel().getLeadSelectionIndex();
+            if (row >= 0 && row < MODEL.size() && TABLE.isRowSelected(row)) {
+               TABLERowSelected(MODEL.getRow(row));
             }
          }
       });
-                              
+
       // Add right mouse button handler
       TableUtil.AddRightMouseListener(TABLE);
-      
-   }
-   
-   private class ImageCellFactory implements Callback<TableColumn<Tabentry, ImageView>, TableCell<Tabentry, ImageView>> {
-      public TableCell<Tabentry, ImageView> call(TableColumn<Tabentry, ImageView> param) {
-         TableCell<Tabentry, ImageView> cell = new TableCell<Tabentry, ImageView>() {
-            @Override
-            public void updateItem(final ImageView item, boolean empty) {
-               super.updateItem(item,  empty);
-               if (empty) {
-                  setGraphic(null);
-               } else {
-                  if (item != null)
-                     setGraphic(item);
-               }
-            }
-         };
-         return cell;
-      }
-   }   
 
-   // ColorRowFactory for setting row background color
-   private class ColorRowFactory implements Callback<TableView<Tabentry>, TableRow<Tabentry>> {
-      public TableRow<Tabentry> call(TableView<Tabentry> tableView) {
-         TableRow<Tabentry> row = new TableRow<Tabentry>() {
-            @Override
-            public void updateItem(Tabentry entry, boolean empty) {
-               super.updateItem(entry,  empty);
-               styleProperty().unbind(); setStyle("");
-               if (entry != null) {
-                  JSONObject json = entry.getDATE().json;
-                  if (json != null) {
-                     try {
-                        if (json.has("state")) {
-                           if (json.getString("state").equals("inProgress"))
-                              TableUtil.setRowColor(this, TableUtil.tableBkgndRecording);
-                        }
-                        
-                        if (config.showHistoryInTable == 1) {
-                           if (json.has("partnerCollectionId")) {
-                              // Series 4 and later TiVos
-                              if (auto.keywordMatchHistoryFast(json.getString("partnerCollectionId"), false))
-                                 TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);
-                           }
-                           if (json.has("partnerContentId")) {
-                              // This is for series 3 TiVos where programId is part of partnerContentId
-                              // example: parternContentId = "epgProvider:ct.EP013898090001"
-                              String programId = json.getString("partnerContentId");
-                              programId = programId.replaceFirst("^.+\\.", "");
-                              if (auto.keywordMatchHistoryFast(programId, false))
-                                 TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);
-                           }
-                        }
-                     } catch (JSONException e) {
-                        log.error("todoTable ColorRowFactory - " + e.getMessage());
+   }
+
+   // Row background color handling
+   private class ColorRow implements RowColorer<Tabentry> {
+      public Color getColor(Tabentry entry) {
+         if (entry != null) {
+            JSONObject json = entry.getDATE().json;
+            if (json != null) {
+               try {
+                  Color color = null;
+                  if (json.has("state")) {
+                     if (json.getString("state").equals("inProgress"))
+                        color = TableUtil.tableBkgndRecording;
+                  }
+
+                  if (config.showHistoryInTable == 1) {
+                     if (json.has("partnerCollectionId")) {
+                        // Series 4 and later TiVos
+                        if (auto.keywordMatchHistoryFast(json.getString("partnerCollectionId"), false))
+                           color = TableUtil.tableBkgndInHistory;
+                     }
+                     if (json.has("partnerContentId")) {
+                        // This is for series 3 TiVos where programId is part of partnerContentId
+                        // example: parternContentId = "epgProvider:ct.EP013898090001"
+                        String programId = json.getString("partnerContentId");
+                        programId = programId.replaceFirst("^.+\\.", "");
+                        if (auto.keywordMatchHistoryFast(programId, false))
+                           color = TableUtil.tableBkgndInHistory;
                      }
                   }
+                  return color;
+               } catch (JSONException e) {
+                  log.error("todoTable ColorRow - " + e.getMessage());
                }
             }
-         };
-         return row;
+         }
+         return null;
       }
-   }   
-   
+   }
+
    public static class Tabentry {
-      ImageView image = new ImageView();
+      imageCell image = new imageCell();
       public String title = "";
       public sortableDate date;
       public String channel = "";
@@ -257,32 +182,38 @@ public class todoTable extends TableMap {
             }
             title = JSONConverter.makeShowTitle(data);
             channel = JSONConverter.makeChannelName(data);
-            
+
             date = new sortableDate(data, start);
             duration = new sortableDuration(end-start, false);
             if (data.has("subscriptionIdentifier")) {
                JSONObject id = data.getJSONArray("subscriptionIdentifier").getJSONObject(0);
                String type = id.getString("subscriptionType");
-               if (type.equals("repeatingTimeChannel") || type.equals("seasonPass"))
+               if (type.equals("repeatingTimeChannel") || type.equals("seasonPass")) {
                   image.setImage(gui.Images.get("image-season-pass"));
-               if (type.equals("wishList"))
+                  image.imageName = "image-season-pass";
+               }
+               if (type.equals("wishList")) {
                   image.setImage(gui.Images.get("image-season-pass-wishlist"));
-               if (type.startsWith("single"))
+                  image.imageName = "image-season-pass-wishlist";
+               }
+               if (type.startsWith("single")) {
                   image.setImage(gui.Images.get("image-single-explicit-record"));
+                  image.imageName = "image-single-explicit-record";
+               }
             }
          } catch (Exception e) {
             log.error("todoTable Tabentry - " + e.getMessage());
          }
       }
-      
-      public ImageView getIMAGE() {
+
+      public imageCell getIMAGE() {
          return image;
       }
-      
+
       public sortableDate getDATE() {
          return date;
       }
-      
+
       public String getSHOW() {
          return title;
       }
@@ -294,14 +225,14 @@ public class todoTable extends TableMap {
       public sortableDuration getDUR() {
          return duration;
       }
-      
+
       public String toString() {
          return title;
       }
    }
-      
+
    public JSONObject GetRowData(int row) {
-      return TABLE.getItems().get(row).getDATE().json;
+      return MODEL.getRow(row).getDATE().json;
    }
 
     public void AddRows(String tivoName, JSONArray data) {
@@ -311,7 +242,7 @@ public class todoTable extends TableMap {
           }
           tivo_data.put(tivoName, data);
           currentTivo = tivoName;
-          TABLE.sort();
+          MODEL.sort();
           TableUtil.autoSizeTableViewColumns(TABLE, true);
           if (config.gui.remote_gui != null) {
              config.gui.remote_gui.setTivoName("todo", tivoName);
@@ -321,16 +252,16 @@ public class todoTable extends TableMap {
           log.error("todoTable AddRows - " + e.getMessage());
        }
     }
-    
+
     private void AddRow(JSONObject data) {
        debug.print("data=" + data);
-       TABLE.getItems().add(new Tabentry(data));
+       MODEL.addRow(new Tabentry(data));
     }
-    
+
     private void TABLERowSelected(Tabentry entry) {
        if (searchingRepeats)
           return;
-       // Get column items for selected row 
+       // Get column items for selected row
        sortableDate s = entry.getDATE();
        if (s.folder) {
           // Folder entry - don't display anything
@@ -357,29 +288,29 @@ public class todoTable extends TableMap {
           }
        }
     }
-    
+
     private void selectRow(JSONObject json) {
-       for (int row=0; row<TABLE.getItems().size(); ++row) {
+       for (int row=0; row<MODEL.size(); ++row) {
           JSONObject rowData = GetRowData(row);
           if (rowData == json) {
-             TABLE.getSelectionModel().select(row);
+             TABLE.addRowSelectionInterval(row, row);
              TableUtil.scrollToCenter(TABLE, row);
              TABLE.requestFocus();
           }
        }
     }
-    
+
     // Handle keyboard presses
     private void KeyPressed(KeyEvent e) {
        if (e.isControlDown())
           return;
-       KeyCode keyCode = e.getCode();
-       if (keyCode == KeyCode.DELETE){
+       int keyCode = e.getKeyCode();
+       if (keyCode == KeyEvent.VK_DELETE){
           // Delete key has special action
           e.consume(); // Need this so as not to remove focus which is default key action
           DeleteCB();
        }
-       else if (keyCode == KeyCode.A) {
+       else if (keyCode == KeyEvent.VK_A) {
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
              return;
@@ -387,13 +318,13 @@ public class todoTable extends TableMap {
           if (json != null)
              auto.AddHistoryEntry(json);
        }
-       else if (keyCode == KeyCode.C) {
-          config.gui.remote_gui.todo_tab.cancel.fire();
+       else if (keyCode == KeyEvent.VK_C) {
+          config.gui.remote_gui.todo_tab.cancel.doClick();
        }
-       else if (keyCode == KeyCode.M) {
-          config.gui.remote_gui.todo_tab.modify.fire();
+       else if (keyCode == KeyEvent.VK_M) {
+          config.gui.remote_gui.todo_tab.modify.doClick();
        }
-       else if (keyCode == KeyCode.I) {
+       else if (keyCode == KeyEvent.VK_I) {
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
              return;
@@ -401,7 +332,7 @@ public class todoTable extends TableMap {
           if (json != null) {
              config.gui.show_details.update(TABLE, currentTivo, json);
           }
-       } else if (keyCode == KeyCode.J) {
+       } else if (keyCode == KeyEvent.VK_J) {
           // Print json of selected row to log window
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
@@ -411,12 +342,12 @@ public class todoTable extends TableMap {
              rnpl.pprintJSON(json);
              id.printIds(json);
           }
-       } else if (keyCode == KeyCode.N) {
+       } else if (keyCode == KeyEvent.VK_N) {
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
              return;
           TableUtil.PrintEpisodes(GetRowData(selected[0]));
-       } else if (keyCode == KeyCode.K) {
+       } else if (keyCode == KeyEvent.VK_K) {
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
              return;
@@ -424,22 +355,21 @@ public class todoTable extends TableMap {
           if (json.has("contentId")) {
              try {
                 final String contentId = json.getString("contentId");
-                Task<Void> task = new Task<Void>() {
-                   @Override public Void call() {
+                Runnable task = new Runnable() {
+                   @Override public void run() {
                       Remote r = config.initRemote(currentTivo);
                       if (r.success) {
                          r.printClipData(contentId);
                          r.disconnect();
                       }
-                      return null;
                    }
                 };
-                new Thread(task).start();            
+                new Thread(task).start();
              } catch (JSONException e1) {
                 log.error("KeyPressed K - " + e1.getMessage());
              }
           }
-       } else if (keyCode == KeyCode.Q) {
+       } else if (keyCode == KeyEvent.VK_Q) {
           // Web query currently selected entry
           int[] selected = TableUtil.GetSelectedRows(TABLE);
           if (selected == null || selected.length < 1)
@@ -457,7 +387,7 @@ public class todoTable extends TableMap {
           }
        }
     }
-    
+
     public void DeleteCB() {
        Integer[] selected = TableUtil.highToLow(TableUtil.GetSelectedRows(TABLE));
        if (selected == null) {
@@ -489,26 +419,27 @@ public class todoTable extends TableMap {
                       refreshNumber();
                    } else {
                       // Remove from selection list since cancel failed
-                      TABLE.getSelectionModel().clearSelection(row);
+                      TABLE.removeRowSelectionInterval(row, row);
                    }
                 } catch (JSONException e1) {
                    log.error("ToDo cancel - " + e1.getMessage());
                 }
              }
           }
-          r.disconnect();                   
+          r.disconnect();
        }
-       int count = TABLE.getSelectionModel().getSelectedItems().size();
-       TABLE.getItems().removeAll(TABLE.getSelectionModel().getSelectedItems());
-       if (count > 1)
-          TABLE.getSelectionModel().clearSelection();
+       // Remove selected rows from table (highest first to keep indexes valid)
+       Integer[] remaining = TableUtil.highToLow(TableUtil.GetSelectedRows(TABLE));
+       for (int row : remaining)
+          MODEL.removeRow(row);
+       TABLE.clearSelection();
     }
-    
+
     // Refresh the # SHOWS label in the ToDo tab
     private void refreshNumber() {
        config.gui.remote_gui.todo_tab.label.setText("" + tivo_data.get(currentTivo).length() + " SHOWS");
     }
-    
+
     // Schedule a single recording
     public void recordSingle(String tivoName) {
        int[] selected = TableUtil.GetSelectedRows(TABLE);
@@ -524,21 +455,21 @@ public class todoTable extends TableMap {
           TableUtil.recordSingleCB(tivoName, entries);
        }
     }
-    
+
     // Look for repeated recordings to trim
     public void trimRepeats(String tivoName) {
        if (! tivo_data.containsKey(tivoName))
           return;
        searchingRepeats = true;
-       TABLE.getSelectionModel().clearSelection(); // Clear selection
+       TABLE.clearSelection(); // Clear selection
        Hashtable<String,JSONObject> map = new Hashtable<String,JSONObject>();
        JSONArray shows = tivo_data.get(tivoName);
-       
+
        try {
           int repeatCount = 0;
           for (int i=0; i<shows.length(); ++i) {
              JSONObject show = shows.getJSONObject(i);
-             
+
              // Repeated programId
              String pid = id.programId(show);
              if (pid != null && show.has("subtitle")) {
@@ -552,7 +483,7 @@ public class todoTable extends TableMap {
                 else
                    map.put(pid, show);
              }
-             
+
              // Repeated title + subtitle
              if (show.has("title") && show.has("subtitle")) {
                 String title = show.getString("title") + " - " + show.getString("subtitle");

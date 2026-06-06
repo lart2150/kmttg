@@ -174,8 +174,6 @@ public class config {
 
    // misc
    public static String programDir = "";
-   public static String cssDir = "";
-   public static String cssFile = "default.css";
    public static String OS = "other";
    public static String tmpDir = "/tmp";
    public static String perl = "perl";
@@ -746,7 +744,6 @@ public class config {
       autoLog      = programDir + s + "auto.log";
       autoHistory  = programDir + s + "auto.history";
       encProfDir   = programDir + s + "encode";
-      cssDir       = programDir + s + "css";
       
       // File to store/restore GUI settings
       String settings_name = ".kmttg_settings_v2";

@@ -18,59 +18,51 @@
  */
 package com.tivo.kmttg.gui.remote;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Hashtable;
-import java.util.Optional;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
 
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-
 public class info {
-   public VBox panel = null;   
-   public ChoiceBox<String> tivo = null;
-   public Button reboot = null;
-   public TextArea text = null;
+   public JPanel panel = null;
+   public JComboBox<String> tivo = null;
+   public JButton reboot = null;
+   public JTextArea text = null;
    public Hashtable<String,String> tivo_data = new Hashtable<String,String>();
-   public Hashtable<String, Button> buttons = new Hashtable<String, Button>();
-   
-   public info (final Stage frame) {
-      
-      // System Information tab items      
-      HBox row1 = new HBox();
-      row1.setSpacing(5);
-      row1.setAlignment(Pos.CENTER_LEFT);
-      row1.setPadding(new Insets(5,0,0,5));
+   public Hashtable<String, JButton> buttons = new Hashtable<String, JButton>();
 
-      Label title = new Label("System Information");
+   public info (final JFrame frame) {
 
-      Label tivo_label = new Label("");
+      // System Information tab items
+      JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
-      tivo = new ChoiceBox<String>();
-      tivo.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
+      JLabel title = new JLabel("System Information");
+
+      JLabel tivo_label = new JLabel("");
+
+      tivo = new JComboBox<String>();
+      tivo.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)tivo.getSelectedItem();
             if (newVal != null) {
                // Clear text area
                text.setEditable(true);
@@ -88,25 +80,25 @@ public class info {
             }
          }
       });
-      tivo.setTooltip(tooltip.getToolTip("tivo_info"));
+      tivo.setToolTipText(tooltip.getToolTip("tivo_info"));
 
-      Button refresh = new Button("Refresh");
-      refresh.setTooltip(tooltip.getToolTip("refresh_info"));
-      refresh.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      JButton refresh = new JButton("Refresh");
+      refresh.setToolTipText(tooltip.getToolTip("refresh_info"));
+      refresh.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Refresh info text
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0)
                RC_infoCB(tivoName);
          }
       });
 
-      Button netconnect = new Button("Network Connect");
-      netconnect.setTooltip(tooltip.getToolTip("netconnect_info"));
-      netconnect.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      JButton netconnect = new JButton("Network Connect");
+      netconnect.setToolTipText(tooltip.getToolTip("netconnect_info"));
+      netconnect.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Initiate a net connect on selected TiVo
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                Remote r = config.initRemote(tivoName);
                if (r.success) {
@@ -121,12 +113,12 @@ public class info {
          }
       });
 
-      Button connectStatus = new Button("Connection Status");
-      connectStatus.setTooltip(tooltip.getToolTip("connectStatus"));
-      connectStatus.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      JButton connectStatus = new JButton("Connection Status");
+      connectStatus.setToolTipText(tooltip.getToolTip("connectStatus"));
+      connectStatus.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Print net connect status for selected TiVo
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                Remote r = config.initRemote(tivoName);
                if (r.success) {
@@ -137,7 +129,7 @@ public class info {
                      if (result != null) {
                         text.setEditable(true);
                         text.setText(result.toString(3));
-                        text.setEditable(false);                     
+                        text.setEditable(false);
                      }
                   } catch (Exception ex) {
                      log.error("connectStatus - " + ex.getMessage());
@@ -148,21 +140,20 @@ public class info {
          }
       });
 
-      reboot = new Button("Reboot");
-      reboot.setTooltip(tooltip.getToolTip("reboot_info"));
-      reboot.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      reboot = new JButton("Reboot");
+      reboot.setToolTipText(tooltip.getToolTip("reboot_info"));
+      reboot.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Reboot selected TiVo
-            final String tivoName = tivo.getValue();
+            final String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
-                     Alert alert = new Alert(AlertType.CONFIRMATION);
-                     alert.setTitle("Reboot " + tivoName + "?");
-                     config.gui.setFontSize(alert, config.FontSize);
-                     alert.setContentText("OK to reboot?");
-                     Optional<ButtonType> result = alert.showAndWait();
-                     if (result.get() == ButtonType.OK) {
+                     int result = JOptionPane.showConfirmDialog(
+                        frame, "OK to reboot?", "Reboot " + tivoName + "?",
+                        JOptionPane.OK_CANCEL_OPTION
+                     );
+                     if (result == JOptionPane.OK_OPTION) {
                         Remote r = config.initRemote(tivoName);
                         if (r.success) {
                            r.reboot(tivoName);
@@ -174,30 +165,30 @@ public class info {
          }
       });
 
-      row1.getChildren().add(title);
-      row1.getChildren().add(tivo_label);
-      row1.getChildren().add(tivo);
-      row1.getChildren().add(util.space(40));
-      row1.getChildren().add(refresh);
-      row1.getChildren().add(netconnect);
-      row1.getChildren().add(connectStatus);
-      row1.getChildren().add(util.space(40));
-      row1.getChildren().add(reboot);
+      row1.add(title);
+      row1.add(tivo_label);
+      row1.add(tivo);
+      row1.add(util.space(40));
+      row1.add(refresh);
+      row1.add(netconnect);
+      row1.add(connectStatus);
+      row1.add(util.space(40));
+      row1.add(reboot);
 
-      text = new TextArea();
-      text.setStyle("-fx-font-family: monospace;");
+      text = new JTextArea();
+      text.setFont(new Font(Font.MONOSPACED, Font.PLAIN, text.getFont().getSize()));
       text.setEditable(false);
-      text.setWrapText(true); // This disables horizontal scrollbar
-      VBox.setVgrow(text, Priority.ALWAYS); // stretch vertically
+      text.setLineWrap(true); // This disables horizontal scrollbar
+      text.setWrapStyleWord(true);
 
-      panel = new VBox();
-      panel.setSpacing(1);
-      panel.getChildren().addAll(row1, text);
+      panel = new JPanel(new BorderLayout());
+      panel.add(row1, BorderLayout.NORTH);
+      panel.add(new JScrollPane(text), BorderLayout.CENTER); // stretch vertically
 
    }
    private void RC_infoCB(final String tivoName) {
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             log.warn("Collecting info for TiVo: " + tivoName + " ...");
             Remote r = config.initRemote(tivoName);
             if (r.success) {
@@ -264,7 +255,7 @@ public class info {
                               info += String.format(
                                  "%-30s %s\n", strings[i], response.getString(strings[i])
                               );
-                        }                           
+                        }
                         for (int i=0; i<jsons.length; ++i) {
                            if (response.has(jsons[i])) {
                               response.getJSONObject(jsons[i]).remove("type");
@@ -272,7 +263,7 @@ public class info {
                                  "%s:\n%s\n", jsons[i], response.getJSONObject(jsons[i]).toString(3)
                               );
                            }
-                        }                           
+                        }
                         for (int i=0; i<integers.length; ++i) {
                            if (response.has(integers[i]))
                               info += String.format(
@@ -280,7 +271,7 @@ public class info {
                               );
                         }
                      }
-                     
+
                      // What's On info
                      String [] whatson = getWhatsOn(tivoName);
                      if (whatson != null) {
@@ -293,7 +284,7 @@ public class info {
                         info += "\n";
                      }
                      info += "\n";
-                     
+
                      if (! r.awayMode() ) {
                         // Tuner info
                         reply = r.Command("TunerInfo", new JSONObject());
@@ -312,7 +303,7 @@ public class info {
                            }
                         }
                      }
-                     
+
                      // Add info to text_info widget
                      text.setEditable(true);
                      text.setText(info);
@@ -326,12 +317,11 @@ public class info {
                r.disconnect();
             }
             log.warn("Done collecting info");
-            return null;
          }
       };
       new Thread(task).start();
    }
-   
+
    private String[] getWhatsOn(String tivoName) {
       Remote r = config.initRemote(tivoName);
       if (r.success) {

@@ -18,127 +18,136 @@
  */
 package com.tivo.kmttg.gui;
 
+import java.awt.Color;
 import java.util.Stack;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
-import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.gui.swing.SwingUtil;
+import com.tivo.kmttg.util.debug;
 
-import javafx.application.Platform;
-import javafx.scene.paint.Color;
-import javafx.scene.web.WebView;
-
+/**
+ * Colored, scrolling message/log pane (JTextPane based).
+ * Formerly implemented with a JavaFX WebView + DOM manipulation.
+ */
 public class textpane {
-   private WebView p;
+   private JTextPane p;
+   private JScrollPane scroll;
    private int BUFFER_SIZE = 250000; // Limit to this many characters
-   private String BLACK, BLUE, RED;
-  
-   textpane(WebView p) {
-      BLACK = config.gui.getWebColor(Color.BLACK);
-      BLUE = config.gui.getWebColor(Color.BLUE);
-      RED = config.gui.getWebColor(Color.RED);
-      this.p = p;
-      this.p.getEngine().loadContent("<body><div id=\"content\"></div></body>");
+   // null style = current theme foreground; blue/red chosen to be readable
+   // on both light and dark themes
+   private SimpleAttributeSet BLACK = null;
+   private SimpleAttributeSet BLUE, RED;
+
+   public textpane() {
+      BLUE = makeStyle(new Color(0x4d, 0x8a, 0xf0));
+      RED = makeStyle(new Color(0xe0, 0x52, 0x52));
+      p = new JTextPane();
+      p.setEditable(false);
+      scroll = new JScrollPane(p);
    }
-   
-   public WebView getPane() {
-      return p;
+
+   private SimpleAttributeSet makeStyle(Color color) {
+      SimpleAttributeSet style = new SimpleAttributeSet();
+      StyleConstants.setForeground(style, color);
+      return style;
    }
-  
+
+   // Component to embed in main window (text pane wrapped in scroll pane)
+   public JScrollPane getPane() {
+      return scroll;
+   }
+
    public void print(String s) {
       appendText(BLACK, s);
-      scroll();
    }
-  
+
    public void warn(String s) {
       appendText(BLUE, s);
-      scroll();
    }
-  
+
    public void error(String s) {
       appendText(RED, s);
       java.awt.Toolkit.getDefaultToolkit().beep();
-      scroll();
    }
-  
+
    public void print(Stack<String> s) {
-      for (int i=0; i<s.size(); ++i)
+      for (int i = 0; i < s.size(); ++i)
          appendText(BLACK, s.get(i));
-      scroll();
    }
-  
+
    public void warn(Stack<String> s) {
-      for (int i=0; i<s.size(); ++i)
+      for (int i = 0; i < s.size(); ++i)
          appendText(BLUE, s.get(i));
-      scroll();
    }
-  
+
    public void error(Stack<String> s) {
-      for (int i=0; i<s.size(); ++i)
+      for (int i = 0; i < s.size(); ++i)
          appendText(RED, s.get(i));
       java.awt.Toolkit.getDefaultToolkit().beep();
-      scroll();
    }
-  
-   private void scroll() {
-      if (p != null) {
-         Platform.runLater(new Runnable() {
-            @Override public void run() {
-               try {
-                  p.getEngine().executeScript("window.scrollTo(0,document.body.scrollHeight);");
-               } catch (Exception e) {}
+
+   public void appendText(final SimpleAttributeSet given, final String s) {
+      SwingUtil.runLater(new Runnable() {
+         @Override public void run() {
+            try {
+               // null style = theme default text color (evaluated at append
+               // time so it tracks light/dark theme switches)
+               SimpleAttributeSet style = given;
+               if (style == null)
+                  style = makeStyle(p.getForeground());
+               StyledDocument doc = p.getStyledDocument();
+               String text = s;
+               if (doc.getLength() > 0)
+                  text = "\n" + text;
+               limitBuffer(doc, text.length());
+               doc.insertString(doc.getLength(), text, style);
+               // Auto-scroll to bottom
+               p.setCaretPosition(doc.getLength());
+            } catch (Exception e) {
+               debug.print("textpane appendText - " + e.toString());
             }
-         });
-      }
+         }
+      });
    }
-  
-   public void appendText(String color, String s) {
-      if (p != null && p.getEngine() != null) {
-         Document doc = p.getEngine().getDocument();
-         if (doc == null)
-            return;
-         Element content = doc.getElementById("content");
-         limitBuffer(content, s.length());
-         // Use <pre> tag so as to preserve whitespace
-         Element pre = doc.createElement("pre");
-         pre.setTextContent(s);
-         // NOTE: display: inline prevents newline from being added for <pre> tag
-         // NOTE: white-space: pre-wrap allows horizontal work wrapping to avoid horizontal scrollbar
-         pre.setAttribute("style", "font-size: " + config.FontSize + "pt; white-space: pre-wrap; display: inline; color:" + color);
-         if (content.getChildNodes().getLength() > 0)
-            content.appendChild(doc.createElement("br"));
-         content.appendChild(pre);
-      }
-   }
-  
+
    // Limit text pane buffer size by truncating total data size to
    // BUFFER_SIZE or less if needed
-   private void limitBuffer(Element content, int incomingDataSize) {
-      if (p != null) {
-         int doc_length = content.getTextContent().getBytes().length;
-         int overLength = doc_length + incomingDataSize - BUFFER_SIZE;
-         if (overLength > 0 && doc_length >= overLength) {
-            NodeList list = content.getChildNodes();
-            int removed=0;
-            while( list.getLength() > 0 && removed < overLength ) {
-               removed += list.item(0).getTextContent().length();
-               content.removeChild(list.item(0));
+   private void limitBuffer(StyledDocument doc, int incomingDataSize) {
+      try {
+         int overLength = doc.getLength() + incomingDataSize - BUFFER_SIZE;
+         if (overLength > 0 && doc.getLength() >= overLength) {
+            doc.remove(0, overLength);
+         }
+      } catch (Exception e) {
+         debug.print("textpane limitBuffer - " + e.toString());
+      }
+   }
+
+   // Full current text contents (used by Save messages to file)
+   public String getText() {
+      try {
+         StyledDocument doc = p.getStyledDocument();
+         return doc.getText(0, doc.getLength());
+      } catch (Exception e) {
+         return "";
+      }
+   }
+
+   public void clear() {
+      SwingUtil.runLater(new Runnable() {
+         @Override public void run() {
+            try {
+               StyledDocument doc = p.getStyledDocument();
+               doc.remove(0, doc.getLength());
+            } catch (Exception e) {
+               debug.print("textpane clear - " + e.toString());
             }
          }
-      }
-   }
-   
-   public void clear() {
-      if (p != null) {
-         Element content = p.getEngine().getDocument().getElementById("content");
-         NodeList list = content.getChildNodes();
-         while (list.getLength() > 0) {
-            content.removeChild(list.item(0));
-         }
-      }
-
+      });
    }
 }
-

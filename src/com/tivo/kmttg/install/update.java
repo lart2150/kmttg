@@ -35,10 +35,8 @@ import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -47,13 +45,10 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
+import javax.swing.JOptionPane;
 
 import com.tivo.kmttg.gui.help;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.file;
@@ -75,17 +70,16 @@ public class update {
                log.print("Available version: " + current_version);
                
                // Ask user to install new version
-               Alert alert = new Alert(AlertType.CONFIRMATION);
-               alert.setTitle("Confirm");
-               config.gui.setFontSize(alert, config.FontSize);
-               alert.setContentText("Install new version: " + current_version + " ?");
-               Optional<ButtonType> result = alert.showAndWait();
-               if (result.get() == ButtonType.OK) {
+               boolean confirmation = JOptionPane.showConfirmDialog(
+                  config.gui==null?null:config.gui.getFrame(),
+                  "Install new version: " + current_version + " ?", "Confirm",
+                  JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION;
+               if (confirmation) {
                   final String fname = "kmttg_" + current_version + ".zip";
                   final String url = "https://github.com/lart2150/kmttg/releases/download/"+current_version+"/kmttg_"+current_version+".zip";
                   auto.serviceStopIfNeeded();
-                  Task<Void> task = new Task<Void>() {
-                     public Void call() {
+                  Runnable task = new Runnable() {
+                     public void run() {
                         String filename = config.tmpDir + File.separator + fname;
                         String zipFile = downloadUrl(filename, url);
                         if (zipFile != null) {
@@ -106,7 +100,6 @@ public class update {
                               file.delete(zipFile);
                            }
                         }
-                        return null;
                      }
                   };
                   new Thread(task).start();
@@ -135,20 +128,19 @@ public class update {
             query = "Last installed file: " + lastVersion + "\n" + query;
       }
       // Ask user to install new version
-      Alert alert = new Alert(AlertType.CONFIRMATION);
-      alert.setTitle("Confirm");
-      config.gui.setFontSize(alert, config.FontSize);
-      alert.setContentText(query);
-      Optional<ButtonType> result = alert.showAndWait();
-      if (result.get() == ButtonType.OK) {
-         class backgroundRun extends Task<Void> {
+      boolean confirmation = JOptionPane.showConfirmDialog(
+         config.gui==null?null:config.gui.getFrame(),
+         query, "Confirm",
+         JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION;
+      if (confirmation) {
+         class backgroundRun implements Runnable {
             String version;
             public backgroundRun(String version) {
                this.version = version;
             }
-            @Override protected Void call() {
+            @Override public void run() {
                String zipFile = t.download(config.programDir, config.OS);
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      config.gui.progressBar_setValue(0);
                      config.gui.setTitle(config.kmttg);
@@ -172,7 +164,6 @@ public class update {
                      writeToolsVersion(installedVersionFile, version);
                   }
                }
-               return null;
             }
          };
          backgroundRun b = new backgroundRun(version);

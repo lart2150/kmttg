@@ -19,48 +19,47 @@
 package com.tivo.kmttg.gui.table;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Hashtable;
 
+import javax.swing.JTable;
+
+import com.tivo.kmttg.gui.comparator.DoubleComparator;
+import com.tivo.kmttg.gui.comparator.DurationComparator;
 import com.tivo.kmttg.gui.sortable.sortableDouble;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
-
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.util.Callback;
+import com.tivo.kmttg.gui.swing.KmttgTable;
+import com.tivo.kmttg.gui.swing.KmttgTableModel;
 
 public class bitrateTable {
-   private String[] TITLE_cols = {"CHANNEL", "SIZE (GB)", "TIME", "RATE (Mbps)", "RATE (GB/hour)"};
+   // Model column names map to getXXX() getters via reflection; header text
+   // (with spaces/parens) is applied separately below.
+   private String[] TITLE_cols = {"CHANNEL", "SIZE_GB", "TIME", "RATE_Mbps", "RATE_GB_hour"};
+   private String[] HEADER_cols = {"CHANNEL", "SIZE (GB)", "TIME", "RATE (Mbps)", "RATE (GB/hour)"};
    private double[] weights = {20, 20, 20, 20, 20};
-   public TableView<Tabentry> TABLE = null;
+   public JTable TABLE = null;
+   public KmttgTableModel<Tabentry> MODEL = null;
 
    public bitrateTable() {
-      TABLE = new TableView<Tabentry>();
-      TABLE.setEditable(false);
-      for (String colName : TITLE_cols) {
+      MODEL = new KmttgTableModel<Tabentry>(TITLE_cols);
+      for (String cName : TITLE_cols) {
          // NOTE: cName defines get<cName> method to use in Tabentry class
-         String cName = colName.replaceAll(" ", "_");
-         cName = cName.replaceAll("\\(", "");
-         cName = cName.replaceAll("\\)", "");
-         cName = cName.replaceAll("/", "_");
          if (cName.equals("CHANNEL")) {
-            TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(cName));
-            TABLE.getColumns().add(col);
+            // Regular String sort
+         }
+         else if (cName.equals("TIME")) {
+            MODEL.setComparator(cName, new DurationComparator());
          }
          else {
-            TableColumn<Tabentry,Double> col = new TableColumn<Tabentry,Double>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,Double>(cName));
-            col.setComparator(new DoubleComparator());
-            if (cName.equals("TIME"))
-               col.setCellFactory(new DurationCellFactory());
-            else
-               col.setCellFactory(new DoubleCellFactory());
-            TABLE.getColumns().add(col);
+            MODEL.setComparator(cName, new DoubleComparator());
          }
-      }            
+      }
+      TABLE = KmttgTable.create(MODEL, null);
+      // Apply display header text
+      for (int i=0; i<TITLE_cols.length; ++i) {
+         int view = TABLE.convertColumnIndexToView(i);
+         if (view >= 0)
+            TABLE.getColumnModel().getColumn(view).setHeaderValue(HEADER_cols[i]);
+      }
       TableUtil.setWeights(TABLE, TITLE_cols, weights, true);
    }
 
@@ -83,55 +82,20 @@ public class bitrateTable {
          return channel;
       }
 
-      public Double getSIZE_GB() {
-         return bytes.sortable;
+      public sortableDouble getSIZE_GB() {
+         return bytes;
       }
 
-      public Double getTIME() {
-         return duration.sortable.doubleValue();
+      public sortableDuration getTIME() {
+         return duration;
       }
 
-      public Double getRATE_Mbps() {
-         return mbps.sortable;
+      public sortableDouble getRATE_Mbps() {
+         return mbps;
       }
 
-      public Double getRATE_GB_hour() {
-         return GBph.sortable;
-      }
-   }
-
-   public class DoubleCellFactory implements Callback<TableColumn<Tabentry, Double>, TableCell<Tabentry, Double>> {
-      public TableCell<Tabentry, Double> call(TableColumn<Tabentry, Double> param) {
-         TableCell<Tabentry, Double> cell = new TableCell<Tabentry, Double>() {
-            @Override
-            public void updateItem(final Double item, boolean empty) {
-               if (item != null) {
-                  setText(new sortableDouble(item).toString());
-               }
-            }
-         };
-         return cell;
-      }
-   }   
-
-   public class DurationCellFactory implements Callback<TableColumn<Tabentry, Double>, TableCell<Tabentry, Double>> {
-      public TableCell<Tabentry, Double> call(TableColumn<Tabentry, Double> param) {
-         TableCell<Tabentry, Double> cell = new TableCell<Tabentry, Double>() {
-            @Override
-            public void updateItem(final Double item, boolean empty) {
-               if (item != null) {
-                  setText(new sortableDuration(item.longValue()).toString());
-               }
-            }
-         };
-         return cell;
-      }
-   }   
-
-   // Define custom column sorting routines
-   public class DoubleComparator implements Comparator<Double> {
-      public int compare(Double o1, Double o2) {
-         return o1 < o2 ? -1 : o1 == o2 ? 0 : 1;
+      public sortableDouble getRATE_GB_hour() {
+         return GBph;
       }
    }
 
@@ -145,7 +109,7 @@ public class bitrateTable {
    }
 
    public void AddRow(String channel, Hashtable<String,Double> data) {
-      TABLE.getItems().add(new Tabentry(channel, data.get("bytes"), data.get("duration")));
+      MODEL.addRow(new Tabentry(channel, data.get("bytes"), data.get("duration")));
    }
 
    // Mbps = (bytes*8)/(1e6*secs)

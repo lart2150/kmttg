@@ -27,8 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import javafx.application.Platform;
-
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.kmttg;
 
@@ -102,7 +101,7 @@ public class log {
          s = filterMAK(s);
          if (config.GUIMODE) {
             final String s_final = s;
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override public void run() {
                   config.gui.text_print(s_final);
                }
@@ -128,7 +127,7 @@ public class log {
          s = filterMAK(s);
          if (config.GUIMODE) {
             final String s_final = s;
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override public void run() {
                   config.gui.text_warn(s_final);
                }
@@ -154,7 +153,7 @@ public class log {
          s = filterMAK(s);
          if (config.GUIMODE) {
             final String s_final = s;
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override public void run() {
                   config.gui.text_error(s_final);
                }
@@ -177,7 +176,7 @@ public class log {
    public static void print(final Stack<String> s) {
       if (s != null && s.size() > 0) {
          if (config.GUIMODE) {
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override public void run() {
                   config.gui.text_print(s);
                }
@@ -199,7 +198,7 @@ public class log {
    public static void warn(final Stack<String> s) {
       if (s != null && s.size() > 0) {
          if (config.GUIMODE) {
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override public void run() {
                   config.gui.text_warn(s);
                }
@@ -221,7 +220,7 @@ public class log {
    public static void error(final Stack<String> s) {
       if (s != null && s.size() > 0) {
          if (config.GUIMODE) {
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override public void run() {
                   config.gui.text_error(s);
                }

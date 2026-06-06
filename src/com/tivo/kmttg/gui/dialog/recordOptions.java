@@ -18,35 +18,39 @@
  */
 package com.tivo.kmttg.gui.dialog;
 
-import java.util.Optional;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.TwoWayHashmap;
 import com.tivo.kmttg.util.log;
 
 public class recordOptions {
-   VBox components;
-   Label label;
-   ChoiceBox<String> record, number, until, start, stop;
-   CheckBox anywhere;
+   JPanel components;
+   JLabel label;
+   JComboBox<String> record, number, until, start, stop;
+   JCheckBox anywhere;
    TwoWayHashmap<String,String> untilHash = new TwoWayHashmap<String,String>();
    TwoWayHashmap<String,Integer> startHash = new TwoWayHashmap<String,Integer>();
    TwoWayHashmap<String,Integer> stopHash = new TwoWayHashmap<String,Integer>();
-   
-   public recordOptions() {            
+
+   public recordOptions() {
       untilHash.add("Space needed",   "fifo");
       untilHash.add("Until I delete", "forever");
-      
+
       startHash.add("On time",          0);
       startHash.add("1 minute early",   60);
       startHash.add("2 minutes early",  120);
@@ -54,7 +58,7 @@ public class recordOptions {
       startHash.add("4 minutes early",  240);
       startHash.add("5 minutes early",  300);
       startHash.add("10 minutes early", 600);
-      
+
       stopHash.add("On time",          0);
       stopHash.add("1 minute late",   60);
       stopHash.add("2 minutes late",  120);
@@ -67,71 +71,98 @@ public class recordOptions {
       stopHash.add("60 minutes late", 3600);
       stopHash.add("90 minutes late", 5400);
       stopHash.add("180 minutes late", 10800);
-      
-      createComponents();      
-   }
-   
-   private void createComponents() {
-      label = new Label();
-      label.setText("");
-      until = new ChoiceBox<String>();
-      until.getItems().addAll("Space needed", "Until I delete");
-      until.setValue("Space needed");
 
-      start = new ChoiceBox<String>();
-      start.getItems().addAll(
+      createComponents();
+   }
+
+   private void createComponents() {
+      label = new JLabel();
+      label.setText("");
+      until = new JComboBox<String>();
+      until.addItem("Space needed");
+      until.addItem("Until I delete");
+      until.setSelectedItem("Space needed");
+
+      start = new JComboBox<String>();
+      String[] startItems = {
          "On time", "1 minute early", "2 minutes early", "3 minutes early",
          "4 minutes early", "5 minutes early", "10 minutes early"
-      );
-      start.setValue("On time");
+      };
+      for (String s : startItems)
+         start.addItem(s);
+      start.setSelectedItem("On time");
 
-      stop = new ChoiceBox<String>();
-      stop.getItems().addAll(
+      stop = new JComboBox<String>();
+      String[] stopItems = {
          "On time", "1 minute late", "2 minutes late", "3 minutes late",
          "4 minutes late", "5 minutes late", "10 minutes late",
          "15 minutes late", "30 minutes late", "60 minutes late",
          "90 minutes late", "180 minutes late"
-      );
-      stop.setValue("On time");
-      anywhere = new CheckBox();
+      };
+      for (String s : stopItems)
+         stop.addItem(s);
+      stop.setSelectedItem("On time");
+      anywhere = new JCheckBox();
       anywhere.setText("Try scheduling on all TiVos");
       anywhere.setSelected(false);
 
-      components = new VBox();
-      components.setSpacing(5);
-      components.getChildren().addAll(
-         label,
-         new Label("Keep until"),      until,
-         new Label("Start recording"), start,
-         new Label("Stop recording"),  stop,
-         anywhere
-      );
+      components = new JPanel();
+      components.setLayout(new BoxLayout(components, BoxLayout.Y_AXIS));
+      components.add(label);
+      components.add(new JLabel("Keep until"));      components.add(until);
+      components.add(new JLabel("Start recording")); components.add(start);
+      components.add(new JLabel("Stop recording"));  components.add(stop);
+      components.add(anywhere);
    }
-   
-   @SuppressWarnings("static-access")
+
    public JSONObject promptUser(String title, JSONObject json) {
       try {
          if (json != null)
             setValues(json);
          label.setText(title);
-         Dialog<?> dialog = new Dialog<>();
-         dialog.initOwner(config.gui.getFrame());
-         config.gui.LoadIcons((Stage) dialog.getDialogPane().getScene().getWindow());
-         config.gui.setFontSize(dialog, config.FontSize);
-         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+         final JDialog dialog = new JDialog(config.gui.getFrame());
+         dialog.setModal(true);
+         SwingUtil.loadIcons(dialog);
          dialog.setTitle("Recording Options");
-         dialog.getDialogPane().setContent(components);
-         Optional<?> response = dialog.showAndWait();
-         if (response != null && response.get().equals(ButtonType.OK)) {
+
+         final AtomicBoolean ok = new AtomicBoolean(false);
+         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+         JButton okButton = new JButton("OK");
+         okButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               ok.set(true);
+               dialog.setVisible(false);
+            }
+         });
+         JButton cancelButton = new JButton("CANCEL");
+         cancelButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               ok.set(false);
+               dialog.setVisible(false);
+            }
+         });
+         buttons.add(okButton);
+         buttons.add(cancelButton);
+
+         JPanel root = new JPanel(new java.awt.BorderLayout());
+         root.add(components, java.awt.BorderLayout.CENTER);
+         root.add(buttons, java.awt.BorderLayout.SOUTH);
+         dialog.getContentPane().add(root);
+         dialog.pack();
+         dialog.setLocationRelativeTo(config.gui.getFrame());
+         dialog.setVisible(true);
+         dialog.dispose();
+
+         if (ok.get()) {
             // NOTE: Make a copy of json so we don't change existing one
             JSONObject j;
             if (json == null)
                j = new JSONObject();
             else
                j = new JSONObject(json.toString());
-            j.put("keepBehavior",     untilHash.getV((String)until.getValue()));
-            j.put("startTimePadding", startHash.getV((String)start.getValue()));
-            j.put("endTimePadding",   stopHash.getV((String)stop.getValue()));
+            j.put("keepBehavior",     untilHash.getV((String)until.getSelectedItem()));
+            j.put("startTimePadding", startHash.getV((String)start.getSelectedItem()));
+            j.put("endTimePadding",   stopHash.getV((String)stop.getSelectedItem()));
             if (anywhere.isSelected())
                j.put("_anywhere_", "true");
             return j;
@@ -143,19 +174,19 @@ public class recordOptions {
          return null;
       }
    }
-   
+
    public void setValues(JSONObject json) {
       try {
          if(json.has("keepBehavior"))
-            until.setValue(untilHash.getK(json.getString("keepBehavior")));
+            until.setSelectedItem(untilHash.getK(json.getString("keepBehavior")));
          if(json.has("startTimePadding"))
-            start.setValue(startHash.getK(json.getInt("startTimePadding")));
+            start.setSelectedItem(startHash.getK(json.getInt("startTimePadding")));
          else if(json.has("requestedStartPadding"))
-            start.setValue(startHash.getK(json.getInt("requestedStartPadding")));
+            start.setSelectedItem(startHash.getK(json.getInt("requestedStartPadding")));
          if(json.has("endTimePadding"))
-            stop.setValue(stopHash.getK(json.getInt("endTimePadding")));
+            stop.setSelectedItem(stopHash.getK(json.getInt("endTimePadding")));
          else if(json.has("requestedEndPadding"))
-            stop.setValue(stopHash.getK(json.getInt("requestedEndPadding")));
+            stop.setSelectedItem(stopHash.getK(json.getInt("requestedEndPadding")));
          if (json.has("anywhere")) {
             if (json.getString("anywhere").equals("true"))
                anywhere.setSelected(true);
@@ -166,13 +197,13 @@ public class recordOptions {
          log.error("recordOptions.setValues - " + e.getMessage());
       }
    }
-   
+
    public JSONObject getValues() {
       JSONObject json = new JSONObject();
       try {
-         json.put("keepBehavior", untilHash.getV((String)until.getValue()));
-         json.put("startTimePadding", startHash.getV((String)start.getValue()));
-         json.put("endTimePadding", stopHash.getV((String)stop.getValue()));
+         json.put("keepBehavior", untilHash.getV((String)until.getSelectedItem()));
+         json.put("startTimePadding", startHash.getV((String)start.getSelectedItem()));
+         json.put("endTimePadding", stopHash.getV((String)stop.getSelectedItem()));
          if (anywhere.isSelected())
             json.put("anywhere", "true");
          else

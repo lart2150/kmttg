@@ -31,9 +31,6 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javafx.concurrent.Task;
-import javafx.embed.swing.JFXPanel;
-
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -42,7 +39,6 @@ import com.tivo.kmttg.util.string;
 
 public class encodeConfig {
    private static Boolean encodeName_reset = true;
-   private static Boolean panel = false;
 
    // Determine list of encoding profiles to use
    public static void parseEncodingProfiles() {
@@ -102,19 +98,10 @@ public class encodeConfig {
             if (config.gui != null) {
                // In GUI mode add VRD encoding profiles in background/threaded mode
                // since this can take several seconds and would hang up GUI
-               // The JFXPanel() call is a hack to initialize toolkit if it's not ready
-               if (! panel) {
-                  new JFXPanel();
-                  panel = true;
-               }
-               Task<Boolean> worker = new Task<Boolean>() {
-                  @Override
-                  public Boolean call() {
-                    return getVrdProfiles();
-                  }
-                  public void done() {
+               Runnable worker = new Runnable() {
+                  public void run() {
                     try {
-                       if ( get() ) {
+                       if ( getVrdProfiles() ) {
                           // Refresh Encoding Profile combo box
                           log.warn("VideoRedo Profiles refreshed");
                           config.gui.SetEncodings(getValidEncodeNames());

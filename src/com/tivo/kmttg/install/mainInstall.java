@@ -18,15 +18,9 @@
  */
 package com.tivo.kmttg.install;
 
-import java.util.Optional;
+import javax.swing.JOptionPane;
 
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.Alert.AlertType;
-
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.file;
 
@@ -38,18 +32,17 @@ public class mainInstall {
       // for windows & mac only
       if ( ! file.isFile(config.ffmpeg) ) {
          if (config.OS.equals("windows") || config.OS.equals("mac")) {
-            Alert alert = new Alert(AlertType.CONFIRMATION);
-            alert.setTitle("Confirm");
-            config.gui.setFontSize(alert, config.FontSize);
-            alert.setContentText("Required tools not detected. Download and install them?");
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.get() == ButtonType.OK) {
-               Task<Void> task = new Task<Void>() {
-                  @Override public Void call() {
+            boolean confirmation = JOptionPane.showConfirmDialog(
+               config.gui==null?null:config.gui.getFrame(),
+               "Required tools not detected. Download and install them?", "Confirm",
+               JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION;
+            if (confirmation) {
+               Runnable task = new Runnable() {
+                  @Override public void run() {
                      final String dir = config.programDir; // Install where jar file is
                      toolDownload t = new toolDownload();
                      final String download = t.download(dir, config.OS);
-                     Platform.runLater(new Runnable() {
+                     SwingUtil.runLater(new Runnable() {
                         @Override public void run() {
                            config.gui.progressBar_setValue(0);
                            config.gui.setTitle(config.kmttg);
@@ -75,7 +68,6 @@ public class mainInstall {
                            }
                         }
                      });
-                     return null;
                   }
                };
                new Thread(task).start();
@@ -85,19 +77,18 @@ public class mainInstall {
       
       // Prompt for MAK if not set
       if (config.MAK == null || config.MAK.length() != 10) {
-         Platform.runLater(new Runnable() {
+         SwingUtil.runLater(new Runnable() {
             @Override public void run() {
                String prompt = "Enter your 10 digit Tivo Media Acess Key (MAK):\n";
                prompt += "\nYou can find it on any of your Tivos under";
                prompt += "\nTivo Central-Messages&Settings-Account&System Information-Media Access Key";
-               TextInputDialog d = new TextInputDialog("");
-               d.setTitle("Enter 10 digit MAK");
-               d.setHeaderText(prompt);
-               Optional<String> result = d.showAndWait();
-               if (result.isPresent()){
-                   if (result.get().length() > 0) {
-                      config.MAK = result.get();
-                      config.save();                      
+               String result = JOptionPane.showInputDialog(
+                  config.gui==null?null:config.gui.getFrame(),
+                  prompt, "Enter 10 digit MAK", JOptionPane.QUESTION_MESSAGE);
+               if (result != null){
+                   if (result.length() > 0) {
+                      config.MAK = result;
+                      config.save();
                    }
                }
             }

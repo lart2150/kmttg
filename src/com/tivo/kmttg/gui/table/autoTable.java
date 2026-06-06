@@ -18,36 +18,32 @@
  */
 package com.tivo.kmttg.gui.table;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+
+import javax.swing.JTable;
+
 import com.tivo.kmttg.gui.dialog.autoTableEntry;
+import com.tivo.kmttg.gui.swing.KmttgTable;
+import com.tivo.kmttg.gui.swing.KmttgTableModel;
 import com.tivo.kmttg.main.autoConfig;
 import com.tivo.kmttg.main.autoEntry;
 import com.tivo.kmttg.util.log;
 
-import javafx.event.EventHandler;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-
 public class autoTable {
-   public TableView<Tabentry> TABLE = null;
+   private String[] TITLE_cols = {"Type", "Keywords"};
+   public JTable TABLE = null;
+   public KmttgTableModel<Tabentry> MODEL = null;
 
    public autoTable() {
-      TABLE = new TableView<Tabentry>();
-      //TABLE.setEditable(false);
-      TableColumn<Tabentry,autoTableEntry> col1 = new TableColumn<Tabentry,autoTableEntry>("Type");
-      col1.setCellValueFactory(new PropertyValueFactory<Tabentry,autoTableEntry>("Type"));
-      col1.setComparator(null); // Disable column sorting
-      TABLE.getColumns().add(col1);
-      TableColumn<Tabentry,String> col2 = new TableColumn<Tabentry,String>("Keywords");
-      col2.setCellValueFactory(new PropertyValueFactory<Tabentry,String>("Keywords"));
-      col2.setComparator(null); // Disable column sorting
-      TABLE.getColumns().add(col2);
+      MODEL = new KmttgTableModel<Tabentry>(TITLE_cols);
+      MODEL.setSortingEnabled(false); // Row order is meaningful
+      TABLE = KmttgTable.create(MODEL, null);
 
       // Add keyboard listener
-      TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {
-         public void handle(KeyEvent e) {
+      TABLE.addKeyListener(new KeyAdapter() {
+         @Override
+         public void keyPressed(KeyEvent e) {
             KeyPressed(e);
          }
       });
@@ -74,44 +70,45 @@ public class autoTable {
          return keywords;
       }
    }
-   
+
    public autoEntry GetRowData(int row) {
-      if (row >= TABLE.getItems().size())
+      if (row >= MODEL.size())
          return null;
-      return TABLE.getItems().get(row).getType().entry;
+      return MODEL.getRow(row).getType().entry;
    }
-   
+
    public int[] getSelectedRows() {
       return TableUtil.GetSelectedRows(TABLE);
    }
-   
+
    private void InsertRow(int row, autoEntry entry) {
-      TABLE.getItems().add(row, new Tabentry(entry));
+      MODEL.getRows().add(row, new Tabentry(entry));
+      MODEL.fireTableRowsInserted(row, row);
    }
-   
+
    public void RemoveRow(int row) {
-      TABLE.getItems().remove(row);
+      MODEL.removeRow(row);
       resize();
    }
 
    public void clear() {
-      TABLE.getItems().clear();
+      MODEL.clear();
    }
 
    public void AddRow(autoEntry entry) {
-      TABLE.getItems().add(new Tabentry(entry));
+      MODEL.addRow(new Tabentry(entry));
       resize();
    }
-   
+
    public void resize() {
       TableUtil.autoSizeTableViewColumns(TABLE, true);
    }
-   
+
    private void KeyPressed(KeyEvent e) {
       if (e.isControlDown())
          return;
-      KeyCode keyCode = e.getCode();
-      if (keyCode == KeyCode.UP) {
+      int keyCode = e.getKeyCode();
+      if (keyCode == KeyEvent.VK_UP) {
          // Move selected row up
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 0) {
@@ -128,7 +125,7 @@ public class autoTable {
             }
          }
       }
-      else if (keyCode == KeyCode.DOWN) {
+      else if (keyCode == KeyEvent.VK_DOWN) {
          // Move selected row down
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 0) {
@@ -138,11 +135,11 @@ public class autoTable {
          int row;
          for (int i=0; i<selected.length; ++i) {
             row = selected[i];
-            if (row < TABLE.getItems().size()-1) {
+            if (row < MODEL.size()-1) {
                autoEntry entry = GetRowData(row);
                RemoveRow(row);
                InsertRow(row+1, entry);
-               TABLE.getSelectionModel().select(row);
+               TABLE.addRowSelectionInterval(row, row);
             }
          }
       }
