@@ -8,3 +8,8 @@
 /css
 /cdata.*
 /*.jar
+/build
+# Third party jars are downloaded by Gradle, not committed - except the
+# tivo-libre decoder which is not published to Maven Central.
+/lib/*.jar
+!/lib/tivo-libre.jar
