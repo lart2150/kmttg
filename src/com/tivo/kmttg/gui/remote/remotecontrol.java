@@ -18,6 +18,16 @@
  */
 package com.tivo.kmttg.gui.remote;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -27,10 +37,23 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Stack;
 
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.JSON.JSONTokener;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.telnet;
 import com.tivo.kmttg.rpc.Remote;
@@ -38,99 +61,78 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-
 public class remotecontrol {
-   public VBox panel = null;
-   public ChoiceBox<String> tivo = null;
-   public ChoiceBox<String> hme = null;
-   public ChoiceBox<String> hme_sps = null;
-   public TextField jumpto_text = null;
-   public TextField jumpahead_text = null;
-   public TextField jumpback_text = null;
+   public JPanel panel = null;
+   public JComboBox<String> tivo = null;
+   public JComboBox<String> hme = null;
+   public JComboBox<String> hme_sps = null;
+   public JTextField jumpto_text = null;
+   public JTextField jumpahead_text = null;
+   public JTextField jumpback_text = null;
    public Boolean cc_state = false;
-   
+
    // These buttons selectively disabled
-   public Button hme_button = null;
-   public Button sps_button = null;
-   public Button jumpto_button = null;
-   public Button jumpahead_button = null;
-   public Button jumpback_button = null;
-   String background = config.gui.getWebColor(Color.BLACK);
-   String text_color = config.gui.getWebColor(Color.WHITE);
-   
-   public remotecontrol (final Stage frame) {
+   public JButton hme_button = null;
+   public JButton sps_button = null;
+   public JButton jumpto_button = null;
+   public JButton jumpahead_button = null;
+   public JButton jumpback_button = null;
+   Color background = Color.BLACK;
+   Color text_color = Color.WHITE;
+
+   public remotecontrol (final JFrame frame) {
       // Remote Control Tab items
-      panel = new VBox();
-      panel.setStyle("-fx-background-color: " + background);
-      
-      Pane panel_controls = new Pane();
-      panel_controls.setStyle("-fx-background-color: " + background);
-      
+      panel = new JPanel();
+      panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+      panel.setBackground(background);
+      panel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+
+      JPanel panel_controls = new JPanel();
+      panel_controls.setLayout(null); // absolute positioning (was JavaFX Pane)
+      panel_controls.setBackground(background);
+
       // TiVo Remote control panel
       final Object[][] Buttons = {
-         {"back",        "back.png",         0.6,  20,   0,  0, 0, "AltZ",      KeyCode.K},
-         {"channelUp",   "channel_up.png",   0.5,  20,  25,  0, 0, "PAGE_UP",   KeyCode.PAGE_UP},
+         {"back",        "back.png",         0.6,  20,   0,  0, 0, "AltZ",      KeyEvent.VK_K},
+         {"channelUp",   "channel_up.png",   0.5,  20,  25,  0, 0, "PAGE_UP",   KeyEvent.VK_PAGE_UP},
          {"lab_channel", "channel_label.png",0.7,  20,  55,  0, 0, null,        null},
-         {"channelDown", "channel_down.png", 0.5,  20,  70,  0, 0, "PAGE_DOWN", KeyCode.PAGE_DOWN},
-         {"left",        "left.png",         0.5,  15,  85, 20, 0, "LEFT",      KeyCode.LEFT},
-         {"zoom",        "zoom.png",         0.7,  20, 130,  0, 0, "AltZ",      KeyCode.Z},
-         {"tivo",        "tivo.png",         0.7,  60,   0,  0, 0, "AltT",      KeyCode.T},
-         {"up",          "up.png",           0.5,  65,  40, 20, 0, "UP",        KeyCode.UP},
-         {"select",      "select.png",       0.5,  70,  85,  0, 0, "AltS",      KeyCode.S},
-         {"down",        "down.png",         0.5,  65, 125, 20, 0, "DOWN",      KeyCode.DOWN},
-         {"liveTv",      "livetv.png",       0.7, 115,  20,  0, 0, "AltL",      KeyCode.L},
-         {"info",        "info.png",         0.7, 115,  55,  0, 0, "AltI",      KeyCode.I},
-         {"right",       "right.png",        0.5, 120,  85, 20, 0, "RIGHT",     KeyCode.RIGHT},
-         {"guide",       "guide.png",        0.7, 115, 130,  0, 0, "AltG",      KeyCode.G},
-         {"num1",        "1.png",            0.7, 200,   0, 10, 0, "1",         KeyCode.DIGIT1},
-         {"num2",        "2.png",            0.7, 245,   0, 10, 0, "2",         KeyCode.DIGIT2},
-         {"num3",        "3.png",            0.7, 290,   0, 10, 0, "3",         KeyCode.DIGIT3},
-         {"num4",        "4.png",            0.7, 200,  35, 10, 0, "4",         KeyCode.DIGIT4},
-         {"num5",        "5.png",            0.7, 245,  35, 10, 0, "5",         KeyCode.DIGIT5},
-         {"num6",        "6.png",            0.7, 290,  35, 10, 0, "6",         KeyCode.DIGIT6},
-         {"num7",        "7.png",            0.7, 200,  70, 10, 0, "7",         KeyCode.DIGIT7},
-         {"num8",        "8.png",            0.7, 245,  70, 10, 0, "8",         KeyCode.DIGIT8},
-         {"num9",        "9.png",            0.7, 290,  70, 10, 0, "9",         KeyCode.DIGIT9},
-         {"clear",       "clear.png",        0.7, 200, 105, 10, 0, "DELETE",    KeyCode.DELETE},
-         {"num0",        "0.png",            0.7, 245, 105, 10, 0, "0",         KeyCode.DIGIT0},
-         {"enter",       "enter.png",        0.7, 290, 105, 10, 0, "ENTER",     KeyCode.ENTER},
-         {"actionA",     "A.png",            0.7, 185, 135, 10, 0, "AltA",      KeyCode.A},
-         {"actionB",     "B.png",            0.7, 225, 135, 10, 0, "AltB",      KeyCode.B},
-         {"actionC",     "C.png",            0.7, 265, 135, 10, 0, "AltC",      KeyCode.C},
-         {"actionD",     "D.png",            0.7, 305, 135, 10, 0, "AltD",      KeyCode.D},
-         {"thumbsDown",  "thumbsdown.png",   0.7, 355,   0, 10, 0, "SUBTRACT",  KeyCode.SUBTRACT},
-         {"reverse",     "reverse.png",      0.5, 355,  55, 10, 0, "AltLEFT",   KeyCode.LEFT},
-         {"replay",      "replay.png",       0.7, 355, 105, 10, 0, "Alt9",      KeyCode.DIGIT9},
-         {"play",        "play.png",         0.7, 400,  10, 20, 0, "Alt]",      KeyCode.CLOSE_BRACKET},
-         {"pause",       "pause.png",        0.4, 400,  50, 10, 0, "Alt[",      KeyCode.OPEN_BRACKET},
-         {"slow",        "slow.png",         0.7, 400,  90, 20, 0, "Alt\\",     KeyCode.BACK_SLASH},
-         {"record",      "record.png",       0.7, 400, 130, 10, 0, "AltR",      KeyCode.R},
-         {"thumbsUp",    "thumbsup.png",     0.7, 445,   0, 10, 0, "ADD",       KeyCode.ADD},
-         {"forward",     "forward.png",      0.5, 445,  55, 10, 0, "AltRIGHT",  KeyCode.RIGHT},
-         {"advance",     "advance.png",      0.7, 445, 105, 10, 0, "Alt0",      KeyCode.DIGIT0},
+         {"channelDown", "channel_down.png", 0.5,  20,  70,  0, 0, "PAGE_DOWN", KeyEvent.VK_PAGE_DOWN},
+         {"left",        "left.png",         0.5,  15,  85, 20, 0, "LEFT",      KeyEvent.VK_LEFT},
+         {"zoom",        "zoom.png",         0.7,  20, 130,  0, 0, "AltZ",      KeyEvent.VK_Z},
+         {"tivo",        "tivo.png",         0.7,  60,   0,  0, 0, "AltT",      KeyEvent.VK_T},
+         {"up",          "up.png",           0.5,  65,  40, 20, 0, "UP",        KeyEvent.VK_UP},
+         {"select",      "select.png",       0.5,  70,  85,  0, 0, "AltS",      KeyEvent.VK_S},
+         {"down",        "down.png",         0.5,  65, 125, 20, 0, "DOWN",      KeyEvent.VK_DOWN},
+         {"liveTv",      "livetv.png",       0.7, 115,  20,  0, 0, "AltL",      KeyEvent.VK_L},
+         {"info",        "info.png",         0.7, 115,  55,  0, 0, "AltI",      KeyEvent.VK_I},
+         {"right",       "right.png",        0.5, 120,  85, 20, 0, "RIGHT",     KeyEvent.VK_RIGHT},
+         {"guide",       "guide.png",        0.7, 115, 130,  0, 0, "AltG",      KeyEvent.VK_G},
+         {"num1",        "1.png",            0.7, 200,   0, 10, 0, "1",         KeyEvent.VK_1},
+         {"num2",        "2.png",            0.7, 245,   0, 10, 0, "2",         KeyEvent.VK_2},
+         {"num3",        "3.png",            0.7, 290,   0, 10, 0, "3",         KeyEvent.VK_3},
+         {"num4",        "4.png",            0.7, 200,  35, 10, 0, "4",         KeyEvent.VK_4},
+         {"num5",        "5.png",            0.7, 245,  35, 10, 0, "5",         KeyEvent.VK_5},
+         {"num6",        "6.png",            0.7, 290,  35, 10, 0, "6",         KeyEvent.VK_6},
+         {"num7",        "7.png",            0.7, 200,  70, 10, 0, "7",         KeyEvent.VK_7},
+         {"num8",        "8.png",            0.7, 245,  70, 10, 0, "8",         KeyEvent.VK_8},
+         {"num9",        "9.png",            0.7, 290,  70, 10, 0, "9",         KeyEvent.VK_9},
+         {"clear",       "clear.png",        0.7, 200, 105, 10, 0, "DELETE",    KeyEvent.VK_DELETE},
+         {"num0",        "0.png",            0.7, 245, 105, 10, 0, "0",         KeyEvent.VK_0},
+         {"enter",       "enter.png",        0.7, 290, 105, 10, 0, "ENTER",     KeyEvent.VK_ENTER},
+         {"actionA",     "A.png",            0.7, 185, 135, 10, 0, "AltA",      KeyEvent.VK_A},
+         {"actionB",     "B.png",            0.7, 225, 135, 10, 0, "AltB",      KeyEvent.VK_B},
+         {"actionC",     "C.png",            0.7, 265, 135, 10, 0, "AltC",      KeyEvent.VK_C},
+         {"actionD",     "D.png",            0.7, 305, 135, 10, 0, "AltD",      KeyEvent.VK_D},
+         {"thumbsDown",  "thumbsdown.png",   0.7, 355,   0, 10, 0, "SUBTRACT",  KeyEvent.VK_SUBTRACT},
+         {"reverse",     "reverse.png",      0.5, 355,  55, 10, 0, "AltLEFT",   KeyEvent.VK_LEFT},
+         {"replay",      "replay.png",       0.7, 355, 105, 10, 0, "Alt9",      KeyEvent.VK_9},
+         {"play",        "play.png",         0.7, 400,  10, 20, 0, "Alt]",      KeyEvent.VK_CLOSE_BRACKET},
+         {"pause",       "pause.png",        0.4, 400,  50, 10, 0, "Alt[",      KeyEvent.VK_OPEN_BRACKET},
+         {"slow",        "slow.png",         0.7, 400,  90, 20, 0, "Alt\\",     KeyEvent.VK_BACK_SLASH},
+         {"record",      "record.png",       0.7, 400, 130, 10, 0, "AltR",      KeyEvent.VK_R},
+         {"thumbsUp",    "thumbsup.png",     0.7, 445,   0, 10, 0, "ADD",       KeyEvent.VK_ADD},
+         {"forward",     "forward.png",      0.5, 445,  55, 10, 0, "AltRIGHT",  KeyEvent.VK_RIGHT},
+         {"advance",     "advance.png",      0.7, 445, 105, 10, 0, "Alt0",      KeyEvent.VK_0},
       };
 
       for (int i=0; i<Buttons.length; ++i) {
@@ -142,17 +144,17 @@ public class remotecontrol {
          int cropx = (Integer)Buttons[i][5];
          int cropy = (Integer)Buttons[i][6];
          String keyName = (String)Buttons[i][7];
-         KeyCode keyCode = (KeyCode)Buttons[i][8];
+         Integer keyCode = (Integer)Buttons[i][8];
          if (event.startsWith("lab_")) {
-            Label l = ImageLabel(imageName, scale);
+            JLabel l = ImageLabel(imageName, scale);
             if (l == null) continue;
-            l.setLayoutX(x);
-            l.setLayoutY(y);
-            panel_controls.getChildren().add(l);
+            Dimension pref = l.getPreferredSize();
+            l.setBounds(x, y, pref.width, pref.height);
+            panel_controls.add(l);
          } else {
-            Button b = ImageButton(imageName, scale);
+            JButton b = ImageButton(imageName, scale);
             if (b == null) continue;
-            b.setTooltip(tooltip.getToolTip(event));
+            b.setToolTipText(tooltip.getToolTip(event));
             if (event.equals("left"))
                AddButtonShortcut(b, keyName, keyCode);
             if (event.equals("right"))
@@ -161,25 +163,23 @@ public class remotecontrol {
                AddButtonShortcut(b, keyName, keyCode);
             if (event.equals("down"))
                AddButtonShortcut(b, keyName, keyCode);
-            panel_controls.getChildren().add(b);
-            b.setLayoutX(x);
-            b.setLayoutY(y);
-            b.setPrefWidth(b.getPrefWidth()-cropx);
-            b.setPrefHeight(b.getPrefHeight()-cropy);
-            b.setOnAction(new EventHandler<ActionEvent>() {
-               public void handle(ActionEvent e) {
+            panel_controls.add(b);
+            Dimension pref = b.getPreferredSize();
+            b.setBounds(x, y, pref.width-cropx, pref.height-cropy);
+            b.addActionListener(new ActionListener() {
+               public void actionPerformed(ActionEvent e) {
                   // Set focus on tabbed_panel
-                  Platform.runLater(new Runnable() {
+                  SwingUtil.runLater(new Runnable() {
                      @Override
                      public void run() {
                         if (config.gui.remote_gui != null)
-                           config.gui.remote_gui.tabbed_panel.requestFocus();
+                           config.gui.remote_gui.tabbed_panel.requestFocusInWindow();
                      }
                   });
-                  final String tivoName = (String)tivo.getValue();
+                  final String tivoName = (String)tivo.getSelectedItem();
                   if (tivoName != null && tivoName.length() > 0) {
-                     Task<Void> task = new Task<Void>() {
-                        @Override public Void call() {
+                     Runnable task = new Runnable() {
+                        @Override public void run() {
                            if (config.rpcEnabled(tivoName)) {
                               Remote r = config.initRemote(tivoName);
                               if (r.success) {
@@ -197,13 +197,12 @@ public class remotecontrol {
                               new telnet(config.TIVOS.get(tivoName), mapToTelnet(new String[] {event}));
                            }
                            // Set focus on tabbed_panel
-                           Platform.runLater(new Runnable() {
+                           SwingUtil.runLater(new Runnable() {
                               @Override
                               public void run() {
-                                 config.gui.remote_gui.tabbed_panel.requestFocus();
+                                 config.gui.remote_gui.tabbed_panel.requestFocusInWindow();
                               }
                            });
-                           return null;
                         }
                      };
                      new Thread(task).start();
@@ -215,23 +214,21 @@ public class remotecontrol {
             }
          }
       }
-      
+
       // Special buttons
-      Button standby = new CustomButton(
+      JButton standby = new CustomButton(
          "Toggle standby", "standby",
          new String[] {"standby"}
       );
-      panel_controls.getChildren().add(standby);
-      standby.setLayoutX(500);
-      standby.setLayoutY(10);
-      
-      Button toggle_cc = new CustomButton("Toggle CC", "toggle_cc", null);
-      panel_controls.getChildren().add(toggle_cc);
-      toggle_cc.setLayoutX(500);
-      toggle_cc.setLayoutY(40);
-      toggle_cc.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = (String)tivo.getValue();
+      panel_controls.add(standby);
+      placeCustomButton(standby, 500, 10);
+
+      JButton toggle_cc = new CustomButton("Toggle CC", "toggle_cc", null);
+      panel_controls.add(toggle_cc);
+      placeCustomButton(toggle_cc, 500, 40);
+      toggle_cc.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                String event;
                if (cc_state)
@@ -258,19 +255,18 @@ public class remotecontrol {
                      sequence[0] = "CC_OFF";
                   if (event.equals("ccOn"))
                      sequence[0] = "CC_ON";
-                  new telnet(config.TIVOS.get(tivoName), sequence);                     
+                  new telnet(config.TIVOS.get(tivoName), sequence);
                }
             }
          }
       });
-      
-      Button myShows = new CustomButton("My Shows", "My Shows", null);
-      panel_controls.getChildren().add(myShows);
-      myShows.setLayoutX(500);
-      myShows.setLayoutY(70);
-      myShows.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = (String)tivo.getValue();
+
+      JButton myShows = new CustomButton("My Shows", "My Shows", null);
+      panel_controls.add(myShows);
+      placeCustomButton(myShows, 500, 70);
+      myShows.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                if (config.rpcEnabled(tivoName)) {
                   Remote r = config.initRemote(tivoName);
@@ -287,19 +283,18 @@ public class remotecontrol {
                } else {
                   // Use telnet interface
                   String[] sequence = new String[] {"NOWSHOWING"};
-                  new telnet(config.TIVOS.get(tivoName), sequence);                     
+                  new telnet(config.TIVOS.get(tivoName), sequence);
                }
             }
          }
       });
-      
-      Button find_remote = new CustomButton("Find remote", "Find remote", null);
-      panel_controls.getChildren().add(find_remote);
-      find_remote.setLayoutX(500);
-      find_remote.setLayoutY(100);
-      find_remote.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = (String)tivo.getValue();
+
+      JButton find_remote = new CustomButton("Find remote", "Find remote", null);
+      panel_controls.add(find_remote);
+      placeCustomButton(find_remote, 500, 100);
+      find_remote.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             // Use telnet interface
             log.print("Find remote pressed");
             String[] sequence = new String[] {"FIND_REMOTE"};
@@ -307,21 +302,19 @@ public class remotecontrol {
          }
       });
 
-    Button search_command = new CustomButton("Search...", "Search prompt", null);
-    panel_controls.getChildren().add(search_command);
-    search_command.setLayoutX(500);
-    search_command.setLayoutY(130);
-    search_command.setOnAction(new EventHandler<ActionEvent>() {
-       public void handle(ActionEvent e) {
-          // NOTE JavaFX TextInputDialog requires a particular minimum java version (JDK 1.8.0_40).
-          TextInputDialog alert = new TextInputDialog();
-          alert.setHeaderText("Enter search to perform with Network Remote Control.");
-          alert.showAndWait();
-          String search = alert.getResult();
+    JButton search_command = new CustomButton("Search...", "Search prompt", null);
+    panel_controls.add(search_command);
+    placeCustomButton(search_command, 500, 130);
+    search_command.addActionListener(new ActionListener() {
+       public void actionPerformed(ActionEvent e) {
+          String search = JOptionPane.showInputDialog(
+             frame, "Enter search to perform with Network Remote Control.",
+             "Search", JOptionPane.QUESTION_MESSAGE
+          );
           if (search == null) {
              return;
           }
-          String tivoName = (String)tivo.getValue();
+          String tivoName = (String)tivo.getSelectedItem();
           // prepare macro interface
           log.print("Search for: "+search);
           String commands[];
@@ -354,7 +347,7 @@ public class remotecontrol {
 //        	 String command = alert.getResult();
 //        	 if (command == null) {
 //        		 return;
-//        	 }     	 
+//        	 }
 //            String tivoName = (String)tivo.getValue();
 //            // Use telnet interface
 //            log.print("telnet command: "+command);
@@ -362,31 +355,32 @@ public class remotecontrol {
 //         }
 //      });
 
-      // Other components for the panel      
-      Label label = new Label("TiVo");
-      label.setStyle("-fx-text-fill: " + text_color + ";");
+      // Other components for the panel
+      JLabel label = new JLabel("TiVo");
+      label.setForeground(text_color);
 
-      tivo = new ChoiceBox<String>();
-      tivo.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
+      tivo = new JComboBox<String>();
+      tivo.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)tivo.getSelectedItem();
             if (newVal != null && config.gui.remote_gui != null) {
                 String tivoName = newVal;
                 config.gui.remote_gui.updateButtonStates(tivoName, "Remote");
             }
          }
       });
-      tivo.setTooltip(tooltip.getToolTip("tivo_rc"));
+      tivo.setToolTipText(tooltip.getToolTip("tivo_rc"));
 
-      hme_button = new Button("Launch App:");
+      hme_button = new JButton("Launch App:");
       disableSpaceAction(hme_button);
-      hme_button.setTooltip(tooltip.getToolTip("hme_button"));
-      hme_button.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            final String name = hme.getValue();
+      hme_button.setToolTipText(tooltip.getToolTip("hme_button"));
+      hme_button.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            final String name = (String)hme.getSelectedItem();
             if (name != null && name.length() > 0) {
-               Task<Void> task = new Task<Void>() {
-                  @Override public Void call() {
-                     Remote r = config.initRemote(tivo.getValue());
+               Runnable task = new Runnable() {
+                  @Override public void run() {
+                     Remote r = config.initRemote((String)tivo.getSelectedItem());
                      if (r.success) {
                         LinkedHashMap<String, String> apps = getAppData();
                         String uri = apps.get(name);
@@ -394,16 +388,15 @@ public class remotecontrol {
 
                         r.disconnect();
                      }
-                     return null;
                   }
                };
                new Thread(task).start();
             }
          }
       });
-      
-      hme = new ChoiceBox<String>();
-      hme.setTooltip(tooltip.getToolTip("hme_rc"));
+
+      hme = new JComboBox<String>();
+      hme.setToolTipText(tooltip.getToolTip("hme_rc"));
 
       // util.SPS backdoors
       String sps_name, sps_text;
@@ -426,7 +419,7 @@ public class remotecontrol {
       sps_text += "Clock will be at bottom right corner for series 3 TiVos.<br>";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-            
+
       sps_name = "30 sec skip: SPS30S";
       util.SPS.put(sps_name, "select play select 3 0 select clear");
       sps_text = "<b>" + sps_name + "</b><br>";
@@ -435,7 +428,7 @@ public class remotecontrol {
       sps_text += "NOTE: Unlike other backdoors, this one survives a reboot.<br>";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-      
+
       sps_name = "Information: SPSRS";
       util.SPS.put(sps_name, "select play select replay select");
       sps_text = "<b>" + sps_name + "</b><br>";
@@ -443,7 +436,7 @@ public class remotecontrol {
       sps_text += "Display some video information on the screen.<br>";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-      
+
       sps_name = "Calibration: SPS7S";
       util.SPS.put(sps_name, "select play select 7 select clear");
       sps_text = "<b>" + sps_name + "</b><br>";
@@ -452,7 +445,7 @@ public class remotecontrol {
       sps_text += "NOTE: This only works for series 3 TiVos.<br>";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-      
+
       sps_name = "4x FF: SPS88S";
       util.SPS.put(sps_name, "select play select 8 8 select clear");
       sps_text = "<b>" + sps_name + "</b><br>";
@@ -462,7 +455,7 @@ public class remotecontrol {
       sps_text += "When enabled a 4th FF press resumes normal play as was the case with older TiVo software.<br>";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-      
+
       sps_name = "1.1x quickplay: SPS71S";
       util.SPS.put(sps_name, "select play select 7 1 select clear");
       sps_text = "<b>" + sps_name + "</b><br>";
@@ -471,7 +464,7 @@ public class remotecontrol {
       sps_text += "Only supported for series 5 and later models with quickplay.";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-      
+
       sps_name = "1.2x quickplay: SPS72S";
       util.SPS.put(sps_name, "select play select 7 2 select clear");
       sps_text = "<b>" + sps_name + "</b><br>";
@@ -480,7 +473,7 @@ public class remotecontrol {
       sps_text += "Only supported for series 5 and later models with quickplay.";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-      
+
       sps_name = "1.3x quickplay: SPS73S";
       util.SPS.put(sps_name, "select play select 7 3 select clear");
       sps_text = "<b>" + sps_name + "</b><br>";
@@ -489,7 +482,7 @@ public class remotecontrol {
       sps_text += "Only supported for series 5 and later models with quickplay.";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-      
+
       sps_name = "1.4x quickplay: SPS74S";
       util.SPS.put(sps_name, "select play select 7 4 select clear");
       sps_text = "<b>" + sps_name + "</b><br>";
@@ -498,7 +491,7 @@ public class remotecontrol {
       sps_text += "Only supported for series 5 and later models with quickplay.";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-      
+
       sps_name = "1.5x quickplay: SPS75S";
       util.SPS.put(sps_name, "select play select 7 5 select clear");
       sps_text = "<b>" + sps_name + "</b><br>";
@@ -507,7 +500,7 @@ public class remotecontrol {
       sps_text += "Only supported for series 5 and later models with quickplay.";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-      
+
       sps_name = "1.6x quickplay: SPS76S";
       util.SPS.put(sps_name, "select play select 7 6 select clear");
       sps_text = "<b>" + sps_name + "</b><br>";
@@ -516,7 +509,7 @@ public class remotecontrol {
       sps_text += "Only supported for series 5 and later models with quickplay.";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-      
+
       sps_name = "1.7x quickplay: SPS77S";
       util.SPS.put(sps_name, "select play select 7 7 select clear");
       sps_text = "<b>" + sps_name + "</b><br>";
@@ -525,7 +518,7 @@ public class remotecontrol {
       sps_text += "Only supported for series 5 and later models with quickplay.";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-      
+
       sps_name = "1.8x quickplay: SPS78S";
       util.SPS.put(sps_name, "select play select 8 1 select clear");
       sps_text = "<b>" + sps_name + "</b><br>";
@@ -534,7 +527,7 @@ public class remotecontrol {
       sps_text += "Only supported for series 5 and later models with quickplay.";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-      
+
       sps_name = "1.9x quickplay: SPS79S";
       util.SPS.put(sps_name, "select play select 7 9 select clear");
       sps_text = "<b>" + sps_name + "</b><br>";
@@ -543,14 +536,14 @@ public class remotecontrol {
       sps_text += "Only supported for series 5 and later models with quickplay.";
       sps_text += sps_text_end;
       util.SPS.put(sps_name + "_tooltip", sps_text);
-     
-      sps_button = new Button("SPS backdoor:");
+
+      sps_button = new JButton("SPS backdoor:");
       disableSpaceAction(sps_button);
-      sps_button.setTooltip(tooltip.getToolTip("rc_sps_button"));
-      sps_button.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String name = (String)hme_sps.getValue();
-            String tivoName = (String)tivo.getValue();
+      sps_button.setToolTipText(tooltip.getToolTip("rc_sps_button"));
+      sps_button.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String name = (String)hme_sps.getSelectedItem();
+            String tivoName = (String)tivo.getSelectedItem();
             if (name != null && name.length() > 0 && tivoName != null && tivoName.length() > 0) {
                executeMacro(
                   tivoName,
@@ -559,29 +552,31 @@ public class remotecontrol {
             }
          }
       });
-      
-      hme_sps = new ChoiceBox<String>();
-      hme_sps.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
+
+      hme_sps = new JComboBox<String>();
+      hme_sps.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)hme_sps.getSelectedItem();
             if (newVal != null) {
-               hme_sps.setTooltip(tooltip.getToolTip(newVal));            
+               hme_sps.setToolTipText(tooltip.getToolTip(newVal));
             }
          }
       });
       for (String name : util.SPS.keySet()) {
          if (! name.contains("_tooltip")) {
-            hme_sps.getItems().add(name);
+            hme_sps.addItem(name);
          }
-         hme_sps.getSelectionModel().select(0);
       }
-      
-      jumpto_button = new Button("Jump to minute:");
-      AddButtonShortcut(jumpto_button, "Altm", KeyCode.M);
+      if (hme_sps.getItemCount() > 0)
+         hme_sps.setSelectedIndex(0);
+
+      jumpto_button = new JButton("Jump to minute:");
+      AddButtonShortcut(jumpto_button, "Altm", KeyEvent.VK_M);
       disableSpaceAction(jumpto_button);
-      jumpto_button.setTooltip(tooltip.getToolTip("jumpto_text"));
-      jumpto_button.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            final String tivoName = (String)tivo.getValue();
+      jumpto_button.setToolTipText(tooltip.getToolTip("jumpto_text"));
+      jumpto_button.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            final String tivoName = (String)tivo.getSelectedItem();
             String mins_string = string.removeLeadingTrailingSpaces(jumpto_text.getText());
             if (tivoName == null || tivoName.length() == 0)
                return;
@@ -589,8 +584,8 @@ public class remotecontrol {
                return;
             try {
                final int secs = (int)(Float.parseFloat(mins_string)*60);
-               Task<Void> task = new Task<Void>() {
-                  @Override public Void call() {
+               Runnable task = new Runnable() {
+                  @Override public void run() {
                      Remote r = config.initRemote(tivoName);
                      if (r.success) {
                         JSONObject json = new JSONObject();
@@ -603,27 +598,26 @@ public class remotecontrol {
                         }
                         r.disconnect();
                      }
-                     return null;
                   }
                };
                new Thread(task).start();
             } catch (NumberFormatException e1) {
                log.error("Illegal number of minutes specified: " + mins_string);
                return;
-            }            
+            }
          }
       });
-      jumpto_text = new TextField(); jumpto_text.setMinWidth(50); jumpto_text.setPrefWidth(50);
-      jumpto_text.setTooltip(tooltip.getToolTip("jumpto_text"));
+      jumpto_text = new JTextField(); setFixedWidth(jumpto_text, 50);
+      jumpto_text.setToolTipText(tooltip.getToolTip("jumpto_text"));
       jumpto_text.setText("0");
 
-      jumpahead_button = new Button("Skip minutes ahead:");
-      AddButtonShortcut(jumpahead_button, "Alt.", KeyCode.PERIOD);
+      jumpahead_button = new JButton("Skip minutes ahead:");
+      AddButtonShortcut(jumpahead_button, "Alt.", KeyEvent.VK_PERIOD);
       disableSpaceAction(jumpahead_button);
-      jumpahead_button.setTooltip(tooltip.getToolTip("jumpahead_text"));
-      jumpahead_button.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            final String tivoName = (String)tivo.getValue();
+      jumpahead_button.setToolTipText(tooltip.getToolTip("jumpahead_text"));
+      jumpahead_button.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            final String tivoName = (String)tivo.getSelectedItem();
             String mins_string = string.removeLeadingTrailingSpaces(jumpahead_text.getText());
             if (tivoName == null || tivoName.length() == 0)
                return;
@@ -631,8 +625,8 @@ public class remotecontrol {
                return;
             try {
                final int secs = (int)(Float.parseFloat(mins_string)*60);
-               Task<Void> task = new Task<Void>() {
-                  @Override public Void call() {
+               Runnable task = new Runnable() {
+                  @Override public void run() {
                      Remote r = config.initRemote(tivoName);
                      if (r.success) {
                         JSONObject json = new JSONObject();
@@ -649,27 +643,26 @@ public class remotecontrol {
                         }
                         r.disconnect();
                      }
-                     return null;
                   }
                };
                new Thread(task).start();
             } catch (NumberFormatException e1) {
                log.error("Illegal number of minutes specified: " + mins_string);
                return;
-            }            
+            }
          }
       });
-      jumpahead_text = new TextField(); jumpahead_text.setMinWidth(50); jumpahead_text.setPrefWidth(50);
-      jumpahead_text.setTooltip(tooltip.getToolTip("jumpahead_text"));
+      jumpahead_text = new JTextField(); setFixedWidth(jumpahead_text, 50);
+      jumpahead_text.setToolTipText(tooltip.getToolTip("jumpahead_text"));
       jumpahead_text.setText("5");
 
-      jumpback_button = new Button("Skip minutes back:");
-      AddButtonShortcut(jumpback_button, "Alt,", KeyCode.COMMA);
+      jumpback_button = new JButton("Skip minutes back:");
+      AddButtonShortcut(jumpback_button, "Alt,", KeyEvent.VK_COMMA);
       disableSpaceAction(jumpback_button);
-      jumpback_button.setTooltip(tooltip.getToolTip("jumpback_text"));
-      jumpback_button.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            final String tivoName = (String)tivo.getValue();
+      jumpback_button.setToolTipText(tooltip.getToolTip("jumpback_text"));
+      jumpback_button.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            final String tivoName = (String)tivo.getSelectedItem();
             String mins_string = string.removeLeadingTrailingSpaces(jumpback_text.getText());
             if (tivoName == null || tivoName.length() == 0)
                return;
@@ -677,8 +670,8 @@ public class remotecontrol {
                return;
             try {
                final int secs = (int)(Float.parseFloat(mins_string)*60);
-               Task<Void> task = new Task<Void>() {
-                  @Override public Void call() {
+               Runnable task = new Runnable() {
+                  @Override public void run() {
                      Remote r = config.initRemote(tivoName);
                      if (r.success) {
                         JSONObject json = new JSONObject();
@@ -697,182 +690,210 @@ public class remotecontrol {
                         }
                         r.disconnect();
                      }
-                     return null;
                   }
                };
                new Thread(task).start();
             } catch (NumberFormatException e1) {
                log.error("Illegal number of minutes specified: " + mins_string);
                return;
-            }            
+            }
          }
       });
-      jumpback_text = new TextField(); jumpback_text.setMinWidth(50); jumpback_text.setPrefWidth(50);
-      jumpback_text.setTooltip(tooltip.getToolTip("jumpback_text"));
+      jumpback_text = new JTextField(); setFixedWidth(jumpback_text, 50);
+      jumpback_text.setToolTipText(tooltip.getToolTip("jumpback_text"));
       jumpback_text.setText("5");
-      
+
       // Top panel
-      HBox rctop = new HBox();
-      rctop.setSpacing(5);
-      rctop.setPadding(new Insets(0,0,0,5));
-      rctop.setAlignment(Pos.CENTER_LEFT);
-      rctop.getChildren().add(label);
-      rctop.getChildren().add(tivo);
-      rctop.getChildren().add(hme_button);
-      rctop.getChildren().add(hme);
-      rctop.getChildren().add(sps_button);
-      rctop.getChildren().add(hme_sps);
+      JPanel rctop = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      rctop.setBackground(background);
+      rctop.add(label);
+      rctop.add(tivo);
+      rctop.add(hme_button);
+      rctop.add(hme);
+      rctop.add(sps_button);
+      rctop.add(hme_sps);
 
       // Bottom panel
-      HBox rcbot = new HBox();
-      rcbot.setSpacing(5);
-      rcbot.setPadding(new Insets(0,0,0,5));
-      rcbot.setAlignment(Pos.CENTER_LEFT);
-      rcbot.getChildren().add(jumpto_button);
-      rcbot.getChildren().add(jumpto_text);
-      rcbot.getChildren().add(jumpback_button);
-      rcbot.getChildren().add(jumpback_text);
-      rcbot.getChildren().add(jumpahead_button);
-      rcbot.getChildren().add(jumpahead_text);
+      JPanel rcbot = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      rcbot.setBackground(background);
+      rcbot.add(jumpto_button);
+      rcbot.add(jumpto_text);
+      rcbot.add(jumpback_button);
+      rcbot.add(jumpback_text);
+      rcbot.add(jumpahead_button);
+      rcbot.add(jumpahead_text);
+
+      // Null layout panel doesn't compute its own preferred size (JavaFX
+      // Pane did) - derive it from the placed children so no rows of
+      // buttons get clipped
+      int maxX = 0, maxY = 0;
+      for (java.awt.Component comp : panel_controls.getComponents()) {
+         maxX = Math.max(maxX, comp.getX() + comp.getWidth());
+         maxY = Math.max(maxY, comp.getY() + comp.getHeight());
+      }
+      Dimension rcsize = new Dimension(maxX + 10, maxY + 10);
+      panel_controls.setPreferredSize(rcsize);
+      panel_controls.setMinimumSize(rcsize);
+      panel_controls.setMaximumSize(new Dimension(Integer.MAX_VALUE, rcsize.height));
+
+      // Keep rows at natural height, left aligned; extra vertical space
+      // goes below the bottom jump/skip row
+      rctop.setMaximumSize(new Dimension(Integer.MAX_VALUE, rctop.getPreferredSize().height));
+      rcbot.setMaximumSize(new Dimension(Integer.MAX_VALUE, rcbot.getPreferredSize().height));
+      rctop.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+      panel_controls.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+      rcbot.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
 
       // Combine all RC panels together
-      panel.setAlignment(Pos.CENTER);
-      panel.getChildren().addAll(rctop, panel_controls, rcbot);
-      
+      panel.add(rctop);
+      panel.add(panel_controls);
+      panel.add(rcbot);
+      panel.add(javax.swing.Box.createVerticalGlue());
+
       // RC tab keyboard shortcuts without buttons
       for (char c='A'; c<='Z'; ++c) {
-         AddPanelShortcut("" + c, KeyCode.getKeyCode("" + c), true, new String("" + Character.toChars(c)[0]).toLowerCase());
-         AddPanelShortcut("Shift" + c, KeyCode.getKeyCode("" + c), true, "" + Character.toChars(c)[0]);
+         AddPanelShortcut("" + c, (int)c, true, new String("" + Character.toChars(c)[0]).toLowerCase());
+         AddPanelShortcut("Shift" + c, (int)c, true, "" + Character.toChars(c)[0]);
       }
       // NOTE: The special chars I copied from slide remote (Sym chars)
       Object[][] kb_shortcuts = new Object[][] {
          // NAME       Keyboard KeyEvent   isAscii action
-         {"SPACE",          KeyCode.SPACE,      false, "forward"},
-         {"BACKSPACE",      KeyCode.BACK_SPACE, false, "reverse"},
-         {"PERIOD",         KeyCode.PERIOD,     true,  "."},
-         {"QUOTE",          KeyCode.QUOTE,      true,  "'"},
-         {"NUMPAD0",        KeyCode.NUMPAD0,    true,  "0"},
-         {"NUMPAD1",        KeyCode.NUMPAD1,    true,  "1"},
-         {"NUMPAD2",        KeyCode.NUMPAD2,    true,  "2"},
-         {"NUMPAD3",        KeyCode.NUMPAD3,    true,  "3"},
-         {"NUMPAD4",        KeyCode.NUMPAD4,    true,  "4"},
-         {"NUMPAD5",        KeyCode.NUMPAD5,    true,  "5"},
-         {"NUMPAD6",        KeyCode.NUMPAD6,    true,  "6"},
-         {"NUMPAD7",        KeyCode.NUMPAD7,    true,  "7"},
-         {"NUMPAD8",        KeyCode.NUMPAD8,    true,  "8"},
-         {"NUMPAD9",        KeyCode.NUMPAD9,    true,  "9"},
-         {"SEMICOLON",      KeyCode.SEMICOLON,  true,  ";"},
-         {"BACKQUOTE",      KeyCode.BACK_QUOTE, true,  "`"},
-         {"MINUS",          KeyCode.MINUS,      true,  "-"},
-         {"EQUALS",         KeyCode.EQUALS,     true,  "="},
-         {"OPEN_BRACKET",   KeyCode.OPEN_BRACKET, true,  "["},
-         {"CLOSE_BRACKET",  KeyCode.CLOSE_BRACKET, true,  "]"},
-         {"COMMA",          KeyCode.COMMA,      true,  ","},
-         {"QUOTE",          KeyCode.QUOTE,      true,  "'"},
-         {"SLASH",          KeyCode.SLASH,      true,  "/"},
-         {"BACKSLASH",      KeyCode.BACK_SLASH, true,  "\\"},
-         {"Shift1",         KeyCode.DIGIT1,     true,  "!"},
-         {"Shift2",         KeyCode.DIGIT2,     true,  "@"},
-         {"Shift3",         KeyCode.DIGIT3,     true,  "#"},
-         {"Shift4",         KeyCode.DIGIT4,     true,  "$"},
-         {"Shift5",         KeyCode.DIGIT5,     true,  "%"},
-         {"Shift6",         KeyCode.DIGIT6,     true,  "^"},
-         {"Shift7",         KeyCode.DIGIT7,     true,  "&"},
-         {"Shift8",         KeyCode.DIGIT8,     true,  "*"},
-         {"Shift9",         KeyCode.DIGIT9,     true,  "("},
-         {"Shift0",         KeyCode.DIGIT0,     true,  ")"},
-         {"ShiftBACKQUOTE", KeyCode.BACK_QUOTE, true,  "~"},
-         {"ShiftMINUS",     KeyCode.MINUS,      true,  "_"},
-         {"ShiftEQUALS",    KeyCode.EQUALS,     true,  "+"},
-         {"ShiftOPEN_BRACKET", KeyCode.OPEN_BRACKET,  true, "{"},
-         {"ShiftCLOSE_BRACKET", KeyCode.CLOSE_BRACKET, true, "}"},
-         {"ShiftSEMICOLON", KeyCode.SEMICOLON,  true,  ":"},
-         {"ShiftSLASH",     KeyCode.SLASH,      true,  "?"},
-         {"ShiftQUOTE",     KeyCode.QUOTE,      true,  "\""},
-         {"ShiftCOMMA",     KeyCode.COMMA,      true,  "<"},
-         {"ShiftPERIOD",    KeyCode.PERIOD,     true,  ">"},
-         {"ShiftBACKSLASH", KeyCode.BACK_SLASH, true,  "|"},
+         {"SPACE",          KeyEvent.VK_SPACE,      false, "forward"},
+         {"BACKSPACE",      KeyEvent.VK_BACK_SPACE, false, "reverse"},
+         {"PERIOD",         KeyEvent.VK_PERIOD,     true,  "."},
+         {"QUOTE",          KeyEvent.VK_QUOTE,      true,  "'"},
+         {"NUMPAD0",        KeyEvent.VK_NUMPAD0,    true,  "0"},
+         {"NUMPAD1",        KeyEvent.VK_NUMPAD1,    true,  "1"},
+         {"NUMPAD2",        KeyEvent.VK_NUMPAD2,    true,  "2"},
+         {"NUMPAD3",        KeyEvent.VK_NUMPAD3,    true,  "3"},
+         {"NUMPAD4",        KeyEvent.VK_NUMPAD4,    true,  "4"},
+         {"NUMPAD5",        KeyEvent.VK_NUMPAD5,    true,  "5"},
+         {"NUMPAD6",        KeyEvent.VK_NUMPAD6,    true,  "6"},
+         {"NUMPAD7",        KeyEvent.VK_NUMPAD7,    true,  "7"},
+         {"NUMPAD8",        KeyEvent.VK_NUMPAD8,    true,  "8"},
+         {"NUMPAD9",        KeyEvent.VK_NUMPAD9,    true,  "9"},
+         {"SEMICOLON",      KeyEvent.VK_SEMICOLON,  true,  ";"},
+         {"BACKQUOTE",      KeyEvent.VK_BACK_QUOTE, true,  "`"},
+         {"MINUS",          KeyEvent.VK_MINUS,      true,  "-"},
+         {"EQUALS",         KeyEvent.VK_EQUALS,     true,  "="},
+         {"OPEN_BRACKET",   KeyEvent.VK_OPEN_BRACKET, true,  "["},
+         {"CLOSE_BRACKET",  KeyEvent.VK_CLOSE_BRACKET, true,  "]"},
+         {"COMMA",          KeyEvent.VK_COMMA,      true,  ","},
+         {"QUOTE",          KeyEvent.VK_QUOTE,      true,  "'"},
+         {"SLASH",          KeyEvent.VK_SLASH,      true,  "/"},
+         {"BACKSLASH",      KeyEvent.VK_BACK_SLASH, true,  "\\"},
+         {"Shift1",         KeyEvent.VK_1,          true,  "!"},
+         {"Shift2",         KeyEvent.VK_2,          true,  "@"},
+         {"Shift3",         KeyEvent.VK_3,          true,  "#"},
+         {"Shift4",         KeyEvent.VK_4,          true,  "$"},
+         {"Shift5",         KeyEvent.VK_5,          true,  "%"},
+         {"Shift6",         KeyEvent.VK_6,          true,  "^"},
+         {"Shift7",         KeyEvent.VK_7,          true,  "&"},
+         {"Shift8",         KeyEvent.VK_8,          true,  "*"},
+         {"Shift9",         KeyEvent.VK_9,          true,  "("},
+         {"Shift0",         KeyEvent.VK_0,          true,  ")"},
+         {"ShiftBACKQUOTE", KeyEvent.VK_BACK_QUOTE, true,  "~"},
+         {"ShiftMINUS",     KeyEvent.VK_MINUS,      true,  "_"},
+         {"ShiftEQUALS",    KeyEvent.VK_EQUALS,     true,  "+"},
+         {"ShiftOPEN_BRACKET", KeyEvent.VK_OPEN_BRACKET,  true, "{"},
+         {"ShiftCLOSE_BRACKET", KeyEvent.VK_CLOSE_BRACKET, true, "}"},
+         {"ShiftSEMICOLON", KeyEvent.VK_SEMICOLON,  true,  ":"},
+         {"ShiftSLASH",     KeyEvent.VK_SLASH,      true,  "?"},
+         {"ShiftQUOTE",     KeyEvent.VK_QUOTE,      true,  "\""},
+         {"ShiftCOMMA",     KeyEvent.VK_COMMA,      true,  "<"},
+         {"ShiftPERIOD",    KeyEvent.VK_PERIOD,     true,  ">"},
+         {"ShiftBACKSLASH", KeyEvent.VK_BACK_SLASH, true,  "|"},
       };
       for (int i=0; i<kb_shortcuts.length; ++i) {
          AddPanelShortcut(
             (String)kb_shortcuts[i][0],
-            (KeyCode)kb_shortcuts[i][1],
+            (Integer)kb_shortcuts[i][1],
             (Boolean)kb_shortcuts[i][2],
             (String)kb_shortcuts[i][3]
          );
-      }      
+      }
    }
 
-   private class CustomButton extends Button {
-      private final String STYLE_NORMAL = "-fx-background-color: transparent; -fx-padding: 5, 5, 5, 5;";
-      private final String STYLE_PRESSED = "-fx-background-color: transparent; -fx-padding: 6 4 4 6;";
-      private final String STYLE_LABEL1 = "-fx-background-color: " + background +
-            "; -fx-text-fill: " + text_color + "; -fx-padding: 5, 5, 5, 5;";
-      private final String STYLE_LABEL2 = "-fx-background-color: " + background +
-            "; -fx-text-fill: " + text_color + "; -fx-padding: 6 4 4 6;";
-      
+   private void setFixedWidth(JTextField t, int width) {
+      Dimension d = new Dimension(width, t.getPreferredSize().height);
+      t.setMinimumSize(d);
+      t.setPreferredSize(d);
+   }
+
+   private void placeCustomButton(JButton b, int x, int y) {
+      Dimension pref = b.getPreferredSize();
+      b.setBounds(x, y, pref.width, pref.height);
+   }
+
+   private class CustomButton extends JButton {
+      private static final long serialVersionUID = 1L;
+
       public CustomButton(Image image) {
          super();
-         setGraphic(new ImageView(image));
-         setStyle(STYLE_NORMAL);
-         
+         setIcon(new ImageIcon(image));
+         setContentAreaFilled(false);
+         setBorderPainted(false);
+         setFocusPainted(false);
+         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
          // These actions give visual effect when button pressed
-         setOnMousePressed(new EventHandler<MouseEvent>() {
+         addMouseListener(new MouseAdapter() {
             @Override
-            public void handle(MouseEvent event) {
-                setStyle(STYLE_PRESSED);
-            }            
-         });
-        
-        setOnMouseReleased(new EventHandler<MouseEvent>() {
+            public void mousePressed(MouseEvent event) {
+               setBorder(BorderFactory.createEmptyBorder(6, 6, 4, 4));
+            }
             @Override
-            public void handle(MouseEvent event) {
-               setStyle(STYLE_NORMAL);
-            }            
+            public void mouseReleased(MouseEvent event) {
+               setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+            }
          });
       }
-      
+
       public CustomButton(String label, String toolTipKey, String[] macro) {
          super(label);
-         setTooltip(tooltip.getToolTip(toolTipKey));
+         setToolTipText(tooltip.getToolTip(toolTipKey));
          if (macro != null)
             setMacroCB(this, macro);
-         setStyle(STYLE_LABEL1);
-         
+         setBackground(background);
+         setForeground(text_color);
+         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
          // These actions give visual effect when button pressed
-         setOnMousePressed(new EventHandler<MouseEvent>() {
+         addMouseListener(new MouseAdapter() {
             @Override
-            public void handle(MouseEvent event) {
-                setStyle(STYLE_LABEL2);
-            }            
-         });
-        
-        setOnMouseReleased(new EventHandler<MouseEvent>() {
+            public void mousePressed(MouseEvent event) {
+               setBorder(BorderFactory.createEmptyBorder(6, 6, 4, 4));
+            }
             @Override
-            public void handle(MouseEvent event) {
-               setStyle(STYLE_LABEL1);
-            }            
+            public void mouseReleased(MouseEvent event) {
+               setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+            }
          });
       }
    }
-   
+
    private static Image scale(String imageFile, double scale) {
-      Image unscaled = new Image(new File(imageFile).toURI().toString());
-      if (scale < 1.0) {
-         return new Image(
-            new File(imageFile).toURI().toString(),
-            scale*unscaled.getWidth(),
-            scale*unscaled.getHeight(), false, false
-         );
-      } else {
-         return unscaled;
+      try {
+         Image unscaled = ImageIO.read(new File(imageFile));
+         if (scale < 1.0) {
+            int w = (int)Math.round(scale*unscaled.getWidth(null));
+            int h = (int)Math.round(scale*unscaled.getHeight(null));
+            return unscaled.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+         } else {
+            return unscaled;
+         }
+      } catch (Exception e) {
+         log.error("scale - " + e.getMessage());
+         return null;
       }
    }
-   
-   private Button ImageButton(String imageFile, double scale) {
+
+   private JButton ImageButton(String imageFile, double scale) {
       String f = config.programDir + File.separator + "rc_images" + File.separator + imageFile;
       if (file.isFile(f)) {
-         Button b = new CustomButton(scale(f, scale));
+         Image img = scale(f, scale);
+         if (img == null) return null;
+         JButton b = new CustomButton(img);
          disableSpaceAction(b);
          return b;
       }
@@ -880,34 +901,34 @@ public class remotecontrol {
       return null;
    }
 
-   private Label ImageLabel(String imageFile, double scale) {
+   private JLabel ImageLabel(String imageFile, double scale) {
       String f = config.programDir + File.separator + "rc_images" + File.separator + imageFile;
       if (file.isFile(f)) {
-         ImageView view = new ImageView(scale(f, scale));
-         Label l = new Label();
-         l.setGraphic(view);
-         l.setStyle("-fx-background-color:" + background);
+         Image img = scale(f, scale);
+         if (img == null) return null;
+         JLabel l = new JLabel(new ImageIcon(img));
+         l.setOpaque(true);
+         l.setBackground(background);
          return l;
       }
       log.error("Installation issue: image file not found: " + f);
       return null;
    }
-   
-   private void AddButtonShortcut(Button b, String actionName, KeyCode key) {
+
+   private void AddButtonShortcut(JButton b, String actionName, int key) {
       PanelKey.buttonKeys.push(new PanelKey(actionName, key, b));
    }
-   
-   private void disableSpaceAction(Button b) {
-      b.setOnKeyPressed(new EventHandler<KeyEvent> () {
+
+   private void disableSpaceAction(JButton b) {
+      b.addKeyListener(new KeyAdapter() {
          @Override
-         public void handle(KeyEvent event) {
+         public void keyPressed(KeyEvent event) {
             event.consume();
          }
-         
       });
    }
-   
-   private void AddPanelShortcut(String actionName, KeyCode key, Boolean isAscii, String command) {
+
+   private void AddPanelShortcut(String actionName, int key, Boolean isAscii, String command) {
       PanelKey.panelKeys.push(new PanelKey(actionName, key, isAscii, command));
    }
 
@@ -933,8 +954,8 @@ public class remotecontrol {
       executeMacro(tivoName, sequence, telnet.DEFAULT_BUTTON_INTERVAL);
    }
    private void executeMacro(final String tivoName, final String[] sequence, final int telnetInterval) {
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             if (config.rpcEnabled(tivoName)) {
                Remote r = config.initRemote(tivoName);
                String[] seq;
@@ -952,29 +973,28 @@ public class remotecontrol {
                new telnet(config.TIVOS.get(tivoName), mapToTelnet(sequence), telnetInterval);
             }
             // Set focus on tabbed_panel
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override
                public void run() {
-                  config.gui.remote_gui.tabbed_panel.requestFocus();
+                  config.gui.remote_gui.tabbed_panel.requestFocusInWindow();
                }
             });
-            return null;
          }
       };
       new Thread(task).start();
    }
 
-   private void setMacroCB(Button b, final String[] sequence) {
-      b.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+   private void setMacroCB(JButton b, final String[] sequence) {
+      b.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Set focus on tabbed_panel
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override
                public void run() {
-                  config.gui.remote_gui.tabbed_panel.requestFocus();
+                  config.gui.remote_gui.tabbed_panel.requestFocusInWindow();
                }
             });
-            final String tivoName = tivo.getValue();
+            final String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                executeMacro(tivoName, sequence);
             }
@@ -984,9 +1004,9 @@ public class remotecontrol {
 
    // This handles key presses in RC panel not bound to buttons
    public void RC_keyPress(final Boolean isAscii, final String command) {
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
-            String tivoName = tivo.getValue();
+      Runnable task = new Runnable() {
+         @Override public void run() {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                if (config.rpcEnabled(tivoName)) {
                   Remote r = config.initRemote(tivoName);
@@ -1016,12 +1036,11 @@ public class remotecontrol {
                      new telnet(config.TIVOS.get(tivoName), mapToTelnet(new String[] {command}));
                }
             }
-            return null;
          }
       };
       new Thread(task).start();
    }
-      
+
    /**
     * Read the web/rc_apps.json file as a JSONArray
     * @return
@@ -1030,21 +1049,21 @@ public class remotecontrol {
       String filename = "rc_apps.json";
       String webdir = config.httpserver_home;
       File file = new File(webdir + File.separator + filename);
-      
+
       // data for default rc_apps.json with no disabled items
       JSONArray default_apps = new JSONArray();
       String[][] data = new String[][] {
-//         new String[] {"Tivos ToGether: KMTTG HME", "x-tivo:hme:http://localhost:7291/ttg", 
+//         new String[] {"Tivos ToGether: KMTTG HME", "x-tivo:hme:http://localhost:7291/ttg",
 //               "0-0", "HME App interface to some features of KMTTG, if available"},
-         new String[] {"Netflix (html)", "x-tivo:netflix:netflix", 
+         new String[] {"Netflix (html)", "x-tivo:netflix:netflix",
                "0-1", "Telnet remote interface can do IRCODE NETFLIX. TiVo Premiere Q & Suddenlink: channel 3000, eleven other launch channels used by different lineups per https://help.netflix.com/en/node/23925"},
-         new String[] {"YouTube (html)", "x-tivo:web:https://www.youtube.com/tv", 
+         new String[] {"YouTube (html)", "x-tivo:web:https://www.youtube.com/tv",
                null, ""},
-         new String[] {"Vudu (html)", "x-tivo:vudu:vudu", 
+         new String[] {"Vudu (html)", "x-tivo:vudu:vudu",
                "0-4", ""},
-         new String[] {"Plex", "x-tivo:web:https://plex.tv/web/tv/tivo", 
+         new String[] {"Plex", "x-tivo:web:https://plex.tv/web/tv/tivo",
                "0-3", ""},
-         new String[] {"Amazon Prime", "x-tivo:web:https://atv-ext.amazon.com/cdp/resources/app_host/index.html?deviceTypeID=A3UXGKN0EORVOF", 
+         new String[] {"Amazon Prime", "x-tivo:web:https://atv-ext.amazon.com/cdp/resources/app_host/index.html?deviceTypeID=A3UXGKN0EORVOF",
                null, ""},
          new String[] {"Hulu Plus", "x-tivo:flash:uuid:802897EB-D16B-40C8-AEEF-0CCADB480559",
                "0-2", "TiVo Premiere Q: channel 3001, Shentel: channel 3000"},
@@ -1052,9 +1071,9 @@ public class remotecontrol {
                "1-2", ""},
          new String[] {"iHeartRadio", "x-tivo:web:https://tv.iheart.com/tivo/",
                "1-3", ""},
-         new String[] {"Launchpad", "x-tivo:flash:uuid:545E064D-C899-407E-9814-69A021D68DAD", 
+         new String[] {"Launchpad", "x-tivo:flash:uuid:545E064D-C899-407E-9814-69A021D68DAD",
                null, "2.4l lists only on web"},
-         new String[] {"Opera TV Store", "x-tivo:web:tvstore", 
+         new String[] {"Opera TV Store", "x-tivo:web:tvstore",
                null, "Telnet remote interface can do IRCODE TVSTORE"},
          new String[] {"streambaby", "x-tivo:hme:http://localhost:7290/streambaby",
                "0-5", "(localhost in uri will be replaced by local ip address)"},
@@ -1074,7 +1093,7 @@ public class remotecontrol {
             log.error("readAppConfiguration - " + e.getMessage());
          }
       }
-      
+
       // generate a default rc_apps.json
       if (!file.exists()) {
          try {
@@ -1087,7 +1106,7 @@ public class remotecontrol {
             return default_apps;
          }
       }
-      
+
       JSONArray rc_apps = new JSONArray();
       try {
          BufferedReader is = new BufferedReader(new FileReader(file));
@@ -1100,7 +1119,7 @@ public class remotecontrol {
       }
       return rc_apps;
    }
-   
+
    private LinkedHashMap<String, String> _appData = null;
    /** get an ordered map of app names to uris from the rc_apps.json file*/
    public LinkedHashMap<String, String> getAppData() {
@@ -1108,7 +1127,7 @@ public class remotecontrol {
     	   JSONArray rc_apps = readAppConfiguration();
 
            LinkedHashMap<String, String> data = new LinkedHashMap<String, String>(rc_apps.length());
-           
+
            for(int i = 0 ; i < rc_apps.length() ; ++i) {
         	   try {
 	        	   JSONObject app = (JSONObject) rc_apps.get(i);
@@ -1131,17 +1150,18 @@ public class remotecontrol {
        }
        return _appData;
    }
-      
+
    public void setHmeDestinations(final String tivoName) {
       LinkedHashMap<String, String> data = getAppData();
 
       String[] hmeNames = new String[data.size()];
       hmeNames = data.keySet().toArray(hmeNames);
-      
-      hme.getItems().clear();
+
+      hme.removeAllItems();
       for (int i=0; i<hmeNames.length; ++i)
-         hme.getItems().add(hmeNames[i]);
-      hme.getSelectionModel().select(hmeNames[0]);
+         hme.addItem(hmeNames[i]);
+      if (hmeNames.length > 0)
+         hme.setSelectedItem(hmeNames[0]);
    }
 
 }

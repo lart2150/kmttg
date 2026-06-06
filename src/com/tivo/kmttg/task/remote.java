@@ -21,10 +21,9 @@ package com.tivo.kmttg.task;
 import java.io.Serializable;
 import java.util.Date;
 
-import javafx.application.Platform;
-
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.gui.remote.util;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -185,7 +184,7 @@ public class remote extends baseTask implements Serializable {
              ! job.remote_cancel && ! job.remote_deleted && ! job.remote_search && 
              ! job.remote_adv_search && ! job.remote_thumbs && ! job.remote_channelsTable) {
             // Update STATUS column
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override public void run() {
                   config.gui.jobTab_UpdateJobMonitorRowStatus(job, "running");
                }
@@ -196,7 +195,7 @@ public class remote extends baseTask implements Serializable {
          // Job finished
          if (config.GUIMODE) {
             if ( jobMonitor.isFirstJobInMonitor(job) ) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      config.gui.setTitle(config.kmttg);
                      config.gui.progressBar_setValue(0);
@@ -208,36 +207,36 @@ public class remote extends baseTask implements Serializable {
          if (success) {
             if (job.remote_todo && job.todo != null) {
                // ToDo list job => populate ToDo table
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      job.todo.AddRows(job.tivoName, data);
                   }
                });
             }
             if (job.remote_upcoming && job.todo != null && config.GUIMODE) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      // Upcoming list job => populate ToDo table
                      job.todo.AddRows(job.tivoName, data);
                      // Make the ToDo tab the currently selected tab
-                     config.gui.remote_gui.getPanel().getSelectionModel().select(0);
+                     config.gui.remote_gui.getPanel().setSelectedIndex(0);
                   }
                });
             }
             if (job.remote_conflicts && job.cancelled != null && config.GUIMODE) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      // Conflicts list job => populate Won't Record table
                      job.cancelled.AddRows(job.tivoName, data);
                      // Make the Won't Record tab the currently selected tab
-                     config.gui.remote_gui.getPanel().getSelectionModel().select(2);
+                     config.gui.remote_gui.getPanel().setSelectedIndex(2);
                   }
                });
                // Enter the 1st folder in Won't Record table
                job.cancelled.expandFirstFolder();
             }
             if (job.remote_sp && job.sp != null) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      // SP job => populate SP table
                      job.sp.AddRows(job.tivoName, data);
@@ -245,7 +244,7 @@ public class remote extends baseTask implements Serializable {
                });
             }
             if (job.remote_spreorder && data != null && config.GUIMODE) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      // Refresh SP list for TiVo SPs that were just re-ordered
                      config.gui.remote_gui.clearTable("sp");
@@ -255,28 +254,28 @@ public class remote extends baseTask implements Serializable {
                });
             }
             if (job.remote_cancel && job.cancelled != null) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      job.cancelled.AddRows(job.tivoName, data);
                   }
                });
             }
             if (job.remote_deleted && job.deleted != null) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      job.deleted.AddRows(job.tivoName, data);
                   }
                });
             }
             if (job.remote_thumbs && job.thumbs != null) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      job.thumbs.AddRows(job.tivoName, data);
                   }
                });
             }
             if (job.remote_channelsTable && job.channelsTable != null) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      job.channelsTable.AddRows(job.tivoName, data);
                   }
@@ -286,7 +285,7 @@ public class remote extends baseTask implements Serializable {
                rnpl.setNPLData(job.tivoName, data, job.auto_entries);
             }
             if (job.remote_channels && data != null && config.GUIMODE) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      config.gui.remote_gui.premiere_tab.putChannelData(job.tivoName, data);
                      config.gui.remote_gui.premiere_tab.saveChannelInfo(job.tivoName);
@@ -294,35 +293,35 @@ public class remote extends baseTask implements Serializable {
                });
             }
             if (job.remote_premiere && job.premiere != null) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      job.premiere.AddRows(job.tivoName, data);
                   }
                });
             }
             if (job.remote_search && job.search != null && data != null) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      job.search.AddRows(job.tivoName, data);
                   }
                });
             }
             if (job.remote_adv_search && job.search != null && data != null) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      job.search.AddRows(job.tivoName, data);
                   }
                });
             }
             if (job.remote_guideChannels && job.gTable != null && data != null) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      job.gTable.updateChannels_gui(job.tivoName, data);
                   }
                });
             }
             if (job.remote_stream && job.stream != null) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      job.stream.AddRows(job.tivoName, data);
                   }

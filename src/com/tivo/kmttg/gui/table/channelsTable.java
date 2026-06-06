@@ -18,23 +18,19 @@
  */
 package com.tivo.kmttg.gui.table;
 
-import java.util.Collections;
+import java.awt.Component;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Hashtable;
 import java.util.Stack;
 
-import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.ListChangeListener;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.table.TableCellRenderer;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -44,6 +40,9 @@ import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.comparator.ChannelNumComparator;
 import com.tivo.kmttg.gui.sortable.sortableChannelNum;
 import com.tivo.kmttg.gui.table.TableUtil;
+import com.tivo.kmttg.gui.swing.KmttgTable;
+import com.tivo.kmttg.gui.swing.KmttgTableModel;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -54,7 +53,8 @@ import com.tivo.kmttg.util.log;
 
 public class channelsTable extends TableMap {
    private String currentTivo = null;
-   public TableView<Tabentry> TABLE = null;
+   public JTable TABLE = null;
+   public KmttgTableModel<Tabentry> MODEL = null;
    public String[] TITLE_cols = {"NAME", "NUMBER", "RECEIVED"};
    private double[] weights = {40, 30, 30};
    public String folderName = null;
@@ -62,7 +62,7 @@ public class channelsTable extends TableMap {
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private Boolean loaded = false;
    private String loadedPrefix = "Loaded: ";
-   
+
    // TableMap overrides
    @Override
    public JSONObject getJson(int row) {
@@ -78,62 +78,75 @@ public class channelsTable extends TableMap {
    }
    @Override
    public void clear() {
-      TABLE.getItems().clear();
+      MODEL.clear();
       setLoaded(false);
    }
    @Override
-   public TableView<?> getTable() {
+   public JTable getTable() {
       return TABLE;
    }
-   
+
    public channelsTable() {
-      TABLE = new TableView<Tabentry>();
-      TABLE.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE); // Allow multi row selection
-      TABLE.setEditable(true); // Allow editing
-      // Special sort listener to set sort order to ascending channel num when no sort is selected
-      TABLE.getSortOrder().addListener(new ListChangeListener<TableColumn<Tabentry, ?>>() {
+      MODEL = new KmttgTableModel<Tabentry>(TITLE_cols);
+      MODEL.setComparator("NUMBER", new ChannelNumComparator());
+      // Default sort is ascending channel num when no column sort is selected
+      MODEL.setDefaultSort("NUMBER", true);
+      TABLE = KmttgTable.create(MODEL, null);
+      KmttgTable.setColumnAlignment(TABLE, "RECEIVED", JLabel.CENTER);
+      // RECEIVED column displays an editable checkbox
+      setReceivedColumn();
+      TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
+
+      // Add keyboard listener
+      TABLE.addKeyListener(new KeyAdapter() {
          @Override
-         public void onChanged(Change<? extends TableColumn<Tabentry, ?>> change) {
-            change.next();
-            if (change != null && change.toString().contains("removed")) {
-               if (change.getRemoved().get(0).getText().equals("NUMBER"))
-                  return;
-               int num_col = TableUtil.getColumnIndex(TABLE, "NUMBER");
-               TABLE.getSortOrder().setAll(Collections.singletonList(TABLE.getColumns().get(num_col)));
-               TABLE.getColumns().get(num_col).setSortType(TableColumn.SortType.ASCENDING);
+         public void keyPressed(KeyEvent e) {
+            KeyPressed(e);
+         }
+      });
+
+      // Toggle RECEIVED checkbox value on single click in that column
+      TABLE.addMouseListener(new MouseAdapter() {
+         @Override
+         public void mouseClicked(MouseEvent e) {
+            int viewRow = TABLE.rowAtPoint(e.getPoint());
+            int viewCol = TABLE.columnAtPoint(e.getPoint());
+            if (viewRow < 0 || viewCol < 0)
+               return;
+            int col = TABLE.convertColumnIndexToModel(viewCol);
+            if (TITLE_cols[col].equals("RECEIVED")) {
+               Tabentry entry = MODEL.getRow(viewRow);
+               entry.received = ! entry.received;
+               MODEL.updateRow(viewRow);
             }
          }
       });
-      
-      for (String colName : TITLE_cols) {
-         if (colName.equals("NAME")) {
-            TableColumn<Tabentry,jsonString> col = new TableColumn<Tabentry,jsonString>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,jsonString>(colName));
-            TABLE.getColumns().add(col);
-         } else if (colName.equals("NUMBER")) {
-            TableColumn<Tabentry,sortableChannelNum> col = new TableColumn<Tabentry,sortableChannelNum>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableChannelNum>(colName));
-            col.setComparator(new ChannelNumComparator()); // Custom column sort
-            TABLE.getColumns().add(col);
-         } else {            
-            TableColumn<Tabentry,Boolean> col = new TableColumn<Tabentry,Boolean>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry, Boolean>(colName));
-            col.setCellFactory(CheckBoxTableCell.forTableColumn(col));
-            col.setEditable(true);
-            col.setStyle("-fx-alignment: CENTER;");
-            TABLE.getColumns().add(col);
-         }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
-      }
-      
-      // Add keyboard listener
-      TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {
-         public void handle(KeyEvent e) {
-            KeyPressed(e);
-         }
-      });      
    }
-      
+
+   // Install a checkbox renderer on the RECEIVED column
+   private void setReceivedColumn() {
+      for (int i=0; i<TABLE.getModel().getColumnCount(); ++i) {
+         if (TABLE.getModel().getColumnName(i).equals("RECEIVED")) {
+            TABLE.getColumnModel().getColumn(TABLE.convertColumnIndexToView(i))
+               .setCellRenderer(new CheckBoxRenderer());
+         }
+      }
+   }
+
+   private static class CheckBoxRenderer extends JCheckBox implements TableCellRenderer {
+      private static final long serialVersionUID = 1L;
+      public CheckBoxRenderer() {
+         setHorizontalAlignment(SwingConstants.CENTER);
+         setOpaque(true);
+      }
+      @Override
+      public Component getTableCellRendererComponent(JTable table, Object value,
+            boolean isSelected, boolean hasFocus, int row, int column) {
+         setSelected(value != null && Boolean.TRUE.equals(value));
+         return this;
+      }
+   }
+
    public static class jsonString {
       String display;
       JSONObject json;
@@ -145,11 +158,11 @@ public class channelsTable extends TableMap {
          return display;
       }
    }
-      
+
    public static class Tabentry {
       public jsonString channelName = null;
       public sortableChannelNum channelNum = null;
-      public BooleanProperty received = new SimpleBooleanProperty(false);
+      public boolean received = false;
 
       public Tabentry(JSONObject entry) {
          try {
@@ -160,47 +173,43 @@ public class channelsTable extends TableMap {
             if (entry.has("channelNumber"))
                channelNum = new sortableChannelNum(entry.getString("channelNumber"));
             if (entry.has("isReceived"))
-               received.set(entry.getBoolean("isReceived"));                    
+               received = entry.getBoolean("isReceived");
          } catch (JSONException e1) {
             log.error("channelsTable Tabentry - " + e1.getMessage());
-         }      
+         }
       }
-      
+
       public jsonString getNAME() {
          return channelName;
       }
-      
+
       public sortableChannelNum getNUMBER() {
          return channelNum;
       }
-      
-      public boolean isRECEIVED() {
-         return received.get();
+
+      public Boolean getRECEIVED() {
+         return received;
       }
 
       public String toString() {
          return channelName.toString();
-      }      
-
-      public BooleanProperty RECEIVEDProperty() {
-         return received;
       }
    }
 
    public JSONObject GetRowData(int row) {
-      return TABLE.getItems().get(row).getNAME().json;
+      return MODEL.getRow(row).getNAME().json;
    }
-   
+
    public Boolean GetValueAt(int row, int col) {
-      return (Boolean)TABLE.getColumns().get(col).getCellData(row);
+      return MODEL.getRow(row).getRECEIVED();
    }
-      
+
    // Handle keyboard presses
    private void KeyPressed(KeyEvent e) {
       if (e.isControlDown())
          return;
-      KeyCode keyCode = e.getCode();
-      if (keyCode == KeyCode.J) {
+      int keyCode = e.getKeyCode();
+      if (keyCode == KeyEvent.VK_J) {
          // Print json of selected row to log window
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
@@ -211,17 +220,17 @@ public class channelsTable extends TableMap {
          }
       }
    }
-   
+
    // Update table to display given entries
    public void AddRows(String tivoName, JSONArray data) {
       try {
          Stack<JSONObject> o = new Stack<JSONObject>();
          for (int i=0; i<data.length(); ++i)
             o.add(data.getJSONObject(i));
-         
+
          // Update table
          Refresh(o);
-         TABLE.sort();
+         MODEL.sort();
          TableUtil.autoSizeTableViewColumns(TABLE, true);
          if (tivoName != null) {
             tivo_data.put(tivoName, data);
@@ -233,9 +242,9 @@ public class channelsTable extends TableMap {
          }
       } catch (JSONException e) {
          log.error("Channels AddRows - " + e.getMessage());
-      }      
+      }
    }
-   
+
    // Refresh table with given given entries
    public void Refresh(Stack<JSONObject> o) {
       clear();
@@ -248,32 +257,32 @@ public class channelsTable extends TableMap {
          displayFlatStructure(o);
       }
    }
-   
+
    // Update table display to show top level flat structure
    private void displayFlatStructure(Stack<JSONObject> o) {
       for (int i=0; i<o.size(); ++i) {
          AddTABLERow(o.get(i));
       }
    }
-   
+
    private void updateShowRows(String prefix) {
-      for (int row=0; row<TABLE.getItems().size(); ++row) {
-         Tabentry e = TABLE.getItems().get(row);
+      for (int row=0; row<MODEL.size(); ++row) {
+         Tabentry e = MODEL.getRow(row);
          e.channelName.display = prefix + e.channelName.display;
       }
    }
-   
+
    // Add a non folder entry to TABLE table
    public void AddTABLERow(JSONObject entry) {
       debug.print("entry=" + entry);
-      TABLE.getItems().add(new Tabentry(entry));
-   }   
-   
+      MODEL.addRow(new Tabentry(entry));
+   }
+
    // Refresh the # CHANNELS label in the Channels tab
    private void refreshNumber() {
       config.gui.remote_gui.channels_tab.label.setText("" + tivo_data.get(currentTivo).length() + " CHANNELS");
    }
-   
+
    public void refreshChannels(String tivoName) {
       clear();
       setLoaded(false);
@@ -286,7 +295,7 @@ public class channelsTable extends TableMap {
       job.channelsTable  = this;
       jobMonitor.submitNewJob(job);
    }
-   
+
    // For each row value different that current database, update channel value
    public void updateChannels(final String tivoName) {
       if (isTableLoaded()) {
@@ -295,7 +304,7 @@ public class channelsTable extends TableMap {
       }
       try {
          JSONArray changed = new JSONArray();
-         for (int row=0; row<TABLE.getItems().size(); ++row) {
+         for (int row=0; row<MODEL.size(); ++row) {
             Boolean received_value = GetValueAt(row, TableUtil.getColumnIndex(TABLE, "RECEIVED"));
             JSONObject json = GetRowData(row);
             if (json != null) {
@@ -309,21 +318,20 @@ public class channelsTable extends TableMap {
          }
          if (changed.length() > 0) {
             // There are table changes, so update in the background
-            class backgroundRun extends Task<Void> {
+            class backgroundRun implements Runnable {
                JSONArray changed;
                public backgroundRun(JSONArray changed) {
                   this.changed = changed;
                }
                @Override
-               protected Void call() {
+               public void run() {
                   rpcUpdateChannels(tivoName, changed);
                   // Now refresh the channels table
-                  Platform.runLater(new Runnable() {
+                  SwingUtil.runLater(new Runnable() {
                      @Override public void run() {
                         refreshChannels(tivoName);
                      }
                   });
-                  return null;
                }
             }
             backgroundRun b = new backgroundRun(changed);
@@ -333,7 +341,7 @@ public class channelsTable extends TableMap {
          log.error("updateChannels - " + e.getMessage());
       }
    }
-   
+
    public void saveChannels(String tivoName, String file) {
       if (isTableLoaded()) {
          log.error("Cannot save a loaded table");
@@ -344,9 +352,9 @@ public class channelsTable extends TableMap {
          JSONFile.write(tivo_data.get(tivoName), file);
       } else {
          log.error("No data available to save.");
-      }      
+      }
    }
-   
+
    public void loadChannels(String file) {
       log.print("Loading Channels data from file: " + file);
       JSONArray data = JSONFile.readJSONArray(file);
@@ -359,10 +367,10 @@ public class channelsTable extends TableMap {
          setLoaded(true);
       }
    }
-   
+
    public void copyChannels(final String tivoName) {
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             int[] selected = TableUtil.GetSelectedRows(TABLE);
             if (selected.length > 0) {
                log.print("Copying channels settings to TiVo: " + tivoName);
@@ -406,7 +414,7 @@ public class channelsTable extends TableMap {
                            }
                         }
                      }
-                     rpcUpdateChannels(tivoName, channels);   
+                     rpcUpdateChannels(tivoName, channels);
                   } else {
                      log.error("Failed to get current channel list for TiVo: " + tivoName);
                   }
@@ -416,12 +424,11 @@ public class channelsTable extends TableMap {
             } else {
                log.warn("No rows selected to copy");
             }
-            return null;
          }
       };
       new Thread(task).start();
    }
-   
+
    public void rpcUpdateChannels(String tivoName, JSONArray changed) {
       try {
          if (changed.length() > 0) {
@@ -452,11 +459,11 @@ public class channelsTable extends TableMap {
       }
 
    }
-   
+
    public Boolean isTableLoaded() {
       return loaded;
    }
-   
+
    private void setLoaded(Boolean flag) {
       if (flag) {
          loaded = true;
@@ -464,7 +471,7 @@ public class channelsTable extends TableMap {
          loaded = false;
       }
    }
-   
+
    private JSONObject formatChannel(JSONObject json, Boolean received_value) {
       JSONObject j = new JSONObject();
       try {
@@ -483,15 +490,14 @@ public class channelsTable extends TableMap {
       }
       return j;
    }
-   
+
    public void updateLoadedStatus() {
-      if (TABLE.getItems().size() > 0) {
-         int col = TableUtil.getColumnIndex(TABLE, "NAME");
-         String title = "" + TABLE.getColumns().get(col).getCellData(0);
+      if (MODEL.size() > 0) {
+         String title = "" + MODEL.getRow(0).getNAME();
          if (title != null && title.startsWith(loadedPrefix))
             setLoaded(true);
          else
             setLoaded(false);
       }
-   }   
+   }
 }

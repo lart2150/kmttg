@@ -18,39 +18,33 @@
  */
 package com.tivo.kmttg.gui.remote;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Stack;
 
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.MyListView;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.premiereTable;
 import com.tivo.kmttg.main.config;
@@ -61,40 +55,38 @@ import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
 public class premiere {
-   public VBox panel = null;
-   public premiereTable tab = null;   
-   public ChoiceBox<String> tivo = null;
-   public ChoiceBox<String> days = null;
+   public JPanel panel = null;
+   public premiereTable tab = null;
+   public JComboBox<String> tivo = null;
+   public JComboBox<String> days = null;
    public MyListView channels = null;
    public Hashtable<String,JSONArray> channel_info = new Hashtable<String,JSONArray>();
-   public Button record = null;
-   public Button recordSP = null;
-   public Button wishlist = null;
+   public JButton record = null;
+   public JButton recordSP = null;
+   public JButton wishlist = null;
 
-   public premiere(final Stage frame) {
-      
-      // Premiere tab items            
-      HBox row1 = new HBox();
-      row1.setSpacing(5);
-      row1.setAlignment(Pos.CENTER_LEFT);
-      row1.setPadding(new Insets(5,0,0,5));
-      
-      Label title = new Label("Season Premieres");
-      
-      Label tivo_label = new Label();
-      
-      tivo = new ChoiceBox<String>();
-      tivo.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
-            if (newVal != null) {   
+   public premiere(final JFrame frame) {
+
+      // Premiere tab items
+      JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+
+      JLabel title = new JLabel("Season Premieres");
+
+      JLabel tivo_label = new JLabel();
+
+      tivo = new JComboBox<String>();
+      tivo.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)tivo.getSelectedItem();
+            if (newVal != null) {
                // Clear channel list
                channels.getItems().clear();
-               
-               String tivoName = newVal;
+
+               final String tivoName = newVal;
                if (config.gui.remote_gui != null)
                   config.gui.remote_gui.updateButtonStates(tivoName, "Season Premieres");
                // Load channel list for this TiVo
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override
                   public void run() {
                      loadChannelInfo(tivoName);
@@ -103,31 +95,31 @@ public class premiere {
             }
          }
       });
-      tivo.setTooltip(tooltip.getToolTip("tivo_premiere"));
+      tivo.setToolTipText(tooltip.getToolTip("tivo_premiere"));
 
-      Label days_label = new Label("Days");      
-      days = new ChoiceBox<String>();
-      days.setTooltip(tooltip.getToolTip("premiere_days"));
+      JLabel days_label = new JLabel("Days");
+      days = new JComboBox<String>();
+      days.setToolTipText(tooltip.getToolTip("premiere_days"));
       for (int i=1; i<=12; ++i) {
-         days.getItems().add("" + i);
+         days.addItem("" + i);
       }
-      days.setValue("12");
+      days.setSelectedItem("12");
 
-      Button refresh = new Button("Search");
-      refresh.setTooltip(tooltip.getToolTip("refresh_premiere"));
-      refresh.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      JButton refresh = new JButton("Search");
+      refresh.setToolTipText(tooltip.getToolTip("refresh_premiere"));
+      refresh.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Refresh table
             TableUtil.clear(tab.TABLE);
-            String tivoName = tivo.getValue();
-            if (tivoName != null && tivoName.length() > 0) {            
+            String tivoName = (String)tivo.getSelectedItem();
+            if (tivoName != null && tivoName.length() > 0) {
                // This updates premiere_channel_info "isSelected" settings
                if ( ! updateSelectedChannels(tivoName) )
                   return;
-               
+
                // Save channel information to file
                saveChannelInfo(tivoName);
-               
+
                // Now search for Premieres in background mode
                jobData job = new jobData();
                job.source          = tivoName;
@@ -140,32 +132,32 @@ public class premiere {
             }
          }
       });
-      
-      record = new Button("Record");
-      record.setTooltip(tooltip.getToolTip("record_premiere"));
-      record.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+
+      record = new JButton("Record");
+      record.setToolTipText(tooltip.getToolTip("record_premiere"));
+      record.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0)
                tab.recordSingle(tivoName);
          }
       });
-      
-      recordSP = new Button("Season Pass");
-      recordSP.setTooltip(tooltip.getToolTip("recordSP_premiere"));
-      recordSP.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+
+      recordSP = new JButton("Season Pass");
+      recordSP.setToolTipText(tooltip.getToolTip("recordSP_premiere"));
+      recordSP.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0)
                tab.recordSP(tivoName);
          }
       });
-      
-      wishlist = new Button("WL");
-      wishlist.setTooltip(tooltip.getToolTip("wishlist_search"));
-      wishlist.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+
+      wishlist = new JButton("WL");
+      wishlist.setToolTipText(tooltip.getToolTip("wishlist_search"));
+      wishlist.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                int[] selected = TableUtil.GetSelectedRows(tab.TABLE);
                JSONObject json = null;
@@ -175,12 +167,12 @@ public class premiere {
             }
          }
       });
-      
-      Button channels_update = new Button("Update Channels");
-      channels_update.setTooltip(tooltip.getToolTip("premiere_channels_update"));
-      channels_update.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+
+      JButton channels_update = new JButton("Update Channels");
+      channels_update.setToolTipText(tooltip.getToolTip("premiere_channels_update"));
+      channels_update.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                // Build list of received channels for this TiVo
                jobData job = new jobData();
@@ -193,44 +185,38 @@ public class premiere {
             }
          }
       });
-      
-      channels = new MyListView();
-      channels.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-      channels.setOrientation(Orientation.VERTICAL);      
-      channels.setTooltip(tooltip.getToolTip("premiere_channels"));
-      VBox.setVgrow(channels, Priority.ALWAYS); // stretch vertically
-      
-      row1.getChildren().add(title);
-      row1.getChildren().add(tivo_label);
-      row1.getChildren().add(tivo);
-      row1.getChildren().add(refresh);
-      row1.getChildren().add(days);
-      row1.getChildren().add(days_label);
-      row1.getChildren().add(record);
-      row1.getChildren().add(recordSP);
-      row1.getChildren().add(wishlist);
-      row1.getChildren().add(util.space(40));
-      row1.getChildren().add(channels_update);
-      
-      tab = new premiereTable();
-      VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
-      
-      GridPane row2 = new GridPane();
-      row2.setHgap(5);
-      row2.setPadding(new Insets(0,0,0,5));      
-      row2.getColumnConstraints().add(0, util.cc_stretch());
-      row2.getColumnConstraints().add(1, util.cc_none());
-      row2.getRowConstraints().add(0, util.rc_stretch());
-      channels.setMinWidth(150); channels.setMaxWidth(150);
-      row2.add(tab.TABLE, 0, 0);
-      row2.add(channels, 1, 0);
-      VBox.setVgrow(row2, Priority.ALWAYS); // stretch vertically
 
-      panel = new VBox();
-      panel.setSpacing(1);
-      panel.getChildren().addAll(row1, row2);      
+      channels = new MyListView();
+      channels.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+      channels.setToolTipText(tooltip.getToolTip("premiere_channels"));
+
+      row1.add(title);
+      row1.add(tivo_label);
+      row1.add(tivo);
+      row1.add(refresh);
+      row1.add(days);
+      row1.add(days_label);
+      row1.add(record);
+      row1.add(recordSP);
+      row1.add(wishlist);
+      row1.add(util.space(40));
+      row1.add(channels_update);
+
+      tab = new premiereTable();
+
+      JScrollPane chanScroll = new JScrollPane(channels);
+      chanScroll.setMinimumSize(new Dimension(150, 0));
+      chanScroll.setPreferredSize(new Dimension(150, 0));
+
+      JPanel row2 = new JPanel(new BorderLayout(5, 0));
+      row2.add(new JScrollPane(tab.TABLE), BorderLayout.CENTER);
+      row2.add(chanScroll, BorderLayout.EAST);
+
+      panel = new JPanel(new BorderLayout());
+      panel.add(row1, BorderLayout.NORTH);
+      panel.add(row2, BorderLayout.CENTER);
    }
-   
+
    // Read channel info from a file
    // Columns are:
    // channelNumber, callSign, channelId, stationId, sourceType, isSelected
@@ -305,7 +291,7 @@ public class premiere {
             }
             if (selected.size() > 0) {
                for (int i=0; i<selected.size(); ++i) {
-                  channels.getSelectionModel().select(selected.get(i));
+                  channels.addSelectionInterval(selected.get(i), selected.get(i));
                }
             }
          } catch (Exception e1) {
@@ -313,7 +299,7 @@ public class premiere {
          }
       }
    }
-   
+
    public Boolean updateSelectedChannels(String tivoName) {
       try {
          // Reset "isSelected" entries for premiere_channel_info for this TiVo
@@ -321,14 +307,14 @@ public class premiere {
             for (int i=0; i<channel_info.get(tivoName).length(); ++i) {
                channel_info.get(tivoName).getJSONObject(i).put("isSelected", "false");
             }
-   
+
             // Set "isSelected" to true for selected ones
-            ObservableList<Integer> sel = channels.getSelectionModel().getSelectedIndices();
-            if (sel.size() < 1) {
+            int[] sel = channels.getSelectedIndices();
+            if (sel.length < 1) {
                log.error("No channels selected in channel list for processing.");
                return false;
             }
-            for (Integer row : sel) {
+            for (int row : sel) {
                channel_info.get(tivoName).getJSONObject(row).put("isSelected", "true");
             }
          } else {
@@ -341,15 +327,15 @@ public class premiere {
       }
       return true;
    }
-   
+
    // Return channel information for selected entries in channel list
    // NOTE: This is called from remote "premieres" task
    public JSONArray getSelectedChannelData(String tivoName) {
       JSONArray a = new JSONArray();
       try {
          if (channel_info.containsKey(tivoName)) {
-            ObservableList<Integer> sel = channels.getSelectionModel().getSelectedIndices();
-            for (Integer row : sel) {
+            int[] sel = channels.getSelectedIndices();
+            for (int row : sel) {
                a.put(channel_info.get(tivoName).getJSONObject(row));
             }
          }
@@ -358,41 +344,39 @@ public class premiere {
       }
       return a;
    }
-   
+
    // Populate channel list for given TiVo in Premieres tab
    // NOTE: This is called from remote "channels" task
    public void putChannelData(String tivoName, JSONArray channelInfo) {
       // 1st save selected channels list in a hash for easy access
-      ObservableList<Integer> sel = channels.getSelectionModel().getSelectedIndices();
+      int[] sel = channels.getSelectedIndices();
       Hashtable<String,Boolean> h = new Hashtable<String,Boolean>();
-      for (Integer row : sel) {
+      for (int row : sel) {
          String channelNumber = channels.getItems().get(row);
          h.put(channelNumber, true);
       }
-      
+
       // Now reset GUI list and global
       channel_info.put(tivoName, channelInfo);
       channels.getItems().clear();
       try {
          String channelNumber, callSign;
-         ObservableList<String> oblist = FXCollections.observableList(new ArrayList<String>());
-         int count = 0;
+         DefaultListModel<String> oblist = channels.getItems();
          for (int i=0; i<channelInfo.length(); ++i) {
             JSONObject c = channelInfo.getJSONObject(i);
             if (c.has("channelNumber") && c.has("callSign")) {
                channelNumber = c.getString("channelNumber");
                callSign = c.getString("callSign");
-               oblist.add(count++, channelNumber + "=" + callSign);
+               oblist.addElement(channelNumber + "=" + callSign);
             }
          }
-         channels.setItems(oblist);
-         
+
          // Re-select channels if available
          for (int k=0; k<channels.getItems().size(); ++k) {
             channelNumber = channels.getItems().get(k);
             JSONObject json = channel_info.get(tivoName).getJSONObject(k);
             if (h.containsKey(channelNumber)) {
-               channels.getSelectionModel().select(k);
+               channels.addSelectionInterval(k, k);
                json.put("isSelected", "true");
             } else {
                json.put("isSelected", "false");
@@ -401,8 +385,8 @@ public class premiere {
       } catch (JSONException e) {
          log.error("putChannelData - " + e.getMessage());
       }
-   }  
-   
+   }
+
    // Write channel info to a file
    // Columns are:
    // channelNumber, callSign, channelId, stationId, sourceType, isSelected
@@ -436,7 +420,7 @@ public class premiere {
          log.error("saveChannelInfo - " + e1.getMessage());
       }
    }
-   
+
    // NOTE: This called as part of a background job
    public void TagPremieresWithSeasonPasses(JSONArray data) {
       log.warn("Collecting information on existing Season Passes...");

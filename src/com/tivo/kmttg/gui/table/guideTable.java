@@ -18,29 +18,19 @@
  */
 package com.tivo.kmttg.gui.table;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Stack;
 
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.SortEvent;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.util.Callback;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONConverter;
@@ -53,6 +43,10 @@ import com.tivo.kmttg.gui.comparator.DurationComparator;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
+import com.tivo.kmttg.gui.swing.KmttgTable;
+import com.tivo.kmttg.gui.swing.KmttgTableModel;
+import com.tivo.kmttg.gui.swing.RowColorer;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
@@ -64,13 +58,14 @@ import com.tivo.kmttg.util.log;
 
 public class guideTable extends TableMap {
    private String currentTivo = null;
-   public TableView<Tabentry> TABLE = null;
+   public JTable TABLE = null;
+   public KmttgTableModel<Tabentry> MODEL = null;
    public String[] TITLE_cols = {"DATE", "SHOW", "DUR"};
    private double[] weights = {18, 76, 6};
    public String folderName = null;
    public int folderEntryNum = -1;
-   public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();   
-   
+   public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
+
    // TableMap overrides
    @Override
    public JSONObject getJson(int row) {
@@ -86,126 +81,80 @@ public class guideTable extends TableMap {
    }
    @Override
    public void clear() {
-      TABLE.getItems().clear();
+      MODEL.clear();
    }
    @Override
-   public TableView<?> getTable() {
+   public JTable getTable() {
       return TABLE;
    }
-         
+
    public guideTable() {
-      TABLE = new TableView<Tabentry>();
-      TABLE.getSelectionModel().setSelectionMode(SelectionMode.SINGLE); // Allow multiple row selection
-      TABLE.setRowFactory(new ColorRowFactory()); // For row background color handling
-      // Special sort listener to set sort order to descending date when no sort is selected
-      TABLE.getSortOrder().addListener(new ListChangeListener<TableColumn<Tabentry, ?>>() {
-         @Override
-         public void onChanged(Change<? extends TableColumn<Tabentry, ?>> change) {
-            change.next();
-            if (change != null && change.toString().contains("removed")) {
-               if (change.getRemoved().get(0).getText().equals("DATE"))
-                  return;
-               int date_col = TableUtil.getColumnIndex(TABLE, "DATE");
-               TABLE.getSortOrder().setAll(Collections.singletonList(TABLE.getColumns().get(date_col)));
-               TABLE.getColumns().get(date_col).setSortType(TableColumn.SortType.DESCENDING);
-            }
-         }
-      });
-      
-      // Keep selection visible following sort event
-      TABLE.setOnSort(new EventHandler<SortEvent<TableView<Tabentry>>>() {
-         @Override public void handle(SortEvent<TableView<Tabentry>> event) {
-            Platform.runLater(new Runnable() {
-               @Override public void run() {
-                  // If there's a table selection make sure it's visible
-                  TableUtil.selectedVisible(TABLE);
-               }
-            });
-         }
-      });
-      
-      for (String colName : TITLE_cols) {
-         if (colName.equals("DATE")) {
-            TableColumn<Tabentry,sortableDate> col = new TableColumn<Tabentry,sortableDate>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableDate>(colName));
-            col.setComparator(new DateComparator());
-            col.setStyle("-fx-alignment: CENTER-RIGHT;");
-            TABLE.getColumns().add(col);
-         } else if (colName.equals("DUR")) {
-            TableColumn<Tabentry,sortableDuration> col = new TableColumn<Tabentry,sortableDuration>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableDuration>(colName));
-            col.setComparator(new DurationComparator());
-            col.setStyle("-fx-alignment: CENTER;");
-            TABLE.getColumns().add(col);
-         } else {
-            // Regular String sort
-            TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(colName));
-            TABLE.getColumns().add(col);
-         }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
-      }
-      
+      MODEL = new KmttgTableModel<Tabentry>(TITLE_cols);
+      MODEL.setComparator("DATE", new DateComparator());
+      MODEL.setComparator("DUR", new DurationComparator());
+      // Default sort is descending date when no column sort is selected
+      MODEL.setDefaultSort("DATE", false);
+      TABLE = KmttgTable.create(MODEL, new ColorRow());
+      KmttgTable.setColumnAlignment(TABLE, "DATE", JLabel.RIGHT);
+      KmttgTable.setColumnAlignment(TABLE, "DUR", JLabel.CENTER);
+      TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
+
       // Add keyboard listener
-      TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {
-         public void handle(KeyEvent e) {
+      TABLE.addKeyListener(new KeyAdapter() {
+         @Override
+         public void keyPressed(KeyEvent e) {
             KeyPressed(e);
          }
       });
-      
+
       // Define selection listener to detect table row selection changes
-      TABLE.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tabentry>() {
+      TABLE.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
          @Override
-         public void changed(ObservableValue<? extends Tabentry> obs, Tabentry oldSelection, Tabentry newSelection) {
-            if (newSelection != null) {
-               TABLERowSelected(newSelection);
+         public void valueChanged(ListSelectionEvent e) {
+            if (e.getValueIsAdjusting())
+               return;
+            int row = TABLE.getSelectionModel().getLeadSelectionIndex();
+            if (row >= 0 && row < MODEL.size() && TABLE.isRowSelected(row)) {
+               TABLERowSelected(MODEL.getRow(row));
             }
          }
       });
-                              
+
       // Add right mouse button handler
       TableUtil.AddRightMouseListener(TABLE);
    }
 
-   // ColorRowFactory for setting row background color
-   private class ColorRowFactory implements Callback<TableView<Tabentry>, TableRow<Tabentry>> {
-      public TableRow<Tabentry> call(TableView<Tabentry> tableView) {
-         TableRow<Tabentry> row = new TableRow<Tabentry>() {
-            @Override
-            public void updateItem(Tabentry entry, boolean empty) {
-               super.updateItem(entry,  empty);
-               styleProperty().unbind(); setStyle("");
-               if (entry != null) {
-                  // Mark rows that are already in To Do
-                  JSONObject json = entry.getDATE().json;
-                  if (json != null && json.has("__inTodo__")) {
-                     TableUtil.setRowColor(this, TableUtil.tableBkgndProtected);
+   // Row background color handling
+   private class ColorRow implements RowColorer<Tabentry> {
+      public java.awt.Color getColor(Tabentry entry) {
+         if (entry != null) {
+            // Mark rows that are already in To Do
+            JSONObject json = entry.getDATE().json;
+            if (json != null && json.has("__inTodo__"))
+               return TableUtil.tableBkgndProtected;
+            // Mark rows with entries in auto history file
+            if (config.showHistoryInTable == 1) {
+               try {
+                  if (json != null && json.has("partnerContentId")) {
+                     String programId = json.getString("partnerContentId");
+                     programId = programId.replaceFirst("^.+\\.", "");
+                     if (auto.keywordMatchHistoryFast(programId, false))
+                        return TableUtil.tableBkgndInHistory;
                   }
-                  // Mark rows with entries in auto history file
-                  if (config.showHistoryInTable == 1) {
-                     try {
-                        if (json.has("partnerContentId")) {
-                           String programId = json.getString("partnerContentId");
-                           programId = programId.replaceFirst("^.+\\.", "");
-                           if (auto.keywordMatchHistoryFast(programId, false))
-                              TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);
-                        }
-                     } catch (JSONException e) {
-                        log.error("guideTable ColorRowFactory - " + e.getMessage());
-                     }
-                  }
+               } catch (JSONException e) {
+                  log.error("guideTable ColorRowFactory - " + e.getMessage());
                }
             }
-         };
-         return row;
+         }
+         return null;
       }
-   }   
-   
+   }
+
    public static class Tabentry {
       public String title = "";
       public sortableDate date = null;
       public sortableDuration duration = null;
-      
+
       // Root node constructor
       public Tabentry(String s) {
          // Do nothing
@@ -223,13 +172,13 @@ public class guideTable extends TableMap {
             duration = new sortableDuration(dur, false);
          } catch (JSONException e1) {
             log.error("AddTABLERow - " + e1.getMessage());
-         }      
+         }
       }
 
       public sortableDate getDATE() {
          return date;
       }
-      
+
       public String getSHOW() {
          return title;
       }
@@ -237,12 +186,12 @@ public class guideTable extends TableMap {
       public sortableDuration getDUR() {
          return duration;
       }
-      
+
       public String toString() {
          return title;
       }
    }
-   
+
    // This used by remote guide.java when TiVo selection changes
    public void AddRows(String tivoName, JSONArray data) {
       if (data == null) {
@@ -250,7 +199,7 @@ public class guideTable extends TableMap {
             AddRows(currentTivo, tivo_data.get(currentTivo));
          return;
       }
-      
+
       // update remotegui entries
       if (TABLE != null) {
          // Clear table and update channel list
@@ -258,11 +207,11 @@ public class guideTable extends TableMap {
          updateChannels_gui(tivoName, data);
       }
    }
-      
+
    public JSONObject GetRowData(int row) {
-      return TABLE.getItems().get(row).getDATE().json;
+      return MODEL.getRow(row).getDATE().json;
    }
-      
+
    private void TABLERowSelected(Tabentry entry) {
       // Get column items for selected row
       sortableDate s = entry.getDATE();
@@ -278,7 +227,7 @@ public class guideTable extends TableMap {
             title += " (to be recorded on " + s.json.getString("__inTodo__") + ")";
          log.warn(title);
          log.print(message);
-         
+
          if (config.gui.show_details.isShowing())
             config.gui.show_details.update(TABLE, currentTivo, s.json);
       } catch (JSONException e) {
@@ -286,13 +235,13 @@ public class guideTable extends TableMap {
          return;
       }
    }
-      
+
    // Handle keyboard presses
    private void KeyPressed(KeyEvent e) {
       if (e.isControlDown())
          return;
-      KeyCode keyCode = e.getCode();
-      if (keyCode == KeyCode.I) {
+      int keyCode = e.getKeyCode();
+      if (keyCode == KeyEvent.VK_I) {
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
             return;
@@ -301,7 +250,7 @@ public class guideTable extends TableMap {
             config.gui.show_details.update(TABLE, currentTivo, json);
          }
       }
-      else if (keyCode == KeyCode.A) {
+      else if (keyCode == KeyEvent.VK_A) {
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
             return;
@@ -309,16 +258,16 @@ public class guideTable extends TableMap {
          if (json != null)
             auto.AddHistoryEntry(json);
       }
-      else if (keyCode == KeyCode.P) {
-         config.gui.remote_gui.guide_tab.recordSP.fire();
+      else if (keyCode == KeyEvent.VK_P) {
+         config.gui.remote_gui.guide_tab.recordSP.doClick();
       }
-      else if (keyCode == KeyCode.R) {
-         config.gui.remote_gui.guide_tab.record.fire();
+      else if (keyCode == KeyEvent.VK_R) {
+         config.gui.remote_gui.guide_tab.record.doClick();
       }
-      else if (keyCode == KeyCode.W) {
-         config.gui.remote_gui.guide_tab.wishlist.fire();
+      else if (keyCode == KeyEvent.VK_W) {
+         config.gui.remote_gui.guide_tab.wishlist.doClick();
       }
-      else if (keyCode == KeyCode.J) {
+      else if (keyCode == KeyEvent.VK_J) {
          // Print json of selected row to log window
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
@@ -328,12 +277,12 @@ public class guideTable extends TableMap {
             rnpl.pprintJSON(json);
             id.printIds(json);
          }
-      } else if (keyCode == KeyCode.N) {
+      } else if (keyCode == KeyEvent.VK_N) {
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
             return;
          TableUtil.PrintEpisodes(GetRowData(selected[0]));
-      } else if (keyCode == KeyCode.Q) {
+      } else if (keyCode == KeyEvent.VK_Q) {
          // Web query currently selected entry
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
@@ -351,7 +300,7 @@ public class guideTable extends TableMap {
          }
       }
    }
-   
+
    // Return time rounded down to nearest hour in nice display format
    private String getDisplayTime(long gmt) {
       // Round down to nearest hour
@@ -359,7 +308,7 @@ public class guideTable extends TableMap {
       SimpleDateFormat sdf = new SimpleDateFormat("E MM/dd/yyyy h a");
       return sdf.format(gmt);
    }
-   
+
    // Return a range of dates as an array
    private Stack<String> getDisplayTimeRange(long gmt, int hourIncrement, int numDays) {
       Stack<String> range = new Stack<String>();
@@ -383,33 +332,33 @@ public class guideTable extends TableMap {
          log.error("displayTimeToLong error: " + e.getMessage());
       }
       return 0;
-      
+
    }
-   
+
    // Refresh a combo box with new date range
-   public void setChoiceBoxDates(ChoiceBox<String> widget, int hourIncrement, int numDays) {
+   public void setChoiceBoxDates(JComboBox<String> widget, int hourIncrement, int numDays) {
       // 1st get current setting to restore selection if still relevant
-      String current = widget.getSelectionModel().getSelectedItem();
-      
+      String current = (String) widget.getSelectedItem();
+
       long gmt = new Date().getTime();
-      widget.getItems().clear();
+      widget.removeAllItems();
       Stack<String> dates = getDisplayTimeRange(gmt, hourIncrement, numDays);
       for(int i=0; i<dates.size(); ++i) {
-         widget.getItems().add(dates.get(i));
+         widget.addItem(dates.get(i));
          if (dates.get(i).equals(current))
-            widget.getSelectionModel().select(i);
+            widget.setSelectedIndex(i);
       }
       if (dates.size() > 0)
-         widget.getSelectionModel().select(dates.get(0));
+         widget.setSelectedItem(dates.get(0));
    }
-   
+
    public void updateChannels(final String tivoName, Boolean force) {
       // If not in force mode, use cached data if available
       if (! force && tivo_data.containsKey(tivoName)) {
          updateChannels_gui(tivoName, tivo_data.get(tivoName));
          return;
       }
-      
+
       // No data available so queue up a job to get channel list
       // NOTE: The "remote" task is responsible for updating chan_data
       // once this job completes.
@@ -423,7 +372,7 @@ public class guideTable extends TableMap {
       job.remote_guideChannels  = true;
       jobMonitor.submitNewJob(job);
    }
-   
+
    // This is called after "remote" task completes and updates the
    // guide channel list in remotegui according to JSONArray data
    public void updateChannels_gui(String tivoName, JSONArray data) {
@@ -434,14 +383,14 @@ public class guideTable extends TableMap {
             JSONObject chan = data.getJSONObject(i);
             if (chan.has("channelNumber") && chan.has("callSign")) {
                String name = chan.getString("channelNumber") + "=" + chan.getString("callSign");
-               config.gui.remote_gui.guide_tab.ChanList.getItems().add(name);
+               config.gui.remote_gui.guide_tab.ChanList.getItems().addElement(name);
             }
          }
       } catch (JSONException e) {
          log.error("updateChannels_gui - " + e.getMessage());
       }
    }
-   
+
    // Based on "channelNumber=callSign" setting in remotegui list get the channel json data
    // from tivo_data
    private JSONObject getChanInfo(String tivoName, String chanName) {
@@ -465,7 +414,7 @@ public class guideTable extends TableMap {
       }
       return null;
    }
-   
+
    // This function called from remotegui to update channel information in table
    public void updateTable(final String tivoName, String chanName) {
       JSONObject chan_data = getChanInfo(tivoName, chanName);
@@ -484,11 +433,11 @@ public class guideTable extends TableMap {
          log.error("chan_data missing information for channel: " + chanName);
       }
    }
-   
+
    public void updateFolder(final String tivoName, final int range, final long start,
          final String minEndTime, final long stop, final String maxStartTime, final String isReceived, final JSONObject chan) {
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             Remote r = config.initRemote(tivoName);
             if (r.success) {
                try {
@@ -509,16 +458,16 @@ public class guideTable extends TableMap {
                   r.disconnect();
                   if( result != null ) {
                      if (result.has("gridRow")) {
-                        Platform.runLater(new Runnable() {
+                        SwingUtil.runLater(new Runnable() {
                            @Override public void run() {
                               try {
                                  clear();
                                  JSONArray matches = result.getJSONArray("gridRow").getJSONObject(0).getJSONArray("offer");
                                  util.updateTodoIfNeeded("Guide");
                                  for (int i=0; i<matches.length(); ++i) {
-                                    TABLE.getItems().add(new Tabentry(matches.getJSONObject(i)));
+                                    MODEL.addRow(new Tabentry(matches.getJSONObject(i)));
                                  }
-                                 TABLE.sort();
+                                 MODEL.sort();
                                  TableUtil.autoSizeTableViewColumns(TABLE, true);
                               } catch (Exception e) {
                                  if (e.getMessage().contains("not found")) {
@@ -533,19 +482,18 @@ public class guideTable extends TableMap {
                            "No guide data available: start=" + minEndTime +
                            ", channel=" + channel.getString("channelNumber")
                         );
-                        
+
                      }
-                  }                  
+                  }
                } catch (JSONException e1) {
                   log.error("updateFolder - " + e1.getMessage());
                }
             } // if r.success
-            return null;
          }
       };
       new Thread(task).start();
    }
-   
+
    // Schedule a single recording
    public void recordSingle(String tivoName) {
       int[] selected = TableUtil.GetSelectedRows(TABLE);
@@ -561,7 +509,7 @@ public class guideTable extends TableMap {
          TableUtil.recordSingleCB(tivoName, entries);
       }
    }
-   
+
    // Create a Season Pass
    public void recordSP(final String tivoName) {
       final int[] selected = TableUtil.GetSelectedRows(TABLE);
@@ -584,8 +532,8 @@ public class guideTable extends TableMap {
       }
 
       // Proceed with SP scheduling
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             int[] selected = TableUtil.GetSelectedRows(TABLE);
             if (selected.length > 0) {
                int row;
@@ -599,7 +547,7 @@ public class guideTable extends TableMap {
                   if (existing == null) {
                      log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
                      r.disconnect();
-                     return null;
+                     return;
                   }
                   // Now proceed with subscriptions
                   for (int i=0; i<selected.length; ++i) {
@@ -610,7 +558,6 @@ public class guideTable extends TableMap {
                   }
                }
             }
-            return null;
          }
       };
       new Thread(task).start();

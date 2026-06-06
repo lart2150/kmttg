@@ -22,19 +22,8 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         architecture: x64
-    - uses: actions/cache@v4
-      id: javafx-cache
-      with:
-        path: javafx-sdk-21.0.7
-        key: ${{ runner.os }}-javafx-sdk-21.0.7
-    - name: Install Dependencies
-      if: steps.javafx-cache.outputs.cache-hit != 'true'
-      run: |
-       curl -o javafx.zip https://download2.gluonhq.com/openjfx/21.0.7/openjfx-21.0.7_linux-x64_bin-sdk.zip
-       unzip javafx.zip
     - name: Build with Ant
       run: |
-        sed -i.bak 's/<property name="fxlib" value=".*"\/>/<property name="fxlib" value="javafx-sdk-21.0.7\/lib"\/>/g' build.xml
         ant -noinput -buildfile build.xml
     - uses: actions/upload-artifact@v4
       with:

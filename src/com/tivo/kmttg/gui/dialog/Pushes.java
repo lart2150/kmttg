@@ -18,51 +18,50 @@
  */
 package com.tivo.kmttg.gui.dialog;
 
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.MyTooltip;
-import com.tivo.kmttg.gui.gui;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.pushTable;
-import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
 
 public class Pushes {
-   private Stage frame = null;
-   private Stage dialog = null;
+   private JFrame frame = null;
+   private JDialog dialog = null;
    private pushTable tab = null;
    private JSONArray data = null;
    private String tivoName = null;
-   
-   public Pushes(String tivoName, Stage frame) {
+
+   public Pushes(String tivoName, JFrame frame) {
       this.tivoName = tivoName;
-      this.frame = frame;      
+      this.frame = frame;
       getPushes();
    }
-   
+
    // Retrieve queue data from TiVo mind server
    private void getPushes() {
       // Run in separate background thread
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             if (tab != null)
                tab.clear();
             data = new JSONArray();
             Remote r = new Remote(tivoName, true);
             if (r.success) {
-               try {            
+               try {
                   JSONObject json = new JSONObject();
                   json.put("bodyId", r.bodyId_get());
                   json.put("noLimit", true);
@@ -94,9 +93,9 @@ public class Pushes {
                }
                r.disconnect();
             }
-            
+
             if (data != null && data.length() > 0) {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      if (dialog == null)
                         init();
@@ -107,22 +106,21 @@ public class Pushes {
             } else {
                log.warn(tivoName + ": No pending pushes found to display");
             }
-            return null;
          }
       };
       new Thread(task).start();
    }
-   
+
    private void removePushes(JSONArray entries) {
       // Run in separate background thread
-      class backgroundRun extends Task<Void> {
+      class backgroundRun implements Runnable {
          JSONArray entries;
 
          public backgroundRun(JSONArray entries) {
             this.entries = entries;
          }
          @Override
-         protected Void call() {
+         public void run() {
             try {
                Remote r = new Remote(tivoName, true);
                if (r.success) {
@@ -138,46 +136,45 @@ public class Pushes {
                         log.print(result.toString(3));
                      } else {
                         log.error("push item remove failed");
-                        return null;
+                        return;
                      }
                   }
                   r.disconnect();
               }
             } catch (Exception e) {
                log.error("removePushes - " + e.getMessage());
-               return null;
+               return;
             }
-            return null;
          }
       }
       backgroundRun b = new backgroundRun(entries);
       new Thread(b).start();
    }
-         
+
    private void init() {
       // Define content for dialog window
-      VBox content = new VBox();
+      JPanel content = new JPanel(new BorderLayout());
 
       // Refresh button
-      Button refresh = new Button("Refresh");
+      JButton refresh = new JButton("Refresh");
       String tip = "<b>Refresh</b><br>Query queued pushes and refresh table.<br>";
       tip += "NOTE: The mind server listings can be several seconds off compared to what is currently happening.";
-      refresh.setTooltip(MyTooltip.make(tip));
-      refresh.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      refresh.setToolTipText(MyTooltip.make(tip));
+      refresh.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             getPushes();
          }
       });
 
       // Remove button
-      Button remove = new Button("Remove");
+      JButton remove = new JButton("Remove");
       tip = "<b>Remove</b><br>Attempt to remove selected entry in the table from push queue.<br>";
       tip += "NOTE: This will not cancel pushes already in progress or very close to starting.<br>";
       tip += "NOTE: The response to this operation from mind server is always 'success' so there<br>";
       tip += "is no guarantee that removing an entry actually works or not.";
-      remove.setTooltip(MyTooltip.make(tip));
-      remove.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      remove.setToolTipText(MyTooltip.make(tip));
+      remove.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             JSONArray entries = new JSONArray();
             Boolean cont = true;
             while (cont) {
@@ -196,31 +193,25 @@ public class Pushes {
                removePushes(entries);
          }
       });
-      
+
       // Row 1 = 2 buttons
-      HBox row1 = new HBox();
-      row1.getChildren().addAll(refresh, remove);
-      content.getChildren().add(row1);
-      
+      JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      row1.add(refresh);
+      row1.add(remove);
+      content.add(row1, BorderLayout.NORTH);
+
       // Table
       tab = new pushTable();
       tab.AddRows(data);
-      ScrollPane tabScroll = new ScrollPane(tab.getTable());
-      content.getChildren().add(tabScroll);
-      tabScroll.setFitToHeight(true);
-      tabScroll.setFitToWidth(true);
+      JScrollPane tabScroll = new JScrollPane(tab.getTable());
+      content.add(tabScroll, BorderLayout.CENTER);
 
-      dialog = new Stage();
-      dialog.initOwner(frame);
-      gui.LoadIcons(dialog);
+      dialog = new JDialog(frame); // Non modal
+      SwingUtil.loadIcons(dialog);
       dialog.setTitle("Push Queue");
-      Scene scene = new Scene(new VBox());
-      config.gui.addScene(scene);
-      config.gui.setFontSize(scene, config.FontSize);
-      ((VBox) scene.getRoot()).getChildren().add(content);
-      dialog.setScene(scene);
-      dialog.setWidth(frame.getWidth());
-      dialog.setHeight(frame.getHeight()/3);
-      dialog.show();      
+      dialog.getContentPane().add(content);
+      dialog.setSize(frame.getWidth(), frame.getHeight()/3);
+      dialog.setLocationRelativeTo(frame);
+      dialog.setVisible(true);
    }
 }

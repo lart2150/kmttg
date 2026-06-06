@@ -18,22 +18,27 @@
  */
 package com.tivo.kmttg.gui.dialog;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 //import com.tivo.kmttg.JSON.JSONException;
 //import com.tivo.kmttg.JSON.JSONObject;
@@ -43,71 +48,67 @@ import com.tivo.kmttg.util.log;
 //import com.tivo.kmttg.util.string;
 
 public class wlOptions {
-   VBox components;
-   Label label;
-   Label l_help, l_title, l_keyword, l_title_keyword, l_actor, l_director;
-   TextField tf_title, tf_keyword, tf_title_keyword, tf_actor, tf_director;
-   CheckBox cb_autorecord;
-   Label l_categories = null;
-   ChoiceBox<String> cb_categories = null;
+   JPanel components;
+   JLabel label;
+   JLabel l_help, l_title, l_keyword, l_title_keyword, l_actor, l_director;
+   JTextField tf_title, tf_keyword, tf_title_keyword, tf_actor, tf_director;
+   JCheckBox cb_autorecord;
+   JLabel l_categories = null;
+   JComboBox<String> cb_categories = null;
    JSONArray wishlistCategories = null;
-   
-   public wlOptions() {      
-      createComponents();      
+
+   public wlOptions() {
+      createComponents();
    }
-   
+
    private void createComponents() {
-      label = new Label();
-      l_help = new Label("KEYWORD LOGIC: keywords=>REQ, -keywords=>NOT, (keywords)=>OPT");
-      l_title = new Label("Wishlist Title");
-      tf_title = new TextField(); tf_title.setPrefWidth(15);
-      l_keyword = new Label("Keywords (keywords1,keywords2...)");
-      tf_keyword = new TextField(); tf_keyword.setPrefWidth(30);     
-      l_title_keyword = new Label("Title Keywords (keywords1,keywords2...)");
-      tf_title_keyword = new TextField(); tf_title_keyword.setPrefWidth(30);
-      l_actor = new Label("Actor (First Last,First2 Last2...)");
-      tf_actor = new TextField(); tf_actor.setPrefWidth(30);    
-      l_director = new Label("Director (First Last, First2 Last2...)");
-      tf_director = new TextField(); tf_director.setPrefWidth(30);    
-      cb_autorecord = new CheckBox("Auto Record"); cb_autorecord.setSelected(false);
+      label = new JLabel();
+      l_help = new JLabel("KEYWORD LOGIC: keywords=>REQ, -keywords=>NOT, (keywords)=>OPT");
+      l_title = new JLabel("Wishlist Title");
+      tf_title = new JTextField(15);
+      l_keyword = new JLabel("Keywords (keywords1,keywords2...)");
+      tf_keyword = new JTextField(30);
+      l_title_keyword = new JLabel("Title Keywords (keywords1,keywords2...)");
+      tf_title_keyword = new JTextField(30);
+      l_actor = new JLabel("Actor (First Last,First2 Last2...)");
+      tf_actor = new JTextField(30);
+      l_director = new JLabel("Director (First Last, First2 Last2...)");
+      tf_director = new JTextField(30);
+      cb_autorecord = new JCheckBox("Auto Record"); cb_autorecord.setSelected(false);
       // Intentionally disable for now since category Ids don't seem to work
       //createCategories();
-      
-      components = new VBox();
-      components.setSpacing(5);
+
+      components = new JPanel();
+      components.setLayout(new BoxLayout(components, BoxLayout.Y_AXIS));
       if (cb_categories != null) {
-         components.getChildren().addAll(
-            label,
-            l_help,
-            l_title, tf_title,
-            l_keyword, tf_keyword,
-            l_title_keyword, tf_title_keyword,
-            l_actor, tf_actor,
-            l_director, tf_director,
-            l_categories, cb_categories,
-            cb_autorecord
-         );
+         components.add(label);
+         components.add(l_help);
+         components.add(l_title); components.add(tf_title);
+         components.add(l_keyword); components.add(tf_keyword);
+         components.add(l_title_keyword); components.add(tf_title_keyword);
+         components.add(l_actor); components.add(tf_actor);
+         components.add(l_director); components.add(tf_director);
+         components.add(l_categories); components.add(cb_categories);
+         components.add(cb_autorecord);
       } else {
-         components.getChildren().addAll(
-            label,
-            l_help,
-            l_title, tf_title,
-            l_keyword, tf_keyword,
-            l_title_keyword, tf_title_keyword,
-            l_actor, tf_actor,
-            l_director, tf_director,
-            cb_autorecord
-         );
+         components.add(label);
+         components.add(l_help);
+         components.add(l_title); components.add(tf_title);
+         components.add(l_keyword); components.add(tf_keyword);
+         components.add(l_title_keyword); components.add(tf_title_keyword);
+         components.add(l_actor); components.add(tf_actor);
+         components.add(l_director); components.add(tf_director);
+         components.add(cb_autorecord);
       }
    }
-   
+
    /*private void createCategories() {
       if (wishlistCategories == null) {
          wishlistCategories = getWishlistCategoryIds(config.getTivoNames().firstElement());
       }
       if (wishlistCategories != null) {
-         l_categories = new Label("Category");
-         cb_categories = new ChoiceBox();
+         l_categories = new JLabel("Category");
+         cb_categories = new JComboBox<String>();
          cb_categories.addItem("");
          try {
             for (int i=0; i<wishlistCategories.length(); ++i) {
@@ -126,23 +127,47 @@ public class wlOptions {
          }
       }
    }*/
-   
-   @SuppressWarnings("static-access")
+
    public JSONObject promptUser(String title, Hashtable<String,String> hash) {
       if (hash != null && hash.size() > 0) {
          clearFields();
          setValues(hash);
       }
       label.setText(title);
-      Dialog<?> dialog = new Dialog<>();
-      dialog.initOwner(config.gui.getFrame());
-      config.gui.LoadIcons((Stage) dialog.getDialogPane().getScene().getWindow());
-      config.gui.setFontSize(dialog, config.FontSize);
-      dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+      final JDialog dialog = new JDialog(config.gui.getFrame());
+      dialog.setModal(true);
+      SwingUtil.loadIcons(dialog);
       dialog.setTitle("Create Wishlist");
-      dialog.getDialogPane().setContent(components);
-      Optional<?> response = dialog.showAndWait();
-      if (response != null && response.get().equals(ButtonType.OK)) {
+
+      final AtomicBoolean okPressed = new AtomicBoolean(false);
+      JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+      JButton okButton = new JButton("OK");
+      okButton.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            okPressed.set(true);
+            dialog.setVisible(false);
+         }
+      });
+      JButton cancelButton = new JButton("CANCEL");
+      cancelButton.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            okPressed.set(false);
+            dialog.setVisible(false);
+         }
+      });
+      buttons.add(okButton);
+      buttons.add(cancelButton);
+
+      JPanel root = new JPanel(new BorderLayout());
+      root.add(components, BorderLayout.CENTER);
+      root.add(buttons, BorderLayout.SOUTH);
+      dialog.getContentPane().add(root);
+      dialog.pack();
+      dialog.setLocationRelativeTo(config.gui.getFrame());
+      dialog.setVisible(true);
+      dialog.dispose();
+
+      if (okPressed.get()) {
          Hashtable<String,String> h = new Hashtable<String,String>();
          String t = (String)tf_title.getText();
          String keyword = (String)tf_keyword.getText();
@@ -150,7 +175,7 @@ public class wlOptions {
          String actor = (String)tf_actor.getText();
          String director = (String)tf_director.getText();
          //String category = (String)cb_categories.getSelectedItem();
-         
+
          // Check for minimum wishlist specification requirements
          if (keyword.length() < 1 &&
              title_keyword.length() < 1 &&
@@ -159,7 +184,7 @@ public class wlOptions {
             log.error("Wishlist must contain at least 1 keyword");
             return null;
          }
-         
+
          if (t.length() > 0) h.put("title", t);
          if (keyword.length() > 0) h.put("keyword", keyword);
          if (title_keyword.length() > 0) h.put("title_keyword", title_keyword);
@@ -173,20 +198,20 @@ public class wlOptions {
          return null;
       }
    }
-   
+
    private JSONObject hashToJson(Hashtable<String,String> h) {
       try {
          JSONObject json = new JSONObject();
          // Title is always required
          json.put("title", h.get("title"));
-         
+
          // auto record
          if (h.containsKey("autorecord"))
             json.put("autoRecord", true);
-         
+
          if (h.containsKey("categoryId"))
             json.put("categoryId", h.get("categoryId"));
-         
+
          String []s = {"title_keyword", "keyword"};
          for (int j=0; j<s.length; ++j) {
             if (h.containsKey(s[j])) {
@@ -220,7 +245,7 @@ public class wlOptions {
                }
             }
          }
-         
+
          String []s2 = {"actor", "director"};
          for (int j=0; j<s.length; ++j) {
             if (h.containsKey(s2[j])) {
@@ -265,7 +290,7 @@ public class wlOptions {
       }
       return null;
    }
-   
+
    private void setValues(Hashtable<String,String> h) {
       if (h.containsKey("title") && h.get("title").length() > 0)
          tf_title.setText(h.get("title"));
@@ -278,7 +303,7 @@ public class wlOptions {
       if (h.containsKey("director") && h.get("director").length() > 0)
          tf_director.setText(h.get("director"));
    }
-   
+
    private void clearFields() {
       label.setText("");
       tf_title.setText("");
@@ -287,7 +312,7 @@ public class wlOptions {
       tf_actor.setText("");
       tf_director.setText("");
    }
-   
+
    // Build list of top level categories plus sub-categories which can be used
    // for Wishlist creation
    /*private JSONArray getWishlistCategoryIds(String tivoName) {
@@ -306,7 +331,7 @@ public class wlOptions {
                   if (top.getJSONObject(i).has("partnerId"))
                      top.remove(i);
                }
-               
+
                // Build initial return JSONArray with top level info
                JSONArray categories = new JSONArray();
                for (int i=0; i<top.length(); ++i) {
@@ -315,7 +340,7 @@ public class wlOptions {
                   j.put("categoryId", top.getJSONObject(i).getString("categoryId"));
                   categories.put(j);
                }
-               
+
                // Now add in sub-categories
                for (int i=0; i<categories.length(); ++i) {
                   JSONObject j = new JSONObject();
@@ -334,7 +359,7 @@ public class wlOptions {
                      }
                      categories.getJSONObject(i).put("subcategories", sa);
                   }
-               }               
+               }
                return categories;
             }
          } catch (JSONException e) {
@@ -344,7 +369,7 @@ public class wlOptions {
       }
       return null;
    }*/
-   
+
    /*private String findCategoryId(String name) {
       String main, sub=null;
       if (name.contains(":")) {

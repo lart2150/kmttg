@@ -35,15 +35,13 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONConverter;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.remote.util;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -1682,7 +1680,7 @@ public class Remote{
          int offset = 0;
          int count = 50;
          
-         String search_type = (String)config.gui.remote_gui.search_tab.search_type.getValue();
+         String search_type = (String)config.gui.remote_gui.search_tab.search_type.getSelectedItem();
          
          // Role type search
          JSONArray credit = null;
@@ -2861,7 +2859,7 @@ public class Remote{
                }
             }
          }
-         Platform.runLater(new backgroundRun(schedule, tivoName, json, title, existingSP));
+         SwingUtil.runLater(new backgroundRun(schedule, tivoName, json, title, existingSP));
       } catch (JSONException e) {
          log.error("SPschedule - " + e.getMessage());
       }
@@ -2895,8 +2893,8 @@ public class Remote{
    
    // Background mode reboot sequence for a TiVo
    public void reboot(final String tivoName) {
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             try {
                JSONObject json = new JSONObject();
                json.put("bodyId", bodyId_get());
@@ -2917,7 +2915,6 @@ public class Remote{
             } catch (Exception e) {
                log.error("reboot - " + e.getMessage());
             }
-            return null;
          }
       };
       new Thread(task).start();

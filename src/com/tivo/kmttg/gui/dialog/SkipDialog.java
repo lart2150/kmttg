@@ -18,42 +18,42 @@
  */
 package com.tivo.kmttg.gui.dialog;
 
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.MyTooltip;
-import com.tivo.kmttg.gui.gui;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.skipTable;
-import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.util.log;
 
 public class SkipDialog {
-   private Stage frame = null;
-   private Stage dialog = null;
+   private JFrame frame = null;
+   private JDialog dialog = null;
    private skipTable tab = null;
    private JSONArray data = null;
-   
-   public SkipDialog(Stage frame) {
-      this.frame = frame;      
+
+   public SkipDialog(JFrame frame) {
+      this.frame = frame;
       getEntries();
    }
-   
+
    // Retrieve entries from AutoSkip.ini file
    private void getEntries() {
       if (tab != null)
          tab.clear();
-      data = SkipManager.getEntries();      
+      data = SkipManager.getEntries();
       if (data != null && data.length() > 0) {
          if (dialog == null)
             init();
@@ -63,17 +63,17 @@ public class SkipDialog {
          log.warn("No data available to display");
       }
    }
-   
+
    private void removeEntries(JSONArray entries) {
       // Run in separate background thread
-      class backgroundRun extends Task<Void> {
+      class backgroundRun implements Runnable {
          JSONArray entries;
 
          public backgroundRun(JSONArray entries) {
             this.entries = entries;
          }
          @Override
-         protected Void call() {
+         public void run() {
             try {
                for (int i=0; i<entries.length(); ++i) {
                   JSONObject json = entries.getJSONObject(i);
@@ -81,35 +81,34 @@ public class SkipDialog {
                }
             } catch (Exception e) {
                log.error("removeEntries - " + e.getMessage());
-               return null;
+               return;
             }
-            return null;
          }
       }
       backgroundRun b = new backgroundRun(entries);
       new Thread(b).start();
    }
-         
+
    private void init() {
       // Define content for dialog window
-      VBox content = new VBox();
+      JPanel content = new JPanel(new BorderLayout());
 
       // Refresh button
-      Button refresh = new Button("Refresh");
+      JButton refresh = new JButton("Refresh");
       String tip = "<b>Refresh</b><br>Get list of AutoSkip entries and refresh table.";
-      refresh.setTooltip(MyTooltip.make(tip));
-      refresh.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      refresh.setToolTipText(MyTooltip.make(tip));
+      refresh.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             getEntries();
          }
       });
 
       // Remove button
-      Button remove = new Button("Remove");
+      JButton remove = new JButton("Remove");
       tip = "<b>Remove</b><br>Remove selected entry in the table from AutoSkip file.";
-      remove.setTooltip(MyTooltip.make(tip));
-      remove.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      remove.setToolTipText(MyTooltip.make(tip));
+      remove.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             int[] selected = TableUtil.GetSelectedRows(tab.getTable());
             if (selected == null || selected.length != 1) {
                log.error("Must select a single table row.");
@@ -125,31 +124,24 @@ public class SkipDialog {
                removeEntries(entries);
          }
       });
-      
+
       // Row 1 = buttons
-      HBox row1 = new HBox();
-      row1.setSpacing(5);
-      row1.getChildren().addAll(refresh, remove);
-      content.getChildren().add(row1);
-      
+      JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      row1.add(refresh);
+      row1.add(remove);
+      content.add(row1, BorderLayout.NORTH);
+
       // Table
       tab = new skipTable();
-      VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
       tab.AddRows(data);
-      content.getChildren().add(tab.TABLE);
-      VBox.setVgrow(content, Priority.ALWAYS); // stretch vertically
+      content.add(new JScrollPane(tab.TABLE), BorderLayout.CENTER); // stretch vertically
 
-      dialog = new Stage();
-      dialog.initOwner(frame);
-      gui.LoadIcons(dialog);
+      dialog = new JDialog(frame);
+      SwingUtil.loadIcons(dialog);
       dialog.setTitle("AutoSkip Entries");
-      Scene scene = new Scene(new VBox());
-      config.gui.addScene(scene);
-      config.gui.setFontSize(scene, config.FontSize);
-      ((VBox) scene.getRoot()).getChildren().add(content);
-      dialog.setScene(scene);
-      dialog.setWidth(frame.getWidth()/1.2);
-      dialog.setHeight(frame.getHeight()/3);
-      dialog.show();      
+      dialog.getContentPane().add(content);
+      dialog.setSize((int)(frame.getWidth()/1.2), frame.getHeight()/3);
+      dialog.setLocationRelativeTo(frame);
+      dialog.setVisible(true);
    }
 }

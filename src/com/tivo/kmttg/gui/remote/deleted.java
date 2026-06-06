@@ -18,7 +18,20 @@
  */
 package com.tivo.kmttg.gui.remote;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.deletedTable;
@@ -28,48 +41,29 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.stage.FileChooser.ExtensionFilter;
-
 public class deleted {
-   public VBox panel = null;
+   public JPanel panel = null;
    public deletedTable tab = null;
-   public ChoiceBox<String> tivo = null;
-   public Button refresh = null;
-   public Label label = null;
-   public Button recover = null;
-   public Button permDelete = null;  
+   public JComboBox<String> tivo = null;
+   public JButton refresh = null;
+   public JLabel label = null;
+   public JButton recover = null;
+   public JButton permDelete = null;
 
-   public deleted(final Stage frame) {
-      
-      // Deleted table items      
-      HBox row1 = new HBox();
-      row1.setSpacing(5);
-      row1.setAlignment(Pos.CENTER_LEFT);
-      row1.setPadding(new Insets(5,0,0,5));
-      
-      Label title = new Label("Recently Deleted list");
-      
-      Label tivo_label = new Label();
-      
-      tivo = new ChoiceBox<String>();
-      tivo.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
-            if (newVal != null && config.gui.remote_gui != null) {               
+   public deleted(final JFrame frame) {
+
+      // Deleted table items
+      JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+
+      JLabel title = new JLabel("Recently Deleted list");
+
+      JLabel tivo_label = new JLabel();
+
+      tivo = new JComboBox<String>();
+      tivo.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)tivo.getSelectedItem();
+            if (newVal != null && config.gui.remote_gui != null) {
                // TiVo selection changed for Deleted tab
                TableUtil.clear(tab.TABLE);
                label.setText("");
@@ -80,104 +74,106 @@ public class deleted {
             }
          }
       });
-      tivo.setTooltip(tooltip.getToolTip("tivo_deleted"));
+      tivo.setToolTipText(tooltip.getToolTip("tivo_deleted"));
 
-      refresh = new Button("Refresh");
-      refresh.setTooltip(tooltip.getToolTip("refresh_deleted"));
-      refresh.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      refresh = new JButton("Refresh");
+      refresh.setToolTipText(tooltip.getToolTip("refresh_deleted"));
+      refresh.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Refresh deleted list
             TableUtil.clear(tab.TABLE);
             label.setText("");
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                deletedJob(tivoName);
             }
          }
       });
 
-      recover = new Button("Recover");
-      recover.setTooltip(tooltip.getToolTip("recover_deleted"));
-      recover.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+      recover = new JButton("Recover");
+      recover.setToolTipText(tooltip.getToolTip("recover_deleted"));
+      recover.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                tab.recoverSingle(tivoName);
             }
          }
       });
 
-      permDelete = new Button("Permanently Delete");
-      permDelete.setTooltip(tooltip.getToolTip("permDelete_deleted"));
-      permDelete.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+      permDelete = new JButton("Permanently Delete");
+      permDelete.setToolTipText(tooltip.getToolTip("permDelete_deleted"));
+      permDelete.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               Task<Void> task = new Task<Void>() {
-                  @Override public Void call() {
+               Runnable task = new Runnable() {
+                  @Override public void run() {
                         tab.permanentlyDelete(tivoName);
-                        return null;
                   }
                };
                new Thread(task).start();
             }
          }
       });
-      
-      Button export = new Button("Export");
-      export.setTooltip(tooltip.getToolTip("export_deleted"));
-      export.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+
+      JButton export = new JButton("Export");
+      export.setToolTipText(tooltip.getToolTip("export_deleted"));
+      export.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName == null || tivoName.length() == 0) {
                log.warn("select a tivo to export the deleted list" );
                return;
             }
-            config.gui.remote_gui.Browser.getExtensionFilters().clear();
-            config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
-            config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
-            config.gui.remote_gui.Browser.setTitle("Save to file");
-            config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
-            config.gui.remote_gui.Browser.setInitialFileName(tivoName + "_deleted.csv");
-            final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(frame);
+            JFileChooser Browser = config.gui.remote_gui.Browser;
+            Browser.resetChoosableFileFilters();
+            Browser.addChoosableFileFilter(new FileNameExtensionFilter("CSV Files", "csv"));
+            Browser.setDialogTitle("Save to file");
+            Browser.setCurrentDirectory(new File(config.programDir));
+            Browser.setSelectedFile(new File(config.programDir, tivoName + "_deleted.csv"));
+            final String ftivoName = tivoName;
+            final File selectedFile;
+            if (Browser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
+               selectedFile = Browser.getSelectedFile();
+            else
+               selectedFile = null;
             if (selectedFile != null) {
-               Task<Void> task = new Task<Void>() {
-                  @Override public Void call() {
-                     log.warn("Exporting '" + tivoName + "' deleted list to csv file: " + selectedFile.getAbsolutePath());
-                     Remote r = config.initRemote(tivoName);
+               Runnable task = new Runnable() {
+                  @Override public void run() {
+                     log.warn("Exporting '" + ftivoName + "' deleted list to csv file: " + selectedFile.getAbsolutePath());
+                     Remote r = config.initRemote(ftivoName);
                      if (r.success) {
-                        jobData job = deletedJob(tivoName);
+                        jobData job = deletedJob(ftivoName);
                         r.DeletedShowsCSV(selectedFile, job);
                         r.disconnect();
                      }
-                     return null;
                   }
                };
                new Thread(task).start();
             }
          }
       });
-      
-      label = new Label();
-      
-      row1.getChildren().add(title);
-      row1.getChildren().add(tivo_label);
-      row1.getChildren().add(tivo);
-      row1.getChildren().add(refresh);
-      row1.getChildren().add(recover);
-      row1.getChildren().add(permDelete);
-      row1.getChildren().add(export);
-      row1.getChildren().add(label);
-      
+
+      label = new JLabel();
+
+      row1.add(title);
+      row1.add(tivo_label);
+      row1.add(tivo);
+      row1.add(refresh);
+      row1.add(recover);
+      row1.add(permDelete);
+      row1.add(export);
+      row1.add(label);
+
       tab = new deletedTable();
-      VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
-      
-      panel = new VBox();
-      panel.setSpacing(1);
-      panel.getChildren().addAll(row1, tab.TABLE);
-      
+
+      panel = new JPanel(new BorderLayout());
+      panel.add(row1, BorderLayout.NORTH);
+      panel.add(new JScrollPane(tab.TABLE), BorderLayout.CENTER); // stretch vertically
+
    }
-   
+
    private jobData deletedJob(String tivoName) {
       jobData job = new jobData();
       job.source         = tivoName;

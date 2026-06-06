@@ -30,8 +30,7 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Stack;
 
-import javafx.stage.FileChooser;
-
+import javax.swing.JFileChooser;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -80,14 +79,13 @@ public class SkipImport {
          if (usedFile == null) {
             log.warn("No file found automatically to import. Prompting for file.");
             // No file found automatically - so prompt user for one
-            FileChooser FileBrowser = new FileChooser();
-            FileBrowser.setInitialDirectory(new File(config.outputDir));
-            FileBrowser.setTitle("Choose File");
-            File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-            if (selectedFile == null)
+            JFileChooser FileBrowser = new JFileChooser();
+            FileBrowser.setCurrentDirectory(new File(config.outputDir));
+            FileBrowser.setDialogTitle("Choose File");
+            if (FileBrowser.showOpenDialog(config.gui.getFrame()) != JFileChooser.APPROVE_OPTION)
                return false;
             else
-               usedFile = selectedFile.getPath();
+               usedFile = FileBrowser.getSelectedFile().getPath();
          }
          
          if (usedFile != null) {

@@ -4,27 +4,20 @@
     <tstamp/>
     <property name="bversion" value="${DSTAMP}-${TSTAMP}"/>
     <property name="lib" value="lib"/>
-    <property name="fxlib" value="C:\Program Files\Eclipse Adoptium\javafx-sdk-21.0.7\lib"/>
     <property name="release" value="release"/>
     <property name="main" value="."/>
     <property name="main.class" value="com.tivo.kmttg.main.kmttg"/>
     <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.8"/>
-    <property name="source" value="1.8"/>
+    <property name="release.java" value="17"/>
     <path id="main.classpath">
         <pathelement location="${lib}/jmdns.jar"/>
         <pathelement location="${lib}/tivo-libre.jar"/>
         <pathelement location="${lib}/httpclient5-5.1.3.jar"/>
         <pathelement location="${lib}/httpcore5-5.1.3.jar"/>
 		<pathelement location="${lib}/Java-WebSocket-1.5.5.jar"/>
-        <pathelement location="${fxlib}/javafx.base.jar"/>
-        <pathelement location="${fxlib}/javafx.controls.jar"/>
-        <pathelement location="${fxlib}/javafx.fxml.jar"/>
-        <pathelement location="${fxlib}/javafx.graphics.jar"/>
-        <pathelement location="${fxlib}/jjavafx.media.jar"/>
-        <pathelement location="${fxlib}/javafx.swing.jar"/>
-        <pathelement location="${fxlib}/javafx.web.jar"/>
-        <pathelement location="${fxlib}/javafx-swt.jar"/>
+        <pathelement location="${lib}/flatlaf-3.7.1.jar"/>
+        <pathelement location="${lib}/miglayout-swing-11.4.3.jar"/>
+        <pathelement location="${lib}/miglayout-core-11.4.3.jar"/>
     </path>
     <target name="clean">
         <delete dir="bin"/>
@@ -54,6 +47,8 @@
             <zipgroupfileset dir="${lib}" includes="httpclient5-5.1.3.jar"/>
             <zipgroupfileset dir="${lib}" includes="httpcore5-5.1.3.jar"/>
 			<zipgroupfileset dir="${lib}" includes="Java-WebSocket-1.5.5.jar"/>
+            <zipgroupfileset dir="${lib}" includes="flatlaf-*.jar"/>
+            <zipgroupfileset dir="${lib}" includes="miglayout-*.jar"/>
             <manifest>
                 <attribute name="Main-Class" value="${main.class}"/>
             </manifest>
@@ -65,10 +60,8 @@
         	debug="true"
         	debuglevel="${debuglevel}"
         	destdir="bin"
-        	source="${source}"
-        	target="${target}"
+        	release="${release.java}"
         	>
-        	<!-- to better test java 8 compatability bootclasspath="C:\Program Files\Eclipse Adoptium\jdk-8.0.362.9-hotspot\jre\lib\rt.jar" -->
             <src path="src"/>
             <classpath refid="main.classpath"/>
         	<compilerarg value="-Xlint:deprecation" />

@@ -18,64 +18,75 @@
  */
 package com.tivo.kmttg.gui;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
-import javafx.scene.control.ListView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
-// Extend ListView to add rudimentary keyboard keyword matching support
-public class MyListView extends ListView<String> {
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+
+// Extend JList to add rudimentary keyboard keyword matching support
+public class MyListView extends JList<String> {
+   private static final long serialVersionUID = 1L;
    private StringBuilder sb = new StringBuilder();
+   private DefaultListModel<String> items = new DefaultListModel<String>();
+
    public MyListView() {
       super();
-      setOnKeyPressed(new EventHandler<KeyEvent>() {
-         public void handle(KeyEvent key) {
+      setModel(items);
+      addKeyListener(new KeyAdapter() {
+         @Override
+         public void keyPressed(KeyEvent key) {
             handleChannelKey(key);
          }
       });
-      focusedProperty().addListener(new ChangeListener<Boolean>() {
+      addFocusListener(new FocusAdapter() {
          @Override
-         public void changed(ObservableValue<? extends Boolean> observable, Boolean oldVal, Boolean newVal) {
-            if (newVal) {
-               scrollTo(getSelectionModel().getSelectedIndex());
-            } else {
-               sb.delete(0, sb.length());
-            }
+         public void focusGained(FocusEvent e) {
+            ensureIndexIsVisible(getSelectedIndex());
+         }
+         @Override
+         public void focusLost(FocusEvent e) {
+            sb.delete(0, sb.length());
          }
       });
    }
-   
-   
+
+   // Backing list model (was JavaFX ObservableList)
+   public DefaultListModel<String> getItems() {
+      return items;
+   }
+
    // Handle keyboard pattern matching for channels ListView
    private void handleChannelKey(KeyEvent event) {
-      event.consume();
-      if (event.getCode() == KeyCode.DOWN || event.getCode() == KeyCode.UP || event.getCode() == KeyCode.TAB) {
+      int code = event.getKeyCode();
+      if (code == KeyEvent.VK_DOWN || code == KeyEvent.VK_UP || code == KeyEvent.VK_TAB) {
           return;
       }
-      else if (event.getCode() == KeyCode.BACK_SPACE && sb.length() > 0) {
+      event.consume();
+      if (code == KeyEvent.VK_BACK_SPACE && sb.length() > 0) {
           sb.deleteCharAt(sb.length()-1);
       }
-     else {
-          sb.append(event.getText());
+      else {
+          char c = event.getKeyChar();
+          if (c != KeyEvent.CHAR_UNDEFINED && !Character.isISOControl(c))
+             sb.append(c);
       }
 
-      if (sb.length() == 0) 
+      if (sb.length() == 0)
           return;
-      
+
       boolean found = false;
-      ObservableList<String> items = getItems();
       for (int i=0; i<items.size(); i++) {
-          if (event.getCode() != KeyCode.BACK_SPACE && items.get(i).toString().toLowerCase().startsWith(sb.toString().toLowerCase())) {
-              getSelectionModel().clearAndSelect(i);           
-              scrollTo(getSelectionModel().getSelectedIndex());
+          if (code != KeyEvent.VK_BACK_SPACE && items.get(i).toString().toLowerCase().startsWith(sb.toString().toLowerCase())) {
+              setSelectedIndex(i);
+              ensureIndexIsVisible(i);
               found = true;
               break;
           }
       }
-      
+
       if (!found && sb.length() > 0)
           sb.deleteCharAt(sb.length() - 1);
   }

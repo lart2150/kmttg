@@ -18,7 +18,25 @@
  */
 package com.tivo.kmttg.gui.remote;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Hashtable;
+
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -31,86 +49,61 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-
 public class search {
-   public VBox panel = null;
-   public ChoiceBox<String> tivo = null;
+   public JPanel panel = null;
+   public JComboBox<String> tivo = null;
    public searchTable tab = null;
-   public TextField text = null;
-   public Button button = null;
-   public Spinner<Integer> max = null;
-   public ChoiceBox<String> search_type = null;
-   public CheckBox includeFree = null;
-   public CheckBox includePaid = null;
-   //public CheckBox includeVod = null;
-   //public CheckBox unavailable = null;
+   public JTextField text = null;
+   public JButton button = null;
+   public JSpinner max = null;
+   public JComboBox<String> search_type = null;
+   public JCheckBox includeFree = null;
+   public JCheckBox includePaid = null;
+   //public JCheckBox includeVod = null;
+   //public JCheckBox unavailable = null;
    public Hashtable<String,JSONArray> search_info = new Hashtable<String,JSONArray>();
    public AdvSearch advSearch = new AdvSearch();
-   public Button manual_record = null;
-   public Button record = null;    
-   public Button recordSP = null;    
-   public Button wishlist = null;    
-   
-   public search (final Stage frame) {
-      
-      // Search tab items      
-      HBox row1 = new HBox();
-      row1.setSpacing(5);
-      row1.setAlignment(Pos.CENTER_LEFT);
-      row1.setPadding(new Insets(5,0,0,5));
-      
-      HBox row2 = new HBox();
-      row2.setSpacing(5);
-      row2.setAlignment(Pos.CENTER_LEFT);
-      row2.setPadding(new Insets(0,0,0,5));
-      
-      Label title = new Label("Search");
-      
-      Label tivo_label = new Label();
-      
-      tivo = new ChoiceBox<String>();
-      tivo.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
+   public JButton manual_record = null;
+   public JButton record = null;
+   public JButton recordSP = null;
+   public JButton wishlist = null;
+
+   public search (final JFrame frame) {
+
+      // Search tab items
+      JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+
+      JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+
+      JLabel title = new JLabel("Search");
+
+      JLabel tivo_label = new JLabel();
+
+      tivo = new JComboBox<String>();
+      tivo.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)tivo.getSelectedItem();
             if (newVal != null && config.gui.remote_gui != null) {
                 String tivoName = newVal;
                 config.gui.remote_gui.updateButtonStates(tivoName, "Search");
             }
          }
       });
-      tivo.setTooltip(tooltip.getToolTip("tivo_search"));
+      tivo.setToolTipText(tooltip.getToolTip("tivo_search"));
 
-      button = new Button("Search");
-      button.setTooltip(tooltip.getToolTip("button_search"));
-      button.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      button = new JButton("Search");
+      button.setToolTipText(tooltip.getToolTip("button_search"));
+      button.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // New search
             tab.clear();
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                String keyword = string.removeLeadingTrailingSpaces(text.getText());
                if (keyword == null || keyword.length() == 0)
                   return;
                int max_val = (Integer)max.getValue();
-               
+
                jobData job = new jobData();
                job.source                = tivoName;
                job.tivoName              = tivoName;
@@ -125,27 +118,26 @@ public class search {
          }
       });
 
-      text = new TextField(); text.setMinWidth(15);
-      text.setMinWidth(text.getPrefWidth());
+      text = new JTextField(); text.setColumns(15);
       // Press "Search" button when enter pressed in search text field
-      text.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-         public void handle(KeyEvent event) {
+      text.addKeyListener(new KeyAdapter() {
+         public void keyPressed(KeyEvent event) {
             if (event.isControlDown())
                return;
-            if( event.getCode() == KeyCode.ENTER ) {
-               button.fire();
+            if( event.getKeyCode() == KeyEvent.VK_ENTER ) {
+               button.doClick();
                event.consume();
             }
          }
       });
 
-      text.setTooltip(tooltip.getToolTip("text_search"));
+      text.setToolTipText(tooltip.getToolTip("text_search"));
 
-      Button adv = new Button("Search++");
-      adv.setTooltip(tooltip.getToolTip("adv_search"));
-      adv.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+      JButton adv = new JButton("Search++");
+      adv.setToolTipText(tooltip.getToolTip("adv_search"));
+      adv.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                advSearch.display(
                   config.gui.getFrame(), tivoName, (Integer)max.getValue()
@@ -154,33 +146,33 @@ public class search {
          }
       });
 
-      record = new Button("Record");
-      record.setTooltip(tooltip.getToolTip("record_search"));
-      record.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+      record = new JButton("Record");
+      record.setToolTipText(tooltip.getToolTip("record_search"));
+      record.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                tab.recordSingle(tivoName);
             }
          }
       });
 
-      recordSP = new Button("SP");
-      recordSP.setTooltip(tooltip.getToolTip("record_sp_search"));
-      recordSP.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+      recordSP = new JButton("SP");
+      recordSP.setToolTipText(tooltip.getToolTip("record_sp_search"));
+      recordSP.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                tab.recordSP(tivoName);
             }
          }
       });
-      
-      wishlist = new Button("WL");
-      wishlist.setTooltip(tooltip.getToolTip("wishlist_search"));
-      wishlist.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+
+      wishlist = new JButton("WL");
+      wishlist.setToolTipText(tooltip.getToolTip("wishlist_search"));
+      wishlist.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                int[] selected = TableUtil.GetSelectedRows(tab.TABLE);
                JSONObject json = null;
@@ -190,30 +182,29 @@ public class search {
             }
          }
       });
-      
-      manual_record = new Button("MR");
-      manual_record.setTooltip(tooltip.getToolTip("guide_manual_record"));
-      manual_record.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+
+      manual_record = new JButton("MR");
+      manual_record.setToolTipText(tooltip.getToolTip("guide_manual_record"));
+      manual_record.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                util.mRecordOpt.promptUser(tivoName);
             }
          }
       });
 
-      Button refresh_todo = new Button("Refresh ToDo");
-      refresh_todo.setTooltip(tooltip.getToolTip("refresh_todo_search"));
-      refresh_todo.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+      JButton refresh_todo = new JButton("Refresh ToDo");
+      refresh_todo.setToolTipText(tooltip.getToolTip("refresh_todo_search"));
+      refresh_todo.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               Task<Void> task = new Task<Void>() {
-                  @Override public Void call() {
+               Runnable task = new Runnable() {
+                  @Override public void run() {
                      log.warn("Refreshing ToDo list for Search matches...");
                      util.all_todo = util.getTodoLists();
                      log.warn("Refresh ToDo list for Search matches completed.");
-                     return null;
                   }
                };
                new Thread(task).start();
@@ -221,64 +212,69 @@ public class search {
          }
       });
 
-      Label max_label = new Label("Max");
-      max = new Spinner<Integer>(50, 800, 100, 50);
-      max.setEditable(true);
-      max.setMaxWidth(90);
-      max.setTooltip(tooltip.getToolTip("max_search"));
-      
-      row1.getChildren().add(title);
-      row1.getChildren().add(tivo_label);
-      row1.getChildren().add(tivo);
-      row1.getChildren().add(button);
-      row1.getChildren().add(text);
-      row1.getChildren().add(max_label);
-      row1.getChildren().add(max);
-      row1.getChildren().add(adv);
-      row1.getChildren().add(record);
-      row1.getChildren().add(recordSP);
-      row1.getChildren().add(wishlist);
-      row1.getChildren().add(manual_record);
-      row1.getChildren().add(refresh_todo);
-      
-      Label search_type_label = new Label("Type");
-      
-      search_type = new ChoiceBox<String>();
-      search_type.getItems().addAll(
+      JLabel max_label = new JLabel("Max");
+      max = new JSpinner(new SpinnerNumberModel(100, 50, 800, 50));
+      max.setMaximumSize(new Dimension(90, max.getPreferredSize().height));
+
+      max.setToolTipText(tooltip.getToolTip("max_search"));
+
+      row1.add(title);
+      row1.add(tivo_label);
+      row1.add(tivo);
+      row1.add(button);
+      row1.add(text);
+      row1.add(max_label);
+      row1.add(max);
+      row1.add(adv);
+      row1.add(record);
+      row1.add(recordSP);
+      row1.add(wishlist);
+      row1.add(manual_record);
+      row1.add(refresh_todo);
+
+      JLabel search_type_label = new JLabel("Type");
+
+      search_type = new JComboBox<String>();
+      String[] search_type_items = {
          "keywords", "actor", "director", "producer", "executiveProducer", "writer"
-      );
-      search_type.setValue("keywords");
-      search_type.setTooltip(tooltip.getToolTip("search_type"));
-      
-      includeFree = new CheckBox("Streaming content");
+      };
+      for (String item : search_type_items)
+         search_type.addItem(item);
+      search_type.setSelectedItem("keywords");
+      search_type.setToolTipText(tooltip.getToolTip("search_type"));
+
+      includeFree = new JCheckBox("Streaming content");
       includeFree.setSelected(false);
-      includeFree.setTooltip(tooltip.getToolTip("includeFree"));
-      
-      includePaid = new CheckBox("Paid streaming content");
+      includeFree.setToolTipText(tooltip.getToolTip("includeFree"));
+
+      includePaid = new JCheckBox("Paid streaming content");
       includePaid.setSelected(false);
-      includePaid.setTooltip(tooltip.getToolTip("includePaid"));
-      
-      //includeVod = new CheckBox("VOD content");
+      includePaid.setToolTipText(tooltip.getToolTip("includePaid"));
+
+      //includeVod = new JCheckBox("VOD content");
       //includeVod.setSelected(false);
-      //includeVod.setTooltip(tooltip.getToolTip("includeVod"));
-      
-      //unavailable = new CheckBox("Unavailable");
+      //includeVod.setToolTipText(tooltip.getToolTip("includeVod"));
+
+      //unavailable = new JCheckBox("Unavailable");
       //unavailable.setSelected(false);
-      //unavailable.setTooltip(tooltip.getToolTip("unavailable"));
-      
-      row2.getChildren().add(search_type_label);
-      row2.getChildren().add(search_type);
-      row2.getChildren().add(includeFree);
-      row2.getChildren().add(includePaid);
-      //row2.getChildren().add(includeVod);
-      //row2.getChildren().add(unavailable);
-      
+      //unavailable.setToolTipText(tooltip.getToolTip("unavailable"));
+
+      row2.add(search_type_label);
+      row2.add(search_type);
+      row2.add(includeFree);
+      row2.add(includePaid);
+      //row2.add(includeVod);
+      //row2.add(unavailable);
+
       tab = new searchTable();
-      VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
-      
-      panel = new VBox();
-      panel.setSpacing(1);
-      panel.getChildren().addAll(row1, row2, tab.TABLE);      
+
+      JPanel rows = new JPanel(new BorderLayout());
+      rows.add(row1, BorderLayout.NORTH);
+      rows.add(row2, BorderLayout.SOUTH);
+
+      panel = new JPanel(new BorderLayout());
+      panel.add(rows, BorderLayout.NORTH);
+      panel.add(new JScrollPane(tab.TABLE.table), BorderLayout.CENTER); // stretch vertically
    }
 
 }

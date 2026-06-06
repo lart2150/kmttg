@@ -20,26 +20,25 @@ package com.tivo.kmttg.gui.remote;
 
 import java.util.Stack;
 
-import javafx.scene.control.Button;
-import javafx.scene.input.KeyCode;
+import javax.swing.JButton;
 
 public class PanelKey {
    public String actionName = null;
-   public KeyCode key = null;
+   public int key = -1;
    public Boolean isAscii = false;
    public String command = "";
-   public Button button = null;
+   public JButton button = null;
    public static Stack<PanelKey> panelKeys = new Stack<PanelKey>();
    public static Stack<PanelKey> buttonKeys = new Stack<PanelKey>();
-   
-   public PanelKey(String actionName, KeyCode key, Boolean isAscii, String command) {
+
+   public PanelKey(String actionName, int key, Boolean isAscii, String command) {
       this.actionName = actionName;
       this.key = key;
       this.isAscii = isAscii;
       this.command = command;
    }
-   
-   public PanelKey(String actionName, KeyCode key, Button button) {
+
+   public PanelKey(String actionName, int key, JButton button) {
       this.actionName = actionName;
       this.key = key;
       this.button = button;

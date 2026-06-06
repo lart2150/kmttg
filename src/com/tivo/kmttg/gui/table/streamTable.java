@@ -18,23 +18,13 @@
  */
 package com.tivo.kmttg.gui.table;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Hashtable;
 
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
-import javafx.scene.control.cell.TreeItemPropertyValueFactory;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.util.Callback;
+import javax.swing.JLabel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONConverter;
@@ -43,7 +33,12 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.comparator.DateComparator;
+import com.tivo.kmttg.gui.comparator.ImageComparator;
 import com.tivo.kmttg.gui.sortable.sortableDate;
+import com.tivo.kmttg.gui.swing.KmttgTable;
+import com.tivo.kmttg.gui.swing.SwingUtil;
+import com.tivo.kmttg.gui.swing.TreeTable;
+import com.tivo.kmttg.gui.swing.TreeTable.TreeItem;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.id;
@@ -53,14 +48,14 @@ import com.tivo.kmttg.util.log;
 
 public class streamTable extends TableMap {
    private String currentTivo = null;
-   public TreeTableView<Tabentry> TABLE = null;
+   public TreeTable<Tabentry> TABLE = null;
    public String[] TITLE_cols = {"", "CREATED", "ITEM", "SOURCE"};
    private double[] weights = {9, 17, 59, 15};
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    public Hashtable<String,JSONArray> episode_data = new Hashtable<String,JSONArray>();
-   
+
    // TableMap overrides
    @Override
    public JSONObject getJson(int row) {
@@ -76,88 +71,58 @@ public class streamTable extends TableMap {
    }
    @Override
    public void clear() {
-      TABLE.getRoot().getChildren().clear();
+      TABLE.getRoot().clearChildren();
       episode_data = new Hashtable<String,JSONArray>();
    }
    @Override
-   public TreeTableView<?> getTreeTable() {
+   public TreeTable<?> getTreeTable() {
       return TABLE;
    }
-         
+
    public streamTable() {
-      TABLE = new TreeTableView<Tabentry>();
-      TABLE.setRoot(new TreeItem<>(new Tabentry("")));
-      TABLE.setShowRoot(false); // Don't show the empty root node
-      TABLE.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE); // Allow multiple row selection
-      
-      for (String colName : TITLE_cols) {
-         if (colName.length() == 0)
-            colName = "IMAGE";
-         if (colName.equals("IMAGE")) {
-            TreeTableColumn<Tabentry,ImageView> col = new TreeTableColumn<Tabentry,ImageView>("");
-            col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,ImageView>(colName));
-            col.setCellFactory(new ImageCellFactory());
-            TABLE.getColumns().add(col);               
-         } else if (colName.equals("CREATED")) {
-            TreeTableColumn<Tabentry,sortableDate> col = new TreeTableColumn<Tabentry,sortableDate>(colName);
-            col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableDate>(colName));
-            col.setComparator(new DateComparator());
-            col.setStyle("-fx-alignment: CENTER-RIGHT;");
-            TABLE.getColumns().add(col);
-         } else {
-            // Regular String sort
-            TreeTableColumn<Tabentry,String> col = new TreeTableColumn<Tabentry,String>(colName);
-            col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,String>(colName));
-            TABLE.getColumns().add(col);
+      TABLE = new TreeTable<Tabentry>(TITLE_cols);
+      TABLE.setComparator("", new ImageComparator());
+      TABLE.setComparator("CREATED", new DateComparator());
+      KmttgTable.setColumnAlignment(TABLE.table, "CREATED", JLabel.RIGHT);
+      TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
+
+      // Want to resize columns whenever a tree is expanded
+      TABLE.setOnExpand(new Runnable() {
+         @Override public void run() {
+            TableUtil.autoSizeTableViewColumns(TABLE, true);
          }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
-      }
-      
+      });
+
       // Add keyboard listener
-      TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {
-         public void handle(KeyEvent e) {
+      TABLE.table.addKeyListener(new KeyAdapter() {
+         @Override
+         public void keyPressed(KeyEvent e) {
             KeyPressed(e);
          }
       });
-      
+
       // Define selection listener to detect table row selection changes
-      TABLE.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<Tabentry>>() {
+      TABLE.table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
          @Override
-         public void changed(ObservableValue<? extends TreeItem<Tabentry>> obs, TreeItem<Tabentry> oldSelection, TreeItem<Tabentry> newSelection) {
-            if (newSelection != null) {
-               TABLERowSelected(newSelection.getValue());
-            }
+         public void valueChanged(ListSelectionEvent e) {
+            if (e.getValueIsAdjusting())
+               return;
+            int row = TABLE.table.getSelectionModel().getLeadSelectionIndex();
+            if (row >= 0 && row < TABLE.getExpandedItemCount() && TABLE.isSelected(row))
+               TABLERowSelected(row, TABLE.getTreeItem(row).getValue());
          }
       });
-                              
+
       // Add right mouse button handler
       TableUtil.AddRightMouseListener(TABLE);
    }
 
-   private class ImageCellFactory implements Callback<TreeTableColumn<Tabentry, ImageView>, TreeTableCell<Tabentry, ImageView>> {
-      public TreeTableCell<Tabentry, ImageView> call(TreeTableColumn<Tabentry, ImageView> param) {
-         TreeTableCell<Tabentry, ImageView> cell = new TreeTableCell<Tabentry, ImageView>() {
-            @Override
-            public void updateItem(final ImageView item, boolean empty) {
-               super.updateItem(item, empty);
-               if (empty) {
-                  setGraphic(null);
-               } else {
-                  if (item != null)
-                     setGraphic(item);
-               }
-            }
-         };
-         return cell;
-      }
-   }   
-   
    public static class Tabentry {
-      public ImageView image = new ImageView();
+      public imageCell image = new imageCell();
       public String title = "";
       public sortableDate created = null;
       public String source = "";
-      
+
       public Tabentry(JSONObject entry) {
          try {
             long start = -1;
@@ -165,7 +130,8 @@ public class streamTable extends TableMap {
                start = JSONConverter.getLongDateFromString(entry.getString("startTime"));
             title = JSONConverter.makeShowTitle(entry);
             if (entry.has("isFolder") && entry.getBoolean("isFolder")) {
-               image = new ImageView(gui.Images.get("folder"));
+               image.setImage(gui.Images.get("folder"));
+               image.imageName = "folder";
                created = new sortableDate(title, entry, start);
             } else {
                created = new sortableDate(entry, start);
@@ -175,27 +141,27 @@ public class streamTable extends TableMap {
             log.error("streamTable Tabentry - " + e1.getMessage());
          }
       }
-      
+
       public Tabentry(String entry) {
          title = entry;
       }
-      
-      public ImageView getIMAGE() {
+
+      public imageCell getIMAGE() {
          return image;
       }
 
       public sortableDate getCREATED() {
          return created;
       }
-      
+
       public String getITEM() {
          return title;
       }
-      
+
       public String getSOURCE() {
          return source;
       }
-      
+
       public String toString() {
          return title;
       }
@@ -204,13 +170,13 @@ public class streamTable extends TableMap {
    public JSONObject GetRowData(int row) {
       return TABLE.getTreeItem(row).getValue().getCREATED().json;
    }
-      
-   private void TABLERowSelected(Tabentry entry) {
-      // Get column items for selected row 
+
+   private void TABLERowSelected(int row, Tabentry entry) {
+      // Get column items for selected row
       sortableDate s = entry.getCREATED();
       if (s.folder) {
          // For folder item selection add child nodes if not already
-         TreeItem<Tabentry> item = TABLE.getSelectionModel().getSelectedItems().get(0);
+         TreeItem<Tabentry> item = TABLE.getTreeItem(row);
          if (item.getChildren().size() == 0)
             updateFolder(item, entry);
       } else {
@@ -224,7 +190,7 @@ public class streamTable extends TableMap {
                title += " - " + s.json.getString("subtitle");
             log.warn(title);
             log.print(message);
-            
+
             if (config.gui.show_details.isShowing())
                config.gui.show_details.update(TABLE, currentTivo, s.json);
          } catch (JSONException e) {
@@ -240,16 +206,16 @@ public class streamTable extends TableMap {
       Refresh(data);
       TABLE.sort();
       TableUtil.autoSizeTableViewColumns(TABLE, true);
-      
+
       // Save the data
       currentTivo = tivoName;
       tivo_data.put(tivoName, data);
-      
+
       // Update stream tab to show this tivoName
       if (config.gui.remote_gui != null)
          config.gui.remote_gui.setTivoName("stream", tivoName);
    }
-   
+
    // Refresh whole table
    public void Refresh(JSONArray data) {
       if (data == null) {
@@ -268,41 +234,28 @@ public class streamTable extends TableMap {
                log.error("Refresh - " + e.getMessage());
             }
          }
-         
+
          TABLE.getRoot().setExpanded(true);
       }
    }
-      
+
    // Add row to table
    public void AddTABLERow(JSONObject entry) {
-      TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(entry) );
-      try {
-         if (entry.has("isFolder") && entry.getBoolean("isFolder")) {
-            // Want to resize columns whenever a tree is expanded or collapsed
-            item.expandedProperty().addListener(new ChangeListener<Boolean>() {
-               @Override
-               public void changed(ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) {
-                  TableUtil.autoSizeTableViewColumns(TABLE, true);
-               }         
-            });
-         }
-      } catch (JSONException e) {
-         log.error("streamTable AddTABLERow - " + e.getMessage());
-      }
-      TABLE.getRoot().getChildren().add(item);
-   }  
-   
+      TreeItem<Tabentry> item = new TreeItem<Tabentry>( new Tabentry(entry) );
+      TABLE.getRoot().addChild(item);
+   }
+
    private void BePatient(final TreeItem<Tabentry> item, final String title) {
-      Platform.runLater(new Runnable() {
+      SwingUtil.runLater(new Runnable() {
          @Override public void run() {
             String message = "PLEASE BE PATIENT - getting '" + title + "' episodes";
-            item.getChildren().add(new TreeItem<>(new Tabentry(message)));
+            item.addChild(new TreeItem<Tabentry>(new Tabentry(message)));
             item.setExpanded(true);
             TableUtil.autoSizeTableViewColumns(TABLE, true);
          }
       });
    }
-   
+
 
    // Look for entry with given folder name and select it
    // (This used when returning back from folder mode to top level mode)
@@ -312,21 +265,20 @@ public class streamTable extends TableMap {
          sortableDate s = TABLE.getRoot().getChildren().get(i).getValue().getCREATED();
          if (s.folder) {
             if (s.folderName.equals(folderName)) {
-               TABLE.getSelectionModel().clearSelection();
-               TABLE.getSelectionModel().select(i);
-               TableUtil.scrollToCenter(TABLE, i);
+               TABLE.clearSelection();
+               TABLE.select(TABLE.getRoot().getChildren().get(i));
                return;
             }
          }
       }
    }
-   
+
    // Handle keyboard presses
    private void KeyPressed(KeyEvent e) {
       if (e.isControlDown())
          return;
-      KeyCode keyCode = e.getCode();
-      if (keyCode == KeyCode.I) {
+      int keyCode = e.getKeyCode();
+      if (keyCode == KeyEvent.VK_I) {
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
             return;
@@ -335,13 +287,13 @@ public class streamTable extends TableMap {
             config.gui.show_details.update(TABLE, currentTivo, json);
          }
       }
-      else if (keyCode == KeyCode.N) {
+      else if (keyCode == KeyEvent.VK_N) {
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
             return;
-         TableUtil.PrintEpisodes(GetRowData(selected[0]));         
+         TableUtil.PrintEpisodes(GetRowData(selected[0]));
       }
-      else if (keyCode == KeyCode.J) {
+      else if (keyCode == KeyEvent.VK_J) {
          // Print json of selected row to log window
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
@@ -352,7 +304,7 @@ public class streamTable extends TableMap {
             id.printIds(json);
          }
       }
-      else if (keyCode == KeyCode.Q) {
+      else if (keyCode == KeyEvent.VK_Q) {
          // Web query currently selected entry
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
@@ -369,16 +321,16 @@ public class streamTable extends TableMap {
             }
          }
       }
-      else if (keyCode == KeyCode.R) {
-         config.gui.remote_gui.stream_tab.remove.fire();
-      } else if (keyCode == KeyCode.T) {
+      else if (keyCode == KeyEvent.VK_R) {
+         config.gui.remote_gui.stream_tab.remove.doClick();
+      } else if (keyCode == KeyEvent.VK_T) {
          TableUtil.toggleTreeState(TABLE);
       }
    }
-   
+
    // Get all episodes for a specific collectionId
    public void updateFolder(final TreeItem<Tabentry> item, Tabentry entry) {
-      try {         
+      try {
          final String tivoName = currentTivo;
          JSONObject json = entry.getCREATED().json;
          final String title = json.getString("title");
@@ -389,14 +341,14 @@ public class streamTable extends TableMap {
             return;
          }
          BePatient(item, title);
-         Task<Void> task = new Task<Void>() {
-            @Override public Void call() {
+         Runnable task = new Runnable() {
+            @Override public void run() {
                Remote r = config.initRemote(tivoName);
                if (r.success) {
                   log.warn(">> Collecting episode data for: " + title);
                   final JSONArray entries = r.getEpisodes(collectionId);
                   r.disconnect();
-                  item.getChildren().clear();
+                  item.clearChildren();
                   if (entries != null && entries.length() > 0) {
                      try {
                         for (int i=0; i<entries.length(); ++i)
@@ -407,11 +359,11 @@ public class streamTable extends TableMap {
                   }
                   episode_data.put(collectionId, entries);
                   if (entries.length() > 0) {
-                     Platform.runLater(new Runnable() {
+                     SwingUtil.runLater(new Runnable() {
                         @Override public void run() {
                            try {
                               for (int i=0; i<entries.length(); ++i) {
-                                 item.getChildren().add(new TreeItem<>(new Tabentry(entries.getJSONObject(i))));
+                                 item.addChild(new TreeItem<Tabentry>(new Tabentry(entries.getJSONObject(i))));
                               }
                               item.setExpanded(true);
                               TableUtil.autoSizeTableViewColumns(TABLE, true);
@@ -422,7 +374,6 @@ public class streamTable extends TableMap {
                      });
                   }
                } // if r.success
-               return null;
             }
          };
          new Thread(task).start();
@@ -430,14 +381,14 @@ public class streamTable extends TableMap {
          log.error("streamTable updateFolder - " + e.getMessage());
       }
    }
-   
+
    // Attempt to remove currently selected top view table item(s)
    public void removeButtonCB() {
       final String tivoName = currentTivo;
       final int[] selected = TableUtil.GetSelectedRows(TABLE);
       if (selected.length > 0) {
-         Task<Void> task = new Task<Void>() {
-            @Override public Void call() {
+         Runnable task = new Runnable() {
+            @Override public void run() {
                try {
                   Boolean removed = false;
                   Remote r = config.initRemote(tivoName);
@@ -478,17 +429,16 @@ public class streamTable extends TableMap {
                      r.disconnect();
                      if (removed) {
                         // Force a table refresh if any items were removed
-                        config.gui.remote_gui.stream_tab.refresh.fire();
+                        config.gui.remote_gui.stream_tab.refresh.doClick();
                      }
                   } // if r.success
                } catch (JSONException e) {
                   log.error("removeButtonCB - " + e.getMessage());
                }
-               return null;
             }
          };
          new Thread(task).start();
       }
    }
-            
+
 }

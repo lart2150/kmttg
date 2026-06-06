@@ -32,9 +32,8 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javafx.application.Platform;
-
 import com.tivo.kmttg.gui.gui;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.util.NplItemXML;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
@@ -474,7 +473,7 @@ public class jobMonitor {
             }
          }
          backgroundRun b = new backgroundRun(output);
-         new Thread(b).start();
+         SwingUtil.runLater(b);
       }
       
       // Add job to master job list
@@ -503,7 +502,7 @@ public class jobMonitor {
       
       // Remove entry from job monitor
       if (config.GUIMODE) {
-         Platform.runLater(new Runnable() {
+         SwingUtil.runLater(new Runnable() {
             @Override public void run() {
                config.gui.jobTab_RemoveJobMonitorRow(job);
             }
@@ -522,7 +521,7 @@ public class jobMonitor {
    public static void updateJobStatus(final jobData job, final String status) {
       job.status = status;
       if (config.GUIMODE) {
-         Platform.runLater(new Runnable() {
+         SwingUtil.runLater(new Runnable() {
             @Override public void run() {
                config.gui.jobTab_UpdateJobMonitorRowStatus(job,status);
             }
@@ -1516,7 +1515,7 @@ public class jobMonitor {
          }
          // Clear title & progress bar
          if ( config.GUIMODE && isFirstJobInMonitor(job) ) {
-            Platform.runLater(new Runnable() {
+            SwingUtil.runLater(new Runnable() {
                @Override public void run() {
                   config.gui.setTitle(config.kmttg);
                   config.gui.progressBar_setValue(0);
@@ -1869,7 +1868,7 @@ public class jobMonitor {
                config.gui.updateNPLjobStatus(map);
             }
          }
-         Platform.runLater(new backgroundRun(map));
+         SwingUtil.runLater(new backgroundRun(map));
       }
    }
    

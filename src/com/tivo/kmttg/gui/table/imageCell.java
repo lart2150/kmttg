@@ -18,33 +18,42 @@
  */
 package com.tivo.kmttg.gui.table;
 
-import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
+import java.awt.Image;
 
-public class imageCell extends HBox {
-   private ImageView image = new ImageView();
-   private ImageView image2 = new ImageView();
-   private Label label = new Label("");
+/**
+ * Value object for table image cells (up to 2 icons + a text label).
+ * Rendered by com.tivo.kmttg.gui.swing.ImageCellRenderer.
+ */
+public class imageCell {
+   private Image image = null;
+   private Image image2 = null;
+   private String label = "";
    public String imageName = "";
-   
+
    public imageCell() {
-      super();
-      setSpacing(1);
-      getChildren().addAll(image, image2, label);
-   }
-   
-   public void setImage(Image img) {
-      image.setImage(img);
-   }
-   
-   public void setImage2(Image img) {
-      image2.setImage(img);
-   }
-   
-   public void setLabel(String s) {
-      label.setText(s);
    }
 
+   public void setImage(Image img) {
+      image = img;
+   }
+
+   public void setImage2(Image img) {
+      image2 = img;
+   }
+
+   public void setLabel(String s) {
+      label = s;
+   }
+
+   public Image getImage() {
+      return image;
+   }
+
+   public Image getImage2() {
+      return image2;
+   }
+
+   public String getLabel() {
+      return label;
+   }
 }

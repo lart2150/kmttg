@@ -26,7 +26,6 @@ import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.*;
 import com.tivo.kmttg.gui.gui;
-import com.tivo.kmttg.gui.JavaFX;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class kmttg {
@@ -83,10 +82,6 @@ public class kmttg {
       });
       
       if (gui_mode) {
-          if (!JavaFX.checkForJavaFX()) {
-        	  System.err.println(JavaFX.message);
-        	  System.exit(-100);
-          }
          // GUI mode
          config.gui = new gui();
          config.parse();

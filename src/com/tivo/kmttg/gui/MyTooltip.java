@@ -20,25 +20,21 @@ package com.tivo.kmttg.gui;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
+
+import javax.swing.ToolTipManager;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Tooltip;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
-import javafx.util.Duration;
-
+/**
+ * Tooltip helpers. Swing tooltips natively support html markup, so make()
+ * simply wraps the text in html tags. Delay/timeout settings are handled
+ * globally by ToolTipManager.
+ */
 public class MyTooltip {
    private static Boolean initialized = false;
-   private static int close_delay = 100;
-   
+
    public static void init() {
       // Quick parse of config.ini to see if tooltips should be disabled
       // I need to do this because main gui is built before config.ini is parsed
@@ -87,115 +83,41 @@ public class MyTooltip {
       setTooltipDelay(config.toolTipsDelay, config.toolTipsTimeout);
       initialized = true;
    }
-   
-   // Parse html syntax and return a tooltip made up of TextFlow elements
-   // Currently only supports <br> and <b>...</b> html quantifiers
-   public static Tooltip make(String text) {
+
+   // Returns html tooltip text for given limited html markup (<br>, <b>),
+   // or null if tooltips are disabled.
+   public static String make(String text) {
       if (! initialized)
          init();
       if (config.toolTips == 0)
          return null;
-      Tooltip  tip = new Tooltip();
-      tip.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-      TextFlow tf = new TextFlow();
-      String[] lines = text.split("<br>");
-      for (String line : lines) {
-         if (line.contains("<b>")) {
-            String text_split = line;
-            text_split = text_split.replaceAll("<b>", "\nBOLD");
-            text_split = text_split.replaceAll("</b>", "\n");
-            String[] split = text_split.split("\n");
-            for (String s : split) {
-               if (s.length() > 0) {
-                  Text t = new Text();
-                  if (s.startsWith("BOLD")) {
-                     s = s.replaceFirst("BOLD", "");
-                     t.setFont(Font.font("System", FontWeight.BOLD, 12));
-                  } else {
-                     t.setFont(Font.font("System", FontWeight.NORMAL, 12));
-                  }
-                  t.setText(s);
-                  tf.getChildren().add(t);
-               }
-            }
-            tf.getChildren().add(new Text("\n"));
-         } else {
-           Text t = new Text();
-            t.setFont(Font.font("System", FontWeight.NORMAL, 12));
-            t.setText(line + "\n");
-            tf.getChildren().add(t);
-         }
-      }
-      tip.setGraphic(tf);
-      tip.setMaxHeight(50);
-      tip.getStyleClass().add("tooltips");
-      return tip;      
+      return "<html>" + text + "</html>";
    }
-   
+
    public static void setTooltipDelay(int open_secs, int timeout_secs) {
-      // This only works for Java 8, so don't execute for Java 9 or later (Java 8=1.8)
-      if (! System.getProperty("java.version").startsWith("1."))
-         return;
-      setupCustomTooltipBehavior(open_secs*1000, timeout_secs*1000, close_delay);
+      // Snappy initial delay (the configured value defaults to 2s, which
+      // feels like tooltips are missing). Cap it so tooltips appear
+      // promptly, but still honor a smaller user-requested value.
+      ToolTipManager.sharedInstance().setInitialDelay(Math.min(open_secs * 1000, 600));
+      // Keep a long dismiss delay so kmttg's multi-line tooltips stay
+      // readable.
+      ToolTipManager.sharedInstance().setDismissDelay(timeout_secs * 1000);
    }
-   
+
    public static void disable() {
       config.toolTips = 0;
+      ToolTipManager.sharedInstance().setEnabled(false);
    }
-   
+
    public static void enable() {
       config.toolTips = 1;
+      ToolTipManager.sharedInstance().setEnabled(true);
    }
-   
+
    public static void enableToolTips(int on) {
       if (on == 1)
          enable();
       else
          disable();
    }
-   
-   private static void setupCustomTooltipBehavior(int openDelayInMillis, int visibleDurationInMillis, int closeDelayInMillis) {
-      try {           
-          Class<?> TTBehaviourClass = null;
-          Class<?>[] declaredClasses = Tooltip.class.getDeclaredClasses();
-          for (Class<?> c:declaredClasses) {
-              if (c.getCanonicalName().equals("javafx.scene.control.Tooltip.TooltipBehavior")) {
-                  TTBehaviourClass = c;
-                  break;
-              }
-          }
-          if (TTBehaviourClass == null) {
-              // abort
-              return;
-          }
-          Constructor<?> constructor = TTBehaviourClass.getDeclaredConstructor(
-                  Duration.class, Duration.class, Duration.class, boolean.class);
-          if (constructor == null) {
-              // abort
-              return;
-          }
-          constructor.setAccessible(true);
-          Object newTTBehaviour = constructor.newInstance(
-                  new Duration(openDelayInMillis), new Duration(visibleDurationInMillis), 
-                  new Duration(closeDelayInMillis), false);
-          if (newTTBehaviour == null) {
-              // abort
-              return;
-          }
-          Field ttbehaviourField = Tooltip.class.getDeclaredField("BEHAVIOR");
-          if (ttbehaviourField == null) {
-              // abort
-              return;
-          }
-          ttbehaviourField.setAccessible(true);
-           
-          // Cache the default behavior if needed.
-          //Object defaultTTBehavior = ttbehaviourField.get(Tooltip.class);
-          ttbehaviourField.set(Tooltip.class, newTTBehaviour);
-           
-      } catch (Exception e) {
-          //catch silently.  This does not seem to work with recent java 8 builds.
-      }
-  }
-   
 }

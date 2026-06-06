@@ -18,27 +18,15 @@
  */
 package com.tivo.kmttg.gui.table;
 
-import java.util.Collections;
+import java.awt.Color;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Hashtable;
 
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.SortEvent;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableRow;
-import javafx.scene.control.TreeTableView;
-import javafx.scene.control.cell.TreeItemPropertyValueFactory;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.util.Callback;
+import javax.swing.JLabel;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONConverter;
@@ -48,10 +36,15 @@ import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.comparator.DateComparator;
 import com.tivo.kmttg.gui.comparator.DurationComparator;
+import com.tivo.kmttg.gui.comparator.ImageComparator;
 import com.tivo.kmttg.gui.comparator.StringChannelComparator;
 import com.tivo.kmttg.gui.comparator.StringShowComparator;
 import com.tivo.kmttg.gui.sortable.sortableDate;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
+import com.tivo.kmttg.gui.swing.KmttgTable;
+import com.tivo.kmttg.gui.swing.RowColorer;
+import com.tivo.kmttg.gui.swing.TreeTable;
+import com.tivo.kmttg.gui.swing.TreeTable.TreeItem;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
@@ -62,13 +55,13 @@ import com.tivo.kmttg.util.log;
 
 public class searchTable extends TableMap {
    private String currentTivo = null;
-   public TreeTableView<Tabentry> TABLE = null;
+   public TreeTable<Tabentry> TABLE = null;
    public String[] TITLE_cols = {"", "TYPE", "SHOW", "DATE", "CHANNEL", "DUR"};
    private double[] weights = {7, 12, 40, 20, 15, 6};
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
-   
+
    // TableMap overrides
    @Override
    public JSONObject getJson(int row) {
@@ -84,165 +77,101 @@ public class searchTable extends TableMap {
    }
    @Override
    public void clear() {
-      TABLE.getRoot().getChildren().clear();
+      TABLE.getRoot().clearChildren();
    }
    @Override
-   public TreeTableView<?> getTreeTable() {
+   public TreeTable<?> getTreeTable() {
       return TABLE;
    }
-         
-   public searchTable() {      
-      TABLE = new TreeTableView<Tabentry>();
-      TABLE.setRoot(new TreeItem<>(new Tabentry("")));
-      TABLE.setShowRoot(false); // Don't show the empty root node
-      TABLE.getSelectionModel().setSelectionMode(SelectionMode.SINGLE); // Allow multiple row selection
-      TABLE.setRowFactory(new ColorRowFactory()); // For row background color handling
-      // Special sort listener to set sort order to descending date when no sort is selected
-      TABLE.getSortOrder().addListener(new ListChangeListener<TreeTableColumn<Tabentry, ?>>() {
-         @Override
-         public void onChanged(Change<? extends TreeTableColumn<Tabentry, ?>> change) {
-            change.next();
-            if (change != null && change.toString().contains("removed")) {
-               if (change.getRemoved().get(0).getText().equals("DATE"))
-                  return;
-               int date_col = TableUtil.getColumnIndex(TABLE, "DATE");
-               TABLE.getSortOrder().setAll(Collections.singletonList(TABLE.getColumns().get(date_col)));
-               TABLE.getColumns().get(date_col).setSortType(TreeTableColumn.SortType.DESCENDING);
-            }
+
+   public searchTable() {
+      TABLE = new TreeTable<Tabentry>(TITLE_cols);
+      TABLE.table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); // Single row selection
+      TABLE.setRowColorer(new ColorRow()); // For row background color handling
+      TABLE.setComparator("", new ImageComparator());
+      TABLE.setComparator("DATE", new DateComparator());
+      TABLE.setComparator("DUR", new DurationComparator());
+      TABLE.setComparator("CHANNEL", new StringChannelComparator()); // Custom column sort
+      TABLE.setComparator("SHOW", new StringShowComparator()); // Custom column sort strips off leading price
+      // Default sort order is descending date when no sort is selected
+      TABLE.setDefaultSort("DATE", false);
+      KmttgTable.setColumnAlignment(TABLE.table, "DATE", JLabel.RIGHT);
+      KmttgTable.setColumnAlignment(TABLE.table, "DUR", JLabel.CENTER);
+      TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
+
+      // Want to resize columns whenever a tree is expanded
+      TABLE.setOnExpand(new Runnable() {
+         @Override public void run() {
+            TableUtil.autoSizeTableViewColumns(TABLE, true);
          }
       });
-      
-      // Keep selection visible following sort event
-      TABLE.setOnSort(new EventHandler<SortEvent<TreeTableView<Tabentry>>>() {
-         @Override public void handle(SortEvent<TreeTableView<Tabentry>> event) {
-            Platform.runLater(new Runnable() {
-               @Override public void run() {
-                  // If there's a table selection make sure it's visible
-                  TableUtil.selectedVisible(TABLE);
-               }
-            });
-         }
-      });
-      
-      for (String colName : TITLE_cols) {
-         if (colName.length() == 0)
-            colName = "IMAGE";
-         if (colName.equals("IMAGE")) {
-            TreeTableColumn<Tabentry,ImageView> col = new TreeTableColumn<Tabentry,ImageView>("");
-            col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,ImageView>(colName));
-            col.setCellFactory(new ImageCellFactory());
-            TABLE.getColumns().add(col);
-         } else if (colName.equals("DATE")) {
-            TreeTableColumn<Tabentry,sortableDate> col = new TreeTableColumn<Tabentry,sortableDate>(colName);
-            col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableDate>(colName));
-            col.setComparator(new DateComparator());
-            col.setStyle("-fx-alignment: CENTER-RIGHT;");
-            TABLE.getColumns().add(col);
-         } else if (colName.equals("DUR")) {
-            TreeTableColumn<Tabentry,sortableDuration> col = new TreeTableColumn<Tabentry,sortableDuration>(colName);
-            col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableDuration>(colName));
-            col.setComparator(new DurationComparator());
-            col.setStyle("-fx-alignment: CENTER;");
-            TABLE.getColumns().add(col);
-         } else {
-            // Regular String sort
-            TreeTableColumn<Tabentry,String> col = new TreeTableColumn<Tabentry,String>(colName);
-            col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,String>(colName));
-            if (colName.equals("CHANNEL"))
-               col.setComparator(new StringChannelComparator()); // Custom column sort
-            if (colName.equals("SHOW"))
-               col.setComparator(new StringShowComparator()); // Custom column sort strips off leading price
-            TABLE.getColumns().add(col);
-         }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
-      }
-      
+
       // Add keyboard listener
-      TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {
-         public void handle(KeyEvent e) {
+      TABLE.table.addKeyListener(new KeyAdapter() {
+         @Override
+         public void keyPressed(KeyEvent e) {
             KeyPressed(e);
          }
       });
 
       // Define selection listener to detect table row selection changes
-      TABLE.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<Tabentry>>() {
+      TABLE.table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
          @Override
-         public void changed(ObservableValue<? extends TreeItem<Tabentry>> obs, TreeItem<Tabentry> oldSelection, TreeItem<Tabentry> newSelection) {
-            if (newSelection != null) {
-               TABLERowSelected(newSelection.getValue());
-            }
+         public void valueChanged(ListSelectionEvent e) {
+            if (e.getValueIsAdjusting())
+               return;
+            int row = TABLE.table.getSelectionModel().getLeadSelectionIndex();
+            if (row >= 0 && row < TABLE.getExpandedItemCount() && TABLE.isSelected(row))
+               TABLERowSelected(TABLE.getTreeItem(row).getValue());
          }
       });
-                        
+
       // Add right mouse button handler
       TableUtil.AddRightMouseListener(TABLE);
-   }   
+   }
 
-   // ColorRowFactory for setting row background color
-   private class ColorRowFactory implements Callback<TreeTableView<Tabentry>, TreeTableRow<Tabentry>> {
-      public TreeTableRow<Tabentry> call(TreeTableView<Tabentry> tableView) {
-         TreeTableRow<Tabentry> row = new TreeTableRow<Tabentry>() {
-            @Override
-            public void updateItem(Tabentry entry, boolean empty) {
-               super.updateItem(entry,  empty);
-               styleProperty().unbind(); setStyle("");
-               if (entry != null) {
-                  // Mark rows that are already in To Do
-                  JSONObject json = entry.getDATE().json;
-                  if (json != null && json.has("__inTodo__"))
-                     TableUtil.setRowColor(this, TableUtil.tableBkgndProtected);
-                  
-                  // Mark rows with entries in auto history file
-                  if (config.showHistoryInTable == 1) {
-                     try {
-                        if (json.has("partnerContentId")) {
-                           String programId = json.getString("partnerContentId");
-                           programId = programId.replaceFirst("^.+\\.", "");
-                           if (auto.keywordMatchHistoryFast(programId, false))
-                              TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);
-                        }
-                        else if (json.has("partnerCollectionId")) {
-                           String programId = json.getString("partnerCollectionId");
-                           if (auto.keywordMatchHistoryFast(programId, false))
-                              TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);                           
-                        }
-                     } catch (JSONException e) {
-                        log.error("searchTable ColorRowFactory - " + e.getMessage());
-                     }
+   // RowColorer for setting row background color
+   private class ColorRow implements RowColorer<Tabentry> {
+      public Color getColor(Tabentry entry) {
+         if (entry != null) {
+            // Mark rows that are already in To Do
+            JSONObject json = entry.getDATE().json;
+            Color color = null;
+            if (json != null && json.has("__inTodo__"))
+               color = TableUtil.tableBkgndProtected;
+
+            // Mark rows with entries in auto history file
+            if (config.showHistoryInTable == 1) {
+               try {
+                  if (json.has("partnerContentId")) {
+                     String programId = json.getString("partnerContentId");
+                     programId = programId.replaceFirst("^.+\\.", "");
+                     if (auto.keywordMatchHistoryFast(programId, false))
+                        color = TableUtil.tableBkgndInHistory;
                   }
+                  else if (json.has("partnerCollectionId")) {
+                     String programId = json.getString("partnerCollectionId");
+                     if (auto.keywordMatchHistoryFast(programId, false))
+                        color = TableUtil.tableBkgndInHistory;
+                  }
+               } catch (JSONException e) {
+                  log.error("searchTable ColorRow - " + e.getMessage());
                }
             }
-         };
-         return row;
-      }
-   }   
-
-   private class ImageCellFactory implements Callback<TreeTableColumn<Tabentry, ImageView>, TreeTableCell<Tabentry, ImageView>> {
-      public TreeTableCell<Tabentry, ImageView> call(TreeTableColumn<Tabentry, ImageView> param) {
-         TreeTableCell<Tabentry, ImageView> cell = new TreeTableCell<Tabentry, ImageView>() {
-            @Override
-            public void updateItem(final ImageView item, boolean empty) {
-               super.updateItem(item, empty);
-               if (empty) {
-                  setGraphic(null);
-               } else {
-                  if (item != null)
-                     setGraphic(item);
-               }
-            }
-         };
-         return cell;
+            return color;
+         }
+         return null;
       }
    }
-   
+
    public static class Tabentry {
-      public ImageView image = new ImageView();
+      public imageCell image = new imageCell();
       public String type = "";
       public String title = "";
       public sortableDate date = null;
       public String channel = "";
       public sortableDuration duration = null;
-      
+
       // Root node constructor
       public Tabentry(String s) {
          // Do nothing
@@ -274,7 +203,8 @@ public class searchTable extends TableMap {
                   channel = chan;
                else
                   channel = "<various>";
-               image = new ImageView(gui.Images.get("folder"));
+               image.setImage(gui.Images.get("folder"));
+               image.imageName = "folder";
                type = entry.getString("type");
                title = " " + entry.getString("title") + " (" + num + ")";
                String startString = "";
@@ -295,7 +225,7 @@ public class searchTable extends TableMap {
                // Single item => don't display as folder
                if (entry.has("entries"))
                   entry = entry.getJSONArray("entries").getJSONObject(0);
-               
+
                // If entry is in 1 of todo lists then add special __inTodo__ JSON entry
                config.gui.remote_gui.flagIfInTodo(entry, false);
                long start = -1;
@@ -331,7 +261,7 @@ public class searchTable extends TableMap {
                   channel = JSONConverter.makeChannelName(entry);
                else if (entry.has("partnerId"))
                   channel = JSONConverter.getPartnerName(entry);
-               
+
                date = new sortableDate(entry, start);
                duration = new sortableDuration(dur, false);
             } // else
@@ -339,15 +269,15 @@ public class searchTable extends TableMap {
             log.error("searchTable Tabentry - " + e1.getMessage());
          }
       }
-      
-      public ImageView getIMAGE() {
+
+      public imageCell getIMAGE() {
          return image;
       }
-      
+
       public String getTYPE() {
          return type;
       }
-      
+
       public String getSHOW() {
          return title;
       }
@@ -363,19 +293,19 @@ public class searchTable extends TableMap {
       public sortableDuration getDUR() {
          return duration;
       }
-      
+
       public String toString() {
          return title;
       }
-   }   
-      
+   }
+
    public JSONObject GetRowData(int row) {
       if (row < 0) return null;
       return TABLE.getTreeItem(row).getValue().getDATE().json;
    }
-   
+
    private void TABLERowSelected(Tabentry entry) {
-      // Get column items for selected row 
+      // Get column items for selected row
       sortableDate s = entry.getDATE();
       if (s.folder) {
          // Folder entry - don't display anything
@@ -388,12 +318,12 @@ public class searchTable extends TableMap {
             if (s.json.has("title"))
                title += s.json.getString("title");
             if (s.json.has("subtitle"))
-               title += " - " + s.json.getString("subtitle");            
+               title += " - " + s.json.getString("subtitle");
             if (s.json.has("__inTodo__"))
                title += " (to be recorded on " + s.json.getString("__inTodo__") + ")";
             log.warn(title);
             log.print(message);
-            
+
             if (config.gui.show_details.isShowing())
                config.gui.show_details.update(TABLE, currentTivo, s.json);
          } catch (JSONException e) {
@@ -412,16 +342,16 @@ public class searchTable extends TableMap {
       Refresh(data);
       TABLE.sort();
       TableUtil.autoSizeTableViewColumns(TABLE, true);
-      
+
       // Save the data
       currentTivo = tivoName;
       tivo_data.put(tivoName, data);
-      
+
       // Update search tab to show this tivoName
       if (config.gui.remote_gui != null)
          config.gui.remote_gui.setTivoName("search", tivoName);
    }
-   
+
    public void Refresh(JSONArray data) {
       if (data == null) {
          if (currentTivo != null)
@@ -438,11 +368,11 @@ public class searchTable extends TableMap {
                log.error("Refresh - " + e.getMessage());
             }
          }
-         
+
          TABLE.getRoot().setExpanded(true);
       }
    }
-      
+
    // Add a row to table
    public void AddTABLERow(JSONObject entry) {
       try {
@@ -451,28 +381,21 @@ public class searchTable extends TableMap {
          if (entries.length() > 1)
             folder = true;
          if (folder) {
-            TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(entry, true) );
-            // Want to resize columns whenever a tree is expanded or collapsed
-            item.expandedProperty().addListener(new ChangeListener<Boolean>() {
-               @Override
-               public void changed(ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) {
-                  TableUtil.autoSizeTableViewColumns(TABLE, true);
-               }         
-            });
+            TreeItem<Tabentry> item = new TreeItem<Tabentry>( new Tabentry(entry, true) );
             for (int i=0; i<entries.length(); ++i) {
-               TreeItem<Tabentry> subitem = new TreeItem<>(new Tabentry(entries.getJSONObject(i), false));
-               item.getChildren().add(subitem);
+               TreeItem<Tabentry> subitem = new TreeItem<Tabentry>(new Tabentry(entries.getJSONObject(i), false));
+               item.addChild(subitem);
             }
-            TABLE.getRoot().getChildren().add(item); 
+            TABLE.getRoot().addChild(item);
          } else {
-            TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(entry, false) );
-            TABLE.getRoot().getChildren().add(item);
+            TreeItem<Tabentry> item = new TreeItem<Tabentry>( new Tabentry(entry, false) );
+            TABLE.getRoot().addChild(item);
          }
       } catch (JSONException e) {
          log.error("searchTable AddTABLERow - " + e.getMessage());
       }
-   }  
-      
+   }
+
    private Boolean isFolder(int row) {
       if (row < 0) return false;
       sortableDate s = TABLE.getTreeItem(row).getValue().getDATE();
@@ -487,21 +410,20 @@ public class searchTable extends TableMap {
          sortableDate s = TABLE.getRoot().getChildren().get(i).getValue().getDATE();
          if (s.folder) {
             if (s.folderName.equals(folderName)) {
-               TABLE.getSelectionModel().clearSelection();
-               TABLE.getSelectionModel().select(i);
-               TableUtil.scrollToCenter(TABLE, i);
+               TABLE.clearSelection();
+               TABLE.select(TABLE.getRoot().getChildren().get(i));
                return;
             }
          }
       }
    }
-   
+
    // Handle keyboard presses
    private void KeyPressed(KeyEvent e) {
       if (e.isControlDown())
          return;
-      KeyCode keyCode = e.getCode();
-      if (keyCode == KeyCode.I) {
+      int keyCode = e.getKeyCode();
+      if (keyCode == KeyEvent.VK_I) {
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
             return;
@@ -510,13 +432,13 @@ public class searchTable extends TableMap {
             config.gui.show_details.update(TABLE, currentTivo, json);
          }
       }
-      else if (keyCode == KeyCode.N) {
+      else if (keyCode == KeyEvent.VK_N) {
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
             return;
          TableUtil.PrintEpisodes(GetRowData(selected[0]));
       }
-      else if (keyCode == KeyCode.A) {
+      else if (keyCode == KeyEvent.VK_A) {
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
             return;
@@ -524,7 +446,7 @@ public class searchTable extends TableMap {
          if (json != null)
             auto.AddHistoryEntry(json);
       }
-      else if (keyCode == KeyCode.K) {
+      else if (keyCode == KeyEvent.VK_K) {
          // Print skipmode information if available
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
@@ -532,16 +454,16 @@ public class searchTable extends TableMap {
          JSONObject json = GetRowData(selected[0]);
          TableUtil.PrintClipData(currentTivo, json);
       }
-      else if (keyCode == KeyCode.P) {
-         config.gui.remote_gui.search_tab.recordSP.fire();
+      else if (keyCode == KeyEvent.VK_P) {
+         config.gui.remote_gui.search_tab.recordSP.doClick();
       }
-      else if (keyCode == KeyCode.R) {
-       config.gui.remote_gui.search_tab.record.fire();
+      else if (keyCode == KeyEvent.VK_R) {
+       config.gui.remote_gui.search_tab.record.doClick();
       }
-      else if (keyCode == KeyCode.W) {
-       config.gui.remote_gui.search_tab.wishlist.fire();
+      else if (keyCode == KeyEvent.VK_W) {
+       config.gui.remote_gui.search_tab.wishlist.doClick();
       }
-      else if (keyCode == KeyCode.J) {
+      else if (keyCode == KeyEvent.VK_J) {
          // Print json of selected row to log window
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
@@ -551,7 +473,7 @@ public class searchTable extends TableMap {
             rnpl.pprintJSON(json);
             id.printIds(json);
          }
-      } else if (keyCode == KeyCode.Q) {
+      } else if (keyCode == KeyEvent.VK_Q) {
          // Web query currently selected entry
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
@@ -567,11 +489,11 @@ public class searchTable extends TableMap {
                log.error("KeyPressed Q - " + e1.getMessage());
             }
          }
-      } else if (keyCode == KeyCode.T) {
+      } else if (keyCode == KeyEvent.VK_T) {
          TableUtil.toggleTreeState(TABLE);
       }
    }
-   
+
    // Schedule a single recording
    public void recordSingle(String tivoName) {
       int[] selected = TableUtil.GetSelectedRows(TABLE);
@@ -589,7 +511,7 @@ public class searchTable extends TableMap {
          TableUtil.recordSingleCB(tivoName, entries);
       }
    }
-   
+
    // Create a Season Pass
    public void recordSP(final String tivoName) {
       final int[] selected = TableUtil.GetSelectedRows(TABLE);
@@ -614,8 +536,8 @@ public class searchTable extends TableMap {
       }
 
       // Proceed with SP scheduling
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             int[] selected = TableUtil.GetSelectedRows(TABLE);
             if (selected.length > 0) {
                int row;
@@ -629,7 +551,7 @@ public class searchTable extends TableMap {
                   if (existing == null) {
                      log.error("Failed to grab existing SPs to check against for TiVo: " + tivoName);
                      r.disconnect();
-                     return null;
+                     return;
                   }
                   // Now proceed with subscriptions
                   for (int i=0; i<selected.length; ++i) {
@@ -642,7 +564,6 @@ public class searchTable extends TableMap {
                   }
                }
             }
-            return null;
          }
       };
       new Thread(task).start();

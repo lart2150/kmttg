@@ -1,0 +1,24 @@
+# Normalize text file line endings to LF in the repository.
+# Existing files are only normalized when next modified; to convert the
+# whole tree at once run:  git add --renormalize .  &&  git commit
+* text=auto
+
+# Source and text formats stored with LF
+*.java   text eol=lf
+*.xml    text eol=lf
+*.html   text eol=lf
+*.css    text eol=lf
+*.properties text eol=lf
+*.md     text eol=lf
+*.yml    text eol=lf
+*.sh     text eol=lf
+*.bat    text eol=crlf
+*.ps1    text eol=crlf
+
+# Binary files - never apply line ending conversion
+*.jar    binary
+*.png    binary
+*.gif    binary
+*.jpg    binary
+*.ico    binary
+*.zip    binary

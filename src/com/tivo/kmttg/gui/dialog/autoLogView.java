@@ -18,6 +18,7 @@
  */
 package com.tivo.kmttg.gui.dialog;
 
+import java.awt.BorderLayout;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -26,67 +27,59 @@ import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
-import com.tivo.kmttg.gui.gui;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
-public class autoLogView {   
-   private Stage dialog = null;
-   private TextArea text = null;
+public class autoLogView {
+   private JDialog dialog = null;
+   private JTextArea text = null;
    private static String logfile = config.autoLog + ".0";
    Timer timer;
    BufferedReader br = null;
    int max_lines = 100;
    Stack<String> lines = new Stack<String>();
-   
-   public autoLogView(Stage frame) {
+
+   public autoLogView(JFrame frame) {
       debug.print("frame=" + frame);
-      
+
       if ( ! file.isFile(logfile)) {
          log.error("Auto log file not found: " + logfile);
          return;
       }
-      
+
       try {
          br = new BufferedReader(new FileReader(logfile));
       } catch (FileNotFoundException e) {
          log.error("Auto log file not found: " + logfile);
          return;
       }
-            
+
       // Define content for dialog window
-      VBox content = new VBox();
-      content.setSpacing(5);
-      
+      JPanel content = new JPanel(new BorderLayout());
+
       // text area
-      text = new TextArea();
-      text.setWrapText(true);
-      HBox.setHgrow(text, Priority.ALWAYS);  // stretch horizontally
-      VBox.setVgrow(text, Priority.ALWAYS);  // stretch vertically
-      content.getChildren().add(text);
+      text = new JTextArea();
+      text.setLineWrap(true);
+      text.setWrapStyleWord(true);
+      content.add(new JScrollPane(text), BorderLayout.CENTER);  // stretch horizontally and vertically
 
       // create and display dialog window
-      dialog = new Stage();
+      dialog = new JDialog(frame);
       dialog.setTitle(logfile);
-      Scene scene = new Scene(content);
-	  config.gui.addScene(scene);
-      dialog.setScene(scene);
-      config.gui.setFontSize(dialog.getScene(), config.FontSize);
-      dialog.setWidth(600);
-      dialog.setHeight(400);
-      dialog.initOwner(frame);
-      gui.LoadIcons(dialog);
-      dialog.show();
+      dialog.getContentPane().add(content);
+      dialog.setSize(600, 400);
+      SwingUtil.loadIcons(dialog);
+      dialog.setLocationRelativeTo(frame);
+      dialog.setVisible(true);
 
       // Start a timer that updates stdout/stderr text areas dynamically
       timer = new Timer();
@@ -94,7 +87,7 @@ public class autoLogView {
          new TimerTask() {
             @Override
             public void run() {
-               Platform.runLater(new Runnable() {
+               SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
                      update();
                   }
@@ -105,7 +98,7 @@ public class autoLogView {
         1000
       );
    }
-   
+
    private void update() {
       if (! dialog.isShowing()) {
          timer.cancel();
@@ -124,7 +117,7 @@ public class autoLogView {
             lines.push(line);
          }
          for (String l : lines)
-            text.appendText(l + "\n");
+            text.append(l + "\n");
          lines.clear();
       } catch (IOException e) {
          log.error("autoLogView update - " + e.getMessage());

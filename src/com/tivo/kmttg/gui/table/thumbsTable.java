@@ -18,23 +18,17 @@
  */
 package com.tivo.kmttg.gui.table;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Stack;
 
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellEditEvent;
-import javafx.scene.control.TablePosition;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTable;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -43,6 +37,9 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.PopupHandler;
 import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.table.TableUtil;
+import com.tivo.kmttg.gui.swing.KmttgTable;
+import com.tivo.kmttg.gui.swing.KmttgTableModel;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -54,7 +51,8 @@ import com.tivo.kmttg.util.log;
 
 public class thumbsTable extends TableMap {
    private String currentTivo = null;
-   public TableView<Tabentry> TABLE = null;
+   public JTable TABLE = null;
+   public KmttgTableModel<Tabentry> MODEL = null;
    public String[] TITLE_cols = {"TYPE", "SHOW", "RATING"};
    private double[] weights = {15, 75, 10};
    public String folderName = null;
@@ -62,7 +60,7 @@ public class thumbsTable extends TableMap {
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
    private Boolean loaded = false;
    private String loadedPrefix = "Loaded: ";
-   
+
    // TableMap overrides
    @Override
    public JSONObject getJson(int row) {
@@ -78,91 +76,90 @@ public class thumbsTable extends TableMap {
    }
    @Override
    public void clear() {
-      TABLE.getItems().clear();
+      MODEL.clear();
       setLoaded(false);
    }
    @Override
-   public TableView<?> getTable() {
+   public JTable getTable() {
       return TABLE;
    }
-   
+
    public thumbsTable() {
-      TABLE = new TableView<Tabentry>();
-      TABLE.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE); // Allow multi row selection
-      TABLE.setEditable(true); // Allow editing
-      
-      for (String colName : TITLE_cols) {
-         if (colName.equals("TYPE")) {
-            TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(colName));
-            TABLE.getColumns().add(col);
-         } else if (colName.equals("SHOW")) {
-            TableColumn<Tabentry,jsonString> col = new TableColumn<Tabentry,jsonString>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,jsonString>(colName));
-            TABLE.getColumns().add(col);
-         } else if (colName.equals("RATING")) {
-            TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(colName));
-            col.setComparator(new RatingComparator()); // Custom column sort
-            col.setStyle("-fx-alignment: CENTER;");
-            col.setCellFactory(TextFieldTableCell.<Tabentry>forTableColumn());
-            // This column is editable
-            col.setOnEditCommit( new EventHandler<CellEditEvent<Tabentry, String>>() {
-               @Override
-               public void handle(CellEditEvent<Tabentry, String> event) {
-                  int row = event.getTablePosition().getRow();
-                  Tabentry entry = event.getTableView().getItems().get(row);
-                  int val = 1;
-                  try {
-                     val = Integer.parseInt(event.getNewValue());
-                  } catch (NumberFormatException e) {
-                     log.warn("Illegal value - setting to 1");
-                     val = 1;
-                  }
-                  if (val < -3) {
-                     log.warn("Illegal value - setting to -3");
-                     val = -3;
-                  }
-                  if (val > 3) {
-                     val = 3;
-                     log.warn("Illegal value - setting to 3");
-                  }
-                  // Update row Tabentry value
-                  entry.rating = "" + val;
-                  TABLE.getItems().set(event.getTablePosition().getRow(), entry);
-               }
-            });
-            TABLE.getColumns().add(col);
-         }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
-      }
-      
+      MODEL = new KmttgTableModel<Tabentry>(TITLE_cols);
+      MODEL.setComparator("RATING", new RatingComparator());
+      TABLE = KmttgTable.create(MODEL, null);
+      KmttgTable.setColumnAlignment(TABLE, "RATING", JLabel.CENTER);
+      TableUtil.setWeights(TABLE, TITLE_cols, weights, false);
+
       // Add keyboard listener
-      TABLE.setOnKeyPressed(new EventHandler<KeyEvent>() {
-         public void handle(KeyEvent e) {
+      TABLE.addKeyListener(new KeyAdapter() {
+         @Override
+         public void keyPressed(KeyEvent e) {
             KeyPressed(e);
          }
       });
-      
-      // Mouse listener for single click in RATING column
-      TABLE.setOnMousePressed(new EventHandler<MouseEvent>() {
-         @Override 
-         public void handle(MouseEvent event) {
-            // Pass along right mouse button click
-            if (event.isSecondaryButtonDown())
+
+      // Mouse listener: trigger edit prompt for single click in RATING cell,
+      // and pass along right mouse button click
+      TABLE.addMouseListener(new MouseAdapter() {
+         @Override
+         public void mousePressed(MouseEvent event) {
+            PopupHandler.hide();
+            if (event.isPopupTrigger()) {
                PopupHandler.display(TABLE, event);
-            else {
-               // Trigger edit for single click in RATING cell
-               if (event.getClickCount() == 1 && event.getTarget().getClass() == TextFieldTableCell.class) {
-                  @SuppressWarnings("unchecked")
-                  TablePosition<Tabentry,?> pos = TABLE.getSelectionModel().getSelectedCells().get(0);
-                  TABLE.edit(pos.getRow(), pos.getTableColumn());
-               }
+            }
+         }
+         @Override
+         public void mouseReleased(MouseEvent event) {
+            if (event.isPopupTrigger())
+               PopupHandler.display(TABLE, event);
+         }
+         @Override
+         public void mouseClicked(MouseEvent event) {
+            if (event.isPopupTrigger())
+               return;
+            int viewRow = TABLE.rowAtPoint(event.getPoint());
+            int viewCol = TABLE.columnAtPoint(event.getPoint());
+            if (viewRow < 0 || viewCol < 0)
+               return;
+            int col = TABLE.convertColumnIndexToModel(viewCol);
+            if (TITLE_cols[col].equals("RATING")) {
+               editRating(viewRow);
             }
          }
       });
    }
-   
+
+   // Prompt for a new RATING value for given row (replaces inline text edit)
+   private void editRating(int row) {
+      Tabentry entry = MODEL.getRow(row);
+      String result = JOptionPane.showInputDialog(
+         config.gui.getFrame(),
+         "Thumbs Rating (-3 to 3):",
+         entry.rating
+      );
+      if (result == null)
+         return;
+      int val = 1;
+      try {
+         val = Integer.parseInt(result);
+      } catch (NumberFormatException e) {
+         log.warn("Illegal value - setting to 1");
+         val = 1;
+      }
+      if (val < -3) {
+         log.warn("Illegal value - setting to -3");
+         val = -3;
+      }
+      if (val > 3) {
+         val = 3;
+         log.warn("Illegal value - setting to 3");
+      }
+      // Update row Tabentry value
+      entry.rating = "" + val;
+      MODEL.updateRow(row);
+   }
+
    public static class jsonString {
       String display;
       JSONObject json;
@@ -174,17 +171,17 @@ public class thumbsTable extends TableMap {
          return display;
       }
    }
-   
-   private class RatingComparator implements Comparator<String> {
-      public int compare(String s1, String s2) {
-         Integer i1 = Integer.parseInt(s1);
-         Integer i2 = Integer.parseInt(s2);
+
+   private class RatingComparator implements Comparator<Object> {
+      public int compare(Object o1, Object o2) {
+         Integer i1 = Integer.parseInt(o1.toString());
+         Integer i2 = Integer.parseInt(o2.toString());
          if (i1 > i2) return 1;
          if (i1 < i2) return -1;
-         return 0;         
+         return 0;
       }
    }
-   
+
    public static class Tabentry {
       public String type = "";
       public jsonString show = null;
@@ -197,16 +194,16 @@ public class thumbsTable extends TableMap {
             if (entry.has("title"))
                show = new jsonString(entry, entry.getString("title"));
             if (entry.has("thumbsRating"))
-               rating = "" + entry.getInt("thumbsRating");                    
+               rating = "" + entry.getInt("thumbsRating");
          } catch (JSONException e1) {
             log.error("thumbsTable Tabentry - " + e1.getMessage());
-         }      
+         }
       }
-      
+
       public String getTYPE() {
          return type;
       }
-      
+
       public jsonString getSHOW() {
          return show;
       }
@@ -217,23 +214,23 @@ public class thumbsTable extends TableMap {
 
       public String toString() {
          return show.toString();
-      }      
+      }
    }
 
    public JSONObject GetRowData(int row) {
-      return TABLE.getItems().get(row).getSHOW().json;
+      return MODEL.getRow(row).getSHOW().json;
    }
-   
+
    public String GetValueAt(int row, int col) {
-      return TABLE.getColumns().get(col).getCellData(row).toString();
+      return MODEL.getValueAt(row, col).toString();
    }
-      
+
    // Handle keyboard presses
    private void KeyPressed(KeyEvent e) {
       if (e.isControlDown())
          return;
-      KeyCode keyCode = e.getCode();
-      if (keyCode == KeyCode.I) {
+      int keyCode = e.getKeyCode();
+      if (keyCode == KeyEvent.VK_I) {
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
             return;
@@ -242,7 +239,7 @@ public class thumbsTable extends TableMap {
             config.gui.show_details.update(TABLE, currentTivo, json);
          }
       }
-      else if (keyCode == KeyCode.J) {
+      else if (keyCode == KeyEvent.VK_J) {
          // Print json of selected row to log window
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
@@ -253,16 +250,16 @@ public class thumbsTable extends TableMap {
             id.printIds(json);
          }
       }
-      else if (keyCode == KeyCode.N) {
+      else if (keyCode == KeyEvent.VK_N) {
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
             return;
          TableUtil.PrintEpisodes(GetRowData(selected[0]));
       }
-      else if (keyCode == KeyCode.C) {
-         config.gui.remote_gui.thumbs_tab.copy.fire();
+      else if (keyCode == KeyEvent.VK_C) {
+         config.gui.remote_gui.thumbs_tab.copy.doClick();
       }
-      else if (keyCode == KeyCode.Q) {
+      else if (keyCode == KeyEvent.VK_Q) {
          // Web query currently selected entry
          int[] selected = TableUtil.GetSelectedRows(TABLE);
          if (selected == null || selected.length < 1)
@@ -278,17 +275,17 @@ public class thumbsTable extends TableMap {
          }
       }
    }
-   
+
    // Update table to display given entries
    public void AddRows(String tivoName, JSONArray data) {
       try {
          Stack<JSONObject> o = new Stack<JSONObject>();
          for (int i=0; i<data.length(); ++i)
             o.add(data.getJSONObject(i));
-         
+
          // Update table
          Refresh(o);
-         TABLE.sort();
+         MODEL.sort();
          TableUtil.autoSizeTableViewColumns(TABLE, true);
          if (tivoName != null) {
             tivo_data.put(tivoName, data);
@@ -300,9 +297,9 @@ public class thumbsTable extends TableMap {
          }
       } catch (JSONException e) {
          log.error("Thumbs AddRows - " + e.getMessage());
-      }      
+      }
    }
-   
+
    // Refresh table with given given entries
    public void Refresh(Stack<JSONObject> o) {
       clear();
@@ -315,32 +312,32 @@ public class thumbsTable extends TableMap {
          displayFlatStructure(o);
       }
    }
-   
+
    // Update table display to show top level flat structure
    private void displayFlatStructure(Stack<JSONObject> o) {
       for (int i=0; i<o.size(); ++i) {
          AddTABLERow(o.get(i));
       }
    }
-   
+
    private void updateShowRows(String prefix) {
-      for (int row=0; row<TABLE.getItems().size(); ++row) {
-         Tabentry e = TABLE.getItems().get(row);
+      for (int row=0; row<MODEL.size(); ++row) {
+         Tabentry e = MODEL.getRow(row);
          e.show.display = prefix + e.show.display;
       }
    }
-   
+
    // Add a non folder entry to TABLE table
    public void AddTABLERow(JSONObject entry) {
       debug.print("entry=" + entry);
-      TABLE.getItems().add(new Tabentry(entry));
-   }   
-   
+      MODEL.addRow(new Tabentry(entry));
+   }
+
    // Refresh the # SHOWS label in the ToDo tab
    private void refreshNumber() {
       config.gui.remote_gui.thumbs_tab.label.setText("" + tivo_data.get(currentTivo).length() + " THUMBS");
    }
-   
+
    public void refreshThumbs(String tivoName) {
       clear();
       setLoaded(false);
@@ -353,7 +350,7 @@ public class thumbsTable extends TableMap {
       job.thumbs         = this;
       jobMonitor.submitNewJob(job);
    }
-   
+
    // For each row value different that current database, update thumbs value
    public void updateThumbs(final String tivoName) {
       if (isTableLoaded()) {
@@ -362,7 +359,7 @@ public class thumbsTable extends TableMap {
       }
       try {
          JSONArray changed = new JSONArray();
-         for (int row=0; row<TABLE.getItems().size(); ++row) {
+         for (int row=0; row<MODEL.size(); ++row) {
             String table_value = GetValueAt(row, TableUtil.getColumnIndex(TABLE, "RATING"));
             JSONObject json = GetRowData(row);
             if (json != null) {
@@ -377,13 +374,13 @@ public class thumbsTable extends TableMap {
          }
          if (changed.length() > 0) {
             // There are table changes, so update in the background
-            class backgroundRun extends Task<Void> {
+            class backgroundRun implements Runnable {
                JSONArray changed;
                public backgroundRun(JSONArray changed) {
                   this.changed = changed;
                }
                @Override
-               protected Void call() {
+               public void run() {
                  try {
                      Remote r = config.initRemote(tivoName);
                      if (r.success) {
@@ -405,12 +402,11 @@ public class thumbsTable extends TableMap {
                      log.error("updateThumbs (1) - " + e.getMessage());
                   }
                   // Now refresh the thumbs table
-                  Platform.runLater(new Runnable() {
+                  SwingUtil.runLater(new Runnable() {
                      @Override public void run() {
                         refreshThumbs(tivoName);
                      }
                   });
-                  return null;
                }
             }
             backgroundRun b = new backgroundRun(changed);
@@ -420,7 +416,7 @@ public class thumbsTable extends TableMap {
          log.error("updateThumbs (2) - " + e.getMessage());
       }
    }
-   
+
    public void saveThumbs(String tivoName, String file) {
       if (isTableLoaded()) {
          log.error("Cannot save a loaded table");
@@ -431,9 +427,9 @@ public class thumbsTable extends TableMap {
          JSONFile.write(tivo_data.get(tivoName), file);
       } else {
          log.error("No data available to save.");
-      }      
+      }
    }
-   
+
    public void loadThumbs(String file) {
       log.print("Loading Thumbs data from file: " + file);
       JSONArray data = JSONFile.readJSONArray(file);
@@ -446,10 +442,10 @@ public class thumbsTable extends TableMap {
          setLoaded(true);
       }
    }
-   
+
    public void copyThumbs(final String tivoName) {
-      Task<Void> task = new Task<Void>() {
-         @Override public Void call() {
+      Runnable task = new Runnable() {
+         @Override public void run() {
             int[] selected = TableUtil.GetSelectedRows(TABLE);
             if (selected.length > 0) {
                int row;
@@ -478,16 +474,15 @@ public class thumbsTable extends TableMap {
                   r.disconnect();
                }
             }
-            return null;
          }
       };
       new Thread(task).start();
    }
-   
+
    public Boolean isTableLoaded() {
       return loaded;
    }
-   
+
    private void setLoaded(Boolean flag) {
       if (flag) {
          loaded = true;
@@ -495,9 +490,9 @@ public class thumbsTable extends TableMap {
          loaded = false;
       }
    }
-   
+
    public void updateLoadedStatus() {
-      if (TABLE.getItems().size() > 0) {
+      if (MODEL.size() > 0) {
          int col = TableUtil.getColumnIndex(TABLE, "SHOW");
          String title = GetValueAt(0,col);
          if (title != null && title.startsWith(loadedPrefix))
@@ -505,5 +500,5 @@ public class thumbsTable extends TableMap {
          else
             setLoaded(false);
       }
-   }   
+   }
 }

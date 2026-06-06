@@ -18,9 +18,22 @@
  */
 package com.tivo.kmttg.gui.remote;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.Optional;
 import java.util.Stack;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -31,48 +44,29 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.log;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.stage.FileChooser.ExtensionFilter;
-
 public class seasonpasses {
-   public VBox panel = null;
+   public JPanel panel = null;
    public spTable tab = null;
-   public ChoiceBox<String> tivo = null;
-   public Button copy = null;
-   public Button conflicts = null;
-   public Button modify = null;
-   public Button upcoming = null;   
-   public Button reorder = null;
-   
-   public seasonpasses(final Stage frame) {
-      
-      // Season Passes Tab items      
-      HBox row1 = new HBox();
-      row1.setSpacing(5);
-      row1.setAlignment(Pos.CENTER_LEFT);
-      row1.setPadding(new Insets(5,0,0,5));
+   public JComboBox<String> tivo = null;
+   public JButton copy = null;
+   public JButton conflicts = null;
+   public JButton modify = null;
+   public JButton upcoming = null;
+   public JButton reorder = null;
 
-      Label title = new Label("Season Passes");
+   public seasonpasses(final JFrame frame) {
 
-      Label tivo_label = new Label();
+      // Season Passes Tab items
+      JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
-      tivo = new ChoiceBox<String>();
-      tivo.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
+      JLabel title = new JLabel("Season Passes");
+
+      JLabel tivo_label = new JLabel();
+
+      tivo = new JComboBox<String>();
+      tivo.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)tivo.getSelectedItem();
             if (newVal != null && config.gui.remote_gui != null) {
                TableUtil.clear(tab.TABLE);
                String tivoName = newVal;
@@ -83,96 +77,107 @@ public class seasonpasses {
             }
          }
       });
-      tivo.setTooltip(tooltip.getToolTip("tivo_sp"));
+      tivo.setToolTipText(tooltip.getToolTip("tivo_sp"));
 
-      Button refresh = new Button("Refresh");
-      refresh.setTooltip(tooltip.getToolTip("refresh_sp"));
-      refresh.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      JButton refresh = new JButton("Refresh");
+      refresh.setToolTipText(tooltip.getToolTip("refresh_sp"));
+      refresh.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Refresh SP list
             TableUtil.clear(tab.TABLE);
             tab.setLoaded(false);
-            SPListCB(tivo.getValue());
+            SPListCB((String)tivo.getSelectedItem());
          }
       });
 
-      Button save = new Button("Save...");
-      save.setTooltip(tooltip.getToolTip("save_sp"));
-      save.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      JButton save = new JButton("Save...");
+      save.setToolTipText(tooltip.getToolTip("save_sp"));
+      save.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Save SP data to a file
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                if (tab.isTableLoaded()) {
                   log.error("Cannot save loaded Season Passes");
                   return;
                }  else {
-                  config.gui.remote_gui.Browser.getExtensionFilters().clear();
-                  config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("SP Files", "*.sp"));
-                  config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
-                  config.gui.remote_gui.Browser.setTitle("Save to file");
-                  config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
-                  config.gui.remote_gui.Browser.setInitialFileName(tivoName + ".sp");
-                  final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(frame);
+                  JFileChooser Browser = config.gui.remote_gui.Browser;
+                  Browser.resetChoosableFileFilters();
+                  Browser.addChoosableFileFilter(new FileNameExtensionFilter("SP Files", "sp"));
+                  Browser.setDialogTitle("Save to file");
+                  Browser.setCurrentDirectory(new File(config.programDir));
+                  Browser.setSelectedFile(new File(config.programDir, tivoName + ".sp"));
+                  final File selectedFile;
+                  if (Browser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
+                     selectedFile = Browser.getSelectedFile();
+                  else
+                     selectedFile = null;
                   if (selectedFile != null) {
                      tab.SPListSave(tivoName, selectedFile.getAbsolutePath());
                   }
                }
             }
          }
-      });         
+      });
 
-      Button load = new Button("Load...");
-      load.setTooltip(tooltip.getToolTip("load_sp"));
-      load.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      JButton load = new JButton("Load...");
+      load.setToolTipText(tooltip.getToolTip("load_sp"));
+      load.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Load SP data from a file
-            config.gui.remote_gui.Browser.getExtensionFilters().clear();
-            config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("SP Files", "*.sp"));
-            config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
-            config.gui.remote_gui.Browser.setTitle("Load from file");
-            config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
-            config.gui.remote_gui.Browser.setInitialFileName(null);
-            final File selectedFile = config.gui.remote_gui.Browser.showOpenDialog(frame);
+            JFileChooser Browser = config.gui.remote_gui.Browser;
+            Browser.resetChoosableFileFilters();
+            Browser.addChoosableFileFilter(new FileNameExtensionFilter("SP Files", "sp"));
+            Browser.setDialogTitle("Load from file");
+            Browser.setCurrentDirectory(new File(config.programDir));
+            final File selectedFile;
+            if (Browser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
+               selectedFile = Browser.getSelectedFile();
+            else
+               selectedFile = null;
             if (selectedFile != null) {
                tab.SPListLoad(selectedFile.getAbsolutePath());
             }
          }
-      });         
+      });
 
-      Button export = new Button("Export...");
-      export.setTooltip(tooltip.getToolTip("export_sp"));
-      export.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      JButton export = new JButton("Export...");
+      export.setToolTipText(tooltip.getToolTip("export_sp"));
+      export.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Export SP data to a file in csv format
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                if (tab.isTableLoaded()) {
                   log.error("Cannot export loaded Season Passes");
                   return;
                }  else {
-                  config.gui.remote_gui.Browser.getExtensionFilters().clear();
-                  config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
-                  config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
-                  config.gui.remote_gui.Browser.setTitle("Export to csv file");
-                  config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
-                  config.gui.remote_gui.Browser.setInitialFileName(tivoName + "" + ".csv");
-                  final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(frame);
+                  JFileChooser Browser = config.gui.remote_gui.Browser;
+                  Browser.resetChoosableFileFilters();
+                  Browser.addChoosableFileFilter(new FileNameExtensionFilter("CSV Files", "csv"));
+                  Browser.setDialogTitle("Export to csv file");
+                  Browser.setCurrentDirectory(new File(config.programDir));
+                  Browser.setSelectedFile(new File(config.programDir, tivoName + "" + ".csv"));
+                  final File selectedFile;
+                  if (Browser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
+                     selectedFile = Browser.getSelectedFile();
+                  else
+                     selectedFile = null;
                   if (selectedFile != null) {
                      tab.SPListExport(tivoName, selectedFile.getAbsolutePath());
                   }
                }
             }
          }
-      });         
+      });
 
-      copy = new Button("Copy");
-      copy.setTooltip(tooltip.getToolTip("copy_sp"));
-      copy.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      copy = new JButton("Copy");
+      copy.setToolTipText(tooltip.getToolTip("copy_sp"));
+      copy.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Copy selected SPs to a TiVo
             // Build list of eligible TiVos
-            String thisTivo = tivo.getValue();
+            String thisTivo = (String)tivo.getSelectedItem();
             Stack<String> all = config.getTivoNames();
             for (int i=0; i<all.size(); ++i) {
                String tivo = all.get(i);
@@ -185,16 +190,12 @@ public class seasonpasses {
                   continue;
                }
             }
-            
+
             // Prompt user to choose a TiVo
-            ChoiceDialog<String> dialog = new ChoiceDialog<String>(all.get(0), all);
-            dialog.setTitle("Copy To");
-            dialog.setHeaderText("Choose which TiVo to copy to");
-            dialog.setContentText("TiVo:");
-            String tivoName = null;
-            Optional<String> result = dialog.showAndWait();
-            if (result.isPresent())
-               tivoName = result.get();
+            String tivoName = (String)JOptionPane.showInputDialog(
+               frame, "Choose which TiVo to copy to", "Copy To",
+               JOptionPane.QUESTION_MESSAGE, null, all.toArray(new String[0]), all.get(0)
+            );
             if (tivoName != null && tivoName.length() > 0) {
                if (tivoName.equals(thisTivo)) {
                   // Don't copy to self unless in loaded state
@@ -206,22 +207,22 @@ public class seasonpasses {
                tab.SPListCopy(tivoName);
             }
          }
-      });         
+      });
 
-      Button delete = new Button("Delete");
-      delete.setTooltip(tooltip.getToolTip("delete_sp"));
-      delete.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      JButton delete = new JButton("Delete");
+      delete.setToolTipText(tooltip.getToolTip("delete_sp"));
+      delete.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             tab.SPListDelete();
          }
-      });         
+      });
 
-      modify = new Button("Modify");
-      modify.setTooltip(tooltip.getToolTip("modify_sp"));
-      modify.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      modify = new JButton("Modify");
+      modify.setToolTipText(tooltip.getToolTip("modify_sp"));
+      modify.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Modify selected SP
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                if (tab.isTableLoaded()) {
                   log.error("Cannot modify loaded Season Passes");
@@ -231,14 +232,14 @@ public class seasonpasses {
                }
             }
          }
-      });         
+      });
 
-      reorder = new Button("Re-order");
-      reorder.setTooltip(tooltip.getToolTip("reorder_sp"));
-      reorder.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      reorder = new JButton("Re-order");
+      reorder.setToolTipText(tooltip.getToolTip("reorder_sp"));
+      reorder.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Re-prioritize SPs on TiVo to match current table row order
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                if (tab.isTableLoaded()) {
                   log.error("Cannot re-order loaded Season Passes");
@@ -248,12 +249,12 @@ public class seasonpasses {
                }
             }
          }
-      });         
+      });
 
-      upcoming = new Button("Upcoming");
-      upcoming.setTooltip(tooltip.getToolTip("upcoming_sp"));
-      upcoming.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      upcoming = new JButton("Upcoming");
+      upcoming.setToolTipText(tooltip.getToolTip("upcoming_sp"));
+      upcoming.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             int selected[] = TableUtil.GetSelectedRows(tab.TABLE);
             if (selected.length > 0) {
                int row = selected[0];
@@ -262,7 +263,7 @@ public class seasonpasses {
                   // Get upcoming SP episodes and display in ToDo table
                   config.gui.remote_gui.todo_tab.tab.clear();
                   config.gui.remote_gui.todo_tab.label.setText("");
-                  String tivoName = tivo.getValue();
+                  String tivoName = (String)tivo.getSelectedItem();
                   try {
                      if (tivoName != null && tivoName.length() > 0) {
                         jobData job = new jobData();
@@ -285,10 +286,10 @@ public class seasonpasses {
          }
       });
 
-      conflicts = new Button("Conflicts");
-      conflicts.setTooltip(tooltip.getToolTip("conflicts_sp"));
-      conflicts.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      conflicts = new JButton("Conflicts");
+      conflicts.setToolTipText(tooltip.getToolTip("conflicts_sp"));
+      conflicts.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             int selected[] = TableUtil.GetSelectedRows(tab.TABLE);
             if (selected.length > 0) {
                int row = selected[0];
@@ -296,7 +297,7 @@ public class seasonpasses {
                if (json.has("__conflicts")) {
                   // Get conflict SP episodes and display in Won't Record table
                   config.gui.remote_gui.cancel_tab.tab.clear();
-                  String tivoName = tivo.getValue();
+                  String tivoName = (String)tivo.getSelectedItem();
                   try {
                      if (tivoName != null && tivoName.length() > 0) {
                         jobData job = new jobData();
@@ -319,28 +320,27 @@ public class seasonpasses {
          }
       });
 
-      row1.getChildren().add(title);
-      row1.getChildren().add(tivo_label);
-      row1.getChildren().add(tivo);
-      row1.getChildren().add(refresh);
-      row1.getChildren().add(save);
-      row1.getChildren().add(load);
-      row1.getChildren().add(export);
-      row1.getChildren().add(delete);
-      row1.getChildren().add(copy);
-      row1.getChildren().add(modify);
-      row1.getChildren().add(reorder);
-      row1.getChildren().add(upcoming);
-      row1.getChildren().add(conflicts);
+      row1.add(title);
+      row1.add(tivo_label);
+      row1.add(tivo);
+      row1.add(refresh);
+      row1.add(save);
+      row1.add(load);
+      row1.add(export);
+      row1.add(delete);
+      row1.add(copy);
+      row1.add(modify);
+      row1.add(reorder);
+      row1.add(upcoming);
+      row1.add(conflicts);
 
       tab = new spTable();
-      VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
 
-      panel = new VBox();
-      panel.setSpacing(1);
-      panel.getChildren().addAll(row1, tab.TABLE);      
+      panel = new JPanel(new BorderLayout());
+      panel.add(row1, BorderLayout.NORTH);
+      panel.add(new JScrollPane(tab.TABLE), BorderLayout.CENTER); // stretch vertically
    }
-   
+
    // Submit remote SP request to Job Monitor
    public void SPListCB(String tivoName) {
       jobData job = new jobData();

@@ -18,38 +18,36 @@
  */
 package com.tivo.kmttg.gui.dialog;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Stack;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import net.miginfocom.swing.MigLayout;
 
 import com.tivo.kmttg.gui.MyTooltip;
-import com.tivo.kmttg.gui.gui;
-import com.tivo.kmttg.gui.remote.util;
+import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.autoTable;
 import com.tivo.kmttg.gui.table.autoTable.Tabentry;
@@ -63,58 +61,57 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class configAuto {
-   private static Stack<TextField> errors = new Stack<TextField>();
-   private static String textbg_default = "";
+   private static Stack<JTextField> errors = new Stack<JTextField>();
    private static double pos_x = -1;
    private static double pos_y = -1;
-   
-   private static Stage dialog = null;
-   private static VBox content = null;
-   private static Button add = null;
-   private static Button del = null;
-   private static Button update = null;
-   private static Label text = null;
+
+   private static JDialog dialog = null;
+   private static JPanel content = null;
+   private static JButton add = null;
+   private static JButton del = null;
+   private static JButton update = null;
+   private static JLabel text = null;
    private static autoTable table = null;
-   private static ScrollPane table_scroll = null;
-   private static ChoiceBox<String> type = null;
-   private static ChoiceBox<String> tivo = null;
-   private static ComboBox<String> encoding_name = null;
-   private static ComboBox<String> encoding_name2 = null;
-   private static TextField encoding_name2_suffix = null;
-   private static CheckBox enabled = null;
-   private static CheckBox TSDownload = null;
-   private static CheckBox metadata = null;
-   private static CheckBox decrypt = null;
-   private static CheckBox qsfix = null;
-   private static CheckBox twpdelete = null;
-   private static CheckBox rpcdelete = null;
-   private static CheckBox comskip = null;
-   private static CheckBox comcut = null;
-   private static CheckBox captions = null;
-   private static CheckBox encode = null;
-   //private static CheckBox push = null;
-   private static CheckBox custom = null;
-   private static CheckBox dry_run = null;
-   private static CheckBox noJobWait = null;
-   private static TextField title = null;
-   private static TextField check_interval = null;
-   private static TextField comskipIni = null;
-   private static TextField channelFilter = null;
-   private static TextField tivoFileNameFormat = null;
-   private static CheckBox dateFilter = null;
-   private static CheckBox suggestionsFilter = null;
-   private static CheckBox suggestionsFilter_single = null;
-   private static CheckBox useProgramId_unique = null;
-   private static CheckBox kuidFilter = null;
-   private static CheckBox programIdFilter = null;
-   private static ChoiceBox<String> dateOperator = null;
-   private static TextField dateHours = null;
-   private static Button OK = null;
-   private static Button CANCEL = null;
-   
+   private static JScrollPane table_scroll = null;
+   private static JComboBox<String> type = null;
+   private static JComboBox<String> tivo = null;
+   private static JComboBox<String> encoding_name = null;
+   private static JComboBox<String> encoding_name2 = null;
+   private static JTextField encoding_name2_suffix = null;
+   private static JCheckBox enabled = null;
+   private static JCheckBox TSDownload = null;
+   private static JCheckBox metadata = null;
+   private static JCheckBox decrypt = null;
+   private static JCheckBox qsfix = null;
+   private static JCheckBox twpdelete = null;
+   private static JCheckBox rpcdelete = null;
+   private static JCheckBox comskip = null;
+   private static JCheckBox comcut = null;
+   private static JCheckBox captions = null;
+   private static JCheckBox encode = null;
+   //private static JCheckBox push = null;
+   private static JCheckBox custom = null;
+   private static JCheckBox dry_run = null;
+   private static JCheckBox noJobWait = null;
+   private static JTextField title = null;
+   private static JTextField check_interval = null;
+   private static JTextField comskipIni = null;
+   private static JTextField channelFilter = null;
+   private static JTextField tivoFileNameFormat = null;
+   private static JCheckBox dateFilter = null;
+   private static JCheckBox suggestionsFilter = null;
+   private static JCheckBox suggestionsFilter_single = null;
+   private static JCheckBox useProgramId_unique = null;
+   private static JCheckBox kuidFilter = null;
+   private static JCheckBox programIdFilter = null;
+   private static JComboBox<String> dateOperator = null;
+   private static JTextField dateHours = null;
+   private static JButton OK = null;
+   private static JButton CANCEL = null;
+
    private static final String _noSecondEncodingTxt = "Do not encode twice";
 
-   public void display(Stage frame) {
+   public void display(JFrame frame) {
       debug.print("frame=" + frame);
       // Create dialog if not already created
       if (dialog == null) {
@@ -122,129 +119,132 @@ public class configAuto {
          // Set component tooltips
          setToolTips();
       }
-      
+
       // Parse auto.ini file to define current configuration
       autoConfig.parseAuto(config.autoIni);
-      
+
       // Clear out any error highlights
       clearTextFieldErrors();
-      
+
       // Update component settings to current configuration
       update();
-      
+
       // Refresh available options based on settings
       refreshOptions();
-      
+
       // Display the dialog
       if (pos_x != -1)
-         dialog.setX(pos_x);
-      if (pos_y != -1)
-         dialog.setY(pos_y);
-      dialog.show();
+         dialog.setLocation((int)pos_x, (int)pos_y);
+      dialog.setVisible(true);
    }
-   
-   public static Stage getDialog() {
+
+   public static JDialog getDialog() {
       return dialog;
    }
-   
-   private void textFieldError(TextField f, String message) {
+
+   private void textFieldError(JTextField f, String message) {
       debug.print("f=" + f + " message=" + message);
       log.error(message);
-      f.setStyle("-fx-background-color: " + config.gui.getWebColor(TableUtil.lightRed));
+      f.setBackground(TableUtil.lightRed);
       errors.add(f);
    }
-   
+
    private void clearTextFieldErrors() {
       debug.print("");
       if (errors.size() > 0) {
          for (int i=0; i<errors.size(); i++) {
-            errors.get(i).setStyle(textbg_default);
+            errors.get(i).setBackground(UIManager.getColor("TextField.background"));
          }
          errors.clear();
       }
    }
-  
-   private void create(Stage frame) {
+
+   private void create(JFrame frame) {
       debug.print("frame=" + frame);
-      
+
       // Create all the components of the dialog
       table = new autoTable();
-      table.TABLE.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tabentry>() {
+      table.TABLE.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
          @Override
-         public void changed(ObservableValue<? extends Tabentry> obs, Tabentry oldSelection, Tabentry newSelection) {
-            if (newSelection != null) {
-               TableRowSelected(newSelection.getType().entry);
+         public void valueChanged(ListSelectionEvent e) {
+            if (e.getValueIsAdjusting())
+               return;
+            int row = table.TABLE.getSelectionModel().getLeadSelectionIndex();
+            if (row >= 0 && row < table.MODEL.size() && table.TABLE.isRowSelected(row)) {
+               Tabentry newSelection = table.MODEL.getRow(row);
+               if (newSelection != null) {
+                  TableRowSelected(newSelection.getType().entry);
+               }
             }
          }
       });
-      table_scroll = new ScrollPane(table.TABLE);
-      table_scroll.setPrefHeight(150);
-      table_scroll.setFitToHeight(true);
-      table_scroll.setFitToWidth(true);
-            
-      text = new Label();
+      table_scroll = new JScrollPane(table.TABLE);
+      table_scroll.setPreferredSize(new java.awt.Dimension(table_scroll.getPreferredSize().width, 150));
+
+      text = new JLabel();
       String message = "for Type=keywords: Multiple keywords are allowed separated by '| character";
       message += "\nkeyword=>AND  (keyword)=>OR  -keyword=>NOT";
       message += "\nEXAMPLE: Type=keywords  keywords=(basketball)|(football)|-new york";
       message += "\n  => football OR basketball NOT new york";
-      text.setText(message);
-      
-      add = new Button("ADD");
-      add.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      text.setText("<html>" + message.replaceAll("\n", "<br>") + "</html>");
+
+      add = new JButton("ADD");
+      add.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             addCB();
          }
       });
 
-      update = new Button("UPDATE");
-      update.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      update = new JButton("UPDATE");
+      update.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             updateCB();
          }
       });
 
-      del = new Button("DEL");
-      del.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      del = new JButton("DEL");
+      del.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             delCB();
          }
       });
 
-      Label type_label = new Label("Type");
-      type = new ChoiceBox<String>();
-      type.getItems().addAll("title", "keywords");
-      type.setValue(type.getItems().get(0));
-      
-      Label tivo_label = new Label("TiVo");
-      tivo = new ChoiceBox<String>();
+      JLabel type_label = new JLabel("Type");
+      type = new JComboBox<String>();
+      type.addItem("title");
+      type.addItem("keywords");
+      type.setSelectedItem(type.getItemAt(0));
+
+      JLabel tivo_label = new JLabel("TiVo");
+      tivo = new JComboBox<String>();
       for (String s : getTivoFilterNames()) {
-         tivo.getItems().add(s);
+         tivo.addItem(s);
       }
-      if (tivo.getItems().size() > 0)
-         tivo.setValue(tivo.getItems().get(0));
-      
-      title = new TextField();
-            
-      enabled    = new CheckBox("enabled"); enabled.setSelected(true);
-      TSDownload = new CheckBox("TS Downloads");
-      metadata   = new CheckBox("metadata");
-      decrypt    = new CheckBox("decrypt");
-      qsfix      = new CheckBox("QS Fix");
-      twpdelete  = new CheckBox("TWP Delete");
-      rpcdelete  = new CheckBox("rpc Delete");
-      comskip    = new CheckBox("Ad Detect");
-      comcut     = new CheckBox("Ad Cut");
-      captions   = new CheckBox("captions");
-      qsfix.setOnAction(new EventHandler<ActionEvent>() {
+      if (tivo.getItemCount() > 0)
+         tivo.setSelectedItem(tivo.getItemAt(0));
+
+      title = new JTextField();
+
+      enabled    = new JCheckBox("enabled"); enabled.setSelected(true);
+      TSDownload = new JCheckBox("TS Downloads");
+      metadata   = new JCheckBox("metadata");
+      decrypt    = new JCheckBox("decrypt");
+      qsfix      = new JCheckBox("QS Fix");
+      twpdelete  = new JCheckBox("TWP Delete");
+      rpcdelete  = new JCheckBox("rpc Delete");
+      comskip    = new JCheckBox("Ad Detect");
+      comcut     = new JCheckBox("Ad Cut");
+      captions   = new JCheckBox("captions");
+      qsfix.addActionListener(new ActionListener() {
          // Call refreshOptions whenever this is toggled
-         public void handle(ActionEvent e) {
+         public void actionPerformed(ActionEvent e) {
             refreshOptions();
          }
       });
-      encode    = new CheckBox("encode");
-      //push      = new CheckBox("push");
-      suggestionsFilter_single = new CheckBox("Filter out TiVo Suggestions");
-      useProgramId_unique = new CheckBox("Treat each recording as unique");
+      encode    = new JCheckBox("encode");
+      //push      = new JCheckBox("push");
+      suggestionsFilter_single = new JCheckBox("Filter out TiVo Suggestions");
+      useProgramId_unique = new JCheckBox("Treat each recording as unique");
       // This intentionally disabled for now
       //encode.addActionListener(new ActionListener() {
       //   public void actionPerformed(ActionEvent e) {
@@ -262,243 +262,234 @@ public class configAuto {
       //      }
       //   }
       //});
-      custom   = new CheckBox("custom");
-      
-      Label comskipIni_label = new Label("comskip.ini override: ");
-      comskipIni = new TextField(); comskipIni.setMinWidth(30);
-      
-      Label channelFilter_label = new Label("channel filter: ");
-      channelFilter = new TextField(); channelFilter.setMinWidth(30);
-      
-      Label tivoFileNameFormat_label = new Label("file name override: ");
-      tivoFileNameFormat = new TextField(); tivoFileNameFormat.setMinWidth(30);
-      
-      Label encoding_name_label = new Label("Encoding Name: ");
-      
-      encoding_name = new ComboBox<String>();
-      encoding_name2 = new ComboBox<String>();
-      encoding_name2_suffix = new TextField(); encoding_name2_suffix.setMinWidth(15);
+      custom   = new JCheckBox("custom");
+
+      JLabel comskipIni_label = new JLabel("comskip.ini override: ");
+      comskipIni = new JTextField(); comskipIni.setMinimumSize(new java.awt.Dimension(30, comskipIni.getPreferredSize().height));
+
+      JLabel channelFilter_label = new JLabel("channel filter: ");
+      channelFilter = new JTextField(); channelFilter.setMinimumSize(new java.awt.Dimension(30, channelFilter.getPreferredSize().height));
+
+      JLabel tivoFileNameFormat_label = new JLabel("file name override: ");
+      tivoFileNameFormat = new JTextField(); tivoFileNameFormat.setMinimumSize(new java.awt.Dimension(30, tivoFileNameFormat.getPreferredSize().height));
+
+      JLabel encoding_name_label = new JLabel("Encoding Name: ");
+
+      encoding_name = new JComboBox<String>();
+      encoding_name2 = new JComboBox<String>();
+      encoding_name2_suffix = new JTextField(); encoding_name2_suffix.setMinimumSize(new java.awt.Dimension(15, encoding_name2_suffix.getPreferredSize().height));
       SetEncodings(encodeConfig.getValidEncodeNames());
-      
-      Label global_settings = new Label("GLOBAL SETTINGS:");
-      
-      Label check_interval_label = new Label("Check Tivos Interval (mins)");
-      
-      check_interval = new TextField(); check_interval.setPrefWidth(50);
+
+      JLabel global_settings = new JLabel("GLOBAL SETTINGS:");
+
+      JLabel check_interval_label = new JLabel("Check Tivos Interval (mins)");
+
+      check_interval = new JTextField(); check_interval.setColumns(5);
       check_interval.setText("" + autoConfig.CHECK_TIVOS_INTERVAL);
-      
-      dry_run = new CheckBox("Dry Run Mode (test keywords only)");
+
+      dry_run = new JCheckBox("Dry Run Mode (test keywords only)");
       dry_run.setSelected((Boolean)(autoConfig.dryrun == 1));
-      
-      noJobWait = new CheckBox("Do not wait for all jobs to finish before processing new ones");
+
+      noJobWait = new JCheckBox("Do not wait for all jobs to finish before processing new ones");
       noJobWait.setSelected((Boolean)(autoConfig.noJobWait == 1));
-      
-      dateFilter = new CheckBox("Date Filter");
-      dateOperator = new ChoiceBox<String>();
-      dateOperator.getItems().add("more than");
-      dateOperator.getItems().add("less than");
-      dateOperator.setValue(dateOperator.getItems().get(0));
-      dateHours = new TextField("48");
-      dateHours.setPrefWidth(50);
-      Label dateHours_label = new Label("hours old");
-      
-      suggestionsFilter = new CheckBox("Filter out TiVo Suggestions");
-      
-      kuidFilter = new CheckBox("Only process KUID recordings");
-      
-      programIdFilter = new CheckBox("Do not process recordings without ProgramId");
-      
-      OK = new Button("OK");
-      OK.setPrefWidth(200);
-      OK.setId("button_autoconfig_ok");
-      OK.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+
+      dateFilter = new JCheckBox("Date Filter");
+      dateOperator = new JComboBox<String>();
+      dateOperator.addItem("more than");
+      dateOperator.addItem("less than");
+      dateOperator.setSelectedItem(dateOperator.getItemAt(0));
+      dateHours = new JTextField("48");
+      dateHours.setColumns(5);
+      JLabel dateHours_label = new JLabel("hours old");
+
+      suggestionsFilter = new JCheckBox("Filter out TiVo Suggestions");
+
+      kuidFilter = new JCheckBox("Only process KUID recordings");
+
+      programIdFilter = new JCheckBox("Do not process recordings without ProgramId");
+
+      OK = new JButton("OK");
+      OK.setName("button_autoconfig_ok");
+      OK.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             okCB();
          }
       });
-      
-      CANCEL = new Button("CANCEL");
-      CANCEL.setPrefWidth(200);
-      CANCEL.setId("button_autoconfig_cancel");
-      CANCEL.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+
+      CANCEL = new JButton("CANCEL");
+      CANCEL.setName("button_autoconfig_cancel");
+      CANCEL.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             pos_x = dialog.getX(); pos_y = dialog.getY();
-            dialog.hide();
+            dialog.setVisible(false);
          }
       });
-      
-      content = new VBox();
-      content.setSpacing(3);
-      content.setPadding(new Insets(5,5,5,5));
-      
+
+      content = new JPanel();
+      content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+      content.setBorder(javax.swing.BorderFactory.createEmptyBorder(5,5,5,5));
+
       // table
-      content.getChildren().add(table_scroll);
+      content.add(table_scroll);
 
       // text pane
-      content.getChildren().add(text);
+      content.add(text);
 
       // row 3 items
-      GridPane row3 = new GridPane();
-      row3.setHgap(5);
-      row3.getColumnConstraints().addAll(
-         util.cc_none(), util.cc_none(), util.cc_none(), util.cc_none(), util.cc_stretch()
-      );
-      row3.add(type_label, 0, 0);
-      row3.add(type, 1, 0);
-      row3.add(tivo_label, 2, 0);
-      row3.add(tivo, 3, 0);
-      row3.add(title, 4, 0);
-      content.getChildren().add(row3);
-      
+      JPanel row3 = new JPanel(new MigLayout("gapx 5", "[][][][][grow]", ""));
+      row3.add(type_label, "cell 0 0");
+      row3.add(type, "cell 1 0");
+      row3.add(tivo_label, "cell 2 0");
+      row3.add(tivo, "cell 3 0");
+      row3.add(title, "cell 4 0, growx");
+      content.add(row3);
+
       // row4
-      HBox row4 = new HBox();
-      row4.setSpacing(5);
-      row4.getChildren().addAll(TSDownload, metadata, decrypt, qsfix);
+      JPanel row4 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      row4.add(TSDownload);
+      row4.add(metadata);
+      row4.add(decrypt);
+      row4.add(qsfix);
       if (config.twpDeleteEnabled()) {
-         row4.getChildren().add(twpdelete);         
+         row4.add(twpdelete);
       }
       if (config.rpcDeleteEnabled()) {
-         row4.getChildren().add(rpcdelete);         
+         row4.add(rpcdelete);
       }
-      row4.getChildren().addAll(comskip, comcut, captions, encode, custom);
-      content.getChildren().add(row4);
-      
-      // row5
-      GridPane row5 = new GridPane();
-      row5.setHgap(5);
-      row5.getColumnConstraints().addAll(
-         util.cc_none(), util.cc_none(), util.cc_stretch()
-      );
-      row5.setAlignment(Pos.CENTER_LEFT);
-      row5.setHgap(5);
-      row5.add(encoding_name, 0, 0);
-      row5.add(encoding_name2, 1, 0);
-      row5.add(encoding_name2_suffix, 2, 0);
-      content.getChildren().add(row5);
-      
-      // Put these items in a grid for better alignment
-      GridPane gp = new GridPane();
-      gp.getColumnConstraints().addAll(util.cc_none(), util.cc_stretch());
-      gp.add(encoding_name_label, 0, 0); gp.add(row5, 1, 0);
-      gp.add(comskipIni_label, 0, 1); gp.add(comskipIni, 1, 1);
-      gp.add(channelFilter_label, 0, 2); gp.add(channelFilter, 1, 2);
-      gp.add(tivoFileNameFormat_label, 0, 3); gp.add(tivoFileNameFormat, 1, 3);
-      content.getChildren().add(gp); 
-            
-      // row_misc
-      HBox row_misc = new HBox();
-      row_misc.setSpacing(5);
-      row_misc.getChildren().addAll(enabled, suggestionsFilter_single, useProgramId_unique);
-      content.getChildren().add(row_misc);
-      
-      // Add, Update, Del
-      HBox buttons = new HBox();
-      buttons.setSpacing(5);
-      buttons.getChildren().addAll(add, update, del);
-      buttons.setAlignment(Pos.CENTER);
-      content.getChildren().add(buttons); 
-            
-      // separator
-      Separator sep = new Separator();
-      sep.setOrientation(Orientation.HORIZONTAL);
-      content.getChildren().add(sep);
-                        
-      // global_settings
-      content.getChildren().add(global_settings);
-      
-      // row_dry_run
-      HBox row_dry_run = new HBox();
-      row_dry_run.setSpacing(10);
-      row_dry_run.getChildren().addAll(dry_run, check_interval_label, check_interval);
-      row_dry_run.setAlignment(Pos.CENTER_LEFT);
-      content.getChildren().add(row_dry_run);
-      
-      // date filter row
-      HBox date = new HBox();
-      date.setAlignment(Pos.CENTER_LEFT);
-      date.setSpacing(5);
-      date.getChildren().addAll(dateFilter, dateOperator, dateHours, dateHours_label);
-      content.getChildren().add(date);
+      row4.add(comskip);
+      row4.add(comcut);
+      row4.add(captions);
+      row4.add(encode);
+      row4.add(custom);
+      content.add(row4);
 
-      HBox filter_panel = new HBox();
-      filter_panel.setSpacing(5);
-      filter_panel.getChildren().addAll(suggestionsFilter, kuidFilter, programIdFilter);
-      filter_panel.setAlignment(Pos.CENTER_LEFT);
-      content.getChildren().add(filter_panel);
-      
+      // row5
+      JPanel row5 = new JPanel(new MigLayout("gapx 5", "[][][grow]", ""));
+      row5.add(encoding_name, "cell 0 0");
+      row5.add(encoding_name2, "cell 1 0");
+      row5.add(encoding_name2_suffix, "cell 2 0, growx");
+      content.add(row5);
+
+      // Put these items in a grid for better alignment
+      JPanel gp = new JPanel(new MigLayout("", "[][grow]", ""));
+      gp.add(encoding_name_label, "cell 0 0"); gp.add(row5, "cell 1 0, growx");
+      gp.add(comskipIni_label, "cell 0 1"); gp.add(comskipIni, "cell 1 1, growx");
+      gp.add(channelFilter_label, "cell 0 2"); gp.add(channelFilter, "cell 1 2, growx");
+      gp.add(tivoFileNameFormat_label, "cell 0 3"); gp.add(tivoFileNameFormat, "cell 1 3, growx");
+      content.add(gp);
+
+      // row_misc
+      JPanel row_misc = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      row_misc.add(enabled);
+      row_misc.add(suggestionsFilter_single);
+      row_misc.add(useProgramId_unique);
+      content.add(row_misc);
+
+      // Add, Update, Del
+      JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+      buttons.add(add);
+      buttons.add(update);
+      buttons.add(del);
+      content.add(buttons);
+
+      // separator
+      JSeparator sep = new JSeparator(JSeparator.HORIZONTAL);
+      content.add(sep);
+
+      // global_settings
+      content.add(global_settings);
+
+      // row_dry_run
+      JPanel row_dry_run = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+      row_dry_run.add(dry_run);
+      row_dry_run.add(check_interval_label);
+      row_dry_run.add(check_interval);
+      content.add(row_dry_run);
+
+      // date filter row
+      JPanel date = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      date.add(dateFilter);
+      date.add(dateOperator);
+      date.add(dateHours);
+      date.add(dateHours_label);
+      content.add(date);
+
+      JPanel filter_panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      filter_panel.add(suggestionsFilter);
+      filter_panel.add(kuidFilter);
+      filter_panel.add(programIdFilter);
+      content.add(filter_panel);
+
       // noJobWait
-      content.getChildren().add(noJobWait);
-            
+      content.add(noJobWait);
+
       // OK & CANCEL
-      HBox last = new HBox();
-      last.setSpacing(50);
-      last.setAlignment(Pos.CENTER);
-      last.getChildren().addAll(OK, CANCEL);
-      content.getChildren().add(last);
-                 
+      JPanel last = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 0));
+      last.add(OK);
+      last.add(CANCEL);
+      content.add(last);
+
       // create dialog window
-      dialog = new Stage();
-      dialog.setOnCloseRequest(new EventHandler<WindowEvent>() {
+      dialog = new JDialog(frame);
+      dialog.addWindowListener(new WindowAdapter() {
          @Override
-         public void handle(WindowEvent arg0) {
+         public void windowClosing(WindowEvent arg0) {
             pos_x = dialog.getX(); pos_y = dialog.getY();
          }
       });
-      dialog.initOwner(frame);
-      gui.LoadIcons(dialog);
-      dialog.initModality(Modality.NONE);
+      SwingUtil.loadIcons(dialog);
       dialog.setTitle("kmttg auto transfers configuration");
-      Scene scene = new Scene(new VBox());
-      config.gui.addScene(scene);
-      config.gui.setFontSize(scene, config.FontSize);
-      ((VBox) scene.getRoot()).getChildren().add(content);
-      dialog.setScene(scene);
+      JPanel root = new JPanel(new BorderLayout());
+      root.add(content, BorderLayout.CENTER);
+      dialog.getContentPane().add(root);
+      dialog.pack();
+      dialog.setLocationRelativeTo(frame);
    }
-   
+
    // Component tooltip setup
    public void setToolTips() {
-      enabled.setTooltip(getToolTip("enabled"));
-      TSDownload.setTooltip(config.gui.getToolTip("TSDownload"));
-      metadata.setTooltip(config.gui.getToolTip("metadata"));
-      decrypt.setTooltip(config.gui.getToolTip("decrypt"));
-      qsfix.setTooltip(config.gui.getToolTip("qsfix"));
-      twpdelete.setTooltip(config.gui.getToolTip("twpdelete"));
-      rpcdelete.setTooltip(config.gui.getToolTip("rpcdelete"));
-      comskip.setTooltip(config.gui.getToolTip("comskip"));
-      comcut.setTooltip(config.gui.getToolTip("comcut"));
-      captions.setTooltip(config.gui.getToolTip("captions"));
-      encode.setTooltip(config.gui.getToolTip("encode"));
-      //push.setTooltip(config.gui.getToolTip("push"));
-      custom.setTooltip(config.gui.getToolTip("custom"));
-      encoding_name.setTooltip(config.gui.getToolTip("encoding"));
-      encoding_name2.setTooltip(config.gui.getToolTip("encoding2"));
-      encoding_name2_suffix.setTooltip(config.gui.getToolTip("encoding2_suffix"));
-      table.TABLE.setTooltip(getToolTip("table"));
-      type.setTooltip(getToolTip("type"));
-      tivo.setTooltip(getToolTip("tivo"));
-      dry_run.setTooltip(getToolTip("dry_run"));
-      noJobWait.setTooltip(getToolTip("noJobWait"));
-      title.setTooltip(getToolTip("title"));
-      comskipIni.setTooltip(getToolTip("comskipIni"));
-      channelFilter.setTooltip(getToolTip("channelFilter"));
-      tivoFileNameFormat.setTooltip(getToolTip("tivoFileNameFormat"));
-      check_interval.setTooltip(getToolTip("check_interval"));
-      add.setTooltip(getToolTip("add"));
-      update.setTooltip(getToolTip("update"));
-      del.setTooltip(getToolTip("del"));      
-      dateFilter.setTooltip(getToolTip("dateFilter"));
-      suggestionsFilter.setTooltip(getToolTip("suggestionsFilter"));
-      suggestionsFilter_single.setTooltip(getToolTip("suggestionsFilter_single"));
-      useProgramId_unique.setTooltip(getToolTip("useProgramId_unique"));
-      kuidFilter.setTooltip(getToolTip("kuidFilter"));
-      programIdFilter.setTooltip(getToolTip("programIdFilter"));
-      dateOperator.setTooltip(getToolTip("dateOperator"));
-      dateHours.setTooltip(getToolTip("dateHours"));
-      OK.setTooltip(getToolTip("OK"));
-      CANCEL.setTooltip(getToolTip("CANCEL"));      
+      enabled.setToolTipText(getToolTip("enabled"));
+      TSDownload.setToolTipText(config.gui.getToolTip("TSDownload"));
+      metadata.setToolTipText(config.gui.getToolTip("metadata"));
+      decrypt.setToolTipText(config.gui.getToolTip("decrypt"));
+      qsfix.setToolTipText(config.gui.getToolTip("qsfix"));
+      twpdelete.setToolTipText(config.gui.getToolTip("twpdelete"));
+      rpcdelete.setToolTipText(config.gui.getToolTip("rpcdelete"));
+      comskip.setToolTipText(config.gui.getToolTip("comskip"));
+      comcut.setToolTipText(config.gui.getToolTip("comcut"));
+      captions.setToolTipText(config.gui.getToolTip("captions"));
+      encode.setToolTipText(config.gui.getToolTip("encode"));
+      //push.setToolTipText(config.gui.getToolTip("push"));
+      custom.setToolTipText(config.gui.getToolTip("custom"));
+      encoding_name.setToolTipText(config.gui.getToolTip("encoding"));
+      encoding_name2.setToolTipText(config.gui.getToolTip("encoding2"));
+      encoding_name2_suffix.setToolTipText(config.gui.getToolTip("encoding2_suffix"));
+      table.TABLE.setToolTipText(getToolTip("table"));
+      type.setToolTipText(getToolTip("type"));
+      tivo.setToolTipText(getToolTip("tivo"));
+      dry_run.setToolTipText(getToolTip("dry_run"));
+      noJobWait.setToolTipText(getToolTip("noJobWait"));
+      title.setToolTipText(getToolTip("title"));
+      comskipIni.setToolTipText(getToolTip("comskipIni"));
+      channelFilter.setToolTipText(getToolTip("channelFilter"));
+      tivoFileNameFormat.setToolTipText(getToolTip("tivoFileNameFormat"));
+      check_interval.setToolTipText(getToolTip("check_interval"));
+      add.setToolTipText(getToolTip("add"));
+      update.setToolTipText(getToolTip("update"));
+      del.setToolTipText(getToolTip("del"));
+      dateFilter.setToolTipText(getToolTip("dateFilter"));
+      suggestionsFilter.setToolTipText(getToolTip("suggestionsFilter"));
+      suggestionsFilter_single.setToolTipText(getToolTip("suggestionsFilter_single"));
+      useProgramId_unique.setToolTipText(getToolTip("useProgramId_unique"));
+      kuidFilter.setToolTipText(getToolTip("kuidFilter"));
+      programIdFilter.setToolTipText(getToolTip("programIdFilter"));
+      dateOperator.setToolTipText(getToolTip("dateOperator"));
+      dateHours.setToolTipText(getToolTip("dateHours"));
+      OK.setToolTipText(getToolTip("OK"));
+      CANCEL.setToolTipText(getToolTip("CANCEL"));
    }
-   
-   public Tooltip getToolTip(String component) {
+
+   public String getToolTip(String component) {
       String text = "";
       if (component.equals("table")) {
          text =  "<b>auto transfers entries</b><br>";
@@ -655,17 +646,17 @@ public class configAuto {
       }
       return MyTooltip.make(text);
    }
-   
+
    private void setTivoFilterNames() {
-      tivo.getItems().clear();
+      tivo.removeAllItems();
       String[] names = getTivoFilterNames();
       for (int i=0; i<names.length; ++i) {
-         tivo.getItems().add(names[i]);
+         tivo.addItem(names[i]);
       }
-      if (tivo.getItems().size() > 0)
-         tivo.setValue(tivo.getItems().get(0));
+      if (tivo.getItemCount() > 0)
+         tivo.setSelectedItem(tivo.getItemAt(0));
    }
-   
+
    // Defines choices for tivo name filtering
    private String[] getTivoFilterNames() {
       Stack<String> names = config.getNplTivoNames();
@@ -689,96 +680,96 @@ public class configAuto {
       }
       return "all";
    }
-   
+
    // This will decide which options are enabled based on current config settings
    // Options are disabled when associated config entry is not setup
    public void refreshOptions() {
       if (config.VRD == 0 && ! file.isFile(config.ffmpeg)) {
          qsfix.setSelected(false);
-         qsfix.setDisable(true);
+         qsfix.setEnabled(false);
       } else {
-         qsfix.setDisable(false);
+         qsfix.setEnabled(true);
       }
-      
+
       if (!config.twpDeleteEnabled()) {
          twpdelete.setSelected(false);
-         twpdelete.setDisable(true);
+         twpdelete.setEnabled(false);
       } else {
-         twpdelete.setDisable(false);
+         twpdelete.setEnabled(true);
       }
-      
+
       if ( ! config.rpcDeleteEnabled() ) {
          rpcdelete.setSelected(false);
-         rpcdelete.setDisable(true);
+         rpcdelete.setEnabled(false);
       } else {
-         rpcdelete.setDisable(false);
+         rpcdelete.setEnabled(true);
       }
 
       if (! file.isFile(config.comskip)) {
          comskip.setSelected(false);
-         comskip.setDisable(true);
+         comskip.setEnabled(false);
       } else {
-         comskip.setDisable(false);
+         comskip.setEnabled(true);
       }
 
       if (config.VRD == 0 && ! file.isFile(config.ffmpeg)) {
          comcut.setSelected(false);
-         comcut.setDisable(true);
+         comcut.setEnabled(false);
       } else {
-         comcut.setDisable(false);
+         comcut.setEnabled(true);
       }
 
       if (! file.isFile(config.t2extract) && ! file.isFile(config.ccextractor)) {
          captions.setSelected(false);
-         captions.setDisable(true);
+         captions.setEnabled(false);
       } else {
-         captions.setDisable(false);
+         captions.setEnabled(true);
       }
       if (config.VRD == 0 && qsfix.isSelected()) {
          captions.setSelected(false);
-         captions.setDisable(true);         
+         captions.setEnabled(false);
       }
 
       if (! file.isFile(config.ffmpeg) &&
           ! file.isFile(config.mencoder) &&
           ! file.isFile(config.handbrake) ) {
          encode.setSelected(false);
-         encode.setDisable(true);
+         encode.setEnabled(false);
       } else {
-         encode.setDisable(false);
+         encode.setEnabled(true);
       }
 
       /*if ( ! file.isFile(config.pyTivo_config) ) {
          push.setSelected(false);
-         push.setDisable(true);
+         push.setEnabled(false);
       } else {
-         push.setDisable(false);
+         push.setEnabled(true);
       }*/
-      
+
       if ( ! com.tivo.kmttg.task.custom.customCommandExists() ) {
          custom.setSelected(false);
-         custom.setDisable(true);
+         custom.setEnabled(false);
       } else {
-         custom.setDisable(false);
+         custom.setEnabled(true);
       }
-      
+
    }
-   
+
    public void clearTable() {
       debug.print("");
       table.clear();
    }
-   
+
    public void addTableRow(autoEntry entry) {
       debug.print("entry=" + entry);
       table.AddRow(entry);
    }
-   
+
    public void removeTableRow(int row) {
       debug.print("row=" + row);
       table.RemoveRow(row);
    }
-  
+
    public int[] getTableSelectedRows() {
       debug.print("");
       int[] rows = table.getSelectedRows();
@@ -786,48 +777,48 @@ public class configAuto {
          log.error("No rows selected");
       return rows;
    }
-     
+
    // Return autoEntry instance of selected entry
    public autoEntry GetRowData(int row) {
       return table.GetRowData(row);
    }
-   
+
    // Update dialog settings based on autoConfig current settings
    public void update() {
       SetKeywords(autoConfig.KEYWORDS);
       SetEncodings(encodeConfig.getValidEncodeNames());
       setTivoFilterNames();
-      check_interval.setText("" + autoConfig.CHECK_TIVOS_INTERVAL);      
+      check_interval.setText("" + autoConfig.CHECK_TIVOS_INTERVAL);
       dry_run.setSelected((Boolean)(autoConfig.dryrun == 1));
       noJobWait.setSelected((Boolean)(autoConfig.noJobWait == 1));
       dateFilter.setSelected((Boolean)(autoConfig.dateFilter == 1));
-      dateOperator.setValue(autoConfig.dateOperator);
+      dateOperator.setSelectedItem(autoConfig.dateOperator);
       dateHours.setText("" + autoConfig.dateHours);
       suggestionsFilter.setSelected((Boolean)(autoConfig.suggestionsFilter == 1));
       kuidFilter.setSelected((Boolean)(autoConfig.kuidFilter == 1));
       programIdFilter.setSelected((Boolean)(autoConfig.programIdFilter == 1));
    }
-   
+
    // Set encoding_name ComboBox choices
    public void SetEncodings(Stack<String> values) {
       debug.print("values=" + values);
-      
-      encoding_name.getItems().clear();
-      encoding_name2.getItems().clear();
-      
+
+      encoding_name.removeAllItems();
+      encoding_name2.removeAllItems();
+
       // Second encoding optional
-      encoding_name2.getItems().add(_noSecondEncodingTxt);
-      
+      encoding_name2.addItem(_noSecondEncodingTxt);
+
       for (int i=0; i<values.size(); ++i) {
-         encoding_name.getItems().add(values.get(i));
-         encoding_name2.getItems().add(values.get(i));
+         encoding_name.addItem(values.get(i));
+         encoding_name2.addItem(values.get(i));
       }
-      if (encoding_name.getItems().size() > 0)
-         encoding_name.setValue(encoding_name.getItems().get(0));
-      if (encoding_name2.getItems().size() > 0)
-         encoding_name2.setValue(encoding_name2.getItems().get(0));      
+      if (encoding_name.getItemCount() > 0)
+         encoding_name.setSelectedItem(encoding_name.getItemAt(0));
+      if (encoding_name2.getItemCount() > 0)
+         encoding_name2.setSelectedItem(encoding_name2.getItemAt(0));
    }
-   
+
    // Set table entries according to auto config setup
    public void SetKeywords(Stack<autoEntry> entries) {
       debug.print("entries=" + entries);
@@ -837,23 +828,23 @@ public class configAuto {
             addTableRow(entries.get(i));
          }
       }
-   }   
-   
+   }
+
    // Callback for ADD button
    // Add type & keywords as a table entry
    private void addCB() {
       debug.print("");
-      String ktype = type.getValue();
+      String ktype = (String)type.getSelectedItem();
       String keywords = string.removeLeadingTrailingSpaces(title.getText());
       if (keywords.length() == 0) {
          log.error("No keywords specified");
          return;
       }
-      
+
       // Make sure this is not a duplicate entry
       Boolean duplicate = false;
-      if (table.TABLE.getItems().size() > 0) {
-         for (int i=0; i<table.TABLE.getItems().size(); ++i) {
+      if (table.MODEL.size() > 0) {
+         for (int i=0; i<table.MODEL.size(); ++i) {
             autoEntry check = GetRowData(i);
             if (check.type.equals(ktype)) {
                if (check.type.equals("title")) {
@@ -863,20 +854,20 @@ public class configAuto {
                }
             }
          }
-      }      
+      }
       if (duplicate) {
          log.error("Duplicate entry, not adding");
          return;
       }
-      
+
       autoEntry entry = new autoEntry();
       // Set entry settings based on dialog settings
       guiToEntry(entry);
-      
+
       // Add a new table row
       addTableRow(entry);
    }
-   
+
    // Callback for UPDATE button
    // Update selected table entry with dialog settings
    private void updateCB() {
@@ -886,25 +877,25 @@ public class configAuto {
          log.error("No table row selected");
          return;
       }
-   
+
       int row = rows[0]; // Process top most row
       autoEntry entry = GetRowData(row);
-      
+
       // Update entry settings
       guiToEntry(entry);
-      
+
       // Update table settings
-      Tabentry e = table.TABLE.getItems().get(row);
-      e.type = new autoTableEntry(entry);      
+      Tabentry e = table.MODEL.getRow(row);
+      e.type = new autoTableEntry(entry);
       if (entry.type.equals("title"))
          e.keywords = entry.keyword;
       else
          e.keywords = autoConfig.keywordsToString(entry.keywords);
-      
+
       table.resize();
       log.warn("Updated auto transfers entry # " + (row+1));
    }
-   
+
    // Callback for DEL button
    // Remove selected table entries
    private void delCB() {
@@ -912,9 +903,9 @@ public class configAuto {
       int[] rows = getTableSelectedRows();
       for (int i=rows.length-1; i>-1; --i) {
          removeTableRow(rows[i]);
-      }      
+      }
    }
-   
+
    // Callback for OK button
    // Save table settings to auto.ini and hide the dialog
    private void okCB() {
@@ -929,7 +920,7 @@ public class configAuto {
          textFieldError(check_interval, "check interval should be an integer: '" + value + "'");
          return;
       }
-      
+
       float hours = 48;
       value = string.removeLeadingTrailingSpaces(dateHours.getText());
       try {
@@ -938,7 +929,7 @@ public class configAuto {
          textFieldError(check_interval, "Date Filter hours should be of type float: '" + value + "'");
          return;
       }
-      
+
       // Write to file
       try {
          BufferedWriter ofp = new BufferedWriter(new FileWriter(config.autoIni));
@@ -959,7 +950,7 @@ public class configAuto {
             ofp.write("1\n\n");
          else
             ofp.write("0\n\n");
-         ofp.write("<dateOperator>\n" + dateOperator.getValue() + "\n\n");
+         ofp.write("<dateOperator>\n" + dateOperator.getSelectedItem() + "\n\n");
          ofp.write("<dateHours>\n" + hours + "\n\n");
          ofp.write("<suggestionsFilter>\n");
          if (suggestionsFilter.isSelected())
@@ -976,8 +967,8 @@ public class configAuto {
             ofp.write("1\n\n");
          else
             ofp.write("0\n\n");
-         
-         int rows = table.TABLE.getItems().size();
+
+         int rows = table.MODEL.size();
          if (rows > 0) {
             autoEntry entry;
             for (int i=0; i<rows; ++i) {
@@ -998,15 +989,15 @@ public class configAuto {
                ofp.write("<options>\n");
                ofp.write("enabled "             + entry.enabled             + "\n");
                ofp.write("tivo "                + entry.tivo                + "\n");
-               ofp.write("TSDownload "          + entry.TSDownload          + "\n");               
-               ofp.write("metadata "            + entry.metadata            + "\n");               
-               ofp.write("decrypt "             + entry.decrypt             + "\n");               
-               ofp.write("qsfix "               + entry.qsfix               + "\n");               
-               ofp.write("twpdelete "           + entry.twpdelete           + "\n");               
-               ofp.write("rpcdelete "          + entry.rpcdelete          + "\n");               
-               ofp.write("comskip "             + entry.comskip             + "\n");               
-               ofp.write("comcut "              + entry.comcut              + "\n");               
-               ofp.write("captions "            + entry.captions            + "\n");               
+               ofp.write("TSDownload "          + entry.TSDownload          + "\n");
+               ofp.write("metadata "            + entry.metadata            + "\n");
+               ofp.write("decrypt "             + entry.decrypt             + "\n");
+               ofp.write("qsfix "               + entry.qsfix               + "\n");
+               ofp.write("twpdelete "           + entry.twpdelete           + "\n");
+               ofp.write("rpcdelete "          + entry.rpcdelete          + "\n");
+               ofp.write("comskip "             + entry.comskip             + "\n");
+               ofp.write("comcut "              + entry.comcut              + "\n");
+               ofp.write("captions "            + entry.captions            + "\n");
                ofp.write("encode "              + entry.encode              + "\n");
                //ofp.write("push "                + entry.push                + "\n");
                ofp.write("custom "              + entry.custom              + "\n");
@@ -1028,24 +1019,24 @@ public class configAuto {
                   ofp.write("comskipIni " + "none" + "\n");
             }
          }
-         
+
          ofp.close();
       } catch (IOException ex) {
          log.error("Cannot write to auto config file: " + config.autoIni);
          log.error(ex.toString());
          return;
-      } 
-      
+      }
+
       log.warn("Auto config settings saved");
-      
+
       // Close dialog
       pos_x = dialog.getX(); pos_y = dialog.getY();
-      dialog.hide();
-      
-      // Update autoConfig settings      
+      dialog.setVisible(false);
+
+      // Update autoConfig settings
       autoConfig.parseAuto(config.autoIni);
    }
-   
+
    // Callback when user clicks on a table row
    // This will update component settings according to selected row data
    private void TableRowSelected(autoEntry entry) {
@@ -1064,130 +1055,130 @@ public class configAuto {
       custom.setSelected((Boolean)(entry.custom == 1));
       suggestionsFilter_single.setSelected((Boolean)(entry.suggestionsFilter == 1));
       useProgramId_unique.setSelected((Boolean)(entry.useProgramId_unique == 1));
-      
-      encoding_name.setValue(entry.encode_name);
-      
+
+      encoding_name.setSelectedItem(entry.encode_name);
+
       if (entry.encode_name2 != null) {
-    	  encoding_name2.setValue(entry.encode_name2);
+    	  encoding_name2.setSelectedItem(entry.encode_name2);
     	  encoding_name2_suffix.setText(entry.encode_name2_suffix);
       } else
-    	  encoding_name2.setValue(_noSecondEncodingTxt);
-      
+    	  encoding_name2.setSelectedItem(_noSecondEncodingTxt);
+
       comskipIni.setText(entry.comskipIni);
-      
+
       if (entry.channelFilter != null)
          channelFilter.setText(entry.channelFilter);
       else
          channelFilter.setText("");
-      
+
       if (entry.tivoFileNameFormat != null)
          tivoFileNameFormat.setText(entry.tivoFileNameFormat);
       else
          tivoFileNameFormat.setText("");
-      
-      type.setValue(entry.type);
-      
+
+      type.setSelectedItem(entry.type);
+
       entry.tivo = validateTivoName(entry.tivo);
-      tivo.setValue(entry.tivo);
-      
+      tivo.setSelectedItem(entry.tivo);
+
       if (entry.type.equals("title")) {
          title.setText(entry.keyword);
       } else {
          title.setText(autoConfig.keywordsToString(entry.keywords));
       }
    }
-   
+
    private Boolean guiToEntry(autoEntry entry) {
-      String ktype = type.getValue();
-      String ktivo = tivo.getValue();
+      String ktype = (String)type.getSelectedItem();
+      String ktivo = (String)tivo.getSelectedItem();
       String keywords = string.removeLeadingTrailingSpaces(title.getText());
       if (keywords.length() == 0) {
          log.error("No keywords specified");
          return false;
       }
-      
+
       if (enabled.isSelected())
          entry.enabled = 1;
       else
          entry.enabled = 0;
-      
+
       if (TSDownload.isSelected())
          entry.TSDownload = 1;
       else
          entry.TSDownload = 0;
-      
+
       if (metadata.isSelected())
          entry.metadata = 1;
       else
          entry.metadata = 0;
-      
+
       if (decrypt.isSelected())
          entry.decrypt = 1;
       else
          entry.decrypt = 0;
-      
+
       if (qsfix.isSelected())
          entry.qsfix = 1;
       else
          entry.qsfix = 0;
-      
+
       if (twpdelete.isSelected())
          entry.twpdelete = 1;
       else
          entry.twpdelete = 0;
-      
+
       if (rpcdelete.isSelected())
          entry.rpcdelete = 1;
       else
          entry.rpcdelete = 0;
-      
+
       if (comskip.isSelected())
          entry.comskip = 1;
       else
          entry.comskip = 0;
-      
+
       if (comcut.isSelected())
          entry.comcut = 1;
       else
          entry.comcut = 0;
-      
+
       if (captions.isSelected())
          entry.captions = 1;
       else
          entry.captions = 0;
-      
+
       if (encode.isSelected())
          entry.encode = 1;
       else
          entry.encode = 0;
-      
+
       /*if (push.isSelected())
          entry.push = 1;
       else
          entry.push = 0;*/
-      
+
       if (custom.isSelected())
          entry.custom = 1;
       else
          entry.custom = 0;
-      
+
       if (suggestionsFilter_single.isSelected())
          entry.suggestionsFilter = 1;
       else
          entry.suggestionsFilter = 0;
-      
+
       if (useProgramId_unique.isSelected())
          entry.useProgramId_unique = 1;
       else
          entry.useProgramId_unique = 0;
-      
-      entry.encode_name = encoding_name.getValue();
-      
+
+      entry.encode_name = (String)encoding_name.getSelectedItem();
+
       // Does user want to encode second time? save profile name
-      if (encoding_name2.getValue().equals(_noSecondEncodingTxt))
+      if (encoding_name2.getSelectedItem().equals(_noSecondEncodingTxt))
     	  entry.encode_name2 = null;
       else {
-    	  entry.encode_name2 = encoding_name2.getValue();
+    	  entry.encode_name2 = (String)encoding_name2.getSelectedItem();
     	  entry.encode_name2_suffix = encoding_name2_suffix.getText();
       }
 
@@ -1198,29 +1189,29 @@ public class configAuto {
          }
       }
       entry.comskipIni = ini;
-      
+
       String cFilter = (String)string.removeLeadingTrailingSpaces(channelFilter.getText());
       if (cFilter.length() > 0)
          entry.channelFilter = cFilter;
       else
          entry.channelFilter = null;
-      
+
       cFilter = (String)string.removeLeadingTrailingSpaces(tivoFileNameFormat.getText());
       if (cFilter.length() > 0)
          entry.tivoFileNameFormat = cFilter;
       else
          entry.tivoFileNameFormat = null;
-      
+
       entry.type = ktype;
-      
+
       entry.tivo = ktivo;
-      
+
       if (ktype.equals("title")) {
          entry.keyword = keywords;
       } else {
          autoConfig.stringToKeywords(keywords, entry);
       }
-      
+
       return true;
 
    }

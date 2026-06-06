@@ -18,48 +18,41 @@
  */
 package com.tivo.kmttg.gui.dialog;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Stack;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Tooltip;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+
+import net.miginfocom.swing.MigLayout;
 
 import com.tivo.kmttg.gui.MyTooltip;
-import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.help;
-import com.tivo.kmttg.gui.remote.util;
+import com.tivo.kmttg.gui.swing.SwingUtil;
+import com.tivo.kmttg.gui.swing.Theme;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.httpserver.kmttgServer;
 import com.tivo.kmttg.main.beacon;
@@ -67,7 +60,6 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.main.mdns;
-import com.tivo.kmttg.rpc.GetDomainToken;
 import com.tivo.kmttg.task.autotune;
 import com.tivo.kmttg.task.custom;
 import com.tivo.kmttg.util.debug;
@@ -76,145 +68,145 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.string;
 
 public class configMain {
-   private static Stack<TextField> errors = new Stack<TextField>();
-   private static String textbg_default = null;
+   private static Stack<JTextField> errors = new Stack<JTextField>();
+   private static Color textbg_default = null;
    private static double pos_x = -1;
    private static double pos_y = -1;
-   
-   private static Button add = null;
-   private static Button del = null;
-   private static Button domain_token = null;
-   private static Button share_add = null;
-   private static Button share_del = null;
-   private static Button OK = null;
-   private static Button CANCEL = null;
-   private static Button autotune_test = null;
-   private static Stage dialog = null;
-   private static ChoiceBox<String> tivos = null;
-   private static ChoiceBox<String> shares = null;
-   private static CheckBox remove_tivo = null;
-   private static CheckBox remove_comcut = null;
-   private static CheckBox remove_comcut_mpeg = null;
-   private static CheckBox remove_mpeg = null;
-   private static CheckBox QSFixBackupMpegFile = null;
-   private static CheckBox download_check_length = null;
-   private static CheckBox check_space = null;
-   private static CheckBox beacon = null;
-   private static CheckBox npl_when_started = null;
-   private static CheckBox showHistoryInTable = null;
-   private static CheckBox UseOldBeacon = null;
-   private static CheckBox download_time_estimate = null;
-   private static CheckBox UseAdscan = null;
-   private static CheckBox VRD = null;
-   private static CheckBox VrdReview = null;
-   private static CheckBox comskip_review = null;
-   private static CheckBox VrdReview_noCuts = null;
-   private static CheckBox VrdQsFilter = null;
-   private static CheckBox VrdDecrypt = null;
-   private static CheckBox DsdDecrypt = null;
-   private static CheckBox tivolibreDecrypt = null;
-   private static CheckBox tivolibreCompat = null;
-   private static CheckBox httpserver_enable = null;
-   private static CheckBox httpserver_share_filter = null;
-   private static CheckBox VrdEncode = null;
-   private static CheckBox VrdAllowMultiple = null;
-   private static CheckBox VrdCombineCutEncode = null;
-   private static CheckBox VrdQsfixMpeg2ps = null;
-   private static CheckBox VrdOneAtATime = null;
-   private static CheckBox TivoWebPlusDelete = null;
-   private static CheckBox rpcDelete = null;
-   private static CheckBox rpcOld = null;
-   private static CheckBox HideProtectedFiles = null;
-   private static CheckBox TiVoSort = null;
-   private static CheckBox OverwriteFiles = null;
-   private static CheckBox DeleteFailedDownloads = null;
-   private static CheckBox toolTips = null;
-   private static CheckBox slingBox = null;
-   private static CheckBox tableColAutoSize = null;
-   private static CheckBox jobMonitorFullPaths = null;
-   private static CheckBox autotune_enabled = null;
-   private static CheckBox autoskip_enabled = null;
-   private static CheckBox autoskip_import = null;
-   private static CheckBox autoskip_cutonly = null;
-   private static CheckBox autoskip_prune = null;
-   private static CheckBox autoskip_batch_standby = null;
-   private static CheckBox autoskip_indicate_skip = null;
-   private static CheckBox autoskip_jumpToEnd = null;
-   private static CheckBox combine_download_decrypt = null;
-   private static CheckBox single_download = null;
-   private static CheckBox rpcnpl = null;
-   private static CheckBox enableRpc = null;
-   private static CheckBox persistQueue = null;
-   private static TextField VRDexe = null;
-   private static TextField tivo_name = null;
-   private static TextField tivo_ip = null;
-   private static TextField share_name = null;
-   private static TextField share_dir = null;
-   private static TextField files_path = null;
-   private static TextField MAK = null;
-   private static TextField FontSize = null;
-   private static TextField file_naming = null;
-   private static TextField tivo_output_dir = null;
-   private static TextField mpeg_output_dir = null;
-   private static TextField qsfixDir = null;
-   private static TextField mpeg_cut_dir = null;
-   private static TextField encode_output_dir = null;
-   private static TextField tivodecode = null;
-   private static TextField dsd = null;
-   private static TextField ffmpeg = null;
-   private static TextField mediainfo = null;
-   private static TextField mencoder = null;
-   private static TextField handbrake = null;
-   private static TextField comskip = null;
-   private static TextField comskip_ini = null;
-   private static TextField wan_http_port = null;
-   private static TextField wan_https_port = null;
-   private static TextField wan_rpc_port = null;
-   private static TextField limit_npl_fetches = null;
-   private static TextField active_job_limit = null;
-   private static TextField t2extract = null;
-   //private static TextField t2extract_args = null;
-   private static TextField ccextractor = null;
-   private static TextField AtomicParsley = null;
-   private static TextField disk_space = null;
-   private static TextField customCommand = null;
-   private static TextField toolTipsDelay = null;
-   private static TextField toolTipsTimeout = null;
-   private static TextField cpu_cores = null;
-   private static TextField download_tries = null;
-   private static TextField download_retry_delay = null;
-   private static TextField download_delay = null;
-   private static TextField autoskip_padding_start = null;
-   private static TextField autoskip_padding_stop = null;
-   private static TextField autoskip_chan_off = null;
-   private static TextField autoskip_chan_on = null;
-   private static TextField metadata_entries = null;
-   private static TextField httpserver_port = null;
-   private static TextField httpserver_cache = null;
-   private static TextField autoLogSizeMB = null;
-   //private static TextField pyTivo_host = null;
-   private static TextField web_query = null;
-   private static TextField web_browser = null;
-   private static TextField tivo_username = null;
-   private static TextField tivo_password = null;
-   //private static TextField pyTivo_config = null;
-   private static TextField autotune_channel_interval = null;
-   private static TextField autotune_button_interval = null;
-   private static TextField autotune_chan1 = null;
-   private static TextField autotune_chan2 = null;
-   private static ChoiceBox<String> MinChanDigits = null;
-   //private static ChoiceBox<String> pyTivo_tivo = null;
-   //private static ChoiceBox<String> pyTivo_files = null;
-   private static ChoiceBox<String> metadata_files = null;
-   private static ChoiceBox<String> keywords = null;
-   private static ChoiceBox<String> customFiles = null;
-   private static ChoiceBox<String> autotune_tivoName = null;
-   private static ChoiceBox<String> lookAndFeel = null;
-   private static FileChooser FileBrowser = null;
-   private static DirectoryChooser DirBrowser = null;
-   private static TabPane tabbed_panel = null;
-      
-   public static void display(Stage frame) {
+
+   private static JButton add = null;
+   private static JButton del = null;
+   private static JButton domain_token = null;
+   private static JButton share_add = null;
+   private static JButton share_del = null;
+   private static JButton OK = null;
+   private static JButton CANCEL = null;
+   private static JButton autotune_test = null;
+   private static JDialog dialog = null;
+   private static JComboBox<String> tivos = null;
+   private static JComboBox<String> shares = null;
+   private static JCheckBox remove_tivo = null;
+   private static JCheckBox remove_comcut = null;
+   private static JCheckBox remove_comcut_mpeg = null;
+   private static JCheckBox remove_mpeg = null;
+   private static JCheckBox QSFixBackupMpegFile = null;
+   private static JCheckBox download_check_length = null;
+   private static JCheckBox check_space = null;
+   private static JCheckBox beacon = null;
+   private static JCheckBox npl_when_started = null;
+   private static JCheckBox showHistoryInTable = null;
+   private static JCheckBox UseOldBeacon = null;
+   private static JCheckBox download_time_estimate = null;
+   private static JCheckBox UseAdscan = null;
+   private static JCheckBox VRD = null;
+   private static JCheckBox VrdReview = null;
+   private static JCheckBox comskip_review = null;
+   private static JCheckBox VrdReview_noCuts = null;
+   private static JCheckBox VrdQsFilter = null;
+   private static JCheckBox VrdDecrypt = null;
+   private static JCheckBox DsdDecrypt = null;
+   private static JCheckBox tivolibreDecrypt = null;
+   private static JCheckBox tivolibreCompat = null;
+   private static JCheckBox httpserver_enable = null;
+   private static JCheckBox httpserver_share_filter = null;
+   private static JCheckBox VrdEncode = null;
+   private static JCheckBox VrdAllowMultiple = null;
+   private static JCheckBox VrdCombineCutEncode = null;
+   private static JCheckBox VrdQsfixMpeg2ps = null;
+   private static JCheckBox VrdOneAtATime = null;
+   private static JCheckBox TivoWebPlusDelete = null;
+   private static JCheckBox rpcDelete = null;
+   private static JCheckBox rpcOld = null;
+   private static JCheckBox HideProtectedFiles = null;
+   private static JCheckBox TiVoSort = null;
+   private static JCheckBox OverwriteFiles = null;
+   private static JCheckBox DeleteFailedDownloads = null;
+   private static JCheckBox toolTips = null;
+   private static JCheckBox slingBox = null;
+   private static JCheckBox tableColAutoSize = null;
+   private static JCheckBox jobMonitorFullPaths = null;
+   private static JCheckBox autotune_enabled = null;
+   private static JCheckBox autoskip_enabled = null;
+   private static JCheckBox autoskip_import = null;
+   private static JCheckBox autoskip_cutonly = null;
+   private static JCheckBox autoskip_prune = null;
+   private static JCheckBox autoskip_batch_standby = null;
+   private static JCheckBox autoskip_indicate_skip = null;
+   private static JCheckBox autoskip_jumpToEnd = null;
+   private static JCheckBox combine_download_decrypt = null;
+   private static JCheckBox single_download = null;
+   private static JCheckBox rpcnpl = null;
+   private static JCheckBox enableRpc = null;
+   private static JCheckBox persistQueue = null;
+   private static JTextField VRDexe = null;
+   private static JTextField tivo_name = null;
+   private static JTextField tivo_ip = null;
+   private static JTextField share_name = null;
+   private static JTextField share_dir = null;
+   private static JTextField files_path = null;
+   private static JTextField MAK = null;
+   private static JTextField FontSize = null;
+   private static JTextField file_naming = null;
+   private static JTextField tivo_output_dir = null;
+   private static JTextField mpeg_output_dir = null;
+   private static JTextField qsfixDir = null;
+   private static JTextField mpeg_cut_dir = null;
+   private static JTextField encode_output_dir = null;
+   private static JTextField tivodecode = null;
+   private static JTextField dsd = null;
+   private static JTextField ffmpeg = null;
+   private static JTextField mediainfo = null;
+   private static JTextField mencoder = null;
+   private static JTextField handbrake = null;
+   private static JTextField comskip = null;
+   private static JTextField comskip_ini = null;
+   private static JTextField wan_http_port = null;
+   private static JTextField wan_https_port = null;
+   private static JTextField wan_rpc_port = null;
+   private static JTextField limit_npl_fetches = null;
+   private static JTextField active_job_limit = null;
+   private static JTextField t2extract = null;
+   //private static JTextField t2extract_args = null;
+   private static JTextField ccextractor = null;
+   private static JTextField AtomicParsley = null;
+   private static JTextField disk_space = null;
+   private static JTextField customCommand = null;
+   private static JTextField toolTipsDelay = null;
+   private static JTextField toolTipsTimeout = null;
+   private static JTextField cpu_cores = null;
+   private static JTextField download_tries = null;
+   private static JTextField download_retry_delay = null;
+   private static JTextField download_delay = null;
+   private static JTextField autoskip_padding_start = null;
+   private static JTextField autoskip_padding_stop = null;
+   private static JTextField autoskip_chan_off = null;
+   private static JTextField autoskip_chan_on = null;
+   private static JTextField metadata_entries = null;
+   private static JTextField httpserver_port = null;
+   private static JTextField httpserver_cache = null;
+   private static JTextField autoLogSizeMB = null;
+   //private static JTextField pyTivo_host = null;
+   private static JTextField web_query = null;
+   private static JTextField web_browser = null;
+   private static JTextField tivo_username = null;
+   private static JTextField tivo_password = null;
+   //private static JTextField pyTivo_config = null;
+   private static JTextField autotune_channel_interval = null;
+   private static JTextField autotune_button_interval = null;
+   private static JTextField autotune_chan1 = null;
+   private static JTextField autotune_chan2 = null;
+   private static JComboBox<String> MinChanDigits = null;
+   //private static JComboBox<String> pyTivo_tivo = null;
+   //private static JComboBox<String> pyTivo_files = null;
+   private static JComboBox<String> metadata_files = null;
+   private static JComboBox<String> keywords = null;
+   private static JComboBox<String> customFiles = null;
+   private static JComboBox<String> autotune_tivoName = null;
+   private static JComboBox<String> lookAndFeel = null;
+   private static JFileChooser FileBrowser = null;
+   private static JFileChooser DirBrowser = null;
+   private static JTabbedPane tabbed_panel = null;
+
+   public static void display(JFrame frame) {
       debug.print("frame=" + frame);
       // Create dialog if not already created
       if (dialog == null) {
@@ -222,93 +214,96 @@ public class configMain {
          // Set component tooltips
          setToolTips();
       }
-      
+
       // Update component settings to current configuration
       read();
-      
+
       // Clear out any error highlights
       clearTextFieldErrors();
-      
+
       // Display the dialog
       if (pos_x != -1)
-         dialog.setX(pos_x);
-      if (pos_y != -1)
-         dialog.setY(pos_y);
-      dialog.show();
+         dialog.setLocation((int)pos_x, (int)pos_y);
+      dialog.setVisible(true);
    }
-   
-   public static Stage getDialog() {
+
+   public static JDialog getDialog() {
       return dialog;
    }
-   
+
    // Paint text field background to indicate an error setting
-   private static void textFieldError(TextField f, String message) {
+   private static void textFieldError(JTextField f, String message) {
       debug.print("f=" + f + " message=" + message);
       log.error(message);
-      f.setStyle("-fx-background-color: " + config.gui.getWebColor(TableUtil.lightRed));
+      f.setBackground(TableUtil.lightRed);
       errors.add(f);
       // Set tab background of this text field to error color as well
-      Tab tab = getParentTab(f);
-      if (f != null)
-         tab.setStyle("-fx-background-color: " + config.gui.getWebColor(TableUtil.lightRed));         
+      int tab = getParentTab(f);
+      if (f != null && tab != -1)
+         tabbed_panel.setBackgroundAt(tab, TableUtil.lightRed);
    }
-   
-   private static Tab getParentTab(Node node) {
-      for (Tab tab : tabbed_panel.getTabs()) {
-         for (Node n : tab.getContent().lookupAll("*")) {
-            if (n.equals(node))
-               return tab;
+
+   private static int getParentTab(Component node) {
+      for (int i=0; i<tabbed_panel.getTabCount(); ++i) {
+         if (containsComponent(tabbed_panel.getComponentAt(i), node))
+            return i;
+      }
+      return -1;
+   }
+
+   private static boolean containsComponent(Component parent, Component node) {
+      if (parent == node)
+         return true;
+      if (parent instanceof Container) {
+         for (Component c : ((Container)parent).getComponents()) {
+            if (containsComponent(c, node))
+               return true;
          }
       }
-      return null;
+      return false;
    }
-   
+
    // Clear all text field and tab background color error paint settings
    private static void clearTextFieldErrors() {
       debug.print("");
       if (errors.size() > 0) {
          for (int i=0; i<errors.size(); i++) {
-            errors.get(i).setStyle(textbg_default);
+            errors.get(i).setBackground(textbg_default);
          }
          errors.clear();
       }
       // Clear tab background settings as well
-      for (int i=0; i<tabbed_panel.getTabs().size(); ++i)
-         tabbed_panel.getTabs().get(i).setStyle(textbg_default);
+      for (int i=0; i<tabbed_panel.getTabCount(); ++i)
+         tabbed_panel.setBackgroundAt(i, null);
    }
-   
+
    // Callback for OK button
    private static void okCB() {
       debug.print("");
       clearTextFieldErrors();
       int errors = write();
       if (errors > 0) {
-         Alert alert = new Alert(AlertType.CONFIRMATION);
-         // Hack to default to CANCEL button
-         DialogPane pane = alert.getDialogPane();
-         for ( ButtonType t : alert.getButtonTypes() )
-            ( (Button) pane.lookupButton(t) ).setDefaultButton( t == ButtonType.CANCEL );
-         alert.setTitle("Confirm");
-         config.gui.setFontSize(alert, config.FontSize);
-         alert.setContentText("" + errors + " error(s). Proceed to save settings anyway?");
-         Optional<ButtonType> result = alert.showAndWait();
-         if (result.get() == ButtonType.OK) {
+         int result = JOptionPane.showConfirmDialog(
+            dialog, "" + errors + " error(s). Proceed to save settings anyway?",
+            "Confirm", JOptionPane.OK_CANCEL_OPTION
+         );
+         if (result == JOptionPane.OK_OPTION) {
             config.save();
             pos_x = dialog.getX(); pos_y = dialog.getY();
-            dialog.hide();
+            dialog.setVisible(false);
          }
       } else {
          config.save();
          pos_x = dialog.getX(); pos_y = dialog.getY();
-         dialog.hide();
+         dialog.setVisible(false);
       }
       config.gui.refreshOptions(true);
    }
-   
+
    // Callback for tivo add button
    private static void addCB() {
       debug.print("");
-      // Add name=ip to tivos ChoiceBox
+      // Add name=ip to tivos JComboBox
       String name = string.removeLeadingTrailingSpaces(tivo_name.getText());
       String ip = string.removeLeadingTrailingSpaces(tivo_ip.getText());
       if ( name.length() == 0) {
@@ -319,33 +314,33 @@ public class configMain {
          log.error("Enter an ip address in the 'Tivo IP#' field");
          return;
       }
-      addTivo(name, ip);      
+      addTivo(name, ip);
    }
-   
-   public static void addTivo(String name, String ip) {  
+
+   public static void addTivo(String name, String ip) {
       debug.print("name=" + name + " ip=" + ip);
       if (dialog == null || tivos == null) return;
       String value = name + "=" + ip;
       // Don't add duplicate value
       Boolean doit = true;
-      int count = tivos.getItems().size();
+      int count = tivos.getItemCount();
       if (count > 0) {
          for (int i=0; i<count; i++) {
-            String s = tivos.getItems().get(i);
+            String s = tivos.getItemAt(i);
             if (s.equals(value))
                doit = false;
          }
       }
       if (doit) {
-         tivos.getItems().add(value);
-         tivos.setValue(value);
+         tivos.addItem(value);
+         tivos.setSelectedItem(value);
       }
    }
-   
+
    // Callback for share add button
    private static void share_addCB() {
       debug.print("");
-      // Add name=dir to shares ChoiceBox
+      // Add name=dir to shares JComboBox
       String name = string.removeLeadingTrailingSpaces(share_name.getText());
       String dir = string.removeLeadingTrailingSpaces(share_dir.getText());
       if ( name.length() == 0) {
@@ -356,29 +351,29 @@ public class configMain {
          log.error("Enter a valid directory in 'Share Directory' field");
          return;
       }
-      addShare(name, dir);      
+      addShare(name, dir);
    }
-   
-   public static void addShare(String name, String dir) {  
+
+   public static void addShare(String name, String dir) {
       debug.print("name=" + name + " dir=" + dir);
       if (dialog == null || shares == null) return;
       String value = name + "=" + dir;
       // Don't add duplicate value
       Boolean doit = true;
-      int count = shares.getItems().size();
+      int count = shares.getItemCount();
       if (count > 0) {
          for (int i=0; i<count; i++) {
-            String s = shares.getItems().get(i);
+            String s = shares.getItemAt(i);
             if (s.equals(value))
                doit = false;
          }
       }
       if (doit) {
-         shares.getItems().add(value);
-         shares.setValue(value);
+         shares.addItem(value);
+         shares.setSelectedItem(value);
       }
    }
-   
+
    private static void updateWanSettings(String setting) {
       if (setting != null) {
          String tivoName = setting.replaceFirst("=.+$", "");
@@ -403,7 +398,7 @@ public class configMain {
          }
       }
    }
-   
+
    private static void updateLimitNplSettings(String setting) {
       if (setting != null) {
          String tivoName = setting.replaceFirst("=.+$", "");
@@ -412,7 +407,7 @@ public class configMain {
          limit_npl_fetches.setText("" + limit);
       }
    }
-   
+
    private static void updateEnableRpcSettings(String setting) {
       if (setting != null) {
          String tivoName = setting.replaceFirst("=.+$", "");
@@ -423,19 +418,19 @@ public class configMain {
             enableRpc.setSelected(false);
       }
    }
-   
+
    // Callback for tivo del button
    private static void delCB() {
       debug.print("");
-      // Remove current selection in tivos ChoiceBox
-      int selected = tivos.getSelectionModel().getSelectedIndex();
+      // Remove current selection in tivos JComboBox
+      int selected = tivos.getSelectedIndex();
       if (selected > -1) {
-         tivos.getItems().remove(selected);
+         tivos.removeItemAt(selected);
       } else {
          log.error("No tivo entries left to remove");
       }
    }
-   
+
    // Callback for tivo del button
    private static void domainTokenCB() {
 	 log.warn("Refreshing token");
@@ -447,23 +442,23 @@ public class configMain {
 	 };
 	 t.start();
    }
-   
+
    // Callback for share del button
    private static void share_delCB() {
       debug.print("");
-      // Remove current selection in shares ChoiceBox
-      int selected = shares.getSelectionModel().getSelectedIndex();
+      // Remove current selection in shares JComboBox
+      int selected = shares.getSelectedIndex();
       if (selected > -1) {
-         shares.getItems().remove(selected);
+         shares.removeItemAt(selected);
       } else {
          log.error("No share entries left to remove");
       }
    }
-   
+
    // Callback for autotune test button
    private static void autotune_testCB() {
       debug.print("");
-      if ( autotune_tivoName.getItems().size() > 0 ) {
+      if ( autotune_tivoName.getItemCount() > 0 ) {
          String cinterval = string.removeLeadingTrailingSpaces(
             autotune_channel_interval.getText()
          );
@@ -511,7 +506,7 @@ public class configMain {
             log.error("channel 2 not specified");
             return;
          }
-         String tivoName = autotune_tivoName.getValue();
+         String tivoName = (String)autotune_tivoName.getSelectedItem();
          if (tivoName == null || tivoName.length() == 0) {
             log.error("No TiVo name selected");
             return;
@@ -528,32 +523,31 @@ public class configMain {
          jobMonitor.submitNewJob(job);
       }
    }
-   
-   // Callback for keywords ChoiceBox
+
+   // Callback for keywords JComboBox
    private static void keywordsCB(String keyword) {
       debug.print("");
       if (keyword != null) {
          // Append selected entry to file_naming text field
          // (Replace current selection if any)
          int len = file_naming.getText().length();
-         file_naming.positionCaret(len);
+         file_naming.setCaretPosition(len);
          file_naming.replaceSelection(keyword);
       }
-      keywords.setValue(null);
    }
-   
-   // Callback for customFiles ChoiceBox
+
+   // Callback for customFiles JComboBox
    private static void customFilesCB(String keyword) {
       debug.print("");
-      
+
       // Append selected entry to customCommand text field
       // (Replace current selection if any)
       int len = customCommand.getText().length();
-      customCommand.positionCaret(len);
+      customCommand.setCaretPosition(len);
       customCommand.replaceSelection(keyword);
    }
-   
-   // Callback for autotune_tivoName ChoiceBox
+
+   // Callback for autotune_tivoName JComboBox
    private static void autotune_tivoNameCB(String name) {
       debug.print("");
       if (name != null && name.length() > 0) {
@@ -567,7 +561,7 @@ public class configMain {
          autotune_chan2.setText("" + config.autotune.get(name).get("chan2"));
       }
    }
-   
+
    // Update widgets with config settings
    public static void read() {
       debug.print("");
@@ -576,57 +570,57 @@ public class configMain {
       Stack<String> tivoNames = config.getTivoNames();
       if (tivoNames.size()>0) {
          // Update tivo name lists
-         tivos.getItems().clear();
-         autotune_tivoName.getItems().clear();
+         tivos.removeAllItems();
+         autotune_tivoName.removeAllItems();
          String ip;
          for (int i=0; i<tivoNames.size(); i++) {
             name = tivoNames.get(i);
             ip = config.TIVOS.get(name);
-            tivos.getItems().add(name + "=" + ip);
+            tivos.addItem(name + "=" + ip);
             if (config.nplCapable(name))
-               autotune_tivoName.getItems().add(name);
+               autotune_tivoName.addItem(name);
          }
-         if (tivos.getItems().size() > 0)
-            tivos.setValue(tivos.getItems().get(0));
-         if (autotune_tivoName.getItems().size() > 0)
-            autotune_tivoName.setValue(autotune_tivoName.getItems().get(0));
+         if (tivos.getItemCount() > 0)
+            tivos.setSelectedItem(tivos.getItemAt(0));
+         if (autotune_tivoName.getItemCount() > 0)
+            autotune_tivoName.setSelectedItem(autotune_tivoName.getItemAt(0));
       }
-      
+
       // Shares
       if (config.httpserver_shares.size()>0) {
          // Update share name lists
-         shares.getItems().clear();
+         shares.removeAllItems();
          for (String dir : config.httpserver_shares.keySet()) {
-            shares.getItems().add(dir + "=" + config.httpserver_shares.get(dir));
+            shares.addItem(dir + "=" + config.httpserver_shares.get(dir));
          }
-         if (shares.getItems().size() > 0)
-            shares.setValue(shares.getItems().get(0));
+         if (shares.getItemCount() > 0)
+            shares.setSelectedItem(shares.getItemAt(0));
       }
-      
+
       // enableRpc
       enableRpc.setSelected(false);
-      name = tivos.getValue();
+      name = (String)tivos.getSelectedItem();
       if (name != null) {
          String tivoName = name.replaceFirst("=.+$", "");
          if (config.rpcEnabled(tivoName))
             enableRpc.setSelected(true);
          else
             enableRpc.setSelected(false);
-      }      
-      
+      }
+
       // limit_npl_fetches
       limit_npl_fetches.setText("0");
-      name = tivos.getValue();
+      name = (String)tivos.getSelectedItem();
       if (name != null) {
          String tivoName = name.replaceFirst("=.+$", "");
          int limit = config.getLimitNplSetting(tivoName);
          limit_npl_fetches.setText("" + limit);
       }
-      
+
       // wan http & https ports
       wan_http_port.setText("");
       wan_https_port.setText("");
-      name = tivos.getValue();
+      name = (String)tivos.getSelectedItem();
       if (name != null) {
          String tivoName = name.replaceFirst("=.+$", "");
          String http = config.getWanSetting(tivoName, "http");
@@ -639,55 +633,55 @@ public class configMain {
          if (rpc != null)
             wan_rpc_port.setText(rpc);
       }
-            
+
       // Beacon
       if (config.CheckBeacon == 1)
          beacon.setSelected(true);
       else
          beacon.setSelected(false);
-      
+
       // UseOldBeacon
       if (config.UseOldBeacon == 1)
          UseOldBeacon.setSelected(true);
       else
          UseOldBeacon.setSelected(false);
-      
+
       // npl_when_started
       if (config.npl_when_started == 1)
          npl_when_started.setSelected(true);
       else
          npl_when_started.setSelected(false);
-      
+
       // showHistoryInTable
       if (config.showHistoryInTable == 1)
          showHistoryInTable.setSelected(true);
       else
          showHistoryInTable.setSelected(false);
-      
+
       // download_time_estimate
       if (config.download_time_estimate == 1)
          download_time_estimate.setSelected(true);
       else
          download_time_estimate.setSelected(false);
-      
+
       // Remove .TiVo
       if (config.RemoveTivoFile == 1)
          remove_tivo.setSelected(true);
       else
          remove_tivo.setSelected(false);
-      
+
       // Remove comcut files
       if (config.RemoveComcutFiles == 1)
          remove_comcut.setSelected(true);
       else
          remove_comcut.setSelected(false);
-      
+
       // Remove mpeg file after comcut
       if (config.RemoveComcutFiles_mpeg == 1)
          remove_comcut_mpeg.setSelected(true);
       else
          remove_comcut_mpeg.setSelected(false);
-      
+
       // Remove .mpg file
       if (config.RemoveMpegFile == 1)
          remove_mpeg.setSelected(true);
@@ -703,378 +697,378 @@ public class configMain {
          download_check_length.setSelected(true);
       else
          download_check_length.setSelected(false);
-      
+
       // Check disk space
       if (config.CheckDiskSpace == 1)
          check_space.setSelected(true);
       else
          check_space.setSelected(false);
-            
+
       // UseAdscan
       if (config.UseAdscan == 1)
          UseAdscan.setSelected(true);
       else
          UseAdscan.setSelected(false);
-            
+
       // VrdReview
       if (config.VrdReview == 1)
          VrdReview.setSelected(true);
       else
          VrdReview.setSelected(false);
-      
+
       // comskip_review
       if (config.comskip_review == 1)
          comskip_review.setSelected(true);
       else
          comskip_review.setSelected(false);
-      
+
       // VrdReview_noCuts
       if (config.VrdReview_noCuts == 1)
          VrdReview_noCuts.setSelected(true);
       else
          VrdReview_noCuts.setSelected(false);
-      
+
       // VrdQsFilter
       if (config.VrdQsFilter == 1)
          VrdQsFilter.setSelected(true);
       else
          VrdQsFilter.setSelected(false);
-      
+
       // VrdDecrypt
       if (config.VrdDecrypt == 1)
          VrdDecrypt.setSelected(true);
       else
          VrdDecrypt.setSelected(false);
-      
+
       // DsdDecrypt
       if (config.DsdDecrypt == 1)
          DsdDecrypt.setSelected(true);
       else
          DsdDecrypt.setSelected(false);
-      
+
       // tivolibreDecrypt
       if (config.tivolibreDecrypt == 1) {
          tivolibreDecrypt.setSelected(true);
          DsdDecrypt.setSelected(false);
          config.DsdDecrypt = 0;
       }
-      
+
       // tivolibreCompat
       if (config.tivolibreCompat == 1)
-         tivolibreCompat.setSelected(true);      
+         tivolibreCompat.setSelected(true);
       else
          tivolibreCompat.setSelected(false);
-      
+
       // httpserver_enable
       if (config.httpserver_enable == 1)
          httpserver_enable.setSelected(true);
       else
          httpserver_enable.setSelected(false);
-      
+
       // httpserver_share_filter
       if (config.httpserver_share_filter == 1)
          httpserver_share_filter.setSelected(true);
       else
          httpserver_share_filter.setSelected(false);
-      
+
       // VRD flag
       if (config.VRD == 1)
          VRD.setSelected(true);
       else
          VRD.setSelected(false);
-      
+
       // VRDexe
       if (config.VRD == 1)
          VRDexe.setText(config.VRDexe);
-      
+
       // VrdEncode
       if (config.VrdEncode == 1)
          VrdEncode.setSelected(true);
       else
          VrdEncode.setSelected(false);
-      
+
       // VrdAllowMultiple
       if (config.VrdAllowMultiple == 1)
          VrdAllowMultiple.setSelected(true);
       else
          VrdAllowMultiple.setSelected(false);
-      
+
       // VrdCombineCutEncode
       if (config.VrdCombineCutEncode == 1)
          VrdCombineCutEncode.setSelected(true);
       else
          VrdCombineCutEncode.setSelected(false);
-      
+
       // VrdQsfixMpeg2ps
       if (config.VrdQsfixMpeg2ps == 1)
          VrdQsfixMpeg2ps.setSelected(true);
       else
          VrdQsfixMpeg2ps.setSelected(false);
-      
+
       // VrdOneAtATime
       if (config.VrdOneAtATime == 1)
     	  VrdOneAtATime.setSelected(true);
       else
     	  VrdOneAtATime.setSelected(false);
-      
+
       // TivoWebPlusDelete
       if (config.twpDeleteEnabled())
          TivoWebPlusDelete.setSelected(true);
       else
          TivoWebPlusDelete.setSelected(false);
-      
+
       // rpcDelete
       if (config.rpcDelete == 1)
          rpcDelete.setSelected(true);
       else
          rpcDelete.setSelected(false);
-      
+
       // rpcOld
       if (config.rpcOld == 1)
          rpcOld.setSelected(true);
       else
          rpcOld.setSelected(false);
-      
+
       // HideProtectedFiles
       if (config.HideProtectedFiles == 1)
          HideProtectedFiles.setSelected(true);
       else
          HideProtectedFiles.setSelected(false);
-      
+
       // TiVoSort
       if (config.TiVoSort == 1)
          TiVoSort.setSelected(true);
       else
          TiVoSort.setSelected(false);
-      
+
       // OverwriteFiles
       if (config.OverwriteFiles == 1)
          OverwriteFiles.setSelected(true);
       else
          OverwriteFiles.setSelected(false);
-      
+
       // DeleteFailedDownloads
       if (config.DeleteFailedDownloads == 1)
          DeleteFailedDownloads.setSelected(true);
       else
          DeleteFailedDownloads.setSelected(false);
-      
+
       // combine_download_decrypt
       if (config.combine_download_decrypt == 1)
          combine_download_decrypt.setSelected(true);
       else
          combine_download_decrypt.setSelected(false);
-      
+
       // single_download
       if (config.single_download == 1)
          single_download.setSelected(true);
       else
          single_download.setSelected(false);
-      
+
       // rpcnpl
       if (config.rpcnpl == 1)
          rpcnpl.setSelected(true);
       else
          rpcnpl.setSelected(false);
-      
+
       // persistQueue
       if (config.persistQueue)
     	  persistQueue.setSelected(true);
       else
     	  persistQueue.setSelected(false);
-      
+
       // toolTips
       if (config.toolTips == 1)
          toolTips.setSelected(true);
       else
          toolTips.setSelected(false);
-      
+
       // slingBox
       if (config.slingBox == 1)
          slingBox.setSelected(true);
       else
          slingBox.setSelected(false);
-      
+
       // tableColAutoSize
       if (config.tableColAutoSize == 1)
          tableColAutoSize.setSelected(true);
       else
          tableColAutoSize.setSelected(false);
-      
+
       // jobMonitorFullPaths
       if (config.jobMonitorFullPaths == 1)
          jobMonitorFullPaths.setSelected(true);
       else
          jobMonitorFullPaths.setSelected(false);
-      
+
       // Files naming
       file_naming.setText(config.tivoFileNameFormat);
-      
+
       // FILES Default path
       files_path.setText(config.TIVOS.get("FILES"));
-      
+
       // Min requested space
       disk_space.setText("" + config.LowSpaceSize);
-      
+
       // MAK
       MAK.setText(config.MAK);
-      
+
       // FontSize
       FontSize.setText("" + config.FontSize);
-      
+
       // .TiVo output dir
       tivo_output_dir.setText(config.outputDir);
-      
+
       // .mpg output dir
       mpeg_output_dir.setText(config.mpegDir);
-      
+
       // qsfixDir
       qsfixDir.setText(config.qsfixDir);
-      
+
       // .mpg cut dir
       mpeg_cut_dir.setText(config.mpegCutDir);
-      
+
       // encode output dir
       encode_output_dir.setText(config.encodeDir);
-            
+
       // mencoder
       mencoder.setText(config.mencoder);
 
       // handbrake
       handbrake.setText(config.handbrake);
-      
+
       // comskip
       comskip.setText(config.comskip);
-      
+
       // comskip_ini
       comskip_ini.setText(config.comskipIni);
-      
+
       // tivodecode
       tivodecode.setText(config.tivodecode);
-      
+
       // dsd
       dsd.setText(config.dsd);
-      
+
       // t2extract
       t2extract.setText(config.t2extract);
-      
+
       // t2extract_args
       //t2extract_args.setText(config.t2extract_args);
-      
+
       // ccextractor
       ccextractor.setText(config.ccextractor);
-      
+
       // AtomicParsley
       AtomicParsley.setText(config.AtomicParsley);
-      
+
       // ffmpeg
       ffmpeg.setText(config.ffmpeg);
-      
+
       // mediainfo
       mediainfo.setText(config.mediainfo);
-      
+
       // customCommand
       customCommand.setText(config.customCommand);
-      
+
       // active job limit
       active_job_limit.setText("" + config.MaxJobs);
-      
+
       // MinChanDigits
-      MinChanDigits.setValue("" + config.MinChanDigits);
-      
+      MinChanDigits.setSelectedItem("" + config.MinChanDigits);
+
       // toolTipsDelay
       toolTipsDelay.setText("" + config.toolTipsDelay);
-      
+
       // toolTipsTimeout
       toolTipsTimeout.setText("" + config.toolTipsTimeout);
-      
+
       // cpu_cores
       cpu_cores.setText("" + config.cpu_cores);
-      
+
       // download_tries
       download_tries.setText("" + config.download_tries);
-      
+
       // download_retry_delay
       download_retry_delay.setText("" + config.download_retry_delay);
-      
+
       // download_delay
       download_delay.setText("" + config.download_delay);
-      
+
       // autoskip_enabled
       autoskip_enabled.setSelected(config.autoskip_enabled == 1);
-      
+
       // autoskip_enabled
       autoskip_import.setSelected(config.autoskip_import == 1);
-      
+
       // autoskip_cutonly
       autoskip_cutonly.setSelected(config.autoskip_cutonly == 1);
-      
+
       // autoskip_prune
       autoskip_prune.setSelected(config.autoskip_prune == 1);
-      
+
       // autoskip_batch_standby
       autoskip_batch_standby.setSelected(config.autoskip_batch_standby == 1);
-      
+
       // autoskip_indicate_skip
       autoskip_indicate_skip.setSelected(config.autoskip_indicate_skip == 1);
-      
+
       // autoskip_jumpToEnd
       autoskip_jumpToEnd.setSelected(config.autoskip_jumpToEnd == 1);
-      
+
       // autoskip_padding_start
       autoskip_padding_start.setText("" + config.autoskip_padding_start);
-      
+
       // autoskip_padding_stop
       autoskip_padding_stop.setText("" + config.autoskip_padding_stop);
-      
+
       // autoskip_chan_off
       autoskip_chan_off.setText("" + config.autoskip_chan_off);
-      
+
       // autoskip_chan_off
       autoskip_chan_on.setText("" + config.autoskip_chan_on);
-      
+
       // metadata_entries
       metadata_entries.setText("" + config.metadata_entries);
-      
+
       // httpserver_port
       httpserver_port.setText("" + config.httpserver_port);
-      
+
       // httpserver_cache
       httpserver_cache.setText(config.httpserver_cache);
-      
+
       // autoLogSizeMB
       autoLogSizeMB.setText("" + config.autoLogSizeMB);
-      
+
       // pyTivo_host
       //pyTivo_host.setText("" + config.pyTivo_host);
-      
+
       // web_query
       if (config.web_query.length() > 0)
          web_query.setText("" + config.web_query);
       else
          web_query.setText("http://www.imdb.com/find?s=all&q=");
-      
+
       // web_browser
       if (config.web_browser.length() > 0)
          web_browser.setText("" + config.web_browser);
       else
          web_browser.setText("");
-      
+
       // tivo_username
       if (config.getTivoUsername() != null)
          tivo_username.setText("" + config.getTivoUsername());
       else
          tivo_username.setText("");
-      
+
       // tivo_password
       if (config.getTivoPassword() != null)
          tivo_password.setText("" + config.getTivoPassword());
       else
          tivo_password.setText("");
-      
+
       // pyTivo_config
       //pyTivo_config.setText("" + config.pyTivo_config);
-      
+
       // pyTivo_tivo
       /*Stack<String> names = config.getNplTivoNames();
       if (names.size() > 0) {
@@ -1086,28 +1080,21 @@ public class configMain {
          }
          pyTivo_tivo.setValue(setting);
       }*/
-      
+
       // pyTivo_files
       //pyTivo_files.setValue(config.pyTivo_files);
-      
+
       // metadata_files
-      metadata_files.setValue(config.metadata_files);
-      
-      // lookAndFeel
+      metadata_files.setSelectedItem(config.metadata_files);
+
+      // lookAndFeel (normalize maps historical css names to current themes)
       if (lookAndFeel != null && config.lookAndFeel != null) {
-         List<String> available = config.gui.getAvailableLooks();
-         Boolean legal = false;
-         for (String entry : available) {
-            if (config.lookAndFeel.equals(entry))
-               legal = true;
-         }
-         if (legal)
-            lookAndFeel.setValue(config.lookAndFeel);
+         lookAndFeel.setSelectedItem(Theme.normalize(config.lookAndFeel));
       }
-      
+
       // autotune settings
       if (autotune_tivoName != null) {
-         name = autotune_tivoName.getValue();
+         name = (String)autotune_tivoName.getSelectedItem();
       } else {
          name = config.getNplTivoNames().get(0);
       }
@@ -1122,16 +1109,16 @@ public class configMain {
          autotune_chan2.setText("" + config.autotune.get(name).get("chan2"));
       }
    }
-   
+
    // Update config settings with widget values
    public static int write() {
       debug.print("");
       int errors = 0;
       String value;
       String name;
-      
+
       // enableRpc
-      name = tivos.getValue();
+      name = (String)tivos.getSelectedItem();
       if (name != null) {
          String tivoName = name.replaceFirst("=.+$", "");
          if (enableRpc.isSelected())
@@ -1139,13 +1126,13 @@ public class configMain {
          else
             config.setRpcSetting("enableRpc_" + tivoName, "0");
       }
-      
+
       // Tivos
-      int count = tivos.getItems().size();
+      int count = tivos.getItemCount();
       LinkedHashMap<String,String> h = new LinkedHashMap<String,String>();
       if (count > 0) {
          for (int i=0; i<count; i++) {
-            String s = tivos.getItems().get(i);
+            String s = tivos.getItemAt(i);
             String[] l = s.split("=");
             if (l.length == 2) {
                h.put(l[0], l[1]);
@@ -1153,22 +1140,22 @@ public class configMain {
          }
       }
       config.setTivoNames(h);
-      
+
       // Shares
-      count = shares.getItems().size();
+      count = shares.getItemCount();
       if (count > 0) {
          config.httpserver_shares.clear();
          for (int i=0; i<count; i++) {
-            String s = shares.getItems().get(i);
+            String s = shares.getItemAt(i);
             String[] l = s.split("=");
             if (l.length == 2) {
                config.httpserver_shares.put(l[0], l[1]);
             }
          }
       }
-      
+
       // limit_npl_fetches
-      name = tivos.getValue();
+      name = (String)tivos.getSelectedItem();
       if (name != null) {
          String tivoName = name.replaceFirst("=.+$", "");
          value = string.removeLeadingTrailingSpaces(limit_npl_fetches.getText());
@@ -1184,9 +1171,9 @@ public class configMain {
             config.setLimitNplSetting("limit_npl_" + tivoName, "0");
          }
       }
-      
+
       // wan http & https ports
-      name = tivos.getValue();
+      name = (String)tivos.getSelectedItem();
       if (name != null) {
          String tivoName = name.replaceFirst("=.+$", "");
          value = string.removeLeadingTrailingSpaces(wan_http_port.getText());
@@ -1201,7 +1188,7 @@ public class configMain {
          } else {
             config.setWanSetting(tivoName, "http", "");
          }
-         
+
          value = string.removeLeadingTrailingSpaces(wan_https_port.getText());
          if (value.length() > 0) {
             try {
@@ -1214,7 +1201,7 @@ public class configMain {
          } else {
             config.setWanSetting(tivoName, "https", "");
          }
-         
+
          value = string.removeLeadingTrailingSpaces(wan_rpc_port.getText());
          if (value.length() > 0) {
             try {
@@ -1228,43 +1215,43 @@ public class configMain {
             config.setWanSetting(tivoName, "rpc", "");
          }
       }
-      
+
       // UseOldBeacon
       if (UseOldBeacon.isSelected()) {
          config.UseOldBeacon = 1;
       } else {
          config.UseOldBeacon = 0;
       }
-      
+
       // download_time_estimate
       if (download_time_estimate.isSelected()) {
          config.download_time_estimate = 1;
       } else {
          config.download_time_estimate = 0;
       }
-      
+
       // npl_when_started
       if (npl_when_started.isSelected()) {
          config.npl_when_started = 1;
       } else {
          config.npl_when_started = 0;
       }
-      
+
       // showHistoryInTable
       if (showHistoryInTable.isSelected()) {
          config.showHistoryInTable = 1;
       } else {
          config.showHistoryInTable = 0;
       }
-      
+
       // Beacon
       if (beacon.isSelected()) {
          config.CheckBeacon = 1;
          if (config.UseOldBeacon == 0) {
-            if (config.jmdns == null) config.jmdns = new mdns();            
+            if (config.jmdns == null) config.jmdns = new mdns();
          } else {
             if (config.tivo_beacon == null) config.tivo_beacon = new beacon();
-         }         
+         }
       } else {
          config.CheckBeacon = 0;
          if (config.UseOldBeacon == 0) {
@@ -1276,53 +1263,53 @@ public class configMain {
             config.tivo_beacon = null;
          }
       }
-            
+
       // Remove .TiVo
       if (remove_tivo.isSelected())
          config.RemoveTivoFile = 1;
       else
          config.RemoveTivoFile = 0;
-            
+
       // Remove comcut files
       if (remove_comcut.isSelected())
          config.RemoveComcutFiles = 1;
       else
          config.RemoveComcutFiles = 0;
-      
+
       // Remove mpeg file after comcut
       if (remove_comcut_mpeg.isSelected())
          config.RemoveComcutFiles_mpeg = 1;
       else
          config.RemoveComcutFiles_mpeg = 0;
-      
+
       // Remove .mpg file
       if (remove_mpeg.isSelected())
          config.RemoveMpegFile = 1;
       else
          config.RemoveMpegFile = 0;
-      
+
       if (QSFixBackupMpegFile.isSelected())
          config.QSFixBackupMpegFile = 1;
       else
          config.QSFixBackupMpegFile = 0;
-      
+
       if (download_check_length.isSelected())
          config.download_check_length = 1;
       else
          config.download_check_length = 0;
-      
+
       // Check disk space
       if (check_space.isSelected())
          config.CheckDiskSpace = 1;
       else
          config.CheckDiskSpace = 0;
-      
+
       // VRD flag
       if (VRD.isSelected())
          config.VRD = 1;
       else
          config.VRD = 0;
-      
+
       // VRDexe
       value = string.removeLeadingTrailingSpaces(VRDexe.getText());
       if (value.length() > 0) {
@@ -1335,49 +1322,49 @@ public class configMain {
     	      }
     	   }
       }
-      
+
       // UseAdscan
       if (UseAdscan.isSelected() && config.VRD == 1)
          config.UseAdscan = 1;
       else
          config.UseAdscan = 0;
-      
+
       // VrdReview
       if (VrdReview.isSelected() && config.VRD == 1)
          config.VrdReview = 1;
       else
          config.VrdReview = 0;
-      
+
       // comskip_review
       if (comskip_review.isSelected() && file.isFile(config.comskip))
          config.comskip_review = 1;
       else
          config.comskip_review = 0;
-      
+
       // VrdReview_noCuts
       if (VrdReview_noCuts.isSelected() && config.VRD == 1)
          config.VrdReview_noCuts = 1;
       else
          config.VrdReview_noCuts = 0;
-      
+
       // VrdQsFilter
       if (VrdQsFilter.isSelected() && config.VRD == 1)
          config.VrdQsFilter = 1;
       else
          config.VrdQsFilter = 0;
-      
+
       // VrdDecrypt
       if (VrdDecrypt.isSelected() && config.VRD == 1)
          config.VrdDecrypt = 1;
       else
          config.VrdDecrypt = 0;
-      
+
       // DsdDecrypt
       if (DsdDecrypt.isSelected())
          config.DsdDecrypt = 1;
       else
          config.DsdDecrypt = 0;
-      
+
       // tivolibreDecrypt
       if (tivolibreDecrypt.isSelected()) {
          config.tivolibreDecrypt = 1;
@@ -1385,13 +1372,13 @@ public class configMain {
       }
       else
          config.tivolibreDecrypt = 0;
-      
+
       // tivolibreCompat
       if (tivolibreCompat.isSelected())
          config.tivolibreCompat = 1;
       else
          config.tivolibreCompat = 0;
-      
+
       // httpserver_enable
       if (httpserver_enable.isSelected()) {
          config.httpserver_enable = 1;
@@ -1405,7 +1392,7 @@ public class configMain {
             config.httpserver = null;
          }
       }
-      
+
       // httpserver_share_filter
       if (httpserver_share_filter.isSelected()) {
          config.httpserver_share_filter = 1;
@@ -1413,128 +1400,128 @@ public class configMain {
       else {
          config.httpserver_share_filter = 0;
       }
-      
+
       // VrdEncode
       if (VrdEncode.isSelected() && config.VRD == 1)
          config.VrdEncode = 1;
       else
          config.VrdEncode = 0;
-      
+
       // VrdAllowMultiple
       if (VrdAllowMultiple.isSelected() && config.VRD == 1)
          config.VrdAllowMultiple = 1;
       else
          config.VrdAllowMultiple = 0;
-      
+
       // VrdCombineCutEncode
       if (VrdCombineCutEncode.isSelected() && config.VRD == 1)
          config.VrdCombineCutEncode = 1;
       else
          config.VrdCombineCutEncode = 0;
-      
+
       // VrdQsfixMpeg2ps
       if (VrdQsfixMpeg2ps.isSelected() && config.VRD == 1)
          config.VrdQsfixMpeg2ps = 1;
       else
          config.VrdQsfixMpeg2ps = 0;
-      
+
       // VrdOneAtATime
       if (VrdOneAtATime.isSelected() && config.VRD == 1)
          config.VrdOneAtATime = 1;
       else
          config.VrdOneAtATime = 0;
-      
+
       // TivoWebPlusDelete
       if (TivoWebPlusDelete.isSelected())
          config.twpDeleteEnabledSet(true);
       else
          config.twpDeleteEnabledSet(false);
-      
+
       // rpcDelete
       if (rpcDelete.isSelected())
          config.rpcDelete = 1;
       else
          config.rpcDelete = 0;
-      
+
       // rpcOld
       if (rpcOld.isSelected())
          config.rpcOld = 1;
       else
          config.rpcOld = 0;
-      
+
       // HideProtectedFiles
       if (HideProtectedFiles.isSelected())
          config.HideProtectedFiles = 1;
       else
          config.HideProtectedFiles = 0;
-      
+
       // TiVoSort
       if (TiVoSort.isSelected())
          config.TiVoSort = 1;
       else
          config.TiVoSort = 0;
-      
+
       // OverwriteFiles
       if (OverwriteFiles.isSelected())
          config.OverwriteFiles = 1;
       else
          config.OverwriteFiles = 0;
-      
+
       // DeleteFailedDownloads
       if (DeleteFailedDownloads.isSelected())
          config.DeleteFailedDownloads = 1;
       else
          config.DeleteFailedDownloads = 0;
-      
+
       // combine_download_decrypt
       if (combine_download_decrypt.isSelected())
          config.combine_download_decrypt = 1;
       else
          config.combine_download_decrypt = 0;
-      
+
       // single_download
       if (single_download.isSelected())
          config.single_download = 1;
       else
          config.single_download = 0;
-      
+
       // rpcnpl
       if (rpcnpl.isSelected())
          config.rpcnpl = 1;
       else
          config.rpcnpl = 0;
-      
+
       // persistQueue
       if (persistQueue.isSelected())
          config.persistQueue = true;
       else
          config.persistQueue = false;
-      
+
       // toolTips
       if (toolTips.isSelected())
          config.toolTips = 1;
       else
          config.toolTips = 0;
       MyTooltip.enableToolTips(config.toolTips);
-      
+
       // slingBox
       if (slingBox.isSelected())
          config.slingBox = 1;
       else
          config.slingBox = 0;
-      
+
       // tableColAutoSize
       if (tableColAutoSize.isSelected())
          config.tableColAutoSize = 1;
       else
          config.tableColAutoSize = 0;
-      
+
       // jobMonitorFullPaths
       if (jobMonitorFullPaths.isSelected())
          config.jobMonitorFullPaths = 1;
       else
          config.jobMonitorFullPaths = 0;
-      
+
       // Files naming
       value = file_naming.getText();
       if (value.length() == 0) {
@@ -1542,7 +1529,7 @@ public class configMain {
          value = "[title] ([monthNum]_[mday]_[year])";
       }
       config.tivoFileNameFormat = value;
-      
+
       // FILES Default path
       value = string.removeLeadingTrailingSpaces(files_path.getText());
       if (value.length() == 0) {
@@ -1555,7 +1542,7 @@ public class configMain {
          }
       }
       config.TIVOS.put("FILES", value);
-      
+
       // Min requested space
       value = string.removeLeadingTrailingSpaces(disk_space.getText());
       if (value.length() > 0) {
@@ -1571,7 +1558,7 @@ public class configMain {
       } else {
          config.LowSpaceSize = 0;
       }
-      
+
       // MAK
       value = string.removeLeadingTrailingSpaces(MAK.getText());
       if (value.length() > 0) {
@@ -1591,7 +1578,7 @@ public class configMain {
          textFieldError(MAK, "MAK not specified - should be a 10 digit number");
          errors++;
       }
-      
+
       // FontSize
       value = string.removeLeadingTrailingSpaces(FontSize.getText());
       int size = 12;
@@ -1608,14 +1595,14 @@ public class configMain {
       }
       if (config.FontSize != size) {
          config.FontSize = size;
-         config.gui.setFontSize(config.gui.getFrame().getScene(), size);
+         config.gui.setFontSize(size);
       }
-      
+
       // .TiVo output dir
       value = string.removeLeadingTrailingSpaces(tivo_output_dir.getText());
       if (value.length() == 0) {
          // Reset to default if none given
-         value = config.programDir;         
+         value = config.programDir;
       } else {
          if ( ! file.isDir(value) ) {
             textFieldError(tivo_output_dir, ".TiVo Output Dir setting not a valid dir: '" + value + "'");
@@ -1623,7 +1610,7 @@ public class configMain {
          }
       }
       config.outputDir = value;
-      
+
       // .mpg output dir
       value = string.removeLeadingTrailingSpaces(mpeg_output_dir.getText());
       if (value.length() == 0) {
@@ -1636,7 +1623,7 @@ public class configMain {
          }
       }
       config.mpegDir = value;
-      
+
       // qsfixDir
       value = string.removeLeadingTrailingSpaces(qsfixDir.getText());
       if (value.length() == 0) {
@@ -1649,7 +1636,7 @@ public class configMain {
          }
       }
       config.qsfixDir = value;
-      
+
       // .mpg cut dir
       value = string.removeLeadingTrailingSpaces(mpeg_cut_dir.getText());
       if (value.length() == 0) {
@@ -1662,7 +1649,7 @@ public class configMain {
          }
       }
       config.mpegCutDir = value;
-      
+
       // encode output dir
       value = string.removeLeadingTrailingSpaces(encode_output_dir.getText());
       if (value.length() == 0) {
@@ -1675,7 +1662,7 @@ public class configMain {
          }
       }
       config.encodeDir = value;
-      
+
       // mencoder
       value = string.removeLeadingTrailingSpaces(mencoder.getText());
       if (value.length() == 0) {
@@ -1688,7 +1675,7 @@ public class configMain {
          }
       }
       config.mencoder = value;
-      
+
       // handbrake
       value = string.removeLeadingTrailingSpaces(handbrake.getText());
       if (value.length() == 0) {
@@ -1701,7 +1688,7 @@ public class configMain {
          }
       }
       config.handbrake = value;
-      
+
       // comskip
       value = string.removeLeadingTrailingSpaces(comskip.getText());
       if (value.length() == 0) {
@@ -1714,7 +1701,7 @@ public class configMain {
          }
       }
       config.comskip = value;
-      
+
       // comskip_ini
       value = string.removeLeadingTrailingSpaces(comskip_ini.getText());
       if (value.length() == 0) {
@@ -1727,7 +1714,7 @@ public class configMain {
          }
       }
       config.comskipIni = value;
-      
+
       // tivodecode
       value = string.removeLeadingTrailingSpaces(tivodecode.getText());
       if (value.length() == 0) {
@@ -1740,7 +1727,7 @@ public class configMain {
          }
       }
       config.tivodecode = value;
-      
+
       // dsd
       value = string.removeLeadingTrailingSpaces(dsd.getText());
       if (value.length() == 0) {
@@ -1753,7 +1740,7 @@ public class configMain {
          }
       }
       config.dsd = value;
-      
+
       // t2extract
       value = string.removeLeadingTrailingSpaces(t2extract.getText());
       if (value.length() == 0) {
@@ -1766,7 +1753,7 @@ public class configMain {
          }
       }
       config.t2extract = value;
-      
+
       // t2extract_args
       //value = string.removeLeadingTrailingSpaces(t2extract_args.getText());
       //if (value.length() == 0) {
@@ -1774,7 +1761,7 @@ public class configMain {
       //   value = "";
       //}
       //config.t2extract_args = value;
-      
+
       // ccextractor
       value = string.removeLeadingTrailingSpaces(ccextractor.getText());
       if (value.length() == 0) {
@@ -1787,7 +1774,7 @@ public class configMain {
          }
       }
       config.ccextractor = value;
-            
+
       // AtomicParsley
       value = string.removeLeadingTrailingSpaces(AtomicParsley.getText());
       if (value.length() == 0) {
@@ -1800,7 +1787,7 @@ public class configMain {
          }
       }
       config.AtomicParsley = value;
-      
+
       // ffmpeg
       value = string.removeLeadingTrailingSpaces(ffmpeg.getText());
       if (value.length() == 0) {
@@ -1813,7 +1800,7 @@ public class configMain {
          }
       }
       config.ffmpeg = value;
-      
+
       // mediainfo
       value = string.removeLeadingTrailingSpaces(mediainfo.getText());
       if (value.length() == 0) {
@@ -1826,7 +1813,7 @@ public class configMain {
          }
       }
       config.mediainfo = value;
-      
+
       // customCommand
       value = string.removeLeadingTrailingSpaces(customCommand.getText());
       if (value.length() == 0) {
@@ -1839,7 +1826,7 @@ public class configMain {
          }
       }
       config.customCommand = value;
-      
+
       // active job limit
       value = string.removeLeadingTrailingSpaces(active_job_limit.getText());
       if (value.length() > 0) {
@@ -1855,10 +1842,10 @@ public class configMain {
       } else {
          config.MaxJobs = 2;
       }
-      
+
       // MinChanDigits
-      config.MinChanDigits = Integer.parseInt(MinChanDigits.getValue());
-      
+      config.MinChanDigits = Integer.parseInt((String)MinChanDigits.getSelectedItem());
+
       // cpu_cores
       value = string.removeLeadingTrailingSpaces(cpu_cores.getText());
       if (value.length() > 0) {
@@ -1874,7 +1861,7 @@ public class configMain {
       } else {
          config.cpu_cores = 1;
       }
-      
+
       // download_tries
       value = string.removeLeadingTrailingSpaces(download_tries.getText());
       if (value.length() > 0) {
@@ -1890,7 +1877,7 @@ public class configMain {
       } else {
          config.download_tries = 5;
       }
-      
+
       // download_retry_delay
       value = string.removeLeadingTrailingSpaces(download_retry_delay.getText());
       if (value.length() > 0) {
@@ -1906,7 +1893,7 @@ public class configMain {
       } else {
          config.download_retry_delay = 10;
       }
-      
+
       // metadata_entries
       value = string.removeLeadingTrailingSpaces(metadata_entries.getText());
       if (value.length() > 0) {
@@ -1914,7 +1901,7 @@ public class configMain {
       } else {
          config.metadata_entries = "";
       }
-      
+
       // httpserver_port
       value = string.removeLeadingTrailingSpaces(httpserver_port.getText());
       if (value.length() > 0) {
@@ -1930,7 +1917,7 @@ public class configMain {
       } else {
          config.httpserver_port = 8181;
       }
-      
+
       // httpserver_cache
       value = string.removeLeadingTrailingSpaces(httpserver_cache.getText());
       if (value.length() == 0) {
@@ -1943,7 +1930,7 @@ public class configMain {
          }
       }
       config.httpserver_cache = value;
-            
+
       // download_delay
       value = string.removeLeadingTrailingSpaces(download_delay.getText());
       if (value.length() > 0) {
@@ -1959,49 +1946,49 @@ public class configMain {
       } else {
          config.download_delay = 10;
       }
-      
+
       // autoskip_enabled
       if (autoskip_enabled.isSelected())
          config.autoskip_enabled = 1;
       else
          config.autoskip_enabled = 0;
-      
+
       // autoskip_import
       if (autoskip_import.isSelected())
          config.autoskip_import = 1;
       else
          config.autoskip_import = 0;
-      
+
       // autoskip_cutonly
       if (autoskip_cutonly.isSelected())
          config.autoskip_cutonly = 1;
       else
          config.autoskip_cutonly = 0;
-      
+
       // autoskip_prune
       if (autoskip_prune.isSelected())
          config.autoskip_prune = 1;
       else
          config.autoskip_prune = 0;
-      
+
       // autoskip_batch_standby
       if (autoskip_batch_standby.isSelected())
          config.autoskip_batch_standby = 1;
       else
          config.autoskip_batch_standby = 0;
-      
+
       // autoskip_indicate_skip
       if (autoskip_indicate_skip.isSelected())
          config.autoskip_indicate_skip = 1;
       else
          config.autoskip_indicate_skip = 0;
-      
+
       // autoskip_jumpToEnd
       if (autoskip_jumpToEnd.isSelected())
          config.autoskip_jumpToEnd = 1;
       else
          config.autoskip_jumpToEnd = 0;
-      
+
       // autoskip_padding_start
       value = string.removeLeadingTrailingSpaces(autoskip_padding_start.getText());
       if (value.length() > 0) {
@@ -2017,7 +2004,7 @@ public class configMain {
       } else {
          config.autoskip_padding_start = 0;
       }
-      
+
       // autoskip_padding_stop
       value = string.removeLeadingTrailingSpaces(autoskip_padding_stop.getText());
       if (value.length() > 0) {
@@ -2033,7 +2020,7 @@ public class configMain {
       } else {
          config.autoskip_padding_stop = 0;
       }
-      
+
       // autoskip_chan_off
       value = string.removeLeadingTrailingSpaces(autoskip_chan_off.getText());
       if (value.length() > 0) {
@@ -2041,7 +2028,7 @@ public class configMain {
       } else {
          config.autoskip_chan_off = "0";
       }
-      
+
       // autoskip_chan_on
       value = string.removeLeadingTrailingSpaces(autoskip_chan_on.getText());
       if (value.length() > 0) {
@@ -2049,7 +2036,7 @@ public class configMain {
       } else {
          config.autoskip_chan_on = "1";
       }
-      
+
       // autoLogSizeMB
       value = string.removeLeadingTrailingSpaces(autoLogSizeMB.getText());
       if (value.length() > 0) {
@@ -2060,7 +2047,7 @@ public class configMain {
                log.error("Should be integer > 0... Setting to 10");
                config.autoLogSizeMB = 10;
                autoLogSizeMB.setText("" + config.autoLogSizeMB);
-               errors++;               
+               errors++;
             }
          } catch(NumberFormatException e) {
             textFieldError(autoLogSizeMB, "Illegal setting for auto log file size limit (MB): '" + value + "'");
@@ -2072,7 +2059,7 @@ public class configMain {
       } else {
          config.autoLogSizeMB = 10;
       }
-      
+
       // toolTipsDelay
       value = string.removeLeadingTrailingSpaces(toolTipsDelay.getText());
       if (value.length() > 0) {
@@ -2089,7 +2076,7 @@ public class configMain {
       } else {
          config.toolTipsDelay = 2;
       }
-      
+
       // toolTipsTimeout
       value = string.removeLeadingTrailingSpaces(toolTipsTimeout.getText());
       if (value.length() > 0) {
@@ -2106,7 +2093,7 @@ public class configMain {
       } else {
          config.toolTipsTimeout = 20;
       }
-      
+
       // pyTivo_host
       /*value = string.removeLeadingTrailingSpaces(pyTivo_host.getText());
       if (value.length() == 0) {
@@ -2114,7 +2101,7 @@ public class configMain {
          value = "localhost";
       }
       config.pyTivo_host = value;*/
-      
+
       // web_query
       value = string.removeLeadingTrailingSpaces(web_query.getText());
       if (value.length() == 0) {
@@ -2122,7 +2109,7 @@ public class configMain {
          value = "http://www.imdb.com/find?s=all&q=";
       }
       config.web_query = value;
-      
+
       // web_browser
       value = string.removeLeadingTrailingSpaces(web_browser.getText());
       if (value.length() == 0) {
@@ -2130,7 +2117,7 @@ public class configMain {
          value = "";
       }
       config.web_browser = value;
-      
+
       // tivo_username
       value = string.removeLeadingTrailingSpaces(tivo_username.getText());
       if (value.length() == 0) {
@@ -2138,7 +2125,7 @@ public class configMain {
          value = "";
       }
       config.setTivoUsername(value);
-      
+
       // tivo_password
       value = string.removeLeadingTrailingSpaces(tivo_password.getText());
       if (value.length() == 0) {
@@ -2146,7 +2133,7 @@ public class configMain {
          value = "";
       }
       config.setTivoPassword(value);
-      
+
       // pyTivo_config
       /*value = string.removeLeadingTrailingSpaces(pyTivo_config.getText());
       if (value.length() == 0) {
@@ -2154,22 +2141,22 @@ public class configMain {
          value = "";
       }
       config.pyTivo_config = value;*/
-      
+
       // pyTivo_tivo
       //config.pyTivo_tivo = pyTivo_tivo.getValue();
-      
+
       // pyTivo_files
       //config.pyTivo_files = pyTivo_files.getValue();
-      
+
       // metadata_files
-      config.metadata_files = metadata_files.getValue();
-      
+      config.metadata_files = (String)metadata_files.getSelectedItem();
+
       // lookAndFeel
-      config.lookAndFeel = lookAndFeel.getValue();
-      
+      config.lookAndFeel = (String)lookAndFeel.getSelectedItem();
+
       // autotune settings
-      if (autotune_tivoName != null && autotune_tivoName.getItems().size() > 0) {
-         name = autotune_tivoName.getValue();
+      if (autotune_tivoName != null && autotune_tivoName.getItemCount() > 0) {
+         name = (String)autotune_tivoName.getSelectedItem();
          if (name != null) {
             if (autotune_enabled.isSelected())
                autotune.enable(name);
@@ -2181,78 +2168,78 @@ public class configMain {
             config.autotune.get(name).put("chan2", string.removeLeadingTrailingSpaces(autotune_chan2.getText()));
          }
       }
-      
+
       return errors;
    }
 
-   private static void create(Stage frame) {
+   private static void create(JFrame frame) {
       debug.print("frame=" + frame);
-      encode_output_dir = new TextField(); encode_output_dir.setPrefWidth(30);
-      textbg_default = encode_output_dir.getStyle();
-      mpeg_cut_dir = new TextField(); mpeg_cut_dir.setPrefWidth(30);
-      mpeg_output_dir = new TextField(); mpeg_output_dir.setPrefWidth(30);
-      qsfixDir = new TextField(); qsfixDir.setPrefWidth(30);
-      tivo_output_dir = new TextField(); tivo_output_dir.setPrefWidth(30);
-      file_naming = new TextField(); file_naming.setPrefWidth(30);
-      files_path = new TextField(); files_path.setPrefWidth(30);
-      tivodecode = new TextField(); tivodecode.setPrefWidth(30);
-      dsd = new TextField(); dsd.setPrefWidth(30);
-      ffmpeg = new TextField(); ffmpeg.setPrefWidth(30);
-      mediainfo = new TextField(); mediainfo.setPrefWidth(30);
-      mencoder = new TextField(); mencoder.setPrefWidth(30);
-      handbrake = new TextField(); handbrake.setPrefWidth(30);
-      comskip = new TextField(); comskip.setPrefWidth(30);
-      comskip_ini = new TextField(); comskip_ini.setPrefWidth(30);
-      t2extract = new TextField(); t2extract.setPrefWidth(30);
-      //t2extract_args = new TextField(); t2extract_args.setPrefWidth(30);
-      ccextractor = new TextField(); ccextractor.setPrefWidth(30);
-      AtomicParsley = new TextField(); AtomicParsley.setPrefWidth(30);
-      customCommand = new TextField(); customCommand.setPrefWidth(30);
-      web_query = new TextField(); web_query.setPrefWidth(30);
-      web_browser = new TextField(); web_browser.setPrefWidth(30);
-      tivo_username = new TextField(); tivo_username.setPrefWidth(30);
-      tivo_password = new TextField(); tivo_password.setPrefWidth(30);
-      //pyTivo_config = new TextField(); pyTivo_config.setPrefWidth(30);
-      
-      VRDexe = new TextField(); VRDexe.setPrefWidth(20);
-      tivo_name = new TextField(); tivo_name.setPrefWidth(20);
-      tivo_ip = new TextField(); tivo_ip.setPrefWidth(20);
-      share_name = new TextField(); share_name.setPrefWidth(20);
-      share_dir = new TextField(); share_dir.setPrefWidth(20);
-      autotune_channel_interval = new TextField(); autotune_channel_interval.setPrefWidth(20);
-      autotune_button_interval = new TextField(); autotune_button_interval.setPrefWidth(20);
-      autotune_chan1 = new TextField(); autotune_chan1.setPrefWidth(20);
-      autotune_chan2 = new TextField(); autotune_chan2.setPrefWidth(20);
-      //pyTivo_host = new TextField(); pyTivo_host.setPrefWidth(20);
-      
-      MAK = new TextField(); MAK.setPrefWidth(15);
-      wan_http_port = new TextField(); wan_http_port.setPrefWidth(15);
-      wan_https_port = new TextField(); wan_https_port.setPrefWidth(15);
-      wan_rpc_port = new TextField(); wan_rpc_port.setPrefWidth(15);
-      limit_npl_fetches = new TextField(); limit_npl_fetches.setPrefWidth(15);
-      active_job_limit = new TextField(); active_job_limit.setPrefWidth(15);
-      toolTipsDelay = new TextField(); toolTipsDelay.setPrefWidth(15);
-      toolTipsTimeout = new TextField(); toolTipsTimeout.setPrefWidth(15);
-      cpu_cores = new TextField(); cpu_cores.setPrefWidth(15);
-      download_tries = new TextField(); download_tries.setPrefWidth(15);
-      download_retry_delay = new TextField(); download_retry_delay.setPrefWidth(15);
-      download_delay = new TextField(); download_delay.setPrefWidth(15);
-      autoskip_padding_start = new TextField(); autoskip_padding_start.setPrefWidth(15);
-      autoskip_padding_stop = new TextField(); autoskip_padding_stop.setPrefWidth(15);
-      autoskip_chan_off = new TextField(); autoskip_chan_off.setPrefWidth(15);
-      autoskip_chan_on = new TextField(); autoskip_chan_on.setPrefWidth(15);
-      metadata_entries = new TextField(); metadata_entries.setPrefWidth(15);
-      httpserver_port = new TextField(); httpserver_port.setPrefWidth(15);
-      httpserver_cache = new TextField(); httpserver_cache.setPrefWidth(15);
-      autoLogSizeMB = new TextField(); autoLogSizeMB.setPrefWidth(15);
-      
-      disk_space = new TextField(); disk_space.setPrefWidth(5);
-      FontSize = new TextField(); FontSize.setPrefWidth(5);
-      
-      Label tivos_label = new Label();
-      tivos = new ChoiceBox<String>();
-      tivos.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
+      encode_output_dir = new JTextField(); encode_output_dir.setColumns(30);
+      mpeg_cut_dir = new JTextField(); mpeg_cut_dir.setColumns(30);
+      mpeg_output_dir = new JTextField(); mpeg_output_dir.setColumns(30);
+      qsfixDir = new JTextField(); qsfixDir.setColumns(30);
+      tivo_output_dir = new JTextField(); tivo_output_dir.setColumns(30);
+      file_naming = new JTextField(); file_naming.setColumns(30);
+      files_path = new JTextField(); files_path.setColumns(30);
+      tivodecode = new JTextField(); tivodecode.setColumns(30);
+      dsd = new JTextField(); dsd.setColumns(30);
+      ffmpeg = new JTextField(); ffmpeg.setColumns(30);
+      mediainfo = new JTextField(); mediainfo.setColumns(30);
+      mencoder = new JTextField(); mencoder.setColumns(30);
+      handbrake = new JTextField(); handbrake.setColumns(30);
+      comskip = new JTextField(); comskip.setColumns(30);
+      comskip_ini = new JTextField(); comskip_ini.setColumns(30);
+      t2extract = new JTextField(); t2extract.setColumns(30);
+      //t2extract_args = new JTextField(); t2extract_args.setColumns(30);
+      ccextractor = new JTextField(); ccextractor.setColumns(30);
+      AtomicParsley = new JTextField(); AtomicParsley.setColumns(30);
+      customCommand = new JTextField(); customCommand.setColumns(30);
+      web_query = new JTextField(); web_query.setColumns(30);
+      web_browser = new JTextField(); web_browser.setColumns(30);
+      tivo_username = new JTextField(); tivo_username.setColumns(30);
+      tivo_password = new JTextField(); tivo_password.setColumns(30);
+      //pyTivo_config = new JTextField(); pyTivo_config.setColumns(30);
+
+      VRDexe = new JTextField(); VRDexe.setColumns(20);
+      tivo_name = new JTextField(); tivo_name.setColumns(20);
+      tivo_ip = new JTextField(); tivo_ip.setColumns(20);
+      share_name = new JTextField(); share_name.setColumns(20);
+      share_dir = new JTextField(); share_dir.setColumns(20);
+      autotune_channel_interval = new JTextField(); autotune_channel_interval.setColumns(20);
+      autotune_button_interval = new JTextField(); autotune_button_interval.setColumns(20);
+      autotune_chan1 = new JTextField(); autotune_chan1.setColumns(20);
+      autotune_chan2 = new JTextField(); autotune_chan2.setColumns(20);
+      //pyTivo_host = new JTextField(); pyTivo_host.setColumns(20);
+
+      MAK = new JTextField(); MAK.setColumns(15);
+      wan_http_port = new JTextField(); wan_http_port.setColumns(15);
+      wan_https_port = new JTextField(); wan_https_port.setColumns(15);
+      wan_rpc_port = new JTextField(); wan_rpc_port.setColumns(15);
+      limit_npl_fetches = new JTextField(); limit_npl_fetches.setColumns(15);
+      active_job_limit = new JTextField(); active_job_limit.setColumns(15);
+      toolTipsDelay = new JTextField(); toolTipsDelay.setColumns(15);
+      toolTipsTimeout = new JTextField(); toolTipsTimeout.setColumns(15);
+      cpu_cores = new JTextField(); cpu_cores.setColumns(15);
+      download_tries = new JTextField(); download_tries.setColumns(15);
+      download_retry_delay = new JTextField(); download_retry_delay.setColumns(15);
+      download_delay = new JTextField(); download_delay.setColumns(15);
+      autoskip_padding_start = new JTextField(); autoskip_padding_start.setColumns(15);
+      autoskip_padding_stop = new JTextField(); autoskip_padding_stop.setColumns(15);
+      autoskip_chan_off = new JTextField(); autoskip_chan_off.setColumns(15);
+      autoskip_chan_on = new JTextField(); autoskip_chan_on.setColumns(15);
+      metadata_entries = new JTextField(); metadata_entries.setColumns(15);
+      httpserver_port = new JTextField(); httpserver_port.setColumns(15);
+      httpserver_cache = new JTextField(); httpserver_cache.setColumns(15);
+      autoLogSizeMB = new JTextField(); autoLogSizeMB.setColumns(15);
+
+      disk_space = new JTextField(); disk_space.setColumns(5);
+      FontSize = new JTextField(); FontSize.setColumns(5);
+
+      JLabel tivos_label = new JLabel();
+      tivos = new JComboBox<String>();
+      tivos.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)tivos.getSelectedItem();
             if (newVal != null) {
                updateWanSettings(newVal);
                updateLimitNplSettings(newVal);
@@ -2260,189 +2247,190 @@ public class configMain {
             }
          }
       });
-      
-      Label shares_label = new Label();
-      shares = new ChoiceBox<String>();
 
-      add = new Button();
-      del = new Button();
-      domain_token = new Button();
-      share_add = new Button();
-      share_del = new Button();
-      Label VRDexe_label = new Label();
-      Label tivo_name_label = new Label();
-      Label tivo_ip_label = new Label();
-      Label share_name_label = new Label();
-      Label share_dir_label = new Label();
-      Label autotune_channel_interval_label = new Label();
-      Label autotune_button_interval_label = new Label();
-      Label autotune_chan1_label = new Label();
-      Label autotune_chan2_label = new Label();
-      Label autotune_tivoName_label = new Label();
-      Label files_path_label = new Label();
-      remove_tivo = new CheckBox();
-      remove_comcut = new CheckBox();
-      remove_comcut_mpeg = new CheckBox();
-      remove_mpeg = new CheckBox();
-      QSFixBackupMpegFile = new CheckBox();
-      download_check_length = new CheckBox();
-      UseAdscan = new CheckBox();
-      VRD = new CheckBox();
-      VrdReview = new CheckBox();
-      comskip_review = new CheckBox();
-      VrdReview_noCuts = new CheckBox();
-      VrdQsFilter = new CheckBox();
-      VrdDecrypt = new CheckBox();
-      DsdDecrypt = new CheckBox();
-      tivolibreDecrypt = new CheckBox();
-      tivolibreCompat = new CheckBox();
-      httpserver_enable = new CheckBox();
-      httpserver_share_filter = new CheckBox();
-      VrdEncode = new CheckBox();
-      VrdAllowMultiple = new CheckBox();
-      VrdCombineCutEncode = new CheckBox();
-      VrdQsfixMpeg2ps = new CheckBox();
-      VrdOneAtATime = new CheckBox();
-      TivoWebPlusDelete = new CheckBox();
-      rpcDelete = new CheckBox();
-      rpcOld = new CheckBox();
-      HideProtectedFiles = new CheckBox();
-      TiVoSort = new CheckBox();
-      OverwriteFiles = new CheckBox();
-      DeleteFailedDownloads = new CheckBox();
-      combine_download_decrypt = new CheckBox();
-      single_download = new CheckBox();
-      rpcnpl = new CheckBox();
-      enableRpc = new CheckBox();
-      persistQueue = new CheckBox();
-      Label MAK_label = new Label();
-      Label FontSize_label = new Label();
-      Label file_naming_label = new Label();
-      Label tivo_output_dir_label = new Label();
-      Label mpeg_output_dir_label = new Label();
-      Label qsfixDir_label = new Label();
-      Label mpeg_cut_dir_label = new Label();
-      Label encode_output_dir_label = new Label();
-      Label tivodecode_label = new Label();
-      Label dsd_label = new Label();
-      Label ffmpeg_label = new Label();
-      Label mediainfo_label = new Label();
-      Label mencoder_label = new Label();
-      Label handbrake_label = new Label();
-      Label comskip_label = new Label();
-      Label comskip_ini_label = new Label();
-      Label wan_http_port_label = new Label();
-      Label wan_https_port_label = new Label();
-      Label wan_rpc_port_label = new Label();
-      Label limit_npl_fetches_label = new Label();
-      Label active_job_limit_label = new Label();
-      Label t2extract_label = new Label();
-      //Label t2extract_args_label = new Label();
-      Label ccextractor_label = new Label();
-      Label AtomicParsley_label = new Label();
-      Label customCommand_label = new Label();
-      Label customFiles_label = new Label();
-      Label cpu_cores_label = new Label();
-      Label download_tries_label = new Label();
-      Label download_retry_delay_label = new Label();
-      Label download_delay_label = new Label();
-      Label autoskip_padding_start_label = new Label();
-      Label autoskip_padding_stop_label = new Label();
-      Label autoskip_chan_off_label = new Label();
-      Label autoskip_chan_on_label = new Label();
-      Label metadata_entries_label = new Label();
-      Label httpserver_port_label = new Label();
-      Label httpserver_cache_label = new Label();
-      Label autoLogSizeMB_label = new Label();
-      Label available_keywords_label = new Label();
-      //Label pyTivo_host_label = new Label();
-      Label web_query_label = new Label();
-      Label web_browser_label = new Label();
-      Label tivo_username_label = new Label();
-      Label tivo_password_label = new Label();
-      //Label pyTivo_config_label = new Label();
-      //Label pyTivo_tivo_label = new Label();
-      Label MinChanDigits_label = new Label();
-      //Label pyTivo_files_label = new Label();
-      Label metadata_files_label = new Label();
-      Label lookAndFeel_label = new Label();
-      MinChanDigits = new ChoiceBox<String>();
-      //pyTivo_tivo = new ChoiceBox<String>();
-      //pyTivo_files = new ChoiceBox<String>();
-      metadata_files = new ChoiceBox<String>();
-      lookAndFeel = new ChoiceBox<String>();
-      keywords = new ChoiceBox<String>();
-      customFiles = new ChoiceBox<String>();
-      autotune_tivoName = new ChoiceBox<String>();
-      check_space = new CheckBox();
-      Label disk_space_label = new Label();
-      beacon = new CheckBox();
-      UseOldBeacon = new CheckBox();
-      npl_when_started = new CheckBox();
-      showHistoryInTable = new CheckBox();
-      download_time_estimate = new CheckBox();
-      toolTips = new CheckBox();
-      slingBox = new CheckBox();
-      tableColAutoSize = new CheckBox();
-      jobMonitorFullPaths = new CheckBox();
-      autotune_enabled = new CheckBox();
-      autoskip_enabled = new CheckBox();
-      autoskip_import = new CheckBox();
-      autoskip_cutonly = new CheckBox();
-      autoskip_prune = new CheckBox();
-      autoskip_batch_standby = new CheckBox();
-      autoskip_indicate_skip = new CheckBox();
-      autoskip_jumpToEnd = new CheckBox();
-      Label toolTipsDelay_label = new Label();
-      Label toolTipsTimeout_label = new Label();
-      OK = new Button();
-      CANCEL = new Button();
-      autotune_test = new Button();
-      FileBrowser = new FileChooser(); FileBrowser.setInitialDirectory(new File(config.programDir));
-      FileBrowser.setTitle("Choose File");
-      DirBrowser = new DirectoryChooser(); DirBrowser.setInitialDirectory(new File(config.programDir));
-      DirBrowser.setTitle("Choose Directory");
+      JLabel shares_label = new JLabel();
+      shares = new JComboBox<String>();
+
+      add = new JButton();
+      del = new JButton();
+      domain_token = new JButton();
+      share_add = new JButton();
+      share_del = new JButton();
+      JLabel VRDexe_label = new JLabel();
+      JLabel tivo_name_label = new JLabel();
+      JLabel tivo_ip_label = new JLabel();
+      JLabel share_name_label = new JLabel();
+      JLabel share_dir_label = new JLabel();
+      JLabel autotune_channel_interval_label = new JLabel();
+      JLabel autotune_button_interval_label = new JLabel();
+      JLabel autotune_chan1_label = new JLabel();
+      JLabel autotune_chan2_label = new JLabel();
+      JLabel autotune_tivoName_label = new JLabel();
+      JLabel files_path_label = new JLabel();
+      remove_tivo = new JCheckBox();
+      remove_comcut = new JCheckBox();
+      remove_comcut_mpeg = new JCheckBox();
+      remove_mpeg = new JCheckBox();
+      QSFixBackupMpegFile = new JCheckBox();
+      download_check_length = new JCheckBox();
+      UseAdscan = new JCheckBox();
+      VRD = new JCheckBox();
+      VrdReview = new JCheckBox();
+      comskip_review = new JCheckBox();
+      VrdReview_noCuts = new JCheckBox();
+      VrdQsFilter = new JCheckBox();
+      VrdDecrypt = new JCheckBox();
+      DsdDecrypt = new JCheckBox();
+      tivolibreDecrypt = new JCheckBox();
+      tivolibreCompat = new JCheckBox();
+      httpserver_enable = new JCheckBox();
+      httpserver_share_filter = new JCheckBox();
+      VrdEncode = new JCheckBox();
+      VrdAllowMultiple = new JCheckBox();
+      VrdCombineCutEncode = new JCheckBox();
+      VrdQsfixMpeg2ps = new JCheckBox();
+      VrdOneAtATime = new JCheckBox();
+      TivoWebPlusDelete = new JCheckBox();
+      rpcDelete = new JCheckBox();
+      rpcOld = new JCheckBox();
+      HideProtectedFiles = new JCheckBox();
+      TiVoSort = new JCheckBox();
+      OverwriteFiles = new JCheckBox();
+      DeleteFailedDownloads = new JCheckBox();
+      combine_download_decrypt = new JCheckBox();
+      single_download = new JCheckBox();
+      rpcnpl = new JCheckBox();
+      enableRpc = new JCheckBox();
+      persistQueue = new JCheckBox();
+      JLabel MAK_label = new JLabel();
+      JLabel FontSize_label = new JLabel();
+      JLabel file_naming_label = new JLabel();
+      JLabel tivo_output_dir_label = new JLabel();
+      JLabel mpeg_output_dir_label = new JLabel();
+      JLabel qsfixDir_label = new JLabel();
+      JLabel mpeg_cut_dir_label = new JLabel();
+      JLabel encode_output_dir_label = new JLabel();
+      JLabel tivodecode_label = new JLabel();
+      JLabel dsd_label = new JLabel();
+      JLabel ffmpeg_label = new JLabel();
+      JLabel mediainfo_label = new JLabel();
+      JLabel mencoder_label = new JLabel();
+      JLabel handbrake_label = new JLabel();
+      JLabel comskip_label = new JLabel();
+      JLabel comskip_ini_label = new JLabel();
+      JLabel wan_http_port_label = new JLabel();
+      JLabel wan_https_port_label = new JLabel();
+      JLabel wan_rpc_port_label = new JLabel();
+      JLabel limit_npl_fetches_label = new JLabel();
+      JLabel active_job_limit_label = new JLabel();
+      JLabel t2extract_label = new JLabel();
+      //JLabel t2extract_args_label = new JLabel();
+      JLabel ccextractor_label = new JLabel();
+      JLabel AtomicParsley_label = new JLabel();
+      JLabel customCommand_label = new JLabel();
+      JLabel customFiles_label = new JLabel();
+      JLabel cpu_cores_label = new JLabel();
+      JLabel download_tries_label = new JLabel();
+      JLabel download_retry_delay_label = new JLabel();
+      JLabel download_delay_label = new JLabel();
+      JLabel autoskip_padding_start_label = new JLabel();
+      JLabel autoskip_padding_stop_label = new JLabel();
+      JLabel autoskip_chan_off_label = new JLabel();
+      JLabel autoskip_chan_on_label = new JLabel();
+      JLabel metadata_entries_label = new JLabel();
+      JLabel httpserver_port_label = new JLabel();
+      JLabel httpserver_cache_label = new JLabel();
+      JLabel autoLogSizeMB_label = new JLabel();
+      JLabel available_keywords_label = new JLabel();
+      //JLabel pyTivo_host_label = new JLabel();
+      JLabel web_query_label = new JLabel();
+      JLabel web_browser_label = new JLabel();
+      JLabel tivo_username_label = new JLabel();
+      JLabel tivo_password_label = new JLabel();
+      //JLabel pyTivo_config_label = new JLabel();
+      //JLabel pyTivo_tivo_label = new JLabel();
+      JLabel MinChanDigits_label = new JLabel();
+      //JLabel pyTivo_files_label = new JLabel();
+      JLabel metadata_files_label = new JLabel();
+      JLabel lookAndFeel_label = new JLabel();
+      MinChanDigits = new JComboBox<String>();
+      //pyTivo_tivo = new JComboBox<String>();
+      //pyTivo_files = new JComboBox<String>();
+      metadata_files = new JComboBox<String>();
+      lookAndFeel = new JComboBox<String>();
+      keywords = new JComboBox<String>();
+      customFiles = new JComboBox<String>();
+      autotune_tivoName = new JComboBox<String>();
+      check_space = new JCheckBox();
+      JLabel disk_space_label = new JLabel();
+      beacon = new JCheckBox();
+      UseOldBeacon = new JCheckBox();
+      npl_when_started = new JCheckBox();
+      showHistoryInTable = new JCheckBox();
+      download_time_estimate = new JCheckBox();
+      toolTips = new JCheckBox();
+      slingBox = new JCheckBox();
+      tableColAutoSize = new JCheckBox();
+      jobMonitorFullPaths = new JCheckBox();
+      autotune_enabled = new JCheckBox();
+      autoskip_enabled = new JCheckBox();
+      autoskip_import = new JCheckBox();
+      autoskip_cutonly = new JCheckBox();
+      autoskip_prune = new JCheckBox();
+      autoskip_batch_standby = new JCheckBox();
+      autoskip_indicate_skip = new JCheckBox();
+      autoskip_jumpToEnd = new JCheckBox();
+      JLabel toolTipsDelay_label = new JLabel();
+      JLabel toolTipsTimeout_label = new JLabel();
+      OK = new JButton();
+      CANCEL = new JButton();
+      autotune_test = new JButton();
+      FileBrowser = new JFileChooser(); FileBrowser.setCurrentDirectory(new File(config.programDir));
+      FileBrowser.setDialogTitle("Choose File");
+      DirBrowser = new JFileChooser(); DirBrowser.setCurrentDirectory(new File(config.programDir));
+      DirBrowser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      DirBrowser.setDialogTitle("Choose Directory");
 
       tivos_label.setText("Tivos");
-      
-      add.setText("ADD"); 
-      add.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+
+      add.setText("ADD");
+      add.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             addCB();
          }
       });
-      
-      del.setText("DEL"); 
-      del.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+
+      del.setText("DEL");
+      del.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             delCB();
          }
       });
-      
-      domain_token.setText("Refresh Token"); 
-      domain_token.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+
+      domain_token.setText("Refresh Token");
+      domain_token.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
         	 domainTokenCB();
          }
       });
-      
-      
-      share_add.setText("ADD"); 
-      share_add.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+
+
+      share_add.setText("ADD");
+      share_add.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             share_addCB();
          }
       });
-      
-      share_del.setText("DEL"); 
-      share_del.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+
+      share_del.setText("DEL");
+      share_del.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             share_delCB();
          }
       });
-      
-      VRDexe_label.setText("VideoRedo executable"); 
-      tivo_name_label.setText("Tivo Name"); 
+
+      VRDexe_label.setText("VideoRedo executable");
+      tivo_name_label.setText("Tivo Name");
       tivo_ip_label.setText("Tivo IP#");
       share_name_label.setText("Share Name");
       share_dir_label.setText("Share Directory");
@@ -2451,8 +2439,8 @@ public class configMain {
       autotune_chan1_label.setText("Channel number for tuner 1");
       autotune_chan2_label.setText("Channel number for tuner 2");
       autotune_tivoName_label.setText("TiVo to Autotune");
-      files_path_label.setText("FILES Default Path"); 
-      remove_tivo.setText("Remove .TiVo after file decrypt"); 
+      files_path_label.setText("FILES Default Path");
+      remove_tivo.setText("Remove .TiVo after file decrypt");
       remove_comcut.setText("Remove Ad Detect files after Ad Cut");
       remove_comcut_mpeg.setText("Remove .mpg file after Ad Cut");
       remove_mpeg.setText("Remove .mpg file after encode");
@@ -2490,32 +2478,32 @@ public class configMain {
       MAK_label.setText("MAK");
       shares_label.setText("Shares");
       FontSize_label.setText("GUI Font Size");
-      file_naming_label.setText("File Naming"); 
-      tivo_output_dir_label.setText(".TiVo Output Dir"); 
+      file_naming_label.setText("File Naming");
+      tivo_output_dir_label.setText(".TiVo Output Dir");
       mpeg_output_dir_label.setText(".mpg Output Dir");
       qsfixDir_label.setText("QS Fix Output Dir");
-      mpeg_cut_dir_label.setText(".mpg Cut Dir"); 
-      encode_output_dir_label.setText("Encode Output Dir"); 
-      tivodecode_label.setText("tivodecode"); 
-      dsd_label.setText("dsd"); 
-      ffmpeg_label.setText("ffmpeg"); 
-      mediainfo_label.setText("mediainfo cli"); 
-      mencoder_label.setText("mencoder"); 
-      handbrake_label.setText("handbrake"); 
-      comskip_label.setText("comskip"); 
-      comskip_ini_label.setText("comskip.ini"); 
-      wan_http_port_label.setText("wan http port"); 
+      mpeg_cut_dir_label.setText(".mpg Cut Dir");
+      encode_output_dir_label.setText("Encode Output Dir");
+      tivodecode_label.setText("tivodecode");
+      dsd_label.setText("dsd");
+      ffmpeg_label.setText("ffmpeg");
+      mediainfo_label.setText("mediainfo cli");
+      mencoder_label.setText("mencoder");
+      handbrake_label.setText("handbrake");
+      comskip_label.setText("comskip");
+      comskip_ini_label.setText("comskip.ini");
+      wan_http_port_label.setText("wan http port");
       wan_https_port_label.setText("wan https port");
-      wan_rpc_port_label.setText("wan rpc port"); 
+      wan_rpc_port_label.setText("wan rpc port");
       limit_npl_fetches_label.setText("limit # of npl fetches");
-      active_job_limit_label.setText("active job limit"); 
-      t2extract_label.setText("ccextractor"); 
+      active_job_limit_label.setText("active job limit");
+      t2extract_label.setText("ccextractor");
       //t2extract_args_label.setText("t2extract extra arguments");
       ccextractor_label.setText("ccextractor");
       AtomicParsley_label.setText("AtomicParsley");
       customCommand_label.setText("custom command");
-      check_space.setText("Check Available Disk Space");      
-      available_keywords_label.setText("Available keywords:"); 
+      check_space.setText("Check Available Disk Space");
+      available_keywords_label.setText("Available keywords:");
       cpu_cores_label.setText("encoding cpu cores");
       download_tries_label.setText("# download attempts");
       download_retry_delay_label.setText("seconds between download retry attempts");
@@ -2540,14 +2528,17 @@ public class configMain {
       lookAndFeel_label.setText("look and feel");
       MinChanDigits_label.setText("Min # Channel Digits");
 
-      keywords.getItems().addAll(
+      String[] keywordsValues = {
          "[title]", "[mainTitle]", "[episodeTitle]", "[channelNum]",
          "[channel]", "[min]", "[hour]", "[wday]", "[mday]", "[month]",
-         "[monthNum]", "[year]", "[movieYear]", "[originalAirDate]", "[oad_no_dashes]", "[season]", "[episode]", 
+         "[monthNum]", "[year]", "[movieYear]", "[originalAirDate]", "[oad_no_dashes]", "[season]", "[episode]",
          "[EpisodeNumber]", "[SeriesEpNumber]", "[description]", "[tivoName]", "[startTime]", "[/]"
-      );
-      keywords.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
+      };
+      for (String s : keywordsValues)
+         keywords.addItem(s);
+      keywords.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)keywords.getSelectedItem();
             if (newVal != null) {
                keywordsCB(newVal);
             }
@@ -2555,37 +2546,45 @@ public class configMain {
       });
 
       for (String name : config.getNplTivoNames())
-         autotune_tivoName.getItems().add(name);
-      autotune_tivoName.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
+         autotune_tivoName.addItem(name);
+      autotune_tivoName.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)autotune_tivoName.getSelectedItem();
             if (newVal != null) {
                autotune_tivoNameCB(newVal);
             }
          }
       });
-      
-      MinChanDigits.getItems().addAll("1","2","3","4");
-      MinChanDigits.getSelectionModel().select(0);
-      
+
+      MinChanDigits.addItem("1");
+      MinChanDigits.addItem("2");
+      MinChanDigits.addItem("3");
+      MinChanDigits.addItem("4");
+      MinChanDigits.setSelectedIndex(0);
+
       /*for (String name : config.getNplTivoNames())
          pyTivo_tivo.getItems().add(name);
       pyTivo_tivo.getSelectionModel().select(0);
-      
+
       pyTivo_files.getItems().addAll(
          "tivoFile", "mpegFile", "mpegFile_cut", "encodeFile", "last", "all"
       );
       pyTivo_files.getSelectionModel().select(0);*/
-      
-      metadata_files.getItems().addAll(
-         "tivoFile", "mpegFile", "mpegFile_cut", "encodeFile", "last", "all"
-      );
-      metadata_files.getSelectionModel().select(0);
-      
+
+      metadata_files.addItem("tivoFile");
+      metadata_files.addItem("mpegFile");
+      metadata_files.addItem("mpegFile_cut");
+      metadata_files.addItem("encodeFile");
+      metadata_files.addItem("last");
+      metadata_files.addItem("all");
+      metadata_files.setSelectedIndex(0);
+
       for (String name : config.gui.getAvailableLooks())
-         lookAndFeel.getItems().add(name);
-      lookAndFeel.getSelectionModel().select("default.css");
-      lookAndFeel.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
+         lookAndFeel.addItem(name);
+      lookAndFeel.setSelectedItem(Theme.normalize(config.lookAndFeel));
+      lookAndFeel.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)lookAndFeel.getSelectedItem();
             if (newVal != null) {
                config.gui.setLookAndFeel(newVal);
             }
@@ -2593,29 +2592,33 @@ public class configMain {
       });
 
       customFiles_label.setText("Available file args:");
-      customFiles.getItems().addAll(
-         "[tivoFile]", "[metaFile]", "[mpegFile]", "[mpegFile_cut]", "[srtFile]", "[encodeFile]",
-         "[downloadURL]"
-      );
-      customFiles.getSelectionModel().select(0);
-      customFiles.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
+      customFiles.addItem("[tivoFile]");
+      customFiles.addItem("[metaFile]");
+      customFiles.addItem("[mpegFile]");
+      customFiles.addItem("[mpegFile_cut]");
+      customFiles.addItem("[srtFile]");
+      customFiles.addItem("[encodeFile]");
+      customFiles.addItem("[downloadURL]");
+      customFiles.setSelectedIndex(0);
+      customFiles.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)customFiles.getSelectedItem();
             if (newVal != null) {
-               customFilesCB(newVal); 
+               customFilesCB(newVal);
             }
          }
       });
 
-      disk_space_label.setText("Min requested space (GB)"); 
+      disk_space_label.setText("Min requested space (GB)");
       beacon.setText("Look for Tivos on network");
       UseOldBeacon.setText("Detect with TiVo Beacon instead of Bonjour");
-      
+
       npl_when_started.setText("Start NPL jobs when starting kmttg GUI");
-      
+
       showHistoryInTable.setText("Highlight processed shows in history file");
-      
+
       download_time_estimate.setText("Show estimated time remaining for downloads");
-      
+
       toolTips.setText("Display toolTips");
       toolTipsDelay_label.setText("toolTip open delay (secs)");
       toolTipsTimeout_label.setText("toolTip timeout (secs)");
@@ -2623,299 +2626,333 @@ public class configMain {
       slingBox.setText("Show Slingbox capture tab");
 
       tableColAutoSize.setText("Auto size table column widths");
-      
+
       jobMonitorFullPaths.setText("Show full paths in Job Monitor");
-      
+
       autotune_enabled.setText("Tune to specified channels before a download");
-      
+
       autoskip_enabled.setText("Enable AutoSkip functionality");
-      
+
       autoskip_import.setText("Automatically Import to Skip Table after Ad Detect");
-      
+
       autoskip_cutonly.setText("Only run Ad Skip/Ad Detect for shows with AutoSkip data");
-      
+
       autoskip_prune.setText("Prune Skip Table automatically after NPL refresh");
-      
+
       autoskip_batch_standby.setText("Set standby mode after batch AutoSkip from SkipMode");
-      
+
       autoskip_indicate_skip.setText("Indicate with play when skipping");
-      
+
       autoskip_jumpToEnd.setText("Jump to end of recording when last skip block entered");
-            
+
       OK.setText("OK");
-      OK.setId("button_config_ok");
-      OK.setPrefWidth(200);
-      OK.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      OK.setName("button_config_ok");
+      OK.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             okCB();
          }
       });
 
       CANCEL.setText("CANCEL");
-      CANCEL.setId("button_config_cancel");
-      CANCEL.setPrefWidth(200);
-      CANCEL.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      CANCEL.setName("button_config_cancel");
+      CANCEL.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             pos_x = dialog.getX(); pos_y = dialog.getY();
-            dialog.hide();
+            dialog.setVisible(false);
          }
       });
-      
+
       autotune_test.setText("TEST");
       //autotune_test.setBackground(Color.green);
-      autotune_test.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      autotune_test.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             autotune_testCB();
          }
       });
-      
+
       // File browser mouse double-click listeners
-      files_path.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      files_path.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = DirBrowser.showDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     files_path.setText(selectedFile.getPath());
-                  }
-               }
-            }
-         }
-      });
-      
-      tivo_output_dir.setOnMouseClicked(new EventHandler<MouseEvent>() {
-         @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
-               if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = DirBrowser.showDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     tivo_output_dir.setText(selectedFile.getPath());
+                  if (DirBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = DirBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        files_path.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      mpeg_output_dir.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      tivo_output_dir.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = DirBrowser.showDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     mpeg_output_dir.setText(selectedFile.getPath());
+                  if (DirBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = DirBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        tivo_output_dir.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      qsfixDir.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      mpeg_output_dir.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = DirBrowser.showDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     qsfixDir.setText(selectedFile.getPath());
+                  if (DirBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = DirBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        mpeg_output_dir.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      mpeg_cut_dir.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      qsfixDir.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = DirBrowser.showDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     mpeg_cut_dir.setText(selectedFile.getPath());
+                  if (DirBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = DirBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        qsfixDir.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      encode_output_dir.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      mpeg_cut_dir.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = DirBrowser.showDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     encode_output_dir.setText(selectedFile.getPath());
+                  if (DirBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = DirBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        mpeg_cut_dir.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      tivodecode.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      encode_output_dir.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     tivodecode.setText(selectedFile.getPath());
+                  if (DirBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = DirBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        encode_output_dir.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      dsd.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      tivodecode.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     dsd.setText(selectedFile.getPath());
+                  if (FileBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = FileBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        tivodecode.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      ffmpeg.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      dsd.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     ffmpeg.setText(selectedFile.getPath());
+                  if (FileBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = FileBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        dsd.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      mediainfo.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      ffmpeg.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     mediainfo.setText(selectedFile.getPath());
+                  if (FileBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = FileBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        ffmpeg.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      customCommand.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      mediainfo.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     customCommand.setText(selectedFile.getPath());
+                  if (FileBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = FileBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        mediainfo.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      mencoder.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      customCommand.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     mencoder.setText(selectedFile.getPath());
+                  if (FileBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = FileBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        customCommand.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      handbrake.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      mencoder.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     handbrake.setText(selectedFile.getPath());
+                  if (FileBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = FileBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        mencoder.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      comskip.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      handbrake.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     comskip.setText(selectedFile.getPath());
+                  if (FileBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = FileBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        handbrake.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      comskip_ini.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      comskip.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     comskip_ini.setText(selectedFile.getPath());
+                  if (FileBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = FileBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        comskip.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      t2extract.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      comskip_ini.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     t2extract.setText(selectedFile.getPath());
+                  if (FileBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = FileBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        comskip_ini.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      ccextractor.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      t2extract.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     ccextractor.setText(selectedFile.getPath());
+                  if (FileBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = FileBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        t2extract.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
          }
       });
 
-      AtomicParsley.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      ccextractor.addMouseListener(new MouseAdapter() {
          @Override
-         public void handle(MouseEvent mouseEvent) {
-            if( mouseEvent.getButton().equals(MouseButton.PRIMARY) ) {
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
                if (mouseEvent.getClickCount() == 2) {
-                  File selectedFile = FileBrowser.showOpenDialog(config.gui.getFrame());
-                  if (selectedFile != null) {
-                     AtomicParsley.setText(selectedFile.getPath());
+                  if (FileBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = FileBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        ccextractor.setText(selectedFile.getPath());
+                     }
+                  }
+               }
+            }
+         }
+      });
+
+      AtomicParsley.addMouseListener(new MouseAdapter() {
+         @Override
+         public void mouseClicked(MouseEvent mouseEvent) {
+            if( mouseEvent.getButton() == MouseEvent.BUTTON1 ) {
+               if (mouseEvent.getClickCount() == 2) {
+                  if (FileBrowser.showOpenDialog(config.gui.getFrame()) == JFileChooser.APPROVE_OPTION) {
+                     File selectedFile = FileBrowser.getSelectedFile();
+                     if (selectedFile != null) {
+                        AtomicParsley.setText(selectedFile.getPath());
+                     }
                   }
                }
             }
@@ -2945,645 +2982,608 @@ public class configMain {
       int gy = 0;
 
       // Tivos Panel
-      GridPane tivo_panel = new GridPane();
-      tivo_panel.setAlignment(Pos.CENTER);
-      tivo_panel.setVgap(5);
-      tivo_panel.setHgap(5);
+      JPanel tivo_panel = new JPanel(new MigLayout("gapx 5, gapy 5"));
       // npl_when_started
       gy = 0;
-      tivo_panel.add(npl_when_started, 1, gy);
-      
+      tivo_panel.add(npl_when_started, "cell 1 " + gy);
+
       // Look for Tivos on network
       gy++;
-      tivo_panel.add(beacon, 1, gy);
-      
+      tivo_panel.add(beacon, "cell 1 " + gy);
+
       // UseOldBeacon
       gy++;
-      tivo_panel.add(UseOldBeacon, 1, gy);
-      
-      // Tivo ChoiceBox
+      tivo_panel.add(UseOldBeacon, "cell 1 " + gy);
+
+      // Tivo JComboBox
       gy++;
-      tivo_panel.add(tivos_label, 0, gy);
-      tivo_panel.add(tivos, 1, gy);
+      tivo_panel.add(tivos_label, "cell 0 " + gy);
+      tivo_panel.add(tivos, "cell 1 " + gy);
 
       // DEL button
-      tivo_panel.add(del, 4, gy);
-      
+      tivo_panel.add(del, "cell 4 " + gy);
+
       // Tivo name
       gy++;
-      tivo_panel.add(tivo_name_label, 0, gy);
-      tivo_panel.add(tivo_name, 1, gy);
-      
+      tivo_panel.add(tivo_name_label, "cell 0 " + gy);
+      tivo_panel.add(tivo_name, "cell 1 " + gy);
+
       // ADD button
-      tivo_panel.add(add, 4, gy);
-      
+      tivo_panel.add(add, "cell 4 " + gy);
+
       // Tivo ip
       gy++;
-      tivo_panel.add(tivo_ip_label, 0, gy);
-      tivo_panel.add(tivo_ip, 1, gy);
-      
+      tivo_panel.add(tivo_ip_label, "cell 0 " + gy);
+      tivo_panel.add(tivo_ip, "cell 1 " + gy);
+
       // vertical space via empty label
-      Label bogus = new Label(" ");
+      JLabel bogus = new JLabel(" ");
       gy++;
-      tivo_panel.add(bogus, 1, gy);
-      
+      tivo_panel.add(bogus, "cell 1 " + gy);
+
       // enableRpc
       gy++;
-      tivo_panel.add(enableRpc, 1, gy);
-      
+      tivo_panel.add(enableRpc, "cell 1 " + gy);
+
       // limit_npl_fetches
       gy++;
-      tivo_panel.add(limit_npl_fetches_label, 0, gy);
-      tivo_panel.add(limit_npl_fetches, 1, gy);
-            
+      tivo_panel.add(limit_npl_fetches_label, "cell 0 " + gy);
+      tivo_panel.add(limit_npl_fetches, "cell 1 " + gy);
+
       // wan http port
       gy++;
-      tivo_panel.add(wan_http_port_label, 0, gy);
-      tivo_panel.add(wan_http_port, 1, gy);
-      
+      tivo_panel.add(wan_http_port_label, "cell 0 " + gy);
+      tivo_panel.add(wan_http_port, "cell 1 " + gy);
+
       // wan https port
       gy++;
-      tivo_panel.add(wan_https_port_label, 0, gy);
-      tivo_panel.add(wan_https_port, 1, gy);
-      
+      tivo_panel.add(wan_https_port_label, "cell 0 " + gy);
+      tivo_panel.add(wan_https_port, "cell 1 " + gy);
+
       // wan rpc port
       gy++;
-      tivo_panel.add(wan_rpc_port_label, 0, gy);
-      tivo_panel.add(wan_rpc_port, 1, gy);
-      
+      tivo_panel.add(wan_rpc_port_label, "cell 0 " + gy);
+      tivo_panel.add(wan_rpc_port, "cell 1 " + gy);
+
       // tivo.com username & password
       gy++;
-      tivo_panel.add(tivo_username_label, 0, gy);
-      tivo_panel.add(tivo_username, 1, gy);
+      tivo_panel.add(tivo_username_label, "cell 0 " + gy);
+      tivo_panel.add(tivo_username, "cell 1 " + gy);
 
       gy++;
-      tivo_panel.add(tivo_password_label, 0, gy);
-      tivo_panel.add(tivo_password, 1, gy);
-      tivo_panel.add(domain_token, 4, gy);
+      tivo_panel.add(tivo_password_label, "cell 0 " + gy);
+      tivo_panel.add(tivo_password, "cell 1 " + gy);
+      tivo_panel.add(domain_token, "cell 4 " + gy);
 
 
       // autotune panel
-      GridPane autotune_panel = new GridPane();
-      autotune_panel.setAlignment(Pos.CENTER);
-      autotune_panel.setVgap(5);
-      autotune_panel.setHgap(5);
-      
+      JPanel autotune_panel = new JPanel(new MigLayout("gapx 5, gapy 5"));
+
       gy=0;
-      autotune_panel.add(autotune_tivoName_label, 0, gy);
-      autotune_panel.add(autotune_tivoName, 1, gy);
+      autotune_panel.add(autotune_tivoName_label, "cell 0 " + gy);
+      autotune_panel.add(autotune_tivoName, "cell 1 " + gy);
 
       gy++;
-      autotune_panel.add(autotune_enabled, 1, gy);
-      
+      autotune_panel.add(autotune_enabled, "cell 1 " + gy);
+
       gy++;
-      autotune_panel.add(autotune_chan1_label, 0, gy);      
-      autotune_panel.add(autotune_chan1, 1, gy);
-      
+      autotune_panel.add(autotune_chan1_label, "cell 0 " + gy);
+      autotune_panel.add(autotune_chan1, "cell 1 " + gy);
+
       gy++;
-      autotune_panel.add(autotune_chan2_label, 0, gy);      
-      autotune_panel.add(autotune_chan2, 1, gy);
-      
+      autotune_panel.add(autotune_chan2_label, "cell 0 " + gy);
+      autotune_panel.add(autotune_chan2, "cell 1 " + gy);
+
       gy++;
-      autotune_panel.add(autotune_channel_interval_label, 0, gy);
-      autotune_panel.add(autotune_channel_interval, 1, gy);
-      
+      autotune_panel.add(autotune_channel_interval_label, "cell 0 " + gy);
+      autotune_panel.add(autotune_channel_interval, "cell 1 " + gy);
+
       gy++;
-      autotune_panel.add(autotune_button_interval_label, 0, gy);
-      autotune_panel.add(autotune_button_interval, 1, gy);
-      
+      autotune_panel.add(autotune_button_interval_label, "cell 0 " + gy);
+      autotune_panel.add(autotune_button_interval, "cell 1 " + gy);
+
       gy++;
-      autotune_panel.add(autotune_test, 1, gy);
-      
+      autotune_panel.add(autotune_test, "cell 1 " + gy);
+
       // autoskip_panel
-      GridPane autoskip_panel = new GridPane();
-      autoskip_panel.setAlignment(Pos.CENTER);
-      autoskip_panel.setVgap(5);
-      autoskip_panel.setHgap(5);
-      
-      Button autoskip_doc = new Button("Documentation");
-      autoskip_doc.setTooltip(getToolTip("autoskip_doc"));
-      autoskip_doc.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      JPanel autoskip_panel = new JPanel(new MigLayout("gapx 5, gapy 5"));
+
+      JButton autoskip_doc = new JButton("Documentation");
+      autoskip_doc.setToolTipText(getToolTip("autoskip_doc"));
+      autoskip_doc.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             help.showInBrowser("https://sourceforge.net/p/kmttg/wiki/AutoSkip/");
          }
       });
 
       gy = 0;
-      autoskip_panel.add(autoskip_doc, 1, gy);
-      
+      autoskip_panel.add(autoskip_doc, "cell 1 " + gy);
+
       gy++;
-      autoskip_panel.add(autoskip_enabled, 1, gy);
-      
+      autoskip_panel.add(autoskip_enabled, "cell 1 " + gy);
+
       gy++;
-      autoskip_panel.add(autoskip_import, 1, gy);
-      
+      autoskip_panel.add(autoskip_import, "cell 1 " + gy);
+
       gy++;
-      autoskip_panel.add(autoskip_cutonly, 1, gy);
-      
+      autoskip_panel.add(autoskip_cutonly, "cell 1 " + gy);
+
       gy++;
-      autoskip_panel.add(autoskip_prune, 1, gy);
-      
+      autoskip_panel.add(autoskip_prune, "cell 1 " + gy);
+
       gy++;
-      autoskip_panel.add(autoskip_indicate_skip, 1, gy);
-      
+      autoskip_panel.add(autoskip_indicate_skip, "cell 1 " + gy);
+
       gy++;
-      autoskip_panel.add(autoskip_batch_standby, 1, gy);
-      
+      autoskip_panel.add(autoskip_batch_standby, "cell 1 " + gy);
+
       gy++;
-      autoskip_panel.add(autoskip_jumpToEnd, 1, gy);
-      
+      autoskip_panel.add(autoskip_jumpToEnd, "cell 1 " + gy);
+
       gy++;
-      autoskip_panel.add(autoskip_padding_start_label, 0, gy);
-      autoskip_panel.add(autoskip_padding_start, 1, gy);
-      
+      autoskip_panel.add(autoskip_padding_start_label, "cell 0 " + gy);
+      autoskip_panel.add(autoskip_padding_start, "cell 1 " + gy);
+
       gy++;
-      autoskip_panel.add(autoskip_padding_stop_label, 0, gy);
-      autoskip_panel.add(autoskip_padding_stop, 1, gy);
-      
+      autoskip_panel.add(autoskip_padding_stop_label, "cell 0 " + gy);
+      autoskip_panel.add(autoskip_padding_stop, "cell 1 " + gy);
+
       gy++;
-      autoskip_panel.add(autoskip_chan_off_label, 0, gy);
-      autoskip_panel.add(autoskip_chan_off, 1, gy);
-      
+      autoskip_panel.add(autoskip_chan_off_label, "cell 0 " + gy);
+      autoskip_panel.add(autoskip_chan_off, "cell 1 " + gy);
+
       gy++;
-      autoskip_panel.add(autoskip_chan_on_label, 0, gy);
-      autoskip_panel.add(autoskip_chan_on, 1, gy);
-      
+      autoskip_panel.add(autoskip_chan_on_label, "cell 0 " + gy);
+      autoskip_panel.add(autoskip_chan_on, "cell 1 " + gy);
+
       // Files panel
-      GridPane files_panel = new GridPane();      
-      files_panel.setAlignment(Pos.CENTER);
-      files_panel.setVgap(5);
-      files_panel.setHgap(5);
-      
+      JPanel files_panel = new JPanel(new MigLayout("gapx 5, gapy 5"));
+
       // Remove .TiVo after file decrypt
       gy=0;
-      files_panel.add(remove_tivo, 0, gy);
-      
+      files_panel.add(remove_tivo, "cell 0 " + gy);
+
       // Remove Ad Detect files after Ad Cut
-      files_panel.add(remove_comcut, 1, gy);
-      
+      files_panel.add(remove_comcut, "cell 1 " + gy);
+
       // Remove .mpg file after Ad Cut
       gy++;
-      files_panel.add(remove_comcut_mpeg, 0, gy);
-      
+      files_panel.add(remove_comcut_mpeg, "cell 0 " + gy);
+
       // Remove Ad Detect files after Ad Cut
       // Remove .mpg file after encode
-      files_panel.add(remove_mpeg, 1, gy);
-      
+      files_panel.add(remove_mpeg, "cell 1 " + gy);
+
       // QSFixBackupMpegFile
       gy++;
-      files_panel.add(QSFixBackupMpegFile, 0, gy);
-      
+      files_panel.add(QSFixBackupMpegFile, "cell 0 " + gy);
+
       // download_check_length
-      files_panel.add(download_check_length, 1, gy);
-            
+      files_panel.add(download_check_length, "cell 1 " + gy);
+
       // Check Available Disk Space
       gy++;
-      files_panel.add(check_space, 0, gy);
-      
-      // Min requested space      
-      HBox p = new HBox();
-      p.setSpacing(5);
-      HBox.setHgrow(disk_space, Priority.ALWAYS);  // stretch horizontally
-      p.getChildren().addAll(disk_space_label, disk_space);
-      files_panel.add(p, 1, gy);
-      
+      files_panel.add(check_space, "cell 0 " + gy);
+
+      // Min requested space
+      JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      p.add(disk_space_label);
+      p.add(disk_space);
+      files_panel.add(p, "cell 1 " + gy);
+
       // File naming
       gy++;
-      files_panel.add(file_naming_label, 0, gy);
-      files_panel.add(file_naming, 1, gy);
-      
+      files_panel.add(file_naming_label, "cell 0 " + gy);
+      files_panel.add(file_naming, "cell 1 " + gy);
+
       gy++;
-      files_panel.add(available_keywords_label, 0, gy);
-      files_panel.add(keywords, 1, gy);
-      
+      files_panel.add(available_keywords_label, "cell 0 " + gy);
+      files_panel.add(keywords, "cell 1 " + gy);
+
       // FILES Default Path
       gy++;
-      files_panel.add(files_path_label, 0, gy);
-      files_panel.add(files_path, 1, gy);
-      
+      files_panel.add(files_path_label, "cell 0 " + gy);
+      files_panel.add(files_path, "cell 1 " + gy);
+
       // .TiVo Output Dir
       gy++;
-      files_panel.add(tivo_output_dir_label, 0, gy);
-      files_panel.add(tivo_output_dir, 1, gy);
-      
+      files_panel.add(tivo_output_dir_label, "cell 0 " + gy);
+      files_panel.add(tivo_output_dir, "cell 1 " + gy);
+
       // .mpg Output Dir
       gy++;
-      files_panel.add(mpeg_output_dir_label, 0, gy);
-      files_panel.add(mpeg_output_dir, 1, gy);
-      
+      files_panel.add(mpeg_output_dir_label, "cell 0 " + gy);
+      files_panel.add(mpeg_output_dir, "cell 1 " + gy);
+
       // qsfixDir
       gy++;
-      files_panel.add(qsfixDir_label, 0, gy);
-      files_panel.add(qsfixDir, 1, gy);
-      
+      files_panel.add(qsfixDir_label, "cell 0 " + gy);
+      files_panel.add(qsfixDir, "cell 1 " + gy);
+
       // .mpg Cut Dir
       gy++;
-      files_panel.add(mpeg_cut_dir_label, 0, gy);
-      files_panel.add(mpeg_cut_dir, 1, gy);
-      
+      files_panel.add(mpeg_cut_dir_label, "cell 0 " + gy);
+      files_panel.add(mpeg_cut_dir, "cell 1 " + gy);
+
       // Encode output dir
       gy++;
-      files_panel.add(encode_output_dir_label, 0, gy);
-      files_panel.add(encode_output_dir, 1, gy);
-      
+      files_panel.add(encode_output_dir_label, "cell 0 " + gy);
+      files_panel.add(encode_output_dir, "cell 1 " + gy);
+
       // autoLogSizeMB
       gy++;
-      files_panel.add(autoLogSizeMB_label, 0, gy);
-      files_panel.add(autoLogSizeMB, 1, gy);
-      
+      files_panel.add(autoLogSizeMB_label, "cell 0 " + gy);
+      files_panel.add(autoLogSizeMB, "cell 1 " + gy);
+
       // OverwriteFiles
       gy++;
-      files_panel.add(OverwriteFiles, 0, gy);
-      
+      files_panel.add(OverwriteFiles, "cell 0 " + gy);
+
       // DeleteFailedDownloads
-      files_panel.add(DeleteFailedDownloads, 1, gy);
+      files_panel.add(DeleteFailedDownloads, "cell 1 " + gy);
 
       // Programs Panel
-      GridPane programs_panel = new GridPane();
-      programs_panel.setAlignment(Pos.CENTER);
-      programs_panel.setVgap(5);
-      programs_panel.setHgap(5);
-      programs_panel.getColumnConstraints().addAll(util.cc_none(), util.cc_stretch());
-      programs_panel.setPadding(new Insets(5,5,5,5)); // top, right, bottom, left
-      
+      JPanel programs_panel = new JPanel(new MigLayout("gapx 5, gapy 5", "[][grow]", ""));
+
       gy=0;
-      
+
       // tivodecode
       gy++;
-      programs_panel.add(tivodecode_label, 0, gy);
-      programs_panel.add(tivodecode, 1, gy);
-      
+      programs_panel.add(tivodecode_label, "cell 0 " + gy);
+      programs_panel.add(tivodecode, "cell 1 " + gy + ", growx");
+
       // dsd
       if (config.OS.equals("windows")) {
          gy++;
-         programs_panel.add(dsd_label, 0, gy);
-         programs_panel.add(dsd, 1, gy);
+         programs_panel.add(dsd_label, "cell 0 " + gy);
+         programs_panel.add(dsd, "cell 1 " + gy + ", growx");
       }
-      
+
       // mencoder
       gy++;
-      programs_panel.add(mencoder_label, 0, gy);
-      programs_panel.add(mencoder, 1, gy);
-      
+      programs_panel.add(mencoder_label, "cell 0 " + gy);
+      programs_panel.add(mencoder, "cell 1 " + gy + ", growx");
+
       // ffmpeg
       gy++;
-      programs_panel.add(ffmpeg_label, 0, gy);
-      programs_panel.add(ffmpeg, 1, gy);
-      
+      programs_panel.add(ffmpeg_label, "cell 0 " + gy);
+      programs_panel.add(ffmpeg, "cell 1 " + gy + ", growx");
+
       // handbrake
       gy++;
-      programs_panel.add(handbrake_label, 0, gy);
-      programs_panel.add(handbrake, 1, gy);
-      
+      programs_panel.add(handbrake_label, "cell 0 " + gy);
+      programs_panel.add(handbrake, "cell 1 " + gy + ", growx");
+
       // comskip
       gy++;
-      programs_panel.add(comskip_label, 0, gy);
-      programs_panel.add(comskip, 1, gy);
-      
+      programs_panel.add(comskip_label, "cell 0 " + gy);
+      programs_panel.add(comskip, "cell 1 " + gy + ", growx");
+
       // comskip.ini
       gy++;
-      programs_panel.add(comskip_ini_label, 0, gy);
-      programs_panel.add(comskip_ini, 1, gy);
-      
+      programs_panel.add(comskip_ini_label, "cell 0 " + gy);
+      programs_panel.add(comskip_ini, "cell 1 " + gy + ", growx");
+
       // t2extract
       gy++;
-      programs_panel.add(t2extract_label, 0, gy);
-      programs_panel.add(t2extract, 1, gy);
-      
+      programs_panel.add(t2extract_label, "cell 0 " + gy);
+      programs_panel.add(t2extract, "cell 1 " + gy + ", growx");
+
       // ccextractor (intentionally disabled for now)
       //gy++;
-      //programs_panel.add(ccextractor_label, 0, gy);
-      //programs_panel.add(ccextractor, 1, gy);
-      
+      //programs_panel.add(ccextractor_label, "cell 0 " + gy);
+      //programs_panel.add(ccextractor, "cell 1 " + gy + ", growx");
+
       // AtomicParsley
       gy++;
-      programs_panel.add(AtomicParsley_label, 0, gy);
-      programs_panel.add(AtomicParsley, 1, gy);
-      
+      programs_panel.add(AtomicParsley_label, "cell 0 " + gy);
+      programs_panel.add(AtomicParsley, "cell 1 " + gy + ", growx");
+
       // mediainfo
       gy++;
-      programs_panel.add(mediainfo_label, 0, gy);
-      programs_panel.add(mediainfo, 1, gy);
-      
+      programs_panel.add(mediainfo_label, "cell 0 " + gy);
+      programs_panel.add(mediainfo, "cell 1 " + gy + ", growx");
+
       // custom command
       gy++;
-      programs_panel.add(customCommand_label, 0, gy);
-      programs_panel.add(customCommand, 1, gy);
-      
+      programs_panel.add(customCommand_label, "cell 0 " + gy);
+      programs_panel.add(customCommand, "cell 1 " + gy + ", growx");
+
       // customFiles
       gy++;
-      programs_panel.add(customFiles_label, 0, gy);
-      programs_panel.add(customFiles, 1, gy);
-      
+      programs_panel.add(customFiles_label, "cell 0 " + gy);
+      programs_panel.add(customFiles, "cell 1 " + gy);
+
       // Program_options Panel
-      GridPane program_options_panel = new GridPane();
-      program_options_panel.setPadding(new Insets(0,5,0,5));
-      program_options_panel.setAlignment(Pos.CENTER);
-      program_options_panel.setVgap(5);
-      program_options_panel.setHgap(5);
-      
+      JPanel program_options_panel = new JPanel(new MigLayout("gapx 5, gapy 5"));
+
       // MAK
       gy=0;
-      program_options_panel.add(MAK_label, 0, gy);
-      program_options_panel.add(MAK, 1, gy);
-            
+      program_options_panel.add(MAK_label, "cell 0 " + gy);
+      program_options_panel.add(MAK, "cell 1 " + gy);
+
       // active job limit
       gy++;
-      program_options_panel.add(active_job_limit_label, 0, gy);
-      program_options_panel.add(active_job_limit, 1, gy);
-      
+      program_options_panel.add(active_job_limit_label, "cell 0 " + gy);
+      program_options_panel.add(active_job_limit, "cell 1 " + gy);
+
       // cpu_cores
       gy++;
-      program_options_panel.add(cpu_cores_label, 0, gy);
-      program_options_panel.add(cpu_cores, 1, gy);
-      
+      program_options_panel.add(cpu_cores_label, "cell 0 " + gy);
+      program_options_panel.add(cpu_cores, "cell 1 " + gy);
+
       // t2extract_args
       //gy++;
-      //program_options_panel.add(t2extract_args_label, 0, gy);
-      //program_options_panel.add(t2extract_args, 1, gy);
-      
+      //program_options_panel.add(t2extract_args_label, "cell 0 " + gy);
+      //program_options_panel.add(t2extract_args, "cell 1 " + gy);
+
       // download_tries
       gy++;
-      program_options_panel.add(download_tries_label, 0, gy);
-      program_options_panel.add(download_tries, 1, gy);
-      
+      program_options_panel.add(download_tries_label, "cell 0 " + gy);
+      program_options_panel.add(download_tries, "cell 1 " + gy);
+
       // download_retry_delay
       gy++;
-      program_options_panel.add(download_retry_delay_label, 0, gy);      
-      program_options_panel.add(download_retry_delay, 1, gy);
-      
+      program_options_panel.add(download_retry_delay_label, "cell 0 " + gy);
+      program_options_panel.add(download_retry_delay, "cell 1 " + gy);
+
       // download_delay
       gy++;
-      program_options_panel.add(download_delay_label, 0, gy);
-      program_options_panel.add(download_delay, 1, gy);
-      
+      program_options_panel.add(download_delay_label, "cell 0 " + gy);
+      program_options_panel.add(download_delay, "cell 1 " + gy);
+
       // metadata_files
       gy++;
-      program_options_panel.add(metadata_files_label, 0, gy);
-      program_options_panel.add(metadata_files, 1, gy);
-      
+      program_options_panel.add(metadata_files_label, "cell 0 " + gy);
+      program_options_panel.add(metadata_files, "cell 1 " + gy);
+
       // metadata_entries
       gy++;
-      program_options_panel.add(metadata_entries_label, 0, gy);
-      program_options_panel.add(metadata_entries, 1, gy);
-      
+      program_options_panel.add(metadata_entries_label, "cell 0 " + gy);
+      program_options_panel.add(metadata_entries, "cell 1 " + gy);
+
       // TivoWebPlusDelete
       gy++;
-      program_options_panel.add(TivoWebPlusDelete, 0, gy);
-      
+      program_options_panel.add(TivoWebPlusDelete, "cell 0 " + gy);
+
       // rpcDelete
-      program_options_panel.add(rpcDelete, 1, gy);
-      
+      program_options_panel.add(rpcDelete, "cell 1 " + gy);
+
       // download_time_estimate
       gy++;
-      program_options_panel.add(download_time_estimate, 0, gy);
-      
+      program_options_panel.add(download_time_estimate, "cell 0 " + gy);
+
       // rpcOld
-      program_options_panel.add(rpcOld, 1, gy);
-      
+      program_options_panel.add(rpcOld, "cell 1 " + gy);
+
       // combine_download_decrypt
       gy++;
-      program_options_panel.add(combine_download_decrypt, 0, gy);
-      
+      program_options_panel.add(combine_download_decrypt, "cell 0 " + gy);
+
       // single_download
-      program_options_panel.add(single_download, 1, gy);
-      
+      program_options_panel.add(single_download, "cell 1 " + gy);
+
       // rpcnpl
       gy++;
-      program_options_panel.add(rpcnpl, 0, gy);
-      
+      program_options_panel.add(rpcnpl, "cell 0 " + gy);
+
       // persistJobQueue
-      program_options_panel.add(persistQueue, 1, gy);
-      
+      program_options_panel.add(persistQueue, "cell 1 " + gy);
+
       // comskip_review
       gy++;
-      program_options_panel.add(comskip_review, 0, gy);
-      
+      program_options_panel.add(comskip_review, "cell 0 " + gy);
+
       // tivolibreDecrypt
-      program_options_panel.add(tivolibreDecrypt, 1, gy);
-      
+      program_options_panel.add(tivolibreDecrypt, "cell 1 " + gy);
+
       // tivolibreCompat
       gy++;
-      program_options_panel.add(tivolibreCompat, 0, gy);
-      
+      program_options_panel.add(tivolibreCompat, "cell 0 " + gy);
+
       if (config.OS.equals("windows")) {
          // DsdDecrypt
-         program_options_panel.add(DsdDecrypt, 1, gy);
+         program_options_panel.add(DsdDecrypt, "cell 1 " + gy);
       }
-      
+
       // Visual Panel
-      GridPane visual_panel = new GridPane();       
-      visual_panel.setAlignment(Pos.CENTER);
-      visual_panel.setVgap(5);
-      visual_panel.setHgap(5);
-      visual_panel.getColumnConstraints().addAll(util.cc_none(), util.cc_stretch());
-      visual_panel.setPadding(new Insets(5,5,5,5)); // top, right, bottom, left
-      
+      JPanel visual_panel = new JPanel(new MigLayout("gapx 5, gapy 5", "[][grow]", ""));
+
       // lookAndFeel
       gy=0;
-      visual_panel.add(lookAndFeel_label, 0, gy);
-      visual_panel.add(lookAndFeel, 1, gy);
-      
+      visual_panel.add(lookAndFeel_label, "cell 0 " + gy);
+      visual_panel.add(lookAndFeel, "cell 1 " + gy);
+
       // FontSize
       gy++;
-      visual_panel.add(FontSize_label, 0, gy);
-      visual_panel.add(FontSize, 1, gy);
+      visual_panel.add(FontSize_label, "cell 0 " + gy);
+      visual_panel.add(FontSize, "cell 1 " + gy);
 
       // toolTipsDelay
       gy++;
-      visual_panel.add(toolTipsDelay_label, 0, gy);
-      visual_panel.add(toolTipsDelay, 1, gy);
+      visual_panel.add(toolTipsDelay_label, "cell 0 " + gy);
+      visual_panel.add(toolTipsDelay, "cell 1 " + gy);
 
       // toolTipsTimeout
       gy++;
-      visual_panel.add(toolTipsTimeout_label, 0, gy);
-      visual_panel.add(toolTipsTimeout, 1, gy);
-      
+      visual_panel.add(toolTipsTimeout_label, "cell 0 " + gy);
+      visual_panel.add(toolTipsTimeout, "cell 1 " + gy);
+
       // MinChanDigits
       gy++;
-      visual_panel.add(MinChanDigits_label, 0, gy);
-      visual_panel.add(MinChanDigits, 1, gy);
-      
+      visual_panel.add(MinChanDigits_label, "cell 0 " + gy);
+      visual_panel.add(MinChanDigits, "cell 1 " + gy);
+
       // toolTips
       gy++;
-      visual_panel.add(toolTips, 0, gy);
-      
+      visual_panel.add(toolTips, "cell 0 " + gy);
+
       // jobMonitorFullPaths
       gy++;
-      visual_panel.add(jobMonitorFullPaths, 0, gy);
+      visual_panel.add(jobMonitorFullPaths, "cell 0 " + gy);
 
       // HideProtectedFiles
       gy++;
-      visual_panel.add(HideProtectedFiles, 0, gy);
+      visual_panel.add(HideProtectedFiles, "cell 0 " + gy);
 
       // TiVoSort
       gy++;
-      visual_panel.add(TiVoSort, 0, gy);
-      
+      visual_panel.add(TiVoSort, "cell 0 " + gy);
+
       // tableColAutoSize
       gy++;
-      visual_panel.add(tableColAutoSize, 0, gy);      
-      
+      visual_panel.add(tableColAutoSize, "cell 0 " + gy);
+
       // showHistoryInTable
       gy++;
-      visual_panel.add(showHistoryInTable, 0, gy);      
-      
+      visual_panel.add(showHistoryInTable, "cell 0 " + gy);
+
       // slingBox
       gy++;
-      visual_panel.add(slingBox, 0, gy);
-      
+      visual_panel.add(slingBox, "cell 0 " + gy);
+
       // web_query
       gy++;
-      visual_panel.add(web_query_label, 0, gy);
-      visual_panel.add(web_query, 1, gy);
-      
+      visual_panel.add(web_query_label, "cell 0 " + gy);
+      visual_panel.add(web_query, "cell 1 " + gy + ", growx");
+
       // web_browser - not used for Mac or Windows
       if ( config.OS.equals("other")) {
          gy++;
-         visual_panel.add(web_browser_label, 0, gy);
-         visual_panel.add(web_browser, 1, gy);
+         visual_panel.add(web_browser_label, "cell 0 " + gy);
+         visual_panel.add(web_browser, "cell 1 " + gy + ", growx");
       }
-      
+
       // Web Panel
-      GridPane web_panel = new GridPane();       
-      web_panel.setAlignment(Pos.CENTER);
-      web_panel.setVgap(5);
-      web_panel.setHgap(5);
-      web_panel.getColumnConstraints().addAll(util.cc_none(), util.cc_stretch());
-      web_panel.setPadding(new Insets(5,5,5,5)); // top, right, bottom, left
-            
+      JPanel web_panel = new JPanel(new MigLayout("gapx 5, gapy 5", "[][grow]", ""));
+
       // httpserver_enable
       gy=0;
-      web_panel.add(httpserver_enable, 0, gy);
-      
+      web_panel.add(httpserver_enable, "cell 0 " + gy);
+
       // httpserver_port
       gy++;
-      web_panel.add(httpserver_port_label, 0, gy);
-      web_panel.add(httpserver_port, 1, gy);
-      
+      web_panel.add(httpserver_port_label, "cell 0 " + gy);
+      web_panel.add(httpserver_port, "cell 1 " + gy);
+
       // httpserver_cache
       gy++;
-      web_panel.add(httpserver_cache_label, 0, gy);
-      web_panel.add(httpserver_cache, 1, gy);
-      
+      web_panel.add(httpserver_cache_label, "cell 0 " + gy);
+      web_panel.add(httpserver_cache, "cell 1 " + gy);
+
       // httpserver_enable
       gy++;
-      web_panel.add(httpserver_share_filter, 0, gy);
-      
-      // shares ChoiceBox
+      web_panel.add(httpserver_share_filter, "cell 0 " + gy);
+
+      // shares JComboBox
       gy++;
-      web_panel.add(shares_label, 0, gy);
-      web_panel.add(shares, 1, gy);
+      web_panel.add(shares_label, "cell 0 " + gy);
+      web_panel.add(shares, "cell 1 " + gy);
 
       // DEL button
-      web_panel.add(share_del, 4, gy);
-      
+      web_panel.add(share_del, "cell 4 " + gy);
+
       // Share name
       gy++;
-      web_panel.add(share_name_label, 0, gy);
-      web_panel.add(share_name, 1, gy);
-      
+      web_panel.add(share_name_label, "cell 0 " + gy);
+      web_panel.add(share_name, "cell 1 " + gy);
+
       // ADD button
-      web_panel.add(share_add, 4, gy);
-      
+      web_panel.add(share_add, "cell 4 " + gy);
+
       // Share dir
       gy++;
-      web_panel.add(share_dir_label, 0, gy);
-      web_panel.add(share_dir, 1, gy);
-      
+      web_panel.add(share_dir_label, "cell 0 " + gy);
+      web_panel.add(share_dir, "cell 1 " + gy);
+
       // VRD Panel
-      GridPane vrd_panel = new GridPane();       
-      vrd_panel.setAlignment(Pos.CENTER);
-      vrd_panel.setVgap(5);
-      vrd_panel.setHgap(5);
-      
+      JPanel vrd_panel = new JPanel(new MigLayout("gapx 5, gapy 5"));
+
       // VRD flag
       gy=0;
-      vrd_panel.add(VRD, 1, gy);
-      
+      vrd_panel.add(VRD, "cell 1 " + gy);
+
       // VRDexe
       gy++;
-      vrd_panel.add(VRDexe_label, 0, gy);
-      vrd_panel.add(VRDexe, 1, gy);
+      vrd_panel.add(VRDexe_label, "cell 0 " + gy);
+      vrd_panel.add(VRDexe, "cell 1 " + gy);
 
       // UseAdscan
       gy++;
-      vrd_panel.add(UseAdscan, 1, gy);      
-      
+      vrd_panel.add(UseAdscan, "cell 1 " + gy);
+
       // VrdReview
       gy++;
-      vrd_panel.add(VrdReview, 1, gy);
-      
+      vrd_panel.add(VrdReview, "cell 1 " + gy);
+
       // VrdReview_noCuts
       gy++;
-      vrd_panel.add(VrdReview_noCuts, 1, gy);
-      
+      vrd_panel.add(VrdReview_noCuts, "cell 1 " + gy);
+
       // VrdQsFilter
       gy++;
-      vrd_panel.add(VrdQsFilter, 1, gy);
-      
+      vrd_panel.add(VrdQsFilter, "cell 1 " + gy);
+
       // VrdDecrypt
       gy++;
-      vrd_panel.add(VrdDecrypt, 1, gy);
-      
+      vrd_panel.add(VrdDecrypt, "cell 1 " + gy);
+
       // VrdEncode
       gy++;
-      vrd_panel.add(VrdEncode, 1, gy);
-      
+      vrd_panel.add(VrdEncode, "cell 1 " + gy);
+
       // VrdCombineCutEncode
       gy++;
-      vrd_panel.add(VrdCombineCutEncode, 1, gy);
-      
+      vrd_panel.add(VrdCombineCutEncode, "cell 1 " + gy);
+
       // VrdQsfixMpeg2ps
       gy++;
-      vrd_panel.add(VrdQsfixMpeg2ps, 1, gy);
-      
+      vrd_panel.add(VrdQsfixMpeg2ps, "cell 1 " + gy);
+
       // VrdAllowMultiple
       gy++;
-      vrd_panel.add(VrdAllowMultiple, 1, gy);
-      
+      vrd_panel.add(VrdAllowMultiple, "cell 1 " + gy);
+
       // VrdOneAtATime
       gy++;
-      vrd_panel.add(VrdOneAtATime, 1, gy);
-      
+      vrd_panel.add(VrdOneAtATime, "cell 1 " + gy);
+
       // pyTivo Panel
-      /*GridPane pyTivo_panel = new GridPane();      
+      /*GridPane pyTivo_panel = new GridPane();
       pyTivo_panel.setAlignment(Pos.CENTER);
       pyTivo_panel.setVgap(5);
       pyTivo_panel.setHgap(5);
       pyTivo_panel.getColumnConstraints().addAll(util.cc_none(), util.cc_stretch());
       pyTivo_panel.setPadding(new Insets(5,5,5,5)); // top, right, bottom, left
-      
+
       // pyTivo_config
       gy=0;
       pyTivo_panel.add(pyTivo_config_label, 0, gy);
       pyTivo_panel.add(pyTivo_config, 1, gy);
-      
+
       // pyTivo_host
       gy++;
       pyTivo_panel.add(pyTivo_host_label, 0, gy);
       pyTivo_panel.add(pyTivo_host, 1, gy);
-      
+
       // pyTivo_tivo
       gy++;
       pyTivo_panel.add(pyTivo_tivo_label, 0, gy);
       pyTivo_panel.add(pyTivo_tivo, 1, gy);
-      
+
       // pyTivo_files
       gy++;
       pyTivo_panel.add(pyTivo_files_label, 0, gy);
       pyTivo_panel.add(pyTivo_files, 1, gy);*/
-      
+
       // Common panel
-      HBox common_panel = new HBox();
-      common_panel.setAlignment(Pos.CENTER);
-      common_panel.setSpacing(50);
+      JPanel common_panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 0));
       // OK and CANCEL buttons
-      common_panel.getChildren().addAll(OK, CANCEL);
-      
+      common_panel.add(OK);
+      common_panel.add(CANCEL);
+
       // Tabbed panel
-      tabbed_panel = new TabPane();
-      tabbed_panel.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+      tabbed_panel = new JTabbedPane();
       addTabPane("File Settings", files_panel);
       addTabPane("Programs", programs_panel);
       addTabPane("Program Options", program_options_panel);
@@ -3595,171 +3595,166 @@ public class configMain {
       //addTabPane("pyTivo", pyTivo_panel);
       addTabPane("Autotune", autotune_panel);
       addTabPane("AutoSkip", autoskip_panel);
-      
+
       // Main panel
-      VBox main_panel = new VBox();
-      main_panel.setSpacing(5);
-      main_panel.getChildren().addAll(tabbed_panel, common_panel);
-      
+      JPanel main_panel = new JPanel();
+      main_panel.setLayout(new BoxLayout(main_panel, BoxLayout.Y_AXIS));
+      main_panel.add(tabbed_panel);
+      main_panel.add(common_panel);
+
       // create dialog window
-      dialog = new Stage();
-      dialog.setOnCloseRequest(new EventHandler<WindowEvent>() {
+      dialog = new JDialog(frame);
+      dialog.addWindowListener(new WindowAdapter() {
          @Override
-         public void handle(WindowEvent arg0) {
+         public void windowClosing(WindowEvent arg0) {
             pos_x = dialog.getX(); pos_y = dialog.getY();
          }
       });
-      dialog.initOwner(frame);
-      gui.LoadIcons(dialog);
-      dialog.initModality(Modality.NONE); // Non modal
+      SwingUtil.loadIcons(dialog);
       dialog.setTitle("kmttg configuration");
-      Scene scene = new Scene(new VBox());
-      config.gui.addScene(scene);
-      config.gui.setFontSize(scene, config.FontSize);
-      ((VBox) scene.getRoot()).getChildren().add(main_panel);
-      dialog.setScene(scene);
+      JPanel root = new JPanel(new BorderLayout());
+      root.add(main_panel, BorderLayout.CENTER);
+      dialog.getContentPane().add(root);
       dialog.setResizable(false);
+      dialog.pack();
+      dialog.setLocationRelativeTo(frame);
   }
-   
+
    // Add a new tab pane
-   public static void addTabPane(String name, GridPane content) {
-      Tab tab = new Tab();
-      tab.setContent(content);
-      tab.setText(name);
-      tabbed_panel.getTabs().add(tab);
+   public static void addTabPane(String name, JPanel content) {
+      tabbed_panel.addTab(name, content);
    }
-   
    public static void setToolTips() {
       debug.print("");
-      VRDexe.setTooltip(getToolTip("VRDexe"));
-      tivo_name.setTooltip(getToolTip("tivo_name"));
-      tivo_ip.setTooltip(getToolTip("tivo_ip"));
-      share_name.setTooltip(getToolTip("share_name"));
-      share_dir.setTooltip(getToolTip("share_dir"));
-      autotune_enabled.setTooltip(getToolTip("autotune_enabled"));
-      autotune_channel_interval.setTooltip(getToolTip("autotune_channel_interval"));
-      autotune_button_interval.setTooltip(getToolTip("autotune_button_interval"));
-      autotune_chan1.setTooltip(getToolTip("autotune_chan1"));
-      autotune_chan2.setTooltip(getToolTip("autotune_chan2"));
-      autotune_tivoName.setTooltip(getToolTip("autotune_tivoName"));
-      add.setTooltip(getToolTip("add")); 
-      del.setTooltip(getToolTip("del"));
-      domain_token.setTooltip(getToolTip("domain_token")); 
-      share_add.setTooltip(getToolTip("share_add")); 
-      share_del.setTooltip(getToolTip("share_del")); 
-      remove_tivo.setTooltip(getToolTip("remove_tivo"));
-      remove_comcut.setTooltip(getToolTip("remove_comcut"));
-      remove_comcut_mpeg.setTooltip(getToolTip("remove_comcut_mpeg"));
-      remove_mpeg.setTooltip(getToolTip("remove_mpeg"));
-      QSFixBackupMpegFile.setTooltip(getToolTip("QSFixBackupMpegFile"));
-      download_check_length.setTooltip(getToolTip("download_check_length"));
-      check_space.setTooltip(getToolTip("check_space"));
-      beacon.setTooltip(getToolTip("beacon"));
-      UseOldBeacon.setTooltip(getToolTip("UseOldBeacon"));
-      npl_when_started.setTooltip(getToolTip("npl_when_started"));
-      showHistoryInTable.setTooltip(getToolTip("showHistoryInTable"));
-      download_time_estimate.setTooltip(getToolTip("download_time_estimate"));
-      UseAdscan.setTooltip(getToolTip("UseAdscan"));
-      VRD.setTooltip(getToolTip("VRD"));
-      VrdReview.setTooltip(getToolTip("VrdReview"));
-      comskip_review.setTooltip(getToolTip("comskip_review"));
-      VrdReview_noCuts.setTooltip(getToolTip("VrdReview_noCuts"));
-      VrdQsFilter.setTooltip(getToolTip("VrdQsFilter"));
-      VrdDecrypt.setTooltip(getToolTip("VrdDecrypt"));
-      DsdDecrypt.setTooltip(getToolTip("DsdDecrypt"));
-      tivolibreDecrypt.setTooltip(getToolTip("tivolibreDecrypt"));
-      tivolibreCompat.setTooltip(getToolTip("tivolibreCompat"));
-      httpserver_enable.setTooltip(getToolTip("httpserver_enable"));
-      httpserver_share_filter.setTooltip(getToolTip("httpserver_share_filter"));
-      VrdEncode.setTooltip(getToolTip("VrdEncode"));
-      VrdAllowMultiple.setTooltip(getToolTip("VrdAllowMultiple"));
-      VrdCombineCutEncode.setTooltip(getToolTip("VrdCombineCutEncode"));
-      VrdQsfixMpeg2ps.setTooltip(getToolTip("VrdQsfixMpeg2ps"));
-      VrdOneAtATime.setTooltip(getToolTip("VrdOneAtATime"));
-      TivoWebPlusDelete.setTooltip(getToolTip("TivoWebPlusDelete"));
-      rpcDelete.setTooltip(getToolTip("rpcDelete"));
-      rpcOld.setTooltip(getToolTip("rpcOld"));
-      HideProtectedFiles.setTooltip(getToolTip("HideProtectedFiles"));
-      TiVoSort.setTooltip(getToolTip("TiVoSort"));
-      OverwriteFiles.setTooltip(getToolTip("OverwriteFiles"));
-      DeleteFailedDownloads.setTooltip(getToolTip("DeleteFailedDownloads"));
-      combine_download_decrypt.setTooltip(getToolTip("combine_download_decrypt"));
-      single_download.setTooltip(getToolTip("single_download"));
-      rpcnpl.setTooltip(getToolTip("rpcnpl"));
-      enableRpc.setTooltip(getToolTip("enableRpc"));
-      persistQueue.setTooltip(getToolTip("persistQueue"));
-      files_path.setTooltip(getToolTip("files_path"));
-      MAK.setTooltip(getToolTip("MAK"));
-      FontSize.setTooltip(getToolTip("FontSize"));
-      file_naming.setTooltip(getToolTip("file_naming"));
-      tivo_output_dir.setTooltip(getToolTip("tivo_output_dir"));
-      mpeg_output_dir.setTooltip(getToolTip("mpeg_output_dir"));
-      qsfixDir.setTooltip(getToolTip("qsfixDir"));
-      mpeg_cut_dir.setTooltip(getToolTip("mpeg_cut_dir"));
-      encode_output_dir.setTooltip(getToolTip("encode_output_dir"));
-      tivodecode.setTooltip(getToolTip("tivodecode"));
-      dsd.setTooltip(getToolTip("dsd"));
-      ffmpeg.setTooltip(getToolTip("ffmpeg"));
-      mediainfo.setTooltip(getToolTip("mediainfo"));
-      mencoder.setTooltip(getToolTip("mencoder"));
-      handbrake.setTooltip(getToolTip("handbrake"));
-      comskip.setTooltip(getToolTip("comskip"));
-      comskip_ini.setTooltip(getToolTip("comskip_ini"));
-      t2extract.setTooltip(getToolTip("t2extract"));
-      //t2extract_args.setTooltip(getToolTip("t2extract_args"));
-      ccextractor.setTooltip(getToolTip("ccextractor"));
-      AtomicParsley.setTooltip(getToolTip("AtomicParsley"));
-      wan_http_port.setTooltip(getToolTip("wan_http_port"));
-      wan_https_port.setTooltip(getToolTip("wan_https_port"));
-      wan_rpc_port.setTooltip(getToolTip("wan_rpc_port"));
-      limit_npl_fetches.setTooltip(getToolTip("limit_npl_fetches"));
-      active_job_limit.setTooltip(getToolTip("active_job_limit"));
-      disk_space.setTooltip(getToolTip("disk_space"));
-      customCommand.setTooltip(getToolTip("customCommand"));
-      keywords.setTooltip(getToolTip("keywords"));
-      customFiles.setTooltip(getToolTip("customFiles")); 
-      OK.setTooltip(getToolTip("OK")); 
-      CANCEL.setTooltip(getToolTip("CANCEL"));
-      autotune_test.setTooltip(getToolTip("autotune_test"));
-      toolTips.setTooltip(getToolTip("toolTips"));
-      slingBox.setTooltip(getToolTip("slingBox"));
-      tableColAutoSize.setTooltip(getToolTip("tableColAutoSize"));
-      jobMonitorFullPaths.setTooltip(getToolTip("jobMonitorFullPaths"));
-      toolTipsDelay.setTooltip(getToolTip("toolTipsDelay")); 
-      toolTipsTimeout.setTooltip(getToolTip("toolTipsTimeout")); 
-      cpu_cores.setTooltip(getToolTip("cpu_cores"));
-      download_tries.setTooltip(getToolTip("download_tries"));
-      download_retry_delay.setTooltip(getToolTip("download_retry_delay"));
-      download_delay.setTooltip(getToolTip("download_delay"));
-      autoskip_enabled.setTooltip(getToolTip("autoskip_enabled"));
-      autoskip_import.setTooltip(getToolTip("autoskip_import"));
-      autoskip_cutonly.setTooltip(getToolTip("autoskip_cutonly"));
-      autoskip_prune.setTooltip(getToolTip("autoskip_prune"));
-      autoskip_batch_standby.setTooltip(getToolTip("autoskip_batch_standby"));
-      autoskip_indicate_skip.setTooltip(getToolTip("autoskip_indicate_skip"));
-      autoskip_jumpToEnd.setTooltip(getToolTip("autoskip_jumpToEnd"));
-      autoskip_padding_start.setTooltip(getToolTip("autoskip_padding_start"));
-      autoskip_padding_stop.setTooltip(getToolTip("autoskip_padding_stop"));
-      autoskip_chan_off.setTooltip(getToolTip("autoskip_chan_off"));
-      autoskip_chan_on.setTooltip(getToolTip("autoskip_chan_on"));
-      metadata_entries.setTooltip(getToolTip("metadata_entries"));
-      httpserver_port.setTooltip(getToolTip("httpserver_port"));
-      httpserver_cache.setTooltip(getToolTip("httpserver_cache"));
-      autoLogSizeMB.setTooltip(getToolTip("autoLogSizeMB"));
-      web_query.setTooltip(getToolTip("web_query"));
-      web_browser.setTooltip(getToolTip("web_browser"));
-      tivo_username.setTooltip(getToolTip("tivo_username"));
-      tivo_password.setTooltip(getToolTip("tivo_password"));
-      //pyTivo_host.setTooltip(getToolTip("pyTivo_host"));
-      //pyTivo_config.setTooltip(getToolTip("pyTivo_config"));
-      //pyTivo_tivo.setTooltip(getToolTip("pyTivo_tivo"));
-      //pyTivo_files.setTooltip(getToolTip("pyTivo_files"));
-      metadata_files.setTooltip(getToolTip("metadata_files"));
-      lookAndFeel.setTooltip(getToolTip("lookAndFeel"));
-      MinChanDigits.setTooltip(getToolTip("MinChanDigits"));
+      VRDexe.setToolTipText(getToolTip("VRDexe"));
+      tivo_name.setToolTipText(getToolTip("tivo_name"));
+      tivo_ip.setToolTipText(getToolTip("tivo_ip"));
+      share_name.setToolTipText(getToolTip("share_name"));
+      share_dir.setToolTipText(getToolTip("share_dir"));
+      autotune_enabled.setToolTipText(getToolTip("autotune_enabled"));
+      autotune_channel_interval.setToolTipText(getToolTip("autotune_channel_interval"));
+      autotune_button_interval.setToolTipText(getToolTip("autotune_button_interval"));
+      autotune_chan1.setToolTipText(getToolTip("autotune_chan1"));
+      autotune_chan2.setToolTipText(getToolTip("autotune_chan2"));
+      autotune_tivoName.setToolTipText(getToolTip("autotune_tivoName"));
+      add.setToolTipText(getToolTip("add")); 
+      del.setToolTipText(getToolTip("del"));
+      domain_token.setToolTipText(getToolTip("domain_token")); 
+      share_add.setToolTipText(getToolTip("share_add")); 
+      share_del.setToolTipText(getToolTip("share_del")); 
+      remove_tivo.setToolTipText(getToolTip("remove_tivo"));
+      remove_comcut.setToolTipText(getToolTip("remove_comcut"));
+      remove_comcut_mpeg.setToolTipText(getToolTip("remove_comcut_mpeg"));
+      remove_mpeg.setToolTipText(getToolTip("remove_mpeg"));
+      QSFixBackupMpegFile.setToolTipText(getToolTip("QSFixBackupMpegFile"));
+      download_check_length.setToolTipText(getToolTip("download_check_length"));
+      check_space.setToolTipText(getToolTip("check_space"));
+      beacon.setToolTipText(getToolTip("beacon"));
+      UseOldBeacon.setToolTipText(getToolTip("UseOldBeacon"));
+      npl_when_started.setToolTipText(getToolTip("npl_when_started"));
+      showHistoryInTable.setToolTipText(getToolTip("showHistoryInTable"));
+      download_time_estimate.setToolTipText(getToolTip("download_time_estimate"));
+      UseAdscan.setToolTipText(getToolTip("UseAdscan"));
+      VRD.setToolTipText(getToolTip("VRD"));
+      VrdReview.setToolTipText(getToolTip("VrdReview"));
+      comskip_review.setToolTipText(getToolTip("comskip_review"));
+      VrdReview_noCuts.setToolTipText(getToolTip("VrdReview_noCuts"));
+      VrdQsFilter.setToolTipText(getToolTip("VrdQsFilter"));
+      VrdDecrypt.setToolTipText(getToolTip("VrdDecrypt"));
+      DsdDecrypt.setToolTipText(getToolTip("DsdDecrypt"));
+      tivolibreDecrypt.setToolTipText(getToolTip("tivolibreDecrypt"));
+      tivolibreCompat.setToolTipText(getToolTip("tivolibreCompat"));
+      httpserver_enable.setToolTipText(getToolTip("httpserver_enable"));
+      httpserver_share_filter.setToolTipText(getToolTip("httpserver_share_filter"));
+      VrdEncode.setToolTipText(getToolTip("VrdEncode"));
+      VrdAllowMultiple.setToolTipText(getToolTip("VrdAllowMultiple"));
+      VrdCombineCutEncode.setToolTipText(getToolTip("VrdCombineCutEncode"));
+      VrdQsfixMpeg2ps.setToolTipText(getToolTip("VrdQsfixMpeg2ps"));
+      VrdOneAtATime.setToolTipText(getToolTip("VrdOneAtATime"));
+      TivoWebPlusDelete.setToolTipText(getToolTip("TivoWebPlusDelete"));
+      rpcDelete.setToolTipText(getToolTip("rpcDelete"));
+      rpcOld.setToolTipText(getToolTip("rpcOld"));
+      HideProtectedFiles.setToolTipText(getToolTip("HideProtectedFiles"));
+      TiVoSort.setToolTipText(getToolTip("TiVoSort"));
+      OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
+      DeleteFailedDownloads.setToolTipText(getToolTip("DeleteFailedDownloads"));
+      combine_download_decrypt.setToolTipText(getToolTip("combine_download_decrypt"));
+      single_download.setToolTipText(getToolTip("single_download"));
+      rpcnpl.setToolTipText(getToolTip("rpcnpl"));
+      enableRpc.setToolTipText(getToolTip("enableRpc"));
+      persistQueue.setToolTipText(getToolTip("persistQueue"));
+      files_path.setToolTipText(getToolTip("files_path"));
+      MAK.setToolTipText(getToolTip("MAK"));
+      FontSize.setToolTipText(getToolTip("FontSize"));
+      file_naming.setToolTipText(getToolTip("file_naming"));
+      tivo_output_dir.setToolTipText(getToolTip("tivo_output_dir"));
+      mpeg_output_dir.setToolTipText(getToolTip("mpeg_output_dir"));
+      qsfixDir.setToolTipText(getToolTip("qsfixDir"));
+      mpeg_cut_dir.setToolTipText(getToolTip("mpeg_cut_dir"));
+      encode_output_dir.setToolTipText(getToolTip("encode_output_dir"));
+      tivodecode.setToolTipText(getToolTip("tivodecode"));
+      dsd.setToolTipText(getToolTip("dsd"));
+      ffmpeg.setToolTipText(getToolTip("ffmpeg"));
+      mediainfo.setToolTipText(getToolTip("mediainfo"));
+      mencoder.setToolTipText(getToolTip("mencoder"));
+      handbrake.setToolTipText(getToolTip("handbrake"));
+      comskip.setToolTipText(getToolTip("comskip"));
+      comskip_ini.setToolTipText(getToolTip("comskip_ini"));
+      t2extract.setToolTipText(getToolTip("t2extract"));
+      //t2extract_args.setToolTipText(getToolTip("t2extract_args"));
+      ccextractor.setToolTipText(getToolTip("ccextractor"));
+      AtomicParsley.setToolTipText(getToolTip("AtomicParsley"));
+      wan_http_port.setToolTipText(getToolTip("wan_http_port"));
+      wan_https_port.setToolTipText(getToolTip("wan_https_port"));
+      wan_rpc_port.setToolTipText(getToolTip("wan_rpc_port"));
+      limit_npl_fetches.setToolTipText(getToolTip("limit_npl_fetches"));
+      active_job_limit.setToolTipText(getToolTip("active_job_limit"));
+      disk_space.setToolTipText(getToolTip("disk_space"));
+      customCommand.setToolTipText(getToolTip("customCommand"));
+      keywords.setToolTipText(getToolTip("keywords"));
+      customFiles.setToolTipText(getToolTip("customFiles")); 
+      OK.setToolTipText(getToolTip("OK")); 
+      CANCEL.setToolTipText(getToolTip("CANCEL"));
+      autotune_test.setToolTipText(getToolTip("autotune_test"));
+      toolTips.setToolTipText(getToolTip("toolTips"));
+      slingBox.setToolTipText(getToolTip("slingBox"));
+      tableColAutoSize.setToolTipText(getToolTip("tableColAutoSize"));
+      jobMonitorFullPaths.setToolTipText(getToolTip("jobMonitorFullPaths"));
+      toolTipsDelay.setToolTipText(getToolTip("toolTipsDelay")); 
+      toolTipsTimeout.setToolTipText(getToolTip("toolTipsTimeout")); 
+      cpu_cores.setToolTipText(getToolTip("cpu_cores"));
+      download_tries.setToolTipText(getToolTip("download_tries"));
+      download_retry_delay.setToolTipText(getToolTip("download_retry_delay"));
+      download_delay.setToolTipText(getToolTip("download_delay"));
+      autoskip_enabled.setToolTipText(getToolTip("autoskip_enabled"));
+      autoskip_import.setToolTipText(getToolTip("autoskip_import"));
+      autoskip_cutonly.setToolTipText(getToolTip("autoskip_cutonly"));
+      autoskip_prune.setToolTipText(getToolTip("autoskip_prune"));
+      autoskip_batch_standby.setToolTipText(getToolTip("autoskip_batch_standby"));
+      autoskip_indicate_skip.setToolTipText(getToolTip("autoskip_indicate_skip"));
+      autoskip_jumpToEnd.setToolTipText(getToolTip("autoskip_jumpToEnd"));
+      autoskip_padding_start.setToolTipText(getToolTip("autoskip_padding_start"));
+      autoskip_padding_stop.setToolTipText(getToolTip("autoskip_padding_stop"));
+      autoskip_chan_off.setToolTipText(getToolTip("autoskip_chan_off"));
+      autoskip_chan_on.setToolTipText(getToolTip("autoskip_chan_on"));
+      metadata_entries.setToolTipText(getToolTip("metadata_entries"));
+      httpserver_port.setToolTipText(getToolTip("httpserver_port"));
+      httpserver_cache.setToolTipText(getToolTip("httpserver_cache"));
+      autoLogSizeMB.setToolTipText(getToolTip("autoLogSizeMB"));
+      web_query.setToolTipText(getToolTip("web_query"));
+      web_browser.setToolTipText(getToolTip("web_browser"));
+      tivo_username.setToolTipText(getToolTip("tivo_username"));
+      tivo_password.setToolTipText(getToolTip("tivo_password"));
+      //pyTivo_host.setToolTipText(getToolTip("pyTivo_host"));
+      //pyTivo_config.setToolTipText(getToolTip("pyTivo_config"));
+      //pyTivo_tivo.setToolTipText(getToolTip("pyTivo_tivo"));
+      //pyTivo_files.setToolTipText(getToolTip("pyTivo_files"));
+      metadata_files.setToolTipText(getToolTip("metadata_files"));
+      lookAndFeel.setToolTipText(getToolTip("lookAndFeel"));
+      MinChanDigits.setToolTipText(getToolTip("MinChanDigits"));
    }
-   
-   public static Tooltip getToolTip(String component) {
+
+   public static String getToolTip(String component) {
       debug.print("component=" + component);
       String text = "";
       if (component.equals("tivo_name")) {
@@ -4636,8 +4631,7 @@ public class configMain {
       else if (component.equals("lookAndFeel")) {
          text =  "<b>look and feel</b><br>";
          text += "Select look and feel to use for GUI in general.<br>";
-         text += "NOTE: Anything other than 'default' may not look as intended.<br>";
-         text += "NOTE: The <b>Mac OS</b> choice is reported to cause issues so should not be used";
+         text += "Choices include light and dark themes which apply immediately.";
       }
       else if (component.equals("MinChanDigits")) {
          text =  "<b>Min # Channel Digits</b><br>";
@@ -4658,5 +4652,6 @@ public class configMain {
       
        return MyTooltip.make(text);
    }
-      
+
 }
+

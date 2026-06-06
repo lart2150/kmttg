@@ -20,10 +20,10 @@ package com.tivo.kmttg.gui;
 
 import java.util.Hashtable;
 
-import javafx.scene.control.TableView;
-import javafx.scene.control.TreeTableView;
+import javax.swing.JTable;
 
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.swing.TreeTable;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.log;
 
@@ -63,11 +63,11 @@ public class TableMap {
       // Nothing here
    }
    
-   public TableView<?> getTable() {
+   public JTable getTable() {
       return null;
    }
-   
-   public TreeTableView<?> getTreeTable() {
+
+   public TreeTable<?> getTreeTable() {
       return null;
    }
    

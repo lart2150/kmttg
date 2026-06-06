@@ -18,40 +18,35 @@
  */
 package com.tivo.kmttg.gui.table;
 
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javax.swing.JTable;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.sortable.sortableInt;
+import com.tivo.kmttg.gui.swing.KmttgTable;
+import com.tivo.kmttg.gui.swing.KmttgTableModel;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.log;
 
 public class pushTable {
-   private String[] TITLE_cols = {"NUM", "TITLE", "DEST TiVo"};
-   public TableView<Tabentry> TABLE = null;
+   // Model column names map to getXXX() getters via reflection; header text
+   // (with spaces) is applied separately below.
+   private String[] TITLE_cols = {"NUM", "TITLE", "DEST_TiVo"};
+   private String[] HEADER_cols = {"NUM", "TITLE", "DEST TiVo"};
+   public JTable TABLE = null;
+   public KmttgTableModel<Tabentry> MODEL = null;
 
    public pushTable() {
-      TABLE = new TableView<Tabentry>();
-      for (String colName : TITLE_cols) {
-         // Regular String sort
-         String cName = colName;
-         if (colName.equals("DEST TiVo"))
-            cName = "DEST_TIVO";
-         if (colName.equals("NUM")) {
-            TableColumn<Tabentry,sortableInt> col = new TableColumn<Tabentry,sortableInt>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableInt>(cName));
-            col.setComparator(null); // disable sorting
-            TABLE.getColumns().add(col);
-         } else {
-            TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(cName));
-            col.setComparator(null); // disable sorting
-            TABLE.getColumns().add(col);
-         }
+      MODEL = new KmttgTableModel<Tabentry>(TITLE_cols);
+      MODEL.setSortingEnabled(false); // Row order is meaningful
+      TABLE = KmttgTable.create(MODEL, null);
+      // Apply display header text
+      for (int i=0; i<TITLE_cols.length; ++i) {
+         int view = TABLE.convertColumnIndexToView(i);
+         if (view >= 0)
+            TABLE.getColumnModel().getColumn(view).setHeaderValue(HEADER_cols[i]);
       }
    }
 
@@ -86,17 +81,17 @@ public class pushTable {
          return title;
       }
 
-      public String getDEST_TIVO() {
+      public String getDEST_TiVo() {
          return tivo;
-      }      
+      }
    }
 
-   public TableView<?> getTable() {
+   public JTable getTable() {
       return TABLE;
    }
 
    public void clear() {
-      TABLE.getItems().clear();
+      MODEL.clear();
    }
 
    public void AddRows(JSONArray data) {
@@ -112,17 +107,17 @@ public class pushTable {
    }
 
    public void AddRow(JSONObject json, int num) {
-      TABLE.getItems().add(new Tabentry(json, num));
+      MODEL.addRow(new Tabentry(json, num));
    }
 
    public void RemoveRow(int row) {
-      TABLE.getItems().remove(row);
+      MODEL.removeRow(row);
    }
 
    public JSONObject GetRowData(int row) {
-      sortableInt s = TABLE.getItems().get(row).num;
+      sortableInt s = MODEL.getRow(row).num;
       if (s != null)
          return s.json;
       return null;
-   }    
+   }
 }

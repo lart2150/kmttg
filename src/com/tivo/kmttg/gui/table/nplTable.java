@@ -18,6 +18,10 @@
  */
 package com.tivo.kmttg.gui.table;
 
+import java.awt.Color;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -31,40 +35,18 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Stack;
 import java.util.Vector;
 
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
-import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.SortEvent;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableRow;
-import javafx.scene.control.TreeTableView;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.cell.TreeItemPropertyValueFactory;
-import javafx.scene.image.Image;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.TransferMode;
-import javafx.util.Callback;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.TransferHandler;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.comparator.ChannelComparator;
@@ -80,6 +62,10 @@ import com.tivo.kmttg.gui.sortable.sortableDouble;
 import com.tivo.kmttg.gui.sortable.sortableDuration;
 import com.tivo.kmttg.gui.sortable.sortableShow;
 import com.tivo.kmttg.gui.sortable.sortableSize;
+import com.tivo.kmttg.gui.swing.KmttgTable;
+import com.tivo.kmttg.gui.swing.RowColorer;
+import com.tivo.kmttg.gui.swing.TreeTable;
+import com.tivo.kmttg.gui.swing.TreeTable.TreeItem;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobMonitor;
@@ -95,7 +81,7 @@ import com.tivo.kmttg.util.log;
 
 public class nplTable extends TableMap {
    public String tivoName = null;
-   public TreeTableView<Tabentry> NowPlaying = null;
+   public TreeTable<Tabentry> NowPlaying = null;
    public String[] FILE_cols = {"FILE", "SIZE", "DIR"};
    private double[] FILE_weights = {41, 12, 47};
    public String[] TIVO_cols = {"", "SHOW", "DATE", "CHANNEL", "DUR", "SIZE", "Mbps"};
@@ -111,164 +97,107 @@ public class nplTable extends TableMap {
    // This needed to flag when calling updateNPLjobStatus so that multiple
    // selection event triggers can be avoided
    private Boolean UpdatingNPL = false;
-   
+
    // Override TableMap methods
    @Override
    public void clear() {
-      NowPlaying.getRoot().getChildren().clear();
+      NowPlaying.getRoot().clearChildren();
    }
    @Override
-   public TreeTableView<?> getTreeTable() {
+   public TreeTable<?> getTreeTable() {
       return NowPlaying;
    }
-         
+
    public nplTable(final String tivoName) {
       this.tivoName = tivoName;
-      NowPlaying = new TreeTableView<Tabentry>();
-      NowPlaying.setRoot(new TreeItem<>(new Tabentry("")));
-      NowPlaying.setShowRoot(false); // Don't show the empty root node
-      NowPlaying.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE); // Allow multiple row selection
-      NowPlaying.setRowFactory(new ColorRowFactory()); // For row background color handling
-      // Special sort listener to set sort order to descending date when no sort is selected
-      NowPlaying.getSortOrder().addListener(new ListChangeListener<TreeTableColumn<Tabentry, ?>>() {
-         @Override
-         public void onChanged(Change<? extends TreeTableColumn<Tabentry, ?>> change) {
-            if (tivoName.equals("FILES"))
-               return;
-            change.next();
-            if (NowPlaying.getRoot().getChildren().size() > 0 && change != null && change.toString().contains("removed")) {
-               if (change.getRemoved().get(0).getText().equals("DATE"))
-                  return;
-               int date_col = TableUtil.getColumnIndex(NowPlaying, "DATE");
-               NowPlaying.getSortOrder().setAll(Collections.singletonList(NowPlaying.getColumns().get(date_col)));
-               NowPlaying.getColumns().get(date_col).setSortType(TreeTableColumn.SortType.DESCENDING);
-            }
-         }
-      });
-      
-      // Keep selection visible following sort event
-      NowPlaying.setOnSort(new EventHandler<SortEvent<TreeTableView<Tabentry>>>() {
-         @Override public void handle(SortEvent<TreeTableView<Tabentry>> event) {
-            Platform.runLater(new Runnable() {
-               @Override public void run() {
-                  // If there's a table selection make sure it's visible
-                  TableUtil.selectedVisible(NowPlaying);
-               }
-            });
-         }
-      });
-      
+      if (tivoName.equals("FILES"))
+         NowPlaying = new TreeTable<Tabentry>(FILE_cols);
+      else
+         NowPlaying = new TreeTable<Tabentry>(TIVO_cols);
+      NowPlaying.setRowColorer(new ColorRow()); // For row background color handling
+
       if (tivoName.equals("FILES")) {
          // Add ability to accept drag and drop files
-         NowPlaying.setOnDragOver(new EventHandler<DragEvent>() {
+         NowPlaying.table.setTransferHandler(new TransferHandler() {
+            private static final long serialVersionUID = 1L;
             @Override
-            public void handle(DragEvent event) {
-               event.acceptTransferModes(TransferMode.COPY);
-               event.consume();
-            }                  
-         });
-         NowPlaying.setOnDragDropped(new EventHandler<DragEvent>() {
+            public boolean canImport(TransferSupport support) {
+               return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+            }
+            @SuppressWarnings("unchecked")
             @Override
-            public void handle(DragEvent event) {
-               List<File> fileList = event.getDragboard().getFiles();
-               if (fileList != null && fileList.size() > 0) {
-                  for (File f : fileList) {
-                     AddNowPlayingFileRow(f);
+            public boolean importData(TransferSupport support) {
+               try {
+                  List<File> fileList = (List<File>)support.getTransferable()
+                     .getTransferData(DataFlavor.javaFileListFlavor);
+                  if (fileList != null && fileList.size() > 0) {
+                     for (File f : fileList) {
+                        AddNowPlayingFileRow(f);
+                     }
                   }
-                  event.setDropCompleted(true);
+                  return true;
+               } catch (Exception e) {
+                  return false;
                }
-               event.consume();
-            }                  
+            }
          });
 
-         for (String colName : FILE_cols) {
-            if (colName.equals("SIZE")) {
-               TreeTableColumn<Tabentry,sortableSize> col = new TreeTableColumn<Tabentry,sortableSize>(colName);
-               col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableSize>(colName));
-               col.setComparator(new SizeComparator());
-               NowPlaying.getColumns().add(col);
-            } else {
-               // Regular String sort
-               TreeTableColumn<Tabentry,String> col = new TreeTableColumn<Tabentry,String>(colName);
-               col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,String>(colName));
-               NowPlaying.getColumns().add(col);
-            }
-         }
+         NowPlaying.setComparator("SIZE", new SizeComparator());
          TableUtil.setWeights(NowPlaying, FILE_cols, FILE_weights, false);
       } else {
-         for (String colName : TIVO_cols) {
-            if (colName.length() == 0)
-               colName = "IMAGE";
-            if (colName.equals("IMAGE")) {
-               TreeTableColumn<Tabentry,imageCell> col = new TreeTableColumn<Tabentry,imageCell>("");
-               col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,imageCell>(colName));
-               col.setCellFactory(new ImageCellFactory());
-               col.setComparator(new ImageComparator());
-               NowPlaying.getColumns().add(col);               
-            } else if (colName.equals("SHOW")) {
-               TreeTableColumn<Tabentry,sortableShow> col = new TreeTableColumn<Tabentry,sortableShow>(colName);
-               col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableShow>(colName));
-               col.setComparator(new ShowComparator());
-               NowPlaying.getColumns().add(col);
-            } else if (colName.equals("DATE")) {
-               TreeTableColumn<Tabentry,sortableDate> col = new TreeTableColumn<Tabentry,sortableDate>(colName);
-               col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableDate>(colName));
-               col.setComparator(new DateComparator());
-               col.setStyle("-fx-alignment: CENTER-RIGHT;");
-               NowPlaying.getColumns().add(col);
-            } else if (colName.equals("CHANNEL")) {
-               TreeTableColumn<Tabentry,sortableChannel> col = new TreeTableColumn<Tabentry,sortableChannel>(colName);
-               col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableChannel>(colName));
-               col.setComparator(new ChannelComparator());
-               NowPlaying.getColumns().add(col);
-            } else if (colName.equals("DUR")) {
-               TreeTableColumn<Tabentry,sortableDuration> col = new TreeTableColumn<Tabentry,sortableDuration>(colName);
-               col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableDuration>(colName));
-               col.setComparator(new DurationComparator());
-               col.setStyle("-fx-alignment: CENTER;");
-               NowPlaying.getColumns().add(col);
-            } else if (colName.equals("SIZE")) {
-               TreeTableColumn<Tabentry,sortableSize> col = new TreeTableColumn<Tabentry,sortableSize>(colName);
-               col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableSize>(colName));
-               col.setComparator(new SizeComparator());
-               col.setStyle("-fx-alignment: CENTER-RIGHT;");
-               NowPlaying.getColumns().add(col);
-            } else if (colName.equals("Mbps")) {
-               TreeTableColumn<Tabentry,sortableDouble> col = new TreeTableColumn<Tabentry,sortableDouble>(colName);
-               col.setCellValueFactory(new TreeItemPropertyValueFactory<Tabentry,sortableDouble>(colName));
-               col.setComparator(new DoubleComparator());
-               col.setStyle("-fx-alignment: CENTER-RIGHT;");
-               NowPlaying.getColumns().add(col);
-            }
-         }
+         NowPlaying.setComparator("", new ImageComparator());
+         NowPlaying.setComparator("SHOW", new ShowComparator());
+         NowPlaying.setComparator("DATE", new DateComparator());
+         NowPlaying.setComparator("CHANNEL", new ChannelComparator());
+         NowPlaying.setComparator("DUR", new DurationComparator());
+         NowPlaying.setComparator("SIZE", new SizeComparator());
+         NowPlaying.setComparator("Mbps", new DoubleComparator());
+         // Default sort is descending date when no column sort is selected
+         NowPlaying.setDefaultSort("DATE", false);
+         KmttgTable.setColumnAlignment(NowPlaying.table, "DATE", JLabel.RIGHT);
+         KmttgTable.setColumnAlignment(NowPlaying.table, "DUR", JLabel.CENTER);
+         KmttgTable.setColumnAlignment(NowPlaying.table, "SIZE", JLabel.RIGHT);
+         KmttgTable.setColumnAlignment(NowPlaying.table, "Mbps", JLabel.RIGHT);
          TableUtil.setWeights(NowPlaying, TIVO_cols, TIVO_weights, false);
       }
-      
+
+      // Want to resize columns + update job status whenever a tree is expanded
+      NowPlaying.setOnExpand(new Runnable() {
+         @Override public void run() {
+            // Identify NPL table items associated with queued/running jobs
+            jobMonitor.updateNPLjobStatus();
+            TableUtil.autoSizeTableViewColumns(NowPlaying, false);
+         }
+      });
+
       // Add right mouse button handler
       TableUtil.AddRightMouseListener(NowPlaying);
-      
+
       // Add keyboard listener
-      NowPlaying.setOnKeyPressed(new EventHandler<KeyEvent>() {
-         public void handle(KeyEvent e) {
+      NowPlaying.table.addKeyListener(new KeyAdapter() {
+         @Override
+         public void keyPressed(KeyEvent e) {
             KeyPressed(e);
          }
       });
-      
+
       // Define selection listener to detect table row selection changes
-      NowPlaying.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<Tabentry>>() {
+      NowPlaying.table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
          @Override
-         public void changed(ObservableValue<? extends TreeItem<Tabentry>> obs, TreeItem<Tabentry> oldSelection, TreeItem<Tabentry> newSelection) {
-            if (newSelection == null || UpdatingNPL) return;
-            NowPlayingRowSelected(newSelection.getValue());
+         public void valueChanged(ListSelectionEvent e) {
+            if (e.getValueIsAdjusting() || UpdatingNPL) return;
+            int row = NowPlaying.table.getSelectionModel().getLeadSelectionIndex();
+            if (row >= 0 && row < NowPlaying.getExpandedItemCount() && NowPlaying.isSelected(row))
+               NowPlayingRowSelected(NowPlaying.getTreeItem(row).getValue());
          }
-      });                    
+      });
    }
-   
+
    public class Tabentry {
       // FILES mode entries
       private String fileName = "";
       private String dirName = "";
-      
+
       // TIVO mode entries
       private imageCell image = new imageCell();
       private sortableShow show = null;
@@ -277,12 +206,12 @@ public class nplTable extends TableMap {
       private sortableDuration duration = null;
       private sortableSize size = null;
       private sortableDouble mbps = null;
-      
+
       // Root node constructor
       public Tabentry(String s) {
          // Do nothing
       }
-      
+
       // FILES mode constructor
       public Tabentry(File file) {
          if (!file.exists()) {
@@ -291,21 +220,20 @@ public class nplTable extends TableMap {
          }
          fileName = file.getName();
          dirName = file.getParentFile().getPath();
-         long size_long = file.length();         
+         long size_long = file.length();
          if (size_long == 0) {
             log.warn("File size is 0. It may be empty");
-         }         
+         }
          size = new sortableSize(size_long);
       }
-      
+
       // TIVO mode folder constructor
       public Tabentry(String fName, Stack<Hashtable<String,String>> folderEntry) {
          if (folderEntry.size() == 0)
             return;
-         image.setAlignment(Pos.CENTER_LEFT);
          image.setImage(gui.Images.get("folder"));
          image.imageName = "folder";
-         
+
          // For date, find most recent recording
          // For channel see if they are all from same channel
          String chan = "";
@@ -346,7 +274,7 @@ public class nplTable extends TableMap {
             rate_total /= folderEntry.size();
             show = new sortableShow(fName, folderEntry, gmt_index);
             date = new sortableDate(fName, folderEntry, gmt_index);
-            
+
             if (sameChannel) {
                if ( folderEntry.get(0).containsKey("channelNum") && folderEntry.get(0).containsKey("channel")) {
                   channel = new sortableChannel(
@@ -357,19 +285,18 @@ public class nplTable extends TableMap {
             } else {
                channel = new sortableChannel("<various>", "0");
             }
-            
+
             duration = new sortableDuration(folderEntry);
             size = new sortableSize(folderEntry);
-            mbps = new sortableDouble(rate_total);         
+            mbps = new sortableDouble(rate_total);
          }
       }
 
       // TIVO mode non-folder constructor
       public Tabentry(Hashtable<String,String> entry) {
-         image.setAlignment(Pos.CENTER_LEFT);
          if ( entry.containsKey("ExpirationImage") ) {
             image.setImage(gui.Images.get(entry.get("ExpirationImage")));
-            image.imageName = entry.get("ExpirationImage");            
+            image.imageName = entry.get("ExpirationImage");
          }
          if (entry.containsKey("clipMetadataId"))
             image.setImage2(gui.Images.get("skipmode"));
@@ -379,20 +306,20 @@ public class nplTable extends TableMap {
          if ( entry.containsKey("channelNum") && entry.containsKey("channel") )
             channel = new sortableChannel(entry.get("channel"), entry.get("channelNum"));
          else
-            channel = new sortableChannel("", "");         
+            channel = new sortableChannel("", "");
          duration = new sortableDuration(entry);
          size = new sortableSize(entry);
          Double rate = 0.0;
          if (entry.containsKey("size") && entry.containsKey("duration")) {
             rate = bitRate(entry.get("size"), entry.get("duration"));
          }
-         mbps = new sortableDouble(rate);         
+         mbps = new sortableDouble(rate);
       }
-      
+
       public imageCell getIMAGE() {
          return image;
       }
-      
+
       public sortableShow getSHOW() {
          return show;
       }
@@ -408,27 +335,27 @@ public class nplTable extends TableMap {
       public sortableDuration getDUR() {
          return duration;
       }
-      
+
       public sortableSize getSIZE() {
          return size;
       }
-            
+
       public String getFILE() {
          return fileName;
       }
-      
+
       public String getDIR() {
          return dirName;
       }
-      
+
       public sortableDouble getMbps() {
          return mbps;
       }
-      
-      public void setIMAGE(Image img) {
+
+      public void setIMAGE(java.awt.Image img) {
          image.setImage(img);
       }
-      
+
       public String toString() {
          if (show == null)
             return "";
@@ -436,59 +363,36 @@ public class nplTable extends TableMap {
       }
    }
 
-   // ColorRowFactory for setting row background color
-   private class ColorRowFactory implements Callback<TreeTableView<Tabentry>, TreeTableRow<Tabentry>> {
-      public TreeTableRow<Tabentry> call(TreeTableView<Tabentry> tableView) {
-         TreeTableRow<Tabentry> row = new TreeTableRow<Tabentry>() {
-            @Override
-            public void updateItem(Tabentry entry, boolean empty) {
-               super.updateItem(entry,  empty);
-               styleProperty().unbind(); setStyle("");
-               if (entry != null) {
-                  sortableDate d = entry.getDATE();
-                  if (d != null && d.data != null) {
-                     if (d.data.containsKey("CopyProtected"))
-                        TableUtil.setRowColor(this, TableUtil.tableBkgndProtected);
-                     
-                     if (d.data.containsKey("ExpirationImage") &&
-                         (d.data.get("ExpirationImage").equals("in-progress-recording") ||
-                          d.data.get("ExpirationImage").equals("in-progress-transfer")))
-                        TableUtil.setRowColor(this, TableUtil.tableBkgndRecording);
-                     
-                     if (config.showHistoryInTable == 1) {
-                        if (d.data.containsKey("ProgramId") &&
-                              auto.keywordMatchHistoryFast(d.data.get("ProgramId"), false))
-                           TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);
-                        if (d.data.containsKey("ProgramId_unique") &&
-                              auto.keywordMatchHistoryFast(d.data.get("ProgramId_unique"), false))
-                           TableUtil.setRowColor(this, TableUtil.tableBkgndInHistory);
-                     }
-                  }
-               }
-            }
-         };
-         return row;
-      }
-   }   
+   // Row background color handling (replaces JavaFX ColorRowFactory)
+   private class ColorRow implements RowColorer<Tabentry> {
+      public Color getColor(Tabentry entry) {
+         if (entry != null) {
+            sortableDate d = entry.getDATE();
+            if (d != null && d.data != null) {
+               Color color = null;
+               if (d.data.containsKey("CopyProtected"))
+                  color = TableUtil.tableBkgndProtected;
 
-   private class ImageCellFactory implements Callback<TreeTableColumn<Tabentry, imageCell>, TreeTableCell<Tabentry, imageCell>> {
-      public TreeTableCell<Tabentry, imageCell> call(TreeTableColumn<Tabentry, imageCell> param) {
-         TreeTableCell<Tabentry, imageCell> cell = new TreeTableCell<Tabentry, imageCell>() {
-            @Override
-            public void updateItem(final imageCell item, boolean empty) {
-               super.updateItem(item, empty);
-               if (empty) {
-                  setGraphic(null);
-               } else {
-                  if (item != null)
-                     setGraphic(item);
+               if (d.data.containsKey("ExpirationImage") &&
+                   (d.data.get("ExpirationImage").equals("in-progress-recording") ||
+                    d.data.get("ExpirationImage").equals("in-progress-transfer")))
+                  color = TableUtil.tableBkgndRecording;
+
+               if (config.showHistoryInTable == 1) {
+                  if (d.data.containsKey("ProgramId") &&
+                        auto.keywordMatchHistoryFast(d.data.get("ProgramId"), false))
+                     color = TableUtil.tableBkgndInHistory;
+                  if (d.data.containsKey("ProgramId_unique") &&
+                        auto.keywordMatchHistoryFast(d.data.get("ProgramId_unique"), false))
+                     color = TableUtil.tableBkgndInHistory;
                }
+               return color;
             }
-         };
-         return cell;
+         }
+         return null;
       }
-   } 
-   
+   }
+
    private sortableDate getFirstSelected() {
       int[] selected = GetSelectedRows();
       if (selected == null || selected.length < 1)
@@ -496,32 +400,32 @@ public class nplTable extends TableMap {
       return NowPlaying.getTreeItem(selected[0]).getValue().getDATE();
 
    }
-   
+
    // Handle keyboard presses
    private void KeyPressed(KeyEvent e) {
       if (e.isControlDown())
          return;
-      KeyCode keyCode = e.getCode();
-      if (keyCode == KeyCode.S) {
+      int keyCode = e.getKeyCode();
+      if (keyCode == KeyEvent.VK_S) {
          // s key presses START JOBS button
-         config.gui.start.fire();
+         config.gui.start.doClick();
          return;
       }
       if (tivoName.equals("FILES"))
          return;
-      if (keyCode == KeyCode.DELETE ||
-               keyCode == KeyCode.BACK_SPACE ||
-               keyCode == KeyCode.P) {
-         Integer[] selected = TableUtil.highToLow(GetSelectedRows());     
+      if (keyCode == KeyEvent.VK_DELETE ||
+               keyCode == KeyEvent.VK_BACK_SPACE ||
+               keyCode == KeyEvent.VK_P) {
+         Integer[] selected = TableUtil.highToLow(GetSelectedRows());
          if (selected != null && selected.length > 0) {
-            if (keyCode == KeyCode.DELETE || keyCode == KeyCode.BACK_SPACE) {
+            if (keyCode == KeyEvent.VK_DELETE || keyCode == KeyEvent.VK_BACK_SPACE) {
                // Delete key has special action
                e.consume(); // Need this so as not to remove focus which is default key action
                String show_names = "";
                LinkedHashMap<String,Integer> urlsToDelete = new LinkedHashMap<String,Integer>();
                LinkedHashMap<String,Integer> idsToDelete = new LinkedHashMap<String,Integer>();
                String id;
-               
+
                // Figure out what selection should be if all selected rows are deleted
                sortableDate final_select = null;
                int lowest = -1;
@@ -539,9 +443,9 @@ public class nplTable extends TableMap {
                }
                else
                   lowest -= 1;
-               if (lowest >= 0)
+               if (lowest >= 0 && lowest < NowPlaying.getExpandedItemCount())
                   final_select = NowPlaying.getTreeItem(lowest).getValue().getDATE();
-               
+
                for (int i=0; i<selected.length; ++i) {
                   int row = selected[i];
                   sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
@@ -612,10 +516,10 @@ public class nplTable extends TableMap {
                      RemoveIds(urlsToDelete, idsToDelete);
                   }
                } // if urslToDelete
-               
+
                // After table refresh this is the data of the row to look for to select
                if (final_select != null) {
-                  NowPlaying.getSelectionModel().clearSelection();
+                  NowPlaying.clearSelection();
                   if (final_select.folder) {
                      Hashtable<String,String> h = new Hashtable<String,String>();
                      h.put("folderName", final_select.folderName);
@@ -624,9 +528,9 @@ public class nplTable extends TableMap {
                      selectRowWithData(final_select.data);
                   }
                }
-            } // if keyCode == KeyCode.DELETE
-            
-            if (keyCode == KeyCode.P) {
+            } // if keyCode == VK_DELETE
+
+            if (keyCode == KeyEvent.VK_P) {
                // P key has special action
                if (config.rpcEnabled(tivoName)) {
                   int[] rows = GetSelectedRows();
@@ -662,43 +566,43 @@ public class nplTable extends TableMap {
                      PlayShow(ids, titles);
                   }
                }
-            } // if keyCode == KeyCode.P            
+            } // if keyCode == VK_P
          } // if selected != null
-      } else if (keyCode == KeyCode.I) {
+      } else if (keyCode == KeyEvent.VK_I) {
          // Print all data of selected row to log window by sorted keys
          sortableDate s = getFirstSelected(); if (s == null) return;
          if (! s.folder && s.data != null && s.data.containsKey("recordingId")) {
             config.gui.show_details.update(NowPlaying, tivoName, s.data.get("recordingId"));
          }
-      } else if (keyCode == KeyCode.J) {
+      } else if (keyCode == KeyEvent.VK_J) {
          // Print all data of selected row to log window by sorted keys
          sortableDate s = getFirstSelected(); if (s == null) return;
          if ( ! s.folder && s.data != null ) {
             Vector<String> v = new Vector<String>(s.data.keySet());
-            Collections.sort(v);            
+            Collections.sort(v);
             for (Enumeration<String> it = v.elements(); it.hasMoreElements();) {
               String name = it.nextElement();
               log.print(name + " = " + s.data.get(name));
             }
          }
-      } else if (keyCode == KeyCode.N) {
+      } else if (keyCode == KeyEvent.VK_N) {
          sortableDate s = getFirstSelected(); if (s == null) return;
          if (! s.folder && s.data != null && s.data.containsKey("collectionId"))
             TableUtil.PrintEpisodes(s.data.get("titleOnly"), s.data.get("collectionId"));
-      } else if (keyCode == KeyCode.Q) {
+      } else if (keyCode == KeyEvent.VK_Q) {
          // Web query currently selected entry
          sortableDate s = getFirstSelected(); if (s == null) return;
          if ( ! s.folder && s.data != null && s.data.containsKey("title")) {
             TableUtil.webQuery(s.data.get("title"));
          }
-      } else if (keyCode == KeyCode.R) {
+      } else if (keyCode == KeyEvent.VK_R) {
          // Collect and print RPC data of selected row
          sortableDate s = getFirstSelected(); if (s == null) return;
          if ( ! s.folder && s.data != null ) {
             if (s.data.containsKey("recordingId")) {
                final String recordingId = s.data.get("recordingId");
-               Task<Void> task = new Task<Void>() {
-                  @Override public Void call() {
+               Runnable task = new Runnable() {
+                  @Override public void run() {
                      Remote r = config.initRemote(tivoName);
                      if (r.success) {
                         try {
@@ -715,32 +619,30 @@ public class nplTable extends TableMap {
                         }
                         r.disconnect();
                      }
-                     return null;
                   }
                };
                new Thread(task).start();
             }
-         }         
-      } else if (keyCode == KeyCode.M) {
+         }
+      } else if (keyCode == KeyEvent.VK_M) {
          sortableDate s = getFirstSelected(); if (s == null) return;
          createMeta.getExtendedMetadata(tivoName, s.data, true);
-      } else if (keyCode == KeyCode.K) {
+      } else if (keyCode == KeyEvent.VK_K) {
          sortableDate s = getFirstSelected(); if (s == null) return;
          if (s.data.containsKey("contentId")) {
             final String contentId = s.data.get("contentId");
-            Task<Void> task = new Task<Void>() {
-               @Override public Void call() {
+            Runnable task = new Runnable() {
+               @Override public void run() {
                   Remote r = config.initRemote(tivoName);
                   if (r.success) {
                      r.printClipData(contentId);
                      r.disconnect();
                   }
-                  return null;
                }
             };
-            new Thread(task).start();            
+            new Thread(task).start();
          }
-      } else if (keyCode == KeyCode.E) {
+      } else if (keyCode == KeyEvent.VK_E) {
          // Operate on entire selected set
          Integer[] selected = TableUtil.highToLow(GetSelectedRows());
          if (selected == null) return;
@@ -761,52 +663,27 @@ public class nplTable extends TableMap {
                log.warn("Entry missing contentId and/or duration - skipping");
             }
          }
-      } else if (keyCode == KeyCode.T) {
+      } else if (keyCode == KeyEvent.VK_T) {
          TableUtil.toggleTreeState(NowPlaying);
       }
-      else if (keyCode == KeyCode.C) {
+      else if (keyCode == KeyEvent.VK_C) {
          // Import Skip Share
          sortableDate s = getFirstSelected(); if (s == null) return;
          if ( ! s.folder && s.data != null ) {
             com.tivo.kmttg.rpc.SkipShare.tableImport(s.data, tivoName);
          }
       }
-      /*else if (keyCode == KeyCode.X) {
-         if (AutoSkip.isMonitoring()) {
-            log.print("Requested skip to 1st commercial point...");
-            AutoSkip.jumpTo1st();
-         }
-      }
-      else if (keyCode == KeyCode.C) {
-         if (AutoSkip.skipEnabled()) {
-            int[] selected = GetSelectedRows();
-            if (selected == null || selected.length < 1)
-               return;
-            for (int row : selected) {
-               sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
-               log.print("Requested skip mode 1st commercial detect...");
-               jobData job = new jobData();
-               job.source   = s.data.get("url_TiVoVideoDetails");
-               job.type     = "skipdetect";
-               job.name     = "java";
-               job.tivoName = tivoName;
-               job.entry    = s.data;
-               job.title    = s.data.get("title");
-               jobMonitor.submitNewJob(job);
-            }
-         }
-      }*/
-      else if (keyCode == KeyCode.V) {
+      else if (keyCode == KeyEvent.VK_V) {
          // Operate on entire selected set
          Integer[] selected = TableUtil.highToLow(GetSelectedRows());
          if (selected == null) return;
          if (selected.length == 0) return;
          visualDetect(selected);
       }
-      else if (keyCode == KeyCode.W) {
+      else if (keyCode == KeyEvent.VK_W) {
          visualDetectAll();
       }
-      else if (keyCode == KeyCode.Z) {
+      else if (keyCode == KeyEvent.VK_Z) {
          if (SkipManager.skipEnabled()) {
             if (SkipManager.isMonitoring(tivoName)) {
                log.print("Scheduling AutoSkip disable");
@@ -821,17 +698,17 @@ public class nplTable extends TableMap {
          }
       }
    }
-   
+
    // Return current state of Display Folders boolean for this TiVo
    public Boolean showFolders() {
       if (tivoName.equals("FILES")) return false;
       return config.gui.getTab(tivoName).showFolders();
    }
-   
+
    public String getColumnName(int c) {
-      return NowPlaying.getColumns().get(c).getText();
+      return NowPlaying.getColumnName(c);
    }
-   
+
    public int[] GetSelectedRows() {
       debug.print("");
       int[] rows = TableUtil.GetSelectedRows(NowPlaying);
@@ -839,14 +716,16 @@ public class nplTable extends TableMap {
          log.error("No rows selected");
       return rows;
    }
-   
+
    public void NowPlayingRowSelected(Tabentry entry) {
       if (tivoName.equals("FILES")) {
          // FILES mode - don't do anything
       } else {
          // Now Playing mode
-         // Get column items for selected row 
+         // Get column items for selected row
          sortableDate s = entry.getDATE();
+         if (s == null)
+            return;
          if (s.folder) {
             // Folder entry - don't display anything
          } else {
@@ -871,17 +750,17 @@ public class nplTable extends TableMap {
                message += " on " + channelNum + "=" + channel;
             }
             message += ", Duration=" + d;
-            
+
             if (s.data.containsKey("EpisodeNumber"))
                message += ", EpisodeNumber=" + s.data.get("EpisodeNumber");
-            
+
             if (s.data.containsKey("ByteOffset") && s.data.containsKey("size")) {
                if (! s.data.get("ByteOffset").startsWith("0")) {
                   Double pct = Double.valueOf(s.data.get("ByteOffset"))/Double.valueOf(s.data.get("size"));
                   message += ", PAUSE POINT: " + String.format("%.1f%%", pct*100);
                }
             }
-            
+
             if (s.data.containsKey("TimeOffset")) {
                if (! s.data.get("TimeOffset").startsWith("0")) {
                   int secs = Integer.parseInt(s.data.get("TimeOffset"));
@@ -890,7 +769,7 @@ public class nplTable extends TableMap {
                   message += ", PAUSE POINT: " + String.format("%d mins %d secs", mins, secs);
                }
             }
-            
+
             if (s.data.containsKey("originalAirDate")) {
                message += ", originalAirDate=" + s.data.get("originalAirDate");
             }
@@ -898,24 +777,24 @@ public class nplTable extends TableMap {
             if (s.data.containsKey("movieYear")) {
                message += ", movieYear=" + s.data.get("movieYear");
             }
-            
+
             if (description != null) {
                message += "\n" + description;
             }
-      
+
             log.warn("\n" + s.data.get("title"));
             log.print(message);
-            
+
             if (config.gui.show_details.isShowing() && s.data.containsKey("recordingId"))
                config.gui.show_details.update(NowPlaying, tivoName, s.data.get("recordingId"));
          }
       }
    }
-   
+
    // Now Playing mode get selection data at given row
    public Hashtable<String,String> NowPlayingGetSelectionData(int row) {
       debug.print("row=" + row);
-      // Get column items for selected row 
+      // Get column items for selected row
       if (row < 0) {
          log.error("Nothing selected");
          return null;
@@ -927,7 +806,7 @@ public class nplTable extends TableMap {
       }
       return s.data;
    }
-   
+
    // FILES mode get selection data
    // Return full path file name of selected row
    public String NowPlayingGetSelectionFile(int row) {
@@ -942,7 +821,7 @@ public class nplTable extends TableMap {
       String fullName = dirName + s + fileName;
       return fullName;
    }
-   
+
    // This is for non FILES tables
    public Stack<Hashtable<String,String>> getRowData(int row) {
       Stack<Hashtable<String,String>> data = new Stack<Hashtable<String,String>>();
@@ -961,55 +840,54 @@ public class nplTable extends TableMap {
    // (Called only when NowPlaying task completes)
    public void SetNowPlaying(Stack<Hashtable<String,String>> h) {
       debug.print("h=" + h);
-      
+
       // Update lastUpdated since this is a brand new listing
       lastUpdated = " (Last updated: " + getStatusTime(new Date().getTime()) + ")";
-      
+
       // Reset local entries/folders hashes to new entries
       entries = h;
       folderize(h); // populates folders hash
       viewedFilter(h); // populates entries_viewed hash
-      
+
       if (config.showHistoryInTable == 1) {
          // Update history hash (used for highlighting entries with IDs in auto.history)
          auto.keywordMatchHistoryFast("bogus", true);
       }
-      
+
       // Update table listings
       RefreshNowPlaying(entries);
-            
+
       // Adjust column widths to data
       TableUtil.autoSizeTableViewColumns(NowPlaying, false);
    }
-   
+
    // Refresh table with given NowPlaying entries
    // (This can be flat top level display, top level folder display or individual folder item display)
    public void RefreshNowPlaying(Stack<Hashtable<String,String>> h) {
       debug.print("h=" + h);
       if (h == null) h = entries;
       if (h == null) return;
-      
+
       // Update skipEntries
       if (SkipManager.skipEnabled()) {
          skipEntries = SkipManager.getEntries();
       }
-      
+
       if (showFolders())
          displayFolderStructure();
       else
          displayFlatStructure(h);
       String message = getTotalsString(h);
-      
-      NowPlaying.getRoot().setExpanded(true);
+
       NowPlaying.sort();
-      
+
       // Display totals message
       displayTotals(message);
-      
+
       // Identify NPL table items associated with queued/running jobs
       jobMonitor.updateNPLjobStatus();
    }
-   
+
    // Update table display to show either top level flat structure or inside a folder
    public String displayFlatStructure(Stack<Hashtable<String,String>> h) {
       debug.print("h=" + h);
@@ -1021,12 +899,12 @@ public class nplTable extends TableMap {
          if ( ! shouldHideEntry(entry) )
             AddNowPlayingRow(entry);
       }
-      
+
       // Return message indicating size totals of displayed items
       message = getTotalsString(h);
       return message;
    }
-      
+
    // Update table display to show top level folderized NPL entries
    public void displayFolderStructure() {
       debug.print("");
@@ -1059,12 +937,12 @@ public class nplTable extends TableMap {
          }
       }
    }
-   
+
    // Display only entries with pause points
    public void displayUpdate(Boolean viewed_filter) {
       if (entries == null || entries_viewed == null)
          return;
-      
+
       if (config.showHistoryInTable == 1) {
          // Update history hash (used for highlighting entries with IDs in auto.history)
          auto.keywordMatchHistoryFast("bogus", true);
@@ -1080,11 +958,11 @@ public class nplTable extends TableMap {
          folderize(entries);
          RefreshNowPlaying(entries);
       }
-      
+
       // Adjust column widths to data
       TableUtil.autoSizeTableViewColumns(NowPlaying, false);
    }
-   
+
    // Simple string matching to string array
    public static Boolean matches(String test, String[] array) {
       for (int i=0; i<array.length; ++i) {
@@ -1092,7 +970,7 @@ public class nplTable extends TableMap {
       }
       return false;
    }
-   
+
    // Compute total size and duration of all given items and return as a string
    private String getTotalsString(Stack<Hashtable<String,String>> h) {
       debug.print("h=" + h);
@@ -1123,7 +1001,7 @@ public class nplTable extends TableMap {
       }
       return message;
    }
-   
+
    // Display size/duration totals
    private void displayTotals(String message) {
       debug.print("message=" + message);
@@ -1135,7 +1013,7 @@ public class nplTable extends TableMap {
          config.gui.nplTab_UpdateStatus(tivoName, status);
       }
    }
-   
+
    // Create data structure to organize NPL in folder format
    @SuppressWarnings("unchecked")
    private void folderize(Stack<Hashtable<String,String>> entries) {
@@ -1156,7 +1034,7 @@ public class nplTable extends TableMap {
             }
             folders.get(name).add(entries.get(i));
          }
-         
+
          // Categorize by titleOnly (not including suggestions)
          if (!suggestion && entries.get(i).containsKey("titleOnly")) {
             name = entries.get(i).get("titleOnly");
@@ -1167,21 +1045,8 @@ public class nplTable extends TableMap {
             }
             folders.get(name).add(entries.get(i));
          }
-         
-         // Categorize by HD channels (includes suggestions)
-         /*if (entries.get(i).containsKey("HD")) {
-            if (entries.get(i).get("HD").equals("Yes")) {
-               name = "HD Channels";
-               if ( ! folders.containsKey(name) ) {
-                  // Init new stack
-                  Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
-                  folders.put(name, stack);
-               }
-               folders.get(name).add(entries.get(i));
-            }
-         }*/
       }
-      
+
       // Define default sort order for all folder entries
       // Sort by largest gmt first except put Suggestions last
       Comparator<Hashtable<String,String>> folderSort = new Comparator<Hashtable<String,String>>() {
@@ -1192,7 +1057,7 @@ public class nplTable extends TableMap {
             if (gmt1 > gmt2) return -1;
             return 0;
          }
-      };      
+      };
       Hashtable<String,String> entry;
       sortedOrder = new Vector<Hashtable<String,String>>();
       for (Enumeration<String> e=folders.keys(); e.hasMoreElements();) {
@@ -1205,7 +1070,7 @@ public class nplTable extends TableMap {
       }
       Collections.sort(sortedOrder, folderSort);
    }
-   
+
    // Set entries_viewed to only items with pause points
    private void viewedFilter(Stack<Hashtable<String,String>> h) {
       if (h==null)
@@ -1222,7 +1087,7 @@ public class nplTable extends TableMap {
             entries_viewed.push(entry);
       }
    }
-      
+
    // Convert seconds to mins
    private long secsToMins(Long secs) {
       debug.print("secs=" + secs);
@@ -1235,50 +1100,36 @@ public class nplTable extends TableMap {
          mins += 1;
       }
       return mins;
-   }   
+   }
    // Add a now playing non folder entry to NowPlaying table
    public void AddNowPlayingRow(Hashtable<String,String> entry) {
-      TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(entry) );
-      NowPlaying.getRoot().getChildren().add(item);
+      TreeItem<Tabentry> item = new TreeItem<Tabentry>( new Tabentry(entry) );
+      NowPlaying.getRoot().addChild(item);
 
-   }   
+   }
 
    // Add a now playing folder entry to NowPlaying table
    public void AddNowPlayingRow(String fName, Stack<Hashtable<String,String>> folderEntry) {
-      TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(fName, folderEntry) );
+      TreeItem<Tabentry> item = new TreeItem<Tabentry>( new Tabentry(fName, folderEntry) );
       for (int i=0; i<folderEntry.size(); ++i) {
-         TreeItem<Tabentry> subitem = new TreeItem<>( new Tabentry(folderEntry.get(i)) );
-         item.getChildren().add(subitem);
+         TreeItem<Tabentry> subitem = new TreeItem<Tabentry>( new Tabentry(folderEntry.get(i)) );
+         item.addChild(subitem);
       }
-      // Want to resize columns whenever a tree is expanded or collapsed
-      item.expandedProperty().addListener(new ChangeListener<Boolean>() {
-         @Override
-         public void changed(ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) {
-            if (arg2) {
-               // Identify NPL table items associated with queued/running jobs
-               jobMonitor.updateNPLjobStatus();
-            }
-            
-            TableUtil.autoSizeTableViewColumns(NowPlaying, false);
-         }         
-      });
-      NowPlaying.getRoot().getChildren().add(item);
+      NowPlaying.getRoot().addChild(item);
    }
- 
+
    // Add a selected file in FILES mode to NowPlaying table
    public void AddNowPlayingFileRow(File file) {
-      TreeItem<Tabentry> item = new TreeItem<>( new Tabentry(file) );
-      NowPlaying.getRoot().getChildren().add(item);
-      NowPlaying.getRoot().setExpanded(true);
+      TreeItem<Tabentry> item = new TreeItem<Tabentry>( new Tabentry(file) );
+      NowPlaying.getRoot().addChild(item);
       // Adjust column widths to data
       TableUtil.autoSizeTableViewColumns(NowPlaying, false);
       // Select entry just added
       int last = NowPlaying.getRoot().getChildren().size()-1;
       if (last >= 0) {
-         NowPlaying.getSelectionModel().clearSelection();
-         NowPlaying.getSelectionModel().select(last);
-         NowPlaying.requestFocus();
-         NowPlaying.getFocusModel().focus(last);
+         NowPlaying.clearSelection();
+         NowPlaying.select(last);
+         NowPlaying.table.requestFocus();
       }
    }
 
@@ -1291,7 +1142,7 @@ public class nplTable extends TableMap {
       RemoveRow(row);
 
    }
-   
+
    public void RemoveRow(int row) {
       TreeItem<Tabentry> item = NowPlaying.getTreeItem(row);
       if (item != null) {
@@ -1307,17 +1158,17 @@ public class nplTable extends TableMap {
             if (new_data.size() > 0)
                parent.setValue(new Tabentry(date.folderName, new_data));
             else {
-               NowPlaying.getRoot().getChildren().remove(parent);
+               NowPlaying.getRoot().removeChild(parent);
             }
          }
          // Remove table entry
-         parent.getChildren().remove(item);
-         
+         parent.removeChild(item);
+
          // Update table label
          displayTotals(getTotalsString(entries));
       }
    }
-   
+
    public void RemoveRows(Stack<Integer> rows) {
       // Must remove by highest index first
       int row, index;
@@ -1336,20 +1187,24 @@ public class nplTable extends TableMap {
          }
       }
    }
-      
+
    public void SetNowPlayingHeaders(String[] headers) {
       debug.print("headers=" + Arrays.toString(headers));
       for (int i=0; i<headers.length; ++i) {
          SetHeaderText(headers[i], i);
       }
    }
-   
+
    // Refresh all titles currently displayed in table for non-folder entries
    public void refreshTitles() {
       for (int row=0; row<NowPlaying.getRoot().getChildren().size(); ++row) {
-         sortableDate s = NowPlaying.getRoot().getChildren().get(row).getValue().getDATE();
-         if (! s.folder && s.data != null)
-            NowPlaying.getRoot().getChildren().get(row).getValue().show = new sortableShow(s.data);
+         TreeItem<Tabentry> item = NowPlaying.getRoot().getChildren().get(row);
+         sortableDate s = item.getValue().getDATE();
+         if (! s.folder && s.data != null) {
+            Tabentry entry = item.getValue();
+            entry.show = new sortableShow(s.data);
+            item.setValue(entry);
+         }
       }
    }
 
@@ -1358,18 +1213,18 @@ public class nplTable extends TableMap {
    public void SelectFolder(String folderName) {
       debug.print("folderName=" + folderName);
       for (int i=0; i<NowPlaying.getRoot().getChildren().size(); ++i) {
-         sortableDate s = NowPlaying.getRoot().getChildren().get(i).getValue().getDATE();
+         TreeItem<Tabentry> item = NowPlaying.getRoot().getChildren().get(i);
+         sortableDate s = item.getValue().getDATE();
          if (s.folder) {
             if (s.folderName.equals(folderName)) {
-               NowPlaying.getSelectionModel().clearSelection();
-               NowPlaying.getSelectionModel().select(i);
-               TableUtil.scrollToCenter(NowPlaying, i);
+               NowPlaying.clearSelection();
+               NowPlaying.select(item);
                return;
             }
          }
       }
    }
-   
+
    private void selectRowWithData(Hashtable<String,String> data) {
       if (data.containsKey("folderName"))
          SelectFolder(data.get("folderName"));
@@ -1385,7 +1240,7 @@ public class nplTable extends TableMap {
                      sortableDate r = subitem.getValue().getDATE();
                      if (r!= null && r.data != null && r.data.containsKey("ProgramId_unique")) {
                         if (r.data.get("ProgramId_unique").equals(data.get("ProgramId_unique"))) {
-                           NowPlaying.getSelectionModel().select(subitem);
+                           NowPlaying.select(subitem);
                            return;
                         }
                      }
@@ -1395,7 +1250,7 @@ public class nplTable extends TableMap {
                   sortableDate r = item.getValue().getDATE();
                   if (r!= null && r.data != null && r.data.containsKey("ProgramId_unique")) {
                      if (r.data.get("ProgramId_unique").equals(data.get("ProgramId_unique"))) {
-                        NowPlaying.getSelectionModel().select(item);
+                        NowPlaying.select(item);
                         return;
                      }
                   }
@@ -1404,7 +1259,7 @@ public class nplTable extends TableMap {
          }
       }
    }
-   
+
    // Remove NPL entry containing given recordingId
    public void RemoveEntry(String recordingId) {
       log.print("RemoveEntry " + recordingId);
@@ -1417,7 +1272,7 @@ public class nplTable extends TableMap {
                sortableDate r = subitem.getValue().getDATE();
                if (r != null && r.data != null && r.data.containsKey("recordingId")) {
                   if (r.data.get("recordingId").equals(recordingId)) {
-                     subitem.getParent().getChildren().remove(subitem);
+                     subitem.getParent().removeChild(subitem);
                      displayTotals(getTotalsString(entries));
                      return;
                   }
@@ -1428,7 +1283,7 @@ public class nplTable extends TableMap {
             sortableDate r = item.getValue().getDATE();
             if (r!= null && r.data != null && r.data.containsKey("recordingId")) {
                if (r.data.get("recordingId").equals(recordingId)) {
-                  item.getParent().getChildren().remove(item);
+                  item.getParent().removeChild(item);
                   displayTotals(getTotalsString(entries));
                   return;
                }
@@ -1436,11 +1291,11 @@ public class nplTable extends TableMap {
          }
       }
    }
-   
+
    public void SetHeaderText(String text, int col) {
-      NowPlaying.getColumns().get(col).setText(text);
+      NowPlaying.setColumnName(col, text);
    }
-   
+
    @SuppressWarnings("unchecked")
    private void RemoveUrls(LinkedHashMap<String,Integer> urls) {
       // First update table
@@ -1461,7 +1316,7 @@ public class nplTable extends TableMap {
          }
       }
       folderize(entries);
-      
+
       // TWP delete calls
       for (String url : urls.keySet()) {
          file.TivoWebPlusDelete(url);
@@ -1474,7 +1329,7 @@ public class nplTable extends TableMap {
          } catch (InterruptedException e) {}
       }
    }
-   
+
    @SuppressWarnings("unchecked")
    private void RemoveIds(LinkedHashMap<String,Integer> urls, LinkedHashMap<String,Integer> ids) {
       // First update table
@@ -1495,7 +1350,7 @@ public class nplTable extends TableMap {
          }
       }
       folderize(entries);
-      
+
       // Remote delete calls
       JSONArray a = new JSONArray();
       JSONObject json = new JSONObject();
@@ -1519,7 +1374,7 @@ public class nplTable extends TableMap {
          log.print("RemoveIds failed - " + e.getMessage());
       }
    }
-   
+
    private Boolean StopRecording(String id) {
       Boolean deleted = false;
       JSONObject json = new JSONObject();
@@ -1537,7 +1392,7 @@ public class nplTable extends TableMap {
       }
       return deleted;
    }
-   
+
    private void PlayShow(JSONArray ids, Stack<String> titles) {
       JSONObject json = new JSONObject();
       try {
@@ -1546,7 +1401,7 @@ public class nplTable extends TableMap {
             json.put("id", ids.get(0));
             Remote r = config.initRemote(tivoName);
             if (r.success) {
-               r.Command("Playback", json);  
+               r.Command("Playback", json);
                r.disconnect();
             }
          } else {
@@ -1556,25 +1411,25 @@ public class nplTable extends TableMap {
             json.put("id", ids);
             Remote r = config.initRemote(tivoName);
             if (r.success) {
-               r.Command("Playgroup", json);  
+               r.Command("Playgroup", json);
                r.disconnect();
             }
          }
       } catch (JSONException e) {
          log.print("PlayShow failed - " + e.getMessage());
-      }      
+      }
    }
-   
+
    private String getStatusTime(long gmt) {
       debug.print("gmt=" + gmt);
       SimpleDateFormat sdf = new SimpleDateFormat("hh:mm aa");
       return sdf.format(gmt);
    }
-   
+
    public Stack<Hashtable<String,String>> getEntries() {
       return entries;
    }
-   
+
    public static Double bitRate(String size, String duration) {
       Double rate = 0.0;
       try {
@@ -1588,12 +1443,12 @@ public class nplTable extends TableMap {
       }
       return rate;
    }
-      
+
    // Return true if this entry should not be displayed, false otherwise
    private Boolean shouldHideEntry(Hashtable<String,String> entry) {
       return config.HideProtectedFiles == 1 && entry.containsKey("CopyProtected");
    }
-   
+
    // Identify NPL table items associated with queued/running jobs
    public void updateNPLjobStatus(Hashtable<String,String> map) {
       UpdatingNPL = true;
@@ -1613,7 +1468,7 @@ public class nplTable extends TableMap {
                   entry = NowPlaying.getTreeItem(row).getValue();
                   entry.setIMAGE(null);
                   NowPlaying.getTreeItem(row).setValue(entry);
-                  
+
                   // Set to ExpirationImage icon if available
                   if ( s.data.containsKey("ExpirationImage") ) {
                      entry = NowPlaying.getTreeItem(row).getValue();
@@ -1626,7 +1481,7 @@ public class nplTable extends TableMap {
       }
       UpdatingNPL = false;
    }
-   
+
    // Identify NPL table items containing skip data
    public void updateSkipStatus(String contentId) {
       UpdatingNPL = true;
@@ -1645,11 +1500,12 @@ public class nplTable extends TableMap {
       }
       UpdatingNPL = false;
    }
-   
+
    private String getValueAt(int row, int col) {
-      return NowPlaying.getColumns().get(col).getCellData(row).toString();
+      Object o = NowPlaying.getValueAt(row, col);
+      return o == null ? "" : o.toString();
    }
-   
+
    private String getPctWatched(Hashtable<String,String> data) {
       String pct = "";
       if (data.containsKey("ByteOffset") && data.containsKey("size")) {
@@ -1658,7 +1514,7 @@ public class nplTable extends TableMap {
             pct = "" + percent + "%";
          }
       }
-      
+
       if (data.containsKey("TimeOffset") && data.containsKey("duration")) {
          if (! data.get("TimeOffset").startsWith("0")) {
             Double secs = Double.valueOf(data.get("TimeOffset"));
@@ -1667,7 +1523,7 @@ public class nplTable extends TableMap {
             pct = "" + percent + "%";
          }
       }
-      
+
       // If this offerId has an entry in AutoSkip.ini then mark with an S
       if (data.containsKey("offerId") && skipEntries != null) {
          for (int i=0; i<skipEntries.length(); ++i) {
@@ -1684,7 +1540,7 @@ public class nplTable extends TableMap {
       }
       return pct;
    }
-      
+
    // Export NPL entries to a csv file
    // NOTE: The current table structure + sorting is used
    public void exportNPL(String file) {
@@ -1694,8 +1550,8 @@ public class nplTable extends TableMap {
             log.warn("Exporting NPL table for: " + tivoName + " ...");
             BufferedWriter ofp = new BufferedWriter(new FileWriter(file));
             int col = 0;
-            for (TreeTableColumn<Tabentry,?> column : NowPlaying.getColumns()) {
-               String name = column.getText();
+            for (int c=0; c<numCols; ++c) {
+               String name = NowPlaying.getColumnName(c);
                if (name.equals(""))
                   continue;
                if (name.equals("DUR"))
@@ -1716,11 +1572,9 @@ public class nplTable extends TableMap {
             }
             ofp.write("\r\n");
             for (int row=0; row<NowPlaying.getExpandedItemCount(); row++) {
-               int c = 0;
-               for (TreeTableColumn<Tabentry,?> column : NowPlaying.getColumns()) {
-                  String colName = column.getText();
+               for (int c=0; c<numCols; ++c) {
+                  String colName = NowPlaying.getColumnName(c);
                   if (colName.equals("")) {
-                     c++;
                      continue;
                   }
                   String val = getValueAt(row, c);
@@ -1739,7 +1593,6 @@ public class nplTable extends TableMap {
                      // This is the SORTABLE DATE column
                      ofp.write("\"" + TableUtil.getSortableDate(e.date) + "\",");
                   }
-                  c++;
                }
                ofp.write("\r\n");
             }
@@ -1752,7 +1605,7 @@ public class nplTable extends TableMap {
          log.error("exportNPL - " + e.getMessage());
       }
    }
-   
+
    private void visualDetect(Integer[] selected) {
       if (config.visualDetect_running) {
          log.error("Please wait until current 'AutoSkip from SkipMode' run finishes before starting another");
@@ -1766,31 +1619,29 @@ public class nplTable extends TableMap {
          if (s.data.containsKey("clipMetadataId") && s.data.containsKey("contentId")) {
             Boolean go = true;
             if (SkipManager.hasEntry(s.data.get("contentId"))) {
-               go = false;
-               Alert alert = new Alert(AlertType.CONFIRMATION);
-               Button cancel = (Button)alert.getDialogPane().lookupButton(ButtonType.CANCEL);
-               cancel.setDefaultButton(true);
-               alert.setTitle("Confirm");
-               config.gui.setFontSize(alert, config.FontSize);
-               alert.setContentText("Override existing AutoSkip data?");
-               Optional<ButtonType> result = alert.showAndWait();
-               if (result.get() == ButtonType.OK) {
-                  go = true;
-               }
+               // Confirmation dialog defaulting to Cancel
+               Object[] options = {"OK", "Cancel"};
+               int result = JOptionPane.showOptionDialog(
+                  config.gui.getFrame(),
+                  "Override existing AutoSkip data?", "Confirm",
+                  JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
+                  null, options, options[1]
+               );
+               go = result == JOptionPane.OK_OPTION;
             }
             if (go) {
                stack.push(s.data);
             }
          } else {
             log.error("No SkipMode data available for this show - skipping");
-         }        
+         }
       } // for
       if (stack.isEmpty())
          log.warn("No valid entries found to process in selected set");
       else
          SkipManager.visualDetect(tivoName, stack, true);
    }
-   
+
    private void visualDetectAll() {
       // Build stack of eligible entries to run visualDetect on
       Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
@@ -1807,14 +1658,15 @@ public class nplTable extends TableMap {
          log.warn("" + stack.size() + " entries found to process for AutoSkip from SkipMode:");
          for (Hashtable<String,String> entry : stack)
             log.warn("   " + entry.get("title"));
-         Alert alert = new Alert(AlertType.CONFIRMATION);
-         Button cancel = (Button)alert.getDialogPane().lookupButton(ButtonType.CANCEL);
-         cancel.setDefaultButton(true);
-         alert.setTitle("Confirm");
-         config.gui.setFontSize(alert, config.FontSize);
-         alert.setContentText("Run AutoSkip from SkipMode for " + stack.size() + " entries (show in message window)?");
-         Optional<ButtonType> result = alert.showAndWait();
-         if (result.get() != ButtonType.OK) {
+         Object[] options = {"OK", "Cancel"};
+         int result = JOptionPane.showOptionDialog(
+            config.gui.getFrame(),
+            "Run AutoSkip from SkipMode for " + stack.size() + " entries (show in message window)?",
+            "Confirm",
+            JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
+            null, options, options[1]
+         );
+         if (result != JOptionPane.OK_OPTION) {
             return;
          }
          SkipManager.visualDetect(tivoName, stack, true);

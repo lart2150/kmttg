@@ -18,24 +18,20 @@
  */
 package com.tivo.kmttg.gui.remote;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.todoTable;
@@ -46,27 +42,25 @@ import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
 
 public class todo {
-   public VBox panel = null;
+   public JPanel panel = null;
    public todoTable tab = null;
-   public ChoiceBox<String> tivo = null;
-   public Label label = null;
-   public Button cancel = null;
-   public Button modify = null;
-   
-   public todo(final Stage frame) {
-      // ToDo Tab items            
-      HBox row1 = new HBox();
-      row1.setSpacing(5);
-      row1.setPadding(new Insets(5,0,0,5));
-      row1.setAlignment(Pos.CENTER_LEFT);
-      
-      Label title = new Label("ToDo list");
-      
-      Label tivo_label = new Label();
-      
-      tivo = new ChoiceBox<String>();
-      tivo.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
+   public JComboBox<String> tivo = null;
+   public JLabel label = null;
+   public JButton cancel = null;
+   public JButton modify = null;
+
+   public todo(final JFrame frame) {
+      // ToDo Tab items
+      JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+
+      JLabel title = new JLabel("ToDo list");
+
+      JLabel tivo_label = new JLabel();
+
+      tivo = new JComboBox<String>();
+      tivo.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)tivo.getSelectedItem();
             if (newVal != null && config.gui.remote_gui != null) {
                 TableUtil.clear(tab.TABLE);
                 label.setText("");
@@ -77,16 +71,16 @@ public class todo {
             }
          }
       });
-      tivo.setTooltip(tooltip.getToolTip("tivo_todo"));
+      tivo.setToolTipText(tooltip.getToolTip("tivo_todo"));
 
-      Button refresh = new Button("Refresh");
-      refresh.setTooltip(tooltip.getToolTip("refresh_todo"));
-      refresh.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      JButton refresh = new JButton("Refresh");
+      refresh.setToolTipText(tooltip.getToolTip("refresh_todo"));
+      refresh.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Refresh to do list
             TableUtil.clear(tab.TABLE);
             label.setText("");
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                jobData job = new jobData();
                job.source      = tivoName;
@@ -100,81 +94,83 @@ public class todo {
          }
       });
 
-      cancel = new Button("Cancel");
-      cancel.setTooltip(tooltip.getToolTip("cancel_todo"));
-      cancel.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      cancel = new JButton("Cancel");
+      cancel.setToolTipText(tooltip.getToolTip("cancel_todo"));
+      cancel.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             tab.DeleteCB();
          }
       });
 
-      modify = new Button("Modify");
-      modify.setTooltip(tooltip.getToolTip("modify_todo"));
-      modify.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String tivoName = tivo.getValue();
+      modify = new JButton("Modify");
+      modify.setToolTipText(tooltip.getToolTip("modify_todo"));
+      modify.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                tab.recordSingle(tivoName);
             }
          }
       });
 
-      Button export = new Button("Export ...");
-      export.setTooltip(tooltip.getToolTip("export_todo"));
-      export.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            final String tivoName = tivo.getValue();
-            config.gui.remote_gui.Browser.getExtensionFilters().clear();
-            config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
-            config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
-            config.gui.remote_gui.Browser.setTitle("Save to file");
-            config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
-            config.gui.remote_gui.Browser.setInitialFileName(tivoName + "_" + TableUtil.currentYearMonthDay() + ".csv");
-            final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(frame);
+      JButton export = new JButton("Export ...");
+      export.setToolTipText(tooltip.getToolTip("export_todo"));
+      export.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            final String tivoName = (String)tivo.getSelectedItem();
+            JFileChooser Browser = config.gui.remote_gui.Browser;
+            Browser.resetChoosableFileFilters();
+            Browser.addChoosableFileFilter(new FileNameExtensionFilter("CSV Files", "csv"));
+            Browser.setDialogTitle("Save to file");
+            Browser.setCurrentDirectory(new File(config.programDir));
+            Browser.setSelectedFile(new File(config.programDir, tivoName + "_" + TableUtil.currentYearMonthDay() + ".csv"));
+            final File selectedFile;
+            if (Browser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
+               selectedFile = Browser.getSelectedFile();
+            else
+               selectedFile = null;
             if (selectedFile != null) {
-               Task<Void> task = new Task<Void>() {
-                  @Override public Void call() {
+               Runnable task = new Runnable() {
+                  @Override public void run() {
                      log.warn("Exporting '" + tivoName + "' todo list to csv file: " + selectedFile.getAbsolutePath());
                      Remote r = config.initRemote(tivoName);
                      if (r.success) {
                         r.TodoExportCSV(selectedFile);
                         r.disconnect();
                      }
-                     return null;
                   }
                };
                new Thread(task).start();
             }
          }
       });
-      
-      Button trim = new Button("Select repeats");
-      trim.setTooltip(tooltip.getToolTip("trim_todo"));
-      trim.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            final String tivoName = tivo.getValue();
+
+      JButton trim = new JButton("Select repeats");
+      trim.setToolTipText(tooltip.getToolTip("trim_todo"));
+      trim.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            final String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null)
                tab.trimRepeats(tivoName);
          }
       });
-      
-      label = new Label();
-      
-      row1.getChildren().add(title);
-      row1.getChildren().add(tivo_label);
-      row1.getChildren().add(tivo);
-      row1.getChildren().add(refresh);
-      row1.getChildren().add(cancel);
-      row1.getChildren().add(modify);
-      row1.getChildren().add(export);
-      row1.getChildren().add(trim);
-      row1.getChildren().add(label);
-      
+
+      label = new JLabel();
+
+      row1.add(title);
+      row1.add(tivo_label);
+      row1.add(tivo);
+      row1.add(refresh);
+      row1.add(cancel);
+      row1.add(modify);
+      row1.add(export);
+      row1.add(trim);
+      row1.add(label);
+
       tab = new todoTable();
-      VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
-            
-      panel = new VBox();
-      panel.setSpacing(1);
-      panel.getChildren().addAll(row1, tab.TABLE);
+
+      panel = new JPanel(new BorderLayout());
+      panel.add(row1, BorderLayout.NORTH);
+      panel.add(new JScrollPane(tab.TABLE), BorderLayout.CENTER); // stretch vertically
    }
 }

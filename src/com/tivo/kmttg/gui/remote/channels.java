@@ -18,9 +18,22 @@
  */
 package com.tivo.kmttg.gui.remote;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.Optional;
 import java.util.Stack;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.channelsTable;
@@ -28,49 +41,29 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.stage.FileChooser.ExtensionFilter;
-
 public class channels {
-   public VBox panel = null;
+   public JPanel panel = null;
    public channelsTable tab = null;
-   public Button refresh = null;
-   public Button copy = null;
-   public Button update = null;
-   public Label label = null;
-   public ChoiceBox<String> tivo = null;
-   
-   public channels(final Stage frame) {
-      
-      // Channels tab items      
-      HBox row1 = new HBox();
-      row1.setSpacing(5);
-      row1.setAlignment(Pos.CENTER_LEFT);
-      row1.setPadding(new Insets(5,0,0,5));
-      
-      Label title = new Label("Channels");
-      
-      Label tivo_label = new Label();
-      
-      tivo = new ChoiceBox<String>();
-      tivo.valueProperty().addListener(new ChangeListener<String>() {
-         @Override public void changed(ObservableValue<? extends String> ov, String oldVal, String newVal) {
-            if (newVal != null && config.gui.remote_gui != null) {                
+   public JButton refresh = null;
+   public JButton copy = null;
+   public JButton update = null;
+   public JLabel label = null;
+   public JComboBox<String> tivo = null;
+
+   public channels(final JFrame frame) {
+
+      // Channels tab items
+      JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+
+      JLabel title = new JLabel("Channels");
+
+      JLabel tivo_label = new JLabel();
+
+      tivo = new JComboBox<String>();
+      tivo.addActionListener(new ActionListener() {
+         @Override public void actionPerformed(ActionEvent e) {
+            String newVal = (String)tivo.getSelectedItem();
+            if (newVal != null && config.gui.remote_gui != null) {
                // TiVo selection changed for Channels tab
                TableUtil.clear(tab.TABLE);
                label.setText("");
@@ -82,26 +75,30 @@ public class channels {
             }
          }
       });
-      tivo.setTooltip(tooltip.getToolTip("tivo_channels"));
+      tivo.setToolTipText(tooltip.getToolTip("tivo_channels"));
 
-      Button save = new Button("Save...");
-      save.setTooltip(tooltip.getToolTip("save_channels"));
-      save.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      JButton save = new JButton("Save...");
+      save.setToolTipText(tooltip.getToolTip("save_channels"));
+      save.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Save channels list
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                if (tab.isTableLoaded()) {
                   log.error("Cannot save loaded Channels");
                   return;
                }  else {
-                  config.gui.remote_gui.Browser.getExtensionFilters().clear();
-                  config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("Channel Files", "*.chan"));
-                  config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
-                  config.gui.remote_gui.Browser.setTitle("Save to file");
-                  config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
-                  config.gui.remote_gui.Browser.setInitialFileName(tivoName + ".chan");
-                  final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(frame);
+                  JFileChooser Browser = config.gui.remote_gui.Browser;
+                  Browser.resetChoosableFileFilters();
+                  Browser.addChoosableFileFilter(new FileNameExtensionFilter("Channel Files", "chan"));
+                  Browser.setDialogTitle("Save to file");
+                  Browser.setCurrentDirectory(new File(config.programDir));
+                  Browser.setSelectedFile(new File(config.programDir, tivoName + ".chan"));
+                  final File selectedFile;
+                  if (Browser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
+                     selectedFile = Browser.getSelectedFile();
+                  else
+                     selectedFile = null;
                   if (selectedFile != null) {
                      tab.saveChannels(tivoName, selectedFile.getAbsolutePath());
                   }
@@ -110,20 +107,24 @@ public class channels {
          }
       });
 
-      Button load = new Button("Load...");
-      load.setTooltip(tooltip.getToolTip("load_channels"));
-      load.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      JButton load = new JButton("Load...");
+      load.setToolTipText(tooltip.getToolTip("load_channels"));
+      load.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Load channels list
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               config.gui.remote_gui.Browser.getExtensionFilters().clear();
-               config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("Channel Files", "*.chan"));
-               config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
-               config.gui.remote_gui.Browser.setTitle("Load channels file");
-               config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
-               config.gui.remote_gui.Browser.setInitialFileName(tivoName + ".chan");
-               final File selectedFile = config.gui.remote_gui.Browser.showOpenDialog(frame);
+               JFileChooser Browser = config.gui.remote_gui.Browser;
+               Browser.resetChoosableFileFilters();
+               Browser.addChoosableFileFilter(new FileNameExtensionFilter("Channel Files", "chan"));
+               Browser.setDialogTitle("Load channels file");
+               Browser.setCurrentDirectory(new File(config.programDir));
+               Browser.setSelectedFile(new File(config.programDir, tivoName + ".chan"));
+               final File selectedFile;
+               if (Browser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
+                  selectedFile = Browser.getSelectedFile();
+               else
+                  selectedFile = null;
                if (selectedFile != null) {
                   label.setText("");
                   tab.loadChannels(selectedFile.getAbsolutePath());
@@ -131,29 +132,32 @@ public class channels {
             }
          }
       });
-      
-      Button export_channels = new Button("Export ...");
-      export_channels.setTooltip(tooltip.getToolTip("export_channels"));
-      export_channels.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            final String tivoName = tivo.getValue();
-            config.gui.remote_gui.Browser.getExtensionFilters().clear();
-            config.gui.remote_gui.Browser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
-            config.gui.remote_gui.Browser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ALL FILES", "*"));
-            config.gui.remote_gui.Browser.setTitle("Save to file");
-            config.gui.remote_gui.Browser.setInitialDirectory(new File(config.programDir));
-            config.gui.remote_gui.Browser.setInitialFileName(tivoName + "_channels.csv");
-            final File selectedFile = config.gui.remote_gui.Browser.showSaveDialog(frame);
+
+      JButton export_channels = new JButton("Export ...");
+      export_channels.setToolTipText(tooltip.getToolTip("export_channels"));
+      export_channels.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
+            final String tivoName = (String)tivo.getSelectedItem();
+            JFileChooser Browser = config.gui.remote_gui.Browser;
+            Browser.resetChoosableFileFilters();
+            Browser.addChoosableFileFilter(new FileNameExtensionFilter("CSV Files", "csv"));
+            Browser.setDialogTitle("Save to file");
+            Browser.setCurrentDirectory(new File(config.programDir));
+            Browser.setSelectedFile(new File(config.programDir, tivoName + "_channels.csv"));
+            final File selectedFile;
+            if (Browser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
+               selectedFile = Browser.getSelectedFile();
+            else
+               selectedFile = null;
             if (selectedFile != null) {
-               Task<Void> task = new Task<Void>() {
-                  @Override public Void call() {
+               Runnable task = new Runnable() {
+                  @Override public void run() {
                      log.warn("Exporting '" + tivoName + "' channel list to csv file: " + selectedFile.getAbsolutePath());
                      Remote r = config.initRemote(tivoName);
                      if (r.success) {
                         r.ChannelLineupCSV(selectedFile);
                         r.disconnect();
                      }
-                     return null;
                   }
                };
                new Thread(task).start();
@@ -161,13 +165,13 @@ public class channels {
          }
       });
 
-      copy = new Button("Copy");
-      copy.setTooltip(tooltip.getToolTip("copy_channels"));
-      copy.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      copy = new JButton("Copy");
+      copy.setToolTipText(tooltip.getToolTip("copy_channels"));
+      copy.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Copy selected channel settings to a TiVo
             // Build list of eligible TiVos
-            String thisTivo = tivo.getValue();
+            String thisTivo = (String)tivo.getSelectedItem();
             Stack<String> all = config.getTivoNames();
             for (int i=0; i<all.size(); ++i) {
                String tivo = all.get(i);
@@ -180,16 +184,12 @@ public class channels {
                   continue;
                }
             }
-            
+
             // Prompt user to choose a TiVo
-            ChoiceDialog<String> dialog = new ChoiceDialog<String>(all.get(0), all);
-            dialog.setTitle("Copy To");
-            dialog.setHeaderText("Choose which TiVo to copy to");
-            dialog.setContentText("TiVo:");
-            String tivoName = null;
-            Optional<String> result = dialog.showAndWait();
-            if (result.isPresent())
-               tivoName = result.get();
+            String tivoName = (String)JOptionPane.showInputDialog(
+               frame, "Choose which TiVo to copy to", "Copy To",
+               JOptionPane.QUESTION_MESSAGE, null, all.toArray(new String[0]), all.get(0)
+            );
             if (tivoName != null && tivoName.length() > 0) {
                if (tivoName.equals(thisTivo)) {
                   // Don't copy to self unless in loaded state
@@ -203,12 +203,12 @@ public class channels {
          }
       });
 
-      refresh = new Button("Refresh");
-      refresh.setTooltip(tooltip.getToolTip("refresh_channels"));
-      refresh.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      refresh = new JButton("Refresh");
+      refresh.setToolTipText(tooltip.getToolTip("refresh_channels"));
+      refresh.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Refresh channels list
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
                label.setText("");
                tab.refreshChannels(tivoName);
@@ -216,36 +216,35 @@ public class channels {
          }
       });
 
-      update = new Button("Modify");
-      update.setTooltip(tooltip.getToolTip("update_channels"));
-      update.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
+      update = new JButton("Modify");
+      update.setToolTipText(tooltip.getToolTip("update_channels"));
+      update.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent e) {
             // Update channels list
-            String tivoName = tivo.getValue();
+            String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0)
                label.setText("");
                tab.updateChannels(tivoName);
          }
       });
-      
-      label = new Label();
-            
-      row1.getChildren().add(title);
-      row1.getChildren().add(tivo_label);
-      row1.getChildren().add(tivo);
-      row1.getChildren().add(refresh);
-      row1.getChildren().add(save);
-      row1.getChildren().add(load);
-      row1.getChildren().add(export_channels);
-      row1.getChildren().add(copy);
-      row1.getChildren().add(update);
-      row1.getChildren().add(label);
-      
+
+      label = new JLabel();
+
+      row1.add(title);
+      row1.add(tivo_label);
+      row1.add(tivo);
+      row1.add(refresh);
+      row1.add(save);
+      row1.add(load);
+      row1.add(export_channels);
+      row1.add(copy);
+      row1.add(update);
+      row1.add(label);
+
       tab = new channelsTable();
-      VBox.setVgrow(tab.TABLE, Priority.ALWAYS); // stretch vertically
-      
-      panel = new VBox();
-      panel.setSpacing(1);
-      panel.getChildren().addAll(row1, tab.TABLE);      
+
+      panel = new JPanel(new BorderLayout());
+      panel.add(row1, BorderLayout.NORTH);
+      panel.add(new JScrollPane(tab.TABLE), BorderLayout.CENTER); // stretch vertically
    }
 }

@@ -20,25 +20,26 @@ package com.tivo.kmttg.gui.table;
 
 import java.util.Comparator;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.sortable.sortableString;
+import com.tivo.kmttg.gui.swing.KmttgTable;
+import com.tivo.kmttg.gui.swing.KmttgTableModel;
 import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.util.log;
 
 public class skipTable {
    private String[] TITLE_cols = {"SHOW", "TIVO", "CONTENTID", "AD1"};
    private double[] weights = {52, 20, 15, 13};
-   public TableView<Tabentry> TABLE = null;
-   
+   public JTable TABLE = null;
+   public KmttgTableModel<Tabentry> MODEL = null;
+
    class offsetComparator implements Comparator<String> {
       public int compare(String s1, String s2) {
          if (s1 != null && s2 != null) {
@@ -52,29 +53,19 @@ public class skipTable {
    }
 
    public skipTable() {
-      TABLE = new TableView<Tabentry>();
-      TABLE.setEditable(true); // Allow editing
-      for (String colName : TITLE_cols) {
-         // Regular String sort
-         String cName = colName;
-         if (colName.equals("SHOW")) {
-            TableColumn<Tabentry,sortableString> col = new TableColumn<Tabentry,sortableString>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,sortableString>(cName));
-            TABLE.getColumns().add(col);            
-         } else {
-            TableColumn<Tabentry,String> col = new TableColumn<Tabentry,String>(colName);
-            col.setCellValueFactory(new PropertyValueFactory<Tabentry,String>(cName));
-            TABLE.getColumns().add(col);
-         }
-         TableUtil.setWeights(TABLE, TITLE_cols, weights, true);
-      }
-      
+      MODEL = new KmttgTableModel<Tabentry>(TITLE_cols);
+      TABLE = KmttgTable.create(MODEL, null);
+      TableUtil.setWeights(TABLE, TITLE_cols, weights, true);
+
       // Define selection listener to detect table row selection changes
-      TABLE.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tabentry>() {
+      TABLE.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
          @Override
-         public void changed(ObservableValue<? extends Tabentry> obs, Tabentry oldSelection, Tabentry newSelection) {
-            if (newSelection != null) {
-               TABLERowSelected(newSelection);
+         public void valueChanged(ListSelectionEvent e) {
+            if (e.getValueIsAdjusting())
+               return;
+            int row = TABLE.getSelectionModel().getLeadSelectionIndex();
+            if (row >= 0 && row < MODEL.size() && TABLE.isRowSelected(row)) {
+               TABLERowSelected(MODEL.getRow(row));
             }
          }
       });
@@ -101,30 +92,30 @@ public class skipTable {
       public sortableString getSHOW() {
          return show;
       }
-      
+
       public String getCONTENTID() {
          return contentId;
       }
-      
+
       public String getTIVO() {
          return tivo;
       }
 
       public String getAD1() {
          return ad1;
-      }      
+      }
    }
-   
+
    private String adStart(String ad1) {
       return SkipManager.toMinSec(Long.parseLong(ad1));
    }
 
-   public TableView<?> getTable() {
+   public JTable getTable() {
       return TABLE;
    }
 
    public void clear() {
-      TABLE.getItems().clear();
+      MODEL.clear();
    }
 
    public void AddRows(JSONArray data) {
@@ -140,25 +131,26 @@ public class skipTable {
    }
 
    public void AddRow(JSONObject json) {
-      TABLE.getItems().add(new Tabentry(json));
+      MODEL.addRow(new Tabentry(json));
    }
 
    public void RemoveRow(int row) {
-      TABLE.getItems().remove(row);
+      MODEL.removeRow(row);
    }
 
    public JSONObject GetRowData(int row) {
-      return TABLE.getItems().get(row).getSHOW().json;
+      return MODEL.getRow(row).getSHOW().json;
    }
-   
+
    public String GetValueAt(int row, int col) {
-      return TABLE.getColumns().get(col).getCellData(row).toString();
+      Object o = MODEL.getValueAt(row, col);
+      return o == null ? "" : o.toString();
    }
-   
+
    public void changeTable() {
       try {
          JSONArray changed = new JSONArray();
-         for (int row=0; row<TABLE.getItems().size(); ++row) {
+         for (int row=0; row<MODEL.size(); ++row) {
             String table_value = GetValueAt(row, TableUtil.getColumnIndex(TABLE, "OFFSET"));
             JSONObject json = GetRowData(row);
             if (json != null) {
@@ -181,7 +173,7 @@ public class skipTable {
          log.error("changeTable - " + e.getMessage());
       }
    }
-   
+
    private void TABLERowSelected(Tabentry entry) {
       try {
          JSONObject json = entry.getSHOW().json;
@@ -198,7 +190,7 @@ public class skipTable {
             String message = "" + index + ": start=";
             message += SkipManager.toMinSec(start);
             message += " end=";
-            message += SkipManager.toMinSec(end);         
+            message += SkipManager.toMinSec(end);
             log.print(message);
             index++;
          }
