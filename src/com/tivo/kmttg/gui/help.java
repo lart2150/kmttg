@@ -29,7 +29,6 @@ import java.util.LinkedHashMap;
 
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 
 import java.awt.Color;
@@ -182,10 +181,11 @@ public class help {
       String version_url = "https://raw.githubusercontent.com/lart2150/kmttg/master/version";
       try {
     	 HttpGet httpget = new HttpGet(version_url);
-    	 CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(httpget);
-         BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-         version = in.readLine();
-         in.close();
+         version = httpClient.execute(httpget, response -> {
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
+               return in.readLine();
+            }
+         });
       } catch (Exception ex) {
     	  log.error(ex.getMessage());
          version = null;

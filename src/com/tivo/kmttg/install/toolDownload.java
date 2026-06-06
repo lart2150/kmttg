@@ -30,8 +30,8 @@ import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.DefaultRedirectStrategy;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
@@ -89,8 +89,8 @@ public class toolDownload {
           HttpClient httpClient = httpClientBuilder.build();
           HttpGet httpget = new HttpGet(urlString);
           
-          CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(httpget);
-          in = new BufferedInputStream(response.getEntity().getContent());         
+          ClassicHttpResponse response = httpClient.executeOpen(null, httpget, null);
+          in = new BufferedInputStream(response.getEntity().getContent());
           out = new RandomAccessFile(localFileName, "rw");
           
           Integer howManyBytes;

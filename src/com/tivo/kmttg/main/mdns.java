@@ -19,6 +19,7 @@
 package com.tivo.kmttg.main;
 
 import java.net.DatagramSocket;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 //import java.util.Date;
 import java.util.Enumeration;
@@ -54,6 +55,15 @@ public class mdns {
       } 
    }
    
+   // Return the first IPv4 address of a service as a dotted string, or null.
+   // Replaces the deprecated ServiceInfo.getHostAddress().
+   private static String getHostAddress(ServiceInfo info) {
+      Inet4Address[] addrs = info.getInet4Addresses();
+      if (addrs != null && addrs.length > 0)
+         return addrs[0].getHostAddress();
+      return null;
+   }
+
    public void close() {
       if (jmdns != null) {
          try {
@@ -108,9 +118,10 @@ public class mdns {
                   }
                   // Update existing IP if necessary (for case if DHCP updates IP of existing Tivo)
                   if (add == false) {
-                     if (! info[i].getHostAddress().equals(config.TIVOS.get(name))) {
+                     String ip = getHostAddress(info[i]);
+                     if (ip != null && ! ip.equals(config.TIVOS.get(name))) {
                         log.warn("Updating IP for TiVo: " + name);
-                        config.TIVOS.put(name, info[i].getHostAddress());
+                        config.TIVOS.put(name, ip);
                         config.save();
                      }
                   }
@@ -133,7 +144,7 @@ public class mdns {
                if (add) {
                   // This tivo not part of current kmttg list so add it
                   Hashtable<String,String> b = new Hashtable<String,String>();
-                  b.put("ip", info[i].getHostAddress());
+                  b.put("ip", getHostAddress(info[i]));
                   b.put("machine", name);
                   b.put("identity", tsn);
                   config.addTivo(b);
@@ -153,7 +164,7 @@ public class mdns {
          for (int i=0; i<info.length; ++i) {
             if ( ! SERVICE.containsKey(info[i].getName()) ) {
                SERVICE.put(info[i].getName(), info[i]);
-               log.warn("MDNS: " + info[i].getName() + " (" + info[i].getHostAddress() + ":" + info[i].getPort() + ")");
+               log.warn("MDNS: " + info[i].getName() + " (" + getHostAddress(info[i]) + ":" + info[i].getPort() + ")");
                Enumeration<?> e = info[i].getPropertyNames();
                while (e.hasMoreElements()) {
                   String key = (String) e.nextElement();
