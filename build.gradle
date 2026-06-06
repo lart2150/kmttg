@@ -1,0 +1,92 @@
+plugins {
+    id 'application'
+    // Produces the fat "uber" kmttg.jar (maintained fork of the shadow plugin)
+    id 'com.gradleup.shadow' version '8.3.5'
+}
+
+group   = 'com.tivo.kmttg'
+version = 'v2.9.5-l'
+
+// ---------------------------------------------------------------------------
+// Third party library versions - bump these to update a dependency. The jars
+// are downloaded from Maven Central by Gradle and are NOT committed to git.
+// ---------------------------------------------------------------------------
+ext {
+    httpclientVersion = '5.1.3'   // pulls httpcore5 transitively
+    websocketVersion  = '1.5.5'
+    flatlafVersion    = '3.7.1'
+    miglayoutVersion  = '11.4.3'  // miglayout-swing pulls miglayout-core
+    jmdnsVersion      = '3.6.3'
+}
+
+repositories {
+    mavenCentral()
+}
+
+// slf4j-api is bundled inside the local tivo-libre.jar, so keep it from being
+// pulled in transitively (httpclient5 / Java-WebSocket reference it) to avoid
+// duplicate classes in the fat jar.
+configurations.configureEach {
+    exclude group: 'org.slf4j', module: 'slf4j-api'
+}
+
+dependencies {
+    implementation "org.apache.httpcomponents.client5:httpclient5:${httpclientVersion}"
+    implementation "org.java-websocket:Java-WebSocket:${websocketVersion}"
+    implementation "com.formdev:flatlaf:${flatlafVersion}"
+    implementation "com.miglayout:miglayout-swing:${miglayoutVersion}"
+    implementation "org.jmdns:jmdns:${jmdnsVersion}"
+
+    // kmttg's TiVo .TiVo decoder library. Not published to Maven Central, so it
+    // stays as a committed local jar. It also bundles slf4j-api (see above).
+    implementation files('lib/tivo-libre.jar')
+}
+
+application {
+    mainClass = 'com.tivo.kmttg.main.kmttg'
+}
+
+// kmttg uses a flat source layout (src/com/...) and bundles the images/
+// directory at the jar root, so override the default source set locations.
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+        resources {
+            srcDirs = ['images']
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xlint:deprecation'
+}
+
+// Build the runnable fat jar as release/kmttg.jar (the launcher scripts in
+// release/ expect it there).
+shadowJar {
+    archiveFileName = 'kmttg.jar'
+    destinationDirectory = file('release')
+    manifest {
+        attributes 'Main-Class': application.mainClass.get()
+    }
+}
+
+// `gradle build` produces the fat jar
+tasks.named('build') {
+    dependsOn 'shadowJar'
+}
+
+// Release distribution zip (mirrors the old ant dist-both target): zips the
+// release/ folder contents, excluding user/runtime files.
+tasks.register('releaseZip', Zip) {
+    dependsOn 'shadowJar'
+    archiveFileName = "kmttg_${version}.zip"
+    destinationDirectory = file('dist')
+    from('release') {
+        exclude '*.ini', 'auto.*', '*.sp', '*.csv'
+    }
+}

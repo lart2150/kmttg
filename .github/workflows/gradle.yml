@@ -1,5 +1,5 @@
-# This workflow will build a Java project with Ant
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-ant
+# This workflow builds the project with Gradle
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
 name: Java CI
 
@@ -21,10 +21,8 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        architecture: x64
-    - name: Build with Ant
-      run: |
-        ant -noinput -buildfile build.xml
+    - name: Build with Gradle
+      run: ./gradlew --no-daemon shadowJar
     - uses: actions/upload-artifact@v4
       with:
         path: release/kmttg.jar
