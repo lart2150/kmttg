@@ -89,4 +89,6 @@ tasks.register('releaseZip', Zip) {
     from('release') {
         exclude '*.ini', 'auto.*', '*.sp', '*.csv'
     }
+    // Ship the third-party attribution notices with the distribution
+    from('THIRD-PARTY.md')
 }
