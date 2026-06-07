@@ -833,14 +833,17 @@ public class Remote{
          error("rpc MyShows error - " + e.getMessage());
          return null;
       }
-      
+
+      // Persist any newly-resolved recordingId -> mfs id mappings.
+      MfsCache.save();
+
       // Process collections to efficiently get seriesId information
       if (collections.size() > 0)
          addSeriesID(allShows, collections);
 
       return allShows;
    }
-   
+
    // Get flat list of all shows with partiallyViewed filter enabled
    public JSONArray MyShowsWatched(jobData job) {
       JSONArray allShows = new JSONArray();
@@ -913,12 +916,15 @@ public class Remote{
          error("rpc MyShowsWatched error - " + e.getMessage());
          return null;
       }
-      
+
+      // Persist any newly-resolved recordingId -> mfs id mappings.
+      MfsCache.save();
+
       // Process collections to efficiently get seriesId information
       if (collections.size() > 0)
          addSeriesID(allShows, collections);
-      
-      return allShows;      
+
+      return allShows;
    }
    
    // Find mfs id based on RPC recordingId and then build equivalent
@@ -927,34 +933,40 @@ public class Remote{
    // doesn't have the TTG URLs in JSON data.
    private Boolean getURLs(String tivoName, JSONObject json) {
       try {
-         JSONObject j = new JSONObject();
-         j.put("bodyId", bodyId_get());
-         j.put("namespace", "mfs");
-         j.put("objectId", json.getString("recordingId"));
-         JSONObject result = Command("idSearch", j);
-         if (result != null) {
-            if (result.has("objectId")) {
-               String id = result.getJSONArray("objectId").getString(0);
-               id = id.replaceFirst("mfs:rc\\.", "");
-               String ip = config.TIVOS.get(tivoName);
-               String port_http = config.getWanSetting(tivoName, "http");
-               if (port_http == null)
-                  port_http = "80";
-               String port_https = config.getWanSetting(tivoName, "https");
-               if (port_https == null)
-                  port_https = "443";
-               String fname = URLEncoder.encode(id, "UTF-8");
-               if (json.has("title"))
-                  fname = URLEncoder.encode(json.getString("title"), "UTF-8");
-               String url = "http://" + ip + ":" + port_http + "/download/" +
-                  fname + ".TiVo?Container=%2FNowPlaying&id=" + id;
-               String url_details = "https://" + ip + ":" + port_https +
-                  "/TiVoVideoDetails?id=" + id;
-               json.put("__url__", url);
-               json.put("__url_TiVoVideoDetails__", url_details);
-               return true;
+         String recordingId = json.getString("recordingId");
+         // The recordingId -> mfs id mapping is stable, so reuse a cached value
+         // (across refreshes and restarts) instead of issuing an idSearch RPC.
+         String id = MfsCache.get(tivoName, recordingId);
+         if (id == null) {
+            JSONObject j = new JSONObject();
+            j.put("bodyId", bodyId_get());
+            j.put("namespace", "mfs");
+            j.put("objectId", recordingId);
+            JSONObject result = Command("idSearch", j);
+            if (result != null && result.has("objectId")) {
+               id = result.getJSONArray("objectId").getString(0).replaceFirst("mfs:rc\\.", "");
+               MfsCache.put(tivoName, recordingId, id);
             }
-         }         
+         }
+         if (id != null) {
+            String ip = config.TIVOS.get(tivoName);
+            String port_http = config.getWanSetting(tivoName, "http");
+            if (port_http == null)
+               port_http = "80";
+            String port_https = config.getWanSetting(tivoName, "https");
+            if (port_https == null)
+               port_https = "443";
+            String fname = URLEncoder.encode(id, "UTF-8");
+            if (json.has("title"))
+               fname = URLEncoder.encode(json.getString("title"), "UTF-8");
+            String url = "http://" + ip + ":" + port_http + "/download/" +
+               fname + ".TiVo?Container=%2FNowPlaying&id=" + id;
+            String url_details = "https://" + ip + ":" + port_https +
+               "/TiVoVideoDetails?id=" + id;
+            json.put("__url__", url);
+            json.put("__url_TiVoVideoDetails__", url_details);
+            return true;
+         }
       }
       catch (Exception e) {
          log.error("Remote getURLs - " + e.getMessage());
