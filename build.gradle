@@ -40,6 +40,31 @@ dependencies {
     // kmttg's TiVo .TiVo decoder library. Not published to Maven Central, so it
     // stays as a committed local jar. It also bundles slf4j-api (see above).
     implementation files('lib/tivo-libre.jar')
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // Used to stub the Swing gui singleton for the GUI-coupled searchKeywords test.
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+    }
+}
+
+// One-off tool to (re)generate the RPC test fixtures from a live TiVo.
+// Usage: gradlew captureRpcFixtures -PconfigDir="C:\\path\\to\\kmttg" -Ptivo=Bolt
+// It connects, fetches the safe read calls, sanitizes TSN/MAK, and writes the
+// JSON fixtures under src/test/resources/fixtures/. NOT part of the test suite.
+tasks.register('captureRpcFixtures', JavaExec) {
+    group = 'kmttg'
+    description = 'Capture sanitized RPC fixtures from a live TiVo (manual)'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.tivo.kmttg.rpc.RpcFixtureCapture'
+    if (project.hasProperty('configDir')) args(project.property('configDir'))
+    if (project.hasProperty('tivo')) args(project.property('tivo'))
 }
 
 application {
@@ -55,6 +80,15 @@ sourceSets {
         }
         resources {
             srcDirs = ['images']
+        }
+    }
+    test {
+        // Kept out of src/ because the main source set globs all of src/.
+        java {
+            srcDirs = ['test/java']
+        }
+        resources {
+            srcDirs = ['test/resources']
         }
     }
 }
