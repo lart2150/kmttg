@@ -77,7 +77,8 @@ public class kmttg {
              jobMonitor.killRunning();
              if (config.httpserver != null)
                 config.httpserver.killTranscodes();
-             if (debug.enabled) debug.close();             
+             if (debug.enabled) debug.close();
+             if (rpcLog.enabled) rpcLog.close();
           }
       });
       
@@ -145,6 +146,9 @@ public class kmttg {
          else if (arg.equals("-d")) {
             debug.enabled = true;
          }
+         else if (arg.equals("-rpcLog")) {
+            rpcLog.enabled = true;
+         }
          else if (arg.equals("-h")) {
             useage();
          }
@@ -181,6 +185,7 @@ public class kmttg {
       System.out.println("-b => Run in auto download batch mode - single loop\n");
       System.out.println("-c => Run auto-conflict resolver in batch mode - single run\n");
       System.out.println("-d => Enable verbose debug mode\n");
+      System.out.println("-rpcLog => Log all RPC requests/responses with timing to rpc.jsonl (JSONL)\n");
       System.out.println("-k \"tivoName\" => Run background mode AutoSkip service for given TiVo\n");
       System.out.println("-k all => Run background mode AutoSkip service for all eligible TiVos\n");
       System.out.println("-s \"tivoName\" => Process AutoSkip from SkipMode for given TiVo\n");

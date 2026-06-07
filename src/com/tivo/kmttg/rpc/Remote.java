@@ -47,6 +47,7 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
+import com.tivo.kmttg.util.rpcLog;
 import com.tivo.kmttg.util.string;
 
 public class Remote{
@@ -719,15 +720,16 @@ public class Remote{
          }
          
          if (req != null) {
+            long start = rpcLog.enabled ? System.nanoTime() : 0;
+            JSONObject result;
             if (this.away) {
-               return ws.sendRequestAndWaitForResponse(req);
+               result = ws.sendRequestAndWaitForResponse(req);
             } else {
-               if ( s.Write(req) ) {
-                  return ReadRemote();
-               }
-               else
-                  return null;
+               result = s.Write(req) ? ReadRemote() : null;
             }
+            if (rpcLog.enabled)
+               rpcLog.log(tivoName, type, (System.nanoTime() - start) / 1000000L, json, result);
+            return result;
          } else {
             error("rpc: unhandled Key type: " + type);
             return null;
