@@ -21,8 +21,10 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v4
     - name: Build with Gradle
-      run: ./gradlew --no-daemon test shadowJar
+      run: ./gradlew test shadowJar
     - uses: actions/upload-artifact@v4
       with:
         path: release/kmttg.jar
