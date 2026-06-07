@@ -56,6 +56,7 @@ public class deletedTable extends TableMap {
    public String folderName = null;
    public int folderEntryNum = -1;
    public Hashtable<String,JSONArray> tivo_data = new Hashtable<String,JSONArray>();
+   private String filterText = ""; // lower-cased SHOW-column filter ("" => show all)
 
    // TableMap overrides
    @Override
@@ -262,24 +263,48 @@ public class deletedTable extends TableMap {
 
    // Update table to display given entries
    public void AddRows(String tivoName, JSONArray data) {
+      tivo_data.put(tivoName, data);
+      currentTivo = tivoName;
+      displayData(data, true);
+      if (config.gui.remote_gui != null)
+         config.gui.remote_gui.setTivoName("deleted", tivoName);
+   }
+
+   // Set the SHOW-column filter and re-display the current TiVo's list. An
+   // empty/blank filter shows everything; otherwise only rows whose show title
+   // contains the text (case-insensitive) are shown.
+   public void setFilter(String text) {
+      filterText = (text == null) ? "" : text.trim().toLowerCase();
+      if (currentTivo != null && tivo_data.containsKey(currentTivo))
+         displayData(tivo_data.get(currentTivo), false);
+   }
+
+   // Populate the table from data, keeping only entries that match the current
+   // filter. autoSize is skipped on filter changes so columns don't jump while
+   // the user types.
+   private void displayData(JSONArray data, boolean autoSize) {
       try {
          Stack<JSONObject> o = new Stack<JSONObject>();
-         for (int i=0; i<data.length(); ++i)
-            o.add(data.getJSONObject(i));
-
-         // Reset local entries to new entries
+         for (int i=0; i<data.length(); ++i) {
+            JSONObject entry = data.getJSONObject(i);
+            if (matchesFilter(entry))
+               o.add(entry);
+         }
          Refresh(o);
          MODEL.sort();
-         TableUtil.autoSizeTableViewColumns(TABLE, true);
-         tivo_data.put(tivoName, data);
-         currentTivo = tivoName;
-         if (config.gui.remote_gui != null) {
-            config.gui.remote_gui.setTivoName("deleted", tivoName);
-            refreshNumber();
-         }
+         if (autoSize)
+            TableUtil.autoSizeTableViewColumns(TABLE, true);
+         refreshNumber();
       } catch (JSONException e) {
-         log.print("Deleted AddRows - " + e.getMessage());
+         log.print("Deleted displayData - " + e.getMessage());
       }
+   }
+
+   private boolean matchesFilter(JSONObject entry) {
+      if (filterText.length() == 0)
+         return true;
+      String title = JSONConverter.makeShowTitle(entry);
+      return title != null && title.toLowerCase().contains(filterText);
    }
 
    // Refresh table with given given entries
@@ -307,13 +332,42 @@ public class deletedTable extends TableMap {
       MODEL.addRow(new Tabentry(entry));
    }
 
-   // Refresh the # SHOWS label in the ToDo tab
+   // Refresh the # SHOWS label. When a filter is active, show "shown of total".
    private void refreshNumber() {
+      if (config.gui.remote_gui == null || currentTivo == null || !tivo_data.containsKey(currentTivo))
+         return;
       SwingUtil.runLater(new Runnable() {
          @Override public void run() {
-            config.gui.remote_gui.deleted_tab.label.setText("" + tivo_data.get(currentTivo).length() + " SHOWS");
+            int total = tivo_data.get(currentTivo).length();
+            int shown = MODEL.size();
+            String text = (shown == total)
+                  ? (total + " SHOWS")
+                  : (shown + " of " + total + " SHOWS");
+            config.gui.remote_gui.deleted_tab.label.setText(text);
          }
       });
+   }
+
+   // Remove the cached entry with the given recordingId from the current TiVo's
+   // full data. Matched by recordingId rather than row index because the model
+   // is sorted/filtered relative to the cached JSONArray.
+   private void removeFromCache(String recordingId) {
+      if (recordingId == null || currentTivo == null)
+         return;
+      JSONArray data = tivo_data.get(currentTivo);
+      if (data == null)
+         return;
+      for (int i = 0; i < data.length(); ++i) {
+         try {
+            JSONObject o = data.getJSONObject(i);
+            if (o.has("recordingId") && recordingId.equals(o.getString("recordingId"))) {
+               data.remove(i);
+               return;
+            }
+         } catch (JSONException e) {
+            // skip malformed entry
+         }
+      }
    }
 
    // Undelete selected recordings
@@ -332,9 +386,10 @@ public class deletedTable extends TableMap {
                      JSONObject json = GetRowData(row);
                      final String title = json.getString("title");
                      if (json != null) {
+                        final String recordingId = json.getString("recordingId");
                         JSONObject o = new JSONObject();
                         JSONArray a = new JSONArray();
-                        a.put(json.getString("recordingId"));
+                        a.put(recordingId);
                         o.put("recordingId", a);
                         final JSONObject result = r.Command("Undelete", o);
                         SwingUtil.runLater(new Runnable() {
@@ -346,7 +401,7 @@ public class deletedTable extends TableMap {
                               } else {
                                  log.warn("Recovered recording: '" + title + "' on TiVo: " + tivoName);
                                  MODEL.removeRow(row);
-                                 tivo_data.get(currentTivo).remove(row);
+                                 removeFromCache(recordingId);
                                  refreshNumber();
                               }
                            }
@@ -385,9 +440,10 @@ public class deletedTable extends TableMap {
                         if (json.has("subtitle"))
                            title += " - " + json.getString("subtitle");
                         final String title_final = title;
+                        final String recordingId = json.getString("recordingId");
                         JSONObject o = new JSONObject();
                         JSONArray a = new JSONArray();
-                        a.put(json.getString("recordingId"));
+                        a.put(recordingId);
                         o.put("recordingId", a);
                         final JSONObject result = r.Command("PermanentlyDelete", o);
                         SwingUtil.runLater(new Runnable() {
@@ -399,7 +455,7 @@ public class deletedTable extends TableMap {
                               } else {
                                  log.warn("Permanently deleted recording: '" + title_final + "' on TiVo: " + tivoName);
                                  MODEL.removeRow(row);
-                                 tivo_data.get(currentTivo).remove(row);
+                                 removeFromCache(recordingId);
                                  refreshNumber();
                               }
                            }
