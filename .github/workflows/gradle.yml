@@ -22,7 +22,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     - name: Build with Gradle
-      run: ./gradlew --no-daemon shadowJar
+      run: ./gradlew --no-daemon test shadowJar
     - uses: actions/upload-artifact@v4
       with:
         path: release/kmttg.jar

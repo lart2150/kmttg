@@ -84,6 +84,20 @@ public class Remote{
       }
    }
    
+   /**
+    * Test seam: builds a Remote that is NOT connected to a TiVo. Intended only
+    * for record/replay test doubles (in the test sources) that override
+    * {@link #Command(String, JSONObject)} to supply recorded responses. Never
+    * used in production code.
+    */
+   protected Remote() {
+      this.tivoName = null;
+      this.IP = "";
+      this.port = 0;
+      this.away = false;
+      this.success = true;
+   }
+
    // This constructor designed to be use by kmttg
    public Remote(String tivoName) {
       this(tivoName, false, // doesn't actually set this.tivoName
@@ -1751,7 +1765,8 @@ public class Remote{
                }                        
             }
          } // while
-         log.warn(">> Keyword search completed: '" + keyword + "' on TiVo: " + job.tivoName);
+         log.warn(">> Keyword search completed: '" + keyword + "'"
+               + (job != null ? " on TiVo: " + job.tivoName : ""));
          
          // Now generate table_entries in priority order
          if (collections.length() > 0) {

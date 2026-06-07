@@ -1,0 +1,5960 @@
+[
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 66440,
+        "isDigital": true,
+        "channelNumber": "23-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "8365506822144",
+        "levelOfDetail": "medium",
+        "isHdtv": false,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WWME-CD",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WWME-CD",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.117154229"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Matlock",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "1989-11-21",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16411569",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-06-02 15:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-06-02 15:00:00",
+      "size": 3532800,
+      "subtitle": "The Prisoner, Part 2",
+      "actualEndTime": "2026-06-02 15:00:03",
+      "offerId": "tivo:of.ctd.117154229.23-1.terrestrial.2026-06-02-14-00-00.3600",
+      "desiredDeletion": "2026-06-04 14:00:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        }
+      ],
+      "partnerCollectionId": "EP0000018471-0000164184",
+      "actualStartTime": "2026-06-02 13:59:58",
+      "episodeNum": [10],
+      "contentId": "tivo:ct.164184",
+      "description": "Conclusion. Matlock finds the murder weapon, while Conrad (Clarence Gilyard Jr.) tries to unravel the plot from outside. Tiny: Tiny Lister Jr. Steve Mazorofski: David Carradine. Billy Costello: Conor O'Farrell. Art Spring: Daniel Quinn. Matlock: Andy Griffith.",
+      "title": "Matlock",
+      "__SeriesId__": "SH0000018471",
+      "collectionTitle": "Matlock",
+      "duration": 3600,
+      "repeat": true,
+      "scheduledStartTime": "2026-06-02 14:00:00",
+      "startTime": "2026-06-02 14:00:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "starRating": "three",
+      "collectionId": "tivo:cl.18471",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 4,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-06-02 14:00:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "sd",
+      "recordingId": "tivo:rc.16679519"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 66440,
+        "isDigital": true,
+        "channelNumber": "23-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "8278519054336",
+        "levelOfDetail": "medium",
+        "isHdtv": false,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WWME-CD",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WWME-CD",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.117154229"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Matlock",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "1989-11-14",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16411569",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-06-01 15:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-06-01 15:00:00",
+      "size": 3543040,
+      "subtitle": "The Prisoner, Part 1",
+      "actualEndTime": "2026-06-01 15:00:03",
+      "offerId": "tivo:of.ctd.117154229.23-1.terrestrial.2026-06-01-14-00-00.3600",
+      "desiredDeletion": "2026-06-03 14:00:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        }
+      ],
+      "partnerCollectionId": "EP0000018471-0000145321",
+      "actualStartTime": "2026-06-01 13:59:58",
+      "episodeNum": [9],
+      "contentId": "tivo:ct.145321",
+      "description": "Part 1 of two. Matlock goes behind bars to defend a guard accused of murder in a kangaroo court set up by inmates in a riot-torn prison. Lenny Marcus: David Paymer. Steve Mazarofski: David Carradine. Tiny: Tiny Lister Jr. Matlock: Andy Griffith.",
+      "title": "Matlock",
+      "__SeriesId__": "SH0000018471",
+      "collectionTitle": "Matlock",
+      "duration": 3599,
+      "repeat": true,
+      "scheduledStartTime": "2026-06-01 14:00:00",
+      "startTime": "2026-06-01 14:00:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "starRating": "three",
+      "collectionId": "tivo:cl.18471",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 4,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-06-01 14:00:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "sd",
+      "category": [
+        {
+          "genreId": 35,
+          "topLevel": false,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413811"
+        },
+        {
+          "genreId": 176,
+          "topLevel": false,
+          "label": "Law",
+          "type": "category",
+          "categoryId": "tivo:ca.10916211"
+        },
+        {
+          "genreId": 29,
+          "topLevel": false,
+          "label": "Crime",
+          "type": "category",
+          "categoryId": "tivo:ca.413805"
+        },
+        {
+          "genreId": 1005,
+          "topLevel": true,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413901"
+        }
+      ],
+      "recordingId": "tivo:rc.16679209"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7818318970880",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Christopher Kimball/Milk",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": false,
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16364129",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-24 15:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-24 15:00:00",
+      "size": 1648640,
+      "actualEndTime": "2026-05-24 15:00:00",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-05-24-14-30-00.1800",
+      "desiredDeletion": "2026-05-26 14:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "SH0376798952-0376798953",
+      "actualStartTime": "2026-05-24 14:29:58",
+      "contentId": "tivo:ct.376798953",
+      "description": "A cooking series that showcases fresh, bold and simple ways to prepare food, featuring recipes from the world over.",
+      "title": "Christopher Kimball's Milk Street Television",
+      "__SeriesId__": "SH0376798952",
+      "hdtv": true,
+      "collectionTitle": "Christopher Kimball's Milk Street Television",
+      "duration": 1800,
+      "repeat": true,
+      "scheduledStartTime": "2026-05-24 14:30:00",
+      "startTime": "2026-05-24 14:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.376798952",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-24 14:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        }
+      ],
+      "recordingId": "tivo:rc.16675869"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7527740735488",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Test Kitchen",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-03-31",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16363779",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-23 20:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-23 20:00:00",
+      "size": 1699840,
+      "subtitle": "Grilled Flank Steak and Chili Crisp Noodles",
+      "actualEndTime": "2026-05-23 20:00:02",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-05-23-19-30-00.1800",
+      "desiredDeletion": "2026-05-25 19:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0010327616-0538264718",
+      "actualStartTime": "2026-05-23 19:29:58",
+      "episodeNum": [19],
+      "contentId": "tivo:ct.538264718",
+      "description": "Joe Gitter fires up the grill and makes Bridget Lancaster a delicious Grilled Flank Steak.",
+      "title": "America's Test Kitchen",
+      "__SeriesId__": "SH0010327616",
+      "hdtv": true,
+      "collectionTitle": "America's Test Kitchen",
+      "duration": 1800,
+      "repeat": true,
+      "scheduledStartTime": "2026-05-23 19:30:00",
+      "startTime": "2026-05-23 19:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.10327616",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 26,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-23 19:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16675579"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7238640992256",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Cook's Country",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-02-17",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16364359",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-23 18:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-23 18:00:00",
+      "size": 1638400,
+      "subtitle": "Episode 1826",
+      "actualEndTime": "2026-05-23 18:00:00",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-05-23-17-30-00.1800",
+      "desiredDeletion": "2026-05-25 17:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0322554097-0536433116",
+      "actualStartTime": "2026-05-23 17:29:58",
+      "episodeNum": [25],
+      "contentId": "tivo:ct.536433116",
+      "description": "Test cook Bryan Roof hits the road to Oregon and makes Grilled Mussels for host Julia Collin Davison. Toni Tipton-Martin celebrates the Texas Shrimp Diva. And test cook Lawman Johnson prepares One-Pot Shrimp Piccata Pasta for host Bridget Lancaster.",
+      "title": "Cook's Country",
+      "__SeriesId__": "SH0322554097",
+      "hdtv": true,
+      "collectionTitle": "Cook's Country",
+      "duration": 1800,
+      "repeat": true,
+      "scheduledStartTime": "2026-05-23 17:30:00",
+      "startTime": "2026-05-23 17:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.322554097",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 18,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-23 17:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        }
+      ],
+      "recordingId": "tivo:rc.16675629"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65555,
+        "isDigital": true,
+        "channelNumber": "2-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6277958729728",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WBBMDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WBBMDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": false,
+        "stationId": "tivo:st.10420179"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "The Late Show With Stephen Colbert",
+      "type": "recording",
+      "bookmarkPosition": 1916848,
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-05-21",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16363799",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 1800,
+      "scheduledEndTime": "2026-05-22 05:24:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-22 04:54:00",
+      "size": 4802560,
+      "subtitle": "The Late Show With Stephen Colbert Series Finale featuring special guests",
+      "actualEndTime": "2026-05-22 05:24:03",
+      "offerId": "tivo:of.ctd.10420179.2-1.terrestrial.2026-05-22-03-35-00.4740",
+      "desiredDeletion": "2026-05-24 03:35:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        }
+      ],
+      "partnerCollectionId": "EP0314839233-0543224509",
+      "actualStartTime": "2026-05-22 03:34:58",
+      "episodeNum": [68],
+      "contentId": "tivo:ct.543224509",
+      "description": "The Late Show With Stephen Colbert Series Finale featuring special guests.",
+      "title": "The Late Show With Stephen Colbert",
+      "__SeriesId__": "SH0314839233",
+      "hdtv": true,
+      "collectionTitle": "The Late Show With Stephen Colbert",
+      "duration": 6540,
+      "scheduledStartTime": "2026-05-22 03:35:00",
+      "clipMetadata": [{
+        "contentId": "tivo:ct.543224509",
+        "type": "clipMetadata",
+        "clipMetadataId": "tivo:cm.1569863",
+        "segmentType": "adSkip"
+      }],
+      "startTime": "2026-05-22 03:35:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.314839233",
+      "isAdult": false,
+      "watchedTime": 4693,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 11,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-22 03:35:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 106,
+          "topLevel": false,
+          "label": "Talk Show",
+          "type": "category",
+          "categoryId": "tivo:ca.413882"
+        },
+        {
+          "genreId": 69,
+          "topLevel": false,
+          "label": "Music",
+          "type": "category",
+          "categoryId": "tivo:ca.413845"
+        },
+        {
+          "genreId": 25,
+          "topLevel": false,
+          "label": "Comedy",
+          "type": "category",
+          "categoryId": "tivo:ca.413801"
+        },
+        {
+          "genreId": 60,
+          "topLevel": false,
+          "label": "Interview",
+          "type": "category",
+          "categoryId": "tivo:ca.413836"
+        },
+        {
+          "genreId": 187,
+          "topLevel": false,
+          "label": "Politics",
+          "type": "category",
+          "categoryId": "tivo:ca.10916224"
+        },
+        {
+          "genreId": 160,
+          "topLevel": false,
+          "label": "Entertainment",
+          "type": "category",
+          "categoryId": "tivo:ca.10916193"
+        },
+        {
+          "genreId": 113,
+          "topLevel": false,
+          "label": "Variety",
+          "type": "category",
+          "categoryId": "tivo:ca.413889"
+        },
+        {
+          "genreId": 1010,
+          "topLevel": true,
+          "label": "Talk Shows",
+          "type": "category",
+          "categoryId": "tivo:ca.413906"
+        },
+        {
+          "genreId": 1016,
+          "topLevel": true,
+          "label": "Arts",
+          "type": "category",
+          "categoryId": "tivo:ca.10916167"
+        },
+        {
+          "genreId": 1002,
+          "topLevel": true,
+          "label": "Comedy",
+          "type": "category",
+          "categoryId": "tivo:ca.413898"
+        },
+        {
+          "genreId": 1007,
+          "topLevel": true,
+          "label": "News and Business",
+          "type": "category",
+          "categoryId": "tivo:ca.413903"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16675129"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65555,
+        "isDigital": true,
+        "channelNumber": "2-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6308825661440",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WBBMDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WBBMDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": false,
+        "stationId": "tivo:st.10420179"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "The Late Show With Stephen Colbert",
+      "type": "recording",
+      "bookmarkPosition": 3626189,
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-05-20",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16363799",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-21 04:37:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-21 04:37:00",
+      "size": 2754560,
+      "subtitle": "Bruce Springsteen; The Colbert Questionert",
+      "actualEndTime": "2026-05-21 04:37:03",
+      "offerId": "tivo:of.ctd.10420179.2-1.terrestrial.2026-05-21-03-35-00.3720",
+      "desiredDeletion": "2026-05-23 03:35:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        }
+      ],
+      "partnerCollectionId": "EP0314839233-0543224508",
+      "actualStartTime": "2026-05-21 03:34:58",
+      "episodeNum": [67],
+      "contentId": "tivo:ct.543224508",
+      "description": "Stephen Colbert takes \"The Colbert Questionert,\" featuring special guests; and a performance by Bruce Springsteen.",
+      "title": "The Late Show With Stephen Colbert",
+      "__SeriesId__": "SH0314839233",
+      "hdtv": true,
+      "collectionTitle": "The Late Show With Stephen Colbert",
+      "duration": 3720,
+      "scheduledStartTime": "2026-05-21 03:35:00",
+      "clipMetadata": [{
+        "contentId": "tivo:ct.543224508",
+        "type": "clipMetadata",
+        "clipMetadataId": "tivo:cm.1569230",
+        "segmentType": "adSkip"
+      }],
+      "startTime": "2026-05-21 03:35:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.314839233",
+      "isAdult": false,
+      "watchedTime": 1938,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 11,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-21 03:35:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 106,
+          "topLevel": false,
+          "label": "Talk Show",
+          "type": "category",
+          "categoryId": "tivo:ca.413882"
+        },
+        {
+          "genreId": 69,
+          "topLevel": false,
+          "label": "Music",
+          "type": "category",
+          "categoryId": "tivo:ca.413845"
+        },
+        {
+          "genreId": 25,
+          "topLevel": false,
+          "label": "Comedy",
+          "type": "category",
+          "categoryId": "tivo:ca.413801"
+        },
+        {
+          "genreId": 60,
+          "topLevel": false,
+          "label": "Interview",
+          "type": "category",
+          "categoryId": "tivo:ca.413836"
+        },
+        {
+          "genreId": 187,
+          "topLevel": false,
+          "label": "Politics",
+          "type": "category",
+          "categoryId": "tivo:ca.10916224"
+        },
+        {
+          "genreId": 160,
+          "topLevel": false,
+          "label": "Entertainment",
+          "type": "category",
+          "categoryId": "tivo:ca.10916193"
+        },
+        {
+          "genreId": 113,
+          "topLevel": false,
+          "label": "Variety",
+          "type": "category",
+          "categoryId": "tivo:ca.413889"
+        },
+        {
+          "genreId": 1010,
+          "topLevel": true,
+          "label": "Talk Shows",
+          "type": "category",
+          "categoryId": "tivo:ca.413906"
+        },
+        {
+          "genreId": 1016,
+          "topLevel": true,
+          "label": "Arts",
+          "type": "category",
+          "categoryId": "tivo:ca.10916167"
+        },
+        {
+          "genreId": 1002,
+          "topLevel": true,
+          "label": "Comedy",
+          "type": "category",
+          "categoryId": "tivo:ca.413898"
+        },
+        {
+          "genreId": 1007,
+          "topLevel": true,
+          "label": "News and Business",
+          "type": "category",
+          "categoryId": "tivo:ca.413903"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16674799"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65555,
+        "isDigital": true,
+        "channelNumber": "2-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6271556124672",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WBBMDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WBBMDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": false,
+        "stationId": "tivo:st.10420179"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "The Late Show With Stephen Colbert",
+      "type": "recording",
+      "bookmarkPosition": 728961,
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-05-19",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16363799",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-20 04:37:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-20 04:37:00",
+      "size": 2764800,
+      "subtitle": "Jon Stewart; Steven Spielberg; David Byrne",
+      "actualEndTime": "2026-05-20 04:37:03",
+      "offerId": "tivo:of.ctd.10420179.2-1.terrestrial.2026-05-20-03-35-00.3720",
+      "desiredDeletion": "2026-05-22 03:35:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        }
+      ],
+      "partnerCollectionId": "EP0314839233-0543222873",
+      "actualStartTime": "2026-05-20 03:34:58",
+      "episodeNum": [66],
+      "contentId": "tivo:ct.543222873",
+      "description": "Jon Stewart; Steven Spielberg; and a special performance by David Byrne and Stephen Colbert.",
+      "title": "The Late Show With Stephen Colbert",
+      "__SeriesId__": "SH0314839233",
+      "hdtv": true,
+      "collectionTitle": "The Late Show With Stephen Colbert",
+      "duration": 3719,
+      "scheduledStartTime": "2026-05-20 03:35:00",
+      "clipMetadata": [
+        {
+          "contentId": "tivo:ct.543222873",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1568596",
+          "segmentType": "adSkip"
+        },
+        {
+          "contentId": "tivo:ct.543222873",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1569227",
+          "segmentType": "adSkip"
+        }
+      ],
+      "startTime": "2026-05-20 03:35:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.314839233",
+      "isAdult": false,
+      "watchedTime": 728,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 11,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-20 03:35:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 106,
+          "topLevel": false,
+          "label": "Talk Show",
+          "type": "category",
+          "categoryId": "tivo:ca.413882"
+        },
+        {
+          "genreId": 69,
+          "topLevel": false,
+          "label": "Music",
+          "type": "category",
+          "categoryId": "tivo:ca.413845"
+        },
+        {
+          "genreId": 25,
+          "topLevel": false,
+          "label": "Comedy",
+          "type": "category",
+          "categoryId": "tivo:ca.413801"
+        },
+        {
+          "genreId": 60,
+          "topLevel": false,
+          "label": "Interview",
+          "type": "category",
+          "categoryId": "tivo:ca.413836"
+        },
+        {
+          "genreId": 187,
+          "topLevel": false,
+          "label": "Politics",
+          "type": "category",
+          "categoryId": "tivo:ca.10916224"
+        },
+        {
+          "genreId": 160,
+          "topLevel": false,
+          "label": "Entertainment",
+          "type": "category",
+          "categoryId": "tivo:ca.10916193"
+        },
+        {
+          "genreId": 113,
+          "topLevel": false,
+          "label": "Variety",
+          "type": "category",
+          "categoryId": "tivo:ca.413889"
+        },
+        {
+          "genreId": 1010,
+          "topLevel": true,
+          "label": "Talk Shows",
+          "type": "category",
+          "categoryId": "tivo:ca.413906"
+        },
+        {
+          "genreId": 1016,
+          "topLevel": true,
+          "label": "Arts",
+          "type": "category",
+          "categoryId": "tivo:ca.10916167"
+        },
+        {
+          "genreId": 1002,
+          "topLevel": true,
+          "label": "Comedy",
+          "type": "category",
+          "categoryId": "tivo:ca.413898"
+        },
+        {
+          "genreId": 1007,
+          "topLevel": true,
+          "label": "News and Business",
+          "type": "category",
+          "categoryId": "tivo:ca.413903"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16674509"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7666604703744",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Test Kitchen",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-02-26",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16363779",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-16 20:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-16 20:00:00",
+      "size": 1710080,
+      "subtitle": "Petite French Pastries",
+      "actualEndTime": "2026-05-16 20:00:00",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-05-16-19-30-00.1800",
+      "desiredDeletion": "2026-05-18 19:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0010327616-0536969360",
+      "actualStartTime": "2026-05-16 19:29:58",
+      "episodeNum": [18],
+      "contentId": "tivo:ct.536969360",
+      "description": "Bridget Lancaster bakes up delicious Macarons with Raspberry Buttercream.",
+      "title": "America's Test Kitchen",
+      "__SeriesId__": "SH0010327616",
+      "hdtv": true,
+      "collectionTitle": "America's Test Kitchen",
+      "duration": 1801,
+      "repeat": true,
+      "scheduledStartTime": "2026-05-16 19:30:00",
+      "startTime": "2026-05-16 19:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.10327616",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 26,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-16 19:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16672989"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7327391416320",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Cook's Country",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-02-16",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16364359",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-16 18:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-16 18:00:00",
+      "size": 1679360,
+      "subtitle": "Puerto Rican Flavors",
+      "actualEndTime": "2026-05-16 18:00:02",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-05-16-17-30-00.1800",
+      "desiredDeletion": "2026-05-18 17:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0322554097-0536433115",
+      "actualStartTime": "2026-05-16 17:29:58",
+      "episodeNum": [23],
+      "contentId": "tivo:ct.536433115",
+      "description": "Test cook Bryan Roof travels to Puerto Rico and makes Alcapurrias for host Julia Collin Davison. Toni Tipton-Martin tells us the story of Coco Lopez and pina coladas. And test cook Christie Morrison makes some delicious Coquito cocktails for host Bridget Lancaster.",
+      "title": "Cook's Country",
+      "__SeriesId__": "SH0322554097",
+      "hdtv": true,
+      "collectionTitle": "Cook's Country",
+      "duration": 1800,
+      "repeat": true,
+      "scheduledStartTime": "2026-05-16 17:30:00",
+      "startTime": "2026-05-16 17:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.322554097",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 18,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-16 17:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        }
+      ],
+      "recordingId": "tivo:rc.16673029"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65555,
+        "isDigital": true,
+        "channelNumber": "2-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6281311027200",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WBBMDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WBBMDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": false,
+        "stationId": "tivo:st.10420179"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Culinary Cup",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-05-13",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16615509",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-14 03:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-14 03:00:00",
+      "size": 4526080,
+      "subtitle": "Million-Dollar Menu",
+      "actualEndTime": "2026-05-14 03:00:01",
+      "offerId": "tivo:of.ctd.10420179.2-1.terrestrial.2026-05-14-01-30-00.5400",
+      "desiredDeletion": "2026-05-16 01:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        }
+      ],
+      "partnerCollectionId": "EP0537510370-0542065554",
+      "actualStartTime": "2026-05-14 01:29:58",
+      "contentId": "tivo:ct.542065554",
+      "description": "A champion will be crowned and walk away with the largest cash prize in culinary history: $1 million. With pressure at an all-time high, the three remaining chefs must face their most daunting commandment yet: innovation. The chefs must reimagine signature dishes from legendary guest judges Eric Ripert, Suzanne Goin and Daniela Soto-Innes. After the chef with the lowest score is eliminated, the final two serve their own three-course menu that puts their past, present and future on the plate.",
+      "title": "America's Culinary Cup",
+      "__SeriesId__": "SH0537510370",
+      "hdtv": true,
+      "collectionTitle": "America's Culinary Cup",
+      "duration": 5394,
+      "scheduledStartTime": "2026-05-14 01:30:00",
+      "clipMetadata": [
+        {
+          "contentId": "tivo:ct.542065554",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1564924",
+          "segmentType": "adSkip"
+        },
+        {
+          "contentId": "tivo:ct.542065554",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1565571",
+          "segmentType": "adSkip"
+        }
+      ],
+      "startTime": "2026-05-14 01:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.537510370",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-14 01:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 160,
+          "topLevel": false,
+          "label": "Entertainment",
+          "type": "category",
+          "categoryId": "tivo:ca.10916193"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16672249"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7604941094912",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Beyond Paradise",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-05-09",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16411449",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-10 03:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-10 03:00:00",
+      "size": 3153920,
+      "subtitle": "Christmas Special",
+      "actualEndTime": "2026-05-10 03:00:00",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-05-10-02-00-00.3600",
+      "desiredDeletion": "2026-05-12 02:00:00",
+      "partnerCollectionId": "EP0473625415-0490592358",
+      "actualStartTime": "2026-05-10 01:59:58",
+      "contentId": "tivo:ct.490592358",
+      "description": "Humphrey investigates a bizarre set of break-ins where Santa is the number one suspect.",
+      "title": "Beyond Paradise",
+      "__SeriesId__": "SH0473625415",
+      "hdtv": true,
+      "collectionTitle": "Beyond Paradise",
+      "duration": 3598,
+      "scheduledStartTime": "2026-05-10 02:00:00",
+      "startTime": "2026-05-10 02:00:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.473625415",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-10 02:00:00",
+      "descriptionLanguage": "eng-GBR",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 30,
+          "topLevel": false,
+          "label": "Crime Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413806"
+        },
+        {
+          "genreId": 35,
+          "topLevel": false,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413811"
+        },
+        {
+          "genreId": 29,
+          "topLevel": false,
+          "label": "Crime",
+          "type": "category",
+          "categoryId": "tivo:ca.413805"
+        },
+        {
+          "genreId": 71,
+          "topLevel": false,
+          "label": "Mystery",
+          "type": "category",
+          "categoryId": "tivo:ca.413847"
+        },
+        {
+          "genreId": 1005,
+          "topLevel": true,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413901"
+        },
+        {
+          "genreId": 1013,
+          "topLevel": true,
+          "label": "Mystery and Suspense",
+          "type": "category",
+          "categoryId": "tivo:ca.413909"
+        }
+      ],
+      "recordingId": "tivo:rc.16670449"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7604941094912",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Beyond Paradise",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-04-08",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16411449",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-10 02:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-10 02:00:00",
+      "size": 3164160,
+      "subtitle": "Episode 6",
+      "actualEndTime": "2026-05-10 01:59:58",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-05-10-01-00-00.3600",
+      "desiredDeletion": "2026-05-12 01:00:00",
+      "partnerCollectionId": "EP0473625415-0475781227",
+      "actualStartTime": "2026-05-10 00:59:58",
+      "episodeNum": [6],
+      "contentId": "tivo:ct.475781227",
+      "description": "A house is burgled but the prime suspect was locked up in a police cell at the time. It's up to Esther to rally a devastated Humphrey and solve this impossible crime.",
+      "title": "Beyond Paradise",
+      "__SeriesId__": "SH0473625415",
+      "hdtv": true,
+      "collectionTitle": "Beyond Paradise",
+      "duration": 3599,
+      "repeat": true,
+      "scheduledStartTime": "2026-05-10 01:00:00",
+      "startTime": "2026-05-10 01:00:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.473625415",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-10 01:00:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 30,
+          "topLevel": false,
+          "label": "Crime Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413806"
+        },
+        {
+          "genreId": 71,
+          "topLevel": false,
+          "label": "Mystery",
+          "type": "category",
+          "categoryId": "tivo:ca.413847"
+        },
+        {
+          "genreId": 29,
+          "topLevel": false,
+          "label": "Crime",
+          "type": "category",
+          "categoryId": "tivo:ca.413805"
+        },
+        {
+          "genreId": 1005,
+          "topLevel": true,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413901"
+        },
+        {
+          "genreId": 1013,
+          "topLevel": true,
+          "label": "Mystery and Suspense",
+          "type": "category",
+          "categoryId": "tivo:ca.413909"
+        }
+      ],
+      "recordingId": "tivo:rc.16670439"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7599201189888",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Test Kitchen",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-02-25",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16363779",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-09 20:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-09 20:00:00",
+      "size": 1597440,
+      "subtitle": "Tandoori Salmon and Broiled Zucchini",
+      "actualEndTime": "2026-05-09 20:00:02",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-05-09-19-30-00.1800",
+      "desiredDeletion": "2026-05-11 19:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0010327616-0536910914",
+      "actualStartTime": "2026-05-09 19:29:58",
+      "episodeNum": [17],
+      "contentId": "tivo:ct.536910914",
+      "description": "Lan Lam prepares Broiled Smashed Zucchini with Garlicky Yogurt.",
+      "title": "America's Test Kitchen",
+      "__SeriesId__": "SH0010327616",
+      "hdtv": true,
+      "collectionTitle": "America's Test Kitchen",
+      "duration": 1801,
+      "repeat": true,
+      "scheduledStartTime": "2026-05-09 19:30:00",
+      "startTime": "2026-05-09 19:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.10327616",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 26,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-09 19:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16670159"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7287073669120",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Cook's Country",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-02-13",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16364359",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-09 18:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-09 18:00:00",
+      "size": 1658880,
+      "subtitle": "Episode 1824",
+      "actualEndTime": "2026-05-09 18:00:03",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-05-09-17-30-00.1800",
+      "desiredDeletion": "2026-05-11 17:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0322554097-0536189039",
+      "actualStartTime": "2026-05-09 17:29:58",
+      "episodeNum": [22],
+      "contentId": "tivo:ct.536189039",
+      "description": "Test cook Bryan Roof visits Minneapolis and shares his version of Grilled Hilltribe Chicken with Kua Txob with host Julia Collin Davison. Toni Tipton-Martin walks us through the difference between fondue and fonduta. And test cook Ashley Moore prepares refreshing Tomatoes with Fontina Sauce and Cornichon Dressing for host Bridget Lancaster.",
+      "title": "Cook's Country",
+      "__SeriesId__": "SH0322554097",
+      "hdtv": true,
+      "collectionTitle": "Cook's Country",
+      "duration": 1801,
+      "repeat": true,
+      "scheduledStartTime": "2026-05-09 17:30:00",
+      "startTime": "2026-05-09 17:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.322554097",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 18,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-09 17:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        }
+      ],
+      "recordingId": "tivo:rc.16670209"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65555,
+        "isDigital": true,
+        "channelNumber": "2-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6261715238912",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WBBMDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WBBMDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": false,
+        "stationId": "tivo:st.10420179"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Culinary Cup",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-05-06",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16615509",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-07 02:30:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-07 02:30:00",
+      "size": 2918400,
+      "subtitle": "Bittersweet Semifinals",
+      "actualEndTime": "2026-05-07 02:30:00",
+      "offerId": "tivo:of.ctd.10420179.2-1.terrestrial.2026-05-07-01-30-00.3600",
+      "desiredDeletion": "2026-05-09 01:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        }
+      ],
+      "partnerCollectionId": "EP0537510370-0541695847",
+      "actualStartTime": "2026-05-07 01:29:58",
+      "episodeNum": [10],
+      "contentId": "tivo:ct.541695847",
+      "description": "The final four chefs race to make it to the finale in a challenge highlighting the five flavor profiles. Who's feeling a little salty and who's a little bitter about the competition? This isn't just about taste, it's about strategy. Only three chefs will make it through tonight and move on to the finale, while one will say their bittersweet goodbyes.",
+      "title": "America's Culinary Cup",
+      "__SeriesId__": "SH0537510370",
+      "hdtv": true,
+      "collectionTitle": "America's Culinary Cup",
+      "duration": 3595,
+      "scheduledStartTime": "2026-05-07 01:30:00",
+      "clipMetadata": [
+        {
+          "contentId": "tivo:ct.541695847",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1560574",
+          "segmentType": "adSkip"
+        },
+        {
+          "contentId": "tivo:ct.541695847",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1561185",
+          "segmentType": "adSkip"
+        }
+      ],
+      "startTime": "2026-05-07 01:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.537510370",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-07 01:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 160,
+          "topLevel": false,
+          "label": "Entertainment",
+          "type": "category",
+          "categoryId": "tivo:ca.10916193"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16669629"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7598796439552",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Beyond Paradise",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-03-25",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16411449",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-03 02:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-03 02:00:00",
+      "size": 2938880,
+      "subtitle": "Episode 5",
+      "actualEndTime": "2026-05-03 02:00:03",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-05-03-01-00-00.3600",
+      "desiredDeletion": "2026-05-05 01:00:00",
+      "partnerCollectionId": "EP0473625415-0475410096",
+      "actualStartTime": "2026-05-03 00:59:58",
+      "episodeNum": [5],
+      "contentId": "tivo:ct.475410096",
+      "description": "Panic spreads when an arsonist targets three businesses, bizarrely invoking the Three Little Pigs fable. Meanwhile, Martha has some serious thinking to do.",
+      "title": "Beyond Paradise",
+      "__SeriesId__": "SH0473625415",
+      "hdtv": true,
+      "collectionTitle": "Beyond Paradise",
+      "duration": 3600,
+      "repeat": true,
+      "scheduledStartTime": "2026-05-03 01:00:00",
+      "startTime": "2026-05-03 01:00:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.473625415",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-03 01:00:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 30,
+          "topLevel": false,
+          "label": "Crime Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413806"
+        },
+        {
+          "genreId": 71,
+          "topLevel": false,
+          "label": "Mystery",
+          "type": "category",
+          "categoryId": "tivo:ca.413847"
+        },
+        {
+          "genreId": 29,
+          "topLevel": false,
+          "label": "Crime",
+          "type": "category",
+          "categoryId": "tivo:ca.413805"
+        },
+        {
+          "genreId": 1005,
+          "topLevel": true,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413901"
+        },
+        {
+          "genreId": 1013,
+          "topLevel": true,
+          "label": "Mystery and Suspense",
+          "type": "category",
+          "categoryId": "tivo:ca.413909"
+        }
+      ],
+      "recordingId": "tivo:rc.16667739"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7629861552128",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Test Kitchen",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-02-21",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16363779",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-02 20:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-02 20:00:00",
+      "size": 1587200,
+      "subtitle": "New England Clambake",
+      "actualEndTime": "2026-05-02 20:00:00",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-05-02-19-30-00.1800",
+      "desiredDeletion": "2026-05-04 19:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0010327616-0536788597",
+      "actualStartTime": "2026-05-02 19:29:58",
+      "episodeNum": [16],
+      "contentId": "tivo:ct.536788597",
+      "description": "Julia Collin Davison grills up a New England Clambake for host Bridget Lancaster. Techniquely host Lan Lam shares tips to up your grill game. And test cook Keith Dresser prepares Grilled Fresh Cornbread with Charred Jalapenos and Cheddar.",
+      "title": "America's Test Kitchen",
+      "__SeriesId__": "SH0010327616",
+      "hdtv": true,
+      "collectionTitle": "America's Test Kitchen",
+      "duration": 1800,
+      "repeat": true,
+      "scheduledStartTime": "2026-05-02 19:30:00",
+      "startTime": "2026-05-02 19:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.10327616",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 26,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-02 19:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16667479"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7253905113088",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Cook's Country",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-02-24",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16364359",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-05-02 18:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-05-02 18:00:00",
+      "size": 1679360,
+      "subtitle": "Episode 1823",
+      "actualEndTime": "2026-05-02 18:00:02",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-05-02-17-30-00.1800",
+      "desiredDeletion": "2026-05-04 17:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0322554097-0535583448",
+      "actualStartTime": "2026-05-02 17:29:58",
+      "episodeNum": [26],
+      "contentId": "tivo:ct.535583448",
+      "description": "Test cook Morgan Bolling makes Grilled Brined Pork Chops with Garlic-Herb Oil for host Julia Collin Davison. Equipment expert Hannah Crowley reviews ceramic skillets. And test cook Ashley Moore whips up some seasonal Rhubarb Shortcakes with Buttermilk Whipped Cream for host Bridget Lancaster.",
+      "title": "Cook's Country",
+      "__SeriesId__": "SH0322554097",
+      "hdtv": true,
+      "collectionTitle": "Cook's Country",
+      "duration": 1800,
+      "repeat": true,
+      "scheduledStartTime": "2026-05-02 17:30:00",
+      "startTime": "2026-05-02 17:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.322554097",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 18,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-05-02 17:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        }
+      ],
+      "recordingId": "tivo:rc.16667529"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65555,
+        "isDigital": true,
+        "channelNumber": "2-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6246437486592",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WBBMDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WBBMDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": false,
+        "stationId": "tivo:st.10420179"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Culinary Cup",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-04-29",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16615509",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-30 03:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-30 03:00:00",
+      "size": 2959360,
+      "subtitle": "Passport to Pressure",
+      "actualEndTime": "2026-04-30 03:00:03",
+      "offerId": "tivo:of.ctd.10420179.2-1.terrestrial.2026-04-30-02-00-00.3600",
+      "desiredDeletion": "2026-05-02 02:00:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        }
+      ],
+      "partnerCollectionId": "EP0537510370-0540723765",
+      "actualStartTime": "2026-04-30 01:59:58",
+      "contentId": "tivo:ct.540723765",
+      "description": "Three hours. Three dishes. Three different nations. And the remaining five chefs must prepare a global cuisine to impress a table of judges so intimidating, even the coolest of chefs start to crack under the pressure. At the end, one chef will stand alone at the top of the world, and another is sent on a one-way trip home.",
+      "title": "America's Culinary Cup",
+      "__SeriesId__": "SH0537510370",
+      "hdtv": true,
+      "collectionTitle": "America's Culinary Cup",
+      "duration": 3600,
+      "scheduledStartTime": "2026-04-30 02:00:00",
+      "clipMetadata": [
+        {
+          "contentId": "tivo:ct.540723765",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1556582",
+          "segmentType": "adSkip"
+        },
+        {
+          "contentId": "tivo:ct.540723765",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1557146",
+          "segmentType": "adSkip"
+        }
+      ],
+      "startTime": "2026-04-30 02:00:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.537510370",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-30 02:00:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 160,
+          "topLevel": false,
+          "label": "Entertainment",
+          "type": "category",
+          "categoryId": "tivo:ca.10916193"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16666819"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 66440,
+        "isDigital": true,
+        "channelNumber": "23-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "8207622733824",
+        "levelOfDetail": "medium",
+        "isHdtv": false,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WWME-CD",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WWME-CD",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.117154229"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Matlock",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "1989-01-10",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16411569",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-28 15:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-28 15:00:00",
+      "size": 3502080,
+      "subtitle": "The Captain",
+      "actualEndTime": "2026-04-28 15:00:03",
+      "offerId": "tivo:of.ctd.117154229.23-1.terrestrial.2026-04-28-14-00-00.3600",
+      "desiredDeletion": "2026-04-30 14:00:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        }
+      ],
+      "partnerCollectionId": "EP0000018471-0000063644",
+      "actualStartTime": "2026-04-28 13:59:58",
+      "episodeNum": [6],
+      "contentId": "tivo:ct.63644",
+      "description": "Matlock does the investigating when his friend, a burned-out police captain, constructs an elaborate frame to escape a young cop's accusation of murder. Sgt. Reese: Joe Urla. Off. Shanley: David Neidorf. Off. Dawson: Julie Fulton.",
+      "title": "Matlock",
+      "__SeriesId__": "SH0000018471",
+      "collectionTitle": "Matlock",
+      "duration": 3600,
+      "repeat": true,
+      "scheduledStartTime": "2026-04-28 14:00:00",
+      "startTime": "2026-04-28 14:00:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "starRating": "three",
+      "collectionId": "tivo:cl.18471",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 3,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-28 14:00:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "sd",
+      "category": [
+        {
+          "genreId": 35,
+          "topLevel": false,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413811"
+        },
+        {
+          "genreId": 176,
+          "topLevel": false,
+          "label": "Law",
+          "type": "category",
+          "categoryId": "tivo:ca.10916211"
+        },
+        {
+          "genreId": 29,
+          "topLevel": false,
+          "label": "Crime",
+          "type": "category",
+          "categoryId": "tivo:ca.413805"
+        },
+        {
+          "genreId": 71,
+          "topLevel": false,
+          "label": "Mystery",
+          "type": "category",
+          "categoryId": "tivo:ca.413847"
+        },
+        {
+          "genreId": 1005,
+          "topLevel": true,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413901"
+        },
+        {
+          "genreId": 1013,
+          "topLevel": true,
+          "label": "Mystery and Suspense",
+          "type": "category",
+          "categoryId": "tivo:ca.413909"
+        }
+      ],
+      "recordingId": "tivo:rc.16666069"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7565377273856",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Beyond Paradise",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-03-18",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16411449",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-26 02:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-26 02:00:00",
+      "size": 3225600,
+      "subtitle": "Episode 4",
+      "actualEndTime": "2026-04-26 02:00:00",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-04-26-01-00-00.3600",
+      "desiredDeletion": "2026-04-28 01:00:00",
+      "partnerCollectionId": "EP0473625415-0475051843",
+      "actualStartTime": "2026-04-26 00:59:58",
+      "episodeNum": [4],
+      "contentId": "tivo:ct.475051843",
+      "description": "Humphrey investigates the death of an unidentified man found in the centre of a crop circle. Meanwhile, Archie helps Martha prepare for a visit from a food critic.",
+      "title": "Beyond Paradise",
+      "__SeriesId__": "SH0473625415",
+      "hdtv": true,
+      "collectionTitle": "Beyond Paradise",
+      "duration": 3601,
+      "repeat": true,
+      "scheduledStartTime": "2026-04-26 01:00:00",
+      "startTime": "2026-04-26 01:00:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.473625415",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-26 01:00:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 30,
+          "topLevel": false,
+          "label": "Crime Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413806"
+        },
+        {
+          "genreId": 71,
+          "topLevel": false,
+          "label": "Mystery",
+          "type": "category",
+          "categoryId": "tivo:ca.413847"
+        },
+        {
+          "genreId": 29,
+          "topLevel": false,
+          "label": "Crime",
+          "type": "category",
+          "categoryId": "tivo:ca.413805"
+        },
+        {
+          "genreId": 1005,
+          "topLevel": true,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413901"
+        },
+        {
+          "genreId": 1013,
+          "topLevel": true,
+          "label": "Mystery and Suspense",
+          "type": "category",
+          "categoryId": "tivo:ca.413909"
+        }
+      ],
+      "recordingId": "tivo:rc.16665079"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7563023220736",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Test Kitchen",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-02-14",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16363779",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-25 20:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-25 20:00:00",
+      "size": 1587200,
+      "subtitle": "Seafood Stew and Salmon Burgers",
+      "actualEndTime": "2026-04-25 20:00:02",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-04-25-19-30-00.1800",
+      "desiredDeletion": "2026-04-27 19:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0010327616-0536370046",
+      "actualStartTime": "2026-04-25 19:29:58",
+      "episodeNum": [15],
+      "contentId": "tivo:ct.536370046",
+      "description": "Test cook Vallery Lomas makes host Julia Collin Davison Crab and Shrimp Stew. Equipment expert Adam Ried reviews gyuto knives. And test cook Becky Hays prepares Fresh Salmon Burgers with Sriracha Mayonnaise for host Bridget Lancaster.",
+      "title": "America's Test Kitchen",
+      "__SeriesId__": "SH0010327616",
+      "hdtv": true,
+      "collectionTitle": "America's Test Kitchen",
+      "duration": 1801,
+      "repeat": true,
+      "scheduledStartTime": "2026-04-25 19:30:00",
+      "startTime": "2026-04-25 19:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.10327616",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 26,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-25 19:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16664729"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6922658906112",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Cook's Country",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-02-17",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16364359",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-25 18:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-25 18:00:00",
+      "size": 1720320,
+      "subtitle": "From Texas, With Love",
+      "actualEndTime": "2026-04-25 18:00:02",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-04-25-17-30-00.1800",
+      "desiredDeletion": "2026-04-27 17:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0322554097-0535345001",
+      "actualStartTime": "2026-04-25 17:29:58",
+      "episodeNum": [24],
+      "contentId": "tivo:ct.535345001",
+      "description": "Test cook Bryan Roof hits the road to Lockhart, Texas, where he explores its barbecuing traditions, and then cooks up some Barbecued Chuck Roast for host Bridget Lancaster. Toni Tipton-Martin shares the origins of ranch dressing. And test cook Kelly Song prepares a delightful Tomatillo and Bibb Lettuce Salad with Tomatillo Ranch for host Julia Collin Davison.",
+      "title": "Cook's Country",
+      "__SeriesId__": "SH0322554097",
+      "hdtv": true,
+      "collectionTitle": "Cook's Country",
+      "duration": 1800,
+      "repeat": true,
+      "scheduledStartTime": "2026-04-25 17:30:00",
+      "startTime": "2026-04-25 17:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.322554097",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 18,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-25 17:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        }
+      ],
+      "recordingId": "tivo:rc.16664779"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65555,
+        "isDigital": true,
+        "channelNumber": "2-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6453305802752",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WBBMDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WBBMDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": false,
+        "stationId": "tivo:st.10420179"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Culinary Cup",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-04-22",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16615509",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-23 02:30:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-23 02:30:00",
+      "size": 2877440,
+      "subtitle": "Consistency Is Key",
+      "actualEndTime": "2026-04-23 02:30:03",
+      "offerId": "tivo:of.ctd.10420179.2-1.terrestrial.2026-04-23-01-30-00.3600",
+      "desiredDeletion": "2026-04-25 01:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        }
+      ],
+      "partnerCollectionId": "EP0537510370-0540790089",
+      "actualStartTime": "2026-04-23 01:29:58",
+      "contentId": "tivo:ct.540790089",
+      "description": "The commandments have always kept the chefs on their toes, but this week it's time to stay consistent. Whipping up 30 identical fish dishes may be a team effort, but when push comes to shove, it's every chef for themselves as they scramble to deliver what the judges are looking for in record time \u2013 and one competitor isn't egg-actly successful.",
+      "title": "America's Culinary Cup",
+      "__SeriesId__": "SH0537510370",
+      "hdtv": true,
+      "collectionTitle": "America's Culinary Cup",
+      "duration": 3600,
+      "scheduledStartTime": "2026-04-23 01:30:00",
+      "clipMetadata": [
+        {
+          "contentId": "tivo:ct.540790089",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1552721",
+          "segmentType": "adSkip"
+        },
+        {
+          "contentId": "tivo:ct.540790089",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1553312",
+          "segmentType": "adSkip"
+        }
+      ],
+      "startTime": "2026-04-23 01:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.537510370",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-23 01:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 160,
+          "topLevel": false,
+          "label": "Entertainment",
+          "type": "category",
+          "categoryId": "tivo:ca.10916193"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16664119"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7303414677504",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Beyond Paradise",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-03-18",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16411449",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-19 02:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-19 02:00:00",
+      "size": 3000320,
+      "subtitle": "Episode 3",
+      "actualEndTime": "2026-04-19 02:00:00",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-04-19-01-00-00.3600",
+      "desiredDeletion": "2026-04-21 01:00:00",
+      "partnerCollectionId": "EP0473625415-0474433828",
+      "actualStartTime": "2026-04-19 00:59:58",
+      "episodeNum": [3],
+      "contentId": "tivo:ct.474433828",
+      "description": "The community of Shipton Abbott is rocked when a beloved painting disappears in a seemingly impossible heist. Humphrey tries his best to find some common ground with Archie.",
+      "title": "Beyond Paradise",
+      "__SeriesId__": "SH0473625415",
+      "hdtv": true,
+      "collectionTitle": "Beyond Paradise",
+      "duration": 3600,
+      "repeat": true,
+      "scheduledStartTime": "2026-04-19 01:00:00",
+      "startTime": "2026-04-19 01:00:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.473625415",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-19 01:00:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 30,
+          "topLevel": false,
+          "label": "Crime Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413806"
+        },
+        {
+          "genreId": 71,
+          "topLevel": false,
+          "label": "Mystery",
+          "type": "category",
+          "categoryId": "tivo:ca.413847"
+        },
+        {
+          "genreId": 29,
+          "topLevel": false,
+          "label": "Crime",
+          "type": "category",
+          "categoryId": "tivo:ca.413805"
+        },
+        {
+          "genreId": 1005,
+          "topLevel": true,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413901"
+        },
+        {
+          "genreId": 1013,
+          "topLevel": true,
+          "label": "Mystery and Suspense",
+          "type": "category",
+          "categoryId": "tivo:ca.413909"
+        }
+      ],
+      "recordingId": "tivo:rc.16662029"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7279616196608",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Test Kitchen",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-02-07",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16363779",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-18 20:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-18 20:00:00",
+      "size": 1536000,
+      "subtitle": "Maple Pork Chops and Squash Soup",
+      "actualEndTime": "2026-04-18 20:00:02",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-04-18-19-30-00.1800",
+      "desiredDeletion": "2026-04-20 19:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0010327616-0535950892",
+      "actualStartTime": "2026-04-18 19:29:58",
+      "episodeNum": [14],
+      "contentId": "tivo:ct.535950892",
+      "description": "Test cook Erin McMurrer makes host Bridget Lancaster Maple Pork Chops with Sweet Potato\u2013Bacon Hash. Equipment expert Adam Ried reviews enameled cast-iron skillets, and Techniquely host Lan Lam explains how to defrost food quickly. Finally, test cook Aran Goyoaga prepares Leek, Fennel, and Squash Soup with Sausage for host Julia Collin Davison.",
+      "title": "America's Test Kitchen",
+      "__SeriesId__": "SH0010327616",
+      "hdtv": true,
+      "collectionTitle": "America's Test Kitchen",
+      "duration": 1799,
+      "repeat": true,
+      "scheduledStartTime": "2026-04-18 19:30:00",
+      "startTime": "2026-04-18 19:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.10327616",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 26,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-18 19:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16661679"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7034450739200",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Cook's Country",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-02-10",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16364359",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-18 18:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-18 18:00:00",
+      "size": 1576960,
+      "subtitle": "Tucson Tacos",
+      "actualEndTime": "2026-04-18 18:00:00",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-04-18-17-30-00.1800",
+      "desiredDeletion": "2026-04-20 17:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0322554097-0535345000",
+      "actualStartTime": "2026-04-18 17:29:58",
+      "episodeNum": [21],
+      "contentId": "tivo:ct.535345000",
+      "description": "Test cook Bryan Roof travels to Tucson for some tasty tacos and makes host Bridget Lancaster smoky Mesquite-Grilled Tacos Rasurados. And equipment expert Hannah Crowley reviews portable burners.",
+      "title": "Cook's Country",
+      "__SeriesId__": "SH0322554097",
+      "hdtv": true,
+      "collectionTitle": "Cook's Country",
+      "duration": 1800,
+      "repeat": true,
+      "scheduledStartTime": "2026-04-18 17:30:00",
+      "startTime": "2026-04-18 17:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.322554097",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 18,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-18 17:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        }
+      ],
+      "recordingId": "tivo:rc.16661729"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65555,
+        "isDigital": true,
+        "channelNumber": "2-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6396816916480",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WBBMDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WBBMDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": false,
+        "stationId": "tivo:st.10420179"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Culinary Cup",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-04-15",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16615509",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-16 02:30:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-16 02:30:00",
+      "size": 2969600,
+      "subtitle": "The Gastronomic Gauntlet",
+      "actualEndTime": "2026-04-16 02:30:01",
+      "offerId": "tivo:of.ctd.10420179.2-1.terrestrial.2026-04-16-01-30-00.3600",
+      "desiredDeletion": "2026-04-18 01:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        }
+      ],
+      "partnerCollectionId": "EP0537510370-0540482423",
+      "actualStartTime": "2026-04-16 01:29:58",
+      "contentId": "tivo:ct.540482423",
+      "description": "The commandment of culinary science and technology not only pushes the chefs to merge food and science, but battle in the most strategic cook off yet. The chefs will showcase different molecular gastronomy techniques while creating as many dishes as they can in five hours, begging the questions: Who will win an advantage in the next commandment? Who will go home? And how many dishes can the judges eat?.",
+      "title": "America's Culinary Cup",
+      "__SeriesId__": "SH0537510370",
+      "hdtv": true,
+      "collectionTitle": "America's Culinary Cup",
+      "duration": 3596,
+      "scheduledStartTime": "2026-04-16 01:30:00",
+      "clipMetadata": [
+        {
+          "contentId": "tivo:ct.540482423",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1548558",
+          "segmentType": "adSkip"
+        },
+        {
+          "contentId": "tivo:ct.540482423",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1549236",
+          "segmentType": "adSkip"
+        }
+      ],
+      "startTime": "2026-04-16 01:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.537510370",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-16 01:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 160,
+          "topLevel": false,
+          "label": "Entertainment",
+          "type": "category",
+          "categoryId": "tivo:ca.10916193"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16661029"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65556,
+        "isDigital": true,
+        "channelNumber": "5-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6674037342208",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WMAQDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WMAQDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420178"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "The Fall & Rise of Reggie Dinkins",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-04-13",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16615499",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-14 01:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-14 01:00:00",
+      "size": 1546240,
+      "subtitle": "A Real Cinderello Story",
+      "actualEndTime": "2026-04-14 01:00:02",
+      "offerId": "tivo:of.ctd.10420178.5-1.terrestrial.2026-04-14-00-30-00.1800",
+      "desiredDeletion": "2026-04-16 00:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.5"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.5"
+        }
+      ],
+      "partnerCollectionId": "EP0526672341-0540182768",
+      "actualStartTime": "2026-04-14 00:29:59",
+      "episodeNum": [10],
+      "contentId": "tivo:ct.540182768",
+      "description": "Monica tries to sign an exciting new prospect; Jerry Basmati unexpectedly takes revenge on Reggie.",
+      "title": "The Fall & Rise of Reggie Dinkins",
+      "__SeriesId__": "SH0526672341",
+      "hdtv": true,
+      "collectionTitle": "The Fall & Rise of Reggie Dinkins",
+      "duration": 1798,
+      "scheduledStartTime": "2026-04-14 00:30:00",
+      "clipMetadata": [
+        {
+          "contentId": "tivo:ct.540182768",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1547065",
+          "segmentType": "adSkip"
+        },
+        {
+          "contentId": "tivo:ct.540182768",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1547735",
+          "segmentType": "adSkip"
+        }
+      ],
+      "startTime": "2026-04-14 00:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.526672341",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-14 00:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 25,
+          "topLevel": false,
+          "label": "Comedy",
+          "type": "category",
+          "categoryId": "tivo:ca.413801"
+        },
+        {
+          "genreId": 35,
+          "topLevel": false,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413811"
+        },
+        {
+          "genreId": 91,
+          "topLevel": false,
+          "label": "Sitcom",
+          "type": "category",
+          "categoryId": "tivo:ca.413867"
+        },
+        {
+          "genreId": 42,
+          "topLevel": false,
+          "label": "Football",
+          "type": "category",
+          "categoryId": "tivo:ca.413818"
+        },
+        {
+          "genreId": 221,
+          "topLevel": false,
+          "label": "Sports Event",
+          "type": "category",
+          "categoryId": "tivo:ca.10916239"
+        },
+        {
+          "genreId": 1002,
+          "topLevel": true,
+          "label": "Comedy",
+          "type": "category",
+          "categoryId": "tivo:ca.413898"
+        },
+        {
+          "genreId": 1005,
+          "topLevel": true,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413901"
+        },
+        {
+          "genreId": 1009,
+          "topLevel": true,
+          "label": "Sports",
+          "type": "category",
+          "categoryId": "tivo:ca.413905"
+        }
+      ],
+      "recordingId": "tivo:rc.16660179"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65556,
+        "isDigital": true,
+        "channelNumber": "5-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6674037342208",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WMAQDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WMAQDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420178"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "The Fall & Rise of Reggie Dinkins",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-04-13",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16615499",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-14 00:30:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-14 00:30:00",
+      "size": 1576960,
+      "subtitle": "Mischief And Memories",
+      "actualEndTime": "2026-04-14 00:29:59",
+      "offerId": "tivo:of.ctd.10420178.5-1.terrestrial.2026-04-14-00-00-00.1800",
+      "desiredDeletion": "2026-04-16 00:00:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.5"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.5"
+        }
+      ],
+      "partnerCollectionId": "EP0526672341-0540182767",
+      "actualStartTime": "2026-04-13 23:59:58",
+      "episodeNum": [9],
+      "contentId": "tivo:ct.540182767",
+      "description": "The Dinkins family bands together for their annual push to get Reggie into the Hall of Fame, but Jerry Basmati stands in their way.",
+      "title": "The Fall & Rise of Reggie Dinkins",
+      "__SeriesId__": "SH0526672341",
+      "hdtv": true,
+      "collectionTitle": "The Fall & Rise of Reggie Dinkins",
+      "duration": 1797,
+      "scheduledStartTime": "2026-04-14 00:00:00",
+      "clipMetadata": [
+        {
+          "contentId": "tivo:ct.540182767",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1547028",
+          "segmentType": "adSkip"
+        },
+        {
+          "contentId": "tivo:ct.540182767",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1547684",
+          "segmentType": "adSkip"
+        }
+      ],
+      "startTime": "2026-04-14 00:00:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.526672341",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-14 00:00:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 25,
+          "topLevel": false,
+          "label": "Comedy",
+          "type": "category",
+          "categoryId": "tivo:ca.413801"
+        },
+        {
+          "genreId": 35,
+          "topLevel": false,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413811"
+        },
+        {
+          "genreId": 91,
+          "topLevel": false,
+          "label": "Sitcom",
+          "type": "category",
+          "categoryId": "tivo:ca.413867"
+        },
+        {
+          "genreId": 42,
+          "topLevel": false,
+          "label": "Football",
+          "type": "category",
+          "categoryId": "tivo:ca.413818"
+        },
+        {
+          "genreId": 221,
+          "topLevel": false,
+          "label": "Sports Event",
+          "type": "category",
+          "categoryId": "tivo:ca.10916239"
+        },
+        {
+          "genreId": 1002,
+          "topLevel": true,
+          "label": "Comedy",
+          "type": "category",
+          "categoryId": "tivo:ca.413898"
+        },
+        {
+          "genreId": 1005,
+          "topLevel": true,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413901"
+        },
+        {
+          "genreId": 1009,
+          "topLevel": true,
+          "label": "Sports",
+          "type": "category",
+          "categoryId": "tivo:ca.413905"
+        }
+      ],
+      "recordingId": "tivo:rc.16660169"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7278626340864",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Beyond Paradise",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-03-11",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16411449",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-12 02:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-12 02:00:00",
+      "size": 3276800,
+      "subtitle": "Episode 2",
+      "actualEndTime": "2026-04-12 02:00:00",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-04-12-01-00-00.3600",
+      "desiredDeletion": "2026-04-14 01:00:00",
+      "partnerCollectionId": "EP0473625415-0474032112",
+      "actualStartTime": "2026-04-12 00:59:58",
+      "episodeNum": [2],
+      "contentId": "tivo:ct.474032112",
+      "description": "Humphrey and his team are baffled by the mysterious disappearance of an entire family. Martha prepares for the launch of her café but is thrown when a face from the past shows up.",
+      "title": "Beyond Paradise",
+      "__SeriesId__": "SH0473625415",
+      "hdtv": true,
+      "collectionTitle": "Beyond Paradise",
+      "duration": 3599,
+      "repeat": true,
+      "scheduledStartTime": "2026-04-12 01:00:00",
+      "startTime": "2026-04-12 01:00:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.473625415",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-12 01:00:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 30,
+          "topLevel": false,
+          "label": "Crime Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413806"
+        },
+        {
+          "genreId": 71,
+          "topLevel": false,
+          "label": "Mystery",
+          "type": "category",
+          "categoryId": "tivo:ca.413847"
+        },
+        {
+          "genreId": 29,
+          "topLevel": false,
+          "label": "Crime",
+          "type": "category",
+          "categoryId": "tivo:ca.413805"
+        },
+        {
+          "genreId": 1005,
+          "topLevel": true,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413901"
+        },
+        {
+          "genreId": 1013,
+          "topLevel": true,
+          "label": "Mystery and Suspense",
+          "type": "category",
+          "categoryId": "tivo:ca.413909"
+        }
+      ],
+      "recordingId": "tivo:rc.16658849"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7272989196288",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Test Kitchen",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-01-31",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16363779",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-11 20:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-11 20:00:00",
+      "size": 1525760,
+      "subtitle": "Comforting Japanese Dinners",
+      "actualEndTime": "2026-04-11 20:00:02",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-04-11-19-30-00.1800",
+      "desiredDeletion": "2026-04-13 19:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0010327616-0535588551",
+      "actualStartTime": "2026-04-11 19:29:58",
+      "episodeNum": [13],
+      "contentId": "tivo:ct.535588551",
+      "description": "Test cook Dan Souza makes Tonkatsu (Japanese Fried Pork Chops) for host Bridget Lancaster. Tasting expert Jack Bishop reviews types of Japanese rice. Test cook Lan Lam prepares Kare Raisu (Japanese Curry Rice with Chicken) for Julia Collin Davison.",
+      "title": "America's Test Kitchen",
+      "__SeriesId__": "SH0010327616",
+      "hdtv": true,
+      "collectionTitle": "America's Test Kitchen",
+      "duration": 1799,
+      "repeat": true,
+      "scheduledStartTime": "2026-04-11 19:30:00",
+      "startTime": "2026-04-11 19:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.10327616",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 26,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-11 19:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16658479"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6926707458048",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Cook's Country",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-01-31",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16364359",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-11 18:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-11 18:00:00",
+      "size": 1597440,
+      "subtitle": "Mediterranean Burgers and Fritters",
+      "actualEndTime": "2026-04-11 18:00:02",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-04-11-17-30-00.1800",
+      "desiredDeletion": "2026-04-13 17:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0322554097-0535344849",
+      "actualStartTime": "2026-04-11 17:29:58",
+      "episodeNum": [20],
+      "contentId": "tivo:ct.535344849",
+      "description": "Test cook Morgan Bolling grills up some Lamb Burgers for host Bridget Lancaster. Equipment expert Hannah Crowley and host Julia Collin Davison talk about grill cookware. And test cook Christie Morrison makes Sweet Potato Fritters with Feta, Dill, and Cilantro for Julia.",
+      "title": "Cook's Country",
+      "__SeriesId__": "SH0322554097",
+      "hdtv": true,
+      "collectionTitle": "Cook's Country",
+      "duration": 1800,
+      "repeat": true,
+      "scheduledStartTime": "2026-04-11 17:30:00",
+      "startTime": "2026-04-11 17:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.322554097",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 18,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-11 17:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        }
+      ],
+      "recordingId": "tivo:rc.16658519"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65555,
+        "isDigital": true,
+        "channelNumber": "2-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6366241488896",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WBBMDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WBBMDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": false,
+        "stationId": "tivo:st.10420179"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Culinary Cup",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-04-08",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16615509",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-09 02:30:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-09 02:30:00",
+      "size": 2887680,
+      "subtitle": "Good vs Evil",
+      "actualEndTime": "2026-04-09 02:30:03",
+      "offerId": "tivo:of.ctd.10420179.2-1.terrestrial.2026-04-09-01-30-00.3600",
+      "desiredDeletion": "2026-04-11 01:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        }
+      ],
+      "partnerCollectionId": "EP0537510370-0539866602",
+      "actualStartTime": "2026-04-09 01:29:58",
+      "episodeNum": [6],
+      "contentId": "tivo:ct.539866602",
+      "description": "At the halfway point of the competition, the final eight competitors must each create two desserts, one heavenly and one devilish, using a shocking forbidden ingredient chosen by their rivals. Chefs must vote who's most likely to win and who's most likely to lose which shakes up the competition and causes tempers to simmer.",
+      "title": "America's Culinary Cup",
+      "__SeriesId__": "SH0537510370",
+      "hdtv": true,
+      "collectionTitle": "America's Culinary Cup",
+      "duration": 3600,
+      "scheduledStartTime": "2026-04-09 01:30:00",
+      "clipMetadata": [
+        {
+          "contentId": "tivo:ct.539866602",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1544452",
+          "segmentType": "adSkip"
+        },
+        {
+          "contentId": "tivo:ct.539866602",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1545008",
+          "segmentType": "adSkip"
+        }
+      ],
+      "startTime": "2026-04-09 01:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.537510370",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-09 01:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 160,
+          "topLevel": false,
+          "label": "Entertainment",
+          "type": "category",
+          "categoryId": "tivo:ca.10916193"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16657889"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65556,
+        "isDigital": true,
+        "channelNumber": "5-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "6736627892224",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WMAQDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WMAQDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420178"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "The Fall & Rise of Reggie Dinkins",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-04-06",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16615499",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-07 01:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-07 01:00:00",
+      "size": 1556480,
+      "subtitle": "The Loyalty Swamp",
+      "actualEndTime": "2026-04-07 01:00:00",
+      "offerId": "tivo:of.ctd.10420178.5-1.terrestrial.2026-04-07-00-30-00.1800",
+      "desiredDeletion": "2026-04-09 00:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.5"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.5"
+        }
+      ],
+      "partnerCollectionId": "EP0526672341-0540050931",
+      "actualStartTime": "2026-04-07 00:29:58",
+      "episodeNum": [8],
+      "contentId": "tivo:ct.540050931",
+      "description": "Tobin's past comes back to haunt him; Reggie and Brina struggle to set a wedding date.",
+      "title": "The Fall & Rise of Reggie Dinkins",
+      "__SeriesId__": "SH0526672341",
+      "hdtv": true,
+      "collectionTitle": "The Fall & Rise of Reggie Dinkins",
+      "duration": 1799,
+      "scheduledStartTime": "2026-04-07 00:30:00",
+      "clipMetadata": [
+        {
+          "contentId": "tivo:ct.540050931",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1543517",
+          "segmentType": "adSkip"
+        },
+        {
+          "contentId": "tivo:ct.540050931",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1543990",
+          "segmentType": "adSkip"
+        }
+      ],
+      "startTime": "2026-04-07 00:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.526672341",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-07 00:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 25,
+          "topLevel": false,
+          "label": "Comedy",
+          "type": "category",
+          "categoryId": "tivo:ca.413801"
+        },
+        {
+          "genreId": 35,
+          "topLevel": false,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413811"
+        },
+        {
+          "genreId": 91,
+          "topLevel": false,
+          "label": "Sitcom",
+          "type": "category",
+          "categoryId": "tivo:ca.413867"
+        },
+        {
+          "genreId": 42,
+          "topLevel": false,
+          "label": "Football",
+          "type": "category",
+          "categoryId": "tivo:ca.413818"
+        },
+        {
+          "genreId": 221,
+          "topLevel": false,
+          "label": "Sports Event",
+          "type": "category",
+          "categoryId": "tivo:ca.10916239"
+        },
+        {
+          "genreId": 1002,
+          "topLevel": true,
+          "label": "Comedy",
+          "type": "category",
+          "categoryId": "tivo:ca.413898"
+        },
+        {
+          "genreId": 1005,
+          "topLevel": true,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413901"
+        },
+        {
+          "genreId": 1009,
+          "topLevel": true,
+          "label": "Sports",
+          "type": "category",
+          "categoryId": "tivo:ca.413905"
+        }
+      ],
+      "recordingId": "tivo:rc.16657189"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7284261388288",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Beyond Paradise",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-03-04",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16411449",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-05 02:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-05 02:00:00",
+      "size": 3072000,
+      "subtitle": "Episode 1",
+      "actualEndTime": "2026-04-05 02:00:03",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-04-05-01-00-00.3600",
+      "desiredDeletion": "2026-04-07 01:00:00",
+      "partnerCollectionId": "EP0473625415-0473625413",
+      "actualStartTime": "2026-04-05 00:59:58",
+      "episodeNum": [1],
+      "contentId": "tivo:ct.473625413",
+      "description": "A new adventure awaits as DI Humphrey Goodman and Martha leave London for Devon. Humphrey dives into his first case, which involves an unusual prime suspect: a 17th-century witch.",
+      "title": "Beyond Paradise",
+      "__SeriesId__": "SH0473625415",
+      "hdtv": true,
+      "collectionTitle": "Beyond Paradise",
+      "duration": 3600,
+      "repeat": true,
+      "scheduledStartTime": "2026-04-05 01:00:00",
+      "startTime": "2026-04-05 01:00:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.473625415",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-05 01:00:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 30,
+          "topLevel": false,
+          "label": "Crime Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413806"
+        },
+        {
+          "genreId": 71,
+          "topLevel": false,
+          "label": "Mystery",
+          "type": "category",
+          "categoryId": "tivo:ca.413847"
+        },
+        {
+          "genreId": 29,
+          "topLevel": false,
+          "label": "Crime",
+          "type": "category",
+          "categoryId": "tivo:ca.413805"
+        },
+        {
+          "genreId": 1005,
+          "topLevel": true,
+          "label": "Drama",
+          "type": "category",
+          "categoryId": "tivo:ca.413901"
+        },
+        {
+          "genreId": 1013,
+          "topLevel": true,
+          "label": "Mystery and Suspense",
+          "type": "category",
+          "categoryId": "tivo:ca.413909"
+        }
+      ],
+      "recordingId": "tivo:rc.16655869"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7189770010624",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Test Kitchen",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-01-19",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16363779",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-04 20:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-04 20:00:00",
+      "size": 1546240,
+      "subtitle": "Savory Mexican Classics",
+      "actualEndTime": "2026-04-04 20:00:02",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-04-04-19-30-00.1800",
+      "desiredDeletion": "2026-04-06 19:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0010327616-0535106743",
+      "actualStartTime": "2026-04-04 19:29:58",
+      "episodeNum": [12],
+      "contentId": "tivo:ct.535106743",
+      "description": "Test cook Keith Dresser makes Chiles en Nogada for host Bridget Lancaster. Science expert Dan Souza explains why oil shimmers. And test cook Elle Simone Scott prepares Tacos Gobernador for host Julia Collin Davison.",
+      "title": "America's Test Kitchen",
+      "__SeriesId__": "SH0010327616",
+      "hdtv": true,
+      "collectionTitle": "America's Test Kitchen",
+      "duration": 1800,
+      "repeat": true,
+      "scheduledStartTime": "2026-04-04 19:30:00",
+      "startTime": "2026-04-04 19:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.10327616",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 26,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-04 19:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16655509"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65558,
+        "isDigital": true,
+        "channelNumber": "11-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "7000786206720",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WTTWDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WTTWDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": true,
+        "stationId": "tivo:st.10420334"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "Cook's Country",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2025-12-31",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16364359",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-04 18:00:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-04 18:00:00",
+      "size": 1546240,
+      "subtitle": "Sweet and Savory Brunch",
+      "actualEndTime": "2026-04-04 18:00:02",
+      "offerId": "tivo:of.ctd.10420334.11-1.terrestrial.2026-04-04-17-30-00.1800",
+      "desiredDeletion": "2026-04-06 17:30:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.3"
+        }
+      ],
+      "partnerCollectionId": "EP0322554097-0533611076",
+      "actualStartTime": "2026-04-04 17:29:58",
+      "episodeNum": [19],
+      "contentId": "tivo:ct.533611076",
+      "description": "Test cook Christie Morrison bakes up some comforting Conchas for host Bridget Lancaster. Tasting expert Jack Bishop talks egg substitutes. Test cook Morgan Bolling prepares Skillet Eggs Sardou for host Toni Tipton-Martin.",
+      "title": "Cook's Country",
+      "__SeriesId__": "SH0322554097",
+      "hdtv": true,
+      "collectionTitle": "Cook's Country",
+      "duration": 1800,
+      "repeat": true,
+      "scheduledStartTime": "2026-04-04 17:30:00",
+      "startTime": "2026-04-04 17:30:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.322554097",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 18,
+      "isNew": false,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-04 17:30:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 58,
+          "topLevel": false,
+          "label": "How To",
+          "type": "category",
+          "categoryId": "tivo:ca.413834"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        },
+        {
+          "genreId": 1012,
+          "topLevel": true,
+          "label": "Educational",
+          "type": "category",
+          "categoryId": "tivo:ca.413908"
+        }
+      ],
+      "recordingId": "tivo:rc.16655559"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  },
+  {
+    "isTop": true,
+    "recording": [{
+      "episodic": true,
+      "subscriptionForCollectionIdAndChannel": [{
+        "useOfferStartPadding": false,
+        "useOfferEndPadding": false,
+        "bodyId": "",
+        "type": "subscription"
+      }],
+      "channel": {
+        "logoIndex": 65555,
+        "isDigital": true,
+        "channelNumber": "2-1",
+        "isDiscovered": false,
+        "isReceived": true,
+        "isBlocked": false,
+        "bitrate": "5926697304064",
+        "levelOfDetail": "medium",
+        "isHdtv": true,
+        "isKidZone": false,
+        "type": "channel",
+        "callSign": "WBBMDT",
+        "isHidden": false,
+        "isEntitled": true,
+        "sourceType": "terrestrial",
+        "name": "WBBMDT",
+        "channelId": "tivo:ch.9",
+        "isFavorite": false,
+        "stationId": "tivo:st.10420179"
+      },
+      "levelOfDetail": "medium",
+      "mimeType": "video/mpg2",
+      "shortTitle": "America's Culinary Cup",
+      "type": "recording",
+      "suggestionScore": 0,
+      "remindUser": false,
+      "isEpisode": true,
+      "originalAirdate": "2026-04-01",
+      "deletionPolicy": "whenSpaceNeeded",
+      "state": "complete",
+      "subscriptionIdentifier": [{
+        "subscriptionType": "seasonPass",
+        "subscriptionId": "tivo:sb.16615509",
+        "type": "subscriptionIdentifier"
+      }],
+      "contentType": "video",
+      "drm": {
+        "cgms": "copyFreely",
+        "multiRoomStream": true,
+        "tivoToGo": true,
+        "multiRoomView": true,
+        "type": "drm",
+        "recordingPlaybackPolicy": "allowed",
+        "mrsPlaybackPolicy": "allowed"
+      },
+      "requestedEndPadding": 0,
+      "scheduledEndTime": "2026-04-02 03:20:00",
+      "quality": "best",
+      "requestedEndTime": "2026-04-02 03:20:00",
+      "size": 2959360,
+      "subtitle": "The Roots of Success",
+      "actualEndTime": "2026-04-02 03:20:03",
+      "offerId": "tivo:of.ctd.10420179.2-1.terrestrial.2026-04-02-02-20-00.3600",
+      "desiredDeletion": "2026-04-04 02:20:00",
+      "internalRating": [
+        {
+          "ratingTypeId": "tivo:rt.2",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        },
+        {
+          "ratingTypeId": "tivo:rt.6",
+          "advisoryId": ["tivo:ra.2"],
+          "type": "internalRating",
+          "ratingValueId": "tivo:rv.4"
+        }
+      ],
+      "partnerCollectionId": "EP0537510370-0539572001",
+      "actualStartTime": "2026-04-02 02:19:58",
+      "episodeNum": [5],
+      "contentId": "tivo:ct.539572001",
+      "description": "The remaining chefs face off in teams of three to deliver a vegetarian three-course menu to a dinner party of elite guests from the culinary world. The catch? Each chef must stay within the parameters of their vegetable family, with one lucky chef creating an all-vegetable dessert. After plates are cleared and scores tallied, the bottom team must turn against each other in a three way showdown where one chef is sent home.",
+      "title": "America's Culinary Cup",
+      "__SeriesId__": "SH0537510370",
+      "hdtv": true,
+      "collectionTitle": "America's Culinary Cup",
+      "duration": 3597,
+      "scheduledStartTime": "2026-04-02 02:20:00",
+      "clipMetadata": [
+        {
+          "contentId": "tivo:ct.539572001",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1540406",
+          "segmentType": "adSkip"
+        },
+        {
+          "contentId": "tivo:ct.539572001",
+          "type": "clipMetadata",
+          "clipMetadataId": "tivo:cm.1541073",
+          "segmentType": "adSkip"
+        }
+      ],
+      "startTime": "2026-04-02 02:20:00",
+      "transportType": "stream",
+      "bodyId": "tsn:0000000000000000ED87",
+      "collectionId": "tivo:cl.537510370",
+      "isAdult": false,
+      "watchedTime": 0,
+      "cc": true,
+      "diskPartition": "user",
+      "requestedStartPadding": 0,
+      "seasonNumber": 1,
+      "isNew": true,
+      "collectionType": "series",
+      "requestedStartTime": "2026-04-02 02:20:00",
+      "descriptionLanguage": "eng-USA",
+      "expectedDeletion": "2038-01-19 03:14:00",
+      "videoResolution": "hd",
+      "category": [
+        {
+          "genreId": 160,
+          "topLevel": false,
+          "label": "Entertainment",
+          "type": "category",
+          "categoryId": "tivo:ca.10916193"
+        },
+        {
+          "genreId": 27,
+          "topLevel": false,
+          "label": "Cooking",
+          "type": "category",
+          "categoryId": "tivo:ca.413803"
+        },
+        {
+          "genreId": 1000,
+          "topLevel": true,
+          "label": "Interests",
+          "type": "category",
+          "categoryId": "tivo:ca.413896"
+        }
+      ],
+      "recordingId": "tivo:rc.16655009"
+    }],
+    "type": "recordingList",
+    "IsFinal": true,
+    "isBottom": false
+  }
+]

@@ -1,0 +1,402 @@
+[
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.219",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Law & Order",
+    "collectionId": "tivo:cl.14515",
+    "thumbsRating": 3
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.229",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "South Park",
+    "collectionId": "tivo:cl.15340",
+    "thumbsRating": 2
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.239",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "The Simpsons",
+    "collectionId": "tivo:cl.16642",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.249",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Friends",
+    "collectionId": "tivo:cl.16645",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.259",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Star Trek: The Next Generation",
+    "collectionId": "tivo:cl.16652",
+    "thumbsRating": 1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.269",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Married...With Children",
+    "collectionId": "tivo:cl.16995",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.279",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "The X-Files",
+    "collectionId": "tivo:cl.17032",
+    "thumbsRating": 1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.299",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Fox News Sunday",
+    "collectionId": "tivo:cl.17051",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.309",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "That '70s Show",
+    "collectionId": "tivo:cl.17211",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.319",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "MotorWeek",
+    "collectionId": "tivo:cl.17623",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.329",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "ET Entertainment Tonight",
+    "collectionId": "tivo:cl.18000",
+    "thumbsRating": -3
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.339",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Good Morning America",
+    "collectionId": "tivo:cl.18258",
+    "thumbsRating": -3
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.349",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "The View",
+    "collectionId": "tivo:cl.18260",
+    "thumbsRating": -3
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.359",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "College Football",
+    "collectionId": "tivo:cl.18325",
+    "thumbsRating": -3
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.369",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "America's Funniest Home Videos",
+    "collectionId": "tivo:cl.18329",
+    "thumbsRating": -2
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.379",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Dr. Quinn, Medicine Woman",
+    "collectionId": "tivo:cl.18758",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.389",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Judge Judy",
+    "collectionId": "tivo:cl.18909",
+    "thumbsRating": -3
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.399",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "CBS Sunday Morning",
+    "collectionId": "tivo:cl.18954",
+    "thumbsRating": 1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.409",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "60 Minutes",
+    "collectionId": "tivo:cl.18964",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.419",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Everybody Loves Raymond",
+    "collectionId": "tivo:cl.18989",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.429",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Becker",
+    "collectionId": "tivo:cl.18991",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.439",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "48 Hours",
+    "collectionId": "tivo:cl.19004",
+    "thumbsRating": -2
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.449",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Living Single",
+    "collectionId": "tivo:cl.19245",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.459",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Martin",
+    "collectionId": "tivo:cl.19250",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.469",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "The Jamie Foxx Show",
+    "collectionId": "tivo:cl.19388",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.479",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Extra",
+    "collectionId": "tivo:cl.19524",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.489",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Arthur",
+    "collectionId": "tivo:cl.19585",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.499",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Dateline NBC",
+    "collectionId": "tivo:cl.20006",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.509",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Saturday Night Live",
+    "collectionId": "tivo:cl.20047",
+    "thumbsRating": 1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.519",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Antiques Roadshow",
+    "collectionId": "tivo:cl.20565",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.529",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Roseanne",
+    "collectionId": "tivo:cl.20794",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.539",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Bewitched",
+    "collectionId": "tivo:cl.21561",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.549",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "The Twilight Zone",
+    "collectionId": "tivo:cl.22415",
+    "thumbsRating": 1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.559",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Star Trek",
+    "collectionId": "tivo:cl.22439",
+    "thumbsRating": 1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.569",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Sanford and Son",
+    "collectionId": "tivo:cl.30042",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.579",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "I Dream of Jeannie",
+    "collectionId": "tivo:cl.30056",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.599",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "SportsCenter",
+    "collectionId": "tivo:cl.54270",
+    "thumbsRating": -3
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.609",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Wheel of Fortune",
+    "collectionId": "tivo:cl.55038",
+    "thumbsRating": 1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.619",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "Jeopardy!",
+    "collectionId": "tivo:cl.55039",
+    "thumbsRating": -1
+  },
+  {
+    "collectionType": "series",
+    "userContentId": "tivo:uc.629",
+    "bodyId": "tsn:0000000000000000ED87",
+    "thumbsType": "explicit",
+    "type": "userContent",
+    "title": "The Price Is Right",
+    "collectionId": "tivo:cl.55067",
+    "thumbsRating": 1
+  }
+]
