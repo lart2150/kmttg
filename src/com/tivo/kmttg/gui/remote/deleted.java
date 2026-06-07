@@ -31,6 +31,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.tivo.kmttg.gui.table.TableUtil;
@@ -49,6 +52,7 @@ public class deleted {
    public JLabel label = null;
    public JButton recover = null;
    public JButton permDelete = null;
+   public JTextField filter = null;
 
    public deleted(final JFrame frame) {
 
@@ -157,6 +161,17 @@ public class deleted {
 
       label = new JLabel();
 
+      // Filter the table by show title (live, as you type)
+      JLabel filter_label = new JLabel("Filter:");
+      filter = new JTextField(15);
+      filter.setToolTipText("Filter the list by show title");
+      filter.getDocument().addDocumentListener(new DocumentListener() {
+         @Override public void insertUpdate(DocumentEvent e) { apply(); }
+         @Override public void removeUpdate(DocumentEvent e) { apply(); }
+         @Override public void changedUpdate(DocumentEvent e) { apply(); }
+         private void apply() { tab.setFilter(filter.getText()); }
+      });
+
       row1.add(title);
       row1.add(tivo_label);
       row1.add(tivo);
@@ -164,6 +179,8 @@ public class deleted {
       row1.add(recover);
       row1.add(permDelete);
       row1.add(export);
+      row1.add(filter_label);
+      row1.add(filter);
       row1.add(label);
 
       tab = new deletedTable();
