@@ -1,5 +1,6 @@
 plugins {
     id 'application'
+    id 'jacoco'  // code coverage report for the test suite
     // Produces the fat "uber" kmttg.jar (maintained fork of the shadow plugin)
     id 'com.gradleup.shadow' version '8.3.5'
 }
@@ -51,6 +52,21 @@ test {
     useJUnitPlatform()
     testLogging {
         events 'passed', 'failed', 'skipped'
+    }
+    // Emit the coverage report automatically after the tests run.
+    finalizedBy 'jacocoTestReport'
+}
+
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+// HTML report at build/reports/jacoco/test/html/index.html (+ XML for CI tools).
+jacocoTestReport {
+    dependsOn test
+    reports {
+        html.required = true
+        xml.required  = true
     }
 }
 
