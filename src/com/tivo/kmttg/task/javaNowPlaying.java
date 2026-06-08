@@ -18,10 +18,9 @@
  */
 package com.tivo.kmttg.task;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -34,7 +33,6 @@ import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.rnpl;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
-import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.parseNPL;
 
@@ -45,7 +43,7 @@ public class javaNowPlaying extends baseTask implements Serializable {
    private Boolean success = false;
    private Stack<Hashtable<String,String>> ENTRIES = new Stack<Hashtable<String,String>>();
    private Hashtable<String,Integer> unique = new Hashtable<String,Integer>();
-   private String outputFile = "";
+   private ByteArrayOutputStream nplStream;
    private int AnchorOffset = 0;
    private int TotalItems = 0;
    private static int limit_npl_fetches = 0;
@@ -56,9 +54,6 @@ public class javaNowPlaying extends baseTask implements Serializable {
    public javaNowPlaying(jobData job) {
       debug.print("job=" + job);
       this.job = job;
-      
-      // Generate unique outputFile name
-      outputFile = file.makeTempFile("NPL");
    }
       
    public backgroundProcess getProcess() {
@@ -112,10 +107,11 @@ public class javaNowPlaying extends baseTask implements Serializable {
          log.print(">> Continuing Now Playing List from " + job.tivoName + " (" + AnchorOffset + "/" + TotalItems + ")...");
       log.print(url);
       // Run download method in a separate thread
+      nplStream = new ByteArrayOutputStream();
       Runnable r = new Runnable() {
          public void run () {
             try {
-               success = http.download(url, "tivo", config.MAK, outputFile, false, job.offset);
+               success = http.downloadPiped(url, "tivo", config.MAK, nplStream, false, job.offset);
                thread_running = false;
             }
             catch (Exception e) {
@@ -174,32 +170,35 @@ public class javaNowPlaying extends baseTask implements Serializable {
          
          // Check for problems
          int failed = 0;
-         
-         if ( ! success ) {
-            failed = 1;
-         }
-         
-         // No or empty output means problems         
-         if ( file.isEmpty(outputFile) ) {
-            failed = 1;
-         }
-         
-         // Check that first line is xml
-         if (failed == 0) {
+
+         String npl = null;
+         if ( success && nplStream != null ) {
             try {
-               BufferedReader xml = new BufferedReader(new FileReader(outputFile));
-               String first = xml.readLine();
-               if ( ! first.toLowerCase().matches("^.+xml.+$") ) {
-                  failed = 1;
-                  log.error(first);
-               }
-               xml.close();
+               npl = nplStream.toString("UTF8");
             }
-            catch (IOException ex) {
+            catch (UnsupportedEncodingException ex) {
                failed = 1;
             }
          }
-         
+
+         if ( ! success ) {
+            failed = 1;
+         }
+
+         // No or empty output means problems
+         if ( npl == null || npl.length() == 0 ) {
+            failed = 1;
+         }
+
+         // Check that first line is xml
+         if (failed == 0) {
+            String first = npl.split("\\r?\\n", 2)[0];
+            if ( ! first.toLowerCase().matches("^.+xml.+$") ) {
+               failed = 1;
+               log.error(first);
+            }
+         }
+
          if (failed == 1) {
             log.error("Failed to retrieve Now Playing List from " + job.tivoName);
             log.error("Check YOUR MAK & IP settings");
@@ -207,23 +206,21 @@ public class javaNowPlaying extends baseTask implements Serializable {
          } else {
             log.warn("NPL job completed: " + jobMonitor.getElapsedTime(job.time));
             log.print("---DONE--- job=" + job.type + " tivo=" + job.tivoName);
-            
+
             // Success, so parse the result
-            return parseNPL(outputFile);
+            return parseNPL(npl);
          }
       }
-      file.delete(outputFile);
-      
+
       return false;
    }
 
    // Return true if additional downloads needed, false otherwise
    // NOTE: Must use UTF8 for special characters like Spanish/French characters
-   private Boolean parseNPL(String file) {
-      debug.print("file=" + file);
-      Hashtable<String,Integer> result = parseNPL.parseFile(file, job.tivoName, ENTRIES);
+   private Boolean parseNPL(String npl) {
+      debug.print("");
+      Hashtable<String,Integer> result = parseNPL.parseString(npl, job.tivoName, ENTRIES);
       if (result == null) {
-         com.tivo.kmttg.util.file.delete(outputFile);
          return false;
       }
       TotalItems = result.get("TotalItems");
@@ -269,10 +266,9 @@ public class javaNowPlaying extends baseTask implements Serializable {
          } else {
             // Batch mode
             if (! config.rpcEnabled(job.tivoName) && ! config.mindEnabled(job.tivoName))
-               auto.processAll(job.tivoName, ENTRIES);            
+               auto.processAll(job.tivoName, ENTRIES);
          }
-         com.tivo.kmttg.util.file.delete(outputFile);
-         
+
          if (config.rpcEnabled(job.tivoName) || config.mindEnabled(job.tivoName)) {
             // Extra rpc communication to retrieve NPL information
             // used to be able to play/delete shows.
