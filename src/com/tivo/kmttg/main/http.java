@@ -56,6 +56,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
+import org.apache.hc.client5.http.ssl.HostnameVerificationPolicy;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.apache.hc.core5.http.ClassicHttpResponse;
@@ -120,6 +121,7 @@ public class http {
 							.setSslContext(
 									SSLContextBuilder.create().loadTrustMaterial(TrustAllStrategy.INSTANCE).build())
 							.setTlsVersions(TLS.V_1_0, TLS.V_1_1, TLS.V_1_2)
+							.setHostVerificationPolicy(HostnameVerificationPolicy.CLIENT)
 							.setHostnameVerifier(NoopHostnameVerifier.INSTANCE).buildClassic())
 					.build();
 		}

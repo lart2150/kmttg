@@ -19,8 +19,7 @@
 package com.tivo.kmttg.util;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
@@ -33,15 +32,13 @@ import com.tivo.kmttg.main.config;
 
 public class parseNPL {
    
-   public static Hashtable<String,Integer> parseFile(String file, String tivoName, Stack<Hashtable<String,String>>ENTRIES) {
-      debug.print("file=" + file);
+   public static Hashtable<String,Integer> parseString(String content, String tivoName, Stack<Hashtable<String,String>>ENTRIES) {
+      debug.print("");
       int TotalItems=0, ItemCount=0, offset=0;
       String ll, l, value;
       Hashtable<String,String> h = new Hashtable<String,String>();
       try {
-         BufferedReader xml = new BufferedReader(
-            new InputStreamReader(new FileInputStream(file),"UTF8")
-         );
+         BufferedReader xml = new BufferedReader(new StringReader(content));
          ll = xml.readLine();
          xml.close();
          String[] line = ll.split(">");
