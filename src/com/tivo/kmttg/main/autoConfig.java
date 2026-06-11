@@ -21,6 +21,7 @@ package com.tivo.kmttg.main;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,6 +36,7 @@ public class autoConfig {
    public static int dryrun = 0;
    public static int CHECK_TIVOS_INTERVAL = 60;
    public static int dateFilter = 0;
+   public static int channelExcludes = 0;
    public static String dateOperator = "less than";
    public static float dateHours = 48;
    public static int suggestionsFilter = 0;
@@ -179,8 +181,11 @@ public class autoConfig {
                   entry.suggestionsFilter = Integer.parseInt(value);
                if (name.matches("useProgramId_unique"))
                   entry.useProgramId_unique = Integer.parseInt(value);
+               if (name.matches("channelExcludes"))
+                  entry.channelExcludes = Integer.parseInt(value);
                if (name.matches("channelFilter")) {
                   entry.channelFilter = value;
+                  entry.channelFilterList = Arrays.asList(value.split("\\s*,\\s*"));
                }
                if (name.matches("encode_name")) {
                   // encode_name value can have spaces
