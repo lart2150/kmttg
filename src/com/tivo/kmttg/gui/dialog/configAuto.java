@@ -24,11 +24,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Stack;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -40,6 +43,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -70,7 +74,7 @@ public class configAuto {
    private static JButton add = null;
    private static JButton del = null;
    private static JButton update = null;
-   private static JLabel text = null;
+   private static JTextArea text = null;
    private static autoTable table = null;
    private static JScrollPane table_scroll = null;
    private static JComboBox<String> type = null;
@@ -159,6 +163,15 @@ public class configAuto {
       }
    }
 
+   // Create panel containing a left-justified component
+   private JPanel createBoxItemLJ(Component item) {
+      JPanel pnl = new JPanel();
+      pnl.setLayout(new BoxLayout(pnl, BoxLayout.X_AXIS));
+      pnl.add(item);
+      pnl.add(Box.createHorizontalGlue());
+      return pnl;
+   }
+
    private void create(JFrame frame) {
       debug.print("frame=" + frame);
 
@@ -179,14 +192,14 @@ public class configAuto {
          }
       });
       table_scroll = new JScrollPane(table.TABLE);
-      table_scroll.setPreferredSize(new java.awt.Dimension(table_scroll.getPreferredSize().width, 150));
+      table_scroll.setPreferredSize(new Dimension(table_scroll.getPreferredSize().width, 150));
 
-      text = new JLabel();
-      String message = "for Type=keywords: Multiple keywords are allowed separated by '| character";
+      String message = "For Type=keywords: Multiple keywords are allowed separated by '| character";
       message += "\nkeyword=>AND  (keyword)=>OR  -keyword=>NOT";
       message += "\nEXAMPLE: Type=keywords  keywords=(basketball)|(football)|-new york";
       message += "\n  => football OR basketball NOT new york";
-      text.setText("<html>" + message.replaceAll("\n", "<br>") + "</html>");
+      text = new JTextArea(message);
+      text.setOpaque(false);
 
       add = new JButton("ADD");
       add.addActionListener(new ActionListener() {
@@ -333,7 +346,7 @@ public class configAuto {
       content.add(table_scroll);
 
       // text pane
-      content.add(text);
+      content.add(createBoxItemLJ(text));
 
       // row 3 items
       JPanel row3 = new JPanel(new MigLayout("gapx 5", "[][][][][grow]", ""));
@@ -342,7 +355,7 @@ public class configAuto {
       row3.add(tivo_label, "cell 2 0");
       row3.add(tivo, "cell 3 0");
       row3.add(title, "cell 4 0, growx");
-      content.add(row3);
+      content.add(createBoxItemLJ(row3));
 
       // row4
       JPanel row4 = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -368,7 +381,7 @@ public class configAuto {
       row5.add(encoding_name, "cell 0 0");
       row5.add(encoding_name2, "cell 1 0");
       row5.add(encoding_name2_suffix, "cell 2 0, growx");
-      content.add(row5);
+      content.add(createBoxItemLJ(row5));
 
       // Put these items in a grid for better alignment
       JPanel gp = new JPanel(new MigLayout("", "[][grow]", ""));
@@ -376,7 +389,7 @@ public class configAuto {
       gp.add(comskipIni_label, "cell 0 1"); gp.add(comskipIni, "cell 1 1, growx");
       gp.add(channelFilter_label, "cell 0 2"); gp.add(channelFilter, "cell 1 2, growx");
       gp.add(tivoFileNameFormat_label, "cell 0 3"); gp.add(tivoFileNameFormat, "cell 1 3, growx");
-      content.add(gp);
+      content.add(createBoxItemLJ(gp));
 
       // row_misc
       JPanel row_misc = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -400,7 +413,7 @@ public class configAuto {
       content.add(global_settings);
 
       // row_dry_run
-      JPanel row_dry_run = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+      JPanel row_dry_run = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
       row_dry_run.add(dry_run);
       row_dry_run.add(check_interval_label);
       row_dry_run.add(check_interval);
@@ -421,7 +434,9 @@ public class configAuto {
       content.add(filter_panel);
 
       // noJobWait
-      content.add(noJobWait);
+      JPanel noWait = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+      noWait.add(noJobWait);
+      content.add(noWait);
 
       // OK & CANCEL
       JPanel last = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 0));
