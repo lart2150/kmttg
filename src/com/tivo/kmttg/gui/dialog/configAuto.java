@@ -30,6 +30,8 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Stack;
+import java.util.Arrays;
+import java.util.ArrayList;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -101,6 +103,7 @@ public class configAuto {
    private static JTextField check_interval = null;
    private static JTextField comskipIni = null;
    private static JTextField channelFilter = null;
+   private static JCheckBox chlExcludes = null;
    private static JTextField tivoFileNameFormat = null;
    private static JCheckBox dateFilter = null;
    private static JCheckBox suggestionsFilter = null;
@@ -283,6 +286,8 @@ public class configAuto {
       JLabel channelFilter_label = new JLabel("channel filter: ");
       channelFilter = new JTextField(); channelFilter.setMinimumSize(new java.awt.Dimension(30, channelFilter.getPreferredSize().height));
 
+      chlExcludes = new JCheckBox("Exclude channels");
+
       JLabel tivoFileNameFormat_label = new JLabel("file name override: ");
       tivoFileNameFormat = new JTextField(); tivoFileNameFormat.setMinimumSize(new java.awt.Dimension(30, tivoFileNameFormat.getPreferredSize().height));
 
@@ -387,8 +392,9 @@ public class configAuto {
       JPanel gp = new JPanel(new MigLayout("", "[][grow]", ""));
       gp.add(encoding_name_label, "cell 0 0"); gp.add(row5, "cell 1 0, growx");
       gp.add(comskipIni_label, "cell 0 1"); gp.add(comskipIni, "cell 1 1, growx");
-      gp.add(channelFilter_label, "cell 0 2"); gp.add(channelFilter, "cell 1 2, growx");
-      gp.add(tivoFileNameFormat_label, "cell 0 3"); gp.add(tivoFileNameFormat, "cell 1 3, growx");
+      gp.add(tivoFileNameFormat_label, "cell 0 2"); gp.add(tivoFileNameFormat, "cell 1 2, growx");
+      gp.add(chlExcludes, "cell 0 3");
+      gp.add(channelFilter_label, "cell 0 4"); gp.add(channelFilter, "cell 1 4, growx");
       content.add(createBoxItemLJ(gp));
 
       // row_misc
@@ -493,6 +499,7 @@ public class configAuto {
       update.setToolTipText(getToolTip("update"));
       del.setToolTipText(getToolTip("del"));
       dateFilter.setToolTipText(getToolTip("dateFilter"));
+      chlExcludes.setToolTipText(getToolTip("chlExcludes"));
       suggestionsFilter.setToolTipText(getToolTip("suggestionsFilter"));
       suggestionsFilter_single.setToolTipText(getToolTip("suggestionsFilter_single"));
       useProgramId_unique.setToolTipText(getToolTip("useProgramId_unique"));
@@ -560,6 +567,10 @@ public class configAuto {
          text += "If you wish to use a specific comskip.ini file to use with <b>comcut</b> for<br>";
          text += "this auto transfer then specify the full path to the file here.<br>";
          text += "This will override the comskip.ini file specified in main kmttg configuration.";
+      }
+      else if (component.equals("chlExcludes")) {
+         text = "<b>Ignore channel list</b><br>";
+         text += "Treat channel list as channels to ignore recordings from.";
       }
       else if (component.equals("channelFilter")) {
          text =  "<b>channel filter</b><br>";
@@ -807,6 +818,7 @@ public class configAuto {
       dry_run.setSelected((Boolean)(autoConfig.dryrun == 1));
       noJobWait.setSelected((Boolean)(autoConfig.noJobWait == 1));
       dateFilter.setSelected((Boolean)(autoConfig.dateFilter == 1));
+      chlExcludes.setSelected((Boolean)(autoConfig.channelExcludes == 1));
       dateOperator.setSelectedItem(autoConfig.dateOperator);
       dateHours.setText("" + autoConfig.dateHours);
       suggestionsFilter.setSelected((Boolean)(autoConfig.suggestionsFilter == 1));
@@ -1016,6 +1028,7 @@ public class configAuto {
                ofp.write("encode "              + entry.encode              + "\n");
                //ofp.write("push "                + entry.push                + "\n");
                ofp.write("custom "              + entry.custom              + "\n");
+               ofp.write("channelExcludes "     + entry.channelExcludes     + "\n");
                ofp.write("suggestionsFilter "   + entry.suggestionsFilter   + "\n");
                ofp.write("useProgramId_unique " + entry.useProgramId_unique + "\n");
                if (entry.encode_name != null && entry.encode_name.length() > 0)
@@ -1081,6 +1094,7 @@ public class configAuto {
 
       comskipIni.setText(entry.comskipIni);
 
+      chlExcludes.setSelected((Boolean)(entry.channelExcludes == 1));
       if (entry.channelFilter != null)
          channelFilter.setText(entry.channelFilter);
       else
@@ -1205,11 +1219,19 @@ public class configAuto {
       }
       entry.comskipIni = ini;
 
-      String cFilter = (String)string.removeLeadingTrailingSpaces(channelFilter.getText());
-      if (cFilter.length() > 0)
-         entry.channelFilter = cFilter;
+      if (chlExcludes.isSelected())
+         entry.channelExcludes = 1;
       else
+         entry.channelExcludes = 0;
+
+      String cFilter = (String)string.removeLeadingTrailingSpaces(channelFilter.getText());
+      if (cFilter.length() > 0) {
+         entry.channelFilter = cFilter;
+         entry.channelFilterList = Arrays.asList(cFilter.split("\\s*,\\s*"));
+      } else {
          entry.channelFilter = null;
+         entry.channelFilterList = new ArrayList<String>();
+      }
 
       cFilter = (String)string.removeLeadingTrailingSpaces(tivoFileNameFormat.getText());
       if (cFilter.length() > 0)
