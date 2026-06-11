@@ -19,6 +19,8 @@
 package com.tivo.kmttg.main;
 
 import java.util.Stack;
+import java.util.ArrayList;
+import java.util.List;
 
 public class autoEntry {
    public String type = null;
@@ -47,6 +49,8 @@ public class autoEntry {
    public int suggestionsFilter = 0;
    public int useProgramId_unique = 0;
    public String channelFilter = null;
+   public int channelExcludes = 0;
+   public List<String> channelFilterList = new ArrayList<String>();
    public String tivoFileNameFormat = null;
    
    public String toString() {
