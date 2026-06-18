@@ -1,4 +1,15 @@
 #!/bin/sh
 DIRNAME=`dirname "$0"`
 
-java -Djava.net.preferIPv4Stack=true  -jar "$DIRNAME/kmttg.jar" "$@"
+# Read optional JVM parameters, one per line, from kmttg.vmoptions
+VMOPTIONS=""
+if [ -f "$DIRNAME/kmttg.vmoptions" ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+        case "$line" in
+            ''|\#*) continue ;;
+        esac
+        VMOPTIONS="$VMOPTIONS $line"
+    done < "$DIRNAME/kmttg.vmoptions"
+fi
+
+java -Djava.net.preferIPv4Stack=true $VMOPTIONS -jar "$DIRNAME/kmttg.jar" "$@"
