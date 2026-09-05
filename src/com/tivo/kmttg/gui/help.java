@@ -21,6 +21,7 @@ package com.tivo.kmttg.gui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
@@ -173,24 +174,71 @@ public class help {
       return link;
    }
    
-   public static String getVersion() {
+   private static final String VERSION_URL =
+      "https://raw.githubusercontent.com/lart2150/kmttg/master/version";
+
+   // Contents of the published version file: line 1 is the version string,
+   // minJava is 0 when the file doesn't say.
+   public static class VersionInfo {
+      public final String version;
+      public final int minJava;
+
+      VersionInfo(String version, int minJava) {
+         this.version = version;
+         this.minJava = minJava;
+      }
+   }
+
+   // Line 1 is a permanent contract - every kmttg ever released reads it with a
+   // single readLine() and stops. Later lines are optional key=value metadata,
+   // and unknown keys are ignored so more can be added without breaking old
+   // clients.
+   public static VersionInfo getVersionInfo() {
       debug.print("");
       HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
       HttpClient httpClient = httpClientBuilder.build();
-      String version = null;
-      String version_url = "https://raw.githubusercontent.com/lart2150/kmttg/master/version";
       try {
-    	 HttpGet httpget = new HttpGet(version_url);
-         version = httpClient.execute(httpget, response -> {
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
-               return in.readLine();
+         HttpGet httpget = new HttpGet(VERSION_URL);
+         return httpClient.execute(httpget, response -> {
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(
+                    response.getEntity().getContent(), StandardCharsets.UTF_8))) {
+               String first = in.readLine();
+               if (first == null)
+                  return null;
+               // trim() because readLine() leaves a \r on if the file is CRLF,
+               // which would break the compare and the download URL
+               first = first.trim();
+               if (first.isEmpty())
+                  return null;
+               int minJava = 0;
+               String line;
+               while ((line = in.readLine()) != null) {
+                  line = line.trim();
+                  if (line.isEmpty() || line.startsWith("#"))
+                     continue;
+                  int eq = line.indexOf('=');
+                  if (eq < 1)
+                     continue;
+                  if (line.substring(0, eq).trim().equals("minJava")) {
+                     try {
+                        minJava = Integer.parseInt(line.substring(eq + 1).trim());
+                     } catch (NumberFormatException e) {
+                        // An unreadable hint is no hint - don't block the update
+                     }
+                  }
+               }
+               return new VersionInfo(first, minJava);
             }
          });
       } catch (Exception ex) {
-    	  log.error(ex.getMessage());
-         version = null;
+         log.error(ex.getMessage());
+         return null;
       }
-      return version;
+   }
+
+   public static String getVersion() {
+      VersionInfo info = getVersionInfo();
+      return info == null ? null : info.version;
    }
    
    public static boolean showInBrowser(String url) {
