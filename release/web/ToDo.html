@@ -1,60 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-   <link rel="stylesheet" href="css/pure-min.css">
-   <link rel="stylesheet" href="css/main.css">
-   <link rel="stylesheet" href="dialog/dialog_box.css">
-   <link rel="stylesheet" href="DataTables-2.1.6/datatables.min.css">
-<style>
-table, th, td {
-    border: 1px solid grey;
-}
-td.details-control {
-   background: url('images/details_open.png') no-repeat center center;
-   cursor: pointer;
-}
-tr.shown td.details-control {
-   background: url('images/details_close.png') no-repeat center center;
-}
- #content { background:#eee; border:1px solid #666; left:0; position:fixed; width:100%; margin-top:0; z-index:10;}
- #TABLE_DIV { margin:0 auto; overflow:auto; padding:65px 0; }
-</style>
- <title>ToDo</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ToDo</title>
+<link rel="stylesheet" href="css/pure-min.css">
+<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-   <div class="pure-menu pure-menu-horizontal pure-menu-scrollable" id="tuckedMenu">
-      <ul class="pure-menu-list">
-          <li class="pure-menu-item"><a href="Stream.html" class="pure-menu-link">Streaming</a></li>
-          <li class="pure-menu-item"><a href="Browser.html" class="pure-menu-link">Shares</a></li>
-          <li class="pure-menu-item"><a href="Remote.html" class="pure-menu-link">Remote</a></li>
-          <li class="pure-menu-item"><a href="ToDo.html" class="pure-menu-link">ToDo</a></li>
-          <li class="pure-menu-item"><a href="SeasonPasses.html" class="pure-menu-link">Seaon Passes</a></li>
-          <li class="pure-menu-item"><a href="Info.html" class="pure-menu-link">Info</a></li>
-          <li class="pure-menu-item"><a href="Jobs.html" class="pure-menu-link">Job Monitor</a></li>
-      </ul>
-  </div>
-  <div class="p-1">
-   <div id="content">
-      <label>TiVo:&nbsp;&nbsp;</label><select id="TIVO" class="TIVO"></select>
-      <button type="button" onclick="Refresh()">Refresh</button>
-      <button type="button" onclick="Cancel()">Cancel</button>
-      <div id="MESSAGE"></div>
-   </div>
-   <div id="TABLE_DIV">
-   <table id="TABLE" class="display">
-   <thead>
-   <tr><th></th><th>DATE</th><th>SHOW</th><th>CHANNEL</th><th>DUR</th></tr>
-   </thead>
-   <tbody>
-   </tbody>
-   </table>
-   </div>
-  </div>
- <script type="text/javascript" src="js/jquery-3.7.1.min.js"></script>
- <script type="text/javascript" src="DataTables-2.1.6/datatables.min.js"></script>
- <script type="text/javascript" src="js/String.js"></script>
- <script type="text/javascript" src="js/rpc/util.js"></script>
- <script type="text/javascript" src="js/rpc/ToDo.js"></script>
- <script type="text/javascript" src="dialog/dialog_box.js"></script>
+<div class="toolbar">
+ <label for="TIVO">TiVo:</label>
+ <select id="TIVO"></select>
+ <button type="button" id="REFRESH" class="pure-button pure-button-primary">Refresh</button>
+ <button type="button" id="CANCEL" class="pure-button">Cancel selected</button>
+ <span id="MESSAGE" class="status"></span>
+</div>
+<div class="table-wrap">
+ <table id="TABLE"></table>
+</div>
+<script src="js/util.js"></script>
+<script src="js/dialog.js"></script>
+<script src="js/table.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/pages/ToDo.js"></script>
 </body>
 </html>

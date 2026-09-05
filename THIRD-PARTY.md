@@ -32,6 +32,15 @@ bundles the following libraries:
 | Logback Classic | 1.1.7 | EPL 1.0 / LGPL 2.1 | https://logback.qos.ch/ |
 | Logback Core | 1.1.7 | EPL 1.0 / LGPL 2.1 | https://logback.qos.ch/ |
 
+## Bundled in `release/web/`
+
+Served by the built-in web server and committed to the repository.
+
+| Library | Version | License | Project |
+| --- | --- | --- | --- |
+| Pure CSS | 3.0.0 | BSD 3-Clause License | https://purecss.io/ |
+| normalize.css | 8.0.1 (bundled in `pure-min.css`) | MIT License | https://necolas.github.io/normalize.css/ |
+
 ## Build tooling
 
 | Tool | License | Project |

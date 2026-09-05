@@ -1,69 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
- <link rel="stylesheet" type="text/css" href="dialog/dialog_box.css">
- <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/media/css/jquery.dataTables.css">
- <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/extensions/TableTools/css/dataTables.tableTools.css">
- <style>
- table, th, td {
-     border: 1px solid grey;
- }
- td.details-control {
-    background: url('images/details_open.png') no-repeat center center;
-    cursor: pointer;
- }
- tr.shown td.details-control {
-    background: url('images/details_close.png') no-repeat center center;
- }
- #content { background:#eee; border:1px solid #666; left:0; position:fixed; width:100%; margin-top:0; z-index:10;}
- #FILETABLE_DIV { margin:0 auto; overflow:auto; padding:100px 0; }
- #NPLTABLE_DIV { margin:0 auto; overflow:auto; padding:100px 0; }
- </style>
- <title>Video Streaming</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Video Streaming</title>
+<link rel="stylesheet" href="css/pure-min.css">
+<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
- <div id="content">
- <label>TiVo:&nbsp;&nbsp;</label><select id="TIVO" class="TIVO"></select>
- <button type="button" onclick="MyShows()">My Shows...</button>
- <button type="button" onclick="FileBrowser()">Browse Files...</button>
- <button type="button" id="GetCached" onclick="GetCached()">Get Cached...</button>
- &nbsp;&nbsp;&nbsp;&nbsp;
- <label>JOBS:</label>
- <button type="button" id="ShowRunning" onclick="Running()">Show Running</button>
- <button type="button" onclick="KillAll()">Kill All</button><br>
- <label>Bit rate:&nbsp;&nbsp;</label><select id="MAXRATE" class="MAXRATE"></select>&nbsp;&nbsp;
- <!--<form id="TYPE">-->
-  <label>Transcode type:&nbsp;</label><input type="radio" name="type" value="hls" checked>HLS (Safari, iOS Safari, Android 4.x Chrome, Windows Edge)
-  <input type="radio" name="type" value="webm">webm (Firefox, Chrome)
- <!--</form>-->
- <div id="BROWSE"></div>
- </div>
+<div class="toolbar">
+ <label for="TIVO">TiVo:</label>
+ <select id="TIVO"></select>
+ <button type="button" id="MYSHOWS" class="pure-button pure-button-primary">My Shows...</button>
+ <button type="button" id="BROWSEFILES" class="pure-button">Browse Files...</button>
+ <button type="button" id="GetCached" class="pure-button">Get Cached...</button>
+ <span class="spacer"></span>
+ <label>Jobs:</label>
+ <button type="button" id="ShowRunning" class="pure-button">Show Running</button>
+ <button type="button" id="KILLALL" class="pure-button">Kill All</button>
+</div>
+<div class="toolbar">
+ <label for="MAXRATE">Bit rate:</label>
+ <select id="MAXRATE"></select>
+ <label>Transcode type:</label>
+ <label class="radio"><input type="radio" name="type" value="hls" checked> HLS (Safari, iOS, Android Chrome, Edge)</label>
+ <label class="radio"><input type="radio" name="type" value="webm"> webm (Firefox, Chrome)</label>
+</div>
+<div id="BROWSE" class="status"></div>
 
- <div id="NPLTABLE_DIV" style="display: none">
- <table id="NPLTABLE" class="display">
- <thead>
-  <tr><th></th><th>SHOW</th><th>DATE</th><th>CHANNEL</th><th>DUR</th><th>SIZE</th></tr>
- </thead>
- <tbody>
- </tbody>
- </table>
- </div>
+<div id="NPLTABLE_DIV" class="table-wrap" hidden>
+ <table id="NPLTABLE"></table>
+</div>
 
- <div id="FILETABLE_DIV" style="display: none">
- <table id="FILETABLE" class="display">
- <thead>
-  <tr><th>NAME</th></tr>
- </thead>
- <tbody>
- </tbody>
- </table>
- </div>
- <script type="text/javascript" src="js/jquery-1.11.1.js"></script>
- <script type="text/javascript" src="DataTables-1.10.3/media/js/jquery.dataTables.js"></script>
- <script type="text/javascript" src="DataTables-1.10.3/extensions/TableTools/js/dataTables.tableTools.js"></script>
- <script type="text/javascript" src="js/String.js"></script>
- <script type="text/javascript" src="js/rpc/util.js"></script>
- <script type="text/javascript" src="js/rpc/Stream.js"></script>
- <script type="text/javascript" src="dialog/dialog_box.js"></script>
+<div id="FILETABLE_DIV" class="table-wrap" hidden>
+ <table id="FILETABLE"></table>
+</div>
+<script src="js/util.js"></script>
+<script src="js/dialog.js"></script>
+<script src="js/table.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/pages/Stream.js"></script>
 </body>
 </html>

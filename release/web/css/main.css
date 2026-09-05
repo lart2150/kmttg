@@ -1,11 +1,405 @@
-.p-1 {
-	padding: 1em;
+/* Shared styles for the kmttg web pages, layered on top of Pure. */
+
+:root {
+   --bg: #ffffff;
+   --bg-alt: #f4f5f7;
+   --bg-sunken: #eceef1;
+   --fg: #1d2126;
+   --fg-muted: #5b6672;
+   --border: #d3d8de;
+   --accent: #1c6fb4;
+   --accent-fg: #ffffff;
+   --selected: #d3e6f7;
+   --error: #b4231c;
+   --warning: #9a6400;
+   --success: #1c7a3e;
+   --radius: 5px;
+   --nav-height: 3rem;
+   --shadow: 0 2px 10px rgba(0, 0, 0, .18);
 }
 
-.p-2 {
-	padding: 2em;
+@media (prefers-color-scheme: dark) {
+   :root {
+      --bg: #171a1d;
+      --bg-alt: #21262b;
+      --bg-sunken: #2b3137;
+      --fg: #e6e9ec;
+      --fg-muted: #9aa5b1;
+      --border: #3a424a;
+      --accent: #4d9fe0;
+      --accent-fg: #10141a;
+      --selected: #2d4a63;
+      --error: #f07268;
+      --warning: #e0a63c;
+      --success: #57c07f;
+      --shadow: 0 2px 12px rgba(0, 0, 0, .5);
+   }
 }
 
-.p3 {
-	padding: 3em;
+* {
+   box-sizing: border-box;
+}
+
+body {
+   margin: 0;
+   background: var(--bg);
+   color: var(--fg);
+   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+   font-size: 15px;
+   line-height: 1.5;
+}
+
+a {
+   color: var(--accent);
+}
+
+h1, h2, h3 {
+   line-height: 1.25;
+}
+
+/* ---- layout ---- */
+
+.page {
+   padding: 1rem;
+   max-width: 1600px;
+}
+
+.toolbar {
+   display: flex;
+   flex-wrap: wrap;
+   gap: .5rem;
+   align-items: center;
+   padding: .75rem 1rem;
+   background: var(--bg-alt);
+   border-bottom: 1px solid var(--border);
+   position: sticky;
+   top: 0;
+   z-index: 5;
+}
+
+.toolbar label {
+   color: var(--fg-muted);
+   white-space: nowrap;
+}
+
+.toolbar .spacer {
+   flex: 1 1 auto;
+}
+
+.status {
+   color: var(--accent);
+   padding: .5rem 1rem;
+}
+
+/* ---- navigation ---- */
+
+.knav {
+   background: var(--bg-sunken);
+   border-bottom: 1px solid var(--border);
+   position: sticky;
+   top: 0;
+   z-index: 20;
+}
+
+.knav-list {
+   display: flex;
+   flex-wrap: wrap;
+   list-style: none;
+   margin: 0;
+   padding: 0;
+}
+
+.knav-list a {
+   display: block;
+   padding: .7rem 1rem;
+   color: var(--fg);
+   text-decoration: none;
+   white-space: nowrap;
+}
+
+.knav-list a:hover {
+   background: var(--bg-alt);
+}
+
+.knav-list a.current {
+   box-shadow: inset 0 -3px 0 var(--accent);
+   font-weight: 600;
+}
+
+.knav-toggle {
+   display: none;
+   flex-direction: column;
+   justify-content: center;
+   gap: 4px;
+   width: 44px;
+   height: 44px;
+   padding: 0 10px;
+   margin: 2px;
+   background: none;
+   border: 1px solid var(--border);
+   border-radius: var(--radius);
+   cursor: pointer;
+}
+
+.knav-toggle span {
+   display: block;
+   height: 2px;
+   background: var(--fg);
+}
+
+@media (max-width: 40rem) {
+   .knav-toggle {
+      display: flex;
+   }
+   .knav-list {
+      display: none;
+      flex-direction: column;
+   }
+   .knav.open .knav-list {
+      display: flex;
+   }
+   .knav-list a {
+      padding: .85rem 1rem;
+      border-top: 1px solid var(--border);
+   }
+}
+
+/* ---- buttons and controls ---- */
+
+.pure-button {
+   border-radius: var(--radius);
+   font-family: inherit;
+   /* Comfortable touch target on phones */
+   min-height: 2.25rem;
+}
+
+.pure-button-primary,
+button[type="submit"].pure-button-primary {
+   background: var(--accent);
+   color: var(--accent-fg);
+}
+
+select, input[type="text"], input[type="search"], input[type="number"] {
+   padding: .35rem .5rem;
+   min-height: 2.25rem;
+   background: var(--bg);
+   color: var(--fg);
+   border: 1px solid var(--border);
+   border-radius: var(--radius);
+   font: inherit;
+}
+
+/* ---- tables ---- */
+
+.ktable-toolbar {
+   display: flex;
+   align-items: center;
+   gap: 1rem;
+   padding: .5rem 1rem;
+   color: var(--fg-muted);
+}
+
+.ktable-filter input {
+   margin-left: .4rem;
+}
+
+.ktable-count {
+   margin-left: auto;
+}
+
+.table-wrap {
+   overflow-x: auto;
+   padding: 0 1rem 2rem;
+}
+
+table.ktable {
+   width: 100%;
+   border-collapse: collapse;
+   background: var(--bg);
+   color: var(--fg);
+}
+
+table.ktable th,
+table.ktable td {
+   border: 1px solid var(--border);
+   padding: .45rem .6rem;
+   text-align: left;
+   vertical-align: top;
+}
+
+table.ktable thead th {
+   background: var(--bg-alt);
+   position: sticky;
+   top: 0;
+   z-index: 1;
+}
+
+table.ktable tbody tr:nth-child(even of :not([hidden])) {
+   background: var(--bg-alt);
+}
+
+table.ktable tbody tr.selected,
+table.ktable tbody tr.selected:nth-child(even of :not([hidden])) {
+   background: var(--selected);
+}
+
+table.ktable th.sortable {
+   cursor: pointer;
+   user-select: none;
+}
+
+table.ktable th.sortable::after {
+   content: " \2195";
+   color: var(--fg-muted);
+}
+
+table.ktable th.sort-asc::after {
+   content: " \2191";
+   color: var(--fg);
+}
+
+table.ktable th.sort-desc::after {
+   content: " \2193";
+   color: var(--fg);
+}
+
+/* Expander column */
+table.ktable th.details-control-header {
+   width: 2rem;
+}
+
+table.ktable td.details-control {
+   width: 2rem;
+   cursor: pointer;
+   text-align: center;
+   user-select: none;
+}
+
+table.ktable td.details-control::before {
+   content: "\25B6";
+   color: var(--accent);
+}
+
+table.ktable tr.shown td.details-control::before {
+   content: "\25BC";
+}
+
+table.ktable tr.details-row td {
+   background: var(--bg-sunken);
+}
+
+table.ktable tr.details-row pre {
+   margin: 0;
+   max-height: 24rem;
+   overflow: auto;
+   font-size: .85em;
+   white-space: pre-wrap;
+   word-break: break-word;
+}
+
+/* ---- dialogs ---- */
+
+dialog.kdialog {
+   padding: 0;
+   border: 1px solid var(--border);
+   border-radius: var(--radius);
+   background: var(--bg);
+   color: var(--fg);
+   box-shadow: var(--shadow);
+   max-width: min(40rem, 92vw);
+   min-width: min(20rem, 92vw);
+}
+
+dialog.kdialog::backdrop {
+   background: rgba(0, 0, 0, .45);
+}
+
+dialog.kdialog header {
+   display: flex;
+   align-items: center;
+   gap: 1rem;
+   padding: .6rem 1rem;
+   border-bottom: 1px solid var(--border);
+}
+
+dialog.kdialog h2 {
+   margin: 0;
+   font-size: 1rem;
+   flex: 1 1 auto;
+}
+
+dialog.kdialog.error header {
+   background: var(--error);
+   color: #fff;
+}
+
+dialog.kdialog.warning header {
+   background: var(--warning);
+   color: #fff;
+}
+
+dialog.kdialog.success header {
+   background: var(--success);
+   color: #fff;
+}
+
+dialog.kdialog.prompt header {
+   background: var(--accent);
+   color: var(--accent-fg);
+}
+
+.kdialog-close {
+   background: none;
+   border: 0;
+   color: inherit;
+   font-size: 1.4rem;
+   line-height: 1;
+   cursor: pointer;
+   padding: 0 .25rem;
+}
+
+.kdialog-content {
+   padding: 1rem;
+   margin: 0;
+   max-height: 60vh;
+   overflow: auto;
+   white-space: pre-wrap;
+   word-break: break-word;
+}
+
+.kdialog-select {
+   display: block;
+   width: 100%;
+   margin-top: .4rem;
+}
+
+.kdialog-buttons {
+   display: flex;
+   justify-content: flex-end;
+   gap: .5rem;
+   padding: .75rem 1rem;
+}
+
+.kdialog-buttons:empty {
+   display: none;
+}
+
+/* ---- misc ---- */
+
+pre.info {
+   background: var(--bg-alt);
+   border: 1px solid var(--border);
+   border-radius: var(--radius);
+   padding: .75rem 1rem;
+   overflow-x: auto;
+}
+
+.shares a {
+   display: inline-block;
+   margin: 0 1rem .5rem 0;
+   padding: .5rem .9rem;
+   background: var(--bg-alt);
+   border: 1px solid var(--border);
+   border-radius: var(--radius);
+   text-decoration: none;
 }

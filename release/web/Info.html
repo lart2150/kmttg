@@ -1,36 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
- <title>System Information</title>
- <link rel="stylesheet" href="css/pure-min.css">
- <link rel="stylesheet" href="css/main.css">
- <link rel="stylesheet" href="dialog/dialog_box.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System Information</title>
+<link rel="stylesheet" href="css/pure-min.css">
+<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <div class="pure-menu pure-menu-horizontal pure-menu-scrollable" id="tuckedMenu">
-        <ul class="pure-menu-list">
-            <li class="pure-menu-item"><a href="Stream.html" class="pure-menu-link">Streaming</a></li>
-            <li class="pure-menu-item"><a href="Browser.html" class="pure-menu-link">Shares</a></li>
-            <li class="pure-menu-item"><a href="Remote.html" class="pure-menu-link">Remote</a></li>
-            <li class="pure-menu-item"><a href="ToDo.html" class="pure-menu-link">ToDo</a></li>
-            <li class="pure-menu-item"><a href="SeasonPasses.html" class="pure-menu-link">Seaon Passes</a></li>
-            <li class="pure-menu-item"><a href="Info.html" class="pure-menu-link">Info</a></li>
-            <li class="pure-menu-item"><a href="Jobs.html" class="pure-menu-link">Job Monitor</a></li>
-        </ul>
-    </div>
-    <div class="pure-g"  id="content">
-        <div class="pure-u-lg-1-5 pure-u-0"></div>
-        <div class="pure-u-lg-3-5 pure-u-1 p-1">
-            <label>TiVo:&nbsp;&nbsp;</label><select id="TIVO" class="TIVO"></select>
-            <button type="button" onclick="Info()">Refresh</button>
-            <button type="button" onclick="NetworkConnect()">Network Connect</button>
-            <button type="button" onclick="Reboot()">Reboot</button>
-            <div id="INFO"></div>
-        </div>
-    </div>
-    <script type="text/javascript" src="js/String.js"></script>
-    <script type="text/javascript" src="js/rpc/util.js"></script>
-    <script type="text/javascript" src="js/rpc/Info.js"></script>
-    <script type="text/javascript" src="dialog/dialog_box.js"></script>
+<div class="toolbar">
+ <label for="TIVO">TiVo:</label>
+ <select id="TIVO"></select>
+ <button type="button" id="REFRESH" class="pure-button pure-button-primary">Refresh</button>
+ <button type="button" id="CONNECT" class="pure-button">Network Connect</button>
+ <button type="button" id="REBOOT" class="pure-button">Reboot</button>
+</div>
+<div class="page">
+ <div id="INFO"></div>
+</div>
+<script src="js/util.js"></script>
+<script src="js/dialog.js"></script>
+<script src="js/table.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/pages/Info.js"></script>
 </body>
 </html>

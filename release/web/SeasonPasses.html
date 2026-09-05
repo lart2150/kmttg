@@ -1,63 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
- <link rel="stylesheet" type="text/css" href="dialog/dialog_box.css">
- <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/media/css/jquery.dataTables.css">
- <link rel="stylesheet" type="text/css" href="DataTables-1.10.3/extensions/TableTools/css/dataTables.tableTools.css">
-<style>
-table, th, td {
-    border: 1px solid grey;
-}
-td.details-control {
-   background: url('images/details_open.png') no-repeat center center;
-   cursor: pointer;
-}
-tr.shown td.details-control {
-   background: url('images/details_close.png') no-repeat center center;
-}
- #content { background:#eee; border:1px solid #666; left:0; position:fixed; width:100%; margin-top:0; z-index:10;}
- #TABLE_DIV { margin:0 auto; overflow:auto; padding:65px 0; }
-</style>
- <title>Season Passes</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Season Passes</title>
+<link rel="stylesheet" href="css/pure-min.css">
+<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<div id="content">
- <label>TiVo:&nbsp;&nbsp;</label><select id="TIVO" class="TIVO"></select>
- <button type="button" onclick="Refresh()">Refresh</button>
- <button type="button" onclick="Save()">Save</button>
- <button type="button" onclick="Load()">Load...</button>
- <button type="button" onclick="Delete()">Delete</button>
- <button type="button" onclick="CopyCB()">Copy...</button>
- <button type="button" onclick="Reorder()">Re-order</button>
- <!--<button type="button" onclick="Upcoming()">Upcoming</button>-->
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
- <button type="button" onclick="Up()">Move Up</button>
- <button type="button" onclick="Down()">Move Down</button>
- <div id="COPY" class="COPY" style="display: none">
-   <button type="button" onclick="CancelCopy()">CANCEL</button>
-   <button type="button" onclick="Copy()">Copy to TiVo:</button>
-   <select id="DEST_TIVO" class="DEST_TIVO"></select>
- </div>
- <div id="LOAD" class="LOAD" style="display: none">
-   <button type="button" onclick="CancelSelected()">CANCEL</button>
-   <button type="button" onclick="LoadSelected()">Load file:</button>
-   <select id="SELECT" class="SELECT"></select>
- </div>
+<div class="toolbar">
+ <label for="TIVO">TiVo:</label>
+ <select id="TIVO"></select>
+ <button type="button" id="REFRESH" class="pure-button pure-button-primary">Refresh</button>
+ <button type="button" id="SAVE" class="pure-button">Save</button>
+ <button type="button" id="LOAD" class="pure-button">Load...</button>
+ <button type="button" id="DELETE" class="pure-button">Delete</button>
+ <button type="button" id="COPY" class="pure-button">Copy...</button>
+ <button type="button" id="REORDER" class="pure-button">Re-order</button>
+ <span class="spacer"></span>
+ <button type="button" id="UP" class="pure-button">Move Up</button>
+ <button type="button" id="DOWN" class="pure-button">Move Down</button>
 </div>
- <div id="TABLE_DIV">
- <table id="TABLE" class="display">
- <thead>
-  <tr><th></th><th>PRIORITY</th><th>SHOW</th><th>CHANNEL</th><th>RECORD</th><th>KEEP</th><th>NUM</th><th>START</th><th>END</th></tr>
- </thead>
- <tbody>
- </tbody>
- </table>
- </div>
- <script type="text/javascript" src="js/jquery-1.11.1.js"></script>
- <script type="text/javascript" src="DataTables-1.10.3/media/js/jquery.dataTables.js"></script>
- <script type="text/javascript" src="DataTables-1.10.3/extensions/TableTools/js/dataTables.tableTools.js"></script>
- <script type="text/javascript" src="js/rpc/util.js"></script>
- <script type="text/javascript" src="js/rpc/SeasonPasses.js"></script>
- <script type="text/javascript" src="dialog/dialog_box.js"></script>
+<div class="table-wrap">
+ <table id="TABLE"></table>
+</div>
+<script src="js/util.js"></script>
+<script src="js/dialog.js"></script>
+<script src="js/table.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/pages/SeasonPasses.js"></script>
 </body>
 </html>

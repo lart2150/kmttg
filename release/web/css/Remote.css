@@ -1,17 +1,44 @@
-#RIGHT
+/* TiVo remote skin. The button coordinates below are pixel-exact against
+   remote_background.gif, so the skin keeps its 295x811 geometry and is scaled
+   to fit instead of being re-laid-out. */
+
+#REMOTE_LAYOUT
 {
-   position: absolute;
-   left: 250px;
+   display: flex;
+   flex-wrap: wrap;
+   gap: 2rem;
+   align-items: flex-start;
+   padding: 1rem;
+}
+
+#REMOTE_WRAP
+{
+   --remote-scale: .7;
+   /* transform does not affect layout, so reserve the scaled size here */
+   width: calc(295px * var(--remote-scale));
+   height: calc(811px * var(--remote-scale));
+   flex: 0 0 auto;
 }
 
 #REMOTE
 {
-	position: fixed;
-   top: -15%;
-   left: -1%;
-	background: url(/rc_images/remote_background.gif) no-repeat;
-	width: 295px;
-	height: 811px;
+   position: relative;
+   transform: scale(var(--remote-scale));
+   transform-origin: top left;
+   background: url(/rc_images/remote_background.gif) no-repeat;
+   width: 295px;
+   height: 811px;
+}
+
+#RIGHT
+{
+   flex: 1 1 18rem;
+   min-width: 0;
+}
+
+@media (max-width: 30rem)
+{
+   #REMOTE_WRAP { --remote-scale: .6; }
 }
 
 #REMOTE ul
