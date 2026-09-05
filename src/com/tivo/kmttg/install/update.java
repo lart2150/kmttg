@@ -58,58 +58,87 @@ public class update {
    
    public static void update_kmttg_background() {
       String kmttg_jar = config.programDir + "/kmttg.jar";
-      if (file.isFile(kmttg_jar)) {
-         String[] s = config.kmttg.split("\\s+");
-         String installed_version = s[1];
-         String current_version = help.getVersion();
-         if (installed_version != null && current_version != null) {
-            if (installed_version.equals(current_version)) {
-               log.print("You are running up to date version: " + installed_version);
-            } else {
-               log.print("Installed version: " + installed_version);
-               log.print("Available version: " + current_version);
-               
-               // Ask user to install new version
-               boolean confirmation = JOptionPane.showConfirmDialog(
-                  config.gui==null?null:config.gui.getFrame(),
-                  "Install new version: " + current_version + " ?", "Confirm",
-                  JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION;
-               if (confirmation) {
-                  final String fname = "kmttg_" + current_version + ".zip";
-                  final String url = "https://github.com/lart2150/kmttg/releases/download/"+current_version+"/kmttg_"+current_version+".zip";
-                  auto.serviceStopIfNeeded();
-                  Runnable task = new Runnable() {
-                     public void run() {
-                        String filename = config.tmpDir + File.separator + fname;
-                        String zipFile = downloadUrl(filename, url);
-                        if (zipFile != null) {
-                           // Determine if zipFile contains a redirect
-                           String redirect = util.getRedirect(zipFile);
-                           if (redirect != null) {
-                              zipFile = downloadUrl(filename, redirect);
-                           }
-                        }
-                        if (zipFile != null) {
-                           if ( unzip(config.programDir, zipFile) ) {
-                              log.print("Successfully updated kmttg installation.");
-                              file.delete(zipFile);
-                              // NOTE: With Java 8 runlater doesn't work, so just restart without asking
-                              restartApplication();
-                           } else {
-                              log.error("Trouble unzipping file: " + zipFile);
-                              file.delete(zipFile);
-                           }
-                        }
-                     }
-                  };
-                  new Thread(task).start();
+      if ( ! file.isFile(kmttg_jar) ) {
+         log.error("Cannot find kmttg.jar to determine installed version");
+         return;
+      }
+      String[] s = config.kmttg.split("\\s+");
+      String installed_version = s[1];
+      help.VersionInfo info = help.getVersionInfo();
+      if (installed_version == null || info == null) {
+         log.error("Can't determine installed and/or available versions");
+         return;
+      }
+      final String current_version = info.version;
+      if (installed_version.equals(current_version)) {
+         log.print("You are running up to date version: " + installed_version);
+         return;
+      }
+      log.print("Installed version: " + installed_version);
+      log.print("Available version: " + current_version);
+
+      // Refuse rather than unzip a jar this JVM can't load - restartApplication
+      // below is detached, so a failed relaunch is completely silent
+      int running = javaMajorVersion();
+      if (info.minJava > 0 && running > 0 && running < info.minJava) {
+         String msg =
+            "kmttg " + current_version + " requires Java " + info.minJava + " or newer.\n\n" +
+            "This copy is running on Java " + running +
+               " (" + System.getProperty("java.version") + ")\n\n" +
+            "Install a current Java - Java 21 or Java 25 is recommended.\n" +
+            "Free builds: https://adoptium.net\n" +
+            "Then restart kmttg and try Help > Update kmttg again.\n\n" +
+            "Nothing was downloaded; your current installation is untouched.";
+         log.error(msg);
+         SwingUtil.error(config.gui == null ? null : config.gui.getFrame(),
+                         "Java " + info.minJava + " or newer required", msg);
+         return;
+      }
+
+      // Ask user to install new version
+      boolean confirmation = JOptionPane.showConfirmDialog(
+         config.gui==null?null:config.gui.getFrame(),
+         "Install new version: " + current_version + " ?", "Confirm",
+         JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION;
+      if ( ! confirmation )
+         return;
+
+      final String fname = "kmttg_" + current_version + ".zip";
+      final String url = "https://github.com/lart2150/kmttg/releases/download/"+current_version+"/kmttg_"+current_version+".zip";
+      auto.serviceStopIfNeeded();
+      Runnable task = new Runnable() {
+         public void run() {
+            String filename = config.tmpDir + File.separator + fname;
+            String zipFile = downloadUrl(filename, url);
+            if (zipFile != null) {
+               // Determine if zipFile contains a redirect
+               String redirect = util.getRedirect(zipFile);
+               if (redirect != null) {
+                  zipFile = downloadUrl(filename, redirect);
                }
             }
-         } else {
-            log.error("Can't determine installed and/or available versions");
+            if (zipFile != null) {
+               if ( unzip(config.programDir, zipFile) ) {
+                  log.print("Successfully updated kmttg installation.");
+                  file.delete(zipFile);
+                  // NOTE: With Java 8 runlater doesn't work, so just restart without asking
+                  restartApplication();
+               } else {
+                  log.error("Trouble unzipping file: " + zipFile);
+                  file.delete(zipFile);
+               }
+            }
          }
-      } else {
-         log.error("Cannot find kmttg.jar to determine installed version");
+      };
+      new Thread(task).start();
+   }
+
+   // Runtime.version() is fine here, unlike in the Java 8 launcher shim
+   private static int javaMajorVersion() {
+      try {
+         return Runtime.version().feature();
+      } catch (Throwable t) {
+         return -1;
       }
    }
    

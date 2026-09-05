@@ -6,7 +6,7 @@ plugins {
 }
 
 group   = 'com.tivo.kmttg'
-version = 'v2.9.5-l'
+version = 'v2.10.0-l'
 
 // ---------------------------------------------------------------------------
 // Third party library versions - bump these to update a dependency. The jars
@@ -84,12 +84,24 @@ tasks.register('captureRpcFixtures', JavaExec) {
 }
 
 application {
-    mainClass = 'com.tivo.kmttg.main.kmttg'
+    // Java 8 shim that checks the JRE then hands off to com.tivo.kmttg.main.kmttg
+    mainClass = 'com.tivo.kmttg.main.Launcher'
 }
 
 // kmttg uses a flat source layout (src/com/...) and bundles the images/
 // directory at the jar root, so override the default source set locations.
 sourceSets {
+    // Java 8 launcher shim, kept out of src/ because the main source set below
+    // globs all of src/ and would compile a second copy of it at release 11.
+    launcher {
+        java {
+            srcDirs = ['src-launcher']
+        }
+        resources {
+            // Otherwise defaults to src/launcher/resources, inside the main root
+            srcDirs = []
+        }
+    }
     main {
         java {
             srcDirs = ['src']
@@ -109,10 +121,22 @@ sourceSets {
     }
 }
 
+dependencies {
+    // Test-only. main and launcher are at different bytecode levels and must
+    // never compile against each other.
+    testImplementation sourceSets.launcher.output
+}
+
 tasks.withType(JavaCompile).configureEach {
-    options.release = 11
+    // The launcher shim stays on Java 8, everything else targets Java 11
+    boolean isLauncher = (name == 'compileLauncherJava')
+    options.release = isLauncher ? 8 : 11
     options.encoding = 'UTF-8'
     options.compilerArgs << '-Xlint:deprecation'
+    if (isLauncher) {
+        // Silence "source value 8 is obsolete" - targeting 8 is the point
+        options.compilerArgs << '-Xlint:-options'
+    }
 }
 
 // Build the runnable fat jar as release/kmttg.jar (the launcher scripts in
@@ -120,9 +144,22 @@ tasks.withType(JavaCompile).configureEach {
 shadowJar {
     archiveFileName = 'kmttg.jar'
     destinationDirectory = file('release')
+    // Adds the shim's classes, and the task dependency on launcherClasses
+    from sourceSets.launcher.output
     manifest {
-        attributes 'Main-Class': application.mainClass.get()
+        attributes(
+            'Main-Class'            : application.mainClass.get(),
+            'Implementation-Title'  : 'kmttg',
+            // Read back by Launcher.productName() for the error dialog
+            'Implementation-Version': project.version.toString()
+        )
     }
+}
+
+// `gradle run` uses sourceSets.main.runtimeClasspath, which doesn't include the
+// launcher source set, so add it to go through the shipped entry point
+tasks.named('run', JavaExec) {
+    classpath += sourceSets.launcher.output
 }
 
 // `gradle build` produces the fat jar
@@ -137,8 +174,19 @@ tasks.register('releaseZip', Zip) {
     archiveFileName = "kmttg_${version}.zip"
     destinationDirectory = file('dist')
     from('release') {
-        exclude '*.ini', 'auto.*', '*.sp', '*.csv'
+        // release/ is a working directory too - keep local scratch out of the zip
+        exclude '*.ini', 'auto.*', '*.sp', '*.csv',
+                '*.vmoptions', '*.log', 'kmttg-nofx.jar'
     }
     // Ship the third-party attribution notices with the distribution
     from('THIRD-PARTY.md')
 }
+
+// The shim must not ALSO be compiled by sourceSets.main, which globs all of
+// src/ at release 11. Two copies of Launcher.class would race for the jar.
+if (file('src/com/tivo/kmttg/main/Launcher.java').exists()) {
+    throw new GradleException(
+        "src/com/tivo/kmttg/main/Launcher.java must live in src-launcher/, not src/.\n" +
+        "sourceSets.main globs src/ and compiles it at release 11, which defeats the shim.")
+}
+
