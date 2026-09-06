@@ -1604,19 +1604,39 @@ public class HTTPServer {
             try {
                 while (!serv.isClosed()) {
                     final Socket sock = serv.accept();
-                    executor.execute(new Runnable() {
-                        public void run() {
-                            try {
-                                sock.setSoTimeout(10000);
-                                handleConnection(sock);
-                            } catch (IOException ignore) {
-                            } finally {
-                                try {
-                                    sock.close();
-                                } catch (IOException ignore) {}
-                            }
-                        }
-                    });
+                    // Tracked from here rather than inside the task, so a
+                    // connection accepted just before stop() cannot slip
+                    // through the gap before its handler starts running.
+                    connections.add(sock);
+                    // Read once: a stop() concurrent with this accept clears
+                    // the field, and rejects the task if it gets there first.
+                    Executor exec = executor;
+                    boolean handed = false;
+                    if (exec != null) {
+                        try {
+                            exec.execute(new Runnable() {
+                                public void run() {
+                                    try {
+                                        sock.setSoTimeout(10000);
+                                        handleConnection(sock);
+                                    } catch (IOException ignore) {
+                                    } finally {
+                                        connections.remove(sock);
+                                        try {
+                                            sock.close();
+                                        } catch (IOException ignore) {}
+                                    }
+                                }
+                            });
+                            handed = true;
+                        } catch (RejectedExecutionException ignore) {} // stopped
+                    }
+                    if (!handed) { // nobody will close it for us
+                        connections.remove(sock);
+                        try {
+                            sock.close();
+                        } catch (IOException ignore) {}
+                    }
                 }
             } catch (IOException ignore) {}
         }
@@ -1624,9 +1644,14 @@ public class HTTPServer {
 
     protected volatile int port;
     protected volatile Executor executor;
+    /** The executor start() created, and so the only one stop() may shut down. */
+    protected volatile ExecutorService defaultExecutor;
     protected volatile ServerSocket serv;
     protected final Map<String, VirtualHost> hosts =
         new ConcurrentHashMap<String, VirtualHost>();
+    /** Connections being handled right now, so stop() can close them. */
+    protected final Set<Socket> connections =
+        Collections.newSetFromMap(new ConcurrentHashMap<Socket, Boolean>());
 
     /**
      * Constructs an HTTPServer which can accept connections on the given port.
@@ -1712,8 +1737,10 @@ public class HTTPServer {
         if (serv != null)
             return;
         serv = new ServerSocket(port);
-        if (executor == null) // assign default executor if needed
-            executor = Executors.newCachedThreadPool();
+        if (executor == null) { // assign default executor if needed
+            defaultExecutor = Executors.newCachedThreadPool();
+            executor = defaultExecutor;
+        }
         // register all host aliases (which may have been modified)
         for (VirtualHost host : getVirtualHosts())
             for (String alias : host.getAliases())
@@ -1724,6 +1751,20 @@ public class HTTPServer {
 
     /**
      * Stops this server. If it is already stopped, does nothing.
+     *
+     * Waits for the connections still being handled, because a handler part
+     * way through {@link #serveFileContent} holds the file it is streaming
+     * open - and callers restart the server, or delete what it was serving,
+     * as soon as this returns. Closing the sockets first is what keeps that
+     * wait short: it brings the handlers out of the read they are parked in
+     * rather than leaving them until the socket timeout.
+     *
+     * The wait only covers the executor {@link #start} created. After a
+     * {@link #setExecutor} the pool is the caller's to shut down and to wait
+     * on, so this closes the sockets and returns.
+     *
+     * {@link #connections} is deliberately not cleared: anything left in it
+     * is a handler that outlived the wait.
      */
     public synchronized void stop() {
         try {
@@ -1731,6 +1772,27 @@ public class HTTPServer {
                 serv.close();
         } catch (IOException ignore) {}
         serv = null;
+        for (Socket sock : connections) {
+            try {
+                sock.close();
+            } catch (IOException ignore) {}
+        }
+        // Only the executor start() made is ours to shut down; one handed to
+        // setExecutor belongs to the caller and may outlive this server.
+        ExecutorService owned = defaultExecutor;
+        if (owned != null) {
+            defaultExecutor = null;
+            if (executor == owned) // leave a caller's executor in place
+                executor = null;
+            owned.shutdown();
+            try {
+                if (!owned.awaitTermination(2, TimeUnit.SECONDS))
+                    owned.shutdownNow();
+            } catch (InterruptedException e) {
+                owned.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     /**

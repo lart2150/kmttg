@@ -149,6 +149,41 @@ public class WebServerAccessTest {
       assertEquals(200, status("/rc_images/tivo.png"));
    }
 
+   // stop() used to return while a handler was still streaming, leaving the
+   // file it was sending open. configMain stops the server and immediately
+   // builds a new one, and on Windows an open handle blocks the delete of
+   // anything that was being served - so stopped has to mean the files are
+   // released, not just that the port is closed.
+   @Test
+   public void stoppingReleasesTheFilesBeingServed() throws IOException {
+      // Big enough that the send cannot complete inside the socket buffer, so
+      // the handler is still inside the transfer when the client walks away
+      byte[] big = new byte[4 * 1024 * 1024];
+      Path served = installDir.resolve("web/big.bin");
+      Files.write(served, big);
+
+      // Read the status line only, then drop the connection mid-body
+      HttpURLConnection c = open("/web/big.bin");
+      try {
+         assertEquals(200, c.getResponseCode());
+      } finally {
+         c.disconnect();
+      }
+
+      kmttgServer server = config.httpserver;
+      server.stop();
+      config.httpserver = null;
+
+      // The portable half: a handler is taken out of connections only in its
+      // own finally, so an empty set is stop() having waited for it. Without
+      // the wait the straggler is still in there.
+      assertTrue(server.connections.isEmpty(),
+         "stop() returned with " + server.connections.size() + " connection(s) still being handled");
+      // ...and the half that only bites on Windows, which is where an open
+      // handle actually blocks the delete
+      Files.delete(served);
+   }
+
    @Test
    public void videoShares_areStillServed() throws IOException {
       assertEquals(200, status("/mpegDir/movie.mp4"));
