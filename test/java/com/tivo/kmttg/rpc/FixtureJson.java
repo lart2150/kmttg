@@ -59,7 +59,16 @@ public final class FixtureJson {
       "subscriptionForCollectionIdAndChannel"
    ));
 
-   /** Strips every {@link #UNREAD} key from the array, in place. */
+   /**
+    * Strips every {@link #UNREAD} key from the array, in place - except under a
+    * "request" key, which is left exactly as captured.
+    *
+    * A response is read for a handful of fields and pruning the rest is free. A
+    * request is the opposite: the whole object is the thing the TiVo acted on,
+    * and a shaping test compares against it key for key. The one-pass writes
+    * pass a whole guide offer or subscription row straight back through, so a
+    * pruned request would quietly stop being what went over the wire.
+    */
    public static JSONArray prune(JSONArray a) {
       pruneNode(a);
       return a;
@@ -69,6 +78,8 @@ public final class FixtureJson {
       if (node instanceof JSONObject) {
          JSONObject o = (JSONObject) node;
          for (String key : keysOf(o)) {
+            if (key.equals("request"))
+               continue; // captured requests stay verbatim
             if (UNREAD.contains(key))
                o.remove(key);
             else

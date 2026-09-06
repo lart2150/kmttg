@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
-import com.tivo.kmttg.main.config;
 
 /**
  * An offline {@link Remote} that is never connected to a TiVo. It replays a
@@ -48,7 +47,7 @@ public class ReplayRemote extends Remote {
       super(); // no-connect seam
       // Seed bodyId for this unconnected Remote (IP="", port=0) so bodyId_get()
       // returns immediately instead of issuing an (unrecorded) bodyConfigSearch.
-      config.bodyId_set("", 0, "tsn:0000000000000000");
+      Fixtures.seedBodyId();
       for (int i = 0; i < log.length(); i++) {
          JSONObject rec = log.getJSONObject(i);
          if (!rec.has("response"))

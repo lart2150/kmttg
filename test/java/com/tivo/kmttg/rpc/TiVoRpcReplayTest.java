@@ -549,6 +549,21 @@ public class TiVoRpcReplayTest {
             folders++;
       assertTrue(folders > 0, "fixture should contain folders to recurse into");
 
+      // The trace carries the top level plus the first few folder reads, so the
+      // walk really does descend and chew through their contents rather than
+      // getting a null back on the first recursive call.
+      int replayedChildren = 0, nestedFolders = 0;
+      for (int i = 1; i < log.length(); i++) {
+         JSONArray items = log.getJSONObject(i).getJSONObject("response").getJSONArray("myShowsItem");
+         replayedChildren += items.length();
+         for (int j = 0; j < items.length(); j++)
+            if (items.getJSONObject(j).has("isFolder") && items.getJSONObject(j).getBoolean("isFolder"))
+               nestedFolders++;
+      }
+      assertTrue(replayedChildren > 100,
+         "expected the folder reads to carry real contents, got " + replayedChildren);
+      assertEquals(0, nestedFolders, "My Shows folders do not nest, so the walk is one level deep");
+
       ReplayRemote r = new ReplayRemote(log);
       JSONArray entries = r.streamingEntries(null);
 
@@ -557,7 +572,8 @@ public class TiVoRpcReplayTest {
       assertEquals(0, r.issued("collectionSearch"),
          "nothing in the listing is on demand, so nothing should be looked up");
       // Nothing in the recorded listing advertises onDemandAvailability, so the
-      // walk finds no streaming entries - it must come back empty, not blow up.
+      // walk finds no streaming entries - it must come back empty, not blow up
+      // on the hundreds of ordinary recordings it walks past.
       assertEquals(0, entries.length(), "expected no streaming entries from recorded shows");
    }
 

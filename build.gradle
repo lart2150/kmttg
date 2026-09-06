@@ -85,7 +85,9 @@ tasks.register('captureRpcFixtures', JavaExec) {
 
 // One-off tool to (re)generate the RPC command trace fixtures from an rpc.jsonl
 // capture (written by running kmttg with -rpcLog).
-// Usage: gradlew rpcLogFixtures -PrpcLog="C:\path\to\rpc.jsonl"
+// Usage: gradlew rpcLogFixtures -PrpcLog="C:\path\to\rpc.jsonl" -Pcapture=2026-09-06
+// The capture id picks which slices to rebuild; a slice's line numbers only
+// mean anything against the rpc.jsonl they were read from - see RpcLogFixtures.
 // It slices the log into the commands_*.json fixtures under
 // test/resources/fixtures/. NOT part of the test suite.
 tasks.register('rpcLogFixtures', JavaExec) {
@@ -94,6 +96,7 @@ tasks.register('rpcLogFixtures', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'com.tivo.kmttg.rpc.RpcLogFixtures'
     if (project.hasProperty('rpcLog')) args(project.property('rpcLog'))
+    if (project.hasProperty('capture')) args(project.property('capture'))
 }
 
 application {

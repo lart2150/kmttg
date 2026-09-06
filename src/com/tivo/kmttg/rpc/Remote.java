@@ -937,7 +937,14 @@ public class Remote{
    // traditional TTG URLs based on the mfs id.
    // This is needed when obtaining NPL listings using only RPC which
    // doesn't have the TTG URLs in JSON data.
-   private Boolean getURLs(String tivoName, JSONObject json) {
+   /**
+    * Resolve a recording's mfs id and hang the download URLs off its JSON.
+    * Package private so the tests can call it directly: it is only ever reached
+    * from inside the MyShows read loop, which would need a Search and an
+    * idSearch response for every recording in the trace to get this far.
+    * @return false if the mfs id could not be resolved, which aborts the NPL read
+    */
+   Boolean getURLs(String tivoName, JSONObject json) {
       try {
          String recordingId = json.getString("recordingId");
          // The recordingId -> mfs id mapping is stable, so reuse a cached value

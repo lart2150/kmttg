@@ -1,0 +1,10 @@
+[
+{"request":{"startTimePadding":0,"endTimePadding":0,"contentId":"tivo:ct.549464415","offerId":"tivo:of.ctd.10420178.5-1.terrestrial.2026-09-07-12-00-00.7200","keepBehavior":"fifo","type":"singleOfferSource"},"response":{"subscription":{"bodyId":"tsn:0000000000000000ED87","subscriptionId":"tivo:sb.16717609","type":"subscription"},"type":"subscribeResult","IsFinal":true},"type":"Singlerecording"},
+{"request":{"startTimePadding":0,"endTimePadding":0,"contentId":"tivo:ct.549464414","offerId":"tivo:of.ctd.10420178.5-1.terrestrial.2026-09-06-12-00-00.3600","keepBehavior":"fifo","type":"singleOfferSource"},"response":{"subscription":{"bodyId":"tsn:0000000000000000ED87","subscriptionId":"tivo:sb.16717639","type":"subscription"},"type":"subscribeResult","IsFinal":true},"type":"Singlerecording"},
+{"request":{"state":"cancelled","bodyId":"tsn:0000000000000000ED87","recordingId":["tivo:rc.16717619"],"type":"recordingUpdate"},"response":{"type":"success","IsFinal":true},"type":"Cancel"},
+{"request":{"state":"cancelled","bodyId":"tsn:0000000000000000ED87","recordingId":["tivo:rc.16717649"],"type":"recordingUpdate"},"response":{"type":"success","IsFinal":true},"type":"Cancel"},
+{"request":{"startTimePadding":0,"endTimePadding":240,"contentId":"tivo:ct.549018530","offerId":"tivo:of.ctd.10420180.7-1.terrestrial.2026-09-06-12-00-00.3600","keepBehavior":"forever","type":"singleOfferSource"},"response":{"subscription":{"bodyId":"tsn:0000000000000000ED87","subscriptionId":"tivo:sb.16717689","type":"subscription"},"type":"subscribeResult","IsFinal":true},"type":"Singlerecording"},
+{"request":{"state":"deleted","bodyId":"tsn:0000000000000000ED87","recordingId":["tivo:rc.16717649"],"type":"recordingUpdate"},"response":{"type":"success","IsFinal":true},"type":"Delete"},
+{"request":{"state":"complete","bodyId":"tsn:0000000000000000ED87","recordingId":"tivo:rc.16717699","type":"recordingUpdate"},"response":{"type":"success","IsFinal":true},"type":"StopRecording"},
+{"request":{"state":"deleted","bodyId":"tsn:0000000000000000ED87","recordingId":["tivo:rc.16717699"],"type":"recordingUpdate"},"response":{"type":"success","IsFinal":true},"type":"Delete"}
+]
