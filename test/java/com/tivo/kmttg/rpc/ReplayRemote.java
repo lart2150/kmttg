@@ -27,9 +27,22 @@ import com.tivo.kmttg.main.config;
  * When a type's queue is exhausted, Command returns {@code null}, which is
  * exactly how each read loop detects "no more data" and terminates. That lets a
  * trace trimmed to the first few pages cleanly end the loop with a partial result.
+ *
+ * Because exhaustion also ends a loop, "the right answer came back" alone does
+ * not prove a loop stopped for its own reasons. {@link #issued(String)} reports
+ * how many commands of a type were attempted, so a test can pin the stop
+ * condition - e.g. that seasonYearSearch noticed a repeated page rather than
+ * simply running off the end of the trace.
+ *
+ * A recorded response also says nothing about what was asked for, which matters
+ * on the write commands - a store that sent the wrong value still comes back
+ * successful. {@link #lastRequest(String)} keeps a copy of the request as it was
+ * at issue time so a test can check what went out.
  */
 public class ReplayRemote extends Remote {
    private final Map<String, Deque<JSONObject>> byType = new HashMap<>();
+   private final Map<String, Integer> issued = new HashMap<>();
+   private final Map<String, JSONObject> lastRequest = new HashMap<>();
 
    public ReplayRemote(JSONArray log) throws Exception {
       super(); // no-connect seam
@@ -45,8 +58,28 @@ public class ReplayRemote extends Remote {
       }
    }
 
+   /** How many commands of this type were attempted, replayed or not. */
+   public int issued(String type) {
+      return issued.getOrDefault(type, 0);
+   }
+
+   /**
+    * The most recent request of this type, copied when it was issued. The read
+    * loops reuse one request object across pages, so a live reference would
+    * only ever show the last offset.
+    */
+   public JSONObject lastRequest(String type) {
+      return lastRequest.get(type);
+   }
+
    @Override
    public JSONObject Command(String type, JSONObject json) {
+      issued.merge(type, 1, Integer::sum);
+      try {
+         lastRequest.put(type, new JSONObject(json.toString()));
+      } catch (Exception e) {
+         lastRequest.remove(type);
+      }
       Deque<JSONObject> q = byType.get(type);
       if (q == null || q.isEmpty())
          return null; // past the recorded trace -> loop-terminating

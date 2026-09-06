@@ -1,0 +1,4 @@
+[
+{"request":{"bodyId":"tsn:0000000000000000ED87","type":"userContentSearch","collectionId":"tivo:cl.19388"},"response":{"userContent":[{"userContentId":"tivo:uc.469","bodyId":"tsn:0000000000000000ED87","thumbsType":"explicit","type":"userContent","collectionId":"tivo:cl.19388","thumbsRating":-1}],"type":"userContentList","IsFinal":true},"type":"userContentSearch"},
+{"request":{"bodyId":"tsn:0000000000000000ED87","type":"userContentStore","collectionId":"tivo:cl.19388","thumbsRating":-1},"response":{"userContentId":"tivo:uc.469","bodyId":"tsn:0000000000000000ED87","thumbsType":"explicit","type":"userContent","IsFinal":true,"collectionId":"tivo:cl.19388","thumbsRating":-1},"type":"userContentStore"}
+]

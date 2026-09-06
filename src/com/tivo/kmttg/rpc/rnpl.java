@@ -69,12 +69,23 @@ public class rnpl {
       jobMonitor.submitNewJob(job);
    }
    
-   public static void setNPLData(String tivoName, JSONArray data, Stack<Hashtable<String,String>> ENTRIES) {
-      if (data == null) {
-         if (rnpldata.containsKey(tivoName))
-            rnpldata.remove(tivoName);
-      } else {
+   /**
+    * Replace the RPC recording data findRpcData/addRpcData match NPL rows
+    * against. Package private so the tests can seed it directly: setNPLData
+    * also refreshes the GUI table and kicks off auto processing, neither of
+    * which a test of the matching itself wants.
+    * @param data recordings for this TiVo, or null to forget the TiVo
+    */
+   static void setRpcData(String tivoName, JSONArray data) {
+      if (data == null)
+         rnpldata.remove(tivoName);
+      else
          rnpldata.put(tivoName, data);
+   }
+
+   public static void setNPLData(String tivoName, JSONArray data, Stack<Hashtable<String,String>> ENTRIES) {
+      setRpcData(tivoName, data);
+      if (data != null) {
          // Add RPC data to XML data to enrich information such as originalAirDate & EpisodeNumber
          for (int i=0; i<ENTRIES.size(); ++i)
             addRpcData(tivoName, ENTRIES.get(i));

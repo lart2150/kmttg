@@ -8,10 +8,10 @@ import java.nio.charset.StandardCharsets;
 import com.tivo.kmttg.JSON.JSONArray;
 
 /** Loads the captured (sanitized) RPC response fixtures from the test classpath. */
-final class Fixtures {
+public final class Fixtures {
    private Fixtures() {}
 
-   static JSONArray load(String name) throws Exception {
+   public static JSONArray load(String name) throws Exception {
       try (InputStream is = Fixtures.class.getResourceAsStream("/fixtures/" + name)) {
          assertNotNull(is, "missing fixture: /fixtures/" + name);
          String json = new String(is.readAllBytes(), StandardCharsets.UTF_8);

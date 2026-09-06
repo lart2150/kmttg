@@ -3,7 +3,6 @@ package com.tivo.kmttg.rpc;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -134,10 +133,7 @@ public class RpcFixtureCapture {
          trimmed = new JSONArray();
          for (int i = 0; i < max; i++) trimmed.put(data.get(i));
       }
-      String json = san.scrub(trimmed.toString(2));
-      try (FileWriter w = new FileWriter(new File(dir, name))) {
-         w.write(json);
-      }
+      FixtureJson.write(new File(dir, name), FixtureJson.prune(new JSONArray(san.scrub(trimmed.toString()))));
       System.out.println("  " + name + ": " + trimmed.length() + " of " + data.length() + " entries written");
    }
 
@@ -158,10 +154,8 @@ public class RpcFixtureCapture {
          log = new JSONArray();
          for (int i = 0; i < maxCmds; i++) log.put(fullLog.get(i));
       }
-      String json = san.scrub(log.toString(2));
-      try (FileWriter w = new FileWriter(new File(dir, "commands_" + name + ".json"))) {
-         w.write(json);
-      }
+      FixtureJson.write(new File(dir, "commands_" + name + ".json"),
+            FixtureJson.prune(new JSONArray(san.scrub(log.toString()))));
       System.out.println("  commands_" + name + ".json: " + log.length() + " of " + fullLog.length() + " commands written");
    }
 
