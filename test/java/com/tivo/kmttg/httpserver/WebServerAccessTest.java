@@ -45,7 +45,7 @@ public class WebServerAccessTest {
 
    private int port;
    private Path videos;
-   private String prevProgramDir, prevCache, prevMpegDir, prevMpegCutDir, prevEncodeDir;
+   private String prevProgramDir, prevCache, prevOutputDir, prevMpegDir, prevMpegCutDir, prevEncodeDir;
    private int prevPort;
    private LinkedHashMap<String,String> prevShares;
 
@@ -77,9 +77,16 @@ public class WebServerAccessTest {
       Files.createDirectories(videos.resolve("sub"));
       Files.write(shareDir.resolve("videos_private/secret.txt"),
          "not reachable".getBytes(StandardCharsets.UTF_8));
+      // A video file the transcoder would happily accept if it only looked at
+      // the suffix, and a non-video one sitting in a dir that is shared
+      Files.write(shareDir.resolve("videos_private/secret.mp4"),
+         "not reachable".getBytes(StandardCharsets.UTF_8));
+      Files.write(videos.resolve("notes.txt"), "not reachable".getBytes(StandardCharsets.UTF_8));
+      write("inside.mp4", "not reachable");
 
       prevProgramDir = config.programDir;
       prevCache = config.httpserver_cache;
+      prevOutputDir = config.outputDir;
       prevMpegDir = config.mpegDir;
       prevMpegCutDir = config.mpegCutDir;
       prevEncodeDir = config.encodeDir;
@@ -88,6 +95,9 @@ public class WebServerAccessTest {
 
       config.programDir = installDir.toString();
       config.httpserver_cache = installDir.resolve("web/cache").toString();
+      // /getVideoFiles offers outputDir too, so the transcode check honours it -
+      // pin it empty here so the video dirs are the only way in
+      config.outputDir = "";
       config.mpegDir = videos.toString();
       config.mpegCutDir = videos.toString();
       config.encodeDir = videos.toString();
@@ -106,6 +116,7 @@ public class WebServerAccessTest {
       }
       config.programDir = prevProgramDir;
       config.httpserver_cache = prevCache;
+      config.outputDir = prevOutputDir;
       config.mpegDir = prevMpegDir;
       config.mpegCutDir = prevMpegCutDir;
       config.encodeDir = prevEncodeDir;
@@ -306,7 +317,120 @@ public class WebServerAccessTest {
       assertEquals(403, status(spLoad(outside.toString())));
    }
 
+   // /transcode?file= used to take any absolute path and check only that it
+   // existed, so any readable media on the machine could be transcoded and
+   // published under /web/cache/ - and a .tivo one ran tivolibre with the MAK
+   @Test
+   public void transcode_refusesFilesOutsideTheVideoDirs() throws IOException {
+      String[] rejected = {
+         shareDir.resolve("videos_private/secret.mp4").toString(), // sibling of the share
+         installDir.resolve("inside.mp4").toString(),              // the install dir
+         "C:\\Windows\\Temp\\anything.mp4",
+         "/etc/passwd.mp4"
+      };
+      for (String file : rejected)
+         assertEquals(403, status(transcode(file)), file + " was accepted for transcode");
+   }
+
+   // The suffix gate matters on its own: /getVideoFiles only ever lists these
+   // 16 extensions, so anything else was never on offer even inside a share
+   @Test
+   public void transcode_refusesNonVideoFilesInsideTheVideoDirs() throws IOException {
+      for (String file : new String[] {
+            videos.resolve("notes.txt").toString(),
+            installDir.resolve("config.ini").toString() })
+         assertEquals(403, status(transcode(file)), file + " was accepted for transcode");
+   }
+
+   // A missing file in a dir that is shared is a 404, not a refusal - those
+   // dirs are already enumerable through /getVideoFiles, so it leaks nothing
+   @Test
+   public void transcode_stillReports404ForAMissingFileInAVideoDir() throws IOException {
+      assertEquals(404, status(transcode(videos.resolve("gone.mp4").toString())));
+   }
+
+   // The OWASP separator encodings, aimed at the parameter rather than the url
+   // path. One decode away from a separator, so they arrive as "../" and must
+   // resolve out of the share; %5c matters on Windows
+   @Test
+   public void transcode_encodedTraversalOutOfTheVideoDirs_isRefused() throws IOException {
+      String dir = enc(videos.toString());
+      for (String file : new String[] {
+            dir + "%2f..%2fvideos_private%2fsecret.mp4",
+            dir + "%2f%2e%2e%2fvideos_private%2fsecret.mp4",
+            dir + "%5c..%5cvideos_private%5csecret.mp4",
+            dir + "%5c%2e%2e%5cvideos_private%5csecret.mp4",
+            dir + "%2fsub%2f..%2f..%2fvideos_private%2fsecret.mp4",
+            enc(videos.toString() + "_private") + "%2fsecret.mp4" }) // shared prefix
+         assertNotTranscoded("/transcode?format=hls&file=" + file);
+   }
+
+   // Double encoding, overlong utf-8, the "....//" filter-dodge and a null byte
+   // truncation. None of these become a separator, so they name nothing inside
+   // the share - what matters is that none of them starts a transcode
+   @Test
+   public void transcode_obfuscatedTraversal_isRefused() throws IOException {
+      String dir = enc(videos.toString());
+      for (String file : new String[] {
+            dir + "%2f%252e%252e%252fvideos_private%252fsecret.mp4",
+            dir + "%2f..%255cvideos_private%5csecret.mp4",
+            dir + "%2f..%c0%afvideos_private%2fsecret.mp4",
+            dir + "%2f..%c1%9cvideos_private%5csecret.mp4",
+            dir + "%2f....%2f%2fvideos_private%2fsecret.mp4",
+            dir + "%2f..%2fvideos_private%2fsecret.mp4%00.mp4" })
+         assertNotTranscoded("/transcode?format=hls&file=" + file);
+   }
+
+   // Dot segments that resolve back inside the share are not an escape, and the
+   // check is about location - a real file from a video dir still goes through
+   @Test
+   public void transcode_stillAcceptsAFileFromTheVideoDirs() throws IOException {
+      // ffmpeg is not configured here, so this gets only as far as failing to
+      // start the encode. What is being pinned is that the path check let it by
+      for (String file : new String[] {
+            videos.resolve("movie.mp4").toString(),
+            videos.resolve("sub/../movie.mp4").toString() }) {
+         int status = status(transcode(file));
+         assertNotEquals(403, status, file + " was refused");
+         assertNotEquals(404, status, file + " was not found");
+      }
+   }
+
+   // tivo=FILES skips the TiVo and url guards because it names a local file
+   // instead - which put the same hole behind a second route, and this one
+   // feeds the decrypt/encode chain rather than the transcoder
+   @Test
+   public void startJob_refusesFilesOutsideTheVideoDirs() throws IOException {
+      String[] rejected = {
+         shareDir.resolve("videos_private/secret.mp4").toString(),
+         installDir.resolve("inside.mp4").toString(),
+         installDir.resolve("config.ini").toString(),
+         videos.resolve("notes.txt").toString(),
+         videos.toString() + "/../videos_private/secret.mp4"
+      };
+      for (String file : rejected)
+         assertEquals(403, status("/startJob?tivo=FILES&recording=" + enc(file)),
+            file + " was accepted as a FILES job");
+   }
+
    /* ---- helpers ---- */
+
+   private static String transcode(String file) throws IOException {
+      return "/transcode?format=hls&file=" + enc(file);
+   }
+
+   private static String enc(String value) throws IOException {
+      return URLEncoder.encode(value, StandardCharsets.UTF_8.name());
+   }
+
+   // Refused before anything is transcoded: 403 when the path leaves the video
+   // dirs, 404 when the encoding leaves it naming nothing there, 400 when the
+   // request will not decode at all. A 500 would mean it reached ffmpeg.
+   private void assertNotTranscoded(String target) throws IOException {
+      String line = firstLine(rawGet(target));
+      assertTrue(line.contains(" 400 ") || line.contains(" 403 ") || line.contains(" 404 "),
+         target + " was not refused: " + line);
+   }
 
    // Asserts nothing was served and no secret came back. Sent over a raw socket
    // so the exact bytes reach the server - an http client is free to normalize

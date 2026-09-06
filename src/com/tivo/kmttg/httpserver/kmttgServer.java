@@ -23,6 +23,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -374,6 +376,29 @@ public class kmttgServer extends HTTPServer {
       }
    }
 
+   // A video file the browser may name. /getVideoFiles only ever offers files
+   // under the configured video dirs, so a path outside them was never ours to
+   // transcode. Whole-name compare on the canonical path, so neither ".." nor a
+   // sibling dir like "<mpegDir>_private" gets through. Null when unacceptable.
+   private static File videoFile(String fileName) {
+      if (fileName == null || ! Hlsutils.isVideoFile(fileName))
+         return null;
+      try {
+         File candidate = new File(fileName).getCanonicalFile();
+         for (String dir : videoDirs()) {
+            // config defaults these to "", which would canonicalize to the
+            // working dir and so allow everything under it
+            if (dir == null || dir.trim().isEmpty())
+               continue;
+            if (candidate.toPath().startsWith(new File(dir).getCanonicalFile().toPath()))
+               return candidate;
+         }
+         return null;
+      } catch (IOException e) {
+         return null;
+      }
+   }
+
    // Handle rpc requests
    // Sample rpc request: /rpc?tivo=Roamio&operation=SysInfo
    public void handleRpc(Request req, Response resp) throws IOException {
@@ -549,22 +574,21 @@ public class kmttgServer extends HTTPServer {
       sendJson(resp, a);
    }
    
+   // The dirs /getVideoFiles walks: the custom shares when they are defined,
+   // the standard output dirs otherwise
+   private static Collection<String> videoDirs() {
+      if (config.httpserver_shares.isEmpty())
+         return Arrays.asList(config.outputDir, config.mpegDir,
+            config.mpegCutDir, config.encodeDir);
+      return config.httpserver_shares.values();
+   }
+
    // Return list of video files known to kmttg
    public void handleVideoFiles(Response resp, boolean addDetails) throws IOException {
       // LinkedHashMap is used to keep hash keys unique
       LinkedHashMap<String,Integer> dirs = new LinkedHashMap<String,Integer>();
-      if (config.httpserver_shares.isEmpty()) {
-         // No custom shares defined - so use default list
-         dirs.put(config.outputDir,1);
-         dirs.put(config.mpegDir,1);
-         dirs.put(config.mpegCutDir,1);
-         dirs.put(config.encodeDir,1);
-      } else {
-         // Custom shares defined - so use them
-         for (String dir : config.httpserver_shares.keySet()) {
-            dirs.put(config.httpserver_shares.get(dir), 1);
-         }
-      }
+      for (String dir : videoDirs())
+         dirs.put(dir, 1);
       LinkedHashMap<String,JSONArray> h = new LinkedHashMap<String,JSONArray>();
       for (String dir : dirs.keySet())
          getVideoFiles(dir, h);
@@ -1033,12 +1057,20 @@ public void handleMyShows(Request req, Response resp) throws IOException {
             }
             if (params.containsKey("recording")) {
                 String recording = params.get("recording");
-                // FILES is the local pseudo source and downloads nothing
+                // FILES is the local pseudo source and downloads nothing - it
+                // names a file on disk instead, so it gets the path check
                 if ( ! tivo.equals("FILES") ) {
                    if (rejectUnknownTivo(tivo, resp))
                       return;
                    if (rejectForeignJobUrl(recording, resp))
                       return;
+                } else {
+                   File video = videoFile(recording);
+                   if ( video == null || ! video.isFile() ) {
+                      resp.sendError(403, "Not a shared video file: '" + recording + "'");
+                      return;
+                   }
+                   recording = video.getAbsolutePath();
                 }
                 try {
                     startJob(tivo, recording, settings);
@@ -1327,10 +1359,17 @@ public void handleMyShows(Request req, Response resp) throws IOException {
       String returnFile = null;
       if (params.containsKey("file") && params.containsKey("format")) {
          String fileName = params.get("file");
-         if ( ! file.isFile(fileName) ) {
+         File video = videoFile(fileName);
+         if ( video == null ) {
+            resp.sendError(403, "Not a shared video file: '" + fileName + "'");
+            return;
+         }
+         if ( ! video.isFile() ) {
             resp.sendError(404, "Cannot find video file: '" + fileName + "'");
             return;
          }
+         // Transcode on the path that was checked, not the one that was asked for
+         fileName = video.getAbsolutePath();
          tc = alreadyRunning(fileName);
          if (tc != null) {
             if (tc.returnFile != null)
