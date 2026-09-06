@@ -1337,6 +1337,10 @@ public class HTTPServer {
         protected OutputStream out;
         protected Headers headers;
         protected boolean discardBody;
+        // Once a status line is on the wire there is no taking it back: a
+        // second one lands in the middle of the first response's body, and the
+        // Content-Length already sent belongs to the body that was abandoned.
+        protected boolean headersSent;
 
         /**
          * Constructs a Response whose output is written to the given stream.
@@ -1411,6 +1415,7 @@ public class HTTPServer {
          * @throws IOException if an error occurs
          */
         public void sendHeaders(int status) throws IOException {
+            headersSent = true; // set first: a partial write is still a write
             if (!headers.contains("Date"))
                 headers.add("Date", formatDate(System.currentTimeMillis()));
             headers.add("Server", "freeutils-HTTPServer/1.0");
@@ -1419,6 +1424,15 @@ public class HTTPServer {
             out.write(CRLF);
             headers.writeTo(out);
             out.flush();
+        }
+
+        /**
+         * Whether a status line has already gone out on this response.
+         *
+         * @return true once sendHeaders has started writing
+         */
+        public boolean headersSent() {
+            return headersSent;
         }
 
         /**
@@ -1752,12 +1766,19 @@ public class HTTPServer {
             } catch (InterruptedIOException ignore) { // timeout
                 break;
             } catch (IOException ioe) {
-                resp.sendError(500,
-                    "error processing request: " + ioe.getMessage());
+                if (!resp.headersSent())
+                    resp.sendError(500,
+                        "error processing request: " + ioe.getMessage());
                 break;
             } catch (RuntimeException re) {
-                // otherwise a handler bug drops the socket with no response
-                resp.sendError(500, "error processing request: " + re);
+                // otherwise a handler bug drops the socket with no response.
+                // Only when nothing has gone out yet - a handler that fails
+                // part way through streaming a file has already sent a 200 and
+                // its Content-Length, and appending a second response there
+                // corrupts the one in flight. Dropping the connection is what
+                // a client can actually recognize as a truncated response.
+                if (!resp.headersSent())
+                    resp.sendError(500, "error processing request: " + re);
                 break;
             }
             out.flush(); // flush response output

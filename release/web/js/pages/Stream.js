@@ -474,7 +474,7 @@ function monitor() {
    const stop = fileDiv.hidden ||
       (fileMode !== "Running" && fileMode !== "Cached") ||
       fileTable.rows.length === 0 ||
-      cellText(fileTable.rows[0].cells[0]) === "NO JOBS RUNNING";
+      rowText(fileTable.rows[0], 0) === "NO JOBS RUNNING";
    if (stop) {
       monitorOff();
       return;

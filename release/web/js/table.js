@@ -181,8 +181,8 @@ class KTable {
       this.sortAsc = this.sortIndex === index ? !this.sortAsc : true;
       this.sortIndex = index;
       const dir = this.sortAsc ? 1 : -1;
-      this.rows.sort((a, b) => dir * String(cellText(a.cells[index]))
-         .localeCompare(String(cellText(b.cells[index])), undefined, { numeric: true }));
+      this.rows.sort((a, b) => dir * rowText(a, index)
+         .localeCompare(rowText(b, index), undefined, { numeric: true }));
       this.el.querySelectorAll("th").forEach((th, i) => {
          th.classList.toggle("sort-asc", i === index && this.sortAsc);
          th.classList.toggle("sort-desc", i === index && !this.sortAsc);
@@ -206,7 +206,7 @@ class KTable {
 
    applyFilterRow(row) {
       const hit = !this.filterText ||
-         row.cells.some(c => String(cellText(c)).toLowerCase().includes(this.filterText));
+         this.columns.some((col, i) => rowText(row, i).toLowerCase().includes(this.filterText));
       row.el.hidden = !hit;
       if (row.detailsRow)
          row.detailsRow.hidden = !hit;
@@ -237,6 +237,30 @@ function setCell(td, value) {
       td.innerHTML = value.html;
    else
       td.textContent = value;
+}
+
+// Text a rendered cell contributes to sorting and filtering.
+//
+// This has to read the <td>, not the value that was handed to add(). setCell
+// appends a Node, and appending a DocumentFragment MOVES its children into the
+// td - so the fragment the caller still holds in row.cells is left empty, and
+// every fragment cell would sort and filter as "". Reading the live cell also
+// stays right when a page rewrites one in place, which SeasonPasses does on
+// reorder.
+//
+// Row action links are left out so a filter matches what the row is rather than
+// the buttons that every row carries.
+function rowText(row, i) {
+   const td = row.el.cells[i];
+   if (!td)
+      return String(cellText(row.cells[i]));
+   const actions = td.querySelector(".row-actions");
+   if (!actions)
+      return td.textContent;
+   return Array.from(td.childNodes)
+      .filter(n => n !== actions)
+      .map(n => n.textContent)
+      .join("");
 }
 
 // Text used for filtering and sorting

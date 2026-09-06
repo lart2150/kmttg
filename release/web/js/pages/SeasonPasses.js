@@ -231,8 +231,12 @@ async function Reorder() {
    if (ids.length === 0)
       return;
    try {
+      // The ids are plain subscriptionIds, but subscriptionsReprioritize wants
+      // them under subscriptionIdV2 - sent as "subscriptionId" the TiVo rejects
+      // the whole request as not conforming to the schema. Remote.SPReorder
+      // does the same thing for the desktop UI.
       const result = await getJSON("/rpc",
-         rpcParams("Prioritize", TIVO.value, { subscriptionId: ids }));
+         rpcParams("Prioritize", TIVO.value, { subscriptionIdV2: ids }));
       if (result.type === "success") {
          delete cache[TIVO.value];
          Refresh();
