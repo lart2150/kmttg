@@ -709,6 +709,12 @@ public class Remote{
             	req = RpcRequest("phoneHomeRequest", false, json);
             }
          }
+         else if (type.equals("PhoneHomeStatus")) {
+            // Progress of the connection PhoneHome started. Named here so a
+            // caller that has no bodyId of its own - the web ui - can ask.
+            json.put("bodyId", bodyId_get());
+            req = RpcRequest("phoneHomeStatusEventRegister", false, json);
+         }
          else if (type.equals("WhatsOn")) {
             // Request info on what is currently playing on the TiVo
             json.put("bodyId", bodyId_get());
