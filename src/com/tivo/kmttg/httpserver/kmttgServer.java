@@ -21,6 +21,8 @@ package com.tivo.kmttg.httpserver;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -89,9 +91,14 @@ public class kmttgServer extends HTTPServer {
          config.httpserver_cache_relative = "/web/cache/";
          VirtualHost host = config.httpserver.getVirtualHost(null);
          host.setAllowGeneratedIndex(true);
-         // Root dir is always kmttg install dir
-         host.addContext("/", new FileContextHandler(new File(baseDir), "/"));
-         
+         // The install dir is NOT served wholesale - it holds config.ini (MAK,
+         // TiVo account credentials, domain token), the logs and the RPC trace.
+         // Only these subdirectories are exposed; index.html and README.html
+         // are served by name in serve(), and anything else 404s because no
+         // context matches it.
+         host.addContext("/web", new FileContextHandler(new File(baseDir, "web"), "/web"));
+         host.addContext("/rc_images", new FileContextHandler(new File(baseDir, "rc_images"), "/rc_images"));
+
          // Cache dir is configurable
          host.addContext(config.httpserver_cache_relative,
             new FileContextHandler(new File(config.httpserver_cache),
@@ -215,6 +222,17 @@ public class kmttgServer extends HTTPServer {
          return;
       }
       
+      // The install dir has no context of its own, so its two public pages are
+      // served by name here. Everything else in it stays unreachable.
+      if (path.equals("/") || path.equals("/index.html")) {
+         serveProgramDirFile("index.html", req, resp);
+         return;
+      }
+      if (path.equals("/README.html")) {
+         serveProgramDirFile("README.html", req, resp);
+         return;
+      }
+
       // This is normal/default handling
       ContextHandler handler = req.getVirtualHost().getContext(path);
       if (handler == null) {
@@ -238,6 +256,124 @@ public class kmttgServer extends HTTPServer {
           resp.sendError(status);
    }
    
+   // Response.send() defaults to text/html; sendHeaders keeps a Content-Type
+   // that is already set, so adding it here wins.
+   private static void send(Response resp, String contentType, String body) throws IOException {
+      resp.getHeaders().replace("Content-Type", contentType);
+      resp.send(200, body);
+   }
+
+   private static void sendJson(Response resp, Object json) throws IOException {
+      send(resp, "application/json; charset=utf-8", json.toString());
+   }
+
+   private static void sendText(Response resp, String text) throws IOException {
+      send(resp, "text/plain; charset=utf-8", text);
+   }
+
+   // Null when it will not parse, so the caller can answer 400 rather than
+   // let the exception unwind out of the handler
+   private static Integer intParam(String value) {
+      try {
+         return Integer.valueOf(value);
+      } catch (NumberFormatException e) {
+         return null;
+      }
+   }
+
+   // Remote uses a name it does not recognize as a host name, so an unchecked
+   // name gets the caller the MAK and the rpc client cert. FILES is the
+   // local-files pseudo source, not a tivo.
+   private static boolean isKnownTivo(String tivo) {
+      return tivo != null && ! tivo.equals("FILES") && config.TIVOS.containsKey(tivo);
+   }
+
+   private static boolean rejectUnknownTivo(String tivo, Response resp) throws IOException {
+      if (isKnownTivo(tivo))
+         return false;
+      resp.sendError(403, "Unknown TiVo: " + tivo);
+      return true;
+   }
+
+   // Download urls are fetched with the MAK as the password, so they have to
+   // address a known tivo as well - the host is what config holds for one.
+   private static boolean isKnownTivoUrl(String url) {
+      try {
+         String host = new URI(url).getHost();
+         if (host == null)
+            return false;
+         // URI.getHost keeps the brackets on an IPv6 literal, config does not
+         if (host.startsWith("[") && host.endsWith("]"))
+            host = host.substring(1, host.length() - 1);
+         for (String configured : config.TIVOS.values()) {
+            if (host.equalsIgnoreCase(configured))
+               return true;
+         }
+         return false;
+      } catch (URISyntaxException e) {
+         return false;
+      }
+   }
+
+   private static boolean rejectForeignUrl(String url, Response resp) throws IOException {
+      if (isKnownTivoUrl(url))
+         return false;
+      resp.sendError(403, "Download url does not address a known TiVo: " + url);
+      return true;
+   }
+
+   // A job carries its urls inside the recording json, and there is more than
+   // one: __url__ downloads, __url_TiVoVideoDetails__ fetches metadata. Both
+   // go out with the MAK, so check every __url* key rather than the first.
+   private static boolean rejectForeignJobUrl(String recordingJson, Response resp) throws IOException {
+      try {
+         JSONObject json = new JSONObject(recordingJson);
+         String[] names = JSONObject.getNames(json);
+         if (names == null)
+            return false;
+         for (String name : names) {
+            if (name.startsWith("__url") && rejectForeignUrl(json.getString(name), resp))
+               return true;
+         }
+         return false;
+      } catch (JSONException e) {
+         resp.sendError(400, "startJob - unreadable recording json");
+         return true;
+      }
+   }
+
+   // Serve a single named file from the kmttg install dir. The name is a
+   // literal from serve(), never anything the client supplied.
+   private void serveProgramDirFile(String name, Request req, Response resp) throws IOException {
+      File f = new File(config.programDir, name);
+      if ( ! f.isFile()) {
+         resp.sendError(404);
+         return;
+      }
+      serveFileContent(f, req, resp);
+   }
+
+   // Resolve a season pass file name supplied by the browser. Only .sp files
+   // sitting directly in the kmttg install dir are allowed - that is all
+   // SPFiles ever offers - so a crafted name cannot read elsewhere on disk.
+   // Returns null when the name is not acceptable.
+   private static File spFile(String fileName) {
+      if (fileName == null || ! fileName.toLowerCase().endsWith(".sp"))
+         return null;
+      try {
+         File dir = new File(config.programDir).getCanonicalFile();
+         File candidate = new File(fileName);
+         if ( ! candidate.isAbsolute())
+            candidate = new File(dir, fileName);
+         candidate = candidate.getCanonicalFile();
+         if ( ! dir.equals(candidate.getParentFile()) || ! candidate.isFile())
+            return null;
+         return candidate;
+      } catch (IOException e) {
+         return null;
+      }
+   }
+
    // Handle rpc requests
    // Sample rpc request: /rpc?tivo=Roamio&operation=SysInfo
    public void handleRpc(Request req, Response resp) throws IOException {
@@ -250,6 +386,8 @@ public class kmttgServer extends HTTPServer {
             
             if (operation.equals("keyEventMacro")) {
                // Special case
+               if (rejectUnknownTivo(tivo, resp))
+                  return;
                String sequence = params.get("sequence");
                String[] s = sequence.split(" ");
                Remote r = new Remote(tivo);
@@ -257,7 +395,7 @@ public class kmttgServer extends HTTPServer {
                   // Single character strings are sent as ascii character
                   // A SPACE would have to be "FORWARD". 
                   r.keyEventMacro(s);
-                  resp.send(200, "");
+                  sendText(resp, "");
                } else {
                   resp.sendError(500, "RPC call failed to TiVo: " + tivo);
                }
@@ -265,7 +403,9 @@ public class kmttgServer extends HTTPServer {
             }
             
             if (operation.equals("SPSave")) {
-               // Special case
+               // Special case - the name is also the file name written to
+               if (rejectUnknownTivo(tivo, resp))
+                  return;
                String fileName = config.programDir + File.separator + tivo + ".sp";
                Remote r = new Remote(tivo);
                if (r.success) {
@@ -273,6 +413,8 @@ public class kmttgServer extends HTTPServer {
                   if ( a != null ) {
                      if ( ! JSONFile.write(a, fileName) ) {
                         resp.sendError(500, "Failed to write to file: " + fileName);
+                        r.disconnect();
+                        return;
                      }
                   } else {
                      resp.sendError(500, "Failed to retriev SP list for tivo: " + tivo);
@@ -280,7 +422,7 @@ public class kmttgServer extends HTTPServer {
                      return;
                   }
                   r.disconnect();
-                  resp.send(200, "Saved SP to file: " + fileName);
+                  sendText(resp, "Saved SP to file: " + fileName);
                } else {
                   resp.sendError(500, "RPC call failed to TiVo: " + tivo);
                }
@@ -299,16 +441,21 @@ public class kmttgServer extends HTTPServer {
                for (File f : files) {
                   a.put(f.getAbsolutePath());
                }
-               resp.send(200, a.toString());
+               sendJson(resp, a);
                return;
             }
             
             if (operation.equals("SPLoad")) {
                // Special case
                String fileName = params.get("file");
-               JSONArray a = JSONFile.readJSONArray(fileName);
+               File sp = spFile(fileName);
+               if ( sp == null ) {
+                  resp.sendError(403, "Not a season pass file: " + fileName);
+                  return;
+               }
+               JSONArray a = JSONFile.readJSONArray(sp.getAbsolutePath());
                if ( a != null ) {
-                  resp.send(200, a.toString());
+                  sendJson(resp, a);
                } else {
                   resp.sendError(500, "Failed to load SP file: " + fileName);
                }
@@ -322,6 +469,8 @@ public class kmttgServer extends HTTPServer {
 //            }
             
             // General purpose remote operation
+            if (rejectUnknownTivo(tivo, resp))
+               return;
             JSONObject json;
             if (params.containsKey("json"))
                json = new JSONObject(params.get("json"));
@@ -333,12 +482,15 @@ public class kmttgServer extends HTTPServer {
                if (result == null) {
                   resp.sendError(500, "operation failed: " + operation);
                } else {
-                  resp.send(200, result.toString());
+                  sendJson(resp, result);
                }
                r.disconnect();
+            } else {
+               // without this an unreachable tivo sent no response at all
+               resp.sendError(500, "RPC call failed to TiVo: " + tivo);
             }
          } catch (Exception e) {
-            resp.sendError(500, e.getMessage());
+            resp.sendError(500, "rpc " + params.get("operation") + " - " + e);
          }
       } else {
          resp.sendError(400, "RPC request missing 'operation' and/or 'tivo'");
@@ -353,7 +505,7 @@ public class kmttgServer extends HTTPServer {
          if (config.rpcEnabled(tivoName))
             a.put(tivoName);
       }
-      resp.send(200, a.toString());
+      sendJson(resp, a);
    }
    
    // Return list TiVos known by kmttg and rpc flag for each
@@ -374,7 +526,7 @@ public class kmttgServer extends HTTPServer {
                 json.put("npl", 0);
             a.put(json);
          }
-         resp.send(200, a.toString());
+         sendJson(resp, a);
       } catch (JSONException e) {
          resp.sendError(500, "handleTivos - Error obtaining tivo list");
          log.error("handleTivos - " + e.getMessage());
@@ -394,7 +546,7 @@ public class kmttgServer extends HTTPServer {
             a.put(dir);
          }
       }
-      resp.send(200, a.toString());
+      sendJson(resp, a);
    }
    
    // Return list of video files known to kmttg
@@ -464,7 +616,7 @@ public class kmttgServer extends HTTPServer {
 	         a.put(key);
 	      }
       }
-      resp.send(200, a.toString());
+      sendJson(resp, a);
    }
 
    /** 
@@ -667,11 +819,19 @@ public void handleMyShows(Request req, Response resp) throws IOException {
       Map<String,String> params = req.getParams();
       if (params.containsKey("tivo")) {
          String tivo = params.get("tivo");
+         if (rejectUnknownTivo(tivo, resp))
+            return;
          if (params.containsKey("xml")) {
             // Non RPC method requested returns XML
             int offset = 0;
-            if (params.containsKey("offset"))
-               offset = Integer.parseInt(params.get("offset"));
+            if (params.containsKey("offset")) {
+               Integer parsed = intParam(params.get("offset"));
+               if (parsed == null) {
+                  resp.sendError(400, "Invalid offset: " + params.get("offset"));
+                  return;
+               }
+               offset = parsed;
+            }
             String outputFile = file.makeTempFile("NPL");
             String ip = config.TIVOS.get(tivo);
             String url = "https://" + ip;
@@ -681,7 +841,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
             url += "/TiVoConnect?Command=QueryContainer&Container=/NowPlaying&Recurse=Yes&AnchorOffset=" + offset;
             try {
                if (http.download(url, "tivo", config.MAK, outputFile, false, null) ) {
-                  resp.send(200, Hlsutils.getTextFileContents(outputFile));
+                  send(resp, "text/xml; charset=utf-8", Hlsutils.getTextFileContents(outputFile));
                   file.delete(outputFile);
                } else {
                   resp.sendError(400, "Failed to retrive NPL listings for TiVo: " + tivo);
@@ -700,7 +860,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
                job.getURLs = true; // This needed to get __url__ property
                JSONArray a = r.MyShows(job);
                r.disconnect();
-               resp.send(200, a.toString());
+               sendJson(resp, a);
             } else {
                resp.sendError(500, "Failed to get shows from tivo: " + tivo);
                return;
@@ -715,13 +875,15 @@ public void handleMyShows(Request req, Response resp) throws IOException {
       Map<String,String> params = req.getParams();
       if (params.containsKey("tivo")) {
          String tivo = params.get("tivo");
+         if (rejectUnknownTivo(tivo, resp))
+            return;
          Remote r = new Remote(tivo);
          if (r.success) {
             jobData job = new jobData();
             job.tivoName = tivo;
             JSONArray a = r.ToDo(job);
             r.disconnect();
-            resp.send(200, a.toString());
+            sendJson(resp, a);
          } else {
             resp.sendError(500, "Failed to get todo from tivo: " + tivo);
             return;
@@ -735,10 +897,12 @@ public void handleMyShows(Request req, Response resp) throws IOException {
       Map<String,String> params = req.getParams();
       if (params.containsKey("tivo")) {
          String tivo = params.get("tivo");
+         if (rejectUnknownTivo(tivo, resp))
+            return;
          Remote r = new Remote(tivo);
          if (r.success) {
             r.reboot(tivo);
-            resp.send(200, "Reboot sequence sent to TiVo: " + tivo);
+            sendText(resp, "Reboot sequence sent to TiVo: " + tivo);
          } else {
             resp.sendError(500, "Failed to send reboot sequence to TiVo: " + tivo);
             return;
@@ -750,10 +914,15 @@ public void handleMyShows(Request req, Response resp) throws IOException {
    
    private void getVideoFiles(String pathname, LinkedHashMap<String,JSONArray> h) {
       File f = new File(pathname);
+      // null when the configured dir does not exist or cannot be read
       File[] listfiles = f.listFiles();
+      if (listfiles == null)
+         return;
       for (int i = 0; i < listfiles.length; i++) {
          if (listfiles[i].isDirectory()) {
             File[] internalFile = listfiles[i].listFiles();
+            if (internalFile == null)
+               continue;
             for (int j = 0; j < internalFile.length; j++) {
                String selectedFile = internalFile[j].getAbsolutePath();
                if (Hlsutils.isVideoFile(selectedFile))
@@ -802,6 +971,8 @@ public void handleMyShows(Request req, Response resp) throws IOException {
         Map<String, String> params = req.getParams();
         if (params.containsKey("tivo")) {
             String tivo = params.get("tivo");
+            if (rejectUnknownTivo(tivo, resp))
+                return;
             String commands[] = null;
             if (params.containsKey("search")) {
                 String search = params.get("search");
@@ -845,7 +1016,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
                   resp.sendError(500, "ircode - " + e.getMessage());
                   return;
                }
-               resp.send(200, "code sent");
+               sendText(resp, "code sent");
                return;
             }
         }
@@ -862,13 +1033,20 @@ public void handleMyShows(Request req, Response resp) throws IOException {
             }
             if (params.containsKey("recording")) {
                 String recording = params.get("recording");
+                // FILES is the local pseudo source and downloads nothing
+                if ( ! tivo.equals("FILES") ) {
+                   if (rejectUnknownTivo(tivo, resp))
+                      return;
+                   if (rejectForeignJobUrl(recording, resp))
+                      return;
+                }
                 try {
                     startJob(tivo, recording, settings);
                 } catch (Exception e) {
                     resp.sendError(500, "startJob - " + e.getMessage());
                     return;
                 }
-                resp.send(200, "Started job");
+                sendText(resp, "Started job");
                 return;
             }
         }
@@ -1038,7 +1216,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
                return;
             }
          }
-         resp.send(200, jobs.toString());
+         sendJson(resp, jobs);
          return;
       }
       
@@ -1063,7 +1241,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
                settings.put(nameArg, encodeConfig.getEncodeName());
             }
             settings.put(encodeNamesArg,config.ENCODE_NAMES);
-            resp.send(200, settings.toString());
+            sendJson(resp, settings);
             return;
           } catch (Exception e) {
               resp.sendError(500, "getJobs - " + e.getMessage());
@@ -1079,7 +1257,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
                String jid = "" + j.familyId;
                if (jid.equals(id)) {
                   jobMonitor.kill(j);
-                  resp.send(200, "Killed job: " + j.toString());
+                  sendText(resp, "Killed job: " + j.toString());
                   return;
                }
             }
@@ -1095,12 +1273,19 @@ public void handleMyShows(Request req, Response resp) throws IOException {
       Map<String,String> params = req.getParams();
       
       String maxrate = null;
-      if (params.containsKey("maxrate"))
+      if (params.containsKey("maxrate")) {
          maxrate = params.get("maxrate");
-      
+         // This lands in an ffmpeg argument string that is later split on
+         // spaces, so anything but a plain rate would add arguments of its own
+         if ( ! maxrate.matches("\\d{1,7}k?") ) {
+            resp.sendError(400, "Invalid maxrate: " + maxrate);
+            return;
+         }
+      }
+
       if (params.containsKey("killall")) {
          int num = killTranscodes();
-         resp.send(200, "Killed " + num + " jobs");
+         sendText(resp, "Killed " + num + " jobs");
          return;
       }
       
@@ -1110,7 +1295,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
          if (jobName == null)
             resp.sendError(500, "Failed to kill job: " + fileName);
          else
-            resp.send(200, "Killed job: " + jobName);
+            sendText(resp, "Killed job: " + jobName);
          return;
       }
       
@@ -1118,7 +1303,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
          JSONArray a = getRunning();
          if (a.length() == 0)
             a.put("NONE");
-         resp.send(200, a.toString());
+         sendJson(resp, a);
          return;
       }
       
@@ -1126,14 +1311,14 @@ public void handleMyShows(Request req, Response resp) throws IOException {
          JSONArray a = getCached();
          if (a.length() == 0)
             a.put("NONE");
-         resp.send(200, a.toString());
+         sendJson(resp, a);
          return;
       }
       
       if (params.containsKey("removeCached")) {
          int removed = removeCached(params.get("removeCached"));
          String message = "Removed " + removed + " cached items";
-         resp.send(200, message);
+         sendText(resp, message);
          return;
       }
       
@@ -1177,6 +1362,8 @@ public void handleMyShows(Request req, Response resp) throws IOException {
             && params.containsKey("name") && params.containsKey("tivo")) {
          String url = params.get("url");
          String tivo = params.get("tivo");
+         if (rejectUnknownTivo(tivo, resp) || rejectForeignUrl(url, resp))
+            return;
          if ( ! isOnlyTivo(tivo) ) {
             resp.sendError(500, "Only 1 tivo download at a time allowed: " + tivo);
             return;
@@ -1192,7 +1379,12 @@ public void handleMyShows(Request req, Response resp) throws IOException {
             if (maxrate != null)
                tc.maxrate = maxrate;
             if (params.containsKey("duration")) {
-               tc.duration = Integer.parseInt(params.get("duration"));
+               Integer parsed = intParam(params.get("duration"));
+               if (parsed == null) {
+                  resp.sendError(400, "Invalid duration: " + params.get("duration"));
+                  return;
+               }
+               tc.duration = parsed;
             }
             addTranscode(tc);
             if (format.equals("webm"))
@@ -1231,7 +1423,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
                      message += name;
                   if (fileName != null)
                      message += fileName;
-                  resp.send(200, message);
+                  sendText(resp, message);
                } else {
                   // Streaming mode => response is a link tag for Play start
                   String message = "Play ";
@@ -1254,9 +1446,12 @@ public void handleMyShows(Request req, Response resp) throws IOException {
                      jsonResult.put("__url__",url);// from url parameter
 
                      jsonResult.put("name",name); // from params (required if using url)
-                     resp.send(200, jsonResult.toString());
+                     sendJson(resp, jsonResult);
                   } else {
-                     resp.send(200, "<a href=\"" + returnFile + "\">" + message + "</a>");
+                     // the only reply that really is html - message carries
+                     // the caller's own name/file parameters, so escape it
+                     resp.send(200, "<a href=\"" + escapeHTML(returnFile) + "\">"
+                        + escapeHTML(message) + "</a>");
                   }
                }
             }

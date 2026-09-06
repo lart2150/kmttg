@@ -1755,6 +1755,10 @@ public class HTTPServer {
                 resp.sendError(500,
                     "error processing request: " + ioe.getMessage());
                 break;
+            } catch (RuntimeException re) {
+                // otherwise a handler bug drops the socket with no response
+                resp.sendError(500, "error processing request: " + re);
+                break;
             }
             out.flush(); // flush response output
             // consume any leftover body data so next request can be processed
@@ -2235,6 +2239,21 @@ public class HTTPServer {
     }
 
     /**
+     * Returns the given path percent-escaped for use as a link target,
+     * '#' and '?' included - left as-is they cut the link short.
+     *
+     * @param path the path to encode
+     * @return the encoded path, or the path unchanged if it cannot be encoded
+     */
+    public static String encodePath(String path) {
+        try {
+            return new URI(null, null, path, null).toASCIIString();
+        } catch (URISyntaxException use) {
+            return path;
+        }
+    }
+
+    /**
      * Transfers data from an input stream to an output stream.
      *
      * @param in the input stream to transfer from
@@ -2446,11 +2465,20 @@ public class HTTPServer {
     public static int serveFile(File base, String context,
             Request req, Response resp) throws IOException {
         String relativePath = req.getPath().substring(context.length());
-        File file = new File(base, relativePath).getCanonicalFile();
+        File file;
+        try {
+            file = new File(base, relativePath).getCanonicalFile();
+        } catch (IOException ioe) {
+            // unresolvable - a null byte, a drive letter mid-path - so it
+            // names nothing
+            return 404;
+        }
         if (!file.exists() || file.isHidden()) {
             return 404;
         } else if (!file.canRead()
-                   || !file.getPath().startsWith(base.getPath())) { // validate
+                   // whole-name compare, so a sibling like "<base>_private"
+                   // does not pass the way a string prefix test let it
+                   || !file.toPath().startsWith(base.toPath())) { // validate
             return 403;
         } else if (file.isDirectory()) {
             if (relativePath.endsWith("/") || relativePath.length() == 0) {
@@ -2567,21 +2595,23 @@ public class HTTPServer {
             "<html><head><title>Index of %s</title></head>%n" +
             "<body><h1>Index of %s</h1>%n" +
             "<pre> Name%" + (w - 5) + "s Last modified      Size<hr>",
-            path, path, "");
+            escapeHTML(path), escapeHTML(path), "");
         if (path.length() > 1) // add parent link if not root path
             f.format(" <a href=\"%s/\">Parent Directory</a>%"
-                + (w + 5) + "s-%n", getParentPath(path), "");
+                + (w + 5) + "s-%n",
+                escapeHTML(encodePath(getParentPath(path))), "");
         for (File file : dir.listFiles()) {
              String name = file.getName() + (file.isDirectory() ? "/" : "");
              String size = file.isDirectory() ? "- " : toSizeApproxString(file.length());
              if (config.httpserver_share_filter == 1 && ! file.isDirectory() &&
                    ! Hlsutils.isVideoFile(file.getName()))
                    continue;
-             // properly url-encode the link
-             String link = escapeHTML(path + name);
+             // properly url-encode the link; escape the displayed name so a
+             // recording titled with markup does not run as script
+             String link = escapeHTML(encodePath(path + name));
              f.format(" <a href=\"%s\">%s</a>%-" + (w - name.length()) +
                  "s&#8206;%td-%<tb-%<tY %<tR%6s%n",
-                 link, name, "", file.lastModified(), size);
+                 link, escapeHTML(name), "", file.lastModified(), size);
         }
         f.format("</pre></body></html>");
         return f.toString();
