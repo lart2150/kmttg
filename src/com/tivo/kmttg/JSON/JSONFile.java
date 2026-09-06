@@ -28,48 +28,41 @@ import java.io.Writer;
 import com.tivo.kmttg.util.log;
 
 public class JSONFile {
+   // The streams are closed in a finally (try-with-resources) rather than at
+   // the end of the body: a parse error part way through a file used to leave
+   // the handle open, which on Windows keeps the file locked.
    public static Boolean write(JSONObject json, String fileName) {
-      try {
-         Writer os = new BufferedWriter(new FileWriter(fileName));
+      try (Writer os = new BufferedWriter(new FileWriter(fileName))) {
          os.write(json.toString());
-         os.close();
          return true;
       } catch (Exception e) {
          log.error("write - " + e.getMessage());
          return false;
       }
    }
-   
+
    public static Boolean write(JSONArray json, String fileName) {
-      try {
-         Writer os = new BufferedWriter(new FileWriter(fileName));
+      try (Writer os = new BufferedWriter(new FileWriter(fileName))) {
          os.write(json.toString());
-         os.close();
          return true;
       } catch (Exception e) {
          log.error("write - " + e.getMessage());
          return false;
       }
    }
-   
+
    public static JSONObject readJSONObject(String fileName) {
-      try {
-         Reader is = new BufferedReader(new FileReader(fileName));
-         JSONObject json = new JSONObject(new JSONTokener(is));
-         is.close();
-         return json;
+      try (Reader is = new BufferedReader(new FileReader(fileName))) {
+         return new JSONObject(new JSONTokener(is));
       } catch (Exception e) {
          log.error("readJSONObject - " + e.getMessage());
          return null;
       }
    }
-   
+
    public static JSONArray readJSONArray(String fileName) {
-      try {
-         Reader is = new BufferedReader(new FileReader(fileName));
-         JSONArray json = new JSONArray(new JSONTokener(is));
-         is.close();
-         return json;
+      try (Reader is = new BufferedReader(new FileReader(fileName))) {
+         return new JSONArray(new JSONTokener(is));
       } catch (Exception e) {
          log.error("readJSONArray - " + e.getMessage());
          return null;
