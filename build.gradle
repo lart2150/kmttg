@@ -6,7 +6,7 @@ plugins {
 }
 
 group   = 'com.tivo.kmttg'
-version = 'v2.10.0-l'
+version = 'v2.11.0-rc1'
 
 // ---------------------------------------------------------------------------
 // Third party library versions - bump these to update a dependency. The jars
