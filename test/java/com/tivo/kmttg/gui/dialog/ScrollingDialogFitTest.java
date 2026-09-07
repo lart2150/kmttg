@@ -52,6 +52,8 @@ public class ScrollingDialogFitTest {
 
    @AfterEach
    public void release() throws Exception {
+      if (state == null)
+         return; // headless: the assumption stood the test aside before setup
       SwingTest.run(() -> {
          if (dialog != null)
             dialog.dispose();
