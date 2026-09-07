@@ -18,6 +18,7 @@
  */
 package com.tivo.kmttg.gui.dialog;
 
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -53,6 +54,7 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.MyListView;
 import com.tivo.kmttg.gui.MyTooltip;
 import com.tivo.kmttg.gui.swing.SwingUtil;
+import com.tivo.kmttg.gui.swing.Theme;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -337,9 +339,9 @@ public class AdvSearch {
       row.add(receivedChannelsOnly); row.add(favoriteChannelsOnly);
       content.add(row);
 
-      row = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-      row.add(search); row.add(Box.createHorizontalStrut(50)); row.add(close);
-      content.add(row);
+      // Kept out of content so the buttons stay put when the search fields scroll
+      JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+      buttons.add(search); buttons.add(Box.createHorizontalStrut(50)); buttons.add(close);
 
       // create dialog window
       dialog = new JDialog(frame);
@@ -351,9 +353,14 @@ public class AdvSearch {
       });
 
       dialog.setTitle("Advanced Search");
-      dialog.getContentPane().add(content);
+      // The fields scroll and the buttons keep their row, so both stay
+      // reachable at a font size that wants more height than the screen has.
+      JPanel root = new JPanel(new BorderLayout());
+      root.add(SwingUtil.scrollPane(content), BorderLayout.CENTER);
+      root.add(buttons, BorderLayout.SOUTH);
+      dialog.getContentPane().add(root);
       SwingUtil.loadIcons(dialog);
-      dialog.pack();
+      Theme.fitToScreen(dialog);
       dialog.setLocationRelativeTo(frame);
       dialog.setVisible(true);
    }

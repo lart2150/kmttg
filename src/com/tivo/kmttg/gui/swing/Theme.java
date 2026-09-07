@@ -19,10 +19,19 @@
 package com.tivo.kmttg.gui.swing;
 
 import java.awt.Color;
+import java.awt.Dialog;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.Window;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.RootPaneContainer;
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.FontUIResource;
@@ -45,6 +54,10 @@ import com.tivo.kmttg.util.log;
  * existing config.ini lookAndFeel entries continue to work.
  */
 public class Theme {
+   // Marks the size we gave a window, so a later refit can tell it from one
+   // the user has dragged
+   private static final String FITTED = "kmttg.fittedSize";
+
    private static final String[] NAMES = {
       "Light", "Dark", "IntelliJ", "Darcula", "macOS Light", "macOS Dark"
    };
@@ -89,6 +102,7 @@ public class Theme {
          applyFontSize(config.FontSize);
          applyTableDefaults();
          FlatLaf.updateUI();
+         refitWindows();
       } catch (Exception e) {
          log.error("Trouble setting look and feel: " + e.toString());
       }
@@ -121,6 +135,87 @@ public class Theme {
    public static void setFontSize(int fontSize) {
       applyFontSize(fontSize);
       FlatLaf.updateUI();
+      refitWindows();
+   }
+
+   // updateUI() restyles the open windows but leaves each one at the size it
+   // was packed at, so a larger font just gets clipped - and the dialogs are
+   // built once and kept, so the clipping sticks. Windows the user cannot drag
+   // were sized by pack() and are packed again; the rest are only ever grown,
+   // so a window sized by hand keeps the size it was given.
+   private static void refitWindows() {
+      for (Window w : Window.getWindows()) {
+         if ( ! (w instanceof Dialog) || ! w.isDisplayable())
+            continue;
+         if ( ! ((Dialog)w).isResizable() || sizedByUs(w)) {
+            fitToScreen(w);
+            continue;
+         }
+         Dimension needed = w.getPreferredSize();
+         if (w.getWidth() < needed.width || w.getHeight() < needed.height) {
+            w.setSize(Math.max(w.getWidth(),  needed.width),
+                      Math.max(w.getHeight(), needed.height));
+            settle(w);
+         }
+      }
+   }
+
+   // Size a window to what its contents now need, within what the screen will
+   // take. Callers that scroll their contents degrade gracefully when capped.
+   public static void fitToScreen(Window w) {
+      w.pack();
+      settle(w);
+      if (w instanceof RootPaneContainer)
+         ((RootPaneContainer)w).getRootPane().putClientProperty(FITTED, w.getSize());
+   }
+
+   // A window still the size we last gave it has not been touched since, so a
+   // smaller font can take the room back. Once the user drags it we only ever
+   // grow it, and stop recording, so their size survives every later change.
+   private static boolean sizedByUs(Window w) {
+      if ( ! (w instanceof RootPaneContainer))
+         return false;
+      Object fitted = ((RootPaneContainer)w).getRootPane().getClientProperty(FITTED);
+      return w.getSize().equals(fitted);
+   }
+
+   private static void settle(Window w) {
+      clampToScreen(w);
+      int extra = SwingUtil.scrollbarWidthToReclaim(w);
+      if (extra > 0) {
+         w.setSize(w.getWidth() + extra, w.getHeight());
+         clampToScreen(w);
+      }
+   }
+
+   private static void clampToScreen(Window w) {
+      Rectangle screen = usableBounds(w);
+      w.setSize(
+         Math.min(w.getWidth(),  screen.width),
+         Math.min(w.getHeight(), screen.height)
+      );
+      // A window that just grew can end up hanging off the bottom or the right
+      w.setLocation(
+         Math.max(screen.x, Math.min(w.getX(), screen.x + screen.width  - w.getWidth())),
+         Math.max(screen.y, Math.min(w.getY(), screen.y + screen.height - w.getHeight()))
+      );
+      w.validate();
+   }
+
+   // The usable area of the screen this window is on. getMaximumWindowBounds()
+   // only ever describes the primary display, so on a second monitor it would
+   // cap the window to the wrong size and drag it back onto the first.
+   private static Rectangle usableBounds(Window w) {
+      GraphicsConfiguration gc = w.getGraphicsConfiguration();
+      if (gc == null)
+         return GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+      Rectangle bounds = new Rectangle(gc.getBounds());
+      Insets in = Toolkit.getDefaultToolkit().getScreenInsets(gc);
+      bounds.x      += in.left;
+      bounds.y      += in.top;
+      bounds.width  -= in.left + in.right;
+      bounds.height -= in.top  + in.bottom;
+      return bounds;
    }
 
    private static void applyFontSize(int fontSize) {

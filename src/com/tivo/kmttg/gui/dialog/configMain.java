@@ -34,7 +34,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Stack;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -1596,6 +1595,7 @@ public class configMain {
       if (config.FontSize != size) {
          config.FontSize = size;
          config.gui.setFontSize(size);
+         fit();
       }
 
       // .TiVo output dir
@@ -2584,9 +2584,13 @@ public class configMain {
       lookAndFeel.setSelectedItem(Theme.normalize(config.lookAndFeel));
       lookAndFeel.addActionListener(new ActionListener() {
          @Override public void actionPerformed(ActionEvent e) {
+            // setSelectedItem fires this even when nothing changed, and
+            // read() sets it on every open - reapplying the theme there would
+            // undo a resize the user had made to this window and to others
             String newVal = (String)lookAndFeel.getSelectedItem();
-            if (newVal != null) {
+            if (newVal != null && ! newVal.equals(Theme.normalize(config.lookAndFeel))) {
                config.gui.setLookAndFeel(newVal);
+               fit();
             }
          }
       });
@@ -3596,11 +3600,12 @@ public class configMain {
       addTabPane("Autotune", autotune_panel);
       addTabPane("AutoSkip", autoskip_panel);
 
-      // Main panel
-      JPanel main_panel = new JPanel();
-      main_panel.setLayout(new BoxLayout(main_panel, BoxLayout.Y_AXIS));
-      main_panel.add(tabbed_panel);
-      main_panel.add(common_panel);
+      // Main panel. The tabs take whatever height is left over so that the OK
+      // and CANCEL buttons keep theirs even when the dialog is capped at the
+      // screen height.
+      JPanel main_panel = new JPanel(new BorderLayout());
+      main_panel.add(tabbed_panel, BorderLayout.CENTER);
+      main_panel.add(common_panel, BorderLayout.SOUTH);
 
       // create dialog window
       dialog = new JDialog(frame);
@@ -3615,15 +3620,24 @@ public class configMain {
       JPanel root = new JPanel(new BorderLayout());
       root.add(main_panel, BorderLayout.CENTER);
       dialog.getContentPane().add(root);
-      dialog.setResizable(false);
-      dialog.pack();
+      fit();
       dialog.setLocationRelativeTo(frame);
   }
 
-   // Add a new tab pane
+   // Add a new tab pane. The settings scroll inside the tab rather than being
+   // cut off when they do not all fit - the tab strip and the OK button sit
+   // outside this, so they stay reachable however tall the settings get.
    public static void addTabPane(String name, JPanel content) {
-      tabbed_panel.addTab(name, content);
+      tabbed_panel.addTab(name, SwingUtil.scrollPane(content));
    }
+
+   // Size the dialog to the settings it holds, but no larger than the screen
+   // will take. A large GUI Font Size can ask for more room than there is.
+   private static void fit() {
+      if (dialog != null)
+         Theme.fitToScreen(dialog);
+   }
+
    public static void setToolTips() {
       debug.print("");
       VRDexe.setToolTipText(getToolTip("VRDexe"));

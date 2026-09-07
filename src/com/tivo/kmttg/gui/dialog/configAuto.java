@@ -54,6 +54,7 @@ import net.miginfocom.swing.MigLayout;
 
 import com.tivo.kmttg.gui.MyTooltip;
 import com.tivo.kmttg.gui.swing.SwingUtil;
+import com.tivo.kmttg.gui.swing.Theme;
 import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.autoTable;
 import com.tivo.kmttg.gui.table.autoTable.Tabentry;
@@ -444,11 +445,10 @@ public class configAuto {
       noWait.add(noJobWait);
       content.add(noWait);
 
-      // OK & CANCEL
+      // OK & CANCEL. Kept out of content so they stay put when it scrolls.
       JPanel last = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 0));
       last.add(OK);
       last.add(CANCEL);
-      content.add(last);
 
       // create dialog window
       dialog = new JDialog(frame);
@@ -460,10 +460,13 @@ public class configAuto {
       });
       SwingUtil.loadIcons(dialog);
       dialog.setTitle("kmttg auto transfers configuration");
+      // The settings scroll and the buttons keep their row, so both stay
+      // reachable at a font size that wants more height than the screen has.
       JPanel root = new JPanel(new BorderLayout());
-      root.add(content, BorderLayout.CENTER);
+      root.add(SwingUtil.scrollPane(content), BorderLayout.CENTER);
+      root.add(last, BorderLayout.SOUTH);
       dialog.getContentPane().add(root);
-      dialog.pack();
+      Theme.fitToScreen(dialog);
       dialog.setLocationRelativeTo(frame);
    }
 

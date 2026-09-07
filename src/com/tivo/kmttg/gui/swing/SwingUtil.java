@@ -18,15 +18,25 @@
  */
 package com.tivo.kmttg.gui.swing;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
+import javax.swing.Scrollable;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import com.tivo.kmttg.util.debug;
@@ -37,6 +47,93 @@ import com.tivo.kmttg.util.debug;
  * Alert dialogs so converted call sites stay one-liners.
  */
 public class SwingUtil {
+
+   // Wrap settings in a scroller so they can be reached when the window is not
+   // tall enough for them - a large GUI Font Size on a small screen. Whatever
+   // sits outside this (a tab strip, an OK button) stays put.
+   public static JScrollPane scrollPane(JPanel content) {
+      JScrollPane scroller = new JScrollPane(new stretchPanel(content));
+      scroller.setBorder(null);
+      scroller.getVerticalScrollBar().setUnitIncrement(16);
+      return scroller;
+   }
+
+   // A window capped at the screen height puts a vertical scrollbar inside the
+   // scroller, and it takes its width out of the settings - enough to set them
+   // scrolling sideways as well. Report what to hand back, so nothing has to.
+   static int scrollbarWidthToReclaim(Window window) {
+      JScrollPane scroller = findScroller(window);
+      if (scroller == null || ! scroller.getHorizontalScrollBar().isVisible())
+         return 0;
+      JScrollBar bar = scroller.getVerticalScrollBar();
+      if ( ! bar.isVisible())
+         return 0;
+      int shortfall = scroller.getViewport().getView().getPreferredSize().width
+                    - scroller.getViewport().getWidth();
+      return Math.max(0, Math.min(shortfall, bar.getWidth()));
+   }
+
+   // Only the scrollers this class made, and only one on show - a tabbed
+   // dialog keeps a scroller per tab and the hidden ones carry stale sizes
+   private static JScrollPane findScroller(Container c) {
+      for (Component k : c.getComponents()) {
+         if ( ! k.isVisible())
+            continue;
+         if (k instanceof JScrollPane
+             && ((JScrollPane)k).getViewport().getView() instanceof stretchPanel)
+            return (JScrollPane) k;
+         if (k instanceof Container) {
+            JScrollPane found = findScroller((Container) k);
+            if (found != null)
+               return found;
+         }
+      }
+      return null;
+   }
+
+   // Fills the viewport when there is room to spare and scrolls when there is
+   // not. A plain panel in a viewport would sit at its preferred width and
+   // leave the wider layouts half empty.
+   private static class stretchPanel extends JPanel implements Scrollable {
+      private static final long serialVersionUID = 1L;
+
+      stretchPanel(JPanel content) {
+         super(new BorderLayout());
+         add(content, BorderLayout.CENTER);
+      }
+
+      @Override
+      public Dimension getPreferredScrollableViewportSize() {
+         return getPreferredSize();
+      }
+
+      @Override
+      public int getScrollableUnitIncrement(Rectangle r, int orientation, int direction) {
+         return 16;
+      }
+
+      @Override
+      public int getScrollableBlockIncrement(Rectangle r, int orientation, int direction) {
+         return orientation == SwingConstants.VERTICAL ? r.height : r.width;
+      }
+
+      @Override
+      public boolean getScrollableTracksViewportWidth() {
+         return fits(getPreferredSize().width, true);
+      }
+
+      @Override
+      public boolean getScrollableTracksViewportHeight() {
+         return fits(getPreferredSize().height, false);
+      }
+
+      private boolean fits(int needed, boolean horizontal) {
+         if ( ! (getParent() instanceof JViewport) )
+            return false;
+         JViewport port = (JViewport)getParent();
+         return needed <= (horizontal ? port.getWidth() : port.getHeight());
+      }
+   }
 
    // Equivalent of JavaFX Platform.runLater - safe to call from any thread
    public static void runLater(Runnable r) {
