@@ -75,6 +75,8 @@ public class deleted {
                config.gui.remote_gui.updateButtonStates(tivoName, "Deleted");
                if (tab.tivo_data.containsKey(tivoName))
                   tab.AddRows(tivoName, tab.tivo_data.get(tivoName));
+               else
+                  tab.setCurrentTivo(tivoName);
             }
          }
       });
@@ -111,12 +113,8 @@ public class deleted {
          public void actionPerformed(ActionEvent e) {
             String tivoName = (String)tivo.getSelectedItem();
             if (tivoName != null && tivoName.length() > 0) {
-               Runnable task = new Runnable() {
-                  @Override public void run() {
-                        tab.permanentlyDelete(tivoName);
-                  }
-               };
-               new Thread(task).start();
+               // permanentlyDelete snapshots the selection then threads itself
+               tab.permanentlyDelete(tivoName);
             }
          }
       });

@@ -270,6 +270,12 @@ public class deletedTable extends TableMap {
          config.gui.remote_gui.setTivoName("deleted", tivoName);
    }
 
+   // Point the table at a TiVo whose list hasn't been fetched yet, so a filter
+   // change can't re-display the TiVo that was showing before
+   public void setCurrentTivo(String tivoName) {
+      currentTivo = tivoName;
+   }
+
    // Set the SHOW-column filter and re-display the current TiVo's list. An
    // empty/blank filter shows everything; otherwise only rows whose show title
    // contains the text (case-insensitive) are shown.
@@ -333,12 +339,14 @@ public class deletedTable extends TableMap {
    }
 
    // Refresh the # SHOWS label. When a filter is active, show "shown of total".
+   // The count is read here rather than in the runnable: currentTivo can move
+   // to a TiVo with nothing fetched before the EDT gets round to it.
    private void refreshNumber() {
       if (config.gui.remote_gui == null || currentTivo == null || !tivo_data.containsKey(currentTivo))
          return;
+      final int total = tivo_data.get(currentTivo).length();
       SwingUtil.runLater(new Runnable() {
          @Override public void run() {
-            int total = tivo_data.get(currentTivo).length();
             int shown = MODEL.size();
             String text = (shown == total)
                   ? (total + " SHOWS")
@@ -348,13 +356,13 @@ public class deletedTable extends TableMap {
       });
    }
 
-   // Remove the cached entry with the given recordingId from the current TiVo's
-   // full data. Matched by recordingId rather than row index because the model
-   // is sorted/filtered relative to the cached JSONArray.
-   private void removeFromCache(String recordingId) {
-      if (recordingId == null || currentTivo == null)
+   // Remove the cached entry with the given recordingId from that TiVo's full
+   // data. Matched by recordingId rather than row index because the model is
+   // sorted/filtered relative to the cached JSONArray.
+   private void removeFromCache(String tivoName, String recordingId) {
+      if (recordingId == null || tivoName == null)
          return;
-      JSONArray data = tivo_data.get(currentTivo);
+      JSONArray data = tivo_data.get(tivoName);
       if (data == null)
          return;
       for (int i = 0; i < data.length(); ++i) {
@@ -370,43 +378,103 @@ public class deletedTable extends TableMap {
       }
    }
 
+   // Snapshot the json of the selected rows. Actions take this before starting
+   // their worker thread: a row index only means something for as long as the
+   // sort and filter that produced it.
+   Stack<JSONObject> selectedJson() {
+      final Stack<JSONObject> selected = new Stack<JSONObject>();
+      SwingUtil.runAndWait(new Runnable() {
+         @Override public void run() {
+            for (int row : TableUtil.GetSelectedRows(TABLE)) {
+               if (row < 0 || row >= MODEL.size())
+                  continue;
+               try {
+                  selected.add(GetRowData(row));
+               } catch (RuntimeException e) {
+                  // A row the Tabentry constructor couldn't fill has no json to
+                  // act on. Skip it rather than lose the rest of the selection.
+                  log.error("Skipping unreadable row " + row + " - " + e.toString());
+               }
+            }
+         }
+      });
+      return selected;
+   }
+
+   // Row currently displaying the given recordingId, or -1 if it isn't showing
+   // (the user may have sorted or filtered it away since the action started).
+   int findRow(String recordingId) {
+      for (int row = 0; row < MODEL.size(); ++row) {
+         try {
+            JSONObject json = GetRowData(row);
+            if (json != null && json.has("recordingId") &&
+                  recordingId.equals(json.getString("recordingId")))
+               return row;
+         } catch (JSONException | RuntimeException e) {
+            // skip malformed entry
+         }
+      }
+      return -1;
+   }
+
+   // Drop the show with the given recordingId from tivoName's rows and cached
+   // data. recordingIds are per TiVo, so the table is only touched while it is
+   // still showing the one the action ran against.
+   void removeEntry(String tivoName, String recordingId) {
+      if (showing(tivoName)) {
+         int row = findRow(recordingId);
+         if (row >= 0)
+            MODEL.removeRow(row);
+      }
+      removeFromCache(tivoName, recordingId);
+      refreshNumber();
+   }
+
+   // Deselect a show whose action failed, leaving the rest of the selection
+   // intact so it still reflects what the user asked for
+   private void deselectEntry(String tivoName, String recordingId) {
+      if (! showing(tivoName))
+         return;
+      int row = findRow(recordingId);
+      if (row >= 0)
+         TABLE.removeRowSelectionInterval(row, row);
+   }
+
+   private boolean showing(String tivoName) {
+      return tivoName != null && tivoName.equals(currentTivo);
+   }
+
    // Undelete selected recordings
    public void recoverSingle(final String tivoName) {
-      // Get selection set ordered highest to lowest
-      final Integer[] sorted_final = TableUtil.highToLow(TableUtil.GetSelectedRows(TABLE));
-      if (sorted_final.length == 0)
+      final Stack<JSONObject> selected = selectedJson();
+      if (selected.isEmpty())
          return;
       log.print("Recovering individual recordings on TiVo: " + tivoName);
       Runnable task = new Runnable() {
          @Override public void run() {
             Remote r = config.initRemote(tivoName);
             if (r.success) {
-               for (final int row : sorted_final) {
+               for (JSONObject json : selected) {
                   try {
-                     JSONObject json = GetRowData(row);
-                     final String title = json.getString("title");
-                     if (json != null) {
-                        final String recordingId = json.getString("recordingId");
-                        JSONObject o = new JSONObject();
-                        JSONArray a = new JSONArray();
-                        a.put(recordingId);
-                        o.put("recordingId", a);
-                        final JSONObject result = r.Command("Undelete", o);
-                        SwingUtil.runLater(new Runnable() {
-                           @Override
-                           public void run() {
-                              if (result == null) {
-                                 TABLE.removeRowSelectionInterval(row, row);
-                                 log.error("Failed to recover recording: '" + title + "'");
-                              } else {
-                                 log.warn("Recovered recording: '" + title + "' on TiVo: " + tivoName);
-                                 MODEL.removeRow(row);
-                                 removeFromCache(recordingId);
-                                 refreshNumber();
-                              }
+                     final String title = json.has("title") ? json.getString("title") : "";
+                     final String recordingId = json.getString("recordingId");
+                     JSONObject o = new JSONObject();
+                     JSONArray a = new JSONArray();
+                     a.put(recordingId);
+                     o.put("recordingId", a);
+                     final JSONObject result = r.Command("Undelete", o);
+                     SwingUtil.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                           if (result == null) {
+                              deselectEntry(tivoName, recordingId);
+                              log.error("Failed to recover recording: '" + title + "'");
+                           } else {
+                              log.warn("Recovered recording: '" + title + "' on TiVo: " + tivoName);
+                              removeEntry(tivoName, recordingId);
                            }
-                        });
-                     }
+                        }
+                     });
                   } catch (JSONException e) {
                      log.error("recoverSingle failed - " + e.getMessage());
                   }
@@ -420,47 +488,40 @@ public class deletedTable extends TableMap {
 
    // Permanently delete selected recordings
    public void permanentlyDelete(final String tivoName) {
-      // Get selection set ordered highest to lowest
-      final Integer[] sorted_final = TableUtil.highToLow(TableUtil.GetSelectedRows(TABLE));
-      if (sorted_final.length == 0)
+      final Stack<JSONObject> selected = selectedJson();
+      if (selected.isEmpty())
          return;
       log.print("Permanently deleting individual recordings on TiVo: " + tivoName);
       Runnable task = new Runnable() {
          @Override public void run() {
-            JSONObject json;
             Remote r = config.initRemote(tivoName);
             if (r.success) {
-               for (final int row : sorted_final) {
+               for (JSONObject json : selected) {
                   try {
-                     json = GetRowData(row);
-                     if (json != null) {
-                        String title = "";
-                        if (json.has("title"))
-                           title = json.getString("title");
-                        if (json.has("subtitle"))
-                           title += " - " + json.getString("subtitle");
-                        final String title_final = title;
-                        final String recordingId = json.getString("recordingId");
-                        JSONObject o = new JSONObject();
-                        JSONArray a = new JSONArray();
-                        a.put(recordingId);
-                        o.put("recordingId", a);
-                        final JSONObject result = r.Command("PermanentlyDelete", o);
-                        SwingUtil.runLater(new Runnable() {
-                           @Override
-                           public void run() {
-                              if (result == null) {
-                                 TABLE.removeRowSelectionInterval(row, row);
-                                 log.error("Failed to permanently delete recording: '" + title_final + "'");
-                              } else {
-                                 log.warn("Permanently deleted recording: '" + title_final + "' on TiVo: " + tivoName);
-                                 MODEL.removeRow(row);
-                                 removeFromCache(recordingId);
-                                 refreshNumber();
-                              }
+                     String title = "";
+                     if (json.has("title"))
+                        title = json.getString("title");
+                     if (json.has("subtitle"))
+                        title += " - " + json.getString("subtitle");
+                     final String title_final = title;
+                     final String recordingId = json.getString("recordingId");
+                     JSONObject o = new JSONObject();
+                     JSONArray a = new JSONArray();
+                     a.put(recordingId);
+                     o.put("recordingId", a);
+                     final JSONObject result = r.Command("PermanentlyDelete", o);
+                     SwingUtil.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                           if (result == null) {
+                              deselectEntry(tivoName, recordingId);
+                              log.error("Failed to permanently delete recording: '" + title_final + "'");
+                           } else {
+                              log.warn("Permanently deleted recording: '" + title_final + "' on TiVo: " + tivoName);
+                              removeEntry(tivoName, recordingId);
                            }
-                        });
-                     }
+                        }
+                     });
                   } catch (JSONException e) {
                      log.error("permanentlyDelete failed - " + e.getMessage());
                   }
