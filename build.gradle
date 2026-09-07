@@ -10,7 +10,7 @@ version = 'v2.10.0-l'
 
 // ---------------------------------------------------------------------------
 // Third party library versions - bump these to update a dependency. The jars
-// are downloaded from Maven Central by Gradle and are NOT committed to git.
+// are downloaded by Gradle from the repositories below and are NOT committed to git.
 // ---------------------------------------------------------------------------
 ext {
     httpclientVersion = '5.6.1'   // pulls httpcore5 transitively
@@ -18,17 +18,20 @@ ext {
     flatlafVersion    = '3.7.1'
     miglayoutVersion  = '11.4.3'  // miglayout-swing pulls miglayout-core
     jmdnsVersion      = '3.6.3'
+    tivolibreVersion  = '0.8.0'
+    // Both are for the spawned tivolibre command line app, not for kmttg itself; see below
+    commonsCliVersion = '1.11.0'
+    logbackVersion    = '1.6.3'
 }
 
 repositories {
     mavenCentral()
-}
-
-// slf4j-api is bundled inside the local tivo-libre.jar, so keep it from being
-// pulled in transitively (httpclient5 / Java-WebSocket reference it) to avoid
-// duplicate classes in the fat jar.
-configurations.configureEach {
-    exclude group: 'org.slf4j', module: 'slf4j-api'
+    // tivolibre is not on Maven Central. This branch of the fork is a Maven repository, and
+    // raw.githubusercontent.com serves it without authentication.
+    maven {
+        url = 'https://raw.githubusercontent.com/lart2150/tivolibre/maven/'
+        content { includeGroup 'io.github.lart2150' }
+    }
 }
 
 dependencies {
@@ -38,9 +41,18 @@ dependencies {
     implementation "com.miglayout:miglayout-swing:${miglayoutVersion}"
     implementation "org.jmdns:jmdns:${jmdnsVersion}"
 
-    // kmttg's TiVo .TiVo decoder library. Not published to Maven Central, so it
-    // stays as a committed local jar. It also bundles slf4j-api (see above).
-    implementation files('lib/tivo-libre.jar')
+    // kmttg's TiVo .TiVo decoder library, from the repository declared above.
+    implementation "io.github.lart2150:tivo-libre:${tivolibreVersion}"
+
+    // TiVoTranscode and Transcode spawn
+    //     java -cp kmttg.jar net.straylightlabs.tivolibre.DecoderApp
+    // so the fat jar has to carry what that command line app needs, not just what the library
+    // needs. tivolibre leaves them out of its own dependencies so that embedding it does not
+    // drag in an argument parser and a logging backend. Neither is substitutable: DecoderApp
+    // uses commons-cli's org.apache.commons.cli.help package (1.10+ only) and casts the root
+    // logger to ch.qos.logback.classic.Logger. No kmttg source compiles against either.
+    runtimeOnly "commons-cli:commons-cli:${commonsCliVersion}"
+    runtimeOnly "ch.qos.logback:logback-classic:${logbackVersion}"
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

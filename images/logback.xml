@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!-- The spawned DecoderApp writes the decoded MPEG to stdout, so nothing may
+         log there. Keep every appender on stderr. -->
+    <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <encoder><pattern>%msg%n</pattern></encoder>
+    </appender>
     <logger name="org.apache" level="ERROR" />
     <logger name="httpclient" level="ERROR" />
+    <!-- DecoderApp resets this for itself (ERROR, or DEBUG with -d), so this
+         level only governs the kmttg process. -->
+    <root level="error">
+        <appender-ref ref="STDERR"/>
+    </root>
 </configuration>

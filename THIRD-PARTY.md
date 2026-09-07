@@ -16,21 +16,26 @@ These are declared in `build.gradle` and fetched at build time (versions are the
 | FlatLaf | 3.7.1 | Apache License 2.0 | https://www.formdev.com/flatlaf/ |
 | MigLayout (Swing) | 11.4.3 | BSD 3-Clause License | https://www.miglayout.com/ |
 | jmDNS | 3.6.3 | Apache License 2.0 | https://github.com/jmdns/jmdns |
+| Apache Commons Codec | 1.22.1 | Apache License 2.0 | https://commons.apache.org/proper/commons-codec/ |
+| SLF4J API | 2.0.19 | MIT License | https://www.slf4j.org/ |
+| Apache Commons CLI | 1.11.0 | Apache License 2.0 | https://commons.apache.org/proper/commons-cli/ |
+| Logback Classic / Core | 1.6.3 | EPL 1.0 / LGPL 2.1 | https://logback.qos.ch/ |
 
-## Bundled in `lib/tivo-libre.jar`
+Commons Codec and SLF4J come in transitively with TivoLibre. Commons CLI and Logback are there for
+TivoLibre's `DecoderApp`, which kmttg runs as a separate process out of `kmttg.jar`; nothing in
+kmttg compiles against them.
 
-`tivo-libre.jar` is a kmttg-specific TiVo recording decoder that is not published to
-Maven Central, so it is committed to the repository. It is an "uber" jar that also
-bundles the following libraries:
+## TivoLibre, the TiVo recording decoder
+
+TivoLibre is Todd Kulesza's project at https://github.com/fflewddur/tivolibre, itself derived from
+Jeremy Drake's TivoDecode 0.4.4. kmttg consumes the maintained fork at
+https://github.com/lart2150/tivolibre, which is published as `io.github.lart2150:tivo-libre` from
+that repository's `maven` branch rather than to Maven Central. Same authorship, different
+coordinate.
 
 | Library | Version | License | Project |
 | --- | --- | --- | --- |
-| TivoLibre | (bundled) | refer to project | https://github.com/fflewddur/tivolibre |
-| Apache Commons CLI | 1.3.1 | Apache License 2.0 | https://commons.apache.org/proper/commons-cli/ |
-| Apache Commons Codec | 1.10 | Apache License 2.0 | https://commons.apache.org/proper/commons-codec/ |
-| SLF4J API | 1.7.21 | MIT License | https://www.slf4j.org/ |
-| Logback Classic | 1.1.7 | EPL 1.0 / LGPL 2.1 | https://logback.qos.ch/ |
-| Logback Core | 1.1.7 | EPL 1.0 / LGPL 2.1 | https://logback.qos.ch/ |
+| TivoLibre | 0.8.0 | GNU General Public License v3 | https://github.com/fflewddur/tivolibre |
 
 ## Bundled in `release/web/`
 
@@ -47,6 +52,4 @@ Served by the built-in web server and committed to the repository.
 | --- | --- | --- |
 | Gradle (wrapper) | Apache License 2.0 | https://gradle.org/ |
 
-Full license texts are available from each project at the URLs above. The Apache
-Commons license/notice files are also included inside `tivo-libre.jar` under
-`META-INF/`.
+Full license texts are available from each project at the URLs above.
