@@ -1,0 +1,78 @@
+[
+ {
+  "type": "clipMetadataAdjust",
+  "response": {
+   "authorId": "kinetiq_program_segments_1.2",
+   "channelAffiliate": "ABC Affiliate",
+   "channelNumber": "1200",
+   "channelSourceType": "cable",
+   "channelStationId": "tivo:st.69048654",
+   "clipMetadataId": "tivo:cm.1636994",
+   "contentEpisodeNumber": 1,
+   "contentId": "tivo:ct.549894442",
+   "contentSeasonNumber": 35,
+   "contentSubtitle": "Premiere: Night One",
+   "contentTitle": "Dancing With the Stars",
+   "createDate": "1970-01-01",
+   "description": "version 1.0",
+   "offerStartTime": "2026-09-16 00:00:00",
+   "segment": [
+    {
+     "endOffset": "912511",
+     "keyword": [
+      "AUTO_SKIP_MODE"
+     ],
+     "startOffset": "-27739",
+     "type": "clipSegment"
+    },
+    {
+     "endOffset": "1655561",
+     "startOffset": "1107328",
+     "type": "clipSegment"
+    },
+    {
+     "endOffset": "2401272",
+     "startOffset": "1897332",
+     "type": "clipSegment"
+    },
+    {
+     "endOffset": "3152080",
+     "startOffset": "2641312",
+     "type": "clipSegment"
+    },
+    {
+     "endOffset": "4198476",
+     "startOffset": "3392683",
+     "type": "clipSegment"
+    },
+    {
+     "endOffset": "4874170",
+     "startOffset": "4378343",
+     "type": "clipSegment"
+    },
+    {
+     "endOffset": "5606540",
+     "startOffset": "5099096",
+     "type": "clipSegment"
+    },
+    {
+     "endOffset": "6351373",
+     "startOffset": "5811920",
+     "type": "clipSegment"
+    },
+    {
+     "endOffset": "6726666",
+     "startOffset": "6508240",
+     "type": "clipSegment"
+    },
+    {
+     "endOffset": "7232203",
+     "startOffset": "6861410",
+     "type": "clipSegment"
+    }
+   ],
+   "segmentType": "adSkip",
+   "type": "clipMetadata"
+  }
+ }
+]

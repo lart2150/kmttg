@@ -1,0 +1,48 @@
+[
+ {
+  "type": "clipMetadataAdjust",
+  "response": {
+   "authorId": "kinetiq_program_segments_1.2",
+   "channelAffiliate": "ABC Affiliate",
+   "channelNumber": "1200",
+   "channelSourceType": "cable",
+   "channelStationId": "tivo:st.69048654",
+   "clipMetadataId": "tivo:cm.1636994",
+   "contentEpisodeNumber": 1,
+   "contentId": "tivo:ct.549894442",
+   "contentSeasonNumber": 35,
+   "contentSubtitle": "Padded segment list",
+   "contentTitle": "Dancing With the Stars",
+   "createDate": "1970-01-01",
+   "description": "version 1.0",
+   "offerStartTime": "2026-09-16 00:00:00",
+   "segment": [
+    {
+     "startOffset": "4115586",
+     "endOffset": "4751201",
+     "type": "clipSegment",
+     "keyword": [
+      "AUTO_SKIP_MODE"
+     ]
+    },
+    {
+     "startOffset": "4916182",
+     "endOffset": "5338562",
+     "type": "clipSegment"
+    },
+    {
+     "startOffset": "7673916",
+     "endOffset": "7726162",
+     "type": "clipSegment"
+    },
+    {
+     "startOffset": "0",
+     "endOffset": "0",
+     "type": "clipSegment"
+    }
+   ],
+   "segmentType": "adSkip",
+   "type": "clipMetadata"
+  }
+ }
+]

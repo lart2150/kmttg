@@ -93,6 +93,21 @@ public class MkvMuxer {
    private static final long TAG_NAME          = 0x45A3L;
    private static final long TAG_STRING        = 0x4487L;
 
+   private static final long CHAPTERS          = 0x1043A770L;
+   private static final long EDITION_ENTRY     = 0x45B9L;
+   private static final long EDITION_UID       = 0x45BCL;
+   private static final long EDITION_HIDDEN    = 0x45BDL;
+   private static final long EDITION_DEFAULT   = 0x45DBL;
+   private static final long CHAPTER_ATOM      = 0xB6L;
+   private static final long CHAPTER_UID       = 0x73C4L;
+   private static final long CHAPTER_START     = 0x91L;
+   private static final long CHAPTER_END       = 0x92L;
+   private static final long CHAPTER_HIDDEN    = 0x98L;
+   private static final long CHAPTER_ENABLED   = 0x4598L;
+   private static final long CHAPTER_DISPLAY   = 0x80L;
+   private static final long CHAP_STRING       = 0x85L;
+   private static final long CHAP_LANGUAGE     = 0x437CL;
+
    private static final long ATTACHMENTS       = 0x1941A469L;
    private static final long ATTACHED_FILE     = 0x61A7L;
    private static final long FILE_NAME         = 0x466EL;
@@ -141,6 +156,21 @@ public class MkvMuxer {
       }
    }
 
+   // Times are milliseconds on the same rebased clock as addSample, converted to the
+   // nanoseconds Matroska wants at write time. ChapterTimeStart is one of the few elements
+   // the spec does NOT scale by TimestampScale, so it cannot share the millisecond path.
+   public static class Chapter {
+      public final long startMs;
+      public final long endMs;
+      public final String name;
+
+      public Chapter(long startMs, long endMs, String name) {
+         this.startMs = startMs;
+         this.endMs = endMs;
+         this.name = name;
+      }
+   }
+
    private static class Attachment {
       String name;
       String mimeType;
@@ -175,6 +205,7 @@ public class MkvMuxer {
    private int cueTrack = -1;
 
    private final List<Tag> tags = new ArrayList<Tag>();
+   private final List<Chapter> chapters = new ArrayList<Chapter>();
    private final List<Attachment> attachments = new ArrayList<Attachment>();
    // Offsets of the SeekPosition values reserved in the SeekHead, in write order
    private final List<long[]> seekPatch = new ArrayList<long[]>();   // {fileOffset, elementId}
@@ -195,6 +226,11 @@ public class MkvMuxer {
 
    public void addTags(List<Tag> list) {
       for (Tag t : list) addTag(t);
+   }
+
+   public void addChapters(List<Chapter> list) {
+      requireUnwritten();
+      chapters.addAll(list);
    }
 
    public void addAttachment(String name, String mimeType, byte[] data) {
@@ -290,6 +326,7 @@ public class MkvMuxer {
       ids.add(TRACKS);
       ids.add(CUES);
       if (! tags.isEmpty())        ids.add(TAGS);
+      if (! chapters.isEmpty())    ids.add(CHAPTERS);
       if (! attachments.isEmpty()) ids.add(ATTACHMENTS);
 
       EbmlWriter body = new EbmlWriter();
@@ -469,6 +506,7 @@ public class MkvMuxer {
       patchSeek(CUES, cuesPos);
 
       writeTags();
+      writeChapters();
       writeAttachments();
 
       long end = file.getFilePointer();
@@ -508,6 +546,73 @@ public class MkvMuxer {
       buf.writeMaster(TAGS, all.toByteArray());
       buf.writeTo(file);
       patchSeek(TAGS, pos);
+   }
+
+   // Clamping lives here rather than in the caller because chapters have to be declared
+   // before the header - the SeekHead reserves their entry - and the duration is not known
+   // until the last cluster is written. SkipMode offsets come from a window that runs past
+   // both ends of the recording, so without this a player gets chapters outside the file.
+   private void writeChapters() throws IOException {
+      if (chapters.isEmpty()) return;
+
+      // Clamp first, then drop what collapsed: a SkipMode window overhangs both ends of the
+      // recording, so without this a truncated or short file ends up with a run of zero
+      // length chapters in the menu.
+      List<Chapter> kept = new ArrayList<Chapter>();
+      for (Chapter c : chapters) {
+         long start = clampTime(c.startMs, 0);
+         long end   = clampTime(c.endMs, start);
+         if (end > start) kept.add(new Chapter(start, end, c.name));
+      }
+      // Something has to be written even if everything collapsed: the SeekHead reserved an
+      // entry for this element back in the header, and an empty Chapters would leave that
+      // entry pointing at zero. Deliberately NOT the first chapter's name: everything
+      // collapsing means the marks did not describe this recording, and calling the whole
+      // file "Segment 1" states something about it that is not true.
+      if (kept.isEmpty()) {
+         kept.add(new Chapter(0, lastTimestamp, "Chapter 1"));
+      }
+
+      EbmlWriter atoms = new EbmlWriter();
+      long uid = 1;
+      for (Chapter c : kept) {
+         long start = c.startMs;
+         long end   = c.endMs;
+
+         EbmlWriter display = new EbmlWriter();
+         display.writeString(CHAP_STRING, c.name);
+         display.writeString(CHAP_LANGUAGE, "eng");
+
+         EbmlWriter atom = new EbmlWriter();
+         atom.writeUInt(CHAPTER_UID, uid++);
+         atom.writeUInt(CHAPTER_START, start * 1000000);
+         atom.writeUInt(CHAPTER_END, end * 1000000);
+         atom.writeUInt(CHAPTER_HIDDEN, 0);
+         atom.writeUInt(CHAPTER_ENABLED, 1);
+         atom.writeMaster(CHAPTER_DISPLAY, display.toByteArray());
+         atoms.writeMaster(CHAPTER_ATOM, atom.toByteArray());
+      }
+
+      EbmlWriter edition = new EbmlWriter();
+      edition.writeUInt(EDITION_UID, 1);
+      edition.writeUInt(EDITION_HIDDEN, 0);
+      edition.writeUInt(EDITION_DEFAULT, 1);
+      edition.writeRaw(atoms.toByteArray());
+
+      EbmlWriter all = new EbmlWriter();
+      all.writeMaster(EDITION_ENTRY, edition.toByteArray());
+
+      long pos = file.getFilePointer() - segmentDataStart;
+      buf.reset();
+      buf.writeMaster(CHAPTERS, all.toByteArray());
+      buf.writeTo(file);
+      patchSeek(CHAPTERS, pos);
+   }
+
+   // Chapter times are bounded by the recording: at least floor, at most the last timestamp.
+   private long clampTime(long ms, long floor) {
+      long v = ms < floor ? floor : ms;
+      return v > lastTimestamp ? lastTimestamp : v;
    }
 
    // Artwork is an attachment in Matroska rather than a tag, which is why cover art does not

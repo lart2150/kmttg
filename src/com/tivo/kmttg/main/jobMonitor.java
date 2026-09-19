@@ -364,6 +364,18 @@ public class jobMonitor {
       if (entry.containsKey("SeriesId"))      job.seriesId = entry.get("SeriesId");
       if (entry.containsKey("ProgramId"))     job.ProgramId = entry.get("ProgramId");
       if (entry.containsKey("contentId"))     job.contentId = entry.get("contentId");
+      if (entry.containsKey("recordingId"))   job.recordingId = entry.get("recordingId");
+      if (entry.containsKey("clipMetadataId")) job.clipMetadataId = entry.get("clipMetadataId");
+      // offerId is how AutoSkip recognises the recording being played back, so an entry
+      // saved without it is listed in the Skip table but never fires.
+      if (entry.containsKey("offerId"))       job.offerId = entry.get("offerId");
+      if (entry.containsKey("duration")) {
+         try {
+            job.recordingDurationMs = Long.parseLong(entry.get("duration"));
+         } catch (NumberFormatException e) {
+            job.recordingDurationMs = 0;
+         }
+      }
       if (entry.containsKey("collectionId"))  job.collectionId = entry.get("collectionId");
    }
 
@@ -1722,7 +1734,11 @@ public class jobMonitor {
          active = false;
       if (job.type.equals("vrdreview"))
          active = false;
-      String[] a = {"atomic", "autotune", "javametadata", "metadata", "push", "remote", "slingbox"};
+      // skipfetch is here for the same reason as remote and autotune: it is a tivo.com round
+      // trip per recording and nothing else, so holding the single MaxJobs slot for the many
+      // minutes a first run takes would stall every queued decrypt, encode and remux.
+      String[] a = {"atomic", "autotune", "javametadata", "metadata", "push", "remote",
+            "skipfetch", "slingbox"};
       for (int i=0; i<a.length; ++i) {
          if (job.type.equals(a[i]))
             active = false;
