@@ -42,7 +42,7 @@ import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.httpserver.kmttgServer;
 
 public class config {
-   public static String kmttg = "kmttg v2.11.0-rc1";
+   public static String kmttg = "kmttg v2.11.0";
    
    // encoding related
    public static String encProfDir = "";
