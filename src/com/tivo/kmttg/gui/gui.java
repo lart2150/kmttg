@@ -376,11 +376,6 @@ public class gui {
          // Tasks
          metadata = new JCheckBox("metadata"); metadata.setSelected(false);
          decrypt = new JCheckBox("decrypt"); decrypt.setSelected(true);
-         decrypt.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               refreshOptions(false);
-            }
-         });
          qsfix = new JCheckBox("QS Fix"); qsfix.setSelected(false);
          qsfix.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -395,7 +390,8 @@ public class gui {
          encode = new JCheckBox("encode"); encode.setSelected(false);
          mkv = new JCheckBox("MKV"); mkv.setSelected(false);
          mkv.setToolTipText("Remux to Matroska in kmttg, with no external encoder. "
-            + "Needs the decrypt task and tivolibre decryption.");
+            + "Needs TS downloads and tivolibre decryption. Leave decrypt unchecked and no "
+            + "transport stream is written at all - the download feeds the muxer directly.");
          mkv.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                refreshOptions(false);
