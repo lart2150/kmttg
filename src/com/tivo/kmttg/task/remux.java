@@ -152,15 +152,23 @@ public class remux extends baseTask implements Serializable {
       if (job.contentId == null) return;
       try {
          ClipSegments.Result result = ClipSegments.get(
-            job.tivoName, job.contentId, job.recordingId, job.clipMetadataId);
+            job.tivoName, job.contentId, job.recordingId, job.clipMetadataId, job.offerId);
          if (result == null || result.segments.isEmpty()) return;
          // Same check the AutoSkip write makes. Without it, segments anchored outside the
          // recording all clamp away in the muxer and the "keep at least one" fallback leaves
          // a single meaningless chapter spanning the whole file.
-         String reason = ClipSegments.rejectReason(result.segments, job.recordingDurationMs);
-         if (reason != null) {
-            ClipSegments.warnRejected(job.title, reason);
-            return;
+         // Records the verdict when it does not fit, so the fetch job stops asking for this
+         // recording on every NPL refresh. Only tivo.com data is worth remembering: AutoSkip
+         // data that fails is a local problem, not something re-fetching would fix.
+         if (result.source == ClipSegments.SOURCE_SKIPMODE) {
+            if (! ClipSegments.remember(job.contentId, job.clipMetadataId, job.title,
+                  result.segments, job.recordingDurationMs)) return;
+         } else {
+            String reason = ClipSegments.rejectReason(result.segments, job.recordingDurationMs);
+            if (reason != null) {
+               ClipSegments.warnRejected(job.title, reason);
+               return;
+            }
          }
          sink.setChapters(buildChapters(result.segments));
          log.print("Embedding " + result.segments.size() + " SkipMode segments as chapters");

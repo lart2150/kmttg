@@ -1,0 +1,122 @@
+[
+ {
+  "type": "clipMetadataSearch",
+  "response": {
+   "type": "clipMetadataList",
+   "isTop": true,
+   "isBottom": true,
+   "clipMetadata": [
+    {
+     "clipMetadataId": "tivo:cm.1524227",
+     "contentId": "tivo:ct.537510368",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-05 02:30:00",
+     "createDate": "2026-03-05 04:20:54",
+     "channelStationId": "tivo:st.69021345",
+     "channelNumber": "1209",
+     "isRevoked": false,
+     "type": "clipMetadata"
+    },
+    {
+     "clipMetadataId": "tivo:cm.1524936",
+     "contentId": "tivo:ct.537510368",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-05 02:30:00",
+     "createDate": "2026-03-06 04:25:08",
+     "channelStationId": "tivo:st.69021345",
+     "channelNumber": "1209",
+     "isRevoked": false,
+     "type": "clipMetadata"
+    },
+    {
+     "clipMetadataId": "tivo:cm.1526679",
+     "contentId": "tivo:ct.537510368",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-09 03:00:00",
+     "createDate": "2026-03-09 04:55:16",
+     "channelStationId": "tivo:st.117220691",
+     "channelNumber": "741",
+     "isRevoked": false,
+     "type": "clipMetadata"
+    },
+    {
+     "clipMetadataId": "tivo:cm.1527035",
+     "contentId": "tivo:ct.537510368",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-09 23:00:00",
+     "createDate": "2026-03-10 00:55:04",
+     "channelStationId": "tivo:st.69032459",
+     "channelNumber": "118",
+     "isRevoked": false,
+     "type": "clipMetadata"
+    },
+    {
+     "clipMetadataId": "tivo:cm.1527275",
+     "contentId": "tivo:ct.537510368",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-09 03:00:00",
+     "createDate": "2026-03-10 05:00:15",
+     "channelStationId": "tivo:st.117220691",
+     "channelNumber": "741",
+     "isRevoked": false,
+     "type": "clipMetadata"
+    },
+    {
+     "clipMetadataId": "tivo:cm.1527634",
+     "contentId": "tivo:ct.537510368",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-09 23:00:00",
+     "createDate": "2026-03-11 00:55:03",
+     "channelStationId": "tivo:st.69032459",
+     "channelNumber": "118",
+     "isRevoked": false,
+     "type": "clipMetadata"
+    },
+    {
+     "clipMetadataId": "tivo:cm.1527765",
+     "contentId": "tivo:ct.537510368",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-11 01:00:00",
+     "createDate": "2026-03-11 02:55:14",
+     "channelStationId": "tivo:st.69032459",
+     "channelNumber": "118",
+     "isRevoked": false,
+     "type": "clipMetadata"
+    },
+    {
+     "clipMetadataId": "tivo:cm.1528228",
+     "contentId": "tivo:ct.537510368",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-11 22:00:00",
+     "createDate": "2026-03-11 23:55:10",
+     "channelStationId": "tivo:st.117220691",
+     "channelNumber": "741",
+     "isRevoked": false,
+     "type": "clipMetadata"
+    },
+    {
+     "clipMetadataId": "tivo:cm.1528466",
+     "contentId": "tivo:ct.537510368",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-11 01:00:00",
+     "createDate": "2026-03-12 03:00:05",
+     "channelStationId": "tivo:st.69032459",
+     "channelNumber": "118",
+     "isRevoked": false,
+     "type": "clipMetadata"
+    },
+    {
+     "clipMetadataId": "tivo:cm.1528948",
+     "contentId": "tivo:ct.537510368",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-11 22:00:00",
+     "createDate": "2026-03-12 23:55:04",
+     "channelStationId": "tivo:st.117220691",
+     "channelNumber": "741",
+     "isRevoked": false,
+     "type": "clipMetadata"
+    }
+   ]
+  }
+ }
+]

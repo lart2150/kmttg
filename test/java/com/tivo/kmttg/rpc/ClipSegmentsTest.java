@@ -1,6 +1,7 @@
 package com.tivo.kmttg.rpc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,9 +10,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +34,10 @@ public class ClipSegmentsTest {
 
    @TempDir
    Path work;
+
+   // The offerId of the airing the clipmetadata_search fixture was captured against.
+   private static final String RECORDED_AIRING =
+      "tivo:of.ctd.10420179.2-1.terrestrial.2026-03-05-02-30-00.5400";
 
    private String savedProgramDir;
    private String savedUser;
@@ -72,7 +79,7 @@ public class ClipSegmentsTest {
    @Test
    void autoSkipEntryIsUsedAndReportedAsSuch() throws Exception {
       writeAutoSkipEntry("tivo:ct.1");
-      ClipSegments.Result r = ClipSegments.get("Bolt", "tivo:ct.1", "tivo:rc.1", "tivo:cm.1");
+      ClipSegments.Result r = ClipSegments.get("Bolt", "tivo:ct.1", "tivo:rc.1", "tivo:cm.1", RECORDED_AIRING);
       assertNotNull(r);
       assertEquals(ClipSegments.SOURCE_AUTOSKIP, r.source);
       assertEquals(2, r.segments.size());
@@ -88,21 +95,21 @@ public class ClipSegmentsTest {
       // Two of the six writers of this table are comskip review and VideoReDo review, so the
       // entry may be a correction somebody made by hand.
       writeAutoSkipEntry("tivo:ct.1");
-      ClipSegments.Result r = ClipSegments.get("Bolt", "tivo:ct.1", "tivo:rc.1", "tivo:cm.1");
+      ClipSegments.Result r = ClipSegments.get("Bolt", "tivo:ct.1", "tivo:rc.1", "tivo:cm.1", RECORDED_AIRING);
       assertEquals(ClipSegments.SOURCE_AUTOSKIP, r.source);
    }
 
    @Test
    void noAutoSkipAndNoCredentialsMeansNoSegments() {
       // The quiet path: chapters are simply omitted rather than approximated.
-      assertNull(ClipSegments.get("Bolt", "tivo:ct.1", "tivo:rc.1", "tivo:cm.1"));
+      assertNull(ClipSegments.get("Bolt", "tivo:ct.1", "tivo:rc.1", "tivo:cm.1", RECORDED_AIRING));
    }
 
    @Test
    void missingIdsNeverReachTheNetwork() {
-      assertNull(ClipSegments.get("Bolt", null, "tivo:rc.1", "tivo:cm.1"));
-      assertNull(ClipSegments.get("Bolt", "tivo:ct.1", null, "tivo:cm.1"));
-      assertNull(ClipSegments.get("Bolt", "tivo:ct.1", "tivo:rc.1", null));
+      assertNull(ClipSegments.get("Bolt", null, "tivo:rc.1", "tivo:cm.1", RECORDED_AIRING));
+      assertNull(ClipSegments.get("Bolt", "tivo:ct.1", null, "tivo:cm.1", RECORDED_AIRING));
+      assertNull(ClipSegments.get("Bolt", "tivo:ct.1", "tivo:rc.1", null, RECORDED_AIRING));
    }
 
    @Test
@@ -158,6 +165,74 @@ public class ClipSegmentsTest {
       assertNull(ClipSegments.fromClipMetadataAdjust(r, "tivo:rc.1", "tivo:cm.1"));
    }
 
+   @Test
+   void theRecordedAiringIsPickedNotWhicheverWasAuthoredFirst() throws Exception {
+      // Ten clipMetadata for one episode, five airings over a week on three stations. The
+      // fixture's first entry is the 03-05 airing, so match against the 03-09 one to prove
+      // the offerStartTime is doing the work rather than the list order.
+      ReplayRemote r = new ReplayRemote(Fixtures.load("clipmetadata_search.json"));
+      assertEquals("tivo:cm.1526679", ClipSegments.chooseForAiring(r, "tivo:ct.537510368",
+         "tivo:of.ctd.1.2-1.terrestrial.2026-03-09-03-00-00.5400", "tivo:cm.fallback"));
+   }
+
+   @Test
+   void amongCopiesOfOneAiringTheFirstListedWins() throws Exception {
+      // Each airing is authored two to four times over two days with identical offsets, and
+      // the most recent copy is routinely one clipMetadataAdjust answers "Requested clip
+      // metadata is not found" for. Preferring the newest cost two recordings their data.
+      ReplayRemote r = new ReplayRemote(Fixtures.load("clipmetadata_search.json"));
+      assertEquals("tivo:cm.1524227",
+         ClipSegments.chooseForAiring(r, "tivo:ct.537510368", RECORDED_AIRING, "tivo:cm.fallback"));
+   }
+
+   @Test
+   void dataForOtherAiringsOnlyIsStillUsed() throws Exception {
+      // Refusing here was tried and was wrong: clipMetadataAdjust re-anchors whatever clip it
+      // is handed onto the recording asked for, so a clip authored for a different broadcast -
+      // even nine years earlier - still comes back fitting. Refusing cost 20 working
+      // recordings on a live library. Matching an airing is a refinement, never a veto.
+      ReplayRemote r = new ReplayRemote(Fixtures.load("clipmetadata_search.json"));
+      assertEquals("tivo:cm.fallback", ClipSegments.chooseForAiring(r, "tivo:ct.537510368",
+         "tivo:of.ctd.10420179.2-1.terrestrial.2026-06-01-01-00-00.5400", "tivo:cm.fallback"));
+   }
+
+   @Test
+   void anAiringAMinuteOffIsStillTheSameBroadcast() throws Exception {
+      // Guide data and the clip author do not always agree to the second, so the match has
+      // slack. Two minutes is far short of the gap between reruns.
+      ReplayRemote r = new ReplayRemote(Fixtures.load("clipmetadata_search.json"));
+      assertEquals("tivo:cm.1524227", ClipSegments.chooseForAiring(r, "tivo:ct.537510368",
+         "tivo:of.ctd.10420179.2-1.terrestrial.2026-03-05-02-31-00.5400", "tivo:cm.fallback"));
+   }
+
+   @Test
+   void anOfferIdWithoutATimestampKeepsTheOldBehaviour() throws Exception {
+      // Cannot tell which airing this is, so fall back to what the NPL offered rather than
+      // refusing - an unreadable offerId must be no worse than before, not a regression.
+      ReplayRemote r = new ReplayRemote(Fixtures.load("clipmetadata_search.json"));
+      assertEquals("tivo:cm.fallback",
+         ClipSegments.chooseForAiring(r, "tivo:ct.1", null, "tivo:cm.fallback"));
+      assertEquals("tivo:cm.fallback",
+         ClipSegments.chooseForAiring(r, "tivo:ct.1", "tivo:of.ctd.no.timestamp", "tivo:cm.fallback"));
+      assertEquals(0, r.issued("clipMetadataSearch"), "nothing to match on, so do not ask");
+   }
+
+   @Test
+   void airingTimesAreComparedInUtc() {
+      // Both stamps are UTC. Reading either as local time would shift every comparison by the
+      // offset, which for a show on the hour is enough to match a different airing entirely.
+      TimeZone saved = TimeZone.getDefault();
+      try {
+         TimeZone.setDefault(TimeZone.getTimeZone("America/Chicago"));
+         assertEquals(Instant.parse("2026-03-05T02:30:00Z").toEpochMilli(),
+            ClipSegments.offerStartTime(RECORDED_AIRING));
+      } finally {
+         TimeZone.setDefault(saved);
+      }
+      assertEquals(0, ClipSegments.offerStartTime(null));
+      assertEquals(0, ClipSegments.offerStartTime("tivo:of.ctd.no.timestamp"));
+   }
+
    private static Hashtable<String,String> npl(String contentId, String clipMetadataId,
          String recordingId) {
       Hashtable<String,String> e = new Hashtable<String,String>();
@@ -191,6 +266,43 @@ public class ClipSegmentsTest {
       // empty rather than merely small.
       assertTrue(ClipSegments.missingFromAutoSkip(npl).isEmpty());
       assertTrue(ClipSegments.missingFromAutoSkip(null).isEmpty());
+   }
+
+   @Test
+   void aRejectIsRememberedUnderTheIdTheScanWillLookUp() throws Exception {
+      // The reject cache is written by the fetch and read by the scan, and they have to agree
+      // on the key or nothing is ever skipped. The fetch picks an airing-matched id that is
+      // normally NOT the one on the NPL entry, so keying the row on the chosen id silently
+      // defeated the whole cache: every refused recording came back on every refresh.
+      Hashtable<String,String> e = npl("tivo:ct.adrift", "tivo:cm.oldest", "tivo:rc.1");
+      e.put("offerId", RECORDED_AIRING);
+      e.put("duration", "1800000");   // segments land hours past this, so it is refused
+
+      ReplayRemote r = new ReplayRemote(Fixtures.load("clipmetadata_search_then_adjust.json"));
+      assertFalse(ClipSegments.fetchOne(r, "Bolt", e), "adrift segments must not be written");
+      assertEquals("tivo:cm.oldest", SkipModeRejects.load().get("tivo:ct.adrift"));
+
+      List<Hashtable<String,String>> npl = new ArrayList<Hashtable<String,String>>();
+      npl.add(e);
+      assertTrue(ClipSegments.missingFromAutoSkip(npl).isEmpty(),
+         "a remembered reject must not be queued again on the next refresh");
+   }
+
+   @Test
+   void aPreferredClipThatWillNotAdjustFallsBackToTheNplsOwn() throws Exception {
+      // clipMetadataSearch lists ids that clipMetadataAdjust then refuses with "Requested clip
+      // metadata is not found". Two real recordings lost their data that way: the preferred
+      // clip 404s and the one on the NPL entry, a copy of the same airing, adjusts fine.
+      Hashtable<String,String> e = npl("tivo:ct.fb", "tivo:cm.onnpl", "tivo:rc.1");
+      e.put("offerId", RECORDED_AIRING);
+      e.put("duration", "1800000");
+
+      ReplayRemote r = new ReplayRemote(Fixtures.load("clipmetadata_adjust_fallback.json"));
+      assertTrue(ClipSegments.fetchOne(r, "Bolt", e), "the fallback's segments must be saved");
+      assertEquals(2, r.issued("clipMetadataAdjust"), "the refused id then the NPL's");
+      assertEquals("tivo:cm.onnpl",
+         r.lastRequest("clipMetadataAdjust").getString("clipMetadataId"));
+      assertFalse(SkipManager.getEntry("tivo:ct.fb").isEmpty(), "AutoSkip entry written");
    }
 
    @Test
@@ -343,7 +455,7 @@ public class ClipSegmentsTest {
       assertTrue(ini.contains("offerId=tivo:of.1"), "offerId must be stored: " + ini);
 
       // And it reads back as the AutoSkip tier, which is the point of writing it.
-      ClipSegments.Result back = ClipSegments.get("Bolt", "tivo:ct.1", "tivo:rc.1", "tivo:cm.1");
+      ClipSegments.Result back = ClipSegments.get("Bolt", "tivo:ct.1", "tivo:rc.1", "tivo:cm.1", RECORDED_AIRING);
       assertEquals(ClipSegments.SOURCE_AUTOSKIP, back.source);
       assertEquals(10, back.segments.size());
       assertEquals(0, back.segments.get(0).startMs);
