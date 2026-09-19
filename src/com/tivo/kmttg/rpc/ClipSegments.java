@@ -18,11 +18,17 @@
  */
 package com.tivo.kmttg.rpc;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
@@ -78,7 +84,7 @@ public class ClipSegments {
    // Returns null rather than an empty Result when there are no segments to be had, so a
    // caller can tell "nothing available" from "a show with no breaks".
    public static Result get(String tivoName, String contentId, String recordingId,
-         String clipMetadataId) {
+         String clipMetadataId, String offerId) {
       debug.print("tivoName=" + tivoName + " contentId=" + contentId);
       if (contentId == null) return null;
 
@@ -95,12 +101,84 @@ public class ClipSegments {
       try {
          r = new Remote(tivoName, true);
          if (! r.success) return null;
-         List<Segment> adjusted = fromClipMetadataAdjust(r, recordingId, clipMetadataId);
+         String chosen = chooseForAiring(r, contentId, offerId, clipMetadataId);
+         List<Segment> adjusted = adjustPreferring(r, recordingId, chosen, clipMetadataId);
          if (adjusted == null) return null;
          log.print("Using tivo.com SkipMode data for chapters (" + adjusted.size() + " segments)");
          return new Result(adjusted, SOURCE_SKIPMODE);
       } finally {
          if (r != null && r.success) r.disconnect();
+      }
+   }
+
+   // Correct pairings match to the second; one was seen a minute off. Far tighter than the
+   // months between reruns.
+   private static final long AIRING_SLACK_MS = 120000;
+
+   // Which clipMetadata to adjust, when tivo.com holds more than one - it authors one per
+   // airing, and the recording's own list carries no offerStartTime, so the first entry is
+   // just whichever was authored earliest. A refinement only, never a veto: clipMetadataAdjust
+   // re-anchors whatever clip it is handed onto the recording asked for, so another airing's
+   // clip still fits and must not be refused. Matching wins ~2 s on the interior boundaries,
+   // up to ~30 s on the first one, and the trailing end-tag segment.
+   static String chooseForAiring(Remote r, String contentId, String offerId, String fallback) {
+      long scheduled = offerStartTime(offerId);
+      if (scheduled == 0) return fallback;
+      try {
+         JSONObject json = new JSONObject();
+         json.put("contentId", contentId);
+         JSONObject result = r.Command("clipMetadataSearch", json);
+         if (result == null || ! result.has("clipMetadata")) return fallback;
+         JSONArray a = result.getJSONArray("clipMetadata");
+         String best = null;
+         long bestDelta = 0;
+         for (int i=0; i<a.length(); ++i) {
+            JSONObject clip = a.getJSONObject(i);
+            if (! clip.has("clipMetadataId") || ! clip.has("offerStartTime")) continue;
+            if (clip.has("segmentType") && ! clip.getString("segmentType").equals("adSkip"))
+               continue;
+            long start = parseUtc(clip.getString("offerStartTime"), "yyyy-MM-dd HH:mm:ss");
+            if (start == 0) continue;
+            long delta = Math.abs(start - scheduled);
+            if (delta > AIRING_SLACK_MS) continue;
+            // First listed wins among equals. An airing is authored two to four times over
+            // two days and the copies hold identical offsets, so there is nothing to gain
+            // from preferring the newest - and the newest is routinely the one adjust then
+            // answers "Requested clip metadata is not found" for.
+            if (best == null || delta < bestDelta) {
+               best = clip.getString("clipMetadataId");
+               bestDelta = delta;
+            }
+         }
+         return best == null ? fallback : best;
+      } catch (JSONException e) {
+         log.error("ClipSegments clipMetadataSearch - " + e.getMessage());
+         return fallback;
+      }
+   }
+
+   // The scheduled start embedded in an offerId, as in
+   // tivo:of.ctd.10420179.2-1.terrestrial.2026-03-05-02-30-00.5400. Equals scheduledStartTime
+   // but is already on the NPL entry, so matching costs no extra recordingSearch.
+   private static final Pattern OFFER_TIME =
+      Pattern.compile("\\.(\\d{4}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-\\d{2})(?:\\.|$)");
+
+   static long offerStartTime(String offerId) {
+      if (offerId == null) return 0;
+      Matcher m = OFFER_TIME.matcher(offerId);
+      if (! m.find()) return 0;
+      return parseUtc(m.group(1), "yyyy-MM-dd-HH-mm-ss");
+   }
+
+   // Both stamps are UTC. Reading them as local time would shift every comparison by the
+   // offset and match the wrong airing outside UTC. 0 for unparseable, read as "unknown".
+   private static long parseUtc(String value, String pattern) {
+      try {
+         SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+         return sdf.parse(value).getTime();
+      } catch (ParseException e) {
+         return 0;
       }
    }
 
@@ -266,6 +344,17 @@ public class ClipSegments {
       return null;
    }
 
+   // Validates and, on failure, remembers the verdict so the same clipMetadata is not fetched
+   // again on every refresh. Returns true when the segments are usable.
+   public static boolean remember(String contentId, String clipMetadataId, String title,
+         List<Segment> segments, long durationMs) {
+      String reason = rejectReason(segments, durationMs);
+      if (reason == null) return true;
+      warnRejected(title, reason);
+      SkipModeRejects.add(contentId, clipMetadataId, title, reason);
+      return false;
+   }
+
    public static void warnRejected(String title, String reason) {
       log.warn("Ignoring SkipMode data for '" + title + "': " + reason);
    }
@@ -311,27 +400,65 @@ public class ClipSegments {
             // before the batch started and a download in the meantime may have filled one in.
             if (! SkipManager.getEntry(contentId).isEmpty()) continue;
 
-            List<Segment> segments =
-               fromClipMetadataAdjust(r, e.get("recordingId"), e.get("clipMetadataId"));
-            if (segments == null) {
-               log.warn("No SkipMode data from tivo.com for: " + title);
-            } else if (saveToAutoSkip(contentId, e.get("offerId"), title, tivoName, segments,
-                  durationMs(e.get("duration")))) {
-               // Counted on the write, not the fetch: data that does not fit the recording is
-               // fetched successfully and still stores nothing.
-               saved++;
-            }
-            try {
-               Thread.sleep(PACE_MS);
-            } catch (InterruptedException ie) {
-               Thread.currentThread().interrupt();
-               break;
-            }
+            // Counted on the write, not the fetch: data that does not fit the recording is
+            // fetched successfully and still stores nothing.
+            if (fetchOne(r, tivoName, e)) saved++;
+            if (! pace()) break;
          }
       } finally {
          r.disconnect();
       }
       return saved;
+   }
+
+   // Spacing is per request, not per recording: fetchOne makes two cloud calls, three when the
+   // preferred clip has to fall back, so pacing only the loop would treble the burst rate.
+   // False when interrupted, which is how a cancelled batch stops instead of running on
+   // unpaced - every later sleep would throw straight away and issue its requests back to back.
+   private static boolean pace() {
+      try {
+         Thread.sleep(PACE_MS);
+         return true;
+      } catch (InterruptedException ie) {
+         Thread.currentThread().interrupt();
+         return false;
+      }
+   }
+
+   // Adjust with the preferred clip, falling back to the one the NPL carried when the
+   // preferred one cannot be resolved. clipMetadataSearch lists ids that clipMetadataAdjust
+   // then refuses with "Requested clip metadata is not found", so a refinement has to be able
+   // to hand the fallback back rather than losing the recording.
+   private static List<Segment> adjustPreferring(Remote r, String recordingId, String chosen,
+         String fallback) {
+      List<Segment> segments = fromClipMetadataAdjust(r, recordingId, chosen);
+      if (segments == null && fallback != null && ! fallback.equals(chosen)) {
+         log.warn("clipMetadata " + chosen + " did not adjust, falling back to " + fallback);
+         pace();
+         segments = fromClipMetadataAdjust(r, recordingId, fallback);
+      }
+      return segments;
+   }
+
+   // One recording's fetch. Takes the Remote for the same reason fromClipMetadataAdjust does:
+   // fetchMissing owns the away mode connection, so this is the only part a replayed trace can
+   // drive. Returns whether an AutoSkip entry was written.
+   static boolean fetchOne(Remote r, String tivoName, Hashtable<String,String> e) {
+      String contentId = e.get("contentId"), title = e.get("title");
+      long duration = durationMs(e.get("duration"));
+      String chosen = chooseForAiring(r, contentId, e.get("offerId"), e.get("clipMetadataId"));
+      pace();
+      List<Segment> segments =
+         adjustPreferring(r, e.get("recordingId"), chosen, e.get("clipMetadataId"));
+      if (segments == null) {
+         log.warn("No SkipMode data from tivo.com for: " + title);
+         return false;
+      }
+      // Keyed on the NPL's id, not the one chooseForAiring settled on: the scan that reads
+      // this back only ever sees the NPL's, so storing anything else means the row never
+      // matches and the recording is refetched on every refresh.
+      if (! remember(contentId, e.get("clipMetadataId"), title, segments, duration)) return false;
+      return saveToAutoSkip(contentId, e.get("offerId"), title, tivoName, segments, duration);
    }
 
    // NPL entries carry duration as a msec string. Absent or unparseable means unknown, which
@@ -354,10 +481,14 @@ public class ClipSegments {
       List<Hashtable<String,String>> missing = new ArrayList<Hashtable<String,String>>();
       if (nplEntries == null) return missing;
       Set<String> known = SkipManager.contentIds();
+      Map<String,String> rejected = SkipModeRejects.load();
       for (Hashtable<String,String> e : nplEntries) {
          if (e.get("contentId") == null || e.get("clipMetadataId") == null) continue;
          if (e.get("recordingId") == null) continue;
          if (known.contains(e.get("contentId"))) continue;
+         // Already tried and found not to fit. Compared on the clipMetadataId so replacement
+         // metadata for the same recording still gets a fresh attempt.
+         if (e.get("clipMetadataId").equals(rejected.get(e.get("contentId")))) continue;
          missing.add(e);
       }
       return missing;

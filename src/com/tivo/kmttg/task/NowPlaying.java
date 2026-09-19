@@ -23,7 +23,9 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -33,6 +35,7 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.ClipSegments;
+import com.tivo.kmttg.rpc.SkipModeRejects;
 import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.util.*;
 
@@ -179,6 +182,13 @@ public class NowPlaying extends baseTask implements Serializable {
          log.warn("SkipMode fetch is enabled but no tivo.com login is configured - skipping");
          return;
       }
+      // Drop remembered rejects for recordings that are gone, so the file tracks My Shows.
+      Set<String> live = new HashSet<String>();
+      for (Hashtable<String,String> e : entries) {
+         if (e.get("contentId") != null) live.add(e.get("contentId"));
+      }
+      SkipModeRejects.prune(live);
+
       List<Hashtable<String,String>> missing = ClipSegments.missingFromAutoSkip(entries);
       if (missing.isEmpty()) return;
       log.warn("" + missing.size() + " recording(s) have SkipMode but no AutoSkip data");

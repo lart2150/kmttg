@@ -1,0 +1,60 @@
+[
+ {
+  "type": "clipMetadataSearch",
+  "response": {
+   "type": "clipMetadataList",
+   "isTop": true,
+   "isBottom": true,
+   "clipMetadata": [
+    {
+     "clipMetadataId": "tivo:cm.dead",
+     "contentId": "tivo:ct.fb",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-05 02:30:00",
+     "createDate": "2026-03-05 04:20:54",
+     "type": "clipMetadata"
+    },
+    {
+     "clipMetadataId": "tivo:cm.onnpl",
+     "contentId": "tivo:ct.fb",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-05 02:30:00",
+     "createDate": "2026-03-06 04:25:08",
+     "type": "clipMetadata"
+    }
+   ]
+  }
+ },
+ {
+  "type": "clipMetadataAdjust",
+  "response": {
+   "type": "error",
+   "code": "badArgument",
+   "text": "Requested clip metadata is not found"
+  }
+ },
+ {
+  "type": "clipMetadataAdjust",
+  "response": {
+   "type": "clipMetadata",
+   "clipMetadataId": "tivo:cm.onnpl",
+   "contentId": "tivo:ct.fb",
+   "segmentType": "adSkip",
+   "segment": [
+    {
+     "startOffset": "-27000",
+     "endOffset": "900000",
+     "keyword": [
+      "AUTO_SKIP_MODE"
+     ],
+     "type": "clipSegment"
+    },
+    {
+     "startOffset": "1100000",
+     "endOffset": "1700000",
+     "type": "clipSegment"
+    }
+   ]
+  }
+ }
+]

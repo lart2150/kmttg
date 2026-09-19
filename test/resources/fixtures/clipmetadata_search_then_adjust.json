@@ -1,0 +1,53 @@
+[
+ {
+  "type": "clipMetadataSearch",
+  "response": {
+   "type": "clipMetadataList",
+   "isTop": true,
+   "isBottom": true,
+   "clipMetadata": [
+    {
+     "clipMetadataId": "tivo:cm.oldest",
+     "contentId": "tivo:ct.adrift",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-05 02:30:00",
+     "createDate": "2026-03-05 04:20:54",
+     "type": "clipMetadata"
+    },
+    {
+     "clipMetadataId": "tivo:cm.reissued",
+     "contentId": "tivo:ct.adrift",
+     "segmentType": "adSkip",
+     "offerStartTime": "2026-03-05 02:30:00",
+     "createDate": "2026-03-06 04:25:08",
+     "type": "clipMetadata"
+    }
+   ]
+  }
+ },
+ {
+  "type": "clipMetadataAdjust",
+  "response": {
+   "type": "clipMetadata",
+   "clipMetadataId": "tivo:cm.reissued",
+   "contentId": "tivo:ct.adrift",
+   "segmentType": "adSkip",
+   "offerStartTime": "2026-03-05 02:30:00",
+   "segment": [
+    {
+     "startOffset": "6140558",
+     "endOffset": "6780355",
+     "keyword": [
+      "AUTO_SKIP_MODE"
+     ],
+     "type": "clipSegment"
+    },
+    {
+     "startOffset": "6976991",
+     "endOffset": "7708345",
+     "type": "clipSegment"
+    }
+   ]
+  }
+ }
+]
