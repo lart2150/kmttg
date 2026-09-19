@@ -158,6 +158,7 @@ public class gui {
    public JCheckBox comcut = null;
    public JCheckBox captions = null;
    public JCheckBox encode = null;
+   public JCheckBox mkv = null;
    public JCheckBox custom = null;
    private textpane textp = null;
    private jobTable jobTab = null;
@@ -366,12 +367,20 @@ public class gui {
                   config.TSDownload = 1;
                else
                   config.TSDownload = 0;
+               // MKV is only available for a TS download, so the tasks row has to be
+               // re-evaluated rather than left showing a choice that no longer applies.
+               refreshOptions(false);
             }
          });
 
          // Tasks
          metadata = new JCheckBox("metadata"); metadata.setSelected(false);
          decrypt = new JCheckBox("decrypt"); decrypt.setSelected(true);
+         decrypt.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               refreshOptions(false);
+            }
+         });
          qsfix = new JCheckBox("QS Fix"); qsfix.setSelected(false);
          qsfix.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -384,6 +393,14 @@ public class gui {
          comcut = new JCheckBox("Ad Cut"); comcut.setSelected(false);
          captions = new JCheckBox("captions"); captions.setSelected(false);
          encode = new JCheckBox("encode"); encode.setSelected(false);
+         mkv = new JCheckBox("MKV"); mkv.setSelected(false);
+         mkv.setToolTipText("Remux to Matroska in kmttg, with no external encoder. "
+            + "Needs the decrypt task and tivolibre decryption.");
+         mkv.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               refreshOptions(false);
+            }
+         });
          custom = new JCheckBox("custom"); custom.setSelected(false);
 
          // Tasks row
@@ -404,6 +421,7 @@ public class gui {
          tasks_panel.add(comcut);
          tasks_panel.add(captions);
          tasks_panel.add(encode);
+         tasks_panel.add(mkv);
          tasks_panel.add(custom);
 
          // Encoding row
@@ -1280,6 +1298,27 @@ public class gui {
          encode.setEnabled(true);
       }
 
+      // The built-in remuxer reads elementary streams from tivolibre's transport stream
+      // decoder, so it needs tivolibre as the decrypter and a TS download. VideoRedo decrypt
+      // can emit a program stream, and a program stream .TiVo goes to a decoder that has no
+      // frame sink at all - the mux would produce an empty file rather than fail.
+      if ( ! encodeConfig.isValidEncodeName(encodeConfig.MUX_PROFILE)
+           || config.tivolibreDecrypt != 1 || config.TSDownload != 1 ) {
+         mkv.setSelected(false);
+         mkv.setEnabled(false);
+      } else {
+         mkv.setEnabled(true);
+      }
+
+      // The remux IS the encode step for that job, so the two cannot both run on one source.
+      // decrypt stays the user's own choice and is what decides whether the .ts is kept: with
+      // it, the decode writes the .ts and feeds the muxer; without it, the muxer is the only
+      // consumer and no transport stream is ever written to disk.
+      if ( mkv.isSelected() ) {
+         encode.setSelected(false);
+         encode.setEnabled(false);
+      }
+
       if ( ! com.tivo.kmttg.task.custom.customCommandExists() ) {
          custom.setSelected(false);
          custom.setEnabled(false);
@@ -1679,6 +1718,7 @@ public class gui {
             ofp.write("<comcut>\n"              + comcut_setting()           + "\n");
             ofp.write("<captions>\n"            + captions_setting()         + "\n");
             ofp.write("<encode>\n"              + encode_setting()           + "\n");
+            ofp.write("<mkv>\n"                 + mkv_setting()              + "\n");
             ofp.write("<custom>\n"              + custom_setting()           + "\n");
             ofp.write("<encode_name>\n"         + config.encodeName          + "\n");
             ofp.write("<toolTips>\n"            + config.toolTips            + "\n");
@@ -1937,6 +1977,14 @@ public class gui {
                   encode.setSelected(true);
                else
                   encode.setSelected(false);
+            }
+            if (key.equals("mkv")) {
+               // refreshOptions runs after loading and clears this again if its prerequisites
+               // are not met, which is the behaviour we want.
+               if (line.matches("1"))
+                  mkv.setSelected(true);
+               else
+                  mkv.setSelected(false);
             }
             if (key.equals("custom")) {
                if (line.matches("1"))
@@ -2674,6 +2722,12 @@ public class gui {
       debug.print("");
       int selected = 0;
       if (encode.isSelected()) selected = 1;
+      return selected;
+   }
+
+   public int mkv_setting() {
+      int selected = 0;
+      if (mkv.isSelected()) selected = 1;
       return selected;
    }
    public int custom_setting() {

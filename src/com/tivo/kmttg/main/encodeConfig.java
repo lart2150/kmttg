@@ -238,6 +238,17 @@ public class encodeConfig {
       return full;      
    }
 
+   // A profile whose command is the KMTTG_MUX keyword runs in-process rather than spawning
+   // an encoder. Nothing substitutes that keyword, so getCommandName hands it back unchanged.
+   public static final String BUILTIN_MUX = "KMTTG_MUX";
+
+   // The profile that routes to the in-process remuxer, shipped in release/encode.
+   public static final String MUX_PROFILE = "mkv_copy";
+
+   public static Boolean isBuiltinMux(String encodeName) {
+      return BUILTIN_MUX.equals(getCommandName(encodeName));
+   }
+
    // Return encoder command
    public static String getCommandName(String encodeName) {
       debug.print("");

@@ -45,6 +45,7 @@ import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.gui.table.nplTable;
 import com.tivo.kmttg.main.auto;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.main.encodeConfig;
 //import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
@@ -503,7 +504,15 @@ public class tivoTab {
                h.put("comskip",    config.gui.comskip.isSelected());
                h.put("comcut",     config.gui.comcut.isSelected());
                h.put("captions",   config.gui.captions.isSelected());
-               h.put("encode",     config.gui.encode.isSelected());
+               if (config.gui.mkv.isSelected()) {
+                  // The remuxer is an encoding profile, so it rides the existing encode path
+                  // rather than a parallel one: jobMonitor routes a KMTTG_MUX profile to the
+                  // in-process remux task by itself.
+                  h.put("encode", true);
+                  h.put("encodeName", encodeConfig.MUX_PROFILE);
+               } else {
+                  h.put("encode",     config.gui.encode.isSelected());
+               }
                //h.put("push",       config.gui.push.isSelected());
                h.put("custom",     config.gui.custom.isSelected());
                jobMonitor.LaunchJobs(h);

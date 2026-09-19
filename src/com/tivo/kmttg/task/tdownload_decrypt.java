@@ -52,30 +52,37 @@ public class tdownload_decrypt extends baseTask implements Serializable {
    public backgroundProcess getProcess() {
       return process;
    }
+
+   // The file this job is judged by. Normally the decrypted stream; when the decode feeds only
+   // the muxer there is no decrypted stream, and every size, duration and existence check has
+   // to be made against the MKV instead or the job reports failure on a file it never wrote.
+   private String outputFile() {
+      return job.muxOnly && job.muxFile != null ? job.muxFile : job.mpegFile;
+   }
    
    public Boolean launchJob() {
       debug.print("");
       Boolean schedule = true;
       
-      // Don't decrypt if mpegFile already exists
-      if ( file.isFile(job.mpegFile) ) {
+      // Don't decrypt if the output already exists
+      if ( file.isFile(outputFile()) ) {
          if (job.offset != null) {
             job.mpegFile = job.mpegFile.replaceFirst("\\.mpg", "(2).mpg");
             log.warn("NOTE: Renaming mpeg file to avoid overwrite: " + job.mpegFile);
             jobMonitor.updatePendingJobFieldValue(job, "mpegFile", job.mpegFile);
          } else {
             if (config.OverwriteFiles == 0) {
-               log.warn("SKIPPING DOWNLOAD/DECRYPT, FILE ALREADY EXISTS: " + job.mpegFile);
+               log.warn("SKIPPING DOWNLOAD/DECRYPT, FILE ALREADY EXISTS: " + outputFile());
                schedule = false;
             } else {
-               log.warn("OVERWRITING EXISTING FILE: " + job.mpegFile);
+               log.warn("OVERWRITING EXISTING FILE: " + outputFile());
             }
          }
       }
       
       if (schedule) {
          // Create sub-folders for output file if needed
-         if ( ! jobMonitor.createSubFolders(job.mpegFile, job) ) schedule = false;
+         if ( ! jobMonitor.createSubFolders(outputFile(), job) ) schedule = false;
       }
       
       if (schedule) {
@@ -118,9 +125,11 @@ public class tdownload_decrypt extends baseTask implements Serializable {
       if (isFileChanged) {            
          // If in GUI mode, update job monitor output field
          if (config.GUIMODE) {
-            String output = string.basename(job.mpegFile);
+            // outputFile(), not mpegFile: a streaming job's row names the MKV, and rewriting it
+            // with the .ts here would replace it with a name nothing ever writes.
+            String output = string.basename(outputFile());
             if (config.jobMonitorFullPaths == 1)
-               output = job.mpegFile;
+               output = outputFile();
             config.gui.jobTab_UpdateJobMonitorRowOutput(job, output);
          }
          
@@ -148,12 +157,15 @@ public class tdownload_decrypt extends baseTask implements Serializable {
          }
       }
 
-      String message = "DOWNLOADING/DECRYPTING";
+      // Naming the MKV after "DECRYPTING" reads as though the decrypted stream were being
+      // written there, and the muxer announces the same file again a line later. One job, one
+      // output, one line.
+      String message = job.muxOnly ? "DOWNLOADING/DECRYPTING/REMUXING" : "DOWNLOADING/DECRYPTING";
       if (job.offset != null) {
          message = "RESUMING DOWNLOAD/DECRYPT WITH OFFSET=" + job.offset;
          job.tivoFileSize -= Long.parseLong(job.offset);
       }
-      log.print(">> " + message + " TO " + job.mpegFile + " ...");
+      log.print(">> " + message + " TO " + outputFile() + " ...");
       
       // Run java download + tivolibre pipe in a separate thread
       final String urlString = url;
@@ -190,7 +202,7 @@ public class tdownload_decrypt extends baseTask implements Serializable {
    public void kill() {
       debug.print("");
       if (job.limit == 0)
-         log.warn("Killing '" + job.type + "' file: " + job.mpegFile);
+         log.warn("Killing '" + job.type + "' file: " + outputFile());
       thread.interrupt();
       thread_running = false;
    }
@@ -202,9 +214,17 @@ public class tdownload_decrypt extends baseTask implements Serializable {
       //debug.print("");
       if (thread_running) {
          // Still running
-         if (config.GUIMODE && file.isFile(job.mpegFile)) {
+         // A streaming job writes no .ts, so there is no growing file to size - and the MKV
+         // does not begin until the muxer can describe its tracks. Progress comes from the
+         // bytes pulled off the TiVo, which is what the percentage was always measured against.
+         Long size = null;
+         if (job.muxOnly) {
+            if (job.streamedBytes > 0) size = job.streamedBytes;
+         } else if (file.isFile(job.mpegFile)) {
+            size = file.size(job.mpegFile);
+         }
+         if (config.GUIMODE && size != null) {
             // Update status in job table
-            Long size = file.size(job.mpegFile);
             String s = String.format("%.2f MB", (float)size/Math.pow(2,20));
             String t = jobMonitor.getElapsedTime(job.time);
             int pct;
@@ -292,47 +312,47 @@ public class tdownload_decrypt extends baseTask implements Serializable {
          }
          
          // No or empty output means problems         
-         if ( file.isEmpty(job.mpegFile) ) {
+         if ( file.isEmpty(outputFile()) ) {
             failed = 1;
          } else {
             // Print statistics for the job
-            String s = String.format("%.2f MB", file.size(job.mpegFile)/Math.pow(2,20));
+            String s = String.format("%.2f MB", file.size(outputFile())/Math.pow(2,20));
             String t = jobMonitor.getElapsedTime(job.time);
-            String r = jobMonitor.getRate(file.size(job.mpegFile), job.time);
-            log.warn(job.mpegFile + ": size=" + s + " elapsed=" + t + " (" + r + ")");
+            String r = jobMonitor.getRate(file.size(outputFile()), job.time);
+            log.warn(outputFile() + ": size=" + s + " elapsed=" + t + " (" + r + ")");
          }
          
          // If file size is very small then it's likely a failure
          if (failed == 0) {
-            if ( file.size(job.mpegFile) < 1000 ) failed = 1;
+            if ( file.size(outputFile()) < 1000 ) failed = 1;
          }
          
          if (failed == 0) {
             // Check download duration if configured (and not resume download)
-            if ( job.offset == null && ! mediainfo.checkDownloadDuration(job.download_duration, job.mpegFile) )
+            if ( job.offset == null && ! mediainfo.checkDownloadDuration(job.download_duration, outputFile()) )
                failed = 1;
          }
          
          if (failed == 1) {
-            log.error("Download failed to file: " + job.mpegFile);
+            log.error("Download failed to file: " + outputFile());
             if (config.DeleteFailedDownloads == 1) {
-               if (file.delete(job.mpegFile))
-                  log.warn("Removed failed download file: " + job.mpegFile);
+               if (file.delete(outputFile()))
+                  log.warn("Removed failed download file: " + outputFile());
             }
             
             // Try download again with delayed launch time if specified
             if (job.launch_tries < config.download_tries) {
                job.launch_tries++;
-               log.warn(string.basename(job.mpegFile) + ": Download attempt # " +
+               log.warn(string.basename(outputFile()) + ": Download attempt # " +
                      job.launch_tries + " scheduled in " + config.download_retry_delay + " seconds.");
                job.launch_time = new Date().getTime() + config.download_retry_delay*1000;
                jobMonitor.submitNewJob(job);
             } else {
-               log.error(string.basename(job.mpegFile) + ": Too many failed downloads, GIVING UP!!");
+               log.error(string.basename(outputFile()) + ": Too many failed downloads, GIVING UP!!");
                jobMonitor.kill(job); // This called so that family of jobs is killed
             }
          } else {
-            log.print("---DONE--- job=" + job.type + " output=" + job.mpegFile);
+            log.print("---DONE--- job=" + job.type + " output=" + outputFile());
             // Add auto history entry if auto downloads configured
             if (file.isFile(config.autoIni))
                auto.AddHistoryEntry(job);

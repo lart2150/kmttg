@@ -63,6 +63,9 @@ import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 
+import com.tivo.kmttg.mux.MuxSink;
+import com.tivo.kmttg.util.file;
+
 import net.straylightlabs.tivolibre.TivoDecoder;
 
 import com.tivo.kmttg.util.log;
@@ -298,11 +301,44 @@ public class http {
 			httpget.setHeader("Range", "bytes=" + offset + "-");
 		}
 
+		// job.muxOnly says nothing downstream reads the decrypted stream, so it is not written:
+		// the decoder gets a frame sink and no output stream, and the only file this job
+		// produces is the MKV. TivoDecoder accepts one, the other or both.
+		final Boolean streamOnly = job.muxOnly && job.muxFile != null;
+
+		// Optionally mux straight to MKV from the same decode. job.muxFile is set when the
+		// download job is standing in for a separate remux job: the decoder feeds the file
+		// and the muxer at once, so nothing is read back off disk afterwards.
+		//
+		// Built before the TiVo connection is opened rather than after: the cover art lookup is
+		// an rpc round trip plus an image download, and running that with the transfer already
+		// open leaves the TiVo holding a stream nobody is reading for as long as it takes.
+		final MuxSink muxSink;
+		if (job.muxFile != null) {
+			// The mkv lands under encodeDir, not next to the mpeg, and file naming can put it in
+			// a sub-folder that does not exist yet. A remux job does this from launchJob; nothing
+			// did on this path, so the muxer simply failed to open its own output.
+			jobMonitor.createSubFolders(job.muxFile, job);
+			muxSink = new MuxSink(new java.io.File(job.muxFile));
+			muxSink.setSupplement(com.tivo.kmttg.task.remux.supplement(job));
+			com.tivo.kmttg.task.remux.attachCoverArt(muxSink, job);
+			// A streaming job already announced this file as its one output; only say it here
+			// when the muxer is the second consumer of the decode.
+			if (! streamOnly) log.print(">> ALSO REMUXING TO " + job.muxFile + " ...");
+		} else {
+			muxSink = null;
+		}
+
 		response = httpclient.executeOpen(null, httpget, null);
 
 		in = new BufferedInputStream(response.getEntity().getContent());
 
-		final BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(job.mpegFile));
+		// Only once the TiVo has actually answered. Clearing it above, next to the rest of the
+		// muxer setup, would mean a TiVo that never answers costs the user the file they had.
+		if (muxSink != null) file.delete(job.muxFile);
+
+		final BufferedOutputStream out = streamOnly
+				? null : new BufferedOutputStream(new FileOutputStream(job.mpegFile));
 		final PipedInputStream pipedIn = new PipedInputStream(BUFFER_SIZE);
 		PipedOutputStream pipedOut = new PipedOutputStream(pipedIn);
 
@@ -311,9 +347,11 @@ public class http {
 			public void run() {
 				Boolean compat_mode = config.tivolibreCompat == 1;
 				log.warn("tivolibre DirectShow compatilibity mode = " + compat_mode);
-				TivoDecoder decoder = new TivoDecoder.Builder().input(pipedIn).output(out)
-						.compatibilityMode(compat_mode).mak(config.MAK).build();
-				decoder.decode();
+				TivoDecoder.Builder b = new TivoDecoder.Builder().input(pipedIn)
+						.compatibilityMode(compat_mode).mak(config.MAK);
+				if (out != null) b.output(out);
+				if (muxSink != null) b.frameSink(muxSink);
+				b.build().decode();
 			}
 		};
 		Thread thread = new Thread(r);
@@ -324,11 +362,12 @@ public class http {
 		long bytes = 0;
 		byte[] buffer = new byte[BUFSIZE];
 		int c;
+		Boolean downloadFinished = false;
 		try {
 			while ((c = in.read(buffer, 0, BUFSIZE)) != -1) {
 				if (Thread.interrupted()) {
 					httpget.abort();
-					out.close();
+					if (out != null) out.close();
 					in.close();
 					pipedOut.flush();
 					pipedOut.close();
@@ -338,21 +377,63 @@ public class http {
 				}
 				pipedOut.write(buffer, 0, c);
 				bytes += c;
+				// The only progress a streaming job has: with no .ts there is no growing file
+				// for the job monitor to size.
+				job.streamedBytes = bytes;
 				if (job.limit > 0 && bytes > job.limit) {
 					break;
 				}
 			}
 			pipedOut.flush();
+			downloadFinished = true;
 		} finally {
-			pipedOut.close();
-			pipedIn.close();
-			out.close();
-			in.close();
-			thread.join();
-			response.close();
+			try {
+				try {
+					pipedOut.close();
+					pipedIn.close();
+					if (out != null) out.close();
+					in.close();
+				} finally {
+					// The pipes are shut by now so the decoder is on its way out. Joining from
+					// here rather than below the closes means one of them throwing - a full disk
+					// flushing the last buffer - cannot leave the decode thread running.
+					thread.join();
+				}
+				response.close();
+			} finally {
+				// Has to run on every way out, not after the try: a cancel throws from inside the
+				// loop, and cleanup placed below it left a .part behind for every killed download.
+				finishMux(job, muxSink, downloadFinished);
+			}
 		}
 
 		return true;
+	}
+
+	// The decoder's own finally has ended the sink by now, so the muxed file is closed and can
+	// be moved into place. Failure here costs the download only when the .ts was written too,
+	// in which case a later remux job can still produce the MKV from it. A streaming job has
+	// no such fallback, and the empty-output check in tdownload_decrypt fails and retries it.
+	private static void finishMux(jobData job, MuxSink muxSink, Boolean downloadFinished) {
+		if (job.muxFile == null) return;
+		// A no-op once the decoder ended the sink, but it releases the handle if it did not -
+		// and on Windows an open handle is what stops the delete below from working.
+		muxSink.abort();
+		if (! downloadFinished) {
+			log.warn("remux during download did not finish - discarding " + job.muxFile);
+			file.delete(job.muxFile);
+		} else if (muxSink.isFailed()) {
+			log.error("remux during download failed: " + muxSink.getFailure());
+			file.delete(job.muxFile);
+		} else if (file.isFile(job.muxFile) && ! file.isEmpty(job.muxFile)) {
+			// A job that also wrote a .ts names that as its own output, so the MKV needs saying
+			// here. A streaming job has no other output and the task announces this one itself.
+			if (! job.muxOnly) log.print("---DONE--- remuxed to " + job.muxFile);
+		} else {
+			log.error("remux during download produced nothing");
+			file.delete(job.muxFile);
+		}
+		com.tivo.kmttg.task.remux.reportNotes(muxSink);
 	}
 
 	// Check URL is alive with specificed connection timeout
