@@ -56,6 +56,7 @@ import com.tivo.kmttg.gui.table.TableUtil;
 import com.tivo.kmttg.httpserver.kmttgServer;
 import com.tivo.kmttg.main.beacon;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.SkipModeRejects;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.main.mdns;
@@ -129,6 +130,7 @@ public class configMain {
    private static JCheckBox autoskip_cutonly = null;
    private static JCheckBox autoskip_save_skipmode = null;
    private static JCheckBox autoskip_fetch_skipmode = null;
+   private static JCheckBox autoskip_stream_anchor = null;
    private static JCheckBox autoskip_prune = null;
    private static JCheckBox autoskip_batch_standby = null;
    private static JCheckBox autoskip_indicate_skip = null;
@@ -278,6 +280,27 @@ public class configMain {
          tabbed_panel.setBackgroundAt(i, null);
    }
 
+   // Set during write(), acted on only once the settings are actually saved.
+   private static boolean streamAnchorJustEnabled = false;
+
+   // Asked once, when the stream anchor option goes from off to on. Silent when there is
+   // nothing remembered, which is the common case.
+   private static void offerToClearRejects() {
+      if (! streamAnchorJustEnabled) return;
+      streamAnchorJustEnabled = false;
+      int n = SkipModeRejects.count();
+      if (n < 1) return;
+      int result = JOptionPane.showConfirmDialog(
+         dialog,
+         "" + n + " recording(s) are remembered as having unusable SkipMode data.\n\n"
+            + "They were judged before this option was enabled, and it is exactly this kind\n"
+            + "of recording it recovers - but they will be skipped while they are remembered.\n\n"
+            + "Forget them so they are tried again on the next My Shows refresh?",
+         "SkipMode stream anchor", JOptionPane.YES_NO_OPTION
+      );
+      if (result == JOptionPane.YES_OPTION) SkipModeRejects.clear();
+   }
+
    // Callback for OK button
    private static void okCB() {
       debug.print("");
@@ -290,11 +313,13 @@ public class configMain {
          );
          if (result == JOptionPane.OK_OPTION) {
             config.save();
+            offerToClearRejects();
             pos_x = dialog.getX(); pos_y = dialog.getY();
             dialog.setVisible(false);
          }
       } else {
          config.save();
+         offerToClearRejects();
          pos_x = dialog.getX(); pos_y = dialog.getY();
          dialog.setVisible(false);
       }
@@ -1009,6 +1034,9 @@ public class configMain {
 
       // autoskip_fetch_skipmode
       autoskip_fetch_skipmode.setSelected(config.autoskip_fetch_skipmode == 1);
+
+      // autoskip_stream_anchor
+      autoskip_stream_anchor.setSelected(config.autoskip_stream_anchor == 1);
 
       // autoskip_prune
       autoskip_prune.setSelected(config.autoskip_prune == 1);
@@ -1985,6 +2013,22 @@ public class configMain {
       else
          config.autoskip_fetch_skipmode = 0;
 
+      // autoskip_stream_anchor
+      // Turning this on changes the verdict on recordings already written off: they were
+      // judged without the anchor, and those remembered rejects are exactly the ones this
+      // rescues - but the scan skips them, so enabling it would silently do nothing until the
+      // clipMetadataId changed. Offer the reset the file's own header describes.
+      if (autoskip_stream_anchor.isSelected()) {
+         // Note it, but do not act: write() is validation and the user can still abandon the
+         // save. Deleting the remembered rejects here would survive a Cancel.
+         streamAnchorJustEnabled = config.autoskip_stream_anchor != 1;
+         config.autoskip_stream_anchor = 1;
+      }
+      else {
+         streamAnchorJustEnabled = false;
+         config.autoskip_stream_anchor = 0;
+      }
+
       // autoskip_prune
       if (autoskip_prune.isSelected())
          config.autoskip_prune = 1;
@@ -2398,6 +2442,7 @@ public class configMain {
       autoskip_cutonly = new JCheckBox();
       autoskip_save_skipmode = new JCheckBox();
       autoskip_fetch_skipmode = new JCheckBox();
+      autoskip_stream_anchor = new JCheckBox();
       autoskip_prune = new JCheckBox();
       autoskip_batch_standby = new JCheckBox();
       autoskip_indicate_skip = new JCheckBox();
@@ -2664,6 +2709,7 @@ public class configMain {
       autoskip_cutonly.setText("Only run Ad Skip/Ad Detect for shows with AutoSkip data");
       autoskip_save_skipmode.setText("Save tivo.com SkipMode data to AutoSkip table");
       autoskip_fetch_skipmode.setText("Auto fetch tivo.com SkipMode data after NPL refresh");
+      autoskip_stream_anchor.setText("Rescue mis-anchored SkipMode data by streaming (Bolt or Edge only)");
 
       autoskip_prune.setText("Prune Skip Table automatically after NPL refresh");
 
@@ -3141,6 +3187,9 @@ public class configMain {
 
       gy++;
       autoskip_panel.add(autoskip_fetch_skipmode, "cell 1 " + gy);
+
+      gy++;
+      autoskip_panel.add(autoskip_stream_anchor, "cell 1 " + gy);
 
       gy++;
       autoskip_panel.add(autoskip_prune, "cell 1 " + gy);
@@ -3775,6 +3824,7 @@ public class configMain {
       autoskip_cutonly.setToolTipText(getToolTip("autoskip_cutonly"));
       autoskip_save_skipmode.setToolTipText(getToolTip("autoskip_save_skipmode"));
       autoskip_fetch_skipmode.setToolTipText(getToolTip("autoskip_fetch_skipmode"));
+      autoskip_stream_anchor.setToolTipText(getToolTip("autoskip_stream_anchor"));
       autoskip_prune.setToolTipText(getToolTip("autoskip_prune"));
       autoskip_batch_standby.setToolTipText(getToolTip("autoskip_batch_standby"));
       autoskip_indicate_skip.setToolTipText(getToolTip("autoskip_indicate_skip"));
@@ -4561,6 +4611,26 @@ public class configMain {
          text += "so a full My Shows list may take many minutes. It runs as a normal job, so you can<br>";
          text += "watch its progress and cancel it from the Job Monitor. Later refreshes only pick up<br>";
          text += "whatever is new. Shows that already have AutoSkip data are left alone.";
+      }
+      else if (component.equals("autoskip_stream_anchor")) {
+         text =  "<b>Rescue mis-anchored SkipMode data by streaming</b><br>";
+         text += "<b>Requires a TiVo with a built-in streamer - a Bolt or an Edge.</b> Older boxes<br>";
+         text += "use a separate TiVo Stream device and are not supported, so this option does<br>";
+         text += "nothing on them beyond one harmless check.<br>";
+         text += "<br>";
+         text += "About a third of recordings come back from tivo.com with cut points measured<br>";
+         text += "from when the tuner last changed channel rather than from the start of the<br>";
+         text += "recording, so they land hours out and kmttg discards them. This option asks the<br>";
+         text += "TiVo to stream a few seconds of the recording, reads the missing starting point<br>";
+         text += "out of the stream, and corrects the cut points instead of throwing them away.<br>";
+         text += "<br>";
+         text += "<b>It briefly uses one of the TiVo's transcoders</b> - a Bolt has two and an Edge<br>";
+         text += "four - for about 15 seconds per recording. If they are all busy the recording is<br>";
+         text += "simply left for the next refresh. It will not interrupt anything you are watching.<br>";
+         text += "Nothing is played back on the TiVo and no video is kept.<br>";
+         text += "<br>";
+         text += "Only recordings kmttg would otherwise refuse are streamed, so once a show has<br>";
+         text += "usable data it costs nothing on later refreshes.";
       }
       else if (component.equals("autoskip_prune")) {
          text =  "<b>Prune Skip Table automatically after NPL refresh</b><br>";

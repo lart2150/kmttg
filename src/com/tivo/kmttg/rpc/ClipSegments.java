@@ -344,6 +344,88 @@ public class ClipSegments {
       return null;
    }
 
+   // Segments shifted onto the recording, when the ones tivo.com returned describe the right
+   // airing but start from the wrong zero.
+   //
+   // clipMetadataAdjust states offsets on the tuner's stream clock, whose zero is when that
+   // tuner last tuned the channel. A recording that began its own tuner session is already
+   // recording-relative and passes; one recorded partway into a continuous capture is out by
+   // however long that capture had been running, which is what refuses about a third of a real
+   // My Shows list. The shift is startStreamTime, and only the box can say it - see HlsStream.
+   //
+   // Returns the originals unchanged whenever it cannot help: already usable, disabled, no
+   // anchor available, or an anchor that does not make them fit. That last case matters - one
+   // recording came back with segment lengths that describe no airing at all, and no amount of
+   // re-anchoring should make that look acceptable.
+   public static Anchored reanchor(String tivoName, String recordingId,
+         List<Segment> segments, long durationMs) {
+      return reanchor(null, tivoName, recordingId, segments, durationMs);
+   }
+
+   // Takes an already connected away-mode Remote when the caller has one. A batch holds its
+   // connection open across every recording, and opening a second websocket per recording just
+   // to ask one question cost a connect and an authenticate each time.
+   public static Anchored reanchor(Remote r, String tivoName, String recordingId,
+         List<Segment> segments, long durationMs) {
+      if (config.autoskip_stream_anchor != 1) return Anchored.unchanged(segments);
+      if (segments == null || segments.isEmpty()) return Anchored.unchanged(segments);
+      if (recordingId == null || tivoName == null) return Anchored.unchanged(segments);
+      if (rejectReason(segments, durationMs) == null) return Anchored.unchanged(segments);
+
+      HlsStream.Anchor anchor = r == null
+         ? HlsStream.read(tivoName, recordingId)
+         : HlsStream.read(r, tivoName, recordingId);
+      // The TiVo was busy or unreachable. Saying nothing is the point: a verdict recorded now
+      // would be about the box, and it would stop this recording ever being tried again.
+      if (anchor.retryLater) return Anchored.retryLater(segments);
+      if (anchor.ms == null) return Anchored.unchanged(segments);
+
+      List<Segment> shifted = shift(segments, anchor.ms);
+      String reason = rejectReason(shifted, durationMs);
+      if (reason != null) {
+         log.warn("Stream anchor did not make the SkipMode data fit: " + reason);
+         return Anchored.unchanged(segments);
+      }
+      log.print("Re-anchored SkipMode data by " + anchor.ms + " ms using the recording's stream");
+      return Anchored.rescued(shifted);
+   }
+
+   // Segments to use, and whether the TiVo was simply unavailable. A caller that remembers
+   // rejections must not remember one when retryLater is set.
+   public static class Anchored {
+      public final List<Segment> segments;
+      public final boolean retryLater;
+
+      private Anchored(List<Segment> segments, boolean retryLater) {
+         this.segments = segments;
+         this.retryLater = retryLater;
+      }
+
+      // The segments were usable as they were, or nothing could be done about them.
+      static Anchored unchanged(List<Segment> segments) {
+         return new Anchored(segments, false);
+      }
+
+      // The stream anchor moved them onto the recording.
+      static Anchored rescued(List<Segment> segments) {
+         return new Anchored(segments, false);
+      }
+
+      static Anchored retryLater(List<Segment> segments) {
+         return new Anchored(segments, true);
+      }
+   }
+
+   // Both ends of every segment moved back by the stream's start. Separate from reanchor so
+   // the arithmetic can be tested without a TiVo to ask for the anchor.
+   static List<Segment> shift(List<Segment> segments, long anchorMs) {
+      List<Segment> shifted = new ArrayList<Segment>();
+      for (Segment seg : segments) {
+         shifted.add(new Segment(seg.startMs - anchorMs, seg.endMs - anchorMs));
+      }
+      return shifted;
+   }
+
    // Validates and, on failure, remembers the verdict so the same clipMetadata is not fetched
    // again on every refresh. Returns true when the segments are usable.
    public static boolean remember(String contentId, String clipMetadataId, String title,
@@ -373,6 +455,8 @@ public class ClipSegments {
    // Fill in AutoSkip entries for a batch of recordings, over ONE away mode connection: the
    // websocket handshake and tivo.com auth cost far more than the requests, so opening one per
    // recording would dominate a run of any size. Returns how many entries were written.
+   // A batch asks the box once whether it can stream at all, rather than once per recording -
+   // on a TiVo that cannot, the probe and its warning would otherwise repeat for every entry.
    public static int fetchMissing(String tivoName, List<Hashtable<String,String>> entries,
          Progress progress) {
       if (entries == null || entries.isEmpty()) return 0;
@@ -380,6 +464,8 @@ public class ClipSegments {
          log.error("SkipMode fetch needs a tivo.com username and password");
          return 0;
       }
+      // Fresh each batch: a box that was rebooting last time may be ready now.
+      HlsStream.forgetStreamingState();
       Remote r = new Remote(tivoName, true);
       if (! r.success) {
          log.error("SkipMode fetch could not connect to tivo.com");
@@ -452,6 +538,17 @@ public class ClipSegments {
          adjustPreferring(r, e.get("recordingId"), chosen, e.get("clipMetadataId"));
       if (segments == null) {
          log.warn("No SkipMode data from tivo.com for: " + title);
+         return false;
+      }
+      // Offsets anchored to the tuner rather than the recording are the single biggest reason
+      // this refuses data, so give the box a chance to say where its stream started before
+      // writing that verdict down. No-ops unless the option is on and the data actually fails.
+      Anchored anchored = reanchor(r, tivoName, e.get("recordingId"), segments, duration);
+      segments = anchored.segments;
+      // The TiVo was busy or unreachable. Leave the recording untouched so the next refresh
+      // picks it up again - remembering now would cache a fact about the box, not the data.
+      if (anchored.retryLater) {
+         log.warn("Leaving '" + title + "' for a later refresh: the TiVo could not be asked");
          return false;
       }
       // Keyed on the NPL's id, not the one chooseForAiring settled on: the scan that reads

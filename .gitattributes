@@ -19,6 +19,8 @@
 *.ps1    text eol=crlf
 
 # Binary files - never apply line ending conversion
+# Transport stream fixtures are binary despite .ts also being a text extension elsewhere
+test/resources/fixtures/*.ts binary
 *.jar    binary
 *.png    binary
 *.gif    binary

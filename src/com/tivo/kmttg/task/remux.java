@@ -160,24 +160,34 @@ public class remux extends baseTask implements Serializable {
          // Records the verdict when it does not fit, so the fetch job stops asking for this
          // recording on every NPL refresh. Only tivo.com data is worth remembering: AutoSkip
          // data that fails is a local problem, not something re-fetching would fix.
+         List<ClipSegments.Segment> segments = result.segments;
          if (result.source == ClipSegments.SOURCE_SKIPMODE) {
+            // A remux is already a deliberate, long-running act, so this is the one place the
+            // stream anchor can be paid for: it costs a TiVo transcoder for about 13 seconds.
+            // No-ops unless the data fails the check below and the option is on.
+            ClipSegments.Anchored anchored = ClipSegments.reanchor(job.tivoName,
+               job.recordingId, segments, job.recordingDurationMs);
+            segments = anchored.segments;
+            // Busy TiVo: skip the chapters this once rather than recording a verdict that
+            // would stop this recording ever being tried again.
+            if (anchored.retryLater) return;
             if (! ClipSegments.remember(job.contentId, job.clipMetadataId, job.title,
-                  result.segments, job.recordingDurationMs)) return;
+                  segments, job.recordingDurationMs)) return;
          } else {
-            String reason = ClipSegments.rejectReason(result.segments, job.recordingDurationMs);
+            String reason = ClipSegments.rejectReason(segments, job.recordingDurationMs);
             if (reason != null) {
                ClipSegments.warnRejected(job.title, reason);
                return;
             }
          }
-         sink.setChapters(buildChapters(result.segments));
-         log.print("Embedding " + result.segments.size() + " SkipMode segments as chapters");
+         sink.setChapters(buildChapters(segments));
+         log.print("Embedding " + segments.size() + " SkipMode segments as chapters");
 
          // Only SkipMode data is worth keeping: AutoSkip data is where it would be written.
          if (result.source == ClipSegments.SOURCE_SKIPMODE
                && config.autoskip_save_skipmode == 1) {
             ClipSegments.saveToAutoSkip(job.contentId, job.offerId, job.title, job.tivoName,
-               result.segments, job.recordingDurationMs);
+               segments, job.recordingDurationMs);
          }
       } catch (Exception e) {
          log.warn("Could not fetch SkipMode data: " + e.getMessage());
