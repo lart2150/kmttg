@@ -333,7 +333,10 @@ public class H264Parser {
       // Unsigned exp-Golomb: count leading zeros, then read that many bits.
       int ue() {
          int zeros = 0;
-         while (read(1) == 0 && zeros < 32 && (bit >> 3) < d.length) zeros++;
+         // Capped at 31, not 32: a Java shift is taken mod 32, so (1 << 32) - 1 evaluates to
+         // 0 and a damaged stream's long zero run read back as a small plausible value. At 31
+         // the result is large or negative instead, which parseSps rejects on width/height.
+         while (read(1) == 0 && zeros < 31 && (bit >> 3) < d.length) zeros++;
          if (zeros == 0) return 0;
          return (1 << zeros) - 1 + read(zeros);
       }
