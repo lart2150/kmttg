@@ -80,6 +80,7 @@ public class MuxSink implements FrameSink {
    private TivoMetadata metadata;
    private MetadataTags.Supplement supplement;
    private byte[] coverArt;
+   private List<MkvMuxer.Chapter> chapters;
    private String coverName;
    private String coverMime;
    private boolean started;
@@ -111,6 +112,12 @@ public class MuxSink implements FrameSink {
       this.coverName = name;
       this.coverMime = mimeType;
       this.coverArt = data;
+   }
+
+   // SkipMode segment marks, already on the recording's own clock. Set before the first
+   // payload: chapters reserve a SeekHead entry and so must precede the header.
+   public void setChapters(List<MkvMuxer.Chapter> list) {
+      this.chapters = list;
    }
 
    // Only ever called for a .TiVo source; a plain .ts carries no metadata and the library
@@ -294,6 +301,9 @@ public class MuxSink implements FrameSink {
          muxer = new MkvMuxer(outFile);
          // Tags reserve a SeekHead entry, so they must be declared before the header.
          muxer.addTags(MetadataTags.build(metadata, supplement));
+         if (chapters != null && ! chapters.isEmpty()) {
+            muxer.addChapters(chapters);
+         }
          if (coverArt != null && coverArt.length > 0) {
             muxer.addAttachment(coverName, coverMime, coverArt);
          }
@@ -419,7 +429,6 @@ public class MuxSink implements FrameSink {
    public List<String> getNotes()        { return notes; }
    public long getDiscardedNoPts()       { return discarded; }
    public long getClampedTimestamps()    { return time.getClamped(); }
-   public MkvMuxer getMuxer()            { return muxer; }
    public long getDurationMs()           { return finalDurationMs; }
    public int  getCueCount()             { return finalCueCount; }
 

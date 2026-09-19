@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
+import java.util.List;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -31,6 +32,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.ClipSegments;
 import com.tivo.kmttg.rpc.SkipManager;
 import com.tivo.kmttg.util.*;
 
@@ -157,6 +159,10 @@ public class NowPlaying extends baseTask implements Serializable {
                      log.warn("Pruning AutoSkip table entries");
                      SkipManager.pruneEntries(job.tivoName, ENTRIES);
                   }
+
+                  if (config.autoskip_fetch_skipmode == 1) {
+                     queueSkipFetch(job.tivoName, ENTRIES);
+                  }
                }
             }
          }
@@ -165,6 +171,25 @@ public class NowPlaying extends baseTask implements Serializable {
       return false;
    }
    
+   // Queue a job to fill AutoSkip from tivo.com for anything with SkipMode and no entry yet.
+   // The scan is local and cheap; the job is only submitted when it has work, so the common
+   // case of an already-complete table costs one pass over the NPL and nothing else.
+   private static void queueSkipFetch(String tivoName, Stack<Hashtable<String,String>> entries) {
+      if (config.getTivoUsername() == null || config.getTivoPassword() == null) {
+         log.warn("SkipMode fetch is enabled but no tivo.com login is configured - skipping");
+         return;
+      }
+      List<Hashtable<String,String>> missing = ClipSegments.missingFromAutoSkip(entries);
+      if (missing.isEmpty()) return;
+      log.warn("" + missing.size() + " recording(s) have SkipMode but no AutoSkip data");
+      skipfetch.setPending(tivoName, missing);
+      jobData fetch = new jobData();
+      fetch.tivoName = tivoName;
+      fetch.type     = "skipfetch";
+      fetch.name     = "skipfetch";
+      jobMonitor.submitNewJob(fetch);
+   }
+
    // Convert rpc data to traditional Hash data and populate NPL table
    private void rpcToNPL() {
       // Populate ENTRIES

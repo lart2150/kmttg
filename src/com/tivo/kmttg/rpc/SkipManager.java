@@ -25,7 +25,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.Stack;
 
 import com.tivo.kmttg.JSON.JSONArray;
@@ -40,12 +42,14 @@ import com.tivo.kmttg.util.log;
 import com.tivo.kmttg.util.parseNPL;
 
 public class SkipManager {
-   private static String ini = config.programDir + File.separator + "AutoSkip.ini";
    private static Hashtable<String,AutoSkip> instances = new Hashtable<String,AutoSkip>();
    private static Hashtable<String,SkipService> serviceInstances = new Hashtable<String,SkipService>();
    
+   // Resolved on each call rather than latched into a static at class load: programDir is
+   // only known once config has initialised, and a test that points it somewhere else has no
+   // way to know whether this class had already been loaded.
    public static synchronized String iniFile() {
-      return ini;
+      return config.programDir + File.separator + "AutoSkip.ini";
    }
    
    public static synchronized void disableMonitor(String tivoName) {
@@ -122,14 +126,14 @@ public class SkipManager {
       instances.get(tivoName).skipPlay(tivoName, entry);
    }
    
-   // Save commercial points for current entry to ini file
+   // Save commercial points for current entry to the ini file
    public static synchronized void saveEntry(final String contentId, String offerId, long offset,
          String title, final String tivoName, Stack<Hashtable<String,Long>> data) {
       debug.print("contentId=" + contentId + " offerId=" + offerId + " offset=" + offset);
       log.print("Saving AutoSkip entry: " + title);
       try {
          String eol = "\r\n";
-         BufferedWriter ofp = new BufferedWriter(new FileWriter(ini, true));
+         BufferedWriter ofp = new BufferedWriter(new FileWriter(iniFile(), true));
          ofp.write("<entry>" + eol);
          ofp.write("contentId=" + contentId + eol);
          ofp.write("offerId=" + offerId + eol);
@@ -156,9 +160,9 @@ public class SkipManager {
       debug.print("contentId=" + contentId);
       if (! skipEnabled() )
          return false;
-      if (file.isFile(ini)) {
+      if (file.isFile(iniFile())) {
          try {
-            BufferedReader ifp = new BufferedReader(new FileReader(ini));
+            BufferedReader ifp = new BufferedReader(new FileReader(iniFile()));
             String line = null;
             while (( line = ifp.readLine()) != null) {
                if (line.contains("<entry>")) {
@@ -181,14 +185,14 @@ public class SkipManager {
       return false;
    }
    
-   // Remove any entries matching given contentId from ini file
+   // Remove any entries matching given contentId from the ini file
    public static synchronized Boolean removeEntry(final String contentId) {
       debug.print("contentId=" + contentId);
-      if (file.isFile(ini)) {
+      if (file.isFile(iniFile())) {
          try {
             Boolean itemRemoved = false;
             Stack<String> lines = new Stack<String>();
-            BufferedReader ifp = new BufferedReader(new FileReader(ini));
+            BufferedReader ifp = new BufferedReader(new FileReader(iniFile()));
             String line = null;
             Boolean include = true;
             String tivoName = null;
@@ -217,7 +221,7 @@ public class SkipManager {
             }
             ifp.close();
             String eol = "\r\n";
-            BufferedWriter ofp = new BufferedWriter(new FileWriter(ini));
+            BufferedWriter ofp = new BufferedWriter(new FileWriter(iniFile()));
             for (String l : lines) {
                ofp.write(l + eol);
             }
@@ -250,11 +254,11 @@ public class SkipManager {
    // Change offset for given contentId
    public static synchronized Boolean changeEntry(String contentId, String offset, String title) {
       debug.print("contentId=" + contentId + " offset=" + offset + " title=" + title);
-      if (file.isFile(ini)) {
+      if (file.isFile(iniFile())) {
          try {
             Boolean itemChanged = false;
             Stack<String> lines = new Stack<String>();
-            BufferedReader ifp = new BufferedReader(new FileReader(ini));
+            BufferedReader ifp = new BufferedReader(new FileReader(iniFile()));
             String line = null;
             while (( line = ifp.readLine()) != null) {
                if (line.contains("contentId")) {
@@ -279,7 +283,7 @@ public class SkipManager {
             }
             ifp.close();
             String eol = "\r\n";
-            BufferedWriter ofp = new BufferedWriter(new FileWriter(ini));
+            BufferedWriter ofp = new BufferedWriter(new FileWriter(iniFile()));
             for (String l : lines) {
                ofp.write(l + eol);
             }
@@ -296,7 +300,34 @@ public class SkipManager {
       return false;
    }
    
-   public static Stack<Hashtable<String,Long>> getEntry(String contentId) {
+   // Every contentId the table holds, in one pass over the file. getEntry re-reads and
+   // re-parses the whole ini for each id it is asked about, which is fine for one lookup and
+   // quadratic when a caller is asking about a whole Now Playing list.
+   public static synchronized Set<String> contentIds() {
+      debug.print("");
+      Set<String> ids = new HashSet<String>();
+      if (file.isFile(iniFile())) {
+         try {
+            BufferedReader ifp = new BufferedReader(new FileReader(iniFile()));
+            String line = null;
+            while (( line = ifp.readLine()) != null) {
+               if (line.startsWith("contentId")) {
+                  String[] l = line.split("=");
+                  if (l.length > 1) ids.add(l[1]);
+               }
+            }
+            ifp.close();
+         } catch (Exception e) {
+            log.error("SkipManager contentIds - " + e.getMessage());
+         }
+      }
+      return ids;
+   }
+
+   // Synchronized like every other accessor here: removeEntry and changeEntry rewrite the
+   // whole ini, so an unsynchronized read can land on a truncated file and report a recording
+   // as having no skip data when it has some.
+   public static synchronized Stack<Hashtable<String,Long>> getEntry(String contentId) {
       debug.print("contentId=" + contentId);
       Stack<Hashtable<String,Long>> entry = new Stack<Hashtable<String,Long>>();
       if (file.isFile(SkipManager.iniFile())) {
@@ -339,9 +370,9 @@ public class SkipManager {
    public static synchronized JSONArray getEntries() {
       debug.print("");
       JSONArray entries = new JSONArray();
-      if (file.isFile(ini)) {
+      if (file.isFile(iniFile())) {
          try {
-            BufferedReader ifp = new BufferedReader(new FileReader(ini));
+            BufferedReader ifp = new BufferedReader(new FileReader(iniFile()));
             String line=null, contentId="", title="", offset="", offerId="", tivoName="";
             JSONArray cuts = new JSONArray();
             while (( line = ifp.readLine()) != null) {

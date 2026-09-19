@@ -127,6 +127,8 @@ public class configMain {
    private static JCheckBox autoskip_enabled = null;
    private static JCheckBox autoskip_import = null;
    private static JCheckBox autoskip_cutonly = null;
+   private static JCheckBox autoskip_save_skipmode = null;
+   private static JCheckBox autoskip_fetch_skipmode = null;
    private static JCheckBox autoskip_prune = null;
    private static JCheckBox autoskip_batch_standby = null;
    private static JCheckBox autoskip_indicate_skip = null;
@@ -1001,6 +1003,12 @@ public class configMain {
 
       // autoskip_cutonly
       autoskip_cutonly.setSelected(config.autoskip_cutonly == 1);
+
+      // autoskip_save_skipmode
+      autoskip_save_skipmode.setSelected(config.autoskip_save_skipmode == 1);
+
+      // autoskip_fetch_skipmode
+      autoskip_fetch_skipmode.setSelected(config.autoskip_fetch_skipmode == 1);
 
       // autoskip_prune
       autoskip_prune.setSelected(config.autoskip_prune == 1);
@@ -1965,6 +1973,18 @@ public class configMain {
       else
          config.autoskip_cutonly = 0;
 
+      // autoskip_save_skipmode
+      if (autoskip_save_skipmode.isSelected())
+         config.autoskip_save_skipmode = 1;
+      else
+         config.autoskip_save_skipmode = 0;
+
+      // autoskip_fetch_skipmode
+      if (autoskip_fetch_skipmode.isSelected())
+         config.autoskip_fetch_skipmode = 1;
+      else
+         config.autoskip_fetch_skipmode = 0;
+
       // autoskip_prune
       if (autoskip_prune.isSelected())
          config.autoskip_prune = 1;
@@ -2376,6 +2396,8 @@ public class configMain {
       autoskip_enabled = new JCheckBox();
       autoskip_import = new JCheckBox();
       autoskip_cutonly = new JCheckBox();
+      autoskip_save_skipmode = new JCheckBox();
+      autoskip_fetch_skipmode = new JCheckBox();
       autoskip_prune = new JCheckBox();
       autoskip_batch_standby = new JCheckBox();
       autoskip_indicate_skip = new JCheckBox();
@@ -2640,6 +2662,8 @@ public class configMain {
       autoskip_import.setText("Automatically Import to Skip Table after Ad Detect");
 
       autoskip_cutonly.setText("Only run Ad Skip/Ad Detect for shows with AutoSkip data");
+      autoskip_save_skipmode.setText("Save tivo.com SkipMode data to AutoSkip table");
+      autoskip_fetch_skipmode.setText("Auto fetch tivo.com SkipMode data after NPL refresh");
 
       autoskip_prune.setText("Prune Skip Table automatically after NPL refresh");
 
@@ -3111,6 +3135,12 @@ public class configMain {
 
       gy++;
       autoskip_panel.add(autoskip_cutonly, "cell 1 " + gy);
+
+      gy++;
+      autoskip_panel.add(autoskip_save_skipmode, "cell 1 " + gy);
+
+      gy++;
+      autoskip_panel.add(autoskip_fetch_skipmode, "cell 1 " + gy);
 
       gy++;
       autoskip_panel.add(autoskip_prune, "cell 1 " + gy);
@@ -3743,6 +3773,8 @@ public class configMain {
       autoskip_enabled.setToolTipText(getToolTip("autoskip_enabled"));
       autoskip_import.setToolTipText(getToolTip("autoskip_import"));
       autoskip_cutonly.setToolTipText(getToolTip("autoskip_cutonly"));
+      autoskip_save_skipmode.setToolTipText(getToolTip("autoskip_save_skipmode"));
+      autoskip_fetch_skipmode.setToolTipText(getToolTip("autoskip_fetch_skipmode"));
       autoskip_prune.setToolTipText(getToolTip("autoskip_prune"));
       autoskip_batch_standby.setToolTipText(getToolTip("autoskip_batch_standby"));
       autoskip_indicate_skip.setToolTipText(getToolTip("autoskip_indicate_skip"));
@@ -4507,6 +4539,28 @@ public class configMain {
          text =  "<b>Only run Ad Skip/Ad Detect for shows with AutoSkip data</b><br>";
          text += "If enabled, only run Ad Skip and Ad Detect tasks for shows that have AutoSkip data;<br>";
          text += "shows without AutoSkip data will not schedule Ad Skip and Ad Detect tasks.";
+      }
+      else if (component.equals("autoskip_save_skipmode")) {
+         text =  "<b>Save tivo.com SkipMode data to AutoSkip table</b><br>";
+         text += "<b>Requires the tivo.com online login</b> (username and password on the Tivos tab).<br>";
+         text += "These cut points come from tivo.com, not from the TiVo on your network, so without<br>";
+         text += "a login nothing is fetched and nothing is saved.<br>";
+         text += "<b>Only captured while creating an MKV.</b> The built-in mkv remux profile looks up<br>";
+         text += "SkipMode data to write chapters; with this enabled it also stores what it found in<br>";
+         text += "the AutoSkip table, where Ad Skip and the VPrj/EDL exports can use it without<br>";
+         text += "scanning the recording. Nothing is fetched or saved for any other job type.<br>";
+         text += "Shows that already have an AutoSkip entry are left alone.";
+      }
+      else if (component.equals("autoskip_fetch_skipmode")) {
+         text =  "<b>Auto fetch tivo.com SkipMode data after NPL refresh</b><br>";
+         text += "<b>Requires the tivo.com online login</b> (username and password on the Tivos tab).<br>";
+         text += "After each My Shows refresh, kmttg looks for recordings that have SkipMode but no<br>";
+         text += "AutoSkip data, and if it finds any it queues a <b>SkipMode fetch</b> job to collect<br>";
+         text += "the cut points from tivo.com. Nothing is played back on the TiVo.<br>";
+         text += "<b>The first run can take a long time</b> - it is one tivo.com request per recording,<br>";
+         text += "so a full My Shows list may take many minutes. It runs as a normal job, so you can<br>";
+         text += "watch its progress and cancel it from the Job Monitor. Later refreshes only pick up<br>";
+         text += "whatever is new. Shows that already have AutoSkip data are left alone.";
       }
       else if (component.equals("autoskip_prune")) {
          text =  "<b>Prune Skip Table automatically after NPL refresh</b><br>";

@@ -59,6 +59,7 @@ import com.tivo.kmttg.task.qsfix;
 import com.tivo.kmttg.task.remote;
 import com.tivo.kmttg.task.remux;
 import com.tivo.kmttg.task.skipdetect;
+import com.tivo.kmttg.task.skipfetch;
 import com.tivo.kmttg.task.slingbox;
 import com.tivo.kmttg.task.tdownload_decrypt;
 import com.tivo.kmttg.task.tivolibre;
@@ -138,6 +139,14 @@ public class jobData implements Serializable, Cloneable {
    public String offset = null;
    public String SkipPoint = null;
    public String contentId = null;
+   public String recordingId = null;
+   public String clipMetadataId = null;
+   // The recording's length in msecs, straight off the NPL entry. Deliberately not
+   // job.duration: encode derives that one from ffmpeg when it is null and uses it for the
+   // progress percentage, so filling it from the NPL would skew that on a cut file. A
+   // primitive because an old queue file deserialises a boxed field as null, and 0 here
+   // just means "unknown", which is the same as not clamping.
+   public long recordingDurationMs = 0;
    public String collectionId = null;
    // Set when a combined download+decrypt job should also mux straight to MKV, avoiding a
    // second job that would re-read everything just written.
@@ -247,6 +256,7 @@ public class jobData implements Serializable, Cloneable {
          "autotune",
          "remote",
          "skipdetect",
+         "skipfetch",
          "javadownload",
          "jdownload_decrypt",
          "tdownload_decrypt",
@@ -304,6 +314,8 @@ public class jobData implements Serializable, Cloneable {
          job.process = new tivolibre(job);
       if (job.type.equals("skipdetect"))
          job.process = new skipdetect(job);
+      if (job.type.equals("skipfetch"))
+         job.process = new skipfetch(job);
       if (job.type.equals("dsd"))
          job.process = new dsd(job);
       if (job.type.equals("encode"))
@@ -396,6 +408,12 @@ public class jobData implements Serializable, Cloneable {
       }
       else if (type.equals("skipdetect")) {
          file = title;
+      }
+      else if (type.equals("skipfetch")) {
+         // NOTE: Must assign an output file of some sort to prevent job duplication across
+         // different Tivos. A skipfetch has no output file, and its work list is per Tivo, so
+         // the Tivo name is what makes two of them different jobs - same as a playlist.
+         file = tivoName;
       }
       else if (type.equals("javadownload")) {
          file = tivoFile;

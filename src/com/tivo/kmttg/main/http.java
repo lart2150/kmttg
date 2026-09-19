@@ -321,6 +321,9 @@ public class http {
 			jobMonitor.createSubFolders(job.muxFile, job);
 			muxSink = new MuxSink(new java.io.File(job.muxFile));
 			muxSink.setSupplement(com.tivo.kmttg.task.remux.supplement(job));
+			// Same reason as the cover art for being on this side of the connection: looking up
+			// SkipMode segments is an rpc round trip and may open a websocket to tivo.com.
+			com.tivo.kmttg.task.remux.attachChapters(muxSink, job);
 			com.tivo.kmttg.task.remux.attachCoverArt(muxSink, job);
 			// A streaming job already announced this file as its one output; only say it here
 			// when the muxer is the second consumer of the decode.

@@ -23,19 +23,23 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.mux.MetadataTags;
 import com.tivo.kmttg.mux.MuxSink;
+import com.tivo.kmttg.mux.mkv.MkvMuxer;
 import com.tivo.kmttg.util.backgroundProcess;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
 import com.tivo.kmttg.rpc.artwork;
+import com.tivo.kmttg.rpc.ClipSegments;
 
 import net.straylightlabs.tivolibre.TivoDecoder;
 import net.straylightlabs.tivolibre.TransportStreamReader;
@@ -74,6 +78,7 @@ public class remux extends baseTask implements Serializable {
             inputStream = new BufferedInputStream(new FileInputStream(job.inputFile), 1 << 20);
             sink = new MuxSink(new File(job.encodeFile));
             sink.setSupplement(supplement(job));
+            attachChapters(sink, job);
             attachCoverArt(sink, job);
             if (job.inputFile.toLowerCase().endsWith(".tivo")) {
                // Fused: decrypt and mux in one read, no intermediate .ts written at all.
@@ -138,6 +143,54 @@ public class remux extends baseTask implements Serializable {
       s.setSeasonEpisode(job.season, job.episode);
       s.setEpisodeNumber(job.episodeNumber);
       return s;
+   }
+
+   // SkipMode segments as Matroska chapters, so a player can jump the ad breaks the way the
+   // TiVo does. Best effort like the cover art - no skip data is not a reason to fail, and no
+   // rpcEnabled check here because neither source needs the local box.
+   public static void attachChapters(MuxSink sink, jobData job) {
+      if (job.contentId == null) return;
+      try {
+         ClipSegments.Result result = ClipSegments.get(
+            job.tivoName, job.contentId, job.recordingId, job.clipMetadataId);
+         if (result == null || result.segments.isEmpty()) return;
+         // Same check the AutoSkip write makes. Without it, segments anchored outside the
+         // recording all clamp away in the muxer and the "keep at least one" fallback leaves
+         // a single meaningless chapter spanning the whole file.
+         String reason = ClipSegments.rejectReason(result.segments, job.recordingDurationMs);
+         if (reason != null) {
+            ClipSegments.warnRejected(job.title, reason);
+            return;
+         }
+         sink.setChapters(buildChapters(result.segments));
+         log.print("Embedding " + result.segments.size() + " SkipMode segments as chapters");
+
+         // Only SkipMode data is worth keeping: AutoSkip data is where it would be written.
+         if (result.source == ClipSegments.SOURCE_SKIPMODE
+               && config.autoskip_save_skipmode == 1) {
+            ClipSegments.saveToAutoSkip(job.contentId, job.offerId, job.title, job.tivoName,
+               result.segments, job.recordingDurationMs);
+         }
+      } catch (Exception e) {
+         log.warn("Could not fetch SkipMode data: " + e.getMessage());
+      }
+   }
+
+   // Alternating show and ad chapters rather than show only: a gap between chapters is
+   // invisible in a chapter menu, and marking the breaks is what makes them skippable. The ad
+   // chapters are the gaps between segments, so n segments give 2n-1 chapters - there is no
+   // break after the last segment, and anything before the first is inside it.
+   public static List<MkvMuxer.Chapter> buildChapters(List<ClipSegments.Segment> segments) {
+      List<MkvMuxer.Chapter> chapters = new ArrayList<MkvMuxer.Chapter>();
+      for (int i=0; i<segments.size(); ++i) {
+         ClipSegments.Segment s = segments.get(i);
+         chapters.add(new MkvMuxer.Chapter(s.startMs, s.endMs, "Segment " + (i+1)));
+         if (i+1 < segments.size()) {
+            chapters.add(new MkvMuxer.Chapter(
+               s.endMs, segments.get(i+1).startMs, "Commercials " + (i+1)));
+         }
+      }
+      return chapters;
    }
 
    // Poster art for the MKV, the same image Show Information displays. Fetched here rather
@@ -220,11 +273,10 @@ public class remux extends baseTask implements Serializable {
 
    public Boolean start() {
       debug.print("");
-      // Write to a temp name and rename on success: the decode verdict only arrives at EOF,
-      // so a failed run must not leave a partial file where the finished one belongs.
-      // Written straight to its final name, as encode.java does. A hard crash can leave a
-      // partial behind; that is a redownload, not something worth a staging file and a
-      // rename that File.renameTo cannot do over an existing file on Windows anyway.
+      // Written straight to its final name, as encode.java does. The decode verdict only
+      // arrives at EOF, so the worker deletes a failed output on the way out. A hard crash
+      // can still leave a partial behind; that is a redownload, not something worth a staging
+      // file and a rename that File.renameTo cannot do over an existing file on Windows.
       file.delete(job.encodeFile);
 
       log.print(">> REMUXING " + job.inputFile + " TO " + job.encodeFile + " ...");
