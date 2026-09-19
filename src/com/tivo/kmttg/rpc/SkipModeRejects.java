@@ -95,6 +95,25 @@ public class SkipModeRejects {
          + (reason == null ? "" : " - " + reason), notes);
    }
 
+   // How many recordings are currently written off. Zero also covers "no file yet".
+   public static synchronized int count() {
+      return load().size();
+   }
+
+   // Forget every verdict, so all of them are tried again on the next refresh. The same thing
+   // the file's own header tells a user to do by hand, offered from the GUI when turning on an
+   // option that changes what the verdicts would have been.
+   public static synchronized boolean clear() {
+      debug.print("");
+      if (! file.isFile(iniFile())) return true;
+      if (file.delete(iniFile())) {
+         log.warn("Cleared remembered SkipMode rejects - they will be tried again");
+         return true;
+      }
+      log.error("Could not delete " + iniFile());
+      return false;
+   }
+
    // Drop anything the NPL no longer lists, so the file tracks the recordings that exist.
    public static synchronized void prune(Set<String> liveContentIds) {
       if (liveContentIds == null || liveContentIds.isEmpty()) return;

@@ -124,4 +124,20 @@ public class SkipModeRejectsTest {
       e.put("title", contentId);
       return e;
    }
+
+   // Turning on the stream anchor offers to forget these, because they were judged without it.
+   @Test
+   public void countAndClearDriveTheResetOfferedWhenTheAnchorIsEnabled() {
+      assertEquals(0, SkipModeRejects.count(), "no file yet is not an error");
+      assertTrue(SkipModeRejects.clear(), "clearing nothing succeeds");
+
+      SkipModeRejects.add("tivo:ct.1", "tivo:cm.1", "One", "does not fit");
+      SkipModeRejects.add("tivo:ct.2", "tivo:cm.2", "Two", "does not fit");
+      assertEquals(2, SkipModeRejects.count());
+
+      assertTrue(SkipModeRejects.clear());
+      assertEquals(0, SkipModeRejects.count());
+      assertFalse(SkipModeRejects.isRejected("tivo:ct.1", "tivo:cm.1"),
+         "a cleared verdict must not survive");
+   }
 }

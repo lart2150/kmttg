@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -42,17 +43,22 @@ public class ClipSegmentsTest {
    private String savedProgramDir;
    private String savedUser;
    private String savedPass;
+   private int savedStreamAnchor;
 
    @BeforeEach
    void redirectProgramDir() {
       savedProgramDir = config.programDir;
       savedUser = config.getTivoUsername();
       savedPass = config.getTivoPassword();
+      savedStreamAnchor = config.autoskip_stream_anchor;
       config.programDir = work.toString();
       // No credentials: the tivo.com tier must decline before it tries to open a websocket,
       // so an unreachable network can never turn these into slow or flaky tests.
       config.setTivoUsername("");
       config.setTivoPassword("");
+      // Off by default here for the same reason: every reanchor test below is written so the
+      // guards answer before anything would reach for a TiVo.
+      config.autoskip_stream_anchor = 0;
    }
 
    @AfterEach
@@ -60,6 +66,7 @@ public class ClipSegmentsTest {
       config.programDir = savedProgramDir;
       config.setTivoUsername(savedUser == null ? "" : savedUser);
       config.setTivoPassword(savedPass == null ? "" : savedPass);
+      config.autoskip_stream_anchor = savedStreamAnchor;
    }
 
    // Two show segments, in the shape visualDetect writes.
@@ -356,6 +363,67 @@ public class ClipSegmentsTest {
       assertNull(ClipSegments.rejectReason(segs(-28101, 611696, 5292000, 5432000), 5393000));
       // Start padding pushes the first segment well inside the file, which is also fine.
       assertNull(ClipSegments.rejectReason(segs(270000, 900000), 1800000));
+   }
+
+   // The whole point of the stream anchor, in arithmetic. These are the real offsets
+   // clipMetadataAdjust returned for rc.16455369 - the same pair the rejection test below
+   // uses - and 7259888 is the startStreamTime read off that recording's own HLS stream.
+   // Subtracting one from the other has to turn data the checks refuse into data they accept.
+   @Test
+   void theStreamAnchorRescuesAnAdriftRecording() {
+      List<ClipSegments.Segment> adrift = segs(7220822, 7785262);
+      long duration = 3538000;
+      assertNotNull(ClipSegments.rejectReason(adrift, duration),
+         "the unshifted offsets are the case this feature exists for");
+
+      List<ClipSegments.Segment> fixed = ClipSegments.shift(adrift, 7259888);
+      assertEquals(-39066, fixed.get(0).startMs);
+      assertEquals(525374, fixed.get(0).endMs);
+      assertNull(ClipSegments.rejectReason(fixed, duration),
+         "the measured anchor must make the real offsets fit");
+   }
+
+   @Test
+   void shiftMovesBothEndsOfEverySegment() {
+      List<ClipSegments.Segment> shifted = ClipSegments.shift(segs(1000, 2000, 5000, 6000), 400);
+      assertEquals(2, shifted.size());
+      assertEquals(600, shifted.get(0).startMs);
+      assertEquals(1600, shifted.get(0).endMs);
+      assertEquals(4600, shifted.get(1).startMs);
+      assertEquals(5600, shifted.get(1).endMs);
+   }
+
+   // Enabled, but the data is already usable - so there is nothing to fix and no reason to
+   // spend one of the TiVo's two transcoders. Returning before the network is what makes that
+   // true, and is why this test can run with no TiVo anywhere.
+   @Test
+   void reanchorLeavesUsableSegmentsAlone() {
+      config.autoskip_stream_anchor = 1;
+      List<ClipSegments.Segment> good = segs(270000, 900000);
+      ClipSegments.Anchored a = ClipSegments.reanchor("Bolt", "tivo:rc.1", good, 1800000);
+      assertSame(good, a.segments);
+      assertFalse(a.retryLater);
+   }
+
+   // Off by default: this costs a transcoder and contends with live viewing, so it never runs
+   // unless it has been turned on, even for data that plainly needs it.
+   @Test
+   void reanchorDoesNothingUnlessEnabled() {
+      List<ClipSegments.Segment> adrift = segs(7220822, 7785262);
+      ClipSegments.Anchored a = ClipSegments.reanchor("Bolt", "tivo:rc.1", adrift, 3538000);
+      assertSame(adrift, a.segments);
+      assertFalse(a.retryLater, "a disabled option is not a busy TiVo");
+   }
+
+   @Test
+   void reanchorDeclinesWithoutEnoughToGoOn() {
+      config.autoskip_stream_anchor = 1;
+      List<ClipSegments.Segment> adrift = segs(7220822, 7785262);
+      assertSame(adrift, ClipSegments.reanchor("Bolt", null, adrift, 3538000).segments);
+      assertSame(adrift, ClipSegments.reanchor(null, "tivo:rc.1", adrift, 3538000).segments);
+      assertNull(ClipSegments.reanchor("Bolt", "tivo:rc.1", null, 3538000).segments);
+      // None of these are the TiVo being busy, so none of them may defer a verdict.
+      assertFalse(ClipSegments.reanchor("Bolt", null, adrift, 3538000).retryLater);
    }
 
    @Test
