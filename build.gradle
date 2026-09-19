@@ -18,7 +18,7 @@ ext {
     flatlafVersion    = '3.7.1'
     miglayoutVersion  = '11.4.3'  // miglayout-swing pulls miglayout-core
     jmdnsVersion      = '3.6.3'
-    tivolibreVersion  = '0.8.0'
+    tivolibreVersion  = '0.9.0-alpha1'
     // Both are for the spawned tivolibre command line app, not for kmttg itself; see below
     commonsCliVersion = '1.11.0'
     logbackVersion    = '1.6.3'

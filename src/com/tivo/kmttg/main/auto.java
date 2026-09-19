@@ -831,8 +831,13 @@ public class auto {
             ofp.write("comskip "     + config.gui.comskip_setting()   + "\n");
             ofp.write("comcut "      + config.gui.comcut_setting()    + "\n");
             ofp.write("captions "    + config.gui.captions_setting()  + "\n");
-            ofp.write("encode "      + config.gui.encode_setting()    + "\n");
-            ofp.write("encode_name " + config.encodeName              + "\n");
+            // Selecting MKV clears the encode checkbox, so encode_setting() alone would
+            // store "encode 0" and auto transfers would silently produce only a .ts. The
+            // remuxer is an encoding profile, so it saves as one.
+            Boolean mkvSelected = config.gui.mkv_setting() == 1;
+            ofp.write("encode "      + (mkvSelected ? 1 : config.gui.encode_setting()) + "\n");
+            ofp.write("encode_name " + (mkvSelected ? encodeConfig.MUX_PROFILE
+                                                    : config.encodeName) + "\n");
             //ofp.write("push "        + config.gui.push_setting()      + "\n");
             ofp.write("custom "      + config.gui.custom_setting()    + "\n");
             ofp.write("comskipIni "  + "none"                         + "\n");

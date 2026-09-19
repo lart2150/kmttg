@@ -1,0 +1,13 @@
+# Description (single line, keep short)
+<description>
+Matroska container, copy source video and audio. No external encoder needed.
+
+# Encode command or script (single line)
+# Known keywords: FFMPEG, HANDBRAKE, MENCODER, PERL, INPUT, OUTPUT, PWD, CPU_CORES, SRTFILE
+# KMTTG_MUX runs kmttg's built-in remuxer instead of spawning an encoder.
+<command>
+KMTTG_MUX INPUT OUTPUT
+
+# Encoded output file extension
+<extension>
+mkv

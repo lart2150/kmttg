@@ -50,6 +50,7 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.gui.swing.TreeTable;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.artwork;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
 
@@ -639,41 +640,18 @@ public class ShowDetails {
       if (url != null) // another episode of this series already looked it up
          return loadImage(url);
 
-      Remote r = config.initRemote(tivoName);
-      if (r.success) {
-         try {
-            JSONObject json = new JSONObject();
-            JSONObject template = new JSONObject();
-            template.put("type", "responseTemplate");
-            template.put("typeName", "category");
-            template.put("fieldName", new JSONArray("[\"image\"]"));
-            json.put("responseTemplate", template);
-            if (sourceJson.has("contentId")) {
-               json.put("contentId", sourceJson.getString("contentId"));
-               JSONObject result = r.Command("contentSearch", json);
-               if (result != null && result.has("content")) {
-                  JSONObject content = result.getJSONArray("content").getJSONObject(0);
-                  if (content.has("image")) {
-                     url = pickImageUrl(content.getJSONArray("image"));
-                  }
-               }
-            }
-            else if (sourceJson.has("collectionId")) {
-               json.put("collectionId", sourceJson.getString("collectionId"));
-               JSONObject result = r.Command("collectionSearch", json);
-               if (result != null && result.has("collection")) {
-                  JSONObject collection = result.getJSONArray("collection").getJSONObject(0);
-                  if (collection.has("image")) {
-                     url = pickImageUrl(collection.getJSONArray("image"));
-                  }
-               }
-            }
-         } catch (JSONException e) {
-            log.error("ShowDetails searchImage - " + e.getMessage());
-         } finally {
-            r.disconnect();
-         }
+      // The rpc lookup lives in rpc/artwork so the remux task can embed the same image as
+      // cover art. This dialog wants a thumbnail; that one wants the largest available.
+      String contentId = null, collectionId = null;
+      try {
+         if (sourceJson.has("contentId")) contentId = sourceJson.getString("contentId");
+         else if (sourceJson.has("collectionId"))
+            collectionId = sourceJson.getString("collectionId");
+      } catch (JSONException e) {
+         log.error("ShowDetails searchImage - " + e.getMessage());
       }
+      url = artwork.findUrl(tivoName, contentId, collectionId, DESIRED_IMAGE_HEIGHT);
+
       // Only a real answer is cached. Recording a miss would also record a
       // TiVo that was asleep, and the series would stay pictureless for the
       // rest of the session even once it came back.
@@ -681,27 +659,11 @@ public class ShowDetails {
       return loadImage(url);
    }
 
-   // The url closest to the height the dialog wants to show
+   private static final int DESIRED_IMAGE_HEIGHT = 180;
+
+   // The url closest to the height this dialog shows
    private static String pickImageUrl(JSONArray imageArray) {
-      try {
-         int diff = 500;
-         int desired = 180;
-         int index = 0;
-         // 1st find closest to desired height
-         for (int i=0; i<imageArray.length(); ++i) {
-            JSONObject j = imageArray.getJSONObject(i);
-            int h = j.getInt("height");
-            if (Math.abs(desired-h) < diff) {
-               index = i;
-               diff = Math.abs(desired-h);
-            }
-         }
-         // Now pick according to selected height
-         return imageArray.getJSONObject(index).getString("imageUrl");
-      } catch (JSONException e) {
-         log.error("ShowDetails pickImageUrl - " + e.getMessage());
-         return null;
-      }
+      return artwork.pickUrl(imageArray, DESIRED_IMAGE_HEIGHT);
    }
 
    private ImageIcon loadImage(final String urlString) {

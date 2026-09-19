@@ -349,6 +349,24 @@ public class jobMonitor {
       return prior;
    }
 
+   // Copy what the Now Playing entry knows about the show onto a job. Only the metadata job
+   // used to get these, so anything else - the remuxer wanting them for MKV tags, say - saw
+   // nulls. Entry is null in some paths, including non GUI runs that never fetched one, so
+   // this has to tolerate that rather than assume.
+   private static void copyShowInfo(jobData job, Hashtable<String,String> entry) {
+      if (entry == null) return;
+      if (entry.containsKey("title"))         job.title = entry.get("title");
+      if (entry.containsKey("EpisodeNumber")) job.episodeNumber = entry.get("EpisodeNumber");
+      if (entry.containsKey("season"))        job.season = entry.get("season");
+      if (entry.containsKey("episode"))       job.episode = entry.get("episode");
+      if (entry.containsKey("channel"))       job.callsign = entry.get("channel");
+      if (entry.containsKey("channelNum"))    job.displayMajorNumber = entry.get("channelNum");
+      if (entry.containsKey("SeriesId"))      job.seriesId = entry.get("SeriesId");
+      if (entry.containsKey("ProgramId"))     job.ProgramId = entry.get("ProgramId");
+      if (entry.containsKey("contentId"))     job.contentId = entry.get("contentId");
+      if (entry.containsKey("collectionId"))  job.collectionId = entry.get("collectionId");
+   }
+
    // Create directory of f if it doesn't already exist
    public static Boolean createSubFolders(String f, jobData job) {
       debug.print("f=" + f);
@@ -454,7 +472,8 @@ public class jobMonitor {
          }
          
          // For encode jobs add profile name before output file name
-         if (job.type.equals("encode") || job.type.equals("vrdencode")) {
+         if (job.type.equals("encode") || job.type.equals("vrdencode")
+               || job.type.equals("remux")) {
             output = "(" + job.encodeName + ") " + output;
          }
          
@@ -554,8 +573,15 @@ public class jobMonitor {
       String taskNames[] = jobData.allTaskNames();
       int task_offset = 0;
       if (job.type != null) {
-         while (! job.type.equals(taskNames[task_offset])) {
+         // Bounded: a job type missing from allTaskNames() used to walk off the end and throw
+         // AIOOBE, killing the job with no clue why. Ordering is lost for an unregistered
+         // type, which is a bug worth a log line rather than a crash.
+         while (task_offset < taskNames.length && ! job.type.equals(taskNames[task_offset])) {
             task_offset++;
+         }
+         if (task_offset >= taskNames.length) {
+            log.error("job.type=" + job.type + " is not in jobData.allTaskNames()");
+            task_offset = 0;
          }
       }
       float minorId = (float)0.01*task_offset;
@@ -684,6 +710,30 @@ public class jobMonitor {
       }
    }
      
+   // Whether the decrypted transport stream is an output in its own right. RemoveMpegFile=1
+   // says it goes as soon as the encode is done, so it is not one whatever the Decrypt checkbox
+   // says - and never writing a gigabyte beats writing it and deleting it. Worth its own rule
+   // because it is the common case: decrypt is checked by default and the MKV task used to
+   // force it on, so hardly anyone has it unchecked.
+   static Boolean mpegIsAnOutput(Boolean decryptRequested) {
+      return decryptRequested && config.RemoveMpegFile != 1;
+   }
+
+   // Decides whether the decrypted transport stream has to exist as a file at all. When the
+   // builtin muxer is the only thing that would ever read it, the download decodes straight
+   // into the MKV and no .ts is written: one pass over the stream, nothing on disk in between.
+   //
+   // Anything that reads the mpeg afterwards keeps it - ad detection, ad cutting, qsfix,
+   // caption extraction, the custom command, a second encoding profile - and so does the user
+   // wanting the decrypted file for its own sake, which is mpegIsAnOutput above. That reads the
+   // Decrypt checkbox as the user left it, not the value after LaunchJobs turns it on to
+   // satisfy the encode; taking the latter would mean the stream is never written for anybody.
+   static Boolean canStreamToMux(Boolean mpegIsAnOutput, Boolean comskip, Boolean comcut,
+         Boolean qsfix, Boolean captions, Boolean custom, Boolean secondProfile) {
+      return ! mpegIsAnOutput && ! comskip && ! comcut && ! qsfix
+          && ! captions && ! custom && ! secondProfile;
+   }
+
    // Master job launch function (in both GUI & auto modes)
    // Builds file names & launches jobs according to specs
    @SuppressWarnings("unchecked")
@@ -727,6 +777,11 @@ public class jobMonitor {
       Boolean metadata     = (Boolean)specs.get("metadata");
       Boolean metadataTivo = (Boolean)specs.get("metadataTivo");
       Boolean decrypt      = (Boolean)specs.get("decrypt");
+      // The Decrypt checkbox as the user left it. Several blocks below turn decrypt on to
+      // satisfy some other task, so by the time jobs are built the flag no longer says whether
+      // the decrypted file was asked for or merely implied - and that is the difference
+      // between an output and an intermediate.
+      Boolean decryptRequested = decrypt;
       Boolean qsfix        = (Boolean)specs.get("qsfix");
       Boolean twpdelete    = (Boolean)specs.get("twpdelete");
       Boolean rpcdelete    = (Boolean)specs.get("rpcdelete");
@@ -756,6 +811,10 @@ public class jobMonitor {
       // Init names
       String source       = null;
       String tivoName     = null;
+      // Set when the download job absorbed the remux, so no separate one is queued.
+      Boolean fusedMux = false;
+      // Set when that fused job also skips the .ts: the decode feeds only the muxer.
+      Boolean streamToMux = false;
       String encodeName   = null;
       String encodeName2   = null;
       String encodeName2_suffix = null;
@@ -798,6 +857,27 @@ public class jobMonitor {
       }
       if (encode && encodeName2 != null && ! encodeConfig.isValidEncodeName(encodeName2) ) {
          log.error("Cancelling second encode task due to invalid encoding profile specified: " + encodeName2);
+         // Said "cancelling" but left the name in place, so the second encode was still built
+         // from it. getExtension is safe (it returns ""), but getCommandName dereferences
+         // config.ENCODE.get(name) unguarded, so isBuiltinMux on a name that is not there
+         // throws. Clearing it is what the message already claims.
+         encodeName2 = null;
+      }
+
+      // The builtin remuxer reads elementary streams from tivolibre's transport stream decoder.
+      // A program stream download is handed to a decoder with no frame sink at all, so the mux
+      // would write an empty file instead of failing. The GUI greys the MKV task out for this,
+      // but auto mode and the web server build their specs without it.
+      if (encode && mode.equals("Download") && TSDownload != 1
+            && encodeConfig.isBuiltinMux(encodeName)) {
+         log.error("Cancelling encode task: " + encodeName + " needs TS downloads enabled");
+         encode = false;
+      }
+      if (encode && encodeName2 != null && TSDownload != 1 && mode.equals("Download")
+            && encodeConfig.isValidEncodeName(encodeName2)
+            && encodeConfig.isBuiltinMux(encodeName2)) {
+         log.error("Cancelling second encode task: " + encodeName2 + " needs TS downloads enabled");
+         encodeName2 = null;
       }
 
       String outputDir = config.outputDir;
@@ -998,12 +1078,58 @@ public class jobMonitor {
       if (comskip && entry != null &&
             entry.containsKey("contentId") && SkipManager.hasEntry(entry.get("contentId")))
          exportSkip = true;
+
+      // Resolved here rather than at the download job because a resumed download cannot be
+      // fused: it starts mid stream, so the decoder has no header to work from and the muxer
+      // would write a file with no tracks - and a streaming job would have no .ts to fall back
+      // on. The normal decrypt-then-remux jobs handle that case.
+      String byteOffset = null;
+      if (mode.equals("Download") && config.resumeDownloads && entry.containsKey("url")) {
+         byteOffset = NplItemXML.ByteOffset(tivoName, entry.get("url"));
+         if (byteOffset != null) {
+            if (entry.containsKey("title"))
+               log.warn(">> '" + entry.get("title") + "' ByteOffset=" + byteOffset);
+            entry.put("ByteOffset", byteOffset);
+         }
+      }
+
+      // Whether the download job can absorb the remux, and whether the decrypted transport
+      // stream then has to be written at all. Decided here rather than at the download job
+      // below because the metadata sidecar list is built first and must not name a file that
+      // will never exist.
+      if (mode.equals("Download") && encode && decrypt && byteOffset == null
+            && config.combine_download_decrypt == 1 && config.VrdDecrypt == 0
+            && config.tivolibreDecrypt == 1
+            && encodeConfig.isValidEncodeName(encodeName)
+            && encodeConfig.isBuiltinMux(encodeName)
+            // Not when anything downstream rewrites the mpeg first. qsfix and ad cutting both
+            // produce a new source that the encode step is supposed to read, so fusing the
+            // remux into the download would silently mux the uncut stream instead.
+            && ! comcut && ! qsfix) {
+         streamToMux = canStreamToMux(mpegIsAnOutput(decryptRequested), comskip, comcut,
+               qsfix, captions, custom, encodeName2 != null);
+         // Two settings only a remux job knows how to honour, so leave it to one whenever
+         // either applies: OverwriteFiles=0 means an existing mkv is left alone, and
+         // RemoveMpegFile=1 means the decrypted mpeg goes once the mkv is written, which
+         // nothing on the download path does. Streaming satisfies the second by never
+         // writing the mpeg in the first place.
+         //
+         // An already present mpeg matters too: OverwriteFiles=0 makes the download job skip
+         // itself, and with the remux job absorbed into it nothing would then write the mkv
+         // at all. A streaming job is judged by the mkv instead, so only the other one cares.
+         Boolean remuxJobMustRun = (config.RemoveMpegFile == 1 && ! streamToMux)
+               || (config.OverwriteFiles == 0
+                     && (file.isFile(encodeFile) || (! streamToMux && file.isFile(mpegFile))));
+         fusedMux = ! remuxJobMustRun;
+         streamToMux = streamToMux && fusedMux;
+      }
       if ( mode.equals("Download") ) {
          source = entry.get("url_TiVoVideoDetails");
          if (metadata) {
             Stack<String> meta_files = videoFilesToProcess(
                mode, decrypt, comcut, encode, config.metadata_files,
-               startFile, videoFile, tivoFile, mpegFile, mpegFile_cut, encodeFile, encodeFile2, ".txt"
+               startFile, videoFile, tivoFile, streamToMux ? encodeFile : mpegFile,
+               mpegFile_cut, encodeFile, encodeFile2, ".txt"
             );
             if (meta_files.size() > 0) {
                for (int i=0; i<meta_files.size(); ++i) {
@@ -1047,29 +1173,33 @@ public class jobMonitor {
 
          // Download
          jobData job = new jobData();
+         // The download job can now carry the remux, which needs the show info for tags and
+         // cover art - it used to reach only the metadata and encode jobs.
+         copyShowInfo(job, entry);
          job.TSDownload   = TSDownload;
          job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
          if (entry != null && entry.containsKey("duration"))
             job.download_duration = (int) (Long.parseLong(entry.get("duration"))/1000);
-         if (config.resumeDownloads) {
-            if (entry.containsKey("url")) {
-               String ByteOffset = NplItemXML.ByteOffset(tivoName, entry.get("url"));
-               if (ByteOffset != null) {
-                  if (entry.containsKey("title"))
-                     log.warn(">> '" + entry.get("title") + "' ByteOffset=" + ByteOffset);
-                  entry.put("ByteOffset", ByteOffset);
-                  job.offset = ByteOffset;
-               }
-            }
-         }
+         job.offset = byteOffset;
          if (config.combine_download_decrypt == 1 && decrypt && config.VrdDecrypt == 0) {
             // Combined java download & decrypt
             decrypt = false;
             job.type = "jdownload_decrypt";
             if (config.tivolibreDecrypt == 1)
                job.type = "tdownload_decrypt";
+            // Fuse the remux in too: one decode feeds the .ts and the muxer together, so
+            // download, decrypt and remux become a single job that reads the stream once.
+            // fusedMux already required tivolibreDecrypt, so the type here is always
+            // tdownload_decrypt - jdownload_decrypt has no FrameSink to attach to.
+            if (fusedMux) {
+               job.muxFile = encodeFile;
+               job.encodeName = encodeName;
+               // And when nothing downstream reads the decrypted stream it is never written
+               // at all: the decode feeds the muxer alone and the .ts does not exist.
+               job.muxOnly = streamToMux;
+            }
             job.name = "java";
             job.mpegFile = mpegFile;
             job.mpegFile_cut = mpegFile_cut;
@@ -1089,14 +1219,8 @@ public class jobMonitor {
          job.tivoFile     = tivoFile;
          job.url          = entry.get("url");
          job.tivoFileSize = Long.parseLong(entry.get("size"));
-         if (entry.containsKey("ProgramId")) {
-            job.ProgramId = entry.get("ProgramId");
-         }
          if (useProgramId_unique && entry.containsKey("ProgramId_unique")) {
             job.ProgramId_unique = entry.get("ProgramId_unique");
-         }
-         if (entry.containsKey("title")) {
-            job.title = entry.get("title");
          }
          if (! specs.containsKey("nodownload"))
             submitNewJob(job);
@@ -1105,7 +1229,8 @@ public class jobMonitor {
       if (metadataTivo) {
          Stack<String> meta_files = videoFilesToProcess(
             mode, decrypt, comcut, encode, config.metadata_files,
-            startFile, videoFile, tivoFile, mpegFile, mpegFile_cut, encodeFile, encodeFile2, ".txt"
+            startFile, videoFile, tivoFile, streamToMux ? encodeFile : mpegFile,
+            mpegFile_cut, encodeFile, encodeFile2, ".txt"
          );
          if (meta_files.size() > 0) {
             for (int i=0; i<meta_files.size(); ++i) {
@@ -1351,6 +1476,7 @@ public class jobMonitor {
       
       if (encode) {
          jobData job = new jobData();
+         copyShowInfo(job, entry);
          job.startFile    = startFile;
          job.source       = source;
          job.tivoName     = tivoName;
@@ -1367,13 +1493,24 @@ public class jobMonitor {
             job.tivoFile  = tivoFile;
             job.vprjFile  = string.replaceSuffix(job.mpegFile, ".VPrj");
          }
+         else if (encodeConfig.isValidEncodeName(encodeName)
+               && encodeConfig.isBuiltinMux(encodeName)) {
+            // Built-in remux profile => in-process remux job, no external encoder.
+            // tivoFile lets the task fall back to decrypting and muxing in one read when no
+            // decrypt job produced an mpeg; without it that path is unreachable.
+            job.type      = "remux";
+            job.tivoFile  = tivoFile;
+         }
          // Indicate we need to keep source file longer
          if (encodeName2 != null)
             job.hasMoreEncodingJobs = true;
-         submitNewJob(job);
-         
+         // Skip only this one when the download absorbed it. A second profile queued behind
+         // it is a different output and still needs its own job.
+         if (! fusedMux) submitNewJob(job);
+
          if (encodeName2 != null) {
             job = new jobData();
+            copyShowInfo(job, entry);
             job.startFile    = startFile;
             job.source       = source;
             job.tivoName     = tivoName;
@@ -1384,11 +1521,20 @@ public class jobMonitor {
             job.mpegFile_cut = mpegFile_cut;
             job.encodeFile   = encodeFile2;
             job.srtFile      = srtFile;
+            // Same order as the first profile above, so the two cannot disagree about which
+            // job type a name maps to. isBuiltinMux reaches into config.ENCODE and throws on a
+            // name that is not there; encodeName2 is cleared when it fails validation now, so
+            // the check here is belt and braces on a path no test reaches.
             if (config.VrdEncode == 1 && encodeConfig.getCommandName(encodeName2) == null) {
                // VRD encode selected => vrdencode job
                job.type      = "vrdencode";
                job.tivoFile  = tivoFile;
                job.vprjFile  = string.replaceSuffix(job.mpegFile, ".VPrj");
+            }
+            else if (encodeConfig.isValidEncodeName(encodeName2)
+                  && encodeConfig.isBuiltinMux(encodeName2)) {
+               job.type      = "remux";
+               job.tivoFile  = tivoFile;
             }
             submitNewJob(job);
          }
@@ -1441,6 +1587,9 @@ public class jobMonitor {
    
    // This makes decisions based on file filter setting for metadata and/or push tasks which
    // video files specifically should be processed
+   // A job that streams straight into the muxer never writes an mpeg, and callers pass the
+   // encode output as mpegFile so the sidecar follows the video rather than naming a file that
+   // will not exist. That makes the two the same path under "all", hence the de-duplication.
    private static Stack<String> videoFilesToProcess(
       String mode, Boolean decrypt, Boolean comcut, Boolean encode, String filter,
       String startFile, String videoFile, String tivoFile, String mpegFile, String mpegFile_cut,
@@ -1502,7 +1651,11 @@ public class jobMonitor {
          if (encode2)
             files.add(encodeFile2 + suffix);
       }
-      return files;
+      Stack<String> unique = new Stack<String>();
+      for (String f : files) {
+         if (! unique.contains(f)) unique.add(f);
+      }
+      return unique;
    }
 
    // Cancel and/or kill given job

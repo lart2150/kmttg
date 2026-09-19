@@ -57,6 +57,7 @@ import com.tivo.kmttg.task.metadataTivo;
 //import com.tivo.kmttg.task.push;
 import com.tivo.kmttg.task.qsfix;
 import com.tivo.kmttg.task.remote;
+import com.tivo.kmttg.task.remux;
 import com.tivo.kmttg.task.skipdetect;
 import com.tivo.kmttg.task.slingbox;
 import com.tivo.kmttg.task.tdownload_decrypt;
@@ -108,6 +109,10 @@ public class jobData implements Serializable, Cloneable {
    public String metaTmpFile = null;
    public String metaFile = null;
    public String episodeNumber = null;
+   // Real season and episode when the NPL entry carried them, which beats splitting
+   // episodeNumber. Same source tivoFileName prefers for [SeriesEpNumber].
+   public String season = null;
+   public String episode = null;
    public String displayMajorNumber = null;
    public String callsign = null;
    public String seriesId = null;
@@ -117,6 +122,7 @@ public class jobData implements Serializable, Cloneable {
    
    // download related
    public Long tivoFileSize = null;
+   public Long inputFileSize = null;
    public String ProgramId = null;
    String ProgramId_unique = null;
    public String title = null;
@@ -132,6 +138,20 @@ public class jobData implements Serializable, Cloneable {
    public String offset = null;
    public String SkipPoint = null;
    public String contentId = null;
+   public String collectionId = null;
+   // Set when a combined download+decrypt job should also mux straight to MKV, avoiding a
+   // second job that would re-read everything just written.
+   public String muxFile = null;
+   // Set alongside muxFile when nothing downstream reads the decrypted stream, so it is never
+   // written: mpegFile then names a file that does not and will not exist, and every check
+   // that would have looked at it has to look at muxFile instead. Primitive rather than
+   // Boolean: a queue file saved by an older kmttg deserializes into this class with the new
+   // field unset, and a null there would NPE on every unboxing below.
+   public boolean muxOnly = false;
+   // Bytes pulled off the TiVo so far. The only progress signal a streaming job has, because
+   // the MKV does not begin until the muxer has enough to describe its tracks and then grows
+   // at its own rate. Written by the download thread, read by the job monitor.
+   public volatile long streamedBytes = 0;
    public String offerId = null;
    public Boolean autoskip = false;
    public Boolean exportSkip = false;
@@ -243,6 +263,7 @@ public class jobData implements Serializable, Cloneable {
          "adcut",
          "captions",
          "encode",
+         "remux",
          "vrdencode",
          "atomic",
          "custom",
@@ -287,6 +308,8 @@ public class jobData implements Serializable, Cloneable {
          job.process = new dsd(job);
       if (job.type.equals("encode"))
          job.process = new encode(job);
+      if (job.type.equals("remux"))
+         job.process = new remux(job);
       if (job.type.equals("javadownload"))
          job.process = new javadownload(job);
       if (job.type.equals("javametadata"))
@@ -381,7 +404,9 @@ public class jobData implements Serializable, Cloneable {
          file = mpegFile;
       }
       else if (type.equals("tdownload_decrypt")) {
-         file = mpegFile;
+         // A streaming job never writes mpegFile, so naming it in the monitor would point at
+         // a file the user will never find.
+         file = muxOnly ? muxFile : mpegFile;
       }
       else if (type.equals("decrypt")) {
          file = mpegFile;
@@ -423,7 +448,7 @@ public class jobData implements Serializable, Cloneable {
       else if (type.equals("adcut")) {
          file = mpegFile_cut;
       }
-      else if (type.equals("encode")) {
+      else if (type.equals("encode") || type.equals("remux")) {
          file = encodeFile;
       }
       else if (type.equals("vrdencode")) {
