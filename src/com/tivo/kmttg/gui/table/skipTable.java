@@ -166,7 +166,7 @@ public class skipTable {
          if (changed.length() > 0) {
             for (int i=0; i<changed.length(); ++i) {
                JSONObject j = changed.getJSONObject(i);
-               SkipManager.changeEntry(j.getString("contentId"), j.getString("offset"), j.getString("title"));
+               SkipManager.changeEntry(j.getString("offerId"), j.getString("offset"), j.getString("title"));
             }
          }
       } catch (Exception e) {

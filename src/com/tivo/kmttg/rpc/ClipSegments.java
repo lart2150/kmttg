@@ -88,7 +88,7 @@ public class ClipSegments {
       debug.print("tivoName=" + tivoName + " contentId=" + contentId);
       if (contentId == null) return null;
 
-      List<Segment> saved = fromAutoSkip(contentId);
+      List<Segment> saved = fromAutoSkip(offerId);
       if (saved != null) {
          log.print("Using AutoSkip cut points for chapters (" + saved.size() + " segments)");
          return new Result(saved, SOURCE_AUTOSKIP);
@@ -185,8 +185,8 @@ public class ClipSegments {
    // What visualDetect measured, stored as show segments in AutoSkip.ini. The per entry
    // offset is a playback nudge and is left out here, matching what the VPrj and EDL exports
    // in SkipImport do with the same data.
-   private static List<Segment> fromAutoSkip(String contentId) {
-      Stack<Hashtable<String,Long>> entries = SkipManager.getEntry(contentId);
+   private static List<Segment> fromAutoSkip(String offerId) {
+      Stack<Hashtable<String,Long>> entries = SkipManager.getEntry(offerId);
       if (entries == null || entries.isEmpty()) return null;
       List<Segment> segments = new ArrayList<Segment>();
       for (Hashtable<String,Long> e : entries) {
@@ -271,7 +271,7 @@ public class ClipSegments {
       // AutoSkip switched off even when an entry is sitting there - the save would then append
       // a second one. Asking first also keeps removeEntry from logging "No entry found" for
       // every recording in a bulk fetch.
-      if (! SkipManager.getEntry(contentId).isEmpty()) SkipManager.removeEntry(contentId);
+      if (! SkipManager.getEntry(offerId).isEmpty()) SkipManager.removeEntry(offerId);
       SkipManager.saveEntry(contentId, offerId, 0L, title, tivoName, cuts);
       return true;
    }
@@ -497,7 +497,7 @@ public class ClipSegments {
                   || e.get("clipMetadataId") == null) continue;
             // Re-checked per recording rather than trusted from the scan: the list was built
             // before the batch started and a download in the meantime may have filled one in.
-            if (! SkipManager.getEntry(contentId).isEmpty()) continue;
+            if (! SkipManager.getEntry(e.get("offerId")).isEmpty()) continue;
 
             // Counted on the write, not the fetch: data that does not fit the recording is
             // fetched successfully and still stores nothing.
@@ -590,12 +590,13 @@ public class ClipSegments {
          List<Hashtable<String,String>> nplEntries) {
       List<Hashtable<String,String>> missing = new ArrayList<Hashtable<String,String>>();
       if (nplEntries == null) return missing;
-      Set<String> known = SkipManager.contentIds();
+      Set<String> known = SkipManager.offerIds();
       Map<String,String> rejected = SkipModeRejects.load();
       for (Hashtable<String,String> e : nplEntries) {
          if (e.get("contentId") == null || e.get("clipMetadataId") == null) continue;
+         if (e.get("offerId") == null) continue;
          if (e.get("recordingId") == null) continue;
-         if (known.contains(e.get("contentId"))) continue;
+         if (known.contains(e.get("offerId"))) continue;
          // Already tried and found not to fit. Compared on the clipMetadataId so replacement
          // metadata for the same recording still gets a fresh attempt.
          if (e.get("clipMetadataId").equals(rejected.get(e.get("contentId")))) continue;

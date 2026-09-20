@@ -130,6 +130,12 @@ public class SkipManager {
    public static synchronized void saveEntry(final String contentId, String offerId, long offset,
          String title, final String tivoName, Stack<Hashtable<String,Long>> data) {
       debug.print("contentId=" + contentId + " offerId=" + offerId + " offset=" + offset);
+      // Every lookup is by airing, so an entry without one is written and never found again -
+      // and the remove-then-save its callers do would append another copy on the next run
+      if (offerId == null || offerId.isEmpty()) {
+         log.warn("Not saving AutoSkip entry for '" + title + "': the recording carries no offerId");
+         return;
+      }
       log.print("Saving AutoSkip entry: " + title);
       try {
          String eol = "\r\n";
@@ -147,7 +153,7 @@ public class SkipManager {
          if (config.GUIMODE) {
             SwingUtil.runLater(new Runnable() {
                @Override public void run() {
-                  config.gui.getTab(tivoName).getTable().updateSkipStatus(contentId);
+                  config.gui.getTab(tivoName).getTable().updateSkipStatus(offerId);
                }
             });
          }
@@ -156,38 +162,104 @@ public class SkipManager {
       }
    }
    
-   public static synchronized Boolean hasEntry(String contentId) {
-      debug.print("contentId=" + contentId);
-      if (! skipEnabled() )
-         return false;
-      if (file.isFile(iniFile())) {
-         try {
-            BufferedReader ifp = new BufferedReader(new FileReader(iniFile()));
-            String line = null;
-            while (( line = ifp.readLine()) != null) {
-               if (line.contains("<entry>")) {
-                  line = ifp.readLine();
-                  if (line.startsWith("contentId")) {
-                     String[] l = line.split("=");
-                     if (l[1].equals(contentId)) {
-                        ifp.close();
-                        return true;
-                     }
-                  }
-               }
+   // One entry of AutoSkip.ini as the file holds it
+   static class SkipEntry {
+      String contentId = "", offerId = "", offset = "", tivoName = "", title = "";
+      Stack<Hashtable<String,Long>> cuts = new Stack<Hashtable<String,Long>>();
+   }
+   
+   // Every entry, in file order
+   static Stack<SkipEntry> readEntries() {
+      return read(null);
+   }
+   
+   // The entry for one airing, or null. An absent id matches nothing rather than everything:
+   // offerId is optional in the NPL data (parseNPL only sets it when the recording carries
+   // one), so "no id" has to mean "no entry" and not "whichever entry comes first".
+   static SkipEntry readEntry(String offerId) {
+      if (offerId == null || offerId.isEmpty())
+         return null;
+      Stack<SkipEntry> entries = read(offerId);
+      return entries.isEmpty() ? null : entries.get(0);
+   }
+   
+   // One pass over AutoSkip.ini, stopping early once the wanted airing is in hand. Entries
+   // are keyed by the airing rather than the programme: the same episode on two stations is
+   // two recordings with two sets of breaks, and keying on the contentId they share let one
+   // of them overwrite the other.
+   private static Stack<SkipEntry> read(String offerId) {
+      Stack<SkipEntry> entries = new Stack<SkipEntry>();
+      if ( ! file.isFile(iniFile()) )
+         return entries;
+      try (BufferedReader ifp = new BufferedReader(new FileReader(iniFile()))) {
+         String line = null;
+         SkipEntry current = null;
+         while (( line = ifp.readLine()) != null) {
+            if (line.contains("<entry>")) {
+               if (collect(current, offerId, entries))
+                  return entries;
+               current = new SkipEntry();
             }
-            ifp.close();
-         } catch (Exception e) {
-            log.error("readEntry - " + e.getMessage());
-            log.error(Arrays.toString(e.getStackTrace()));
+            else if (current == null)
+               continue;
+            else if (line.startsWith("contentId="))
+               current.contentId = value(line, "contentId");
+            else if (line.startsWith("offerId="))
+               current.offerId = value(line, "offerId");
+            else if (line.startsWith("offset="))
+               current.offset = value(line, "offset");
+            else if (line.startsWith("tivoName="))
+               current.tivoName = value(line, "tivoName");
+            else if (line.startsWith("title="))
+               current.title = value(line, "title");
+            else if (line.matches("^[0-9]+.*")) {
+               String[] l = line.split("\\s+");
+               Hashtable<String,Long> h = new Hashtable<String,Long>();
+               h.put("start", Long.parseLong(l[0]));
+               h.put("end", Long.parseLong(l[1]));
+               current.cuts.push(h);
+            }
          }
+         collect(current, offerId, entries);
+      } catch (Exception e) {
+         log.error("SkipManager readEntries - " + e.getMessage());
+         log.error(Arrays.toString(e.getStackTrace()));
+      }
+      return entries;
+   }
+   
+   // Keep the finished entry if it was asked for, and say whether the scan can stop here
+   private static Boolean collect(SkipEntry entry, String offerId, Stack<SkipEntry> entries) {
+      if (entry == null)
+         return false;
+      if (offerId == null) {
+         entries.push(entry);
+         return false;
+      }
+      if (offerId.equals(entry.offerId)) {
+         entries.push(entry);
+         return true;
       }
       return false;
    }
    
-   // Remove any entries matching given contentId from the ini file
-   public static synchronized Boolean removeEntry(final String contentId) {
-      debug.print("contentId=" + contentId);
+   // Everything after the first "=", so a title carrying one survives
+   private static String value(String line, String key) {
+      return line.replaceFirst(key + "=", "");
+   }
+   
+   public static synchronized Boolean hasEntry(String offerId) {
+      debug.print("offerId=" + offerId);
+      if (! skipEnabled() )
+         return false;
+      return readEntry(offerId) != null;
+   }
+   
+   // Remove the entry for the given airing from the ini file
+   public static synchronized Boolean removeEntry(final String offerId) {
+      debug.print("offerId=" + offerId);
+      if (offerId == null || offerId.isEmpty())
+         return false;
       if (file.isFile(iniFile())) {
          try {
             Boolean itemRemoved = false;
@@ -200,19 +272,19 @@ public class SkipManager {
             while (( line = ifp.readLine()) != null) {
                if (line.contains("<entry>")) {
                   include = true;
-                  String nextline = ifp.readLine();
-                  String[] l = nextline.split("=");
-                  if (l[1].equals(contentId)) {
+                  String contentLine = ifp.readLine();
+                  String offerLine = ifp.readLine();
+                  if (value(offerLine, "offerId").equals(offerId)) {
                      include = false;
                      itemRemoved = true;
-                     ifp.readLine(); // offerId
                      ifp.readLine(); // offset
-                     tivoName = ifp.readLine().split("=")[1];
-                     title = ifp.readLine().split("=")[1];
+                     tivoName = value(ifp.readLine(), "tivoName");
+                     title = value(ifp.readLine(), "title");
                   }
                   if (include) {
                      lines.push(line);
-                     lines.push(nextline);
+                     lines.push(contentLine);
+                     lines.push(offerLine);
                   }
                } else {
                   if (include)
@@ -235,14 +307,14 @@ public class SkipManager {
                      @Override public void run() {
                         tivoTab t = config.gui.getTab(final_tivoName);
                         if (t != null) {
-                           t.getTable().updateSkipStatus(contentId);
+                           t.getTable().updateSkipStatus(offerId);
                         }
                      }
                   });
                }
             }
             else
-               log.print("No entry found for: " + contentId);
+               log.print("No entry found for: " + offerId);
             return itemRemoved;
          } catch (Exception e) {
             log.error("removeEntry - " + e.getMessage());
@@ -251,9 +323,11 @@ public class SkipManager {
       return false;
    }
    
-   // Change offset for given contentId
-   public static synchronized Boolean changeEntry(String contentId, String offset, String title) {
-      debug.print("contentId=" + contentId + " offset=" + offset + " title=" + title);
+   // Change offset for the given airing
+   public static synchronized Boolean changeEntry(String offerId, String offset, String title) {
+      debug.print("offerId=" + offerId + " offset=" + offset + " title=" + title);
+      if (offerId == null || offerId.isEmpty())
+         return false;
       if (file.isFile(iniFile())) {
          try {
             Boolean itemChanged = false;
@@ -261,22 +335,19 @@ public class SkipManager {
             BufferedReader ifp = new BufferedReader(new FileReader(iniFile()));
             String line = null;
             while (( line = ifp.readLine()) != null) {
-               if (line.contains("contentId")) {
-                  Boolean changed = false;
-                  String[] l = line.split("=");
-                  if (l[1].equals(contentId)) {
-                     itemChanged = true;
-                     changed = true;
-                  }
-                  String offerId = ifp.readLine(); // offerId
-                  String nextline = ifp.readLine(); // offset
-                  l = nextline.split("=");
+               if (line.contains("<entry>")) {
+                  String contentLine = ifp.readLine();
+                  String offerLine = ifp.readLine();
+                  String offsetLine = ifp.readLine();
                   lines.push(line);
-                  lines.push(offerId);
-                  if (changed)
-                     lines.push(l[0] + "=" + offset);
-                  else
-                     lines.push(nextline);
+                  lines.push(contentLine);
+                  lines.push(offerLine);
+                  if (value(offerLine, "offerId").equals(offerId)) {
+                     itemChanged = true;
+                     lines.push("offset=" + offset);
+                  } else {
+                     lines.push(offsetLine);
+                  }
                } else {
                   lines.push(line);
                }
@@ -300,133 +371,58 @@ public class SkipManager {
       return false;
    }
    
-   // Every contentId the table holds, in one pass over the file. getEntry re-reads and
-   // re-parses the whole ini for each id it is asked about, which is fine for one lookup and
-   // quadratic when a caller is asking about a whole Now Playing list.
-   public static synchronized Set<String> contentIds() {
+   // Every airing the file holds, in one pass. getEntry re-reads and re-parses the whole ini
+   // for each id it is asked about, which is fine for one lookup and quadratic when a caller
+   // is asking about a whole Now Playing list.
+   public static synchronized Set<String> offerIds() {
       debug.print("");
       Set<String> ids = new HashSet<String>();
-      if (file.isFile(iniFile())) {
-         try {
-            BufferedReader ifp = new BufferedReader(new FileReader(iniFile()));
-            String line = null;
-            while (( line = ifp.readLine()) != null) {
-               if (line.startsWith("contentId")) {
-                  String[] l = line.split("=");
-                  if (l.length > 1) ids.add(l[1]);
-               }
-            }
-            ifp.close();
-         } catch (Exception e) {
-            log.error("SkipManager contentIds - " + e.getMessage());
-         }
-      }
+      for (SkipEntry e : readEntries())
+         ids.add(e.offerId);
       return ids;
    }
 
    // Synchronized like every other accessor here: removeEntry and changeEntry rewrite the
    // whole ini, so an unsynchronized read can land on a truncated file and report a recording
    // as having no skip data when it has some.
-   public static synchronized Stack<Hashtable<String,Long>> getEntry(String contentId) {
-      debug.print("contentId=" + contentId);
-      Stack<Hashtable<String,Long>> entry = new Stack<Hashtable<String,Long>>();
-      if (file.isFile(SkipManager.iniFile())) {
-         try {
-            BufferedReader ifp = new BufferedReader(new FileReader(SkipManager.iniFile()));
-            String line = null;
-            while (( line = ifp.readLine()) != null) {
-               if (line.contains("<entry>")) {
-                  line = ifp.readLine();
-                  if (line.startsWith("contentId")) {
-                     String[] l = line.split("=");
-                     if (l[1].equals(contentId)) {
-                        while (( line = ifp.readLine()) != null) {
-                           if (line.equals("<entry>"))
-                              break;
-                           if (line.matches("^[0-9]+.*")) {
-                              Hashtable<String,Long> h = new Hashtable<String,Long>();
-                              l = line.split("\\s+");
-                              h.put("start", Long.parseLong(l[0]));
-                              h.put("end", Long.parseLong(l[1]));
-                              entry.push(h);
-                           }
-                        }
-                        break;
-                     }
-                  }
-               }
-            }
-            ifp.close();
-         } catch (Exception e) {
-            log.error("SkipManager getEntry - " + e.getMessage());
-            log.error(Arrays.toString(e.getStackTrace()));
-         }
-      }
-      return entry;
+   public static synchronized Stack<Hashtable<String,Long>> getEntry(String offerId) {
+      debug.print("offerId=" + offerId);
+      SkipEntry entry = readEntry(offerId);
+      return entry == null ? new Stack<Hashtable<String,Long>>() : entry.cuts;
    }
 
-   
    // Return entries for use by SkipDialog table
    public static synchronized JSONArray getEntries() {
       debug.print("");
       JSONArray entries = new JSONArray();
-      if (file.isFile(iniFile())) {
-         try {
-            BufferedReader ifp = new BufferedReader(new FileReader(iniFile()));
-            String line=null, contentId="", title="", offset="", offerId="", tivoName="";
+      try {
+         for (SkipEntry e : readEntries()) {
+            // An entry with no cut pairs has never been listed here
+            if (e.cuts.isEmpty())
+               continue;
             JSONArray cuts = new JSONArray();
-            while (( line = ifp.readLine()) != null) {
-               if (line.contains("<entry>")) {
-                  if (cuts.length() > 0) {
-                     JSONObject json = new JSONObject();
-                     json.put("contentId", contentId);
-                     json.put("offerId", offerId);
-                     json.put("offset", offset);
-                     json.put("tivoName", tivoName);
-                     json.put("title", title);
-                     json.put("ad1", "" + cuts.getJSONObject(0).get("end"));
-                     json.put("cuts", cuts);
-                     entries.put(json);
-                  }
-                  cuts = new JSONArray();
-               }
-               if (line.contains("contentId="))
-                  contentId = line.replaceFirst("contentId=", "");
-               if (line.contains("offerId="))
-                  offerId = line.replaceFirst("offerId=", "");
-               if (line.contains("offset="))
-                  offset = line.replaceFirst("offset=", "");
-               if (line.contains("tivoName="))
-                  tivoName = line.replaceFirst("tivoName=", "");
-               if (line.contains("title="))
-                  title = line.replaceFirst("title=", "");
-               if (line.matches("^[0-9]+.*")) {
-                  String[] l = line.split("\\s+");
-                  JSONObject j = new JSONObject();
-                  j.put("start", Long.parseLong(l[0]));
-                  j.put("end", Long.parseLong(l[1]));
-                  cuts.put(j);
-               }
-            } // while
-            if (cuts.length() > 0) {
-               JSONObject json = new JSONObject();
-               json.put("contentId", contentId);
-               json.put("offerId", offerId);
-               json.put("offset", offset);
-               json.put("tivoName", tivoName);
-               json.put("title", title);
-               json.put("ad1", "" + cuts.getJSONObject(0).get("end"));
-               json.put("cuts", cuts);
-               entries.put(json);
+            for (Hashtable<String,Long> cut : e.cuts) {
+               JSONObject j = new JSONObject();
+               j.put("start", cut.get("start"));
+               j.put("end", cut.get("end"));
+               cuts.put(j);
             }
-            ifp.close();
-         } catch (Exception e) {
-            log.error("getEntries - " + e.getMessage());
+            JSONObject json = new JSONObject();
+            json.put("contentId", e.contentId);
+            json.put("offerId", e.offerId);
+            json.put("offset", e.offset);
+            json.put("tivoName", e.tivoName);
+            json.put("title", e.title);
+            json.put("ad1", "" + cuts.getJSONObject(0).get("end"));
+            json.put("cuts", cuts);
+            entries.put(json);
          }
+      } catch (JSONException e) {
+         log.error("getEntries - " + e.getMessage());
       }
       return entries;
    }
-   
+
    // Remove AutoSkip entries that no longer have corresponding NPL entries
    public static synchronized void pruneEntries(String tivoName, Stack<Hashtable<String,String>> nplEntries) {
       debug.print("tivoName=" + tivoName + " nplEntries=" + nplEntries);
@@ -449,7 +445,7 @@ public class SkipManager {
                   }
                }
                if (! exists) {
-                  removeEntry(json.getString("contentId"));
+                  removeEntry(json.getString("offerId"));
                   count++;
                }
             }
@@ -470,9 +466,10 @@ public class SkipManager {
          );
          String recordingId = data.get("recordingId");
          String contentId = data.get("contentId");
+         String offerId = data.get("offerId");
          String clipMetadataId = data.get("clipMetadataId");
-         if (hasEntry(contentId))
-            removeEntry(contentId);
+         if (hasEntry(offerId))
+            removeEntry(offerId);
          Long point = -1L, lastPoint = -1L;
          int delta = 5000;
          int sleep_time = 900;
@@ -681,8 +678,8 @@ public class SkipManager {
                try {
                   JSONObject json = data.getJSONObject(i).getJSONArray("recording").getJSONObject(0);
                   Hashtable<String,String> entry = parseNPL.rpcToHashEntry(tivoName, json);
-                  if (entry != null && entry.containsKey("contentId")) {
-                     if (entry.containsKey("clipMetadataId") && ! hasEntry(entry.get("contentId"))) {
+                  if (entry != null && entry.containsKey("offerId")) {
+                     if (entry.containsKey("clipMetadataId") && ! hasEntry(entry.get("offerId"))) {
                         stack.push(entry);
                      }
                   }

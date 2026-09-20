@@ -121,6 +121,9 @@ public class SkipModeRejectsTest {
       e.put("contentId", contentId);
       e.put("clipMetadataId", clipMetadataId);
       e.put("recordingId", "tivo:rc.1");
+      // AutoSkip.ini is keyed on the airing, and a recording without one is not worth
+      // queueing because the fetch could not save its result afterwards
+      e.put("offerId", "tivo:of." + contentId);
       e.put("title", contentId);
       return e;
    }

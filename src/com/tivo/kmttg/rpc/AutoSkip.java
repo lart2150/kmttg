@@ -18,9 +18,6 @@
  */
 package com.tivo.kmttg.rpc;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Stack;
 import java.util.Timer;
@@ -30,7 +27,6 @@ import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.util.debug;
-import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
 public class AutoSkip {
@@ -110,7 +106,7 @@ public class AutoSkip {
             recordingId = nplData.get("recordingId");
             r = new Remote(tivoName);
             if (r.success) {
-               if (readEntry(contentId)) {
+               if (readEntry(offerId)) {
                   print("Obtained skip data from file: " + SkipManager.iniFile());
                } else {
                   error("No skip data available for " + title);
@@ -462,64 +458,30 @@ public class AutoSkip {
    // Obtain commercial points for given contentId if it exists
    // Returns true if contentId found, false otherwise
    // NOTE: Reading assumes file entries are structured just like they were originally written
-   synchronized Boolean readEntry(String contentId) {
-      debug.print("contentId=" + contentId);
-      if (file.isFile(SkipManager.iniFile())) {
-         try {
-            BufferedReader ifp = new BufferedReader(new FileReader(SkipManager.iniFile()));
-            String line = null;
-            while (( line = ifp.readLine()) != null) {
-               if (line.contains("<entry>")) {
-                  line = ifp.readLine();
-                  if (line.startsWith("contentId")) {
-                     String[] l = line.split("=");
-                     if (l[1].equals(contentId)) {
-                        skipData_orig = new Stack<Hashtable<String,Long>>();
-                        while (( line = ifp.readLine()) != null) {
-                           if (line.equals("<entry>"))
-                              break;
-                           if (line.startsWith("offerId")) {
-                              l = line.split("=");
-                              offerId = l[1];
-                           }
-                           if (line.startsWith("offset")) {
-                              l = line.split("=");
-                              offset = Long.parseLong(l[1]);
-                           }
-                           if (line.matches("^[0-9]+.*")) {
-                              Hashtable<String,Long> h = new Hashtable<String,Long>();
-                              l = line.split("\\s+");
-                              h.put("start", Long.parseLong(l[0]));
-                              h.put("end", Long.parseLong(l[1]));
-                              skipData_orig.push(h);
-                           }
-                        }
-                        ifp.close();
-                        skipData = hashCopy(skipData_orig);
-                        if (skipData.size() > 0) {
-                           adjustPoints(skipData_orig.get(0).get("end") + offset);
-                           end1 = skipData.get(0).get("end"); // Don't need the pause adjustment
-                           //print("Using existing saved AutoSkip entry for: " + title);
-                           return true;
-                        } else {
-                           error("NOTE: Failed to read skip data for: " + title);
-                           return false;
-                        }
-                     }
-                  }
-               }
-            }
-            ifp.close();
-         } catch (Exception e) {
-            error("readEntry - " + e.getMessage());
-            error(Arrays.toString(e.getStackTrace()));
-         }
+   // Keyed on the airing: the same episode recorded from two stations has its own breaks in
+   // each, so the contentId the two share cannot say which set belongs to this recording.
+   synchronized Boolean readEntry(String offerId) {
+      debug.print("offerId=" + offerId);
+      SkipManager.SkipEntry entry = SkipManager.readEntry(offerId);
+      if (entry == null)
+         return false;
+      this.offerId = entry.offerId;
+      try {
+         offset = Long.parseLong(entry.offset);
+      } catch (NumberFormatException e) {
+         offset = 0;
       }
-      return false;
+      skipData_orig = entry.cuts;
+      skipData = hashCopy(skipData_orig);
+      if (skipData.size() == 0) {
+         error("NOTE: Failed to read skip data for: " + title);
+         return false;
+      }
+      adjustPoints(skipData_orig.get(0).get("end") + offset);
+      end1 = skipData.get(0).get("end"); // Don't need the pause adjustment
+      return true;
    }
 
-
-   
    private synchronized Stack<Hashtable<String,Long>> hashCopy(Stack<Hashtable<String,Long>> orig) {
       debug.print("orig=" + orig);
       Stack<Hashtable<String,Long>> copy = new Stack<Hashtable<String,Long>>();

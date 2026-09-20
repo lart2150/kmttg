@@ -1080,7 +1080,7 @@ public class jobMonitor {
       
       // If config.autoskip_cutonly enabled, then may have to cancel Ad Detect & Ad Skip
       if (comskip && config.autoskip_cutonly == 1 && entry != null) {
-         if (! SkipManager.hasEntry(entry.get("contentId"))) {
+         if (! SkipManager.hasEntry(entry.get("offerId"))) {
             comskip = false;
             comcut = false;
          }
@@ -1088,7 +1088,7 @@ public class jobMonitor {
 
       Boolean exportSkip = false;
       if (comskip && entry != null &&
-            entry.containsKey("contentId") && SkipManager.hasEntry(entry.get("contentId")))
+            entry.containsKey("offerId") && SkipManager.hasEntry(entry.get("offerId")))
          exportSkip = true;
 
       // Resolved here rather than at the download job because a resumed download cannot be
