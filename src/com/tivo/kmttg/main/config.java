@@ -934,8 +934,7 @@ public class config {
    private static Boolean parseIni(String config) {
       debug.print("config=" + config);
             
-      try {
-         BufferedReader ini = new BufferedReader(new FileReader(config));
+      try (BufferedReader ini = new BufferedReader(new FileReader(config))) {
          String line = null;
          String key = null;
          String[] autotune_keys = com.tivo.kmttg.task.autotune.getRequiredElements();
@@ -952,386 +951,390 @@ public class config {
                key = key.replaceFirst(">", "");
                continue;
             }
-            if (key.equals("MAK")) {
-               MAK = string.removeLeadingTrailingSpaces(line);
-            }
-            if (key.equals("TIVOS")) {
-               String name, value;
-               String l[] = line.split("\\s+");
-               if (l[0].equals("FILES")) {
-                  name = l[0];
-                  value = line;
-                  value = value.replaceFirst("^\\s*FILES\\s+(.+)$", "$1");
-                  value = string.removeLeadingTrailingSpaces(value);
-                  name = name.replaceFirst("^\\*", "");
-               } else {
-                  value = l[l.length-1];
+            try {
+               if (key.equals("MAK")) {
+                  MAK = string.removeLeadingTrailingSpaces(line);
+               }
+               if (key.equals("TIVOS")) {
+                  String name, value;
+                  String l[] = line.split("\\s+");
+                  if (l[0].equals("FILES")) {
+                     name = l[0];
+                     value = line;
+                     value = value.replaceFirst("^\\s*FILES\\s+(.+)$", "$1");
+                     value = string.removeLeadingTrailingSpaces(value);
+                     name = name.replaceFirst("^\\*", "");
+                  } else {
+                     value = l[l.length-1];
+                     name = "";
+                     for (int i=0; i<l.length-1; i++) {
+                        name += l[i] + " ";
+                     }
+                     name = name.substring(0,name.length()-1);
+                  }
+                  TIVOS.put(name, value);
+               }
+               if (key.equals("SHARES")) {
+                  String l[] = line.split("=");
+                  httpserver_shares.put(l[0], string.removeLeadingTrailingSpaces(l[1]));
+               }
+               if (key.equals("tivoFileNameFormat")) {
+                  tivoFileNameFormat = line;
+               }
+               if (key.equals("FontSize")) {
+                  FontSize = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("lookAndFeel")) {
+                  lookAndFeel = string.removeLeadingTrailingSpaces(line);
+               }
+               if (key.equals("tableColAutoSize")) {
+                  tableColAutoSize = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("httpserver_enable")) {
+                  httpserver_enable = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("httpserver_port")) {
+                  httpserver_port = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("httpserver_cache")) {
+                  httpserver_cache = string.removeLeadingTrailingSpaces(line);
+                  // Create cache dir if it doesn't exist and web server is on
+                  if (! file.isDir(httpserver_cache))
+                     new File(httpserver_cache).mkdirs();
+               }
+               if (key.equals("httpserver_share_filter")) {
+                  httpserver_share_filter = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("RemoveTivoFile")) {
+                  RemoveTivoFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("RemoveComcutFiles")) {
+                  RemoveComcutFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("RemoveComcutFiles_mpeg")) {
+                  RemoveComcutFiles_mpeg = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("RemoveMpegFile")) {
+                  RemoveMpegFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("QSFixBackupMpegFile")) {
+                  QSFixBackupMpegFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("UseAdscan")) {
+                  UseAdscan = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("VrdReview")) {
+                  VrdReview = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("comskip_review")) {
+                  comskip_review = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("VrdReview_noCuts")) {
+                  VrdReview_noCuts = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("VrdQsFilter")) {
+                  VrdQsFilter = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("VrdDecrypt")) {
+                  VrdDecrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("VrdEncode")) {
+                  VrdEncode = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("VrdAllowMultiple")) {
+                  VrdAllowMultiple = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("VrdCombineCutEncode")) {
+                  VrdCombineCutEncode = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("VrdQsfixMpeg2ps")) {
+                  VrdQsfixMpeg2ps = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("VrdOneAtATime")) {
+               	VrdOneAtATime = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+                }
+               if (key.equals("HideProtectedFiles")) {
+                  HideProtectedFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("TiVoSort")) {
+                  TiVoSort = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("OverwriteFiles")) {
+                  OverwriteFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("DeleteFailedDownloads")) {
+                  DeleteFailedDownloads = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("rpcnpl")) {
+                  rpcnpl = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("combine_download_decrypt")) {
+                  combine_download_decrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("single_download")) {
+                  single_download = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("persistQueue")) {
+                   persistQueue = Boolean.parseBoolean(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("outputDir")) {
+                  outputDir = line;
+               }
+               if (key.equals("mpegDir")) {
+                  mpegDir = line;
+               }
+               if (key.equals("qsfixDir")) {
+                  qs = true;
+                  qsfixDir = line;
+               }
+               if (key.equals("mpegCutDir")) {
+                  mpegCutDir = line;
+               }
+               if (key.equals("encodeDir")) {
+                  encodeDir = line;
+               }
+               if (key.equals("tivodecode")) {
+                  tivodecode = line;
+               }
+               if (key.equals("DsdDecrypt")) {
+                  DsdDecrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("tivolibreDecrypt")) {
+                  tivolibreDecrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("tivolibreCompat")) {
+                  tivolibreCompat = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("dsd")) {
+                  dsd = line;
+               }
+               if (key.equals("ffmpeg")) {
+                  ffmpeg = line;
+               }
+               if (key.equals("mediainfo")) {
+                  mediainfo = line;
+               }
+               if (key.equals("mencoder")) {
+                  mencoder = line;
+               }
+               if (key.equals("handbrake")) {
+                  handbrake = line;
+               }
+               if (key.equals("comskip")) {
+                  comskip = line;
+               }
+               if (key.equals("AtomicParsley")) {
+                  AtomicParsley = line;
+               }
+               if (key.equals("comskipIni")) {
+                  comskipIni = line;
+               }
+               if (key.matches("^wan_.+$")) {
+                  key = key.replaceFirst("_ipad", "_rpc");
+                  WAN.put(key, line);
+               }
+               if (key.matches("^tsn_.+$")) {
+                  TSN.put(key.replaceFirst("tsn_", ""), line);
+               }
+               if (key.matches("^limit_npl_.+$")) {
+                  setLimitNplSetting(key, string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.matches("^enableRpc_.+$")) {
+                  setRpcSetting(key, string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("MaxJobs")) {
+                  MaxJobs = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("MinChanDigits")) {
+                  MinChanDigits = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("VRD")) {
+                  if (! string.removeLeadingTrailingSpaces(line).equals("0"))
+                  VRD = 1;
+               }
+               if (key.equals("VRDexe")) {
+                  VRDexe = string.removeLeadingTrailingSpaces(line);
+               }
+               if (key.equals("t2extract")) {
+                  t2extract = line;
+               }
+               if (key.equals("t2extract_args")) {
+                  t2extract_args = line;
+               }
+               if (key.equals("ccextractor")) {
+                   ccextractor = line;
+                }
+               if (key.equals("custom")) {
+                  customCommand = line;
+               }
+               if (key.equals("web_query")) {
+                  web_query = line;
+               }
+               if (key.equals("web_browser")) {
+                  web_browser = line;
+               }
+               if (key.equals("tivo_username")) {
+                  tivo_username = line;
+               }
+               if (key.equals("tivo_password")) {
+                  tivo_password = line;
+               }
+               if (key.equals("tivo_domain_token")) {
+               	tivo_domain_token = line;
+                }
+               if (key.equals("tivo_domain_token_expires")) {
+                   tivo_domain_token_expires = Long.parseLong(string.removeLeadingTrailingSpaces(line));
+                }
+               /*if (key.equals("pyTivo_config")) {
+                  pyTivo_config = line;
+               }
+               if (key.equals("pyTivo_host")) {
+                  pyTivo_host = line;
+               }
+               if (key.equals("pyTivo_tivo")) {
+                  pyTivo_tivo = line;
+               }
+               if (key.equals("pyTivo_files")) {
+                  pyTivo_files = line;
+               }*/
+               if (key.equals("metadata_files")) {
+                  metadata_files = line;
+               }
+               if (key.equals("metadata_entries")) {
+                  metadata_entries = string.removeLeadingTrailingSpaces(line);
+               }
+               if (key.equals("autotune_tivoName")) {
+                  autotune_tivoName = line;
+               }
+               if (autotune_tivoName != null) {
+                  for (int i=0; i<autotune_keys.length; ++i) {
+                     if (key.equals("autotune_" + autotune_keys[i])) {
+                        com.tivo.kmttg.task.autotune.init(autotune_tivoName);
+                        autotune.get(autotune_tivoName).put(
+                           autotune_keys[i], string.removeLeadingTrailingSpaces(line)
+                        );
+                     }
+                  }
+               }
+               if (key.equals("CheckDiskSpace")) {
+                  CheckDiskSpace = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("LowSpaceSize")) {
+                  LowSpaceSize = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("CheckBeacon")) {
+                  CheckBeacon = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("UseOldBeacon")) {
+                  UseOldBeacon = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("TivoWebPlusDelete")) {
+                  TivoWebPlusDelete = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("rpcDelete") || key.equals("iPadDelete")) {
+                  rpcDelete = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("rpcOld")) {
+                  rpcOld = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("cpu_cores")) {
+                  cpu_cores = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("download_tries")) {
+                  download_tries = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("download_retry_delay")) {
+                  download_retry_delay = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("download_delay")) {
+                  download_delay = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoskip_enabled")) {
+                  autoskip_enabled = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoskip_import")) {
+                  autoskip_import = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoskip_cutonly")) {
+                  autoskip_cutonly = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoskip_save_skipmode")) {
+                  autoskip_save_skipmode = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoskip_fetch_skipmode")) {
+                  autoskip_fetch_skipmode = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoskip_stream_anchor")) {
+                  autoskip_stream_anchor = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoskip_prune")) {
+                  autoskip_prune = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoskip_batch_standby")) {
+                  autoskip_batch_standby = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoskip_indicate_skip")) {
+                  autoskip_indicate_skip = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoskip_chan_off")) {
+                  autoskip_chan_off = string.removeLeadingTrailingSpaces(line);
+               }
+               if (key.equals("autoskip_chan_on")) {
+                  autoskip_chan_on = string.removeLeadingTrailingSpaces(line);
+               }
+               if (key.equals("autoskip_jumpToEnd")) {
+                  autoskip_jumpToEnd = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoskip_padding_start")) {
+                  autoskip_padding_start = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoskip_padding_stop")) {
+                  autoskip_padding_stop = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoskip_ServiceItems")) {
+                  String name;
+                  Boolean value;
+                  String l[] = line.split("\\s+");
+                  value = Boolean.parseBoolean(l[l.length-1]);
                   name = "";
                   for (int i=0; i<l.length-1; i++) {
                      name += l[i] + " ";
                   }
                   name = name.substring(0,name.length()-1);
+                  autoskip_ServiceItems.put(name, value);
                }
-               TIVOS.put(name, value);
-            }
-            if (key.equals("SHARES")) {
-               String l[] = line.split("=");
-               httpserver_shares.put(l[0], string.removeLeadingTrailingSpaces(l[1]));
-            }
-            if (key.equals("tivoFileNameFormat")) {
-               tivoFileNameFormat = line;
-            }
-            if (key.equals("FontSize")) {
-               FontSize = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("lookAndFeel")) {
-               lookAndFeel = string.removeLeadingTrailingSpaces(line);
-            }
-            if (key.equals("tableColAutoSize")) {
-               tableColAutoSize = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("httpserver_enable")) {
-               httpserver_enable = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("httpserver_port")) {
-               httpserver_port = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("httpserver_cache")) {
-               httpserver_cache = string.removeLeadingTrailingSpaces(line);
-               // Create cache dir if it doesn't exist and web server is on
-               if (! file.isDir(httpserver_cache))
-                  new File(httpserver_cache).mkdirs();
-            }
-            if (key.equals("httpserver_share_filter")) {
-               httpserver_share_filter = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("RemoveTivoFile")) {
-               RemoveTivoFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("RemoveComcutFiles")) {
-               RemoveComcutFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("RemoveComcutFiles_mpeg")) {
-               RemoveComcutFiles_mpeg = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("RemoveMpegFile")) {
-               RemoveMpegFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("QSFixBackupMpegFile")) {
-               QSFixBackupMpegFile = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("UseAdscan")) {
-               UseAdscan = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("VrdReview")) {
-               VrdReview = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("comskip_review")) {
-               comskip_review = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("VrdReview_noCuts")) {
-               VrdReview_noCuts = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("VrdQsFilter")) {
-               VrdQsFilter = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("VrdDecrypt")) {
-               VrdDecrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("VrdEncode")) {
-               VrdEncode = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("VrdAllowMultiple")) {
-               VrdAllowMultiple = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("VrdCombineCutEncode")) {
-               VrdCombineCutEncode = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("VrdQsfixMpeg2ps")) {
-               VrdQsfixMpeg2ps = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("VrdOneAtATime")) {
-            	VrdOneAtATime = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-             }
-            if (key.equals("HideProtectedFiles")) {
-               HideProtectedFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("TiVoSort")) {
-               TiVoSort = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("OverwriteFiles")) {
-               OverwriteFiles = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("DeleteFailedDownloads")) {
-               DeleteFailedDownloads = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("rpcnpl")) {
-               rpcnpl = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("combine_download_decrypt")) {
-               combine_download_decrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("single_download")) {
-               single_download = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("persistQueue")) {
-                persistQueue = Boolean.parseBoolean(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("outputDir")) {
-               outputDir = line;
-            }
-            if (key.equals("mpegDir")) {
-               mpegDir = line;
-            }
-            if (key.equals("qsfixDir")) {
-               qs = true;
-               qsfixDir = line;
-            }
-            if (key.equals("mpegCutDir")) {
-               mpegCutDir = line;
-            }
-            if (key.equals("encodeDir")) {
-               encodeDir = line;
-            }
-            if (key.equals("tivodecode")) {
-               tivodecode = line;
-            }
-            if (key.equals("DsdDecrypt")) {
-               DsdDecrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("tivolibreDecrypt")) {
-               tivolibreDecrypt = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("tivolibreCompat")) {
-               tivolibreCompat = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("dsd")) {
-               dsd = line;
-            }
-            if (key.equals("ffmpeg")) {
-               ffmpeg = line;
-            }
-            if (key.equals("mediainfo")) {
-               mediainfo = line;
-            }
-            if (key.equals("mencoder")) {
-               mencoder = line;
-            }
-            if (key.equals("handbrake")) {
-               handbrake = line;
-            }
-            if (key.equals("comskip")) {
-               comskip = line;
-            }
-            if (key.equals("AtomicParsley")) {
-               AtomicParsley = line;
-            }
-            if (key.equals("comskipIni")) {
-               comskipIni = line;
-            }
-            if (key.matches("^wan_.+$")) {
-               key = key.replaceFirst("_ipad", "_rpc");
-               WAN.put(key, line);
-            }
-            if (key.matches("^tsn_.+$")) {
-               TSN.put(key.replaceFirst("tsn_", ""), line);
-            }
-            if (key.matches("^limit_npl_.+$")) {
-               setLimitNplSetting(key, string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.matches("^enableRpc_.+$")) {
-               setRpcSetting(key, string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("MaxJobs")) {
-               MaxJobs = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("MinChanDigits")) {
-               MinChanDigits = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("VRD")) {
-               if (! string.removeLeadingTrailingSpaces(line).equals("0"))
-               VRD = 1;
-            }
-            if (key.equals("VRDexe")) {
-               VRDexe = string.removeLeadingTrailingSpaces(line);
-            }
-            if (key.equals("t2extract")) {
-               t2extract = line;
-            }
-            if (key.equals("t2extract_args")) {
-               t2extract_args = line;
-            }
-            if (key.equals("ccextractor")) {
-                ccextractor = line;
-             }
-            if (key.equals("custom")) {
-               customCommand = line;
-            }
-            if (key.equals("web_query")) {
-               web_query = line;
-            }
-            if (key.equals("web_browser")) {
-               web_browser = line;
-            }
-            if (key.equals("tivo_username")) {
-               tivo_username = line;
-            }
-            if (key.equals("tivo_password")) {
-               tivo_password = line;
-            }
-            if (key.equals("tivo_domain_token")) {
-            	tivo_domain_token = line;
-             }
-            if (key.equals("tivo_domain_token_expires")) {
-                tivo_domain_token_expires = Long.parseLong(string.removeLeadingTrailingSpaces(line));
-             }
-            /*if (key.equals("pyTivo_config")) {
-               pyTivo_config = line;
-            }
-            if (key.equals("pyTivo_host")) {
-               pyTivo_host = line;
-            }
-            if (key.equals("pyTivo_tivo")) {
-               pyTivo_tivo = line;
-            }
-            if (key.equals("pyTivo_files")) {
-               pyTivo_files = line;
-            }*/
-            if (key.equals("metadata_files")) {
-               metadata_files = line;
-            }
-            if (key.equals("metadata_entries")) {
-               metadata_entries = string.removeLeadingTrailingSpaces(line);
-            }
-            if (key.equals("autotune_tivoName")) {
-               autotune_tivoName = line;
-            }
-            if (autotune_tivoName != null) {
-               for (int i=0; i<autotune_keys.length; ++i) {
-                  if (key.equals("autotune_" + autotune_keys[i])) {
-                     com.tivo.kmttg.task.autotune.init(autotune_tivoName);
-                     autotune.get(autotune_tivoName).put(
-                        autotune_keys[i], string.removeLeadingTrailingSpaces(line)
-                     );
+               if (key.equals("download_time_estimate")) {
+                  download_time_estimate = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("download_check_length")) {
+                  download_check_length = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("autoLogSizeMB")) {
+                  autoLogSizeMB = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("npl_when_started")) {
+                  npl_when_started = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("showHistoryInTable")) {
+                  showHistoryInTable = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
+               }
+               if (key.equals("diskSpace")) {
+                  String[] l = line.split("=");
+                  if (l.length == 2) {
+                     try {
+                        float size = Float.parseFloat(l[1]);
+                        diskSpace.put(l[0],size);
+                     }
+                     catch(NumberFormatException e) {
+                        log.warn("Error parsing diskSpace setting");
+                     }
                   }
                }
-            }
-            if (key.equals("CheckDiskSpace")) {
-               CheckDiskSpace = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("LowSpaceSize")) {
-               LowSpaceSize = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("CheckBeacon")) {
-               CheckBeacon = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("UseOldBeacon")) {
-               UseOldBeacon = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("TivoWebPlusDelete")) {
-               TivoWebPlusDelete = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("rpcDelete") || key.equals("iPadDelete")) {
-               rpcDelete = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("rpcOld")) {
-               rpcOld = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("cpu_cores")) {
-               cpu_cores = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("download_tries")) {
-               download_tries = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("download_retry_delay")) {
-               download_retry_delay = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("download_delay")) {
-               download_delay = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoskip_enabled")) {
-               autoskip_enabled = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoskip_import")) {
-               autoskip_import = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoskip_cutonly")) {
-               autoskip_cutonly = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoskip_save_skipmode")) {
-               autoskip_save_skipmode = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoskip_fetch_skipmode")) {
-               autoskip_fetch_skipmode = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoskip_stream_anchor")) {
-               autoskip_stream_anchor = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoskip_prune")) {
-               autoskip_prune = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoskip_batch_standby")) {
-               autoskip_batch_standby = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoskip_indicate_skip")) {
-               autoskip_indicate_skip = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoskip_chan_off")) {
-               autoskip_chan_off = string.removeLeadingTrailingSpaces(line);
-            }
-            if (key.equals("autoskip_chan_on")) {
-               autoskip_chan_on = string.removeLeadingTrailingSpaces(line);
-            }
-            if (key.equals("autoskip_jumpToEnd")) {
-               autoskip_jumpToEnd = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoskip_padding_start")) {
-               autoskip_padding_start = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoskip_padding_stop")) {
-               autoskip_padding_stop = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoskip_ServiceItems")) {
-               String name;
-               Boolean value;
-               String l[] = line.split("\\s+");
-               value = Boolean.parseBoolean(l[l.length-1]);
-               name = "";
-               for (int i=0; i<l.length-1; i++) {
-                  name += l[i] + " ";
-               }
-               name = name.substring(0,name.length()-1);
-               autoskip_ServiceItems.put(name, value);
-            }
-            if (key.equals("download_time_estimate")) {
-               download_time_estimate = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("download_check_length")) {
-               download_check_length = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("autoLogSizeMB")) {
-               autoLogSizeMB = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("npl_when_started")) {
-               npl_when_started = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("showHistoryInTable")) {
-               showHistoryInTable = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
-            }
-            if (key.equals("diskSpace")) {
-               String[] l = line.split("=");
-               if (l.length == 2) {
-                  try {
-                     float size = Float.parseFloat(l[1]);
-                     diskSpace.put(l[0],size);
-                  }
-                  catch(NumberFormatException e) {
-                     log.warn("Error parsing diskSpace setting");
-                  }
-               }
+            } catch (Exception e) {
+               // One unparseable value costs its own setting and nothing else
+               log.error("Ignoring bad '" + key + "' setting in " + config + ": " + line);
             }
          }
-         ini.close();
 
          // Define FILES mode start dir if not configured
          if ( ! TIVOS.containsKey("FILES") ) {
