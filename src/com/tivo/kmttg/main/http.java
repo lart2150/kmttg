@@ -311,8 +311,9 @@ public class http {
 		// and the muxer at once, so nothing is read back off disk afterwards.
 		//
 		// Built before the TiVo connection is opened rather than after: the cover art lookup is
-		// an rpc round trip plus an image download, and running that with the transfer already
-		// open leaves the TiVo holding a stream nobody is reading for as long as it takes.
+		// an rpc round trip plus an image download, the supplement costs another for the content
+		// rating, and running those with the transfer already open leaves the TiVo holding a
+		// stream nobody is reading for as long as they take.
 		final MuxSink muxSink;
 		if (job.muxFile != null) {
 			// The mkv lands under encodeDir, not next to the mpeg, and file naming can put it in

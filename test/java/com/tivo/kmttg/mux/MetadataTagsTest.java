@@ -3,6 +3,7 @@ package com.tivo.kmttg.mux;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -119,6 +120,79 @@ public class MetadataTagsTest {
       List<MkvMuxer.Tag> tags = MetadataTags.build(null, extra);
       assertTrue(has(tags, MkvMuxer.TARGET_EPISODE, "TITLE", "Father Brown"));
       assertTrue(has(tags, MkvMuxer.TARGET_COLLECTION, "CATALOG_NUMBER", "SH0376798952"));
+   }
+
+   @Test
+   void audioLanguageComesFromTheRecordingsOwnMetadata() {
+      // The PMT carries no ISO 639 descriptor on any TiVo recording, so this element is the
+      // only thing that tells a Spanish capture from an English one. Both spellings are real:
+      // measured on a Telemundo World Cup recording and on four English ones.
+      assertEquals("spa", MetadataTags.languageFrom(
+         Arrays.asList("<showing><descriptionLanguage>spa-ESP</descriptionLanguage></showing>")));
+      assertEquals("eng", MetadataTags.languageFrom(
+         Arrays.asList("<showing><descriptionLanguage>eng-USA</descriptionLanguage></showing>")));
+   }
+
+   @Test
+   void anUnstatedLanguageStaysUnstated() {
+      // Nothing to say means "und" downstream, not a guess at English.
+      assertEquals(null, MetadataTags.languageFrom(Arrays.asList("<showing><title>x</title></showing>")));
+      assertEquals(null, MetadataTags.languageFrom(Arrays.asList((String)null)));
+      assertEquals(null, MetadataTags.languageFrom(null));
+      assertEquals(null, MetadataTags.audioLanguage(null));
+   }
+
+   @Test
+   void theSegmentTitleNamesTheWholeFile() {
+      // Not a tag: Matroska keeps this in Segment Information, and it is the one line the
+      // MKVToolNix header editor and a player's title bar show.
+      MetadataTags.Supplement extra = new MetadataTags.Supplement();
+      extra.title = "Father Brown";
+      assertEquals("Father Brown", MetadataTags.segmentTitle(null, extra),
+         "a .ts source has no recording metadata at all");
+      assertEquals(null, MetadataTags.segmentTitle(null, null));
+
+      MetadataTags.Supplement blank = new MetadataTags.Supplement();
+      blank.title = "   ";
+      assertEquals(null, MetadataTags.segmentTitle(null, blank), "whitespace is not a title");
+   }
+
+   @Test
+   void theStarRatingIsAStarCountNotTheCode() {
+      // TiVo stores 1..7 for one star to four in half steps. Writing the code bare made a
+      // three star film read as a 5.
+      assertEquals("1", MetadataTags.stars(1));
+      assertEquals("1.5", MetadataTags.stars(2));
+      assertEquals("3", MetadataTags.stars(5), "The Good Wife came back as code 5");
+      assertEquals("4", MetadataTags.stars(7));
+      assertEquals(null, MetadataTags.stars(0), "out of range is no rating at all");
+      assertEquals(null, MetadataTags.stars(9));
+   }
+
+   @Test
+   void theRatingCodeFromRpcBecomesALabel() {
+      // contentSearch answers with bare codes - measured "pg", "g" and "14" across a real My
+      // Shows list - and LAW_RATING is read by people, not by TiVo.
+      assertEquals("TV-PG", MetadataTags.lawRating(null, "pg"));
+      assertEquals("TV-14", MetadataTags.lawRating(null, "14"));
+      assertEquals("TV-Y7", MetadataTags.lawRating(null, "y7"));
+      assertEquals("TV-14", MetadataTags.lawRating(null, "TV-14"), "already spelled out");
+      assertEquals("PG-13", MetadataTags.lawRating("pg13", null));
+      // "g" and "pg" mean different things on the two scales, which is why they are separate
+      // fields rather than one guessed-at string.
+      assertEquals("G", MetadataTags.lawRating("g", null));
+      assertEquals("TV-G", MetadataTags.lawRating(null, "g"));
+      assertEquals("PG-13", MetadataTags.lawRating("pg13", "14"), "a film rating wins");
+      assertEquals(null, MetadataTags.lawRating(null, null));
+      assertEquals("banana", MetadataTags.lawRating(null, "banana"), "unknown still passes through");
+   }
+
+   @Test
+   void theRatingReachesTheTagsFromTheJob() {
+      MetadataTags.Supplement extra = new MetadataTags.Supplement();
+      extra.tvRating = "pg";
+      List<MkvMuxer.Tag> tags = MetadataTags.build(null, extra);
+      assertTrue(has(tags, MkvMuxer.TARGET_EPISODE, "LAW_RATING", "TV-PG"));
    }
 
    private static String split(String packed) {

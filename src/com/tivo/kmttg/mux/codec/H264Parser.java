@@ -50,6 +50,9 @@ public class H264Parser {
       public int sarHeight = 1;
       public int profileIdc;
       public int levelIdc;
+      // frame_mbs_only_flag. False means the stream may code fields, which on a broadcast
+      // means it is interlaced; the field order itself is only in a pic_struct SEI.
+      public boolean frameMbsOnly = true;
       public byte[] raw;          // the NAL as it appeared, escape bytes included
 
       // Display size for a non square pixel aspect. 720x480 at 40:33 is NTSC widescreen;
@@ -187,6 +190,7 @@ public class H264Parser {
       int widthMbs  = r.ue() + 1;
       int heightMap = r.ue() + 1;
       int frameMbsOnly = r.read(1);
+      sps.frameMbsOnly = frameMbsOnly == 1;
       if (frameMbsOnly == 0) r.read(1);        // mb_adaptive_frame_field_flag
       r.read(1);                               // direct_8x8_inference_flag
 

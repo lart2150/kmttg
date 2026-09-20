@@ -107,6 +107,25 @@ public class Mpeg2Parser {
       return h;
    }
 
+   // top_field_first from the picture coding extension: 1 top first, 0 bottom first, -1 when
+   // this payload unit carries no coded picture or no extension. MPEG-2 states the order per
+   // picture rather than per sequence, but a broadcast never changes it mid recording, so the
+   // first picture describes the track.
+   public static int topFieldFirst(byte[] d) {
+      int pic = findStartCode(d, 0, PICTURE_START);
+      if (pic < 0) return -1;
+      int ext = findStartCode(d, pic + 4, EXTENSION_START);
+      if (ext < 0 || ext + 8 > d.length) return -1;
+      BitReader r = new BitReader(d, ext + 4);
+      if (r.read(4) != 8) return -1;   // extension_start_code_identifier: picture coding
+      r.read(16);                      // f_code[2][2]
+      r.read(2);                       // intra_dc_precision
+      // top_field_first is defined as zero for a field picture, so reading it there would
+      // report bottom first about a stream that never said so. Only a frame picture answers.
+      if (r.read(2) != 3) return -1;   // picture_structure: 3 is a frame picture
+      return r.read(1);
+   }
+
    // picture_coding_type of the first picture in this payload unit, or -1 if there is none.
    // A video payload unit holds one picture, so this is the unit's type.
    public static int pictureCodingType(byte[] d) {
