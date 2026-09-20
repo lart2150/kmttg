@@ -106,12 +106,16 @@ public class pyTivo {
                String[] l = line.split("=");
                if (l.length > 1) {
                   String p = lowerCaseVolume(string.removeLeadingTrailingSpaces(l[1]));
-                  char separator = File.separator.charAt(0);
-                  if (p.charAt(p.length()-1) == separator) {
-                     // Remove extra ending file separator
-                     p = p.substring(0, p.length()-1);
+                  // A path set to nothing used to index charAt(-1), and the catch below
+                  // turned that into a null return that discarded every other share too
+                  if (p.length() > 0) {
+                     char separator = File.separator.charAt(0);
+                     if (p.charAt(p.length()-1) == separator) {
+                        // Remove extra ending file separator
+                        p = p.substring(0, p.length()-1);
+                     }
+                     h.put("path", p);
                   }
-                  h.put("path", p);
                }
             }
          }
