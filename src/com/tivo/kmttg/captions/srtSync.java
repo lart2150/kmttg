@@ -84,7 +84,8 @@ public class srtSync {
             previous = caption;
          }
       }
-      return null;
+      // Past the end of the synced range the last caption is still the one before
+      return previous;
    }
    
    public ccdiff findAfter(long time) {
