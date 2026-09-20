@@ -81,7 +81,9 @@ public class string {
       debug.print("s=" + s);
       try {
          return(URLDecoder.decode(s, "UTF-8"));
-      } catch (UnsupportedEncodingException e) {
+      } catch (Exception e) {
+         // A malformed escape raises IllegalArgumentException, not the checked one, and
+         // this is called on the install path at startup
          log.error(e.getMessage());
          return s;
       }
@@ -192,8 +194,12 @@ public class string {
    public static String getTimeRemaining(long currentTime, long startTime, long totalSize, long size) {
       String s = "time remaining: ";
       long tdelta = currentTime - startTime;
-      if (tdelta > 0 && size > 0) {
-         long tleft = (totalSize-size)/(1000*size/tdelta);
+      // Bytes/sec, and 0 on a stalled transfer averaging under a byte a second
+      long rate = 0;
+      if (tdelta > 0 && size > 0)
+         rate = 1000*size/tdelta;
+      if (rate > 0) {
+         long tleft = (totalSize-size)/rate;
          int mins  = (int)(tleft/60);
          int secs  = (int)(tleft % 60);
          if (mins >= 5) {
