@@ -93,6 +93,10 @@ tasks.register('captureRpcFixtures', JavaExec) {
     mainClass = 'com.tivo.kmttg.rpc.RpcFixtureCapture'
     if (project.hasProperty('configDir')) args(project.property('configDir'))
     if (project.hasProperty('tivo')) args(project.property('tivo'))
+    // Positional: keep maxEntries' slot filled when only guideDate is given
+    if (project.hasProperty('maxEntries')) args(project.property('maxEntries'))
+    else if (project.hasProperty('guideDate')) args('40')
+    if (project.hasProperty('guideDate')) args(project.property('guideDate'))
 }
 
 // One-off tool to (re)generate the RPC command trace fixtures from an rpc.jsonl

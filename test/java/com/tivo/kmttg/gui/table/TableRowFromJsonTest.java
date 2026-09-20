@@ -3,10 +3,12 @@ package com.tivo.kmttg.gui.table;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.util.Hashtable;
+import java.util.Stack;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -22,8 +24,10 @@ import com.tivo.kmttg.gui.remote.remotegui;
 import com.tivo.kmttg.gui.remote.search;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.jobData;
+import com.tivo.kmttg.gui.swing.SwingTest;
 import com.tivo.kmttg.rpc.Fixtures;
 import com.tivo.kmttg.rpc.ReplayRemote;
+import com.tivo.kmttg.util.parseNPL;
 
 /**
  * Tests the table row builders that turn a TiVo RPC response into what the GUI
@@ -347,5 +351,51 @@ public class TableRowFromJsonTest {
          "summary lost the channel: " + summary);
       assertFalse(summary.trim().startsWith(offer.getString("title")),
          "summary should lead with the air date: " + summary);
+   }
+
+   // ---- NPL rows -----------------------------------------------------------
+
+   @Test
+   public void nplRows_flagCopyProtectionWithoutDisplacingTheOtherIcons() throws Exception {
+      // The copy protect icon rides in the 3rd slot so it stacks with the
+      // expiration and SkipMode icons instead of replacing one.
+      gui.Images.put("drm", new java.awt.image.BufferedImage(
+         1, 1, java.awt.image.BufferedImage.TYPE_INT_ARGB));
+
+      final Hashtable<String,String> protectedShow = recording("copyNever");
+      final Hashtable<String,String> freeShow = recording("copyFreely");
+      final Stack<Hashtable<String,String>> folder = new Stack<Hashtable<String,String>>();
+      folder.add(recording("copyFreely"));
+      folder.add(recording("copyOnce"));
+
+      SwingTest.run(new SwingTest.Job() {
+         @Override public void run() {
+            nplTable npl = new nplTable("Bolt");
+            npl.AddNowPlayingRow(protectedShow);
+            npl.AddNowPlayingRow(freeShow);
+            npl.AddNowPlayingRow("Matlock", folder);
+
+            assertNotNull(npl.NowPlaying.getTreeItem(0).getValue().getIMAGE().getImage3(),
+               "copy protected row has no DRM icon");
+            assertNull(npl.NowPlaying.getTreeItem(1).getValue().getIMAGE().getImage3(),
+               "copy freely row should carry no icon");
+            // A folder is marked when anything inside it is protected
+            assertNotNull(npl.NowPlaying.getTreeItem(2).getValue().getIMAGE().getImage3(),
+               "folder holding a protected show has no icon");
+         }
+      });
+   }
+
+   private static Hashtable<String,String> recording(String cgms) throws Exception {
+      JSONObject json = new JSONObject();
+      json.put("title", "Matlock");
+      json.put("startTime", "2026-06-02 14:00:00");
+      json.put("duration", 3600);
+      json.put("size", 3532800);
+      JSONObject drm = new JSONObject();
+      drm.put("cgms", cgms);
+      drm.put("tivoToGo", true);
+      json.put("drm", drm);
+      return parseNPL.rpcToHashEntry("Bolt", json);
    }
 }

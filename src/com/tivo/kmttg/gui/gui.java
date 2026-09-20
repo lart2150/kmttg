@@ -1664,7 +1664,7 @@ public class gui {
          "expires-soon-recording", "save-until-i-delete-recording",
          "in-progress-recording", "in-progress-transfer",
          "expired-recording", "suggestion-recording", "folder",
-         "copy-protected", "running", "queued", "skipmode",
+         "drm", "running", "queued", "skipmode",
          "image-season-pass", "image-season-pass-wishlist",
          "image-single-explicit-record"
       };
