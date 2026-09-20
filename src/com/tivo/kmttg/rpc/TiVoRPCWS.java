@@ -4,8 +4,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
@@ -19,21 +21,46 @@ import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.log;
 
 public class TiVoRPCWS extends WebSocketClient {
 
    protected static final String SchemaVersion = "14";
    protected static final String SchemaVersion_newer = "17";
-   protected int rpc_id = 0;
+   // Atomic rather than guarded by the instance lock: the auth thread numbers its own request,
+   // and a caller that arrives before authentication finishes holds that lock while it waits.
+   protected final AtomicInteger rpc_id = new AtomicInteger(0);
    protected final String tivoName;
    protected final String IP;
    protected final int port;
-   protected Boolean ready = false;
-   private final ReentrantLock lock = new ReentrantLock();
+   // Written by the auth thread onOpen starts, read by whoever is waiting on it.
+   protected volatile boolean ready = false;
+   // Set when the bodyAuthenticate exchange finishes, however it ends, so a caller arriving
+   // afterwards is told the answer instead of waiting for a notify that has already been sent.
+   private volatile boolean authDone = false;
+   private final Object readyLock = new Object();
+   // tivo.com can accept the socket and never authenticate it, which would otherwise park
+   // every caller for good.
+   private static final int AUTH_TIMEOUT = 30000;
+   // Last resort for a connection that is still open but has gone silent: onClose releases
+   // waiters the moment the socket goes, so nothing healthy ever reaches this.
+   private static final int RESPONSE_TIMEOUT = 120000;
+   // Neither half of connecting is bounded by default - the library leaves the socket connect
+   // at 0, meaning no timeout at all, and connectBlocking() waits on a latch that a server
+   // which takes the socket and never finishes the handshake never opens.
+   private static final int CONNECT_TIMEOUT = 30000;
    
    private String tsn;
-   private HashMap<Integer, String> responseMap = new HashMap<Integer, String>();
+   // One in-flight request: the monitor its caller waits on and the slot the reply lands in.
+   // A monitor each rather than one shared between them, so a reply wakes the thread that
+   // asked for it - and so a close can wake every one of them at once.
+   private static class Pending {
+      String response;
+      boolean done;
+   }
+
+   private final Map<Integer,Pending> pending = new ConcurrentHashMap<Integer,Pending>();
    
    protected void error(String msg) {
       log.error(msg);
@@ -46,7 +73,8 @@ public class TiVoRPCWS extends WebSocketClient {
    }
 
    public TiVoRPCWS(URI uri, Draft protocal, String tivoName, String IP, int port) {
-      super(uri, protocal);
+      // No extra headers; the fourth argument is the socket connect timeout.
+      super(uri, protocal, null, CONNECT_TIMEOUT);
       this.tivoName = tivoName;
       this.IP = IP;
       this.port = port;
@@ -65,27 +93,73 @@ public class TiVoRPCWS extends WebSocketClient {
             port
       );
       
-      ws.connectBlocking();
+      // False covers refused, timed out and a handshake that never completed. The library
+      // tears its own connect attempt down on the way out, so there is nothing to close here -
+      // waitForReady then reports the failure to the caller. Not a hard bound either: that
+      // teardown waits on the connect thread, which is only bounded once it owns a socket, so
+      // a name that will not resolve can still take longer than this.
+      if (! ws.connectBlocking(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)) {
+         log.error("Could not open a connection to tivo.com");
+      }
       
       return ws;
    }
    
+   // The RpcId a request or a response carries, read off its header block. Zero for anything
+   // this cannot read: onMessage runs on the library's read thread, where an exception ends
+   // the connection, so a malformed header has to come back as "belongs to nobody".
+   private static Integer rpcIdOf(String headers) {
+      for (String header : headers.split("\r\n")) {
+         if (header.toLowerCase().startsWith("rpcid:")) {
+            try {
+               return Integer.valueOf(header.substring(6).trim());
+            } catch (NumberFormatException e) {
+               break;
+            }
+         }
+      }
+      return Integer.valueOf(0);
+   }
+
+   // Send one request and wait for the reply that quotes its RpcId. Null when the reply never
+   // came: the socket closed, the wait ran out, or the message carried no body. Registering
+   // before the send is what makes a reply that beats us to the wait still count.
+   private String exchange(String request, int timeout) throws InterruptedException {
+      Integer rpcId = rpcIdOf(request.split("\r\n\r\n")[0]);
+      Pending p = new Pending();
+      pending.put(rpcId, p);
+      try {
+         send(request);
+         synchronized (p) {
+            long deadline = System.currentTimeMillis() + timeout;
+            while (! p.done) {
+               long remaining = deadline - System.currentTimeMillis();
+               if (remaining <= 0) break;
+               p.wait(remaining);
+            }
+            return p.response;
+         }
+      } finally {
+         pending.remove(rpcId);
+      }
+   }
+
+   // True only once tivo.com has accepted the domain token. An open socket is not enough: a
+   // rejected token leaves the connection open, and requests sent on it are simply never
+   // answered - which is how a wrong tivo.com password used to look like a hung job.
    public boolean waitForReady() throws InterruptedException {
-      if (!this.isOpen()) {
-         return false;
+      synchronized (readyLock) {
+         long deadline = System.currentTimeMillis() + AUTH_TIMEOUT;
+         while (! authDone && isOpen()) {
+            long remaining = deadline - System.currentTimeMillis();
+            if (remaining <= 0) {
+               error("Timed out waiting for tivo.com to authenticate the connection");
+               break;
+            }
+            readyLock.wait(remaining);
+         }
       }
-      if (this.ready) {
-         return true;
-      }
-      this.lock.lock();
-      synchronized (this.lock ) {
-	      if (!this.isOpen()) {
-	         return false;
-	      }
-	      this.lock.wait();
-	      this.lock.unlock();
-      }
-      return this.isOpen();
+      return ready && isOpen();
    }
    
    
@@ -95,8 +169,7 @@ public class TiVoRPCWS extends WebSocketClient {
       TiVoRPCWS wc = this;
       Thread thread = new Thread(){
          public void run(){
-         	String token = config.getDomainToken();
-         	ReentrantLock readyLock = wc.lock;
+            String token = config.getDomainToken();
             try {
                JSONObject credential = new JSONObject();
                JSONObject h = new JSONObject();
@@ -109,72 +182,79 @@ public class TiVoRPCWS extends WebSocketClient {
                credential.put("domainToken", domainToken);
                h.put("credential", credential);
                String req = RpcRequest("bodyAuthenticate", false, h);
-               String lock = "";
-               synchronized(lock){
-                  responseMap.put(rpc_id, lock);
-                  wc.send(req);
-                  lock.wait();
-                  String response = responseMap.get(rpc_id);
-                  responseMap.remove(rpc_id);
-                  JSONObject result = new JSONObject(response);
-                  if (result.has("status")) {
-                     if (result.get("status").equals("success")) {
-                        // Look for tivoName bodyId in deviceId JSONArray
-                        boolean found = false;
-                        if (result.has("deviceId")) {
-                           JSONArray a = result.getJSONArray("deviceId");
-                           for (int i=0; i<a.length(); ++i) {
-                              JSONObject j = a.getJSONObject(i);
-                              if (j.has("friendlyName")) {
-                                 if (j.getString("friendlyName").equals(tivoName) && j.has("id")) {
-                                    found = true;
-                                    config.bodyId_set(IP, port, j.getString("id"));
-                                    String tsn = j.getString("id");
-                                    tsn = tsn.replaceFirst("tsn:", "");
-                                    if (config.getTsn(tivoName) != tsn) {
-                                       config.setTsn(tivoName, tsn);
-                                    }
-                                    wc.tsn = tsn;
-                                    wc.ready = true;
-                                    log.print("WS connection established");
-                                    break;
+               String response = wc.exchange(req, AUTH_TIMEOUT);
+               if (response == null) {
+                  log.error("Timed out waiting for tivo.com to authenticate the connection");
+                  wc.close();
+                  return;
+               }
+               JSONObject result = new JSONObject(response);
+               if (result.has("status")) {
+                  if (result.get("status").equals("success")) {
+                     // Look for tivoName bodyId in deviceId JSONArray
+                     boolean found = false;
+                     if (result.has("deviceId")) {
+                        JSONArray a = result.getJSONArray("deviceId");
+                        for (int i=0; i<a.length(); ++i) {
+                           JSONObject j = a.getJSONObject(i);
+                           if (j.has("friendlyName")) {
+                              if (j.getString("friendlyName").equals(tivoName) && j.has("id")) {
+                                 found = true;
+                                 config.bodyId_set(IP, port, j.getString("id"));
+                                 String tsn = j.getString("id");
+                                 tsn = tsn.replaceFirst("tsn:", "");
+                                 if (! tsn.equals(config.getTsn(tivoName))) {
+                                    config.setTsn(tivoName, tsn);
                                  }
-                              }
-                           }
-                        }
-                        if (! found) {
-                           if (tivoName == null) {
-                              wc.tsn = "-";
-                              wc.ready = true;
-                           } else {
-                              // Couldn't get id from response so try getting tsn from kmttg
-                              String tsn = config.getTsn(tivoName);
-                              if (tsn == null) {
-                                 log.error("Can't determine bodyId for TiVo: " + tivoName);
-                                 wc.close();
-                              } else {
                                  wc.tsn = tsn;
-                                 config.bodyId_set(IP, port, "tsn:" + tsn);
                                  wc.ready = true;
+                                 log.print("WS connection established");
+                                 break;
                               }
                            }
                         }
                      }
-                  } else if (result.has("type") && result.getString("type").equals("error")) {
-                  	String err = "";
-                  	if (result.has("text")) {
-                  		err = ": " + result.getString("text");
-                  	}
-                  	log.error("Error establishing WS connection" + err);
+                     if (! found) {
+                        if (tivoName == null) {
+                           wc.tsn = "-";
+                           wc.ready = true;
+                        } else {
+                           // Couldn't get id from response so try getting tsn from kmttg
+                           String tsn = config.getTsn(tivoName);
+                           if (tsn == null) {
+                              log.error("Can't determine bodyId for TiVo: " + tivoName);
+                              wc.close();
+                           } else {
+                              wc.tsn = tsn;
+                              config.bodyId_set(IP, port, "tsn:" + tsn);
+                              wc.ready = true;
+                           }
+                        }
+                     }
+                  } else {
+                     // Anything but success leaves an open but unusable socket, and it is the
+                     // only account of why the job is about to fail - saying nothing here is
+                     // how a rejected login used to surface as "could not connect".
+                     log.error("tivo.com refused the connection: " + result.get("status"));
+                     wc.close();
                   }
+               } else if (result.has("type") && result.getString("type").equals("error")) {
+               	String err = "";
+               	if (result.has("text")) {
+               		err = ": " + result.getString("text");
+               	}
+               	log.error("Error establishing WS connection" + err);
+               	wc.close();
                }
             } catch (Exception e) {
-            	e.printStackTrace();
-               error("rpc Auth error - " + e.getMessage());
-            }
-            synchronized(readyLock){
-               readyLock.notifyAll();
-            	log.print("notifyAll");
+               // Named, not just described: the message alone is null for the whole NPE family.
+               error("rpc Auth error - " + e);
+               wc.close();
+            } finally {
+               synchronized(wc.readyLock){
+                  wc.authDone = true;
+                  wc.readyLock.notifyAll();
+               }
             }
          }
       };
@@ -185,48 +265,43 @@ public class TiVoRPCWS extends WebSocketClient {
       return this.tsn;
    }
    
+   // Still serialized per connection: RPCs have always gone out one at a time here and
+   // nothing asks for more. What changed is that a reply, a close or a timeout all end the
+   // wait - it used to end only on a reply.
    public synchronized JSONObject sendRequestAndWaitForResponse(String request) {
-      String[] parts = request.split("\r\n\r\n");
-      String[] headers = parts[0].split("\r\n");
-      
-      Integer rpcId = Integer.valueOf(0);
-      for (String header : headers) {
-         if (header.toLowerCase().startsWith("rpcid:")) {
-            String[] rpcHeader = header.split(" ");
-            rpcId = Integer.valueOf(rpcHeader[1]);
-            break;
-         }
-      }
+      Integer rpcId = rpcIdOf(request.split("\r\n\r\n")[0]);
       try {
-         this.waitForReady();
-      } catch (InterruptedException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      }
-      log.print("WS Sending request: " + rpcId);
-      System.out.println(request);
-      
-      String lock = "";
-      synchronized(lock){
-         responseMap.put(rpcId, lock);
-         this.send(request);
-         try {
-            lock.wait();
-
-            String response = responseMap.get(rpcId);
-            System.out.println(response);
-            responseMap.remove(rpcId);
-            JSONObject result = new JSONObject(response);
-            return result;
-         } catch (InterruptedException|JSONException e) {
-            // TODO Auto-generated catch block
-            log.error("WS error " + e.getMessage());
+         if (! this.waitForReady()) {
+            error("Not connected to tivo.com - dropping request " + rpcId);
             return null;
          }
+         log.print("WS Sending request: " + rpcId);
+         debug.print(request);
+         String response = exchange(request, RESPONSE_TIMEOUT);
+         debug.print(response);
+         if (response == null) {
+            error("No response from tivo.com to request " + rpcId);
+            return null;
+         }
+         return new JSONObject(response);
+      } catch (InterruptedException e) {
+         Thread.currentThread().interrupt();
+         return null;
+      } catch (JSONException e) {
+         error("WS error " + e.getMessage());
+         return null;
+      } catch (RuntimeException e) {
+         // send() throws when the socket has gone out from under us.
+         error("WS error " + e.getMessage());
+         return null;
       }
    }
    
-   public synchronized String RpcRequest(String type, Boolean monitor, JSONObject data) {
+   // Deliberately not synchronized on the instance: the bodyAuthenticate request is built on
+   // the auth thread, and sendRequestAndWaitForResponse holds the instance lock while it waits
+   // for that authentication to finish. Sharing one lock would have the caller block the very
+   // handshake it is waiting on. The only shared state here is the request counter.
+   public String RpcRequest(String type, Boolean monitor, JSONObject data) {
       try {
          String ResponseCount = "single";
          if (monitor)
@@ -235,11 +310,11 @@ public class TiVoRPCWS extends WebSocketClient {
          if (data.has("bodyId"))
             bodyId = (String) data.get("bodyId");
          String schema = "22";
-         rpc_id++;
+         int id = rpc_id.incrementAndGet();
          String eol = "\r\n";
          String headers =
             "Type: request" + eol +
-            "RpcId: " + rpc_id + eol +
+            "RpcId: " + id + eol +
             "SchemaVersion: " + schema + eol +
             "Content-Type: application/json" + eol +
             "RequestType: " + type + eol +
@@ -265,31 +340,36 @@ public class TiVoRPCWS extends WebSocketClient {
    public void onClose(int code, String reason, boolean remote) {
       log.warn("WS closed with exit code " + code + " additional info: " + reason);
       this.ready = false;
+      synchronized (readyLock) {
+         authDone = true;
+         readyLock.notifyAll();
+      }
+      // Marked done rather than left to notice the socket has gone: isOpen() still answers
+      // true in here, because the library flips readyState only once this returns.
+      for (Pending p : pending.values()) {
+         synchronized (p) {
+            p.done = true;
+            p.notifyAll();
+         }
+      }
    }
 
    @Override
    public void onMessage(String message) {
       String[] parts = message.split("\r\n\r\n");
-      String[] headers = parts[0].split("\r\n");
-      
-      Integer rpcId = Integer.valueOf(0);
-      for (String header : headers) {
-         if (header.toLowerCase().startsWith("rpcid:")) {
-            String[] rpcHeader = header.split(" ");
-            rpcId = Integer.valueOf(rpcHeader[1]);
-            break;
-         }
-      }
-      
-      
-      String lock = this.responseMap.get(rpcId);
-      if (lock == null) {
-         error("Unknown rpcid " + rpcId);
-      }
+      Integer rpcId = rpcIdOf(parts[0]);
 
-      this.responseMap.put(rpcId, parts[1]);
-      synchronized(lock) {
-         lock.notify();
+      Pending p = this.pending.get(rpcId);
+      if (p == null) {
+         // Not an error: a monitored request is answered more than once by design, and only
+         // the first answer still has a caller waiting on it.
+         print("No one waiting on rpcid " + rpcId);
+         return;
+      }
+      synchronized (p) {
+         p.response = parts.length > 1 ? parts[1] : null;
+         p.done = true;
+         p.notifyAll();
       }
    }
 

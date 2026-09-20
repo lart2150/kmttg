@@ -107,7 +107,7 @@ public class ClipSegments {
          log.print("Using tivo.com SkipMode data for chapters (" + adjusted.size() + " segments)");
          return new Result(adjusted, SOURCE_SKIPMODE);
       } finally {
-         if (r != null && r.success) r.disconnect();
+         if (r != null) r.disconnect();
       }
    }
 
@@ -452,24 +452,37 @@ public class ClipSegments {
    // trip; the wall clock here is dominated by the network either way.
    private static final long PACE_MS = 200;
 
+   // What a batch did. Nothing saved is not the same answer as never having run: a batch that
+   // could not reach tivo.com has to be reported as a failure rather than as a completed run
+   // that happened to write nothing.
+   public static class Batch {
+      public final int saved;
+      public final String failure;
+      Batch(int saved, String failure) {
+         this.saved = saved;
+         this.failure = failure;
+      }
+   }
+
    // Fill in AutoSkip entries for a batch of recordings, over ONE away mode connection: the
    // websocket handshake and tivo.com auth cost far more than the requests, so opening one per
-   // recording would dominate a run of any size. Returns how many entries were written.
+   // recording would dominate a run of any size.
    // A batch asks the box once whether it can stream at all, rather than once per recording -
    // on a TiVo that cannot, the probe and its warning would otherwise repeat for every entry.
-   public static int fetchMissing(String tivoName, List<Hashtable<String,String>> entries,
+   public static Batch fetchMissing(String tivoName, List<Hashtable<String,String>> entries,
          Progress progress) {
-      if (entries == null || entries.isEmpty()) return 0;
+      if (entries == null || entries.isEmpty()) return new Batch(0, null);
       if (config.getTivoUsername() == null || config.getTivoPassword() == null) {
-         log.error("SkipMode fetch needs a tivo.com username and password");
-         return 0;
+         return new Batch(0, "no tivo.com username and password configured");
       }
       // Fresh each batch: a box that was rebooting last time may be ready now.
       HlsStream.forgetStreamingState();
       Remote r = new Remote(tivoName, true);
+      // Most often a tivo.com login that no longer works - the specific reason has already
+      // been logged by whichever step rejected it.
       if (! r.success) {
-         log.error("SkipMode fetch could not connect to tivo.com");
-         return 0;
+         r.disconnect();
+         return new Batch(0, "could not connect to tivo.com");
       }
       int saved = 0;
       try {
@@ -494,7 +507,7 @@ public class ClipSegments {
       } finally {
          r.disconnect();
       }
-      return saved;
+      return new Batch(saved, null);
    }
 
    // Spacing is per request, not per recording: fetchOne makes two cloud calls, three when the

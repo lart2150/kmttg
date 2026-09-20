@@ -317,7 +317,9 @@ public class ClipSegmentsTest {
       List<Hashtable<String,String>> npl = new ArrayList<Hashtable<String,String>>();
       npl.add(npl("tivo:ct.new", "tivo:cm.2", "tivo:rc.2"));
       // Declines before opening a websocket, so this cannot hang on a missing network.
-      assertEquals(0, ClipSegments.fetchMissing("Bolt", npl, null));
+      ClipSegments.Batch batch = ClipSegments.fetchMissing("Bolt", npl, null);
+      assertEquals(0, batch.saved);
+      assertNotNull(batch.failure, "the job has to be told it never ran");
    }
 
    @Test
