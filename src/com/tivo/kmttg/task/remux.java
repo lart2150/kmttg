@@ -38,8 +38,10 @@ import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.file;
 import com.tivo.kmttg.util.log;
 
+import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.rpc.artwork;
 import com.tivo.kmttg.rpc.ClipSegments;
+import com.tivo.kmttg.rpc.Remote;
 
 import net.straylightlabs.tivolibre.TivoDecoder;
 import net.straylightlabs.tivolibre.TransportStreamReader;
@@ -142,7 +144,39 @@ public class remux extends baseTask implements Serializable {
       s.seriesId = job.seriesId;
       s.setSeasonEpisode(job.season, job.episode);
       s.setEpisodeNumber(job.episodeNumber);
+      addRating(s, job);
       return s;
+   }
+
+   // The content rating. Neither the .TiVo nor its Now Playing entry carries one - measured
+   // across every recording to hand, and a high detail recordingSearch has none either. Only
+   // the content record does, which is one local RPC round trip. collectionSearch carries the
+   // same value (checked over 40 recordings: never a disagreement, and never present there
+   // when the content has none), so there is nothing to gain from asking twice.
+   //
+   // Best effort like the cover art: no rating is not a reason to fail a remux.
+   static void addRating(MetadataTags.Supplement s, jobData job) {
+      if (job.contentId == null) return;
+      try {
+         if (! config.rpcEnabled(job.tivoName)) return;
+         Remote r = config.initRemote(job.tivoName);
+         if (r == null || ! r.success) return;
+         try {
+            JSONObject json = new JSONObject();
+            json.put("bodyId", r.bodyId_get());
+            json.put("levelOfDetail", "high");
+            json.put("contentId", job.contentId);
+            JSONObject result = r.Command("contentSearch", json);
+            if (result == null || ! result.has("content")) return;
+            JSONObject content = result.getJSONArray("content").getJSONObject(0);
+            if (content.has("mpaaRating")) s.mpaaRating = content.getString("mpaaRating");
+            if (content.has("tvRating"))   s.tvRating   = content.getString("tvRating");
+         } finally {
+            r.disconnect();
+         }
+      } catch (Exception e) {
+         log.warn("Could not fetch the content rating: " + e.getMessage());
+      }
    }
 
    // SkipMode segments as Matroska chapters, so a player can jump the ad breaks the way the
@@ -198,11 +232,15 @@ public class remux extends baseTask implements Serializable {
    // invisible in a chapter menu, and marking the breaks is what makes them skippable. The ad
    // chapters are the gaps between segments, so n segments give 2n-1 chapters - there is no
    // break after the last segment, and anything before the first is inside it.
+   // "Inside it" is deliberate: start padding and the tail of the previous program can put
+   // the first show frame minutes into the file - four on one recording - and a chapter menu
+   // whose first entry is not the start of the file reads as broken.
    public static List<MkvMuxer.Chapter> buildChapters(List<ClipSegments.Segment> segments) {
       List<MkvMuxer.Chapter> chapters = new ArrayList<MkvMuxer.Chapter>();
       for (int i=0; i<segments.size(); ++i) {
          ClipSegments.Segment s = segments.get(i);
-         chapters.add(new MkvMuxer.Chapter(s.startMs, s.endMs, "Segment " + (i+1)));
+         long start = i == 0 ? 0 : s.startMs;
+         chapters.add(new MkvMuxer.Chapter(start, s.endMs, "Segment " + (i+1)));
          if (i+1 < segments.size()) {
             chapters.add(new MkvMuxer.Chapter(
                s.endMs, segments.get(i+1).startMs, "Commercials " + (i+1)));

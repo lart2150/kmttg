@@ -64,6 +64,8 @@ public class MkvTagsTest {
    private static final byte[] SEEK_HEAD   = {0x11, 0x4D, (byte)0x9B, 0x74};
    private static final byte[] TAGS        = {0x12, 0x54, (byte)0xC3, 0x67};
    private static final byte[] ATTACHMENTS = {0x19, 0x41, (byte)0xA4, 0x69};
+   private static final byte[] SEGMENT_TITLE = {0x7B, (byte)0xA9};
+   private static final byte[] DATE_UTC      = {0x44, 0x61};
 
    @Test
    void tagsAndAttachmentsAreWritten() throws Exception {
@@ -117,6 +119,47 @@ public class MkvTagsTest {
          // as designed
       }
       m.close();
+   }
+
+   @Test
+   void segmentInformationCarriesATitleAndADate() throws Exception {
+      // Both are optional in Matroska and both used to be left out, which showed up as an
+      // empty Title and Date in the MKVToolNix header editor.
+      File out = work.resolve("info.mkv").toFile();
+      MkvMuxer m = new MkvMuxer(out);
+      m.addTrack(videoTrack());
+      m.setTitle("Father Brown - The Forensic Nun");
+      m.setDate(1772582400000L);      // 2026-03-04T00:00:00Z
+      m.addSample(1, 0, true, new byte[]{0, 0, 1, 0x00, 0x00, 0x08, 9, 9});
+      m.close();
+      byte[] f = Files.readAllBytes(out.toPath());
+
+      int title = indexOf(f, SEGMENT_TITLE);
+      assertTrue(title > 0, "Title element missing from Segment Information");
+      assertTrue(new String(f, "ISO-8859-1").contains("Father Brown - The Forensic Nun"));
+
+      int date = indexOf(f, DATE_UTC);
+      assertTrue(date > 0, "DateUTC element missing from Segment Information");
+      // Signed nanoseconds from 2001-01-01, always eight bytes: a trimmed signed value would
+      // read back as a different date.
+      assertEquals(0x88, f[date + DATE_UTC.length] & 0xFF,
+         "DateUTC is a fixed eight bytes - 0x88 is the EBML coded size for 8");
+      long nanos = 0;
+      for (int i = 0; i < 8; i++) nanos = (nanos << 8) | (f[date + DATE_UTC.length + 1 + i] & 0xFFL);
+      assertEquals((1772582400000L - 978307200000L) * 1000000L, nanos);
+   }
+
+   @Test
+   void noTitleMeansNoTitleElement() throws Exception {
+      // An empty Title reads as a file that claims to be called "", which is worse than one
+      // that does not claim a name at all.
+      File out = work.resolve("untitled.mkv").toFile();
+      MkvMuxer m = new MkvMuxer(out);
+      m.addTrack(videoTrack());
+      m.setTitle("");
+      m.addSample(1, 0, true, new byte[]{0, 0, 1, 0x00, 0x00, 0x08, 9, 9});
+      m.close();
+      assertEquals(0, count(Files.readAllBytes(out.toPath()), SEGMENT_TITLE));
    }
 
    private static int lastIndexOf(byte[] hay, byte[] needle) {

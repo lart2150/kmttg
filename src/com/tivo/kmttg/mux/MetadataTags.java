@@ -21,6 +21,8 @@ package com.tivo.kmttg.mux;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.tivo.kmttg.mux.mkv.MkvMuxer;
 
@@ -43,6 +45,10 @@ public class MetadataTags {
       public Integer episodeNumber;
       public String title;        // fallback when the recording carried no metadata
       public String seriesId;
+      // The content rating, as RPC states it: a bare code like "pg", "14" or "pg13". The
+      // recording itself never carries one, so this is the only source there is.
+      public String tvRating;
+      public String mpaaRating;
 
       // Prefer the real season and episode when the NPL entry carried them; kmttg's
       // tivoFileName does the same and only falls back to splitting the packed string.
@@ -83,6 +89,68 @@ public class MetadataTags {
       if (m != null) addFromRecording(m, tags);
       if (extra != null) addFromKmttg(extra, tags);
       return tags;
+   }
+
+   // Matroska's Segment Title, which lives in Segment Information rather than in Tags and so
+   // cannot come out of build(). Series and episode together: the tags carry them separately
+   // at their own target levels, but this is the single line a player's title bar and the
+   // MKVToolNix header editor show for the whole file, and an episode title on its own does
+   // not say what the file is.
+   public static String segmentTitle(TivoMetadata m, Supplement extra) {
+      String series = null;
+      String episode = null;
+      if (m != null) {
+         series  = trimmed(m.getSeriesTitle().orElse(m.getTitle().orElse(null)));
+         episode = trimmed(m.getEpisodeTitle().orElse(null));
+      }
+      // The two-step path never sees onMetadata, so a remux of an already decrypted .ts has
+      // only what kmttg knows - the same fallback the TITLE tag makes.
+      if (series == null && extra != null) series = trimmed(extra.title);
+      if (series == null) return episode;
+      return episode == null ? series : series + " - " + episode;
+   }
+
+   // The broadcast this file was captured from, as epoch milliseconds, or null when the
+   // recording does not say. Matroska's DateUTC means when the segment was created, and for a
+   // remux that is more useful as the capture's own date than as the minute the remux ran.
+   public static Long recordedDate(TivoMetadata m) {
+      if (m == null || ! m.getAirDate().isPresent()) return null;
+      return Long.valueOf(m.getAirDate().get().toInstant().toEpochMilli());
+   }
+
+   // What language the audio is in, as the three letter code Matroska's Language element
+   // wants, or null when the recording does not say.
+   //
+   // The PMT would be the authoritative source, but TiVo's remux strips the ISO 639 language
+   // descriptor: every elementary stream in every recording measured declares no descriptors
+   // at all, a Spanish capture included. The recording's own metadata is what is left.
+   // descriptionLanguage is strictly the language of the guide text rather than of the audio,
+   // but the two track each other on a broadcast - "spa-ESP" on a Spanish capture, "eng-USA"
+   // on every English one - and a good guess beats "und" for a player picking a track.
+   public static String audioLanguage(TivoMetadata m) {
+      return m == null ? null : languageFrom(m.getDocuments());
+   }
+
+   // Split out so it can be exercised on raw metadata text: only tivolibre can build a
+   // TivoMetadata, so a test has no other way in.
+   static String languageFrom(List<String> documents) {
+      if (documents == null) return null;
+      for (String doc : documents) {
+         if (doc == null) continue;
+         Matcher match = DESCRIPTION_LANGUAGE.matcher(doc);
+         if (match.find()) return match.group(1).toLowerCase();
+      }
+      return null;
+   }
+
+   // Three letters and then a region that Matroska has nowhere to put: "eng-USA", "spa-ESP".
+   private static final Pattern DESCRIPTION_LANGUAGE =
+      Pattern.compile("<descriptionLanguage>\\s*([A-Za-z]{3})");
+
+   private static String trimmed(String v) {
+      if (v == null) return null;
+      String t = v.trim();
+      return t.isEmpty() ? null : t;
    }
 
    private static void addFromRecording(TivoMetadata m, List<MkvMuxer.Tag> tags) {
@@ -126,8 +194,7 @@ public class MetadataTags {
       }
 
       if (m.getStarRating().isPresent()) {
-         add(tags, MkvMuxer.TARGET_EPISODE, "RATING",
-            String.valueOf(m.getStarRating().getAsInt()));
+         add(tags, MkvMuxer.TARGET_EPISODE, "RATING", stars(m.getStarRating().getAsInt()));
       }
       add(tags, MkvMuxer.TARGET_COLLECTION, "CATALOG_NUMBER", m.getSeriesId().orElse(null));
 
@@ -162,6 +229,12 @@ public class MetadataTags {
       if (! hasTag(tags, "CATALOG_NUMBER")) {
          add(tags, MkvMuxer.TARGET_COLLECTION, "CATALOG_NUMBER", extra.seriesId);
       }
+      // Only ever from here in practice: no .TiVo measured carries a rating of its own, so
+      // the recording branch above almost never fills this in.
+      if (! hasTag(tags, "LAW_RATING")) {
+         add(tags, MkvMuxer.TARGET_EPISODE, "LAW_RATING",
+            lawRating(extra.mpaaRating, extra.tvRating));
+      }
       if (extra.seasonNumber != null && extra.seasonNumber > 0) {
          add(tags, MkvMuxer.TARGET_SEASON, "PART_NUMBER",
             String.valueOf(extra.seasonNumber));
@@ -172,6 +245,50 @@ public class MetadataTags {
       }
    }
 
+   // RPC states a rating as a bare code - "pg", "14", "y7" for television, "pg13" for a film -
+   // where Matroska wants the label a viewer would recognise. A film's rating wins when there
+   // is one, the same order the recording branch uses. Unknown codes pass through rather than
+   // being dropped: a rating we do not recognise is still a rating.
+   static String lawRating(String mpaaRating, String tvRating) {
+      // A film rating only wins when it is one this recognises. An mpaaRating the table has
+      // never heard of is passed through rather than dropped, but not at the cost of a
+      // perfectly good tvRating sitting next to it.
+      String film = label(mpaaRating, MPAA_LABEL);
+      if (film != null && known(film, MPAA_LABEL)) return film;
+      String tv = label(tvRating, TV_LABEL);
+      return tv != null ? tv : film;
+   }
+
+   private static boolean known(String label, String[][] table) {
+      for (String[] row : table) {
+         if (row[1].equals(label)) return true;
+      }
+      return false;
+   }
+
+   private static final String[][] TV_LABEL = {
+      {"y7", "TV-Y7"}, {"y", "TV-Y"}, {"g", "TV-G"},
+      {"pg", "TV-PG"}, {"14", "TV-14"}, {"ma", "TV-MA"},
+   };
+
+   private static final String[][] MPAA_LABEL = {
+      {"g", "G"}, {"pg", "PG"}, {"pg13", "PG-13"},
+      {"r", "R"}, {"nc17", "NC-17"}, {"x", "X"}, {"nr", "NR"},
+   };
+
+   private static String label(String value, String[][] table) {
+      String raw = trimmed(value);
+      if (raw == null) return null;
+      String key = raw.toLowerCase().replace("-", "").replace("_", "");
+      // "TV-14" and "14" are the same rating; the RPC sends the bare form but a value that
+      // arrived already spelled out must not then miss the table.
+      if (table == TV_LABEL && key.startsWith("tv")) key = key.substring(2);
+      for (String[] row : table) {
+         if (row[0].equals(key)) return row[1];
+      }
+      return raw;
+   }
+
    // The recording carries TiVo's own rating code, not a label, so writing the bare number
    // leaves a player showing "5" where it should show "TV-14". Same table util/createMeta
    // already uses for AtomicParsley, repeated rather than imported because that class pulls
@@ -179,6 +296,18 @@ public class MetadataTags {
    private static final String[] TV_RATING = {
       null, "TV-Y7", "TV-Y", "TV-G", "TV-PG", "TV-14", "TV-MA", "Unrated"
    };
+
+   // The recording carries a code, not a star count: 1 through 7 for one star through four in
+   // half steps, the same scale Advanced Search spells out as one..four. Writing the code bare
+   // called a three star film a 5, which every reader takes at face value. Same class of bug
+   // the tvRating table above exists to avoid.
+   static String stars(int code) {
+      if (code < 1 || code > 7) return null;
+      double value = (code + 1) / 2.0;
+      return value == Math.floor(value)
+         ? String.valueOf((int)value)
+         : String.valueOf(value);
+   }
 
    private static String tvRating(int code) {
       return code > 0 && code < TV_RATING.length ? TV_RATING[code] : null;

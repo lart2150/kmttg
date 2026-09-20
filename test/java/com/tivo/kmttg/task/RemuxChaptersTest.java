@@ -61,12 +61,27 @@ public class RemuxChaptersTest {
    }
 
    @Test
-   void outOfRangeBoundsArePassedThroughForTheMuxerToClamp() {
-      // The SkipMode window overhangs the recording at both ends. Clamping cannot happen here
-      // because the duration is not known until the last cluster is written, so these have to
-      // survive the trip intact.
+   void theTrailingBoundIsPassedThroughForTheMuxerToClamp() {
+      // The SkipMode window overhangs the end of the recording, and clamping cannot happen
+      // here because the duration is not known until the last cluster is written, so that
+      // bound has to survive the trip intact.
       List<MkvMuxer.Chapter> c = remux.buildChapters(segments(-27739, 912511, 1107328, 7232203));
-      assertEquals(-27739, c.get(0).startMs);
       assertEquals(7232203, c.get(2).endMs);
+   }
+
+   @Test
+   void theFirstChapterStartsAtTheFileEvenWhenTheShowDoesNot() {
+      // Start padding puts the show nearly four minutes in; the chapter still has to open at
+      // the first frame or the menu looks like it is missing an entry.
+      List<MkvMuxer.Chapter> c = remux.buildChapters(segments(228000, 912511, 1107328, 1800000));
+      assertEquals(0, c.get(0).startMs);
+      assertEquals(912511, c.get(0).endMs, "only the start moves");
+      assertEquals(1107328, c.get(2).startMs, "later segments are untouched");
+   }
+
+   @Test
+   void aFirstSegmentBeforeTheFileAlsoStartsAtZero() {
+      List<MkvMuxer.Chapter> c = remux.buildChapters(segments(-27739, 912511));
+      assertEquals(0, c.get(0).startMs);
    }
 }

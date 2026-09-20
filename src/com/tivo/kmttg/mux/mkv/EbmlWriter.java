@@ -102,6 +102,17 @@ public class EbmlWriter {
       out.write(b, 0, b.length);
    }
 
+   // A Matroska date: signed nanoseconds from 2001-01-01T00:00:00 UTC, always the full eight
+   // bytes. Not writeUInt, which trims leading zero bytes - a shortened signed value changes
+   // meaning, and anything before 2001 is negative.
+   public void writeDate(long id, long nanos) {
+      writeId(id);
+      writeSize(8);
+      for (int i = 7; i >= 0; i--) {
+         out.write((int)(nanos >> (i * 8)) & 0xFF);
+      }
+   }
+
    public void writeFloat64(long id, double value) {
       writeId(id);
       writeSize(8);

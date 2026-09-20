@@ -239,6 +239,10 @@ public class MuxSink implements FrameSink {
             t.track.displayHeight = (int)(h / g);
             t.track.displayUnit   = 3;          // display aspect ratio
          }
+         // The SPS says whether fields can be coded at all; which field leads is only in a
+         // pic_struct SEI, so the order is left undetermined rather than guessed.
+         t.track.interlaced = sps.frameMbsOnly ? 2 : 1;
+         if (sps.frameMbsOnly) t.track.fieldOrder = 0;
          t.track.codecPrivate = H264Parser.buildAvcC(t.sps, t.pps);
          t.configured = t.track.codecPrivate != null;
          return;
@@ -251,6 +255,15 @@ public class MuxSink implements FrameSink {
          setDisplaySize(t.track, h.aspectRatioCode);
          if (h.frameRateNum > 0) {
             t.track.defaultDurationNs = 1000000000L * h.frameRateDen / h.frameRateNum;
+         }
+         t.track.interlaced = h.progressive ? 2 : 1;
+         if (h.progressive) {
+            t.track.fieldOrder = 0;
+         } else {
+            // Per picture in MPEG-2, but a broadcast holds it constant, so the first coded
+            // picture speaks for the track. Absent when this unit carried no extension.
+            int tff = Mpeg2Parser.topFieldFirst(d);
+            if (tff >= 0) t.track.fieldOrder = tff == 1 ? 1 : 6;
          }
          t.configured = true;
       } else {
@@ -280,6 +293,26 @@ public class MuxSink implements FrameSink {
       return a == 0 ? 1 : a;
    }
 
+   // What a player shows beside the audio track. The codec is already stated on its own, so
+   // this names the layout, which is the part a viewer actually chooses on.
+   private static String channelLayout(int channels) {
+      switch (channels) {
+         case 1:  return "Mono";
+         case 2:  return "Stereo";
+         case 6:  return "Surround 5.1";
+         case 8:  return "Surround 7.1";
+         default: return channels > 0 ? channels + " channels" : null;
+      }
+   }
+
+   private int audioTrackCount() {
+      int n = 0;
+      for (TrackState t : tracks.values()) {
+         if (t.track.type == MkvMuxer.TYPE_AUDIO) n++;
+      }
+      return n;
+   }
+
    private boolean readyToStart() {
       for (TrackState t : tracks.values()) {
          if (! t.configured) {
@@ -301,6 +334,12 @@ public class MuxSink implements FrameSink {
          muxer = new MkvMuxer(outFile);
          // Tags reserve a SeekHead entry, so they must be declared before the header.
          muxer.addTags(MetadataTags.build(metadata, supplement));
+         // Segment Information, which is not a tag. Falling back to now for the date rather
+         // than leaving it out: a .ts source carries no metadata at all, and the muxing time
+         // is what DateUTC means anyway.
+         muxer.setTitle(MetadataTags.segmentTitle(metadata, supplement));
+         Long recorded = MetadataTags.recordedDate(metadata);
+         muxer.setDate(recorded == null ? System.currentTimeMillis() : recorded.longValue());
          if (chapters != null && ! chapters.isEmpty()) {
             muxer.addChapters(chapters);
          }
@@ -318,6 +357,37 @@ public class MuxSink implements FrameSink {
          if (tracks.isEmpty()) {
             fail("No describable tracks found");
             return;
+         }
+         // Only where the PMT said nothing, which on a TiVo recording is always: the language
+         // descriptor is stripped, so without this every audio track is "und" and a player
+         // choosing between tracks has nothing to go on.
+         //
+         // Only when there is exactly one audio track, though. The guide text says what the
+         // program is in, not what each track is in, so on a broadcast carrying a SAP it would
+         // label both tracks the same - and a player set to prefer that language would then
+         // pick whichever came first rather than the one it wants. "und" on both is a worse
+         // label but a better answer.
+         String lang = MetadataTags.audioLanguage(metadata);
+         if (lang != null && audioTrackCount() == 1) {
+            for (TrackState t : tracks.values()) {
+               if (t.track.type == MkvMuxer.TYPE_AUDIO && "und".equals(t.track.language)) {
+                  t.track.language = lang;
+               }
+            }
+         }
+         // The first track of each kind is the default one. Matroska assumes default when the
+         // flag is absent, so without this a second audio track would be announced as being
+         // just as default as the first.
+         boolean haveVideo = false, haveAudio = false;
+         for (TrackState t : tracks.values()) {
+            if (t.track.type == MkvMuxer.TYPE_VIDEO) {
+               t.track.isDefault = ! haveVideo;
+               haveVideo = true;
+            } else if (t.track.type == MkvMuxer.TYPE_AUDIO) {
+               t.track.isDefault = ! haveAudio;
+               haveAudio = true;
+               if (t.track.name == null) t.track.name = channelLayout(t.track.channels);
+            }
          }
          // Renumber BEFORE adding: addTrack latches the first video track's number as the cue
          // track, so numbering afterwards left it pointing at whatever track inherited that

@@ -46,6 +46,10 @@ public class MkvMuxer {
    private static final long INFO              = 0x1549A966L;
    private static final long TIMESTAMP_SCALE   = 0x2AD7B1L;
    private static final long DURATION          = 0x4489L;
+   private static final long SEGMENT_UID       = 0x73A4L;
+   private static final long SEGMENT_TITLE     = 0x7BA9L;
+   private static final long DATE_UTC          = 0x4461L;
+   private static final long MATROSKA_EPOCH_MS = 978307200000L;   // 2001-01-01T00:00:00 UTC
    private static final long MUXING_APP        = 0x4D80L;
    private static final long WRITING_APP       = 0x5741L;
 
@@ -54,7 +58,11 @@ public class MkvMuxer {
    private static final long TRACK_NUMBER      = 0xD7L;
    private static final long TRACK_UID         = 0x73C5L;
    private static final long TRACK_TYPE        = 0x83L;
+   private static final long TRACK_NAME        = 0x536EL;
+   private static final long FLAG_DEFAULT      = 0x88L;
    private static final long FLAG_LACING       = 0x9CL;
+   private static final long FLAG_INTERLACED   = 0x9AL;
+   private static final long FIELD_ORDER       = 0x9DL;
    private static final long CODEC_ID          = 0x86L;
    private static final long CODEC_PRIVATE     = 0x63A2L;
    private static final long LANGUAGE          = 0x22B59CL;
@@ -134,6 +142,17 @@ public class MkvMuxer {
       public int type;
       public String codecId;
       public String language = "und";
+      // Shown beside the track in a player's menu and in the MKVToolNix header editor.
+      public String name;
+      // FlagDefault. Matroska assumes 1 when the element is absent, so this is only worth
+      // stating to say "not this one" about a second track of the same kind.
+      public boolean isDefault = true;
+      // FlagInterlaced: 0 undetermined, 1 interlaced, 2 progressive. Broadcast is interlaced
+      // far more often than not, and left unstated every file claims not to know.
+      public int interlaced;
+      // FieldOrder: 0 progressive, 1 top field first, 6 bottom field first. -1 states none,
+      // which Matroska reads as undetermined.
+      public int fieldOrder = -1;
       public byte[] codecPrivate;
       public int width, height;
       public int displayWidth, displayHeight;
@@ -204,6 +223,14 @@ public class MkvMuxer {
    private final List<long[]> cues = new ArrayList<long[]>();   // {time, track, clusterPos}
    private int cueTrack = -1;
 
+   // Segment Information. Both are optional in Matroska and both were left out, which is why
+   // MKVToolNix showed an empty Title and Date for every file kmttg wrote.
+   private String title;
+   private Long dateUtcMs;
+   // Shared: seeding a SecureRandom is the expensive part and it can block the first time,
+   // which is no reason to pay it again on every file a batch writes.
+   private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
+
    private final List<Tag> tags = new ArrayList<Tag>();
    private final List<Chapter> chapters = new ArrayList<Chapter>();
    private final List<Attachment> attachments = new ArrayList<Attachment>();
@@ -226,6 +253,20 @@ public class MkvMuxer {
 
    public void addTags(List<Tag> list) {
       for (Tag t : list) addTag(t);
+   }
+
+   // The file's own name, which is not a tag: Matroska keeps it in Segment Information, and
+   // it is what a player's title bar and the MKVToolNix header editor show. Before the header
+   // like everything else in Info.
+   public void setTitle(String value) {
+      requireUnwritten();
+      title = value == null || value.isEmpty() ? null : value;
+   }
+
+   // When the segment was made, as epoch milliseconds.
+   public void setDate(long epochMs) {
+      requireUnwritten();
+      dateUtcMs = Long.valueOf(epochMs);
    }
 
    public void addChapters(List<Chapter> list) {
@@ -288,6 +329,17 @@ public class MkvMuxer {
       // Info. Duration is patched at close, so it is written at a fixed width.
       EbmlWriter info = new EbmlWriter();
       info.writeUInt(TIMESTAMP_SCALE, 1000000);      // 1 ms
+      // A segment has to be identifiable to be linked or referred to, and every other muxer
+      // writes one. Random per file, which is the point - two remuxes of the same recording
+      // are two segments.
+      byte[] uid = new byte[16];
+      RANDOM.nextBytes(uid);
+      info.writeBinary(SEGMENT_UID, uid);
+      if (title != null) info.writeString(SEGMENT_TITLE, title);
+      // Epoch for a Matroska date is 2001-01-01T00:00:00 UTC, not 1970.
+      if (dateUtcMs != null) {
+         info.writeDate(DATE_UTC, (dateUtcMs.longValue() - MATROSKA_EPOCH_MS) * 1000000L);
+      }
       info.writeString(MUXING_APP, "kmttg");
       info.writeString(WRITING_APP, "kmttg");
       byte[] infoHead = info.toByteArray();
@@ -386,6 +438,8 @@ public class MkvMuxer {
       e.writeUInt(TRACK_UID, t.number);
       e.writeUInt(TRACK_TYPE, t.type);
       e.writeUInt(FLAG_LACING, 0);
+      if (! t.isDefault) e.writeUInt(FLAG_DEFAULT, 0);
+      if (t.name != null && ! t.name.isEmpty()) e.writeString(TRACK_NAME, t.name);
       e.writeString(CODEC_ID, t.codecId);
       e.writeString(LANGUAGE, t.language);
       if (t.codecPrivate != null && t.codecPrivate.length > 0) {
@@ -401,6 +455,8 @@ public class MkvMuxer {
          if (t.displayWidth > 0)  v.writeUInt(DISPLAY_WIDTH, t.displayWidth);
          if (t.displayHeight > 0) v.writeUInt(DISPLAY_HEIGHT, t.displayHeight);
          if (t.displayUnit > 0)   v.writeUInt(DISPLAY_UNIT, t.displayUnit);
+         if (t.interlaced > 0)    v.writeUInt(FLAG_INTERLACED, t.interlaced);
+         if (t.fieldOrder >= 0)   v.writeUInt(FIELD_ORDER, t.fieldOrder);
          e.writeMaster(VIDEO, v.toByteArray());
       } else if (t.type == TYPE_AUDIO) {
          EbmlWriter a = new EbmlWriter();
