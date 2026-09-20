@@ -63,7 +63,7 @@ public class RpcFixtureCapture {
       // the existing parse tests) and the command trace (for the replay tests).
       // The command logs are trimmed to the first few pages: ReplayRemote
       // returns null past the recorded requests, which terminates the read loop.
-      captureWithCommands(san, outDir, "todo",         r, () -> r.ToDo(null),          maxEntries, 8);
+      JSONArray todo = captureWithCommands(san, outDir, "todo", r, () -> r.ToDo(null), maxEntries, 8);
       captureWithCommands(san, outDir, "deleted",      r, () -> r.DeletedShows(null),  maxEntries, 3);
       captureWithCommands(san, outDir, "seasonpasses", r, () -> r.SeasonPasses(null),  maxEntries, 1);
       captureWithCommands(san, outDir, "cancelled",    r, () -> r.CancelledShows(null),maxEntries, 3);
@@ -87,10 +87,15 @@ public class RpcFixtureCapture {
 
       // Guide listings (gridRowSearch) for specific channels on a specific day.
       // The high-level guide path reaches into GUI state, so issue the command
-      // directly. Date is fixed so the fixtures are deterministic.
-      String guideDate = "2026-06-07";
+      // directly. Today by default: a TiVo only holds guide data a few days
+      // back, so a date pinned in the source can only go stale and then return
+      // nothing. Pass one to reproduce an old capture while it is still in range.
       // TiVo stores channel numbers with a dash (displayed as 2.1 / 5.1)
       String[] guideChannels = { "2-1", "5-1" };
+      // TodoFlagTest needs a guide listing that the ToDo fixture also contains,
+      // so take the day from the ToDo list itself rather than picking one and
+      // hoping. Only the entries that were actually written count.
+      String guideDate = args.length > 3 ? args[3] : todoDate(todo, guideChannels[0], maxEntries);
       long dayStart = java.time.LocalDate.parse(guideDate)
             .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
       long dayEnd = dayStart + 24L * 60 * 60 * 1000;
@@ -112,9 +117,17 @@ public class RpcFixtureCapture {
          anchor.put("sourceType", channel.getString("sourceType"));
          gReq.put("anchorChannelIdentifier", anchor);
          JSONObject gRes = r.Command("gridRowSearch", gReq);
+         // A row with no offer at all is what an out-of-range date returns, and
+         // throwing here would abandon the run after the other fixtures are
+         // already written. Skip it and leave that fixture as it was.
          JSONArray offers = null;
-         if (gRes != null && gRes.has("gridRow"))
-            offers = gRes.getJSONArray("gridRow").getJSONObject(0).getJSONArray("offer");
+         if (gRes != null && gRes.has("gridRow")) {
+            JSONArray rows = gRes.getJSONArray("gridRow");
+            if (rows.length() > 0 && rows.getJSONObject(0).has("offer"))
+               offers = rows.getJSONObject(0).getJSONArray("offer");
+         }
+         if (offers == null)
+            System.out.println("  guide_" + chanNum + ".json: no offers for " + guideDate + " (skipped)");
          capture(san, outDir, "guide_" + chanNum + ".json", offers, maxEntries);
       }
 
@@ -142,7 +155,33 @@ public class RpcFixtureCapture {
     * (&lt;name&gt;.json) and the RPC command trace it issued, trimmed to the first
     * maxCmds commands (commands_&lt;name&gt;.json), for the replay tests.
     */
-   private static void captureWithCommands(Sanitizer san, File dir, String name, RecordingRemote r,
+   /**
+    * The day of the first written ToDo entry on the given channel, which is the
+    * day whose guide listings will overlap it. Falls back to today when nothing
+    * is scheduled there - the guide still captures, but TodoFlagTest will have
+    * no match to find, so say so rather than let it surface as a test failure.
+    */
+   private static String todoDate(JSONArray todo, String chanNum, int maxEntries) {
+      int n = todo == null ? 0 : Math.min(todo.length(), maxEntries);
+      for (int i = 0; i < n; i++) {
+         try {
+            JSONObject t = todo.getJSONObject(i);
+            if (! t.has("startTime")) continue;
+            if (! chanNum.equals(t.getJSONObject("channel").getString("channelNumber"))) continue;
+            String date = t.getString("startTime").substring(0, 10);
+            System.out.println("Guide date " + date + " (from the ToDo entry on " + chanNum + ")");
+            return date;
+         } catch (Exception e) {
+            // entry shaped differently than expected; try the next one
+         }
+      }
+      String today = java.time.LocalDate.now().toString();
+      System.out.println("WARNING: nothing on " + chanNum + " in the ToDo fixture - "
+         + "capturing guide for " + today + ", and TodoFlagTest will not find an overlap");
+      return today;
+   }
+
+   private static JSONArray captureWithCommands(Sanitizer san, File dir, String name, RecordingRemote r,
          java.util.function.Supplier<JSONArray> call, int maxEntries, int maxCmds) throws Exception {
       r.reset();
       JSONArray data = call.get();
@@ -157,6 +196,7 @@ public class RpcFixtureCapture {
       FixtureJson.write(new File(dir, "commands_" + name + ".json"),
             FixtureJson.prune(new JSONArray(san.scrub(log.toString()))));
       System.out.println("  commands_" + name + ".json: " + log.length() + " of " + fullLog.length() + " commands written");
+      return data;
    }
 
    // Extract a named array from a Command response (null-safe).

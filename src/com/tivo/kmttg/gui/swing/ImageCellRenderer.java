@@ -31,12 +31,13 @@ import javax.swing.table.TableCellRenderer;
 import com.tivo.kmttg.gui.table.imageCell;
 
 /**
- * Renderer for imageCell values: up to 2 icons followed by a text label.
+ * Renderer for imageCell values: up to 3 icons followed by a text label.
  */
 public class ImageCellRenderer extends JPanel implements TableCellRenderer {
    private static final long serialVersionUID = 1L;
    private JLabel icon1 = new JLabel();
    private JLabel icon2 = new JLabel();
+   private JLabel icon3 = new JLabel();
    private JLabel text = new JLabel();
 
    public ImageCellRenderer() {
@@ -44,6 +45,7 @@ public class ImageCellRenderer extends JPanel implements TableCellRenderer {
       setOpaque(true);
       add(icon1);
       add(icon2);
+      add(icon3);
       add(text);
    }
 
@@ -52,6 +54,7 @@ public class ImageCellRenderer extends JPanel implements TableCellRenderer {
          boolean isSelected, boolean hasFocus, int row, int column) {
       icon1.setIcon(null);
       icon2.setIcon(null);
+      icon3.setIcon(null);
       text.setText("");
       if (value instanceof imageCell) {
          imageCell cell = (imageCell) value;
@@ -59,6 +62,8 @@ public class ImageCellRenderer extends JPanel implements TableCellRenderer {
             icon1.setIcon(new ImageIcon(cell.getImage()));
          if (cell.getImage2() != null)
             icon2.setIcon(new ImageIcon(cell.getImage2()));
+         if (cell.getImage3() != null)
+            icon3.setIcon(new ImageIcon(cell.getImage3()));
          text.setText(cell.getLabel());
       }
       if (isSelected) {

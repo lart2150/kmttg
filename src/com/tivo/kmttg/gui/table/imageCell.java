@@ -21,12 +21,13 @@ package com.tivo.kmttg.gui.table;
 import java.awt.Image;
 
 /**
- * Value object for table image cells (up to 2 icons + a text label).
+ * Value object for table image cells (up to 3 icons + a text label).
  * Rendered by com.tivo.kmttg.gui.swing.ImageCellRenderer.
  */
 public class imageCell {
    private Image image = null;
    private Image image2 = null;
+   private Image image3 = null;
    private String label = "";
    public String imageName = "";
 
@@ -41,6 +42,10 @@ public class imageCell {
       image2 = img;
    }
 
+   public void setImage3(Image img) {
+      image3 = img;
+   }
+
    public void setLabel(String s) {
       label = s;
    }
@@ -51,6 +56,10 @@ public class imageCell {
 
    public Image getImage2() {
       return image2;
+   }
+
+   public Image getImage3() {
+      return image3;
    }
 
    public String getLabel() {

@@ -44,7 +44,10 @@ public final class FixtureJson {
       // imageUrl out of it - but not the per-image catalog fields.
       "imageId", "imageType",
       // Playback/DRM policy and stream plumbing; kmttg downloads over HTTP.
-      "recordingPlaybackPolicy", "mrsPlaybackPolicy", "cgms", "transportType",
+      // mimeType is the container (video/mpg2 on every recording, SD and HD
+      // alike), not the video codec - nothing reads it. cgms is NOT here: the
+      // NPL marks copy protected shows with it.
+      "recordingPlaybackPolicy", "mrsPlaybackPolicy", "transportType",
       "mimeType", "contentType", "bitrate", "quality", "diskPartition",
       // Channel flags kmttg never filters or displays on (it uses callSign,
       // channelNumber, sourceType, stationId and isReceived).

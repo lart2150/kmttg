@@ -85,7 +85,7 @@ public class nplTable extends TableMap {
    public String[] FILE_cols = {"FILE", "SIZE", "DIR"};
    private double[] FILE_weights = {41, 12, 47};
    public String[] TIVO_cols = {"", "SHOW", "DATE", "CHANNEL", "DUR", "SIZE", "Mbps"};
-   private double[] TIVO_weights = {12, 32, 18, 17, 6, 9, 6};
+   private double[] TIVO_weights = {16, 28, 18, 17, 6, 9, 6};
    public String folderName = null;
    public int folderEntryNum = -1;
    private Stack<Hashtable<String,String>> entries = null;
@@ -241,6 +241,7 @@ public class nplTable extends TableMap {
             chan = folderEntry.get(0).get("channel");
          }
          Boolean sameChannel = true;
+         Boolean anyProtected = false;
          Double rate_total = 0.0;
          Double rate;
          long gmt, largestGmt=0;
@@ -258,6 +259,8 @@ public class nplTable extends TableMap {
                   sameChannel = false;
                }
             }
+            if (isCopyMarked(entry))
+               anyProtected = true;
             rate = 0.0;
             if (entry.containsKey("size") && entry.containsKey("duration")) {
                rate = bitRate(entry.get("size"), entry.get("duration"));
@@ -266,6 +269,8 @@ public class nplTable extends TableMap {
                clipDataNum++;
             rate_total += rate;
          }
+         if (anyProtected)
+            image.setImage3(gui.Images.get("drm"));
          if (clipDataNum > 0) {
             image.setImage2(gui.Images.get("skipmode"));
             image.setLabel(" " + clipDataNum);
@@ -300,6 +305,8 @@ public class nplTable extends TableMap {
          }
          if (entry.containsKey("clipMetadataId"))
             image.setImage2(gui.Images.get("skipmode"));
+         if (isCopyMarked(entry))
+            image.setImage3(gui.Images.get("drm"));
          image.setLabel(getPctWatched(entry));
          show = new sortableShow(entry);
          date = new sortableDate(entry);
@@ -1445,6 +1452,14 @@ public class nplTable extends TableMap {
          rate = 0.0;
       }
       return rate;
+   }
+
+   // Whether to show the copy protect icon. Two separate answers about the same show:
+   // CopyProtected is the TiVo saying the transfer would fail, CopyRestricted is the
+   // broadcast flag alone. Only the first one refuses a download, but both are worth
+   // marking in the table.
+   static boolean isCopyMarked(Hashtable<String,String> entry) {
+      return entry.containsKey("CopyProtected") || entry.containsKey("CopyRestricted");
    }
 
    // Return true if this entry should not be displayed, false otherwise

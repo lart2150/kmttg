@@ -273,24 +273,6 @@ public class parseNPL {
                   h.put("suggestion", "yes");
                }
             }
-            
-            // Set copy-protect icon if copy-protected
-            // This intentionally commented out so that people wanting to see
-            // expiration icons instead of copy protect can do so
-            /*if (h.containsKey("CopyProtected")) {
-               // Give preference to show transferring status over copy protected
-               Boolean flag = true;
-               if (h.containsKey("ExpirationImage")) {
-                  if (h.get("ExpirationImage").equals("in-progress-recording"))
-                     flag = false;
-                  if (h.get("ExpirationImage").equals("in-progress-transfer"))
-                     flag = false;                  
-               } 
-               // This intentionally commented out so that people wanting to see
-               // expiration icons instead of copy protect can do so
-               if (flag)
-                  h.put("ExpirationImage", "copy-protected");
-            }*/
          }
          // Add last entry
          if ( ! h.isEmpty() ) {
@@ -460,11 +442,19 @@ public class parseNPL {
          }
          if (json.has("drm")) {
             JSONObject drm = json.getJSONObject("drm");
+            // cgms is the broadcast flag (copyFreely/copyOnce/copyNever);
+            // tivoToGo is the TiVo's own verdict on transferring it. Either one
+            // saying no is enough to mark the show, but they land on separate
+            // keys: CopyProtected is what refuses a download (jobMonitor and
+            // auto both stop on it), and the TiVo's own verdict is the only
+            // answer that means the transfer would actually fail.
+            if (drm.has("cgms")) {
+               if (! drm.getString("cgms").equals("copyFreely"))
+                  entry.put("CopyRestricted", "Yes");
+            }
             if (drm.has("tivoToGo")) {
-               if (! drm.getBoolean("tivoToGo")) {
-                  //entry.put("ExpirationImage", "copy-protected");
+               if (! drm.getBoolean("tivoToGo"))
                   entry.put("CopyProtected", "Yes");
-               }
             }
          }
          if (json.has("desiredDeletion")) {
