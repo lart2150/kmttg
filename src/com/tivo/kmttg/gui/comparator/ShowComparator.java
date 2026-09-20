@@ -26,11 +26,8 @@ import com.tivo.kmttg.main.config;
 public class ShowComparator implements Comparator<sortableShow> {
    public int compare(sortableShow s1, sortableShow s2) {
       if (s1 != null && s2 != null) {
-         int e1=-1, e2=-1;
-         if (s1.episodeNum.length() > 0 && s2.episodeNum.length() > 0) {
-            e1 = Integer.parseInt(s1.episodeNum);
-            e2 = Integer.parseInt(s2.episodeNum);
-         }
+         int e1 = episodeNum(s1);
+         int e2 = episodeNum(s2);
          // Sort 1st by titleOnly, then by episode, then by date
          int result;
          if (config.TiVoSort == 1)         
@@ -48,5 +45,15 @@ public class ShowComparator implements Comparator<sortableShow> {
          return result;
       }
       return 0;
+   }
+
+   // Each show is read on its own. Reading the pair together, and leaving both at -1
+   // unless both carried a number, made a numbered and an unnumbered episode fall
+   // through to date - an order that is not transitive, which Collections.sort rejects
+   // outright once a list is big enough for it to notice.
+   private static int episodeNum(sortableShow s) {
+      if (s.episodeNum.length() == 0)
+         return -1;
+      return Integer.parseInt(s.episodeNum);
    }
 }
