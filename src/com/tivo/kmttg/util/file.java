@@ -134,16 +134,15 @@ public class file {
    }
    
    public static Boolean copy(String source, String dest) {
-      try {
-         InputStream in = new FileInputStream(source);
-         OutputStream out = new FileOutputStream(dest);
+      // Both streams have to close on the failure paths too - a half done copy that
+      // leaves the source open cannot be retried or cleaned up on Windows
+      try (InputStream in = new FileInputStream(source);
+           OutputStream out = new FileOutputStream(dest)) {
          byte[] buf = new byte[1024];
          int len;
          while ((len = in.read(buf)) > 0) {
             out.write(buf, 0, len);
          }
-         in.close();
-         out.close(); 
       } catch (Exception e) {
          log.error("file copy: " + e.getMessage());
          log.error(Arrays.toString(e.getStackTrace()));
