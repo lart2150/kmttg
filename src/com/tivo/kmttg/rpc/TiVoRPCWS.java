@@ -125,7 +125,7 @@ public class TiVoRPCWS extends WebSocketClient {
    // came: the socket closed, the wait ran out, or the message carried no body. Registering
    // before the send is what makes a reply that beats us to the wait still count.
    private String exchange(String request, int timeout) throws InterruptedException {
-      Integer rpcId = rpcIdOf(request.split("\r\n\r\n")[0]);
+      Integer rpcId = rpcIdOf(request.split("\r\n\r\n", 2)[0]);
       Pending p = new Pending();
       pending.put(rpcId, p);
       try {
@@ -269,7 +269,7 @@ public class TiVoRPCWS extends WebSocketClient {
    // nothing asks for more. What changed is that a reply, a close or a timeout all end the
    // wait - it used to end only on a reply.
    public synchronized JSONObject sendRequestAndWaitForResponse(String request) {
-      Integer rpcId = rpcIdOf(request.split("\r\n\r\n")[0]);
+      Integer rpcId = rpcIdOf(request.split("\r\n\r\n", 2)[0]);
       try {
          if (! this.waitForReady()) {
             error("Not connected to tivo.com - dropping request " + rpcId);
@@ -356,7 +356,9 @@ public class TiVoRPCWS extends WebSocketClient {
 
    @Override
    public void onMessage(String message) {
-      String[] parts = message.split("\r\n\r\n");
+      // Limit 2: everything past the blank line is the body, and a JSON body is free to
+      // contain a blank line of its own - splitting on every one truncates it.
+      String[] parts = message.split("\r\n\r\n", 2);
       Integer rpcId = rpcIdOf(parts[0]);
 
       Pending p = this.pending.get(rpcId);
