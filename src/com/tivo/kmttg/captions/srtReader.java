@@ -54,11 +54,7 @@ public class srtReader {
             if (line.matches("^[0-9]+:[0-9]+:[0-9].*$")) {
                // New time entry: HH:MM:SS,mmm --> HH:MM:SS,mmm
                if( t2 != 0) {
-                  cc captions = new cc();
-                  captions.start = t1;
-                  captions.stop = t2;
-                  captions.text = text;
-                  ccstack.push(captions);
+                  push(t1, t2, text);
                   t1=0; t2=0;
                   text = "";
                }
@@ -79,6 +75,9 @@ public class srtReader {
             }
             text = text + line + " ";
          } // while
+         // Nothing follows the last entry to flush it out of the loop
+         if (t2 != 0)
+            push(t1, t2, text);
          ifp.close();
       } catch (Exception e) {
          log.error("srtReader - " + e.getMessage());
@@ -86,7 +85,15 @@ public class srtReader {
       }
       return true;
    }
-   
+
+   private void push(long start, long stop, String text) {
+      cc captions = new cc();
+      captions.start = start;
+      captions.stop = stop;
+      captions.text = text;
+      ccstack.push(captions);
+   }
+
    // Print content of ccstack for debug
    public void print() {
       if (ccstack != null) {
