@@ -73,6 +73,11 @@ public class Remote{
                   port
               );
             this.success = ws.waitForReady();
+            // A failed away mode connection is still a socket: a token tivo.com rejects leaves
+            // it open. Closed here rather than at each caller, because every one of them tests
+            // success and returns, and a tivo.com session left open is one the next attempt
+            // has to fight for.
+            if (! this.success) ws.close();
          } else {
             s = new TiVoRPC(tivoName, IP, mak, programDir, port, cdata,
             (config.rpcOld == 1), com.tivo.kmttg.util.debug.enabled);
@@ -3177,9 +3182,11 @@ public class Remote{
 	
    public void disconnect() {
       if (away) {
-         this.ws.close();
+         // Null when the connect itself failed - an interrupt during connectBlocking leaves
+         // a Remote that reports no success and has nothing to close.
+         if (this.ws != null) this.ws.close();
       } else {
-         this.s.disconnect();
+         if (this.s != null) this.s.disconnect();
       }
   }
 }

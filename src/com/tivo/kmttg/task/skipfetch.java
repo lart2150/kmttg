@@ -54,6 +54,7 @@ public class skipfetch extends baseTask implements Serializable {
    private volatile int done = 0;
    private volatile int total = 0;
    private volatile int saved = 0;
+   private volatile String failure = null;
    private volatile Boolean cancelled = false;
    public jobData job;
 
@@ -104,7 +105,7 @@ public class skipfetch extends baseTask implements Serializable {
       thread = new Thread() {
          public void run() {
             try {
-               saved = ClipSegments.fetchMissing(job.tivoName, entries,
+               ClipSegments.Batch batch = ClipSegments.fetchMissing(job.tivoName, entries,
                   new ClipSegments.Progress() {
                      public boolean update(int n, int of, String title) {
                         done = n;
@@ -113,8 +114,13 @@ public class skipfetch extends baseTask implements Serializable {
                         return true;
                      }
                   });
+               saved = batch.saved;
+               failure = batch.failure;
             } catch (Exception e) {
-               log.error("skipfetch - " + e.getMessage());
+               // The exception itself, not its message: a message is null for the whole NPE
+               // family, and a null failure is how check() decides the batch ran and simply
+               // saved nothing.
+               failure = e.toString();
             } finally {
                thread_running = false;
             }
@@ -158,8 +164,14 @@ public class skipfetch extends baseTask implements Serializable {
          config.gui.progressBar_setValue(0);
       }
       jobMonitor.removeFromJobList(job);
-      log.warn("SkipMode fetch completed: " + saved + " of " + total
-         + " saved to AutoSkip table (" + jobMonitor.getElapsedTime(job.time) + ")");
+      // A batch that never ran is a failed job, not a run that saved nothing: saying
+      // "completed: 0 of 145" for a rejected tivo.com login reads like there was no data.
+      if (failure != null) {
+         log.error("SkipMode fetch failed: " + failure);
+      } else {
+         log.warn("SkipMode fetch completed: " + saved + " of " + total
+            + " saved to AutoSkip table (" + jobMonitor.getElapsedTime(job.time) + ")");
+      }
       log.print("---DONE--- job=" + job.type + " tivo=" + job.tivoName);
       return false;
    }
