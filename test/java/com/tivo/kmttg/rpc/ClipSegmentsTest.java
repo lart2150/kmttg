@@ -71,10 +71,14 @@ public class ClipSegmentsTest {
 
    // Two show segments, in the shape visualDetect writes.
    private void writeAutoSkipEntry(String contentId) throws IOException {
+      writeAutoSkipEntry(contentId, RECORDED_AIRING);
+   }
+
+   private void writeAutoSkipEntry(String contentId, String offerId) throws IOException {
       String eol = "\r\n";
       String entry = "<entry>" + eol
          + "contentId=" + contentId + eol
-         + "offerId=tivo:of.test" + eol
+         + "offerId=" + offerId + eol
          + "offset=0" + eol
          + "tivoName=Bolt" + eol
          + "title=Test Show" + eol
@@ -240,10 +244,13 @@ public class ClipSegmentsTest {
       assertEquals(0, ClipSegments.offerStartTime("tivo:of.ctd.no.timestamp"));
    }
 
+   // The offerId is derived from the contentId so each fixture recording names a distinct
+   // airing - which is what AutoSkip.ini is keyed on
    private static Hashtable<String,String> npl(String contentId, String clipMetadataId,
          String recordingId) {
       Hashtable<String,String> e = new Hashtable<String,String>();
       if (contentId != null)      e.put("contentId", contentId);
+      if (contentId != null)      e.put("offerId", "tivo:of." + contentId);
       if (clipMetadataId != null) e.put("clipMetadataId", clipMetadataId);
       if (recordingId != null)    e.put("recordingId", recordingId);
       e.put("title", "Show " + contentId);
@@ -252,7 +259,7 @@ public class ClipSegmentsTest {
 
    @Test
    void onlyRecordingsWithSkipModeAndNoEntryNeedFetching() throws Exception {
-      writeAutoSkipEntry("tivo:ct.done");
+      writeAutoSkipEntry("tivo:ct.done", "tivo:of.tivo:ct.done");
       List<Hashtable<String,String>> npl = new ArrayList<Hashtable<String,String>>();
       npl.add(npl("tivo:ct.done", "tivo:cm.1", "tivo:rc.1"));   // already in the table
       npl.add(npl("tivo:ct.new",  "tivo:cm.2", "tivo:rc.2"));   // wanted
@@ -266,7 +273,7 @@ public class ClipSegmentsTest {
 
    @Test
    void nothingToFetchWhenTheTableIsAlreadyComplete() throws Exception {
-      writeAutoSkipEntry("tivo:ct.done");
+      writeAutoSkipEntry("tivo:ct.done", "tivo:of.tivo:ct.done");
       List<Hashtable<String,String>> npl = new ArrayList<Hashtable<String,String>>();
       npl.add(npl("tivo:ct.done", "tivo:cm.1", "tivo:rc.1"));
       // An empty list is what stops a job being queued at all, so it matters that this is
@@ -309,7 +316,7 @@ public class ClipSegmentsTest {
       assertEquals(2, r.issued("clipMetadataAdjust"), "the refused id then the NPL's");
       assertEquals("tivo:cm.onnpl",
          r.lastRequest("clipMetadataAdjust").getString("clipMetadataId"));
-      assertFalse(SkipManager.getEntry("tivo:ct.fb").isEmpty(), "AutoSkip entry written");
+      assertFalse(SkipManager.getEntry(RECORDED_AIRING).isEmpty(), "AutoSkip entry written");
    }
 
    @Test
@@ -507,7 +514,7 @@ public class ClipSegmentsTest {
 
    @Test
    void savingToAutoSkipClampsToTheRecordingAndReplacesAnyExistingEntry() throws Exception {
-      writeAutoSkipEntry("tivo:ct.1");
+      writeAutoSkipEntry("tivo:ct.1", "tivo:of.1");
       ReplayRemote r = new ReplayRemote(Fixtures.load("clipmetadata_adjust.json"));
       List<ClipSegments.Segment> s =
          ClipSegments.fromClipMetadataAdjust(r, "tivo:rc.16716059", "tivo:cm.1636994");
@@ -525,7 +532,7 @@ public class ClipSegmentsTest {
       assertTrue(ini.contains("offerId=tivo:of.1"), "offerId must be stored: " + ini);
 
       // And it reads back as the AutoSkip tier, which is the point of writing it.
-      ClipSegments.Result back = ClipSegments.get("Bolt", "tivo:ct.1", "tivo:rc.1", "tivo:cm.1", RECORDED_AIRING);
+      ClipSegments.Result back = ClipSegments.get("Bolt", "tivo:ct.1", "tivo:rc.1", "tivo:cm.1", "tivo:of.1");
       assertEquals(ClipSegments.SOURCE_AUTOSKIP, back.source);
       assertEquals(10, back.segments.size());
       assertEquals(0, back.segments.get(0).startMs);

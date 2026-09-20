@@ -246,7 +246,7 @@ public class SkipService {
       try {
          if (entry.has("contentId")) {
             skip.setMonitor(tivoName, entry.getString("offerId"), entry.getString("contentId"), entry.getString("title"));
-            if (skip.readEntry(entry.getString("contentId"))) {
+            if (skip.readEntry(entry.getString("offerId"))) {
                print("Entering AutoSkip for: " + entry.getString("title"));
                skip.showSkipData();
             }

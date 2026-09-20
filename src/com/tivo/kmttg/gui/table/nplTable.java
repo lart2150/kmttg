@@ -1501,7 +1501,7 @@ public class nplTable extends TableMap {
    }
 
    // Identify NPL table items containing skip data
-   public void updateSkipStatus(String contentId) {
+   public void updateSkipStatus(String offerId) {
       UpdatingNPL = true;
       if (SkipManager.skipEnabled()) {
          skipEntries = SkipManager.getEntries();
@@ -1640,7 +1640,7 @@ public class nplTable extends TableMap {
          if (s.folder) continue;
          if (s.data.containsKey("clipMetadataId") && s.data.containsKey("contentId")) {
             Boolean go = true;
-            if (SkipManager.hasEntry(s.data.get("contentId"))) {
+            if (SkipManager.hasEntry(s.data.get("offerId"))) {
                // Confirmation dialog defaulting to Cancel
                Object[] options = {"OK", "Cancel"};
                int result = JOptionPane.showOptionDialog(
@@ -1668,8 +1668,8 @@ public class nplTable extends TableMap {
       // Build stack of eligible entries to run visualDetect on
       Stack<Hashtable<String,String>> stack = new Stack<Hashtable<String,String>>();
       for (Hashtable<String,String> entry : entries) {
-         if ( ! shouldHideEntry(entry) && entry.containsKey("contentId")) {
-            if (entry.containsKey("clipMetadataId") && ! SkipManager.hasEntry(entry.get("contentId"))) {
+         if ( ! shouldHideEntry(entry) && entry.containsKey("offerId")) {
+            if (entry.containsKey("clipMetadataId") && ! SkipManager.hasEntry(entry.get("offerId"))) {
                stack.push(entry);
             }
          }

@@ -100,7 +100,7 @@ public class vrdreview extends baseTask implements Serializable {
       if (config.VrdReview_noCuts == 1 && ! file.isFile(job.vprjFile)) {
          if (job.entry != null &&
              job.entry.containsKey("contentId") &&
-             SkipManager.hasEntry(job.entry.get("contentId"))) {
+             SkipManager.hasEntry(job.entry.get("offerId"))) {
             log.warn("vrdreview: Using AutoSkip entry cut points");
             String vprjFile = SkipImport.vrdExport(job.entry);
             if (vprjFile != null)
@@ -221,8 +221,8 @@ public class vrdreview extends baseTask implements Serializable {
                // AutoSkip table entry creation
                Stack<Hashtable<String,Long>> cuts = SkipImport.vrdImport(job.vprjFile, job.duration);
                if (cuts != null && cuts.size() > 0) {
-                  if (SkipManager.hasEntry(job.contentId))
-                     SkipManager.removeEntry(job.contentId);
+                  if (SkipManager.hasEntry(job.offerId))
+                     SkipManager.removeEntry(job.offerId);
                   SkipManager.saveEntry(job.contentId, job.offerId, 0L, job.title, job.tivoName, cuts);
                }
             }

@@ -77,7 +77,7 @@ public class SkipDialog {
             try {
                for (int i=0; i<entries.length(); ++i) {
                   JSONObject json = entries.getJSONObject(i);
-                  SkipManager.removeEntry(json.getString("contentId"));
+                  SkipManager.removeEntry(json.getString("offerId"));
                }
             } catch (Exception e) {
                log.error("removeEntries - " + e.getMessage());

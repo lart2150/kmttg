@@ -97,9 +97,9 @@ public class SkipImport {
          }
          
          if (cuts != null) {
-            // If contentId entry already in table then remove it
-            if (SkipManager.hasEntry(entry.get("contentId")))
-               SkipManager.removeEntry(entry.get("contentId"));
+            // If this airing already has an entry then remove it
+            if (SkipManager.hasEntry(entry.get("offerId")))
+               SkipManager.removeEntry(entry.get("offerId"));
             
             // Save entry to AutoSkip table with offset=0
             SkipManager.saveEntry(entry.get("contentId"), entry.get("offerId"), 0L, entry.get("title"), tivoName, cuts);
@@ -239,7 +239,7 @@ public class SkipImport {
          return null;
       }
       String vprjFile = null;
-      Stack<Hashtable<String,Long>> entries = SkipManager.getEntry(nplEntry.get("contentId"));
+      Stack<Hashtable<String,Long>> entries = SkipManager.getEntry(nplEntry.get("offerId"));
       long duration = Long.parseLong(nplEntry.get("duration"));
       if (entries.size() > 0) {
          String videoFile = videoToUseForExport(nplEntry);
@@ -289,7 +289,7 @@ public class SkipImport {
          return null;
       }
       String edlFile = null;
-      Stack<Hashtable<String,Long>> entries = SkipManager.getEntry(nplEntry.get("contentId"));
+      Stack<Hashtable<String,Long>> entries = SkipManager.getEntry(nplEntry.get("offerId"));
       long duration = Long.parseLong(nplEntry.get("duration"));
       if (entries.size() > 0) {
          edlFile = buildEdlFile(nplEntry);
