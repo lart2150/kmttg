@@ -134,6 +134,41 @@ tasks.register('captureXmlFixtures', JavaExec) {
     args(project.findProperty('label') ?: '')
 }
 
+// The standalone capture jar to hand to somebody with a model we have no fixtures for.
+// They drop it beside their config.ini, run it, and send back the zip it writes:
+//     gradlew fixtureCaptureJar   ->  build/fixture-capture/
+//     java -jar kmttg-fixture-capture.jar
+// Self contained on purpose: a contributor should not need kmttg.jar, a cdata.p12 or a
+// matching Gradle to run it. Java 11 or newer, same as kmttg itself.
+tasks.register('fixtureCaptureJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    group = 'kmttg'
+    description = 'Build the standalone TiVo fixture capture jar (manual)'
+    archiveFileName = 'kmttg-fixture-capture.jar'
+    // Its own folder: the launchers are copied in beside it, and declaring all of build/
+    // as a task output would have Gradle fingerprinting the whole tree on every check.
+    destinationDirectory = layout.buildDirectory.dir('fixture-capture')
+    from sourceSets.tools.output
+    from sourceSets.main.output
+    configurations = [project.configurations.toolsRuntimeClasspath]
+    manifest {
+        attributes(
+            'Main-Class'           : 'com.tivo.kmttg.tools.ContributorCapture',
+            'Implementation-Title' : 'kmttg fixture capture',
+            'Implementation-Version': project.version.toString()
+        )
+    }
+    finalizedBy 'fixtureCaptureScripts'
+}
+
+// The launchers go beside the jar rather than inside it: double clicking a jar on Windows
+// runs it through javaw, which gives no console, so the summary saying where the zip was
+// written is lost.
+tasks.register('fixtureCaptureScripts', Copy) {
+    from 'src-tools/scripts'
+    into layout.buildDirectory.dir('fixture-capture')
+    filePermissions { unix(0755) }
+}
+
 application {
     // Java 8 shim that checks the JRE then hands off to com.tivo.kmttg.main.kmttg
     mainClass = 'com.tivo.kmttg.main.Launcher'
