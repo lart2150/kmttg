@@ -114,6 +114,26 @@ tasks.register('rpcLogFixtures', JavaExec) {
     if (project.hasProperty('capture')) args(project.property('capture'))
 }
 
+// One-off tool to (re)generate the TiVo XML fixtures from a live TiVo.
+// Usage: gradlew captureXmlFixtures -PconfigDir="C:\\path\\to\\kmttg" -Ptivo=Bolt
+// It reads the Now Playing List and the extended metadata documents over the TiVo's
+// HTTP interface, sanitizes address and MAK, and writes the .xml fixtures under
+// test/resources/fixtures/. NOT part of the test suite.
+// Fixtures are named after -Plabel (defaults to the tivo name), so capturing a second
+// box adds a set rather than replacing the first. The tests read whatever is there.
+tasks.register('captureXmlFixtures', JavaExec) {
+    group = 'kmttg'
+    description = 'Capture sanitized TiVo XML fixtures from a live TiVo (manual)'
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'com.tivo.kmttg.util.XmlFixtureCapture'
+    // Every slot filled, in order: these are positional, so skipping one shifts the rest
+    // left and the tool reads an item count as a TiVo name.
+    args(project.findProperty('configDir') ?: '.')
+    args(project.findProperty('tivo') ?: '')
+    args(project.findProperty('itemCount') ?: '8')
+    args(project.findProperty('label') ?: '')
+}
+
 application {
     // Java 8 shim that checks the JRE then hands off to com.tivo.kmttg.main.kmttg
     mainClass = 'com.tivo.kmttg.main.Launcher'
