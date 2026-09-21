@@ -158,14 +158,12 @@ public class TiVoRpcFixturesTest {
 
    // ---- Guide listings (gridRowSearch) ------------------------------------
 
+   // Whichever channels the capture picked: every listing in a guide fixture has to be
+   // on the channel its name says, or the fixture is two channels' rows run together.
    @Test
-   public void guide_channel2_1_parses() throws Exception {
-      assertGuideChannel("guide_2-1.json", "2-1");
-   }
-
-   @Test
-   public void guide_channel5_1_parses() throws Exception {
-      assertGuideChannel("guide_5-1.json", "5-1");
+   public void guideListingsParseAndStayOnTheirChannel() throws Exception {
+      for (String fixture : Fixtures.guideFixtures())
+         assertGuideChannel(fixture, Fixtures.guideChannel(fixture));
    }
 
    private void assertGuideChannel(String fixture, String channelNumber) throws Exception {

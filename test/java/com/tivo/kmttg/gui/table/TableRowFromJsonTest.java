@@ -159,7 +159,7 @@ public class TableRowFromJsonTest {
    public void guideRows_needStartTimeAndDuration() throws Exception {
       // Unlike the other tables this one reads startTime/duration without
       // checking has() first, so every guide offer has to carry both.
-      for (String fixture : new String[] { "guide_2-1.json", "guide_5-1.json" }) {
+      for (String fixture : Fixtures.guideFixtures()) {
          JSONArray offers = Fixtures.load(fixture);
          assertTrue(offers.length() > 0, "expected listings in " + fixture);
 
@@ -341,7 +341,7 @@ public class TableRowFromJsonTest {
    public void showSummary_combinesDateChannelAndTitle() throws Exception {
       // Guide offers carry startTime, which is the key makeShowSummary needs
       // for its date half; ToDo entries do not, and are expected to lose it.
-      JSONArray offers = Fixtures.load("guide_2-1.json");
+      JSONArray offers = Fixtures.load(Fixtures.guideFixtures().get(0));
       JSONObject offer = offers.getJSONObject(0);
 
       String summary = TableUtil.makeShowSummary(offer);

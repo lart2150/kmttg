@@ -3,6 +3,7 @@ package com.tivo.kmttg.rpc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.util.Hashtable;
 
@@ -19,9 +20,10 @@ import com.tivo.kmttg.JSON.JSONObject;
  * a listing against the ToDo lists of every connected TiVo, so it is sensitive
  * to the exact shape of both responses.
  *
- * The fixtures line up for real here: guide_2-1.json is the same channel and
- * day as the captured ToDo list, and five of its listings are shows that were
- * genuinely scheduled to record.
+ * The fixtures line up for real here: one captured guide fixture is the same
+ * channel and day as the captured ToDo list, and several of its listings are
+ * shows that were genuinely scheduled to record. Which channel that is depends
+ * on the box the capture came from, so it is found rather than named.
  */
 public class TodoFlagTest {
 
@@ -34,42 +36,67 @@ public class TodoFlagTest {
       return all;
    }
 
+   /** Whether the ToDo list holds this listing: same channel, same start time. */
+   private static boolean isScheduled(JSONObject offer, JSONArray todo) throws Exception {
+      for (int j = 0; j < todo.length(); j++) {
+         JSONObject t = todo.getJSONObject(j);
+         if (t.getString("startTime").equals(offer.getString("startTime"))
+               && t.getJSONObject("channel").getString("channelNumber")
+                     .equals(offer.getJSONObject("channel").getString("channelNumber")))
+            return true;
+      }
+      return false;
+   }
+
+   private static int countScheduled(JSONArray guide, JSONArray todo) throws Exception {
+      int n = 0;
+      for (int i = 0; i < guide.length(); i++)
+         if (isScheduled(guide.getJSONObject(i), todo)) n++;
+      return n;
+   }
+
+   /**
+    * The captured guide fixture the ToDo list overlaps. The capture aims the guide date at
+    * a day something was scheduled, so one of them should - if none does, the two halves of
+    * the capture are of different days and the overlap this class tests is not there to test.
+    */
+   private static JSONArray overlappingGuide() throws Exception {
+      JSONArray todo = Fixtures.load("todo.json");
+      for (String fixture : Fixtures.guideFixtures()) {
+         JSONArray guide = Fixtures.load(fixture);
+         if (countScheduled(guide, todo) > 0) return guide;
+      }
+      throw new IllegalStateException("no captured guide fixture overlaps the ToDo list -"
+         + " recapture with a guide date that has something scheduled on it");
+   }
+
+   /** A captured guide fixture with nothing scheduled on it, or null if they all overlap. */
+   private static JSONArray unscheduledGuide() throws Exception {
+      JSONArray todo = Fixtures.load("todo.json");
+      for (String fixture : Fixtures.guideFixtures()) {
+         JSONArray guide = Fixtures.load(fixture);
+         if (guide.length() > 0 && countScheduled(guide, todo) == 0) return guide;
+      }
+      return null;
+   }
+
    /** A guide listing that the recorded ToDo list also contains. */
    private static JSONObject scheduledListing() throws Exception {
-      JSONArray guide = Fixtures.load("guide_2-1.json");
+      JSONArray guide = overlappingGuide();
       JSONArray todo = Fixtures.load("todo.json");
       for (int i = 0; i < guide.length(); i++) {
-         JSONObject offer = guide.getJSONObject(i);
-         for (int j = 0; j < todo.length(); j++) {
-            JSONObject t = todo.getJSONObject(j);
-            if (t.getString("startTime").equals(offer.getString("startTime"))
-                  && t.getJSONObject("channel").getString("channelNumber")
-                        .equals(offer.getJSONObject("channel").getString("channelNumber")))
-               return offer;
-         }
+         if (isScheduled(guide.getJSONObject(i), todo)) return guide.getJSONObject(i);
       }
       throw new IllegalStateException("no guide listing in the fixture is also in the ToDo list");
    }
 
    @Test
    public void flagsExactlyTheListingsThatAreScheduled() throws Exception {
-      JSONArray guide = Fixtures.load("guide_2-1.json");
+      JSONArray guide = overlappingGuide();
       JSONArray todo = Fixtures.load("todo.json");
       // Work out the expected count the way a viewer would: same channel, same
       // start time as something on the ToDo list.
-      int expected = 0;
-      for (int i = 0; i < guide.length(); i++) {
-         for (int j = 0; j < todo.length(); j++) {
-            JSONObject t = todo.getJSONObject(j);
-            JSONObject offer = guide.getJSONObject(i);
-            if (t.getString("startTime").equals(offer.getString("startTime"))
-                  && t.getJSONObject("channel").getString("channelNumber")
-                        .equals(offer.getJSONObject("channel").getString("channelNumber"))) {
-               expected++;
-               break;
-            }
-         }
-      }
+      int expected = countScheduled(guide, todo);
       assertTrue(expected > 0, "fixtures should overlap - same channel and day");
 
       Hashtable<String,JSONArray> all = todoLists("Bolt");
@@ -149,8 +176,11 @@ public class TodoFlagTest {
 
    @Test
    public void leavesUnscheduledListingsAlone() throws Exception {
-      // Nothing on this channel was scheduled in the captured ToDo list.
-      JSONArray guide = Fixtures.load("guide_5-1.json");
+      // A captured channel with nothing scheduled on it. A box can be recording
+      // something on every channel the capture picked, and then there is no such
+      // fixture and nothing here to check.
+      JSONArray guide = unscheduledGuide();
+      assumeTrue(guide != null, "every captured guide channel has a scheduled recording on it");
       Hashtable<String,JSONArray> all = todoLists("Bolt");
 
       for (int i = 0; i < guide.length(); i++) {

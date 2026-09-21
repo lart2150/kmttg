@@ -6,5 +6,6 @@ series: 6
 software: 21.11.1.v22-USC-11-849
 httpd: tivo-httpd-1:21.11.1.v22-USC-11:849
 protocol: 1.6
+maxMindVersion: 42
 itemCount: 8
 captured: 2026-09-20
