@@ -422,6 +422,10 @@ public class MuxSink implements FrameSink {
       if (failed) return;
       try {
          byte[] d = payload.getData();
+         // A unit cut off right behind its PES header carries a timestamp and no elementary
+         // bytes at all, which is what an excision leaves where it landed. Matroska forbids an
+         // empty block, so there is nothing to write for one.
+         if (d.length == 0) return;
          if (t.isAvc) {
             // One start code scan for both answers below: this is every byte of every video
             // payload, so walking it twice is a second pass over the whole recording.
