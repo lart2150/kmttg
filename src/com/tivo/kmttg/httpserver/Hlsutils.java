@@ -69,9 +69,18 @@ public class Hlsutils {
       String[] lines = text.split("\n");
       for (String line : lines) {
          if (line.contains("#EXTINF")) {
+            // "#EXTINF:<duration>,<title>" - the title is optional, and the
+            // page polls this while ffmpeg is still appending, so a half
+            // written line is worth nothing rather than an error
             line = line.replaceFirst("#EXTINF:", "");
-            line = line.replace(",", "");
-            total += Float.parseFloat(line);
+            int comma = line.indexOf(',');
+            // No comma yet means the line is still being written, so the digits so far are
+            // not a duration - counting them makes the total jump about between polls.
+            if (comma < 0) continue;
+            line = line.substring(0, comma);
+            try {
+               total += Float.parseFloat(line.trim());
+            } catch (NumberFormatException e) {}
          }
       }
       return total;
