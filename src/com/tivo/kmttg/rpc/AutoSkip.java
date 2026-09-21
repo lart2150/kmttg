@@ -400,7 +400,9 @@ public class AutoSkip {
    // Get the closest non-commercial start point to given pos
    // This will be point to jump to when in a commercial segment
    // Return value of -1 => no change wanted
-   private synchronized long getClosest(long pos) {
+   // Package visible so a test can ask where playback would jump from a given position;
+   // everything else about the skip decision needs a TiVo answering Position queries.
+   synchronized long getClosest(long pos) {
       debug.print("pos=" + pos);
       long closest = -1;
       // If current pos is within any start-end range then no skip necessary
@@ -413,7 +415,10 @@ public class AutoSkip {
       
       if (skipData.size() > 1)
          closest = skipData.get(0).get("start");
-      long diff = pos;
+      // Distance to the nearest start found so far. Seeding it with pos instead made a start
+      // further ahead than the current position unreachable, so a recording with a single
+      // show segment never skipped the commercial in front of it.
+      long diff = Long.MAX_VALUE;
       int count = 0; int index = 0;
       for (Hashtable<String,Long> h : skipData) {
          long start = h.get("start");
