@@ -43,8 +43,7 @@ public class srtReader {
       Matcher m;
       long t1=0, t2=0;
       int HH, MM, SS, mmm;
-      try {
-         BufferedReader ifp = new BufferedReader(new FileReader(srtFile));
+      try (BufferedReader ifp = new BufferedReader(new FileReader(srtFile))) {
          while (( line = ifp.readLine()) != null) {
             // Get rid of leading and trailing white space
             line = line.replaceFirst("^\\s*", "");
@@ -78,7 +77,6 @@ public class srtReader {
          // Nothing follows the last entry to flush it out of the loop
          if (t2 != 0)
             push(t1, t2, text);
-         ifp.close();
       } catch (Exception e) {
          log.error("srtReader - " + e.getMessage());
          return false;

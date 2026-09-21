@@ -96,7 +96,9 @@ public class SkipImport {
                cuts = edlImport(usedFile, Long.parseLong(entry.get("duration")));
          }
          
-         if (cuts != null) {
+         // No cut points is not an import: the entry is removed first, so going on would
+         // trade this recording's cut points for one the Skip dialog will not even list
+         if (cuts != null && cuts.size() > 0) {
             // If this airing already has an entry then remove it
             if (SkipManager.hasEntry(entry.get("offerId")))
                SkipManager.removeEntry(entry.get("offerId"));
@@ -105,6 +107,7 @@ public class SkipImport {
             SkipManager.saveEntry(entry.get("contentId"), entry.get("offerId"), 0L, entry.get("title"), tivoName, cuts);
             return true;
          }
+         log.error("No cut points found in file: " + usedFile);
       }
       return false;
    }
@@ -151,8 +154,10 @@ public class SkipImport {
    
    static public Stack<Hashtable<String,Long>> edlImport(String edlFile, Long duration) {
       Stack<Hashtable<String,Long>> cuts = new Stack<Hashtable<String,Long>>();
-      try {
-         BufferedReader ifp = new BufferedReader(new FileReader(edlFile));
+      // A half written last line throws out of the loop, so the close has to be the reader's
+      // own job - otherwise the edl stays open for the life of the session and Windows will
+      // not let comskip rewrite it or the cleanup delete it
+      try (BufferedReader ifp = new BufferedReader(new FileReader(edlFile))) {
          String line = null;
          while (( line = ifp.readLine()) != null) {
             if (line.matches("^\\d+.+$")) {
@@ -167,7 +172,6 @@ public class SkipImport {
                }
             }
          }
-         ifp.close();
       } catch (Exception e) {
          log.error("SkipImport edlImport - " + e.getMessage());
          log.error(Arrays.toString(e.getStackTrace()));         
@@ -326,20 +330,19 @@ public class SkipImport {
    static private Stack<Hashtable<String,Long>> entriesToCuts(Stack<Hashtable<String,Long>> entries, long duration) {
       Stack<Hashtable<String,Long>> cuts = new Stack<Hashtable<String,Long>>();
       if (entries != null && entries.size() > 0) {
-         for (int i=0; i<entries.size()-1; ++i) {
-            long start = entries.get(i).get("start");
-            long end = entries.get(i).get("end");
-            if (i==0) {
-               if (start != 0) {
-                  Hashtable<String,Long> h = new Hashtable<String,Long>();
-                  h.put("start", 0L); h.put("end", start);
-                  cuts.push(h);
-               }
-            }
+         // Whatever runs before the first show segment is a cut. It belongs out here rather
+         // than in the loop below, which only walks the gaps between segments and so never
+         // runs at all for a recording with a single show segment.
+         long first = entries.get(0).get("start");
+         if (first != 0) {
             Hashtable<String,Long> h = new Hashtable<String,Long>();
-            h.put("start", end);
-            start = entries.get(i+1).get("start");
-            h.put("end", start);
+            h.put("start", 0L); h.put("end", first);
+            cuts.push(h);
+         }
+         for (int i=0; i<entries.size()-1; ++i) {
+            Hashtable<String,Long> h = new Hashtable<String,Long>();
+            h.put("start", entries.get(i).get("end"));
+            h.put("end", entries.get(i+1).get("start"));
             cuts.push(h);
          }
          long end = entries.get(entries.size()-1).get("end");
