@@ -34,12 +34,12 @@ import com.tivo.kmttg.util.string;
 
 public class SkipShare {
    
-   public static void Import(
+   public static Boolean Import(
       String tivoName, JSONObject json, String shareSrt,
       String shareCut, String mySrt, Boolean debug) {
       try {
          srtSync csync = new srtSync(shareSrt, mySrt, false);
-         if (csync.ccstack == null) return;
+         if (csync.ccstack == null) return false;
          Stack<Hashtable<String,Long>> points;
          Stack<Hashtable<String,Long>> points_adj = new Stack<Hashtable<String,Long>>();
          long duration = json.getLong("duration");
@@ -49,7 +49,7 @@ public class SkipShare {
             points = SkipImport.edlImport(shareCut, duration);
          if (debug)
             printImportedCuts(points);
-         if (points == null) return;
+         if (points == null) return false;
          
          int i=1;
          String line = "";
@@ -96,6 +96,14 @@ public class SkipShare {
             }
          } // for
          
+         // Nothing lined up - the share is for a different recording, or the two caption
+         // files have nothing in common. The entry already in the table is removed below, so
+         // going on would cost the cut points this recording already had.
+         if (points_adj.isEmpty()) {
+            log.error("No cut points could be matched against '" + mySrt + "'");
+            return false;
+         }
+
          String title = json.getString("title");
          if (json.has("subtitle"))
             title = title + " - " + json.getString("subtitle");
@@ -104,9 +112,11 @@ public class SkipShare {
          if (SkipManager.hasEntry(offerId))
             SkipManager.removeEntry(offerId);
          SkipManager.saveEntry(contentId, offerId, 0L, title, tivoName, points_adj);
+         return true;
       } catch (Exception e) {
          log.error("SkipShare Import - " + e.getMessage());
       }
+      return false;
    }
    
    public static void tableImport(Hashtable<String,String> entry, String tivoName) {
@@ -134,6 +144,9 @@ public class SkipShare {
    public static Boolean ZipImport(
       String tivoName, JSONObject json, String zipFile,
       String srt_ref, Boolean debug) {
+      // The dialog closes itself and reports success on true, so this has to mean the table
+      // was written - not merely that the zip was opened and thrown away again
+      Boolean imported = false;
       try {
          File temp = new File(config.programDir + File.separator + "_SkipImport_");
          file.deleteDir(temp);
@@ -156,7 +169,9 @@ public class SkipShare {
                   }
                }
                if (srt_zip != null && cut_zip != null) {
-                  Import(tivoName, json, srt_zip, cut_zip, srt_ref, debug);
+                  imported = Import(tivoName, json, srt_zip, cut_zip, srt_ref, debug);
+               } else {
+                  log.error("Zip file must hold an srt file and an edl or VPrj file: " + zipFile);
                }
             }
             file.deleteDir(temp);
@@ -168,7 +183,7 @@ public class SkipShare {
          log.error("SkipShare Import - " + e.getMessage());
          return false;
       }
-      return true;
+      return imported;
    }
    
    public static void printImportedCuts(Stack<Hashtable<String,Long>> points) {
