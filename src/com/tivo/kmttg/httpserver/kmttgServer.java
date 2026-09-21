@@ -1632,6 +1632,14 @@ public void handleMyShows(Request req, Response resp) throws IOException {
       return a;
    }
    
+   // A transcode owns the cache files carrying its own "t<n>" prefix:
+   // "<prefix>.m3u8" or "<prefix>.webm", the "<prefix>-00000.ts" segments and
+   // the .txt beside them. A plain startsWith gave "t1" everything belonging
+   // to "t10" as well.
+   private static boolean belongsTo(String fileName, String prefix) {
+      return fileName.startsWith(prefix + ".") || fileName.startsWith(prefix + "-");
+   }
+   
    private int removeCached(String target) {
       int count = 0;
       String base = config.httpserver_cache;
@@ -1650,7 +1658,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
          prefix = prefix.replaceFirst("\\.webm", "");
          for (File f : files) {
             String fileName = string.basename(f.getAbsolutePath());
-            if (fileName.startsWith(prefix)) {
+            if (belongsTo(fileName, prefix)) {
                if (f.delete() && (f.getAbsolutePath().endsWith(".m3u8") || f.getAbsolutePath().endsWith(".webm")))
                   count++;               
             }
@@ -1682,9 +1690,10 @@ public void handleMyShows(Request req, Response resp) throws IOException {
       for (int i=0; i<transcodes.size(); ++i) {
          Transcode tc = transcodes.get(i);
          String prefix = tc.prefix;
-         if (name.startsWith(prefix)) {
+         if (belongsTo(name, prefix)) {
             tc.kill();
             transcodes.remove(i);
+            --i;   // everything shifts down one; without this the next entry is never looked at
             jobName = tc.name;
          }
       }
@@ -1695,6 +1704,7 @@ public void handleMyShows(Request req, Response resp) throws IOException {
             if (name.equals(tc.inputFile)) {
                tc.kill();
                transcodes.remove(i);
+               --i;
                jobName = tc.name;
             }
          }

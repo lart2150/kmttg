@@ -51,7 +51,9 @@ public class TiVoTranscode extends Transcode {
       base = config.httpserver_cache;
       if (! file.isDir(base))
          new File(base).mkdirs();
-      prefix = "t" + config.httpserver.transcode_counter;
+      // Picks a "t<n>" no cached transcode is using - taking the counter
+      // straight meant writing over one the user still had cached
+      setCachePrefix();
       segmentFile = base + File.separator + prefix + ".m3u8";
       String textFile = segmentFile + ".txt";
       String segments = base + File.separator + prefix + "-%05d.ts";
@@ -151,7 +153,9 @@ public class TiVoTranscode extends Transcode {
       base = config.httpserver_cache;
       if (! file.isDir(base))
          new File(base).mkdirs();
-      prefix = "t" + config.httpserver.transcode_counter;
+      // Picks a "t<n>" no cached transcode is using - taking the counter
+      // straight meant writing over one the user still had cached
+      setCachePrefix();
       returnFile = base + File.separator + prefix + ".webm";
       String textFile = returnFile + ".txt";
       String[] ffArgs = args.split(" ");
