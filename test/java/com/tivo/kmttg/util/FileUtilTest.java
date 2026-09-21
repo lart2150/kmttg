@@ -30,6 +30,11 @@ public class FileUtilTest {
    @TempDir
    Path tmp;
 
+   // The real platform, not config.OS - that one is a setting a test may have pinned, and
+   // what renameTo() does is the filesystem's answer rather than kmttg's.
+   private static final boolean WINDOWS =
+      System.getProperty("os.name").toLowerCase().indexOf("windows") > -1;
+
    private Path mpegDir, cutDir, tmpDir;
    private String prevTmpDir, prevMpegDir, prevMpegCutDir;
    private Boolean prevGuiMode;
@@ -240,15 +245,24 @@ public class FileUtilTest {
       assertFalse(file.rename(tmp.resolve("gone.txt").toString(), tmp.resolve("new.txt").toString()));
    }
 
-   // renameTo() will not replace an existing target on Windows, so callers
-   // that want a replace have to delete the target first
+   // renameTo() onto an existing target is not portable: Windows refuses and leaves both
+   // files where they were, POSIX replaces the target and the source is gone. So a caller
+   // that wants either outcome for certain has to delete the target itself first. Both
+   // halves are pinned here rather than the one the machine running this happens to give.
    @Test
-   public void renameOntoAnExistingFileFails() throws IOException {
+   public void renameOntoAnExistingFileIsNotPortable() throws IOException {
       Path source = write("old.txt", "source");
       Path dest = write("new.txt", "target");
-      assertFalse(file.rename(source.toString(), dest.toString()));
-      assertEquals("target", new String(Files.readAllBytes(dest), StandardCharsets.UTF_8));
-      assertTrue(Files.exists(source));
+      boolean renamed = file.rename(source.toString(), dest.toString());
+      if (WINDOWS) {
+         assertFalse(renamed);
+         assertEquals("target", new String(Files.readAllBytes(dest), StandardCharsets.UTF_8));
+         assertTrue(Files.exists(source));
+      } else {
+         assertTrue(renamed);
+         assertEquals("source", new String(Files.readAllBytes(dest), StandardCharsets.UTF_8));
+         assertFalse(Files.exists(source));
+      }
    }
 
    @Test
