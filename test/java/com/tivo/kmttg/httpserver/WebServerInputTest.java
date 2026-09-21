@@ -190,6 +190,26 @@ public class WebServerInputTest {
             + URLEncoder.encode("http://127.0.0.1:80/download/x.TiVo", "UTF-8")), "bad duration");
    }
 
+   // Every handler is reachable with nothing but its path from anything on the
+   // LAN, and half of them read a parameter straight out of the query. A
+   // missing one has to come back as an error the browser can show, not as an
+   // exception out of the handler and a socket closed with no response on it
+   @Test
+   public void missingParameters_giveAnErrorNotADroppedConnection() throws IOException {
+      for (String path : new String[] {
+            "/rpc", "/rpc?operation=SysInfo", "/rpc?tivo=Bolt",
+            "/rpc?operation=keyEventMacro&tivo=Bolt",       // no sequence
+            "/rpc?operation=SPLoad&tivo=Bolt",              // no file
+            "/getMyShows", "/getToDo", "/reboot",
+            "/ircode", "/ircode?tivo=Bolt",                 // no keys to send
+            "/startJob", "/startJob?tivo=Bolt",             // no recording
+            "/jobs", "/jobs?kill=999",
+            "/transcode", "/transcode?format=hls", "/transcode?file=movie.mp4" }) {
+         int status = status(path);
+         assertTrue(status >= 400 && status < 600, path + " answered " + status);
+      }
+   }
+
    // config.mpegDir and friends need not exist - listFiles() returns null for a
    // missing directory, which used to take the whole request down
    @Test
