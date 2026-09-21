@@ -7,9 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringWriter;
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tivo.kmttg.rpc.Fixtures;
@@ -27,12 +29,22 @@ import com.tivo.kmttg.rpc.Fixtures;
  */
 public class FixtureRoundTripTest {
 
+   // The guide fixtures are named after whichever channels the capture picked, so they
+   // are discovered rather than listed here beside the ones whose names are fixed.
+   static Stream<String> everyFixture() throws Exception {
+      return Stream.concat(
+         Stream.of("todo.json", "myshows.json", "seasonpasses.json", "channels.json",
+                   "cancelled.json", "deleted.json", "search.json", "thumbs.json"),
+         Fixtures.guideFixtures().stream());
+   }
+
+   static Stream<String> indentedFixtures() throws Exception {
+      return Stream.concat(Stream.of("todo.json", "channels.json"),
+         Fixtures.guideFixtures().stream());
+   }
+
    @ParameterizedTest
-   @ValueSource(strings = {
-      "todo.json", "myshows.json", "seasonpasses.json", "channels.json",
-      "cancelled.json", "deleted.json", "search.json", "thumbs.json",
-      "guide_2-1.json"
-   })
+   @MethodSource("everyFixture")
    public void serializingAndReparsingIsIdempotent(String fixture) throws Exception {
       JSONArray json = Fixtures.load(fixture);
       assertTrue(json.length() > 0, fixture + " is empty");
@@ -43,7 +55,7 @@ public class FixtureRoundTripTest {
    }
 
    @ParameterizedTest
-   @ValueSource(strings = {"todo.json", "channels.json", "guide_2-1.json"})
+   @MethodSource("indentedFixtures")
    public void prettyPrintingReparsesToTheSameData(String fixture) throws Exception {
       JSONArray json = Fixtures.load(fixture);
       String indented = json.toString(3);

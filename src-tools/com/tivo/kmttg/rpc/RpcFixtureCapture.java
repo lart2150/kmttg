@@ -3,6 +3,8 @@ package com.tivo.kmttg.rpc;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
@@ -103,12 +105,25 @@ public class RpcFixtureCapture {
       // directly. Today by default: a TiVo only holds guide data a few days
       // back, so a date pinned in the source can only go stale and then return
       // nothing. Pass one to reproduce an old capture while it is still in range.
-      // TiVo stores channel numbers with a dash (displayed as 2.1 / 5.1)
-      String[] guideChannels = { "2-1", "5-1" };
-      // TodoFlagTest needs a guide listing that the ToDo fixture also contains,
-      // so take the day from the ToDo list itself rather than picking one and
-      // hoping. Only the entries that were actually written count.
-      if (guideDate == null) guideDate = todoDate(todo, guideChannels[0], maxEntries);
+      // The first two channels the box actually receives. Named channels only worked
+      // on the box that had them - a lineup differs by region and by what its owner
+      // takes - and a channel that is in the lineup but not received has no listings
+      // behind it. TiVo stores the numbers with a dash (2-1 is displayed as 2.1).
+      String[] guideChannels = receivedChannels(channels, 2);
+      if (guideChannels.length == 0)
+         System.out.println("WARNING: no received channels in the lineup - no guide captured");
+      else
+         System.out.println("Guide channels " + String.join(", ", guideChannels)
+            + " (the first received in the lineup)");
+      // TodoFlagTest needs a guide listing that the ToDo fixture also contains, so
+      // take the day from the ToDo list itself rather than picking one and hoping.
+      // Either channel will do. Only the entries that were actually written count.
+      if (guideDate == null) guideDate = todoDate(todo, guideChannels, maxEntries);
+      // A box with a different lineup writes different names, and any guide fixture
+      // left from an earlier capture would go on being read as part of this one.
+      for (File f : outDir.listFiles()) {
+         if (f.getName().startsWith("guide_") && f.getName().endsWith(".json")) f.delete();
+      }
       long dayStart = java.time.LocalDate.parse(guideDate)
             .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
       long dayEnd = dayStart + 24L * 60 * 60 * 1000;
@@ -169,29 +184,48 @@ public class RpcFixtureCapture {
     * maxCmds commands (commands_&lt;name&gt;.json), for the replay tests.
     */
    /**
-    * The day of the first written ToDo entry on the given channel, which is the
-    * day whose guide listings will overlap it. Falls back to today when nothing
-    * is scheduled there - the guide still captures, but TodoFlagTest will have
-    * no match to find, so say so rather than let it surface as a test failure.
+    * The day of the first written ToDo entry on any of the given channels, which is
+    * the day whose guide listings will overlap it. Falls back to today when nothing
+    * is scheduled on any of them - the guide still captures, but TodoFlagTest will
+    * have no match to find, so say so rather than let it surface as a test failure.
     */
-   private static String todoDate(JSONArray todo, String chanNum, int maxEntries) {
+   private static String todoDate(JSONArray todo, String[] chanNums, int maxEntries) {
       int n = todo == null ? 0 : Math.min(todo.length(), maxEntries);
-      for (int i = 0; i < n; i++) {
-         try {
-            JSONObject t = todo.getJSONObject(i);
-            if (! t.has("startTime")) continue;
-            if (! chanNum.equals(t.getJSONObject("channel").getString("channelNumber"))) continue;
-            String date = t.getString("startTime").substring(0, 10);
-            System.out.println("Guide date " + date + " (from the ToDo entry on " + chanNum + ")");
-            return date;
-         } catch (Exception e) {
-            // entry shaped differently than expected; try the next one
+      for (String chanNum : chanNums) {
+         for (int i = 0; i < n; i++) {
+            try {
+               JSONObject t = todo.getJSONObject(i);
+               if (! t.has("startTime")) continue;
+               if (! chanNum.equals(t.getJSONObject("channel").getString("channelNumber"))) continue;
+               String date = t.getString("startTime").substring(0, 10);
+               System.out.println("Guide date " + date + " (from the ToDo entry on " + chanNum + ")");
+               return date;
+            } catch (Exception e) {
+               // entry shaped differently than expected; try the next one
+            }
          }
       }
       String today = java.time.LocalDate.now().toString();
-      System.out.println("WARNING: nothing on " + chanNum + " in the ToDo fixture - "
-         + "capturing guide for " + today + ", and TodoFlagTest will not find an overlap");
+      System.out.println("WARNING: nothing on " + String.join(" or ", chanNums)
+         + " in the ToDo fixture - capturing guide for " + today
+         + ", and TodoFlagTest will not find an overlap");
       return today;
+   }
+
+   /**
+    * The first n channels the box receives, in lineup order. isReceived is false for a
+    * channel that is listed but not tuned - one the subscription does not cover, or one
+    * the antenna does not reach - and asking for its listings returns nothing.
+    */
+   private static String[] receivedChannels(JSONArray channels, int n) throws Exception {
+      List<String> found = new ArrayList<String>();
+      if (channels == null) return new String[0];
+      for (int i = 0; i < channels.length() && found.size() < n; i++) {
+         JSONObject ch = channels.getJSONObject(i);
+         if (ch.optBoolean("isReceived") && ch.has("channelNumber"))
+            found.add(ch.getString("channelNumber"));
+      }
+      return found.toArray(new String[0]);
    }
 
    private static JSONArray captureWithCommands(FixtureSanitizer san, File dir, String name, RecordingRemote r,

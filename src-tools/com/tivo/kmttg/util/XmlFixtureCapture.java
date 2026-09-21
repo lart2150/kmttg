@@ -32,6 +32,7 @@ import org.apache.hc.core5.ssl.SSLContextBuilder;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.http;
+import com.tivo.kmttg.rpc.MindVersionQuery;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.tools.FixtureSanitizer;
 
@@ -80,6 +81,7 @@ public class XmlFixtureCapture {
       public String series   = "unknown";   // RPC only
       public String software = "unknown";   // RPC only; the Server header carries it too
       public String protocol = "unknown";
+      public String maxMind  = "unknown";   // RPC only; newest grammar it will accept
       public String tsn;                    // never written, only scrubbed out of what is
       public boolean rpc = true;            // false on a box older than the RPC interface
    }
@@ -219,6 +221,10 @@ public class XmlFixtureCapture {
       identify(box);
       if (box.rpc) {
          describe(box, tivoName, ip);
+         // Over a connection of its own, because the answer only carries the grammar version
+         // when the question is asked at a newer schema version than kmttg itself speaks.
+         String mind = MindVersionQuery.get(tivoName, ip, config.MAK, config.programDir);
+         if (mind != null) box.maxMind = mind;
          // The software version and the service number carry the prefix too, so a box that
          // served no Server header is named by what the RPC just gave.
          identify(box);
@@ -240,6 +246,8 @@ public class XmlFixtureCapture {
       // a capture whose provenance is half missing is one nobody can attribute later.
       if (box.rpc && box.series.equals("unknown"))
          System.out.println("  NOTE: no RPC answer - series and software version not recorded");
+      if (box.rpc && ! box.series.equals("unknown") && box.maxMind.equals("unknown"))
+         System.out.println("  NOTE: the box answered RPC but named no maxMindVersion");
       if (box.tsn == null)
          System.out.println("  NOTE: no service number from RPC - it can only be taken out of"
             + " the fixtures by shape, not by value");
@@ -307,6 +315,7 @@ public class XmlFixtureCapture {
          + "software: " + box.software + "\n"
          + "httpd: " + box.httpd + "\n"
          + "protocol: " + box.protocol + "\n"
+         + "maxMindVersion: " + box.maxMind + "\n"
          + "itemCount: " + itemCount + "\n"
          + "captured: " + java.time.LocalDate.now() + "\n";
       try {
