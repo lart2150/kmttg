@@ -19,23 +19,23 @@ public class HlsStreamTest {
    // to come out the same every time for a given TiVo, including after a crash and restart.
    @Test
    public void clientUuidIsStableForATivo() {
-      String first = HlsStream.clientUuid("84900019045ED87");
-      assertEquals(first, HlsStream.clientUuid("84900019045ED87"));
+      String first = HlsStream.clientUuid("84900010000XX00");
+      assertEquals(first, HlsStream.clientUuid("84900010000XX00"));
    }
 
    // Scoped to the box, so a kmttg talking to two TiVos does not present one identity to both
    // and then reclaim the wrong box's session.
    @Test
    public void clientUuidDiffersPerTivo() {
-      assertNotEquals(HlsStream.clientUuid("84900019045ED87"),
-         HlsStream.clientUuid("84900019045ED88"));
+      assertNotEquals(HlsStream.clientUuid("84900010000XX00"),
+         HlsStream.clientUuid("84900010000XX01"));
    }
 
    // The field is called clientUuid. The box accepts any string today, so this is about not
    // relying on that.
    @Test
    public void clientUuidIsAWellFormedUuid() {
-      String uuid = HlsStream.clientUuid("84900019045ED87");
+      String uuid = HlsStream.clientUuid("84900010000XX00");
       assertEquals(36, uuid.length());
       // Round trips through the parser, and back to the same text.
       assertEquals(uuid, UUID.fromString(uuid).toString());
