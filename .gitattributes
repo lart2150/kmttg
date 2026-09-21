@@ -21,6 +21,9 @@
 # Binary files - never apply line ending conversion
 # Transport stream fixtures are binary despite .ts also being a text extension elsewhere
 test/resources/fixtures/*.ts binary
+# Serialized job queue fixtures - mostly ASCII field names, so do not let the text
+# heuristic guess and rewrite the framing bytes
+test/resources/fixtures/*.dat binary
 *.jar    binary
 *.png    binary
 *.gif    binary
