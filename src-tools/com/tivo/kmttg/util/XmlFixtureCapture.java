@@ -81,6 +81,7 @@ public class XmlFixtureCapture {
       public String software = "unknown";   // RPC only; the Server header carries it too
       public String protocol = "unknown";
       public String tsn;                    // never written, only scrubbed out of what is
+      public boolean rpc = true;            // false on a box older than the RPC interface
    }
 
    public static void main(String[] args) throws Exception {
@@ -210,9 +211,20 @@ public class XmlFixtureCapture {
       Box box = new Box();
       String header = serverHeader("https://" + ip + "/TiVoConnect?Command=QueryServer");
       if (header != null) box.httpd = header.trim();
-      describe(box, tivoName, ip);
-      box.code = modelCode(box);
-      box.model = modelName(box.code);
+      // Named off the header before anything has been asked of the box, because that is
+      // what makes the next decision possible: RPC arrived with the Premiere, so on a
+      // Series 3 or earlier there is nothing listening and connecting only spends a
+      // timeout to learn what the prefix already said. A box that named no model is still
+      // worth trying - that is the case where the RPC answer is the only one there is.
+      identify(box);
+      if (box.rpc) {
+         describe(box, tivoName, ip);
+         // The software version and the service number carry the prefix too, so a box that
+         // served no Server header is named by what the RPC just gave.
+         identify(box);
+      } else {
+         System.out.println("  " + box.model + " predates the RPC interface - XML only");
+      }
       try {
          ByteArrayOutputStream out = new ByteArrayOutputStream();
          if (http.downloadPiped("https://" + ip + "/TiVoConnect?Command=QueryServer",
@@ -226,9 +238,11 @@ public class XmlFixtureCapture {
       }
       // Said out loud rather than left as an "unknown" line in a file nobody reads again:
       // a capture whose provenance is half missing is one nobody can attribute later.
-      if (box.series.equals("unknown"))
-         System.out.println("  NOTE: no RPC answer - series and software version not recorded,"
-            + " and the service number could not be scrubbed by value");
+      if (box.rpc && box.series.equals("unknown"))
+         System.out.println("  NOTE: no RPC answer - series and software version not recorded");
+      if (box.tsn == null)
+         System.out.println("  NOTE: no service number from RPC - it can only be taken out of"
+            + " the fixtures by shape, not by value");
       if (box.httpd.equals("unknown"))
          System.out.println("  NOTE: no Server header - the model could not be read");
       return box;
@@ -257,6 +271,15 @@ public class XmlFixtureCapture {
       } finally {
          if (r != null) r.disconnect();
       }
+   }
+
+   // The model, its series and whether RPC is worth trying, from whichever of the three
+   // sources has an answer. Run again after the RPC half, which supplies two of them.
+   private static void identify(Box box) {
+      box.code = modelCode(box);
+      box.model = modelName(box.code);
+      if (box.series.equals("unknown")) box.series = modelSeries(box.code);
+      box.rpc = ! box.series.equals("3") && ! box.series.equals("2");
    }
 
    // Named after the model, so the fixtures say what they are rather than what their owner
@@ -295,9 +318,12 @@ public class XmlFixtureCapture {
       }
    }
 
-   // Service number prefix to model, from TiVo's own table (support article 000001490). A
-   // prefix names a series rather than one box - every Bolt variant is 849, and the two Edge
-   // ones differ only in what they tune - which is the level a fixture cares about.
+   // Service number prefix to model, from TiVo's own tables (support article 000001490 for
+   // the Premiere on, 000001411 for Series 3 and earlier). A prefix names a series rather
+   // than one box - every Bolt variant is 849, and the two Edge ones differ only in what
+   // they tune - which is the level a fixture cares about. Where an article gives one name
+   // to several prefixes the prefix is kept in the name here, so that two boxes captured
+   // side by side do not write over each other's files.
    private static String modelName(String code) {
       switch (code) {
          case "D6E": case "D6F":                         return "Edge";
@@ -306,7 +332,46 @@ public class XmlFixtureCapture {
          case "746": case "748": case "750": case "758": return "Premiere";
          case "A92": case "A93": case "A95":             return "Mini";
          case "A94":                                     return "Stream";
+         case "658":                                     return "TiVo HD XL";
+         case "652":                                     return "TiVo HD";
+         case "648":                                     return "Series3 HD";
+         case "649":                                     return "Series2 DT";
+         case "595":                                     return "Humax DVD Writer";
+         case "590":                                     return "Humax Series2";
+         case "565":                                     return "Toshiba DVD Writer";
+         case "382":                                     return "Samsung DirecTV";
+         case "357":                                     return "Hughes HD DTV";
+         case "351":                                     return "Hughes DirecTV";
+         case "321":                                     return "RCA DirecTV";
+         case "301":                                     return "Philips DirecTV";
+         case "275":                                     return "Pioneer DVD";
+         case "264":                                     return "Toshiba DVD Player";
+         case "151":                                     return "Hughes Satellite";
+         case "121":                                     return "RCA DTV";
+         case "542": case "540": case "240":
+         case "230": case "140": case "130":
+         case "110":                                     return "Series2 " + code;
          default:                                        return "unknown";
+      }
+   }
+
+   // The series a prefix belongs to, for the two that have to be known before the box is
+   // asked anything: RPC arrived with the Premiere, so a Series 3 or earlier serves the XML
+   // interface and nothing else. Every prefix in both is here (support article 000001411) -
+   // a Series 2 missing from it would be connected to, and the person running this would
+   // wait out a timeout for it. Series 4 and up answer with their own platform, so they are
+   // not listed: a number guessed here would be written into the provenance file as fact.
+   private static String modelSeries(String code) {
+      switch (code) {
+         case "658": case "652": case "648":
+            return "3";
+         case "649": case "595": case "590": case "565": case "542": case "540":
+         case "382": case "357": case "351": case "321": case "301":
+         case "275": case "264": case "240": case "230":
+         case "151": case "140": case "130": case "121": case "110":
+            return "2";
+         default:
+            return "unknown";
       }
    }
 
@@ -314,9 +379,11 @@ public class XmlFixtureCapture {
    // header and the RPC software version both end with it, and the number itself starts with
    // it - so it survives any one of the three being unavailable. Unlike the number it
    // prefixes, it names a model rather than a box, which is why it is safe to write down.
+   // Either separator in the header: a Bolt serves tivo-httpd-1:<version>:849, and the
+   // older boxes that make the header the only source hang the prefix off a dash instead.
    private static String modelCode(Box box) {
       String[][] sources = {
-         {box.httpd,    ":([A-Z0-9]{3})$"},
+         {box.httpd,    "[:-]([A-Z0-9]{3})$"},
          {box.software, "-([A-Z0-9]{3})$"},
          {box.tsn,      "^(?:tsn:)?([A-Z0-9]{3})"}
       };
