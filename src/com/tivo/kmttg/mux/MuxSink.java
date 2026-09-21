@@ -92,8 +92,11 @@ public class MuxSink implements FrameSink {
    private int finalCueCount;
    private long lastMs;
    private final List<String> notes = new ArrayList<String>();
-   // Pids announced after the header went out, so each is only complained about once.
-   private final Set<Integer> lateStreams = new LinkedHashSet<Integer>();
+   // Pids that are not being carried, so each is only complained about once. The ones the
+   // header deliberately left out go in here too: the program list is cumulative, so the PMT
+   // that names a genuinely late stream names those again beside it, and reporting them as
+   // having appeared after the header says something about them that is not true.
+   private final Set<Integer> notCarried = new LinkedHashSet<Integer>();
 
    public MuxSink(File outFile) {
       this.outFile = outFile;
@@ -132,7 +135,7 @@ public class MuxSink implements FrameSink {
          // second audio language, say - cannot be carried. Said out loud rather than dropped
          // in silence: every payload on that pid then vanishes with nothing to explain it.
          for (ElementaryStreamInfo info : streams) {
-            if (! tracks.containsKey(info.getPid()) && lateStreams.add(info.getPid())) {
+            if (! tracks.containsKey(info.getPid()) && notCarried.add(info.getPid())) {
                notes.add(String.format("pid=0x%04x appeared after the header; not carried",
                   info.getPid()));
             }
@@ -143,6 +146,9 @@ public class MuxSink implements FrameSink {
          if (tracks.containsKey(info.getPid())) continue;
          TrackState t = newTrack(info);
          if (t != null) tracks.put(info.getPid(), t);
+         // A type we cannot describe carries no payloads worth explaining, so it is passed
+         // over in silence - but it is on the list, and a later PMT repeats it.
+         else notCarried.add(info.getPid());
       }
    }
 
@@ -353,7 +359,10 @@ public class MuxSink implements FrameSink {
                drop.add(e.getKey());
             }
          }
-         for (Integer pid : drop) tracks.remove(pid);
+         for (Integer pid : drop) {
+            tracks.remove(pid);
+            notCarried.add(pid);
+         }
          if (tracks.isEmpty()) {
             fail("No describable tracks found");
             return;
