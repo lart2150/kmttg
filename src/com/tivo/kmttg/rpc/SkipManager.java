@@ -340,6 +340,15 @@ public class SkipManager {
                   String offerLine = ifp.readLine();
                   String offsetLine = ifp.readLine();
                   lines.push(line);
+                  // A file cut short mid entry - a save interrupted by a crash or a full
+                  // disk - otherwise pushes a null through to the writer below, which puts
+                  // the literal text "null" into the user's skip data and leaves read()
+                  // mis-parsing that entry on every load afterwards.
+                  if (contentLine == null || offerLine == null || offsetLine == null) {
+                     if (contentLine != null) lines.push(contentLine);
+                     if (offerLine != null)   lines.push(offerLine);
+                     break;
+                  }
                   lines.push(contentLine);
                   lines.push(offerLine);
                   if (value(offerLine, "offerId").equals(offerId)) {
@@ -445,8 +454,10 @@ public class SkipManager {
                   }
                }
                if (! exists) {
-                  removeEntry(json.getString("offerId"));
-                  count++;
+                  // Only what actually went: removeEntry declines an empty offerId, and
+                  // counting that anyway reported entries pruned that are still in the file.
+                  if (removeEntry(json.getString("offerId")))
+                     count++;
                }
             }
          }
