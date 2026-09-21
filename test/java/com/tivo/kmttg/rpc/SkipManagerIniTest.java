@@ -259,6 +259,29 @@ public class SkipManagerIniTest {
       assertEquals(1, countEntries(raw()));
    }
 
+   // A file cut short by a crash part way through an append, or one somebody hand edited. The
+   // parse is driven by the field names rather than by counting lines, so it picks itself up
+   // at the next <entry> and the recordings after the damaged one still have their cut points.
+   @Test
+   void anEntryCutShortDoesNotHideTheEntriesAfterIt() throws IOException {
+      String eol = "\r\n";
+      Files.write(work.resolve("AutoSkip.ini"), (
+           "<entry>" + eol
+         + "contentId=tivo:ct.1" + eol
+         + "<entry>" + eol
+         + "contentId=tivo:ct.2" + eol
+         + "offerId=" + AIRING_B + eol
+         + "offset=0" + eol
+         + "tivoName=Bolt" + eol
+         + "title=Frasier" + eol
+         + "0 800000" + eol).getBytes(StandardCharsets.UTF_8));
+
+      assertTrue(SkipManager.hasEntry(AIRING_B));
+      assertEquals(800000L, SkipManager.getEntry(AIRING_B).get(0).get("end").longValue());
+      // and the half written one names no airing, so it answers to nothing
+      assertEquals(1, SkipManager.getEntries().length());
+   }
+
    private static int countEntries(String text) {
       int n = 0, i = 0;
       while ((i = text.indexOf("<entry>", i)) >= 0) { n++; i += 7; }
