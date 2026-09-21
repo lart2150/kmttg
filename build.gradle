@@ -89,14 +89,13 @@ jacocoTestReport {
 tasks.register('captureRpcFixtures', JavaExec) {
     group = 'kmttg'
     description = 'Capture sanitized RPC fixtures from a live TiVo (manual)'
-    classpath = sourceSets.test.runtimeClasspath
+    classpath = sourceSets.tools.runtimeClasspath
     mainClass = 'com.tivo.kmttg.rpc.RpcFixtureCapture'
-    if (project.hasProperty('configDir')) args(project.property('configDir'))
-    if (project.hasProperty('tivo')) args(project.property('tivo'))
-    // Positional: keep maxEntries' slot filled when only guideDate is given
-    if (project.hasProperty('maxEntries')) args(project.property('maxEntries'))
-    else if (project.hasProperty('guideDate')) args('40')
-    if (project.hasProperty('guideDate')) args(project.property('guideDate'))
+    // Positional, so every slot is filled whether or not it was asked for
+    args(project.findProperty('configDir') ?: '.')
+    args(project.findProperty('tivo') ?: 'Bolt')
+    args(project.findProperty('maxEntries') ?: '40')
+    args(project.findProperty('guideDate') ?: '')
 }
 
 // One-off tool to (re)generate the RPC command trace fixtures from an rpc.jsonl
@@ -109,7 +108,7 @@ tasks.register('captureRpcFixtures', JavaExec) {
 tasks.register('rpcLogFixtures', JavaExec) {
     group = 'kmttg'
     description = 'Rebuild the RPC replay fixtures from an rpc.jsonl capture (manual)'
-    classpath = sourceSets.test.runtimeClasspath
+    classpath = sourceSets.tools.runtimeClasspath
     mainClass = 'com.tivo.kmttg.rpc.RpcLogFixtures'
     if (project.hasProperty('rpcLog')) args(project.property('rpcLog'))
     if (project.hasProperty('capture')) args(project.property('capture'))
@@ -142,6 +141,17 @@ sourceSets {
             srcDirs = ['images']
         }
     }
+    // The fixture capture tools. Kept out of the test source set so the contributor jar
+    // below can be built without JUnit on its classpath, and out of src/ so none of it
+    // reaches the shipped kmttg.jar.
+    tools {
+        java {
+            srcDirs = ['src-tools']
+        }
+        resources {
+            srcDirs = []
+        }
+    }
     test {
         // Kept out of src/ because the main source set globs all of src/.
         java {
@@ -153,10 +163,21 @@ sourceSets {
     }
 }
 
+// The tools compile against kmttg and the same libraries it uses.
+configurations {
+    toolsImplementation.extendsFrom implementation
+    toolsRuntimeOnly.extendsFrom runtimeOnly
+}
+
 dependencies {
     // Test-only. main and launcher are at different bytecode levels and must
     // never compile against each other.
     testImplementation sourceSets.launcher.output
+
+    toolsImplementation sourceSets.main.output
+    // RecordingRemote and FixtureJson are the offline RPC doubles' base classes as well as
+    // the capture tools', so the tests read them from here rather than holding a copy.
+    testImplementation sourceSets.tools.output
 }
 
 tasks.withType(JavaCompile).configureEach {

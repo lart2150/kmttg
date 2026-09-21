@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.tools.FixtureSanitizer;
 
 /** Loads the captured (sanitized) RPC response fixtures from the test classpath. */
 public final class Fixtures {
@@ -21,7 +22,7 @@ public final class Fixtures {
     * IP="" port=0, so they share one entry and nothing puts back what was there
     * before. Seeding one agreed value keeps that from mattering.
     */
-   public static final String BODY_ID = "tsn:0000000000000000ED87";
+   public static final String BODY_ID = FixtureSanitizer.BODY_ID;
 
    /** Seed the shared bodyId map for an unconnected (IP="", port=0) Remote. */
    public static void seedBodyId() {

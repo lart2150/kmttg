@@ -7,6 +7,7 @@ import java.io.FileReader;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.tools.FixtureSanitizer;
 
 /**
  * One-off developer tool (NOT a unit test) that connects to a live TiVo and
@@ -32,6 +33,8 @@ public class RpcFixtureCapture {
       String tivoName  = args.length > 1 ? args[1] : "Bolt";
       // Keep fixtures small/representative rather than dumping the whole TiVo.
       int maxEntries   = args.length > 2 ? Integer.parseInt(args[2]) : 40;
+      // The task fills every positional slot, so an unasked-for date arrives empty
+      String guideDate = args.length > 3 && args[3].length() > 0 ? args[3] : null;
 
       // Point kmttg at the given config dir (for the cdata cert fallback) and
       // read just the values we need from config.ini ourselves, so we don't
@@ -42,15 +45,25 @@ public class RpcFixtureCapture {
       if (mak == null || ip == null)
          throw new IllegalStateException("Could not read MAK / " + tivoName + " IP from config.ini");
 
+      run(tivoName, ip, mak, maxEntries, guideDate, new File("test/resources/fixtures"));
+   }
+
+   /**
+    * The capture itself, against one box, into one directory. Split out from main so the
+    * contributor tool can run it beside the XML capture for each box it found.
+    */
+   public static void run(String tivoName, String ip, String mak, int maxEntries,
+         String guideDate, File outDir) throws Exception {
       System.out.println("Connecting to " + tivoName + " at " + ip + " ...");
       RecordingRemote r = new RecordingRemote(tivoName, ip, -1, mak, null);
       if (!r.success)
          throw new IllegalStateException("RPC connection/auth failed");
 
-      String tsn = r.bodyId_get(); // e.g. "tsn:8460001234567890"
-      Sanitizer san = new Sanitizer(tsn, mak);
+      String tsn = r.bodyId_get(); // e.g. "tsn:846000123456AB12"
+      // The address as well: a response naming the box's own host would otherwise keep it,
+      // and which values are in reach should not depend on which capture wrote the file.
+      FixtureSanitizer san = new FixtureSanitizer(ip, mak, tsn);
 
-      File outDir = new File("test/resources/fixtures");
       outDir.mkdirs();
 
       // MyShows is huge (one Search per recording) - keep its response fixture
@@ -95,7 +108,7 @@ public class RpcFixtureCapture {
       // TodoFlagTest needs a guide listing that the ToDo fixture also contains,
       // so take the day from the ToDo list itself rather than picking one and
       // hoping. Only the entries that were actually written count.
-      String guideDate = args.length > 3 ? args[3] : todoDate(todo, guideChannels[0], maxEntries);
+      if (guideDate == null) guideDate = todoDate(todo, guideChannels[0], maxEntries);
       long dayStart = java.time.LocalDate.parse(guideDate)
             .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
       long dayEnd = dayStart + 24L * 60 * 60 * 1000;
@@ -135,7 +148,7 @@ public class RpcFixtureCapture {
       System.out.println("Done.");
    }
 
-   private static void capture(Sanitizer san, File dir, String name, JSONArray data, int max) throws Exception {
+   private static void capture(FixtureSanitizer san, File dir, String name, JSONArray data, int max) throws Exception {
       if (data == null) {
          System.out.println("  " + name + ": NULL (skipped)");
          return;
@@ -181,7 +194,7 @@ public class RpcFixtureCapture {
       return today;
    }
 
-   private static JSONArray captureWithCommands(Sanitizer san, File dir, String name, RecordingRemote r,
+   private static JSONArray captureWithCommands(FixtureSanitizer san, File dir, String name, RecordingRemote r,
          java.util.function.Supplier<JSONArray> call, int maxEntries, int maxCmds) throws Exception {
       r.reset();
       JSONArray data = call.get();
@@ -248,36 +261,5 @@ public class RpcFixtureCapture {
          }
       }
       return null;
-   }
-
-   /** Replaces the real TSN and MAK with same-format dummy values. */
-   private static class Sanitizer {
-      private final String tsnDigits;
-      private final String mak;
-
-      Sanitizer(String tsn, String mak) {
-         // tsn looks like "tsn:8460001234567890" - keep only the digits
-         this.tsnDigits = (tsn != null) ? tsn.replaceAll("[^0-9]", "") : "";
-         this.mak = mak;
-      }
-
-      String scrub(String s) {
-         if (tsnDigits.length() > 0) {
-            String dummy = repeat('0', tsnDigits.length());
-            s = s.replace(tsnDigits, dummy);
-         }
-         if (mak != null && mak.length() > 0) {
-            s = s.replace(mak, repeat('0', mak.length()));
-         }
-         // Catch any other tsn:<digits> sequences just in case
-         s = s.replaceAll("tsn:[0-9]+", "tsn:0000000000000000");
-         return s;
-      }
-
-      private static String repeat(char c, int n) {
-         StringBuilder sb = new StringBuilder();
-         for (int i = 0; i < n; i++) sb.append(c);
-         return sb.toString();
-      }
    }
 }
