@@ -25,7 +25,11 @@ import com.tivo.kmttg.util.XmlFixtureCapture;
  * It only ever reads. The TiVo is asked for its Now Playing list, the metadata behind a
  * few of those recordings, and the read-only RPC calls kmttg itself makes for the To Do
  * list, season passes and thumbs ratings. Nothing is recorded, deleted or scheduled.
-
+ *
+ * The RPC interface arrived with the Premiere, so a Series 3 or earlier is read over HTTP
+ * alone. Those are the models the project is least likely to get fixtures for any other
+ * way, so the box is named off its Server header before it is asked anything and the RPC
+ * half is skipped rather than left to time out.
  *
  * Every identifier goes through FixtureSanitizer on the way to disk, and the summary
  * printed at the end says what the zip holds so it can be looked at before being sent.
@@ -98,6 +102,14 @@ public class ContributorCapture {
          XmlFixtureCapture.writeProvenance(dir, box.label, box, NPL_ITEMS);
          XmlFixtureCapture.capture(new FixtureSanitizer(box.ip, mak, box.tsn), dir,
             box.label, box.ip, NPL_ITEMS);
+         // A Series 3 or earlier has no RPC interface at all, and a set of XML fixtures
+         // from one is the whole capture rather than half of a failed one - so it is not
+         // attempted and not reported as a failure.
+         if (! box.rpc) {
+            System.out.println("  A " + box.model + " has no RPC interface - the XML"
+               + " fixtures above are the capture.");
+            continue;
+         }
          // The RPC half is the one that needs the certificate, so it is the one that fails
          // on a box kmttg itself could not talk to either. The XML fixtures are worth
          // sending on their own, so a failure here does not lose them.
