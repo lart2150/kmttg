@@ -2092,6 +2092,12 @@ public class HTTPServer {
                 int dash = token.indexOf('-');
                 if (dash == 0) { // suffix range
                     start = length - parseULong(token.substring(1), 10);
+                    // RFC2616#14.35.1 - a suffix longer than the resource
+                    // means the whole resource. A negative start promised a
+                    // body longer than the file, and the send then ran off
+                    // the end and dropped the connection.
+                    if (start < 0)
+                        start = 0;
                     end = length - 1;
                 } else if (dash == token.length() - 1) { // open range
                     start = parseULong(token.substring(0, dash), 10);
