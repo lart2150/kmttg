@@ -175,6 +175,12 @@ public class auto {
          config.GUI_AUTO--;
    }
    
+   // Both sides of a keyword match go through this: the searched text and the keywords
+   // themselves. They used to differ, so a keyword carrying any of these could not match.
+   private static String stripPunctuation(String s) {
+      return s.replaceAll("[,;:.!?()]", "");
+   }
+
    // Match title & keywords against an entry
    // Return true if this entry should be processed, false otherwise
    public static Boolean keywordSearch(Hashtable<String,String> entry) {
@@ -250,17 +256,22 @@ public class auto {
             keyword = keyword.replaceFirst("^\\s+", "");
             keyword = keyword.replaceFirst("\\s+$", "");
             keyword = keyword.toLowerCase();
-            if ( keyword.matches("^-") ) {
-               keyword = keyword.replaceFirst("^-", "");
-               not.add(keyword);
+            // NOTE: startsWith, not matches - matches wants the whole keyword to be the regex,
+            // so only a bare "-" or "(" ever reached these, and every real "-foo" or "(foo)"
+            // fell through to the 'and' list below as a literal the text can never contain.
+            // That killed the entry: a keyword set with a NOT or an OR in it matched nothing.
+            // The punctuation strip has to happen on this side too, and after the branch is
+            // chosen so the leading "-" and "(" are still there to choose on. The text below
+            // has the same characters taken out, so a keyword that kept them could never
+            // match: "-u.s." would look for "u.s." in a text that reads "us".
+            if ( keyword.startsWith("-") ) {
+               not.add(stripPunctuation(keyword.replaceFirst("^-", "")));
             }
-            else if ( keyword.matches("\\(") ) {
-               keyword = keyword.replaceAll("\\(", "");
-               keyword = keyword.replaceAll("\\)", "");
-               or.add(keyword);
+            else if ( keyword.startsWith("(") ) {
+               or.add(stripPunctuation(keyword));
             }
             else {
-               and.add(keyword);
+               and.add(stripPunctuation(keyword));
             }
          }
          
@@ -274,14 +285,7 @@ public class auto {
             text += " " + entry.get("description");
          text = text.toLowerCase();
          // Remove punctuation for matching purposes
-         text = text.replaceAll(",", "");
-         text = text.replaceAll(";", "");
-         text = text.replaceAll(":", "");
-         text = text.replaceAll("\\.", "");
-         text = text.replaceAll("\\!", "");
-         text = text.replaceAll("\\?", "");
-         text = text.replaceAll("\\(", "");
-         text = text.replaceAll("\\)", "");
+         text = stripPunctuation(text);
          
          debug.print("keywordSearch::matching keywords '" + keywordsList +"' in '" + text + "'");
          debug.print("keywordSearch::and=" + and);
