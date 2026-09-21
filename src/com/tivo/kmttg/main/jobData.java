@@ -18,6 +18,8 @@
  */
 package com.tivo.kmttg.main;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -488,7 +490,51 @@ public class jobData implements Serializable, Cloneable {
       }
       return file;
    }
-      
+
+   // Deserialization does not run the field initialisers above, so any field the saved stream
+   // does not carry arrives as the JVM default - null for a boxed one. The queue file in a
+   // user's install dir was written by whatever kmttg they ran last, and an older one carries
+   // none of the fields added since, so a restored job reaches launch with null where the task
+   // code unboxes a Boolean. That throws out of jobMonitor.monitor and stalls everything queued
+   // behind it. None of these fields means anything as null, so put the class's own defaults
+   // back for whatever the stream left out.
+   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+      // Deserialization runs no constructor, so every field starts at the JVM default and
+      // the initialisers above never happen.
+      ObjectInputStream.GetField stream = in.readFields();
+      jobData initial = new jobData();
+      for (java.lang.reflect.Field f : jobData.class.getDeclaredFields()) {
+         if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
+         f.setAccessible(true);
+         Object fallback = null;
+         try {
+            fallback = f.get(initial);
+            f.set(this, fromStream(stream, f.getName(), f.getType(), fallback));
+         }
+         catch (Exception e) {
+            log.error("jobData readObject - " + f.getName() + ": " + e.getMessage());
+            try { f.set(this, fallback); } catch (Exception ignored) { }
+         }
+      }
+   }
+
+   // One field's value out of the stream, or the fallback when the stream has no such field.
+   // GetField is what answers "did the stream carry this", which nothing else can: a null
+   // Boolean or a zeroed int may equally have been written on purpose. It has a typed
+   // accessor per primitive and no generic one, hence the ladder.
+   private static Object fromStream(ObjectInputStream.GetField stream, String name,
+         Class<?> type, Object fallback) throws IOException {
+      if (type == boolean.class) return stream.get(name, ((Boolean)fallback).booleanValue());
+      if (type == int.class)     return stream.get(name, ((Integer)fallback).intValue());
+      if (type == long.class)    return stream.get(name, ((Long)fallback).longValue());
+      if (type == float.class)   return stream.get(name, ((Float)fallback).floatValue());
+      if (type == double.class)  return stream.get(name, ((Double)fallback).doubleValue());
+      if (type == short.class)   return stream.get(name, ((Short)fallback).shortValue());
+      if (type == byte.class)    return stream.get(name, ((Byte)fallback).byteValue());
+      if (type == char.class)    return stream.get(name, ((Character)fallback).charValue());
+      return stream.get(name, fallback);
+   }
+
 	/**
 	 * Does a shallow copy of this instance so the fields can be modified
 	 * without touching the original
