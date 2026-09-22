@@ -39,6 +39,9 @@ public class TiVoRPCWS extends WebSocketClient {
    // Set when the bodyAuthenticate exchange finishes, however it ends, so a caller arriving
    // afterwards is told the answer instead of waiting for a notify that has already been sent.
    private volatile boolean authDone = false;
+   // tivo.com answered bodyAuthenticate and said no, as opposed to never answering at all -
+   // the one failure a fresh token can fix.
+   private volatile boolean authRejected = false;
    private final Object readyLock = new Object();
    // tivo.com can accept the socket and never authenticate it, which would otherwise park
    // every caller for good.
@@ -236,6 +239,7 @@ public class TiVoRPCWS extends WebSocketClient {
                      // only account of why the job is about to fail - saying nothing here is
                      // how a rejected login used to surface as "could not connect".
                      log.error("tivo.com refused the connection: " + result.get("status"));
+                     wc.authRejected = true;
                      wc.close();
                   }
                } else if (result.has("type") && result.getString("type").equals("error")) {
@@ -244,6 +248,10 @@ public class TiVoRPCWS extends WebSocketClient {
                		err = ": " + result.getString("text");
                	}
                	log.error("Error establishing WS connection" + err);
+               	// Only an error about the token itself ("Domain token invalid") is worth a fresh
+               	// login. A new login replaces the token every other session is using, so a
+               	// passing server error must not trigger one.
+               	wc.authRejected = isTokenError(result);
                	wc.close();
                }
             } catch (Exception e) {
@@ -265,10 +273,19 @@ public class TiVoRPCWS extends WebSocketClient {
       return this.tsn;
    }
    
-   // Still serialized per connection: RPCs have always gone out one at a time here and
-   // nothing asks for more. What changed is that a reply, a close or a timeout all end the
-   // wait - it used to end only on a reply.
-   public synchronized JSONObject sendRequestAndWaitForResponse(String request) {
+   public boolean isAuthRejected() {
+      return authRejected;
+   }
+   
+   static boolean isTokenError(JSONObject error) {
+      String said = (error.optString("code") + " " + error.optString("text")).toLowerCase();
+      return said.contains("token") || said.contains("auth");
+   }
+
+   // Not serialized: each request waits on its own Pending and send() writes under the
+   // library's own lock, so the web server's pool can have several in flight on one
+   // connection. A reply, a close or a timeout all end the wait.
+   public JSONObject sendRequestAndWaitForResponse(String request) {
       Integer rpcId = rpcIdOf(request.split("\r\n\r\n", 2)[0]);
       try {
          if (! this.waitForReady()) {
@@ -297,10 +314,8 @@ public class TiVoRPCWS extends WebSocketClient {
       }
    }
    
-   // Deliberately not synchronized on the instance: the bodyAuthenticate request is built on
-   // the auth thread, and sendRequestAndWaitForResponse holds the instance lock while it waits
-   // for that authentication to finish. Sharing one lock would have the caller block the very
-   // handshake it is waiting on. The only shared state here is the request counter.
+   // Deliberately not synchronized: requests are built on the auth thread and on every web
+   // server thread sharing the connection. The only shared state here is the request counter.
    public String RpcRequest(String type, Boolean monitor, JSONObject data) {
       try {
          String ResponseCount = "single";

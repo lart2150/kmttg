@@ -125,6 +125,17 @@ public class Remote{
             config.middlemind_port, null);
    }
    
+   // Away mode over a connection someone else owns - the web server's pool. Already
+   // authenticated, and closing it is the pool's business, so don't disconnect() this one.
+   public Remote(String tivoName, TiVoRPCWS ws) {
+      this.tivoName = tivoName;
+      this.IP = config.middlemind_host;
+      this.port = config.middlemind_port;
+      this.away = true;
+      this.ws = ws;
+      this.success = ws.isOpen();
+   }
+
    // This constructor designed for use without kmttg config
    public Remote(String IP, int port, String MAK, String cdata) {
       this(null, false,

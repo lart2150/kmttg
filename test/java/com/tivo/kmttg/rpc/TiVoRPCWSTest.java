@@ -138,6 +138,35 @@ public class TiVoRPCWSTest {
       assertNull(answer.get(), "a dropped connection is no answer");
    }
 
+   // The web server's pool puts several requests on one connection, so the second must go out
+   // while the first is still waiting, and each must get its own reply whatever the order.
+   @Test
+   void requestsInFlightTogetherAreEachAnsweredInAnyOrder() throws Exception {
+      final java.util.concurrent.atomic.AtomicInteger sends = new java.util.concurrent.atomic.AtomicInteger();
+      final FakeWs ws = new FakeWs() {
+         public void send(String text) {
+            sends.incrementAndGet();
+         }
+      };
+      final String first = ws.RpcRequest("bodyConfigSearch", false, new JSONObject());
+      final String second = ws.RpcRequest("bodyConfigSearch", false, new JSONObject());
+      final AtomicReference<JSONObject> a1 = new AtomicReference<JSONObject>();
+      final AtomicReference<JSONObject> a2 = new AtomicReference<JSONObject>();
+
+      assertTimeoutPreemptively(PATIENCE, () -> {
+         Thread t1 = ask(ws, first, a1, new AtomicBoolean());
+         Thread t2 = ask(ws, second, a2, new AtomicBoolean());
+         for (int i = 0; i < 500 && sends.get() < 2; ++i) Thread.sleep(10);
+         assertEquals(2, sends.get(), "the second request has to go out while the first waits");
+         ws.onMessage(reply(2, "{\"type\":\"second\"}"));
+         ws.onMessage(reply(1, "{\"type\":\"first\"}"));
+         t1.join();
+         t2.join();
+      });
+      assertEquals("first", a1.get().getString("type"));
+      assertEquals("second", a2.get().getString("type"));
+   }
+
    @Test
    void anOpenButUnauthenticatedConnectionIsNotReady() throws Exception {
       final boolean[] open = { true };

@@ -42,6 +42,7 @@ import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.main.telnet;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.rpc.TiVoRPCWSPool;
 import com.tivo.kmttg.util.createMeta;
 import com.tivo.kmttg.util.debug;
 import com.tivo.kmttg.util.ffmpeg;
@@ -54,6 +55,8 @@ import com.tivo.kmttg.util.string;
 public class kmttgServer extends HTTPServer {
    private Stack<Transcode> transcodes = new Stack<Transcode>();
    public int transcode_counter = 0;
+   // tivo.com connections for /rpcws, each closed after a minute without a request.
+   TiVoRPCWSPool wsPool = new TiVoRPCWSPool(60000);
    
    /** Calls HTTPServer.addContentType for all the video file types important to kmttg.
     * You can call getContentType with a file or path to get the registered content type. */
@@ -148,6 +151,12 @@ public class kmttgServer extends HTTPServer {
       // Handle rpc requests
       if (path.equals("/rpc")) {
          handleRpc(req, resp);
+         return;
+      }
+
+      // Same as /rpc, but always over the tivo.com websocket rather than to the TiVo itself
+      if (path.equals("/rpcws")) {
+         handleRpcWs(req, resp);
          return;
       }
       
@@ -522,6 +531,41 @@ public class kmttgServer extends HTTPServer {
       }
    }
    
+   // Sample rpcws request: /rpcws?tivo=Roamio&operation=SysInfo
+   // tivo is the TiVo's name on the tivo.com account, and is optional for a request that
+   // names no bodyId. A token tivo.com won't take and kmttg can't renew is a 401.
+   public void handleRpcWs(Request req, Response resp) throws IOException {
+      Map<String,String> params = req.getParams();
+      String operation = params.get("operation");
+      if (operation == null) {
+         resp.sendError(400, "rpcws request missing 'operation'");
+         return;
+      }
+      String tivo = params.get("tivo");
+      try {
+         JSONObject json;
+         if (params.containsKey("json"))
+            json = new JSONObject(params.get("json"));
+         else
+            json = new JSONObject();
+         JSONObject result = wsPool.command(tivo, operation, json);
+         if (result == null)
+            resp.sendError(500, "operation failed: " + operation);
+         else
+            sendJson(resp, result);
+      } catch (TiVoRPCWSPool.ConnectException e) {
+         resp.sendError(e.auth ? 401 : 500, e.getMessage());
+      } catch (Exception e) {
+         resp.sendError(500, "rpcws " + operation + " - " + e);
+      }
+   }
+
+   @Override
+   public synchronized void stop() {
+      super.stop();
+      wsPool.closeAll();
+   }
+
    // Return list of rpc enabled TiVos known by kmttg
    public void handleRpcTivos(Response resp) throws IOException {
       Stack<String> tivos = config.getTivoNames();
