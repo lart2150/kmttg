@@ -2020,8 +2020,9 @@ public class configMain {
       // clipMetadataId changed. Offer the reset the file's own header describes.
       if (autoskip_stream_anchor.isSelected()) {
          // Note it, but do not act: write() is validation and the user can still abandon the
-         // save. Deleting the remembered rejects here would survive a Cancel.
-         streamAnchorJustEnabled = config.autoskip_stream_anchor != 1;
+         // save. Deleting the remembered rejects here would survive a Cancel. Sticky, because
+         // write() has already set the option by then and the next OK would not see it change.
+         streamAnchorJustEnabled = streamAnchorJustEnabled || config.autoskip_stream_anchor != 1;
          config.autoskip_stream_anchor = 1;
       }
       else {
