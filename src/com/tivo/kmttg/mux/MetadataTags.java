@@ -18,6 +18,7 @@
  */
 package com.tivo.kmttg.mux;
 
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -181,10 +182,12 @@ public class MetadataTags {
             m.getOriginalAirDate().get().format(DateTimeFormatter.ISO_LOCAL_DATE));
       }
       // The broadcast this file was captured from is a different fact, and Matroska has a
-      // tag that means exactly that. Keeping both loses nothing.
+      // tag that means exactly that. Keeping both loses nothing. The air time is UTC, where an
+      // 8 PM Eastern show is already tomorrow, so it takes the local day the file name uses.
       if (m.getAirDate().isPresent()) {
          add(tags, MkvMuxer.TARGET_EPISODE, "DATE_RECORDED",
-            m.getAirDate().get().format(DateTimeFormatter.ISO_LOCAL_DATE));
+            m.getAirDate().get().withZoneSameInstant(ZoneId.systemDefault())
+               .format(DateTimeFormatter.ISO_LOCAL_DATE));
       }
 
       if (m.getMpaaRating().isPresent()) {
