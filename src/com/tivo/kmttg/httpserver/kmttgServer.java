@@ -1184,15 +1184,18 @@ public void handleMyShows(Request req, Response resp) throws IOException {
         } else {
            captions = config.gui.captions.isSelected(); 
         }
+        // MKV clears the encode checkbox, so the GUI defaults have to be read through it the
+        // way tivoTab does or a web launch silently drops the remux.
+        Boolean mkv = config.gui.mkv.isSelected();
         if(settings.has(encArg)) {
            encode = settings.getBoolean(encArg);
         } else {
-           encode = config.gui.encode.isSelected();
+           encode = mkv || config.gui.encode.isSelected();
         }
         if(settings.has(nameArg)) {
            encodeName = settings.getString(nameArg);
         } else {
-           encodeName = null;
+           encodeName = mkv ? encodeConfig.MUX_PROFILE : null;
         }
     	
         // Launch jobs appropriately
@@ -1268,8 +1271,11 @@ public void handleMyShows(Request req, Response resp) throws IOException {
             settings.put(detArg, config.gui.comskip.isSelected());
             settings.put(cutArg, config.gui.comcut.isSelected());
             settings.put(ccArg, config.gui.captions.isSelected()); 
-            settings.put(encArg, config.gui.encode.isSelected());
-            if(encodeConfig.getEncodeName() != null) {
+            Boolean mkv = config.gui.mkv.isSelected();
+            settings.put(encArg, mkv || config.gui.encode.isSelected());
+            if (mkv) {
+               settings.put(nameArg, encodeConfig.MUX_PROFILE);
+            } else if(encodeConfig.getEncodeName() != null) {
                settings.put(nameArg, encodeConfig.getEncodeName());
             }
             settings.put(encodeNamesArg,config.ENCODE_NAMES);
@@ -1674,11 +1680,13 @@ public void handleMyShows(Request req, Response resp) throws IOException {
          Transcode tc = transcodes.get(i);
          if (! tc.isRunning()) {
             transcodes.remove(i);
+            --i;
             removed = true;
          }
          if ( ! removed && ! Hlsutils.isPartial(tc.segmentFile) ) {
             // Segment file is terminated, so job must have finished
             transcodes.remove(i);
+            --i;
          }
       }
    }
