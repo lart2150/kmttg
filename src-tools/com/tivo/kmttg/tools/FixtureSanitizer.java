@@ -50,7 +50,7 @@ public class FixtureSanitizer {
       s = s.replaceAll("\\b[0-9]{3}-[0-9]{4}-[0-9]{4}-[0-9A-Za-z]{4}\\b", "000-0000-0000-0000");
       // systemInformationGet answers with these beside the number: where the box is, which
       // streaming account it is signed in to, and what its owner calls it.
-      s = s.replaceAll("(?<pre>\"zipCode\"\\s*:\\s*\"[0-9])[^\"]*(?<post>\")", "${pre}0000${post}");
+      s = s.replaceAll("(?<pre>\"zipCode\"\\s*:\\s*\"[0-9A-Za-z])[^\"]*(?<post>\")", "${pre}0000${post}");
       s = s.replaceAll("(\"netflixEsn\"\\s*:\\s*\")[^\"]*(\")", "$1TIVRTLSER6NF-000-0000000000000$2");
       s = s.replaceAll("(\"deviceName\"\\s*:\\s*\")[^\"]*(\")", "$1TiVo$2");
       return s;

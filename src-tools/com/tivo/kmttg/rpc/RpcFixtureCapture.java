@@ -197,7 +197,11 @@ public class RpcFixtureCapture {
                JSONObject t = todo.getJSONObject(i);
                if (! t.has("startTime")) continue;
                if (! chanNum.equals(t.getJSONObject("channel").getString("channelNumber"))) continue;
-               String date = t.getString("startTime").substring(0, 10);
+               // startTime is UTC and the guide window is a local day, so an evening entry
+               // belongs to the day before the one its text says.
+               String date = java.time.LocalDateTime.parse(t.getString("startTime").replace(' ', 'T'))
+                     .atZone(java.time.ZoneOffset.UTC).withZoneSameInstant(java.time.ZoneId.systemDefault())
+                     .toLocalDate().toString();
                System.out.println("Guide date " + date + " (from the ToDo entry on " + chanNum + ")");
                return date;
             } catch (Exception e) {
