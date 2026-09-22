@@ -1021,8 +1021,16 @@ public class jobMonitor {
       
       // Check task dependencies and enable prior tasks if necessary
       
-      // encode requires mpegFile or mpegFile_cut which may require at minimum decrypt
-      if (encode && config.VrdEncode == 0) {
+      // encode requires mpegFile or mpegFile_cut which may require at minimum decrypt.
+      // Not the built-in remux on a separate download: it decrypts the .TiVo itself in the
+      // same read, so forcing decrypt here only writes a .ts nobody asked for.
+      // Anything else that reads the mpeg - captions, custom, a second profile - still gets it.
+      Boolean remuxReadsTivo = mode.equals("Download") && TSDownload == 1
+         && encodeConfig.isValidEncodeName(encodeName) && encodeConfig.isBuiltinMux(encodeName)
+         && config.tivolibreDecrypt == 1 && config.combine_download_decrypt == 0
+         && config.MAK != null && config.MAK.length() > 0
+         && encodeName2 == null && ! captions && ! custom;
+      if (encode && config.VrdEncode == 0 && ! remuxReadsTivo) {
          if ( ! decrypt ) {
             if ( ! file.isFile(mpegFile) && ! file.isFile(mpegFile_cut) ) {
                decrypt = true;
@@ -1117,7 +1125,10 @@ public class jobMonitor {
             // Not when anything downstream rewrites the mpeg first. qsfix and ad cutting both
             // produce a new source that the encode step is supposed to read, so fusing the
             // remux into the download would silently mux the uncut stream instead.
-            && ! comcut && ! qsfix) {
+            && ! comcut && ! qsfix
+            // Nor when ad detection is about to write this recording's cut points to
+            // AutoSkip: a fused mux picks its chapters at download start, before they exist.
+            && ! (comskip && SkipManager.skipEnabled() && config.autoskip_import == 1)) {
          streamToMux = canStreamToMux(mpegIsAnOutput(decryptRequested), comskip, comcut,
                qsfix, captions, custom, encodeName2 != null);
          // Two settings only a remux job knows how to honour, so leave it to one whenever
