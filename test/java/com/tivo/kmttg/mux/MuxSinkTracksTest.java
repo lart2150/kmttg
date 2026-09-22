@@ -37,6 +37,7 @@ import static net.straylightlabs.tivolibre.FrameFixtures.program;
 import static net.straylightlabs.tivolibre.FrameFixtures.stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -224,6 +225,31 @@ public class MuxSinkTracksTest {
 
    // One video track and an audio track per set of descriptors given, which is how a SAP
    // broadcast arrives: two AC-3 streams that the PMT describes separately.
+   @Test
+   void audioItCannotMuxIsReportedAndMarksTheFileIncomplete() throws Exception {
+      // MPEG-1 Layer II has no track type here. Dropping it silently left a file with no
+      // sound that the job called a success, and a streaming job then deleted the recording.
+      MuxSink sink = new MuxSink(work.resolve("mp2.mkv").toFile());
+      sink.onProgram(program(stream(VIDEO_PID, MPEG2), stream(AUDIO_PID, 0x03)));
+      sink.onPesPayload(payload(VIDEO_PID, PTS, mpeg2Key(704, 480, 3)));
+      sink.onPesPayload(payload(VIDEO_PID, PTS + 3003, mpeg2Inter()));
+      sink.onEnd(cleanDecode());
+      assertFalse(sink.isFailed());
+      assertTrue(sink.isIncomplete());
+      assertTrue(sink.getNotes().stream().anyMatch(n -> n.contains("stream type 0x03")),
+         sink.getNotes().toString());
+   }
+
+   @Test
+   void privateDataIsNotAMissingTrack() throws Exception {
+      MuxSink sink = new MuxSink(work.resolve("private.mkv").toFile());
+      sink.onProgram(program(stream(VIDEO_PID, MPEG2), stream(AUDIO_PID, 0x06)));
+      sink.onPesPayload(payload(VIDEO_PID, PTS, mpeg2Key(704, 480, 3)));
+      sink.onPesPayload(payload(VIDEO_PID, PTS + 3003, mpeg2Inter()));
+      sink.onEnd(cleanDecode());
+      assertFalse(sink.isIncomplete());
+   }
+
    private byte[] muxWithAudio(String name, TivoMetadata metadata, byte[]... descriptors)
          throws Exception {
       File out = work.resolve(name).toFile();

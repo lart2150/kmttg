@@ -85,6 +85,9 @@ public class MuxSink implements FrameSink {
    private String coverMime;
    private boolean started;
    private boolean failed;
+   // An audio or video stream the file does not carry. Not a failure - the rest is still
+   // worth having - but it is not the whole recording either.
+   private boolean incomplete;
    private String failure;
    private long minPtsSeen = Long.MAX_VALUE;
    private long discarded;
@@ -147,8 +150,23 @@ public class MuxSink implements FrameSink {
          TrackState t = newTrack(info);
          if (t != null) tracks.put(info.getPid(), t);
          // A type we cannot describe carries no payloads worth explaining, so it is passed
-         // over in silence - but it is on the list, and a later PMT repeats it.
-         else notCarried.add(info.getPid());
+         // over in silence - but it is on the list, and a later PMT repeats it. Audio and
+         // video are the exception: losing one of those is the file, not a detail.
+         else if (notCarried.add(info.getPid()) && isAudioOrVideo(info.getStreamType())) {
+            incomplete = true;
+            notes.add(String.format("pid=0x%04x stream type 0x%02x cannot be muxed; dropped",
+               info.getPid(), info.getStreamType()));
+         }
+      }
+   }
+
+   // MPEG-1/2 audio, AAC, E-AC-3, MPEG-4 video and HEVC: real tracks newTrack cannot write.
+   private static boolean isAudioOrVideo(int streamType) {
+      switch (streamType) {
+         case 0x03: case 0x04: case 0x0F: case 0x11: case 0x87: case 0x10: case 0x24:
+            return true;
+         default:
+            return false;
       }
    }
 
@@ -356,6 +374,7 @@ public class MuxSink implements FrameSink {
          for (Map.Entry<Integer,TrackState> e : tracks.entrySet()) {
             if (! e.getValue().configured) {
                notes.add(String.format("pid=0x%04x never described itself; dropped", e.getKey()));
+               incomplete = true;
                drop.add(e.getKey());
             }
          }
@@ -508,6 +527,7 @@ public class MuxSink implements FrameSink {
    }
 
    public boolean isFailed()             { return failed; }
+   public boolean isIncomplete()         { return incomplete; }
    public String getFailure()            { return failure; }
    public List<String> getNotes()        { return notes; }
    public long getDiscardedNoPts()       { return discarded; }

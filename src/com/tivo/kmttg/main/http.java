@@ -416,10 +416,11 @@ public class http {
 
 	// The decoder's own finally has ended the sink by now, so the muxed file is closed and can
 	// be moved into place. Failure here costs the download only when the .ts was written too,
-	// in which case a later remux job can still produce the MKV from it. A streaming job has
-	// no such fallback, and the empty-output check in tdownload_decrypt fails and retries it.
+	// in which case tdownload_decrypt queues a remux job to produce the MKV from it. A
+	// streaming job has no such fallback, and the empty-output check fails and retries it.
 	private static void finishMux(jobData job, MuxSink muxSink, Boolean downloadFinished) {
 		if (job.muxFile == null) return;
+		job.muxIncomplete = muxSink.isIncomplete();
 		// A no-op once the decoder ended the sink, but it releases the handle if it did not -
 		// and on Windows an open handle is what stops the delete below from working.
 		muxSink.abort();
