@@ -24,9 +24,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -35,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Stack;
 
+import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.rpc.GetDomainToken;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.*;
@@ -683,7 +686,28 @@ public class config {
    }
    
    public static boolean isDomainTokenExpired() {
-	   return (new Date()).getTime() > tivo_domain_token_expires;
+      long now = (new Date()).getTime();
+      if (now > tivo_domain_token_expires)
+         return true;
+      long exp = jwtExpiry(tivo_domain_token);
+      return exp > 0 && now > exp;
+   }
+   
+   // The cookie's expiry is not necessarily the token's: a JWT carries its own exp, and that
+   // is the one tivo.com judges it by. Any segment that decodes to a JSON object with an exp
+   // counts, so nothing is assumed about the token's layout. 0 when there is none to read.
+   static long jwtExpiry(String token) {
+      for (String segment : token.split("\\.")) {
+         try {
+            JSONObject claims = new JSONObject(
+               new String(Base64.getUrlDecoder().decode(segment), StandardCharsets.UTF_8));
+            if (claims.has("exp"))
+               return claims.getLong("exp") * 1000L;
+         } catch (Exception e) {
+            // Not base64url, or not JSON - the signature segment always lands here.
+         }
+      }
+      return 0;
    }
    
    public static void setDomainToken(String token, long expires) {
