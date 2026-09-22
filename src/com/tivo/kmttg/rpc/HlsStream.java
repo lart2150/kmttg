@@ -19,7 +19,9 @@
 package com.tivo.kmttg.rpc;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -169,7 +171,18 @@ public class HlsStream {
    }
 
    private static Streaming probeStreaming(String base, String tivoName) {
-      Http rsp = get(base + "/sysinfo/json/svcinfo");
+      Http rsp;
+      try {
+         rsp = fetch(base + "/sysinfo/json/svcinfo");
+      } catch (ConnectException e) {
+         rsp = null;   // refused: the box is up and nothing listens there
+      } catch (Exception e) {
+         // A timeout or dropped connection says nothing about the box, and NEVER is cached
+         // for the batch and turns every mis-anchored recording in it into a reject.
+         log.warn("HlsStream: could not reach " + tivoName + " on port " + PORT
+            + " - " + e.getMessage());
+         return Streaming.LATER;
+      }
       if (rsp == null || rsp.code != HttpURLConnection.HTTP_OK) {
          log.warn("HlsStream: " + tivoName + " has no built-in streamer (nothing on port "
             + PORT + "), so SkipMode offsets cannot be re-anchored from it");
@@ -555,6 +568,15 @@ public class HlsStream {
    }
 
    private static Http get(String url) {
+      try {
+         return fetch(url);
+      } catch (Exception e) {
+         debug.print("HlsStream get " + url + " - " + e.getMessage());
+         return null;
+      }
+   }
+
+   private static Http fetch(String url) throws IOException {
       HttpURLConnection conn = null;
       try {
          conn = (HttpURLConnection) new URL(url).openConnection();
@@ -575,9 +597,6 @@ public class HlsStream {
          }
          rsp.body = out.toByteArray();
          return rsp;
-      } catch (Exception e) {
-         debug.print("HlsStream get " + url + " - " + e.getMessage());
-         return null;
       } finally {
          if (conn != null) conn.disconnect();
       }
