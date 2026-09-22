@@ -159,6 +159,8 @@ public class jobData implements Serializable, Cloneable {
    // Boolean: a queue file saved by an older kmttg deserializes into this class with the new
    // field unset, and a null there would NPE on every unboxing below.
    public boolean muxOnly = false;
+   // The fused mux left out an audio or video stream. Primitive for the same reason.
+   public boolean muxIncomplete = false;
    // Bytes pulled off the TiVo so far. The only progress signal a streaming job has, because
    // the MKV does not begin until the muxer has enough to describe its tracks and then grows
    // at its own rate. Written by the download thread, read by the job monitor.

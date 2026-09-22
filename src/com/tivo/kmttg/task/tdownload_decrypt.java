@@ -356,14 +356,38 @@ public class tdownload_decrypt extends baseTask implements Serializable {
             // Add auto history entry if auto downloads configured
             if (file.isFile(config.autoIni))
                auto.AddHistoryEntry(job);
-            
+
+            // The fused mux failed but the .ts is there, and LaunchJobs skipped the remux
+            // job because this one was standing in for it - so queue it now.
+            if (job.muxFile != null && ! job.muxOnly && ! file.isFile(job.muxFile)) {
+               jobData remux = job.clone();
+               remux.type = "remux";
+               remux.name = job.encodeName;
+               remux.encodeFile = job.muxFile;
+               remux.muxFile = null;
+               remux.inputFile = null;
+               remux.inputFileSize = null;
+               remux.twpdelete = false;
+               remux.rpcdelete = false;
+               log.warn("Queuing a remux job for " + job.muxFile);
+               jobMonitor.submitNewJob(remux);
+            }
+
+            // A streaming job's MKV is the only copy, so it has to be the whole recording
+            // before the original goes.
+            Boolean keepOnTivo = job.muxOnly && job.muxIncomplete;
+            if (keepOnTivo && (job.twpdelete || job.rpcdelete)) {
+               log.error("Not deleting show on TiVo: " + job.muxFile
+                  + " is missing an audio or video stream");
+            }
+
             // TivoWebPlus call to delete show on TiVo if configured
-            if (job.twpdelete && ! config.rpcEnabled(job.tivoName)) {
+            if (! keepOnTivo && job.twpdelete && ! config.rpcEnabled(job.tivoName)) {
                file.TivoWebPlusDelete(job.url);
             }
             
             // rpc style delete show on TiVo if configured
-            if (job.rpcdelete && config.rpcEnabled(job.tivoName)) {
+            if (! keepOnTivo && job.rpcdelete && config.rpcEnabled(job.tivoName)) {
                String recordingId = rnpl.findRecordingId(job.tivoName, job.entry);
                if ( ! file.rpcDelete(job.tivoName, recordingId) )
                   log.error("Failed to delete show on TiVo");
