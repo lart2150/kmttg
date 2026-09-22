@@ -58,7 +58,9 @@ public class Remote{
    private String tivoName;
    protected final String IP;
    protected final int port;
-   
+   private JSONObject lastError = null;
+   private Integer schemaVersion = null;
+
    /** perform a socket setup and auth. all public constructors call this. */
    private Remote(String tivoName, boolean away, String IP, String mak, String programDir, int port, String cdata) {
       this.tivoName = tivoName;
@@ -212,25 +214,30 @@ public class Remote{
    }
    
    /**
-    * Perform {@link #Read()}, if rpcOld got set, update config, return null if the result is an error.
+    * Send req and read its reply, if rpcOld got set, update config, return null if the result is an error.
     * @return null if there was an error, otherwise the response.
     */
-   private synchronized JSONObject ReadRemote() {
+   private synchronized JSONObject ReadRemote(String req) {
       boolean rpcPre = s.rpcOld;
+      lastError = null;
 
-      // do the actual read
-      JSONObject result = s.Read();
+      // do the actual exchange
+      JSONObject result = s.Request(req, schemaVersion == null);
+      if (result == null) {
+         saveRpcOld(rpcPre);
+         return null;
+      }
 
       // update config if rpcOld was changed as a result of the Read.
       // note, that also means this will have been an error so null is returned below.
-      if (!rpcPre && s.rpcOld) {
-         config.rpcOld = 1;
-         config.save();
-      }
+      saveRpcOld(rpcPre);
 
       // expecting null result for errors.
       try {
          if (result.has("type") && result.getString("type").equals("error")) {
+            // Read adds IsFinal from the header; the error is kept as the TiVo sent it.
+            result.remove("IsFinal");
+            lastError = result;
             return null;
          }
       } catch (Exception e) {
@@ -241,8 +248,43 @@ public class Remote{
       return result;
    }
 
+   private void saveRpcOld(boolean rpcPre) {
+      if (!rpcPre && s.rpcOld) {
+         config.rpcOld = 1;
+         config.save();
+      }
+   }
+
+   // The error response behind the last null a local Command returned, or null when that
+   // null was not the TiVo refusing. Away mode hands errors back as the result instead.
+   public JSONObject getLastError() {
+      return lastError;
+   }
+
+   // The reply exactly as the TiVo sent it, errors included. type goes out as the literal
+   // RequestType with json as the body - none of Command's mapping or added fields. Null
+   // only when no reply came at all.
+   public String RawCommand(String type, JSONObject json) {
+      String req = RpcRequest(type, false, json);
+      if (req == null)
+         return null;
+      if (this.away)
+         return ws.sendRequestAndWaitForBody(req, schemaVersion == null);
+      boolean rpcPre = s.rpcOld;
+      String body = s.RequestRaw(req, schemaVersion == null);
+      saveRpcOld(rpcPre);
+      return body;
+   }
+   
+   // The SchemaVersion header for every request this Remote sends, in place of the one its
+   // connection negotiated - for probing a TiVo at a version of the caller's choosing. A
+   // refusal at it is answered as it is and never moves the connection's own version.
+   public void setSchemaVersion(Integer schemaVersion) {
+      this.schemaVersion = schemaVersion;
+   }
+
    /**
-    * true if this Remote is connected via middlemind 
+    * true if this Remote is connected via middlemind
     * (means {@link #Remote(String, Boolean)} constructor was used (and passed true)) 
     */
    public Boolean awayMode() {
@@ -251,8 +293,8 @@ public class Remote{
    
    public synchronized String RpcRequest(String type, Boolean monitor, JSONObject data) {
       return this.away
-            ? ws.RpcRequest(type, monitor, data)
-            : s.RpcRequest(type, monitor, data);
+            ? ws.RpcRequest(type, monitor, data, schemaVersion)
+            : s.RpcRequest(type, monitor, data, schemaVersion);
    }
    
    // RPC command set
@@ -745,9 +787,9 @@ public class Remote{
             long start = rpcLog.enabled ? System.nanoTime() : 0;
             JSONObject result;
             if (this.away) {
-               result = ws.sendRequestAndWaitForResponse(req);
+               result = ws.sendRequestAndWaitForResponse(req, schemaVersion == null);
             } else {
-               result = s.Write(req) ? ReadRemote() : null;
+               result = ReadRemote(req);
             }
             if (rpcLog.enabled)
                rpcLog.log(tivoName, type, (System.nanoTime() - start) / 1000000L, json, result);

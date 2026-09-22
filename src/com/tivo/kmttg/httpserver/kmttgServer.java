@@ -153,7 +153,7 @@ public class kmttgServer extends HTTPServer {
          handleRpc(req, resp);
          return;
       }
-
+      
       // Same as /rpc, but always over the tivo.com websocket rather than to the TiVo itself
       if (path.equals("/rpcws")) {
          handleRpcWs(req, resp);
@@ -270,12 +270,89 @@ public class kmttgServer extends HTTPServer {
    // Response.send() defaults to text/html; sendHeaders keeps a Content-Type
    // that is already set, so adding it here wins.
    private static void send(Response resp, String contentType, String body) throws IOException {
+      send(resp, 200, contentType, body);
+   }
+
+   private static void send(Response resp, int status, String contentType, String body) throws IOException {
       resp.getHeaders().replace("Content-Type", contentType);
-      resp.send(200, body);
+      resp.send(status, body);
    }
 
    private static void sendJson(Response resp, Object json) throws IOException {
       send(resp, "application/json; charset=utf-8", json.toString());
+   }
+
+   // A TiVo's reply passed on as it came. An error is a 502 - the TiVo answered, and said no -
+   // so pages that throw on a non-2xx keep doing so, and a client can tell it from kmttg's own
+   // failures without reading the body. Errors are compacted, since tivo.com sends some of
+   // them pretty-printed; anything else goes out byte for byte.
+   private static void sendTivoReply(Response resp, String body) throws IOException {
+      int status = 200;
+      try {
+         JSONObject j = new JSONObject(body);
+         if (j.has("type") && j.getString("type").equals("error")) {
+            status = 502;
+            body = j.toString();
+         }
+      } catch (JSONException e) {
+         // Not JSON - pass it on all the same.
+      }
+      send(resp, status, "application/json; charset=utf-8", body);
+   }
+
+   // A named command's result, already parsed - no need to read it back from text.
+   private static void sendTivoReply(Response resp, JSONObject result) throws IOException {
+      boolean error = "error".equals(result.optString("type"));
+      send(resp, error ? 502 : 200, "application/json; charset=utf-8", result.toString());
+   }
+
+   // kmttg's own failure - no TiVo reply to pass on - told apart from a TiVo's
+   // {"type":"error"} by its type as well as its status.
+   private static void sendKmttgError(Response resp, int status, String text) throws IOException {
+      send(resp, status, "application/json; charset=utf-8",
+         "{\"type\":\"kmttgError\",\"text\":" + JSONObject.quote(text) + "}");
+   }
+
+   private static boolean rejectUnknownTivoJson(String tivo, Response resp) throws IOException {
+      if (isKnownTivo(tivo))
+         return false;
+      sendKmttgError(resp, 403, "Unknown TiVo: " + tivo);
+      return true;
+   }
+
+   // The request's json parameter, or null once a 400 has been sent for one that won't parse.
+   private static JSONObject jsonParam(Map<String,String> params, Response resp) throws IOException {
+      if (! params.containsKey("json"))
+         return new JSONObject();
+      try {
+         return new JSONObject(params.get("json"));
+      } catch (JSONException e) {
+         sendKmttgError(resp, 400, "json parameter is not valid JSON - " + e.getMessage());
+         return null;
+      }
+   }
+
+   // The schemaVersion parameter: the header for this one request, null for the negotiated one.
+   private static Integer schemaParam(Map<String,String> params) {
+      String value = params.get("schemaVersion");
+      return value == null ? null : intParam(value);
+   }
+
+   // True once a 400 has gone out for a schemaVersion that isn't a version number.
+   private static boolean badSchemaParam(Map<String,String> params, Response resp) throws IOException {
+      String value = params.get("schemaVersion");
+      if (value == null)
+         return false;
+      Integer schema = intParam(value);
+      if (schema != null && schema > 0)
+         return false;
+      sendKmttgError(resp, 400, "schemaVersion is not a version number: " + value);
+      return true;
+   }
+
+   private static boolean raw(Map<String,String> params) {
+      String raw = params.get("raw");
+      return "1".equals(raw) || "true".equals(raw);
    }
 
    private static void sendText(Response resp, String text) throws IOException {
@@ -410,6 +487,11 @@ public class kmttgServer extends HTTPServer {
 
    // Handle rpc requests
    // Sample rpc request: /rpc?tivo=Roamio&operation=SysInfo
+   // With raw=1 operation is sent as the literal MindRPC type and the reply comes back as the
+   // TiVo sent it. A TiVo error is a 502 carrying its own JSON; kmttg's own failures are
+   // {"type":"kmttgError"} - 504 for a raw request that got no reply, 400/403 for a bad
+   // request, 500 otherwise.
+   // schemaVersion=N sends this one request at SchemaVersion N instead of the negotiated one.
    public void handleRpc(Request req, Response resp) throws IOException {
       Map<String,String> params = req.getParams();
       if (params.containsKey("operation") && params.containsKey("tivo")) {
@@ -420,7 +502,7 @@ public class kmttgServer extends HTTPServer {
             
             if (operation.equals("keyEventMacro")) {
                // Special case
-               if (rejectUnknownTivo(tivo, resp))
+               if (rejectUnknownTivoJson(tivo, resp))
                   return;
                String sequence = params.get("sequence");
                String[] s = sequence.split(" ");
@@ -431,14 +513,14 @@ public class kmttgServer extends HTTPServer {
                   r.keyEventMacro(s);
                   sendText(resp, "");
                } else {
-                  resp.sendError(500, "RPC call failed to TiVo: " + tivo);
+                  sendKmttgError(resp, 500, "RPC call failed to TiVo: " + tivo);
                }
                return;
             }
             
             if (operation.equals("SPSave")) {
                // Special case - the name is also the file name written to
-               if (rejectUnknownTivo(tivo, resp))
+               if (rejectUnknownTivoJson(tivo, resp))
                   return;
                String fileName = config.programDir + File.separator + tivo + ".sp";
                Remote r = new Remote(tivo);
@@ -446,19 +528,19 @@ public class kmttgServer extends HTTPServer {
                   JSONArray a = r.SeasonPasses(null);
                   if ( a != null ) {
                      if ( ! JSONFile.write(a, fileName) ) {
-                        resp.sendError(500, "Failed to write to file: " + fileName);
+                        sendKmttgError(resp, 500, "Failed to write to file: " + fileName);
                         r.disconnect();
                         return;
                      }
                   } else {
-                     resp.sendError(500, "Failed to retriev SP list for tivo: " + tivo);
+                     sendKmttgError(resp, 500, "Failed to retriev SP list for tivo: " + tivo);
                      r.disconnect();
                      return;
                   }
                   r.disconnect();
                   sendText(resp, "Saved SP to file: " + fileName);
                } else {
-                  resp.sendError(500, "RPC call failed to TiVo: " + tivo);
+                  sendKmttgError(resp, 500, "RPC call failed to TiVo: " + tivo);
                }
                return;
             }
@@ -484,14 +566,14 @@ public class kmttgServer extends HTTPServer {
                String fileName = params.get("file");
                File sp = spFile(fileName);
                if ( sp == null ) {
-                  resp.sendError(403, "Not a season pass file: " + fileName);
+                  sendKmttgError(resp, 403, "Not a season pass file: " + fileName);
                   return;
                }
                JSONArray a = JSONFile.readJSONArray(sp.getAbsolutePath());
                if ( a != null ) {
                   sendJson(resp, a);
                } else {
-                  resp.sendError(500, "Failed to load SP file: " + fileName);
+                  sendKmttgError(resp, 500, "Failed to load SP file: " + fileName);
                }
                return;
             }
@@ -503,31 +585,45 @@ public class kmttgServer extends HTTPServer {
 //            }
             
             // General purpose remote operation
-            if (rejectUnknownTivo(tivo, resp))
+            if (rejectUnknownTivoJson(tivo, resp))
                return;
-            JSONObject json;
-            if (params.containsKey("json"))
-               json = new JSONObject(params.get("json"));
-            else
-               json = new JSONObject();
+            JSONObject json = jsonParam(params, resp);
+            if (json == null || badSchemaParam(params, resp))
+               return;
             Remote r = new Remote(tivo);
             if (r.success) {
-               JSONObject result = r.Command(operation, json);
-               if (result == null) {
-                  resp.sendError(500, "operation failed: " + operation);
-               } else {
-                  sendJson(resp, result);
+               r.setSchemaVersion(schemaParam(params));
+               try {
+                  if (raw(params)) {
+                     // operation is the literal RequestType - no named command gets a look in
+                     String reply = r.RawCommand(operation, json);
+                     if (reply == null)
+                        sendKmttgError(resp, 504, "No reply from TiVo " + tivo + " to " + operation);
+                     else
+                        sendTivoReply(resp, reply);
+                  } else {
+                     JSONObject result = r.Command(operation, json);
+                     if (result == null)
+                        result = r.getLastError();
+                     // Null without a TiVo error behind it is as likely kmttg failing to build
+                     // the request as the TiVo not answering, so it isn't a 504.
+                     if (result == null)
+                        sendKmttgError(resp, 500, "operation failed: " + operation);
+                     else
+                        sendTivoReply(resp, result);
+                  }
+               } finally {
+                  r.disconnect();
                }
-               r.disconnect();
             } else {
                // without this an unreachable tivo sent no response at all
-               resp.sendError(500, "RPC call failed to TiVo: " + tivo);
+               sendKmttgError(resp, 500, "RPC call failed to TiVo: " + tivo);
             }
          } catch (Exception e) {
-            resp.sendError(500, "rpc " + params.get("operation") + " - " + e);
+            sendKmttgError(resp, 500, "rpc " + params.get("operation") + " - " + e);
          }
       } else {
-         resp.sendError(400, "RPC request missing 'operation' and/or 'tivo'");
+         sendKmttgError(resp, 400, "RPC request missing 'operation' and/or 'tivo'");
       }
    }
    
@@ -538,34 +634,40 @@ public class kmttgServer extends HTTPServer {
       Map<String,String> params = req.getParams();
       String operation = params.get("operation");
       if (operation == null) {
-         resp.sendError(400, "rpcws request missing 'operation'");
+         sendKmttgError(resp, 400, "rpcws request missing 'operation'");
          return;
       }
       String tivo = params.get("tivo");
       try {
-         JSONObject json;
-         if (params.containsKey("json"))
-            json = new JSONObject(params.get("json"));
-         else
-            json = new JSONObject();
-         JSONObject result = wsPool.command(tivo, operation, json);
-         if (result == null)
-            resp.sendError(500, "operation failed: " + operation);
-         else
-            sendJson(resp, result);
+         JSONObject json = jsonParam(params, resp);
+         if (json == null || badSchemaParam(params, resp))
+            return;
+         if (raw(params)) {
+            String reply = wsPool.rawCommand(tivo, operation, json, schemaParam(params));
+            if (reply == null)
+               sendKmttgError(resp, 504, "No reply from tivo.com to " + operation);
+            else
+               sendTivoReply(resp, reply);
+         } else {
+            JSONObject result = wsPool.command(tivo, operation, json, schemaParam(params));
+            if (result == null)
+               sendKmttgError(resp, 500, "operation failed: " + operation);
+            else
+               sendTivoReply(resp, result);
+         }
       } catch (TiVoRPCWSPool.ConnectException e) {
-         resp.sendError(e.auth ? 401 : 500, e.getMessage());
+         sendKmttgError(resp, e.auth ? 401 : 500, e.getMessage());
       } catch (Exception e) {
-         resp.sendError(500, "rpcws " + operation + " - " + e);
+         sendKmttgError(resp, 500, "rpcws " + operation + " - " + e);
       }
    }
-
+   
    @Override
    public synchronized void stop() {
       super.stop();
       wsPool.closeAll();
    }
-
+   
    // Return list of rpc enabled TiVos known by kmttg
    public void handleRpcTivos(Response resp) throws IOException {
       Stack<String> tivos = config.getTivoNames();

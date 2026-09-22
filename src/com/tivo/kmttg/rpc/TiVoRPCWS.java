@@ -26,8 +26,10 @@ import com.tivo.kmttg.util.log;
 
 public class TiVoRPCWS extends WebSocketClient {
 
-   protected static final String SchemaVersion = "14";
-   protected static final String SchemaVersion_newer = "17";
+   // What tivo.com has always been asked at, and where a refused request falls back to.
+   static final int SCHEMA_DEFAULT = 22;
+   // Raised to the box's maxMindVersion once the connection has authenticated.
+   private volatile int schema = SCHEMA_DEFAULT;
    // Atomic rather than guarded by the instance lock: the auth thread numbers its own request,
    // and a caller that arrives before authentication finishes holds that lock while it waits.
    protected final AtomicInteger rpc_id = new AtomicInteger(0);
@@ -46,6 +48,7 @@ public class TiVoRPCWS extends WebSocketClient {
    // tivo.com can accept the socket and never authenticate it, which would otherwise park
    // every caller for good.
    private static final int AUTH_TIMEOUT = 30000;
+   private static final int PROBE_TIMEOUT = 5000;
    // Last resort for a connection that is still open but has gone silent: onClose releases
    // waiters the moment the socket goes, so nothing healthy ever reaches this.
    private static final int RESPONSE_TIMEOUT = 120000;
@@ -54,7 +57,7 @@ public class TiVoRPCWS extends WebSocketClient {
    // which takes the socket and never finishes the handshake never opens.
    private static final int CONNECT_TIMEOUT = 30000;
    
-   private String tsn;
+   String tsn;
    // One in-flight request: the monitor its caller waits on and the slot the reply lands in.
    // A monitor each rather than one shared between them, so a reply wakes the thread that
    // asked for it - and so a close can wake every one of them at once.
@@ -254,6 +257,9 @@ public class TiVoRPCWS extends WebSocketClient {
                	wc.authRejected = isTokenError(result);
                	wc.close();
                }
+               // Before authDone, so nobody sends at the default while this is being asked.
+               if (wc.ready)
+                  wc.negotiateSchema();
             } catch (Exception e) {
                // Named, not just described: the message alone is null for the whole NPE family.
                error("rpc Auth error - " + e);
@@ -272,20 +278,84 @@ public class TiVoRPCWS extends WebSocketClient {
    public String getTsn() {
       return this.tsn;
    }
-   
+
    public boolean isAuthRejected() {
       return authRejected;
    }
-   
+
    static boolean isTokenError(JSONObject error) {
       String said = (error.optString("code") + " " + error.optString("text")).toLowerCase();
       return said.contains("token") || said.contains("auth");
+   }
+
+   private static final String TYPE_KEY = "tivo.com type:";
+
+   private int schemaFor(String type) {
+      Integer refused = SchemaVersions.cached(TYPE_KEY + type);
+      return refused != null ? refused : schema;
+   }
+
+   private static String requestTypeOf(String request) {
+      for (String header : request.split("\r\n\r\n", 2)[0].split("\r\n")) {
+         if (header.startsWith("RequestType: "))
+            return header.substring(13).trim();
+      }
+      return null;
+   }
+
+   // As TiVoRPC does on the LAN, but asked through tivo.com by the box's bodyId. Once per TiVo
+   // per run; anything short of a maxMindVersion above the default leaves it where it was.
+   void negotiateSchema() {
+      if (tsn == null || tsn.equals("-"))
+         return;
+      String key = "tivo.com:" + tsn;
+      Integer known = SchemaVersions.cached(key);
+      if (known == null) {
+         try {
+            JSONObject data = new JSONObject();
+            data.put("bodyId", tsn);
+            // Short, and inside the auth window every caller is waiting on. Unanswered counts as
+            // no answer for the run: the box may be offline, and each connection waiting for
+            // it again would put this delay in front of every one of them.
+            String response = exchange(RpcRequest("bodyConfigSearch", false, data, SchemaVersions.PROBE), PROBE_TIMEOUT);
+            known = Math.max(SCHEMA_DEFAULT, response == null ? 0 : SchemaVersions.maxMindVersion(response));
+         } catch (Exception e) {
+            warn("SchemaVersion probe failed - " + e);
+            return;
+         }
+         SchemaVersions.remember(key, known);
+         log.print(tivoName + " (tivo.com): SchemaVersion " + known);
+      }
+      schema = known;
    }
 
    // Not serialized: each request waits on its own Pending and send() writes under the
    // library's own lock, so the web server's pool can have several in flight on one
    // connection. A reply, a close or a timeout all end the wait.
    public JSONObject sendRequestAndWaitForResponse(String request) {
+      return sendRequestAndWaitForResponse(request, true);
+   }
+
+   // mayFallBack is false for a request sent at a version the caller chose: its refusal is
+   // answered as it is, and falls nothing back.
+   public JSONObject sendRequestAndWaitForResponse(String request, boolean mayFallBack) {
+      String response = sendRequestAndWaitForBody(request, mayFallBack);
+      if (response == null)
+         return null;
+      try {
+         return new JSONObject(response);
+      } catch (JSONException e) {
+         error("WS error " + e.getMessage());
+         return null;
+      }
+   }
+
+   // The reply body exactly as tivo.com sent it, error or not.
+   public String sendRequestAndWaitForBody(String request) {
+      return sendRequestAndWaitForBody(request, true);
+   }
+
+   public String sendRequestAndWaitForBody(String request, boolean mayFallBack) {
       Integer rpcId = rpcIdOf(request.split("\r\n\r\n", 2)[0]);
       try {
          if (! this.waitForReady()) {
@@ -300,12 +370,23 @@ public class TiVoRPCWS extends WebSocketClient {
             error("No response from tivo.com to request " + rpcId);
             return null;
          }
-         return new JSONObject(response);
+         // A refusal is usually one of tivo.com's own services stopping short of the box's
+         // version, so it is that request type that falls back, not the whole connection.
+         String type = requestTypeOf(request);
+         int sentAt = SchemaVersions.of(request);
+         if (mayFallBack && sentAt > SCHEMA_DEFAULT && type != null
+               && SchemaVersions.isUnsupported(response)) {
+            log.warn(type + ": SchemaVersion " + sentAt + " refused by tivo.com - using " + SCHEMA_DEFAULT);
+            SchemaVersions.remember(TYPE_KEY + type, SCHEMA_DEFAULT);
+            response = exchange(SchemaVersions.withSchema(request, SCHEMA_DEFAULT), RESPONSE_TIMEOUT);
+            if (response == null) {
+               error("No response from tivo.com to request " + rpcId);
+               return null;
+            }
+         }
+         return response;
       } catch (InterruptedException e) {
          Thread.currentThread().interrupt();
-         return null;
-      } catch (JSONException e) {
-         error("WS error " + e.getMessage());
          return null;
       } catch (RuntimeException e) {
          // send() throws when the socket has gone out from under us.
@@ -317,6 +398,11 @@ public class TiVoRPCWS extends WebSocketClient {
    // Deliberately not synchronized: requests are built on the auth thread and on every web
    // server thread sharing the connection. The only shared state here is the request counter.
    public String RpcRequest(String type, Boolean monitor, JSONObject data) {
+      return RpcRequest(type, monitor, data, null);
+   }
+
+   // schemaVersion, when given, is the header for this one request, whatever was negotiated.
+   public String RpcRequest(String type, Boolean monitor, JSONObject data, Integer schemaVersion) {
       try {
          String ResponseCount = "single";
          if (monitor)
@@ -324,7 +410,7 @@ public class TiVoRPCWS extends WebSocketClient {
          String bodyId = null;
          if (data.has("bodyId"))
             bodyId = (String) data.get("bodyId");
-         String schema = "22";
+         String schema = String.valueOf(schemaVersion != null ? schemaVersion : schemaFor(type));
          int id = rpc_id.incrementAndGet();
          String eol = "\r\n";
          String headers =
@@ -336,7 +422,10 @@ public class TiVoRPCWS extends WebSocketClient {
             "ResponseCount: " + ResponseCount + eol;
 
          if (bodyId != null) {
-            headers += "BodyId: tsn:" + bodyId + eol;
+            // kmttg's own callers pass a bare TSN; a raw request may already carry the prefix.
+            if (! bodyId.startsWith("tsn:"))
+               bodyId = "tsn:" + bodyId;
+            headers += "BodyId: " + bodyId + eol;
          }
 
          data.put("type", type);

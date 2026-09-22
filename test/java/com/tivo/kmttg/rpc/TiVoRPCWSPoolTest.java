@@ -54,7 +54,7 @@ public class TiVoRPCWSPoolTest {
          open = false;
       }
 
-      public JSONObject sendRequestAndWaitForResponse(String request) {
+      public JSONObject sendRequestAndWaitForResponse(String request, boolean mayFallBack) {
          sent = request;
          try {
             return new JSONObject("{\"type\":\"bodyConfigList\"}");
@@ -278,7 +278,7 @@ public class TiVoRPCWSPoolTest {
 
    @Test
    void aCommandGoesOutOnThePooledConnectionAndGivesItBack() throws Exception {
-      JSONObject result = pool.command("Bolt", "bodyConfigSearch", new JSONObject());
+      JSONObject result = pool.command("Bolt", "bodyConfigSearch", new JSONObject(), null);
       assertEquals("bodyConfigList", result.getString("type"));
       pool.clock = IDLE;
       pool.reapIdle();
