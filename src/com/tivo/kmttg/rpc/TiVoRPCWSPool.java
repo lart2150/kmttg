@@ -59,10 +59,23 @@ public class TiVoRPCWSPool {
       this.idleTimeout = idleTimeout;
    }
 
-   public JSONObject command(String tivoName, String operation, JSONObject json) throws ConnectException {
+   public JSONObject command(String tivoName, String operation, JSONObject json, Integer schemaVersion) throws ConnectException {
       Conn c = acquire(tivoName);
       try {
-         return new Remote(tivoName, c.ws).Command(operation, json);
+         Remote r = new Remote(tivoName, c.ws);
+         r.setSchemaVersion(schemaVersion);
+         return r.Command(operation, json);
+      } finally {
+         release(c);
+      }
+   }
+
+   public String rawCommand(String tivoName, String operation, JSONObject json, Integer schemaVersion) throws ConnectException {
+      Conn c = acquire(tivoName);
+      try {
+         Remote r = new Remote(tivoName, c.ws);
+         r.setSchemaVersion(schemaVersion);
+         return r.RawCommand(operation, json);
       } finally {
          release(c);
       }

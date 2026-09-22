@@ -2,11 +2,13 @@ package com.tivo.kmttg.rpc;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.SocketException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -34,6 +36,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.util.GetKeyStore;
 import com.tivo.kmttg.util.log;
@@ -67,6 +70,8 @@ public class TiVoRPC {
    private String programDir;
    
    protected boolean rpcOld;
+   // What this connection asks at unless rpcOld: the box's maxMindVersion once negotiated.
+   private int schema = Integer.parseInt(SchemaVersion_newer);
 
    private int rpc_id = 0;
    private int session_id = 0;
@@ -115,6 +120,19 @@ public class TiVoRPC {
       RemoteInit(mak);
    }
    
+   /**
+    * Test seam: a session over the given streams, with no socket and no authentication.
+    * Never used in production code.
+    */
+   TiVoRPC(InputStream in, OutputStream out) {
+      this.tivoName = null;
+      this.IP = "";
+      this.port = 0;
+      this.debug = false;
+      this.in = new DataInputStream(in);
+      this.out = new DataOutputStream(out);
+   }
+
    public boolean isConnected() {
       return this.socket.isConnected();
    }
@@ -158,6 +176,11 @@ public class TiVoRPC {
     * @return the String to pass to {@link #Write(String)}
     */
    protected synchronized String RpcRequest(String type, Boolean monitor, JSONObject data) {
+      return RpcRequest(type, monitor, data, null);
+   }
+
+   // schemaVersion, when given, is the header for this one request, whatever was negotiated.
+   protected synchronized String RpcRequest(String type, Boolean monitor, JSONObject data, Integer schemaVersion) {
       try {
          String ResponseCount = "single";
          if (monitor)
@@ -165,9 +188,7 @@ public class TiVoRPC {
          String bodyId = "";
          if (data.has("bodyId"))
             bodyId = (String) data.get("bodyId");
-         String schema = SchemaVersion_newer;
-         if (rpcOld)
-            schema = SchemaVersion;
+         String schema = schemaVersion != null ? schemaVersion.toString() : defaultSchema();
          rpc_id++;
          String eol = "\r\n";
          String headers =
@@ -276,7 +297,9 @@ public class TiVoRPC {
           out = new DataOutputStream(socket.getOutputStream());
           
           success = Auth(MAK);
-          
+          if (success)
+             negotiateSchema();
+
        } catch (Exception e) {
           if (attempt == 0 && e.getMessage() != null && e.getMessage().contains("UNKNOWN ALERT")) {
              // Try it again as this could be temporary glitch
@@ -345,69 +368,194 @@ public class TiVoRPC {
     * Adds the boolean header "IsFinal" as a value in the response.
     * @return the JSON response.
     */
-   @SuppressWarnings("deprecation")
    protected synchronized final JSONObject Read() {
-      String buf = "";
-      Integer head_len;
-      Integer body_len;
-      
       try {
-         // Expect line of format: MRPC/2 76 1870
-         // 1st number is header length, 2nd number body length
-         buf = in.readLine();
-         if (debug) {
-            print("READ: " + buf);
-         }
-         if (buf != null && buf.matches("^.*MRPC/2.+$")) {
-            String[] split = buf.split(" ");
-            head_len = Integer.parseInt(split[1]);
-            body_len = Integer.parseInt(split[2]);
-            
-            byte[] headers = new byte[head_len];
-            readBytes(headers, head_len);
-   
-            byte[] body = new byte[body_len];
-            readBytes(body, body_len);
-            
-            if (debug) {
-               print("READ: " + new String(headers) + new String(body));
-            }
-            
-            // Pull out IsFinal value from header
-            Boolean IsFinal;
-            buf = new String(headers, "UTF8");
-            if (buf.contains("IsFinal: true"))
-               IsFinal = true;
-            else
-               IsFinal = false;
-            
-            // Return json contents with IsFinal flag added
-            buf = new String(body, "UTF8");
-            JSONObject j = new JSONObject(buf);
-            if (j.has("type") && j.getString("type").equals("error")) {
-               error("RPC error response:\n" + j.toString(3));
-               if (j.has("text") && j.getString("text").equals("Unsupported schema version")) {
-                  // Revert to older schema version for older TiVo software versions
-                  warn("Reverting to older RPC schema version - try command again.");
-                  rpcOld = true;
-               }
-               // not returning null.  subclasses can make that choice.
-            }
-            j.put("IsFinal", IsFinal);
-            return j;
+         String[] message = readMessage();
+         if (message == null)
+            return null;
+         JSONObject j = new JSONObject(message[1]);
+         if (noteError(j))
+            fallBack();
+         // not returning null for an error.  subclasses can make that choice.
+         j.put("IsFinal", message[0].contains("IsFinal: true"));
+         return j;
+      } catch (Exception e) {
+         error("rpc Read error - " + e.getMessage());
+         return null;
+      }
+   }
 
+   /**
+    * Write a request and read its reply, as {@link #Read()} returns it.
+    * A reply refusing the SchemaVersion the request went out at steps this connection down,
+    * and the request is sent again at the version it stepped to - unless mayFallBack is false,
+    * as it is for a request sent at a version the caller chose.
+    */
+   protected synchronized final JSONObject Request(String req, boolean mayFallBack) {
+      Reply reply = exchange(req, mayFallBack);
+      if (reply == null)
+         return null;
+      if (reply.json == null) {
+         error("rpc Read error - reply is not JSON");
+         return null;
+      }
+      try {
+         reply.json.put("IsFinal", reply.headers.contains("IsFinal: true"));
+      } catch (JSONException e) {
+         error("rpc Read error - " + e.getMessage());
+         return null;
+      }
+      return reply.json;
+   }
+
+   // As Request, but the reply body exactly as the TiVo sent it, error or not.
+   protected synchronized final String RequestRaw(String req, boolean mayFallBack) {
+      Reply reply = exchange(req, mayFallBack);
+      return reply == null ? null : reply.body;
+   }
+
+   // A reply off the socket, parsed once. json is null when the body isn't JSON.
+   private static class Reply {
+      final String headers, body;
+      final JSONObject json;
+
+      Reply(String[] message) {
+         headers = message[0];
+         body = message[1];
+         JSONObject j = null;
+         try {
+            j = new JSONObject(body);
+         } catch (JSONException e) {
+            // Not JSON - still the TiVo's answer.
+         }
+         json = j;
+      }
+   }
+
+   private Reply exchange(String req, boolean mayFallBack) {
+      try {
+         while (true) {
+            if (! Write(req))
+               return null;
+            String[] message = readMessage();
+            if (message == null)
+               return null;
+            Reply reply = new Reply(message);
+            boolean refused = reply.json != null && noteError(reply.json);
+            if (! refused || ! mayFallBack || ! fallBack())
+               return reply;
+            req = SchemaVersions.withSchema(req, Integer.parseInt(defaultSchema()));
          }
       } catch (Exception e) {
          error("rpc Read error - " + e.getMessage());
          return null;
       }
-      return null;
+   }
+
+   private String defaultSchema() {
+      return rpcOld ? SchemaVersion : String.valueOf(schema);
+   }
+
+   // Ask the box how high it goes, once per TiVo per run. Software that predates
+   // maxMindVersion refuses the probe or leaves the field out, and either way stays at 17.
+   void negotiateSchema() {
+      if (rpcOld)
+         return;
+      Integer known = SchemaVersions.cached(schemaKey());
+      if (known == null) {
+         try {
+            JSONObject data = new JSONObject();
+            data.put("bodyId", "-");
+            String req = RpcRequest("bodyConfigSearch", false, data, SchemaVersions.PROBE);
+            if (req == null || ! Write(req)) {
+               success = false;
+               return;
+            }
+            String[] message = readMessage();
+            if (message == null) {
+               success = false;
+               return;
+            }
+            known = Math.max(schema, SchemaVersions.maxMindVersion(message[1]));
+         } catch (Exception e) {
+            // Replies on the LAN are read in order, not matched by RpcId, so a probe that timed
+            // out would have its late answer read as the reply to the next request. The
+            // connection is no use after that.
+            error("SchemaVersion probe failed - " + e.getMessage());
+            success = false;
+            return;
+         }
+         SchemaVersions.remember(schemaKey(), known);
+         log.print(schemaName() + ": SchemaVersion " + known);
+      }
+      schema = known;
+   }
+
+   // Down a step: from the negotiated version to 17, from 17 to 14. False when there is no
+   // lower step to take.
+   private boolean fallBack() {
+      if (rpcOld)
+         return false;
+      int newer = Integer.parseInt(SchemaVersion_newer);
+      if (schema > newer) {
+         log.warn(schemaName() + ": SchemaVersion " + schema + " refused - using " + newer);
+         schema = newer;
+         SchemaVersions.remember(schemaKey(), newer);
+      } else {
+         // Revert to older schema version for older TiVo software versions
+         warn("Reverting to older RPC schema version.");
+         rpcOld = true;
+      }
+      return true;
+   }
+
+   private String schemaKey() {
+      return IP + ":" + port;
+   }
+
+   private String schemaName() {
+      return tivoName != null ? tivoName : IP;
+   }
+
+   // One message off the socket as {headers, body}. Expects a start line of the form
+   // "MRPC/2 76 1870": header length, then body length.
+   @SuppressWarnings("deprecation")
+   private String[] readMessage() throws IOException {
+      String buf = in.readLine();
+      if (debug) {
+         print("READ: " + buf);
+      }
+      if (buf == null || ! buf.matches("^.*MRPC/2.+$"))
+         return null;
+      String[] split = buf.split(" ");
+      byte[] headers = new byte[Integer.parseInt(split[1])];
+      readBytes(headers, headers.length);
+      byte[] body = new byte[Integer.parseInt(split[2])];
+      readBytes(body, body.length);
+      if (debug) {
+         print("READ: " + new String(headers) + new String(body));
+      }
+      return new String[] { new String(headers, "UTF8"), new String(body, "UTF8") };
+   }
+   
+   // Logs an error reply, and says whether it is the TiVo refusing the SchemaVersion.
+   private boolean noteError(JSONObject j) throws JSONException {
+      if (j.has("type") && j.getString("type").equals("error")) {
+         error("RPC error response:\n" + j.toString(3));
+         return SchemaVersions.isUnsupported(j);
+      }
+      return false;
    }
 
    private void readBytes(byte[] body, int len) throws IOException {
       int bytesRead = 0;
       while (bytesRead < len) {
-         bytesRead += in.read(body, bytesRead, len - bytesRead);
+         int n = in.read(body, bytesRead, len - bytesRead);
+         // -1 is the TiVo closing mid message. Adding it in walked the count backwards until
+         // read threw on a negative offset, which reported the close as an index error.
+         if (n < 0)
+            throw new EOFException("connection closed part way through a response");
+         bytesRead += n;
       }
    }
    
