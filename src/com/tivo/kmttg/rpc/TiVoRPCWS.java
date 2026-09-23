@@ -28,8 +28,8 @@ public class TiVoRPCWS extends WebSocketClient {
 
    // What tivo.com has always been asked at, and where a refused request falls back to.
    static final int SCHEMA_DEFAULT = 22;
-   // Raised to the box's maxMindVersion once the connection has authenticated.
-   private volatile int schema = SCHEMA_DEFAULT;
+   // The box's maxMindVersion, asked for only by a request that wants it (see TiVoRPC).
+   private volatile Integer negotiated = null;
    // Atomic rather than guarded by the instance lock: the auth thread numbers its own request,
    // and a caller that arrives before authentication finishes holds that lock while it waits.
    protected final AtomicInteger rpc_id = new AtomicInteger(0);
@@ -257,9 +257,6 @@ public class TiVoRPCWS extends WebSocketClient {
                	wc.authRejected = isTokenError(result);
                	wc.close();
                }
-               // Before authDone, so nobody sends at the default while this is being asked.
-               if (wc.ready)
-                  wc.negotiateSchema();
             } catch (Exception e) {
                // Named, not just described: the message alone is null for the whole NPE family.
                error("rpc Auth error - " + e);
@@ -290,9 +287,19 @@ public class TiVoRPCWS extends WebSocketClient {
 
    private static final String TYPE_KEY = "tivo.com type:";
 
-   private int schemaFor(String type) {
+   // The version for a request that wants the box's newest, as TiVoRPC.negotiatedSchema. A
+   // type tivo.com has refused above the default stays at the default.
+   int negotiatedSchema(String type) {
+      try {
+         if (negotiated == null && waitForReady())
+            negotiateSchema();
+      } catch (InterruptedException e) {
+         Thread.currentThread().interrupt();
+      }
       Integer refused = SchemaVersions.cached(TYPE_KEY + type);
-      return refused != null ? refused : schema;
+      if (refused != null)
+         return refused;
+      return negotiated != null ? negotiated : SCHEMA_DEFAULT;
    }
 
    private static String requestTypeOf(String request) {
@@ -320,13 +327,15 @@ public class TiVoRPCWS extends WebSocketClient {
             String response = exchange(RpcRequest("bodyConfigSearch", false, data, SchemaVersions.PROBE), PROBE_TIMEOUT);
             known = Math.max(SCHEMA_DEFAULT, response == null ? 0 : SchemaVersions.maxMindVersion(response));
          } catch (Exception e) {
+            // Not remembered, so a later connection asks again, but this one stops asking
             warn("SchemaVersion probe failed - " + e);
+            negotiated = SCHEMA_DEFAULT;
             return;
          }
          SchemaVersions.remember(key, known);
          log.print(tivoName + " (tivo.com): SchemaVersion " + known);
       }
-      schema = known;
+      negotiated = known;
    }
 
    // Not serialized: each request waits on its own Pending and send() writes under the
@@ -410,7 +419,7 @@ public class TiVoRPCWS extends WebSocketClient {
          String bodyId = null;
          if (data.has("bodyId"))
             bodyId = (String) data.get("bodyId");
-         String schema = String.valueOf(schemaVersion != null ? schemaVersion : schemaFor(type));
+         String schema = String.valueOf(schemaVersion != null ? schemaVersion : SCHEMA_DEFAULT);
          int id = rpc_id.incrementAndGet();
          String eol = "\r\n";
          String headers =

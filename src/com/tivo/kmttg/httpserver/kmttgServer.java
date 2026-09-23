@@ -593,6 +593,7 @@ public class kmttgServer extends HTTPServer {
             Remote r = new Remote(tivo);
             if (r.success) {
                r.setSchemaVersion(schemaParam(params));
+               r.useNegotiatedSchema(true);
                try {
                   if (raw(params)) {
                      // operation is the literal RequestType - no named command gets a look in
