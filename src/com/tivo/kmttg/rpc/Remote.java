@@ -33,6 +33,7 @@ import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.SortedSet;
 import java.util.Stack;
+import java.util.TimeZone;
 import java.util.TreeSet;
 
 import com.tivo.kmttg.JSON.JSONArray;
@@ -1780,7 +1781,9 @@ public class Remote{
          int count = 50;
          
          String search_type = (String)config.gui.remote_gui.search_tab.search_type.getSelectedItem();
-         
+         if (search_type.equals("naturalLanguage"))
+            return searchNaturalLanguage(keyword, job, max);
+
          // Role type search
          JSONArray credit = null;
          if (! search_type.equals("keywords")) {
@@ -1890,6 +1893,80 @@ public class Remote{
          log.error("searchKeywords failed - " + e.getMessage());
       }
       
+      return table_entries;
+   }
+
+   // Plain English search ("Clint Eastwood westerns") using the TiVo voice search.
+   // It returns titles only, so each one is followed by an offerSearch for its upcoming
+   // airings; titles with none are dropped. Same return structure as searchKeywords.
+   public JSONArray searchNaturalLanguage(String text, jobData job, int max) {
+      JSONArray table_entries = new JSONArray();
+      try {
+         if (job != null)
+            config.gui.jobTab_UpdateJobMonitorRowOutput(job, "Guide Search: " + text);
+         JSONObject locale = new JSONObject();
+         locale.put("type", "mindLocale");
+         locale.put("language", "en");
+         locale.put("region", "US");
+         JSONObject json = new JSONObject();
+         json.put("bodyId", bodyId_get());
+         json.put("transcription", text);
+         json.put("deviceType", "stb");
+         json.put("locale", locale);
+         json.put("utcOffset", TimeZone.getDefault().getOffset(new Date().getTime()) / 1000);
+         // 50 is the most it returns, and offset paging just repeats filler titles
+         json.put("count", 50);
+         JSONObject result = Command("naturalLanguageFeedItemFind", json);
+         if (result == null || ! result.has("items")) {
+            log.error("Plain English search found nothing for: '" + text + "'");
+            return table_entries;
+         }
+         JSONArray items = result.getJSONArray("items");
+         int matches = 0;
+         for (int i=0; i<items.length() && matches < max; ++i) {
+            JSONObject kernel = items.getJSONObject(i).optJSONObject("kernel");
+            if (kernel == null || ! kernel.has("collectionId"))
+               continue;
+            JSONObject offerJson = new JSONObject();
+            offerJson.put("count", 50);
+            offerJson.put("offset", 0);
+            offerJson.put("orderBy", new JSONArray("[\"startTime\"]"));
+            // A movie or episode result names its content, a series result only its collection
+            if (kernel.has("contentId"))
+               offerJson.put("contentId", kernel.getString("contentId"));
+            else
+               offerJson.put("collectionId", kernel.getString("collectionId"));
+            JSONObject offers = Command("OfferSearch", offerJson);
+            if (offers == null || ! offers.has("offer"))
+               continue;
+            JSONArray entries = new JSONArray();
+            JSONArray a = offers.getJSONArray("offer");
+            for (int j=0; j<a.length() && matches < max; ++j) {
+               if (a.getJSONObject(j).has("channel")) {
+                  entries.put(a.getJSONObject(j));
+                  matches++;
+               }
+            }
+            if (entries.length() == 0)
+               continue;
+            JSONObject first = entries.getJSONObject(0);
+            JSONObject collection = new JSONObject();
+            collection.put("collectionId", kernel.getString("collectionId"));
+            collection.put("title", first.getString("title"));
+            collection.put("type", first.optString("collectionType", ""));
+            collection.put("entries", entries);
+            table_entries.put(collection);
+            if (job != null) {
+               config.gui.jobTab_UpdateJobMonitorRowStatus(job, "Matches: " + matches);
+               if ( jobMonitor.isFirstJobInMonitor(job) )
+                  config.gui.setTitle("Search: " + matches + " " + config.kmttg);
+            }
+         }
+         log.warn(">> Plain English search completed: '" + text + "'"
+               + (job != null ? " on TiVo: " + job.tivoName : ""));
+      } catch (JSONException e) {
+         log.error("searchNaturalLanguage failed - " + e.getMessage());
+      }
       return table_entries;
    }
 
