@@ -623,7 +623,7 @@ public class TableUtil {
             }
             message += "'" + title + "'";
             final JSONObject o = util.recordOpt.promptUser(
-               message, existing
+               tivoName, message, existing
             );
             if (o != null) {
                Boolean anywhere = false;
