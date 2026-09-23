@@ -15,7 +15,8 @@ import com.tivo.kmttg.util.XmlFixtureCapture;
 
 /**
  * The entry point of the standalone capture jar: drop it beside a config.ini, run it, and
- * it produces one zip of test fixtures to send back.
+ * it produces one zip of test fixtures to send back. kmttg's Help menu runs the same capture
+ * through {@link #run} (see CaptureFixtures).
  *
  * kmttg's tests run against documents captured from a real TiVo, and what a box sends
  * differs by model and software level. Only the models somebody has can be captured, so
@@ -41,6 +42,28 @@ public class ContributorCapture {
    // Per RPC list. The same figure the project's own fixtures were captured with.
    private static final int RPC_ENTRIES = 40;
 
+   // What the zip holds and what is taken out of it: printed after a run, and shown by
+   // kmttg's Help menu before one.
+   public static final String CONTENTS =
+        "What is in it:\n"
+      + "  capture_*.txt        which model and software version it came from\n"
+      + "  npl_*.xml            one page of your Now Playing list\n"
+      + "  videodetails_*.xml   the metadata behind a few of those recordings\n"
+      + "  *.json               up to 40 entries each of My Shows, To Do, Deleted,\n"
+      + "                       Won't Record, season passes, thumbs ratings and the\n"
+      + "                       channel list, one day of guide for two channels and a\n"
+      + "                       sample search, as kmttg's own RPC calls return them\n"
+      + "\n"
+      + "Replaced with dummy values: your MAK, service number, IP address, Netflix ESN\n"
+      + "and zip code (all but its first digit).\n"
+      + "\n"
+      + "Kept: programme titles, descriptions, channels and call signs - they are what\n"
+      + "the tests read, though call signs say roughly where you are - and which shows\n"
+      + "you record, rate and have season passes for.\n"
+      + "\n"
+      + "It only reads from the TiVo: nothing is recorded, deleted or changed. It is all\n"
+      + "plain text, so open the zip and look before sending it on.";
+
    public static void main(String[] args) throws Exception {
       // Same security relaxations kmttg applies so the TiVo's weak cert chain is accepted.
       System.setProperty("https.cipherSuites", "SSL_RSA_WITH_RC4_128_SHA");
@@ -50,26 +73,32 @@ public class ContributorCapture {
       File configDir = configDir(args);
       File ini = new File(configDir, "config.ini");
       if (! ini.isFile()) {
-         System.out.println("No config.ini found in " + configDir.getAbsolutePath());
-         System.out.println();
-         System.out.println("Put this jar in your kmttg folder - the one holding config.ini -");
-         System.out.println("and run it again, or give that folder as an argument:");
-         System.out.println("    java -jar kmttg-fixture-capture.jar \"C:\\path\\to\\kmttg\"");
+         CaptureLog.out.println("No config.ini found in " + configDir.getAbsolutePath());
+         CaptureLog.out.println();
+         CaptureLog.out.println("Put this jar in your kmttg folder - the one holding config.ini -");
+         CaptureLog.out.println("and run it again, or give that folder as an argument:");
+         CaptureLog.out.println("    java -jar kmttg-fixture-capture.jar \"C:\\path\\to\\kmttg\"");
          return;
       }
-      System.out.println("kmttg fixture capture");
-      System.out.println("Reading " + ini.getAbsolutePath());
-      System.out.println();
+      CaptureLog.out.println("kmttg fixture capture");
+      CaptureLog.out.println("Reading " + ini.getAbsolutePath());
+      CaptureLog.out.println();
 
       // programDir is where kmttg reads the decoder certificate from, and the RPC half does
       // not connect without it. The bundled one in this jar is the fallback.
       config.programDir = configDir.getAbsolutePath();
-      String mak = XmlFixtureCapture.readIniValue(ini.getAbsolutePath(), "MAK");
+      config.MAK = XmlFixtureCapture.readIniValue(ini.getAbsolutePath(), "MAK");
+      run(ini, configDir);
+   }
+
+   // Every TiVo config.ini names, one per model, into a zip in outDir. kmttg's Help menu
+   // calls this directly with its own config already loaded. Null when nothing was captured.
+   public static File run(File ini, File outDir) throws Exception {
+      String mak = config.MAK;
       if (mak == null || mak.length() != 10) {
-         System.out.println("No usable MAK in config.ini - kmttg needs one to read a TiVo.");
-         return;
+         CaptureLog.out.println("No usable MAK in config.ini - kmttg needs one to read a TiVo.");
+         return null;
       }
-      config.MAK = mak;
 
       // plan() throws when config.ini names no TiVos at all, which is as likely here as a
       // box being switched off - and the person reading this is not the one who would make
@@ -78,54 +107,64 @@ public class ContributorCapture {
       try {
          boxes = XmlFixtureCapture.plan(ini.getAbsolutePath(), null, null);
       } catch (Exception e) {
-         System.out.println();
-         System.out.println(e.getMessage());
-         System.out.println("Open kmttg, add your TiVo under Configure, and run this again.");
-         return;
+         CaptureLog.out.println();
+         CaptureLog.out.println(e.getMessage());
+         CaptureLog.out.println("Open kmttg, add your TiVo under Configure, and run this again.");
+         return null;
       }
       if (boxes.isEmpty()) {
-         System.out.println();
-         System.out.println("No TiVo answered. Check the box is on and on this network.");
-         return;
+         CaptureLog.out.println();
+         CaptureLog.out.println("No TiVo answered. Check the box is on and on this network.");
+         return null;
       }
 
-      File out = new File(configDir, "kmttg-fixtures");
+      File out = new File(outDir, "kmttg-fixtures");
       delete(out);
+      // An install under Program Files, say, is readable but not writable
+      if (! out.mkdirs()) {
+         CaptureLog.out.println("Can't write to " + outDir.getAbsolutePath());
+         return null;
+      }
       List<String> labels = new ArrayList<String>();
-      for (XmlFixtureCapture.Box box : boxes) {
-         System.out.println();
-         System.out.println(box.model + " (" + box.name + ")");
-         File dir = new File(out, box.label);
-         dir.mkdirs();
-         labels.add(box.label);
+      File zip;
+      try {
+         for (XmlFixtureCapture.Box box : boxes) {
+            CaptureLog.out.println();
+            CaptureLog.out.println(box.model + " (" + box.name + ")");
+            File dir = new File(out, box.label);
+            dir.mkdirs();
+            labels.add(box.label);
 
-         XmlFixtureCapture.writeProvenance(dir, box.label, box, NPL_ITEMS);
-         XmlFixtureCapture.capture(new FixtureSanitizer(box.ip, mak, box.tsn), dir,
-            box.label, box.ip, NPL_ITEMS);
-         // A Series 3 or earlier has no RPC interface at all, and a set of XML fixtures
-         // from one is the whole capture rather than half of a failed one - so it is not
-         // attempted and not reported as a failure.
-         if (! box.rpc) {
-            System.out.println("  A " + box.model + " has no RPC interface - the XML"
-               + " fixtures above are the capture.");
-            continue;
+            XmlFixtureCapture.writeProvenance(dir, box.label, box, NPL_ITEMS);
+            XmlFixtureCapture.capture(new FixtureSanitizer(box.ip, mak, box.tsn), dir,
+               box.label, box.ip, NPL_ITEMS);
+            // A Series 3 or earlier has no RPC interface at all, and a set of XML fixtures
+            // from one is the whole capture rather than half of a failed one - so it is not
+            // attempted and not reported as a failure.
+            if (! box.rpc) {
+               CaptureLog.out.println("  A " + box.model + " has no RPC interface - the XML"
+                  + " fixtures above are the capture.");
+               continue;
+            }
+            // The RPC half is the one that needs the certificate, so it is the one that fails
+            // on a box kmttg itself could not talk to either. The XML fixtures are worth
+            // sending on their own, so a failure here does not lose them.
+            try {
+               RpcFixtureCapture.run(box.name, box.ip, mak, RPC_ENTRIES, null, dir);
+            } catch (Exception e) {
+               CaptureLog.out.println("  RPC capture failed (" + e.getMessage() + ")");
+               CaptureLog.out.println("  The XML fixtures above are still worth sending.");
+            }
          }
-         // The RPC half is the one that needs the certificate, so it is the one that fails
-         // on a box kmttg itself could not talk to either. The XML fixtures are worth
-         // sending on their own, so a failure here does not lose them.
-         try {
-            RpcFixtureCapture.run(box.name, box.ip, mak, RPC_ENTRIES, null, dir);
-         } catch (Exception e) {
-            System.out.println("  RPC capture failed (" + e.getMessage() + ")");
-            System.out.println("  The XML fixtures above are still worth sending.");
-         }
+
+         zip = new File(outDir, "kmttg-fixtures-" + join(labels) + "-"
+            + java.time.LocalDate.now() + ".zip");
+         zip(out, zip);
+      } finally {
+         delete(out);
       }
-
-      File zip = new File(configDir, "kmttg-fixtures-" + join(labels) + "-"
-         + java.time.LocalDate.now() + ".zip");
-      zip(out, zip);
-      delete(out);
       summary(zip);
+      return zip;
    }
 
    // Where config.ini is: said on the command line, else beside the jar, else where the
@@ -145,20 +184,11 @@ public class ContributorCapture {
    }
 
    private static void summary(File zip) {
-      System.out.println();
-      System.out.println("Written: " + zip.getAbsolutePath());
-      System.out.println();
-      System.out.println("What is in it:");
-      System.out.println("  capture_*.txt        which model and software version it came from");
-      System.out.println("  npl_*.xml            one page of your Now Playing list");
-      System.out.println("  videodetails_*.xml   the metadata behind a few of those recordings");
-      System.out.println("  *.json               the To Do list, season passes, thumbs and");
-      System.out.println("                       channel list, as kmttg's own RPC calls return them");
-      System.out.println();
-      System.out.println("Your MAK, service number, IP address and zip code are replaced with");
-      System.out.println("dummy values. Programme titles, channels and call signs are kept - they");
-      System.out.println("are what the tests read. It is all plain text: open the zip and look");
-      System.out.println("before sending it on.");
+      CaptureLog.out.println();
+      CaptureLog.out.println("Written: " + zip.getAbsolutePath());
+      CaptureLog.out.println();
+      for (String line : CONTENTS.split("\n"))
+         CaptureLog.out.println(line);
    }
 
    private static String join(List<String> labels) {

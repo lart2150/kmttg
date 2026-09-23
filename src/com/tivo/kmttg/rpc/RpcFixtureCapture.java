@@ -9,6 +9,7 @@ import java.util.List;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.tools.CaptureLog;
 import com.tivo.kmttg.tools.FixtureSanitizer;
 
 /**
@@ -56,11 +57,22 @@ public class RpcFixtureCapture {
     */
    public static void run(String tivoName, String ip, String mak, int maxEntries,
          String guideDate, File outDir) throws Exception {
-      System.out.println("Connecting to " + tivoName + " at " + ip + " ...");
+      CaptureLog.out.println("Connecting to " + tivoName + " at " + ip + " ...");
       RecordingRemote r = new RecordingRemote(tivoName, ip, -1, mak, null);
       if (!r.success)
          throw new IllegalStateException("RPC connection/auth failed");
 
+      // Inside kmttg's own process a failure part way would otherwise leave the session open
+      try {
+         captureAll(r, ip, mak, maxEntries, guideDate, outDir);
+      } finally {
+         r.disconnect();
+      }
+      CaptureLog.out.println("Done.");
+   }
+
+   private static void captureAll(RecordingRemote r, String ip, String mak, int maxEntries,
+         String guideDate, File outDir) throws Exception {
       String tsn = r.bodyId_get(); // e.g. "tsn:846000123456AB12"
       // The address as well: a response naming the box's own host would otherwise keep it,
       // and which values are in reach should not depend on which capture wrote the file.
@@ -111,9 +123,9 @@ public class RpcFixtureCapture {
       // behind it. TiVo stores the numbers with a dash (2-1 is displayed as 2.1).
       String[] guideChannels = receivedChannels(channels, 2);
       if (guideChannels.length == 0)
-         System.out.println("WARNING: no received channels in the lineup - no guide captured");
+         CaptureLog.out.println("WARNING: no received channels in the lineup - no guide captured");
       else
-         System.out.println("Guide channels " + String.join(", ", guideChannels)
+         CaptureLog.out.println("Guide channels " + String.join(", ", guideChannels)
             + " (the first received in the lineup)");
       // TodoFlagTest needs a guide listing that the ToDo fixture also contains, so
       // take the day from the ToDo list itself rather than picking one and hoping.
@@ -130,7 +142,7 @@ public class RpcFixtureCapture {
       for (String chanNum : guideChannels) {
          JSONObject channel = findChannel(channels, chanNum);
          if (channel == null) {
-            System.out.println("  guide_" + chanNum + ".json: channel not found (skipped)");
+            CaptureLog.out.println("  guide_" + chanNum + ".json: channel not found (skipped)");
             continue;
          }
          JSONObject gReq = new JSONObject();
@@ -155,17 +167,15 @@ public class RpcFixtureCapture {
                offers = rows.getJSONObject(0).getJSONArray("offer");
          }
          if (offers == null)
-            System.out.println("  guide_" + chanNum + ".json: no offers for " + guideDate + " (skipped)");
+            CaptureLog.out.println("  guide_" + chanNum + ".json: no offers for " + guideDate + " (skipped)");
          capture(san, outDir, "guide_" + chanNum + ".json", offers, maxEntries);
       }
 
-      r.disconnect();
-      System.out.println("Done.");
    }
 
    private static void capture(FixtureSanitizer san, File dir, String name, JSONArray data, int max) throws Exception {
       if (data == null) {
-         System.out.println("  " + name + ": NULL (skipped)");
+         CaptureLog.out.println("  " + name + ": NULL (skipped)");
          return;
       }
       // Trim to a representative sample to keep fixtures small
@@ -175,7 +185,7 @@ public class RpcFixtureCapture {
          for (int i = 0; i < max; i++) trimmed.put(data.get(i));
       }
       FixtureJson.write(new File(dir, name), FixtureJson.prune(new JSONArray(san.scrub(trimmed.toString()))));
-      System.out.println("  " + name + ": " + trimmed.length() + " of " + data.length() + " entries written");
+      CaptureLog.out.println("  " + name + ": " + trimmed.length() + " of " + data.length() + " entries written");
    }
 
    /**
@@ -202,7 +212,7 @@ public class RpcFixtureCapture {
                String date = java.time.LocalDateTime.parse(t.getString("startTime").replace(' ', 'T'))
                      .atZone(java.time.ZoneOffset.UTC).withZoneSameInstant(java.time.ZoneId.systemDefault())
                      .toLocalDate().toString();
-               System.out.println("Guide date " + date + " (from the ToDo entry on " + chanNum + ")");
+               CaptureLog.out.println("Guide date " + date + " (from the ToDo entry on " + chanNum + ")");
                return date;
             } catch (Exception e) {
                // entry shaped differently than expected; try the next one
@@ -210,7 +220,7 @@ public class RpcFixtureCapture {
          }
       }
       String today = java.time.LocalDate.now().toString();
-      System.out.println("WARNING: nothing on " + String.join(" or ", chanNums)
+      CaptureLog.out.println("WARNING: nothing on " + String.join(" or ", chanNums)
          + " in the ToDo fixture - capturing guide for " + today
          + ", and TodoFlagTest will not find an overlap");
       return today;
@@ -246,7 +256,7 @@ public class RpcFixtureCapture {
       }
       FixtureJson.write(new File(dir, "commands_" + name + ".json"),
             FixtureJson.prune(new JSONArray(san.scrub(log.toString()))));
-      System.out.println("  commands_" + name + ".json: " + log.length() + " of " + fullLog.length() + " commands written");
+      CaptureLog.out.println("  commands_" + name + ".json: " + log.length() + " of " + fullLog.length() + " commands written");
       return data;
    }
 

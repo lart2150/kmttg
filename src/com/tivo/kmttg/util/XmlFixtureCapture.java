@@ -34,6 +34,7 @@ import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.rpc.MindVersionQuery;
 import com.tivo.kmttg.rpc.Remote;
+import com.tivo.kmttg.tools.CaptureLog;
 import com.tivo.kmttg.tools.FixtureSanitizer;
 
 /**
@@ -116,7 +117,7 @@ public class XmlFixtureCapture {
          writeProvenance(outDir, box.label, box, itemCount);
          capture(new FixtureSanitizer(box.ip, mak, box.tsn), outDir, box.label, box.ip, itemCount);
       }
-      System.out.println(boxes.isEmpty() ? "Nothing captured." : "Done.");
+      CaptureLog.out.println(boxes.isEmpty() ? "Nothing captured." : "Done.");
    }
 
    // Which boxes to capture, already probed and named: one per model, because four Bolts
@@ -140,19 +141,19 @@ public class XmlFixtureCapture {
       Set<String> seen = new LinkedHashSet<String>();
       for (Map.Entry<String,String> tivo : tivos.entrySet()) {
          String name = tivo.getKey(), ip = tivo.getValue();
-         System.out.println("Reading " + name + " at " + ip + " ...");
+         CaptureLog.out.println("Reading " + name + " at " + ip + " ...");
          Box box = probe(name, ip);
          box.name = name;
          box.ip = ip;
          // A box that answered nothing is one that is off or on another network. Its
          // fixtures would be missing too, so say so and move to the next one.
          if (box.httpd.equals("unknown") && box.software.equals("unknown")) {
-            System.out.println("  " + name + ": no answer - skipped");
+            CaptureLog.out.println("  " + name + ": no answer - skipped");
             continue;
          }
          String kind = box.code.equals("unknown") ? slug(name) : box.code;
          if (! seen.add(kind)) {
-            System.out.println("  " + name + ": already have a " + box.model + " - skipped");
+            CaptureLog.out.println("  " + name + ": already have a " + box.model + " - skipped");
             continue;
          }
          box.label = label(labelArg, box, name);
@@ -166,7 +167,8 @@ public class XmlFixtureCapture {
       // A run that finds fewer kinds of recording than the last one writes fewer files, and
       // whatever it does not overwrite would otherwise sit there being read as part of this
       // capture forever. Only this label's own files, so the other models keep theirs.
-      for (File f : dir.listFiles()) {
+      File[] existing = dir.listFiles();
+      for (File f : existing == null ? new File[0] : existing) {
          String name = f.getName();
          if (name.startsWith("npl_" + label + "_") || name.startsWith("videodetails_" + label + "_"))
             f.delete();
@@ -189,10 +191,10 @@ public class XmlFixtureCapture {
             fetch(san, dir, "npl_" + label + "_item.xml", "https://" + ip
                + "/TiVoConnect?Command=QueryItem&Url=" + URLEncoder.encode(download, "UTF-8"));
          } catch (Exception e) {
-            System.out.println("  npl_" + label + "_item.xml: " + e.getMessage() + " (skipped)");
+            CaptureLog.out.println("  npl_" + label + "_item.xml: " + e.getMessage() + " (skipped)");
          }
       } else {
-         System.out.println("  npl_" + label + "_item.xml: no download url on the page (skipped)");
+         CaptureLog.out.println("  npl_" + label + "_item.xml: no download url on the page (skipped)");
       }
 
       // The extended metadata createMeta turns into a pyTivo .txt file. Several, because the
@@ -203,7 +205,7 @@ public class XmlFixtureCapture {
          fetch(san, dir, "videodetails_" + label + "_" + (i + 1) + ".xml", details.get(i));
       }
       if (details.isEmpty())
-         System.out.println("  videodetails_" + label + ": nothing to fetch (skipped)");
+         CaptureLog.out.println("  videodetails_" + label + ": nothing to fetch (skipped)");
    }
 
    // What the box says about itself. The software level is in the Server header of every
@@ -229,7 +231,7 @@ public class XmlFixtureCapture {
          // served no Server header is named by what the RPC just gave.
          identify(box);
       } else {
-         System.out.println("  " + box.model + " predates the RPC interface - XML only");
+         CaptureLog.out.println("  " + box.model + " predates the RPC interface - XML only");
       }
       try {
          ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -240,19 +242,19 @@ public class XmlFixtureCapture {
             if (m.find()) box.protocol = m.group(1);
          }
       } catch (Exception e) {
-         System.out.println("  QueryServer: " + e.getMessage());
+         CaptureLog.out.println("  QueryServer: " + e.getMessage());
       }
       // Said out loud rather than left as an "unknown" line in a file nobody reads again:
       // a capture whose provenance is half missing is one nobody can attribute later.
       if (box.rpc && box.series.equals("unknown"))
-         System.out.println("  NOTE: no RPC answer - series and software version not recorded");
+         CaptureLog.out.println("  NOTE: no RPC answer - series and software version not recorded");
       if (box.rpc && ! box.series.equals("unknown") && box.maxMind.equals("unknown"))
-         System.out.println("  NOTE: the box answered RPC but named no maxMindVersion");
+         CaptureLog.out.println("  NOTE: the box answered RPC but named no maxMindVersion");
       if (box.tsn == null)
-         System.out.println("  NOTE: no service number from RPC - it can only be taken out of"
+         CaptureLog.out.println("  NOTE: no service number from RPC - it can only be taken out of"
             + " the fixtures by shape, not by value");
       if (box.httpd.equals("unknown"))
-         System.out.println("  NOTE: no Server header - the model could not be read");
+         CaptureLog.out.println("  NOTE: no Server header - the model could not be read");
       return box;
    }
 
@@ -275,7 +277,7 @@ public class XmlFixtureCapture {
          box.tsn = field(response, "tivoServiceNumber");
          if (box.tsn.equals("unknown")) box.tsn = r.bodyId_get();
       } catch (Exception e) {
-         System.out.println("  systemInformationGet: " + e.getMessage());
+         CaptureLog.out.println("  systemInformationGet: " + e.getMessage());
       } finally {
          if (r != null) r.disconnect();
       }
@@ -321,9 +323,9 @@ public class XmlFixtureCapture {
       try {
          Files.write(new File(dir, "capture_" + label + ".txt").toPath(),
             text.getBytes(Charset.forName("UTF-8")));
-         System.out.println("  capture_" + label + ".txt: " + box.model + ", " + box.httpd);
+         CaptureLog.out.println("  capture_" + label + ".txt: " + box.model + ", " + box.httpd);
       } catch (Exception e) {
-         System.out.println("  capture_" + label + ".txt: " + e.getMessage() + " (skipped)");
+         CaptureLog.out.println("  capture_" + label + ".txt: " + e.getMessage() + " (skipped)");
       }
    }
 
@@ -335,11 +337,11 @@ public class XmlFixtureCapture {
    // side by side do not write over each other's files.
    private static String modelName(String code) {
       switch (code) {
-         case "D6E": case "D6F":                         return "Edge";
+         case "D6E": case "D6F":                         return "Edge " + code;
          case "849":                                     return "Bolt";
-         case "840": case "846": case "848":             return "Roamio";
-         case "746": case "748": case "750": case "758": return "Premiere";
-         case "A92": case "A93": case "A95":             return "Mini";
+         case "840": case "846": case "848":             return "Roamio " + code;
+         case "746": case "748": case "750": case "758": return "Premiere " + code;
+         case "A92": case "A93": case "A95":             return "Mini " + code;
          case "A94":                                     return "Stream";
          case "658":                                     return "TiVo HD XL";
          case "652":                                     return "TiVo HD";
@@ -446,17 +448,17 @@ public class XmlFixtureCapture {
       try {
          ByteArrayOutputStream out = new ByteArrayOutputStream();
          if (! http.downloadPiped(url, "tivo", config.MAK, out, false, null)) {
-            System.out.println("  " + name + ": fetch failed (skipped)");
+            CaptureLog.out.println("  " + name + ": fetch failed (skipped)");
             return null;
          }
          String xml = new String(out.toByteArray(), "UTF-8");
          Files.write(new File(dir, name).toPath(),
             san.scrub(xml).getBytes(Charset.forName("UTF-8")));
-         System.out.println("  " + name + ": " + xml.length() + " bytes, "
+         CaptureLog.out.println("  " + name + ": " + xml.length() + " bytes, "
             + count(xml, "<Item>") + " items");
          return xml;
       } catch (Exception e) {
-         System.out.println("  " + name + ": " + e.getMessage() + " (skipped)");
+         CaptureLog.out.println("  " + name + ": " + e.getMessage() + " (skipped)");
          return null;
       }
    }
@@ -529,8 +531,10 @@ public class XmlFixtureCapture {
                if (t.startsWith("<")) break;
                String[] parts = t.split("\\s+");
                if (parts.length < 2) continue;
-               String name = parts[0], address = parts[parts.length - 1];
-               if (name.equals("FILES") || address.contains("\\") || address.contains("/"))
+               // Names can hold spaces; the address is the last field, as config.java reads it
+               String address = parts[parts.length - 1];
+               String name = t.substring(0, t.lastIndexOf(address)).trim();
+               if (parts[0].equals("FILES") || address.contains("\\") || address.contains("/"))
                   continue;
                tivos.put(name, address);
             }
