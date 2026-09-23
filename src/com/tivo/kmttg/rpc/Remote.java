@@ -1922,6 +1922,10 @@ public class Remote{
             return table_entries;
          }
          JSONArray items = result.getJSONArray("items");
+         // A series can come back more than once (as itself and as one of its episodes),
+         // so rows are kept by collection and airings by offer, as searchKeywords does
+         LinkedHashMap<String,JSONObject> collections = new LinkedHashMap<String,JSONObject>();
+         Hashtable<String,Integer> seen = new Hashtable<String,Integer>();
          int matches = 0;
          for (int i=0; i<items.length() && matches < max; ++i) {
             JSONObject kernel = items.getJSONObject(i).optJSONObject("kernel");
@@ -1939,29 +1943,35 @@ public class Remote{
             JSONObject offers = Command("OfferSearch", offerJson);
             if (offers == null || ! offers.has("offer"))
                continue;
-            JSONArray entries = new JSONArray();
+            String collectionId = kernel.getString("collectionId");
             JSONArray a = offers.getJSONArray("offer");
             for (int j=0; j<a.length() && matches < max; ++j) {
-               if (a.getJSONObject(j).has("channel")) {
-                  entries.put(a.getJSONObject(j));
-                  matches++;
+               JSONObject offer = a.getJSONObject(j);
+               String offerId = offer.optString("offerId");
+               if (! offer.has("channel") || seen.containsKey(offerId))
+                  continue;
+               if (offerId.length() > 0)
+                  seen.put(offerId, 1);
+               JSONObject collection = collections.get(collectionId);
+               if (collection == null) {
+                  collection = new JSONObject();
+                  collection.put("collectionId", collectionId);
+                  collection.put("title", offer.optString("title"));
+                  collection.put("type", offer.optString("collectionType", ""));
+                  collection.put("entries", new JSONArray());
+                  collections.put(collectionId, collection);
                }
+               collection.getJSONArray("entries").put(offer);
+               matches++;
             }
-            if (entries.length() == 0)
-               continue;
-            JSONObject first = entries.getJSONObject(0);
-            JSONObject collection = new JSONObject();
-            collection.put("collectionId", kernel.getString("collectionId"));
-            collection.put("title", first.getString("title"));
-            collection.put("type", first.optString("collectionType", ""));
-            collection.put("entries", entries);
-            table_entries.put(collection);
             if (job != null) {
                config.gui.jobTab_UpdateJobMonitorRowStatus(job, "Matches: " + matches);
                if ( jobMonitor.isFirstJobInMonitor(job) )
                   config.gui.setTitle("Search: " + matches + " " + config.kmttg);
             }
          }
+         for (JSONObject collection : collections.values())
+            table_entries.put(collection);
          log.warn(">> Plain English search completed: '" + text + "'"
                + (job != null ? " on TiVo: " + job.tivoName : ""));
       } catch (JSONException e) {
@@ -2484,8 +2494,6 @@ public class Remote{
       return channels;
    }
    
-   // Given a collectionId return greatest season number found
-   // Return JSONObject with "maxSeason" integer or "years" JSONArray
    // Copy a recording from another TiVo on the network to this one. The reply is a
    // recordingTransferResult holding the new recording, the conflicts it would cause, or a
    // cancellation reason (sourceNotFound, copyProtected, transferDisallowed...).
@@ -2523,6 +2531,8 @@ public class Remote{
       return null;
    }
 
+   // Given a collectionId return greatest season number found
+   // Return JSONObject with "maxSeason" integer or "years" JSONArray
    public JSONObject seasonYearSearch(String collectionId) {
       JSONObject info = new JSONObject();
       int maxSeason = 1;

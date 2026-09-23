@@ -28,6 +28,7 @@ import java.util.Hashtable;
 import java.util.Stack;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -270,7 +271,13 @@ public class spOptions {
          tivoButton.setToolTipText("Fill in the defaults set on the TiVo under Settings > Recordings");
          tivoButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-               loadTivoDefaults(tivoName);
+               // A reply that lands after the dialog closed would change the remembered choices
+               loadTivoDefaults(tivoName, new Consumer<JSONObject>() {
+                  public void accept(JSONObject settings) {
+                     if (dialog.isVisible())
+                        applyTivoDefaults(settings);
+                  }
+               });
             }
          });
          buttons.add(tivoButton);
@@ -465,18 +472,24 @@ public class spOptions {
       return json;
    }
 
-   private void loadTivoDefaults(final String tivoName) {
+   // Fetches the TiVo's recording defaults in the background and hands them to apply on the
+   // EDT. Shared with recordOptions.
+   static void loadTivoDefaults(final String tivoName, final Consumer<JSONObject> apply) {
       new Thread(new Runnable() {
          @Override public void run() {
             Remote r = config.initRemote(tivoName);
             if (! r.success)
                return;
-            final JSONObject settings = r.recordingSettings();
-            r.disconnect();
+            final JSONObject settings;
+            try {
+               settings = r.recordingSettings();
+            } finally {
+               r.disconnect();
+            }
             if (settings != null) {
                SwingUtil.runLater(new Runnable() {
                   @Override public void run() {
-                     applyTivoDefaults(settings);
+                     apply.accept(settings);
                   }
                });
             }
@@ -489,7 +502,9 @@ public class spOptions {
       select(record, recordHash.getK(s.optString("defaultShowStatus")));
       if (s.has("defaultMaxRecordings"))
          select(number, numberHash.getK(s.optInt("defaultMaxRecordings")));
-      select(until, untilHash.getK(keepBehavior(s.optString("defaultDeletionPolicy"))));
+      String keep = keepBehavior(s.optString("defaultDeletionPolicy"));
+      if (keep != null)
+         select(until, untilHash.getK(keep));
       if (s.has("defaultStartTimePadding"))
          select(start, startHash.getK(s.optInt("defaultStartTimePadding")));
       if (s.has("defaultStopTimePadding"))

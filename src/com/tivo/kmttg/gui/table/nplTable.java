@@ -1452,25 +1452,32 @@ public class nplTable extends TableMap {
                return;
             String sourceBodyId = src.bodyId_get();
             src.disconnect();
+            if (sourceBodyId.equals("-")) {
+               log.error("Copy to " + dest + " failed: could not get the TiVo id of " + tivoName);
+               return;
+            }
             Remote r = config.initRemote(dest);
             if (! r.success)
                return;
-            for (String id : shows.keySet()) {
-               String title = shows.get(id);
-               JSONObject result = r.recordingTransfer(id, sourceBodyId);
-               if (result == null)
-                  log.error("Copy to " + dest + " failed, no reply: " + title);
-               else if (result.has("recording"))
-                  log.warn("Copying to " + dest + ": " + title);
-               else if (result.has("reason"))
-                  log.error("Copy to " + dest + " refused (" + result.optString("reason") + "): " + title);
-               else if (result.has("conflicts")) {
-                  log.error("Copy to " + dest + " would conflict with scheduled recordings: " + title);
-                  log.print(result.optJSONObject("conflicts").toString());
-               } else
-                  log.error("Copy to " + dest + " failed: " + title + " - " + result.toString());
+            try {
+               for (String id : shows.keySet()) {
+                  String title = shows.get(id);
+                  JSONObject result = r.recordingTransfer(id, sourceBodyId);
+                  if (result == null)
+                     log.error("Copy to " + dest + " failed, no reply: " + title);
+                  else if (result.has("recording"))
+                     log.warn("Copying to " + dest + ": " + title);
+                  else if (result.has("reason"))
+                     log.error("Copy to " + dest + " refused (" + result.optString("reason") + "): " + title);
+                  else if (result.has("conflicts")) {
+                     log.error("Copy to " + dest + " would conflict with scheduled recordings: " + title);
+                     log.print(String.valueOf(result.opt("conflicts")));
+                  } else
+                     log.error("Copy to " + dest + " failed: " + title + " - " + result.toString());
+               }
+            } finally {
+               r.disconnect();
             }
-            r.disconnect();
          }
       };
       new Thread(task).start();
