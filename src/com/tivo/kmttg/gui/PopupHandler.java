@@ -145,6 +145,14 @@ public class PopupHandler {
          }
          if (config.rpcEnabled(tivoName) || config.twpDeleteEnabled())
             items.add(new PopupPair("Delete [delete]", KeyEvent.VK_DELETE, tivoName));
+         if (config.rpcEnabled(tivoName)) {
+            for (String name : config.getTivoNames()) {
+               if (! name.equals(tivoName) && config.rpcEnabled(name)) {
+                  items.add(new PopupPair("Copy to another TiVo [o]", KeyEvent.VK_O, tivoName));
+                  break;
+               }
+            }
+         }
          items.add(new PopupPair("Display data [j]", KeyEvent.VK_J, tivoName));
          if (config.rpcEnabled(tivoName) || config.mindEnabled(tivoName))
             items.add(new PopupPair("Episode Info [n]", KeyEvent.VK_N, tivoName));

@@ -634,6 +634,9 @@ public class nplTable extends TableMap {
          }
       } else if (keyCode == KeyEvent.VK_T) {
          TableUtil.toggleTreeState(NowPlaying);
+      } else if (keyCode == KeyEvent.VK_O) {
+         if (config.rpcEnabled(tivoName))
+            copyToTivo();
       }
       else if (keyCode == KeyEvent.VK_C) {
          // Import Skip Share
@@ -1401,6 +1404,76 @@ public class nplTable extends TableMap {
          log.print("StopRecording failed - " + e.getMessage());
       }
       return deleted;
+   }
+
+   // Copy the selected shows to another TiVo. The destination pulls each one over MRV,
+   // so the requests go to it, naming this TiVo as the remote host.
+   private void copyToTivo() {
+      Stack<String> dests = new Stack<String>();
+      for (String name : config.getTivoNames()) {
+         if (! name.equals(tivoName) && config.rpcEnabled(name))
+            dests.add(name);
+      }
+      if (dests.isEmpty()) {
+         log.error("Copy to another TiVo needs a second TiVo with RPC enabled");
+         return;
+      }
+      int[] rows = GetSelectedRows();
+      if (rows == null || rows.length == 0)
+         return;
+      // recordingId -> title
+      final LinkedHashMap<String,String> shows = new LinkedHashMap<String,String>();
+      for (int row : rows) {
+         sortableDate s = NowPlaying.getTreeItem(row).getValue().getDATE();
+         Stack<Hashtable<String,String>> entries = new Stack<Hashtable<String,String>>();
+         if (s.folder)
+            entries.addAll(s.folderData);
+         else
+            entries.add(s.data);
+         for (Hashtable<String,String> entry : entries) {
+            String id = rnpl.findRecordingId(tivoName, entry);
+            if (id != null)
+               shows.put(id, entry.containsKey("title") ? entry.get("title") : id);
+         }
+      }
+      if (shows.isEmpty())
+         return;
+      Object choice = JOptionPane.showInputDialog(
+         config.gui.getFrame(), "Copy " + shows.size() + " show(s) from " + tivoName + " to:",
+         "Copy to another TiVo", JOptionPane.QUESTION_MESSAGE, null, dests.toArray(), dests.get(0)
+      );
+      if (choice == null)
+         return;
+      final String dest = (String)choice;
+      Runnable task = new Runnable() {
+         @Override public void run() {
+            Remote src = config.initRemote(tivoName);
+            if (! src.success)
+               return;
+            String sourceBodyId = src.bodyId_get();
+            src.disconnect();
+            Remote r = config.initRemote(dest);
+            if (! r.success)
+               return;
+            for (String id : shows.keySet()) {
+               String title = shows.get(id);
+               JSONObject result = r.recordingTransfer(id, sourceBodyId);
+               if (result == null)
+                  log.error("Copy to " + dest + " failed, no reply: " + title);
+               else if (result.has("recording"))
+                  log.warn("Copying to " + dest + ": " + title);
+               else if (result.has("reason"))
+                  log.error("Copy to " + dest + " refused (" + result.optString("reason") + "): " + title);
+               else if (result.has("conflicts")) {
+                  log.error("Copy to " + dest + " would conflict with scheduled recordings: " + title);
+                  log.print(result.optJSONObject("conflicts").toString());
+               } else
+                  log.error("Copy to " + dest + " failed: " + title + " - " + result.toString());
+            }
+            r.disconnect();
+         }
+      };
+      new Thread(task).start();
    }
 
    private void PlayShow(JSONArray ids, Stack<String> titles) {
