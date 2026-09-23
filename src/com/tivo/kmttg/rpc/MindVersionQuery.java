@@ -2,6 +2,7 @@ package com.tivo.kmttg.rpc;
 
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.tools.CaptureLog;
 
 /**
  * The newest RPC grammar a TiVo will accept - its maxMindVersion - for the fixture capture
@@ -52,7 +53,7 @@ public class MindVersionQuery extends TiVoRPC {
          Object version = configs.getJSONObject(0).opt("maxMindVersion");
          return version == null ? null : String.valueOf(version);
       } catch (Exception e) {
-         System.out.println("  maxMindVersion: " + e.getMessage());
+         CaptureLog.out.println("  maxMindVersion: " + e.getMessage());
          return null;
       } finally {
          q.disconnect();

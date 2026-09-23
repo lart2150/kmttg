@@ -196,9 +196,8 @@ sourceSets {
             srcDirs = ['images']
         }
     }
-    // The fixture capture tools. Kept out of the test source set so the contributor jar
-    // below can be built without JUnit on its classpath, and out of src/ so none of it
-    // reaches the shipped kmttg.jar.
+    // Developer-only fixture tools (RpcLogFixtures). The capture tools themselves live in
+    // src/ because kmttg's Help menu runs them; the contributor jar still builds from both.
     tools {
         java {
             srcDirs = ['src-tools']
@@ -230,9 +229,6 @@ dependencies {
     testImplementation sourceSets.launcher.output
 
     toolsImplementation sourceSets.main.output
-    // RecordingRemote and FixtureJson are the offline RPC doubles' base classes as well as
-    // the capture tools', so the tests read them from here rather than holding a copy.
-    testImplementation sourceSets.tools.output
 }
 
 tasks.withType(JavaCompile).configureEach {

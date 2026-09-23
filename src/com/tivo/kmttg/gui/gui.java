@@ -71,6 +71,7 @@ import javax.swing.table.TableColumnModel;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.dialog.CaptureFixtures;
 import com.tivo.kmttg.gui.dialog.ShowDetails;
 import com.tivo.kmttg.gui.dialog.SkipDialog;
 import com.tivo.kmttg.gui.dialog.autoLogView;
@@ -114,6 +115,7 @@ public class gui {
    private JMenuItem helpAboutMenuItem = null;
    private JMenuItem helpUpdateMenuItem = null;
    private JMenuItem helpToolsUpdateMenuItem = null;
+   private JMenuItem helpCaptureMenuItem = null;
    private JMenuItem exitMenuItem = null;
    private JMenuItem autoConfigMenuItem = null;
    private JMenuItem runInGuiMenuItem = null;
@@ -584,6 +586,7 @@ public class gui {
          helpMenu.add(getHelpUpdateMenuItem());
          if (config.OS.equals("windows") || config.OS.equals("mac"))
             helpMenu.add(getHelpToolsUpdateMenuItem());
+         helpMenu.add(getHelpCaptureMenuItem());
       }
       return helpMenu;
    }
@@ -628,6 +631,20 @@ public class gui {
          });
       }
       return helpToolsUpdateMenuItem;
+   }
+
+   private JMenuItem getHelpCaptureMenuItem() {
+      debug.print("");
+      if (helpCaptureMenuItem == null) {
+         helpCaptureMenuItem = new JMenuItem();
+         helpCaptureMenuItem.setText("Capture TiVo test data...");
+         helpCaptureMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               CaptureFixtures.promptUser();
+            }
+         });
+      }
+      return helpCaptureMenuItem;
    }
 
    private JMenuItem getExitMenuItem() {
