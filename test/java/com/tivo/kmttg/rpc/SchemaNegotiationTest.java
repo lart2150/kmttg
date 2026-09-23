@@ -20,9 +20,11 @@ import org.junit.jupiter.api.Test;
 
 import com.tivo.kmttg.JSON.JSONObject;
 
-// A TiVo leaves out every field newer than the SchemaVersion it is asked at, so kmttg asks each
-// box how high it goes and uses that - stepping down, and resending, when a request is refused
-// at it. A version the caller chose for one request is never second-guessed.
+// kmttg's own requests go out at the version it is written against (17 locally, 22 through
+// tivo.com). A newer grammar can change what a request does - gridRowSearch ignores its anchor
+// channel at 42 - so the box's maximum is asked for only by a request that wants it (the /rpc
+// and /rpcws passthrough), stepping down and resending when one is refused at it. A version the
+// caller chose for one request is never second-guessed.
 public class SchemaNegotiationTest {
 
    private static final String REFUSED =
@@ -71,6 +73,12 @@ public class SchemaNegotiationTest {
          return rpc.RequestRaw(rpc.RpcRequest("channelSearch", false, new JSONObject(), schemaVersion),
             schemaVersion == null);
       }
+
+      // As a Remote that asked for the negotiated version sends one
+      String requestNegotiated() throws Exception {
+         return rpc.RequestRaw(rpc.RpcRequest("channelSearch", false, new JSONObject(), rpc.negotiatedSchema()),
+            true);
+      }
    }
 
    @Test
@@ -87,27 +95,33 @@ public class SchemaNegotiationTest {
    }
 
    @Test
-   void theProbeAsksAtNineteenAndLaterRequestsUseTheBoxsMaximum() throws Exception {
-      Box box = new Box(BOLT, OK);
-      box.rpc.negotiateSchema();
+   void kmttgsOwnRequestsStayAtSeventeenAndAskNothing() throws Exception {
+      Box box = new Box(OK, OK);
       box.request(null);
-      assertEquals(List.of(SchemaVersions.PROBE, 42), box.sentAt());
+      box.request(null);
+      assertEquals(List.of(17, 17), box.sentAt());
+   }
+
+   @Test
+   void theProbeAsksAtNineteenAndOnlyANegotiatedRequestUsesTheBoxsMaximum() throws Exception {
+      Box box = new Box(BOLT, OK, OK);
+      box.requestNegotiated();
+      box.request(null);
+      assertEquals(List.of(SchemaVersions.PROBE, 42, 17), box.sentAt());
    }
 
    @Test
    void theAnswerIsRememberedSoTheNextConnectionDoesNotAsk() throws Exception {
-      new Box(BOLT).rpc.negotiateSchema();
+      new Box(BOLT).rpc.negotiatedSchema();
       Box second = new Box(OK);
-      second.rpc.negotiateSchema();
-      second.request(null);
+      second.requestNegotiated();
       assertEquals(List.of(42), second.sentAt());
    }
 
    @Test
    void softwareWithoutMaxMindVersionStaysAtSeventeen() throws Exception {
       Box box = new Box(OLD_BOX, OK);
-      box.rpc.negotiateSchema();
-      box.request(null);
+      box.requestNegotiated();
       assertEquals(List.of(SchemaVersions.PROBE, 17), box.sentAt());
    }
 
@@ -115,8 +129,7 @@ public class SchemaNegotiationTest {
    @Test
    void aRefusedProbeStaysAtSeventeenWithoutGoingOld() throws Exception {
       Box box = new Box(REFUSED, OK);
-      box.rpc.negotiateSchema();
-      box.request(null);
+      box.requestNegotiated();
       assertEquals(List.of(SchemaVersions.PROBE, 17), box.sentAt());
       assertFalse(box.rpc.rpcOld);
    }
@@ -124,9 +137,8 @@ public class SchemaNegotiationTest {
    @Test
    void aRefusalAtTheNegotiatedVersionIsResentAtSeventeen() throws Exception {
       Box box = new Box(BOLT, REFUSED, OK, OK);
-      box.rpc.negotiateSchema();
-      assertEquals(OK, box.request(null));
-      box.request(null);
+      assertEquals(OK, box.requestNegotiated());
+      box.requestNegotiated();
       assertEquals(List.of(SchemaVersions.PROBE, 42, 17, 17), box.sentAt());
       assertFalse(box.rpc.rpcOld, "stepping down from the negotiated version is not the old-schema fallback");
    }
@@ -142,9 +154,9 @@ public class SchemaNegotiationTest {
    @Test
    void aVersionTheCallerChoseIsAnsweredAsItIsAndMovesNothing() throws Exception {
       Box box = new Box(BOLT, REFUSED, OK);
-      box.rpc.negotiateSchema();
+      box.rpc.negotiatedSchema();
       assertEquals(REFUSED, box.request(99));
-      box.request(null);
+      box.requestNegotiated();
       assertEquals(List.of(SchemaVersions.PROBE, 99, 42), box.sentAt());
    }
 
@@ -164,7 +176,7 @@ public class SchemaNegotiationTest {
    @Test
    void aProbeWithNoAnswerLeavesTheConnectionUnusable() {
       Box box = new Box();
-      box.rpc.negotiateSchema();
+      box.rpc.negotiatedSchema();
       assertFalse(box.rpc.getSuccess());
    }
 
@@ -179,6 +191,20 @@ public class SchemaNegotiationTest {
       r.setSchemaVersion(33);
       r.RawCommand("deviceAdParamsGet", new JSONObject());
       assertEquals(List.of(33), box.sentAt());
+   }
+
+   @Test
+   void aRemoteAsksForTheBoxsMaximumOnlyWhenToldTo() throws Exception {
+      final Box box = new Box(OK, BOLT, OK);
+      Remote r = new Remote() {
+         {
+            s = box.rpc;
+         }
+      };
+      r.RawCommand("deviceAdParamsGet", new JSONObject());
+      r.useNegotiatedSchema(true);
+      r.RawCommand("deviceAdParamsGet", new JSONObject());
+      assertEquals(List.of(17, SchemaVersions.PROBE, 42), box.sentAt());
    }
 
    // tivo.com, answering from a queue and remembering what it was sent.
@@ -218,21 +244,26 @@ public class SchemaNegotiationTest {
          return sendRequestAndWaitForBody(RpcRequest(type, false, new JSONObject(), schemaVersion),
             schemaVersion == null);
       }
+
+      String requestNegotiated(String type) throws Exception {
+         return sendRequestAndWaitForBody(RpcRequest(type, false, new JSONObject(), negotiatedSchema(type)),
+            true);
+      }
    }
 
    @Test
-   void overTivoComTheBoxsMaximumIsNegotiatedToo() throws Exception {
-      Cloud cloud = new Cloud(BOLT, OK);
-      cloud.negotiateSchema();
+   void overTivoComOnlyANegotiatedRequestUsesTheBoxsMaximum() throws Exception {
+      Cloud cloud = new Cloud(OK, BOLT, OK);
       cloud.request("channelSearch", null);
-      assertEquals(List.of("bodyConfigSearch@" + SchemaVersions.PROBE, "channelSearch@42"), cloud.sentAt());
+      cloud.requestNegotiated("channelSearch");
+      assertEquals(List.of("channelSearch@" + TiVoRPCWS.SCHEMA_DEFAULT,
+         "bodyConfigSearch@" + SchemaVersions.PROBE, "channelSearch@42"), cloud.sentAt());
    }
 
    @Test
    void withoutAnAnswerTivoComStaysWhereItAlwaysWas() throws Exception {
       Cloud cloud = new Cloud(OLD_BOX, OK);
-      cloud.negotiateSchema();
-      cloud.request("channelSearch", null);
+      cloud.requestNegotiated("channelSearch");
       assertEquals("channelSearch@" + TiVoRPCWS.SCHEMA_DEFAULT, cloud.sentAt().get(1));
    }
 
@@ -242,10 +273,9 @@ public class SchemaNegotiationTest {
    void aTypeTivoComRefusesFallsBackAloneAndIsResent() throws Exception {
       SchemaVersions.forget("tivo.com type:feedItemFindTest");
       Cloud cloud = new Cloud(BOLT, REFUSED, OK, OK, OK);
-      cloud.negotiateSchema();
-      assertEquals(OK, cloud.request("feedItemFindTest", null));
-      cloud.request("feedItemFindTest", null);
-      cloud.request("channelSearch", null);
+      assertEquals(OK, cloud.requestNegotiated("feedItemFindTest"));
+      cloud.requestNegotiated("feedItemFindTest");
+      cloud.requestNegotiated("channelSearch");
       assertEquals(List.of("bodyConfigSearch@" + SchemaVersions.PROBE,
          "feedItemFindTest@42", "feedItemFindTest@22", "feedItemFindTest@22", "channelSearch@42"),
          cloud.sentAt());
@@ -255,7 +285,7 @@ public class SchemaNegotiationTest {
    @Test
    void overTivoComAVersionTheCallerChoseIsNotResent() throws Exception {
       Cloud cloud = new Cloud(BOLT, REFUSED);
-      cloud.negotiateSchema();
+      cloud.negotiatedSchema("channelSearch");
       assertEquals(REFUSED, cloud.request("channelSearch", 99));
       assertEquals(2, cloud.sent.size());
    }
@@ -263,7 +293,7 @@ public class SchemaNegotiationTest {
    @Test
    void overTivoComAChosenVersionThatMatchesTheNegotiatedOneIsNotResent() throws Exception {
       Cloud cloud = new Cloud(BOLT, REFUSED);
-      cloud.negotiateSchema();
+      cloud.negotiatedSchema("channelSearch");
       assertEquals(REFUSED, cloud.request("channelSearch", 42));
       assertEquals(2, cloud.sent.size());
    }

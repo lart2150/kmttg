@@ -61,6 +61,7 @@ public class Remote{
    protected final int port;
    private JSONObject lastError = null;
    private Integer schemaVersion = null;
+   private boolean negotiated = false;
 
    /** perform a socket setup and auth. all public constructors call this. */
    private Remote(String tivoName, boolean away, String IP, String mak, String programDir, int port, String cdata) {
@@ -277,11 +278,30 @@ public class Remote{
       return body;
    }
    
-   // The SchemaVersion header for every request this Remote sends, in place of the one its
-   // connection negotiated - for probing a TiVo at a version of the caller's choosing. A
-   // refusal at it is answered as it is and never moves the connection's own version.
+   // The SchemaVersion header for every request this Remote sends, in place of kmttg's own -
+   // for probing a TiVo at a version of the caller's choosing. A refusal at it is answered as
+   // it is and never moves the connection's version.
    public void setSchemaVersion(Integer schemaVersion) {
       this.schemaVersion = schemaVersion;
+   }
+
+   // Send at the TiVo's newest SchemaVersion rather than the one kmttg is written against
+   // (17 locally, 22 through tivo.com). For the /rpc and /rpcws passthrough only: a newer
+   // grammar can change what a request does, not just add fields.
+   public void useNegotiatedSchema(boolean on) {
+      this.negotiated = on;
+   }
+
+   // One request at the negotiated SchemaVersion, for the few kmttg sends that 17 doesn't
+   // define or answers without fields they need
+   private JSONObject negotiatedCommand(String type, JSONObject json) {
+      boolean was = negotiated;
+      negotiated = true;
+      try {
+         return Command(type, json);
+      } finally {
+         negotiated = was;
+      }
    }
 
    /**
@@ -293,9 +313,12 @@ public class Remote{
    }
    
    public synchronized String RpcRequest(String type, Boolean monitor, JSONObject data) {
+      Integer version = schemaVersion;
+      if (version == null && negotiated)
+         version = this.away ? ws.negotiatedSchema(type) : s.negotiatedSchema();
       return this.away
-            ? ws.RpcRequest(type, monitor, data, schemaVersion)
-            : s.RpcRequest(type, monitor, data, schemaVersion);
+            ? ws.RpcRequest(type, monitor, data, version)
+            : s.RpcRequest(type, monitor, data, version);
    }
    
    // RPC command set
@@ -1916,7 +1939,8 @@ public class Remote{
          json.put("utcOffset", TimeZone.getDefault().getOffset(new Date().getTime()) / 1000);
          // 50 is the most it returns, and offset paging just repeats filler titles
          json.put("count", 50);
-         JSONObject result = Command("naturalLanguageFeedItemFind", json);
+         // Not defined at 17
+         JSONObject result = negotiatedCommand("naturalLanguageFeedItemFind", json);
          if (result == null || ! result.has("items")) {
             log.error("Plain English search found nothing for: '" + text + "'");
             return table_entries;
@@ -2521,7 +2545,8 @@ public class Remote{
          JSONObject json = new JSONObject();
          json.put("bodyId", bodyId_get());
          json.put("settingGroup", "recording");
-         JSONObject result = Command("settingsGet", json);
+         // defaultOnePassStartFrom is left out at 17
+         JSONObject result = negotiatedCommand("settingsGet", json);
          if (result != null && result.optString("type").equals("recordingSettings"))
             return result;
          log.error("recordingSettings - no recording settings from TiVo: " + tivoName);

@@ -64,6 +64,7 @@ public class TiVoRPCWSPool {
       try {
          Remote r = new Remote(tivoName, c.ws);
          r.setSchemaVersion(schemaVersion);
+         r.useNegotiatedSchema(true);
          return r.Command(operation, json);
       } finally {
          release(c);
@@ -75,6 +76,7 @@ public class TiVoRPCWSPool {
       try {
          Remote r = new Remote(tivoName, c.ws);
          r.setSchemaVersion(schemaVersion);
+         r.useNegotiatedSchema(true);
          return r.RawCommand(operation, json);
       } finally {
          release(c);

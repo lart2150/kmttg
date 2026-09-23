@@ -70,8 +70,9 @@ public class TiVoRPC {
    private String programDir;
    
    protected boolean rpcOld;
-   // What this connection asks at unless rpcOld: the box's maxMindVersion once negotiated.
-   private int schema = Integer.parseInt(SchemaVersion_newer);
+   // The box's maxMindVersion, asked for only by a request that wants it. kmttg's own
+   // requests are written against 17 and go out at it.
+   private Integer negotiated = null;
 
    private int rpc_id = 0;
    private int session_id = 0;
@@ -297,8 +298,6 @@ public class TiVoRPC {
           out = new DataOutputStream(socket.getOutputStream());
           
           success = Auth(MAK);
-          if (success)
-             negotiateSchema();
 
        } catch (Exception e) {
           if (attempt == 0 && e.getMessage() != null && e.getMessage().contains("UNKNOWN ALERT")) {
@@ -375,7 +374,7 @@ public class TiVoRPC {
             return null;
          JSONObject j = new JSONObject(message[1]);
          if (noteError(j))
-            fallBack();
+            fallBack(Integer.parseInt(defaultSchema()));
          // not returning null for an error.  subclasses can make that choice.
          j.put("IsFinal", message[0].contains("IsFinal: true"));
          return j;
@@ -442,7 +441,7 @@ public class TiVoRPC {
                return null;
             Reply reply = new Reply(message);
             boolean refused = reply.json != null && noteError(reply.json);
-            if (! refused || ! mayFallBack || ! fallBack())
+            if (! refused || ! mayFallBack || ! fallBack(SchemaVersions.of(req)))
                return reply;
             req = SchemaVersions.withSchema(req, Integer.parseInt(defaultSchema()));
          }
@@ -453,7 +452,19 @@ public class TiVoRPC {
    }
 
    private String defaultSchema() {
-      return rpcOld ? SchemaVersion : String.valueOf(schema);
+      return rpcOld ? SchemaVersion : SchemaVersion_newer;
+   }
+
+   // The version to send a request at when it wants the box's newest rather than kmttg's 17:
+   // the web endpoints' passthrough, and the few requests 17 doesn't define. A newer grammar
+   // can change what a request does, not just add fields - gridRowSearch ignores its anchor
+   // channel at 42 - so nothing of kmttg's own goes out at it.
+   synchronized int negotiatedSchema() {
+      if (rpcOld)
+         return Integer.parseInt(SchemaVersion);
+      if (negotiated == null)
+         negotiateSchema();
+      return negotiated != null ? negotiated : Integer.parseInt(SchemaVersion_newer);
    }
 
    // Ask the box how high it goes, once per TiVo per run. Software that predates
@@ -476,7 +487,7 @@ public class TiVoRPC {
                success = false;
                return;
             }
-            known = Math.max(schema, SchemaVersions.maxMindVersion(message[1]));
+            known = Math.max(Integer.parseInt(SchemaVersion_newer), SchemaVersions.maxMindVersion(message[1]));
          } catch (Exception e) {
             // Replies on the LAN are read in order, not matched by RpcId, so a probe that timed
             // out would have its late answer read as the reply to the next request. The
@@ -488,18 +499,18 @@ public class TiVoRPC {
          SchemaVersions.remember(schemaKey(), known);
          log.print(schemaName() + ": SchemaVersion " + known);
       }
-      schema = known;
+      negotiated = known;
    }
 
-   // Down a step: from the negotiated version to 17, from 17 to 14. False when there is no
-   // lower step to take.
-   private boolean fallBack() {
+   // Down a step from the version a refused request went out at: from the negotiated version
+   // to 17, from 17 to 14. False when there is no lower step to take.
+   private boolean fallBack(int sentAt) {
       if (rpcOld)
          return false;
       int newer = Integer.parseInt(SchemaVersion_newer);
-      if (schema > newer) {
-         log.warn(schemaName() + ": SchemaVersion " + schema + " refused - using " + newer);
-         schema = newer;
+      if (sentAt > newer) {
+         log.warn(schemaName() + ": SchemaVersion " + sentAt + " refused - using " + newer);
+         negotiated = newer;
          SchemaVersions.remember(schemaKey(), newer);
       } else {
          // Revert to older schema version for older TiVo software versions
