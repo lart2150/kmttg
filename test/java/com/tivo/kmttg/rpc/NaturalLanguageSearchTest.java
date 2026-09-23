@@ -132,6 +132,32 @@ public class NaturalLanguageSearchTest {
    }
 
    @Test
+   public void aSeriesReturnedTwiceIsOneRowWithoutRepeatedAirings() throws Exception {
+      JSONObject nl = new JSONObject();
+      nl.put("type", "naturalLanguageFeedItemResults");
+      JSONArray items = new JSONArray();
+      // An episode of the series, then the series itself
+      items.put(item("contentDetailUiAction", "tivo:cl.14577", "tivo:ct.14578"));
+      items.put(item("collectionDetailUiAction", "tivo:cl.14577", null));
+      nl.put("items", items);
+      JSONObject a = offer("Murder, She Wrote", "series", true);
+      a.put("offerId", "tivo:of.1");
+      JSONObject b = offer("Murder, She Wrote", "series", true);
+      b.put("offerId", "tivo:of.2");
+      JSONArray log = new JSONArray();
+      log.put(rec("naturalLanguageFeedItemFind", nl));
+      log.put(rec("OfferSearch", offers(a)));
+      log.put(rec("OfferSearch", offers(new JSONObject(a.toString()), b)));
+      ReplayRemote r = new ReplayRemote(log);
+
+      JSONArray result = r.searchNaturalLanguage("murder she wrote", null, 100);
+
+      assertEquals(1, result.length());
+      assertEquals(2, result.getJSONObject(0).getJSONArray("entries").length(),
+         "tivo:of.1 came back from both lookups and should be listed once");
+   }
+
+   @Test
    public void noItemsIsAnEmptyResult() throws Exception {
       JSONObject nl = new JSONObject();
       nl.put("type", "naturalLanguageFeedItemResults");

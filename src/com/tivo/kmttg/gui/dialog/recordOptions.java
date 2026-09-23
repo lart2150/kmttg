@@ -22,6 +22,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -35,7 +36,6 @@ import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
-import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.TwoWayHashmap;
 import com.tivo.kmttg.util.log;
 
@@ -132,7 +132,13 @@ public class recordOptions {
          tivoButton.setToolTipText("Fill in the defaults set on the TiVo under Settings > Recordings");
          tivoButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-               loadTivoDefaults(tivoName);
+               // A reply that lands after the dialog closed would change the remembered choices
+               spOptions.loadTivoDefaults(tivoName, new Consumer<JSONObject>() {
+                  public void accept(JSONObject settings) {
+                     if (dialog.isVisible())
+                        applyTivoDefaults(settings);
+                  }
+               });
             }
          });
          buttons.add(tivoButton);
@@ -184,31 +190,16 @@ public class recordOptions {
       }
    }
 
-   private void loadTivoDefaults(final String tivoName) {
-      new Thread(new Runnable() {
-         @Override public void run() {
-            Remote r = config.initRemote(tivoName);
-            if (! r.success)
-               return;
-            final JSONObject s = r.recordingSettings();
-            r.disconnect();
-            if (s == null)
-               return;
-            SwingUtil.runLater(new Runnable() {
-               @Override public void run() {
-                  String keep = untilHash.getK(spOptions.keepBehavior(s.optString("defaultDeletionPolicy")));
-                  if (keep != null)
-                     until.setSelectedItem(keep);
-                  String pad = startHash.getK(s.optInt("defaultStartTimePadding", -1));
-                  if (pad != null)
-                     start.setSelectedItem(pad);
-                  pad = stopHash.getK(s.optInt("defaultStopTimePadding", -1));
-                  if (pad != null)
-                     stop.setSelectedItem(pad);
-               }
-            });
-         }
-      }).start();
+   private void applyTivoDefaults(JSONObject s) {
+      String keep = spOptions.keepBehavior(s.optString("defaultDeletionPolicy"));
+      if (keep != null && untilHash.getK(keep) != null)
+         until.setSelectedItem(untilHash.getK(keep));
+      String pad = startHash.getK(s.optInt("defaultStartTimePadding", -1));
+      if (pad != null)
+         start.setSelectedItem(pad);
+      pad = stopHash.getK(s.optInt("defaultStopTimePadding", -1));
+      if (pad != null)
+         stop.setSelectedItem(pad);
    }
 
    public void setValues(JSONObject json) {
