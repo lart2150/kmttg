@@ -315,6 +315,8 @@ public class tooltip {
       else if (component.equals("search_type")) {
          text = "Select type of search to perform:<br>";
          text += "<b>keywords</b> => traditional keyword search in show titles, subtitles, and descriptions<br>";
+         text += "<b>naturalLanguage</b> => describe what you want in plain English, the way you would ask the<br>";
+         text += "TiVo voice remote. EXAMPLE: clint eastwood westerns. Only titles with upcoming airings are listed.<br>";
          text += "For other role choices you should provide person name in the search field. See the tooltip for<br>";
          text += "the search field for details on the expected syntax of person names.";
       }

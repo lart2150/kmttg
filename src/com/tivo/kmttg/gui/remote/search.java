@@ -236,7 +236,7 @@ public class search {
 
       search_type = new JComboBox<String>();
       String[] search_type_items = {
-         "keywords", "actor", "director", "producer", "executiveProducer", "writer"
+         "keywords", "actor", "director", "producer", "executiveProducer", "writer", "naturalLanguage"
       };
       for (String item : search_type_items)
          search_type.addItem(item);
