@@ -2486,6 +2486,26 @@ public class Remote{
    
    // Given a collectionId return greatest season number found
    // Return JSONObject with "maxSeason" integer or "years" JSONArray
+   // Copy a recording from another TiVo on the network to this one. The reply is a
+   // recordingTransferResult holding the new recording, the conflicts it would cause, or a
+   // cancellation reason (sourceNotFound, copyProtected, transferDisallowed...).
+   // Local RPC only; untested past sourceNotFound for want of a second TiVo.
+   public JSONObject recordingTransfer(String recordingId, String remoteHostBodyId) {
+      try {
+         JSONObject json = new JSONObject();
+         json.put("bodyId", bodyId_get());
+         json.put("recordingId", recordingId);
+         json.put("remoteHostBodyId", remoteHostBodyId);
+         JSONObject result = Command("recordingTransfer", json);
+         if (result == null)
+            result = getLastError();
+         return result;
+      } catch (JSONException e) {
+         error("recordingTransfer - " + e.getMessage());
+      }
+      return null;
+   }
+
    // The TiVo's own defaults from Settings > Recordings: padding, keep until, OnePass options.
    // Padding is assumed to be in seconds like subscribe's, which is unconfirmed (Bolt says 0).
    public JSONObject recordingSettings() {
