@@ -266,6 +266,14 @@ public class spOptions {
 
          final AtomicBoolean ok = new AtomicBoolean(false);
          JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+         JButton tivoButton = new JButton("TiVo Defaults");
+         tivoButton.setToolTipText("Fill in the defaults set on the TiVo under Settings > Recordings");
+         tivoButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               loadTivoDefaults(tivoName);
+            }
+         });
+         buttons.add(tivoButton);
          JButton okButton = new JButton("OK");
          okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -455,6 +463,70 @@ public class spOptions {
          return null;
       }
       return json;
+   }
+
+   private void loadTivoDefaults(final String tivoName) {
+      new Thread(new Runnable() {
+         @Override public void run() {
+            Remote r = config.initRemote(tivoName);
+            if (! r.success)
+               return;
+            final JSONObject settings = r.recordingSettings();
+            r.disconnect();
+            if (settings != null) {
+               SwingUtil.runLater(new Runnable() {
+                  @Override public void run() {
+                     applyTivoDefaults(settings);
+                  }
+               });
+            }
+         }
+      }).start();
+   }
+
+   // Values the dialog has no choice for (UHD preferences, "freeOrRent", odd paddings) are left alone
+   private void applyTivoDefaults(JSONObject s) {
+      select(record, recordHash.getK(s.optString("defaultShowStatus")));
+      if (s.has("defaultMaxRecordings"))
+         select(number, numberHash.getK(s.optInt("defaultMaxRecordings")));
+      select(until, untilHash.getK(keepBehavior(s.optString("defaultDeletionPolicy"))));
+      if (s.has("defaultStartTimePadding"))
+         select(start, startHash.getK(s.optInt("defaultStartTimePadding")));
+      if (s.has("defaultStopTimePadding"))
+         select(stop, stopHash.getK(s.optInt("defaultStopTimePadding")));
+      select(hd, hdHash.getK(s.optString("defaultHdPreference")));
+      if (include.isEnabled())
+         select(include, includeHash.getK(s.optString("defaultConsumptionSourceFilter")));
+      select(rentOrBuy, rentOrBuyHash.getK(s.optString("defaultCostFilter")));
+      if (startFrom.isEnabled() && startFrom.getItemCount() > 0) {
+         String from = s.optString("defaultOnePassStartFrom");
+         if (from.equals("newOnly"))
+            select(startFrom, "New episodes only");
+         else if (from.equals("firstSeason"))
+            startFrom.setSelectedIndex(0);
+         else if (from.equals("currentSeason")) {
+            for (int i=startFrom.getItemCount()-1; i>=0; --i) {
+               if (! startFrom.getItemAt(i).equals("New episodes only")) {
+                  startFrom.setSelectedIndex(i);
+                  break;
+               }
+            }
+         }
+      }
+      updateStates();
+   }
+
+   static String keepBehavior(String deletionPolicy) {
+      if (deletionPolicy.equals("whenSpaceNeeded"))
+         return "fifo";
+      if (deletionPolicy.equals("neverDelete"))
+         return "forever";
+      return null;
+   }
+
+   private static void select(JComboBox<String> box, String item) {
+      if (item != null && contains(box, item))
+         box.setSelectedItem(item);
    }
 
    // include cyclic change callback

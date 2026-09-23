@@ -2486,6 +2486,23 @@ public class Remote{
    
    // Given a collectionId return greatest season number found
    // Return JSONObject with "maxSeason" integer or "years" JSONArray
+   // The TiVo's own defaults from Settings > Recordings: padding, keep until, OnePass options.
+   // Padding is assumed to be in seconds like subscribe's, which is unconfirmed (Bolt says 0).
+   public JSONObject recordingSettings() {
+      try {
+         JSONObject json = new JSONObject();
+         json.put("bodyId", bodyId_get());
+         json.put("settingGroup", "recording");
+         JSONObject result = Command("settingsGet", json);
+         if (result != null && result.optString("type").equals("recordingSettings"))
+            return result;
+         log.error("recordingSettings - no recording settings from TiVo: " + tivoName);
+      } catch (JSONException e) {
+         error("recordingSettings - " + e.getMessage());
+      }
+      return null;
+   }
+
    public JSONObject seasonYearSearch(String collectionId) {
       JSONObject info = new JSONObject();
       int maxSeason = 1;

@@ -35,6 +35,7 @@ import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.gui.swing.SwingUtil;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.TwoWayHashmap;
 import com.tivo.kmttg.util.log;
 
@@ -115,7 +116,7 @@ public class recordOptions {
       components.add(anywhere);
    }
 
-   public JSONObject promptUser(String title, JSONObject json) {
+   public JSONObject promptUser(final String tivoName, String title, JSONObject json) {
       try {
          if (json != null)
             setValues(json);
@@ -127,6 +128,14 @@ public class recordOptions {
 
          final AtomicBoolean ok = new AtomicBoolean(false);
          JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+         JButton tivoButton = new JButton("TiVo Defaults");
+         tivoButton.setToolTipText("Fill in the defaults set on the TiVo under Settings > Recordings");
+         tivoButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               loadTivoDefaults(tivoName);
+            }
+         });
+         buttons.add(tivoButton);
          JButton okButton = new JButton("OK");
          okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -173,6 +182,33 @@ public class recordOptions {
          log.error("recordOptions.promptUser - " + e.getMessage());
          return null;
       }
+   }
+
+   private void loadTivoDefaults(final String tivoName) {
+      new Thread(new Runnable() {
+         @Override public void run() {
+            Remote r = config.initRemote(tivoName);
+            if (! r.success)
+               return;
+            final JSONObject s = r.recordingSettings();
+            r.disconnect();
+            if (s == null)
+               return;
+            SwingUtil.runLater(new Runnable() {
+               @Override public void run() {
+                  String keep = untilHash.getK(spOptions.keepBehavior(s.optString("defaultDeletionPolicy")));
+                  if (keep != null)
+                     until.setSelectedItem(keep);
+                  String pad = startHash.getK(s.optInt("defaultStartTimePadding", -1));
+                  if (pad != null)
+                     start.setSelectedItem(pad);
+                  pad = stopHash.getK(s.optInt("defaultStopTimePadding", -1));
+                  if (pad != null)
+                     stop.setSelectedItem(pad);
+               }
+            });
+         }
+      }).start();
    }
 
    public void setValues(JSONObject json) {
