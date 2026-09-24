@@ -2,6 +2,8 @@ This is a fork of [KMTTG by moyekj](https://sourceforge.net/p/kmttg/wiki/Home/)
 
 For more information read the wiki pages on sourceforge for the orginal version by moyekj.
 
+See the [changelog](CHANGELOG.md) for what's changed in each release of this fork.
+
 ## Requirements
 
 kmttg v2.10.0-l and later require **Java 11 or newer** (Java 8 and 10 are no longer
