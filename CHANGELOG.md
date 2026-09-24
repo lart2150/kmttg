@@ -18,6 +18,8 @@ Release notes for the kmttg fork, newest first. Release candidates are rolled in
 - `/rpc` and `/rpcws` can pass TiVo replies and errors through raw, report kmttg failures as typed JSON, and negotiate SchemaVersion per TiVo
 
 ### Fixed
+- ffmpeg encode profiles work with current ffmpeg (tested on 8.1) and still work with the older bundled ffmpeg. The h264 high/med rate, PS3 and Xbox 360 profiles failed on newer ffmpeg
+- Mobile encode profiles now apply their max bitrate, and the 1080p profile uses level 4.1
 - AutoSkip.ini is keyed on the airing, so two airings of one episode keep their own cuts
 - A half written AutoSkip.ini entry is dropped instead of writing "null" back out
 - Existing cut points are kept when an import has none of its own
@@ -34,6 +36,9 @@ Release notes for the kmttg fork, newest first. Release candidates are rolled in
 - urlDecode and getTimeRemaining no longer throw on ordinary input
 - Web server: half written EXTINF lines are ignored so the stream duration stops jumping, a new transcode no longer overwrites a cached one that shares its prefix, and a suffix range asking for more than the file holds serves the whole file
 - Websockets: bounded header/body split so a body containing a blank line survives, and better timeouts
+
+### Removed
+- Zune, Creative Zen and PSP encode profiles
 
 ## v2.11.0-l (2026-09-19)
 
