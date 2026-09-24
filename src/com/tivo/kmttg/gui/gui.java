@@ -1324,8 +1324,8 @@ public class gui {
       }
 
       // The remux IS the encode step for that job, so the two cannot both run on one source.
-      // decrypt stays the user's own choice and is what decides whether the .ts is kept: with
-      // it, the decode writes the .ts and feeds the muxer; without it, the muxer is the only
+      // decrypt stays the user's own choice but no longer decides whether the .ts is kept: it
+      // is written only when a later task reads it, and otherwise the muxer is the only
       // consumer and no transport stream is ever written to disk.
       if ( mkv.isSelected() ) {
          encode.setSelected(false);

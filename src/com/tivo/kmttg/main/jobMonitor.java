@@ -722,27 +722,17 @@ public class jobMonitor {
       }
    }
      
-   // Whether the decrypted transport stream is an output in its own right. RemoveMpegFile=1
-   // says it goes as soon as the encode is done, so it is not one whatever the Decrypt checkbox
-   // says - and never writing a gigabyte beats writing it and deleting it. Worth its own rule
-   // because it is the common case: decrypt is checked by default and the MKV task used to
-   // force it on, so hardly anyone has it unchecked.
-   static Boolean mpegIsAnOutput(Boolean decryptRequested) {
-      return decryptRequested && config.RemoveMpegFile != 1;
-   }
-
    // Decides whether the decrypted transport stream has to exist as a file at all. When the
    // builtin muxer is the only thing that would ever read it, the download decodes straight
    // into the MKV and no .ts is written: one pass over the stream, nothing on disk in between.
    //
    // Anything that reads the mpeg afterwards keeps it - ad detection, ad cutting, qsfix,
-   // caption extraction, the custom command, a second encoding profile - and so does the user
-   // wanting the decrypted file for its own sake, which is mpegIsAnOutput above. That reads the
-   // Decrypt checkbox as the user left it, not the value after LaunchJobs turns it on to
-   // satisfy the encode; taking the latter would mean the stream is never written for anybody.
-   static Boolean canStreamToMux(Boolean mpegIsAnOutput, Boolean comskip, Boolean comcut,
+   // caption extraction, the custom command, a second encoding profile. The Decrypt checkbox
+   // does not: it is checked by default and the MKV task used to force it on, so it says
+   // nothing about wanting a second full size copy of the recording next to the mkv.
+   static Boolean canStreamToMux(Boolean comskip, Boolean comcut,
          Boolean qsfix, Boolean captions, Boolean custom, Boolean secondProfile) {
-      return ! mpegIsAnOutput && ! comskip && ! comcut && ! qsfix
+      return ! comskip && ! comcut && ! qsfix
           && ! captions && ! custom && ! secondProfile;
    }
 
@@ -789,12 +779,7 @@ public class jobMonitor {
       Boolean metadata     = (Boolean)specs.get("metadata");
       Boolean metadataTivo = (Boolean)specs.get("metadataTivo");
       Boolean decrypt      = (Boolean)specs.get("decrypt");
-      // The Decrypt checkbox as the user left it. Several blocks below turn decrypt on to
-      // satisfy some other task, so by the time jobs are built the flag no longer says whether
-      // the decrypted file was asked for or merely implied - and that is the difference
-      // between an output and an intermediate.
-      Boolean decryptRequested = decrypt;
-      Boolean qsfix        = (Boolean)specs.get("qsfix");
+      Boolean qsfix       = (Boolean)specs.get("qsfix");
       Boolean twpdelete    = (Boolean)specs.get("twpdelete");
       Boolean rpcdelete    = (Boolean)specs.get("rpcdelete");
       Boolean comskip      = (Boolean)specs.get("comskip");
@@ -1129,20 +1114,22 @@ public class jobMonitor {
             // Nor when ad detection is about to write this recording's cut points to
             // AutoSkip: a fused mux picks its chapters at download start, before they exist.
             && ! (comskip && SkipManager.skipEnabled() && config.autoskip_import == 1)) {
-         streamToMux = canStreamToMux(mpegIsAnOutput(decryptRequested), comskip, comcut,
+         streamToMux = canStreamToMux(comskip, comcut,
                qsfix, captions, custom, encodeName2 != null);
          // Two settings only a remux job knows how to honour, so leave it to one whenever
          // either applies: OverwriteFiles=0 means an existing mkv is left alone, and
          // RemoveMpegFile=1 means the decrypted mpeg goes once the mkv is written, which
-         // nothing on the download path does. Streaming satisfies the second by never
-         // writing the mpeg in the first place.
+         // nothing on the download path does. Streaming satisfies both on its own: it never
+         // writes the mpeg, and the download job is judged by the mkv, so an existing one
+         // makes it skip itself instead of downloading a .ts that nothing would read.
          //
-         // An already present mpeg matters too: OverwriteFiles=0 makes the download job skip
-         // itself, and with the remux job absorbed into it nothing would then write the mkv
-         // at all. A streaming job is judged by the mkv instead, so only the other one cares.
+         // An already present mpeg matters in either case: OverwriteFiles=0 makes a writing
+         // download skip itself, and with the remux job absorbed into it nothing would then
+         // write the mkv at all. A streaming job would download the whole recording again,
+         // when the remux job can make the mkv from the file already on disk.
          Boolean remuxJobMustRun = (config.RemoveMpegFile == 1 && ! streamToMux)
                || (config.OverwriteFiles == 0
-                     && (file.isFile(encodeFile) || (! streamToMux && file.isFile(mpegFile))));
+                     && ((! streamToMux && file.isFile(encodeFile)) || file.isFile(mpegFile)));
          fusedMux = ! remuxJobMustRun;
          streamToMux = streamToMux && fusedMux;
       }
