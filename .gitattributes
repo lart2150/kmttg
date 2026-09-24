@@ -15,6 +15,9 @@
 *.md     text eol=lf
 *.yml    text eol=lf
 *.sh     text eol=lf
+*.pl     text eol=lf
+release/kmttg text eol=lf
+gradlew  text eol=lf
 *.bat    text eol=crlf
 *.ps1    text eol=crlf
 
