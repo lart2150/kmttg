@@ -439,6 +439,48 @@ public class LaunchJobsTest {
       assertQueued("javadownload");
    }
 
+   private Hashtable<String,Object> mkvDownload() {
+      config.combine_download_decrypt = 1;
+      Hashtable<String,Object> specs = download("Ghosts - Gate-gate.TiVo");
+      specs.put("decrypt", Boolean.TRUE);
+      specs.put("encode", Boolean.TRUE);
+      specs.put("encodeName", "mkv_copy");
+      return specs;
+   }
+
+   @Test
+   void aCheckedDecryptBoxDoesNotKeepATsNextToTheMkv() {
+      // Decrypt is checked by default, so honouring it wrote a second full size copy of
+      // nearly every recording that nothing would ever open.
+      jobMonitor.LaunchJobs(mkvDownload());
+
+      assertQueued("tdownload_decrypt");
+      assertTrue(find("tdownload_decrypt").muxOnly);
+      assertEquals(inVideoDir("Ghosts - Gate-gate.mkv"), find("tdownload_decrypt").muxFile);
+   }
+
+   @Test
+   void anExistingMkvLeavesTheStreamingJobToSkipItself() throws Exception {
+      // Splitting into download + remux here downloaded the whole recording to a .ts only for
+      // the remux to skip the existing mkv. The streaming job is judged by the mkv instead.
+      touch("Ghosts - Gate-gate.mkv");
+      jobMonitor.LaunchJobs(mkvDownload());
+
+      assertQueued("tdownload_decrypt");
+      assertTrue(find("tdownload_decrypt").muxOnly);
+   }
+
+   @Test
+   void anExistingTsIsRemuxedRatherThanDownloadedAgain() throws Exception {
+      // The download skips itself over the .ts and the remux job builds the mkv from it.
+      touch("Ghosts - Gate-gate.ts");
+      jobMonitor.LaunchJobs(mkvDownload());
+
+      assertQueued("tdownload_decrypt", "remux");
+      assertFalse(find("tdownload_decrypt").muxOnly);
+      assertNull(find("tdownload_decrypt").muxFile);
+   }
+
    @SuppressWarnings("unchecked")
    private static Hashtable<String,String> entryOf(Hashtable<String,Object> specs) {
       return (Hashtable<String,String>)specs.get("entry");
