@@ -25,6 +25,8 @@ import java.net.InetAddress;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
@@ -34,6 +36,8 @@ import com.tivo.kmttg.util.log;
 public class mdns {
    private JmDNS jmdns = null;
    private Hashtable<String,ServiceInfo> SERVICE = new Hashtable<String,ServiceInfo>();
+   private final AtomicBoolean refreshing = new AtomicBoolean(false);
+   private final AtomicReference<ServiceInfo[]> latest = new AtomicReference<ServiceInfo[]>();
    //private int timeout = 5;          // ~mins after which mdns listening disabled
    //private long start_time;
    
@@ -64,6 +68,24 @@ public class mdns {
       return null;
    }
 
+   private void startRefresh() {
+      final JmDNS j = jmdns;
+      if (j == null || ! refreshing.compareAndSet(false, true)) return;
+      Thread t = new Thread(new Runnable() {
+         @Override public void run() {
+            try {
+               latest.set(j.list("_http._tcp.local."));
+            } catch (Exception e) {
+               log.error("mdns list error: " + e.getMessage());
+            } finally {
+               refreshing.set(false);
+            }
+         }
+      }, "mdns-list");
+      t.setDaemon(true);
+      t.start();
+   }
+
    public void close() {
       if (jmdns != null) {
          try {
@@ -87,14 +109,19 @@ public class mdns {
       */
       
       if (jmdns == null) return;
-      
+
       // Uncomment this to print/log specific service information
       //printService("_tivo-mindrpc._tcp.local.");
       //printService("_tivo-videostream._tcp.local.");
       //printService("_http._tcp.local.");
-      
-      ServiceInfo info[] = jmdns.list("_http._tcp.local.");
-      if (info.length > 0) {
+
+      // jmdns.list() can block for up to 6 seconds (e.g. after resume from
+      // sleep when cached records have expired). process() is called every
+      // second on the GUI thread, so do the list in the background and only
+      // consume the most recent result here.
+      startRefresh();
+      ServiceInfo info[] = latest.getAndSet(null);
+      if (info != null && info.length > 0) {
          Stack<String> tivoNames = config.getTivoNames();
          // Step through list of found host names
          for (int i=0; i<info.length; ++i) {

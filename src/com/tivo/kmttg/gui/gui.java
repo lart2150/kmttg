@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.imageio.ImageIO;
 import javax.swing.Box;
@@ -290,14 +291,22 @@ public class gui {
       mainInstall.install();
 
       // Invoke a 1000ms period timer for job monitor
+      // Skip a tick if the previous monitor call hasn't run yet so a slow
+      // monitor can't flood the GUI thread's event queue.
+      final AtomicBoolean monitorPending = new AtomicBoolean(false);
       kmttg.timer = new Timer();
       kmttg.timer.schedule(
          new TimerTask() {
              @Override
              public void run() {
+                if (! monitorPending.compareAndSet(false, true)) return;
                 SwingUtil.runLater(new Runnable() {
                    @Override public void run() {
-                      jobMonitor.monitor(config.gui);
+                      try {
+                         jobMonitor.monitor(config.gui);
+                      } finally {
+                         monitorPending.set(false);
+                      }
                    }
                 });
              }
