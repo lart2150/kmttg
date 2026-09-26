@@ -69,6 +69,12 @@ public class file {
    public static Boolean createDirIfNeeded(String f) {
       debug.print("f=" + f);
       String baseDir = string.dirname(f);
+      // JDK 24+ treats new File("") as the current directory; keep failing
+      // for a bare file name on every JDK
+      if (baseDir.isEmpty()) {
+         log.error("Failed to create path: " + baseDir);
+         return false;
+      }
       if ( ! file.isDir(baseDir) ) {
          if ( ! new File(baseDir).mkdirs() ) {
             log.error("Failed to create path: " + baseDir);
