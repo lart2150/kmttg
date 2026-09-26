@@ -47,6 +47,34 @@ public class SwingTest {
          throw (Exception) thrown[0];
    }
 
+   // Wait, off the EDT, for a window that has just been shown to settle. On
+   // X11 AWT guesses the frame insets until the window manager reports them,
+   // and a window manager that draws its frame outside the window (XWayland
+   // on ChromeOS) reports none - so right after show the root pane is still
+   // laid out inside guessed insets and hangs off the bottom by a title bar.
+   // Settled is the root pane filling exactly the insets reported now, a few
+   // polls running.
+   public static void settle(Window w) throws Exception {
+      final boolean[] fits = new boolean[1];
+      int stable = 0;
+      for (int i = 0; i < 60 && stable < 3; i++) {
+         Thread.sleep(50);
+         run(() -> {
+            if ( ! (w instanceof javax.swing.RootPaneContainer)) {
+               fits[0] = true;
+               return;
+            }
+            w.validate();
+            Insets in = w.getInsets();
+            Rectangle root = ((javax.swing.RootPaneContainer) w).getRootPane().getBounds();
+            fits[0] = root.x == in.left && root.y == in.top
+               && root.width  == w.getWidth()  - in.left - in.right
+               && root.height == w.getHeight() - in.top  - in.bottom;
+         });
+         stable = fits[0] ? stable + 1 : 0;
+      }
+   }
+
    // The usable area of the screen a window is on, the way Theme works it out
    public static Rectangle usableBounds(Window w) {
       GraphicsConfiguration gc = w.getGraphicsConfiguration();

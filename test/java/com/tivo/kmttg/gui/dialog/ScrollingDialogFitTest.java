@@ -76,9 +76,11 @@ public class ScrollingDialogFitTest {
 
    @Test
    public void theAdvancedSearchDialogFitsOnTheScreen() throws Exception {
+      SwingTest.run(() -> build(new AdvSearch(), AdvSearch.class));
+      // create() shows it, so let the window manager finish framing it first
+      SwingTest.settle(dialog);
       SwingTest.run(() -> {
-         build(new AdvSearch(), AdvSearch.class);
-         dialog.setVisible(false); // create() shows it
+         dialog.setVisible(false);
          assertFits("Close");
       });
    }
