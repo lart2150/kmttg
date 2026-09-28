@@ -16,6 +16,7 @@ Release notes for the kmttg fork, newest first. Release candidates are rolled in
 - Help > Capture TiVo test data, plus a standalone capture jar so owners of models we don't have can send fixtures back
 - `/rpcws` web endpoint that runs RPCs over pooled tivo.com websocket connections, renews expired tokens and closes after a minute idle
 - `/rpc` and `/rpcws` can pass TiVo replies and errors through raw, report kmttg failures as typed JSON, and negotiate SchemaVersion per TiVo
+- Program Options > Use local websocket instead of local TLS rpc: talks to TiVos on the LAN over their own mind websocket (port 1502) with just the MAK, no cdata.p12 certificate. Unencrypted, so a TiVo with a wan rpc port set stays on TLS
 
 ### Fixed
 - ffmpeg encode profiles work with current ffmpeg (tested on 8.1) and still work with the older bundled ffmpeg. The h264 high/med rate, PS3 and Xbox 360 profiles failed on newer ffmpeg

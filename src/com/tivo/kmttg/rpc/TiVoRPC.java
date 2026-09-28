@@ -199,10 +199,7 @@ public class TiVoRPC {
             "Content-Type: application/json" + eol +
             "RequestType: " + type + eol +
             "ResponseCount: " + ResponseCount + eol +
-            "BodyId: " + bodyId + eol +
-            "X-ApplicationName: Quicksilver" + eol +
-            "X-ApplicationVersion: 1.2" + eol +
-            String.format("X-ApplicationSessionId: 0x%x", session_id) + eol;
+            lanHeaders(bodyId, session_id);
          data.put("type", type);
 
          String body = data.toString();
@@ -214,6 +211,21 @@ public class TiVoRPC {
       }
    }
    
+   // The headers after ResponseCount that a TiVo on the LAN is sent, over TLS or its websocket.
+   static String lanHeaders(String bodyId, int sessionId) {
+      String eol = "\r\n";
+      return
+         "BodyId: " + bodyId + eol +
+         "X-ApplicationName: Quicksilver" + eol +
+         "X-ApplicationVersion: 1.2" + eol +
+         String.format("X-ApplicationSessionId: 0x%x", sessionId) + eol;
+   }
+
+   static int newSessionId() {
+      //TODO this is going to produce the exact same session_id in every instance.  Should seed Random with e.g. the current time.
+      return new Random(0x27dc20).nextInt();
+   }
+
    public void disconnect() {
     try {
        if (out != null) out.close();
@@ -286,8 +298,7 @@ public class TiVoRPC {
     /** perform a (non-web) socket setup and auth.  should be followed by If getSuccess() bodyId_get() */
     private void RemoteInit(String MAK) {
        createSocketFactory();
-       //TODO this is going to produce the exact same session_id in every instance.  Should seed Random with e.g. the current time.
-       session_id = new Random(0x27dc20).nextInt();
+       session_id = newSessionId();
        try {
           socket = (SSLSocket) sslSocketFactory.createSocket(IP, port);
           socket.setNeedClientAuth(true);

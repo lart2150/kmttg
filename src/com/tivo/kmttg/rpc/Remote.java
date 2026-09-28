@@ -53,8 +53,10 @@ import com.tivo.kmttg.util.string;
 
 public class Remote{
    public Boolean success;
-   protected TiVoRPCWS ws;
+   // Exactly one of these: ws for tivo.com (away) or the TiVo's local websocket, s for TLS.
+   protected WebSocketRPC ws;
    protected TiVoRPC s;
+   // tivo.com, as opposed to the TiVo itself - not the same thing as using ws.
    protected final boolean away;
    private String tivoName;
    protected final String IP;
@@ -81,6 +83,10 @@ public class Remote{
             // it open. Closed here rather than at each caller, because every one of them tests
             // success and returns, and a tivo.com session left open is one the next attempt
             // has to fight for.
+            if (! this.success) ws.close();
+         } else if (useLocalWebsocket(tivoName)) {
+            ws = TiVoRPCLocalWS.init(tivoName, IP, port, mak, (config.rpcOld == 1));
+            this.success = ws.waitForReady();
             if (! this.success) ws.close();
          } else {
             s = new TiVoRPC(tivoName, IP, mak, programDir, port, cdata,
@@ -154,6 +160,12 @@ public class Remote{
             port, cdata);
    }
    
+   // The websocket is plaintext, MAK included, so a TiVo reached over the WAN stays on TLS.
+   static boolean useLocalWebsocket(String tivoName) {
+      return config.rpcWebsocket
+            && (tivoName == null || config.getWanSetting(tivoName, "rpc") == null);
+   }
+
    public static String getIPForTivo(String tivoName) {
       String tivoIP = config.TIVOS.get(tivoName);
 
@@ -166,7 +178,7 @@ public class Remote{
    }
    
    public boolean isConnected() {
-      return this.away
+      return this.ws != null
             ? this.ws.isOpen()
             : this.s.isConnected();
    }
@@ -220,11 +232,13 @@ public class Remote{
     * @return null if there was an error, otherwise the response.
     */
    private synchronized JSONObject ReadRemote(String req) {
-      boolean rpcPre = s.rpcOld;
+      boolean rpcPre = rpcOld();
       lastError = null;
 
       // do the actual exchange
-      JSONObject result = s.Request(req, schemaVersion == null);
+      JSONObject result = ws != null
+            ? ws.sendRequestAndWaitForResponse(req, schemaVersion == null)
+            : s.Request(req, schemaVersion == null);
       if (result == null) {
          saveRpcOld(rpcPre);
          return null;
@@ -250,8 +264,14 @@ public class Remote{
       return result;
    }
 
+   private boolean rpcOld() {
+      if (ws instanceof TiVoRPCLocalWS)
+         return ((TiVoRPCLocalWS) ws).rpcOld;
+      return s != null && s.rpcOld;
+   }
+
    private void saveRpcOld(boolean rpcPre) {
-      if (!rpcPre && s.rpcOld) {
+      if (!rpcPre && rpcOld()) {
          config.rpcOld = 1;
          config.save();
       }
@@ -270,10 +290,10 @@ public class Remote{
       String req = RpcRequest(type, false, json);
       if (req == null)
          return null;
-      if (this.away)
-         return ws.sendRequestAndWaitForBody(req, schemaVersion == null);
-      boolean rpcPre = s.rpcOld;
-      String body = s.RequestRaw(req, schemaVersion == null);
+      boolean rpcPre = rpcOld();
+      String body = ws != null
+            ? ws.sendRequestAndWaitForBody(req, schemaVersion == null)
+            : s.RequestRaw(req, schemaVersion == null);
       saveRpcOld(rpcPre);
       return body;
    }
@@ -315,8 +335,8 @@ public class Remote{
    public synchronized String RpcRequest(String type, Boolean monitor, JSONObject data) {
       Integer version = schemaVersion;
       if (version == null && negotiated)
-         version = this.away ? ws.negotiatedSchema(type) : s.negotiatedSchema();
-      return this.away
+         version = this.ws != null ? ws.negotiatedSchema(type) : s.negotiatedSchema();
+      return this.ws != null
             ? ws.RpcRequest(type, monitor, data, version)
             : s.RpcRequest(type, monitor, data, version);
    }
@@ -3383,12 +3403,9 @@ public class Remote{
 	}
 	
    public void disconnect() {
-      if (away) {
-         // Null when the connect itself failed - an interrupt during connectBlocking leaves
-         // a Remote that reports no success and has nothing to close.
-         if (this.ws != null) this.ws.close();
-      } else {
-         if (this.s != null) this.s.disconnect();
-      }
+      // Both null when the connect itself failed - an interrupt during connectBlocking leaves
+      // a Remote that reports no success and has nothing to close.
+      if (this.ws != null) this.ws.close();
+      if (this.s != null) this.s.disconnect();
   }
 }

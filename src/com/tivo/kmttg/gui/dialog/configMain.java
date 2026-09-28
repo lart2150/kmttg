@@ -116,6 +116,7 @@ public class configMain {
    private static JCheckBox TivoWebPlusDelete = null;
    private static JCheckBox rpcDelete = null;
    private static JCheckBox rpcOld = null;
+   private static JCheckBox rpcWebsocket = null;
    private static JCheckBox HideProtectedFiles = null;
    private static JCheckBox TiVoSort = null;
    private static JCheckBox OverwriteFiles = null;
@@ -855,6 +856,9 @@ public class configMain {
       else
          rpcOld.setSelected(false);
 
+      // rpcWebsocket
+      rpcWebsocket.setSelected(config.rpcWebsocket);
+
       // HideProtectedFiles
       if (config.HideProtectedFiles == 1)
          HideProtectedFiles.setSelected(true);
@@ -1483,6 +1487,9 @@ public class configMain {
          config.rpcOld = 1;
       else
          config.rpcOld = 0;
+
+      // rpcWebsocket
+      config.rpcWebsocket = rpcWebsocket.isSelected();
 
       // HideProtectedFiles
       if (HideProtectedFiles.isSelected())
@@ -2358,6 +2365,7 @@ public class configMain {
       TivoWebPlusDelete = new JCheckBox();
       rpcDelete = new JCheckBox();
       rpcOld = new JCheckBox();
+      rpcWebsocket = new JCheckBox();
       HideProtectedFiles = new JCheckBox();
       TiVoSort = new JCheckBox();
       OverwriteFiles = new JCheckBox();
@@ -2534,6 +2542,7 @@ public class configMain {
       TivoWebPlusDelete.setText("Enable TivoWebPlus Delete task");
       rpcDelete.setText("Enable rpc style delete task");
       rpcOld.setText("Use old RPC schema version for older TiVo software");
+      rpcWebsocket.setText("Use local websocket instead of local TLS rpc");
       HideProtectedFiles.setText("Do not show copy protected files in table");
       TiVoSort.setText("Sort table show titles as a TiVo does");
       OverwriteFiles.setText("Overwrite existing files");
@@ -3470,6 +3479,10 @@ public class configMain {
          program_options_panel.add(DsdDecrypt, "cell 1 " + gy);
       }
 
+      // rpcWebsocket
+      gy++;
+      program_options_panel.add(rpcWebsocket, "cell 0 " + gy);
+
       // Visual Panel
       JPanel visual_panel = new JPanel(new MigLayout("gapx 5, gapy 5", "[][grow]", ""));
 
@@ -3768,6 +3781,7 @@ public class configMain {
       TivoWebPlusDelete.setToolTipText(getToolTip("TivoWebPlusDelete"));
       rpcDelete.setToolTipText(getToolTip("rpcDelete"));
       rpcOld.setToolTipText(getToolTip("rpcOld"));
+      rpcWebsocket.setToolTipText(getToolTip("rpcWebsocket"));
       HideProtectedFiles.setToolTipText(getToolTip("HideProtectedFiles"));
       TiVoSort.setToolTipText(getToolTip("TiVoSort"));
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
@@ -4199,6 +4213,14 @@ public class configMain {
          text += "and you should enable this option to force kmttg to use older RPC schema version<br>";
          text += "for RPC operations.";
       }
+      else if (component.equals("rpcWebsocket")) {
+         text =  "<b>Use local websocket instead of local TLS rpc</b><br>";
+         text += "If enabled then kmttg talks rpc to TiVos on the LAN over the TiVo's own websocket<br>";
+         text += "port (1502) instead of the TLS rpc port (1413). This does not use the cdata.p12 client<br>";
+         text += "certificate, only the MAK. Experimental. Does not affect away mode (tivo.com) connections.<br>";
+         text += "NOTE: The websocket is not encrypted, MAK included, so it is for the LAN only. A TiVo with a<br>";
+         text += "<b>wan rpc port</b> set keeps using TLS rpc.";
+      }
       else if (component.equals("HideProtectedFiles")) {
          text = "<b>Do not show copy protected files in table</b><br>";
          text += "If this option is enabled then copy protected TiVo shows are not displayed in the<br>";
@@ -4464,6 +4486,7 @@ public class configMain {
          text += "By default http port 1413 for rpc interface to Tivos on the LAN, but from WAN side<br>";
          text += "you will have to setup port forwarding in your router, then you should specify here the WAN (public) side<br>";
          text += "port number you are using in your router port forwarding settings.<br>";
+         text += "A TiVo with this set always uses TLS rpc, even with <b>Use local websocket instead of local TLS rpc</b> enabled.<br>";
          text += "NOTE: In order to save this setting you must OK the configuration window once for each TiVo";
       }
       else if (component.equals("limit_npl_fetches")) {

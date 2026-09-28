@@ -88,6 +88,7 @@ public class config {
    public static int TivoWebPlusDelete = 0;
    public static int rpcDelete = 0;
    public static int rpcOld = 0;
+   public static boolean rpcWebsocket = false; // Local mind websocket (port 1502) instead of TLS rpc
    public static int UseAdscan = 0;
    public static int VrdReview = 0;
    public static int comskip_review = 0;
@@ -1261,6 +1262,9 @@ public class config {
                if (key.equals("rpcOld")) {
                   rpcOld = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
                }
+               if (key.equals("rpcWebsocket")) {
+                  rpcWebsocket = Boolean.parseBoolean(string.removeLeadingTrailingSpaces(line));
+               }
                if (key.equals("cpu_cores")) {
                   cpu_cores = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
                }
@@ -1585,6 +1589,8 @@ public class config {
          ofp.write("<rpcDelete>\n" + rpcDelete + "\n\n");
          
          ofp.write("<rpcOld>\n" + rpcOld + "\n\n");
+
+         ofp.write("<rpcWebsocket>\n" + rpcWebsocket + "\n\n");
          
          ofp.write("<cpu_cores>\n" + cpu_cores + "\n\n");
          

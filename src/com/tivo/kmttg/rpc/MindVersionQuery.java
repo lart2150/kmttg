@@ -1,7 +1,9 @@
 package com.tivo.kmttg.rpc;
 
 import com.tivo.kmttg.JSON.JSONArray;
+import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.main.config;
 import com.tivo.kmttg.tools.CaptureLog;
 
 /**
@@ -38,6 +40,8 @@ public class MindVersionQuery extends TiVoRPC {
     * answer for a box too old to know the field, and for one that is not listening.
     */
    public static String get(String tivoName, String ip, String mak, String programDir) {
+      if (config.rpcWebsocket)
+         return viaWebsocket(tivoName, ip, mak);
       MindVersionQuery q = new MindVersionQuery(tivoName, ip, mak, programDir);
       try {
          if (! q.getSuccess()) return null;
@@ -45,19 +49,43 @@ public class MindVersionQuery extends TiVoRPC {
          JSONObject json = new JSONObject();
          // "-" rather than the service number, the way bodyId_get asks before it knows one.
          json.put("bodyId", "-");
-         JSONObject response = q.SingleRequest("bodyConfigSearch", json);
-         if (response == null || ! response.has("bodyConfig")) return null;
-         JSONArray configs = response.getJSONArray("bodyConfig");
-         if (configs.length() == 0) return null;
-         // A number rather than a string, so it is read as an Object and not with getString.
-         Object version = configs.getJSONObject(0).opt("maxMindVersion");
-         return version == null ? null : String.valueOf(version);
+         return versionOf(q.SingleRequest("bodyConfigSearch", json));
       } catch (Exception e) {
          CaptureLog.out.println("  maxMindVersion: " + e.getMessage());
          return null;
       } finally {
          q.disconnect();
       }
+   }
+
+   // The websocket takes a SchemaVersion per request, so there is no header to rewrite.
+   private static String viaWebsocket(String tivoName, String ip, String mak) {
+      TiVoRPCLocalWS ws = null;
+      try {
+         ws = TiVoRPCLocalWS.init(tivoName, ip, -1, mak, false);
+         if (! ws.waitForReady()) return null;
+         JSONObject json = new JSONObject();
+         json.put("bodyId", "-");
+         String req = ws.RpcRequest("bodyConfigSearch", false, json, Integer.valueOf(SCHEMA));
+         return versionOf(ws.sendRequestAndWaitForResponse(req, false));
+      } catch (InterruptedException e) {
+         Thread.currentThread().interrupt();
+         return null;
+      } catch (Exception e) {
+         CaptureLog.out.println("  maxMindVersion: " + e.getMessage());
+         return null;
+      } finally {
+         if (ws != null) ws.close();
+      }
+   }
+
+   private static String versionOf(JSONObject response) throws JSONException {
+      if (response == null || ! response.has("bodyConfig")) return null;
+      JSONArray configs = response.getJSONArray("bodyConfig");
+      if (configs.length() == 0) return null;
+      // A number rather than a string, so it is read as an Object and not with getString.
+      Object version = configs.getJSONObject(0).opt("maxMindVersion");
+      return version == null ? null : String.valueOf(version);
    }
 
    // Same layout super builds - start line, headers, blank line, body - with the schema
