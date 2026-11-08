@@ -4,7 +4,6 @@
    "use strict";
    const status = document.getElementById("status");
    const video = document.getElementById("video");
-   const stopButton = document.getElementById("stop");
    const params = new URLSearchParams(window.location.search);
    const tivo = params.get("tivo");
    const recordingId = params.get("recordingId");
@@ -45,10 +44,6 @@
       }
    }
 
-   stopButton.addEventListener("click", () => {
-      stop();
-      status.textContent = "Playback stopped.";
-   });
    window.addEventListener("pagehide", stop, { once: true });
 
    async function start() {
