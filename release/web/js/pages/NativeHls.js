@@ -12,6 +12,13 @@
    const params = new URLSearchParams(window.location.search);
    const tivo = params.get("tivo");
    const recordingId = params.get("recordingId");
+   const stbChannelId = params.get("stbChannelId");
+   const liveTv = !!stbChannelId;
+   const back = document.getElementById("back");
+   if (liveTv) {
+      back.href = "LiveTv.html";
+      back.textContent = "Back to live TV channels";
+   }
    let token = null;
    let player = null;
    let stopping = false;
@@ -124,12 +131,13 @@
    });
 
    async function start() {
-      if (!tivo || !recordingId) {
-         status.textContent = "Missing TiVo or recording identifier.";
+      if (!tivo || !!recordingId === !!stbChannelId) {
+         status.textContent = "Missing or ambiguous TiVo stream source.";
          return;
       }
       try {
-         const response = await fetch(endpoint("/nativeHls/start", { tivo, recordingId }), {
+         const source = liveTv ? { tivo, stbChannelId } : { tivo, recordingId };
+         const response = await fetch(endpoint("/nativeHls/start", source), {
             method: "POST",
             headers: { "X-Kmttg-Playback": "1" },
             cache: "no-store"
@@ -162,8 +170,11 @@
             stop();
             return;
          }
-         if (video.canPlayType("application/vnd.apple.mpegurl")) {
-            video.src = data.playlist; // Safari and native Apple HLS
+         const nativeHls = !!video.canPlayType("application/vnd.apple.mpegurl");
+         const nativeSafari = nativeHls && typeof navigator !== "undefined"
+            && navigator.vendor === "Apple Computer, Inc.";
+         if (nativeSafari) {
+            video.src = data.playlist;
             refreshAudio();
          } else if (typeof Hls !== "undefined" && Hls.isSupported()) {
             player = new Hls({ enableWorker: true });
@@ -177,6 +188,9 @@
             player.on(Hls.Events.AUDIO_TRACK_SWITCHED, refreshAudio);
             player.loadSource(data.playlist);
             player.attachMedia(video);
+         } else if (nativeHls) {
+            video.src = data.playlist;
+            refreshAudio();
          } else {
             stop();
             throw new Error("This browser cannot play HLS.");
