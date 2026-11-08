@@ -45,7 +45,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
    const actions = {
       MYSHOWS: MyShows, BROWSEFILES: FileBrowser, GetCached: GetCached,
-      ShowRunning: Running, KILLALL: KillAll
+      ShowRunning: Running, KILLALL: KillAll,
+      LIVETV: () => {
+         const url = new URL("/web/LiveTv.html", window.location);
+         if (TIVO.value) url.searchParams.set("tivo", TIVO.value);
+         window.open(url.toString(), "_blank", "noopener");
+      }
    };
    for (const [id, fn] of Object.entries(actions))
       document.getElementById(id).addEventListener("click", () => fn());

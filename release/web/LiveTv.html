@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live TV - kmttg</title>
+<link rel="stylesheet" href="css/pure-min.css">
+<link rel="stylesheet" href="css/main.css">
+<style>
+.live-tv { max-width: 750px; padding: 24px 20px; margin: 0 auto; }
+.live-tv select { max-width: 100%; }
+.live-tv .controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.live-tv .status { margin-top: 16px; }
+</style>
+</head>
+<body>
+<main class="live-tv">
+<h2>Live TV</h2>
+<div class="controls">
+<label for="tivo">TiVo</label>
+<select id="tivo" aria-label="TiVo"></select>
+<label for="channel">Channel</label>
+<select id="channel" aria-label="Live TV channel" disabled></select>
+<button type="button" id="watch" class="pure-button pure-button-primary" disabled>Watch Live TV</button>
+</div>
+<p id="status" class="status" role="status">Loading channels…</p>
+<p><a href="Stream.html">Back to recordings</a></p>
+</main>
+<script src="js/pages/LiveTv.js"></script>
+</body>
+</html>

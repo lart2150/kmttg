@@ -19,12 +19,12 @@
 <main class="native-player">
 <h2>Stream from TiVo</h2>
 <p id="status" class="status" role="status">Connecting to TiVo…</p>
-<video id="video" controls playsinline aria-label="TiVo recording"></video>
+<video id="video" controls playsinline aria-label="TiVo video"></video>
 <div id="stream-options" class="stream-options" hidden>
 <label id="quality-control" hidden>Quality <select id="quality" aria-label="Video quality"></select></label>
 <label id="audio-control" hidden>Audio <select id="audio" aria-label="Audio track"></select></label>
 </div>
-<p><a href="Stream.html">Back to recordings</a></p>
+<p><a id="back" href="Stream.html">Back to recordings</a></p>
 </main>
 <script src="js/vendor/hls.min.js"></script>
 <script src="js/pages/NativeHls.js"></script>

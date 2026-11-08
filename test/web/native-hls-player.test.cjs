@@ -8,7 +8,7 @@ const path=require("node:path");
 const vm=require("node:vm");
 const source=fs.readFileSync(path.join(__dirname,"../../release/web/js/pages/NativeHls.js"),"utf8");
 
-async function setup({hls=false,levels=[],tracks=[],nativeTracks=[]}={}){
+async function setup({hls=false,levels=[],tracks=[],nativeTracks=[],liveTv=false}={}){
   const onVideo={},onWindow={},calls=[],timers=new Map();
   const controls=Object.fromEntries(["stream-options","quality-control","audio-control"].map(id=>[id,{hidden:true}]));
   for(const id of ["quality","audio"]){
@@ -19,6 +19,7 @@ async function setup({hls=false,levels=[],tracks=[],nativeTracks=[]}={}){
   const audioTracks=Object.assign([...nativeTracks],{listeners:{},
     addEventListener(name,fn){this.listeners[name]=fn}});
   const status={textContent:"Connecting"};
+  const back={href:"Stream.html",textContent:"Back to recordings"};
   const video={
     src:"",paused:false,audioTracks,
     addEventListener(name,callback){onVideo[name]=callback},
@@ -42,10 +43,14 @@ async function setup({hls=false,levels=[],tracks=[],nativeTracks=[]}={}){
   }
   const sandbox={
     URL,URLSearchParams,Hls:FakeHls,
-    document:{getElementById(id){return {status,video,...controls}[id]||null},
+    navigator:{vendor:!hls && nativeTracks.length ? "Apple Computer, Inc." : "Google Inc."},
+    document:{getElementById(id){return {status,video,back,...controls}[id]||null},
       createElement(tag){return {tag,value:"",textContent:""}}},
     window:{
-      location:{search:"?tivo=TiVo&recordingId=tivo%3Arc.123",origin:"http://127.0.0.1:8181"},
+      location:{search:liveTv
+            ? "?tivo=TiVo&stbChannelId=tivo%3Asch.1234"
+            : "?tivo=TiVo&recordingId=tivo%3Arc.123",
+         origin:"http://127.0.0.1:8181"},
       addEventListener(name,callback){onWindow[name]=callback}
     },
     fetch(url,opts){
@@ -61,7 +66,7 @@ async function setup({hls=false,levels=[],tracks=[],nativeTracks=[]}={}){
   vm.runInNewContext(source,sandbox);
   for(let n=0;n<12;n++)await Promise.resolve();
   assert.equal(calls.filter(x=>x.url.includes("/nativeHls/start")).length,1);
-  return {onVideo,onWindow,calls,status,video,timers,controls,hls:instance};
+  return {onVideo,onWindow,calls,status,video,back,timers,controls,hls:instance};
 }
 
 test("finished video releases exactly its session and heartbeat",async()=>{
@@ -123,5 +128,24 @@ test("Safari native audio tracks are selectable when multiple tracks exist",asyn
   x.controls.audio.value="1";x.controls.audio.listeners.change();
   assert.equal(x.video.audioTracks[0].enabled,false);
   assert.equal(x.video.audioTracks[1].enabled,true);
+  x.onWindow.pagehide();
+});
+
+test("live channel request uses its own source and changes the back-link",async()=>{
+  const x=await setup({liveTv:true});
+  const start=x.calls.find(x=>x.url.includes("/nativeHls/start"));
+  assert(start);
+  assert(start.url.includes("stbChannelId=tivo%3Asch.1234"));
+  assert(!start.url.includes("recordingId="));
+  assert.equal(x.back.href,"LiveTv.html");
+  assert.equal(x.back.textContent,"Back to live TV channels");
+  x.onWindow.pagehide();
+});
+
+test("Chrome's native HLS capability does not hide hls.js quality controls",async()=>{
+  const x=await setup({levels:[{height:240,bitrate:400000},{height:720,bitrate:3400000}]});
+  assert(x.hls,"Chrome should prefer hls.js for manual quality and audio control");
+  x.hls.emit("MANIFEST_PARSED");
+  assert.equal(x.controls["quality-control"].hidden,false);
   x.onWindow.pagehide();
 });
