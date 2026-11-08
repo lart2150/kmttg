@@ -132,6 +132,20 @@ final class NativeHlsWeb {
                ? active.remove(token) : null;
          if (ended != null) releaseSession(ended);
          json(resp, 200, new JSONObject());
+      } else if ("/nativeHls/ping".equals(path)) {
+         if (!isControl(req)) {
+            error(resp, 403, "Native playback requires a same-origin POST");
+            return;
+         }
+         String token = req.getParams().get("token");
+         Active current = TOKEN.matcher(token == null ? "" : token).matches()
+               ? active.get(token) : null;
+         if (current == null) {
+            error(resp, 404, "Native playback session expired");
+            return;
+         }
+         current.lastUse = System.currentTimeMillis();
+         json(resp, 200, new JSONObject());
       } else if (path.startsWith(PREFIX)) {
          if (!"GET".equals(req.getMethod())) {
             error(resp, 405, "Media requests must use GET");
