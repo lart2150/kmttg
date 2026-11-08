@@ -8,6 +8,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import com.sun.net.httpserver.HttpServer;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.util.HashSet;
@@ -111,6 +113,33 @@ public class NativeHlsWebTest {
          assertFalse(NativeHlsWeb.ownsPath("42", path), path);
       }
       assertFalse(NativeHlsWeb.ownsPath("abc", prefix + ".m3u8"));
+   }
+
+   @Test
+   void firmwareStreamingCapabilityProbeRejectsDisabledAndUnreadyBoxes() throws Exception {
+      java.util.concurrent.atomic.AtomicReference<String> response =
+            new java.util.concurrent.atomic.AtomicReference<>(
+               "{\"ServiceStreamingAllowed\":1,\"svcStreamingStateExt\":6}");
+      HttpServer info = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+      info.createContext("/sysinfo/json/svcinfo", exchange -> {
+         byte[] bytes = response.get().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+         exchange.sendResponseHeaders(200, bytes.length);
+         try (var out = exchange.getResponseBody()) { out.write(bytes); }
+      });
+      info.start();
+      try {
+         int listeningPort = info.getAddress().getPort();
+         assertTrue(NativeHlsWeb.streamingReady("127.0.0.1", listeningPort));
+         response.set("{\"ServiceStreamingAllowed\":0,\"svcStreamingStateExt\":6}");
+         assertFalse(NativeHlsWeb.streamingReady("127.0.0.1", listeningPort));
+         response.set("{\"ServiceStreamingAllowed\":1,\"svcStreamingStateExt\":0}");
+         assertFalse(NativeHlsWeb.streamingReady("127.0.0.1", listeningPort));
+         response.set("{}");
+         assertFalse(NativeHlsWeb.streamingReady("127.0.0.1", listeningPort));
+         response.set("not JSON");
+         assertFalse(NativeHlsWeb.streamingReady("127.0.0.1", listeningPort));
+      } finally { info.stop(0); }
+      assertFalse(NativeHlsWeb.streamingReady("127.0.0.1", 1));
    }
 
    @Test

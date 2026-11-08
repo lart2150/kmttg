@@ -25,7 +25,12 @@ The local TiVo must allow HTTP streaming on port 49152 and authenticated RPC
 on its configured port. The native playback page proxies its session-specific
 playlists, AES keys and MPEG-TS segments through the kmttg web server, using a
 random per-session token. The browser page stops the session when closed, and
-the server expires idle sessions after five minutes or on shutdown. Only
+the server expires idle sessions after five minutes or on shutdown. A private,
+durable session journal also allows kmttg to reclaim its own abandoned sessions
+after a hard crash: recovery first checks that the TiVo still reports the exact
+client UUID and session ID, and never releases a session belonging to another
+live kmttg process. Native playback is offered only when the TiVo's streaming
+service reports enabled and Ready. Only
 copy-freely recordings with the expected TiVo DRM permissions are offered
 this option; protected content is never forced or decrypted against policy.
 

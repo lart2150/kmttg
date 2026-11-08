@@ -29,6 +29,7 @@ public final class NativeHlsSession implements AutoCloseable {
    private final String playlistUri;
    private final String ip;
    private boolean closed;
+   private boolean releaseConfirmed;
 
    private NativeHlsSession(Remote remote, String bodyId, String clientUuid,
                             String sessionId, String playlistUri, String ip) {
@@ -106,6 +107,14 @@ public final class NativeHlsSession implements AutoCloseable {
       return sessionId;
    }
 
+   public String clientUuid() {
+      return clientUuid;
+   }
+
+   public synchronized boolean releaseConfirmed() {
+      return releaseConfirmed;
+   }
+
    public synchronized void close() {
       if (closed) return;
       closed = true;
@@ -123,15 +132,16 @@ public final class NativeHlsSession implements AutoCloseable {
       } finally {
          remote.disconnect();
       }
-      if (!released) forceRelease();
+      if (!released) released = forceRelease();
+      releaseConfirmed = released;
    }
 
    // TiVo has no server-side session timeout. If the RPC socket has died during
    // playback, use the firmware's narrowly scoped HTTP release route, never
    // an arbitrary user-supplied URL or device-wide transcoder reset.
-   private void forceRelease() {
+   private boolean forceRelease() {
       if (ip == null || !sessionId.matches("tivo:hls\\.[0-9]+"))
-         return;
+         return false;
       String number = sessionId.substring("tivo:hls.".length());
       HttpURLConnection connection = null;
       try {
@@ -140,13 +150,15 @@ public final class NativeHlsSession implements AutoCloseable {
                "&action=release").openConnection();
          connection.setConnectTimeout(3000);
          connection.setReadTimeout(3000);
-         if (connection.getResponseCode() != 200)
-            log.warn("Native HLS fallback release was rejected");
+         if (connection.getResponseCode() == 200)
+            return true;
+         log.warn("Native HLS fallback release was rejected");
       } catch (Exception e) {
          log.warn("Native HLS fallback release failed: " + e.getMessage());
       } finally {
          if (connection != null) connection.disconnect();
       }
+      return false;
    }
 
 }
