@@ -29,12 +29,17 @@ right-click and choose **Stream to This Computer [h]** (or press H).
 The existing **Play [p]** command starts playback on the TiVo's television
 output. The kmttg web server must be enabled in Web Server settings.
 The existing transcoding options remain available as a fallback.
+If the TiVo reports maxSessionsExceeded, the player displays a no-free-session
+message rather than a generic transcoding error. The kmttg web proxy also
+retains its separate conservative two-session limit, independent of the TiVo
+streaming client's diagnostic slot count.
+
 
 The local TiVo must allow HTTP streaming on port 49152 and authenticated RPC
 on its configured port. The native playback page proxies its session-specific
 playlists, AES keys and MPEG-TS segments through the kmttg web server, using a
-random per-session token. The browser page stops the session when closed, and
-the browser sends a session heartbeat once a minute while the player is open,
+random per-session token. The browser page stops the session when closed or when the recording
+finishes, and the browser sends a session heartbeat once a minute while the player is open,
 so paused recordings are not mistaken for abandoned sessions. The server expires
 sessions with no heartbeat/media activity after five minutes or on shutdown. A private,
 durable session journal also allows kmttg to reclaim its own abandoned sessions
