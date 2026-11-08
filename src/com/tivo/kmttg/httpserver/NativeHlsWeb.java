@@ -77,7 +77,10 @@ final class NativeHlsWeb {
    });
 
    NativeHlsWeb() {
-      expiration.scheduleWithFixedDelay(this::removeExpired, 30, 30, TimeUnit.SECONDS);
+      expiration.scheduleWithFixedDelay(() -> {
+         removeExpired();
+         NativeHlsRecovery.recoverOrphans();
+      }, 2, 30, TimeUnit.SECONDS);
    }
 
    static String newToken() {
@@ -127,7 +130,7 @@ final class NativeHlsWeb {
          String token = req.getParams().get("token");
          Active ended = TOKEN.matcher(token == null ? "" : token).matches()
                ? active.remove(token) : null;
-         if (ended != null) ended.session.close();
+         if (ended != null) releaseSession(ended);
          json(resp, 200, new JSONObject());
       } else if (path.startsWith(PREFIX)) {
          if (!"GET".equals(req.getMethod())) {
@@ -181,20 +184,72 @@ final class NativeHlsWeb {
             error(resp, 403, "Recording is not eligible for native playback");
             return;
          }
+         // The firmware exposes its transcoder capability and state on the
+         // dedicated streaming HTTP service, before any session is allocated.
+         if (!streamingReady(address.getHostAddress(), PORT)) {
+            error(resp, 503, "This TiVo does not have a ready native HLS service");
+            return;
+         }
          NativeHlsSession session = NativeHlsSession.start(remote, bodyId,
                recordingId, address.getHostAddress());
-         String token = newToken();
-         active.put(token, new Active(session, address.getHostAddress()));
-         remote = null; // active session now owns the connection
-         JSONObject response = new JSONObject();
-         response.put("token", token);
-         response.put("playlist", PREFIX + token + session.playlistUri());
-         json(resp, 200, response);
+         remote = null; // session now owns the RPC connection
+         try {
+            // Durable before telling the browser to use it: SIGKILL bypasses finally.
+            NativeHlsRecovery.save(session.clientUuid(), session.sessionId(),
+                  address.getHostAddress());
+            String token = newToken();
+            Active current = new Active(session, address.getHostAddress());
+            active.put(token, current);
+            try {
+               JSONObject response = new JSONObject();
+               response.put("token", token);
+               response.put("playlist", PREFIX + token + session.playlistUri());
+               json(resp, 200, response);
+            } catch (Exception e) {
+               active.remove(token, current);
+               releaseSession(current);
+               throw e;
+            }
+         } catch (Exception e) {
+            // If durable bookkeeping fails, never leave the transcoder allocated.
+            if (!session.releaseConfirmed()) {
+               session.close();
+               if (session.releaseConfirmed())
+                  NativeHlsRecovery.remove(session.clientUuid());
+            }
+            throw e;
+         }
       } catch (Exception e) {
          log.warn("Native HLS start: " + e.getMessage());
          error(resp, 502, "TiVo could not start native playback");
       } finally {
          if (remote != null) remote.disconnect();
+      }
+   }
+
+   static boolean streamingReady(String ip, int port) {
+      HttpURLConnection connection = null;
+      try {
+         connection = (HttpURLConnection) new URL("http", ip, port,
+               "/sysinfo/json/svcinfo").openConnection();
+         connection.setConnectTimeout(2500);
+         connection.setReadTimeout(2500);
+         connection.setInstanceFollowRedirects(false);
+         if (connection.getResponseCode() != 200) return false;
+         byte[] body;
+         try (InputStream input = connection.getInputStream()) {
+            body = input.readNBytes(64 * 1024 + 1);
+         }
+         if (body.length > 64 * 1024) return false;
+         JSONObject info = new JSONObject(new String(body,
+               java.nio.charset.StandardCharsets.UTF_8));
+         return info.optInt("ServiceStreamingAllowed", 0) == 1
+               && info.optInt("svcStreamingStateExt", -1) == 6;
+      } catch (Exception e) {
+         // Unsupported model, booting/rebooting, or unreachable service.
+         return false;
+      } finally {
+         if (connection != null) connection.disconnect();
       }
    }
 
@@ -273,16 +328,22 @@ final class NativeHlsWeb {
       for (Map.Entry<String, Active> entry : active.entrySet()) {
          if (now - entry.getValue().lastUse > IDLE_MS
                && active.remove(entry.getKey(), entry.getValue())) {
-            entry.getValue().session.close();
+            releaseSession(entry.getValue());
          }
       }
+   }
+
+   private static void releaseSession(Active session) {
+      session.session.close();
+      if (session.session.releaseConfirmed())
+         NativeHlsRecovery.remove(session.session.clientUuid());
    }
 
    void close() {
       expiration.shutdownNow();
       for (Map.Entry<String, Active> entry : active.entrySet()) {
          if (active.remove(entry.getKey(), entry.getValue()))
-            entry.getValue().session.close();
+            releaseSession(entry.getValue());
       }
    }
 }
