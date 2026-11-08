@@ -24,9 +24,6 @@
       return url;
    }
 
-   // Derive choices from the actual HLS playlist. The connected BOLT may
-   // expose only one rendition, even when the firmware accepts ABR; never
-   // present an invented or unavailable quality to the user.
    function option(value, label) {
       const item = document.createElement("option");
       item.value = String(value);

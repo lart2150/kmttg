@@ -70,8 +70,6 @@ public final class NativeHlsSession implements AutoCloseable {
       request.put("recordingId", recordingId);
       request.put("clientUuid", clientUuid);
       request.put("sessionType", "streaming");
-      // ABR is a firmware-defined HlsStreamVariantsSet value and was accepted
-      // by the tested BOLT. Devices may still return only one video variant.
       request.put("hlsStreamDesiredVariantsSet", "ABR");
       request.put("isLocal", true);
       request.put("deviceConfiguration", device);
