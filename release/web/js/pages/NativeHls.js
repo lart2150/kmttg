@@ -45,6 +45,12 @@
    }
 
    window.addEventListener("pagehide", stop, { once: true });
+   // Reaching the end is different from pausing. A finished VOD stream should
+   // release its hardware transcoder even if the browser tab stays open.
+   video.addEventListener("ended", () => {
+      stop();
+      status.textContent = "Recording finished.";
+   });
 
    async function start() {
       if (!tivo || !recordingId) {
