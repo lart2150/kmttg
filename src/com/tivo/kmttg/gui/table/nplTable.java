@@ -47,6 +47,7 @@ import javax.swing.event.ListSelectionListener;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONException;
 import com.tivo.kmttg.JSON.JSONObject;
+import com.tivo.kmttg.gui.NativeHlsDesktop;
 import com.tivo.kmttg.gui.TableMap;
 import com.tivo.kmttg.gui.gui;
 import com.tivo.kmttg.gui.comparator.ChannelComparator;
@@ -420,6 +421,17 @@ public class nplTable extends TableMap {
       }
       if (tivoName.equals("FILES"))
          return;
+      if (keyCode == KeyEvent.VK_H && config.rpcEnabled(tivoName)) {
+         String recordingId = selectedNativeHlsRecordingId();
+         if (recordingId == null) {
+            JOptionPane.showMessageDialog(config.gui.getFrame(),
+                  "Select exactly one recording (not a folder) to stream.",
+                  "Stream from TiVo", JOptionPane.INFORMATION_MESSAGE);
+         } else {
+            NativeHlsDesktop.play(tivoName, recordingId);
+         }
+         return;
+      }
       if (keyCode == KeyEvent.VK_DELETE ||
                keyCode == KeyEvent.VK_BACK_SPACE ||
                keyCode == KeyEvent.VK_P) {
@@ -761,6 +773,20 @@ public class nplTable extends TableMap {
                config.gui.show_details.update(NowPlaying, tivoName, s.data.get("recordingId"));
          }
       }
+   }
+
+   // Browser-native playback streams one recording. Unlike Play [p], which
+   // may navigate the TiVo through a whole folder/group, this action has no
+   // support for folder or multi-selection playlists.
+   String selectedNativeHlsRecordingId() {
+      int[] rows = GetSelectedRows();
+      if (rows == null || rows.length != 1)
+         return null;
+      sortableDate selected = NowPlaying.getTreeItem(rows[0]).getValue().getDATE();
+      if (selected.folder || selected.data == null)
+         return null;
+      String id = selected.data.get("recordingId");
+      return id != null && id.matches("[A-Za-z0-9:._-]+") ? id : null;
    }
 
    // Now Playing mode get selection data at given row

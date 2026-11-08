@@ -55,7 +55,9 @@ public class PopupHandler {
          popup.show(TABLE.table, e.getX(), e.getY());
    }
 
-   private static JPopupMenu display(MouseEvent e) {
+   // Package-visible so the context-menu action list can be regression-tested
+   // without requiring a displayed Swing window.
+   static JPopupMenu display(MouseEvent e) {
       String tabName = config.gui.getCurrentTabName();
       String tivoName;
       if (tabName.equals("FILES"))
@@ -141,6 +143,7 @@ public class PopupHandler {
             items.add(new PopupPair("Get extended metadata [m]", KeyEvent.VK_M, tivoName));
          if (config.rpcEnabled(tivoName)) {
             items.add(new PopupPair("Play [p]", KeyEvent.VK_P, tivoName));
+            items.add(new PopupPair("Stream to This Computer [h]", KeyEvent.VK_H, tivoName));
             items.add(new PopupPair("Show Information [i]", KeyEvent.VK_I, tivoName));
          }
          if (config.rpcEnabled(tivoName) || config.twpDeleteEnabled())

@@ -45,8 +45,8 @@ public final class NativeHlsDesktop {
       if (!isAvailable(tivo)) {
          JOptionPane.showMessageDialog(config.gui.getFrame(),
                "Enable the kmttg web server in File > Configure > Web Server, "
-               + "then restart kmttg to use native playback.",
-               "Native HLS playback", JOptionPane.INFORMATION_MESSAGE);
+               + "then restart kmttg to stream recordings to this computer.",
+               "Stream from TiVo", JOptionPane.INFORMATION_MESSAGE);
          return;
       }
       try {
@@ -55,10 +55,10 @@ public final class NativeHlsDesktop {
             throw new IOException("This desktop does not support opening a browser");
          Desktop.getDesktop().browse(playerUri(tivo, recordingId, config.httpserver_port));
       } catch (Exception e) {
-         log.error("Native HLS browser launch failed: " + e.getMessage());
+         log.error("TiVo streaming browser launch failed: " + e.getMessage());
          JOptionPane.showMessageDialog(config.gui.getFrame(),
-               "Could not open the native HLS player: " + e.getMessage(),
-               "Native HLS playback", JOptionPane.ERROR_MESSAGE);
+               "Could not open the TiVo streaming player: " + e.getMessage(),
+               "Stream from TiVo", JOptionPane.ERROR_MESSAGE);
       }
    }
 }

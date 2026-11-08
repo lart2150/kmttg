@@ -251,6 +251,50 @@ public class TableActionTargetTest {
    }
 
    @Test
+   public void nativeHlsContextActionResolvesExactlyOneSelectedRecording() {
+      Stack<Hashtable<String,String>> entries = new Stack<Hashtable<String,String>>();
+      entries.add(show("Ghosts", "Gate-gate", 1000));
+      entries.add(show("Elsbeth", "Catch and Kill", 2000));
+      // Synthetic show() fixtures use titles as IDs and can contain spaces;
+      // actual TiVo recording IDs have the tivo:rc.<identifier> form.
+      entries.get(0).put("recordingId", "tivo:rc.123");
+      entries.get(1).put("recordingId", "tivo:rc.456");
+      nplTable npl = nplTab(false, entries);
+      assertEquals(null, npl.selectedNativeHlsRecordingId(),
+            "No selection must not open an arbitrary recording");
+      npl.NowPlaying.table.setRowSelectionInterval(0, 0);
+      String first = npl.NowPlaying.getTreeItem(0).getValue().getDATE().data.get("recordingId");
+      assertEquals(first, npl.selectedNativeHlsRecordingId());
+      npl.NowPlaying.table.setRowSelectionInterval(0, 1);
+      assertEquals(null, npl.selectedNativeHlsRecordingId(),
+            "Unlike the existing on-TV Play command, native HLS plays one recording");
+      npl.NowPlaying.table.setRowSelectionInterval(0, 0);
+      npl.NowPlaying.getTreeItem(0).getValue().getDATE().data.remove("recordingId");
+      assertEquals(null, npl.selectedNativeHlsRecordingId());
+   }
+
+   @Test
+   public void nativeHlsContextActionNeverTreatsFolderAsRecording() {
+      nplTable npl = nplTab(true, twoFolders());
+      assertTrue(npl.NowPlaying.getTreeItem(0).getValue().getDATE().folder);
+      npl.NowPlaying.table.setRowSelectionInterval(0, 0);
+      assertEquals(null, npl.selectedNativeHlsRecordingId());
+   }
+
+   @Test
+   public void nativeHlsContextActionResolvesSelectionAfterResort() {
+      Stack<Hashtable<String,String>> entries = twoFolders();
+      for (int i = 0; i < entries.size(); i++)
+         entries.get(i).put("recordingId", "tivo:rc." + (100 + i));
+      nplTable npl = nplTab(false, entries);
+      npl.NowPlaying.setDefaultSort("SHOW", true);
+      npl.NowPlaying.sort();
+      npl.NowPlaying.table.setRowSelectionInterval(0, 0);
+      String expected = npl.NowPlaying.getTreeItem(0).getValue().getDATE().data.get("recordingId");
+      assertEquals(expected, npl.selectedNativeHlsRecordingId());
+   }
+
+   @Test
    public void nplCollectDeletes_givesEverySelectedFolderItsOwnRow() throws Exception {
       // Both folders have to come out of the table. Keying the removal off the
       // 1st entry of the whole map instead of the 1st of each folder left the

@@ -100,10 +100,10 @@
             stop();
             throw new Error("This browser cannot play HLS.");
          }
-         status.textContent = "Streaming directly from TiVo.";
+         status.textContent = "Streaming from TiVo without downloading or transcoding on kmttg.";
          video.play().catch(() => {}); // user can press Play if autoplay is blocked
       } catch (error) {
-         status.textContent = error.message || "Native playback failed.";
+         status.textContent = error.message || "Could not stream from TiVo.";
       }
    }
 
