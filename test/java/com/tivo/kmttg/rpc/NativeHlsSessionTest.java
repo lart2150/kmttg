@@ -70,8 +70,8 @@ public class NativeHlsSessionTest {
       for (int i = 0; i < offered.length(); i++)
          assertEquals("hlsStreamEncryptionInfo",
                offered.getJSONObject(i).getString("type"));
-      assertFalse(request.has("hlsStreamDesiredVariantsSet"),
-            "Unverified optional fields should not be invented");
+      assertEquals("ABR", request.getString("hlsStreamDesiredVariantsSet"),
+            "ABR must match the firmware enum and the verified live request");
    }
 
    @Test

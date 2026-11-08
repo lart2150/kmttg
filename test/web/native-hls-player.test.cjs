@@ -1,4 +1,4 @@
-/* Browser lifecycle regression tests for TiVo HLS player.
+/* Browser HLS lifecycle and source-backed stream option tests.
  * Run: node --test test/web/native-hls-player.test.cjs
  */
 const {test}=require("node:test");
@@ -8,23 +8,42 @@ const path=require("node:path");
 const vm=require("node:vm");
 const source=fs.readFileSync(path.join(__dirname,"../../release/web/js/pages/NativeHls.js"),"utf8");
 
-async function setup(){
-  const onVideo={},onWindow={},calls=[];
+async function setup({hls=false,levels=[],tracks=[],nativeTracks=[]}={}){
+  const onVideo={},onWindow={},calls=[],timers=new Map();
+  const controls=Object.fromEntries(["stream-options","quality-control","audio-control"].map(id=>[id,{hidden:true}]));
+  for(const id of ["quality","audio"]){
+    controls[id]={value:"",options:[],listeners:{},
+      replaceChildren(...options){this.options=options},
+      addEventListener(name,fn){this.listeners[name]=fn}};
+  }
+  const audioTracks=Object.assign([...nativeTracks],{listeners:{},
+    addEventListener(name,fn){this.listeners[name]=fn}});
   const status={textContent:"Connecting"};
   const video={
-    src:"",paused:false,
+    src:"",paused:false,audioTracks,
     addEventListener(name,callback){onVideo[name]=callback},
-    canPlayType(){return "probably"},
+    canPlayType(){return hls?"":"probably"},
     play(){return Promise.resolve()},
     pause(){this.paused=true},
     removeAttribute(name){if(name==="src")this.src=""},
     load(){}
   };
-  let next=0;
-  const timers=new Map();
+  let timerId=0,instance;
+  const Events=Object.fromEntries(["MANIFEST_PARSED","LEVELS_UPDATED","LEVEL_SWITCHED","AUDIO_TRACKS_UPDATED","AUDIO_TRACK_SWITCHED"].map(x=>[x,x]));
+  class FakeHls{
+    static isSupported(){return true}
+    static Events=Events
+    constructor(){this.handlers={};this.levels=[...levels];this.audioTracks=[...tracks];this.currentLevel=-1;this.audioTrack=0;this.autoLevelEnabled=true;instance=this}
+    on(name,fn){this.handlers[name]=fn}
+    loadSource(src){this.src=src}
+    attachMedia(m){this.media=m}
+    destroy(){this.destroyed=true}
+    emit(name){this.handlers[name]?.()}
+  }
   const sandbox={
-    URL,URLSearchParams,
-    document:{getElementById(id){return {status,video}[id]||null}},
+    URL,URLSearchParams,Hls:FakeHls,
+    document:{getElementById(id){return {status,video,...controls}[id]||null},
+      createElement(tag){return {tag,value:"",textContent:""}}},
     window:{
       location:{search:"?tivo=TiVo&recordingId=tivo%3Arc.123",origin:"http://127.0.0.1:8181"},
       addEventListener(name,callback){onWindow[name]=callback}
@@ -36,16 +55,16 @@ async function setup(){
       });
       return Promise.resolve({ok:true,status:200});
     },
-    setInterval(callback){const key=++next;timers.set(key,callback);return key},
-    clearInterval(key){timers.delete(key)}
+    setInterval(callback){const id=++timerId;timers.set(id,callback);return id},
+    clearInterval(id){timers.delete(id)}
   };
   vm.runInNewContext(source,sandbox);
   for(let n=0;n<12;n++)await Promise.resolve();
   assert.equal(calls.filter(x=>x.url.includes("/nativeHls/start")).length,1);
-  return {onVideo,onWindow,calls,status,video,timers};
+  return {onVideo,onWindow,calls,status,video,timers,controls,hls:instance};
 }
 
-test("finished video releases exactly its session and heartbeat, leaving page usable",async()=>{
+test("finished video releases exactly its session and heartbeat",async()=>{
   const x=await setup();
   assert.equal(x.timers.size,1);
   x.onVideo.ended();
@@ -60,7 +79,7 @@ test("finished video releases exactly its session and heartbeat, leaving page us
   assert.equal(x.calls.filter(c=>c.url.includes("/nativeHls/stop")).length,1);
 });
 
-test("pause leaves session allocated; pagehide later releases it",async()=>{
+test("pause retains the stream until navigation and releases it exactly once",async()=>{
   const x=await setup();
   x.video.pause();
   assert.equal(x.calls.filter(c=>c.url.includes("/nativeHls/stop")).length,0);
@@ -68,4 +87,41 @@ test("pause leaves session allocated; pagehide later releases it",async()=>{
   x.onWindow.pagehide();
   assert.equal(x.calls.filter(c=>c.url.includes("/nativeHls/stop")).length,1);
   assert.equal(x.timers.size,0);
+});
+
+test("one real HLS rendition yields no misleading quality selector",async()=>{
+  const x=await setup({hls:true,levels:[{height:720,bitrate:8848000}]});
+  x.hls.emit("MANIFEST_PARSED");
+  assert.equal(x.controls["stream-options"].hidden,true);
+  assert.equal(x.controls["quality-control"].hidden,true);
+  x.onWindow.pagehide();
+});
+
+test("multiple actual HLS variants and audio tracks expose working selectors",async()=>{
+  const x=await setup({hls:true,
+    levels:[{height:720,bitrate:8848000},{height:480,bitrate:3200000}],
+    tracks:[{name:"English",lang:"en"},{name:"Español",lang:"es"}]});
+  x.hls.emit("MANIFEST_PARSED");
+  x.hls.emit("AUDIO_TRACKS_UPDATED");
+  assert.equal(x.controls["stream-options"].hidden,false);
+  assert.equal(x.controls["quality-control"].hidden,false);
+  assert.equal(x.controls["audio-control"].hidden,false);
+  assert.deepEqual(x.controls.quality.options.map(v=>v.textContent),["Auto","720p (8.8 Mbps)","480p (3.2 Mbps)"]);
+  assert.equal(x.controls.quality.value,"-1");
+  x.controls.quality.value="1";x.controls.quality.listeners.change();
+  assert.equal(x.hls.currentLevel,1);
+  x.controls.audio.value="1";x.controls.audio.listeners.change();
+  assert.equal(x.hls.audioTrack,1);
+  x.onWindow.pagehide();
+});
+
+test("Safari native audio tracks are selectable when multiple tracks exist",async()=>{
+  const tracks=[{language:"en",enabled:true},{language:"es",enabled:false}];
+  const x=await setup({nativeTracks:tracks});
+  assert.equal(x.controls["audio-control"].hidden,false);
+  assert.equal(x.controls["quality-control"].hidden,true);
+  x.controls.audio.value="1";x.controls.audio.listeners.change();
+  assert.equal(x.video.audioTracks[0].enabled,false);
+  assert.equal(x.video.audioTracks[1].enabled,true);
+  x.onWindow.pagehide();
 });
