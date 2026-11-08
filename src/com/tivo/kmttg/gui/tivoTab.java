@@ -153,6 +153,36 @@ public class tivoTab {
          });
          row.add(refresh);
 
+         // Play the selected recording through the TiVo-native HLS web player.
+         // The web backend performs its own recording eligibility and DRM checks.
+         if (config.rpcEnabled(tivoName)) {
+            JButton nativeHls = new JButton("Play (Native HLS)");
+            nativeHls.setToolTipText(
+                  "Play the selected recording directly from TiVo in your browser");
+            nativeHls.addActionListener(e -> {
+               int[] selected = nplTab.GetSelectedRows();
+               if (selected.length != 1) {
+                  javax.swing.JOptionPane.showMessageDialog(config.gui.getFrame(),
+                        "Select one recording in the Now Playing list.",
+                        "Native HLS playback",
+                        javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                  return;
+               }
+               Hashtable<String,String> entry =
+                     nplTab.NowPlayingGetSelectionData(selected[0]);
+               if (entry == null || !entry.containsKey("recordingId")
+                     || entry.get("recordingId").isBlank()) {
+                  javax.swing.JOptionPane.showMessageDialog(config.gui.getFrame(),
+                        "Select a recording, not a folder.",
+                        "Native HLS playback",
+                        javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                  return;
+               }
+               NativeHlsDesktop.play(tivoName, entry.get("recordingId"));
+            });
+            row.add(nativeHls);
+         }
+
          // Disk Usage button
          if ( ! tivoName.equals("FILES") ) {
             disk_usage = new JButton("Disk Usage");
