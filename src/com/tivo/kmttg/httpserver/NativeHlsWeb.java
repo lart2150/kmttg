@@ -39,11 +39,13 @@ final class NativeHlsWeb {
       final NativeHlsSession session;
       final String ip;
       final String sessionNumber;
+      final boolean liveTv;
       volatile long lastUse = System.currentTimeMillis();
 
-      Active(NativeHlsSession session, String ip) {
+      Active(NativeHlsSession session, String ip, boolean liveTv) {
          this.session = session;
          this.ip = ip;
+         this.liveTv = liveTv;
          String uri = session.playlistUri();
          this.sessionNumber = uri.substring("/session-streaming/".length(),
                uri.length() - ".m3u8".length());
@@ -118,6 +120,12 @@ final class NativeHlsWeb {
             return;
          }
          start(req, resp);
+      } else if ("/nativeHls/channels".equals(path)) {
+         if (!"GET".equals(req.getMethod())) {
+            error(resp, 405, "Channel listings require GET");
+            return;
+         }
+         channels(req, resp);
       } else if ("/nativeHls/stop".equals(path)) {
          if (!isControl(req)) {
             error(resp, 403, "Native playback requires a same-origin POST");
@@ -167,11 +175,14 @@ final class NativeHlsWeb {
       }
       String tivo = req.getParams().get("tivo");
       String recordingId = req.getParams().get("recordingId");
-      if (tivo == null || recordingId == null
-            || recordingId.length() > 180 || recordingId.length() < 5
-            || !recordingId.matches("[A-Za-z0-9:._-]+")
-            || !config.TIVOS.containsKey(tivo)) {
-         error(resp, 400, "Invalid TiVo or recording");
+      String channelId = req.getParams().get("stbChannelId");
+      boolean liveTv = channelId != null;
+      if (tivo == null || !config.TIVOS.containsKey(tivo)
+            || (recordingId == null) == (channelId == null)
+            || (liveTv ? !validStbChannelId(channelId)
+               : recordingId.length() > 180 || recordingId.length() < 5
+                  || !recordingId.matches("[A-Za-z0-9:._-]+"))) {
+         error(resp, 400, "Invalid TiVo or stream source");
          return;
       }
       String bodyId = config.getTsn(tivo);
@@ -193,12 +204,21 @@ final class NativeHlsWeb {
          return;
       }
       try {
-         JSONObject lookup = new JSONObject();
-         lookup.put("recordingId", recordingId);
-         JSONObject details = remote.Command("Search", lookup);
-         if (!copyFreely(details, recordingId)) {
-            error(resp, 403, "Recording is not eligible for native playback");
-            return;
+         if (liveTv) {
+            remote.useNegotiatedSchema(true);
+            JSONObject lineup = remote.Command("channelSearch", channelSearchRequest());
+            if (!receivedChannel(lineup, channelId)) {
+               error(resp, 403, "Channel is not available for live streaming");
+               return;
+            }
+         } else {
+            JSONObject lookup = new JSONObject();
+            lookup.put("recordingId", recordingId);
+            JSONObject details = remote.Command("Search", lookup);
+            if (!copyFreely(details, recordingId)) {
+               error(resp, 403, "Recording is not eligible for native playback");
+               return;
+            }
          }
          // The firmware exposes its transcoder capability and state on the
          // dedicated streaming HTTP service, before any session is allocated.
@@ -206,15 +226,16 @@ final class NativeHlsWeb {
             error(resp, 503, "This TiVo does not have a ready native HLS service");
             return;
          }
-         NativeHlsSession session = NativeHlsSession.start(remote, bodyId,
-               recordingId, address.getHostAddress());
+         NativeHlsSession session = liveTv
+               ? NativeHlsSession.startLiveTv(remote, bodyId, channelId, address.getHostAddress())
+               : NativeHlsSession.start(remote, bodyId, recordingId, address.getHostAddress());
          remote = null; // session now owns the RPC connection
          try {
             // Durable before telling the browser to use it: SIGKILL bypasses finally.
             NativeHlsRecovery.save(session.clientUuid(), session.sessionId(),
                   address.getHostAddress());
             String token = newToken();
-            Active current = new Active(session, address.getHostAddress());
+            Active current = new Active(session, address.getHostAddress(), liveTv);
             active.put(token, current);
             try {
                JSONObject response = new JSONObject();
@@ -243,6 +264,88 @@ final class NativeHlsWeb {
          error(resp, 502, "TiVo could not start streaming");
       } finally {
          if (remote != null) remote.disconnect();
+      }
+   }
+
+   static boolean validStbChannelId(String id) {
+      return id != null && id.matches("tivo:sch\\.[0-9]{1,20}");
+   }
+
+   private static JSONObject channelSearchRequest() throws Exception {
+      JSONObject query = new JSONObject();
+      query.put("noLimit", true);
+      return query;
+   }
+
+   /**
+    * A channel must be present in this TiVo's own lineup and explicitly
+    * received, entitled, recordable and unblocked. An ID from a different
+    * TiVo or a disabled channel must not start a tuner session.
+    */
+   static boolean receivedChannel(JSONObject lineup, String id) {
+      if (!validStbChannelId(id) || lineup == null) return false;
+      JSONArray channels = lineup.optJSONArray("channel");
+      if (channels == null) return false;
+      for (int i = 0; i < channels.length(); i++) {
+         JSONObject ch = channels.optJSONObject(i);
+         if (ch != null && id.equals(ch.optString("stbChannelId", ""))
+               && ch.optBoolean("isReceived", false)
+               && ch.optBoolean("isEntitled", false)
+               && ch.optBoolean("isRecordable", false)
+               && !ch.optBoolean("isBlocked", true))
+            return true;
+      }
+      return false;
+   }
+
+   /**
+    * Read-only, server-side channel discovery for the browser. Never proxy
+    * arbitrary TiVo RPC operations or unverified channel metadata to the UI.
+    */
+   private void channels(HTTPServer.Request req, HTTPServer.Response resp) throws IOException {
+      String tivo = req.getParams().get("tivo");
+      if (tivo == null || !config.TIVOS.containsKey(tivo) || !config.rpcEnabled(tivo)) {
+         error(resp, 400, "Unknown or unsupported TiVo");
+         return;
+      }
+      Remote remote = new Remote(tivo);
+      if (!remote.success) {
+         remote.disconnect();
+         error(resp, 502, "Could not authenticate with TiVo");
+         return;
+      }
+      try {
+         remote.useNegotiatedSchema(true);
+         JSONObject lineup = remote.Command("channelSearch", channelSearchRequest());
+         if (lineup == null || lineup.optJSONArray("channel") == null) {
+            error(resp, 502, "Could not retrieve TiVo channel lineup");
+            return;
+         }
+         JSONArray result = new JSONArray();
+         JSONArray items = lineup.getJSONArray("channel");
+         for (int i = 0; i < items.length(); i++) {
+            JSONObject ch = items.optJSONObject(i);
+            if (ch == null) continue;
+            String id = ch.optString("stbChannelId", "");
+            if (!validStbChannelId(id)
+                  || !ch.optBoolean("isReceived", false)
+                  || !ch.optBoolean("isEntitled", false)
+                  || !ch.optBoolean("isRecordable", false)
+                  || ch.optBoolean("isBlocked", true)) continue;
+            JSONObject out = new JSONObject();
+            out.put("stbChannelId", id);
+            out.put("channelNumber", ch.optString("channelNumber", ""));
+            out.put("callSign", ch.optString("callSign", ""));
+            result.put(out);
+         }
+         JSONObject out = new JSONObject();
+         out.put("channel", result);
+         json(resp, 200, out);
+      } catch (Exception e) {
+         log.warn("Live TV channel discovery: " + e.getMessage());
+         error(resp, 502, "Could not retrieve TiVo channel lineup");
+      } finally {
+         remote.disconnect();
       }
    }
 
@@ -285,6 +388,22 @@ final class NativeHlsWeb {
          && "allowed".equals(drm.optString("recordingPlaybackPolicy", ""));
    }
 
+   // Observed from firmware: the first live segment can briefly return HTTP 400
+   // with error 0x0201 while the transcoder initializes, then serve the same
+   // segment successfully. Retry only that exact condition, only for live TV.
+   static boolean transientLiveSegmentError(int status, String responseBody) {
+      if (status != 400 || responseBody == null || responseBody.length() > 1024) return false;
+      try {
+         return "0x0201".equals(new JSONObject(responseBody).optString("eTranscoderError", ""));
+      } catch (Exception e) {
+         return false;
+      }
+   }
+
+   private static boolean segmentPath(String path) {
+      return path != null && path.matches("/session-streaming/[0-9]+/[0-9]+/[0-9a-fA-F]+");
+   }
+
    private void media(String suffix, HTTPServer.Response resp) throws IOException {
       int slash = suffix.indexOf('/');
       String token = slash >= 0 ? suffix.substring(0, slash) : "";
@@ -297,16 +416,42 @@ final class NativeHlsWeb {
       current.lastUse = System.currentTimeMillis();
       String contentType = path.endsWith(".m3u8") ? "application/vnd.apple.mpegurl"
          : path.endsWith(".kbin") ? "application/octet-stream" : "video/mp2t";
-      HttpURLConnection conn = (HttpURLConnection)
-         new URL("http", current.ip, PORT, path).openConnection();
-      conn.setInstanceFollowRedirects(false);
-      conn.setConnectTimeout(5000);
-      conn.setReadTimeout(15000);
+      HttpURLConnection conn = null;
       try {
-         int code = conn.getResponseCode();
-         if (code != 200) {
-            error(resp, 502, "TiVo HLS media request failed");
-            return;
+         // The first freshly produced live segment can race the hardware
+         // encoder startup. Other status codes, recordings, playlists and
+         // encryption keys are never retried on this error.
+         int maxTries = current.liveTv && segmentPath(path) ? 7 : 1;
+         for (int attempt = 1; attempt <= maxTries; attempt++) {
+            conn = (HttpURLConnection) new URL("http", current.ip, PORT, path).openConnection();
+            conn.setInstanceFollowRedirects(false);
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(15000);
+            int code = conn.getResponseCode();
+            if (code == 200) break;
+            boolean retry = false;
+            if (attempt < maxTries && code == 400) {
+               InputStream errorBody = conn.getErrorStream();
+               if (errorBody != null) {
+                  try (errorBody) {
+                     byte[] bytes = errorBody.readNBytes(1025);
+                     retry = transientLiveSegmentError(code,
+                           new String(bytes, java.nio.charset.StandardCharsets.UTF_8));
+                  }
+               }
+            }
+            conn.disconnect();
+            conn = null;
+            if (!retry) {
+               error(resp, 502, "TiVo HLS media request failed");
+               return;
+            }
+            try {
+               Thread.sleep(250);
+            } catch (InterruptedException e) {
+               Thread.currentThread().interrupt();
+               throw new IOException("Interrupted while waiting for live TV segment", e);
+            }
          }
          long length = conn.getContentLengthLong();
          if (length > MAX_RESPONSE) {
@@ -322,7 +467,7 @@ final class NativeHlsWeb {
             writeChunks(in, out);
          }
       } finally {
-         conn.disconnect();
+         if (conn != null) conn.disconnect();
       }
    }
 

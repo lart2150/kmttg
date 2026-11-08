@@ -32,7 +32,8 @@ public class NativeHlsSessionTest {
          try {
             operations.add(operation);
             requests.add(new JSONObject(data.toString()));
-            if ("hlsStreamRecordingRequest".equals(operation))
+            if ("hlsStreamRecordingRequest".equals(operation)
+                  || "hlsStreamLiveTvRequest".equals(operation))
                return startResponse;
             if ("hlsStreamExtend".equals(operation) && extendFails)
                return null;
@@ -79,6 +80,45 @@ public class NativeHlsSessionTest {
                offered.getJSONObject(i).getString("type"));
       assertEquals("ABR", request.getString("hlsStreamDesiredVariantsSet"),
             "ABR must match the firmware enum and the verified live request");
+   }
+
+   @Test
+   void liveTvRequestUsesStbChannelIdNotRecordingOrTunerIndex() throws Exception {
+      JSONObject request = NativeHlsSession.liveTvRequest(
+            "8490001", "tivo:sch.4295950337", "unique-client-uuid");
+      assertEquals("8490001", request.getString("bodyId"));
+      assertEquals("tivo:sch.4295950337", request.getString("stbChannelId"));
+      assertEquals("unique-client-uuid", request.getString("clientUuid"));
+      assertEquals("streaming", request.getString("sessionType"));
+      assertEquals("ABR", request.getString("hlsStreamDesiredVariantsSet"));
+      assertEquals("webPlayer", request.getJSONObject("deviceConfiguration").getString("deviceType"));
+      assertEquals("hlsAes128Cbc", request.getJSONArray("supportedEncryption")
+            .getJSONObject(0).getString("encryptionType"));
+      assertFalse(request.has("recordingId"));
+      assertFalse(request.has("tunerId"));
+      for (String invalid : new String[]{"", "tivo:ch.1234", "tivo:sch.abc", "../sysinfo",
+            "tivo:sch.42&x=1"}) {
+         assertThrows(IllegalArgumentException.class,
+               () -> NativeHlsSession.liveTvRequest("8490001", invalid, "uuid"), invalid);
+      }
+   }
+
+   @Test
+   void liveTvSessionUsesCorrectRpcAndExactlyScopedRelease() throws Exception {
+      FakeRemote remote = new FakeRemote();
+      remote.startResponse = success("tivo:hls.71", "/session-streaming/71.m3u8");
+      NativeHlsSession session = NativeHlsSession.startLiveTv(remote,
+            "8490001", "tivo:sch.4295950337", "192.168.1.49");
+      assertEquals("hlsStreamLiveTvRequest", remote.operations.get(0));
+      assertEquals("tivo:sch.4295950337", remote.requests.get(0).getString("stbChannelId"));
+      session.close();
+      session.close();
+      assertEquals(2, remote.operations.size());
+      assertEquals("hlsStreamRelease", remote.operations.get(1));
+      assertEquals(remote.requests.get(0).getString("clientUuid"),
+            remote.requests.get(1).getString("clientUuid"));
+      assertEquals("tivo:hls.71", remote.requests.get(1).getString("hlsSessionId"));
+      assertEquals(1, remote.disconnects);
    }
 
    @Test
