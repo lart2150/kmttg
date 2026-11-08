@@ -108,8 +108,10 @@ function showCell(title, playUrl, onTranscode, nativeInfo = null) {
       const play = document.createElement("a");
       play.href = playUrl.toString();
       play.target = "_blank";
+      play.rel = "noopener";
       play.textContent = "[transcode & play]";
-      actions.append(play, " ", link("[transcode]", onTranscode));
+      play.title = "Download the recording to kmttg, transcode with FFmpeg, and play in your browser";
+      actions.append(play);
    }
    if (nativeInfo) {
       const url = new URL("/web/NativeHls.html", window.location);
@@ -119,9 +121,16 @@ function showCell(title, playUrl, onTranscode, nativeInfo = null) {
       native.href = url.toString();
       native.target = "_blank";
       native.rel = "noopener";
-      native.textContent = "[native HLS]";
-      if (playUrl) actions.append(" ");
+      native.textContent = "[stream directly from TiVo]";
+      native.title = "Play in your browser using the TiVo's own streaming service; no download or FFmpeg conversion on kmttg";
+      if (actions.childNodes.length) actions.append(" ");
       actions.append(native);
+   }
+   if (playUrl) {
+      const transcode = link("[transcode]", onTranscode);
+      transcode.title = "Download the recording to kmttg and create a transcoded copy";
+      if (actions.childNodes.length) actions.append(" ");
+      actions.append(transcode);
    }
    wrap.append(actions);
    return wrap;

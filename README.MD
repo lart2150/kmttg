@@ -14,15 +14,21 @@ message, install a newer Java and start kmttg again. Your config.ini, auto.ini,
 queue and downloads are untouched.
 
 
-## Native TiVo recording HLS playback (experimental)
+## Stream recordings directly from TiVo (experimental)
 
-The Video Streaming web page offers **native HLS** for completed, copy-freely
-recordings on compatible TiVos. In the desktop GUI, select one recording in a
-TiVo's Now Playing tab and click **Play (Native HLS)** beside Refresh to open
-the same player in your default browser. The kmttg web server must be enabled
-in the application's Web Server settings. Native HLS uses the TiVo's built-in
-transcoder instead of transferring the recording and running FFmpeg on the
-kmttg host. The existing transcoding links remain available as a fallback.
+The Video Streaming web page offers **stream directly from TiVo** for completed,
+copy-freely recordings on compatible TiVos. Its links appear in this order:
+**transcode & play**, **stream directly from TiVo**, **transcode**.
+Direct streaming plays in your browser using the TiVo's built-in transcoder,
+without downloading and running FFmpeg on the kmttg computer. By contrast,
+**transcode & play** downloads, decodes and converts the recording on the kmttg
+computer as you watch it; **transcode** creates a cached converted file.
+
+In the desktop GUI, select one recording in a TiVo's Now Playing tab,
+right-click and choose **Stream to This Computer [h]** (or press H).
+The existing **Play [p]** command starts playback on the TiVo's television
+output. The kmttg web server must be enabled in Web Server settings.
+The existing transcoding options remain available as a fallback.
 
 The local TiVo must allow HTTP streaming on port 49152 and authenticated RPC
 on its configured port. The native playback page proxies its session-specific
