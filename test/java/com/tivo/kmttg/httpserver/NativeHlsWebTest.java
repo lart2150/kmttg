@@ -80,6 +80,45 @@ public class NativeHlsWebTest {
    }
 
    @Test
+   void liveTvStartValidatesSingleSourceAndConfiguredTiVo() throws Exception {
+      assertEquals(405, status("/nativeHls/channels?tivo=unknown", "POST", true));
+   }
+
+   @Test
+   void liveTvRejectsUnknownTiVoAndMalformedChannelIdentifier() throws Exception {
+      assertEquals(400, status("/nativeHls/start?tivo=UNKNOWN-KMTTG-TEST"
+            + "&stbChannelId=tivo%3Asch.4295950337", "POST", true));
+      assertEquals(400, status("/nativeHls/start?tivo=UNKNOWN-KMTTG-TEST"
+            + "&stbChannelId=..%2Fbad", "POST", true));
+      assertEquals(400, status("/nativeHls/channels?tivo=UNKNOWN-KMTTG-TEST",
+            "GET", false));
+   }
+
+   @Test
+   void liveTvEligibilityChecksTheChannelLineupAndPermissionFlags() throws Exception {
+      JSONObject entry = new JSONObject();
+      entry.put("stbChannelId", "tivo:sch.4295950337");
+      entry.put("isReceived", true);
+      entry.put("isEntitled", true);
+      entry.put("isRecordable", true);
+      entry.put("isBlocked", false);
+      JSONObject channels = new JSONObject();
+      channels.put("channel", new JSONArray().put(entry));
+      assertTrue(NativeHlsWeb.receivedChannel(channels, "tivo:sch.4295950337"));
+      assertFalse(NativeHlsWeb.receivedChannel(channels, "tivo:sch.111"));
+      assertFalse(NativeHlsWeb.receivedChannel(channels, "tivo:ch.4295950337"));
+      assertFalse(NativeHlsWeb.receivedChannel(channels, "../sysinfo"));
+      for (String field : new String[]{"isReceived", "isEntitled", "isRecordable"}) {
+         entry.put(field, false);
+         assertFalse(NativeHlsWeb.receivedChannel(channels, "tivo:sch.4295950337"), field);
+         entry.put(field, true);
+      }
+      entry.put("isBlocked", true);
+      assertFalse(NativeHlsWeb.receivedChannel(channels, "tivo:sch.4295950337"));
+      assertFalse(NativeHlsWeb.receivedChannel(null, "tivo:sch.4295950337"));
+   }
+
+   @Test
    void mediaProxyRejectsUnknownTokenAndUnknownMethods() throws Exception {
       String token = NativeHlsWeb.newToken();
       assertEquals(404, status("/nativeHls/media/" + token
@@ -149,6 +188,18 @@ public class NativeHlsWebTest {
          assertFalse(NativeHlsWeb.streamingReady("127.0.0.1", listeningPort));
       } finally { info.stop(0); }
       assertFalse(NativeHlsWeb.streamingReady("127.0.0.1", 1));
+   }
+
+   @Test
+   void liveSegmentTransientErrorMustMatchExactFirmwareResponse() {
+      String busy = "{\"eTranscoderError\":\"0x0201\","
+            + "\"strTranscoderError\":\"Transcoder Internal Error\",\"httpErrCode\":\"500\"}";
+      assertTrue(NativeHlsWeb.transientLiveSegmentError(400, busy));
+      assertFalse(NativeHlsWeb.transientLiveSegmentError(500, busy));
+      assertFalse(NativeHlsWeb.transientLiveSegmentError(404, busy));
+      assertFalse(NativeHlsWeb.transientLiveSegmentError(400, "{\"eTranscoderError\":\"0x0202\"}"));
+      assertFalse(NativeHlsWeb.transientLiveSegmentError(400, "garbage"));
+      assertFalse(NativeHlsWeb.transientLiveSegmentError(400, null));
    }
 
    @Test

@@ -10,7 +10,7 @@ import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.util.log;
 
 /**
- * One TiVo-native recording HLS session. The caller owns the Remote connection until close().
+ * One TiVo-native HLS session. The caller owns the Remote connection until close().
  * Its request uses the typed Trio fields verified against TiVo's HLS RPC implementation;
  * the box decides whether streaming is permitted for the recording.
  */
@@ -42,11 +42,9 @@ public final class NativeHlsSession implements AutoCloseable {
       this.ip = ip;
    }
 
-   /** Build the wire request from the TiVo's trioschema::HlsStreamRecordingRequest. */
-   static JSONObject request(String bodyId, String recordingId, String clientUuid) throws Exception {
-      if (bodyId == null || bodyId.isEmpty()
-            || recordingId == null || recordingId.isEmpty()
-            || clientUuid == null || clientUuid.isEmpty())
+   /** Common typed request fields in TiVo's recording and live-TV HLS schemas. */
+   private static JSONObject baseRequest(String bodyId, String clientUuid) throws Exception {
+      if (bodyId == null || bodyId.isEmpty() || clientUuid == null || clientUuid.isEmpty())
          throw new IllegalArgumentException("Missing TiVo HLS request identifier");
 
       JSONObject device = new JSONObject();
@@ -63,7 +61,6 @@ public final class NativeHlsSession implements AutoCloseable {
 
       JSONObject request = new JSONObject();
       request.put("bodyId", bodyId);
-      request.put("recordingId", recordingId);
       request.put("clientUuid", clientUuid);
       request.put("sessionType", "streaming");
       request.put("hlsStreamDesiredVariantsSet", "ABR");
@@ -73,15 +70,45 @@ public final class NativeHlsSession implements AutoCloseable {
       return request;
    }
 
+   /** Recording and live-TV requests share a wire schema except for their source ID. */
+   static JSONObject request(String bodyId, String recordingId, String clientUuid) throws Exception {
+      if (recordingId == null || recordingId.isEmpty())
+         throw new IllegalArgumentException("Missing TiVo recording identifier");
+      JSONObject request = baseRequest(bodyId, clientUuid);
+      request.put("recordingId", recordingId);
+      return request;
+   }
+
+   /** Live TV names a configured tuner channel, not a recording or numeric tuner input. */
+   static JSONObject liveTvRequest(String bodyId, String stbChannelId, String clientUuid)
+         throws Exception {
+      if (stbChannelId == null || !stbChannelId.matches("tivo:sch\\.[0-9]+"))
+         throw new IllegalArgumentException("Invalid TiVo STB channel identifier");
+      JSONObject request = baseRequest(bodyId, clientUuid);
+      request.put("stbChannelId", stbChannelId);
+      return request;
+   }
+
    /**
     * Create one session; a successful return must be closed, including after HTTP failures.
-    * The server owns all content policy decisions. This method never changes them.
+    * The server owns content policy and channel eligibility decisions.
     */
    public static NativeHlsSession start(Remote remote, String bodyId, String recordingId,
                                         String ip) throws Exception {
-      String uuid = UUID.randomUUID().toString();
-      JSONObject result = remote.Command("hlsStreamRecordingRequest",
-            request(bodyId, recordingId, uuid));
+      return startRequest(remote, bodyId, ip, "hlsStreamRecordingRequest",
+            request(bodyId, recordingId, UUID.randomUUID().toString()));
+   }
+
+   public static NativeHlsSession startLiveTv(Remote remote, String bodyId,
+                                               String stbChannelId, String ip) throws Exception {
+      return startRequest(remote, bodyId, ip, "hlsStreamLiveTvRequest",
+            liveTvRequest(bodyId, stbChannelId, UUID.randomUUID().toString()));
+   }
+
+   private static NativeHlsSession startRequest(Remote remote, String bodyId, String ip,
+                                                String operation, JSONObject request) throws Exception {
+      String uuid = request.getString("clientUuid");
+      JSONObject result = remote.Command(operation, request);
       if (result == null) {
          JSONObject error = remote.getLastError();
          String code = errorCode(error);
