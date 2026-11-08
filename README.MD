@@ -17,9 +17,12 @@ queue and downloads are untouched.
 ## Native TiVo recording HLS playback (experimental)
 
 The Video Streaming web page offers **native HLS** for completed, copy-freely
-recordings on compatible TiVos. This uses the TiVo's built-in transcoder instead
-of transferring the recording and running FFmpeg on the kmttg host. The existing
-transcoding links remain available as a fallback.
+recordings on compatible TiVos. In the desktop GUI, select one recording in a
+TiVo's Now Playing tab and click **Play (Native HLS)** beside Refresh to open
+the same player in your default browser. The kmttg web server must be enabled
+in the application's Web Server settings. Native HLS uses the TiVo's built-in
+transcoder instead of transferring the recording and running FFmpeg on the
+kmttg host. The existing transcoding links remain available as a fallback.
 
 The local TiVo must allow HTTP streaming on port 49152 and authenticated RPC
 on its configured port. The native playback page proxies its session-specific
