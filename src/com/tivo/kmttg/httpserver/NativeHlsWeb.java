@@ -233,9 +233,12 @@ final class NativeHlsWeb {
             }
             throw e;
          }
+      } catch (NativeHlsSession.BusyException e) {
+         error(resp, 503,
+               "The TiVo has no free streaming session. Stop streaming on another device and try again.");
       } catch (Exception e) {
          log.warn("Native HLS start: " + e.getMessage());
-         error(resp, 502, "TiVo could not start native playback");
+         error(resp, 502, "TiVo could not start streaming");
       } finally {
          if (remote != null) remote.disconnect();
       }

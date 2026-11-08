@@ -20,7 +20,11 @@ public class NativeHlsSessionTest {
       final List<String> operations = new ArrayList<>();
       final List<JSONObject> requests = new ArrayList<>();
       JSONObject startResponse;
+      JSONObject lastError;
       int disconnects;
+
+      @Override
+      public JSONObject getLastError() { return lastError; }
 
       @Override
       public JSONObject Command(String operation, JSONObject data) {
@@ -137,6 +141,19 @@ public class NativeHlsSessionTest {
             () -> NativeHlsSession.start(r, "8490001", "tivo:rc.123", "192.168.1.49"));
       assertEquals(1, r.operations.size());
       assertTrue(r.requests.get(0).has("supportedEncryption"));
+   }
+
+   @Test
+   void firmwareSessionCapacityErrorIsDistinctFromNetworkOrAuthenticationErrors() throws Exception {
+      FakeRemote r = new FakeRemote();
+      r.lastError = new JSONObject("{\"type\":\"error\",\"errorCode\":\"maxSessionsExceeded\"}");
+      assertThrows(NativeHlsSession.BusyException.class,
+            () -> NativeHlsSession.start(r, "8490001", "tivo:rc.123", "192.168.1.49"));
+      assertEquals(1, r.operations.size(), "A rejected start must never release someone else's session");
+      assertEquals("maxSessionsExceeded", NativeHlsSession.errorCode(r.lastError));
+      assertEquals("maxSessionsExceeded", NativeHlsSession.errorCode(
+            new JSONObject("{\"type\":\"error\",\"cause\":{\"code\":\"maxSessionsExceeded\"}}")));
+      assertEquals("no response", NativeHlsSession.errorCode(null));
    }
 
    @Test
