@@ -11,6 +11,7 @@
    let token = null;
    let player = null;
    let stopping = false;
+   let keepAliveTimer = null;
 
    function endpoint(path, values) {
       const url = new URL(path, window.location.origin);
@@ -22,6 +23,10 @@
    function stop() {
       if (stopping) return;
       stopping = true;
+      if (keepAliveTimer !== null) {
+         clearInterval(keepAliveTimer);
+         keepAliveTimer = null;
+      }
       if (player) {
          player.destroy();
          player = null;
@@ -60,6 +65,25 @@
          const data = await response.json();
          if (!response.ok) throw new Error(data.error || "TiVo streaming unavailable");
          token = data.token;
+         // Playback may be paused or fully buffered for minutes without media GETs.
+         // The server must not confuse an open player with a crashed/closed tab.
+         keepAliveTimer = setInterval(async () => {
+            if (stopping || !token) return;
+            try {
+               const ping = await fetch(endpoint("/nativeHls/ping", { token }), {
+                  method: "POST",
+                  headers: { "X-Kmttg-Playback": "1" },
+                  cache: "no-store"
+               });
+               if (ping.status === 404) {
+                  stop();
+                  status.textContent = "TiVo playback session expired.";
+               }
+            } catch (e) {
+               // Transient LAN interruption: let the server's five-minute grace
+               // period handle it; do not stop playback on one dropped ping.
+            }
+         }, 60_000);
          if (stopping) {
             // User navigated away while startup was in progress.
             stopping = false;

@@ -63,6 +63,15 @@ public class NativeHlsWebTest {
    }
 
    @Test
+   void keepaliveRequiresHeaderAndAnExistingSessionToken() throws Exception {
+      String token = NativeHlsWeb.newToken();
+      assertEquals(403, status("/nativeHls/ping?token=" + token, "GET", false));
+      assertEquals(403, status("/nativeHls/ping?token=" + token, "POST", false));
+      assertEquals(404, status("/nativeHls/ping?token=" + token, "POST", true));
+      assertEquals(404, status("/nativeHls/ping?token=not-a-valid-token", "POST", true));
+   }
+
+   @Test
    void invalidTiVoNeverOpensAnRpcConnection() throws Exception {
       assertEquals(400, status("/nativeHls/start?tivo=UNKNOWN-KMTTG-TEST"
          + "&recordingId=tivo%3Arc.123", "POST", true));
