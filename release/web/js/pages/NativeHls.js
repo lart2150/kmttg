@@ -4,6 +4,11 @@
    "use strict";
    const status = document.getElementById("status");
    const video = document.getElementById("video");
+   const streamOptions = document.getElementById("stream-options");
+   const qualityControl = document.getElementById("quality-control");
+   const audioControl = document.getElementById("audio-control");
+   const quality = document.getElementById("quality");
+   const audio = document.getElementById("audio");
    const params = new URLSearchParams(window.location.search);
    const tivo = params.get("tivo");
    const recordingId = params.get("recordingId");
@@ -17,6 +22,75 @@
       for (const [key, value] of Object.entries(values))
          url.searchParams.set(key, value);
       return url;
+   }
+
+   // Derive choices from the actual HLS playlist. The connected BOLT may
+   // expose only one rendition, even when the firmware accepts ABR; never
+   // present an invented or unavailable quality to the user.
+   function option(value, label) {
+      const item = document.createElement("option");
+      item.value = String(value);
+      item.textContent = label;
+      return item;
+   }
+
+   function showOptions() {
+      streamOptions.hidden = qualityControl.hidden && audioControl.hidden;
+   }
+
+   function refreshQuality() {
+      const levels = player?.levels || [];
+      if (levels.length < 2) {
+         qualityControl.hidden = true;
+         showOptions();
+         return;
+      }
+      const items = [option(-1, "Auto")];
+      for (const [index, level] of levels.entries()) {
+         const dimensions = level.height ? level.height + "p" : "Quality " + (index + 1);
+         const speed = level.bitrate ? " (" + (level.bitrate / 1_000_000).toFixed(1) + " Mbps)" : "";
+         items.push(option(index, dimensions + speed));
+      }
+      quality.replaceChildren(...items);
+      quality.value = String(player.autoLevelEnabled ? -1 : player.currentLevel);
+      qualityControl.hidden = false;
+      showOptions();
+   }
+
+   function refreshAudio() {
+      const tracks = player ? player.audioTracks : video.audioTracks;
+      if (!tracks || tracks.length < 2) {
+         audioControl.hidden = true;
+         showOptions();
+         return;
+      }
+      const options = Array.from(tracks, (track, index) =>
+         option(index, track.name || track.label || track.lang || track.language || "Track " + (index + 1)));
+      audio.replaceChildren(...options);
+      const selected = player ? player.audioTrack : Array.from(tracks).findIndex(track => track.enabled);
+      audio.value = String(selected >= 0 ? selected : 0);
+      audioControl.hidden = false;
+      showOptions();
+   }
+
+   quality.addEventListener("change", () => {
+      if (player) player.currentLevel = Number(quality.value);
+   });
+   audio.addEventListener("change", () => {
+      if (player) {
+         player.audioTrack = Number(audio.value);
+      } else if (video.audioTracks) {
+         for (let i = 0; i < video.audioTracks.length; i++)
+            video.audioTracks[i].enabled = i === Number(audio.value);
+      }
+   });
+
+   // Safari handles HLS natively. Its audio-track list is exposed only on
+   // browsers that implement HTMLMediaElement.audioTracks.
+   if (video.audioTracks) {
+      video.audioTracks.addEventListener("addtrack", refreshAudio);
+      video.audioTracks.addEventListener("removetrack", refreshAudio);
+      video.audioTracks.addEventListener("change", refreshAudio);
    }
 
    function stop() {
@@ -93,8 +167,17 @@
          }
          if (video.canPlayType("application/vnd.apple.mpegurl")) {
             video.src = data.playlist; // Safari and native Apple HLS
+            refreshAudio();
          } else if (typeof Hls !== "undefined" && Hls.isSupported()) {
             player = new Hls({ enableWorker: true });
+            player.on(Hls.Events.MANIFEST_PARSED, refreshQuality);
+            player.on(Hls.Events.LEVELS_UPDATED, refreshQuality);
+            player.on(Hls.Events.LEVEL_SWITCHED, () => {
+               if (!qualityControl.hidden)
+                  quality.value = String(player.autoLevelEnabled ? -1 : player.currentLevel);
+            });
+            player.on(Hls.Events.AUDIO_TRACKS_UPDATED, refreshAudio);
+            player.on(Hls.Events.AUDIO_TRACK_SWITCHED, refreshAudio);
             player.loadSource(data.playlist);
             player.attachMedia(video);
          } else {

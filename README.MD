@@ -45,6 +45,10 @@ service reports enabled and Ready. Only
 copy-freely recordings with the expected TiVo DRM permissions are offered
 this option; protected content is never forced or decrypted against policy.
 
+The player requests the firmware's adaptive (ABR) variant set, then offers
+quality and audio-track selectors only if its HLS playlist actually contains
+multiple variants/tracks. A tested BOLT returned one 1280×720 rendition even
+with ABR requested; in that case the quality selector stays hidden.
 The included hls.js player supports browsers with Media Source Extensions,
 while Safari can use its native HLS player. Native playback is experimental
 and may not be available on every TiVo model.

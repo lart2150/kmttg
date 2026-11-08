@@ -10,6 +10,9 @@
 .native-player { max-width: 1120px; margin: 24px auto; padding: 0 20px; }
 .native-player video { display: block; width: 100%; background: #000; }
 .native-player .status { margin: 12px 0; }
+.stream-options { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0; }
+.stream-options[hidden], .stream-options label[hidden] { display: none; }
+.stream-options label { display: flex; align-items: center; gap: 8px; }
 </style>
 </head>
 <body>
@@ -17,6 +20,10 @@
 <h2>Stream from TiVo</h2>
 <p id="status" class="status" role="status">Connecting to TiVo…</p>
 <video id="video" controls playsinline aria-label="TiVo recording"></video>
+<div id="stream-options" class="stream-options" hidden>
+<label id="quality-control" hidden>Quality <select id="quality" aria-label="Video quality"></select></label>
+<label id="audio-control" hidden>Audio <select id="audio" aria-label="Audio track"></select></label>
+</div>
 <p><a href="Stream.html">Back to recordings</a></p>
 </main>
 <script src="js/vendor/hls.min.js"></script>
