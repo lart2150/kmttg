@@ -97,18 +97,32 @@ function link(text, onclick) {
 }
 
 // A show cell: the title, plus play/transcode links when it is not protected
-function showCell(title, playUrl, onTranscode) {
+function showCell(title, playUrl, onTranscode, nativeInfo = null) {
    const wrap = document.createDocumentFragment();
    wrap.append(title);
-   if (!playUrl)
+   if (!playUrl && !nativeInfo)
       return wrap;
    const actions = document.createElement("div");
    actions.className = "row-actions";
-   const play = document.createElement("a");
-   play.href = playUrl.toString();
-   play.target = "_blank";
-   play.textContent = "[transcode & play]";
-   actions.append(play, " ", link("[transcode]", onTranscode));
+   if (playUrl) {
+      const play = document.createElement("a");
+      play.href = playUrl.toString();
+      play.target = "_blank";
+      play.textContent = "[transcode & play]";
+      actions.append(play, " ", link("[transcode]", onTranscode));
+   }
+   if (nativeInfo) {
+      const url = new URL("/web/NativeHls.html", window.location);
+      url.searchParams.set("tivo", nativeInfo.tivo);
+      url.searchParams.set("recordingId", nativeInfo.recordingId);
+      const native = document.createElement("a");
+      native.href = url.toString();
+      native.target = "_blank";
+      native.rel = "noopener";
+      native.textContent = "[native HLS]";
+      if (playUrl) actions.append(" ");
+      actions.append(native);
+   }
    wrap.append(actions);
    return wrap;
 }
@@ -210,7 +224,12 @@ function loadNplRpc(data, tivo) {
       nplTable.add([
          "",
          showCell(name, candownload ? transcodeUrl(params) : null,
-            () => startTranscode("TiVo transcode", params)),
+            () => startTranscode("TiVo transcode", params),
+            candownload && json.state === "complete" && json.recordingId
+               && json.drm && json.drm.cgms === "copyFreely"
+               && json.drm.tivoToGo === true
+               && json.drm.recordingPlaybackPolicy === "allowed"
+               ? { tivo, recordingId: json.recordingId } : null),
          date,
          util_getChannel(json),
          duration ? util_secsToHM(duration) : "",

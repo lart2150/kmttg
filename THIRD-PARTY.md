@@ -45,6 +45,7 @@ Served by the built-in web server and committed to the repository.
 | --- | --- | --- | --- |
 | Pure CSS | 3.0.0 | BSD 3-Clause License | https://purecss.io/ |
 | normalize.css | 8.0.1 (bundled in `pure-min.css`) | MIT License | https://necolas.github.io/normalize.css/ |
+| hls.js | 1.7.4 | Apache License 2.0 | https://github.com/video-dev/hls.js |
 
 ## Build tooling
 
@@ -52,4 +53,4 @@ Served by the built-in web server and committed to the repository.
 | --- | --- | --- |
 | Gradle (wrapper) | Apache License 2.0 | https://gradle.org/ |
 
-Full license texts are available from each project at the URLs above.
+Full license texts are available from each project at the URLs above. The bundled hls.js license is also in release/web/js/vendor/hls-LICENSE.txt.
