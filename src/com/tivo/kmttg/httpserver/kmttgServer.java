@@ -55,6 +55,7 @@ import com.tivo.kmttg.util.string;
 public class kmttgServer extends HTTPServer {
    private Stack<Transcode> transcodes = new Stack<Transcode>();
    public int transcode_counter = 0;
+   private NativeHlsWeb nativeHls;
    // tivo.com connections for /rpcws, each closed after a minute without a request.
    TiVoRPCWSPool wsPool = new TiVoRPCWSPool(60000);
    
@@ -137,8 +138,9 @@ public class kmttgServer extends HTTPServer {
    
    public kmttgServer(int port) {
       super(port);
+      nativeHls = new NativeHlsWeb();
    }
-   
+
    // Override parent method to handle special requests
    // Intercept certain special paths, pass along the rest
    protected void serve(Request req, Response resp) throws IOException {
@@ -148,6 +150,12 @@ public class kmttgServer extends HTTPServer {
       // Clear up finished transcodes
       cleanup();
       
+      // Native TiVo streaming: token-scoped same-origin media proxy.
+      if (path.startsWith("/nativeHls/")) {
+         nativeHls.serve(req, resp);
+         return;
+      }
+
       // Handle rpc requests
       if (path.equals("/rpc")) {
          handleRpc(req, resp);
@@ -667,6 +675,7 @@ public class kmttgServer extends HTTPServer {
    public synchronized void stop() {
       super.stop();
       wsPool.closeAll();
+      if (nativeHls != null) nativeHls.close();
    }
    
    // Return list of rpc enabled TiVos known by kmttg
