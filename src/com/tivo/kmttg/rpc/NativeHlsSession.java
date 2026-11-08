@@ -19,6 +19,11 @@ import com.tivo.kmttg.util.log;
  * the box decides whether streaming is permitted for the recording.
  */
 public final class NativeHlsSession implements AutoCloseable {
+   /** The firmware explicitly reports maxSessionsExceeded for occupied streaming capacity. */
+   public static final class BusyException extends IllegalStateException {
+      public BusyException() { super("TiVo has no free streaming session"); }
+   }
+
    private static final Pattern PLAYLIST =
       Pattern.compile("/session-streaming/[0-9]+\\.m3u8");
 
@@ -85,7 +90,9 @@ public final class NativeHlsSession implements AutoCloseable {
             request(bodyId, recordingId, uuid));
       if (result == null) {
          JSONObject error = remote.getLastError();
-         String code = error == null ? "no response" : error.optString("code", "error");
+         String code = errorCode(error);
+         if ("maxSessionsExceeded".equals(code))
+            throw new BusyException();
          throw new IllegalStateException("TiVo rejected HLS session: " + code);
       }
       JSONObject session = result.optJSONObject("hlsSession");
@@ -100,6 +107,19 @@ public final class NativeHlsSession implements AutoCloseable {
          throw new IllegalStateException("TiVo returned invalid HLS session information");
       }
       return created;
+   }
+
+   // Local MRPC/2 errors may nest their authoritative code inside cause.
+   static String errorCode(JSONObject error) {
+      if (error == null) return "no response";
+      String code = error.optString("errorCode", "");
+      if (!code.isEmpty()) return code;
+      JSONObject cause = error.optJSONObject("cause");
+      if (cause != null) {
+         code = cause.optString("code", "");
+         if (!code.isEmpty()) return code;
+      }
+      return error.optString("code", "error");
    }
 
    public String playlistUri() {
