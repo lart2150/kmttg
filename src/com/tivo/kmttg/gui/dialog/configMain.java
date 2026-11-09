@@ -117,6 +117,7 @@ public class configMain {
    private static JCheckBox rpcDelete = null;
    private static JCheckBox rpcOld = null;
    private static JCheckBox rpcWebsocket = null;
+   private static JCheckBox tivoMobileLogin = null;
    private static JCheckBox HideProtectedFiles = null;
    private static JCheckBox TiVoSort = null;
    private static JCheckBox OverwriteFiles = null;
@@ -859,6 +860,9 @@ public class configMain {
       // rpcWebsocket
       rpcWebsocket.setSelected(config.rpcWebsocket);
 
+      // tivoMobileLogin
+      tivoMobileLogin.setSelected(config.tivoMobileLogin);
+
       // HideProtectedFiles
       if (config.HideProtectedFiles == 1)
          HideProtectedFiles.setSelected(true);
@@ -1490,6 +1494,9 @@ public class configMain {
 
       // rpcWebsocket
       config.rpcWebsocket = rpcWebsocket.isSelected();
+
+      // tivoMobileLogin
+      config.tivoMobileLogin = tivoMobileLogin.isSelected();
 
       // HideProtectedFiles
       if (HideProtectedFiles.isSelected())
@@ -2366,6 +2373,7 @@ public class configMain {
       rpcDelete = new JCheckBox();
       rpcOld = new JCheckBox();
       rpcWebsocket = new JCheckBox();
+      tivoMobileLogin = new JCheckBox();
       HideProtectedFiles = new JCheckBox();
       TiVoSort = new JCheckBox();
       OverwriteFiles = new JCheckBox();
@@ -2543,6 +2551,7 @@ public class configMain {
       rpcDelete.setText("Enable rpc style delete task");
       rpcOld.setText("Use old RPC schema version for older TiVo software");
       rpcWebsocket.setText("Use local websocket instead of local TLS rpc");
+      tivoMobileLogin.setText("Log in to tivo.com the way the mobile app does");
       HideProtectedFiles.setText("Do not show copy protected files in table");
       TiVoSort.setText("Sort table show titles as a TiVo does");
       OverwriteFiles.setText("Overwrite existing files");
@@ -3138,6 +3147,9 @@ public class configMain {
       tivo_panel.add(tivo_password_label, "cell 0 " + gy);
       tivo_panel.add(tivo_password, "cell 1 " + gy);
       tivo_panel.add(domain_token, "cell 4 " + gy);
+
+      gy++;
+      tivo_panel.add(tivoMobileLogin, "cell 1 " + gy);
 
 
       // autotune panel
@@ -3782,6 +3794,7 @@ public class configMain {
       rpcDelete.setToolTipText(getToolTip("rpcDelete"));
       rpcOld.setToolTipText(getToolTip("rpcOld"));
       rpcWebsocket.setToolTipText(getToolTip("rpcWebsocket"));
+      tivoMobileLogin.setToolTipText(getToolTip("tivoMobileLogin"));
       HideProtectedFiles.setToolTipText(getToolTip("HideProtectedFiles"));
       TiVoSort.setToolTipText(getToolTip("TiVoSort"));
       OverwriteFiles.setToolTipText(getToolTip("OverwriteFiles"));
@@ -4745,6 +4758,13 @@ public class configMain {
          text += "tivo.com login can be used for Remote--Search and Search++ if provided to enhance<br>";
          text += "search capabilities to include OTT/streaming titles in addition to linear.<br>";
          text += "This setting is optional but useful to add if you have any series 4 or later TiVos.";
+      }
+      else if (component.equals("tivoMobileLogin")) {
+         text =  "<b>Log in to tivo.com the way the mobile app does</b><br>";
+         text += "If enabled then kmttg gets its tivo.com token from TiVo's mobile login (mobileidp.tivo.com)<br>";
+         text += "instead of through online.tivo.com, for when online.tivo.com is down. Same tivo.com<br>";
+         text += "username and password. The login goes over TLS rpc to middlemind, so it needs the<br>";
+         text += "cdata.p12 certificate. Experimental.";
       }
       else if (component.equals("pyTivo_host")) {
          text =  "<b>pyTivo host name</b><br>";
