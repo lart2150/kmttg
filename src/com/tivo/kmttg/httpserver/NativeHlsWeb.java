@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import com.tivo.kmttg.JSON.JSONArray;
 import com.tivo.kmttg.JSON.JSONObject;
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.NativeHlsCapability;
 import com.tivo.kmttg.rpc.NativeHlsSession;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.util.log;
@@ -185,6 +186,11 @@ final class NativeHlsWeb {
          error(resp, 400, "Invalid TiVo or stream source");
          return;
       }
+      if (!config.rpcEnabled(tivo)
+            || !NativeHlsCapability.hasBuiltInTranscoder(config.getTsn(tivo))) {
+         error(resp, 403, "This TiVo is not a supported native HLS streaming model");
+         return;
+      }
       String bodyId = config.getTsn(tivo);
       String ip = config.TIVOS.get(tivo);
       if (bodyId == null || bodyId.isEmpty() || ip == null) {
@@ -277,10 +283,18 @@ final class NativeHlsWeb {
       return query;
    }
 
+   /** Never trust an unspecified entitlement or disabled/blocked state. */
+   private static boolean canStreamChannel(JSONObject ch) {
+      return ch != null && validStbChannelId(ch.optString("stbChannelId", ""))
+            && ch.optBoolean("isReceived", false)
+            && ch.optBoolean("isEntitled", false)
+            && ch.optBoolean("isRecordable", false)
+            && !ch.optBoolean("isBlocked", true);
+   }
+
    /**
-    * A channel must be present in this TiVo's own lineup and explicitly
-    * received, entitled, recordable and unblocked. An ID from a different
-    * TiVo or a disabled channel must not start a tuner session.
+    * A channel must be in this TiVo's own received/entitled lineup. Reuse
+    * precisely the same eligibility predicate as the channel picker.
     */
    static boolean receivedChannel(JSONObject lineup, String id) {
       if (!validStbChannelId(id) || lineup == null) return false;
@@ -288,14 +302,34 @@ final class NativeHlsWeb {
       if (channels == null) return false;
       for (int i = 0; i < channels.length(); i++) {
          JSONObject ch = channels.optJSONObject(i);
-         if (ch != null && id.equals(ch.optString("stbChannelId", ""))
-               && ch.optBoolean("isReceived", false)
-               && ch.optBoolean("isEntitled", false)
-               && ch.optBoolean("isRecordable", false)
-               && !ch.optBoolean("isBlocked", true))
+         if (canStreamChannel(ch) && id.equals(ch.optString("stbChannelId", "")))
             return true;
       }
       return false;
+   }
+
+   /**
+    * Project only approved channels into a minimal JSON response. A hostile
+    * or inconsistent TiVo response cannot expose extra RPC metadata or
+    * duplicate channel IDs in the browser's picker.
+    */
+   static JSONArray availableChannels(JSONObject lineup) throws Exception {
+      JSONArray result = new JSONArray();
+      JSONArray items = lineup.optJSONArray("channel");
+      if (items == null) return result;
+      java.util.HashSet<String> seen = new java.util.HashSet<>();
+      for (int i = 0; i < items.length(); i++) {
+         JSONObject ch = items.optJSONObject(i);
+         if (!canStreamChannel(ch)) continue;
+         String id = ch.optString("stbChannelId", "");
+         if (!seen.add(id)) continue;
+         JSONObject out = new JSONObject();
+         out.put("stbChannelId", id);
+         out.put("channelNumber", ch.optString("channelNumber", ""));
+         out.put("callSign", ch.optString("callSign", ""));
+         result.put(out);
+      }
+      return result;
    }
 
    /**
@@ -304,8 +338,14 @@ final class NativeHlsWeb {
     */
    private void channels(HTTPServer.Request req, HTTPServer.Response resp) throws IOException {
       String tivo = req.getParams().get("tivo");
-      if (tivo == null || !config.TIVOS.containsKey(tivo) || !config.rpcEnabled(tivo)) {
+      if (tivo == null || !config.TIVOS.containsKey(tivo) || !config.rpcEnabled(tivo)
+            || !NativeHlsCapability.hasBuiltInTranscoder(config.getTsn(tivo))) {
          error(resp, 400, "Unknown or unsupported TiVo");
+         return;
+      }
+      InetAddress address = InetAddress.getByName(config.TIVOS.get(tivo));
+      if (!address.isSiteLocalAddress() && !address.isLoopbackAddress()) {
+         error(resp, 403, "Native streaming only supports local TiVos");
          return;
       }
       Remote remote = new Remote(tivo);
@@ -321,23 +361,7 @@ final class NativeHlsWeb {
             error(resp, 502, "Could not retrieve TiVo channel lineup");
             return;
          }
-         JSONArray result = new JSONArray();
-         JSONArray items = lineup.getJSONArray("channel");
-         for (int i = 0; i < items.length(); i++) {
-            JSONObject ch = items.optJSONObject(i);
-            if (ch == null) continue;
-            String id = ch.optString("stbChannelId", "");
-            if (!validStbChannelId(id)
-                  || !ch.optBoolean("isReceived", false)
-                  || !ch.optBoolean("isEntitled", false)
-                  || !ch.optBoolean("isRecordable", false)
-                  || ch.optBoolean("isBlocked", true)) continue;
-            JSONObject out = new JSONObject();
-            out.put("stbChannelId", id);
-            out.put("channelNumber", ch.optString("channelNumber", ""));
-            out.put("callSign", ch.optString("callSign", ""));
-            result.put(out);
-         }
+         JSONArray result = availableChannels(lineup);
          JSONObject out = new JSONObject();
          out.put("channel", result);
          json(resp, 200, out);

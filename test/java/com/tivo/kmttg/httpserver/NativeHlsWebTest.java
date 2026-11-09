@@ -119,6 +119,66 @@ public class NativeHlsWebTest {
    }
 
    @Test
+   void liveTvChannelPickerUsesExactlyTheSameEligibilityAsStreamStart() throws Exception {
+      JSONArray items = new JSONArray();
+      JSONObject good = new JSONObject();
+      good.put("stbChannelId", "tivo:sch.4295950337");
+      good.put("channelNumber", "15-1");
+      good.put("callSign", "<script>alert(1)</script>");
+      good.put("isReceived", true);
+      good.put("isEntitled", true);
+      good.put("isRecordable", true);
+      good.put("isBlocked", false);
+      items.put(good);
+      items.put(new JSONObject(good.toString())); // Do not duplicate IDs.
+      JSONObject blocked = new JSONObject(good.toString());
+      blocked.put("stbChannelId", "tivo:sch.123");
+      blocked.put("isBlocked", true);
+      items.put(blocked);
+      JSONObject notEntitled = new JSONObject(good.toString());
+      notEntitled.put("stbChannelId", "tivo:sch.456");
+      notEntitled.put("isEntitled", false);
+      items.put(notEntitled);
+      JSONObject invalid = new JSONObject(good.toString());
+      invalid.put("stbChannelId", "../unknown");
+      items.put(invalid);
+      JSONObject lineup = new JSONObject();
+      lineup.put("channel", items);
+      JSONArray visible = NativeHlsWeb.availableChannels(lineup);
+      assertEquals(1, visible.length());
+      JSONObject candidate = visible.getJSONObject(0);
+      assertEquals("tivo:sch.4295950337", candidate.getString("stbChannelId"));
+      assertEquals("15-1", candidate.getString("channelNumber"));
+      assertEquals("<script>alert(1)</script>", candidate.getString("callSign"));
+      assertEquals(3, candidate.length(), "No raw TiVo metadata should be forwarded");
+      assertTrue(NativeHlsWeb.receivedChannel(lineup, candidate.getString("stbChannelId")));
+      assertFalse(NativeHlsWeb.receivedChannel(lineup, "tivo:sch.123"));
+      assertFalse(NativeHlsWeb.receivedChannel(lineup, "tivo:sch.456"));
+      assertEquals(0, NativeHlsWeb.availableChannels(new JSONObject()).length());
+   }
+
+   @Test
+   void channelsCannotConnectToConfiguredPublicAddressesOrUnsupportedModels() throws Exception {
+      String name = "KMTTG-LIVE-TEST-PUBLIC";
+      com.tivo.kmttg.main.config.TIVOS.put(name, "8.8.8.8");
+      com.tivo.kmttg.main.config.TSN.put(name, "849000000000000");
+      com.tivo.kmttg.main.config.enableRpc.put(name, "1");
+      try {
+         assertEquals(403, status("/nativeHls/channels?tivo=" + name, "GET", false));
+         assertEquals(403, status("/nativeHls/start?tivo=" + name
+               + "&stbChannelId=tivo%3Asch.123", "POST", true));
+         com.tivo.kmttg.main.config.TSN.put(name, "846000000000000");
+         assertEquals(400, status("/nativeHls/channels?tivo=" + name, "GET", false));
+         assertEquals(403, status("/nativeHls/start?tivo=" + name
+               + "&stbChannelId=tivo%3Asch.123", "POST", true));
+      } finally {
+         com.tivo.kmttg.main.config.enableRpc.remove(name);
+         com.tivo.kmttg.main.config.TSN.remove(name);
+         com.tivo.kmttg.main.config.TIVOS.remove(name);
+      }
+   }
+
+   @Test
    void mediaProxyRejectsUnknownTokenAndUnknownMethods() throws Exception {
       String token = NativeHlsWeb.newToken();
       assertEquals(404, status("/nativeHls/media/" + token
