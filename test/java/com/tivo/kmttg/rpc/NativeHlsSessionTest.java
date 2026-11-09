@@ -22,6 +22,7 @@ public class NativeHlsSessionTest {
       JSONObject startResponse;
       JSONObject lastError;
       int disconnects;
+      boolean extendFails;
 
       @Override
       public JSONObject getLastError() { return lastError; }
@@ -33,6 +34,8 @@ public class NativeHlsSessionTest {
             requests.add(new JSONObject(data.toString()));
             if ("hlsStreamRecordingRequest".equals(operation))
                return startResponse;
+            if ("hlsStreamExtend".equals(operation) && extendFails)
+               return null;
             return new JSONObject("{\"type\":\"success\"}");
          } catch (Exception e) {
             throw new RuntimeException(e);
@@ -108,6 +111,26 @@ public class NativeHlsSessionTest {
       assertEquals("tivo:hls.31", release.getString("hlsSessionId"));
       assertEquals("userRequested", release.getString("reason"));
       assertEquals(1, r.disconnects);
+   }
+
+   @Test
+   void browserHeartbeatExtendsTheActualTivoSession() throws Exception {
+      FakeRemote r = new FakeRemote();
+      r.startResponse = success("tivo:hls.31", "/session-streaming/31.m3u8");
+      NativeHlsSession session = NativeHlsSession.start(r,
+            "8490001", "tivo:rc.123", "192.168.1.49");
+      assertTrue(session.extend());
+      assertEquals("hlsStreamExtend", r.operations.get(1));
+      assertEquals("8490001", r.requests.get(1).getString("bodyId"));
+      assertEquals("tivo:hls.31", r.requests.get(1).getString("hlsSessionId"));
+      assertEquals(2, r.requests.get(1).length(),
+            "Do not invent unverified fields in the extend request");
+      r.extendFails = true;
+      assertFalse(session.extend(), "The failed RPC must not report success");
+      session.close();
+      assertFalse(session.extend(), "A closed session cannot be extended");
+      assertEquals(4, r.operations.size(), "Only one release should be issued");
+      assertEquals("hlsStreamRelease", r.operations.get(3));
    }
 
    @Test

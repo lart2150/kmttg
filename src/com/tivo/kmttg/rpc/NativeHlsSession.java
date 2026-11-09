@@ -1,7 +1,3 @@
-/*
- * Copyright 2008-Present Kevin Moye <moyekj@yahoo.com>.
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
 package com.tivo.kmttg.rpc;
 
 import java.net.HttpURLConnection;
@@ -134,6 +130,23 @@ public final class NativeHlsSession implements AutoCloseable {
 
    public synchronized boolean releaseConfirmed() {
       return releaseConfirmed;
+   }
+
+   /**
+    * TiVo firmware's HlsStreamExtend accepts an hlsSessionId (or a clientUuid).
+    * Browser pings use this while paused, even when no media segments are fetched.
+    */
+   public synchronized boolean extend() {
+      if (closed) return false;
+      try {
+         JSONObject request = new JSONObject();
+         request.put("bodyId", bodyId);
+         request.put("hlsSessionId", sessionId);
+         return remote.Command("hlsStreamExtend", request) != null;
+      } catch (Exception e) {
+         log.warn("Native HLS session extend failed: " + e.getMessage());
+         return false;
+      }
    }
 
    public synchronized void close() {

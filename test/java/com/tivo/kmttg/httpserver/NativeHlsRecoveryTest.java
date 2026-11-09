@@ -43,6 +43,23 @@ public class NativeHlsRecoveryTest {
       }
    }
 
+   @Test void nonPosixFileSystemStillSupportsPrivateJournalWrites() throws Exception {
+      // ZIPFS, like Windows' default filesystem provider, has no POSIX attributes.
+      Path archive = dir.resolve("non-posix.zip");
+      try (java.nio.file.FileSystem fs = java.nio.file.FileSystems.newFileSystem(
+            java.net.URI.create("jar:" + archive.toUri()),
+            java.util.Map.of("create", "true"))) {
+         Path folder = fs.getPath("/journal");
+         Files.createDirectories(folder);
+         assertFalse(Files.getFileStore(folder).supportsFileAttributeView("posix"));
+         NativeHlsRecovery.restrictPosixPermissions(folder, "rwx------");
+         Path entry = Files.createTempFile(folder, "session-", ".tmp");
+         NativeHlsRecovery.restrictPosixPermissions(entry, "rw-------");
+         Files.writeString(entry, "test", StandardCharsets.US_ASCII);
+         assertEquals("test", Files.readString(entry, StandardCharsets.US_ASCII));
+      }
+   }
+
    @Test void invalidOrTamperedJournalCannotBeUsedForRelease() throws Exception {
       Path file = dir.resolve(UUID.randomUUID() + ".session");
       Files.writeString(file, "something invalid", StandardCharsets.US_ASCII);
