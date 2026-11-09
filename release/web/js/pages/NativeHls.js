@@ -9,12 +9,15 @@
    const audioControl = document.getElementById("audio-control");
    const quality = document.getElementById("quality");
    const audio = document.getElementById("audio");
+   const liveControls = document.getElementById("live-controls");
+   const skipToLive = document.getElementById("skip-to-live");
    const params = new URLSearchParams(window.location.search);
    const tivo = params.get("tivo");
    const recordingId = params.get("recordingId");
    const stbChannelId = params.get("stbChannelId");
    const liveTv = !!stbChannelId;
    const back = document.getElementById("back");
+   liveControls.hidden = !liveTv;
    if (liveTv) {
       back.href = "LiveTv.html";
       back.textContent = "Back to live TV channels";
@@ -89,6 +92,39 @@
       }
    });
 
+   // The TiVo provides a sliding live seek window. hls.js knows its intended
+   // live-sync point; Safari exposes only the native media seekable range.
+   function liveSeekRange() {
+      const ranges = video.seekable;
+      if (!ranges || ranges.length === 0) return null;
+      const index = ranges.length - 1;
+      const first = ranges.start(index);
+      const last = ranges.end(index);
+      return Number.isFinite(first) && Number.isFinite(last) && last > first
+         ? { first, last } : null;
+   }
+
+   function refreshSkipToLive() {
+      if (!liveTv) return;
+      skipToLive.disabled = stopping || !token || !liveSeekRange();
+   }
+
+   skipToLive.addEventListener("click", () => {
+      if (!liveTv || stopping || !token) return;
+      const range = liveSeekRange();
+      if (!range) return;
+      const recommended = player?.liveSyncPosition;
+      const fallback = range.last - Math.min(2, (range.last - range.first) / 2);
+      const target = Number.isFinite(recommended) ? recommended : fallback;
+      // Never seek beyond the current playable live window. Avoid seeking
+      // exactly onto the edge, which can stall while a segment is produced.
+      video.currentTime = Math.max(range.first,
+         Math.min(range.last - Math.min(0.1, (range.last - range.first) / 4), target));
+      video.play().catch(() => {});
+   });
+   for (const event of ["loadedmetadata", "durationchange", "progress", "canplay", "timeupdate"])
+      video.addEventListener(event, refreshSkipToLive);
+
    // Safari handles HLS natively. Its audio-track list is exposed only on
    // browsers that implement HTMLMediaElement.audioTracks.
    if (video.audioTracks) {
@@ -100,6 +136,7 @@
    function stop() {
       if (stopping) return;
       stopping = true;
+      skipToLive.disabled = true;
       if (keepAliveTimer !== null) {
          clearInterval(keepAliveTimer);
          keepAliveTimer = null;
@@ -145,6 +182,7 @@
          const data = await response.json();
          if (!response.ok) throw new Error(data.error || "TiVo streaming unavailable");
          token = data.token;
+         refreshSkipToLive();
          // Playback may be paused or fully buffered for minutes without media GETs.
          // The server must not confuse an open player with a crashed/closed tab.
          keepAliveTimer = setInterval(async () => {
@@ -179,6 +217,7 @@
          } else if (typeof Hls !== "undefined" && Hls.isSupported()) {
             player = new Hls({ enableWorker: true });
             player.on(Hls.Events.MANIFEST_PARSED, refreshQuality);
+            player.on(Hls.Events.LEVEL_UPDATED, refreshSkipToLive);
             player.on(Hls.Events.LEVELS_UPDATED, refreshQuality);
             player.on(Hls.Events.LEVEL_SWITCHED, () => {
                if (!qualityControl.hidden)
