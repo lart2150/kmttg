@@ -421,7 +421,7 @@ public class nplTable extends TableMap {
       }
       if (tivoName.equals("FILES"))
          return;
-      if (keyCode == KeyEvent.VK_H && config.rpcEnabled(tivoName)) {
+      if (keyCode == KeyEvent.VK_H && NativeHlsDesktop.canOffer(tivoName)) {
          String recordingId = selectedNativeHlsRecordingId();
          if (recordingId == null) {
             JOptionPane.showMessageDialog(config.gui.getFrame(),

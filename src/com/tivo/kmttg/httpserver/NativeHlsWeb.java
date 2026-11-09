@@ -1,7 +1,3 @@
-/*
- * Copyright 2008-Present Kevin Moye <moyekj@yahoo.com>.
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
 package com.tivo.kmttg.httpserver;
 
 import java.io.IOException;
@@ -145,6 +141,12 @@ final class NativeHlsWeb {
             return;
          }
          current.lastUse = System.currentTimeMillis();
+         // Refresh the TiVo transcoder itself, not just kmttg's local idle timer.
+         // This matters when playback is paused and no HLS segments are requested.
+         if (!current.session.extend()) {
+            error(resp, 503, "Could not extend the TiVo streaming session");
+            return;
+         }
          json(resp, 200, new JSONObject());
       } else if (path.startsWith(PREFIX)) {
          if (!"GET".equals(req.getMethod())) {

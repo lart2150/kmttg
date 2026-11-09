@@ -41,6 +41,7 @@ import com.tivo.kmttg.main.http;
 import com.tivo.kmttg.main.jobData;
 import com.tivo.kmttg.main.jobMonitor;
 import com.tivo.kmttg.main.telnet;
+import com.tivo.kmttg.rpc.NativeHlsCapability;
 import com.tivo.kmttg.rpc.Remote;
 import com.tivo.kmttg.rpc.TiVoRPCWSPool;
 import com.tivo.kmttg.util.createMeta;
@@ -701,6 +702,8 @@ public class kmttgServer extends HTTPServer {
                json.put("rpc", 1);
             else
                json.put("rpc", 0);
+            json.put("nativeHls", config.rpcEnabled(tivoName)
+                  && NativeHlsCapability.hasBuiltInTranscoder(config.getTsn(tivoName)));
             if (config.nplCapable(tivoName))
                 json.put("npl", 1);
              else

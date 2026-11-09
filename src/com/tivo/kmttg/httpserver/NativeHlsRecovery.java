@@ -1,7 +1,3 @@
-/*
- * Copyright 2008-Present Kevin Moye <moyekj@yahoo.com>.
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
 package com.tivo.kmttg.httpserver;
 
 import java.io.IOException;
@@ -80,15 +76,11 @@ final class NativeHlsRecovery {
       if (!valid(e)) throw new IOException("Invalid native HLS journal entry");
       Path dir = directory();
       Files.createDirectories(dir);
-      try {
-         Files.setPosixFilePermissions(dir,
-               java.nio.file.attribute.PosixFilePermissions.fromString("rwx------"));
-      } catch (UnsupportedOperationException ignored) {}
+      restrictPosixPermissions(dir, "rwx------");
       Path target = dir.resolve(uuid + ".session");
       Path tmp = Files.createTempFile(dir, ".pending-", ".tmp");
       try {
-         Files.setPosixFilePermissions(tmp,
-               java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
+         restrictPosixPermissions(tmp, "rw-------");
          Files.writeString(tmp, String.join("\n", e.uuid, e.sessionId, e.ip,
                Long.toString(e.pid), Long.toString(e.started)) + "\n",
                StandardCharsets.US_ASCII);
@@ -99,6 +91,16 @@ final class NativeHlsRecovery {
          }
       } finally {
          Files.deleteIfExists(tmp);
+      }
+   }
+
+   /** Secure permissions on POSIX, without failing on Windows or non-POSIX providers. */
+   static void restrictPosixPermissions(Path path, String permissions) throws IOException {
+      try {
+         Files.setPosixFilePermissions(path,
+               java.nio.file.attribute.PosixFilePermissions.fromString(permissions));
+      } catch (UnsupportedOperationException ignored) {
+         // Windows ACLs and ZIP file systems do not implement the POSIX view.
       }
    }
 

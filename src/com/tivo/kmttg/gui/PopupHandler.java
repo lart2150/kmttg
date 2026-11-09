@@ -143,7 +143,8 @@ public class PopupHandler {
             items.add(new PopupPair("Get extended metadata [m]", KeyEvent.VK_M, tivoName));
          if (config.rpcEnabled(tivoName)) {
             items.add(new PopupPair("Play [p]", KeyEvent.VK_P, tivoName));
-            items.add(new PopupPair("Stream to This Computer [h]", KeyEvent.VK_H, tivoName));
+            if (NativeHlsDesktop.canOffer(tivoName))
+               items.add(new PopupPair("Stream to This Computer [h]", KeyEvent.VK_H, tivoName));
             items.add(new PopupPair("Show Information [i]", KeyEvent.VK_I, tivoName));
          }
          if (config.rpcEnabled(tivoName) || config.twpDeleteEnabled())

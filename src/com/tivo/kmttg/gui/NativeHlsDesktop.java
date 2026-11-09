@@ -1,7 +1,3 @@
-/*
- * Copyright 2008-Present Kevin Moye <moyekj@yahoo.com>.
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
 package com.tivo.kmttg.gui;
 
 import java.awt.Desktop;
@@ -13,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import javax.swing.JOptionPane;
 
 import com.tivo.kmttg.main.config;
+import com.tivo.kmttg.rpc.NativeHlsCapability;
 import com.tivo.kmttg.util.log;
 
 /**
@@ -35,13 +32,25 @@ public final class NativeHlsDesktop {
       return URI.create("http://127.0.0.1:" + port + "/web/NativeHls.html?" + query);
    }
 
+   /** TSN is an inexpensive UI hint; the streaming service probe is authoritative. */
+   public static boolean canOffer(String tivo) {
+      return config.rpcEnabled(tivo)
+            && NativeHlsCapability.hasBuiltInTranscoder(config.getTsn(tivo));
+   }
+
    /** The normal kmttg web server supplies the session-scoped HLS proxy. */
    public static boolean isAvailable(String tivo) {
-      return config.rpcEnabled(tivo) && config.httpserver != null
+      return canOffer(tivo) && config.httpserver != null
             && config.httpserver_port > 0;
    }
 
    public static void play(String tivo, String recordingId) {
+      if (!canOffer(tivo)) {
+         JOptionPane.showMessageDialog(config.gui.getFrame(),
+               "No built-in HLS transcoder is known for this TiVo model.",
+               "Stream from TiVo", JOptionPane.INFORMATION_MESSAGE);
+         return;
+      }
       if (!isAvailable(tivo)) {
          JOptionPane.showMessageDialog(config.gui.getFrame(),
                "Enable the kmttg web server in File > Configure > Web Server, "

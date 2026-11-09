@@ -11,6 +11,8 @@ let monitorTimer = 0;
 let fileMode = "";
 // Which TiVos speak RPC; the rest fall back to the XML listing
 const isRpc = {};
+// TSN-based UI hint; the server separately probes actual transcoder readiness.
+const canNativeHls = {};
 
 document.addEventListener("DOMContentLoaded", async () => {
    TIVO = document.getElementById("TIVO");
@@ -53,8 +55,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
    try {
       const data = await getJSON("/getTivos");
-      for (const json of data)
+      for (const json of data) {
          isRpc[json.tivo] = json.rpc;
+         canNativeHls[json.tivo] = json.nativeHls === true;
+      }
       fillSelect(TIVO, data.map(json => json.tivo));
    } catch (e) {
       util_handleError("/getTivos", e);
@@ -234,7 +238,7 @@ function loadNplRpc(data, tivo) {
          "",
          showCell(name, candownload ? transcodeUrl(params) : null,
             () => startTranscode("TiVo transcode", params),
-            candownload && json.state === "complete" && json.recordingId
+            canNativeHls[tivo] && candownload && json.state === "complete" && json.recordingId
                && json.drm && json.drm.cgms === "copyFreely"
                && json.drm.tivoToGo === true
                && json.drm.recordingPlaybackPolicy === "allowed"
