@@ -89,6 +89,7 @@ public class config {
    public static int rpcDelete = 0;
    public static int rpcOld = 0;
    public static boolean rpcWebsocket = false; // Local mind websocket (port 1502) instead of TLS rpc
+   public static boolean tivoMobileLogin = false; // tivo.com token from the mobile app's login, not online.tivo.com
    public static int UseAdscan = 0;
    public static int VrdReview = 0;
    public static int comskip_review = 0;
@@ -673,7 +674,9 @@ public class config {
    	 GetDomainToken getDT = new GetDomainToken();
    	 String token = "";
    	 try {
-   		 token = getDT.getToken().getValue();
+   		 token = tivoMobileLogin ? getDT.getMobileToken() : getDT.getToken().getValue();
+   		 if (token == null)
+   			 return null;
    	 } catch (Exception e) {
    		 log.error("Failed to get domain token.  Check your tivo.com username or password.");
    		 return null;
@@ -697,7 +700,7 @@ public class config {
    // The cookie's expiry is not necessarily the token's: a JWT carries its own exp, and that
    // is the one tivo.com judges it by. Any segment that decodes to a JSON object with an exp
    // counts, so nothing is assumed about the token's layout. 0 when there is none to read.
-   static long jwtExpiry(String token) {
+   public static long jwtExpiry(String token) {
       for (String segment : token.split("\\.")) {
          try {
             JSONObject claims = new JSONObject(
@@ -1265,6 +1268,9 @@ public class config {
                if (key.equals("rpcWebsocket")) {
                   rpcWebsocket = Boolean.parseBoolean(string.removeLeadingTrailingSpaces(line));
                }
+               if (key.equals("tivoMobileLogin")) {
+                  tivoMobileLogin = Boolean.parseBoolean(string.removeLeadingTrailingSpaces(line));
+               }
                if (key.equals("cpu_cores")) {
                   cpu_cores = Integer.parseInt(string.removeLeadingTrailingSpaces(line));
                }
@@ -1591,6 +1597,8 @@ public class config {
          ofp.write("<rpcOld>\n" + rpcOld + "\n\n");
 
          ofp.write("<rpcWebsocket>\n" + rpcWebsocket + "\n\n");
+
+         ofp.write("<tivoMobileLogin>\n" + tivoMobileLogin + "\n\n");
          
          ofp.write("<cpu_cores>\n" + cpu_cores + "\n\n");
          
