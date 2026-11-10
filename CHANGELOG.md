@@ -18,6 +18,8 @@ Release notes for the kmttg fork, newest first. Release candidates are rolled in
 - `/rpc` and `/rpcws` can pass TiVo replies and errors through raw, report kmttg failures as typed JSON, and negotiate SchemaVersion per TiVo
 - Program Options > Use local websocket instead of local TLS rpc: talks to TiVos on the LAN over their own mind websocket (port 1502) with just the MAK, no cdata.p12 certificate. Unencrypted, so a TiVo with a wan rpc port set stays on TLS
 - Log in to tivo.com the way the mobile app does (Configure > TiVos): gets the tivo.com token from TiVo's mobile login when online.tivo.com is down. The login itself needs the cdata.p12 certificate; the token works on the tivo.com websocket as before
+- TiVo-native HLS playback in the web interface and from Now Playing in the GUI: streams straight off the TiVo's own transcoder, with quality and audio track selection, on TiVos whose TSN supports it
+- Live TV in the web interface: browse channels, pick the stream quality and skip back to the live position
 
 ### Fixed
 - ffmpeg encode profiles work with current ffmpeg (tested on 8.1) and still work with the older bundled ffmpeg. The h264 high/med rate, PS3 and Xbox 360 profiles failed on newer ffmpeg
